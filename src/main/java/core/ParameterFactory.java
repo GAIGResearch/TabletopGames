@@ -2,6 +2,7 @@ package core;
 
 import evaluation.TunableParameters;
 import games.GameType;
+import games.blackjack.BlackjackParameters;
 import games.coltexpress.ColtExpressParameters;
 import games.diamant.DiamantParameters;
 import games.dicemonastery.DiceMonasteryParams;
@@ -10,6 +11,7 @@ import games.dotsboxes.DBParameters;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.loveletter.LoveLetterParameters;
 import games.pandemic.PandemicParameters;
+import games.poker.PokerGameParameters;
 import games.tictactoe.TicTacToeGameParameters;
 import games.uno.UnoGameParameters;
 import games.virus.VirusGameParameters;
@@ -42,6 +44,10 @@ public class ParameterFactory {
                 return DominionParameters.sizeDistortion(seed);
             case DominionImprovements:
                 return DominionParameters.improvements(seed);
+            case Poker:
+                return new PokerGameParameters(seed);
+            case Blackjack:
+                return new BlackjackParameters(seed);
             case DiceMonastery:
                 return new DiceMonasteryParams(seed);
             default:

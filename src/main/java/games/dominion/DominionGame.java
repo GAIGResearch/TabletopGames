@@ -1,14 +1,7 @@
 package games.dominion;
 
 import core.*;
-import evaluation.AbstractTournament;
-import evaluation.RoundRobinTournament;
 import games.GameType;
-import players.mcts.MCTSEnums;
-import players.mcts.MCTSParams;
-import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCPlayer;
-import players.simple.*;
 
 import java.util.*;
 

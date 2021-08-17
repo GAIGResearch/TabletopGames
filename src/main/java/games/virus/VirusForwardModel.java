@@ -12,7 +12,6 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.VisibilityMode;
 import static games.virus.cards.VirusCard.OrganType.Treatment;
 import static games.virus.cards.VirusCard.OrganType.Wild;
@@ -462,7 +461,7 @@ public class VirusForwardModel extends AbstractForwardModel {
 
     @Override
     protected void endGame(AbstractGameState gameState) {
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println("Game Results:");
             for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
                 if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {

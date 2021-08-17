@@ -46,6 +46,10 @@ public abstract class AbstractParameters {
         return randomSeed;
     }
 
+    public void setRandomSeed(long randomSeed) {
+        this.randomSeed = randomSeed;
+    }
+
     /**
      * Retrieve total thinking time for the game, in minutes
      * @return - thinking time.

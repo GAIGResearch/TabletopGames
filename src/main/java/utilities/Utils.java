@@ -265,4 +265,41 @@ public abstract class Utils {
             throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage() + " : " + e.toString());
         }
     }
+
+    /**
+     * Recursively computes combinations of numbers in an array, taken {r} at a time. Each combination is added into the
+     * allData list.
+     * @param arr - Input Array
+     * @param data - Temporary array to store current combination
+     * @param start - Staring index in arr for current iteration
+     * @param end - Ending index in arr for current iteration
+     * @param index  - Current index in data
+     * @param r ---> Size of a combination
+     */
+    public static void combinationUtil(int[] arr, int[] data, int start, int end, int index, int r, ArrayList<int[]> allData) {
+        if (index == r) {
+            allData.add(data.clone());
+            return;
+        }
+
+        for (int i = start; i <= end && end-i+1 >= r-index; i++) {
+            data[index] = arr[i];
+            combinationUtil(arr, data, i+1, end, index+1, r, allData);
+        }
+    }
+
+    /**
+     * Auxiliary function shortcut to generate combinations of numbers in an array, each of size r.
+     * @param arr - input array
+     * @param r - size of one combination
+     *
+     * @return a list of all possible combinations of values (!not indexes)
+     */
+    public static ArrayList<int[]> generateCombinations(int[] arr, int r) {
+        int[] data = new int[r];
+        ArrayList<int[]> allData = new ArrayList<>();
+        combinationUtil(arr, data, 0, arr.length-1, 0, r, allData);
+        return allData;
+    }
+
 }

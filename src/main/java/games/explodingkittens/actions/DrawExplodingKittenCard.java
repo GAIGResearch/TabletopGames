@@ -9,7 +9,6 @@ import games.explodingkittens.ExplodingKittensTurnOrder;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
-import static core.CoreConstants.VERBOSE;
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse;
 
 public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
@@ -46,9 +45,6 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
                 new DrawCard(deckTo, discardDeck.getComponentID(), defuseCard).execute(gs);
                 gs.setGamePhase(Defuse);
             } else {
-                if (VERBOSE) {
-                    System.out.println("Player " + playerID + " died");
-                }
                 discardDeck.add(to);
                 to.clear();
                 ((ExplodingKittensGameState) gs).killPlayer(playerID);

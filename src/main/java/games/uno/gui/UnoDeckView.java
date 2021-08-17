@@ -8,7 +8,7 @@ import utilities.ImageIO;
 
 import java.awt.*;
 
-import static games.uno.gui.UnoGUI.*;
+import static games.uno.gui.UnoGUIManager.*;
 
 public class UnoDeckView extends DeckView<UnoCard> {
 

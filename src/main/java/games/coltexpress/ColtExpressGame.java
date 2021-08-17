@@ -5,7 +5,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.GameType;
-import games.coltexpress.gui.ColtExpressGUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.simple.RandomPlayer;
@@ -38,7 +37,7 @@ public class ColtExpressGame extends Game {
             ColtExpressGameState tmp_gameState = new ColtExpressGameState(params, agents.size());
 
             Game game = new ColtExpressGame(agents, forwardModel, tmp_gameState);
-            game.run(new ColtExpressGUI(game, ac, 1));
+//            game.run(new ColtExpressGUI(game, ac, 1)); TODO
             ColtExpressGameState gameState = (ColtExpressGameState) game.getGameState();
 
             //gameState.printToConsole();

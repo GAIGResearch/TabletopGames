@@ -83,7 +83,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             // new game set up
             for (int i = 0; i < llgs.getNPlayers(); i++) {
                 boolean[] visible = new boolean[llgs.getNPlayers()];
-                if (PARTIAL_OBSERVABLE) {
+                if (llgs.getCoreGameParameters().partialObservable) {
                     visible[i] = true;
                 } else {
                     Arrays.fill(visible, true);
@@ -154,12 +154,12 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
      * Checks all game end conditions for the game.
      * @param llgs - game state to check if terminal.
      */
-    private void checkEndOfRound(LoveLetterGameState llgs) {
+    public void checkEndOfRound(LoveLetterGameState llgs) {
         // Count the number of active players
         int playersAlive = 0;
         int soleWinner = -1;
         for (int i = 0; i < llgs.getNPlayers(); i++) {
-            if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE) {
+            if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE && llgs.playerHandCards.get(i).getSize() > 0) {
                 playersAlive += 1;
                 soleWinner = i;
             }
@@ -186,12 +186,11 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
      * @param llgs - game state to check
      * @return - true if game has ended, false otherwise
      */
-    private boolean checkEndOfGame(LoveLetterGameState llgs) {
+    public boolean checkEndOfGame(LoveLetterGameState llgs) {
         LoveLetterParameters llp = (LoveLetterParameters) llgs.getGameParameters();
 
         // Required tokens from parameters; if more players in the game, use the last value in the array
-        int nRequiredTokens = (llgs.getNPlayers()-1 < llp.nTokensWin.length ? llp.nTokensWin[llgs.getNPlayers()-1] :
-                llp.nTokensWin[llp.nTokensWin.length-1]);
+        double nRequiredTokens = (llgs.getNPlayers() == 2? llp.nTokensWin2 : llgs.getNPlayers() == 3? llp.nTokensWin3 : llp.nTokensWin4);
 
         // Find players with highest number of tokens above the required number
         HashSet<Integer> bestPlayers = new HashSet<>();
@@ -228,9 +227,16 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
      * @param soleWinner - player ID of the winner if only one (otherwise last winner ID)
      */
     private HashSet<Integer> roundEnd(LoveLetterGameState llgs, int nPlayersAlive, int soleWinner) {
+        HashSet<Integer> winners = getWinners(llgs, nPlayersAlive, soleWinner);
+        for (int i: winners) {
+            llgs.affectionTokens[i] += 1;
+        }
+        return winners;
+    }
+
+    public HashSet<Integer> getWinners(LoveLetterGameState llgs, int nPlayersAlive, int soleWinner) {
         if (nPlayersAlive == 1) {
             // They win and get 1 affection token
-            llgs.affectionTokens[soleWinner] += 1;
             return new HashSet<Integer>() {{
                 add(soleWinner);
             }};
@@ -253,10 +259,6 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
             if (bestPlayers.size() == 1) {
                 // This is the winner of the round, 1 affection token
-                for (int i: bestPlayers) {
-                    llgs.affectionTokens[i] += 1;
-                    break;
-                }
                 return bestPlayers;
             } else {
                 // If tie, add numbers in discard pile, highest wins
@@ -276,10 +278,6 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
                     }
                 }
                 // Everyone tied for most points here wins the round
-                for (int i: bestPlayersByDiscardPoints) {
-                    llgs.affectionTokens[i] += 1;
-                }
-
                 return bestPlayersByDiscardPoints;
             }
         }
@@ -288,7 +286,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
     @Override
     protected void endGame(AbstractGameState gameState) {
         // Print game result
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gameState.getPlayerResults()));
             Utils.GameResult[] playerResults = gameState.getPlayerResults();
             for (int j = 0; j < gameState.getNPlayers(); j++) {
@@ -314,7 +312,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             actions = new ArrayList<>();
             actions.add(new DrawCard(llgs.drawPile.getComponentID(), llgs.playerHandCards.get(player).getComponentID(), 0));
         } else {
-            throw new IllegalArgumentException(gameState.getGamePhase().toString() + " is unknown to LoveLetterGameState");
+            throw new IllegalArgumentException(gameState.getGamePhase() + " is unknown to LoveLetterGameState");
         }
 
         return actions;
@@ -360,8 +358,10 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
                             if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
                                 continue;
                             for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values())
-                                actions.add(new GuardAction(playerDeck.getComponentID(),
-                                        playerDiscardPile.getComponentID(), card, targetPlayer, type));
+                                if (type != LoveLetterCard.CardType.Guard) {
+                                    actions.add(new GuardAction(playerDeck.getComponentID(),
+                                            playerDiscardPile.getComponentID(), card, targetPlayer, type));
+                                }
                         }
                         break;
 
@@ -381,7 +381,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
                     case Prince:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
                                 continue;
                             actions.add(new PrinceAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
