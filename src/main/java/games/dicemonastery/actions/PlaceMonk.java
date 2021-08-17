@@ -90,7 +90,7 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return String.format("Move monk to %s", destination);
+        return String.format("Player %d moves monk to %s", playerId, destination);
     }
 }
 

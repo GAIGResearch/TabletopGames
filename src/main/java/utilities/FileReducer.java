@@ -6,8 +6,8 @@ public class FileReducer {
 
     public static void main(String[] args) {
 
-        String filename = "D:\\DiceMonastery\\DM_EI_15s_OM_A002_0718_Q.txt";
-        String output = "D:\\DiceMonastery\\DM_EI_15s_OM_A002_0718_Q_V100.txt";
+        String filename = "D:\\DiceMonastery\\DM_20s_A002Plus100_0808_Q.txt";
+        String output = "D:\\DiceMonastery\\DM_20s_A002Plus100_0808_Q_V100.txt";
         int visitThreshold = 100;
 
         try {
@@ -20,9 +20,15 @@ public class FileReducer {
                 String line = reader.readLine();
                 String[] details = line.split("\\t");
                 // action visits is 5th, N is 6th
-                int N = Integer.parseInt(details[5]);
-                if (N >= visitThreshold)
-                    writer.write(line + "\n");
+                try {
+                    int N = Integer.parseInt(details[5]);
+
+                    if (N >= visitThreshold)
+                        writer.write(line + "\n");
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+
             }
 
         } catch (Exception e) {
