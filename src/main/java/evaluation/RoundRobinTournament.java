@@ -53,7 +53,7 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               for a large number of players, and random will have a random matchup \n" +
                             "\t               in each game, while ensuring no duplicates, and that all players get the\n" +
                             "\t               the same number of games in total.\n" +
-                            "\tmatchups=      The total number of matchups to run is mode=random\n" +
+                            "\tmatchups=      The total number of matchups to run if mode=random\n" +
                             "\tlistener=      (Optional) The full class name of an IGameListener implementation. \n" +
                             "\t               Defaults to utilities.GameReportListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +

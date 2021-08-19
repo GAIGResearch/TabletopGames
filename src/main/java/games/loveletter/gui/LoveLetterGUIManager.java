@@ -1,7 +1,5 @@
 package games.loveletter.gui;
 
-import gui.AbstractGUIManager;
-import gui.GamePanel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -12,6 +10,8 @@ import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -357,11 +357,13 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                     playerHands[i].setBorder(playerViewBorders[i]);
                 }
             }
-            reserve.updateComponent(llgs.getReserveCards());
+            if (reserve != null)
+                reserve.updateComponent(llgs.getReserveCards());
             drawPile.updateComponent(llgs.getDrawPile());
             if (gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                 drawPile.setFront(true);
-                reserve.setFront(true);
+                if (reserve != null)
+                    reserve.setFront(true);
             }
 
             // Update actions
