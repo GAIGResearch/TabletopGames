@@ -675,8 +675,8 @@ public class ActionTests {
 
         int player = state.getCurrentPlayer();
         state.addResource(state.getCurrentPlayer(), SHILLINGS, 3);
-        if (market.pigmentType != null) {
-            assertTrue(fm.computeAvailableActions(state).contains(new Buy(market.pigmentType, market.pigmentPrice)));
+        if (market.inkType != null) {
+            assertTrue(fm.computeAvailableActions(state).contains(new Buy(market.inkType, market.inkPrice)));
             assertEquals(3, fm.computeAvailableActions(state).size());
         }
         fm.next(state, (new Buy(CALF_SKIN, market.calf_skin)));

@@ -40,8 +40,8 @@ public class VisitMarket extends UseMonk implements IExtendedSequence {
             retValue.add(new Buy(CALF_SKIN, market.calf_skin));
         if (money >= market.grain)
             retValue.add(new Buy(GRAIN, market.grain));
-        if (market.pigmentType != null && money >= market.pigmentPrice)
-            retValue.add(new Buy(market.pigmentType, market.pigmentPrice));
+        if (market.inkType != null && money >= market.inkPrice)
+            retValue.add(new Buy(market.inkType, market.inkPrice));
         if (state.getResource(player, BEER, STOREROOM) > 0)
             retValue.add(new Sell(BEER, market.beer));
         if (state.getResource(player, MEAD, STOREROOM) > 0)

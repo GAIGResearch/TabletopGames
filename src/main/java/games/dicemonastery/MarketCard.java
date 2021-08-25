@@ -13,8 +13,8 @@ public class MarketCard extends Component {
     public final int beer;
     public final int mead;
     public final int candle;
-    public final Resource pigmentType;
-    public final int pigmentPrice;
+    public final Resource inkType;
+    public final int inkPrice;
 
     public MarketCard(int calf, int grain, int beer, int mead, int candle, int pigmentPrice, Resource pigmentType) {
         super(Utils.ComponentType.CARD, "Market Card");
@@ -23,8 +23,8 @@ public class MarketCard extends Component {
         this.beer = beer;
         this.mead = mead;
         this.candle = candle;
-        this.pigmentType = pigmentType;
-        this.pigmentPrice = pigmentPrice;
+        this.inkType = pigmentType;
+        this.inkPrice = pigmentPrice;
     }
 
     @Override
@@ -35,14 +35,14 @@ public class MarketCard extends Component {
     @Override
     public String toString() {
         return String.format("CalfSkin: %d, Grain: %d, %s: %d, Beer: %d, Mead: %d, Candle: %d",
-                calf_skin, grain, pigmentType, pigmentPrice, beer, mead, candle);
+                calf_skin, grain, inkType, inkPrice, beer, mead, candle);
     }
 
     @Override
     public boolean equals(Object o) {
         if (o instanceof MarketCard) {
             MarketCard other = (MarketCard) o;
-            return other.pigmentPrice == pigmentPrice && other.pigmentType == pigmentType &&
+            return other.inkPrice == inkPrice && other.inkType == inkType &&
                     other.calf_skin == calf_skin && other.grain == grain &&
                     other.beer == beer && other.mead == mead && other.candle == candle;
         }
@@ -51,6 +51,6 @@ public class MarketCard extends Component {
 
     @Override
     public int hashCode() {
-        return Objects.hash(beer, mead, candle, calf_skin, grain, pigmentPrice, pigmentType);
+        return Objects.hash(beer, mead, candle, calf_skin, grain, inkPrice, inkType);
     }
 }

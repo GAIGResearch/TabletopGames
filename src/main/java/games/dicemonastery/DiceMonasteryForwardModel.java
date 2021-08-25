@@ -73,14 +73,14 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         state.pilgrimageDecks.get(1).shuffle(state.rnd);
 
         state.marketCards.clear();
-        state.marketCards.add(new MarketCard(2, 2, 1, 2, 3, 4, PALE_GREEN_PIGMENT));
-        state.marketCards.add(new MarketCard(3, 2, 1, 3, 3, 5, PALE_BLUE_PIGMENT));
-        state.marketCards.add(new MarketCard(2, 2, 1, 3, 4, 5, PALE_RED_PIGMENT));
+        state.marketCards.add(new MarketCard(2, 2, 1, 2, 3, 4, PALE_GREEN_INK));
+        state.marketCards.add(new MarketCard(3, 2, 1, 3, 3, 5, PALE_BLUE_INK));
+        state.marketCards.add(new MarketCard(2, 2, 1, 3, 4, 5, PALE_RED_INK));
         state.marketCards.add(new MarketCard(3, 2, 1, 2, 4, 9, null));
-        state.marketCards.add(new MarketCard(2, 2, 2, 2, 3, 4, PALE_RED_PIGMENT));
-        state.marketCards.add(new MarketCard(3, 2, 2, 3, 3, 5, PALE_GREEN_PIGMENT));
+        state.marketCards.add(new MarketCard(2, 2, 2, 2, 3, 4, PALE_RED_INK));
+        state.marketCards.add(new MarketCard(3, 2, 2, 3, 3, 5, PALE_GREEN_INK));
         state.marketCards.add(new MarketCard(2, 2, 2, 3, 4, 9, null));
-        state.marketCards.add(new MarketCard(3, 2, 2, 2, 4, 4, PALE_BLUE_PIGMENT));
+        state.marketCards.add(new MarketCard(3, 2, 2, 2, 4, 4, PALE_BLUE_INK));
         state.marketCards.shuffle(state.rnd);
 
         state.drawBonusTokens();
