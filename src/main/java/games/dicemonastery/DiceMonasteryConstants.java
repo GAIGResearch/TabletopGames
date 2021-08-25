@@ -3,7 +3,9 @@ package games.dicemonastery;
 import core.interfaces.IGamePhase;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static games.dicemonastery.DiceMonasteryConstants.InkColour.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
@@ -53,12 +55,12 @@ public class DiceMonasteryConstants {
         GRAIN, HONEY, WAX, SKEP, BREAD, CALF_SKIN, VELLUM, CANDLE,
         SHILLINGS, PRAYER,
         BEER, PROTO_BEER_1, PROTO_BEER_2, MEAD, PROTO_MEAD_1, PROTO_MEAD_2,
-        PALE_GREEN_INK(GREEN, false), PALE_BLUE_INK(BLUE,  false), PALE_RED_INK(RED,  false),
+        PALE_GREEN_INK(GREEN, 0, false), PALE_BLUE_INK(BLUE, 0, false), PALE_RED_INK(RED, 0, false),
         PALE_GREEN_PIGMENT(GREEN, false, PALE_GREEN_INK),
         PALE_BLUE_PIGMENT(BLUE, false, PALE_BLUE_INK),
         PALE_RED_PIGMENT(RED, false, PALE_RED_INK),
-        VIVID_GREEN_INK(GREEN, true), VIVID_BLUE_INK(BLUE, true),
-        VIVID_RED_INK(RED, true), VIVID_PURPLE_INK(PURPLE, true),
+        VIVID_GREEN_INK(GREEN, 1, true), VIVID_BLUE_INK(BLUE, 2, true),
+        VIVID_RED_INK(RED, 1, true), VIVID_PURPLE_INK(PURPLE, 2, true),
         VIVID_GREEN_PIGMENT(GREEN, true, VIVID_GREEN_INK),
         VIVID_BLUE_PIGMENT(BLUE, true, VIVID_BLUE_INK),
         VIVID_RED_PIGMENT(RED, true, VIVID_RED_INK),
@@ -68,26 +70,28 @@ public class DiceMonasteryConstants {
         public final boolean isInk;
         public final boolean isPigment;
         public final boolean isVivid;
+        public final int vpBonus;
         public final InkColour colour;
         public final Resource processedTo;
 
         Resource() {
-            this(false, false, NONE, false, null);
+            this(false, false, NONE, false, 0, null);
         }
 
-        Resource(InkColour colour, boolean vivid) {
-            this(true, false, colour, vivid, null);
+        Resource(InkColour colour, int vp, boolean vivid) {
+            this(true, false, colour, vivid, vp, null);
         }
 
         Resource(InkColour colour, boolean vivid, Resource processedTo) {
-            this(false, true, colour, vivid, processedTo);
+            this(false, true, colour, vivid, 0, processedTo);
         }
 
-        Resource(boolean ink, boolean pigment, InkColour colour, boolean vivid, Resource processedTo) {
+        Resource(boolean ink, boolean pigment, InkColour colour, boolean vivid, int vp, Resource processedTo) {
             isInk = ink;
             isPigment = pigment;
             this.colour = colour;
             isVivid = vivid;
+            vpBonus = vp;
             this.processedTo = processedTo;
         }
     }
@@ -145,22 +149,22 @@ public class DiceMonasteryConstants {
     public final static int GOSPEL_REWARD = 8;
 
     public enum ILLUMINATED_TEXT {
-        PSALM(3, 1, 1, 1, new Resource[]{}, PSALM_REWARDS),
-        EPISTLE(4, 2, 1, 2, new Resource[]{}, EPISTLE_REWARDS),
-        LITURGY(5, 3, 2, 2, new Resource[]{}, LITURGY_REWARDS),
-        GOSPEL_MARK(6, 2, 2, 2, new Resource[]{VIVID_GREEN_INK, VIVID_BLUE_INK}, new int[]{GOSPEL_REWARD}),
-        GOSPEL_LUKE(6, 2, 2, 2, new Resource[]{VIVID_RED_INK, VIVID_BLUE_INK}, new int[]{GOSPEL_REWARD}),
-        GOSPEL_JOHN(6, 2, 2, 2, new Resource[]{VIVID_RED_INK, VIVID_PURPLE_INK}, new int[]{GOSPEL_REWARD}),
-        GOSPEL_MATHEW(6, 2, 2, 2, new Resource[]{VIVID_GREEN_INK, VIVID_PURPLE_INK}, new int[]{GOSPEL_REWARD});
+        PSALM(3, 1, 1, 1, new ArrayList<>(), PSALM_REWARDS),
+        EPISTLE(4, 2, 1, 2, new ArrayList<>(), EPISTLE_REWARDS),
+        LITURGY(5, 3, 2, 2, new ArrayList<>(), LITURGY_REWARDS),
+        GOSPEL_MARK(6, 2, 2, 2, Arrays.asList(VIVID_GREEN_INK, VIVID_BLUE_INK), new int[]{GOSPEL_REWARD}),
+        GOSPEL_LUKE(6, 2, 2, 2, Arrays.asList(VIVID_RED_INK, VIVID_BLUE_INK), new int[]{GOSPEL_REWARD}),
+        GOSPEL_JOHN(6, 2, 2, 2, Arrays.asList(VIVID_RED_INK, VIVID_PURPLE_INK), new int[]{GOSPEL_REWARD}),
+        GOSPEL_MATHEW(6, 2, 2, 2, Arrays.asList(VIVID_GREEN_INK, VIVID_PURPLE_INK), new int[]{GOSPEL_REWARD});
 
         public final int ap;
         public final int differentInks;
         public final int vellum;
         public final int candles;
-        public final Resource[] specialInks;
+        public final List<Resource> specialInks;
         public final int[] rewards;
 
-        ILLUMINATED_TEXT(int ap, int inks, int vellum, int candles, Resource[] specialInks, int[] rewards) {
+        ILLUMINATED_TEXT(int ap, int inks, int vellum, int candles, List<Resource> specialInks, int[] rewards) {
             this.ap = ap;
             this.differentInks = inks;
             this.vellum = vellum;

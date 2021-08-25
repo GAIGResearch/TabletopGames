@@ -11,6 +11,7 @@ import games.dicemonastery.DiceMonasteryConstants.TREASURE;
 import games.dicemonastery.actions.*;
 import org.junit.Test;
 import players.simple.RandomPlayer;
+import utilities.Hash;
 
 import java.util.*;
 
@@ -761,9 +762,51 @@ public class ActionTests {
         state.addResource(player, VIVID_BLUE_INK, 2);
         assertEquals(4, fm.computeAvailableActions(state).size());
 
-        state.useAP( -1);
+        state.useAP(-1);
         assertEquals(5, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new WriteText(GOSPEL_LUKE)));
+    }
+
+    @Test
+    public void chooseInkSequence() {
+        // we will have a monk of at least level 4 in the library
+        Map<Integer, ActionArea> override = new HashMap<>();
+        override.put(1, LIBRARY);
+        startOfUseMonkPhaseForAreaAfterBonusToken(LIBRARY, SPRING, override);
+
+        int player = state.getCurrentPlayer();
+
+        state.addResource(player, PALE_GREEN_INK, 1);
+        state.addResource(player, PALE_BLUE_INK, 2);
+        state.addResource(player, PALE_RED_INK, 3);
+        state.addResource(player, VELLUM, 3);
+        state.addResource(player, CANDLE, 3);
+
+        WriteText writeText = new WriteText(EPISTLE);
+        fm.next(state, writeText);
+        assertEquals(writeText, state.getActionsInProgress().peek());
+
+        List<AbstractAction> availableActions = fm.computeAvailableActions(state);
+        assertEquals(3, availableActions.size());
+        assertTrue(availableActions.contains(new ChooseInk(PALE_BLUE_INK)));
+        assertTrue(availableActions.contains(new ChooseInk(PALE_RED_INK)));
+        assertTrue(availableActions.contains(new ChooseInk(PALE_GREEN_INK)));
+
+        fm.next(state, new ChooseInk(PALE_RED_INK));
+        availableActions = fm.computeAvailableActions(state);
+        assertEquals(2, availableActions.size());
+        assertTrue(availableActions.contains(new ChooseInk(PALE_BLUE_INK)));
+        assertTrue(availableActions.contains(new ChooseInk(PALE_GREEN_INK)));
+
+        fm.next(state, new ChooseInk(PALE_GREEN_INK));
+        assertFalse(state.isActionInProgress());
+        assertEquals(0, state.getResource(player, PALE_GREEN_INK, STOREROOM));
+        assertEquals(2, state.getResource(player, PALE_RED_INK, STOREROOM));
+        assertEquals(2, state.getResource(player, PALE_BLUE_INK, STOREROOM));
+        assertEquals(2, state.getResource(player, VELLUM, STOREROOM));
+        assertEquals(1, state.getResource(player, CANDLE, STOREROOM));
+
+        assertEquals(1, state.getNumberWritten(EPISTLE));
     }
 
     @Test
@@ -933,6 +976,9 @@ public class ActionTests {
 
         assertEquals(0, state.getNumberWritten(PSALM));
         fm.next(state, action);
+        while (!action.executionComplete(state)) {
+            fm.next(state, fm.computeAvailableActions(state).get(0));
+        }
         assertEquals(1, state.getResource(player, VELLUM, STOREROOM));
         assertEquals(1, state.getResource(player, CANDLE, STOREROOM));
         assertEquals(1, state.getResource(player, PALE_RED_INK, STOREROOM));
@@ -959,12 +1005,15 @@ public class ActionTests {
 
         assertEquals(0, state.getNumberWritten(GOSPEL_MATHEW));
         fm.next(state, action);
+        while (!action.executionComplete(state)) {
+            fm.next(state, fm.computeAvailableActions(state).get(0));
+        }
         assertEquals(0, state.getResource(player, VELLUM, STOREROOM));
         assertEquals(0, state.getResource(player, CANDLE, STOREROOM));
         assertEquals(1, state.getResource(player, PALE_RED_INK, STOREROOM));
         assertEquals(0, state.getResource(player, VIVID_PURPLE_INK, STOREROOM));
         assertEquals(0, state.getResource(player, VIVID_GREEN_INK, STOREROOM));
-        assertEquals(GOSPEL_REWARD, state.getVictoryPoints(player));
+        assertEquals(GOSPEL_REWARD + 5, state.getVictoryPoints(player));
         assertEquals(1, state.getNumberWritten(GOSPEL_MATHEW));
     }
 
@@ -979,6 +1028,9 @@ public class ActionTests {
         state.addResource(player, VIVID_PURPLE_INK, 4);
         state.addResource(player, VIVID_GREEN_INK, 4);
         fm.next(state, action);
+        while (!action.executionComplete(state)) {
+            fm.next(state, fm.computeAvailableActions(state).get(0));
+        }
         assertEquals(1, state.getNumberWritten(GOSPEL_MATHEW));
         assertTrue(WriteText.meetsRequirements(GOSPEL_MATHEW, state.getStores(player, r -> true)));
 
