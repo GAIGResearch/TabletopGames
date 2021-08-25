@@ -40,7 +40,6 @@ public enum DiceMonasteryStateAttributes implements IGameAttribute {
     GRAIN((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.GRAIN, STOREROOM)),
     BREAD((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.BREAD, STOREROOM)),
     HONEY((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.HONEY, STOREROOM)),
-    BERRIES((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.BERRIES, STOREROOM)),
     WAX((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.WAX, STOREROOM)),
     CANDLE((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.CANDLE, STOREROOM)),
     CALF_SKIN((s, p) -> s.getResource(p, DiceMonasteryConstants.Resource.CALF_SKIN, STOREROOM)),

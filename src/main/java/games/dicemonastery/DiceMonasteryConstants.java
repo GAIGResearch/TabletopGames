@@ -50,7 +50,7 @@ public class DiceMonasteryConstants {
     }
 
     public enum Resource {
-        GRAIN, HONEY, WAX, SKEP, BREAD, CALF_SKIN, VELLUM, CANDLE, BERRIES,
+        GRAIN, HONEY, WAX, SKEP, BREAD, CALF_SKIN, VELLUM, CANDLE,
         SHILLINGS, PRAYER,
         BEER, PROTO_BEER_1, PROTO_BEER_2, MEAD, PROTO_MEAD_1, PROTO_MEAD_2,
         PALE_GREEN_INK(GREEN, false), PALE_BLUE_INK(BLUE,  false), PALE_RED_INK(RED,  false),

@@ -34,10 +34,9 @@ public class DontPassPolicy extends AbstractPlayer {
             return possibleActions.stream().filter(a -> a instanceof HarvestWheat).max(Comparator.comparingInt(hw -> ((HarvestWheat) hw).getActionPoints())).get();
 
         if (possibleActions.contains(bakeBread)) {
-            int berries = state.getResource(player, BERRIES, STOREROOM);
             int bread = state.getResource(player, BREAD, STOREROOM);
             int honey = state.getResource(player, HONEY, STOREROOM);
-            if (berries + bread + honey < state.monksIn(null, player).size()) {
+            if (bread + honey < state.monksIn(null, player).size()) {
                 // we do not have enough food for Winter
                 return bakeBread;
             }

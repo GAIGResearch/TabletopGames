@@ -23,8 +23,6 @@ import static java.util.stream.Collectors.toSet;
 
 public class DiceMonasteryForwardModel extends AbstractForwardModel {
 
-    public final AbstractAction FORAGE_1 = new Forage(1);
-    public final AbstractAction FORAGE_5 = new Forage(5);
     public final AbstractAction SOW_WHEAT = new SowWheat();
     public final AbstractAction HARVEST_WHEAT = new HarvestWheat(1);
     public final AbstractAction PLACE_SKEP = new PlaceSkep();
@@ -155,11 +153,6 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     retValue.add(PASS);
                     switch (turnOrder.currentAreaBeingExecuted) {
                         case MEADOW:
-                            retValue.add(FORAGE_1);
-                            if (turnOrder.getActionPointsLeft() >= 5)
-                                retValue.add(FORAGE_5);
-                            else if (turnOrder.getActionPointsLeft() > 1)
-                                retValue.add(new Forage(turnOrder.getActionPointsLeft()));
                             if (turnOrder.season == SPRING) {
                                 retValue.add(SOW_WHEAT);
                                 if (state.getResource(currentPlayer, SKEP, STOREROOM) > 0)

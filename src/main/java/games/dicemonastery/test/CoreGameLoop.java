@@ -373,13 +373,9 @@ public class CoreGameLoop {
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         advanceToJustBeforeStartofWinterandRemoveFood();
 
-        int monksP2 = state.monksIn(null, 2).size();
-
-        state.addResource(1, BERRIES, 1);
         state.addResource(1, BREAD, 10);
         state.addResource(1, HONEY, 2);
         state.addResource(1, GRAIN, 20);
-        state.addResource(2, BERRIES, 1);
         state.addResource(2, BREAD, 2);
         state.addResource(2, HONEY, 10);
 
@@ -388,12 +384,13 @@ public class CoreGameLoop {
         } while (turnOrder.getSeason() != WINTER);
         assertEquals(WINTER, turnOrder.getSeason());
 
-        assertEquals(0, state.getResource(1, BERRIES, STOREROOM));
+        int monksP2 = state.monksIn(null, 2).size();
+        int monksOnPilgrimage = state.monksIn(PILGRIMAGE, 2).size();
+
         assertEquals(0, state.getResource(1, BREAD, STOREROOM));
         assertEquals(2, state.getResource(1, HONEY, STOREROOM));
-        assertEquals(0, state.getResource(2, BERRIES, STOREROOM));
         assertEquals(0, state.getResource(2, BREAD, STOREROOM));
-        assertEquals(10 + 3 - monksP2, state.getResource(2, HONEY, STOREROOM));
+        assertEquals(10 + 2 - monksP2 + monksOnPilgrimage, state.getResource(2, HONEY, STOREROOM));
     }
 
     private void advanceToJustBeforeStartofWinterandRemoveFood() {
@@ -415,8 +412,6 @@ public class CoreGameLoop {
 
         for (int player = 0; player < turnOrder.nPlayers(); player++) {
             // clear out all food supplies for players 1 and 2
-            while (state.getResource(player, BERRIES, STOREROOM) > 0)
-                state.moveCube(player, BERRIES, STOREROOM, SUPPLY);
             while (state.getResource(player, HONEY, STOREROOM) > 0)
                 state.moveCube(player, HONEY, STOREROOM, SUPPLY);
             while (state.getResource(player, BREAD, STOREROOM) > 0)
@@ -443,17 +438,18 @@ public class CoreGameLoop {
         int monksInChapelWhoWillPipUp = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() < 6).count();
         int monksInChapelWhoWillRetire = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 6).count();
         int pietyOneMonksInChapel = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 1).count();
-        int monksOnPilgrimage = state.monksIn(PILGRIMAGE, 1).size();
         totalOners -= pietyOneMonksInChapel; // they won't be oners when they get to feeding time
 
         do {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // last few actions of Autumn -> WINTER
         } while (turnOrder.getSeason() != WINTER);
         assertEquals(WINTER, turnOrder.getSeason());
+        int monksOnPilgrimage = state.monksIn(PILGRIMAGE, 1).size();
+        assertEquals(monksP1.size() - monksOnPilgrimage, state.monksIn(DORMITORY, 1).size());
 
         int newPips = state.monksIn(null, 1).stream().mapToInt(Monk::getPiety).sum();
         assertEquals(totalPips - monksP1.size() + totalOners + monksInChapelWhoWillPipUp + monksOnPilgrimage - monksInChapelWhoWillRetire * 6, newPips);
-        assertEquals(10 - monksP1.size(), state.getVictoryPoints(1));
+        assertEquals(10 - monksP1.size() + monksOnPilgrimage, state.getVictoryPoints(1));
     }
 
     @Test
@@ -469,7 +465,6 @@ public class CoreGameLoop {
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         advanceToJustBeforeStartofWinterandRemoveFood();
 
-        state.addResource(0, BERRIES, 20);
         state.addResource(0, BREAD, 20);
         state.addResource(0, HONEY, 20);
         state.addResource(0, CALF_SKIN, 20 - state.getResource(0, CALF_SKIN, STOREROOM));
@@ -482,7 +477,6 @@ public class CoreGameLoop {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // last Action of Autumn -> WINTER
         } while (turnOrder.getSeason() != WINTER);
 
-        assertEquals(0, state.getResource(0, BERRIES, STOREROOM));
         assertEquals(0, state.getResource(0, BREAD, STOREROOM));
         assertEquals(0, state.getResource(0, CALF_SKIN, STOREROOM));
         assertEquals(20, state.getResource(0, HONEY, STOREROOM));

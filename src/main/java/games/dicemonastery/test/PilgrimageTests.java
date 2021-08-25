@@ -162,7 +162,6 @@ public class PilgrimageTests {
 
         state.addResource(0, BREAD, -state.getResource(0, BREAD, STOREROOM));
         state.addResource(0, HONEY, -state.getResource(0, HONEY, STOREROOM));
-        state.addResource(0, BERRIES, -state.getResource(0, BERRIES, STOREROOM));
         int totalPiety = state.monksIn(null, 0).stream().mapToInt(Monk::getPiety).sum();
         int totalMonksAboveOne = (int) state.monksIn(null, 0).stream().filter(m -> m.getPiety() > 1).count();
 

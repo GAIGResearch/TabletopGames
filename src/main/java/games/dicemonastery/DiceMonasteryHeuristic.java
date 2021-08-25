@@ -127,7 +127,6 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
         double food = 0.0;
         if (FOOD_SUFFICIENCY[season] != 0.0) {
             food = state.getResource(playerId, BREAD, STOREROOM) +
-                    state.getResource(playerId, BERRIES, STOREROOM) +
                     state.getResource(playerId, HONEY, STOREROOM);
             int numberMonks = state.monksIn(null, playerId).size();
             food = numberMonks == 0 ? 1.0 : Math.min(1.0, food / numberMonks);

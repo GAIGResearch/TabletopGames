@@ -202,11 +202,9 @@ public class CopyTests {
     public void foodIsRemovedToFeedMonksAtYearEnd() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
 
-        state.addResource(1, BERRIES, 1);
         state.addResource(1, BREAD, 10);
         state.addResource(1, HONEY, 2);
         state.addResource(1, GRAIN, 20);
-        state.addResource(2, BERRIES, 1);
         state.addResource(2, BREAD, 2);
         state.addResource(2, HONEY, 10);
 
@@ -239,7 +237,6 @@ public class CopyTests {
         DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
         assertEquals(startHash, copy.hashCode());
 
-        state.addResource(0, BERRIES, 20);
         state.addResource(0, BREAD, 20);
         state.addResource(0, HONEY, 20);
         state.addResource(0, CALF_SKIN, 20 - state.getResource(0, CALF_SKIN, STOREROOM));

@@ -196,12 +196,12 @@ public class DiceMonasteryGameState extends AbstractGameState {
         if (getMonkLocation(monk.getComponentID()) == RETIRED)
             throw new AssertionError("Already retired!");
         moveMonk(monk.getComponentID(), getMonkLocation(monk.getComponentID()), RETIRED);
-        if (nextRetirementReward >= RETIREMENT_REWARDS.length) {
-            // no more benefits to retirement
-            return;
+        int vp = 1;
+        if (nextRetirementReward < RETIREMENT_REWARDS.length) {
+            vp = RETIREMENT_REWARDS[nextRetirementReward];
         }
-        dmto.logEvent("Monk retired for " + RETIREMENT_REWARDS[nextRetirementReward] + " VP", this);
-        addVP(RETIREMENT_REWARDS[nextRetirementReward], monk.getOwnerId());
+        dmto.logEvent("Monk retired for " + vp + " VP", this);
+        addVP(vp, monk.getOwnerId());
         nextRetirementReward++;
     }
 
@@ -418,7 +418,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
             List<Monk> monks = monksIn(DORMITORY, player);
             int requiredFood = monks.size();
             DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
-            requiredFood -= getResource(player, Resource.BERRIES, STOREROOM);
             requiredFood -= getResource(player, Resource.BREAD, STOREROOM);
             if (requiredFood > 0) {
                 int honeyEaten = Math.min(requiredFood, getResource(player, Resource.HONEY, STOREROOM));
@@ -439,7 +438,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
             }
             // then remove all perishable goods from Storeroom, and unharvested wheat from the Meadow
             addResource(player, Resource.BREAD, -getResource(player, Resource.BREAD, STOREROOM));
-            addResource(player, Resource.BERRIES, -getResource(player, Resource.BERRIES, STOREROOM));
             addResource(player, Resource.CALF_SKIN, -getResource(player, Resource.CALF_SKIN, STOREROOM));
             int unharvestedWheat = getResource(player, Resource.GRAIN, MEADOW);
             for (int i = 0; i < unharvestedWheat; i++)
