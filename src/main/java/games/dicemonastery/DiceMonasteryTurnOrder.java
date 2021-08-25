@@ -147,9 +147,13 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
 
     private void initialiseUseMonkBooleans(DiceMonasteryGameState state) {
         turnOwnerTakenReward = false;
-        turnOwnerPrayed = false;
         if (state.availableBonusTokens(currentAreaBeingExecuted).isEmpty())
-            turnOwnerTakenReward = true; // no rewards to take
+            playerTakesReward(state); // none to take
+    }
+
+    void playerTakesReward(DiceMonasteryGameState state) {
+        turnOwnerTakenReward = true;
+        turnOwnerPrayed = false;
         if (currentAreaBeingExecuted == CHAPEL || state.getResource(turnOwner, Resource.PRAYER, STOREROOM) == 0)
             turnOwnerPrayed = true; // No prayers in CHAPEL, and if we don't have any
     }

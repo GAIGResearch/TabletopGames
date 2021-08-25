@@ -2,12 +2,10 @@ package games.dicemonastery.test;
 
 import games.dicemonastery.*;
 import org.junit.Test;
-import players.simple.RandomPlayer;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
-import static games.dicemonastery.Pilgrimage.DESTINATION.JERUSALEM;
 import static games.dicemonastery.Pilgrimage.DESTINATION.ROME;
 import static org.junit.Assert.*;
 
@@ -17,14 +15,15 @@ public class PilgrimageTests {
     DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 4));
     DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
     DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) game.getGameState().getTurnOrder();
-    RandomPlayer rnd = new RandomPlayer();
 
     @Test
     public void basicFunctionalityShort() {
-        Pilgrimage p = new Pilgrimage(ROME, false);
+        Pilgrimage.DESTINATION destination = state.peekAtNextShortPilgrimage().destination;
+        DiceMonasteryConstants.Resource reward = destination.finalReward;
+        Pilgrimage p = new Pilgrimage(destination);
         Monk pilgrim = state.createMonk(5, 0);
         assertEquals(0, state.getVictoryPoints(0));
-        assertEquals(0, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
+        assertEquals(0, state.getResource(0, reward, STOREROOM));
         assertEquals(6, state.getResource(0, SHILLINGS, STOREROOM));
         state.moveMonk(pilgrim.getComponentID(), DORMITORY, GATEHOUSE);
         p.startPilgrimage(pilgrim, state);
@@ -32,7 +31,7 @@ public class PilgrimageTests {
         assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(5, pilgrim.getPiety());
         assertEquals(0, state.getVictoryPoints(0));
-        assertEquals(0, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
+        assertEquals(0, state.getResource(0, reward, STOREROOM));
         assertEquals(3, state.getResource(0, SHILLINGS, STOREROOM));
 
         // we now get the reward, but the monk does not return
@@ -40,22 +39,24 @@ public class PilgrimageTests {
         assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(5, pilgrim.getPiety());
         assertEquals(1, state.getVictoryPoints(0));
-        assertEquals(0, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
+        assertEquals(0, state.getResource(0, reward, STOREROOM));
 
         // the monk returns
         p.advance(state);
         assertEquals(DORMITORY, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(6, pilgrim.getPiety());
-        assertEquals(3, state.getVictoryPoints(0));
-        assertEquals(1, state.getResource(0, VIVID_GREEN_PIGMENT, STOREROOM));
+        assertEquals(2, state.getVictoryPoints(0));
+        assertEquals(1, state.getResource(0, reward, STOREROOM));
     }
 
     @Test
     public void basicFunctionalityLong() {
-        Pilgrimage p = new Pilgrimage(JERUSALEM, true);
+        Pilgrimage.DESTINATION destination = state.peekAtNextLongPilgrimage().destination;
+        Pilgrimage p = new Pilgrimage(destination);
+        DiceMonasteryConstants.Resource reward = destination.finalReward;
         Monk pilgrim = state.createMonk(5, 0);
         assertEquals(0, state.getVictoryPoints(0));
-        assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
+        assertEquals(0, state.getResource(0, reward, STOREROOM));
         assertEquals(6, state.getResource(0, SHILLINGS, STOREROOM));
         state.moveMonk(pilgrim.getComponentID(), DORMITORY, GATEHOUSE);
         p.startPilgrimage(pilgrim, state);
@@ -63,32 +64,32 @@ public class PilgrimageTests {
         assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(5, pilgrim.getPiety());
         assertEquals(0, state.getVictoryPoints(0));
-        assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
+        assertEquals(0, state.getResource(0, reward, STOREROOM));
         assertEquals(0, state.getResource(0, SHILLINGS, STOREROOM));
 
         p.advance(state);
         assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(5, pilgrim.getPiety());
         assertEquals(1, state.getVictoryPoints(0));
-        assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
+        assertEquals(0, state.getResource(0, reward, STOREROOM));
 
         p.advance(state);
         assertEquals(PILGRIMAGE, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(5, pilgrim.getPiety());
         assertEquals(2, state.getVictoryPoints(0));
-        assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
+        assertEquals(0, state.getResource(0, reward, STOREROOM));
 
         // the monk returns
         p.advance(state);
         assertEquals(DORMITORY, state.getMonkLocation(pilgrim.getComponentID()));
         assertEquals(6, pilgrim.getPiety());
-        assertEquals(7, state.getVictoryPoints(0));
-        assertEquals(0, state.getResource(0, VIVID_BLUE_PIGMENT, STOREROOM));
+        assertEquals(3, state.getVictoryPoints(0));
+        assertEquals(1, state.getResource(0, reward, STOREROOM));
     }
 
     @Test
     public void copyWorks() {
-        Pilgrimage p = new Pilgrimage(ROME, false);
+        Pilgrimage p = new Pilgrimage(ROME);
         Monk pilgrim = state.createMonk(5, 0);
         state.moveMonk(pilgrim.getComponentID(), DORMITORY, GATEHOUSE);
 
@@ -118,11 +119,13 @@ public class PilgrimageTests {
 
         Monk pilgrim1 = state.createMonk(5, 0);
         state.moveMonk(pilgrim1.getComponentID(), DORMITORY, GATEHOUSE);
-        Pilgrimage p1 = state.startPilgrimage(JERUSALEM, pilgrim1);
+        Pilgrimage.DESTINATION destination1 = state.peekAtNextLongPilgrimage().destination;
+        Pilgrimage p1 = state.startPilgrimage(destination1, pilgrim1);
 
+        Pilgrimage.DESTINATION destination2 = state.peekAtNextShortPilgrimage().destination;
         Monk pilgrim2 = state.createMonk(5, 1);
         state.moveMonk(pilgrim2.getComponentID(), DORMITORY, GATEHOUSE);
-        Pilgrimage p2 = state.startPilgrimage(ROME, pilgrim2);
+        Pilgrimage p2 = state.startPilgrimage(destination2, pilgrim2);
         assertTrue(p1.isActive());
         assertTrue(p2.isActive());
 
@@ -155,7 +158,7 @@ public class PilgrimageTests {
 
         Monk pilgrim1 = state.createMonk(5, 0);
         state.moveMonk(pilgrim1.getComponentID(), DORMITORY, GATEHOUSE);
-        state.startPilgrimage(JERUSALEM, pilgrim1);
+        state.startPilgrimage(state.peekAtNextLongPilgrimage().destination, pilgrim1);
 
         state.addResource(0, BREAD, -state.getResource(0, BREAD, STOREROOM));
         state.addResource(0, HONEY, -state.getResource(0, HONEY, STOREROOM));
@@ -172,7 +175,7 @@ public class PilgrimageTests {
     public void promotingAMonkMidPilgrimage() {
         Monk pilgrim1 = state.createMonk(6, 0);
         state.moveMonk(pilgrim1.getComponentID(), DORMITORY, GATEHOUSE);
-        Pilgrimage p1 = state.startPilgrimage(JERUSALEM, pilgrim1);
+        Pilgrimage p1 = state.startPilgrimage(state.peekAtNextLongPilgrimage().destination, pilgrim1);
 
         assertTrue(p1.isActive());
         assertEquals(0, state.getVictoryPoints(0));

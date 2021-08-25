@@ -8,7 +8,6 @@ import java.util.Objects;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static games.dicemonastery.DiceMonasteryConstants.TREASURE.RELIC;
 
 public class Pilgrimage extends Component {
 
@@ -21,23 +20,26 @@ public class Pilgrimage extends Component {
         public int[] vpPerStep;
         public Resource finalReward;
 
+        public boolean isLong() {
+            return cost == 6;
+        }
+
         DESTINATION(boolean longPilgrimage, Resource reward) {
             if (longPilgrimage) {
                 minPiety = 5;
                 cost = 6;
-                vpPerStep = new int[]{0, 1, 1, 2};
+                vpPerStep = new int[]{0, 1, 1, 1};
             } else {
                 minPiety = 3;
                 cost = 3;
-                vpPerStep = new int[]{0, 1, 2};
+                vpPerStep = new int[]{0, 1, 1};
             }
             finalReward = reward;
         }
     }
 
 
-    final boolean isRelic;
-    final DESTINATION destination;
+    public final DESTINATION destination;
 
     int player = -1;
     boolean active;
@@ -45,10 +47,10 @@ public class Pilgrimage extends Component {
     int progress = -1;
 
 
-    public Pilgrimage(DESTINATION destination, boolean isRelic) {
+    public Pilgrimage(DESTINATION destination) {
         super(Utils.ComponentType.CARD, "Pilgrimage to " + destination.name());
         this.destination = destination;
-        this.isRelic = isRelic;
+
     }
 
     private Pilgrimage(Pilgrimage copy) {
@@ -58,7 +60,6 @@ public class Pilgrimage extends Component {
         this.destination = copy.destination;
         this.active = copy.active;
         this.player = copy.player;
-        this.isRelic = copy.isRelic;
     }
 
     public void startPilgrimage(Monk monk, DiceMonasteryGameState state) {
@@ -81,13 +82,9 @@ public class Pilgrimage extends Component {
         state.addVP(destination.vpPerStep[progress], player);
         if (progress == destination.vpPerStep.length - 1) {
             DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) state.getTurnOrder();
-            dmto.logEvent(String.format("Monk reaches %s and gains %s", destination, isRelic ? "RELIC" : destination.finalReward), state);
+            dmto.logEvent(String.format("Monk reaches %s and gains %s", destination, destination.finalReward), state);
 
-            if (isRelic) {
-                state.acquireTreasure(RELIC, player);
-            } else {
-                state.addResource(player, destination.finalReward, 1);
-            }
+            state.addResource(player, destination.finalReward, 1);
 
             dmto.logEvent(String.format("Monk returns from %s and is promoted", destination), state);
             Monk pilgrim  = state.getMonkById(pilgrimId);
@@ -113,7 +110,7 @@ public class Pilgrimage extends Component {
     public String toString() {
         return String.format("Pilgrimage to %s for %s (%d, %d)",
                 destination,
-                isRelic ? "RELIC" : destination.finalReward,
+                destination.finalReward,
                 pilgrimId, progress);
     }
 

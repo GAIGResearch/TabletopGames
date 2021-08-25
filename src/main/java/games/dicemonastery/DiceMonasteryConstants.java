@@ -141,8 +141,8 @@ public class DiceMonasteryConstants {
 
     public final static int[] PSALM_REWARDS = {4, 3, 3, 2, 2, 2};
     public final static int[] EPISTLE_REWARDS = {5, 4, 4, 3, 3};
-    public final static int[] LITURGY_REWARDS = {7, 6, 6, 5};
-    public final static int GOSPEL_REWARD = 11;
+    public final static int[] LITURGY_REWARDS = {6, 5, 5, 4};
+    public final static int GOSPEL_REWARD = 8;
 
     public enum ILLUMINATED_TEXT {
         PSALM(3, 1, 1, 1, new Resource[]{}, PSALM_REWARDS),
@@ -178,19 +178,12 @@ public class DiceMonasteryConstants {
         CHALICE(5, 1),
         MITRE(6, 1),
         PLATE(7, 1),
-        ALTAR_CROSS(8, 1),
-        RELIC(false, 3, 4);  // from Pilgrimages, not purchase
+        ALTAR_CROSS(8, 1);
 
-        public final boolean buyable;
         public final int vp;
         public final int limit;
 
         TREASURE(int vp, int limit) {
-            this(true, vp, limit);
-        }
-
-        TREASURE(boolean buyable, int vp, int limit) {
-            this.buyable = buyable;
             this.vp = vp;
             this.limit = limit;
         }

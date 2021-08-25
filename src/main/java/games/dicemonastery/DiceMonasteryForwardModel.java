@@ -63,15 +63,14 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         }
 
         for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values()) {
-            Deck<Pilgrimage> deck = state.pilgrimageDecks.get(destination);
-            deck.clear();
+            Deck<Pilgrimage> deck = state.pilgrimageDecks.get(destination.isLong() ? 1 : 0);
             // add all four cards
-            for (int i = 0; i < 3; i++) {
-                deck.add(new Pilgrimage(destination, false));
+            for (int i = 0; i < 4; i++) {
+                deck.add(new Pilgrimage(destination));
             }
-            deck.add(new Pilgrimage(destination, true));
-            deck.shuffle(state.rnd);
         }
+        state.pilgrimageDecks.get(0).shuffle(state.rnd);
+        state.pilgrimageDecks.get(1).shuffle(state.rnd);
 
         state.marketCards.clear();
         state.marketCards.add(new MarketCard(2, 2, 1, 2, 3, 4, PALE_GREEN_PIGMENT));
@@ -106,11 +105,9 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         // and since this is core to the whole game loop, the muddying of responsibilities is acceptable
         if (action instanceof Pray)
             dmto.turnOwnerPrayed = true;
-        if (action instanceof TakeToken) {
-            dmto.turnOwnerTakenReward = true;
-            if (((TakeToken) action).token == BONUS_TOKEN.DEVOTION)
-                dmto.turnOwnerPrayed = false; // in case they had none previously
-        }
+        if (action instanceof TakeToken)
+            dmto.playerTakesReward(state);
+
         if (state.isActionInProgress())
             return;
 
@@ -217,7 +214,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             if (turnOrder.getActionPointsLeft() > 1) {
                                 int shillings = state.getResource(currentPlayer, SHILLINGS, STOREROOM);
                                 for (TREASURE item : TREASURE.values()) {
-                                    if (item.buyable && item.vp * state.getParams().COST_PER_TREASURE_VP <= shillings && state.getNumberCommissioned(item) < item.limit)
+                                    if (item.vp * state.getParams().COST_PER_TREASURE_VP <= shillings && state.getNumberCommissioned(item) < item.limit)
                                         retValue.add(new BuyTreasure(item));
                                 }
                             }
@@ -230,15 +227,16 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                                     .max(comparingInt(Monk::getPiety))
                                     .orElseThrow(() -> new AssertionError("No Monks in Gatehouse?"))
                                     .piety;
-                            for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values()) {
-                                if (turnOrder.getActionPointsLeft() >= destination.minPiety && highestPiety >= destination.minPiety
-                                        && state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= destination.cost) {
-                                    Set<Integer> validPieties = eligibleMonks.stream()
-                                            .map(Monk::getPiety)
-                                            .filter(piety -> piety >= destination.minPiety && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
+                            for (int pilgrimDeck = 0; pilgrimDeck < 2; pilgrimDeck++) {
+                                Deck<Pilgrimage> deck = state.pilgrimageDecks.get(pilgrimDeck);
+                                if (deck.getSize() > 0) {
+                                    Pilgrimage.DESTINATION destination = deck.peek().destination;
+                                    if (turnOrder.getActionPointsLeft() >= destination.minPiety && highestPiety >= destination.minPiety
+                                            && state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= destination.cost) {
+                                        Set<Integer> validPieties = eligibleMonks.stream()
+                                                .map(Monk::getPiety)
+                                                .filter(piety -> piety >= destination.minPiety && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
 
-                                    Pilgrimage topCard = state.peekAtNextPilgrimageTo(destination);
-                                    if (topCard != null) {
                                         validPieties.forEach(p -> retValue.add(new GoOnPilgrimage(destination, p)));
                                     }
                                 }

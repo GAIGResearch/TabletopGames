@@ -25,7 +25,6 @@ import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static games.dicemonastery.DiceMonasteryConstants.TREASURE.CAPE;
 import static games.dicemonastery.DiceMonasteryConstants.TREASURE.ROBE;
-import static games.dicemonastery.Pilgrimage.DESTINATION.ROME;
 import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
@@ -145,15 +144,17 @@ public class ActionTests {
         for (int p = 0; p < 4; p++)
             state.addResource(p, PRAYER, 1); // add Prayer token, as they might have ben used already
 
-        for (int i = 0; i < 2; i++) {  // we do this for the first two players who will have TOKENS to take
+        for (int i = 0; i < 4; i++) {
             // finally we take BONUS_TOKEN and possible PROMOTION
-            assertTrue(fm.computeAvailableActions(state).get(0) instanceof TakeToken);
-            fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
-            if (state.isActionInProgress())
-                fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote a monk
+            if (i < 2) {
+                assertTrue(fm.computeAvailableActions(state).get(0) instanceof TakeToken);
+                fm.next(state, fm.computeAvailableActions(state).get(0)); // take one of the tokens
+                if (state.isActionInProgress())
+                    fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote a monk
+            }
 
             // Now check that we have no option to Pray
-     //       System.out.println(fm.computeAvailableActions(state).stream().map(Objects::toString).collect(joining("\n")));
+       //     System.out.println(fm.computeAvailableActions(state).stream().map(Objects::toString).collect(joining("\n")));
             assertTrue(fm.computeAvailableActions(state).stream().noneMatch(a -> a instanceof Pray));
 
             fm.next(state, fm.computeAvailableActions(state).get(0)); // and promote all monks
@@ -574,20 +575,20 @@ public class ActionTests {
         assertTrue(fm.computeAvailableActions(state).stream().noneMatch(a -> a instanceof GoOnPilgrimage));
 
         state.addResource(player, SHILLINGS, 3);
-        assertEquals(2, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage).count());
-        // ROME and SANTIAGO
-        assertEquals(2, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).getActionPoints() == 4).count());
+        assertEquals(1, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage).count());
+        // ROME or SANTIAGO
+        assertEquals(1, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).getActionPoints() == 4).count());
 
-        state.addResource(player, SHILLINGS, 3); // can now go to JERUSALEM or ALEXANDRIA
-        assertEquals(2, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage).count());
+        state.addResource(player, SHILLINGS, 3); // can now go to JERUSALEM or ALEXANDRIA (but piety limits)
+        assertEquals(1, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage).count());
 
         Monk p5 = state.createMonk(5, player);
         state.moveMonk(p5.getComponentID(), DORMITORY, GATEHOUSE);
         state.addActionPoints(5);
-        assertEquals(6, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage).count());
-        // 2 copies of ROME and SANTIAGO
+        assertEquals(3, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage).count());
+        // Either can go on a short pilgrimage, but only 1 on a long one
         assertEquals(2, fm.computeAvailableActions(state).stream()
-                .filter(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).destination == ROME).count());
+                .filter(a -> a instanceof GoOnPilgrimage && !((GoOnPilgrimage) a).destination.isLong()).count());
     }
 
     @Test
@@ -598,16 +599,18 @@ public class ActionTests {
         state.moveMonk(p5.getComponentID(), DORMITORY, GATEHOUSE);
         state.addActionPoints(5);
         int ap = state.getAPLeft();
-        assertEquals(4, state.pilgrimagesLeft(ROME));
+        assertEquals(8, state.pilgrimagesLeft(false));
+        assertEquals(8, state.pilgrimagesLeft(true));
         assertEquals(0, state.getPilgrimagesStarted().size());
-        Pilgrimage next = state.peekAtNextPilgrimageTo(ROME);
+        Pilgrimage next = state.peekAtNextShortPilgrimage();
 
-        fm.next(state, new GoOnPilgrimage(ROME, 5));
+        fm.next(state, new GoOnPilgrimage(next.destination, 5));
 
-        assertEquals(3, state.pilgrimagesLeft(ROME));
-        assertNotSame(next, state.peekAtNextPilgrimageTo(ROME));
+        assertEquals(7, state.pilgrimagesLeft(false));
+        assertEquals(8, state.pilgrimagesLeft(true));
+        assertNotSame(next, state.peekAtNextShortPilgrimage());
         assertEquals(1, state.getPilgrimagesStarted().size());
-        assertEquals(ap - 5, state.getAPLeft());
+        assertEquals(ap - 5, state.getAPLeft()); // uses all AP
     }
 
     @Test
@@ -620,17 +623,17 @@ public class ActionTests {
         state.moveMonk(p5.getComponentID(), DORMITORY, GATEHOUSE);
         state.addActionPoints(5);
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 8; i++) {
             assertTrue(fm.computeAvailableActions(state).stream()
-                    .anyMatch(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).destination == ROME));
+                    .anyMatch(a -> a instanceof GoOnPilgrimage && !((GoOnPilgrimage) a).destination.isLong()));
             Monk pilgrim = state.createMonk(3, 0);
             state.moveMonk(pilgrim.getComponentID(), DORMITORY, GATEHOUSE);
             state.addResource(0, SHILLINGS, 3);
-            state.startPilgrimage(ROME, pilgrim);
+            state.startPilgrimage(state.peekAtNextShortPilgrimage().destination, pilgrim);
         }
 
         assertTrue(fm.computeAvailableActions(state).stream()
-                .noneMatch(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).destination == ROME));
+                .noneMatch(a -> a instanceof GoOnPilgrimage && !((GoOnPilgrimage) a).destination.isLong()));
     }
 
     @Test
@@ -672,10 +675,10 @@ public class ActionTests {
 
         int player = state.getCurrentPlayer();
         state.addResource(state.getCurrentPlayer(), SHILLINGS, 3);
-        assertTrue(fm.computeAvailableActions(state).contains(new Buy(market.pigmentType, market.pigmentPrice)));
-
-        assertEquals(3, fm.computeAvailableActions(state).size());
-
+        if (market.pigmentType != null) {
+            assertTrue(fm.computeAvailableActions(state).contains(new Buy(market.pigmentType, market.pigmentPrice)));
+            assertEquals(3, fm.computeAvailableActions(state).size());
+        }
         fm.next(state, (new Buy(CALF_SKIN, market.calf_skin)));
         assertTrue(visit.executionComplete(state));
         assertEquals(1, state.getResource(player, CALF_SKIN, STOREROOM));

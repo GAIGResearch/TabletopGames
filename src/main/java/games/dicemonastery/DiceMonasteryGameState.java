@@ -31,7 +31,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     Map<ILLUMINATED_TEXT, Integer> textsWritten = new EnumMap<>(ILLUMINATED_TEXT.class);
     Map<TREASURE, Integer> treasuresCommissioned = new EnumMap<>(TREASURE.class);
     List<List<TREASURE>> treasuresOwnedPerPlayer = new ArrayList<>();
-    Map<Pilgrimage.DESTINATION, Deck<Pilgrimage>> pilgrimageDecks = new HashMap<>(4);
+    List<Deck<Pilgrimage>> pilgrimageDecks = new ArrayList<>(2);
     List<Pilgrimage> pilgrimagesStarted = new ArrayList<>();
     Deck<MarketCard> marketCards = new Deck<>("Market Deck", FIRST_VISIBLE_TO_ALL);
     int[] victoryPoints;
@@ -66,9 +66,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
         treasuresCommissioned = new EnumMap<>(TREASURE.class);
         for (TREASURE item : TREASURE.values())
             treasuresCommissioned.put(item, 0);
-        pilgrimageDecks = new HashMap<>();
-        for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values())
-            pilgrimageDecks.put(destination, new Deck<>("Pilgrimages to " + destination.name(), FIRST_VISIBLE_TO_ALL));
+        pilgrimageDecks = new ArrayList<>(2);
+        pilgrimageDecks.add(0, new Deck<>("Short Pilgrimages", FIRST_VISIBLE_TO_ALL));
+        pilgrimageDecks.add(1, new Deck<>("Long Pilgrimages", FIRST_VISIBLE_TO_ALL));
         pilgrimagesStarted = new ArrayList<>();
     }
 
@@ -326,8 +326,12 @@ public class DiceMonasteryGameState extends AbstractGameState {
         }
     }
 
-    public Pilgrimage peekAtNextPilgrimageTo(Pilgrimage.DESTINATION destination) {
-        return pilgrimageDecks.get(destination).peek();
+    public Pilgrimage peekAtNextShortPilgrimage() {
+        return pilgrimageDecks.get(0).peek();
+    }
+
+    public Pilgrimage peekAtNextLongPilgrimage() {
+        return pilgrimageDecks.get(1).peek();
     }
 
     public MarketCard getCurrentMarket() {
@@ -335,14 +339,16 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public Pilgrimage startPilgrimage(Pilgrimage.DESTINATION destination, Monk monk) {
-        Pilgrimage retValue = pilgrimageDecks.get(destination).draw();
+        Pilgrimage retValue = pilgrimageDecks.get(destination.isLong() ? 1 : 0).draw();
+        if (retValue.destination != destination)
+            throw new AssertionError(String.format("Top card is to %s, but expected to be to %s", retValue.destination, destination));
         retValue.startPilgrimage(monk, this);
         pilgrimagesStarted.add(retValue);
         return retValue;
     }
 
-    public int pilgrimagesLeft(Pilgrimage.DESTINATION to) {
-        return pilgrimageDecks.get(to).getSize();
+    public int pilgrimagesLeft(boolean isLong) {
+        return pilgrimageDecks.get(isLong ? 1 : 0).getSize();
     }
 
     public List<Pilgrimage> getPilgrimagesStarted() {
@@ -458,7 +464,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     protected List<Component> _getAllComponents() {
         List<Component> retValue = new ArrayList<>(allMonks.values());
         retValue.addAll(pilgrimagesStarted);
-        for (Deck<Pilgrimage> pdeck : pilgrimageDecks.values())
+        for (Deck<Pilgrimage> pdeck : pilgrimageDecks)
             retValue.addAll(pdeck.getComponents());
         return retValue;
     }
@@ -504,15 +510,14 @@ public class DiceMonasteryGameState extends AbstractGameState {
         for (Pilgrimage p : pilgrimagesStarted)
             retValue.pilgrimagesStarted.add(p.copy());
 
-        for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values()) {
-            Deck<Pilgrimage> thisDeck = pilgrimageDecks.get(destination);
-            Deck<Pilgrimage> copyDeck = thisDeck.copy();
+        for (Deck<Pilgrimage> pilgrimDeck : pilgrimageDecks) {
+            Deck<Pilgrimage> copyDeck = pilgrimDeck.copy();
             if (playerId != -1 && copyDeck.getSize() > 1) {// only top card is visible, so shuffle if copied from any player's perspective
                 Pilgrimage topCard = copyDeck.draw();
                 copyDeck.shuffle(rnd);
                 copyDeck.add(topCard);
             }
-            retValue.pilgrimageDecks.put(destination, copyDeck);
+            retValue.pilgrimageDecks.add(copyDeck);
         }
 
         retValue.victoryPoints = Arrays.copyOf(victoryPoints, getNPlayers());
