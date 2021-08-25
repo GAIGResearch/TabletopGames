@@ -740,8 +740,10 @@ public class ActionTests {
                 state.addResource(player, ink, -state.getResource(player, ink, STOREROOM));
         }
 
-        state.useAP( -4);
-        assertEquals(5, turnOrder.getActionPointsLeft());
+        state.useAP( -3);
+        Monk m4 = state.createMonk(4, state.getCurrentPlayer());
+        state.moveMonk(m4.getComponentID(), DORMITORY, LIBRARY);
+        assertEquals(4, turnOrder.getActionPointsLeft());
         assertEquals(1, fm.computeAvailableActions(state).size());
 
         state.addResource(player, VELLUM, 2);
@@ -749,22 +751,32 @@ public class ActionTests {
         state.addResource(player, PALE_RED_INK, 3);
 
         assertEquals(2, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(PSALM)));
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(PSALM, 4)));
 
         state.addResource(player, VIVID_RED_INK, 1);
         assertEquals(3, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(EPISTLE)));
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(EPISTLE, 4)));
 
         state.addResource(player, PALE_GREEN_INK, 1);
-        assertEquals(4, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(LITURGY)));
+        assertEquals(3, fm.computeAvailableActions(state).size());
+
+        Monk m5 = state.createMonk(5, state.getCurrentPlayer());
+        state.moveMonk(m5.getComponentID(), DORMITORY, LIBRARY);
+        assertEquals(3, fm.computeAvailableActions(state).size());
+
+        state.useAP( -5);
+        assertEquals(6, fm.computeAvailableActions(state).size());
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(LITURGY, 5)));
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(PSALM, 5)));
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(EPISTLE, 5)));
 
         state.addResource(player, VIVID_BLUE_INK, 2);
-        assertEquals(4, fm.computeAvailableActions(state).size());
+        assertEquals(6, fm.computeAvailableActions(state).size());
 
         state.useAP(-1);
-        assertEquals(5, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(GOSPEL_LUKE)));
+        Monk m6 = state.createMonk(6, state.getCurrentPlayer());
+        state.moveMonk(m6.getComponentID(), DORMITORY, LIBRARY);
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(GOSPEL_LUKE, 6)));
     }
 
     @Test
@@ -782,7 +794,7 @@ public class ActionTests {
         state.addResource(player, VELLUM, 3);
         state.addResource(player, CANDLE, 3);
 
-        WriteText writeText = new WriteText(EPISTLE);
+        WriteText writeText = new WriteText(EPISTLE, 4);
         fm.next(state, writeText);
         assertEquals(writeText, state.getActionsInProgress().peek());
 
@@ -807,6 +819,42 @@ public class ActionTests {
         assertEquals(1, state.getResource(player, CANDLE, STOREROOM));
 
         assertEquals(1, state.getNumberWritten(EPISTLE));
+    }
+
+    @Test
+    public void copyDuringChooseInkSequence() {
+        Map<Integer, ActionArea> override = new HashMap<>();
+        override.put(1, LIBRARY);
+        startOfUseMonkPhaseForAreaAfterBonusToken(LIBRARY, SPRING, override);
+
+        int player = state.getCurrentPlayer();
+
+        state.addResource(player, PALE_GREEN_INK, 1);
+        state.addResource(player, PALE_BLUE_INK, 2);
+        state.addResource(player, PALE_RED_INK, 3);
+        state.addResource(player, VELLUM, 3);
+        state.addResource(player, CANDLE, 3);
+
+        WriteText writeText = new WriteText(EPISTLE, 4);
+
+        int startHash = state.hashCode();
+        DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
+        assertEquals(startHash, copy.hashCode());
+
+        fm.next(state, writeText);
+
+        int midHash = state.hashCode();
+        DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == startHash);
+
+        fm.next(state, new ChooseInk(PALE_RED_INK));
+
+        assertEquals(startHash, copy.hashCode());
+        assertFalse(startHash == state.hashCode());
+        assertEquals(midHash, midCopy.hashCode());
+        assertFalse(midHash == state.hashCode());
+
     }
 
     @Test
@@ -961,7 +1009,7 @@ public class ActionTests {
     @Test
     public void writePsalm() {
         state.addActionPoints(10);
-        WriteText action = new WriteText(PSALM);
+        WriteText action = new WriteText(PSALM, 3);
         try {
             fm.next(state, action);
             fail("Should throw exception as not enough materials");
@@ -989,7 +1037,7 @@ public class ActionTests {
     @Test
     public void writeGospel() {
         state.addActionPoints(10);
-        WriteText action = new WriteText(GOSPEL_MATHEW);
+        WriteText action = new WriteText(GOSPEL_MATHEW, 6);
 
         int player = state.getCurrentPlayer();
         state.addResource(player, VELLUM, 2);
@@ -1020,7 +1068,7 @@ public class ActionTests {
     @Test
     public void cannotWriteTextIfAllWritten() {
         state.addActionPoints(12);
-        WriteText action = new WriteText(GOSPEL_MATHEW);
+        WriteText action = new WriteText(GOSPEL_MATHEW, 6);
         int player = state.getCurrentPlayer();
         state.addResource(player, VELLUM, 4);
         state.addResource(player, CANDLE, 4);

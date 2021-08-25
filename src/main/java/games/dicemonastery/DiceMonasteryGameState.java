@@ -284,6 +284,14 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 .collect(toList());
     }
 
+    public int getHighestPietyMonk(ActionArea area, int player) {
+        List<Monk> eligibleMonks = monksIn(area, player);
+        return eligibleMonks.isEmpty() ? 0 : eligibleMonks.stream()
+                .max(comparingInt(Monk::getPiety))
+                .orElseThrow(() -> new AssertionError("No Monks in Gatehouse?"))
+                .piety;
+    }
+
     public Monk getMonkById(int id) {
         return allMonks.get(id);
     }

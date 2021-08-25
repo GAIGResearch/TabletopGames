@@ -214,12 +214,10 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             if (turnOrder.getActionPointsLeft() > 2 &&
                                     state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= state.monksIn(null, currentPlayer).size())
                                 retValue.add(HIRE_NOVICE);
+
+                            int highestPiety = state.getHighestPietyMonk(GATEHOUSE, currentPlayer);
                             List<Monk> eligibleMonks = state.monksIn(GATEHOUSE, currentPlayer);
-                            // it is possible to have no monks in the gatehouse with AP remaining if a Devotion token was used
-                            int highestPiety = eligibleMonks.isEmpty() ? 0 : eligibleMonks.stream()
-                                    .max(comparingInt(Monk::getPiety))
-                                    .orElseThrow(() -> new AssertionError("No Monks in Gatehouse?"))
-                                    .piety;
+
                             for (int pilgrimDeck = 0; pilgrimDeck < 2; pilgrimDeck++) {
                                 Deck<Pilgrimage> deck = state.pilgrimageDecks.get(pilgrimDeck);
                                 if (deck.getSize() > 0) {
@@ -236,15 +234,21 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             }
                             break;
                         case LIBRARY:
+                            highestPiety = state.getHighestPietyMonk(LIBRARY, currentPlayer);
+                            eligibleMonks = state.monksIn(LIBRARY, currentPlayer);
                             for (ILLUMINATED_TEXT text : ILLUMINATED_TEXT.values()) {
                                 // do we meet the minimum requirements
-                                if (text.ap > turnOrder.getActionPointsLeft()) // enough AP
+                                if (text.ap > highestPiety) // enough AP
                                     continue;
                                 if (state.textsWritten.get(text) == text.rewards.length)  // have they all been written
                                     continue;
                                 if (!WriteText.meetsRequirements(text, state.playerTreasuries.get(currentPlayer)))  // vellum, candles and inks
                                     continue;
-                                retValue.add(new WriteText(text));
+                                Set<Integer> validPieties = eligibleMonks.stream()
+                                        .map(Monk::getPiety)
+                                        .filter(piety -> piety >= text.ap && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
+
+                                validPieties.forEach(p -> retValue.add(new WriteText(text, p)));
                             }
                             break;
                         case CHAPEL:
@@ -297,6 +301,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         }
         throw new AssertionError("Not yet implemented combination " + turnOrder.season + " : " + state.getGamePhase());
     }
+
 
     // just create this once for performance - could also manually write out the array
     private static final List<Pair<Integer, Integer>> bidCombinations = IntStream.rangeClosed(0, 3)

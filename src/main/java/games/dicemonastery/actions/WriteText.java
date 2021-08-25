@@ -21,8 +21,8 @@ public class WriteText extends UseMonk implements IExtendedSequence {
     List<Resource> optionalInks = new ArrayList<>();
     int player = -1;
 
-    public WriteText(ILLUMINATED_TEXT type) {
-        super(type.ap);
+    public WriteText(ILLUMINATED_TEXT type, int piety) {
+        super(piety);
         textType = type;
     }
 
@@ -88,7 +88,7 @@ public class WriteText extends UseMonk implements IExtendedSequence {
 
     @Override
     public WriteText copy() {
-        WriteText retValue = new WriteText(textType);
+        WriteText retValue = new WriteText(textType, actionPoints);
         retValue.optionalInks = new ArrayList<>(optionalInks);
         retValue.player = player;
         return retValue;
@@ -98,7 +98,8 @@ public class WriteText extends UseMonk implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof WriteText) {
             WriteText other = (WriteText) obj;
-            return other.textType == textType && other.player == player && other.optionalInks.equals(optionalInks);
+            return other.textType == textType && other.actionPoints == actionPoints &&
+                    other.player == player && other.optionalInks.equals(optionalInks);
         }
         return false;
     }
@@ -106,7 +107,7 @@ public class WriteText extends UseMonk implements IExtendedSequence {
     @Override
     public int hashCode() {
         // we deliberately do not include player in the hashcode
-        return textType.ordinal() * -6907 + optionalInks.stream().mapToInt(i -> i.ordinal() * i.ordinal() * 71).sum();
+        return textType.ordinal() * -6907 + actionPoints * 47 + optionalInks.stream().mapToInt(i -> (i.ordinal() * i.ordinal() - 1) * (71 + i.ordinal())).sum();
     }
 
     @Override
@@ -116,7 +117,7 @@ public class WriteText extends UseMonk implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return String.format("Write %s %s", textType, optionalInks.isEmpty() ? "" : "using " + optionalInks.stream().map(Objects::toString).collect(joining()));
+        return String.format("Write %s (piety %d) %s", textType, actionPoints, optionalInks.isEmpty() ? "" : "using " + optionalInks.stream().map(Objects::toString).collect(joining()));
     }
 
 
