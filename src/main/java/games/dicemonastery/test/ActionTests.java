@@ -11,7 +11,6 @@ import games.dicemonastery.DiceMonasteryConstants.TREASURE;
 import games.dicemonastery.actions.*;
 import org.junit.Test;
 import players.simple.RandomPlayer;
-import utilities.Hash;
 
 import java.util.*;
 
@@ -724,7 +723,9 @@ public class ActionTests {
 
     @Test
     public void libraryActionsCorrect() {
-        startOfUseMonkPhaseForAreaAfterBonusToken(LIBRARY, SPRING);
+        Map<Integer, ActionArea> override = new HashMap<>();
+        override.put(1, LIBRARY);
+        startOfUseMonkPhaseForAreaAfterBonusToken(LIBRARY, SPRING, override);
 
         state.useAP(turnOrder.getActionPointsLeft() - 1);
         assertEquals(1, turnOrder.getActionPointsLeft());
@@ -750,28 +751,29 @@ public class ActionTests {
         state.addResource(player, CANDLE, 2);
         state.addResource(player, PALE_RED_INK, 3);
 
-        assertEquals(2, fm.computeAvailableActions(state).size());
+        assertEquals(3, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new WriteText(PSALM, 4)));
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(PSALM, 3)));
 
         state.addResource(player, VIVID_RED_INK, 1);
-        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertEquals(4, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new WriteText(EPISTLE, 4)));
 
         state.addResource(player, PALE_GREEN_INK, 1);
-        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertEquals(4, fm.computeAvailableActions(state).size());
 
         Monk m5 = state.createMonk(5, state.getCurrentPlayer());
         state.moveMonk(m5.getComponentID(), DORMITORY, LIBRARY);
-        assertEquals(3, fm.computeAvailableActions(state).size());
+        assertEquals(4, fm.computeAvailableActions(state).size());
 
-        state.useAP( -5);
-        assertEquals(6, fm.computeAvailableActions(state).size());
+        state.useAP(-5);
+        assertEquals(7, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new WriteText(LITURGY, 5)));
         assertTrue(fm.computeAvailableActions(state).contains(new WriteText(PSALM, 5)));
         assertTrue(fm.computeAvailableActions(state).contains(new WriteText(EPISTLE, 5)));
 
         state.addResource(player, VIVID_BLUE_INK, 2);
-        assertEquals(6, fm.computeAvailableActions(state).size());
+        assertEquals(7, fm.computeAvailableActions(state).size());
 
         state.useAP(-1);
         Monk m6 = state.createMonk(6, state.getCurrentPlayer());
