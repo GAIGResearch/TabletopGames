@@ -1,6 +1,7 @@
 package games.dicemonastery.gui;
 
 import games.dicemonastery.*;
+import games.dicemonastery.components.Monk;
 
 import javax.swing.*;
 import java.awt.*;

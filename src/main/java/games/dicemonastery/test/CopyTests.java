@@ -4,22 +4,19 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.*;
+import games.dicemonastery.components.Monk;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.BONUS_TOKEN.*;
-import static games.dicemonastery.DiceMonasteryConstants.ILLUMINATED_TEXT.EPISTLE;
 import static games.dicemonastery.DiceMonasteryConstants.ILLUMINATED_TEXT.PSALM;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.BID;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.SACRIFICE;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
 import static games.dicemonastery.DiceMonasteryConstants.TREASURE.ROBE;
 import static org.junit.Assert.*;

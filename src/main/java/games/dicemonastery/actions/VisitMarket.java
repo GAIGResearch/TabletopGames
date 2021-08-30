@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.MarketCard;
+import games.dicemonastery.components.MarketCard;
 
 import java.util.ArrayList;
 import java.util.List;

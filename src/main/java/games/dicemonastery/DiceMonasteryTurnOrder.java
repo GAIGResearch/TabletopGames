@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.components.Component;
 import core.turnorders.TurnOrder;
 import games.dicemonastery.actions.LogEvent;
+import games.dicemonastery.components.Monk;
 
 import java.util.*;
 
@@ -140,7 +141,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         }
     }
 
-    void logEvent(String eventText, DiceMonasteryGameState state) {
+    public void logEvent(String eventText, DiceMonasteryGameState state) {
         AbstractAction logAction = new LogEvent(eventText);
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.GAME_EVENT, state, logAction));
     }
@@ -154,8 +155,8 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     void playerTakesReward(DiceMonasteryGameState state) {
         turnOwnerTakenReward = true;
         turnOwnerPrayed = false;
-        if (currentAreaBeingExecuted == CHAPEL || state.getResource(turnOwner, Resource.PRAYER, STOREROOM) == 0)
-            turnOwnerPrayed = true; // No prayers in CHAPEL, and if we don't have any
+        if (currentAreaBeingExecuted == CHAPEL || currentAreaBeingExecuted == LIBRARY || state.getResource(turnOwner, Resource.PRAYER, STOREROOM) == 0)
+            turnOwnerPrayed = true; // No prayers in CHAPEL or LIBRARY as they cannot be used on anything, and if we don't have any
     }
 
     @Override

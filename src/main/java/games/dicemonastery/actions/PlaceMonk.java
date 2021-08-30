@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.Monk;
+import games.dicemonastery.components.Monk;
 
 import java.util.List;
 import java.util.Set;
@@ -80,7 +80,8 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return (monkChosen ? 97 : 0) + playerId + destination.ordinal() * -2777 - 5827;
+        // deliberately excludes player id
+        return (monkChosen ? 97 : 0)  + destination.ordinal() * -2777 - 5827;
     }
 
     @Override
@@ -90,7 +91,7 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return String.format("Player %d moves monk to %s", playerId, destination);
+        return String.format("Move monk to %s", destination);
     }
 }
 

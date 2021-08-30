@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.Monk;
+import games.dicemonastery.components.Monk;
 
 import static java.util.stream.Collectors.joining;
 

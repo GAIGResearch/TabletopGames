@@ -1,8 +1,8 @@
 package games.dicemonastery.actions;
 
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.Monk;
-import games.dicemonastery.Pilgrimage;
+import games.dicemonastery.components.Monk;
+import games.dicemonastery.components.Pilgrimage;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.GATEHOUSE;
 import static java.util.stream.Collectors.toList;

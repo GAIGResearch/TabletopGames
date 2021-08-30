@@ -483,7 +483,7 @@ public class SingleTreeNode {
             double explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits + 1) / (actionVisits + player.params.epsilon));
             // unless we are using a variant
             if (player.params.treePolicy == AlphaGo)
-                explorationTerm = player.params.K * Math.sqrt(this.nVisits / (actionVisits + 1.0));
+                explorationTerm = player.params.K * Math.sqrt(this.nVisits) / (actionVisits + 1.0);
 
             // Find 'UCB' value
             double uctValue = 0;

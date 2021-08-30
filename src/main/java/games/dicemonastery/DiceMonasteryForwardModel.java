@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Deck;
 import games.dicemonastery.actions.*;
+import games.dicemonastery.components.*;
 import utilities.Pair;
 
 import java.util.*;
@@ -81,7 +82,14 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         state.marketCards.add(new MarketCard(3, 2, 2, 2, 4, 4, PALE_BLUE_INK));
         state.marketCards.shuffle(state.rnd);
 
+        int playerCount = state.getNPlayers();
+        state.forageCards.clear();
+        for (int[][] forageCardDatum : forageCardData) {
+            int[] cardData = forageCardDatum[playerCount - 2];
+            state.forageCards.add(new ForageCard(cardData[0], cardData[1], cardData[2]));
+        }
         state.drawBonusTokens();
+        state.replenishPigmentInMeadow();
 
         state.setGamePhase(Phase.PLACE_MONKS);
     }
@@ -153,18 +161,23 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     retValue.add(PASS);
                     switch (turnOrder.currentAreaBeingExecuted) {
                         case MEADOW:
+                            DMArea meadow = state.actionAreas.get(MEADOW);
+                            for (Resource pigment : new Resource[]{PALE_BLUE_PIGMENT, PALE_GREEN_PIGMENT, PALE_RED_PIGMENT}) {
+                                if (meadow.count(pigment, -1) > 0)
+                                    retValue.add(new TakePigment(pigment));
+                            }
                             if (turnOrder.season == SPRING) {
                                 retValue.add(SOW_WHEAT);
                                 if (state.getResource(currentPlayer, SKEP, STOREROOM) > 0)
                                     retValue.add(PLACE_SKEP);
                             } else {
-                                int grainInField = state.actionAreas.get(MEADOW).count(GRAIN, currentPlayer);
+                                int grainInField = meadow.count(GRAIN, currentPlayer);
                                 if (grainInField > 0) {
                                     retValue.add(HARVEST_WHEAT);
                                     if (grainInField > 1 && turnOrder.getActionPointsLeft() > 1)
                                         retValue.add(new HarvestWheat(Math.min(grainInField, turnOrder.getActionPointsLeft())));
                                 }
-                                int skepsOut = state.actionAreas.get(MEADOW).count(SKEP, currentPlayer);
+                                int skepsOut = meadow.count(SKEP, currentPlayer);
                                 if (skepsOut > 0) {
                                     retValue.add(COLLECT_SKEP);
                                     if (skepsOut > 1 && turnOrder.getActionPointsLeft() > 1)
@@ -207,7 +220,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             if (turnOrder.getActionPointsLeft() > 1) {
                                 int shillings = state.getResource(currentPlayer, SHILLINGS, STOREROOM);
                                 for (TREASURE item : TREASURE.values()) {
-                                    if (item.vp * state.getParams().COST_PER_TREASURE_VP <= shillings && state.getNumberCommissioned(item) < item.limit)
+                                    if (item.cost <= shillings && state.getNumberCommissioned(item) < item.limit)
                                         retValue.add(new BuyTreasure(item));
                                 }
                             }
@@ -252,8 +265,11 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             }
                             break;
                         case CHAPEL:
-                            retValue.remove(0); // remove Pass
-                            retValue.add(new PromoteAllMonks(CHAPEL));
+                            retValue.remove(0); // remove PASS
+                            eligibleMonks = state.monksIn(CHAPEL, currentPlayer);
+                            Set<Integer> validPieties = eligibleMonks.stream().map(Monk::getPiety).collect(toSet());
+                            retValue.addAll(validPieties.stream().map(piety -> new PromoteMonk(piety, CHAPEL, true)).collect(toList()));
+                            if (retValue.isEmpty()) retValue.add(new Pass()); // might be that last monk was promoted with a DEVOTION token and RETIRED
                             break;
                         default:
                             throw new AssertionError("Unknown area : " + turnOrder.currentAreaBeingExecuted);

@@ -3,7 +3,7 @@ package games.dicemonastery.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.Monk;
+import games.dicemonastery.components.Monk;
 
 import java.util.List;
 

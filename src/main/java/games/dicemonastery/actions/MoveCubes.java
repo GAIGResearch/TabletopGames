@@ -19,8 +19,7 @@ public class MoveCubes extends UseMonk {
 
     @Override
     public boolean _execute(DiceMonasteryGameState state) {
-        for (int i = 0; i < actionPoints; i++)
-            state.moveCube(state.getCurrentPlayer(), resource, from, to);
+        state.moveCubes(state.getCurrentPlayer(), resource, actionPoints, from, to);
         return true;
     }
 

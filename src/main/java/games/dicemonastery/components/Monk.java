@@ -1,6 +1,7 @@
-package games.dicemonastery;
+package games.dicemonastery.components;
 
 import core.components.Component;
+import games.dicemonastery.DiceMonasteryGameState;
 import utilities.Utils;
 
 import java.util.Objects;

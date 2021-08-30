@@ -6,7 +6,7 @@ import core.interfaces.IExtendedSequence;
 import games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import games.dicemonastery.DiceMonasteryConstants.BONUS_TOKEN;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.Monk;
+import games.dicemonastery.components.Monk;
 
 import java.util.List;
 
@@ -103,7 +103,8 @@ public class TakeToken extends AbstractAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return token.ordinal() * -3163 + fromArea.ordinal() * 947 + (monkPromoted ? 3559 : 877);
+        // deliberately exclude fromArea
+        return token.ordinal() * -3163 + (monkPromoted ? 3559 : 877);
     }
 
     @Override
@@ -113,6 +114,6 @@ public class TakeToken extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return String.format("Takes %s token from %s", token, fromArea);
+        return String.format("Takes %s token", token);
     }
 }

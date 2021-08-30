@@ -3,7 +3,7 @@ package games.dicemonastery.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.Monk;
+import games.dicemonastery.components.Monk;
 
 import java.util.Optional;
 
@@ -13,10 +13,18 @@ public class PromoteMonk extends AbstractAction {
 
     public final int pietyLevelToPromote;
     public final ActionArea location;
+    public final boolean useAllAP;
 
     public PromoteMonk(int piety, ActionArea where) {
         pietyLevelToPromote = piety;
         location = where;
+        useAllAP = false;
+    }
+
+    public PromoteMonk(int piety, ActionArea where, boolean useAP) {
+        pietyLevelToPromote = piety;
+        location = where;
+        useAllAP = useAP;
     }
 
     @Override
@@ -31,6 +39,8 @@ public class PromoteMonk extends AbstractAction {
         } else {
             throw new AssertionError(String.format("No monk with piety level %d for player %d in %s", pietyLevelToPromote, state.getCurrentPlayer(), location));
         }
+        if (useAllAP)
+            state.addActionPoints(-state.getAPLeft());
         return true;
     }
 
@@ -44,14 +54,15 @@ public class PromoteMonk extends AbstractAction {
     public boolean equals(Object obj) {
         if (obj instanceof PromoteMonk) {
             PromoteMonk other = (PromoteMonk) obj;
-            return pietyLevelToPromote == other.pietyLevelToPromote && location == other.location;
+            return pietyLevelToPromote == other.pietyLevelToPromote && location == other.location && other.useAllAP == useAllAP;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return 97 + pietyLevelToPromote * 1487 + location.ordinal() * 2777;
+        // we deliberately skip the location in the hashcode
+        return 97 + pietyLevelToPromote * 1487 + (useAllAP ? 1 : 0);
     }
 
     @Override
@@ -61,6 +72,6 @@ public class PromoteMonk extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("Promote Monk of piety %d in %s", pietyLevelToPromote, location);
+        return String.format("Promote Monk of piety %d %s", pietyLevelToPromote, useAllAP ? "(Chapel)" : "");
     }
 }

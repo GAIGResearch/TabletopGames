@@ -56,7 +56,7 @@ public class vOneEight {
         // check that some bonus tokens have been removed as rewards (1 or 2)
         for (ActionArea area : ActionArea.values()) {
             if (area == CHAPEL || area.dieMinimum == 0) continue;
-       //    System.out.printf("%s has %d players and %s tokens%n", area, playersPerArea.getOrDefault(area, 0), state.availableBonusTokens(area).size());
+           System.out.printf("%s has %d players and %s tokens%n", area, playersPerArea.getOrDefault(area, 0), state.availableBonusTokens(area).size());
             int expectedTokens = 2 - playersPerArea.getOrDefault(area, 0);
             if (expectedTokens < 0) expectedTokens = 0;
             assertEquals(expectedTokens, state.availableBonusTokens(area).size());

@@ -2,6 +2,7 @@ package games.dicemonastery;
 
 import core.AbstractGameState;
 import core.interfaces.IGameAttribute;
+import games.dicemonastery.components.Monk;
 
 import java.util.function.BiFunction;
 

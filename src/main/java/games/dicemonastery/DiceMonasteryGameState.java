@@ -6,6 +6,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.Token;
 import games.GameType;
+import games.dicemonastery.components.*;
 import utilities.Utils;
 
 import java.util.*;
@@ -15,6 +16,7 @@ import java.util.stream.IntStream;
 import static core.CoreConstants.VisibilityMode.FIRST_VISIBLE_TO_ALL;
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
@@ -34,6 +36,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     List<Deck<Pilgrimage>> pilgrimageDecks = new ArrayList<>(2);
     List<Pilgrimage> pilgrimagesStarted = new ArrayList<>();
     Deck<MarketCard> marketCards = new Deck<>("Market Deck", FIRST_VISIBLE_TO_ALL);
+    Deck<ForageCard> forageCards = new Deck<>("Forage Deck", FIRST_VISIBLE_TO_ALL);
     int[] victoryPoints;
     Random rnd;
 
@@ -86,8 +89,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
         //    System.out.printf("\tMoving Monk %s%n", movingMonk);
         if (movingMonk == null)
             throw new IllegalArgumentException("Monk does not exist : " + id);
-        if (movingMonk.piety < to.dieMinimum)
-            throw new AssertionError(String.format("Monk only has a piety of %d, so cannot move to %s", movingMonk.piety, to));
+        if (movingMonk.getPiety() < to.dieMinimum)
+            throw new AssertionError(String.format("Monk only has a piety of %d, so cannot move to %s", movingMonk.getPiety(), to));
         monkLocations.put(id, to);
         actionAreas.get(from).removeComponent(movingMonk);
         actionAreas.get(to).putComponent(movingMonk);
@@ -99,6 +102,12 @@ public class DiceMonasteryGameState extends AbstractGameState {
             throw new IllegalArgumentException(String.format("Only have %d %s in stock; cannot remove %d", currentLevel, resource, -amount));
         playerTreasuries.get(player).put(resource, currentLevel + amount);
     }
+
+    public void moveCubes(int player, Resource resource, int count, ActionArea from, ActionArea to) {
+        for (int i = 0; i < count; i++)
+            moveCube(player, resource, from, to);
+    }
+
 
     public void moveCube(int player, Resource resource, ActionArea from, ActionArea to) {
         Token cubeMoved = null;
@@ -120,14 +129,14 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     public boolean reserveBid(int beer, int mead) {
         int player = getCurrentPlayer();
-        int totalBeer = getResource(player, Resource.BEER, STOREROOM);
-        int totalMead = getResource(player, Resource.MEAD, STOREROOM);
+        int totalBeer = getResource(player, BEER, STOREROOM);
+        int totalMead = getResource(player, MEAD, STOREROOM);
         if (beer > totalBeer || mead > totalMead)
             throw new AssertionError(String.format("Cannot bid more beer or mead than you have %d of %d, %d of %d", beer, totalBeer, mead, totalMead));
 
         playerBids.put(player, new HashMap<>());
-        playerBids.get(player).put(Resource.BEER, beer);
-        playerBids.get(player).put(Resource.MEAD, mead);
+        playerBids.get(player).put(BEER, beer);
+        playerBids.get(player).put(MEAD, mead);
         return true;
     }
 
@@ -147,7 +156,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
         List<Integer> bidPerPlayer = IntStream.range(0, getNPlayers()).map(player -> {
                     Map<Resource, Integer> bid = playerBids.get(player);
-                    return bid.getOrDefault(Resource.BEER, 0) + bid.getOrDefault(Resource.MEAD, 0) * 2;
+            return bid.getOrDefault(BEER, 0) + bid.getOrDefault(MEAD, 0) * 2;
                 }
         ).boxed().collect(toList());
 
@@ -183,8 +192,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 int vp = VIKING_REWARDS[bidPerPlayer.size() - 1][playerOrdinality.get(player)];
                 addVP(vp, player);
                 // and then lose stuff in Bid
-                treasury.merge(Resource.BEER, -playerBids.get(player).getOrDefault(Resource.BEER, 0), Integer::sum);
-                treasury.merge(Resource.MEAD, -playerBids.get(player).getOrDefault(Resource.MEAD, 0), Integer::sum);
+                treasury.merge(BEER, -playerBids.get(player).getOrDefault(BEER, 0), Integer::sum);
+                treasury.merge(MEAD, -playerBids.get(player).getOrDefault(MEAD, 0), Integer::sum);
                 playerBids.remove(player);
             }
         }
@@ -289,7 +298,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return eligibleMonks.isEmpty() ? 0 : eligibleMonks.stream()
                 .max(comparingInt(Monk::getPiety))
                 .orElseThrow(() -> new AssertionError("No Monks in Gatehouse?"))
-                .piety;
+                .getPiety();
     }
 
     public Monk getMonkById(int id) {
@@ -307,20 +316,22 @@ public class DiceMonasteryGameState extends AbstractGameState {
     void springAutumnHousekeeping() {
         // We move PROTO_ stuff on its merry way
         for (int player = 0; player < turnOrder.nPlayers(); player++) {
-            int almostBeer = getResource(player, Resource.PROTO_BEER_2, STOREROOM);
-            addResource(player, Resource.BEER, almostBeer);
-            int notBeer = getResource(player, Resource.PROTO_BEER_1, STOREROOM);
-            addResource(player, Resource.PROTO_BEER_2, notBeer - almostBeer);
-            addResource(player, Resource.PROTO_BEER_1, -notBeer);
-            int almostMead = getResource(player, Resource.PROTO_MEAD_2, STOREROOM);
-            addResource(player, Resource.MEAD, almostMead);
-            int notMead = getResource(player, Resource.PROTO_MEAD_1, STOREROOM);
-            addResource(player, Resource.PROTO_MEAD_2, notMead - almostMead);
-            addResource(player, Resource.PROTO_MEAD_1, -notMead);
+            int almostBeer = getResource(player, PROTO_BEER_2, STOREROOM);
+            addResource(player, BEER, almostBeer);
+            int notBeer = getResource(player, PROTO_BEER_1, STOREROOM);
+            addResource(player, PROTO_BEER_2, notBeer - almostBeer);
+            addResource(player, PROTO_BEER_1, -notBeer);
+            int almostMead = getResource(player, PROTO_MEAD_2, STOREROOM);
+            addResource(player, MEAD, almostMead);
+            int notMead = getResource(player, PROTO_MEAD_1, STOREROOM);
+            addResource(player, PROTO_MEAD_2, notMead - almostMead);
+            addResource(player, PROTO_MEAD_1, -notMead);
         }
         advancePilgrims();
         drawBonusTokens();
         marketCards.draw();
+        forageCards.draw();
+        replenishPigmentInMeadow();
     }
 
 
@@ -346,6 +357,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return marketCards.peek();
     }
 
+    public ForageCard getCurrentForage() {
+        return forageCards.peek();
+    }
+
     public Pilgrimage startPilgrimage(Pilgrimage.DESTINATION destination, Monk monk) {
         Pilgrimage retValue = pilgrimageDecks.get(destination.isLong() ? 1 : 0).draw();
         if (retValue.destination != destination)
@@ -365,7 +380,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     void advancePilgrims() {
         for (Pilgrimage p : pilgrimagesStarted) {
-            if (p.active) {
+            if (p.isActive()) {
                 p.advance(this);
             }
         }
@@ -377,10 +392,25 @@ public class DiceMonasteryGameState extends AbstractGameState {
             if (key.dieMinimum > 0) {
                 DMArea area = actionAreas.get(key);
                 for (int i = 0; i < tokensPerArea; i++) {
-                    area.tokens[i] = drawToken(rnd);
+                    area.setToken(i, drawToken(rnd));
                 }
             }
         }
+    }
+
+    void replenishPigmentInMeadow() {
+        // remove any left from last season
+        for (Resource pigment : new Resource[]{PALE_RED_PIGMENT, PALE_BLUE_PIGMENT, PALE_GREEN_PIGMENT}) {
+            int unharvested = getResource(-1, pigment, MEADOW);
+            if (unharvested > 0)
+                moveCubes(-1, pigment, unharvested, MEADOW, SUPPLY);
+        }
+
+        // look at the top Forage card, and add the needed cubes
+        ForageCard topCard = forageCards.peek();
+        moveCubes(-1, PALE_BLUE_PIGMENT, topCard.blue, SUPPLY, MEADOW);
+        moveCubes(-1, PALE_GREEN_PIGMENT, topCard.green, SUPPLY, MEADOW);
+        moveCubes(-1, PALE_RED_PIGMENT, topCard.red, SUPPLY, MEADOW);
     }
 
     BONUS_TOKEN drawToken(Random rnd) {
@@ -397,15 +427,14 @@ public class DiceMonasteryGameState extends AbstractGameState {
         DMArea dma = actionAreas.get(area);
         if (dma == null)
             throw new AssertionError("Area does not exist: " + area);
-        return Arrays.stream(dma.tokens).filter(Objects::nonNull).collect(toList());
+        return Arrays.stream(dma.getTokens()).filter(Objects::nonNull).collect(toList());
     }
 
     public void removeToken(BONUS_TOKEN token, ActionArea area) {
-        BONUS_TOKEN[] tokens = actionAreas.get(area).tokens;
-        DiceMonasteryTurnOrder to = (DiceMonasteryTurnOrder) turnOrder;
+        BONUS_TOKEN[] tokens = actionAreas.get(area).getTokens();
         for (int i = 0; i < tokens.length; i++) {
             if (tokens[i] == token) {
-                tokens[i] = null;
+                actionAreas.get(area).setToken(i, null);
                 return;
             }
         }
@@ -417,7 +446,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public void putToken(ActionArea area, BONUS_TOKEN token, int position) {
-        actionAreas.get(area).tokens[position] = token;
+        actionAreas.get(area).setToken(position, token);
     }
 
     void winterHousekeeping() {
@@ -426,10 +455,10 @@ public class DiceMonasteryGameState extends AbstractGameState {
             List<Monk> monks = monksIn(DORMITORY, player);
             int requiredFood = monks.size();
             DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
-            requiredFood -= getResource(player, Resource.BREAD, STOREROOM);
+            requiredFood -= getResource(player, BREAD, STOREROOM);
             if (requiredFood > 0) {
-                int honeyEaten = Math.min(requiredFood, getResource(player, Resource.HONEY, STOREROOM));
-                addResource(player, Resource.HONEY, -honeyEaten);
+                int honeyEaten = Math.min(requiredFood, getResource(player, HONEY, STOREROOM));
+                addResource(player, HONEY, -honeyEaten);
                 requiredFood -= honeyEaten;
             }
             if (requiredFood > 0) {
@@ -445,11 +474,11 @@ public class DiceMonasteryGameState extends AbstractGameState {
                         .forEach(Monk::demote);
             }
             // then remove all perishable goods from Storeroom, and unharvested wheat from the Meadow
-            addResource(player, Resource.BREAD, -getResource(player, Resource.BREAD, STOREROOM));
-            addResource(player, Resource.CALF_SKIN, -getResource(player, Resource.CALF_SKIN, STOREROOM));
-            int unharvestedWheat = getResource(player, Resource.GRAIN, MEADOW);
+            addResource(player, BREAD, -getResource(player, BREAD, STOREROOM));
+            addResource(player, CALF_SKIN, -getResource(player, CALF_SKIN, STOREROOM));
+            int unharvestedWheat = getResource(player, GRAIN, MEADOW);
             for (int i = 0; i < unharvestedWheat; i++)
-                moveCube(player, Resource.GRAIN, MEADOW, SUPPLY);
+                moveCube(player, GRAIN, MEADOW, SUPPLY);
         }
         // Deliberately do not check monks here...that is done afterwards...Winter housekeeping is done before winter actions
     }
@@ -512,6 +541,12 @@ public class DiceMonasteryGameState extends AbstractGameState {
             retValue.marketCards.shuffle(rnd);
             retValue.marketCards.add(topCard);
         }
+        retValue.forageCards = forageCards.copy();
+        if (playerId != -1 && forageCards.getSize() > 1) { // shuffle all except the top card
+            ForageCard topCard = retValue.forageCards.draw();
+            retValue.forageCards.shuffle(rnd);
+            retValue.forageCards.add(topCard);
+        }
 
         for (Pilgrimage p : pilgrimagesStarted)
             retValue.pilgrimagesStarted.add(p.copy());
@@ -543,8 +578,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return (double) (playerTreasuries.get(playerId).getOrDefault(Resource.BEER, 0) / 2) +
-                playerTreasuries.get(playerId).getOrDefault(Resource.MEAD, 0) +
+        return (double) (playerTreasuries.get(playerId).getOrDefault(BEER, 0) / 2) +
+                playerTreasuries.get(playerId).getOrDefault(MEAD, 0) +
                 getVictoryPoints(playerId);
     }
 
@@ -559,7 +594,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 other.nextRetirementReward == nextRetirementReward && other.actionAreas.equals(actionAreas) &&
                 other.textsWritten.equals(textsWritten) && other.treasuresCommissioned.equals(treasuresCommissioned) &&
                 other.pilgrimagesStarted.equals(pilgrimagesStarted) && other.pilgrimageDecks.equals(pilgrimageDecks) &&
-                other.marketCards == marketCards &&
+                other.marketCards == marketCards && other.forageCards == forageCards &&
                 Arrays.equals(other.victoryPoints, victoryPoints) && Arrays.equals(other.playerResults, playerResults);
     }
 
@@ -567,7 +602,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
                 gameParameters, turnOrder, nextRetirementReward, playerBids, textsWritten, treasuresCommissioned,
-                pilgrimageDecks, pilgrimagesStarted, treasuresOwnedPerPlayer, marketCards) +
+                pilgrimageDecks, pilgrimagesStarted, treasuresOwnedPerPlayer, marketCards, forageCards) +
                 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }
 

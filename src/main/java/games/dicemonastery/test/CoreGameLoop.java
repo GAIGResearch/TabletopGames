@@ -5,6 +5,7 @@ import core.actions.DoNothing;
 import games.dicemonastery.*;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.actions.*;
+import games.dicemonastery.components.Monk;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 import utilities.Utils;
@@ -325,7 +326,7 @@ public class CoreGameLoop {
             } else if (state.currentActionInProgress() instanceof VisitMarket) {
                 playerSwitchExpected = turnOrder.getActionPointsLeft() == 0;
             } else {
-                playerSwitchExpected = actionChosen instanceof Pass || actionChosen instanceof PromoteAllMonks ||
+                playerSwitchExpected = actionChosen instanceof Pass || (actionChosen instanceof PromoteMonk && ((PromoteMonk) actionChosen).useAllAP) ||
                         (actionChosen instanceof UseMonk && ((UseMonk) actionChosen).getActionPoints() == turnOrder.getActionPointsLeft());
             }
             System.out.printf("Action: %s, Player: %d, actionPointsLeft: %d, Switch: %s\n", actionChosen, lastPlayer, turnOrder.getActionPointsLeft(), playerSwitchExpected);

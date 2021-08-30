@@ -1,7 +1,9 @@
-package games.dicemonastery;
+package games.dicemonastery.components;
 
 import core.components.Component;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
+import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.DiceMonasteryTurnOrder;
 import utilities.Utils;
 
 import java.util.Objects;

@@ -71,8 +71,8 @@ public class LearnedAdvantage extends AbstractPlayer implements IGameListener, I
                 BufferedReader reader = new BufferedReader(new FileReader(file));
 
                 // we expect three columns; hash, visits, totAdvantage
+                reader.readLine(); // skip header
                 String nextLine = reader.readLine();
-                nextLine = reader.readLine(); // skip header
                 while (nextLine != null) {
                     List<Double> data = Arrays.stream(nextLine.split(",")).map(Double::valueOf).collect(toList());
                     int hash = data.get(0).intValue();
@@ -122,11 +122,11 @@ public class LearnedAdvantage extends AbstractPlayer implements IGameListener, I
 
             advWriter.write(String.valueOf(advantageHeuristic.RND_WEIGHT));
             advWriter.newLine();
-            advWriter.write("ActionHash, Advantage");
+            advWriter.write("ActionHash, Advantage, Name");
             advWriter.newLine();
             advWriter2.write(String.valueOf(advantageHeuristic.RND_WEIGHT));
             advWriter2.newLine();
-            advWriter2.write("ActionHash, Advantage");
+            advWriter2.write("ActionHash, Advantage, Name");
             advWriter2.newLine();
             // we expect two columns; hash and advantage estimate
 
@@ -138,10 +138,11 @@ public class LearnedAdvantage extends AbstractPlayer implements IGameListener, I
 
 
             Map<Integer, Double> actionAdvantage = getAdvantages();
+            Map<Integer, String> actionNames = advantageHeuristic.actionNames;
             for (Integer hash : newData.keySet()) {
-                advWriter.write(String.format("%d, %.3f", hash, actionAdvantage.getOrDefault(hash, 0.0)));
+                advWriter.write(String.format("%d, %.3f, %s", hash, actionAdvantage.getOrDefault(hash, 0.0), actionNames.getOrDefault(hash, "")));
                 advWriter.newLine();
-                advWriter2.write(String.format("%d, %.3f", hash, actionAdvantage.getOrDefault(hash, 0.0)));
+                advWriter2.write(String.format("%d, %.3f, %s", hash, actionAdvantage.getOrDefault(hash, 0.0), actionNames.getOrDefault(hash, "")));
                 advWriter2.newLine();
 
                 statsWriter.write(String.format("%d, %d, %.6f", hash, newData.get(hash).a, newData.get(hash).b));

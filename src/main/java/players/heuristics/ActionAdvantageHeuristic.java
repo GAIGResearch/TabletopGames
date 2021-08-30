@@ -21,6 +21,7 @@ public class ActionAdvantageHeuristic extends AbstractPlayer implements ToDouble
     protected double RND_WEIGHT;
 
     Map<Integer, Double> actionAdvantage = new HashMap<>();
+    Map<Integer, String> actionNames = new HashMap<>();
 
     public ActionAdvantageHeuristic(String filename) {
         this.filename = filename;
@@ -40,16 +41,20 @@ public class ActionAdvantageHeuristic extends AbstractPlayer implements ToDouble
                 String weight = reader.readLine();
                 RND_WEIGHT = Double.parseDouble(weight);
                 reader.readLine();
-                // we expect two columns; hash and advantage estimate
+                // we expect three columns; hash, advantage estimate, name (optional)
 
                 //   List<List<Double>> data = new ArrayList<>();
                 String nextLine = reader.readLine();
                 while (nextLine != null) {
-                    List<Double> data = Arrays.stream(nextLine.split(",")).map(Double::valueOf).collect(toList());
+                    List<String> data = Arrays.stream(nextLine.split(",")).collect(toList());
 
-                    int hash = data.get(0).intValue();
-                    double advantage = data.get(1);
+                    int hash = Integer.parseInt(data.get(0));
+                    double advantage = Double.parseDouble(data.get(1));
                     actionAdvantage.put(hash, advantage);
+                    if (data.size() > 2) {
+                        String name = data.get(1);
+                        actionNames.put(hash, name);
+                    }
                     nextLine = reader.readLine();
                 }
 
@@ -73,7 +78,9 @@ public class ActionAdvantageHeuristic extends AbstractPlayer implements ToDouble
         double bestValue = Double.NEGATIVE_INFINITY;
         AbstractAction retValue = possibleActions.get(0);
         for (AbstractAction action : possibleActions) {
-            double actionValue = actionAdvantage.getOrDefault(action.hashCode(), 0.0) + rnd.nextDouble() * RND_WEIGHT;
+            int hash = action.hashCode();
+            double actionValue = actionAdvantage.getOrDefault(hash, 0.0) + rnd.nextDouble() * RND_WEIGHT;
+            actionNames.putIfAbsent(hash, action.toString());
             if (actionValue > bestValue) {
                 retValue = action;
                 bestValue = actionValue;

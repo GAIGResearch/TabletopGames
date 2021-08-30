@@ -1,7 +1,7 @@
 package games.dicemonastery.gui;
 
 import games.dicemonastery.DiceMonasteryConstants;
-import games.dicemonastery.Monk;
+import games.dicemonastery.components.Monk;
 import gui.views.ComponentView;
 
 import java.awt.*;

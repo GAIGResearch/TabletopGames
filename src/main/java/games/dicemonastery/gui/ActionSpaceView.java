@@ -2,7 +2,7 @@ package games.dicemonastery.gui;
 
 import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.Monk;
+import games.dicemonastery.components.Monk;
 
 import javax.swing.*;
 import java.awt.*;

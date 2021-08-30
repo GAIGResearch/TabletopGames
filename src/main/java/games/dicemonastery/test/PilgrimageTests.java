@@ -1,12 +1,14 @@
 package games.dicemonastery.test;
 
 import games.dicemonastery.*;
+import games.dicemonastery.components.Monk;
+import games.dicemonastery.components.Pilgrimage;
 import org.junit.Test;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
-import static games.dicemonastery.Pilgrimage.DESTINATION.ROME;
+import static games.dicemonastery.components.Pilgrimage.DESTINATION.ROME;
 import static org.junit.Assert.*;
 
 public class PilgrimageTests {

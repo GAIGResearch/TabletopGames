@@ -1,4 +1,4 @@
-package games.dicemonastery;
+package games.dicemonastery.components;
 
 import core.components.Area;
 import core.components.Component;
@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static games.dicemonastery.DiceMonasteryConstants.Resource;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A wrapper around Area to provide helper methods to get stuff
@@ -50,9 +51,17 @@ public class DMArea {
                 .count();
     }
 
+    public void setToken(int i, BONUS_TOKEN token) {
+        tokens[i] = token;
+    }
+
+    public BONUS_TOKEN[] getTokens() {
+        return tokens.clone();
+    }
+
     public DMArea copy() {
         Area emptyArea = area.emptyCopy();
-        area.getComponents().forEach( c -> emptyArea.putComponent(c.copy()));
+        area.getComponents().forEach(c -> emptyArea.putComponent(c.copy()));
         DMArea retValue = new DMArea(emptyArea);
         retValue.tokens[0] = tokens[0];
         retValue.tokens[1] = tokens[1];
@@ -60,7 +69,7 @@ public class DMArea {
     }
 
     public List<Component> getAll(Predicate<Component> filter) {
-        return area.stream().filter(filter).collect(Collectors.toList());
+        return area.stream().filter(filter).collect(toList());
     }
 
     public void putComponent(Component c) {
