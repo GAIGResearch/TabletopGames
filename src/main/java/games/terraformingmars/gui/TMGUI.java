@@ -44,11 +44,11 @@ public class TMGUI extends AbstractGUI {
 
     static int fontSize = 16;
     static Font defaultFont = new Font("Prototype", Font.BOLD, fontSize);
-    static Color fontColor = Color.black;
-    static Color bgColor = Color.white;
+    static Color fontColor = Color.white;
+    static Color bgColor = Color.black;
     static Color grayColor = Color.gray;
-    static Color lightGrayColor = Color.darkGray;
-    static Color darkGrayColor = Color.lightGray;
+    static Color lightGrayColor = Color.lightGray;
+    static Color darkGrayColor = Color.darkGray;
     static int focusPlayer = 0;
 
     int currentPlayerIdx = 0;
@@ -68,7 +68,7 @@ public class TMGUI extends AbstractGUI {
 //        TexturePaint space = new TexturePaint(bg, new Rectangle2D.Float(0,0, bg.getWidth(), bg.getHeight()));
 //        TiledImage backgroundImage = new TiledImage(space);
 //        setContentPane(backgroundImage);
-        setBackground(Color.white);
+        setBackground(bgColor);
 
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
@@ -252,9 +252,11 @@ public class TMGUI extends AbstractGUI {
         gamePhase.setOpaque(false);
         generationCount.setOpaque(false);
 
-        JTabbedPane tabs = new JTabbedPane();
+        JTabbedPane tabs = new SeeThroughTabbedPane();
         tabs.setForeground(fontColor);
         tabs.setFont(defaultFont);
+        tabs.setBackground(bgColor);
+        tabs.setOpaque(false);
 
         JPanel gameWrap = new JPanel();
         gameWrap.setOpaque(false);
@@ -536,4 +538,39 @@ public class TMGUI extends AbstractGUI {
 
         return resizedImg;
     }
+
+    public static class SeeThroughTabbedPane extends JTabbedPane {
+
+        private float alpha;
+
+        public SeeThroughTabbedPane() {
+            setOpaque(false);
+            setAlpha(1f);
+        }
+
+        public void setAlpha(float value) {
+            if (alpha != value) {
+                float old = alpha;
+                this.alpha = value;
+                firePropertyChange("alpha", old, alpha);
+                repaint();
+            }
+        }
+
+        public float getAlpha() {
+            return alpha;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2d = (Graphics2D) g.create();
+            g2d.setColor(getBackground());
+            g2d.setComposite(AlphaComposite.SrcOver.derive(getAlpha()));
+            g2d.fillRect(0, 0, getWidth(), getHeight());
+            g2d.dispose();
+            super.paintComponent(g);
+        }
+
+    }
+
 }
