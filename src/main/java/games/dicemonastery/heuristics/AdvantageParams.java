@@ -1,7 +1,7 @@
 package games.dicemonastery.heuristics;
 
 import evaluation.TunableParameters;
-import players.heuristics.ActionAdvantageHeuristic;
+import players.heuristics.ActionValueHeuristic;
 
 public class AdvantageParams extends TunableParameters {
 
@@ -25,7 +25,7 @@ public class AdvantageParams extends TunableParameters {
     }
 
     @Override
-    public ActionAdvantageHeuristic instantiate() {
+    public ActionValueHeuristic instantiate() {
         throw new IllegalArgumentException("Not yet implemented");
     }
 

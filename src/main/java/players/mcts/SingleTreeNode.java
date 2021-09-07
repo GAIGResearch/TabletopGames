@@ -1,5 +1,6 @@
 package players.mcts;
 
+import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
@@ -146,6 +147,8 @@ public class SingleTreeNode {
                 openLoopState = player.params.redeterminise ? state.copy(player.getPlayerID()) : state.copy();
                 copyCount++;
             }
+            double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
+                    .mapToDouble(i -> player.heuristic.evaluateState(openLoopState, i)).toArray();
 
             // New timer for this iteration
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
@@ -155,7 +158,7 @@ public class SingleTreeNode {
             SingleTreeNode selected = treePolicy(treeActions);
             // Monte carlo rollout: return value of MC rollout from the newly added node
             List<Pair<Integer, AbstractAction>> rolloutActions = new ArrayList<>();
-            double[] delta = selected.rollOut(rolloutActions);
+            double[] delta = selected.rollOut(rolloutActions, startingValues);
             // Back up the value of the rollout through the tree
             selected.backUp(delta);
             if (player.params.useMAST) {
@@ -574,7 +577,7 @@ public class SingleTreeNode {
      *
      * @return - value of rollout.
      */
-    private double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions) {
+    private double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues) {
         int rolloutDepth = 0; // counting from end of tree
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
@@ -601,8 +604,9 @@ public class SingleTreeNode {
         }
         // Evaluate final state and return normalised score
         double[] retValue = new double[state.getNPlayers()];
+
         for (int i = 0; i < retValue.length; i++) {
-            retValue[i] = player.heuristic.evaluateState(rolloutState, i);
+            retValue[i] = player.heuristic.evaluateState(rolloutState, i) - startingValues[i];
         }
         return retValue;
     }
@@ -729,6 +733,10 @@ public class SingleTreeNode {
 
     public int getActor() {
         return decisionPlayer;
+    }
+
+    public AbstractForwardModel getForwardModel() {
+        return player.getForwardModel();
     }
 
     @Override

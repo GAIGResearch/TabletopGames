@@ -299,11 +299,11 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     // we generate up to 16 SummerBids for every possibility of 0% to 100% of total stuff in 33% increments
                     // taking each of beer and mead independently
                     //  (removing any duplicate bids, so in practise the actual number will be rather lower)
-                    // to avoid silliness, we also remove any bid of 10VP or higher
+                    // to avoid silliness, we also remove any bid of more than 8VP or higher
                     int totalBeer = state.getResource(currentPlayer, BEER, STOREROOM);
                     int totalMead = state.getResource(currentPlayer, MEAD, STOREROOM);
                     return bidCombinations.stream().map(pair -> new SummerBid((int) (pair.a / 3.0 * totalBeer), (int) (pair.b / 3.0 * totalMead)))
-                            .distinct().filter(bid -> bid.beer + bid.mead * 2 < 20).collect(toList());
+                            .distinct().filter(bid -> bid.beer + bid.mead * 2 < 33).collect(toList());
                 }
             case WINTER:
                 List<AbstractAction> retValue = state.monksIn(DORMITORY, state.getCurrentPlayer()).stream()

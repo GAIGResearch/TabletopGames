@@ -3,6 +3,7 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import core.ParameterFactory;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;

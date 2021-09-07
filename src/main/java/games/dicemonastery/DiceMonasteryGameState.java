@@ -475,7 +475,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             }
             // then remove all perishable goods from Storeroom, and unharvested wheat from the Meadow
             addResource(player, BREAD, -getResource(player, BREAD, STOREROOM));
-            addResource(player, CALF_SKIN, -getResource(player, CALF_SKIN, STOREROOM));
+          //  addResource(player, CALF_SKIN, -getResource(player, CALF_SKIN, STOREROOM));
             int unharvestedWheat = getResource(player, GRAIN, MEADOW);
             for (int i = 0; i < unharvestedWheat; i++)
                 moveCube(player, GRAIN, MEADOW, SUPPLY);
