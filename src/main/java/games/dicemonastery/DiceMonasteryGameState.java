@@ -166,19 +166,30 @@ public class DiceMonasteryGameState extends AbstractGameState {
         List<Integer> sortedBids = bidPerPlayer.stream().sorted(comparingInt(i -> -i)).collect(toList());
 
         // contains the ordinality of the player bids, 0 = best bid (including joint equals) and so on.
+        // this automatically takes account of ties correctly
         List<Integer> playerOrdinality = bidPerPlayer.stream().map(sortedBids::indexOf).collect(toList());
-        // we then modify this to take account of ties
-        int ordinality = 0;
-        do {
-            int currentOrdinality = ordinality;
-            int playersInPosition = (int) playerOrdinality.stream().filter(o -> o == currentOrdinality).count();
-            if (playersInPosition > 1) {
-                // all later players are moved on
-                // if two players, then all laters are incremented by 1 for example
-                playerOrdinality = playerOrdinality.stream().map(o -> (o <= currentOrdinality) ? o : o + (playersInPosition - 1)).collect(toList());
+
+        // create map from ordinality to number of players with that ordinality
+        Map<Integer, Integer> allOrdinalities = new HashMap<>();
+        for (Integer integer : playerOrdinality)
+            allOrdinalities.merge(integer, 1, Integer::sum);
+
+        int[] playerRewards = new int[playerOrdinality.size()];
+        int vpTotal = 0;
+        boolean losers = true;
+        for (Integer o = getNPlayers() - 1; o >= 0; o--) {
+            int ordinalityVP = VIKING_REWARDS[getNPlayers() - 1][o];
+            if (!allOrdinalities.containsKey(o)) {
+                // we therefore add this vp to the next set
+                vpTotal += ordinalityVP;
+            } else {
+                // we have players with this ordinality, so divide available points between them
+                // the first time we hit this is for the losing player(s), who by definition score 0 points
+                playerRewards[o] = losers ? 0 : (ordinalityVP + vpTotal) / allOrdinalities.get(o);
+                vpTotal = 0;
+                losers = false;
             }
-            ordinality++;
-        } while (ordinality < playerOrdinality.size());
+        }
 
         List<Integer> retValue = new ArrayList<>();
         for (int player = 0; player < bidPerPlayer.size(); player++) {
@@ -189,7 +200,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 playerBids.remove(player);
             } else {
                 // Gain VP
-                int vp = VIKING_REWARDS[bidPerPlayer.size() - 1][playerOrdinality.get(player)];
+                int vp = playerRewards[playerOrdinality.get(player)];
                 addVP(vp, player);
                 // and then lose stuff in Bid
                 treasury.merge(BEER, -playerBids.get(player).getOrDefault(BEER, 0), Integer::sum);

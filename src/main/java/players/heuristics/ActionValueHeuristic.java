@@ -34,6 +34,8 @@ public class ActionValueHeuristic extends AbstractPlayer implements ToDoubleBiFu
     ) {
         actionValues = advantages;
         RND_WEIGHT = rndWeight;
+        if (bucketFn == null)
+            throw new IllegalArgumentException("Must specify a bucket function");
         bucketFunction = bucketFn;
         this.defaultValue = defaultValue;
     }
