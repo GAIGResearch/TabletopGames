@@ -1,0 +1,48 @@
+ [
+   {
+     "name": ["String","Short Pilgrimages"],
+     "visibility" : "FIRST_VISIBLE_TO_ALL",
+     "cards":
+     [
+      {
+        "destination": ["String","Rome"],
+        "cost": ["Integer", 3],
+        "minPiety": ["Integer", 3],
+        "reward": ["String", "VIVID_GREEN_PIGMENT"],
+        "duration": ["Integer[]", [0, 1, 1]],
+        "multiplicity": ["Integer", 4]
+      },
+      {
+        "destination": ["String","Santiago"],
+        "cost": ["Integer", 3],
+        "minPiety": ["Integer", 3],
+        "reward": ["String", "VIVID_RED_PIGMENT"],
+        "duration": ["Integer[]", [0, 1, 1]],
+        "multiplicity": ["Integer", 4]
+      }
+     ]
+   },
+   {
+     "name": ["String","Long Pilgrimages"],
+     "visibility" : "FIRST_VISIBLE_TO_ALL",
+     "cards":
+     [
+         {
+        "destination": ["String","Alexandria"],
+        "cost": ["Integer", 6],
+        "minPiety": ["Integer", 5],
+        "reward": ["String", "VIVID_BLUE_PIGMENT"],
+        "duration": ["Integer[]", [0, 1, 1, 1]],
+        "multiplicity": ["Integer", 4]
+      },
+      {
+        "destination": ["String","Jerusalem"],
+        "cost": ["Integer", 6],
+        "minPiety": ["Integer", 5],
+        "reward": ["String", "VIVID_PURPLE_PIGMENT"],
+        "duration": ["Integer[]", [0, 1, 1, 1]],
+        "multiplicity": ["Integer", 4]
+      }
+    ]
+  }
+]
