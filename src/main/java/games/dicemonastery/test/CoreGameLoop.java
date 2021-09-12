@@ -6,6 +6,7 @@ import games.dicemonastery.*;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.Monk;
+import games.dicemonastery.components.Treasure;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 import utilities.Utils;
@@ -19,7 +20,6 @@ import static games.dicemonastery.DiceMonasteryConstants.Phase;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
-import static games.dicemonastery.DiceMonasteryConstants.TREASURE.*;
 import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
@@ -784,17 +784,27 @@ public class CoreGameLoop {
 
     @Test
     public void vikingsTakeTreasure() {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
+        List<Treasure> allTreasures = state.availableTreasures();
+        Treasure cape = allTreasures.stream().filter(t -> t.getComponentName().equals("Cape"))
+                .findFirst().orElseThrow( () -> new AssertionError("Cape not found"));
+        Treasure candlestick = allTreasures.stream().filter(t -> t.getComponentName().equals("Candlestick"))
+                .findFirst().orElseThrow( () -> new AssertionError("Candlestick not found"));
+        Treasure altarCross = allTreasures.stream().filter(t -> t.getComponentName().equals("Altar Cross"))
+                .findFirst().orElseThrow( () -> new AssertionError("Altar Cross not found"));
+
         advanceToSummerAndRemoveTreasure();
         emptyAllStores();
-        DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
-        state.addTreasure(CAPE);
-        state.addTreasure(CANDLESTICK);
 
-        state.acquireTreasure(CAPE, 1);
-        state.acquireTreasure(CANDLESTICK, 1);
-        state.acquireTreasure(ALTAR_CROSS, 3);
+
+        state.addTreasure(cape);
+        state.addTreasure(candlestick);
+
+        state.acquireTreasure(cape, 1);
+        state.acquireTreasure(candlestick, 1);
+        state.acquireTreasure(altarCross, 3);
         state.addVP(10, 1);
         // get rid of any monks on PILGRIMAGE
         state.monksIn(PILGRIMAGE, 1).forEach(m -> state.moveMonk(m.getComponentID(), PILGRIMAGE, DORMITORY));
@@ -818,8 +828,8 @@ public class CoreGameLoop {
 
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.stream().filter(a -> a instanceof PayTreasure).count());
-        assertTrue(actions.contains(new PayTreasure(CANDLESTICK)));
-        fm.next(state, new PayTreasure(CANDLESTICK));
+        assertTrue(actions.contains(new PayTreasure(candlestick)));
+        fm.next(state, new PayTreasure(candlestick));
 
         assertEquals(AUTUMN, turnOrder.getSeason());
 
@@ -830,7 +840,7 @@ public class CoreGameLoop {
 
         assertEquals(startVP[1] - 3, state.getVictoryPoints(1));
         assertEquals(1, state.getTreasures(1).size());
-        assertFalse(state.getTreasures(1).contains(CANDLESTICK));
+        assertFalse(state.getTreasures(1).contains(candlestick));
         assertEquals(1, state.getTreasures(3).size());
     }
 

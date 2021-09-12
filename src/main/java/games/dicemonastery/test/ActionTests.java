@@ -7,7 +7,6 @@ import games.dicemonastery.*;
 import games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.DiceMonasteryConstants.Season;
-import games.dicemonastery.DiceMonasteryConstants.TREASURE;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.*;
 import org.junit.Test;
@@ -21,8 +20,6 @@ import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
-import static games.dicemonastery.DiceMonasteryConstants.TREASURE.CAPE;
-import static games.dicemonastery.DiceMonasteryConstants.TREASURE.ROBE;
 import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
@@ -32,6 +29,11 @@ public class ActionTests {
     DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
     DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) game.getGameState().getTurnOrder();
     RandomPlayer rnd = new RandomPlayer();
+    List<Treasure> allTreasures = state.availableTreasures();
+    Treasure cape = allTreasures.stream().filter(t -> t.getComponentName().equals("Cape"))
+            .findFirst().orElseThrow( () -> new AssertionError("Cape not found"));
+    Treasure robe = allTreasures.stream().filter(t -> t.getComponentName().equals("Robe"))
+            .findFirst().orElseThrow( () -> new AssertionError("Robe not found"));
 
     private void startOfUseMonkPhaseForArea(ActionArea region, Season season, Map<Integer, ActionArea> overrides) {
         do {
@@ -562,13 +564,13 @@ public class ActionTests {
         state.useAP(-1);
         state.addResource(state.getCurrentPlayer(), SHILLINGS, 6 - state.getResource(state.getCurrentPlayer(), SHILLINGS, STOREROOM));
         assertEquals(6, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new BuyTreasure(TREASURE.CAPE)));
-        assertTrue(fm.computeAvailableActions(state).contains(new BuyTreasure(TREASURE.ROBE)));
+        assertTrue(fm.computeAvailableActions(state).contains(new BuyTreasure(cape)));
+        assertTrue(fm.computeAvailableActions(state).contains(new BuyTreasure(robe)));
         assertTrue(fm.computeAvailableActions(state).contains(new BegForAlms(2)));
 
-        state.acquireTreasure(TREASURE.CAPE, state.getCurrentPlayer());
+        state.acquireTreasure(cape, state.getCurrentPlayer());
         assertEquals(5, fm.computeAvailableActions(state).size());
-        assertFalse(fm.computeAvailableActions(state).contains(new BuyTreasure(TREASURE.CAPE)));
+        assertFalse(fm.computeAvailableActions(state).contains(new BuyTreasure(cape)));
 
         state.addResource(state.getCurrentPlayer(), SHILLINGS, 8);
         assertEquals(7, fm.computeAvailableActions(state).size());  // One more Treasures in price range
@@ -666,12 +668,12 @@ public class ActionTests {
         state.addActionPoints(3);
         state.addResource(player, SHILLINGS, 4);
 
-        fm.next(state, new BuyTreasure(ROBE));
+        fm.next(state, new BuyTreasure(robe));
         assertEquals(1, turnOrder.getActionPointsLeft());
         assertEquals(5, state.getResource(player, SHILLINGS, STOREROOM));
         assertEquals(2, state.getVictoryPoints(player));
-        assertEquals(1, state.getNumberCommissioned(ROBE));
-        assertEquals(0, state.getNumberCommissioned(CAPE));
+        assertEquals(1, state.getNumberCommissioned(robe));
+        assertEquals(0, state.getNumberCommissioned(cape));
     }
 
     @Test

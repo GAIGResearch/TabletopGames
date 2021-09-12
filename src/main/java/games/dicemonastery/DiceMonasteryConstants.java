@@ -3,12 +3,9 @@ package games.dicemonastery;
 import core.interfaces.IGamePhase;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static games.dicemonastery.DiceMonasteryConstants.InkColour.*;
-import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 
 public class DiceMonasteryConstants {
 
@@ -141,29 +138,6 @@ public class DiceMonasteryConstants {
         public double getChance() {
             return number / (double) Arrays.stream(BONUS_TOKEN.values()).mapToInt(t -> t.number).sum();
         }
-    }
-
-
-    public enum TREASURE {
-        CAPE(1, 3,1),
-        ROBE(2, 5, 1),
-        CANDLESTICK(3, 8,1),
-        LECTERN(4, 11,1),
-        CHALICE(5, 15, 1),
-        MITRE(6, 19,1),
-        PLATE(7, 24,1),
-        ALTAR_CROSS(8, 29,1);
-
-        public final int vp;
-        public final int limit;
-        public final int cost;
-
-        TREASURE(int vp, int cost, int limit) {
-            this.vp = vp;
-            this.limit = limit;
-            this.cost = cost;
-        }
-
     }
 
 }

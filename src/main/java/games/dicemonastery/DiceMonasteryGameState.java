@@ -11,6 +11,7 @@ import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.FIRST_VISIBLE_TO_ALL;
@@ -30,8 +31,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
     List<EnumMap<Resource, Integer>> playerTreasuries = new ArrayList<>();
     Map<Integer, Map<Resource, Integer>> playerBids = new HashMap<>();
     int nextRetirementReward = 0;
-    Map<TREASURE, Integer> treasuresCommissioned = new EnumMap<>(TREASURE.class);
-    List<List<TREASURE>> treasuresOwnedPerPlayer = new ArrayList<>();
+    Map<Treasure, Integer> treasuresCommissioned = new HashMap<>();
+    List<List<Treasure>> treasuresOwnedPerPlayer = new ArrayList<>();
     List<Deck<Pilgrimage>> pilgrimageDecks = new ArrayList<>(2);
     List<Pilgrimage> pilgrimagesStarted = new ArrayList<>();
     Deck<MarketCard> marketCards = new Deck<>("Market Deck", FIRST_VISIBLE_TO_ALL);
@@ -63,11 +64,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
             treasuresOwnedPerPlayer.add(new ArrayList<>());
         }
         nextRetirementReward = 0;
-        for (IlluminatedText text : writtenTexts.keySet())
-            writtenTexts.put(text, 0);
-        treasuresCommissioned = new EnumMap<>(TREASURE.class);
-        for (TREASURE item : TREASURE.values())
-            treasuresCommissioned.put(item, 0);
+        writtenTexts.replaceAll((t, v) -> 0);
+        treasuresCommissioned.replaceAll((t, v) -> 0);
         pilgrimageDecks = new ArrayList<>(2);
         pilgrimageDecks.add(0, new Deck<>("Short Pilgrimages", FIRST_VISIBLE_TO_ALL));
         pilgrimageDecks.add(1, new Deck<>("Long Pilgrimages", FIRST_VISIBLE_TO_ALL));
@@ -139,7 +137,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return true;
     }
 
-    public void loseTreasure(int player, TREASURE treasure) {
+    public void loseTreasure(int player, Treasure treasure) {
         treasuresOwnedPerPlayer.get(player).remove(treasure);
         addVP(-treasure.vp, player);
     }
@@ -250,7 +248,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return writtenTexts.get(textType);
     }
 
-    public void acquireTreasure(TREASURE item, int player) {
+    public void acquireTreasure(Treasure item, int player) {
         if (treasuresCommissioned.get(item) < item.limit) {
             treasuresCommissioned.put(item, treasuresCommissioned.get(item) + 1);
             addVP(item.vp, player);
@@ -259,16 +257,22 @@ public class DiceMonasteryGameState extends AbstractGameState {
             throw new AssertionError("Cannot buy treasure as none left: " + item);
     }
 
-    public void addTreasure(TREASURE item) {
+    public void addTreasure(Treasure item) {
         treasuresCommissioned.merge(item, -1, Integer::sum);
     }
 
-    public int getNumberCommissioned(TREASURE item) {
+    public int getNumberCommissioned(Treasure item) {
         return treasuresCommissioned.get(item);
     }
 
-    public List<TREASURE> getTreasures(int player) {
+    public List<Treasure> getTreasures(int player) {
         return treasuresOwnedPerPlayer.get(player);
+    }
+
+    public List<Treasure> availableTreasures() {
+        return treasuresCommissioned.keySet().stream()
+                .filter(t -> treasuresCommissioned.get(t) < t.limit)
+                .collect(toList());
     }
 
     public void useAP(int actionPointsSpent) {

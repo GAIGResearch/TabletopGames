@@ -2,14 +2,13 @@ package games.dicemonastery.actions;
 
 import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
-
-import static games.dicemonastery.DiceMonasteryConstants.TREASURE;
+import games.dicemonastery.components.Treasure;
 
 public class BuyTreasure extends UseMonk{
 
-    public final TREASURE treasure;
+    public final Treasure treasure;
 
-    public BuyTreasure(TREASURE treasure) {
+    public BuyTreasure(Treasure treasure) {
         super(2);
         this.treasure = treasure;
     }
@@ -24,7 +23,7 @@ public class BuyTreasure extends UseMonk{
 
     @Override
     public int hashCode() {
-        return treasure.ordinal() * 7 - 29291430;
+        return treasure.hashCode() - 29291430;
     }
 
     @Override

@@ -104,6 +104,10 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         for (Card c : rawDeck.getComponents()) {
             state.writtenTexts.put(IlluminatedText.create(c), 0);
         }
+        rawDeck = _data.findDeck("Treasures");
+        for (Card c : rawDeck.getComponents()) {
+            state.treasuresCommissioned.put(Treasure.create(c), 0);
+        }
 
         state.drawBonusTokens();
         state.replenishPigmentInMeadow();
@@ -236,8 +240,8 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             retValue.add(new VisitMarket());
                             if (turnOrder.getActionPointsLeft() > 1) {
                                 int shillings = state.getResource(currentPlayer, SHILLINGS, STOREROOM);
-                                for (TREASURE item : TREASURE.values()) {
-                                    if (item.cost <= shillings && state.getNumberCommissioned(item) < item.limit)
+                                for (Treasure item : state.availableTreasures()) {
+                                    if (item.cost <= shillings)
                                         retValue.add(new BuyTreasure(item));
                                 }
                             }
@@ -298,7 +302,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                 if (state.getGamePhase() == SACRIFICE) {
                     // in this case we have sacrifice decisions to make - Monk or Treasure
                     List<AbstractAction> retValue = new ArrayList<>();
-                    List<TREASURE> treasure = state.getTreasures(currentPlayer);
+                    List<Treasure> treasure = state.getTreasures(currentPlayer);
                     if (!treasure.isEmpty())
                         retValue.add(new PayTreasure(treasure.stream().max(comparingInt(t -> t.vp)).get()));
                     if (treasure.isEmpty() || !params.mandateTreasureLoss) {

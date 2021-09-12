@@ -2,14 +2,14 @@ package games.dicemonastery.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import games.dicemonastery.DiceMonasteryConstants.TREASURE;
 import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.components.Treasure;
 
 public class PayTreasure extends AbstractAction {
 
-    final TREASURE payment;
+    final Treasure payment;
 
-    public PayTreasure(TREASURE loss) {
+    public PayTreasure(Treasure loss) {
         payment = loss;
     }
 
@@ -33,7 +33,7 @@ public class PayTreasure extends AbstractAction {
 
     @Override
     public int hashCode() {
-        return 8341 + payment.ordinal();
+        return 8341 + payment.hashCode();
     }
 
     @Override
