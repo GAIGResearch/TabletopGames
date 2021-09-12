@@ -119,8 +119,6 @@ public class DiceMonasteryConstants {
         }
     }
 
-    public final static boolean mandateTreasureLoss = true;
-
     public final static int[] RETIREMENT_REWARDS = {5, 4, 4, 3, 3, 2, 2, 2};
 
     // rows are number of players; columns are ordinal position in bidding
@@ -129,19 +127,6 @@ public class DiceMonasteryConstants {
             {2, 0, 0, 0},
             {4, 2, 0, 0},
             {6, 4, 2, 0}
-    };
-
-    // first index is card, second index is player count, 3rd index is green/red/blue
-    public final static int[][][] forageCardData = {
-            {{2, 0, 0}, {2, 0, 1}, {2, 1, 1}},
-            {{0, 1, 1}, {0, 1, 2}, {0, 2, 2}},
-            {{1, 0, 1}, {1, 0, 2}, {2, 0, 2}},
-            {{1, 1, 0}, {2, 1, 0}, {0, 2, 2}},
-            {{0, 2, 0}, {1, 2, 0}, {1, 2, 1}},
-            {{0, 1, 1}, {1, 1, 1}, {1, 2, 1}},
-            {{1, 0, 1}, {1, 1, 1}, {1, 1, 2}},
-            {{1, 1, 0}, {1, 1, 1}, {2, 1, 1}},
-            {{0, 0, 2}, {0, 1, 2}, {1, 1, 2}}
     };
 
     public enum BONUS_TOKEN {

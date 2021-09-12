@@ -86,22 +86,20 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         state.pilgrimageDecks.get(1).shuffle(state.rnd);
 
         state.marketCards.clear();
-        state.marketCards.add(new MarketCard(2, 2, 1, 2, 3, 4, PALE_GREEN_INK));
-        state.marketCards.add(new MarketCard(3, 2, 1, 3, 3, 5, PALE_BLUE_INK));
-        state.marketCards.add(new MarketCard(2, 2, 1, 3, 4, 5, PALE_RED_INK));
-        state.marketCards.add(new MarketCard(3, 2, 1, 2, 4, 9, null));
-        state.marketCards.add(new MarketCard(2, 2, 2, 2, 3, 4, PALE_RED_INK));
-        state.marketCards.add(new MarketCard(3, 2, 2, 3, 3, 5, PALE_GREEN_INK));
-        state.marketCards.add(new MarketCard(2, 2, 2, 3, 4, 9, null));
-        state.marketCards.add(new MarketCard(3, 2, 2, 2, 4, 4, PALE_BLUE_INK));
+        rawDeck = _data.findDeck("Market");
+        for (Card c : rawDeck.getComponents()) {
+            state.marketCards.add(MarketCard.create(c));
+        }
         state.marketCards.shuffle(state.rnd);
 
         int playerCount = state.getNPlayers();
         state.forageCards.clear();
-        for (int[][] forageCardDatum : forageCardData) {
-            int[] cardData = forageCardDatum[playerCount - 2];
-            state.forageCards.add(new ForageCard(cardData[0], cardData[1], cardData[2]));
+        rawDeck = _data.findDeck("Forage");
+        for (Card c : rawDeck.getComponents()) {
+            state.forageCards.add(ForageCard.create(c, playerCount));
         }
+        state.forageCards.shuffle(state.rnd);
+
         state.drawBonusTokens();
         state.replenishPigmentInMeadow();
 
@@ -140,7 +138,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
-
+        DiceMonasteryParams params = (DiceMonasteryParams) state.getParams();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         int currentPlayer = turnOrder.getCurrentPlayer(state);
         switch (turnOrder.season) {
@@ -298,7 +296,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     List<TREASURE> treasure = state.getTreasures(currentPlayer);
                     if (!treasure.isEmpty())
                         retValue.add(new PayTreasure(treasure.stream().max(comparingInt(t -> t.vp)).get()));
-                    if (treasure.isEmpty() || !mandateTreasureLoss) {
+                    if (treasure.isEmpty() || !params.mandateTreasureLoss) {
                         int[] pietyLevels = state.monksIn(DORMITORY, currentPlayer).stream().mapToInt(Monk::getPiety).distinct().toArray();
                         for (int piety : pietyLevels)
                             retValue.add(new KillMonk(piety));

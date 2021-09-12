@@ -44,5 +44,136 @@
         "multiplicity": ["Integer", 4]
       }
     ]
+  },
+  {
+  "name" : ["String", "Forage"],
+  "visibility" : "FIRST_VISIBLE_TO_ALL",
+  "cards" : 
+  [
+  	{
+     	"green" : ["Integer[]", [2, 2, 2]],
+     	"red"   : ["Integer[]", [0, 0, 1]],
+     	"blue"  : ["Integer[]", [0, 1, 1]]
+   	},
+   	{
+     	"green" : ["Integer[]", [0, 0, 0]],
+     	"red"   : ["Integer[]", [1, 1, 2]],
+     	"blue"  : ["Integer[]", [1, 2, 2]]
+   	},
+   	{
+     	"green" : ["Integer[]", [1, 1, 2]],
+     	"red"   : ["Integer[]", [0, 0, 0]],
+     	"blue"  : ["Integer[]", [1, 2, 2]]
+   	},
+    	{
+     	"green" : ["Integer[]", [1, 2, 2]],
+     	"red"   : ["Integer[]", [1, 1, 2]],
+     	"blue"  : ["Integer[]", [0, 0, 0]]
+   	},
+  	{
+     	"green" : ["Integer[]", [0, 1, 1]],
+     	"red"   : ["Integer[]", [2, 2, 2]],
+     	"blue"  : ["Integer[]", [0, 0, 1]]
+   	},
+   	{
+     	"green" : ["Integer[]", [0, 1, 1]],
+     	"red"   : ["Integer[]", [1, 1, 2]],
+     	"blue"  : ["Integer[]", [1, 1, 1]]
+   	},
+   	{
+     	"green" : ["Integer[]", [1, 1, 1]],
+     	"red"   : ["Integer[]", [0, 1, 1]],
+     	"blue"  : ["Integer[]", [1, 1, 2]]
+   	},
+  	{
+     	"green" : ["Integer[]", [1, 1, 2]],
+     	"red"   : ["Integer[]", [1, 1, 1]],
+     	"blue"  : ["Integer[]", [0, 1, 1]]
+   	},
+  	{
+     	"green" : ["Integer[]", [0, 0, 1]],
+     	"red"   : ["Integer[]", [0, 1, 1]],
+     	"blue"  : ["Integer[]", [2, 2, 2]]
+   	},
+  ]
+  },
+  {
+  "name" : ["String", "Market"],
+  "visibility" : "FIRST_VISIBLE_TO_ALL",
+  "cards" : 
+  [
+  	{
+  	"calfSkin" : ["Integer", 2],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 1],
+  	"mead" : ["Integer", 2],
+  	"candle" : ["Integer", 3],
+  	"ink" : ["Integer", 4],
+  	"inkType" : ["String", "PALE_GREEN_INK"],
+  	},
+   	{
+  	"calfSkin" : ["Integer", 3],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 1],
+  	"mead" : ["Integer", 3],
+  	"candle" : ["Integer", 3],
+  	"ink" : ["Integer", 5],
+  	"inkType" : ["String", "PALE_BLUE_INK"],
+  	},
+  	{
+  	"calfSkin" : ["Integer", 2],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 1],
+  	"mead" : ["Integer", 3],
+  	"candle" : ["Integer", 4],
+  	"ink" : ["Integer", 5],
+  	"inkType" : ["String", "PALE_RED_INK"],
+  	},
+   	{
+  	"calfSkin" : ["Integer", 3],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 1],
+  	"mead" : ["Integer", 2],
+  	"candle" : ["Integer", 4],
+  	"ink" : ["Integer", 0],
+  	"inkType" : ["String", ""],
+  	},
+  	{
+  	"calfSkin" : ["Integer", 2],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 2],
+  	"mead" : ["Integer", 2],
+  	"candle" : ["Integer", 3],
+  	"ink" : ["Integer", 4],
+  	"inkType" : ["String", "PALE_RED_INK"],
+  	},
+  	{
+   	"calfSkin" : ["Integer", 3],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 2],
+  	"mead" : ["Integer", 3],
+  	"candle" : ["Integer", 3],
+  	"ink" : ["Integer", 5],
+  	"inkType" : ["String", "PALE_GREEN_INK"],
+  	},
+  	{
+  	"calfSkin" : ["Integer", 2],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 2],
+  	"mead" : ["Integer", 3],
+  	"candle" : ["Integer", 4],
+  	"ink" : ["Integer", 0],
+  	"inkType" : ["String", ""],
+  	},
+  	{
+   	"calfSkin" : ["Integer", 3],
+  	"grain" : ["Integer", 2],
+  	"beer" : ["Integer", 2],
+  	"mead" : ["Integer", 2],
+  	"candle" : ["Integer", 4],
+  	"ink" : ["Integer", 4],
+  	"inkType" : ["String", "PALE_BLUE_INK"],
+  	},
+  ]
   }
 ]
