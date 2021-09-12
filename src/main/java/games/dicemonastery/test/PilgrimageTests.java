@@ -8,7 +8,6 @@ import org.junit.Test;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
-import static games.dicemonastery.components.Pilgrimage.DESTINATION.ROME;
 import static org.junit.Assert.*;
 
 public class PilgrimageTests {
@@ -20,9 +19,8 @@ public class PilgrimageTests {
 
     @Test
     public void basicFunctionalityShort() {
-        Pilgrimage.DESTINATION destination = state.peekAtNextShortPilgrimage().destination;
-        DiceMonasteryConstants.Resource reward = destination.finalReward;
-        Pilgrimage p = new Pilgrimage(destination);
+        Pilgrimage p = state.peekAtNextShortPilgrimage();
+        DiceMonasteryConstants.Resource reward = p.finalReward;
         Monk pilgrim = state.createMonk(5, 0);
         assertEquals(0, state.getVictoryPoints(0));
         assertEquals(0, state.getResource(0, reward, STOREROOM));
@@ -53,9 +51,8 @@ public class PilgrimageTests {
 
     @Test
     public void basicFunctionalityLong() {
-        Pilgrimage.DESTINATION destination = state.peekAtNextLongPilgrimage().destination;
-        Pilgrimage p = new Pilgrimage(destination);
-        DiceMonasteryConstants.Resource reward = destination.finalReward;
+        Pilgrimage p = state.peekAtNextLongPilgrimage();
+        DiceMonasteryConstants.Resource reward = p.finalReward;
         Monk pilgrim = state.createMonk(5, 0);
         assertEquals(0, state.getVictoryPoints(0));
         assertEquals(0, state.getResource(0, reward, STOREROOM));
@@ -91,7 +88,7 @@ public class PilgrimageTests {
 
     @Test
     public void copyWorks() {
-        Pilgrimage p = new Pilgrimage(ROME);
+        Pilgrimage p = new Pilgrimage("ROME", 4, 3, "VIVID_GREEN_PIGMENT", new int[] {0, 1, 1} );
         Monk pilgrim = state.createMonk(5, 0);
         state.moveMonk(pilgrim.getComponentID(), DORMITORY, GATEHOUSE);
 
@@ -121,10 +118,10 @@ public class PilgrimageTests {
 
         Monk pilgrim1 = state.createMonk(5, 0);
         state.moveMonk(pilgrim1.getComponentID(), DORMITORY, GATEHOUSE);
-        Pilgrimage.DESTINATION destination1 = state.peekAtNextLongPilgrimage().destination;
+        Pilgrimage destination1 = state.peekAtNextLongPilgrimage();
         Pilgrimage p1 = state.startPilgrimage(destination1, pilgrim1);
 
-        Pilgrimage.DESTINATION destination2 = state.peekAtNextShortPilgrimage().destination;
+        Pilgrimage destination2 = state.peekAtNextShortPilgrimage();
         Monk pilgrim2 = state.createMonk(5, 1);
         state.moveMonk(pilgrim2.getComponentID(), DORMITORY, GATEHOUSE);
         Pilgrimage p2 = state.startPilgrimage(destination2, pilgrim2);
@@ -160,7 +157,7 @@ public class PilgrimageTests {
 
         Monk pilgrim1 = state.createMonk(5, 0);
         state.moveMonk(pilgrim1.getComponentID(), DORMITORY, GATEHOUSE);
-        state.startPilgrimage(state.peekAtNextLongPilgrimage().destination, pilgrim1);
+        state.startPilgrimage(state.peekAtNextLongPilgrimage(), pilgrim1);
 
         state.addResource(0, BREAD, -state.getResource(0, BREAD, STOREROOM));
         state.addResource(0, HONEY, -state.getResource(0, HONEY, STOREROOM));
@@ -176,7 +173,7 @@ public class PilgrimageTests {
     public void promotingAMonkMidPilgrimage() {
         Monk pilgrim1 = state.createMonk(6, 0);
         state.moveMonk(pilgrim1.getComponentID(), DORMITORY, GATEHOUSE);
-        Pilgrimage p1 = state.startPilgrimage(state.peekAtNextLongPilgrimage().destination, pilgrim1);
+        Pilgrimage p1 = state.startPilgrimage(state.peekAtNextLongPilgrimage(), pilgrim1);
 
         assertTrue(p1.isActive());
         assertEquals(0, state.getVictoryPoints(0));

@@ -52,9 +52,6 @@ public abstract class AbstractGameState {
     // Current game phase
     protected IGamePhase gamePhase;
 
-    // Data for this game
-    protected AbstractGameData data;
-
     // Stack for extended actions
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
 
@@ -165,7 +162,6 @@ public abstract class AbstractGameState {
         s.gameStatus = gameStatus;
         s.playerResults = playerResults.clone();
         s.gamePhase = gamePhase;
-        s.data = data;  // Should never be modified
 
         if (coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
@@ -446,7 +442,7 @@ public abstract class AbstractGameState {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, allComponents, gameStatus, gamePhase, data);
+        int result = Objects.hash(gameParameters, turnOrder, allComponents, gameStatus, gamePhase);
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }

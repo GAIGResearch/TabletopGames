@@ -119,6 +119,8 @@ public class DiceMonasteryConstants {
         }
     }
 
+    public final static boolean mandateTreasureLoss = true;
+
     public final static int[] RETIREMENT_REWARDS = {5, 4, 4, 3, 3, 2, 2, 2};
 
     // rows are number of players; columns are ordinal position in bidding

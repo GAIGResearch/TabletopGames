@@ -1,12 +1,18 @@
 package games.dicemonastery;
 
 import core.AbstractForwardModel;
+import core.AbstractGameData;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.components.Card;
 import core.components.Deck;
+import core.properties.PropertyInt;
+import core.properties.PropertyIntArray;
+import core.properties.PropertyString;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.*;
+import utilities.Hash;
 import utilities.Pair;
 
 import java.util.*;
@@ -23,6 +29,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 public class DiceMonasteryForwardModel extends AbstractForwardModel {
+
 
     public final AbstractAction SOW_WHEAT = new SowWheat();
     public final AbstractAction HARVEST_WHEAT = new HarvestWheat(1);
@@ -42,6 +49,9 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) firstState;
+        DiceMonasteryParams params = (DiceMonasteryParams) state.getGameParameters();
+        AbstractGameData _data = new AbstractGameData();
+        _data.load(params.getDataPath());
 
         for (int p = 0; p < state.getNPlayers(); p++) {
             state.createMonk(4, p);
@@ -61,13 +71,17 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
             state.addResource(p, PRAYER, 1);
         }
 
-        for (Pilgrimage.DESTINATION destination : Pilgrimage.DESTINATION.values()) {
-            Deck<Pilgrimage> deck = state.pilgrimageDecks.get(destination.isLong() ? 1 : 0);
-            // add all four cards
-            for (int i = 0; i < 4; i++) {
-                deck.add(new Pilgrimage(destination));
-            }
+        Deck<Card> rawDeck = _data.findDeck("Short Pilgrimages");
+        for (Card c : rawDeck.getComponents()) {
+            Deck<Pilgrimage> deck = state.pilgrimageDecks.get(0);
+            deck.add(Pilgrimage.create(c));
         }
+        rawDeck = _data.findDeck("Long Pilgrimages");
+        for (Card c : rawDeck.getComponents()) {
+            Deck<Pilgrimage> deck = state.pilgrimageDecks.get(1);
+            deck.add(Pilgrimage.create(c));
+        }
+
         state.pilgrimageDecks.get(0).shuffle(state.rnd);
         state.pilgrimageDecks.get(1).shuffle(state.rnd);
 
@@ -234,14 +248,14 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                             for (int pilgrimDeck = 0; pilgrimDeck < 2; pilgrimDeck++) {
                                 Deck<Pilgrimage> deck = state.pilgrimageDecks.get(pilgrimDeck);
                                 if (deck.getSize() > 0) {
-                                    Pilgrimage.DESTINATION destination = deck.peek().destination;
-                                    if (turnOrder.getActionPointsLeft() >= destination.minPiety && highestPiety >= destination.minPiety
-                                            && state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= destination.cost) {
+                                    Pilgrimage topCard = deck.peek();
+                                    if (turnOrder.getActionPointsLeft() >= topCard.minPiety && highestPiety >= topCard.minPiety
+                                            && state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= topCard.cost) {
                                         Set<Integer> validPieties = eligibleMonks.stream()
                                                 .map(Monk::getPiety)
-                                                .filter(piety -> piety >= destination.minPiety && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
+                                                .filter(piety -> piety >= topCard.minPiety && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
 
-                                        validPieties.forEach(p -> retValue.add(new GoOnPilgrimage(destination, p)));
+                                        validPieties.forEach(p -> retValue.add(new GoOnPilgrimage(topCard, p)));
                                     }
                                 }
                             }
@@ -284,12 +298,14 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     List<TREASURE> treasure = state.getTreasures(currentPlayer);
                     if (!treasure.isEmpty())
                         retValue.add(new PayTreasure(treasure.stream().max(comparingInt(t -> t.vp)).get()));
-                    int[] pietyLevels = state.monksIn(DORMITORY, currentPlayer).stream().mapToInt(Monk::getPiety).distinct().toArray();
-                    for (int piety : pietyLevels)
-                        retValue.add(new KillMonk(piety));
-                    if (retValue.isEmpty()) {
-                        // somehow no penalty is due!
-                        retValue.add(new DoNothing());
+                    if (treasure.isEmpty() || !mandateTreasureLoss) {
+                        int[] pietyLevels = state.monksIn(DORMITORY, currentPlayer).stream().mapToInt(Monk::getPiety).distinct().toArray();
+                        for (int piety : pietyLevels)
+                            retValue.add(new KillMonk(piety));
+                        if (retValue.isEmpty()) {
+                            // somehow no penalty is due!
+                            retValue.add(new DoNothing());
+                        }
                     }
                     return retValue;
                 } else {

@@ -372,10 +372,17 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return forageCards.peek();
     }
 
-    public Pilgrimage startPilgrimage(Pilgrimage.DESTINATION destination, Monk monk) {
-        Pilgrimage retValue = pilgrimageDecks.get(destination.isLong() ? 1 : 0).draw();
-        if (retValue.destination != destination)
-            throw new AssertionError(String.format("Top card is to %s, but expected to be to %s", retValue.destination, destination));
+    public Pilgrimage startPilgrimage(Pilgrimage destination, Monk monk) {
+        // find card on a deck
+        Pilgrimage retValue = null;
+        for (Deck<Pilgrimage> deck : pilgrimageDecks) {
+            if (deck.peek().equals((destination))) {
+                retValue = deck.draw();
+                break;
+            }
+        }
+        if (retValue == null)
+            throw new AssertionError(String.format("Top card %s is not found",  destination));
         retValue.startPilgrimage(monk, this);
         pilgrimagesStarted.add(retValue);
         return retValue;

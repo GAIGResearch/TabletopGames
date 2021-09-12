@@ -1,47 +1,37 @@
 package games.dicemonastery.components;
 
 import core.components.Component;
+import core.properties.PropertyInt;
+import core.properties.PropertyIntArray;
+import core.properties.PropertyString;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.DiceMonasteryTurnOrder;
+import utilities.Hash;
 import utilities.Utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
+import static games.dicemonastery.DiceMonasteryConstants.Resource.SHILLINGS;
 
 public class Pilgrimage extends Component {
 
-    public enum DESTINATION {
-        SANTIAGO(false, VIVID_RED_PIGMENT), ROME(false, VIVID_GREEN_PIGMENT),
-        JERUSALEM(true, VIVID_BLUE_PIGMENT), ALEXANDRIA(true, VIVID_PURPLE_PIGMENT);
+    static int mHash = Hash.GetInstance().hash("multiplicity");
+    static int destinationHash = Hash.GetInstance().hash("destination");
+    static int rewardHash = Hash.GetInstance().hash("reward");
+    static int durationHash = Hash.GetInstance().hash("duration");
+    static int minPietyHash = Hash.GetInstance().hash("minPiety");
+    static int costHash = Hash.GetInstance().hash("cost");
 
-        public int minPiety;
-        public int cost;
-        public int[] vpPerStep;
-        public Resource finalReward;
-
-        public boolean isLong() {
-            return cost == 6;
-        }
-
-        DESTINATION(boolean longPilgrimage, Resource reward) {
-            if (longPilgrimage) {
-                minPiety = 5;
-                cost = 6;
-                vpPerStep = new int[]{0, 1, 1, 1};
-            } else {
-                minPiety = 3;
-                cost = 3;
-                vpPerStep = new int[]{0, 1, 1};
-            }
-            finalReward = reward;
-        }
-    }
-
-
-    public final DESTINATION destination;
+    public final String destination;
+    public final int minPiety;
+    public final int cost;
+    public final int[] vpPerStep;
+    public final Resource finalReward;
 
     int player = -1;
     boolean active;
@@ -49,17 +39,28 @@ public class Pilgrimage extends Component {
     int progress = -1;
 
 
-    public Pilgrimage(DESTINATION destination) {
-        super(Utils.ComponentType.CARD, "Pilgrimage to " + destination.name());
+    public Pilgrimage(String destination, int minPiety, int cost, String reward, int[] duration) {
+        super(Utils.ComponentType.CARD, "Pilgrimage to " + destination);
         this.destination = destination;
+        this.minPiety = minPiety;
+        this.cost = cost;
+        this.vpPerStep = duration;
+        if (!reward.isEmpty())
+            this.finalReward = Resource.valueOf(reward);
+        else
+            this.finalReward = null;
 
     }
 
     private Pilgrimage(Pilgrimage copy) {
         super(Utils.ComponentType.CARD, copy.componentName, copy.componentID);
+        this.destination = copy.destination;
+        this.minPiety = copy.minPiety;
+        this.cost = copy.cost;
+        this.vpPerStep = copy.vpPerStep;
+        this.finalReward = copy.finalReward;
         this.progress = copy.progress;
         this.pilgrimId = copy.pilgrimId;
-        this.destination = copy.destination;
         this.active = copy.active;
         this.player = copy.player;
     }
@@ -67,10 +68,10 @@ public class Pilgrimage extends Component {
     public void startPilgrimage(Monk monk, DiceMonasteryGameState state) {
         pilgrimId = monk.getComponentID();
         player = monk.getOwnerId();
-        state.addResource(player, SHILLINGS, -destination.cost);
+        state.addResource(player, SHILLINGS, -cost);
         state.moveMonk(pilgrimId, GATEHOUSE, PILGRIMAGE);
         progress = 0;
-        state.addVP(destination.vpPerStep[0], player);
+        state.addVP(vpPerStep[0], player);
         active = true;
     }
 
@@ -81,15 +82,15 @@ public class Pilgrimage extends Component {
             return;
         }
         progress++;
-        state.addVP(destination.vpPerStep[progress], player);
-        if (progress == destination.vpPerStep.length - 1) {
+        state.addVP(vpPerStep[progress], player);
+        if (progress == vpPerStep.length - 1) {
             DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) state.getTurnOrder();
-            dmto.logEvent(String.format("Monk reaches %s and gains %s", destination, destination.finalReward), state);
+            dmto.logEvent(String.format("Monk reaches %s and gains %s", destination, finalReward), state);
 
-            state.addResource(player, destination.finalReward, 1);
+            state.addResource(player, finalReward, 1);
 
             dmto.logEvent(String.format("Monk returns from %s and is promoted", destination), state);
-            Monk pilgrim  = state.getMonkById(pilgrimId);
+            Monk pilgrim = state.getMonkById(pilgrimId);
             state.moveMonk(pilgrimId, PILGRIMAGE, DORMITORY);
             pilgrim.promote(state);
             active = false;
@@ -112,7 +113,7 @@ public class Pilgrimage extends Component {
     public String toString() {
         return String.format("Pilgrimage to %s for %s (%d, %d)",
                 destination,
-                destination.finalReward,
+                finalReward,
                 pilgrimId, progress);
     }
 
@@ -120,7 +121,9 @@ public class Pilgrimage extends Component {
     public boolean equals(Object o) {
         if (o instanceof Pilgrimage) {
             Pilgrimage other = (Pilgrimage) o;
-            return other.pilgrimId == pilgrimId && other.active == active && other.destination == destination &&
+            return other.pilgrimId == pilgrimId && other.active == active && other.destination.equals(destination) &&
+                    other.minPiety == minPiety && other.cost == cost && Arrays.equals(other.vpPerStep, vpPerStep) &&
+                    other.finalReward == finalReward &&
                     other.progress == progress && other.player == player;
         }
         return false;
@@ -128,7 +131,20 @@ public class Pilgrimage extends Component {
 
     @Override
     public int hashCode() {
-        return Objects.hash(pilgrimId, active, player, progress, destination) + super.hashCode() * 31;
+        return Objects.hash(pilgrimId, active, player, progress, destination, finalReward.ordinal(), minPiety, cost) + Arrays.hashCode(vpPerStep) * 7 + super.hashCode() * 31;
+    }
+
+    public static List<Pilgrimage> create(Component c) {
+        int multiplicity = ((PropertyInt) c.getProperty(mHash)).value;
+        String destination = ((PropertyString) c.getProperty(destinationHash)).value;
+        String reward = ((PropertyString) c.getProperty(rewardHash)).value;
+        int[] duration = ((PropertyIntArray) c.getProperty(durationHash)).getValues();
+        int minPiety = ((PropertyInt) c.getProperty(minPietyHash)).value;
+        int cost = ((PropertyInt) c.getProperty(costHash)).value;
+        List<Pilgrimage> retValue = new ArrayList<>();
+        for (int i = 0; i < multiplicity; i++)
+            retValue.add(new Pilgrimage(destination, minPiety, cost, reward, duration));
+        return retValue;
     }
 
 }

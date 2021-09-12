@@ -618,7 +618,7 @@ public class ActionTests {
         assertEquals(3, fm.computeAvailableActions(state).stream().filter(a -> a instanceof GoOnPilgrimage).count());
         // Either can go on a short pilgrimage, but only 1 on a long one
         assertEquals(2, fm.computeAvailableActions(state).stream()
-                .filter(a -> a instanceof GoOnPilgrimage && !((GoOnPilgrimage) a).destination.isLong()).count());
+                .filter(a -> a instanceof GoOnPilgrimage && (((GoOnPilgrimage) a).destination.cost == 3)).count());
     }
 
     @Test
@@ -634,7 +634,7 @@ public class ActionTests {
         assertEquals(0, state.getPilgrimagesStarted().size());
         Pilgrimage next = state.peekAtNextShortPilgrimage();
 
-        fm.next(state, new GoOnPilgrimage(next.destination, 5));
+        fm.next(state, new GoOnPilgrimage(next, 5));
 
         assertEquals(7, state.pilgrimagesLeft(false));
         assertEquals(8, state.pilgrimagesLeft(true));
@@ -655,15 +655,15 @@ public class ActionTests {
 
         for (int i = 0; i < 8; i++) {
             assertTrue(fm.computeAvailableActions(state).stream()
-                    .anyMatch(a -> a instanceof GoOnPilgrimage && !((GoOnPilgrimage) a).destination.isLong()));
+                    .anyMatch(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).destination.cost == 3));
             Monk pilgrim = state.createMonk(3, 0);
             state.moveMonk(pilgrim.getComponentID(), DORMITORY, GATEHOUSE);
             state.addResource(0, SHILLINGS, 3);
-            state.startPilgrimage(state.peekAtNextShortPilgrimage().destination, pilgrim);
+            state.startPilgrimage(state.peekAtNextShortPilgrimage(), pilgrim);
         }
 
         assertTrue(fm.computeAvailableActions(state).stream()
-                .noneMatch(a -> a instanceof GoOnPilgrimage && !((GoOnPilgrimage) a).destination.isLong()));
+                .noneMatch(a -> a instanceof GoOnPilgrimage && ((GoOnPilgrimage) a).destination.cost == 3));
     }
 
     @Test

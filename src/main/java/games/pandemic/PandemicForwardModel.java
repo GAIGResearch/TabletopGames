@@ -1,32 +1,45 @@
 package games.pandemic;
 
-import core.actions.*;
-import core.components.*;
-import core.properties.*;
-import core.*;
-import core.rules.*;
-import core.rules.nodetypes.ConditionNode;
+import core.AbstractForwardModel;
+import core.AbstractGameData;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.actions.AbstractAction;
+import core.actions.DrawCard;
+import core.components.Area;
+import core.components.Card;
+import core.components.Counter;
+import core.components.Deck;
+import core.properties.Property;
+import core.properties.PropertyLong;
+import core.properties.PropertyString;
+import core.rules.AbstractRuleBasedForwardModel;
 import core.rules.GameOverCondition;
+import core.rules.Node;
+import core.rules.nodetypes.ConditionNode;
 import core.rules.nodetypes.RuleNode;
 import core.rules.rulenodes.ForceAllPlayerReaction;
-import games.pandemic.actions.*;
+import games.pandemic.actions.AddResearchStation;
+import games.pandemic.actions.InfectCity;
 import games.pandemic.rules.conditions.*;
-import games.pandemic.rules.gameOver.*;
+import games.pandemic.rules.gameOver.GameOverDiseasesCured;
+import games.pandemic.rules.gameOver.GameOverDrawCards;
+import games.pandemic.rules.gameOver.GameOverInfection;
+import games.pandemic.rules.gameOver.GameOverOutbreak;
 import games.pandemic.rules.rules.*;
-import games.pandemic.rules.rules.DrawCards;
-import gui.GameFlowDiagram;
 import utilities.Hash;
 
-import java.util.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
-import static core.CoreConstants.VisibilityMode.*;
+import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
+import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+import static core.CoreConstants.playerHandHash;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
-import static core.CoreConstants.playerHandHash;
 
 public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
 
@@ -135,8 +148,10 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         PandemicGameState state = (PandemicGameState) firstState;
-        PandemicParameters pp = (PandemicParameters)state.getGameParameters();
-        PandemicData _data = state.getData();
+        PandemicParameters pp = (PandemicParameters) state.getGameParameters();
+
+        AbstractGameData _data = new AbstractGameData();
+        _data.load(pp.getDataPath());
 
         state.tempDeck = new Deck<>("Temp Deck", VISIBLE_TO_ALL);
         state.areas = new HashMap<>();

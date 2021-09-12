@@ -4,14 +4,16 @@ import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.components.Monk;
 import games.dicemonastery.components.Pilgrimage;
 
+import java.util.Objects;
+
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.GATEHOUSE;
 import static java.util.stream.Collectors.toList;
 
 public class GoOnPilgrimage extends UseMonk {
 
-    public final Pilgrimage.DESTINATION destination;
+    public final Pilgrimage destination;
 
-    public GoOnPilgrimage(Pilgrimage.DESTINATION destination, int piety) {
+    public GoOnPilgrimage(Pilgrimage destination, int piety) {
         super(piety);
         this.destination = destination;
     }
@@ -27,14 +29,14 @@ public class GoOnPilgrimage extends UseMonk {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof GoOnPilgrimage) {
-            return ((GoOnPilgrimage) obj).destination == destination && ((GoOnPilgrimage) obj).actionPoints == actionPoints;
+            return ((GoOnPilgrimage) obj).destination.equals(destination) && ((GoOnPilgrimage) obj).actionPoints == actionPoints;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return actionPoints + destination.ordinal() * 1481 - 168729;
+        return Objects.hash(actionPoints, destination) - 168729;
     }
 
     @Override

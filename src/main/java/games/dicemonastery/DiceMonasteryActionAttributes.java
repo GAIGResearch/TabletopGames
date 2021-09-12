@@ -34,7 +34,7 @@ public enum DiceMonasteryActionAttributes implements IGameAttribute {
         if (a instanceof BuyTreasure) return ((BuyTreasure) a).treasure.name();
         if (a instanceof WriteText) return ((WriteText) a).textType.name();
         if (a instanceof TakeToken) return ((TakeToken) a).token.name();
-        if (a instanceof GoOnPilgrimage) return ((GoOnPilgrimage) a).destination.name();
+        if (a instanceof GoOnPilgrimage) return ((GoOnPilgrimage) a).destination.destination;
         return "";
     }),
     VALUE((s, a) -> {
