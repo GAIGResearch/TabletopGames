@@ -4,11 +4,11 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.components.IlluminatedText;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static games.dicemonastery.DiceMonasteryConstants.ILLUMINATED_TEXT;
 import static games.dicemonastery.DiceMonasteryConstants.Resource;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.CANDLE;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.VELLUM;
@@ -17,15 +17,14 @@ import static java.util.stream.Collectors.toList;
 
 public class WriteText extends UseMonk implements IExtendedSequence {
 
-    public final ILLUMINATED_TEXT textType;
+    public final IlluminatedText textType;
     List<Resource> optionalInks = new ArrayList<>();
     int player = -1;
 
-    public WriteText(ILLUMINATED_TEXT type, int piety) {
+    public WriteText(IlluminatedText type, int piety) {
         super(piety);
         textType = type;
     }
-
 
     @Override
     public boolean _execute(DiceMonasteryGameState state) {
@@ -53,7 +52,7 @@ public class WriteText extends UseMonk implements IExtendedSequence {
     private void completeText(DiceMonasteryGameState state) {
         int player = state.getCurrentPlayer();
 
-        if ((new HashSet<>(optionalInks)).size() < textType.differentInks)
+        if ((new HashSet<>(optionalInks)).size() < textType.inks)
             throw new AssertionError("Not enough different inks to illuminate " + textType);
 
         state.addResource(player, Resource.VELLUM, -textType.vellum);
@@ -61,7 +60,7 @@ public class WriteText extends UseMonk implements IExtendedSequence {
 
         int vpAward = textType.rewards[state.getNumberWritten(textType)];
         List<Resource> inks = new ArrayList<>(optionalInks);
-        inks.addAll(textType.specialInks);
+        inks.addAll(Arrays.asList(textType.specialInks));
         for (Resource ink : inks) {
             state.addResource(player, ink, -1);
             vpAward += ink.vpBonus;
@@ -83,7 +82,7 @@ public class WriteText extends UseMonk implements IExtendedSequence {
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return optionalInks.size() >= textType.differentInks;
+        return optionalInks.size() >= textType.inks;
     }
 
     @Override
@@ -98,7 +97,7 @@ public class WriteText extends UseMonk implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof WriteText) {
             WriteText other = (WriteText) obj;
-            return other.textType == textType && other.actionPoints == actionPoints &&
+            return other.textType.equals(textType) && other.actionPoints == actionPoints &&
                     other.player == player && other.optionalInks.equals(optionalInks);
         }
         return false;
@@ -107,7 +106,7 @@ public class WriteText extends UseMonk implements IExtendedSequence {
     @Override
     public int hashCode() {
         // we deliberately do not include player in the hashcode
-        return textType.ordinal() * -6907 + actionPoints * 47 + optionalInks.stream().mapToInt(i -> (i.ordinal() * i.ordinal() - 1) * (71 + i.ordinal())).sum();
+        return textType.hashCode() + actionPoints * 47 + optionalInks.stream().mapToInt(i -> (i.ordinal() * i.ordinal() - 1) * (71 + i.ordinal())).sum();
     }
 
     @Override
@@ -121,7 +120,7 @@ public class WriteText extends UseMonk implements IExtendedSequence {
     }
 
 
-    private static Set<Resource> inksAvailable(ILLUMINATED_TEXT text, Map<Resource, Integer> resources, List<Resource> reservedList) {
+    private static Set<Resource> inksAvailable(IlluminatedText text, Map<Resource, Integer> resources, List<Resource> reservedList) {
         Map<Resource, Integer> afterSupplyingSpecials = new EnumMap<>(resources);
         for (Resource specialInk : text.specialInks) {
             if (!(resources.getOrDefault(specialInk, 0) > 0))
@@ -136,13 +135,13 @@ public class WriteText extends UseMonk implements IExtendedSequence {
         return retValue;
     }
 
-    public static boolean meetsRequirements(ILLUMINATED_TEXT text, Map<Resource, Integer> resources) {
+    public static boolean meetsRequirements(IlluminatedText text, Map<Resource, Integer> resources) {
         if (text.vellum > resources.getOrDefault(VELLUM, 0))
             return false;
         if (text.candles > resources.getOrDefault(CANDLE, 0))
             return false;
 
-        if (text.differentInks > inksAvailable(text, resources, new ArrayList<>()).size())
+        if (text.inks > inksAvailable(text, resources, new ArrayList<>()).size())
             return false;
 
         return true;

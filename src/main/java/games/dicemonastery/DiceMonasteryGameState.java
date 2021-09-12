@@ -30,13 +30,13 @@ public class DiceMonasteryGameState extends AbstractGameState {
     List<EnumMap<Resource, Integer>> playerTreasuries = new ArrayList<>();
     Map<Integer, Map<Resource, Integer>> playerBids = new HashMap<>();
     int nextRetirementReward = 0;
-    Map<ILLUMINATED_TEXT, Integer> textsWritten = new EnumMap<>(ILLUMINATED_TEXT.class);
     Map<TREASURE, Integer> treasuresCommissioned = new EnumMap<>(TREASURE.class);
     List<List<TREASURE>> treasuresOwnedPerPlayer = new ArrayList<>();
     List<Deck<Pilgrimage>> pilgrimageDecks = new ArrayList<>(2);
     List<Pilgrimage> pilgrimagesStarted = new ArrayList<>();
     Deck<MarketCard> marketCards = new Deck<>("Market Deck", FIRST_VISIBLE_TO_ALL);
     Deck<ForageCard> forageCards = new Deck<>("Forage Deck", FIRST_VISIBLE_TO_ALL);
+    Map<IlluminatedText, Integer> writtenTexts = new HashMap<>();
     int[] victoryPoints;
     Random rnd;
 
@@ -63,9 +63,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
             treasuresOwnedPerPlayer.add(new ArrayList<>());
         }
         nextRetirementReward = 0;
-        textsWritten = new EnumMap<>(ILLUMINATED_TEXT.class);
-        for (ILLUMINATED_TEXT text : ILLUMINATED_TEXT.values())
-            textsWritten.put(text, 0);
+        for (IlluminatedText text : writtenTexts.keySet())
+            writtenTexts.put(text, 0);
         treasuresCommissioned = new EnumMap<>(TREASURE.class);
         for (TREASURE item : TREASURE.values())
             treasuresCommissioned.put(item, 0);
@@ -235,16 +234,20 @@ public class DiceMonasteryGameState extends AbstractGameState {
             victoryPoints[player] = 0;
     }
 
-    public void writeText(ILLUMINATED_TEXT textType) {
-        int currentNumber = textsWritten.get(textType);
+    public void writeText(IlluminatedText textType) {
+        int currentNumber = writtenTexts.get(textType);
         if (currentNumber >= textType.rewards.length) {
             throw new AssertionError("Cannot write any more " + textType);
         }
-        textsWritten.put(textType, currentNumber + 1);
+        writtenTexts.put(textType, currentNumber + 1);
     }
 
-    public int getNumberWritten(ILLUMINATED_TEXT textType) {
-        return textsWritten.get(textType);
+    public Set<IlluminatedText> getAvailableTexts() {
+        return writtenTexts.keySet();
+    }
+
+    public int getNumberWritten(IlluminatedText textType) {
+        return writtenTexts.get(textType);
     }
 
     public void acquireTreasure(TREASURE item, int player) {
@@ -550,7 +553,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 retValue.playerBids.put(p, new HashMap<>(playerBids.get(p)));
         }
         retValue.nextRetirementReward = nextRetirementReward;
-        retValue.textsWritten.putAll(textsWritten);
+        retValue.writtenTexts.putAll(writtenTexts);
         retValue.treasuresCommissioned.putAll(treasuresCommissioned);
 
         retValue.marketCards = marketCards.copy();
@@ -610,7 +613,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 other.playerTreasuries.equals(playerTreasuries) && other.actionsInProgress.equals(actionsInProgress) &&
                 other.playerBids.equals(playerBids) && other.treasuresOwnedPerPlayer.equals(treasuresOwnedPerPlayer) &&
                 other.nextRetirementReward == nextRetirementReward && other.actionAreas.equals(actionAreas) &&
-                other.textsWritten.equals(textsWritten) && other.treasuresCommissioned.equals(treasuresCommissioned) &&
+                other.writtenTexts.equals(writtenTexts) && other.treasuresCommissioned.equals(treasuresCommissioned) &&
                 other.pilgrimagesStarted.equals(pilgrimagesStarted) && other.pilgrimageDecks.equals(pilgrimageDecks) &&
                 other.marketCards == marketCards && other.forageCards == forageCards &&
                 Arrays.equals(other.victoryPoints, victoryPoints) && Arrays.equals(other.playerResults, playerResults);
@@ -619,7 +622,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
-                gameParameters, turnOrder, nextRetirementReward, playerBids, textsWritten, treasuresCommissioned,
+                gameParameters, turnOrder, nextRetirementReward, playerBids, writtenTexts, treasuresCommissioned,
                 pilgrimageDecks, pilgrimagesStarted, treasuresOwnedPerPlayer, marketCards, forageCards) +
                 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }

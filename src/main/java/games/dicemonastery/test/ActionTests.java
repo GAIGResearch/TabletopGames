@@ -9,10 +9,7 @@ import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.DiceMonasteryConstants.Season;
 import games.dicemonastery.DiceMonasteryConstants.TREASURE;
 import games.dicemonastery.actions.*;
-import games.dicemonastery.components.ForageCard;
-import games.dicemonastery.components.MarketCard;
-import games.dicemonastery.components.Monk;
-import games.dicemonastery.components.Pilgrimage;
+import games.dicemonastery.components.*;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
@@ -20,9 +17,6 @@ import java.util.*;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.BONUS_TOKEN.*;
-import static games.dicemonastery.DiceMonasteryConstants.GOSPEL_REWARD;
-import static games.dicemonastery.DiceMonasteryConstants.ILLUMINATED_TEXT.*;
-import static games.dicemonastery.DiceMonasteryConstants.PSALM_REWARDS;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.PLACE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.USE_MONKS;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
@@ -786,6 +780,19 @@ public class ActionTests {
         override.put(1, LIBRARY);
         startOfUseMonkPhaseForAreaAfterBonusToken(LIBRARY, SPRING, override);
 
+        IlluminatedText psalm = state.getAvailableTexts().stream().filter(t -> t.getComponentName().equals("Psalm")).findFirst().orElseThrow(
+                () -> new AssertionError("Psalm not found")
+        );
+        IlluminatedText epistle = state.getAvailableTexts().stream().filter(t -> t.getComponentName().equals("Epistle")).findFirst().orElseThrow(
+                () -> new AssertionError("Epistle not found")
+        );
+        IlluminatedText liturgy = state.getAvailableTexts().stream().filter(t -> t.getComponentName().equals("Liturgy")).findFirst().orElseThrow(
+                () -> new AssertionError("Liturgy not found")
+        );
+        IlluminatedText lukesGospel = state.getAvailableTexts().stream().filter(t -> t.getComponentName().equals("Gospel of Luke")).findFirst().orElseThrow(
+                () -> new AssertionError("Liturgy not found")
+        );
+
         state.useAP(turnOrder.getActionPointsLeft() - 1);
         assertEquals(1, turnOrder.getActionPointsLeft());
         int player = state.getCurrentPlayer();
@@ -811,12 +818,13 @@ public class ActionTests {
         state.addResource(player, PALE_RED_INK, 3);
 
         assertEquals(3, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(PSALM, 4)));
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(PSALM, 3)));
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertTrue(actions.contains(new WriteText(psalm, 4)));
+        assertTrue(actions.contains(new WriteText(psalm, 3)));
 
         state.addResource(player, VIVID_RED_INK, 1);
         assertEquals(4, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(EPISTLE, 4)));
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(epistle, 4)));
 
         state.addResource(player, PALE_GREEN_INK, 1);
         assertEquals(4, fm.computeAvailableActions(state).size());
@@ -827,9 +835,9 @@ public class ActionTests {
 
         state.useAP(-5);
         assertEquals(7, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(LITURGY, 5)));
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(PSALM, 5)));
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(EPISTLE, 5)));
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(liturgy, 5)));
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(psalm, 5)));
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(epistle, 5)));
 
         state.addResource(player, VIVID_BLUE_INK, 2);
         assertEquals(7, fm.computeAvailableActions(state).size());
@@ -837,7 +845,7 @@ public class ActionTests {
         state.useAP(-1);
         Monk m6 = state.createMonk(6, state.getCurrentPlayer());
         state.moveMonk(m6.getComponentID(), DORMITORY, LIBRARY);
-        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(GOSPEL_LUKE, 6)));
+        assertTrue(fm.computeAvailableActions(state).contains(new WriteText(lukesGospel, 6)));
     }
 
     @Test
@@ -847,6 +855,10 @@ public class ActionTests {
         override.put(1, LIBRARY);
         startOfUseMonkPhaseForAreaAfterBonusToken(LIBRARY, SPRING, override);
 
+        IlluminatedText epistle = state.getAvailableTexts().stream().filter(t -> t.getComponentName().equals("Epistle")).findFirst().orElseThrow(
+                () -> new AssertionError("Epistle not found")
+        );
+
         int player = state.getCurrentPlayer();
 
         state.addResource(player, PALE_GREEN_INK, 1);
@@ -855,7 +867,7 @@ public class ActionTests {
         state.addResource(player, VELLUM, 3);
         state.addResource(player, CANDLE, 3);
 
-        WriteText writeText = new WriteText(EPISTLE, 4);
+        WriteText writeText = new WriteText(epistle, 4);
         fm.next(state, writeText);
         assertEquals(writeText, state.getActionsInProgress().peek());
 
@@ -879,7 +891,7 @@ public class ActionTests {
         assertEquals(2, state.getResource(player, VELLUM, STOREROOM));
         assertEquals(1, state.getResource(player, CANDLE, STOREROOM));
 
-        assertEquals(1, state.getNumberWritten(EPISTLE));
+        assertEquals(1, state.getNumberWritten(epistle));
     }
 
     @Test
@@ -887,6 +899,10 @@ public class ActionTests {
         Map<Integer, ActionArea> override = new HashMap<>();
         override.put(1, LIBRARY);
         startOfUseMonkPhaseForAreaAfterBonusToken(LIBRARY, SPRING, override);
+
+        IlluminatedText epistle = state.getAvailableTexts().stream().filter(t -> t.getComponentName().equals("Epistle")).findFirst().orElseThrow(
+                () -> new AssertionError("Epistle not found")
+        );
 
         int player = state.getCurrentPlayer();
 
@@ -896,7 +912,7 @@ public class ActionTests {
         state.addResource(player, VELLUM, 3);
         state.addResource(player, CANDLE, 3);
 
-        WriteText writeText = new WriteText(EPISTLE, 4);
+        WriteText writeText = new WriteText(epistle, 4);
 
         int startHash = state.hashCode();
         DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
@@ -1069,7 +1085,10 @@ public class ActionTests {
     @Test
     public void writePsalm() {
         state.addActionPoints(10);
-        WriteText action = new WriteText(PSALM, 3);
+        IlluminatedText psalm = state.getAvailableTexts().stream().filter(t -> t.getComponentName().equals("Psalm")).findFirst().orElseThrow(
+                () -> new AssertionError("Psalm not found")
+        );
+        WriteText action = new WriteText(psalm, 3);
         try {
             fm.next(state, action);
             fail("Should throw exception as not enough materials");
@@ -1082,7 +1101,7 @@ public class ActionTests {
         state.addResource(player, CANDLE, 2);
         state.addResource(player, PALE_RED_INK, 2);
 
-        assertEquals(0, state.getNumberWritten(PSALM));
+        assertEquals(0, state.getNumberWritten(psalm));
         fm.next(state, action);
         while (!action.executionComplete(state)) {
             fm.next(state, fm.computeAvailableActions(state).get(0));
@@ -1090,28 +1109,31 @@ public class ActionTests {
         assertEquals(1, state.getResource(player, VELLUM, STOREROOM));
         assertEquals(1, state.getResource(player, CANDLE, STOREROOM));
         assertEquals(1, state.getResource(player, PALE_RED_INK, STOREROOM));
-        assertEquals(PSALM_REWARDS[0], state.getVictoryPoints(player));
-        assertEquals(1, state.getNumberWritten(PSALM));
+        assertEquals(psalm.rewards[0], state.getVictoryPoints(player));
+        assertEquals(1, state.getNumberWritten(psalm));
     }
 
     @Test
     public void writeGospel() {
         state.addActionPoints(10);
-        WriteText action = new WriteText(GOSPEL_MATHEW, 6);
+        IlluminatedText matthew = state.getAvailableTexts().stream().filter(t -> t.getComponentName().equals("Gospel of Matthew")).findFirst().orElseThrow(
+                () -> new AssertionError("Matthew not found")
+        );
+        WriteText action = new WriteText(matthew, 6);
 
         int player = state.getCurrentPlayer();
         state.addResource(player, VELLUM, 2);
         state.addResource(player, CANDLE, 2);
         state.addResource(player, PALE_RED_INK, 2);
 
-        assertFalse(WriteText.meetsRequirements(GOSPEL_MATHEW, state.getStores(player, r -> true)));
+        assertFalse(WriteText.meetsRequirements(matthew, state.getStores(player, r -> true)));
         state.addResource(player, VIVID_PURPLE_INK, 1);
         state.addResource(player, VIVID_GREEN_INK, 1);
-        assertFalse(WriteText.meetsRequirements(GOSPEL_MATHEW, state.getStores(player, r -> true)));
+        assertFalse(WriteText.meetsRequirements(matthew, state.getStores(player, r -> true)));
         state.addResource(player, VIVID_PURPLE_INK, 1);
-        assertTrue(WriteText.meetsRequirements(GOSPEL_MATHEW, state.getStores(player, r -> true)));
+        assertTrue(WriteText.meetsRequirements(matthew, state.getStores(player, r -> true)));
 
-        assertEquals(0, state.getNumberWritten(GOSPEL_MATHEW));
+        assertEquals(0, state.getNumberWritten(matthew));
         fm.next(state, action);
         while (!action.executionComplete(state)) {
             fm.next(state, fm.computeAvailableActions(state).get(0));
@@ -1121,14 +1143,17 @@ public class ActionTests {
         assertEquals(1, state.getResource(player, PALE_RED_INK, STOREROOM));
         assertEquals(0, state.getResource(player, VIVID_PURPLE_INK, STOREROOM));
         assertEquals(0, state.getResource(player, VIVID_GREEN_INK, STOREROOM));
-        assertEquals(GOSPEL_REWARD + 5, state.getVictoryPoints(player));
-        assertEquals(1, state.getNumberWritten(GOSPEL_MATHEW));
+        assertEquals(matthew.rewards[0] + 5, state.getVictoryPoints(player));
+        assertEquals(1, state.getNumberWritten(matthew));
     }
 
     @Test
     public void cannotWriteTextIfAllWritten() {
         state.addActionPoints(12);
-        WriteText action = new WriteText(GOSPEL_MATHEW, 6);
+        IlluminatedText matthew = state.getAvailableTexts().stream().filter(t -> t.getComponentName().equals("Gospel of Matthew")).findFirst().orElseThrow(
+                () -> new AssertionError("Matthew not found")
+        );
+        WriteText action = new WriteText(matthew, 6);
         int player = state.getCurrentPlayer();
         state.addResource(player, VELLUM, 4);
         state.addResource(player, CANDLE, 4);
@@ -1139,8 +1164,8 @@ public class ActionTests {
         while (!action.executionComplete(state)) {
             fm.next(state, fm.computeAvailableActions(state).get(0));
         }
-        assertEquals(1, state.getNumberWritten(GOSPEL_MATHEW));
-        assertTrue(WriteText.meetsRequirements(GOSPEL_MATHEW, state.getStores(player, r -> true)));
+        assertEquals(1, state.getNumberWritten(matthew));
+        assertTrue(WriteText.meetsRequirements(matthew, state.getStores(player, r -> true)));
 
         try {
             fm.next(state, action);

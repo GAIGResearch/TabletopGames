@@ -100,6 +100,11 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         }
         state.forageCards.shuffle(state.rnd);
 
+        rawDeck = _data.findDeck("Texts");
+        for (Card c : rawDeck.getComponents()) {
+            state.writtenTexts.put(IlluminatedText.create(c), 0);
+        }
+
         state.drawBonusTokens();
         state.replenishPigmentInMeadow();
 
@@ -261,17 +266,17 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                         case LIBRARY:
                             highestPiety = state.getHighestPietyMonk(LIBRARY, currentPlayer);
                             eligibleMonks = state.monksIn(LIBRARY, currentPlayer);
-                            for (ILLUMINATED_TEXT text : ILLUMINATED_TEXT.values()) {
+                            for (IlluminatedText text : state.writtenTexts.keySet()) {
                                 // do we meet the minimum requirements
-                                if (text.ap > highestPiety) // enough AP
+                                if (text.minPiety > highestPiety) // no advanced enough monk
                                     continue;
-                                if (state.textsWritten.get(text) == text.rewards.length)  // have they all been written
+                                if (state.writtenTexts.get(text) == text.rewards.length)  // have they all been written
                                     continue;
                                 if (!WriteText.meetsRequirements(text, state.playerTreasuries.get(currentPlayer)))  // vellum, candles and inks
                                     continue;
                                 Set<Integer> validPieties = eligibleMonks.stream()
                                         .map(Monk::getPiety)
-                                        .filter(piety -> piety >= text.ap && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
+                                        .filter(piety -> piety >= text.minPiety && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
 
                                 validPieties.forEach(p -> retValue.add(new WriteText(text, p)));
                             }

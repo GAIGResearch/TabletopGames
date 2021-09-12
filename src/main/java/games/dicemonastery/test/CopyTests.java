@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.*;
+import games.dicemonastery.components.IlluminatedText;
 import games.dicemonastery.components.Monk;
 import org.junit.Test;
 import players.simple.RandomPlayer;
@@ -13,7 +14,6 @@ import java.util.List;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.BONUS_TOKEN.*;
-import static games.dicemonastery.DiceMonasteryConstants.ILLUMINATED_TEXT.PSALM;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.BID;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.SACRIFICE;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
@@ -492,7 +492,10 @@ public class CopyTests {
     public void writePsalm() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         state.addActionPoints(10);
-        WriteText action = new WriteText(PSALM, 4);
+        IlluminatedText psalm = state.getAvailableTexts().stream().filter(t -> t.getComponentName().equals("Psalm")).findFirst().orElseThrow(
+                () -> new AssertionError("Psalm not found")
+        );
+        WriteText action = new WriteText(psalm, 4);
 
         int startHash = state.hashCode();
         DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();

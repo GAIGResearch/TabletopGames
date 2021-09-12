@@ -143,36 +143,6 @@ public class DiceMonasteryConstants {
         }
     }
 
-    public final static int[] PSALM_REWARDS = {4, 3, 3, 2, 2, 2};
-    public final static int[] EPISTLE_REWARDS = {5, 4, 4, 3, 3};
-    public final static int[] LITURGY_REWARDS = {6, 5, 5, 4};
-    public final static int GOSPEL_REWARD = 8;
-
-    public enum ILLUMINATED_TEXT {
-        PSALM(3, 1, 1, 1, new ArrayList<>(), PSALM_REWARDS),
-        EPISTLE(4, 2, 1, 2, new ArrayList<>(), EPISTLE_REWARDS),
-        LITURGY(5, 3, 2, 2, new ArrayList<>(), LITURGY_REWARDS),
-        GOSPEL_MARK(6, 2, 2, 2, Arrays.asList(VIVID_GREEN_INK, VIVID_BLUE_INK), new int[]{GOSPEL_REWARD}),
-        GOSPEL_LUKE(6, 2, 2, 2, Arrays.asList(VIVID_RED_INK, VIVID_BLUE_INK), new int[]{GOSPEL_REWARD}),
-        GOSPEL_JOHN(6, 2, 2, 2, Arrays.asList(VIVID_RED_INK, VIVID_PURPLE_INK), new int[]{GOSPEL_REWARD}),
-        GOSPEL_MATHEW(6, 2, 2, 2, Arrays.asList(VIVID_GREEN_INK, VIVID_PURPLE_INK), new int[]{GOSPEL_REWARD});
-
-        public final int ap;
-        public final int differentInks;
-        public final int vellum;
-        public final int candles;
-        public final List<Resource> specialInks;
-        public final int[] rewards;
-
-        ILLUMINATED_TEXT(int ap, int inks, int vellum, int candles, List<Resource> specialInks, int[] rewards) {
-            this.ap = ap;
-            this.differentInks = inks;
-            this.vellum = vellum;
-            this.candles = candles;
-            this.specialInks = specialInks;
-            this.rewards = rewards;
-        }
-    }
 
     public enum TREASURE {
         CAPE(1, 3,1),

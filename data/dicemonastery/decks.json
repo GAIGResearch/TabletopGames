@@ -173,7 +173,77 @@
   	"candle" : ["Integer", 4],
   	"ink" : ["Integer", 4],
   	"inkType" : ["String", "PALE_BLUE_INK"],
-  	},
+  	}
   ]
-  }
+},
+{
+  "name" : ["String", "Texts"],
+  "visibility" : "VISIBLE_TO_ALL",
+  "cards" : 
+  [
+  	{
+  	"name" : ["String", "Psalm"],
+  	"rewards" : ["Integer[]", [4, 3, 3, 2, 2, 2]],
+  	"minPiety" : ["Integer", 3],
+  	"vellum" : ["Integer", 1],
+  	"candles" : ["Integer", 1],
+  	"inks" : ["Integer", 1],
+  	"specialInks" : ["String[]", []]
+  	},
+  	{
+  	"name" : ["String", "Epistle"],
+  	"rewards" : ["Integer[]", [5, 4, 4, 3, 3]],
+  	"minPiety" : ["Integer", 4],
+  	"vellum" : ["Integer", 1],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 2],
+  	"specialInks" : ["String[]", []]
+  	},
+  	{
+  	"name" : ["String", "Liturgy"],
+  	"rewards" : ["Integer[]", [6, 5, 5, 4]],
+  	"minPiety" : ["Integer", 5],
+  	"vellum" : ["Integer", 2],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 3],
+  	"specialInks" : ["String[]", []]
+  	},
+    	{
+  	"name" : ["String", "Gospel of Mark"],
+  	"rewards" : ["Integer[]", [8]],
+  	"minPiety" : ["Integer", 6],
+  	"vellum" : ["Integer", 2],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 2],
+  	"specialInks" : ["String[]", ["VIVID_GREEN_INK", "VIVID_BLUE_INK"]]
+  	},
+    	{
+  	"name" : ["String", "Gospel of Luke"],
+  	"rewards" : ["Integer[]", [8]],
+  	"minPiety" : ["Integer", 6],
+  	"vellum" : ["Integer", 2],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 2],
+  	"specialInks" : ["String[]", ["VIVID_RED_INK", "VIVID_BLUE_INK"]]
+  	},
+    	{
+  	"name" : ["String", "Gospel of John"],
+  	"rewards" : ["Integer[]", [8]],
+  	"minPiety" : ["Integer", 6],
+  	"vellum" : ["Integer", 2],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 2],
+  	"specialInks" : ["String[]", ["VIVID_RED_INK", "VIVID_PURPLE_INK"]]
+  	},
+    	{
+  	"name" : ["String", "Gospel of Matthew"],
+  	"rewards" : ["Integer[]", [8]],
+  	"minPiety" : ["Integer", 6],
+  	"vellum" : ["Integer", 2],
+  	"candles" : ["Integer", 2],
+  	"inks" : ["Integer", 2],
+  	"specialInks" : ["String[]", ["VIVID_GREEN_INK", "VIVID_PURPLE_INK"]]
+  	}
+  ]
+}  
 ]
