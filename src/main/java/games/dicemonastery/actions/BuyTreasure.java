@@ -36,6 +36,6 @@ public class BuyTreasure extends UseMonk{
 
     @Override
     public String toString() {
-        return "Buy " + treasure;
+        return "Buy " + treasure.getComponentName();
     }
 }

@@ -383,7 +383,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         // find card on a deck
         Pilgrimage retValue = null;
         for (Deck<Pilgrimage> deck : pilgrimageDecks) {
-            if (deck.peek().equals((destination))) {
+            if (deck.getSize() > 0 && deck.peek().equals((destination))) {
                 retValue = deck.draw();
                 break;
             }

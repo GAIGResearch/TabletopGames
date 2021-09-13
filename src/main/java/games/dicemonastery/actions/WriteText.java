@@ -116,7 +116,7 @@ public class WriteText extends UseMonk implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return String.format("Write %s (piety %d) %s", textType, actionPoints, optionalInks.isEmpty() ? "" : "using " + optionalInks.stream().map(Objects::toString).collect(joining()));
+        return String.format("Write %s (piety %d) %s", textType.getComponentName(), actionPoints, optionalInks.isEmpty() ? "" : "using " + optionalInks.stream().map(Objects::toString).collect(joining()));
     }
 
 

@@ -43,6 +43,6 @@ public class PayTreasure extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("Loses %s to vikings", payment);
+        return String.format("Loses %s to vikings", payment.getComponentName());
     }
 }

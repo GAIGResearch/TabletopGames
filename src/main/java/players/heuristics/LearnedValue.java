@@ -173,20 +173,29 @@ public class LearnedValue extends AbstractPlayer implements IGameListener, ITree
             statsWriter2.newLine();
 
 
-            Map<String, Map<Integer, Double>> actionAdvantageByBucket = getValues();
+          //  Map<String, Map<Integer, Double>> actionAdvantageByBucket = getValues();
             Map<Integer, String> actionNames = valueHeuristic.actionNames;
             for (String bucket : newData.keySet()) {
                 Map<Integer, Pair<Integer, Double>> newDataByHash = newData.get(bucket);
-                Map<Integer, Double> actionAdvantage = actionAdvantageByBucket.getOrDefault(bucket, new HashMap<>());
+             //   Map<Integer, Double> actionAdvantage = actionAdvantageByBucket.getOrDefault(bucket, new HashMap<>());
                 for (Integer hash : newDataByHash.keySet()) {
-                    advWriter.write(String.format("%s, %d, %.3f, %s", bucket, hash, actionAdvantage.getOrDefault(hash, 0.0), actionNames.getOrDefault(hash, "")));
+                    double specificVisits = newDataByHash.get(hash).a;
+                    double specificAdvantage = newDataByHash.get(hash).b;
+                    double generalAdvantage = newData.get("").get(hash).b;
+                    double generalVisits = newData.get("").get(hash).a;
+                    double specificWeight = Math.sqrt(anchorVisits / (3.0 * specificVisits + anchorVisits));
+                    double specificResult = specificAdvantage / (specificVisits + anchorVisits);
+                    double generalResult = generalAdvantage / (generalVisits + anchorVisits);
+                    double finalAdvantage = specificResult * specificWeight + generalResult * (1.0 - specificWeight);
+
+                    advWriter.write(String.format("%s, %d, %.3f, %s", bucket, hash, finalAdvantage, actionNames.getOrDefault(hash, "")));
                     advWriter.newLine();
-                    advWriter2.write(String.format("%s, %d, %.3f, %s", bucket, hash, actionAdvantage.getOrDefault(hash, 0.0), actionNames.getOrDefault(hash, "")));
+                    advWriter2.write(String.format("%s, %d, %.3f, %s", bucket, hash, finalAdvantage, actionNames.getOrDefault(hash, "")));
                     advWriter2.newLine();
 
-                    statsWriter.write(String.format("%s, %d, %d, %.6f", bucket, hash, newDataByHash.get(hash).a, newDataByHash.get(hash).b));
+                    statsWriter.write(String.format("%s, %d, %.0f, %.6f", bucket, hash, specificVisits, specificAdvantage));
                     statsWriter.newLine();
-                    statsWriter2.write(String.format("%s, %d, %d, %.6f", bucket, hash, newDataByHash.get(hash).a, newDataByHash.get(hash).b));
+                    statsWriter2.write(String.format("%s, %d, %.0f, %.6f", bucket, hash, specificVisits, specificAdvantage));
                     statsWriter2.newLine();
                 }
             }
@@ -260,8 +269,7 @@ public class LearnedValue extends AbstractPlayer implements IGameListener, ITree
                 // if useAdvantage then we subtract meanValue * visits
                 Map<Integer, Pair<Integer, Double>> data = actionsToNodes.stream()
                         .collect(toMap(p -> p.a.hashCode(),
-                                p -> new Pair<>(p.b.getVisits() + (statsByHash.containsKey(p.a.hashCode()) ? 0 : anchorVisits),
-                                        p.b.getTotValue()[actor] - meanValue * p.b.getVisits())));
+                                p -> new Pair<>(p.b.getVisits(), p.b.getTotValue()[actor] - meanValue * p.b.getVisits())));
 
                 // now we merge this data into the existing map
                 Map<Integer, Pair<Integer, Double>> newDataByHash = newData.get(bucket);

@@ -41,6 +41,6 @@ public class GoOnPilgrimage extends UseMonk {
 
     @Override
     public String toString() {
-        return String.format("Pilgrimage to %s (piety %d)", destination.toString(), actionPoints);
+        return String.format("Pilgrimage to %s (piety %d)", destination.destination, actionPoints);
     }
 }
