@@ -5,6 +5,9 @@ import core.AbstractForwardModel;
 import core.Game;
 import games.GameType;
 import games.catan.gui.CatanGUI;
+import gui.AbstractGUIManager;
+import gui.GUI;
+import gui.GamePanel;
 import players.PlayerConstants;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
@@ -16,6 +19,7 @@ import players.simple.CatanRuleBasedPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -60,7 +64,15 @@ public class CatanGame extends Game {
 
         CatanGame game = new CatanGame(agents, params, forwardModel, gs);
 
-        game.run(new CatanGUI(game, new ActionController()));
+        GamePanel panel = new GamePanel();
+        GamePanel gamePanel = new GamePanel();
+
+        GUI frame = new GUI();
+        frame.setContentPane(panel);
+        AbstractGUIManager gui = new CatanGUI(game, new ActionController(), panel);
+        frame.setFrameProperties();
+
+        game.run(gui, frame);
         System.out.println(game.gameState.getGameStatus());
 
 //        runMany(players, forwardModel);

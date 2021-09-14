@@ -15,7 +15,6 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.*;
 
@@ -118,11 +117,11 @@ public class CatanForwardModel extends AbstractForwardModel {
                 }
                 gs.addScore(gs.getCurrentPlayer(), params.longest_road_value);
                 gs.longestRoad = gs.getCurrentPlayer();
-                if (VERBOSE) {
+                if (gs.getCoreGameParameters().verbose) {
                     System.out.println("Player " + gs.getCurrentPlayer() + " has the longest road with length " + gs.longestRoad);
                 }
             }
-            if (VERBOSE) {
+            if (gs.getCoreGameParameters().verbose) {
                 System.out.println("Calculated road length: " + new_length);
             }
         } else if (action instanceof PlaceSettlementWithRoad){
@@ -145,7 +144,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                 }
             }
             gs.setGameStatus(Utils.GameResult.GAME_END);
-            if(VERBOSE){
+            if(gs.getCoreGameParameters().verbose){
                 System.out.println("Game over! winner = " + gs.getCurrentPlayer());
             }
         } else if (params.max_round_count!=-1 && gs.getTurnOrder().getRoundCounter()>params.max_round_count) { // end in tie if round limit exceeded
@@ -199,7 +198,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                                     Card card = resourceDeck.get(i);
                                     if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())) {
                                         // remove from deck and give it to player
-                                        if(VERBOSE){
+                                        if(gs.getCoreGameParameters().verbose){
                                             System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
                                         }
                                         ((Deck<Card>) gs.getComponent(resourceDeckHash)).remove(card);

@@ -10,7 +10,6 @@ import games.catan.components.Settlement;
 
 import java.util.*;
 
-import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.cardType;
 import static games.catan.CatanConstants.resourceDeckHash;
@@ -414,7 +413,7 @@ public class CatanActionFactory {
         int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
         int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
         int[] resources = gs.getPlayerResources(activePlayer);
-        if (VERBOSE){
+        if (gs.getCoreGameParameters().verbose){
             System.out.println("Player " + gs.getCurrentPlayer() + " has " + Arrays.toString(resources));
         }
         ArrayList<AbstractAction> actions = new ArrayList();

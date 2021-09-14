@@ -10,8 +10,6 @@ import games.catan.CatanTile;
 
 import java.util.Objects;
 
-import static core.CoreConstants.VERBOSE;
-
 public class BuildRoad extends AbstractAction {
     public final int x;
     public final int y;

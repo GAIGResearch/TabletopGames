@@ -1,6 +1,14 @@
 package games;
 
 import core.*;
+import games.blackjack.BlackjackForwardModel;
+import games.blackjack.BlackjackGameState;
+import games.blackjack.BlackjackParameters;
+import games.blackjack.gui.BlackjackGUIManager;
+import games.catan.CatanForwardModel;
+import games.catan.CatanGameState;
+import games.catan.CatanParameters;
+import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -207,10 +215,6 @@ public enum GameType {
      */
     public Game createGameInstance(int nPlayers, long seed, AbstractParameters params) {
         if (nPlayers < minPlayers || nPlayers > maxPlayers) {
-            if (VERBOSE) {
-                System.out.println("Unsupported number of players: " + nPlayers
-                        + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
-            }
             return null;
         }
 
@@ -383,7 +387,7 @@ public enum GameType {
                 gui = new DominionGUIManager(parent, game, ac, human);
                 break;
             case Catan:
-                gui = new CatanGUI(game, ac);
+                gui = new CatanGUI(game, ac, parent);
 
             // TODO: Diamant GUI
         }

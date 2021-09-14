@@ -13,7 +13,6 @@ import games.catan.CatanTile;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.resourceDeckHash;
 

@@ -361,7 +361,7 @@ public class CatanGameState extends AbstractGameState {
                 }
             }
         }
-        if(VERBOSE){
+        if(getCoreGameParameters().verbose){
             System.out.println("There are " + counter + " settlements");
         }
         return settlements;
@@ -467,7 +467,7 @@ public class CatanGameState extends AbstractGameState {
         // if we got all 0s -> return true; remove them from player and put them back to resourceDeck
         for (int i = 0; i < costCopy.length; i++){
             if (costCopy[i] > 0){
-                if (VERBOSE)
+                if (gs.getCoreGameParameters().verbose)
                     System.out.println("Player does not have enough resources in hand");
                 return false;
             }
@@ -526,7 +526,7 @@ public class CatanGameState extends AbstractGameState {
         HashMap<Integer, Area> copy = new HashMap<>();
         for(int key : areas.keySet()) {
             Area a = areas.get(key);
-            if (PARTIAL_OBSERVABLE && key != -1) {
+            if (getCoreGameParameters().partialObservable && key != -1) {
                 List<Component> oldComponents = areas.get(key).getComponents();
                 // todo need to handle PO
                 // todo create a cardpool that players may have, shuffle and distribute them

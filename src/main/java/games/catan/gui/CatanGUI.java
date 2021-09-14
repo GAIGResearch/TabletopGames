@@ -1,11 +1,12 @@
 package games.catan.gui;
 
-import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.catan.CatanGameState;
 import games.catan.CatanTile;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -13,7 +14,7 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class CatanGUI extends AbstractGUI {
+public class CatanGUI extends AbstractGUIManager {
     CatanGameState gs;
     CatanTile[][] board;
     CatanBoardView boardView;
@@ -28,11 +29,11 @@ public class CatanGUI extends AbstractGUI {
     JLabel devCards;
     JLabel playerColourLabel;
 
-    public CatanGUI(Game game, ActionController ac) {
-        super(ac, 25);
+    public CatanGUI(Game game, ActionController ac, GamePanel gp) {
+        super(gp, ac, 25);
         gs = (CatanGameState)game.getGameState();
         board = gs.getBoard();
-        setSize(500, 500);
+        gp.setPreferredSize(new Dimension(500, 500));
 
         boardView = new CatanBoardView(gs);
 
@@ -43,11 +44,14 @@ public class CatanGUI extends AbstractGUI {
 //        JPanel buttons = new JPanel();
 //        JButton button1 = new JButton("button1");
 //        buttons.add(button1);
-        getContentPane().add(boardView, BorderLayout.CENTER);
-        getContentPane().add(createGameStateInfoPanel(gs), BorderLayout.EAST);
+        gp.setLayout(new BorderLayout());
+        gp.add(boardView, BorderLayout.CENTER);
+        gp.add(createGameStateInfoPanel(gs), BorderLayout.EAST);
 //        getContentPane().add(buttons, BorderLayout.SOUTH);
 
-        setFrameProperties();
+        gp.revalidate();
+        gp.repaint();
+
     }
 
     @Override
@@ -86,7 +90,7 @@ public class CatanGUI extends AbstractGUI {
                 break;
         }
 
-        repaint();
+        parent.repaint();
     }
 
     protected JPanel createGameStateInfoPanel(AbstractGameState gameState) {

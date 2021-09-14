@@ -11,8 +11,6 @@ import games.catan.components.Settlement;
 
 import java.util.Objects;
 
-import static core.CoreConstants.VERBOSE;
-
 public class BuildCity extends AbstractAction {
     public final int row;
     public final int col;

@@ -86,9 +86,9 @@ public class CatanBoardView extends JComponent {
                         drawSettlement(g, tile.getVerticesCoords(i), CatanConstants.PlayerColors[settlements[i].getOwner()], settlements[i].getType());
                     }
                     // todo lines below are useful for debugging as they display settlement IDs
-                    g.setFont(new Font("TimeRoman", Font.PLAIN, 20));
-                    g.setColor(Color.GRAY);
-                    g.drawString(settlements[i].getID() + "", tile.getVerticesCoords(i).x, tile.getVerticesCoords(i).y);
+//                    g.setFont(new Font("TimeRoman", Font.PLAIN, 20));
+//                    g.setColor(Color.GRAY);
+//                    g.drawString(settlements[i].getID() + "", tile.getVerticesCoords(i).x, tile.getVerticesCoords(i).y);
                 }
 
                 // lines below render cube coordinates and distances from middle

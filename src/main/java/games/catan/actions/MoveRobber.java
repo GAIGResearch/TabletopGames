@@ -7,8 +7,6 @@ import games.catan.CatanTile;
 
 import java.util.Objects;
 
-import static core.CoreConstants.VERBOSE;
-
 public class MoveRobber extends AbstractAction {
     public final int x;
     public final int y;
@@ -21,7 +19,7 @@ public class MoveRobber extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState) gs;
         CatanTile robberTile = cgs.getRobber(cgs.getBoard());
-        if(VERBOSE){
+        if(gs.getCoreGameParameters().verbose){
             System.out.println("moving robber from " + robberTile.toString() + " to " + cgs.getBoard()[x][y].toString());
         }
 
