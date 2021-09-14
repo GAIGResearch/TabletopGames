@@ -36,7 +36,7 @@ public class CatanGame extends Game {
     public static void main(String[] args){
 
         List<AbstractPlayer> agents = new ArrayList<>();
-        agents.add(new OSLAPlayer());
+//        agents.add(new OSLAPlayer());
 
         // RHEA
 //        RMHCParams rmhcParams = new RMHCParams();
@@ -54,8 +54,11 @@ public class CatanGame extends Game {
 
 //        agents.add(new RandomPlayer(new Random()));
         //agents.add(new RandomPlayer(new Random()));
-        agents.add(new RandomPlayer(new Random()));
-        agents.add(new RandomPlayer(new Random()));
+//        agents.add(new RandomPlayer(new Random()));
+//        agents.add(new RandomPlayer(new Random()));
+        agents.add(new CatanRuleBasedPlayer(new Random()));
+        agents.add(new CatanRuleBasedPlayer(new Random()));
+        agents.add(new CatanRuleBasedPlayer(new Random()));
         agents.add(new CatanRuleBasedPlayer(new Random()));
 
         CatanParameters params = new CatanParameters("data/", System.currentTimeMillis());
