@@ -1,19 +1,20 @@
 package games.explodingkittens;
 
-import core.AbstractParameters;
-import core.components.Component;
-import core.interfaces.IGamePhase;
-import core.actions.AbstractAction;
-import core.components.Deck;
 import core.AbstractGameState;
+import core.AbstractParameters;
+import core.actions.AbstractAction;
+import core.components.Component;
+import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static core.CoreConstants.VisibilityMode;
 
 public class ExplodingKittensGameState extends AbstractGameState implements IPrintable {
 
@@ -37,7 +38,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     Stack<AbstractAction> actionStack;
 
     public ExplodingKittensGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ExplodingKittensTurnOrder(nPlayers));
+        super(gameParameters, new ExplodingKittensTurnOrder(nPlayers), GameType.ExplodingKittens);
         playerGettingAFavor = -1;
     }
 
@@ -64,7 +65,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
             ekgs.playerHandCards.add(d.copy());
         }
         ekgs.drawPile = drawPile.copy();
-        if (PARTIAL_OBSERVABLE && playerId != -1) {
+        if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Other player hands + draw deck are hidden, combine in draw pile and shuffle
             // Note: this considers the agent to track opponent's cards that are known to him by itself
             // e.g. in case the agent has previously given a favor card to its opponent
@@ -88,7 +89,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
 
             // Shuffles only hidden cards in draw pile, if player knows what's on top those will stay in place
             ekgs.drawPile.shuffleVisible(r, playerId, false);
-            Deck<ExplodingKittensCard> explosive = new Deck<>("tmp");
+            Deck<ExplodingKittensCard> explosive = new Deck<>("tmp", VisibilityMode.HIDDEN_TO_ALL);
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     for (int j = 0; j < playerHandCards.get(i).getSize(); j++) {
@@ -123,28 +124,21 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
         return new ExplodingKittensHeuristic().evaluateState(this, playerId);
     }
 
+    /**
+     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * of victory points, etc.
+     * If a game does not support this directly, then just return 0.0
+     *
+     * @param playerId
+     * @return - double, score of current state
+     */
     @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    add(playerHandCards.get(i).getComponentID());
-                    for (Component c: playerHandCards.get(i).getComponents()) {
-                        add(c.getComponentID());
-                    }
-                }
-            }
-            add(drawPile.getComponentID());
-            for (int i = 0; i < drawPile.getSize(); i++) {
-                if (!drawPile.isComponentVisible(i, playerId)) {
-                    add(drawPile.get(i).getComponentID());
-                }
-            }
-        }};
+    public double getGameScore(int playerId) {
+        return 0;
     }
 
     @Override

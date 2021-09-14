@@ -1,13 +1,25 @@
 package games.tictactoe;
 import core.AbstractGameState;
+import core.components.Token;
 import core.interfaces.IStateHeuristic;
+import evaluation.TunableParameters;
 import utilities.Pair;
 import utilities.Utils;
 
-public class TicTacToeHeuristic implements IStateHeuristic {
+public class TicTacToeHeuristic extends TunableParameters implements IStateHeuristic {
 
     double FACTOR_PLAYER = 0.8;
     double FACTOR_OPPONENT = 0.5;
+
+    public TicTacToeHeuristic() {
+        addTunableParameter("FACTOR_PLAYER", 0.8);
+        addTunableParameter("FACTOR_OPPONENT", 0.5);
+    }
+    @Override
+    public void _reset() {
+        FACTOR_OPPONENT = (double) getParameterValue("FACTOR_OPPONENT");
+        FACTOR_PLAYER = (double) getParameterValue("FACTOR_PLAYER");
+    }
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
@@ -27,7 +39,7 @@ public class TicTacToeHeuristic implements IStateHeuristic {
 
         double nTotalCount = nPlayer.length * 2 + 2;  // N rows + N columns + 2 diagonals
 
-        Character playerChar = ttgs.playerMapping.get(playerId);
+        Token playerChar = TicTacToeConstants.playerMapping.get(playerId);
 
         // Check columns
         for (int x = 0; x < ttgs.gridBoard.getWidth(); x++){
@@ -53,7 +65,7 @@ public class TicTacToeHeuristic implements IStateHeuristic {
         return pScore * FACTOR_PLAYER + oppScore * FACTOR_OPPONENT;
     }
 
-    private Pair<Integer, Integer> countColumns(TicTacToeGameState ttgs, int column, Character playerChar) {
+    private Pair<Integer, Integer> countColumns(TicTacToeGameState ttgs, int column, Token playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int y = 0; y < ttgs.gridBoard.getHeight(); y++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(column, y));
@@ -61,7 +73,7 @@ public class TicTacToeHeuristic implements IStateHeuristic {
         return count;
     }
 
-    private Pair<Integer, Integer> countRows(TicTacToeGameState ttgs, int row, Character playerChar) {
+    private Pair<Integer, Integer> countRows(TicTacToeGameState ttgs, int row, Token playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int x = 0; x < ttgs.gridBoard.getWidth(); x++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(x, row));
@@ -69,7 +81,7 @@ public class TicTacToeHeuristic implements IStateHeuristic {
         return count;
     }
 
-    private Pair<Integer, Integer> countPrimaryDiagonal(TicTacToeGameState ttgs, Character playerChar) {
+    private Pair<Integer, Integer> countPrimaryDiagonal(TicTacToeGameState ttgs, Token playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int x = 0; x < ttgs.gridBoard.getWidth(); x++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(x, x));
@@ -77,7 +89,7 @@ public class TicTacToeHeuristic implements IStateHeuristic {
         return count;
     }
 
-    private Pair<Integer, Integer> countSecondaryDiagonal(TicTacToeGameState ttgs, Character playerChar) {
+    private Pair<Integer, Integer> countSecondaryDiagonal(TicTacToeGameState ttgs, Token playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int x = 0; x < ttgs.gridBoard.getWidth(); x++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(ttgs.gridBoard.getWidth()-1-x, x));
@@ -85,10 +97,10 @@ public class TicTacToeHeuristic implements IStateHeuristic {
         return count;
     }
 
-    private void checkChar(Pair<Integer, Integer> count, Character playerChar, Character c) {
-        if (c == playerChar) {
+    private void checkChar(Pair<Integer, Integer> count, Token playerChar, Token c) {
+        if (c.equals(playerChar)) {
             count.a ++;
-        } else if (c != ' ') {
+        } else if (!c.getTokenType().equals(" ")) {
             count.b ++;
         }
     }
@@ -102,4 +114,42 @@ public class TicTacToeHeuristic implements IStateHeuristic {
             nOpponent[count.b-1] ++;
         }
     }
+
+    /**
+     * Return a copy of this game parameters object, with the same parameters as in the original.
+     *
+     * @return - new game parameters object.
+     */
+    @Override
+    protected TicTacToeHeuristic _copy() {
+        TicTacToeHeuristic retValue = new TicTacToeHeuristic();
+        retValue.FACTOR_PLAYER = FACTOR_PLAYER;
+        retValue.FACTOR_OPPONENT = FACTOR_OPPONENT;
+        return retValue;
+    }
+
+    /**
+     * Checks if the given object is the same as the current.
+     *
+     * @param o - other object to test equals for.
+     * @return true if the two objects are equal, false otherwise
+     */
+    @Override
+    protected boolean _equals(Object o) {
+        if (o instanceof TicTacToeHeuristic) {
+            TicTacToeHeuristic other = (TicTacToeHeuristic) o;
+            return other.FACTOR_OPPONENT == FACTOR_OPPONENT && other.FACTOR_PLAYER == FACTOR_PLAYER;
+        }
+        return false;
+    }
+
+    /**
+     * @return Returns Tuned Parameters corresponding to the current settings
+     * (will use all defaults if setParameterValue has not been called at all)
+     */
+    @Override
+    public TicTacToeHeuristic instantiate() {
+        return this._copy();
+    }
+
 }

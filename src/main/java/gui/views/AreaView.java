@@ -10,7 +10,7 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
-import static core.AbstractGUI.*;
+import static gui.GUI.*;
 
 // TODO: snap component to deck (add component to deck + dependency) + remove on extract
 // Long press move deck/area, short press move component in deck/area
@@ -366,7 +366,7 @@ public class AreaView extends ComponentView {
         // Find all sub-collections in this area: decks and other areas. Just drawing a rectangle around them and name
         List<Deck<? extends Component>> decks = new ArrayList<>();
         List<Area> areas = new ArrayList<>();
-        for (Map.Entry<Integer, Component> e: area.getComponents().entrySet()) {
+        for (Map.Entry<Integer, Component> e: area.getComponentsMap().entrySet()) {
             Rectangle r = drawMap.get(e.getKey());
             Point t = translation.get(e.getKey());
 
@@ -390,7 +390,7 @@ public class AreaView extends ComponentView {
         }
 
         // Draw components
-        for (Map.Entry<Integer, Component> e: area.getComponents().entrySet()) {
+        for (Map.Entry<Integer, Component> e: area.getComponentsMap().entrySet()) {
             Component c = e.getValue();
 
             // Decks and areas already drawn
@@ -402,7 +402,7 @@ public class AreaView extends ComponentView {
             if (!dependencies.containsKey(e.getKey())) {
                 // Check dependency
                 for (Area a : areas) {
-                    if (a.getComponents().containsValue(c)) {
+                    if (a.getComponentsMap().containsValue(c)) {
                         dependencies.put(e.getKey(), a.getComponentID());
                         break;
                     }

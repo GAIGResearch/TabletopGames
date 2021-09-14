@@ -5,15 +5,14 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.virus.actions.*;
-import games.virus.cards.*;
+import games.virus.cards.VirusCard;
+import games.virus.cards.VirusTreatmentCard;
 import games.virus.components.VirusBody;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-import static core.CoreConstants.VERBOSE;
+import static core.CoreConstants.VisibilityMode;
 import static games.virus.cards.VirusCard.OrganType.Treatment;
 import static games.virus.cards.VirusCard.OrganType.Wild;
 
@@ -37,13 +36,13 @@ public class VirusForwardModel extends AbstractForwardModel {
         }
 
         // Create the draw deck with all the cards
-        vgs.drawDeck = new Deck<>("DrawDeck", -1);
+        vgs.drawDeck = new Deck<>("DrawDeck", -1, VisibilityMode.HIDDEN_TO_ALL);
         createCards(vgs);
 
         vgs.drawDeck.shuffle(new Random(vgs.getGameParameters().getRandomSeed()));
 
         // Create the discard deck, at the beginning it is empty
-        vgs.discardDeck = new Deck<>("DiscardDeck", -1);
+        vgs.discardDeck = new Deck<>("DiscardDeck", -1, VisibilityMode.VISIBLE_TO_ALL);
 
         // Draw initial cards to each player
         vgs.playerDecks = new ArrayList<>(vgs.getNPlayers());
@@ -114,7 +113,7 @@ public class VirusForwardModel extends AbstractForwardModel {
         int nCards = ((VirusGameParameters)vgs.getGameParameters()).nCardsPlayerHand;
         for (int i = 0; i < vgs.getNPlayers(); i++) {
             String playerDeckName = "Player" + i + "Deck";
-            vgs.playerDecks.add(new Deck<>(playerDeckName, i));
+            vgs.playerDecks.add(new Deck<>(playerDeckName, i, VisibilityMode.VISIBLE_TO_OWNER));
             for (int j = 0; j < nCards; j++) {
                 vgs.playerDecks.get(i).add(vgs.drawDeck.draw());
             }
@@ -163,8 +162,9 @@ public class VirusForwardModel extends AbstractForwardModel {
         }
 
         // Playable cards actions
-        for (int i = 0; i < playerHand.getSize(); i++)
-            addActionsForCard(vgs, playerHand.peek(i), actions, playerHand);
+        Set<VirusCard> uniqueCards = new HashSet<>(playerHand.getComponents());
+        for (VirusCard card : uniqueCards)
+            addActionsForCard(vgs, card, actions, playerHand);
 
         // Create DiscardCard actions. The player can always discard 1, 2 or 3 cards TODO: variable player hand card size
         // Discard one card
@@ -461,7 +461,7 @@ public class VirusForwardModel extends AbstractForwardModel {
 
     @Override
     protected void endGame(AbstractGameState gameState) {
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println("Game Results:");
             for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
                 if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {

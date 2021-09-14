@@ -1,7 +1,7 @@
 package gui.views;
 
-import core.AbstractGUI;
 import core.components.Card;
+import gui.GUI;
 import org.davidmoten.text.utils.WordWrap;
 
 import java.awt.*;
@@ -9,7 +9,7 @@ import java.awt.*;
 public class CardView extends ComponentView {
 
     public CardView(Card c) {
-        super(c, AbstractGUI.defaultCardWidth, AbstractGUI.defaultCardHeight);
+        super(c, GUI.defaultCardWidth, GUI.defaultCardHeight);
     }
 
     @Override
@@ -23,6 +23,10 @@ public class CardView extends ComponentView {
 
     public static void drawCard(Graphics2D g, Card card, Rectangle r) {
         drawCard(g, r.x, r.y, r.width, r.height, card, null, null, true);
+    }
+
+    public static void drawCard(Graphics2D g, Rectangle r, Card card, Image front, Image back, boolean visible) {
+        drawCard(g, r.x, r.y, r.width, r.height, card, front, back, visible);
     }
 
     public static void drawCard(Graphics2D g, int x, int y, int width, int height, Card card, Image front, Image back, boolean visible) {

@@ -129,4 +129,9 @@ public class BoardNode extends Component {
 
         return sb.toString();
     }
+
+    @Override
+    public final int hashCode() {
+        return componentID;
+    }
 }

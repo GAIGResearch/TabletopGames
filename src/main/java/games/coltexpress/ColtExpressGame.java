@@ -1,10 +1,12 @@
 package games.coltexpress;
 
+import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.AbstractForwardModel;
 import core.Game;
 import games.GameType;
+import players.human.ActionController;
+import players.human.HumanGUIPlayer;
 import players.simple.RandomPlayer;
 import utilities.Utils;
 
@@ -24,7 +26,8 @@ public class ColtExpressGame extends Game {
     public static void main(String[] args){
         ArrayList<AbstractPlayer> agents = new ArrayList<>();
         agents.add(new RandomPlayer());
-        agents.add(new RandomPlayer());
+        ActionController ac = new ActionController();
+        agents.add(new HumanGUIPlayer(ac));
         agents.add(new RandomPlayer());
         agents.add(new RandomPlayer());
 
@@ -34,7 +37,7 @@ public class ColtExpressGame extends Game {
             ColtExpressGameState tmp_gameState = new ColtExpressGameState(params, agents.size());
 
             Game game = new ColtExpressGame(agents, forwardModel, tmp_gameState);
-            game.run(null);
+//            game.run(new ColtExpressGUI(game, ac, 1)); TODO
             ColtExpressGameState gameState = (ColtExpressGameState) game.getGameState();
 
             //gameState.printToConsole();

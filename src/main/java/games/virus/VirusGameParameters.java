@@ -1,10 +1,14 @@
 package games.virus;
 
 import core.AbstractParameters;
+import core.Game;
+import evaluation.TunableParameters;
+import games.GameType;
 
+import java.util.Arrays;
 import java.util.Objects;
 
-public class VirusGameParameters extends AbstractParameters {
+public class VirusGameParameters extends TunableParameters {
     public int nMaxRounds              = 100;
     public int nCardsPlayerHand        = 3;
     public int nCardsDiscardLatexGlove = 3;
@@ -26,6 +30,38 @@ public class VirusGameParameters extends AbstractParameters {
 
     public VirusGameParameters(long seed) {
         super(seed);
+        addTunableParameter("nCardsPlayerHand", 3, Arrays.asList(2,3,4,5));
+        addTunableParameter("nCardsDiscardLatexGlove", 3, Arrays.asList(2,3,4,5));
+        addTunableParameter("nCardsPerOrgan", 5, Arrays.asList(2,3,4,5,7,8,9,10));
+        addTunableParameter("nCardsPerVirus", 4, Arrays.asList(2,3,4,5,7,8,9,10));
+        addTunableParameter("nCardsPerMedicine", 4, Arrays.asList(2,3,4,5,7,8,9,10));
+        addTunableParameter("maxCardsDiscard", 3, Arrays.asList(2,3,4,5,7,8,9,10));
+        addTunableParameter("nCardsPerWildOrgan", 1, Arrays.asList(1,2,3,4,5,7,8,9,10));
+        addTunableParameter("nCardsPerWildVirus", 1, Arrays.asList(1,2,3,4,5,7,8,9,10));
+        addTunableParameter("nCardsPerWildMedicine", 4, Arrays.asList(1,2,3,4,5,7,8,9,10));
+        addTunableParameter("nCardsPerTreatmentSpreading", 2, Arrays.asList(1,2,3,4,5,7,8,9,10));
+        addTunableParameter("nCardsPerTreatmentTransplant", 3, Arrays.asList(1,2,3,4,5,7,8,9,10));
+        addTunableParameter("nCardsPerTreatmentOrganThief", 1, Arrays.asList(1,2,3,4,5,7,8,9,10));
+        addTunableParameter("nCardsPerTreatmentLatexGlove", 1, Arrays.asList(1,2,3,4,5,7,8,9,10));
+        addTunableParameter("nCardsPerTreatmentMedicalError", 1, Arrays.asList(1,2,3,4,5,7,8,9,10));
+    }
+
+    @Override
+    public void _reset() {
+        nCardsPlayerHand = (int) getParameterValue("nCardsPlayerHand");
+        nCardsDiscardLatexGlove = (int) getParameterValue("nCardsDiscardLatexGlove");
+        nCardsPerOrgan = (int) getParameterValue("nCardsPerOrgan");
+        nCardsPerVirus = (int) getParameterValue("nCardsPerVirus");
+        nCardsPerMedicine = (int) getParameterValue("nCardsPerMedicine");
+        maxCardsDiscard = (int) getParameterValue("maxCardsDiscard");
+        nCardsPerWildOrgan = (int) getParameterValue("nCardsPerWildOrgan");
+        nCardsPerWildVirus = (int) getParameterValue("nCardsPerWildVirus");
+        nCardsPerWildMedicine = (int) getParameterValue("nCardsPerWildMedicine");
+        nCardsPerTreatmentSpreading = (int) getParameterValue("nCardsPerTreatmentSpreading");
+        nCardsPerTreatmentTransplant = (int) getParameterValue("nCardsPerTreatmentTransplant");
+        nCardsPerTreatmentOrganThief = (int) getParameterValue("nCardsPerTreatmentOrganThief");
+        nCardsPerTreatmentLatexGlove = (int) getParameterValue("nCardsPerTreatmentLatexGlove");
+        nCardsPerTreatmentMedicalError = (int) getParameterValue("nCardsPerTreatmentMedicalError");
     }
 
     @Override
@@ -71,6 +107,11 @@ public class VirusGameParameters extends AbstractParameters {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), nCardsPerOrgan, nCardsPerVirus, nCardsPerMedicine, maxCardsDiscard,     nCardsPerWildOrgan,nCardsPerWildVirus,nCardsPerWildMedicine,nCardsPerTreatmentSpreading,nCardsPerTreatmentTransplant,nCardsPerTreatmentOrganThief,nCardsPerTreatmentLatexGlove,nCardsPerTreatmentMedicalError);
+    }
+
+    @Override
+    public Object instantiate() {
+        return new Game(GameType.Virus, new VirusForwardModel(), new VirusGameState(this, GameType.Virus.getMinPlayers()));
     }
 }
 

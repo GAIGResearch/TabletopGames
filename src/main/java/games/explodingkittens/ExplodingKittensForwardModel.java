@@ -1,8 +1,9 @@
 package games.explodingkittens;
 
-import core.actions.AbstractAction;
-import core.AbstractGameState;
 import core.AbstractForwardModel;
+import core.AbstractGameState;
+import core.CoreConstants.VisibilityMode;
+import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.explodingkittens.actions.*;
@@ -16,7 +17,6 @@ import utilities.Utils;
 import java.util.*;
 
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
-import static core.CoreConstants.VERBOSE;
 import static utilities.Utils.generatePermutations;
 
 public class ExplodingKittensForwardModel extends AbstractForwardModel {
@@ -67,7 +67,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
             }
         }
         ekgs.setPlayerHandCards(playerHandCards);
-        ekgs.setDiscardPile(new Deck<>("Discard Pile"));
+        ekgs.setDiscardPile(new Deck<>("Discard Pile", VisibilityMode.VISIBLE_TO_ALL));
 
         // Add remaining defuse cards and exploding kitten cards to the deck and shuffle again
         for (int i = ekgs.getNPlayers(); i < ekp.nDefuseCards; i++){
@@ -122,11 +122,11 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                     }
                     //Action was successfully noped
                     ((IsNopeable) actionStack.pop()).nopedExecute(gameState);
-                    if (VERBOSE) {
+                    if (gameState.getCoreGameParameters().verbose) {
                         System.out.println("Action was successfully noped");
                     }
                 } else {
-                    if (actionStack.size() > 2 && VERBOSE) {
+                    if (actionStack.size() > 2 && gameState.getCoreGameParameters().verbose) {
                         System.out.println("All nopes were noped");
                     }
 
@@ -162,7 +162,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         }
 
         // Print end game result
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gameState.getPlayerResults()));
             for (int j = 0; j < gameState.getNPlayers(); j++) {
                 System.out.println("Player " + j + ": " + gameState.getPlayerResults()[j]);
@@ -310,6 +310,8 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         for (int card = 0; card < playerDeck.getSize(); card++) {
             actions.add(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), card));
         }
+        if (actions.isEmpty()) // the target has no cards.
+            actions.add(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), -1));
         return actions;
     }
 

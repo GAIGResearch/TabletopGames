@@ -1,6 +1,7 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
+import core.CoreConstants.VisibilityMode;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IPrintable;
@@ -10,9 +11,9 @@ import games.loveletter.cards.LoveLetterCard;
 import java.util.Objects;
 
 /**
- * The King lets two player's swap their hand cards.
+ * The King lets two players swap their hand cards.
  */
-public class KingAction extends DrawCard implements IPrintable {
+public class KingAction extends core.actions.DrawCard implements IPrintable {
 
     private final int opponentID;
 
@@ -32,7 +33,7 @@ public class KingAction extends DrawCard implements IPrintable {
 
         // create a temporary deck to store cards in and then swap cards accordingly
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
-            Deck<LoveLetterCard> tmpDeck = new Deck<>("tmp");
+            Deck<LoveLetterCard> tmpDeck = new Deck<>("tmp", VisibilityMode.HIDDEN_TO_ALL);
             while (opponentDeck.getSize() > 0)
                 tmpDeck.add(opponentDeck.draw());
             while (playerDeck.getSize() > 0)
@@ -76,5 +77,9 @@ public class KingAction extends DrawCard implements IPrintable {
     @Override
     public AbstractAction copy() {
         return new KingAction(deckFrom, deckTo, fromIndex, opponentID);
+    }
+
+    public int getOpponentID() {
+        return opponentID;
     }
 }

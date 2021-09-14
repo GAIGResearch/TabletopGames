@@ -38,11 +38,6 @@ public class TileBuildState extends AbstractGameState {
     }
 
     @Override
-    protected double _getScore(int playerId) {
-        return 0;
-    }
-
-    @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         return new ArrayList<>();
     }

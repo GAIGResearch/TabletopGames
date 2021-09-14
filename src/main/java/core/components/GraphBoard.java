@@ -1,5 +1,7 @@
 package core.components;
 
+import core.CoreConstants;
+import core.interfaces.IComponentContainer;
 import core.properties.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -10,15 +12,12 @@ import utilities.Utils.ComponentType;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static core.CoreConstants.imgHash;
 import static core.CoreConstants.nameHash;
 
-public class GraphBoard extends Component {
+public class GraphBoard extends Component implements IComponentContainer<BoardNode> {
 
     // List of nodes in the board graph
     protected List<BoardNode> boardNodes;
@@ -248,5 +247,29 @@ public class GraphBoard extends Component {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof GraphBoard) {
+            GraphBoard other = (GraphBoard) o;
+            return componentID == other.componentID && other.boardNodes.equals(boardNodes);
+        }
+        return false;
+    }
+
+    @Override
+    public final int hashCode() {
+        return Objects.hash(componentID, boardNodes);
+    }
+
+    @Override
+    public List<BoardNode> getComponents() {
+        return getBoardNodes();
+    }
+
+    @Override
+    public CoreConstants.VisibilityMode getVisibilityMode() {
+        return CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
     }
 }

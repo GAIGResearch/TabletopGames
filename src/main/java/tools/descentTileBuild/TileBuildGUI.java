@@ -1,12 +1,13 @@
 package tools.descentTileBuild;
 
-import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import games.descent.DescentTypes;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Pair;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
 
-public class TileBuildGUI extends AbstractGUI {
+public class TileBuildGUI extends AbstractGUIManager {
     TileBuildGridBoardView view;
     TerrainOptionsView terrainOptionsView;
 
@@ -28,8 +29,8 @@ public class TileBuildGUI extends AbstractGUI {
     int width, height;
     private TileBuildState gameState;
 
-    public TileBuildGUI(AbstractGameState gameState, ActionController ac) {
-        super(ac, (DescentTypes.TerrainType.getWalkableTiles().size()+2)
+    public TileBuildGUI(GamePanel parent, AbstractGameState gameState, ActionController ac) {
+        super(parent, ac, (DescentTypes.TerrainType.getWalkableTiles().size()+2)
                 *((TileBuildParameters)gameState.getGameParameters()).maxGridSize
                 *((TileBuildParameters)gameState.getGameParameters()).maxGridSize);
 
@@ -57,7 +58,7 @@ public class TileBuildGUI extends AbstractGUI {
                 view.setPreferredSize(new Dimension(w, h));
                 width = view.getPreferredSize().width;
                 height = view.getPreferredSize().height;
-                repaint();
+                parent.repaint();
             }
         });
 
@@ -172,11 +173,10 @@ public class TileBuildGUI extends AbstractGUI {
         east.add(actions);
         east.add(terrainOptionsView);
 
-        getContentPane().add(east, BorderLayout.EAST);
-        getContentPane().add(view, BorderLayout.CENTER);
-        getContentPane().add(actionPanel, BorderLayout.SOUTH);
-
-        setFrameProperties();
+        parent.setLayout(new BorderLayout());
+        parent.add(east, BorderLayout.EAST);
+        parent.add(view, BorderLayout.CENTER);
+        parent.add(actionPanel, BorderLayout.SOUTH);
     }
 
     @Override
@@ -190,7 +190,7 @@ public class TileBuildGUI extends AbstractGUI {
 //            }
 
             // Find the right action
-            List<AbstractAction> actions = gameState.getActions();
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             for (AbstractAction a: actions) {
                 if (a instanceof SetGridValueAction) {
                     if (((SetGridValueAction) a).getX() == cell.getX() && ((SetGridValueAction) a).getY() == cell.getY()) {
@@ -218,11 +218,7 @@ public class TileBuildGUI extends AbstractGUI {
             }
             this.gameState = (TileBuildState) gameState;
         }
-        repaint();
+        parent.repaint();
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(width*2 + 200 + defaultItemSize*TerrainOptionsView.inARow, height + defaultActionPanelHeight);
-    }
 }

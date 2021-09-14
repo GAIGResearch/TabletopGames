@@ -4,26 +4,28 @@ import core.components.Deck;
 import games.uno.UnoGameState;
 import games.uno.cards.UnoCard;
 
+import javax.swing.*;
 import java.awt.*;
 
-import static games.uno.gui.UnoGUI.*;
+import static games.uno.gui.UnoGUIManager.*;
 
-public class UnoPlayerView extends UnoDeckView {
+public class UnoPlayerView extends JComponent {
 
     // ID of player showing
     int playerId;
     // Number of points player has
     int nPoints;
-
+    UnoDeckView playerHandView;
     // Border offsets
     int border = 5;
     int borderBottom = 20;
+    int width, height;
 
-    public UnoPlayerView(Deck<UnoCard> d, int playerId, String dataPath) {
-        super(d, false, dataPath);
+    public UnoPlayerView(Deck<UnoCard> d, int playerId, int humanId, String dataPath) {
         this.width = playerAreaWidth + border*2;
         this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
+        this.playerHandView = new UnoDeckView(humanId, d, true, dataPath, new Rectangle(border, border, playerAreaWidth, unoCardHeight));
     }
 
     /**
@@ -32,7 +34,7 @@ public class UnoPlayerView extends UnoDeckView {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        drawDeck((Graphics2D) g, new Rectangle(border, border, playerAreaWidth, unoCardHeight));
+        playerHandView.drawDeck((Graphics2D) g);
         g.setColor(Color.black);
         g.drawString(nPoints + " points", border+playerAreaWidth/2 - 20, border+unoCardHeight + 10);
     }
@@ -47,15 +49,7 @@ public class UnoPlayerView extends UnoDeckView {
      * @param gameState - current game state
      */
     public void update(UnoGameState gameState) {
-        this.component = gameState.getPlayerDecks().get(playerId);
+        playerHandView.updateComponent(gameState.getPlayerDecks().get(playerId));
         nPoints = gameState.getPlayerScore()[playerId];
-    }
-
-    // Getters, setters
-    public void setFront(boolean visible) {
-        this.front = visible;
-    }
-    public void flip() {
-        front = !front;
     }
 }

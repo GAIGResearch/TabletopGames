@@ -12,7 +12,7 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.util.HashSet;
 
-import static core.AbstractGUI.defaultItemSize;
+import static gui.GUI.defaultItemSize;
 import static core.CoreConstants.*;
 import static core.CoreConstants.sizeHash;
 import static games.pandemic.PandemicConstants.*;

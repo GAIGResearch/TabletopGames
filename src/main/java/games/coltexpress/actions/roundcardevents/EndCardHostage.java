@@ -10,7 +10,7 @@ import utilities.Utils;
 
 import static games.coltexpress.ColtExpressTypes.LootType.Purse;
 
-public class EndCardHostage extends AbstractAction {
+public class EndCardHostage extends RoundEvent {
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -50,5 +50,10 @@ public class EndCardHostage extends AbstractAction {
     @Override
     public String toString() {
         return "Hostage";
+    }
+
+    @Override
+    public String getEventText() {
+        return "All bandits in or on the locomotive collect $250 ransom.";
     }
 }

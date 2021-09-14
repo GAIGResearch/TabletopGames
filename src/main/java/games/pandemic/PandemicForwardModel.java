@@ -14,6 +14,7 @@ import games.pandemic.rules.conditions.*;
 import games.pandemic.rules.gameOver.*;
 import games.pandemic.rules.rules.*;
 import games.pandemic.rules.rules.DrawCards;
+import gui.GameFlowDiagram;
 import utilities.Hash;
 
 import java.util.*;
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import static core.CoreConstants.VERBOSE;
+import static core.CoreConstants.VisibilityMode.*;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.actions.MovePlayer.placePlayer;
@@ -137,14 +138,14 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         PandemicParameters pp = (PandemicParameters)state.getGameParameters();
         PandemicData _data = state.getData();
 
-        state.tempDeck = new Deck<>("Temp Deck");
+        state.tempDeck = new Deck<>("Temp Deck", VISIBLE_TO_ALL);
         state.areas = new HashMap<>();
 
         // For each player, initialize their own areas: they get a player hand and a player card
         int capacity = pp.max_cards_per_player;
         for (int i = 0; i < state.getNPlayers(); i++) {
             Area playerArea = new Area(i, "Player Area");
-            Deck<Card> playerHand = new Deck<>("Player Hand");
+            Deck<Card> playerHand = new Deck<>("Player Hand", VISIBLE_TO_ALL);
             playerHand.setOwnerId(i);
             playerHand.setCapacity(capacity);
             playerArea.putComponent(playerHandHash, playerHand);
@@ -187,22 +188,22 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             hash = Hash.GetInstance().hash("Disease Cube " + color);
             Counter diseaseCubeCounter = _data.findCounter("Disease Cube " + color);
             diseaseCubeCounter.setMaximum(pp.n_initial_disease_cubes);
-            diseaseCubeCounter.setValue(0);
+            diseaseCubeCounter.setValue(pp.n_initial_disease_cubes);
             gameArea.putComponent(hash, diseaseCubeCounter);
         }
 
         // Set up decks
-        Deck<Card> playerDeck = new Deck<>("Player Deck"); // contains city & event cards
+        Deck<Card> playerDeck = new Deck<>("Player Deck", HIDDEN_TO_ALL); // contains city & event cards
         playerDeck.add(_data.findDeck("Cities"));
         playerDeck.add(_data.findDeck("Events"));
         Deck<Card> playerRoles = _data.findDeck("Player Roles");
         Deck<Card> infectionDeck =  _data.findDeck("Infections");
-        Deck<Card> infectionDiscard =  new Deck<>("Infection Discard");
+        Deck<Card> infectionDiscard =  new Deck<>("Infection Discard", VISIBLE_TO_ALL);
 
         gameArea.putComponent(PandemicConstants.playerDeckHash, playerDeck);
-        gameArea.putComponent(PandemicConstants.playerDeckDiscardHash, new Deck<>("Player Deck Discard"));
+        gameArea.putComponent(PandemicConstants.playerDeckDiscardHash, new Deck<>("Player Deck Discard", VISIBLE_TO_ALL));
         gameArea.putComponent(PandemicConstants.infectionDiscardHash, infectionDiscard);
-        gameArea.putComponent(PandemicConstants.plannerDeckHash, new Deck<>("Planner Deck")); // deck to store extra card for the contingency planner
+        gameArea.putComponent(PandemicConstants.plannerDeckHash, new Deck<>("Planner Deck", VISIBLE_TO_ALL)); // deck to store extra card for the contingency planner
         gameArea.putComponent(PandemicConstants.infectionHash, infectionDeck);
         gameArea.putComponent(PandemicConstants.playerRolesHash, playerRoles);
 
@@ -301,7 +302,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
 
     @Override
     protected AbstractForwardModel _copy() {
-        return new PandemicForwardModel(root);
+        return new PandemicForwardModel(copyRoot());
     }
 
     @Override
@@ -309,7 +310,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             gameState.setPlayerResult(gameState.getGameStatus(), i);
         }
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println(gameState.getGameStatus());
         }
     }

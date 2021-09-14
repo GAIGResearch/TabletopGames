@@ -1,9 +1,10 @@
 package games.descent.gui;
 
-import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import games.descent.DescentGameState;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -11,14 +12,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
 
-public class DescentGUI extends AbstractGUI {
+public class DescentGUI extends AbstractGUIManager {
     DescentGridBoardView view;
     int width, height;
     int maxWidth = 800;
     int maxHeight = 600;
 
-    public DescentGUI(AbstractGameState gameState, ActionController ac) {
-        super(ac, 1);  // TODO: calculate/approximate max action space
+    public DescentGUI(GamePanel panel, AbstractGameState gameState, ActionController ac) {
+        super(panel, ac, 100);  // TODO: calculate/approximate max action space
 
         DescentGameState dgs = (DescentGameState) gameState;
 
@@ -35,11 +36,11 @@ public class DescentGUI extends AbstractGUI {
 
         JScrollPane pane = new JScrollPane(view);
         pane.setPreferredSize(new Dimension(maxWidth, maxHeight));
-        getContentPane().add(pane, BorderLayout.CENTER);
-        getContentPane().add(north, BorderLayout.NORTH);
-        getContentPane().add(actionPanel, BorderLayout.SOUTH);
 
-        setFrameProperties();
+        panel.setLayout(new BorderLayout());
+        panel.add(pane, BorderLayout.CENTER);
+        panel.add(north, BorderLayout.NORTH);
+        panel.add(actionPanel, BorderLayout.SOUTH);
     }
 
     @Override
@@ -50,11 +51,7 @@ public class DescentGUI extends AbstractGUI {
             }
             view.updateGameState((DescentGameState) gameState);
         }
-        repaint();
+        parent.repaint();
     }
 
-    @Override
-    public Dimension getPreferredSize() {
-        return new Dimension(maxWidth, maxHeight + defaultActionPanelHeight + defaultInfoPanelHeight);
-    }
 }
