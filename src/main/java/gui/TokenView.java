@@ -5,7 +5,7 @@ import core.components.Token;
 import javax.swing.*;
 import java.awt.*;
 
-import static core.AbstractGUI.defaultItemSize;
+import static gui.GUI.defaultItemSize;
 
 public class TokenView extends JComponent {
     protected Token token;

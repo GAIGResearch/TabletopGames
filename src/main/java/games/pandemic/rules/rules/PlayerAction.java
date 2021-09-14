@@ -7,6 +7,7 @@ import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
 import core.properties.PropertyString;
+import core.rules.Node;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicTurnOrder;
@@ -27,6 +28,16 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
         super();
         this.n_initial_disease_cubes = n_initial_disease_cubes;
         this.playerHandOverCapacity = -1;
+    }
+
+    /**
+     * Copy constructor
+     * @param playerAction - Node to be copied
+     */
+    public PlayerAction(PlayerAction playerAction) {
+        super(playerAction);
+        this.n_initial_disease_cubes = playerAction.n_initial_disease_cubes;
+        this.playerHandOverCapacity = playerAction.playerHandOverCapacity;
     }
 
     @Override
@@ -80,5 +91,10 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
 
     public void setPlayerHandOverCapacity(int playerHandOverCapacity) {
         this.playerHandOverCapacity = playerHandOverCapacity;
+    }
+
+    @Override
+    protected Node _copy() {
+        return new PlayerAction(this);
     }
 }
