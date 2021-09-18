@@ -132,12 +132,16 @@ public class BattleloreForwardModel extends AbstractForwardModel
         int roundExceedThreshold = 100;
         if (state.getNumberOfRounds() > roundExceedThreshold)
         {
+            /*
             state.setGameStatus(Utils.GameResult.DRAW);
             //Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
             state.setGameStatus(Utils.GameResult.DRAW);
             //int winningPlayer = BattleloreConstants //.playerMapping.indexOf(winnerSymbol);
             state.setPlayerResult(Utils.GameResult.DRAW, 0);
             state.setPlayerResult(Utils.GameResult.DRAW, 1);
+
+             */
+            registerWinner(state, 0);
         }
 
         //currentState.getTurnOrder().endPlayerTurn(currentState);
@@ -316,5 +320,7 @@ public class BattleloreForwardModel extends AbstractForwardModel
         //int winningPlayer = BattleloreConstants //.playerMapping.indexOf(winnerSymbol);
         gameState.setPlayerResult(Utils.GameResult.WIN, winnerD);
         gameState.setPlayerResult(Utils.GameResult.LOSE, winnerD == 0 ? 1 : 0);
+
+        //gameState.GetTotalActionsTaken(winnerD)';'
     }
 }

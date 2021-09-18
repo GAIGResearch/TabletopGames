@@ -57,8 +57,6 @@ public class BattleloreGame extends Game
         MCTSParams params1 = new MCTSParams();
         RMHCParams params2 = new RMHCParams();
 
-
-
         players.add(new RandomPlayer());
         players.add(new OSLAPlayer());
         players.add(new RuleBasedPlayer());
@@ -71,17 +69,20 @@ public class BattleloreGame extends Game
         //players.add(new HumanGUIPlayer(ac));
         /* 4. Run! */
         //------------------------DEBUG----------------------------------------//
-        //players.clear();
+        players.clear();
         //players.add(new BasicMCTSPlayer(new Random().nextLong()));
         //players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
-        //runOne(Battlelore, players, seed, ac, false, null);
+        //players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
+        players.add(new BasicMCTSPlayer(new Random().nextLong()));
+        players.add(new RuleBasedPlayer());
+        runOne(Battlelore, players, seed, ac, false, null);
 
         //------------------------DEBUG----------------------------------------//
         List<GameType> games = new ArrayList<GameType>();
 
         games.add(Battlelore);
 
-        final int repetitions = 10;
+        final int repetitions = 500;
         long[] seeds = new long[repetitions];
 
         for (int i = 0; i < players.size(); i++)
@@ -105,7 +106,7 @@ public class BattleloreGame extends Game
 
 
 
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
+        //runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
 
         /*LinkedList<AbstractPlayer> agents = new LinkedList<AbstractPlayer>();
         for (AbstractPlayer agent : players)
