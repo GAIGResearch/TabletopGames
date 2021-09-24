@@ -337,7 +337,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                 JOptionPane.showMessageDialog(parent, "Round over! Winners: " + winners.toString() + ". Next round begins!");
             }
             
-            if (gameState.getCurrentPlayer() != activePlayer) {
+            if (gameState.getCurrentPlayer() != activePlayer && activePlayer > -1) {
                 playerHands[activePlayer].handCards.setCardHighlight(-1);
                 activePlayer = gameState.getCurrentPlayer();
             }

@@ -12,7 +12,9 @@ import gui.GUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
+import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.Utils;
@@ -34,6 +36,8 @@ public class Game {
     protected List<AbstractPlayer> players;
     // Current player acting
     AbstractPlayer currentPlayer;
+    // Game master, defined separate from other players
+    AbstractPlayer gameMaster;
 
     // Real game state and forward model
     protected AbstractGameState gameState;
@@ -131,6 +135,45 @@ public class Game {
         resetStats();
     }
 
+
+    /**
+     * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
+     * and their IDs, and initialises all players.
+     *
+     * @param players - new players for the game
+     */
+    public final void reset(List<AbstractPlayer> players, AbstractPlayer gameMaster) {
+        gameState.reset();
+        forwardModel.abstractSetup(gameState);
+        this.players = players;
+        this.gameMaster = gameMaster;
+        int id = 0;
+        for (AbstractPlayer player : players) {
+            // Create a FM copy for this player (different random seed)
+            player.forwardModel = this.forwardModel.copy();
+            // Create initial state observation
+            AbstractGameState observation = gameState.copy(id);
+            // Give player their ID
+            player.playerID = id++;
+            // Allow player to initialize
+            player.initializePlayer(observation);
+        }
+        // Do the same setup for game master
+        // Create a FM copy for this player (different random seed)
+        gameMaster.forwardModel = this.forwardModel.copy();
+        // Create initial state observation
+        AbstractGameState observation = gameState.copy();
+        // Give player their ID
+        gameMaster.playerID = -1;
+        // Allow player to initialize
+        gameMaster.initializePlayer(observation);
+
+        gameID = idFountain.incrementAndGet();
+        gameState.setGameID(gameID);
+
+        resetStats();
+    }
+
     /**
      * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
      * and their IDs, and initialises all players.
@@ -213,7 +256,10 @@ public class Game {
                 }
 
                 // This is the next player to be asked for a decision
-                currentPlayer = players.get(activePlayer);
+                if (activePlayer == -1) {
+                    // Game master
+                     currentPlayer = gameMaster;
+                } else currentPlayer = players.get(activePlayer);
 
                 // Get player observation, and time how long it takes
                 double s = System.nanoTime();
@@ -237,7 +283,7 @@ public class Game {
                     }
 
                     // Start the timer for this decision
-                    gameState.playerTimer[activePlayer].resume();
+                    if (activePlayer != -1) gameState.playerTimer[activePlayer].resume();
 
                     // Either ask player which action to use or, in case no actions are available, report the updated observation
                     AbstractAction action = null;
@@ -271,8 +317,8 @@ public class Game {
                     }
 
                     // End the timer for this decision
-                    gameState.playerTimer[activePlayer].pause();
-                    gameState.playerTimer[activePlayer].incrementAction();
+                    if (activePlayer != -1) gameState.playerTimer[activePlayer].pause();
+                    if (activePlayer != -1) gameState.playerTimer[activePlayer].incrementAction();
 
                     if (gameState.coreGameParameters.verbose) {
                         if (action != null) {
@@ -283,7 +329,7 @@ public class Game {
                     }
 
                     // Check player timeout
-                    if (observation.playerTimer[activePlayer].exceededMaxTime()) {
+                    if (activePlayer != -1 && observation.playerTimer[activePlayer].exceededMaxTime()) {
                         forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
                     } else {
                         // Resolve action and game rules, time it
@@ -521,6 +567,14 @@ public class Game {
         this.gameState.setCoreGameParameters(coreParameters);
     }
 
+    public void setGameMaster(AbstractPlayer gameMaster) {
+        this.gameMaster = gameMaster;
+    }
+
+    public AbstractPlayer getGameMaster() {
+        return gameMaster;
+    }
+
     @Override
     public String toString() {
         return gameType.toString();
@@ -553,6 +607,53 @@ public class Game {
 
             // Reset game instance, passing the players for this game
             game.reset(players);
+
+            GUI frame = new GUI();
+            AbstractGUIManager gui = null;
+            if (ac != null) {
+                // Create GUI (null if not implemented; running without visuals)
+                GamePanel gamePanel = new GamePanel();
+                frame.setContentPane(gamePanel);
+                gui = gameToPlay.createGUIManager(gamePanel, game, ac);
+            }
+            frame.setFrameProperties();
+
+            // Run!
+            game.run(gui, frame);
+        } else {
+            System.out.println("Error game: " + gameToPlay);
+        }
+
+        return game;
+    }
+
+
+    /**
+     * Runs one game with a game master.
+     *
+     * @param gameToPlay          - game to play
+     * @param players             - list of players for the game
+     * @param seed                - random seed for the game
+     * @param ac                  - Action Controller object allowing GUI interaction. If null, runs without visuals.
+     * @param randomizeParameters - if true, parameters are randomized for each run of each game (if possible).
+     * @return - game instance created for the run
+     */
+    public static Game runOneGM(GameType gameToPlay, List<AbstractPlayer> players, AbstractPlayer gameMaster, long seed,
+                                ActionController ac, boolean randomizeParameters, List<IGameListener> listeners) {
+        // Creating game instance (null if not implemented)
+        Game game = gameToPlay.createGameInstance(players.size(), seed);
+        if (game != null) {
+            if (listeners != null)
+                listeners.forEach(game::addListener);
+
+            // Randomize parameters
+            if (randomizeParameters) {
+                AbstractParameters gameParameters = game.getGameState().getGameParameters();
+                gameParameters.randomize();
+            }
+
+            // Reset game instance, passing the players for this game
+            game.reset(players, gameMaster);
 
             GUI frame = new GUI();
             AbstractGUIManager gui = null;
@@ -748,14 +849,16 @@ public class Game {
 //        players.add(new MCTSPlayer());
 //        players.add(new MCTSPlayer(params1));
         players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new OSLAPlayer());
+        players.add(new RMHCPlayer());
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(TicTacToe, players, seed, ac, false, null);
+//        runOne(LoveLetter, players, seed, ac, false, null);
+        runOneGM(LoveLetter, players, new RandomPlayer(), seed, ac, false, null);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);

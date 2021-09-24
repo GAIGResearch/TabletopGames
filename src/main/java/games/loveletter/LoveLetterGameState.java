@@ -11,6 +11,7 @@ import games.GameType;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
+import java.sql.Array;
 import java.util.*;
 
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
@@ -71,19 +72,21 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Draw pile, some reserve cards and other player's hand is possibly hidden. Mix all together and draw randoms
-            HashSet<Integer>[] cardsNotVisible = new HashSet[getNPlayers()];
+            ArrayList<Integer>[] cardsNotVisible = new ArrayList[getNPlayers()];
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     PartialObservableDeck<LoveLetterCard> deck = llgs.playerHandCards.get(i);
-                    cardsNotVisible[i] = new HashSet<>();
+                    cardsNotVisible[i] = new ArrayList<>();
                     for (int j = 0; j < deck.getSize(); j++) {
                         if (!deck.getVisibilityForPlayer(j, playerId)) {
                             // Hide!
                             cardsNotVisible[i].add(j);
                         }
                     }
+                    cardsNotVisible[i].sort(Comparator.reverseOrder());
                     for (int j: cardsNotVisible[i]) {
-                        llgs.drawPile.add(llgs.playerHandCards.get(i).pick(j));
+                        LoveLetterCard c = llgs.playerHandCards.get(i).pick(j);
+                        llgs.drawPile.add(c);
                     }
                 }
             }

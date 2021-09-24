@@ -310,7 +310,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         } else if (gameState.getGamePhase().equals(LoveLetterGameState.LoveLetterGamePhase.Draw)) {
             // In draw phase, the players can only draw cards.
             actions = new ArrayList<>();
-            actions.add(new DrawCard(llgs.drawPile.getComponentID(), llgs.playerHandCards.get(player).getComponentID(), 0));
+            actions.add(new DrawCard(player));
         } else {
             throw new IllegalArgumentException(gameState.getGamePhase() + " is unknown to LoveLetterGameState");
         }

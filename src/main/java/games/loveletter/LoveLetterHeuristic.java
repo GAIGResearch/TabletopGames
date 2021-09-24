@@ -30,31 +30,36 @@ public class LoveLetterHeuristic extends TunableParameters implements IStateHeur
     public double evaluateState(AbstractGameState gs, int playerId) {
         LoveLetterGameState llgs = (LoveLetterGameState) gs;
         LoveLetterParameters llp = (LoveLetterParameters) gs.getGameParameters();
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        if (playerId != -1) {
+            Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (playerResult == Utils.GameResult.LOSE)
-            return -1;
-        if (playerResult == Utils.GameResult.WIN)
-            return 1;
+            if (playerResult == Utils.GameResult.LOSE)
+                return -1;
+            if (playerResult == Utils.GameResult.WIN)
+                return 1;
 
-        double cardValues = 0;
+            double cardValues = 0;
 
-        Random r = new Random(llgs.getGameParameters().getRandomSeed());
-        for (LoveLetterCard card: llgs.getPlayerHandCards().get(playerId).getComponents()) {
-            if (card.cardType == LoveLetterCard.CardType.Countess) {
-                if (r.nextDouble() > COUNTESS_PLAY_THRESHOLD) {
-                    cardValues += LoveLetterCard.CardType.Countess.getValue();
+            Random r = new Random(llgs.getGameParameters().getRandomSeed());
+            for (LoveLetterCard card: llgs.getPlayerHandCards().get(playerId).getComponents()) {
+                if (card.cardType == LoveLetterCard.CardType.Countess) {
+                    if (r.nextDouble() > COUNTESS_PLAY_THRESHOLD) {
+                        cardValues += LoveLetterCard.CardType.Countess.getValue();
+                    }
+                } else {
+                    cardValues += card.cardType.getValue();
                 }
-            } else {
-                cardValues += card.cardType.getValue();
             }
+
+            double maxCardValue = 1+llgs.getPlayerHandCards().get(playerId).getSize() * LoveLetterCard.CardType.getMaxCardValue();
+            double nRequiredTokens = (llgs.getNPlayers() == 2? llp.nTokensWin2 : llgs.getNPlayers() == 3? llp.nTokensWin3 : llp.nTokensWin4);
+            if (nRequiredTokens < llgs.affectionTokens[playerId]) nRequiredTokens = llgs.affectionTokens[playerId];
+
+            return FACTOR_CARDS * (cardValues/maxCardValue) + FACTOR_AFFECTION * (llgs.affectionTokens[playerId]/nRequiredTokens);
+        } else {
+            // TODO game master heuristic
+            return 0;
         }
-
-        double maxCardValue = 1+llgs.getPlayerHandCards().get(playerId).getSize() * LoveLetterCard.CardType.getMaxCardValue();
-        double nRequiredTokens = (llgs.getNPlayers() == 2? llp.nTokensWin2 : llgs.getNPlayers() == 3? llp.nTokensWin3 : llp.nTokensWin4);
-        if (nRequiredTokens < llgs.affectionTokens[playerId]) nRequiredTokens = llgs.affectionTokens[playerId];
-
-        return FACTOR_CARDS * (cardValues/maxCardValue) + FACTOR_AFFECTION * (llgs.affectionTokens[playerId]/nRequiredTokens);
     }
 
     /**
