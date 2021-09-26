@@ -5,17 +5,9 @@ import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
-import games.battlelore.BattleloreGame;
-import games.battlelore.BattleloreHeuristic;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
-import players.mcts.BasicMCTSPlayer;
 import players.mcts.MCTSParams;
-import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCParams;
-import players.rmhc.RMHCPlayer;
-import players.simple.OSLAHeuristic;
-import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
@@ -26,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
-import static games.GameType.*;
+import static games.GameType.DotsAndBoxes;
 
 public class Game {
 
@@ -248,7 +240,6 @@ public class Game {
                     } else {
                         if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
                             while (action == null && gui.isWindowOpen()) {
-
                                 action = currentPlayer.getAction(observation, observedActions);
                                 updateGUI(gui);
                             }
@@ -707,23 +698,20 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
         MCTSParams params1 = new MCTSParams();
-        RMHCParams params2 = new RMHCParams();
 
-        //players.add(new RandomPlayer());
-        //players.add(new RandomPlayer());
-        players.add(new OSLAPlayer());
-        players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
+        players.add(new RandomPlayer());
+//        players.add(new RMHCPlayer());
+//        players.add(new MCTSPlayer(params1));
+        players.add(new HumanGUIPlayer(ac));
 
         //players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        //runOne(DotsAndBoxes, players, seed, ac, false, null);
-        runOne(Battlelore, players, seed, ac, false, null);
+        runOne(DotsAndBoxes, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
-        //runOne(TicTacToe, 2, players);
-        //games.add(TicTacToe);
+//        games.add(TicTacToe);
 //        games.add(ExplodingKittens);
 //        games.add(LoveLetter);
 //        runMany(games, players, null, 50, null, false, false);

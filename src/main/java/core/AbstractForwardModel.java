@@ -104,11 +104,9 @@ public abstract class AbstractForwardModel {
             gameState.setPlayerResult(Utils.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
             gameState.turnOrder.endPlayerTurn(gameState);
         } else {
-
             List<AbstractAction> possibleActions = computeAvailableActions(gameState);
             int randomAction = new Random(gameState.getGameParameters().getRandomSeed()).nextInt(possibleActions.size());
             next(gameState, possibleActions.get(randomAction));
-
         }
     }
 
