@@ -8,7 +8,7 @@ import games.loveletter.LoveLetterGameState;
 /**
  * The handmaid protects the player from any targeted effects until the next turn.
  */
-public class HandmaidAction extends DrawCard implements IPrintable {
+public class HandmaidAction extends core.actions.DrawCard implements IPrintable {
 
     public HandmaidAction(int deckFrom, int deckTo, int fromIndex) {
         super(deckFrom, deckTo, fromIndex);

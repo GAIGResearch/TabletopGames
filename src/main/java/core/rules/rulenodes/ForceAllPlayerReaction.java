@@ -1,6 +1,7 @@
 package core.rules.rulenodes;
 
 import core.AbstractGameState;
+import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 import core.turnorders.ReactiveTurnOrder;
 
@@ -12,10 +13,27 @@ import static core.AbstractGameState.DefaultGamePhase.PlayerReaction;
  */
 public class ForceAllPlayerReaction extends RuleNode {
 
+    public ForceAllPlayerReaction() {
+        super();
+    }
+
+    /**
+     * Copy constructor
+     * @param forceAllPlayerReaction - Node to be copied
+     */
+    public ForceAllPlayerReaction(ForceAllPlayerReaction forceAllPlayerReaction) {
+        super(forceAllPlayerReaction);
+    }
+
     @Override
     protected boolean run(AbstractGameState gs) {
         ((ReactiveTurnOrder)gs.getTurnOrder()).addAllReactivePlayers(gs);
         gs.setGamePhase(PlayerReaction);
         return false;
+    }
+
+    @Override
+    protected Node _copy() {
+        return new ForceAllPlayerReaction(this);
     }
 }

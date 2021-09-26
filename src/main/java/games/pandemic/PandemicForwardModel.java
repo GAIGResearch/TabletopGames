@@ -14,6 +14,7 @@ import games.pandemic.rules.conditions.*;
 import games.pandemic.rules.gameOver.*;
 import games.pandemic.rules.rules.*;
 import games.pandemic.rules.rules.DrawCards;
+import gui.GameFlowDiagram;
 import utilities.Hash;
 
 import java.util.*;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.VisibilityMode.*;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
@@ -188,7 +188,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             hash = Hash.GetInstance().hash("Disease Cube " + color);
             Counter diseaseCubeCounter = _data.findCounter("Disease Cube " + color);
             diseaseCubeCounter.setMaximum(pp.n_initial_disease_cubes);
-            diseaseCubeCounter.setValue(0);
+            diseaseCubeCounter.setValue(pp.n_initial_disease_cubes);
             gameArea.putComponent(hash, diseaseCubeCounter);
         }
 
@@ -302,7 +302,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
 
     @Override
     protected AbstractForwardModel _copy() {
-        return new PandemicForwardModel(root);
+        return new PandemicForwardModel(copyRoot());
     }
 
     @Override
@@ -310,7 +310,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             gameState.setPlayerResult(gameState.getGameStatus(), i);
         }
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println(gameState.getGameStatus());
         }
     }

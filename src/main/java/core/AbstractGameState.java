@@ -16,6 +16,7 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.GameResult.GAME_ONGOING;
+import static utilities.Utils.GameResult.WIN;
 
 
 /**
@@ -58,6 +59,7 @@ public abstract class AbstractGameState {
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
 
     private int gameID;
+    CoreParameters coreGameParameters;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -68,6 +70,7 @@ public abstract class AbstractGameState {
         this.gameParameters = gameParameters;
         this.turnOrder = turnOrder;
         this.gameType = gameType;
+        this.coreGameParameters = new CoreParameters();
     }
 
     /**
@@ -164,7 +167,7 @@ public abstract class AbstractGameState {
         s.gamePhase = gamePhase;
         s.data = data;  // Should never be modified
 
-        if (!CoreConstants.COMPETITION_MODE) {
+        if (coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
             s.historyText = new ArrayList<>(historyText);
             // we do not copy individual actions in history, as these are now dead and should not change
@@ -238,7 +241,7 @@ public abstract class AbstractGameState {
     protected abstract double _getHeuristicScore(int playerId);
 
     /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
+     * This provides the current score in game terms. This will only be relevant for games that have the concept
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
@@ -246,6 +249,30 @@ public abstract class AbstractGameState {
      * @return - double, score of current state
      */
     public abstract double getGameScore(int playerId);
+
+    /**
+     * Returns the ordinal position of a player using getGameScore().
+     *
+     * If a Game does not have a score, but does have the concept of player position (e.g. in a race)
+     * then this method should be overridden.
+     * This may also apply for games with important tie-breaking rules not visible in the raw score.
+     *
+     * @param playerId player ID
+     * @return The ordinal position of the player; 1 is 1st, 2 is 2nd and so on.
+     */
+    public int getOrdinalPosition(int playerId) {
+        if (playerResults[playerId] == Utils.GameResult.WIN)
+            return 1;
+        double playerScore = getGameScore(playerId);
+        int ordinal = 1;
+        for (int i = 0, n = getNPlayers(); i < n; i++) {
+            if (getGameScore(i) > playerScore)
+                ordinal++;
+        }
+        if (ordinal == 1 && !isNotTerminal() && playerResults[playerId] != Utils.GameResult.WIN)
+            ordinal = 1 + (int) Arrays.stream(playerResults).filter(r -> r == WIN).count();
+        return ordinal;
+    }
 
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.
@@ -394,6 +421,12 @@ public abstract class AbstractGameState {
 
     void setGameID(int id) {gameID = id;} // package level deliberately
     public int getGameID() {return gameID;}
+    void setCoreGameParameters(CoreParameters coreGameParameters) {
+        this.coreGameParameters = coreGameParameters;
+    }
+    public CoreParameters getCoreGameParameters() {
+        return coreGameParameters;
+    }
 
     @Override
     public boolean equals(Object o) {

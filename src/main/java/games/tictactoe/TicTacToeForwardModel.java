@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static core.CoreConstants.VERBOSE;
-
 
 public class TicTacToeForwardModel extends AbstractForwardModel {
 
@@ -150,7 +148,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
 
     @Override
     protected void endGame(AbstractGameState gameState) {
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gameState.getPlayerResults()));
         }
     }

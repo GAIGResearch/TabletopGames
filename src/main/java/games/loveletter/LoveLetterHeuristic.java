@@ -1,6 +1,5 @@
 package games.loveletter;
 import core.AbstractGameState;
-import core.AbstractParameters;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import games.loveletter.cards.LoveLetterCard;
@@ -52,8 +51,7 @@ public class LoveLetterHeuristic extends TunableParameters implements IStateHeur
         }
 
         double maxCardValue = 1+llgs.getPlayerHandCards().get(playerId).getSize() * LoveLetterCard.CardType.getMaxCardValue();
-        double nRequiredTokens = (llgs.getNPlayers()-1 < llp.nTokensWin.length ? llp.nTokensWin[llgs.getNPlayers()-1] :
-                llp.nTokensWin[llp.nTokensWin.length-1]);
+        double nRequiredTokens = (llgs.getNPlayers() == 2? llp.nTokensWin2 : llgs.getNPlayers() == 3? llp.nTokensWin3 : llp.nTokensWin4);
         if (nRequiredTokens < llgs.affectionTokens[playerId]) nRequiredTokens = llgs.affectionTokens[playerId];
 
         return FACTOR_CARDS * (cardValues/maxCardValue) + FACTOR_AFFECTION * (llgs.affectionTokens[playerId]/nRequiredTokens);

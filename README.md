@@ -22,6 +22,8 @@ Currently implemented games:
 - [x] Pandemic (Matt Leacock 2008)
 - [x] Diamant (Bruno Faidutti and Alan R. Moon 2005)
 - [x] Dominion (Donald X. Vaccarino 2008)
+- [x] Poker Texas Hold'em 
+- [x] Blackjack
 
 Games in progress:
 - [ ] Settlers of Catan (Klaus Teuber 1995)

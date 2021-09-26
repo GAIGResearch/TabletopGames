@@ -51,7 +51,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB);
         addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
+        addTunableParameter("heuristic", ""); // this marks this as settable via JSON - and will default to the heuristic score
     }
 
     @Override
@@ -68,11 +68,13 @@ public class MCTSParams extends PlayerParameters {
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
-        heuristic = (IStateHeuristic) getParameterValue("heuristic");
-        if (heuristic instanceof TunableParameters) {
-            TunableParameters tunableHeuristic = (TunableParameters) heuristic;
-            for (String name : tunableHeuristic.getParameterNames()) {
-                tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
+        if (getParameterValue("heuristic") instanceof IStateHeuristic) {
+            heuristic = (IStateHeuristic) getParameterValue("heuristic");
+            if (heuristic instanceof TunableParameters) {
+                TunableParameters tunableHeuristic = (TunableParameters) heuristic;
+                for (String name : tunableHeuristic.getParameterNames()) {
+                    tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
+                }
             }
         }
     }

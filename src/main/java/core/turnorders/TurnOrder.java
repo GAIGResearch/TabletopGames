@@ -232,5 +232,7 @@ public abstract class TurnOrder {
         listeners.clear();
     }
 
-
+    public int getFirstPlayer() {
+        return firstPlayer;
+    }
 }
