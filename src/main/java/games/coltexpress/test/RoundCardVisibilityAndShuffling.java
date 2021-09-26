@@ -41,7 +41,6 @@ public class RoundCardVisibilityAndShuffling {
     }
 
     static class TestRoundEndListener implements IGameListener {
-
         @Override
         public void onEvent(CoreConstants.GameEvents type, AbstractGameState gameState, AbstractAction action) {
             if (type == ROUND_OVER) {

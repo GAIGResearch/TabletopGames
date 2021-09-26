@@ -703,8 +703,6 @@ public class Game {
 //        players.add(new RMHCPlayer());
 //        players.add(new MCTSPlayer(params1));
         players.add(new HumanGUIPlayer(ac));
-
-        //players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
