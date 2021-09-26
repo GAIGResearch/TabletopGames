@@ -13,11 +13,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommandCard extends Card
-{
+public class CommandCard extends Card {
+
     //Command cards allow different type of "orders" to troops
-    public enum CommandType
-    {
+    public enum CommandType {
         LineAdvance, //1-1-1
         PatrolLeft, //2-0-0
         AttackRight, //0-0-3
@@ -27,19 +26,16 @@ public class CommandCard extends Card
         BattleMarch
     }
 
-    public enum Effects
-    {
+    public enum Effects {
         LoreGain,// BattleLore
         AdditionalMove, //Onslaught
         AdditionalAttack
         //DarkenTheSkies
     }
 
-    public enum Condition
-    {
+    public enum Condition {
         NotWeak, //BattleMarch
         OnlyInfantry //Onslaught
-
     }
 
     private int orderCount;
@@ -50,9 +46,7 @@ public class CommandCard extends Card
     protected String title;
     protected String explanation;
 
-
-    public CommandCard(String title, String explanation, int orderCount, int bonusAttackCount, int bonusLorePoints, int bonusMoveCount)
-    {
+    public CommandCard(String title, String explanation, int orderCount, int bonusAttackCount, int bonusLorePoints, int bonusMoveCount) {
         this.title = title;
         this.explanation = explanation;
         this.orderCount = orderCount;
@@ -61,8 +55,7 @@ public class CommandCard extends Card
         this.bonusMoveCount = bonusMoveCount;
     }
 
-    public CommandCard()
-    {
+    public CommandCard() {
         this.title = "N/A";
         this.orderCount = 0;
         this.bonusAttackCount = 0;
@@ -70,34 +63,26 @@ public class CommandCard extends Card
         this.bonusMoveCount = 0;
     }
 
-
-    public static List<CommandCard> loadCommandCards(String filename)
-    {
+    public static List<CommandCard> loadCommandCards(String filename) {
         JSONParser jsonParser = new JSONParser();
         ArrayList<CommandCard> commandCards = new ArrayList<>();
 
-        try (FileReader reader = new FileReader(filename))
-        {
-
+        try (FileReader reader = new FileReader(filename)) {
             JSONArray data = (JSONArray) jsonParser.parse(reader);
             for(Object o : data) {
-
                 CommandCard newCard = new CommandCard();
                 newCard.loadCommandCard((JSONObject) o);
                 commandCards.add(newCard);
             }
-
         }
-        catch (IOException | ParseException e)
-        {
+        catch (IOException | ParseException e) {
             e.printStackTrace();
         }
 
         return commandCards;
     }
 
-    public void loadCommandCard(JSONObject unit)
-    {
+    public void loadCommandCard(JSONObject unit) {
         this.title = (String) unit.get("title");
         this.explanation = (String) unit.get("explanation");
         this.orderCount = ((Long) ( (JSONArray) unit.get("orderCount")).get(1)).intValue();
@@ -109,8 +94,7 @@ public class CommandCard extends Card
     }
 
     @Override
-    public Card copy()
-    {
+    public Card copy() {
         return new CommandCard(title,explanation, orderCount, bonusAttackCount, bonusLorePoints, bonusMoveCount);
     }
 
@@ -127,5 +111,4 @@ public class CommandCard extends Card
                 bonusLorePoints == that.bonusLorePoints &&
                 bonusMoveCount == that.bonusMoveCount;
     }
-
 }

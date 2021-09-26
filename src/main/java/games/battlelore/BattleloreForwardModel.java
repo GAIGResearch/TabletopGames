@@ -21,35 +21,23 @@ import java.util.*;
 
 import static core.CoreConstants.VERBOSE;
 
-public class BattleloreForwardModel extends AbstractForwardModel
-{
+public class BattleloreForwardModel extends AbstractForwardModel {
     @Override
-    protected void _setup(AbstractGameState initialState)
-    {
+    protected void _setup(AbstractGameState initialState) {
         Random random = new Random(initialState.getGameParameters().getRandomSeed());
         BattleloreGameParameters gameParams = (BattleloreGameParameters) initialState.getGameParameters();
         BattleloreGameState gameState = (BattleloreGameState)initialState;
         BattleloreData _data = gameState.getData();
 
-        for (int i = 0; i  < gameState.playerCount; i++)
-        {
-            if (gameState.playerCount == 2)
-            {
-                //Set Player Faction
-            }
-            else
-            {
+        for (int i = 0; i  < gameState.playerCount; i++) {
+            if (gameState.playerCount != 2) {
                 System.out.println("3 and more players are not supported");
             }
         }
 
         //Init player hands
-
         int hexHeight = gameParams.hexHeight;
         int hexWidth = gameParams.hexWidth;
-
-
-        //MapTile[][] mapTiles= new MapTile[hexWidth][hexHeight];
 
         //Game Area Initialization
         gameState.gameBoard = new GridBoard<MapTile>(hexWidth, hexHeight);
@@ -57,100 +45,68 @@ public class BattleloreForwardModel extends AbstractForwardModel
         gameState.unitTypes = _data.getUnits();
 
         int tileId = 0;
-        for (int x = 0; x < gameState.gameBoard.getWidth(); x++)
-        {
-            for(int y = 0; y < gameState.gameBoard.getHeight(); y++)
-            {
+        for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
+            for(int y = 0; y < gameState.gameBoard.getHeight(); y++) {
                 gameState.gameBoard.setElement(x, y, new MapTile(x, y, new ArrayList<Unit>(), null, tileId));
                 tileId++;
             }
         }
 
         PutLearningScenarioUnits(gameState);
-
         gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep);
-
-
-        //gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.OrderStep);
-
-        //gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
-        //gameState.setGamePhase(BattleloreGameState.BattleloreGamePhase.AttackStep);
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action)
-    {
+    protected void _next(AbstractGameState currentState, AbstractAction action) {
         BattleloreGameState state = (BattleloreGameState) currentState;
         BattleloreGameParameters gameParams = (BattleloreGameParameters) currentState.getGameParameters();
-        action.execute(currentState);//todo
+        action.execute(currentState);
 
         int playerId = state.getCurrentPlayer();
-        Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
+        Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ?
+                Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
-        switch (state.getGamePhase().toString())
-        {
+        switch (state.getGamePhase().toString()) {
             case "CommandAndOrderStep":
                 currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
                 break;
             case "MoveStep":
-                if (state.GetMoveableUnitsFromTile(playerFaction).isEmpty())
-                {
+                if (state.GetMoveableUnitsFromTile(playerFaction).isEmpty()) {
                     currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.AttackStep);
                 }
                 break;
             case "AttackStep":
-                if (state.GetReadyForAttackUnitsFromTile(playerFaction).isEmpty())
-                {
-                    //state.getTurnOrder().endPlayerTurn(state);
-                    int player = state.getCurrentPlayer();
+                if (state.GetReadyForAttackUnitsFromTile(playerFaction).isEmpty()) {
                     state.getTurnOrder().endPlayerTurn(state);
-
                     currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep);
                 }
                 break;
 
-            /*
-            case "VictoryPointStep":
-                break;
-            case "DrawStep":
-                break;
-            case "LoreStep":
-                break;
-            */
             default:
                 break;
         }
 
-        if (checkGameEnd((BattleloreGameState) currentState, playerId))
-        {
+        if (checkGameEnd((BattleloreGameState) currentState, playerId)) {
             currentState.setGameStatus(Utils.GameResult.GAME_END);
-            //Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
             registerWinner(state, playerId);
             return;
         }
 
         int roundExceedThreshold = 100;
-        if (state.getNumberOfRounds() > roundExceedThreshold)
-        {
-            /*
+        if (state.getNumberOfRounds() > roundExceedThreshold) {
+            /* Decide on who should win if the game enters an infinite loop
             state.setGameStatus(Utils.GameResult.DRAW);
             //Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
             state.setGameStatus(Utils.GameResult.DRAW);
             //int winningPlayer = BattleloreConstants //.playerMapping.indexOf(winnerSymbol);
             state.setPlayerResult(Utils.GameResult.DRAW, 0);
             state.setPlayerResult(Utils.GameResult.DRAW, 1);
-
              */
             registerWinner(state, 0);
         }
-
-        //currentState.getTurnOrder().endPlayerTurn(currentState);
     }
 
-
-
-    private void PutLearningScenarioUnits(BattleloreGameState gameState)
-    {
+    private void PutLearningScenarioUnits(BattleloreGameState gameState) {
         gameState.gameBoard.getElement(1, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
         gameState.gameBoard.getElement(3, 1).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.ViperLegion));
         gameState.gameBoard.getElement(3, 2).AddUnit(gameState.GetUnitFromType(BattleloreGameState.UnitType.BloodHarvester));
@@ -173,8 +129,7 @@ public class BattleloreForwardModel extends AbstractForwardModel
     }
 
     @Override
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState)
-    {
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         BattleloreGameState state = (BattleloreGameState) gameState;
         int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
         Unit.Faction playerFaction = player == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
@@ -182,102 +137,77 @@ public class BattleloreForwardModel extends AbstractForwardModel
         ArrayList<AbstractAction> actions = new ArrayList<>();
         IGamePhase a = gameState.getGamePhase();
 
-        if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep)
-        {
-            if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.right))
-            {
+        if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep) {
+            if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.right)) {
                 actions.add(new PlayCommandCardAction(CommandCard.CommandType.AttackRight, playerFaction, player));
             }
-            if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.mid))
-            {
+            if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.mid)) {
                 actions.add(new PlayCommandCardAction(CommandCard.CommandType.BattleMarch, playerFaction, player));
             }
-            if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.left))
-            {
+            if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.left)) {
                 actions.add(new PlayCommandCardAction(CommandCard.CommandType.PatrolLeft, playerFaction, player));
             }
         }
-        if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.MoveStep)
-        {
+        if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.MoveStep) {
             ArrayList<MapTile> moveableUnitTiles = state.GetMoveableUnitsFromTile(playerFaction);
             int[][] possibleLocations = new int[state.getBoard().getWidth()][2];
 
-            if (!moveableUnitTiles.isEmpty())
-            {
-                for (MapTile tile : moveableUnitTiles)
-                {
+            if (!moveableUnitTiles.isEmpty()) {
+                for (MapTile tile : moveableUnitTiles) {
                     possibleLocations = state.GetPossibleLocationsForUnits(tile);
                     //check possible locations size
-                    for (int i = 0 ; i< state.getBoard().getWidth(); i++)
-                    {
-                        if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1)
-                        {
+                    for (int i = 0 ; i< state.getBoard().getWidth(); i++) {
+                        if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
                             actions.add(new MoveUnitsAction(tile, playerFaction, possibleLocations[i][0], possibleLocations[i][1], player));
                         }
                     }
-                    if (actions.isEmpty())
-                    {
+                    if (actions.isEmpty()) {
                         actions.add(new SkipTurnAction(tile, playerFaction, true, false, player));
                     }
                 }
             }
-
-            //if moveable unit count has reached the end, finish the state
+            //if moveable unit count has reached the end, state is finished
         }
-        if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.AttackStep)
-        {
+        if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.AttackStep) {
             ArrayList<MapTile> readyToAttackUnits = state.GetReadyForAttackUnitsFromTile(playerFaction);
             int[][] possibleLocations = new int[state.getBoard().getWidth()][2];
 
-            if (!readyToAttackUnits.isEmpty())
-            {
-                for (MapTile attacker : readyToAttackUnits)
-                {
+            if (!readyToAttackUnits.isEmpty()) {
+                for (MapTile attacker : readyToAttackUnits) {
                     possibleLocations = state.GetPossibleTargetUnits(attacker);
 
-                    for (int i = 0 ; i< state.getBoard().getWidth(); i++)
-                    {
-                        if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1)
-                        {
+                    for (int i = 0 ; i< state.getBoard().getWidth(); i++) {
+                        if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
                             actions.add(new AttackUnitsAction(attacker, state.getBoard().getElement(possibleLocations[i][0], possibleLocations[i][1]), attacker.GetFaction(), player));
                         }
                     }
-                    if (actions.isEmpty())
-                    {
+                    if (actions.isEmpty()) {
                         actions.add(new SkipTurnAction(attacker, playerFaction, false, true, player));
                     }
                 }
             }
         }
 
-        //registerWinner(state, new Token("winner is: " + player));
-        if (actions.isEmpty())
-        {
-            int i = 0;
+        if (actions.isEmpty()) {
             actions.add(new SkipTurnAction());
         }
         return actions;
     }
 
-    private boolean CheckUnitRemainingAtRight(BattleloreGameState gameState, int playerId, MapTile.TileArea area)
-    {
+    private boolean CheckUnitRemainingAtRight(BattleloreGameState gameState, int playerId, MapTile.TileArea area) {
         boolean allyUnitsRemainInArea = false;
         boolean enemyUnitsRemainInArea = false;
 
-        for (int x = 0; x < gameState.gameBoard.getWidth(); x++)
-        {
-            for(int y = 0; y < gameState.gameBoard.getHeight(); y++)
-            {
+        for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
+            for(int y = 0; y < gameState.gameBoard.getHeight(); y++) {
                 MapTile tile = gameState.gameBoard.getElement(x, y);
                 Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
-                if (tile != null && tile.GetUnits() != null && tile.GetUnits().size() > 0 && tile.IsInArea(area))
-                {
-                    if (tile.GetFaction() == playerFaction)
-                    {
+
+                if (tile != null && tile.GetUnits() != null && tile.GetUnits().size() > 0 && tile.IsInArea(area)) {
+                    if (tile.GetFaction() == playerFaction) {
                         allyUnitsRemainInArea = true;
                     }
-                    if (tile.GetFaction() != playerFaction)
-                    {
+                    if (tile.GetFaction() != playerFaction) {
                         enemyUnitsRemainInArea = true;
                     }
                 }
@@ -287,8 +217,7 @@ public class BattleloreForwardModel extends AbstractForwardModel
     }
 
     @Override
-    protected AbstractForwardModel _copy()
-    {
+    protected AbstractForwardModel _copy() {
         return new BattleloreForwardModel();
     }
 
@@ -296,31 +225,23 @@ public class BattleloreForwardModel extends AbstractForwardModel
      * Checks if the game ended.
      * @param gameState - game state to check game end.
      */
-    private boolean checkGameEnd(BattleloreGameState gameState, int playerId)
-    {
+    private boolean checkGameEnd(BattleloreGameState gameState, int playerId) {
         int WIN_SCORE = 4;
         return gameState.GetPlayerScore(playerId) >= WIN_SCORE;
-
     }
 
 
     @Override
-    protected void endGame(AbstractGameState gameState)
-    {
-        if (VERBOSE)
-        {
+    protected void endGame(AbstractGameState gameState) {
+        if (VERBOSE) {
             System.out.println(Arrays.toString(gameState.getPlayerResults()));
         }
     }
 
 
-    private void registerWinner(BattleloreGameState gameState, int winnerD)
-    {
+    private void registerWinner(BattleloreGameState gameState, int winnerD) {
         gameState.setGameStatus(Utils.GameResult.GAME_END);
-        //int winningPlayer = BattleloreConstants //.playerMapping.indexOf(winnerSymbol);
         gameState.setPlayerResult(Utils.GameResult.WIN, winnerD);
         gameState.setPlayerResult(Utils.GameResult.LOSE, winnerD == 0 ? 1 : 0);
-
-        //gameState.GetTotalActionsTaken(winnerD)';'
     }
 }

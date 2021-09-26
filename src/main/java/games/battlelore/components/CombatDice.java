@@ -1,33 +1,25 @@
 package games.battlelore.components;
 
 import core.components.Dice;
-
-import javax.swing.plaf.basic.BasicBorders;
 import java.util.Random;
 
-public class CombatDice extends Dice
-{
-    public enum Result
-    {
+public class CombatDice extends Dice {
+    public enum Result {
         N_A, Strike, Cleave, Pierce, Morale, Lore, Heroic
     }
 
-    public CombatDice()
-    {
+    public CombatDice() {
         super();
     }
 
-    public int getRandomNumberUsingNextInt (int min, int max)
-    {
+    public int getRandomNumberUsingNextInt (int min, int max) {
         Random random = new Random();
         return random.nextInt(max - min) + min;
     }
 
-    public Result getResult()
-    {
+    public Result getResult() {
         int value = getRandomNumberUsingNextInt(0, 3);
-        switch(value)
-        {
+        switch(value) {
             case 1:
                 return Result.Strike;
             case 2:

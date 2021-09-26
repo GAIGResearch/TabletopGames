@@ -5,22 +5,17 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.battlelore.BattleloreGameState;
-
 import players.human.ActionController;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 
-public class BattleloreGUI extends AbstractGUI
-{
+public class BattleloreGUI extends AbstractGUI {
     BattleloreBoardView view;
 
-    public BattleloreGUI(Game game, ActionController ac)
-    {
+    public BattleloreGUI(Game game, ActionController ac) {
         super(ac, 25);
-        if (game == null)
-        {
+
+        if (game == null) {
             return;
         }
 
@@ -40,8 +35,7 @@ public class BattleloreGUI extends AbstractGUI
     }
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState)
-    {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         view.updateComponent(((BattleloreGameState)gameState).getBoard());
         repaint();
     }

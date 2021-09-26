@@ -13,116 +13,90 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-public class AttackUnitsAction extends AbstractAction
-{
+public class AttackUnitsAction extends AbstractAction {
     private Unit.Faction playerFaction;
     private MapTile attacker;
     private MapTile defender;
     private int playerID;
 
-    public AttackUnitsAction(MapTile attackingUnitsTile, MapTile targetTile, Unit.Faction faction, int playerID)
-    {
+    public AttackUnitsAction(MapTile attackingUnitsTile, MapTile targetTile, Unit.Faction faction, int playerID) {
         this.attacker = attackingUnitsTile;
         this.defender = targetTile;
         this.playerFaction = faction;
         this.playerID = playerID;
     }
 
-
     @Override
-    public boolean execute(AbstractGameState gameState)
-    {
+    public boolean execute(AbstractGameState gameState) {
         BattleloreGameState state = (BattleloreGameState) gameState;
 
-        if (this.playerFaction == Unit.Faction.NA)
-        {
+        if (this.playerFaction == Unit.Faction.NA) {
             System.out.println("Wrong player id'");
             return false;
         }
-        else
-        {
+        else {
             ArrayList<Unit> attackerUnits = state.getBoard().getElement(attacker.getLocationX(), attacker.getLocationY()).GetUnits();
             ArrayList<Unit> defenderUnits = state.getBoard().getElement(defender.getLocationX(), defender.getLocationY()).GetUnits();
 
-            //COMBAT SEQUENCE
-            //Roll a dice
+            //COMBAT SEQUENCE: Roll a dice
 
             int defeatedEnemyCount = 0;
             CombatDice dice = new CombatDice();
-            for (int i = 0; i < 3; i++)
-            {
+
+            for (int i = 0; i < 3; i++) {
                 CombatDice.Result result = dice.getResult();
-                if (result == CombatDice.Result.Strike)
-                {
-                    if (attackerUnits.size() > 1)
-                    {
+                if (result == CombatDice.Result.Strike) {
+                    if (attackerUnits.size() > 1) {
                         defeatedEnemyCount++;
                     }
                 }
-                else if (result == CombatDice.Result.Cleave)
-                {
+                else if (result == CombatDice.Result.Cleave) {
                     defeatedEnemyCount++;
                 }
             }
 
-            for (int x = 0; x < defeatedEnemyCount; x++)
-            {
-                if (defenderUnits.size() > 0)
-                {
+            for (int x = 0; x < defeatedEnemyCount; x++) {
+                if (defenderUnits.size() > 0) {
                     defenderUnits.remove(defenderUnits.size() - 1);
                     state.AddScore(playerID, 1);
                 }
             }
-            if (defenderUnits.isEmpty())
-            {
+            if (defenderUnits.isEmpty()) {
                 state.RemoveUnit(defender.getLocationX(), defender.getLocationY());
             }
-            else
-            {
+            else {
                 state.getBoard().getElement(defender.getLocationX(), defender.getLocationY()).SetUnits(defenderUnits);
             }
 
-
-            // state.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
-            for (Unit unit : attackerUnits)
-            {
+            for (Unit unit : attackerUnits) {
                 unit.SetCanAttack(false);
             }
-
-            // check if defender strikes back.
-
 
             state.AddToRounds();
             state.IncrementTurn(playerID);
             return true;
         }
-
     }
 
-    public MapTile GetAttacker()
-    {
+    public MapTile GetAttacker() {
         return attacker;
     }
 
-    public MapTile GetDefender()
-    {
+    public MapTile GetDefender() {
         return attacker;
     }
 
-    public Unit.Faction GetFaction()
-    {
+    public Unit.Faction GetFaction() {
         return playerFaction;
     }
 
     @Override
-    public AbstractAction copy()
-    {
+    public AbstractAction copy() {
         return new AttackUnitsAction(attacker.copy(), defender.copy(), playerFaction, playerID);
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof AttackUnitsAction)) return false;
         AttackUnitsAction that = (AttackUnitsAction) o;
@@ -139,8 +113,8 @@ public class AttackUnitsAction extends AbstractAction
     }
 
     @Override
-    public String getString(AbstractGameState gameState)
-    {
-        return playerFaction.name() + " units in " + attacker.getLocationX() + ":" + attacker.getLocationY() + " attacks to " + defender.getLocationX()+ ":" + defender.getLocationY();
+    public String getString(AbstractGameState gameState) {
+        return playerFaction.name() + " units in " + attacker.getLocationX() + ":" +
+                attacker.getLocationY() + " attacks to " + defender.getLocationX()+ ":" + defender.getLocationY();
     }
 }

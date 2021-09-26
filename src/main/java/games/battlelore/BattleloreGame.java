@@ -23,28 +23,22 @@ import java.util.Random;
 
 import static games.GameType.Battlelore;
 
-public class BattleloreGame extends Game
-{
-    public BattleloreGame(BattleloreGameParameters params)
-    {
+public class BattleloreGame extends Game {
+    public BattleloreGame(BattleloreGameParameters params) {
         super(GameType.Battlelore, new BattleloreForwardModel(), new BattleloreGameState(params, 2));
     }
 
-    public BattleloreGame(List<AbstractPlayer> agents, BattleloreGameParameters params)
-    {
+    public BattleloreGame(List<AbstractPlayer> agents, BattleloreGameParameters params) {
         super(GameType.Battlelore, agents, new BattleloreForwardModel(), new BattleloreGameState(params, agents.size()));
     }
 
-    public static void generateNewSeeds(long[] arr, int repetitions)
-    {
-        for (int i = 0; i < repetitions; i++)
-        {
+    public static void generateNewSeeds(long[] arr, int repetitions) {
+        for (int i = 0; i < repetitions; i++) {
             arr[i] = new Random().nextInt();
         }
     }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
         ActionController ac = new ActionController(); //null;
 
@@ -63,17 +57,16 @@ public class BattleloreGame extends Game
         players.add(new BasicMCTSPlayer(new Random().nextLong()));
         players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
         //players.add(new MCTSPlayer(new Random().nextLong()));
-
-
         //players.add(new HumanConsolePlayer());
         //players.add(new HumanGUIPlayer(ac));
+
         /* 4. Run! */
         //------------------------DEBUG----------------------------------------//
         players.clear();
         //players.add(new BasicMCTSPlayer(new Random().nextLong()));
         //players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
         //players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
-        players.add(new BasicMCTSPlayer(new Random().nextLong()));
+        players.add(new OSLAPlayer());
         players.add(new RuleBasedPlayer());
         runOne(Battlelore, players, seed, ac, false, null);
 
@@ -85,12 +78,9 @@ public class BattleloreGame extends Game
         final int repetitions = 500;
         long[] seeds = new long[repetitions];
 
-        for (int i = 0; i < players.size(); i++)
-        {
-            for (int k = 0; k < players.size(); k++)
-            {
-                if (i != k)
-                {
+        for (int i = 0; i < players.size(); i++) {
+            for (int k = 0; k < players.size(); k++) {
+                if (i != k) {
                     generateNewSeeds(seeds, repetitions);
                     System.out.println(players.get(i).toString() + " vs " + players.get(k).toString() + ":");
                     ArrayList<AbstractPlayer> currentPlayers = new ArrayList<AbstractPlayer>();
@@ -100,21 +90,5 @@ public class BattleloreGame extends Game
                 }
             }
         }
-        //generateNewSeeds(seeds, repetitions);
-        //System.out.println(players.get(0).toString() + " vs " + players.get(1).toString() + ":");
-        //runMany(games, players, repetitions, seeds, null, false, null);
-
-
-
-        //runMany(new ArrayList<GameType>() {{add(Uno);}}, players, null, 1000, null, false, false);
-
-        /*LinkedList<AbstractPlayer> agents = new LinkedList<AbstractPlayer>();
-        for (AbstractPlayer agent : players)
-        {
-            agents.add(agent);
-        }*/
-
-        //RoundRobinTournament tournament = new RoundRobinTournament(agents, Battlelore, 2, 100, true);
-        //tournament.runTournament();
     }
 }

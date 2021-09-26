@@ -12,19 +12,16 @@ import games.dotsboxes.AddGridCellEdge;
 import java.util.List;
 import java.util.Objects;
 
-public class PlayCommandCardAction extends AbstractAction
-{
+public class PlayCommandCardAction extends AbstractAction {
+
     private Unit.Faction playerFaction;
     private CommandCard.CommandType type;
     private int playerID;
-    //private ArrayList<MapTile> orderedTiles;
 
-    public PlayCommandCardAction(CommandCard.CommandType type, Unit.Faction playerFaction, int playerID)
-    {
+    public PlayCommandCardAction(CommandCard.CommandType type, Unit.Faction playerFaction, int playerID) {
         this.type = type;
         this.playerFaction = playerFaction;
         this.playerID = playerID;
-        //this.orderedTiles = orderedTiles;
     }
 
     public CommandCard.CommandType GetCommandType()
@@ -33,48 +30,35 @@ public class PlayCommandCardAction extends AbstractAction
     }
 
     @Override
-    public boolean execute(AbstractGameState gameState)
-    {
+    public boolean execute(AbstractGameState gameState) {
         BattleloreGameState state = (BattleloreGameState) gameState;
 
-        if (this.playerFaction == Unit.Faction.NA)
-        {
+        if (this.playerFaction == Unit.Faction.NA) {
             System.out.println("Wrong player id'");
             return false;
         }
-        else
-        {
-            for (int x = 0; x < state.getBoard().getWidth(); x++)
-            {
-                for (int y = 0; y < state.getBoard().getHeight(); y++)
-                {
-                    MapTile tile = state.getBoard().getElement(x, y);
+        else {
+            for (int x = 0; x < state.getBoard().getWidth(); x++) {
+                for (int y = 0; y < state.getBoard().getHeight(); y++) {
 
+                    MapTile tile = state.getBoard().getElement(x, y);
                     if (type == CommandCard.CommandType.AttackRight && tile.GetUnits() != null &&
-                            tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.right))
-                    {
-                        state.SetUnitsAsOrderable(x, y);
+                            tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.right)) {
                     }
                     else if (type == CommandCard.CommandType.PatrolLeft && tile.GetUnits() != null &&
-                            tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.left))
-                    {
-                        state.SetUnitsAsOrderable(x, y);
+                            tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.left)) {
                     }
                     else if (type == CommandCard.CommandType.BattleMarch && tile.GetUnits() != null &&
-                            tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.mid))
-                    {
-                        state.SetUnitsAsOrderable(x, y);
+                            tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.mid)) {
                     }
+                    state.SetUnitsAsOrderable(x,y);
                 }
             }
 
-            //state.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
             state.AddToRounds();
             state.IncrementTurn(playerID);
             return true;
         }
-
-
     }
 
     @Override
@@ -99,8 +83,7 @@ public class PlayCommandCardAction extends AbstractAction
     }
 
     @Override
-    public String getString(AbstractGameState gameState)
-    {
+    public String getString(AbstractGameState gameState) {
         return playerFaction.name() + " uses " + type.name() + "command and readies units (marked as *).";
     }
 }

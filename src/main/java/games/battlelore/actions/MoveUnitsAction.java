@@ -27,8 +27,7 @@ public class MoveUnitsAction extends AbstractAction
     private int locationY;
     private int playerID;
 
-    public MoveUnitsAction(MapTile tile, Unit.Faction faction, int locX, int locY, int playerID)
-    {
+    public MoveUnitsAction(MapTile tile, Unit.Faction faction, int locX, int locY, int playerID) {
         this.tile = tile;
         this.playerFaction = faction;
         this.locationX = locX;
@@ -36,51 +35,40 @@ public class MoveUnitsAction extends AbstractAction
         this.playerID = playerID;
     }
 
-
     @Override
-    public boolean execute(AbstractGameState gameState)
-    {
+    public boolean execute(AbstractGameState gameState) {
         BattleloreGameState state = (BattleloreGameState) gameState;
 
-        if (this.playerFaction == Unit.Faction.NA)
-        {
+        if (this.playerFaction == Unit.Faction.NA) {
             System.out.println("Wrong player id'");
             return false;
         }
-        else
-        {
+        else {
             ArrayList<Unit> units = state.getBoard().getElement(tile.getLocationX(), tile.getLocationY()).GetUnits();
 
-            if (units == null)
-            {
+            if (units == null) {
                 state.getBoard().getElement(locationX, locationY);
             }
 
-            for(Unit unit : units)
-            {
+            for (Unit unit : units) {
                 state.getBoard().getElement(locationX, locationY).AddUnit(unit);
                 unit.SetCanMove(false);
             }
+
             state.RemoveUnit(tile.getLocationX(), tile.getLocationY());
-
-            // state.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
-
             state.AddToRounds();
             state.IncrementTurn(playerID);
             return true;
         }
-
     }
 
     @Override
-    public AbstractAction copy()
-    {
+    public AbstractAction copy() {
         return new MoveUnitsAction(tile.copy(), playerFaction, locationX, locationY, playerID);
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof MoveUnitsAction)) return false;
         MoveUnitsAction that = (MoveUnitsAction) o;
@@ -98,6 +86,7 @@ public class MoveUnitsAction extends AbstractAction
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return playerFaction.name() + " moves units from " + tile.getLocationX() + ":" + tile.getLocationY() + " to " + locationX + ":" + locationY;
+        return playerFaction.name() + " moves units from " + tile.getLocationX() + ":" +
+                tile.getLocationY() + " to " + locationX + ":" + locationY;
     }
 }
