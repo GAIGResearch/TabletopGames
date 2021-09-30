@@ -7,12 +7,8 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Card;
 import core.components.Deck;
-import core.properties.PropertyInt;
-import core.properties.PropertyIntArray;
-import core.properties.PropertyString;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.*;
-import utilities.Hash;
 import utilities.Pair;
 
 import java.util.*;
@@ -147,7 +143,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
-        DiceMonasteryParams params = (DiceMonasteryParams) state.getParams();
+        DiceMonasteryParams params = state.getParams();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         int currentPlayer = turnOrder.getCurrentPlayer(state);
         switch (turnOrder.season) {
@@ -160,9 +156,17 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                         throw new AssertionError("We have no monks left for player " + currentPlayer);
                     }
                     int mostPiousMonk = availableMonks.stream().mapToInt(Monk::getPiety).max().getAsInt();
+                    String condition = "";
+                    if (params.libraryWritingSets) {
+                        int vellum = state.getResource(currentPlayer, VELLUM, STOREROOM);
+                        int candles = state.getResource(currentPlayer, CANDLE, STOREROOM);
+                        condition = String.valueOf(Math.min(vellum, candles));
+                    }
+
+                    String finalCondition = condition;
                     return Arrays.stream(ActionArea.values())
                             .filter(a -> a.dieMinimum > 0 && a.dieMinimum <= mostPiousMonk)
-                            .map(a -> new PlaceMonk(currentPlayer, a)).collect(toList());
+                            .map(a -> new PlaceMonk(currentPlayer, a, a == LIBRARY ? finalCondition : "")).collect(toList());
                 } else if (state.getGamePhase() == Phase.USE_MONKS) {
                     List<AbstractAction> retValue = new ArrayList<>();
                     if (!turnOrder.turnOwnerTakenReward) {

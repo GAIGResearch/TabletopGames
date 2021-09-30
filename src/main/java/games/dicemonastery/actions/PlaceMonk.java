@@ -18,10 +18,16 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
     public final ActionArea destination;
     public final int playerId;
     boolean monkChosen = false;
+    public final String condition;
 
     public PlaceMonk(int playerId, ActionArea area) {
+        this(playerId, area, "");
+    }
+
+    public PlaceMonk(int playerId, ActionArea area, String condition) {
         this.playerId = playerId;
         destination = area;
+        this.condition = condition;
     }
 
     @Override
@@ -75,13 +81,13 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
         if (!(obj instanceof PlaceMonk))
             return false;
         PlaceMonk other = (PlaceMonk) obj;
-        return other.monkChosen == monkChosen && other.destination == destination && playerId == other.playerId;
+        return other.monkChosen == monkChosen && other.destination == destination && playerId == other.playerId && other.condition.equals(condition);
     }
 
     @Override
     public int hashCode() {
         // deliberately excludes player id
-        return (monkChosen ? 97 : 0)  + destination.ordinal() * -2777 - 5827;
+        return (monkChosen ? 97 : 0) + condition.hashCode() + destination.ordinal() * -2777 - 5827;
     }
 
     @Override
@@ -91,7 +97,7 @@ public class PlaceMonk extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return String.format("Move monk to %s", destination);
+        return String.format("Move monk to %s %s", destination, condition);
     }
 }
 

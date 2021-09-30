@@ -11,7 +11,6 @@ import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.FIRST_VISIBLE_TO_ALL;
@@ -500,7 +499,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
             }
             // then remove all perishable goods from Storeroom, and unharvested wheat from the Meadow
             addResource(player, BREAD, -getResource(player, BREAD, STOREROOM));
-          //  addResource(player, CALF_SKIN, -getResource(player, CALF_SKIN, STOREROOM));
+            if (getParams().calfSkinsRotInWinter)
+                addResource(player, CALF_SKIN, -getResource(player, CALF_SKIN, STOREROOM));
             int unharvestedWheat = getResource(player, GRAIN, MEADOW);
             for (int i = 0; i < unharvestedWheat; i++)
                 moveCube(player, GRAIN, MEADOW, SUPPLY);

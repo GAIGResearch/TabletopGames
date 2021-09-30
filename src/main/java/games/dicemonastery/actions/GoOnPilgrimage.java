@@ -35,6 +35,12 @@ public class GoOnPilgrimage extends UseMonk {
     }
 
     @Override
+    public GoOnPilgrimage copy() {
+        // no longer mutable due to Pilgrimage maintaining state
+        return new GoOnPilgrimage(destination.copy(), actionPoints);
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(actionPoints, destination) - 168729;
     }

@@ -183,10 +183,10 @@ public class LearnedValue extends AbstractPlayer implements IGameListener, ITree
                     double specificAdvantage = newDataByHash.get(hash).b;
                     double generalAdvantage = newData.get("").get(hash).b;
                     double generalVisits = newData.get("").get(hash).a;
-                    double specificWeight = Math.sqrt(anchorVisits / (3.0 * specificVisits + anchorVisits));
+                    double generalWeight = Math.sqrt(anchorVisits / (3.0 * specificVisits + anchorVisits));
                     double specificResult = specificAdvantage / (specificVisits + anchorVisits);
                     double generalResult = generalAdvantage / (generalVisits + anchorVisits);
-                    double finalAdvantage = specificResult * specificWeight + generalResult * (1.0 - specificWeight);
+                    double finalAdvantage = specificResult * (1.0 - generalWeight) + generalResult * generalWeight;
 
                     advWriter.write(String.format("%s, %d, %.3f, %s", bucket, hash, finalAdvantage, actionNames.getOrDefault(hash, "")));
                     advWriter.newLine();
@@ -248,44 +248,48 @@ public class LearnedValue extends AbstractPlayer implements IGameListener, ITree
                 buckets.add(bucketingFunction.apply(n.getState()));
 
             List<AbstractAction> actionsFromState = forwardModel.computeAvailableActions(n.getState());
+            //no point calculating if only one action!
+            if (actionsFromState.size() > 1) {
+                List<Pair<AbstractAction, SingleTreeNode>> actionsToNodes = n.getChildren().keySet().stream()
+                        .filter(action -> n.getChildren().get(action) != null &&
+                                n.getChildren().get(action)[actor] != null &&
+                                actionsFromState.contains(action))
+                        .map(action -> new Pair<>(action, n.getChildren().get(action)[actor]))
+                        .collect(toList());
 
-            List<Pair<AbstractAction, SingleTreeNode>> actionsToNodes = n.getChildren().keySet().stream()
-                    .filter(action -> n.getChildren().get(action) != null &&
-                            n.getChildren().get(action)[actor] != null &&
-                            actionsFromState.contains(action))
-                    .map(action -> new Pair<>(action, n.getChildren().get(action)[actor]))
-                    .collect(toList());
+
+                for (String bucket : buckets) {
+
+                    if (!statsByBucketAndHash.containsKey(bucket))
+                        statsByBucketAndHash.put(bucket, new HashMap<>());
+                    if (!newData.containsKey(bucket))
+                        newData.put(bucket, new HashMap<>());
+
+                    Map<Integer, Pair<Integer, Double>> statsByHash = statsByBucketAndHash.get(bucket);
+
+                    // if useAdvantage then we subtract meanValue * visits
+                    Map<Integer, Pair<Integer, Double>> data = actionsToNodes.stream()
+                            .collect(toMap(p -> p.a.hashCode(),
+                                    p -> new Pair<>(p.b.getVisits(), p.b.getTotValue()[actor] - meanValue * p.b.getVisits())));
 
 
-            for (String bucket : buckets) {
+                    // now we merge this data into the existing map
+                    Map<Integer, Pair<Integer, Double>> newDataByHash = newData.get(bucket);
+                    for (Integer hash : data.keySet()) {
+                        newDataByHash.merge(hash, data.get(hash),
+                                (val1, val2) -> new Pair<>(val1.a + val2.a, val1.b + val2.b));
+                        statsByHash.merge(hash, data.get(hash),
+                                (val1, val2) -> new Pair<>(val1.a + val2.a, val1.b + val2.b));
+                    }
 
-                if (!statsByBucketAndHash.containsKey(bucket))
-                    statsByBucketAndHash.put(bucket, new HashMap<>());
-                if (!newData.containsKey(bucket))
-                    newData.put(bucket, new HashMap<>());
-
-                Map<Integer, Pair<Integer, Double>> statsByHash = statsByBucketAndHash.get(bucket);
-
-                // if useAdvantage then we subtract meanValue * visits
-                Map<Integer, Pair<Integer, Double>> data = actionsToNodes.stream()
-                        .collect(toMap(p -> p.a.hashCode(),
-                                p -> new Pair<>(p.b.getVisits(), p.b.getTotValue()[actor] - meanValue * p.b.getVisits())));
-
-                // now we merge this data into the existing map
-                Map<Integer, Pair<Integer, Double>> newDataByHash = newData.get(bucket);
-                for (Integer hash : data.keySet()) {
-                    newDataByHash.merge(hash, data.get(hash),
-                            (val1, val2) -> new Pair<>(val1.a + val2.a, val1.b + val2.b));
-                    statsByHash.merge(hash, data.get(hash),
-                            (val1, val2) -> new Pair<>(val1.a + val2.a, val1.b + val2.b));
                 }
             }
-
             // and then add the child node that have sufficient visits
             queue.addAll(n.getChildren().values().stream()
                     .filter(Objects::nonNull)
                     .map(arr -> arr[actor])
                     .filter(it -> it != null && it.getVisits() >= threshold).collect(Collectors.toList()));
+
         }
     }
 

@@ -1,7 +1,9 @@
 package evaluation;
 
+import core.AbstractParameters;
 import core.AbstractPlayer;
 import games.GameType;
+import org.apache.commons.math3.analysis.function.Abs;
 
 import java.util.*;
 import java.util.function.IntSupplier;
@@ -22,8 +24,8 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RandomRRTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                              int gamesPerMatchUp, boolean selfPlay, int totalMatchUps, long seed) {
-        super(agents, gameToPlay, playersPerGame, gamesPerMatchUp, selfPlay);
+                              int gamesPerMatchUp, boolean selfPlay, int totalMatchUps, long seed, AbstractParameters gameParams) {
+        super(agents, gameToPlay, playersPerGame, gamesPerMatchUp, selfPlay, gameParams);
         this.totalMatchups = totalMatchUps;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
     }

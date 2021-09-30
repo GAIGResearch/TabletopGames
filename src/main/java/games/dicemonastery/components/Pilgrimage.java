@@ -77,6 +77,9 @@ public class Pilgrimage extends Component {
 
     public void advance(DiceMonasteryGameState state) {
         // first check that pilgrim has not been promoted
+        if (!active) {
+            throw new AssertionError("Should not be trying to advance an inactive Pilgrimage");
+        }
         if (state.getMonkLocation(pilgrimId) != PILGRIMAGE) {
             active = false;
             return;
@@ -131,7 +134,7 @@ public class Pilgrimage extends Component {
 
     @Override
     public int hashCode() {
-        return Objects.hash(pilgrimId, active, player, progress, destination, finalReward.ordinal(), minPiety, cost) + Arrays.hashCode(vpPerStep) * 7 + super.hashCode() * 31;
+        return Objects.hash(pilgrimId, active, player, progress, destination, finalReward.ordinal(), minPiety, cost) + Arrays.hashCode(vpPerStep) * 7;
     }
 
     public static List<Pilgrimage> create(Component c) {

@@ -1,7 +1,9 @@
 package evaluation;
 
+import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.Game;
+import core.ParameterFactory;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
@@ -43,6 +45,7 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\tgame=          The name of the game to play. Defaults to Uno.\n" +
                             "\tplayers=       The directory containing agent JSON files for the competing Players\n" +
                             "\t               If not specified, this defaults to very basic OSLA, RND, RHEA and MCTS players.\n" +
+                            "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tlogFile=       (Optional) The name of a log file to record the results of the Tournament\n" +
                             "\tgamesPerMatchup  Defaults to 1. The number of games to play for each combination.\n" +
                             "\tselfPlay=      If true, then multiple copies of the same agent can be in one game.\n" +
@@ -74,6 +77,8 @@ public class RoundRobinTournament extends AbstractTournament {
         int totalMatchups = getArg(args, "matchups", 1000);
         String playerDirectory = getArg(args, "players", "");
         String logFile = getArg(args, "logFile", "");
+        String gameParams = getArg(args, "gameParams", "");
+
 
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameReportListener").split("\\|")));
         List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "GameReport.txt").split("\\|")));
@@ -106,11 +111,13 @@ public class RoundRobinTournament extends AbstractTournament {
             agents.add(new OSLAPlayer());
         }
 
+        AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, gameParams);
+
         // Run!
         RoundRobinTournament tournament = mode.equals("exhaustive") ?
-                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay) :
+                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay, params) :
                 new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay, totalMatchups,
-                        System.currentTimeMillis());
+                        System.currentTimeMillis(), params);
         tournament.listenerFiles = listenerFiles;
         tournament.listenerClasses = listenerClasses;
         tournament.dataLogger = logFile.equals("") ? null : new FileStatsLogger(logFile, "\t", true);
@@ -127,8 +134,8 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RoundRobinTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, boolean selfPlay) {
-        super(agents, gameToPlay, playersPerGame);
+                                int gamesPerMatchUp, boolean selfPlay, AbstractParameters gameParams) {
+        super(agents, gameToPlay, playersPerGame, gameParams);
         if (!selfPlay && playersPerGame > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
                     "Either add more agents, reduce the number of players per game, or allow self-play.");

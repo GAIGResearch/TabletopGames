@@ -23,12 +23,15 @@ public abstract class AbstractTournament {
      * @param gameToPlay - game to play in this tournament.
      * @param nPlayerPerGame - number of players per game.
      */
-    public AbstractTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame){
+    public AbstractTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame, AbstractParameters gameParams){
         this.agents = agents;
         this.games = new ArrayList<>();
         this.playersPerGame = new ArrayList<>();
 
-        Game g = gameToPlay.createGameInstance(nPlayerPerGame);
+        Game g = gameParams == null ?
+                gameToPlay.createGameInstance(nPlayerPerGame) :
+                gameToPlay.createGameInstance(nPlayerPerGame, gameParams);
+
         if (g == null) throw new IllegalArgumentException("Chosen game not supported");
         else {
             this.games.add(g);
