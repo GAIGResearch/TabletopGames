@@ -1,11 +1,7 @@
 package games.coltexpress;
 
 import core.AbstractParameters;
-import core.Game;
-import evaluation.TunableParameters;
-import games.GameType;
 import games.coltexpress.cards.ColtExpressCard;
-import games.loveletter.cards.LoveLetterCard;
 import utilities.Group;
 
 import java.util.*;
@@ -17,7 +13,7 @@ import static games.coltexpress.ColtExpressTypes.RegularRoundCard.*;
 
 import utilities.Pair;
 
-public class ColtExpressParameters extends TunableParameters {
+public class ColtExpressParameters extends AbstractParameters {
 
     String dataPath = "data/coltexpress/";
 
@@ -127,33 +123,6 @@ public class ColtExpressParameters extends TunableParameters {
 
     public ColtExpressParameters(long seed) {
         super(seed);
-
-        addTunableParameter("nCardsInHand", 6, Arrays.asList(3,4,5,6,7,8,9,10));
-        addTunableParameter("nCardsInHandExtraDoc", 1, Arrays.asList(1,2,3));
-        addTunableParameter("nBulletsPerPlayer", 6, Arrays.asList(4,6,8,10,12));
-        addTunableParameter("nMaxRounds", 5, Arrays.asList(3, 5, 7, 10));
-        addTunableParameter("shooterReward", 1000, Arrays.asList(100, 500, 1000, 1500));
-        addTunableParameter("nCardsDraw", 3, Arrays.asList(1,2,3,4,5));
-        addTunableParameter("nRoofMove", 4, Arrays.asList(1,2,3,4,5,6));
-        addTunableParameter("nCardHostageReward", 250, Arrays.asList(50, 100, 200, 250, 300, 350, 500));
-        addTunableParameter("nCardTakeItAllReward", 1000, Arrays.asList(100, 500, 1000, 1500, 2000));
-        for (ColtExpressCard.CardType c: cardCounts.keySet()) {
-            addTunableParameter(c.name() + " count", cardCounts.get(c), Arrays.asList(1,2,3,4,5));
-        }
-    }
-
-    @Override
-    public void _reset() {
-        nCardsInHand = (int) getParameterValue("nCardsInHand");
-        nCardsInHandExtraDoc = (int) getParameterValue("nCardsInHandExtraDoc");
-        nBulletsPerPlayer = (int) getParameterValue("nBulletsPerPlayer");
-        nMaxRounds = (int) getParameterValue("nMaxRounds");
-        shooterReward = (int) getParameterValue("shooterReward");
-        nCardsDraw = (int) getParameterValue("nCardsDraw");
-        nRoofMove = (int) getParameterValue("nRoofMove");
-        nCardHostageReward = (int) getParameterValue("nCardHostageReward");
-        nCardTakeItAllReward = (int) getParameterValue("nCardTakeItAllReward");
-        cardCounts.replaceAll((c, v) -> (Integer) getParameterValue(c.name() + " count"));
     }
 
     @Override
@@ -227,10 +196,5 @@ public class ColtExpressParameters extends TunableParameters {
 
     public String getDataPath() {
         return dataPath;
-    }
-
-    @Override
-    public Object instantiate() {
-        return new Game(GameType.ColtExpress, new ColtExpressForwardModel(), new ColtExpressGameState(this, GameType.ColtExpress.getMinPlayers()));
     }
 }

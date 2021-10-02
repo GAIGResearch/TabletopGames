@@ -106,7 +106,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     }
 
     /**
-     * This provides the current score in game terms. This will only be relevant for games that have the concept
+     * This provides the current score in game turns. This will only be relevant for games that have the concept
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      *
@@ -231,7 +231,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
                 a = new Area(key, "Game area");
                 HashMap<Integer, Component> oldComponents = areas.get(key).getComponentsMap();
                 for (Map.Entry<Integer, Component> e: oldComponents.entrySet()) {
-                    if (gs.getCoreGameParameters().partialObservable && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
+                    if (PARTIAL_OBSERVABLE && playerId != -1 && (e.getKey() == playerDeckHash || e.getKey() == infectionHash)) {
                         Random r = new Random(gs.getGameParameters().getRandomSeed());
                         Deck<Card> hiddenDeck = (Deck<Card>) e.getValue().copy();
                         if (gamePhase == Forecast && e.getKey() == infectionHash) {

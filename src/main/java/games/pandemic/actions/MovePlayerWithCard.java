@@ -58,7 +58,11 @@ public class MovePlayerWithCard extends MovePlayer {
 
     @Override
     public String toString() {
-        return "Move Player " + playerIdx + " to " + destination + " with card " + cardIdx;
+        return "MovePlayerWithCard{" +
+                "playerIdx=" + playerIdx +
+                ", destination='" + destination + '\'' +
+                ", cardIdx=" + cardIdx +
+                '}';
     }
 
     @Override

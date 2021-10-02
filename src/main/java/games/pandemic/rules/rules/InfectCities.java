@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
-import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 import games.pandemic.PandemicGameState;
 import games.pandemic.actions.InfectCity;
@@ -21,17 +20,6 @@ public class InfectCities extends RuleNode {
         this.infection_rate = infection_rate;
         this.max_cubes_per_city = max_cubes_per_city;
         this.n_cubes_infection = n_cubes_infection;
-    }
-
-    /**
-     * Copy constructor
-     * @param infectCities - Node to be copied
-     */
-    public InfectCities(InfectCities infectCities) {
-        super(infectCities);
-        this.max_cubes_per_city = infectCities.max_cubes_per_city;
-        this.n_cubes_infection = infectCities.n_cubes_infection;
-        this.infection_rate = infectCities.infection_rate;
     }
 
     @Override
@@ -53,10 +41,5 @@ public class InfectCities extends RuleNode {
         ((PandemicGameState)gs).setEpidemic(false);
         ((PandemicGameState)gs).setNCardsDrawn(0);
         return true;
-    }
-
-    @Override
-    protected Node _copy() {
-        return new InfectCities(this);
     }
 }

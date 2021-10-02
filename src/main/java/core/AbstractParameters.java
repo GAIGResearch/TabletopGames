@@ -9,7 +9,7 @@ public abstract class AbstractParameters {
     long randomSeed;
 
     // Player thinking time for the entire game, in minutes. Default max value.
-    long thinkingTimeMins = 90;
+    long thinkingTimeMins = Long.MAX_VALUE;
     // Increment in seconds, added after a common milestone: action, turn, round. Default 0.
     long incrementActionS = 0, incrementTurnS = 0, incrementRoundS = 0;
     // Increment in seconds, added after a custom milestone (to be added manually in game implementation). Default 0.
@@ -44,10 +44,6 @@ public abstract class AbstractParameters {
      */
     public long getRandomSeed() {
         return randomSeed;
-    }
-
-    public void setRandomSeed(long randomSeed) {
-        this.randomSeed = randomSeed;
     }
 
     /**

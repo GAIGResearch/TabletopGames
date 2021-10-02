@@ -1,64 +1,52 @@
 package games;
 
 import core.*;
-
 import core.turnorders.AlternatingTurnOrder;
 import games.battlelore.BattleloreForwardModel;
 import games.battlelore.BattleloreGameState;
 import games.battlelore.BattleloreGameParameters;
 import games.battlelore.gui.BattleloreGUI;
-import games.blackjack.BlackjackForwardModel;
-import games.blackjack.BlackjackGameState;
-import games.blackjack.BlackjackParameters;
-import games.blackjack.gui.BlackjackGUIManager;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
-import games.coltexpress.gui.ColtExpressGUIManager;
+import games.coltexpress.gui.ColtExpressGUI;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.diamant.DiamantParameters;
-import games.dominion.gui.DominionGUIManager;
+import games.dominion.gui.DominionGUI;
 import games.dotsboxes.DBForwardModel;
-import games.dotsboxes.DBGUIManager;
+import games.dotsboxes.DBGUI;
 import games.dotsboxes.DBGameState;
 import games.dotsboxes.DBParameters;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.gui.ExplodingKittensGUIManager;
+import games.explodingkittens.gui.ExplodingKittensGUI;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
-import games.loveletter.gui.LoveLetterGUIManager;
+import games.loveletter.gui.LoveLetterGUI;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
-import games.pandemic.gui.PandemicGUIManager;
-import games.poker.PokerForwardModel;
-import games.poker.PokerGameParameters;
-import games.poker.PokerGameState;
-import games.poker.gui.PokerGUIManager;
+import games.pandemic.gui.PandemicGUI;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
-import games.tictactoe.gui.TicTacToeGUIManager;
+import games.tictactoe.gui.TicTacToeGUI;
 import games.uno.UnoForwardModel;
 import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
-import games.uno.gui.UnoGUIManager;
+import games.uno.gui.UnoGUI;
 import games.virus.VirusForwardModel;
 import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import games.dominion.*;
-import gui.AbstractGUIManager;
-import gui.GamePanel;
-import gui.PrototypeGUIManager;
+import gui.PrototypeGUI;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
 import java.util.*;
-import java.util.List;
 
 import static core.CoreConstants.*;
 import static games.GameType.Category.*;
@@ -107,31 +95,6 @@ public enum GameType {
             }},
             new ArrayList<Mechanic>() {{
                 add(Enclosure);
-            }}),
-    Poker(2, 14,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(ComicBook);
-                add(Number);
-                add(MoviesTVRadio);
-            }},
-
-            new ArrayList<Mechanic>() {{
-                add(HandManagement);
-                add(LoseATurn);
-                add(TakeThat);
-            }}),
-    Blackjack(2, 7,
-            new ArrayList<games.GameType.Category>() {{
-                add(Cards);
-                add(ComicBook);
-                add(Number);
-                add(MoviesTVRadio);
-            }},
-            new ArrayList<games.GameType.Mechanic>() {{
-                add(HandManagement);
-                add(LoseATurn);
-                add(TakeThat);
             }}),
     Diamant(2, 6,
             new ArrayList<Category>() {{
@@ -182,8 +145,6 @@ public enum GameType {
                 return LoveLetter;
             case "uno":
                 return Uno;
-            case "blackjack":
-                return Blackjack;
             case "virus":
                 return Virus;
             case "coltexpress":
@@ -192,8 +153,6 @@ public enum GameType {
                 return DotsAndBoxes;
             case "diamant":
                 return Diamant;
-            case "poker":
-                return Poker;
             case "dominion":
                 return Dominion;
             case "dominionsizedistortion":
@@ -223,7 +182,7 @@ public enum GameType {
             return null;
         }
 
-        params = (params == null) ? createParameterSet(seed) : params;
+        params = (params == null) ? getDefaultParams(seed) : params;
         AbstractForwardModel forwardModel;
         AbstractGameState gameState;
 
@@ -247,14 +206,6 @@ public enum GameType {
             case Uno:
                 forwardModel = new UnoForwardModel();
                 gameState = new UnoGameState(params, nPlayers);
-                break;
-            case Blackjack:
-                forwardModel = new BlackjackForwardModel();
-                gameState = new BlackjackGameState(params, nPlayers);
-                break;
-            case Poker:
-                forwardModel = new PokerForwardModel();
-                gameState = new PokerGameState(params, nPlayers);
                 break;
             case Virus:
                 forwardModel = new VirusForwardModel();
@@ -289,7 +240,7 @@ public enum GameType {
         return new Game(this, forwardModel, gameState);
     }
 
-    public AbstractParameters createParameterSet(long seed) {
+    public AbstractParameters getDefaultParams(long seed) {
         switch (this) {
             case Pandemic:
                 return new PandemicParameters("data/pandemic/", seed);
@@ -301,10 +252,6 @@ public enum GameType {
                 return new LoveLetterParameters(seed);
             case Uno:
                 return new UnoGameParameters(seed);
-            case Blackjack:
-                return new BlackjackParameters(seed);
-            case Poker:
-                return new PokerGameParameters(seed);
             case Virus:
                 return new VirusGameParameters(seed);
             case ColtExpress:
@@ -333,9 +280,9 @@ public enum GameType {
      * @param ac   - ActionController object allowing for user interaction with the GUI.
      * @return - GUI for the given game type.
      */
-    public AbstractGUIManager createGUIManager(GamePanel parent, Game game, ActionController ac) {
+    public AbstractGUI createGUI(Game game, ActionController ac) {
 
-        AbstractGUIManager gui = null;
+        AbstractGUI gui = null;
 
         // Find ID of human player, if any (-1 if none)
         int human = -1;
@@ -350,40 +297,34 @@ public enum GameType {
 
         switch (this) {
             case Pandemic:
-                gui = new PandemicGUIManager(parent, game, ac);
+                gui = new PandemicGUI(game, ac);
                 break;
             case Uno:
-                gui = new UnoGUIManager(parent, game, ac, human);
-                break;
-            case Blackjack:
-                gui = new BlackjackGUIManager(parent, game, ac, human);
-                break;
-            case Poker:
-                gui = new PokerGUIManager(parent, game, ac, human);
+                gui = new UnoGUI(game, ac, human);
                 break;
             case ColtExpress:
-                gui = new ColtExpressGUIManager(parent, game, ac, human);
+                gui = new ColtExpressGUI(game, ac, human);
                 break;
             case ExplodingKittens:
-                gui = new ExplodingKittensGUIManager(parent, game, ac, human);
+                gui = new ExplodingKittensGUI(game, ac, human);
                 break;
             case LoveLetter:
-                gui = new LoveLetterGUIManager(parent, game, ac, human);
+                gui = new LoveLetterGUI(game, ac, human);
                 break;
             case TicTacToe:
-                gui = new TicTacToeGUIManager(parent, game, ac);
+                gui = new TicTacToeGUI(game, ac);
                 break;
             case DotsAndBoxes:
                 if (game != null) {
-                    gui = new DBGUIManager(parent, game.getGameState(), ac);
+                    gui = new DBGUI(game.getGameState(), ac);
                 } else {
-                    gui = new PrototypeGUIManager(parent, null, null, ac, 100);
+                    gui = new PrototypeGUI(null, null, ac, 100);
                 }
                 break;
             case Dominion:
             case DominionImprovements:
             case DominionSizeDistortion:
-                gui = new DominionGUIManager(parent, game, ac, human);
+                gui = new DominionGUI(game, ac, human);
                 break;
             // TODO: Diamant GUI
 
@@ -489,12 +430,11 @@ public enum GameType {
         MovementPoints,
         MultipleMaps,
         Campaign,
+        MoveThroughDeck,
         Enclosure,
         DeckManagement,
         BattleCardDriven,
         CommandCards;
-        MoveThroughDeck,
-        DeckManagement;
 
         /**
          * Retrieves a list of all games using this mechanic.
@@ -538,30 +478,25 @@ public enum GameType {
     public int getMinPlayers() {
         return minPlayers;
     }
-
     public int getMaxPlayers() {
         return maxPlayers;
     }
-
     public ArrayList<Category> getCategories() {
         return categories;
     }
-
     public ArrayList<Mechanic> getMechanics() {
         return mechanics;
     }
-
     public static int getMinPlayersAllGames() {
         int min = Integer.MAX_VALUE;
-        for (GameType gt : GameType.values()) {
+        for (GameType gt: GameType.values()) {
             if (gt.minPlayers < min) min = gt.minPlayers;
         }
         return min;
     }
-
     public static int getMaxPlayersAllGames() {
         int max = Integer.MIN_VALUE;
-        for (GameType gt : GameType.values()) {
+        for (GameType gt: GameType.values()) {
             if (gt.minPlayers > max) max = gt.minPlayers;
         }
         return max;
@@ -569,32 +504,27 @@ public enum GameType {
 
     /**
      * Creates an instance of the given game type with nPlayers number of players and a new random seed.
-     *
      * @param nPlayers - number of players for the game.
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers) {
-        return createGameInstance(nPlayers, System.currentTimeMillis(), createParameterSet(System.currentTimeMillis()));
+        return createGameInstance(nPlayers, System.currentTimeMillis(), getDefaultParams(System.currentTimeMillis()));
     }
 
     public Game createGameInstance(int nPlayers, long seed) {
-        return createGameInstance(nPlayers, seed, createParameterSet(seed));
+        return createGameInstance(nPlayers, seed, getDefaultParams(seed));
     }
 
     public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {
-        if (gameParams == null) {
-            return createGameInstance(nPlayers, System.currentTimeMillis(), gameParams);
-        } else {
-            return createGameInstance(nPlayers, gameParams.getRandomSeed(), gameParams);
-        }
+        return createGameInstance(nPlayers, System.currentTimeMillis(), gameParams);
     }
 
     @Override
     public String toString() {
         boolean implemented = createGameInstance(minPlayers) != null;
-        AbstractGUIManager g = createGUIManager(null,null, null);
+        AbstractGUI g = createGUI(null, null);
         boolean gui = g != null;
-        boolean prototypeGUI = g instanceof PrototypeGUIManager;
+        boolean prototypeGUI = g instanceof PrototypeGUI;
         return (gui ? prototypeGUI ? ANSI_CYAN : ANSI_BLUE : implemented ? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +
                 "\n\tminPlayers = " + minPlayers +
                 "\n\tmaxPlayers = " + maxPlayers +

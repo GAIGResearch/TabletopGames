@@ -10,6 +10,7 @@ import games.uno.cards.*;
 
 import java.util.*;
 
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.uno.cards.UnoCard.UnoCardType.Wild;
 
 public class UnoGameState extends AbstractGameState implements IPrintable {
@@ -128,7 +129,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         }
         copy.drawDeck = drawDeck.copy();
 
-        if (getCoreGameParameters().partialObservable && playerId != -1) {
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
             // Other player cards and the draw deck are unknown.
             // Combine all into one deck, shuffle, then deal random cards to the other players (hand size kept)
             Random r = new Random(copy.gameParameters.getRandomSeed());

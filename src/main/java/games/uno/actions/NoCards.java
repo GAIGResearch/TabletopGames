@@ -10,6 +10,7 @@ import games.uno.cards.UnoCard;
 
 import java.util.Random;
 
+import static core.CoreConstants.VERBOSE;
 
 public class NoCards extends AbstractAction implements IPrintable {
 
@@ -39,8 +40,8 @@ public class NoCards extends AbstractAction implements IPrintable {
         if (card.isPlayable((UnoGameState) gs)) {
             discardDeck.add(card);
             ugs.updateCurrentCard(card);
-            if (ugs.getCoreGameParameters().verbose) {
-                System.out.println("It can be played. " + card);
+            if (VERBOSE) {
+                System.out.println("It can be played. " + card.toString());
             }
         }
         else

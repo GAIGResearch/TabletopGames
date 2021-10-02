@@ -13,7 +13,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 
-import static games.coltexpress.gui.ColtExpressGUIManager.*;
+import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
+import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
+import static games.coltexpress.gui.ColtExpressGUI.*;
 
 public class ColtExpressPlayerView extends JComponent {
 
@@ -56,13 +58,11 @@ public class ColtExpressPlayerView extends JComponent {
         this.playerId = playerId;
         this.dataPath = dataPath;
         this.width = playerAreaWidth + border*2;
-        this.height = playerAreaHeight + border;
+        this.height = playerAreaHeight + borderBottom + border;
         playerHand = new ColtExpressDeckView(null, true, dataPath, characters);
         playerLoot = new ColtExpressDeckView(null, false, dataPath, characters);
         playerCard = characters.get(playerId);
         cardBack = ImageIO.GetInstance().getImage(dataPath + "CardBack.png");
-
-        setToolTipText(playerCard.getPower());
     }
 
     /**
@@ -79,9 +79,9 @@ public class ColtExpressPlayerView extends JComponent {
 
         // Draw loot, bullets left, points total if game end
         playerLoot.drawDeck((Graphics2D) g, new Rectangle(border+ceCardWidth + 10, border,
-                defaultItemSize*2, defaultItemSize), false, 1.0);
+                defaultItemSize*2, defaultItemSize), false);
         g.setColor(Color.black);
-        g.drawString("Bullets left: " + bulletsLeft, border, border+ceCardHeight + 15);
+        g.drawString("Bullets left: " + bulletsLeft, border+ceCardWidth + defaultItemSize*2 + 15, border+ceCardHeight*2/3);
         if (gameEnd) {
             if (lootSum == -1) {
                 lootSum = 0;
@@ -97,18 +97,16 @@ public class ColtExpressPlayerView extends JComponent {
                 endResult += "* ";
             }
             endResult += "Total points: " + lootSum;
-            g.drawString(endResult, border+ceCardWidth*2 + 15, border+ceCardHeight + 15);
+            g.drawString(endResult, border+ceCardWidth + defaultItemSize*2 + 15, border+ceCardHeight/3);
         }
 
         // Draw player deck
-        g.drawImage(cardBack, border+ceCardWidth + defaultItemSize*2 + 15, border, ceCardWidth, ceCardHeight, null);
-        if (playerDeck != null) {
-            g.drawString("" + playerDeck.getSize(), border+ceCardWidth + defaultItemSize*2 + 20, ceCardHeight);
-        }
+        g.drawImage(cardBack, border, border+ceCardHeight + 5, ceCardWidth, ceCardHeight, null);
+        g.drawString("" + playerDeck.getSize(), border+10, border+ceCardHeight*2 - 5);
 
         // Draw player hand
-        playerHand.drawDeck((Graphics2D) g, new Rectangle(border+ceCardWidth + defaultItemSize*2 + 15+ceCardWidth + 30, border,
-                width-ceCardWidth*2-defaultItemSize*2-45, ceCardHeight), false, 1.0);
+        playerHand.drawDeck((Graphics2D) g, new Rectangle(border+ceCardWidth + 30, border+ceCardHeight + 5,
+                width-ceCardWidth*2-30, ceCardHeight), false);
     }
 
     public Dimension getPreferredSize() {
@@ -132,8 +130,12 @@ public class ColtExpressPlayerView extends JComponent {
         }
         bulletsLeft = gameState.getBulletsLeft()[playerId];
 
-        playerHand.setFront(playerId == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
+        if (playerId == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
                 || playerId == humanID
-                || gameState.getCoreGameParameters().alwaysDisplayFullObservable);
+                || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+            playerHand.setFront(true);
+        } else {
+            playerHand.setFront(false);
+        }
     }
 }

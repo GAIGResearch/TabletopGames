@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
+import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.VisibilityMode.*;
 
 public class UnoForwardModel extends AbstractForwardModel {
@@ -119,7 +120,7 @@ public class UnoForwardModel extends AbstractForwardModel {
         // In case, add to draw deck and shuffle again
         while (ugs.isWildCard(ugs.currentCard))
         {
-            if (ugs.getCoreGameParameters().verbose) {
+            if (VERBOSE) {
                 System.out.println("First card wild");
             }
             ugs.drawDeck.add(ugs.currentCard);
@@ -130,7 +131,7 @@ public class UnoForwardModel extends AbstractForwardModel {
 
         // If the first card is Skip, Reverse or DrawTwo, play the card
         if (!ugs.isNumberCard(ugs.currentCard)) {
-            if (ugs.getCoreGameParameters().verbose) {
+            if (VERBOSE) {
                 System.out.println("First card no number " + ugs.currentColor);
             }
             if (ugs.currentCard.type == UnoCard.UnoCardType.Reverse) {
@@ -326,7 +327,7 @@ public class UnoForwardModel extends AbstractForwardModel {
 
     @Override
     protected void endGame(AbstractGameState gameState) {
-        if (gameState.getCoreGameParameters().verbose) {
+        if (VERBOSE) {
             System.out.println("Game Results:");
             for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
                 if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {

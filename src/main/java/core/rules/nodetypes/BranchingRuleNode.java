@@ -28,14 +28,6 @@ public abstract class BranchingRuleNode extends RuleNode {
     }
 
     /**
-     * Copy constructor, does not copy childYes or childNo to avoid endless recursion in looping graphs.
-     * @param node - Node to be copied
-     */
-    protected BranchingRuleNode(BranchingRuleNode node) {
-        super(node);
-    }
-
-    /**
      * Apply the functionality of the rule in the given game state, and decide which of the children is to be executed
      * next.
      * @param gs - game state to modify.

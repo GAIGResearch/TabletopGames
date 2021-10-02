@@ -7,7 +7,7 @@ import games.coltexpress.components.Compartment;
 
 import java.util.LinkedList;
 
-public class RoundCardBraking extends RoundEvent {
+public class RoundCardBraking extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -46,10 +46,5 @@ public class RoundCardBraking extends RoundEvent {
     @Override
     public String toString() {
         return null;
-    }
-
-    @Override
-    public String getEventText() {
-        return "All bandits on the roof of the train move one car toward the locomotive.";
     }
 }

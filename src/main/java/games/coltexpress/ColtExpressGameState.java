@@ -2,6 +2,7 @@ package games.coltexpress;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -9,7 +10,6 @@ import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
 import games.coltexpress.ColtExpressTypes.CharacterType;
-import games.coltexpress.actions.roundcardevents.RoundEvent;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.cards.RoundCard;
 import games.coltexpress.components.Compartment;
@@ -18,6 +18,7 @@ import utilities.Pair;
 
 import java.util.*;
 
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static core.CoreConstants.VisibilityMode;
 import static java.util.stream.Collectors.toList;
 
@@ -98,7 +99,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             copy.trainCompartments.add((Compartment) d.copy());
         }
 
-        if (getCoreGameParameters().partialObservable && playerId != -1) {
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     // Other player hands are hidden, but it's known what's in a player's deck
@@ -397,7 +398,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     RoundCard getEndRoundCard(ColtExpressParameters cep, int idx) {
         if (idx >= 0 && idx < cep.endRoundCards.length) {
             RoundCard.TurnType[] turnTypes = cep.endRoundCards[idx].getTurnTypeSequence();
-            RoundEvent event = cep.endRoundCards[idx].getEndCardEvent();
+            AbstractAction event = cep.endRoundCards[idx].getEndCardEvent();
             return new RoundCard(cep.endRoundCards[idx].name(), turnTypes, event);
         }
         return null;
@@ -414,7 +415,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     RoundCard getRoundCard(ColtExpressTypes.RegularRoundCard cardType, int nPlayers) {
         RoundCard.TurnType[] turnTypes = cardType.getTurnTypeSequence(nPlayers);
-        RoundEvent event = cardType.getEndCardEvent();
+        AbstractAction event = cardType.getEndCardEvent();
         return new RoundCard(cardType.name(), turnTypes, event);
     }
 

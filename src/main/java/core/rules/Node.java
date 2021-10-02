@@ -20,27 +20,6 @@ public abstract class Node {
     }
 
     /**
-     * Copy constructor, does not copy parent node to avoid endless recursion in looping graphs.
-     * @param node - Node to be copied
-     */
-    public Node(Node node) {
-        this.id = node.id;
-        this.actionNode = node.actionNode;
-        this.nextPlayerNode = node.nextPlayerNode;
-        this.action = node.action;
-    }
-
-    /**
-     * Create a copy of the Node by calling subclass _copy()
-     * @return - New Node object with the same properties
-     */
-    public Node copy() {
-        return _copy();
-    }
-
-    protected abstract Node _copy();
-
-    /**
      * Executes the functionality of this node.
      * @param gs - game state to apply functionality in.
      * @return - Node, the next node to execute afterwards.

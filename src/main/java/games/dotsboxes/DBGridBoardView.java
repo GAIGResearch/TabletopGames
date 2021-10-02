@@ -1,13 +1,9 @@
 package games.dotsboxes;
 
-import utilities.Vector2D;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
-import static gui.GUI.defaultItemSize;
+import static core.AbstractGUI.defaultItemSize;
 
 public class DBGridBoardView extends JComponent {
 
@@ -30,60 +26,16 @@ public class DBGridBoardView extends JComponent {
             new Color(103, 50, 155)
     };
 
-    Point start;
-    DBEdge highlight;
-    DBEdge highlightIP;
-
     public DBGridBoardView(DBGameState dbgs) {
         this.dbgs = dbgs;
         DBParameters dbp = (DBParameters) dbgs.getGameParameters();
-        this.width = (dbp.gridWidth + 1) * defaultItemSize;
-        this.height = (dbp.gridHeight + 2) * defaultItemSize;
-
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    if (start == null) {
-                        start = new Point(e.getX()/defaultItemSize, e.getY()/defaultItemSize);
-                    } else {
-                        // highlight edge and reset
-                        Point end = new Point(e.getX()/defaultItemSize, e.getY()/defaultItemSize);
-                        highlight = new DBEdge(new Vector2D(start.x, start.y), new Vector2D(end.x, end.y));
-                        start = null;
-                        highlightIP = null;
-                    }
-                } else {
-                    start = null;
-                    highlightIP = null;
-                    highlight = null;
-                }
-            }
-        });
-        addMouseMotionListener(new MouseAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                if (start != null) {
-                    Point end = new Point(e.getX()/defaultItemSize, e.getY()/defaultItemSize);
-                    highlightIP = new DBEdge(new Vector2D(start.x, start.y), new Vector2D(end.x, end.y));
-                }
-            }
-        });
+        this.width = dbp.gridWidth * defaultItemSize;
+        this.height = dbp.gridHeight * defaultItemSize;
     }
 
     @Override
-    protected void paintComponent(Graphics g0) {
-        Graphics2D g = (Graphics2D)g0;
-        drawGridBoard(g, dotSize/2, dotSize/2);
-
-        if (highlightIP != null) {
-            g.setColor(edgeColors[dbgs.getCurrentPlayer()]);
-            Stroke s = g.getStroke();
-            g.setStroke(new BasicStroke(3));
-            g.drawLine(highlightIP.from.getX() * defaultItemSize + dotSize/2, highlightIP.from.getY() * defaultItemSize + dotSize/2,
-                    highlightIP.to.getX() * defaultItemSize + dotSize/2, highlightIP.to.getY() * defaultItemSize + dotSize/2);
-            g.setStroke(s);
-        }
+    protected void paintComponent(Graphics g) {
+        drawGridBoard((Graphics2D)g, dotSize/2, dotSize/2);
     }
 
     public void drawGridBoard(Graphics2D g, int x, int y) {
@@ -109,14 +61,13 @@ public class DBGridBoardView extends JComponent {
     }
 
     private void drawCell(Graphics2D g, DBCell element, int owner, int x, int y, int offsetX, int offsetY) {
-        if (owner != -1) {
-            // Paint cell background, according to cell owner
+        // Paint cell background, according to cell owner
+        if (owner == -1) {
+            g.setColor(new Color(228, 228, 228));
+        } else {
             g.setColor(colors[owner]);
-            g.fillRect(x, y, defaultItemSize, defaultItemSize);
-            // Draw cell owner
-            g.setColor(Color.black);
-            g.drawString("" + owner, x+defaultItemSize/2, y+defaultItemSize/2);
         }
+        g.fillRect(x, y, defaultItemSize, defaultItemSize);
 
         // Draw 4 dots in the corners of the cell
         g.setColor(Color.black);
@@ -125,6 +76,8 @@ public class DBGridBoardView extends JComponent {
         g.fillOval(x-dotSize/2, y+defaultItemSize-dotSize/2, dotSize, dotSize);
         g.fillOval(x+defaultItemSize-dotSize/2, y+defaultItemSize-dotSize/2, dotSize, dotSize);
 
+        // Draw cell owner
+        g.drawString("" + owner, x+defaultItemSize/2, y+defaultItemSize/2);
     }
 
     public void updateGameState(DBGameState dbgs) {
@@ -133,10 +86,6 @@ public class DBGridBoardView extends JComponent {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(width + dotSize, height + dotSize);
-    }
-
-    public DBEdge getHighlight() {
-        return highlight;
+        return new Dimension(width, height);
     }
 }

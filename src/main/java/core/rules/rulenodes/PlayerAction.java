@@ -1,7 +1,6 @@
 package core.rules.rulenodes;
 
 import core.AbstractGameState;
-import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 
 /**
@@ -14,14 +13,6 @@ public class PlayerAction extends RuleNode {
         super(true);
     }
 
-    /**
-     * Copy constructor
-     * @param playerAction - Node to be copied
-     */
-    public PlayerAction(PlayerAction playerAction) {
-        super(playerAction);
-    }
-
     @Override
     protected boolean run(AbstractGameState gs) {
         if (action != null) {
@@ -29,11 +20,6 @@ public class PlayerAction extends RuleNode {
             return true;
         }
         return false;
-    }
-
-    @Override
-    protected Node _copy() {
-        return new PlayerAction(this);
     }
 
 }

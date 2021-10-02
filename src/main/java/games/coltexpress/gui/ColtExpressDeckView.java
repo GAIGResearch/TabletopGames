@@ -22,7 +22,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
-import static games.coltexpress.gui.ColtExpressGUIManager.*;
+import static games.coltexpress.gui.ColtExpressGUI.*;
 
 public class ColtExpressDeckView<T extends Component> extends ComponentView {
 
@@ -120,11 +120,9 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
         });
     }
 
-    double scale = 1.0;
-
     @Override
     protected void paintComponent(Graphics g) {
-        drawDeck((Graphics2D) g, new Rectangle(0, 0, width, height), firstOnTop, scale);
+        drawDeck((Graphics2D) g, new Rectangle(0, 0, width, height), firstOnTop);
     }
 
     /**
@@ -133,10 +131,8 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
      * @param rect - rectangle to draw deck in.
      * @param firstOnTop - if true, first component is drawn on top, otherwise on bottom.
      */
-    public void drawDeck(Graphics2D g, Rectangle rect, boolean firstOnTop, double scale) {
-        this.scale = scale;
-
-        int size = (int)(g.getFont().getSize() * scale);
+    public void drawDeck(Graphics2D g, Rectangle rect, boolean firstOnTop) {
+        int size = g.getFont().getSize();
         Deck<T> deck = (Deck<T>) component;
 
         if (deck != null && deck.getSize() > 0) {
@@ -148,20 +144,20 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                 if (deck.get(0) instanceof ColtExpressCard) {
                     // Player card
                     int offset = (rect.width-ceCardWidth) / deck.getSize();
-                    Rectangle r = new Rectangle(rect.x + offset * i, rect.y, (int)(ceCardWidth * scale), (int)(ceCardHeight * scale));
+                    Rectangle r = new Rectangle(rect.x + offset * i, rect.y, ceCardWidth, ceCardHeight);
                     rects[i] = r;
                     drawCard(g, (ColtExpressCard) deck.get(i), r, deck instanceof PartialObservableDeck ?
                             activePlayer != -1 && ((PartialObservableDeck) deck).isComponentVisible(i, activePlayer) : front);
                 } else if (deck.get(0) instanceof Loot) {
                     // Loot
-                    int offset = (rect.width-(int)(defaultItemSize * scale)) / deck.getSize();
-                    Rectangle r = new Rectangle(rect.x + offset * i, rect.y, (int)(defaultItemSize * scale), (int)(defaultItemSize * scale));
+                    int offset = (rect.width-defaultItemSize) / deck.getSize();
+                    Rectangle r = new Rectangle(rect.x + offset * i, rect.y, defaultItemSize, defaultItemSize);
                     rects[i] = r;
                     drawLoot(g, (Loot) deck.get(i), r, front);
                 } else {
                     // Round card
-                    int offset = (rect.width-(int)(roundCardWidth*scale)) / deck.getSize();
-                    Rectangle r = new Rectangle(rect.x + offset * i, rect.y, (int)(roundCardWidth*scale), (int)(roundCardHeight*scale));
+                    int offset = (rect.width-roundCardWidth) / deck.getSize();
+                    Rectangle r = new Rectangle(rect.x + offset * i, rect.y, roundCardWidth, roundCardHeight);
                     rects[i] = r;
                     boolean visible = cegs.getTurnOrder().getRoundCounter() >= i;
                     boolean current = cegs.getTurnOrder().getRoundCounter() == i;
@@ -189,8 +185,8 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                     drawLoot(g, (Loot) deck.get(cardHighlight), r, front);
                 } else {
                     // Round card
-                    int offset = (rect.width-(int)(roundCardWidth*scale)) / deck.getSize();
-                    Rectangle r = new Rectangle(rect.x + offset * cardHighlight, rect.y, (int)(roundCardWidth*scale), (int)(roundCardHeight*scale));
+                    int offset = (rect.width-roundCardWidth) / deck.getSize();
+                    Rectangle r = new Rectangle(rect.x + offset * cardHighlight, rect.y, roundCardWidth, roundCardHeight);
                     boolean visible = cegs.getTurnOrder().getRoundCounter() >= cardHighlight;
                     boolean current = cegs.getTurnOrder().getRoundCounter() == cardHighlight;
                     drawRoundCard(g, (RoundCard) deck.get(cardHighlight), r, visible, current);
@@ -242,7 +238,6 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
         Image lootFace;
         if (visible) {
             lootFace = ImageIO.GetInstance().getImage(dataPath + loot.getLootType().name() + "_" + loot.getValue() + ".png");
-            if (lootFace == null) lootFace = ImageIO.GetInstance().getImage(dataPath + loot.getLootType().name() + "_front.png");
         } else {
             lootFace = ImageIO.GetInstance().getImage(dataPath + loot.getLootType().name() + "_behind.png");
         }
@@ -264,9 +259,9 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
         if (visible) {
             // Draw title
             Font f = g.getFont();
-            g.setFont(new Font(f.getName(), Font.PLAIN, (int)(9 * scale)));
+            g.setFont(new Font(f.getName(), Font.PLAIN, 8));
             g.setColor(Color.black);
-            g.drawString(card.getComponentName(), r.x + (int)(5 * scale), r.y + (int)(17 * scale));
+            g.drawString(card.getComponentName(), r.x + 5, r.y + 13);
             g.setFont(f);
 
             double scaleW = 1.0 * r.width / cardFace.getWidth(null);
@@ -283,14 +278,14 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
 
             Image sImg = ImageIO.GetInstance().getImage(dataPath + "roundcards/NormalTurn.png");
             Image dImg = ImageIO.GetInstance().getImage(dataPath + "roundcards/DoubleTurn.png");
-            int singleWidth = (int) (sImg.getWidth(null) * scaleW * 1.2);
+            int singleWidth = (int) (sImg.getWidth(null) * scaleW);
             int roundHeight = (int) (sImg.getHeight(null) * scaleH);
-            int doubleWidth = (int) (dImg.getWidth(null) * scaleW * 1.2);
+            int doubleWidth = (int) (dImg.getWidth(null) * scaleW);
 
             int x = r.x + r.width/2 - ((nRounds-nDouble) * singleWidth + nDouble * doubleWidth)/2;
             for (int i = 0; i < card.getTurnTypes().length; i++) {
                 Image roundImg = ImageIO.GetInstance().getImage(dataPath + "roundcards/" + card.getTurnTypes()[i].name() + ".png");
-                int roundWidth = (int) (roundImg.getWidth(null) * scaleW * 1.2);
+                int roundWidth = (int) (roundImg.getWidth(null) * scaleW);
                 g.drawImage(roundImg, x, r.y + r.height / 3, roundWidth, roundHeight, null);
                 // Highlight current turn in current round
                 if (currentRound && ((ColtExpressTurnOrder)cegs.getTurnOrder()).getFullPlayerTurnCounter() == i) {
@@ -310,7 +305,7 @@ public class ColtExpressDeckView<T extends Component> extends ComponentView {
                 if (endImg != null) {
                     int roundWidth = (int) (endImg.getWidth(null) * scaleW);
                     int rHeight = (int) (endImg.getHeight(null) * scaleH);
-                    g.drawImage(endImg, r.x + r.width / 2 - roundWidth / 2, (int)(r.y + r.height * 2 / 3 - 5*scale), roundWidth, rHeight, null);
+                    g.drawImage(endImg, r.x + r.width / 2 - roundWidth / 2, r.y + r.height * 2 / 3, roundWidth, rHeight, null);
                 }
             }
         }

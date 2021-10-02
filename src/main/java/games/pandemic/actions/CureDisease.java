@@ -69,7 +69,10 @@ public class CureDisease extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Cure Disease " + color;
+        return "CureDisease{" +
+                "color='" + color + '\'' +
+                ", cards=" + cardIds.toString() +
+                '}';
     }
 
     @Override

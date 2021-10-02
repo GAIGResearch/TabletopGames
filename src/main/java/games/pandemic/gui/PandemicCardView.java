@@ -55,8 +55,8 @@ public class PandemicCardView extends CardView {
                 }
             } else if (act != null) {
                 // Player role card
-//                this.background = ImageIO.GetInstance().getImage(dataPath + "playercardbg.png");
-//                this.secondaryBG = ImageIO.GetInstance().getImage(dataPath + "playeractivebg.png");
+                this.background = ImageIO.GetInstance().getImage(dataPath + "playercardbg.png");
+                this.secondaryBG = ImageIO.GetInstance().getImage(dataPath + "playeractivebg.png");
                 tooltip = "Action: " + ((PropertyString)act).value;
             } else {
                 // Event card
@@ -85,7 +85,7 @@ public class PandemicCardView extends CardView {
                 }
             } else if (act != null) {
                 // Player role card
-//                background = ImageIO.GetInstance().getImage(dataPath + "playercardbg.png");
+                background = ImageIO.GetInstance().getImage(dataPath + "playercardbg.png");
             } else {
                 // Event card
                 background = ImageIO.GetInstance().getImage(dataPath + "eventcardbg.png");
@@ -119,11 +119,9 @@ public class PandemicCardView extends CardView {
             double scaleH = height*1.0/h;
             g.drawImage(background, x, y, (int) (w*scaleW), (int) (h*scaleH), null);
         } else {
-            if (card == null || card.getProperty(Hash.GetInstance().hash("action")) == null) {
-                g.setColor(Color.lightGray);
-                g.fillRect(x, y, width - 1, height - 1);
-                g.setColor(Color.black);
-            }
+            g.setColor(Color.lightGray);
+            g.fillRect(x, y, width-1, height-1);
+            g.setColor(Color.black);
         }
 
         if (card != null) {
@@ -135,14 +133,7 @@ public class PandemicCardView extends CardView {
             }
             PropertyColor col = (PropertyColor)card.getProperty(colorHash);
             if (col != null) {
-                Color c = Utils.stringToColor(col.valueStr);
-                if (c != null && background == null) {
-                    g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 50));
-                    g.fillRoundRect(x, y, width, height, 25, 25);
-                    g.setColor(Color.black);
-                    g.drawRoundRect(x, y, width, height, 25, 25);
-                }
-                g.setColor(c);
+                g.setColor(Utils.stringToColor(col.valueStr));
             }
             Stroke st = g.getStroke();
             g.setStroke(new BasicStroke(2));

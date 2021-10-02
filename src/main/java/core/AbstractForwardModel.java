@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import static core.CoreConstants.DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED;
+import static core.CoreConstants.VERBOSE;
+
 public abstract class AbstractForwardModel {
 
     /* Limited access/Final methods */
@@ -88,7 +91,7 @@ public abstract class AbstractForwardModel {
      * @param action    - action played
      */
     protected void illegalActionPlayed(AbstractGameState gameState, AbstractAction action) {
-        disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnIllegalActionPlayed, gameState);
+        disqualifyOrRandomAction(DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED, gameState);
     }
 
     /**
@@ -134,7 +137,7 @@ public abstract class AbstractForwardModel {
             }
             _next(currentState, action);
         } else {
-            if (currentState.coreGameParameters.verbose) {
+            if (VERBOSE) {
                 System.out.println("Invalid action.");
             }
             illegalActionPlayed(currentState, action);

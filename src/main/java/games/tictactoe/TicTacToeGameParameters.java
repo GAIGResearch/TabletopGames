@@ -21,23 +21,26 @@ public class TicTacToeGameParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        TicTacToeGameParameters gp = new TicTacToeGameParameters(System.currentTimeMillis());
-        gp.gridSize = gridSize;
-        return gp;
+        return new TicTacToeGameParameters(System.currentTimeMillis());
     }
 
     @Override
-    public boolean _equals(Object o) {
+    protected boolean _equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        TicTacToeGameParameters that = (TicTacToeGameParameters) o;
-        return gridSize == that.gridSize;
+        if (!(o instanceof TicTacToeGameParameters)) return false;
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), gridSize);
+    }
+
+
+    @Override
+    public String getParameterName(int parameterId) {
+        if (parameterId == 0) return "Grid size";
+        return null;
     }
 
     @Override

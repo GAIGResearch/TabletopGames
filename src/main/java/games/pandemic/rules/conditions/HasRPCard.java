@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
 import core.properties.PropertyString;
-import core.rules.Node;
 import core.rules.nodetypes.ConditionNode;
 import games.pandemic.PandemicGameState;
 
@@ -13,18 +12,6 @@ import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("unchecked")
 public class HasRPCard extends ConditionNode {
-
-    public HasRPCard() {
-        super();
-    }
-
-    /**
-     * Copy constructor
-     * @param hasRPCard - Node to be copied
-     */
-    public HasRPCard(HasRPCard hasRPCard) {
-        super(hasRPCard);
-    }
 
     @Override
     protected boolean test(AbstractGameState gs) {
@@ -40,10 +27,5 @@ public class HasRPCard extends ConditionNode {
             }
         }
         return false;
-    }
-
-    @Override
-    protected Node _copy() {
-        return new HasRPCard(this);
     }
 }

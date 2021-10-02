@@ -3,7 +3,6 @@ package games.pandemic.rules.conditions;
 import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
-import core.rules.Node;
 import core.rules.nodetypes.ConditionNode;
 import games.pandemic.PandemicGameState;
 import games.pandemic.rules.rules.PlayerAction;
@@ -16,15 +15,6 @@ public class PlayerHandOverCapacity extends ConditionNode {
 
     public PlayerHandOverCapacity() {
         this.playerId = -2;  // Current player by default
-    }
-
-    /**
-     * Copy constructor
-     * @param playerHandOverCapacity - Node to be copied
-     */
-    public PlayerHandOverCapacity(PlayerHandOverCapacity playerHandOverCapacity) {
-        super(playerHandOverCapacity);
-        this.playerId = playerHandOverCapacity.playerId;
     }
 
     @Override
@@ -50,11 +40,6 @@ public class PlayerHandOverCapacity extends ConditionNode {
         }
 
         return playerDeck != null && playerDeck.isOverCapacity();
-    }
-
-    @Override
-    protected Node _copy() {
-        return new PlayerHandOverCapacity(this);
     }
 
 }

@@ -8,7 +8,7 @@ import core.interfaces.IPrintable;
  * The Countess needs to be discarded in case the player also hold a King or a Prince card.
  * Despite its high value, the Countess has no other effect.
  */
-public class CountessAction extends core.actions.DrawCard implements IPrintable {
+public class CountessAction extends DrawCard implements IPrintable {
 
     public CountessAction(int deckFrom, int deckTo, int fromIndex) {
         super(deckFrom, deckTo, fromIndex);

@@ -16,6 +16,7 @@ import utilities.Utils;
 
 import java.util.*;
 
+import static core.CoreConstants.VERBOSE;
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 import static utilities.Utils.generatePermutations;
 
@@ -122,11 +123,11 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                     }
                     //Action was successfully noped
                     ((IsNopeable) actionStack.pop()).nopedExecute(gameState);
-                    if (gameState.getCoreGameParameters().verbose) {
+                    if (VERBOSE) {
                         System.out.println("Action was successfully noped");
                     }
                 } else {
-                    if (actionStack.size() > 2 && gameState.getCoreGameParameters().verbose) {
+                    if (actionStack.size() > 2 && VERBOSE) {
                         System.out.println("All nopes were noped");
                     }
 
@@ -162,7 +163,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         }
 
         // Print end game result
-        if (gameState.getCoreGameParameters().verbose) {
+        if (VERBOSE) {
             System.out.println(Arrays.toString(gameState.getPlayerResults()));
             for (int j = 0; j < gameState.getNPlayers(); j++) {
                 System.out.println("Player " + j + ": " + gameState.getPlayerResults()[j]);

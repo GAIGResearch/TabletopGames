@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
 public class VirusGameState extends AbstractGameState implements IPrintable {
     List<VirusBody>       playerBodies;   // Each player has a body
@@ -48,7 +49,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
             vgs.playerDecks.add(playerDecks.get(i).copy());
             vgs.playerBodies.add((VirusBody) playerBodies.get(i).copy());
         }
-        if (getCoreGameParameters().partialObservable && playerId != -1) {
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
             // Draw deck and opponent hand cards are hidden. Shuffle all together and deal random cards for opponents.
             for (int i = 0; i < getNPlayers(); i++) {
                 if (playerId != i) {

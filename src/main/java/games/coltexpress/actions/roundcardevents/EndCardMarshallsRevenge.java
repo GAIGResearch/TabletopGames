@@ -12,7 +12,7 @@ import utilities.Utils;
 
 import java.util.LinkedList;
 
-public class EndCardMarshallsRevenge extends RoundEvent {
+public class EndCardMarshallsRevenge extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -63,10 +63,5 @@ public class EndCardMarshallsRevenge extends RoundEvent {
     @Override
     public String toString() {
         return "Marshall's Revenge";
-    }
-
-    @Override
-    public String getEventText() {
-        return "All bandits on the roof of the Marshall's car drop their least valuable purse.";
     }
 }

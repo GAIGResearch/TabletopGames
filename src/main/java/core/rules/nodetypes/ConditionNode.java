@@ -16,18 +16,6 @@ public abstract class ConditionNode extends Node {
     boolean passed;  // The result of the test, true if condition test returns true, false otherwise
 
     /**
-     * Copy constructor, does not copy childYes or childNo to avoid endless recursion in looping graphs.
-     * @param node - Node to be copied
-     */
-    protected ConditionNode(ConditionNode node) {
-        super(node);
-    }
-
-    public ConditionNode() {
-        super();
-    }
-
-    /**
      * Tests a condition given a game state, returns true if condition passes, false otherwise.
      * @param gs - game state to test condition in.
      * @return - boolean, the result of the condition test.

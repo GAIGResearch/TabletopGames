@@ -8,6 +8,7 @@ import games.pandemic.PandemicGameState;
 import utilities.Hash;
 import utilities.Utils;
 
+import static core.CoreConstants.VERBOSE;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 import static utilities.Utils.GameResult.WIN;
 
@@ -19,7 +20,7 @@ public class GameOverDiseasesCured extends GameOverCondition {
             if (((Counter)((PandemicGameState)gs).getComponent(Hash.GetInstance().hash("Disease " + c))).getValue() < 1) all_cured = false;
         }
         if (all_cured) {
-            if (gs.getCoreGameParameters().verbose) {
+            if (VERBOSE) {
                 System.out.println("WIN!");
             }
             return WIN;

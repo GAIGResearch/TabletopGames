@@ -25,23 +25,21 @@ public class PandemicCounterView extends CounterView {
         if (background != null) {
             g.drawImage(background, 0, 0, null, null);
         } else {
-            if (color != null) {
-                g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 50));
-            } else {
-                g.setColor(Color.lightGray);
-            }
-            g.fillRect(0, 0, width-1, height-1);
-            if (color != null) {
-                g.setColor(color);
-            }
-            g.drawRect(0, 0, width-1, height-1);
+            g.setColor(Color.lightGray);
+            g.fillOval(0, 0, width-1, height-1);
+            g.setColor(Color.black);
         }
 
-        g.setColor(Color.black);
         Font f = g.getFont();
-        g.setFont(new Font(f.getName(), Font.BOLD, 32));
+        g.setFont(new Font(f.getName(), Font.BOLD, 36));
         int value = ((Counter)component).getValue();
-        g.drawString(""+value, width/2-15, width-15);
+        g.drawString(""+value, width/2-10, width-10);
         g.setFont(f);
+
+        if (color != null) {
+            g.setColor(color);
+        }
+        g.drawOval(0, 0, width-1, height-1);
     }
+
 }

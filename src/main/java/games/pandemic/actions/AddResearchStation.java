@@ -53,7 +53,9 @@ public class AddResearchStation extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Add Research Station in " + city;
+        return "AddResearchStation{" +
+                "toCity='" + city + '\'' +
+                '}';
     }
 
     public String getCity() {

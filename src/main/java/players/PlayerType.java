@@ -6,8 +6,6 @@ import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCParams;
-import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
@@ -33,8 +31,7 @@ public enum PlayerType {
     HumanConsolePlayer (new ArrayList<Property>() {{ add(Human); }}),
     Random (new ArrayList<Property>() {{ add(Simple); add(Stochastic); }}),
     OSLA (new ArrayList<Property>() {{ add(Simple); add(Stochastic); add(ForwardPlanning); add(Greedy); }}),
-    MCTS (new ArrayList<Property>() {{ add(Stochastic); add(ForwardPlanning); add(TreeSearch); }}),
-    RMHC (new ArrayList<Property>() {{ add(Stochastic); add(ForwardPlanning); add(EvolutionaryAlgorithm); }});
+    MCTS (new ArrayList<Property>() {{ add(Stochastic); add(ForwardPlanning); add(TreeSearch); }});
 
     /**
      * Converts a given string to the enum type corresponding to the player.
@@ -50,8 +47,6 @@ public enum PlayerType {
                 return OSLA;
             case "mcts":
                 return MCTS;
-            case "rmhc":
-                return RMHC;
             case "console":
                 return HumanConsolePlayer;
             case "gui":
@@ -72,9 +67,6 @@ public enum PlayerType {
     public AbstractPlayer createPlayerInstance(long seed, ActionController ac, PlayerParameters params) {
         AbstractPlayer player = null;
         Random r = new Random(seed);
-        if (params != null) {
-            params.setRandomSeed(seed);
-        }
 
         switch(this) {
             case HumanGUIPlayer:
@@ -95,26 +87,9 @@ public enum PlayerType {
                 }
                 player = new MCTSPlayer((MCTSParams) params);
                 break;
-            case RMHC:
-                if (params == null) {
-                    params = new RMHCParams(seed);
-                }
-                player = new RMHCPlayer((RMHCParams) params);
-                break;
         }
 
         return player;
-    }
-
-    public PlayerParameters createParameterSet(long seed) {
-        switch(this) {
-            case MCTS:
-                return new MCTSParams(seed);
-            case RMHC:
-                return new RMHCParams(seed);
-            default:
-                return null;
-        }
     }
 
     /**
@@ -164,7 +139,6 @@ public enum PlayerType {
         Stochastic,
         ForwardPlanning,
         TreeSearch,
-        EvolutionaryAlgorithm,
         Greedy;
 
         /**

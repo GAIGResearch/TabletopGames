@@ -7,7 +7,7 @@ import games.coltexpress.components.Compartment;
 
 import java.util.LinkedList;
 
-public class RoundCardPassengerRebellion extends RoundEvent {
+public class RoundCardPassengerRebellion extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -44,10 +44,5 @@ public class RoundCardPassengerRebellion extends RoundEvent {
     @Override
     public String toString() {
         return "Passenger Rebellion";
-    }
-
-    @Override
-    public String getEventText() {
-        return "All bandits in the train receive one Neutral Bullet card.";
     }
 }

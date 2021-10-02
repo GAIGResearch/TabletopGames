@@ -12,9 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Counter extends Component {
-    protected int value;  // Current value of this counter
-    protected int minimum;  // Minimum value (inclusive)
-    protected int maximum;  // Maximum value (inclusive)
+    private int value;  // Current value of this counter
+    private int minimum;  // Minimum value (inclusive)
+    private int maximum;  // Maximum value (inclusive)
 
     public Counter() {
         this(0, 0, 0, "");
@@ -27,7 +27,7 @@ public class Counter extends Component {
         this.maximum = maximum;
     }
 
-    protected Counter(int value, int minimum, int maximum, String name, int ID) {
+    private Counter(int value, int minimum, int maximum, String name, int ID) {
         super(ComponentType.COUNTER, name, ID);
         this.value = value;
         this.minimum = minimum;
@@ -169,7 +169,7 @@ public class Counter extends Component {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return componentID;
     }
 }

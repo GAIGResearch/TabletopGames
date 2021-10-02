@@ -1,8 +1,8 @@
 package games.coltexpress.cards;
 
+import core.actions.AbstractAction;
 import core.components.Card;
 import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.actions.roundcardevents.RoundEvent;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -55,15 +55,15 @@ public class RoundCard extends Card {
     }
 
     protected TurnType[] turnTypes;
-    protected RoundEvent endRoundCardEvent;
+    protected AbstractAction endRoundCardEvent;
 
-    public RoundCard(String name, TurnType[] turnTypes, RoundEvent endRoundCardEvent) {
+    public RoundCard(String name, TurnType[] turnTypes, AbstractAction endRoundCardEvent) {
         super(name);
         this.turnTypes = turnTypes;
         this.endRoundCardEvent = endRoundCardEvent;
     }
 
-    public RoundCard(String name, TurnType[] turnTypes, RoundEvent endRoundCardEvent, int ID) {
+    public RoundCard(String name, TurnType[] turnTypes, AbstractAction endRoundCardEvent, int ID) {
         super(name, ID);
         this.turnTypes = turnTypes;
         this.endRoundCardEvent = endRoundCardEvent;
@@ -75,7 +75,7 @@ public class RoundCard extends Card {
         }
     }
 
-    public RoundEvent getEndRoundCardEvent() {
+    public AbstractAction getEndRoundCardEvent() {
         return endRoundCardEvent;
     }
 
@@ -89,7 +89,7 @@ public class RoundCard extends Card {
 
     @Override
     public Card copy() {
-        return new RoundCard(componentName, turnTypes.clone(), (endRoundCardEvent != null? (RoundEvent) endRoundCardEvent.copy() : null), componentID);
+        return new RoundCard(componentName, turnTypes.clone(), (endRoundCardEvent != null? endRoundCardEvent.copy() : null), componentID);
     }
 
     @Override

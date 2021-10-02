@@ -13,7 +13,7 @@ import java.util.Objects;
  * The Priest allows a player to see another player's hand cards.
  * This has no effect in case the game is fully observable.
  */
-public class PriestAction extends core.actions.DrawCard implements IPrintable {
+public class PriestAction extends DrawCard implements IPrintable {
 
     private final int opponentID;
 
@@ -25,7 +25,7 @@ public class PriestAction extends core.actions.DrawCard implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
-        int playerID = gs.getCurrentPlayer();
+        int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
         PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
 
         // Set all cards to be visible by the current player
@@ -69,9 +69,5 @@ public class PriestAction extends core.actions.DrawCard implements IPrintable {
     @Override
     public AbstractAction copy() {
         return new PriestAction(deckFrom, deckTo, fromIndex, opponentID);
-    }
-
-    public int getOpponentID() {
-        return opponentID;
     }
 }

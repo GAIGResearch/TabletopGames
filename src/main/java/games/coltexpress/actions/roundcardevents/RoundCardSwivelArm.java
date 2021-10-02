@@ -7,7 +7,7 @@ import games.coltexpress.components.Compartment;
 
 import java.util.LinkedList;
 
-public class RoundCardSwivelArm extends RoundEvent {
+public class RoundCardSwivelArm extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -47,10 +47,5 @@ public class RoundCardSwivelArm extends RoundEvent {
     @Override
     public String toString() {
         return "Swivel Arm";
-    }
-
-    @Override
-    public String getEventText() {
-        return "All bandits on the roof of the train are swept to the caboose.";
     }
 }

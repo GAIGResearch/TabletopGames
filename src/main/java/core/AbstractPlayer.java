@@ -68,8 +68,7 @@ public abstract class AbstractPlayer {
 
     @Override
     public String toString() {
-        if (name != null) return name;
-        return this.getClass().getSimpleName();
+        return name;
     }
 
     public IStatisticLogger getStatsLogger() {

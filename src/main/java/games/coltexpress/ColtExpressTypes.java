@@ -12,27 +12,21 @@ public class ColtExpressTypes {
 
     // Character types implemented
     public enum CharacterType {
-        Ghost (Color.white, "Ghost is one stealthy bandit. During your first turn of each Round, you can play your Action card face-down on the common deck. If you choose to draw three cards instead of playing an Action card during the first turn, you cannot use Ghost's special ability later in this Round."),
-        Cheyenne (new Color(66, 175, 94), "Cheyenne is an outstanding pickpocket. When punching a Bandit, you can take the Purse he has just lost. If he has lost a Jewel or a Strongbox (your choice), the Loot just falls on the floor (as usual)."),
-        Django (new Color(43, 43, 43), "Django's shots are so powerful that they knock the other bandits back. When shooting a Bandit, make him move one Car in the direction of fire, bearing in mind that Bandits can never leave the train."),
-        Tuco (new Color(225, 7, 20), "Tuco's shots are not stopped by the roof. You cannot be the target of a Fire action or a Punch action if there is another Bandit who can be targeted, too."),
-        Doc (new Color(25, 183, 199), "Doc is the smartest Bandit of the party. At the beginning of each Round, draw seven cards instead of six."),
-        Belle (new Color(233, 13, 130), "Belle's beauty is her best weapon. You can shoot a Bandit who is on the same Car as you are, on the other level, through the roof of your Car.");
+        Ghost (Color.white),
+        Cheyenne (new Color(66, 175, 94)),
+        Django (new Color(43, 43, 43)),
+        Tuco (new Color(225, 7, 20)),
+        Doc (new Color(25, 183, 199)),
+        Belle (new Color(233, 13, 130));
 
-        private final Color color;
-        private final String power;
+        private Color color;
 
-        CharacterType(Color color, String power) {
+        CharacterType(Color color) {
             this.color = color;
-            this.power = power;
         }
 
         public Color getColor() {
             return color;
-        }
-
-        public String getPower() {
-            return power;
         }
     }
 
@@ -54,8 +48,8 @@ public class ColtExpressTypes {
                 new EndCardPickPocket()));
 
         private String key;
-        private Pair<RoundCard.TurnType[], RoundEvent> content;
-        EndRoundCard(String key, Pair<RoundCard.TurnType[], RoundEvent> content) {
+        private Pair<RoundCard.TurnType[], AbstractAction> content;
+        EndRoundCard(String key, Pair<RoundCard.TurnType[], AbstractAction> content) {
             this.key = key;
             this.content = content;
         }
@@ -68,7 +62,7 @@ public class ColtExpressTypes {
             return content.a;
         }
 
-        public RoundEvent getEndCardEvent() {
+        public AbstractAction getEndCardEvent() {
             return content.b;
         }
     }
@@ -108,8 +102,8 @@ public class ColtExpressTypes {
                 null));
 
         private String key;
-        private Group<RoundCard.TurnType[], RoundCard.TurnType[], RoundEvent> content;
-        RegularRoundCard(String key, Group<RoundCard.TurnType[], RoundCard.TurnType[], RoundEvent> content) {
+        private Group<RoundCard.TurnType[], RoundCard.TurnType[], AbstractAction> content;
+        RegularRoundCard(String key, Group<RoundCard.TurnType[], RoundCard.TurnType[], AbstractAction> content) {
             this.key = key;
             this.content = content;
         }
@@ -124,7 +118,7 @@ public class ColtExpressTypes {
             else return content.b;
         }
 
-        public RoundEvent getEndCardEvent() {
+        public AbstractAction getEndCardEvent() {
             return content.c;
         }
     }

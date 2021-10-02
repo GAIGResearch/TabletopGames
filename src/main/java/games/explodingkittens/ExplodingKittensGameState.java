@@ -14,6 +14,7 @@ import utilities.Utils;
 
 import java.util.*;
 
+import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static core.CoreConstants.VisibilityMode;
 
 public class ExplodingKittensGameState extends AbstractGameState implements IPrintable {
@@ -65,7 +66,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
             ekgs.playerHandCards.add(d.copy());
         }
         ekgs.drawPile = drawPile.copy();
-        if (getCoreGameParameters().partialObservable && playerId != -1) {
+        if (PARTIAL_OBSERVABLE && playerId != -1) {
             // Other player hands + draw deck are hidden, combine in draw pile and shuffle
             // Note: this considers the agent to track opponent's cards that are known to him by itself
             // e.g. in case the agent has previously given a favor card to its opponent

@@ -1,12 +1,13 @@
 package games.dominion.gui;
 
 import games.dominion.*;
+import org.intellij.lang.annotations.Flow;
 
 import javax.swing.*;
 import java.awt.*;
 
 import static games.dominion.DominionConstants.*;
-import static games.dominion.gui.DominionGUIManager.*;
+import static games.dominion.gui.DominionGUI.*;
 
 public class DominionPlayerView extends JComponent {
 

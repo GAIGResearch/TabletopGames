@@ -156,7 +156,10 @@ public class InfectCity extends DrawCard {
 
     @Override
     public String toString() {
-        return "Infect city with " + count + " cubes";
+        return "InfectCity{" +
+                "count=" + count +
+                ", maxCubesPerCity=" + maxCubesPerCity +
+                '}';
     }
 
     @Override

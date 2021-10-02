@@ -3,12 +3,17 @@ package games.loveletter.gui;
 import core.components.Deck;
 import games.loveletter.cards.LoveLetterCard;
 import gui.views.CardView;
+import gui.views.ComponentView;
 import gui.views.DeckView;
 import utilities.ImageIO;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-import static games.loveletter.gui.LoveLetterGUIManager.*;
+import static games.loveletter.gui.LoveLetterGUI.*;
 
 public class LoveLetterDeckView extends DeckView<LoveLetterCard> {
 
