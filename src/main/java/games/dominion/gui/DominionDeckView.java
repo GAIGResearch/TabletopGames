@@ -4,13 +4,10 @@ import core.components.Deck;
 import games.dominion.cards.DominionCard;
 import gui.views.*;
 import utilities.ImageIO;
-import games.dominion.*;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
-import static games.dominion.gui.DominionGUI.*;
+import static games.dominion.gui.DominionGUIManager.*;
 
 public class DominionDeckView extends DeckView<DominionCard> {
     // Back of card image

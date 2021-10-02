@@ -1,24 +1,24 @@
 package games.pandemic;
 
 import core.AbstractParameters;
+import core.Game;
+import evaluation.TunableParameters;
+import games.GameType;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class PandemicParameters extends AbstractParameters {
+public class PandemicParameters extends TunableParameters {
 
     String dataPath;
 
     int lose_max_outbreak = 8;
-
     int max_cubes_per_city = 3;  // More cause outbreak
-
     int n_city_cards = 48;
     int n_event_cards = 5;
     int n_epidemic_cards = 4;
     int n_cubes_epidemic = 3;
-
     int[] infection_rate = new int[]{2, 2, 2, 3, 3, 4, 4};  // How many cards are drawn for each counter
     int n_infection_cards_setup = 3;
     int n_infections_setup = 3;
@@ -27,10 +27,10 @@ public class PandemicParameters extends AbstractParameters {
     int n_cards_for_cure = 5;
     int n_cards_for_cure_reduced = 4;
     int n_forecast_cards = 6;  // How many cards should be viewed and rearranged for the Forecast event card
-
     int max_cards_per_player = 7;  // Max cards in hand per player
     int n_cards_draw = 2;  // Number of cards players draw each turn
-
+    int n_actions_per_turn = 4;
+    int n_research_stations = 6;
 
     // Number of cards each player receives.
     HashMap<Integer, Integer> n_cards_per_player = new HashMap<Integer, Integer>() {  // Mapping n_players : n_cards_per_player
@@ -40,12 +40,26 @@ public class PandemicParameters extends AbstractParameters {
             put(4, 2);
         }
     };
-    int n_actions_per_turn = 4;
-    int n_research_stations = 6;
 
     public PandemicParameters(String dataPath, long seed) {
         super(seed);
         this.dataPath = dataPath;
+
+        addTunableParameter("lose_max_outbreak", 8, Arrays.asList(5,8,10,15));
+        addTunableParameter("max_cubes_per_city", 3, Arrays.asList(3,5,8,10));
+        addTunableParameter("n_epidemic_cards", 4, Arrays.asList(1,2,3,4,5,6));
+        addTunableParameter("n_cubes_epidemic", 3, Arrays.asList(3,5,8,10));
+        addTunableParameter("n_infection_cards_setup", 3, Arrays.asList(1,3,5,8));
+        addTunableParameter("n_infections_setup", 3, Arrays.asList(1,3,5,8));
+        addTunableParameter("n_cubes_infection", 1, Arrays.asList(1,2,3));
+        addTunableParameter("n_initial_disease_cubes", 24, Arrays.asList(15,20,24,30,50));
+        addTunableParameter("n_cards_for_cure", 5, Arrays.asList(3,4,5,6,7));
+        addTunableParameter("n_cards_for_cure_reduced", 4, Arrays.asList(2,3,4,5,6));
+        addTunableParameter("n_forecast_cards", 6, Arrays.asList(3,4,5,6,7,8));
+        addTunableParameter("max_cards_per_player", 7, Arrays.asList(5,7,10,15));
+        addTunableParameter("n_cards_draw", 2, Arrays.asList(1,2,3,4,5));
+        addTunableParameter("n_actions_per_turn", 4, Arrays.asList(1,2,3,4,5,6,7,8));
+        addTunableParameter("n_research_stations", 6, Arrays.asList(4,5,6,7,8));
     }
 
     public PandemicParameters(PandemicParameters pandemicParameters) {
@@ -183,9 +197,33 @@ public class PandemicParameters extends AbstractParameters {
     }
 
     @Override
+    public void _reset() {
+        lose_max_outbreak = (int) getParameterValue("lose_max_outbreak");
+        max_cubes_per_city = (int) getParameterValue("max_cubes_per_city");
+        n_epidemic_cards = (int) getParameterValue("n_epidemic_cards");
+        n_cubes_epidemic = (int) getParameterValue("n_cubes_epidemic");
+        n_infection_cards_setup = (int) getParameterValue("n_infection_cards_setup");
+        n_infections_setup = (int) getParameterValue("n_infections_setup");
+        n_cubes_infection = (int) getParameterValue("n_cubes_infection");
+        n_initial_disease_cubes = (int) getParameterValue("n_initial_disease_cubes");
+        n_cards_for_cure = (int) getParameterValue("n_cards_for_cure");
+        n_cards_for_cure_reduced = (int) getParameterValue("n_cards_for_cure_reduced");
+        n_forecast_cards = (int) getParameterValue("n_forecast_cards");
+        max_cards_per_player = (int) getParameterValue("max_cards_per_player");
+        n_cards_draw = (int) getParameterValue("n_cards_draw");
+        n_actions_per_turn = (int) getParameterValue("n_actions_per_turn");
+        n_research_stations = (int) getParameterValue("n_research_stations");
+    }
+
+    @Override
     public int hashCode() {
         int result = Objects.hash(super.hashCode(), dataPath, lose_max_outbreak, max_cubes_per_city, n_city_cards, n_event_cards, n_epidemic_cards, n_cubes_epidemic, n_infection_cards_setup, n_infections_setup, n_cubes_infection, n_initial_disease_cubes, n_cards_for_cure, n_cards_for_cure_reduced, n_forecast_cards, max_cards_per_player, n_cards_draw, n_cards_per_player, n_actions_per_turn, n_research_stations);
         result = 31 * result + Arrays.hashCode(infection_rate);
         return result;
+    }
+
+    @Override
+    public Object instantiate() {
+        return new Game(GameType.Pandemic, new PandemicForwardModel(this, GameType.Pandemic.getMinPlayers()), new PandemicGameState(this, GameType.Pandemic.getMinPlayers()));
     }
 }

@@ -7,7 +7,7 @@ import games.uno.cards.UnoCard;
 import javax.swing.*;
 import java.awt.*;
 
-import static games.uno.gui.UnoGUI.*;
+import static games.uno.gui.UnoGUIManager.*;
 
 public class UnoPlayerView extends JComponent {
 
