@@ -388,7 +388,7 @@ public enum GameType {
             // TODO: Diamant GUI
 
             case Battlelore:
-                gui = new BattleloreGUI(game, ac);
+                gui = new BattleloreGUI(parent, game, ac);
         }
 
         return gui;
@@ -492,9 +492,8 @@ public enum GameType {
         Enclosure,
         DeckManagement,
         BattleCardDriven,
-        CommandCards;
-        MoveThroughDeck,
-        DeckManagement;
+        CommandCards,
+        MoveThroughDeck;
 
         /**
          * Retrieves a list of all games using this mechanic.

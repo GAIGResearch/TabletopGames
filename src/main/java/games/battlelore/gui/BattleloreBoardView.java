@@ -8,7 +8,7 @@ import gui.views.ComponentView;
 import utilities.ImageIO;
 import java.awt.*;
 import java.awt.font.TextLayout;
-import static core.AbstractGUI.defaultItemSize;
+import static gui.GUI.defaultItemSize;
 
 public class BattleloreBoardView extends ComponentView {
     BattleloreGameState gameState;

@@ -1,6 +1,7 @@
 package games.battlelore.gui;
 
-import core.AbstractGUI;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -9,11 +10,11 @@ import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
 
-public class BattleloreGUI extends AbstractGUI {
+public class BattleloreGUI extends AbstractGUIManager {
     BattleloreBoardView view;
 
-    public BattleloreGUI(Game game, ActionController ac) {
-        super(ac, 25);
+    public BattleloreGUI(GamePanel parent, Game game, ActionController ac) {
+        super(parent, ac, 25);
 
         if (game == null) {
             return;
@@ -23,20 +24,26 @@ public class BattleloreGUI extends AbstractGUI {
         view = new BattleloreBoardView(gameState.getBoard());
 
         // Set width/height of display
-        this.width = defaultItemSize * gameState.getBoard().getWidth() * 2;
+        this.width = Math.max(defaultDisplayWidth, defaultItemSize *  gameState.getBoard().getWidth() * 2);
         this.height = defaultItemSize * gameState.getBoard().getHeight() * 2;
+
 
         JPanel infoPanel = createGameStateInfoPanel("Battlelore", gameState, width, defaultInfoPanelHeight);
 
-        getContentPane().add(view, BorderLayout.CENTER);
-        getContentPane().add(infoPanel, BorderLayout.NORTH);
 
-        setFrameProperties();
+        parent.setLayout(new BorderLayout());
+        parent.add(view, BorderLayout.CENTER);
+        parent.add(infoPanel, BorderLayout.NORTH);
+        parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20));
+        parent.revalidate();
+        parent.setVisible(true);
+        parent.repaint();
+
     }
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         view.updateComponent(((BattleloreGameState)gameState).getBoard());
-        repaint();
+        parent.repaint();
     }
 }

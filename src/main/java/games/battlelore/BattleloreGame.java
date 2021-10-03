@@ -48,35 +48,30 @@ public class BattleloreGame extends Game {
         /* 3. Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        MCTSParams params1 = new MCTSParams();
-        RMHCParams params2 = new RMHCParams();
+        /* 4. Run! */
+        //------------------------UNCOMMENT FOR VISUAL REPRESENTATION----------------------------------------//
+        //players.add(new BasicMCTSPlayer(new Random().nextLong()));
+        //players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
+        //players.add(new HumanConsolePlayer());
+        players.add(new OSLAPlayer());
+        players.add(new RuleBasedPlayer());
+        runOne(Battlelore, players, seed, ac, false, null);
+
+
+        //------------------------UNCOMMENT FOR SIMULATIONS----------------------------------------//
+        /*
+        final int repetitions = 500;
+        long[] seeds = new long[repetitions];
 
         players.add(new RandomPlayer());
         players.add(new OSLAPlayer());
         players.add(new RuleBasedPlayer());
         players.add(new BasicMCTSPlayer(new Random().nextLong()));
         players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
-        //players.add(new MCTSPlayer(new Random().nextLong()));
-        //players.add(new HumanConsolePlayer());
-        //players.add(new HumanGUIPlayer(ac));
+        players.add(new MCTSPlayer(new Random().nextLong()));
 
-        /* 4. Run! */
-        //------------------------DEBUG----------------------------------------//
-        players.clear();
-        //players.add(new BasicMCTSPlayer(new Random().nextLong()));
-        //players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
-        //players.add(new RMHCPlayer(params2, new BattleloreHeuristic()));
-        players.add(new OSLAPlayer());
-        players.add(new RuleBasedPlayer());
-        runOne(Battlelore, players, seed, ac, false, null);
-
-        //------------------------DEBUG----------------------------------------//
         List<GameType> games = new ArrayList<GameType>();
-
         games.add(Battlelore);
-
-        final int repetitions = 500;
-        long[] seeds = new long[repetitions];
 
         for (int i = 0; i < players.size(); i++) {
             for (int k = 0; k < players.size(); k++) {
@@ -90,5 +85,6 @@ public class BattleloreGame extends Game {
                 }
             }
         }
+        */
     }
 }

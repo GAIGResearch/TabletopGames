@@ -19,7 +19,6 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.VERBOSE;
 
 public class BattleloreForwardModel extends AbstractForwardModel {
     @Override
@@ -102,7 +101,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
             state.setPlayerResult(Utils.GameResult.DRAW, 0);
             state.setPlayerResult(Utils.GameResult.DRAW, 1);
              */
-            registerWinner(state, 0);
+            registerWinner(state, state.GetPlayerScore(0) >= state.GetPlayerScore(1) ? 0 : 1);
         }
     }
 
@@ -135,7 +134,6 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         Unit.Faction playerFaction = player == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        IGamePhase a = gameState.getGamePhase();
 
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep) {
             if (CheckUnitRemainingAtRight(state, player, MapTile.TileArea.right)) {
@@ -233,7 +231,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
 
     @Override
     protected void endGame(AbstractGameState gameState) {
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gameState.getPlayerResults()));
         }
     }

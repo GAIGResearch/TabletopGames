@@ -54,13 +54,13 @@ public class GUI extends JFrame {
     public GUI() {
     }
 
-    public void setFrameProperties() {
+    public void setFrameProperties(boolean runWithVisuals) {
         // Frame properties
         this.wi = new WindowInput();
         addWindowListener(wi);
         revalidate();
         pack();
-        this.setVisible(true);
+        this.setVisible(runWithVisuals);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 //        setDefaultCloseOperation(EXIT_ON_CLOSE);
         repaint();

@@ -44,17 +44,18 @@ public class PlayCommandCardAction extends AbstractAction {
                     MapTile tile = state.getBoard().getElement(x, y);
                     if (type == CommandCard.CommandType.AttackRight && tile.GetUnits() != null &&
                             tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.right)) {
+                        state.SetUnitsAsOrderable(x,y);
                     }
                     else if (type == CommandCard.CommandType.PatrolLeft && tile.GetUnits() != null &&
                             tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.left)) {
+                        state.SetUnitsAsOrderable(x,y);
                     }
                     else if (type == CommandCard.CommandType.BattleMarch && tile.GetUnits() != null &&
                             tile.GetFaction() == playerFaction && tile.IsInArea(MapTile.TileArea.mid)) {
+                        state.SetUnitsAsOrderable(x,y);
                     }
-                    state.SetUnitsAsOrderable(x,y);
                 }
             }
-
             state.AddToRounds();
             state.IncrementTurn(playerID);
             return true;
