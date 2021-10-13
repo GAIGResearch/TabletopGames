@@ -8,8 +8,8 @@ import static games.dicemonastery.DiceMonasteryConstants.Resource;
 
 public class PrepareVellum extends UseMonk {
 
-    public PrepareVellum() {
-        super(2);
+    public PrepareVellum(int actionPoints) {
+        super(actionPoints);
     }
 
     @Override

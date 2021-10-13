@@ -93,11 +93,11 @@ public class ActionTests {
         assertTrue(fm.computeAvailableActions(state).contains(new PlaceSkep()));
 
         if (state.getCurrentForage().blue > 0)
-            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_BLUE_PIGMENT)));
+            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_BLUE_PIGMENT, 1)));
         if (state.getCurrentForage().red > 0)
-            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_RED_PIGMENT)));
+            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_RED_PIGMENT, 1)));
         if (state.getCurrentForage().green > 0)
-            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_GREEN_PIGMENT)));
+            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_GREEN_PIGMENT, 1)));
     }
 
     @Test
@@ -235,11 +235,11 @@ public class ActionTests {
         }
 
         if (state.getCurrentForage().blue > 0)
-            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_BLUE_PIGMENT)));
+            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_BLUE_PIGMENT, 1)));
         if (state.getCurrentForage().red > 0)
-            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_RED_PIGMENT)));
+            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_RED_PIGMENT, 1)));
         if (state.getCurrentForage().green > 0)
-            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_GREEN_PIGMENT)));
+            assertTrue(fm.computeAvailableActions(state).contains(new TakePigment(PALE_GREEN_PIGMENT, 1)));
     }
 
     @Test
@@ -248,7 +248,7 @@ public class ActionTests {
 
         ForageCard card = state.getCurrentForage();
 
-        TakePigment takeAction = card.blue > 0 ? new TakePigment(PALE_BLUE_PIGMENT) : new TakePigment(PALE_GREEN_PIGMENT);
+        TakePigment takeAction = card.blue > 0 ? new TakePigment(PALE_BLUE_PIGMENT, 1) : new TakePigment(PALE_GREEN_PIGMENT, 1);
         // with 4 players, we must have at least one of these
         assertEquals(card.blue, state.getResource(-1, PALE_BLUE_PIGMENT, MEADOW));
         assertEquals(card.red, state.getResource(-1, PALE_RED_PIGMENT, MEADOW));
@@ -346,21 +346,21 @@ public class ActionTests {
         state.moveCube(state.getCurrentPlayer(), GRAIN, SUPPLY, STOREROOM);
         assertEquals(2, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
-        assertTrue(fm.computeAvailableActions(state).contains(new BakeBread()));
+        assertTrue(fm.computeAvailableActions(state).contains(new BakeBread(1)));
 
         state.useAP(-1);
         assertEquals(3, fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).contains(new Pass()));
-        assertTrue(fm.computeAvailableActions(state).contains(new BakeBread()));
-        assertTrue(fm.computeAvailableActions(state).contains(new BrewBeer()));
+        assertTrue(fm.computeAvailableActions(state).contains(new BakeBread(1)));
+        assertTrue(fm.computeAvailableActions(state).contains(new BrewBeer(2)));
 
         state.moveCube(state.getCurrentPlayer(), HONEY, SUPPLY, STOREROOM);
         assertEquals(4, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new BrewMead()));
+        assertTrue(fm.computeAvailableActions(state).contains(new BrewMead(2)));
 
         state.moveCube(state.getCurrentPlayer(), PALE_BLUE_PIGMENT, SUPPLY, STOREROOM);
         assertEquals(5, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new PrepareInk(PALE_BLUE_PIGMENT)));
+        assertTrue(fm.computeAvailableActions(state).contains(new PrepareInk(PALE_BLUE_PIGMENT, 1)));
 
         state.moveCube(state.getCurrentPlayer(), PALE_RED_PIGMENT, SUPPLY, STOREROOM);
         state.moveCube(state.getCurrentPlayer(), PALE_BLUE_PIGMENT, SUPPLY, STOREROOM);
@@ -413,7 +413,7 @@ public class ActionTests {
     public void bakeBread() {
         state.useAP(-1);
         // Has 2 Grain in STOREROOM at setup
-        (new BakeBread()).execute(state);
+        (new BakeBread(1)).execute(state);
         assertEquals(1, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
         assertEquals(4, state.getResource(state.getCurrentPlayer(), BREAD, STOREROOM));
     }
@@ -422,14 +422,14 @@ public class ActionTests {
     public void prepareInk() {
         state.useAP(-1);
         try {
-            (new PrepareInk(PALE_GREEN_PIGMENT)).execute(state);
+            (new PrepareInk(PALE_GREEN_PIGMENT, 2)).execute(state);
             fail("Should throw exception");
         } catch (IllegalArgumentException error) {
            // expected!
         }
         state.useAP(-1);
         state.moveCube(state.getCurrentPlayer(), PALE_GREEN_PIGMENT, SUPPLY, STOREROOM);
-        (new PrepareInk(PALE_GREEN_PIGMENT)).execute(state);
+        (new PrepareInk(PALE_GREEN_PIGMENT, 2)).execute(state);
         assertEquals(0, state.getResource(state.getCurrentPlayer(), PALE_GREEN_PIGMENT, STOREROOM));
         assertEquals(1, state.getResource(state.getCurrentPlayer(), PALE_GREEN_INK, STOREROOM));
     }
@@ -438,7 +438,7 @@ public class ActionTests {
     public void brewBeer() {
         state.useAP(-2);
         // Has 2 Grain in STOREROOM at setup
-        (new BrewBeer()).execute(state);
+        (new BrewBeer(2)).execute(state);
         assertEquals(1, state.getResource(state.getCurrentPlayer(), GRAIN, STOREROOM));
         assertEquals(1, state.getResource(state.getCurrentPlayer(), PROTO_BEER_1, STOREROOM));
         assertEquals(0, state.getResource(state.getCurrentPlayer(), PROTO_BEER_2, STOREROOM));
@@ -450,7 +450,7 @@ public class ActionTests {
     public void brewMead() {
         state.useAP(-2);
         // Has 2 Honey in STOREROOM at setup
-        (new BrewMead()).execute(state);
+        (new BrewMead(2)).execute(state);
         assertEquals(1, state.getResource(state.getCurrentPlayer(), HONEY, STOREROOM));
         assertEquals(1, state.getResource(state.getCurrentPlayer(), PROTO_MEAD_1, STOREROOM));
         assertEquals(0, state.getResource(state.getCurrentPlayer(), PROTO_MEAD_2, STOREROOM));
@@ -481,15 +481,15 @@ public class ActionTests {
 
         state.moveCube(state.getCurrentPlayer(), VIVID_BLUE_PIGMENT, SUPPLY, STOREROOM);
         assertEquals(3, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new PrepareInk(VIVID_BLUE_PIGMENT)));
+        assertTrue(fm.computeAvailableActions(state).contains(new PrepareInk(VIVID_BLUE_PIGMENT, 2)));
 
         state.moveCube(state.getCurrentPlayer(), WAX, SUPPLY, STOREROOM);
         assertEquals(4, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new MakeCandle()));
+        assertTrue(fm.computeAvailableActions(state).contains(new MakeCandle(2)));
 
         state.moveCube(state.getCurrentPlayer(), CALF_SKIN, SUPPLY, STOREROOM);
         assertEquals(5, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new PrepareVellum()));
+        assertTrue(fm.computeAvailableActions(state).contains(new PrepareVellum(2)));
 
         state.moveCube(state.getCurrentPlayer(), VIVID_RED_PIGMENT, SUPPLY, STOREROOM);
         state.moveCube(state.getCurrentPlayer(), VIVID_PURPLE_PIGMENT, SUPPLY, STOREROOM);
@@ -514,14 +514,14 @@ public class ActionTests {
         assertEquals(0, state.getResource(state.getCurrentPlayer(), CALF_SKIN, STOREROOM));
         assertEquals(0, state.getResource(state.getCurrentPlayer(), VELLUM, STOREROOM));
         try {
-            (new PrepareVellum()).execute(state);
+            (new PrepareVellum(2)).execute(state);
             fail("Should not succeed");
         } catch (IllegalArgumentException e) {
             // expected
         }
         state.useAP(-2);
         state.addResource(state.getCurrentPlayer(), CALF_SKIN, 1);
-        (new PrepareVellum()).execute(state);
+        (new PrepareVellum(2)).execute(state);
         assertEquals(0, state.getResource(state.getCurrentPlayer(), CALF_SKIN, STOREROOM));
         assertEquals(1, state.getResource(state.getCurrentPlayer(), VELLUM, STOREROOM));
     }
@@ -533,14 +533,14 @@ public class ActionTests {
         assertEquals(2, state.getResource(player, WAX, STOREROOM));
         assertEquals(0, state.getResource(player, CANDLE, STOREROOM));
         try {
-            (new MakeCandle()).execute(state);
+            (new MakeCandle(2)).execute(state);
             fail("Should not succeed");
         } catch (IllegalArgumentException e) {
             // expected
         }
         assertEquals(1, turnOrder.getActionPointsLeft());
         state.useAP(-1);
-        fm.next(state, (new MakeCandle()));
+        fm.next(state, (new MakeCandle(2)));
         assertEquals(1, state.getResource(player, WAX, STOREROOM));
         assertEquals(1, state.getResource(player, CANDLE, STOREROOM));
     }
@@ -577,7 +577,7 @@ public class ActionTests {
 
         state.useAP(-1);
         assertEquals(8, fm.computeAvailableActions(state).size());
-        assertTrue(fm.computeAvailableActions(state).contains(new HireNovice()));
+        assertTrue(fm.computeAvailableActions(state).contains(new HireNovice(3)));
     }
 
     @Test
@@ -760,7 +760,7 @@ public class ActionTests {
     @Test
     public void hireNovice() {
         state.useAP(-1);
-        HireNovice action = new HireNovice();
+        HireNovice action = new HireNovice(3);
         try {
             fm.next(state, action);
             fail("Should throw exception as not enough AP");

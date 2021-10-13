@@ -7,8 +7,8 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 
 public class BrewBeer extends UseMonk {
 
-    public BrewBeer() {
-        super(2);
+    public BrewBeer(int actionPoints) {
+        super(actionPoints);
     }
 
     @Override

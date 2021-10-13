@@ -8,8 +8,8 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 public class BakeBread extends UseMonk {
 
 
-    public BakeBread() {
-        super(1);
+    public BakeBread(int actionPoints) {
+        super(actionPoints);
     }
 
     @Override

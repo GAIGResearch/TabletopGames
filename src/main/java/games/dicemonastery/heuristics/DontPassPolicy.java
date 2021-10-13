@@ -17,14 +17,16 @@ import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 public class DontPassPolicy extends AbstractPlayer {
 
     Random rnd = new Random(System.currentTimeMillis());
-    AbstractAction vellum = new PrepareVellum();
-    AbstractAction bakeBread = new BakeBread();
 
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
 
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
         int player = state.getCurrentPlayer();
+
+
+        AbstractAction vellum = new PrepareVellum(state.getParams().prepareVellumCost);
+        AbstractAction bakeBread = new BakeBread(state.getParams().bakeBreadCost);
 
         // We first check a few priorities
         if (possibleActions.contains(vellum))
