@@ -32,15 +32,9 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     public final AbstractAction PLACE_SKEP = new PlaceSkep();
     public final AbstractAction COLLECT_SKEP = new CollectSkep(1);
     public final AbstractAction PASS = new Pass();
-    public final AbstractAction BAKE_BREAD = new BakeBread();
-    public final AbstractAction BREW_BEER = new BrewBeer();
-    public final AbstractAction BREW_MEAD = new BrewMead();
     public final AbstractAction WEAVE_SKEP = new WeaveSkep();
-    public final AbstractAction MAKE_CANDLE = new MakeCandle();
-    public final AbstractAction PREPARE_VELLUM = new PrepareVellum();
     public final AbstractAction BEG_1 = new BegForAlms(1);
     public final AbstractAction BEG_5 = new BegForAlms(5);
-    public final AbstractAction HIRE_NOVICE = new HireNovice();
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -146,6 +140,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
         DiceMonasteryParams params = state.getParams();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         int currentPlayer = turnOrder.getCurrentPlayer(state);
+        int actionPointsAvailable = turnOrder.actionPointsLeftForCurrentPlayer;
         switch (turnOrder.season) {
             case SPRING:
             case AUTUMN:
@@ -179,7 +174,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                         return IntStream.rangeClosed(0, state.getResource(currentPlayer, PRAYER, STOREROOM))
                                 .mapToObj(Pray::new).collect(toList());
                     }
-                    if (turnOrder.actionPointsLeftForCurrentPlayer <= 0) {
+                    if (actionPointsAvailable <= 0) {
                         throw new AssertionError("We have no action points left for player " + currentPlayer);
                     }
 
@@ -187,10 +182,11 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     switch (turnOrder.currentAreaBeingExecuted) {
                         case MEADOW:
                             DMArea meadow = state.actionAreas.get(MEADOW);
-                            for (Resource pigment : new Resource[]{PALE_BLUE_PIGMENT, PALE_GREEN_PIGMENT, PALE_RED_PIGMENT}) {
-                                if (meadow.count(pigment, -1) > 0)
-                                    retValue.add(new TakePigment(pigment));
-                            }
+                            if (actionPointsAvailable >= params.takePigmentCost)
+                                for (Resource pigment : new Resource[]{PALE_BLUE_PIGMENT, PALE_GREEN_PIGMENT, PALE_RED_PIGMENT}) {
+                                    if (meadow.count(pigment, -1) > 0)
+                                        retValue.add(new TakePigment(pigment, params.takePigmentCost));
+                                }
                             if (turnOrder.season == SPRING) {
                                 retValue.add(SOW_WHEAT);
                                 if (state.getResource(currentPlayer, SKEP, STOREROOM) > 0)
@@ -205,53 +201,55 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                                 int skepsOut = meadow.count(SKEP, currentPlayer);
                                 if (skepsOut > 0) {
                                     retValue.add(COLLECT_SKEP);
-                                    if (skepsOut > 1 && turnOrder.getActionPointsLeft() > 1)
-                                        retValue.add(new CollectSkep(Math.min(skepsOut, turnOrder.getActionPointsLeft())));
+                                    if (skepsOut > 1 && actionPointsAvailable > 1)
+                                        retValue.add(new CollectSkep(Math.min(skepsOut, actionPointsAvailable)));
                                 }
                             }
                             break;
                         case KITCHEN:
-                            if (state.getResource(currentPlayer, GRAIN, STOREROOM) > 0)
-                                retValue.add(BAKE_BREAD);
-                            if (turnOrder.getActionPointsLeft() > 1) {
+                            if (state.getResource(currentPlayer, GRAIN, STOREROOM) > 0 && actionPointsAvailable >= params.bakeBreadCost)
+                                retValue.add(new BakeBread(params.bakeBreadCost));
+                            if (actionPointsAvailable >= params.prepareInkCost) {
                                 Map<Resource, Integer> allPalePigments = state.getStores(currentPlayer, r -> r.isPigment && !r.isVivid);
                                 for (Resource pigment : allPalePigments.keySet())
-                                    retValue.add(new PrepareInk(pigment));
-                                if (state.getResource(currentPlayer, GRAIN, STOREROOM) > 0)
-                                    retValue.add(BREW_BEER);
-                                if (state.getResource(currentPlayer, HONEY, STOREROOM) > 0)
-                                    retValue.add(BREW_MEAD);
+                                    retValue.add(new PrepareInk(pigment, params.prepareInkCost));
                             }
+                            if (state.getResource(currentPlayer, GRAIN, STOREROOM) > 0 && actionPointsAvailable >= params.brewBeerCost)
+                                retValue.add(new BrewBeer(params.brewBeerCost));
+                            if (state.getResource(currentPlayer, HONEY, STOREROOM) > 0 && actionPointsAvailable >= params.brewMeadCost)
+                                retValue.add(new BrewMead(params.brewMeadCost));
                             break;
                         case WORKSHOP:
                             retValue.add(WEAVE_SKEP);
-                            if (turnOrder.getActionPointsLeft() > 1) {
+                            if (actionPointsAvailable >= params.prepareInkCost) {
                                 Map<Resource, Integer> allVividPigments = state.getStores(currentPlayer, r -> r.isPigment && r.isVivid);
                                 for (Resource pigment : allVividPigments.keySet())
-                                    retValue.add(new PrepareInk(pigment));
-                                if (state.getResource(currentPlayer, WAX, STOREROOM) > 0)
-                                    retValue.add(MAKE_CANDLE);
-                                if (state.getResource(currentPlayer, CALF_SKIN, STOREROOM) > 0)
-                                    retValue.add(PREPARE_VELLUM);
+                                    retValue.add(new PrepareInk(pigment, params.prepareInkCost));
                             }
+                            if (actionPointsAvailable >= params.makeCandleCost)
+                                if (state.getResource(currentPlayer, WAX, STOREROOM) >= params.waxPerCandle)
+                                    retValue.add(new MakeCandle(params.makeCandleCost));
+                            if (actionPointsAvailable >= params.prepareVellumCost)
+                                if (state.getResource(currentPlayer, CALF_SKIN, STOREROOM) > 0)
+                                    retValue.add(new PrepareVellum(params.prepareVellumCost));
                             break;
                         case GATEHOUSE:
                             retValue.add(BEG_1);
-                            if (turnOrder.getActionPointsLeft() >= 5)
+                            if (actionPointsAvailable >= 5)
                                 retValue.add(BEG_5);
-                            else if (turnOrder.getActionPointsLeft() > 1)
+                            else if (actionPointsAvailable > 1)
                                 retValue.add(new BegForAlms(turnOrder.getActionPointsLeft()));
                             retValue.add(new VisitMarket());
-                            if (turnOrder.getActionPointsLeft() > 1) {
+                            if (actionPointsAvailable > 1) {
                                 int shillings = state.getResource(currentPlayer, SHILLINGS, STOREROOM);
                                 for (Treasure item : state.availableTreasures()) {
                                     if (item.cost <= shillings)
                                         retValue.add(new BuyTreasure(item));
                                 }
                             }
-                            if (turnOrder.getActionPointsLeft() > 2 &&
+                            if (actionPointsAvailable >= params.hireNoviceCost &&
                                     state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= state.monksIn(null, currentPlayer).size())
-                                retValue.add(HIRE_NOVICE);
+                                retValue.add(new HireNovice(params.hireNoviceCost));
 
                             int highestPiety = state.getHighestPietyMonk(GATEHOUSE, currentPlayer);
                             List<Monk> eligibleMonks = state.monksIn(GATEHOUSE, currentPlayer);

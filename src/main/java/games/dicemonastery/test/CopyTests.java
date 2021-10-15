@@ -162,7 +162,7 @@ public class CopyTests {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        (new BakeBread()).execute(state);
+        (new BakeBread(1)).execute(state);
 
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
@@ -176,7 +176,7 @@ public class CopyTests {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
 
         state.useAP(-1);
-        HireNovice action = new HireNovice();
+        HireNovice action = new HireNovice(3);
 
         int startHash = state.hashCode();
         DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();

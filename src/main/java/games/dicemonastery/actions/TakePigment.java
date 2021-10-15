@@ -10,8 +10,8 @@ public class TakePigment extends UseMonk {
 
     public final Resource pigment;
 
-    public TakePigment(Resource pigment) {
-        super(1);
+    public TakePigment(Resource pigment, int actionPoints) {
+        super(actionPoints);
         this.pigment = pigment;
     }
 

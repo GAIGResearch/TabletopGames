@@ -8,17 +8,17 @@ import static games.dicemonastery.DiceMonasteryConstants.Resource;
 
 public class MakeCandle extends UseMonk {
 
-    public MakeCandle() {
-        super(2);
+    public MakeCandle(int actionPoints) {
+        super(actionPoints);
     }
 
     @Override
     public boolean _execute(DiceMonasteryGameState state) {
-        state.moveCube(state.getCurrentPlayer(), Resource.WAX, STOREROOM, SUPPLY);
+        for (int i = 0; i < state.getParams().waxPerCandle; i++)
+            state.moveCube(state.getCurrentPlayer(), Resource.WAX, STOREROOM, SUPPLY);
         state.moveCube(state.getCurrentPlayer(), Resource.CANDLE, SUPPLY, STOREROOM);
         return true;
     }
-
 
     @Override
     public boolean equals(Object obj) {

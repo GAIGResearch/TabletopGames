@@ -17,10 +17,6 @@ public class HireNovice extends UseMonk {
         super(ap);
     }
 
-    public HireNovice() {
-        this(3);
-    }
-
     @Override
     public boolean _execute(DiceMonasteryGameState state) {
         int player = state.getCurrentPlayer();

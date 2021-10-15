@@ -11,8 +11,8 @@ public class PrepareInk extends UseMonk {
 
     public final Resource pigment;
 
-    public PrepareInk(Resource pigment) {
-        super(2);
+    public PrepareInk(Resource pigment, int actionPoints) {
+        super(actionPoints);
         this.pigment = pigment;
     }
 
