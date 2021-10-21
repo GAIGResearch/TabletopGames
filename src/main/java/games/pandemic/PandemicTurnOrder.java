@@ -46,6 +46,8 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
+        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
+
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
         else {
@@ -62,6 +64,10 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
      * @param gameState - current game state.
      */
     public void endRound(AbstractGameState gameState) {
+        if (gameState.getGameStatus() != GAME_ONGOING) return;
+
+        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
+
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) gameState.setGameStatus(Utils.GameResult.GAME_END);
         else {

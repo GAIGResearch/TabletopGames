@@ -1,6 +1,5 @@
 package games.virus.actions;
 
-import com.sun.nio.sctp.NotificationHandler;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
@@ -8,7 +7,6 @@ import core.interfaces.IPrintable;
 import games.virus.VirusGameState;
 import games.virus.cards.VirusCard;
 import games.virus.components.VirusBody;
-import games.virus.components.VirusOrgan;
 
 import java.util.Objects;
 

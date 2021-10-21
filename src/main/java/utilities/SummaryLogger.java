@@ -8,7 +8,7 @@ import java.util.*;
 import static java.util.stream.Collectors.*;
 
 /**
- * Statistics Logger that just takes in Numeric data and maintains summery statistics for each type:
+ * Statistics Logger that just takes in Numeric data and maintains summary statistics for each type:
  * - mean, min, max, standard error, standard deviation, n
  * A summary is printed out in alphabetic order once finished.
  */
@@ -16,7 +16,7 @@ public class SummaryLogger implements IStatisticLogger {
 
     File logFile;
     public boolean printToConsole = true;
-    Map<String, StatSummary> allData = new HashMap<>();
+    Map<String, TAGStatSummary> allData = new HashMap<>();
     Map<String, String> otherData = new HashMap<>();
 
     public SummaryLogger() {
@@ -30,7 +30,7 @@ public class SummaryLogger implements IStatisticLogger {
     public void record(String key, Object value) {
         if (value instanceof Number) {
             if (!allData.containsKey(key))
-                allData.put(key, new StatSummary());
+                allData.put(key, new TAGStatSummary());
             allData.get(key).add((Number) value);
         } else {
             otherData.put(key, value.toString());
@@ -50,7 +50,7 @@ public class SummaryLogger implements IStatisticLogger {
     }
 
     @Override
-    public Map<String, StatSummary> summary() {
+    public Map<String, TAGStatSummary> summary() {
         return allData;
     }
 
@@ -112,7 +112,7 @@ public class SummaryLogger implements IStatisticLogger {
         List<String> alphabeticOrder = allData.keySet().stream().sorted().collect(toList());
         StringBuilder sb = new StringBuilder();
         for (String key : alphabeticOrder) {
-            StatSummary stats = allData.get(key);
+            TAGStatSummary stats = allData.get(key);
             if (stats.n() == 1) {
                 sb.append(String.format("%30s  %8.3g\n", key, stats.mean()));
             } else {

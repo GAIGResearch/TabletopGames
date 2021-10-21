@@ -5,7 +5,9 @@ import utilities.Hash;
 public class CoreConstants {
     public final static boolean VERBOSE = false;
     public final static boolean PARTIAL_OBSERVABLE = true;
+    public final static boolean COMPETITION_MODE = false;
     public final static boolean DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED = false;
+    public final static boolean DISQUALIFY_PLAYER_ON_TIMEOUT = false;
     public final static boolean ALWAYS_DISPLAY_FULL_OBSERVABLE = false;
     public final static boolean ALWAYS_DISPLAY_CURRENT_PLAYER = false;
     public final static long FRAME_SLEEP_MS = 100;
@@ -32,6 +34,17 @@ public class CoreConstants {
     public final static int backgroundImgHash = Hash.GetInstance().hash("backgroundImg");
 
     public enum GameEvents {
-        GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN
+        ABOUT_TO_START, GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN
+    }
+
+    /**
+     * Used in Components that contain other Components (see IComponentContainer) to mark which players can see the
+     * contents.
+     * MIXED_VISIBILITY is an indicator that none of the previous three apply, and that the IComponentContainer
+     * will need to implement more sophisticated logic. This is done for example in PartialObservableDeck - and
+     * this should cover almost all future eventualities.
+     */
+    public enum VisibilityMode {
+        VISIBLE_TO_ALL, HIDDEN_TO_ALL, VISIBLE_TO_OWNER, FIRST_VISIBLE_TO_ALL, LAST_VISIBLE_TO_ALL, MIXED_VISIBILITY
     }
 }

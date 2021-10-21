@@ -45,6 +45,8 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
+        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
+
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));
     }

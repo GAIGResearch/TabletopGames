@@ -5,6 +5,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
+import games.GameType;
 import games.uno.cards.*;
 
 import java.util.*;
@@ -27,7 +28,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers      - number of players for this game.
      */
     public UnoGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new UnoTurnOrder(nPlayers));
+        super(gameParameters, new UnoTurnOrder(nPlayers), GameType.Uno);
     }
 
     @Override
@@ -173,24 +174,6 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     @Override
     public double getGameScore(int playerId) {
         return calculatePlayerPoints(playerId);
-    }
-
-    @Override
-    protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>() {{
-            add(drawDeck.getComponentID());
-            for (Component c: drawDeck.getComponents()) {
-                add(c.getComponentID());
-            }
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId) {
-                    add(playerDecks.get(i).getComponentID());
-                    for (Component c: playerDecks.get(i).getComponents()) {
-                        add(c.getComponentID());
-                    }
-                }
-            }
-        }};
     }
 
     @Override

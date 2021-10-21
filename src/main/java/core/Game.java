@@ -3,30 +3,32 @@ package core;
 import core.actions.AbstractAction;
 import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
+import core.interfaces.IStateHeuristic;
 import core.turnorders.ReactiveTurnOrder;
-import evaluation.GameLogger;
 import games.GameType;
-import players.PlayerConstants;
+import games.sushigo.testing.SGFileWriter;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
+import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
-import utilities.*;
+import utilities.Pair;
+import utilities.TAGStatSummary;
+import utilities.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.*;
 import static games.GameType.*;
-import static java.util.stream.Collectors.*;
 
 public class Game {
 
     // Type of game
-    private GameType gameType;
+    private final GameType gameType;
 
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
@@ -169,6 +171,7 @@ public class Game {
         nActionsPerTurnSum = 0;
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
+        listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
     }
 
     /**
@@ -229,6 +232,9 @@ public class Game {
                     ((IPrintable) observation).printToConsole();
                 }
 
+                // Start the timer for this decision
+                gameState.playerTimer[activePlayer].resume();
+
                 // Either ask player which action to use or, in case no actions are available, report the updated observation
                 AbstractAction action = null;
                 if (observedActions.size() > 0) {
@@ -250,11 +256,19 @@ public class Game {
                             nDecisions++;
                         }
                     }
+                    if (COMPETITION_MODE && !observedActions.contains(action)) {
+                        System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
+                        action = null;
+                    }
                     AbstractAction finalAction = action;
                     listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
                 } else {
                     currentPlayer.registerUpdatedObservation(observation);
                 }
+
+                // End the timer for this decision
+                gameState.playerTimer[activePlayer].pause();
+                gameState.playerTimer[activePlayer].incrementAction();
 
                 if (VERBOSE) {
                     if (action != null) {
@@ -264,10 +278,15 @@ public class Game {
                     }
                 }
 
-                // Resolve action and game rules, time it
-                s = System.nanoTime();
-                forwardModel.next(gameState, action);
-                nextTime += (System.nanoTime() - s);
+                // Check player timeout
+                if (observation.playerTimer[activePlayer].exceededMaxTime()) {
+                    forwardModel.disqualifyOrRandomAction(DISQUALIFY_PLAYER_ON_TIMEOUT, gameState);
+                } else {
+                    // Resolve action and game rules, time it
+                    s = System.nanoTime();
+                    forwardModel.next(gameState, action);
+                    nextTime += (System.nanoTime() - s);
+                }
             } else {
                 if (firstEnd) {
                     if (VERBOSE) {
@@ -320,7 +339,7 @@ public class Game {
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
-        listeners.forEach(l -> l.onEvent(GameEvents.GAME_OVER, gameState, null));
+        listeners.forEach(l -> l.onGameEvent(GameEvents.GAME_OVER, this));
         if (VERBOSE) {
             System.out.println("Game Over");
         }
@@ -532,12 +551,12 @@ public class Game {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
-        StatSummary[] overall = new StatSummary[nPlayers];
+        TAGStatSummary[] overall = new TAGStatSummary[nPlayers];
         String[] agentNames = new String[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
             String[] split = players.get(i).getClass().toString().split("\\.");
             String agentName = split[split.length - 1] + "-" + i;
-            overall[i] = new StatSummary("Overall " + agentName);
+            overall[i] = new TAGStatSummary("Overall " + agentName);
             agentNames[i] = agentName;
         }
 
@@ -545,9 +564,9 @@ public class Game {
         for (GameType gt : gamesToPlay) {
 
             // Save win rate statistics over all repetitions of this game
-            StatSummary[] statSummaries = new StatSummary[nPlayers];
+            TAGStatSummary[] statSummaries = new TAGStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new StatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
+                statSummaries[i] = new TAGStatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
             }
 
             // Play n repetitions of this game and record player results
@@ -609,18 +628,18 @@ public class Game {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
-        StatSummary[] overall = new StatSummary[nPlayers];
+        TAGStatSummary[] overall = new TAGStatSummary[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
-            overall[i] = new StatSummary("Overall Player " + i);
+            overall[i] = new TAGStatSummary("Overall Player " + i);
         }
 
         // For each game...
         for (GameType gt : gamesToPlay) {
 
             // Save win rate statistics over all repetitions of this game
-            StatSummary[] statSummaries = new StatSummary[nPlayers];
+            TAGStatSummary[] statSummaries = new TAGStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new StatSummary("Game: " + gt.name() + "; Player: " + i);
+                statSummaries[i] = new TAGStatSummary("Game: " + gt.name() + "; Player: " + i);
             }
 
             // Play n repetitions of this game and record player results
@@ -655,7 +674,7 @@ public class Game {
      * @param statSummaries - object recording statistics
      * @param game          - finished game
      */
-    public static void recordPlayerResults(StatSummary[] statSummaries, Game game) {
+    public static void recordPlayerResults(TAGStatSummary[] statSummaries, Game game) {
         int nPlayers = statSummaries.length;
         Utils.GameResult[] results = game.getGameState().getPlayerResults();
         for (int p = 0; p < nPlayers; p++) {
@@ -684,15 +703,19 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
         MCTSParams params1 = new MCTSParams();
+        RMHCPlayer params2 = new RMHCPlayer();
+        params1.budget = 10;
 
+//        players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         players.add(new RMHCPlayer());
         players.add(new MCTSPlayer(params1));
-        players.add(new HumanGUIPlayer(ac));
+        //players.add(new HumanGUIPlayer(ac));
+        players.add(new OSLAPlayer());
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(LoveLetter, players, seed, ac, false, null);
+        runOne(SushiGO, players, seed, ac, false, null);
         //       runMany(Collections.singletonList(Dominion), players, 100L,100, null, false, false, listeners);
 //        ArrayList<GameType> games = new ArrayList<>();
 //        games.add(TicTacToe);

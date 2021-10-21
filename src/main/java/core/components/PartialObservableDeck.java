@@ -1,8 +1,12 @@
 package core.components;
 
+import core.CoreConstants.VisibilityMode;
 import utilities.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 import static core.CoreConstants.PARTIAL_OBSERVABLE;
 
@@ -29,7 +33,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     public PartialObservableDeck(String id, int ownerID, boolean[] defaultVisibility) {
-        super(id, ownerID);
+        super(id, ownerID, VisibilityMode.MIXED_VISIBILITY);
         this.deckVisibility = defaultVisibility;
     }
 
@@ -42,12 +46,14 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     }
 
     private PartialObservableDeck(String name, int ownerID, boolean[] defaultVisibility, int ID) {
-        super(name, ownerID, ID);
+        super(name, ownerID, ID, VisibilityMode.MIXED_VISIBILITY);
         this.deckVisibility = defaultVisibility;
     }
 
     /**
      * Retrieves the components in this deck visible by the given player.
+     *
+     * It always returns a List of the correct length, but with a NULL entry for hidden components
      *
      * @param playerID - ID of player observing the deck.
      * @return - ArrayList of components observed by the player.

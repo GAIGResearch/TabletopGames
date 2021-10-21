@@ -1,18 +1,23 @@
 package players.mcts;
 
-import core.*;
-import core.interfaces.*;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.interfaces.IStateHeuristic;
+import core.interfaces.ITunableParameters;
 import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Random;
 
-import static players.mcts.MCTSEnums.SelectionPolicy.*;
-import static players.mcts.MCTSEnums.Strategies.*;
-import static players.mcts.MCTSEnums.TreePolicy.*;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
+import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
+import static players.mcts.MCTSEnums.Strategies.RANDOM;
+import static players.mcts.MCTSEnums.TreePolicy.UCB;
 
 public class MCTSParams extends PlayerParameters {
 
@@ -46,7 +51,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("treePolicy", UCB);
         addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
-        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
+        addTunableParameter("heuristic", ""); // this marks this as settable via JSON - and will default to the heuristic score
     }
 
     @Override
@@ -63,11 +68,13 @@ public class MCTSParams extends PlayerParameters {
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
-        heuristic = (IStateHeuristic) getParameterValue("heuristic");
-        if (heuristic instanceof TunableParameters) {
-            TunableParameters tunableHeuristic = (TunableParameters) heuristic;
-            for (String name : tunableHeuristic.getParameterNames()) {
-                tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
+        if (getParameterValue("heuristic") instanceof IStateHeuristic) {
+            heuristic = (IStateHeuristic) getParameterValue("heuristic");
+            if (heuristic instanceof TunableParameters) {
+                TunableParameters tunableHeuristic = (TunableParameters) heuristic;
+                for (String name : tunableHeuristic.getParameterNames()) {
+                    tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
+                }
             }
         }
     }
@@ -85,6 +92,7 @@ public class MCTSParams extends PlayerParameters {
         ITunableParameters child = super.registerChild(nameSpace, json);
         if (child instanceof IStateHeuristic) {
             heuristic = (IStateHeuristic) child;
+            setParameterValue("heuristic", child);
         }
         return child;
     }

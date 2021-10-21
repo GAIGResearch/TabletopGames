@@ -1,12 +1,14 @@
 package core.actions;
 
+import core.AbstractGameState;
 import core.components.Card;
 import core.components.Deck;
-import core.AbstractGameState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
+
+import static core.CoreConstants.VisibilityMode;
 
 
 public class RearrangeDeckOfCards extends DrawCard {
@@ -47,7 +49,7 @@ public class RearrangeDeckOfCards extends DrawCard {
         for (int value : newCardOrder) {
             cards[value] = rd.draw();
         }
-        Deck<Card> draws = new Deck<>("Temp Draws from: " + rd.getComponentName());
+        Deck<Card> draws = new Deck<>("Temp Draws from: " + rd.getComponentName(), VisibilityMode.HIDDEN_TO_ALL);
         draws.setComponents(new ArrayList<>(Arrays.asList(cards)));
         //return result & rd.add(draws);
         return result & rd.add(draws, 0);

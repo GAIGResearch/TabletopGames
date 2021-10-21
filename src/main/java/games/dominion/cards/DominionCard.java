@@ -1,13 +1,9 @@
 package games.dominion.cards;
 
 import core.actions.AbstractAction;
-import core.components.*;
-import games.dominion.DominionConstants;
-import games.dominion.DominionGame;
+import core.components.Card;
 import games.dominion.DominionGameState;
 import games.dominion.actions.*;
-
-import java.util.Objects;
 
 public class DominionCard extends Card {
 
@@ -18,30 +14,15 @@ public class DominionCard extends Card {
         this.type = type;
     }
 
-    private static DominionCard gold = new DominionCard(CardType.GOLD);
-    private static DominionCard silver = new DominionCard(CardType.SILVER);
-    private static DominionCard copper = new DominionCard(CardType.COPPER);
-    private static DominionCard province = new DominionCard(CardType.PROVINCE);
-    private static DominionCard duchy = new DominionCard(CardType.DUCHY);
-    private static DominionCard estate = new DominionCard(CardType.ESTATE);
-    private static DominionCard curse = new DominionCard(CardType.CURSE);
-
     public static DominionCard create(CardType type) {
         switch (type) {
             case GOLD:
-                return gold;
             case COPPER:
-                return copper;
             case SILVER:
-                return silver;
             case ESTATE:
-                return estate;
             case DUCHY:
-                return duchy;
             case PROVINCE:
-                return province;
             case CURSE:
-                return curse;
             case VILLAGE:
             case SMITHY:
             case LABORATORY:

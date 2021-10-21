@@ -1,5 +1,6 @@
 package games.dominion.actions;
 
+import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.PartialObservableDeck;
 import games.dominion.*;
@@ -40,7 +41,7 @@ public class Bureaucrat extends DominionAttackAction {
     }
 
     @Override
-    public void registerActionTaken(DominionGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if ((action instanceof MoveCard && ((MoveCard) action).playerFrom == currentTarget) ||
                 (action instanceof RevealHand && ((RevealHand) action).player == currentTarget)) {
             victimHasResponded = true;
@@ -53,7 +54,8 @@ public class Bureaucrat extends DominionAttackAction {
     }
 
     @Override
-    public List<AbstractAction> followOnActions(DominionGameState state) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        DominionGameState state = (DominionGameState) gs;
         if (state.getDeck(DeckType.HAND, currentTarget).stream().noneMatch(DominionCard::isVictoryCard)) {
             // we have no victory cards in hand
             return Collections.singletonList(new RevealHand(currentTarget));
@@ -67,7 +69,7 @@ public class Bureaucrat extends DominionAttackAction {
     }
 
     @Override
-    public int getCurrentPlayer(DominionGameState state) {
+    public int getCurrentPlayer(AbstractGameState state) {
         return currentTarget;
     }
 

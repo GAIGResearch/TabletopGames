@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
-public class TAGSummariser implements Collector<Number, StatSummary, StatSummary> {
+public class TAGSummariser implements Collector<Number, TAGStatSummary, TAGStatSummary> {
 
     /**
      * A function that creates and returns a new mutable result container.
@@ -12,8 +12,8 @@ public class TAGSummariser implements Collector<Number, StatSummary, StatSummary
      * @return a function which returns a new, mutable result container
      */
     @Override
-    public Supplier<StatSummary> supplier() {
-        return StatSummary::new;
+    public Supplier<TAGStatSummary> supplier() {
+        return TAGStatSummary::new;
     }
 
     /**
@@ -22,8 +22,8 @@ public class TAGSummariser implements Collector<Number, StatSummary, StatSummary
      * @return a function which folds a value into a mutable result container
      */
     @Override
-    public BiConsumer<StatSummary, Number> accumulator() {
-        return StatSummary::add;
+    public BiConsumer<TAGStatSummary, Number> accumulator() {
+        return TAGStatSummary::add;
     }
 
     /**
@@ -35,7 +35,7 @@ public class TAGSummariser implements Collector<Number, StatSummary, StatSummary
      * result
      */
     @Override
-    public BinaryOperator<StatSummary> combiner() {
+    public BinaryOperator<TAGStatSummary> combiner() {
         return (ss1, ss2) -> {
             ss1.add(ss2);
             return ss1;
@@ -54,7 +54,7 @@ public class TAGSummariser implements Collector<Number, StatSummary, StatSummary
      * result
      */
     @Override
-    public Function<StatSummary, StatSummary> finisher() {
+    public Function<TAGStatSummary, TAGStatSummary> finisher() {
         return ss -> ss;
     }
 

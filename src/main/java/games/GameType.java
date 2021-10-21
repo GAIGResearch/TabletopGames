@@ -1,6 +1,7 @@
 package games;
 
 import core.*;
+import core.components.Card;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -25,6 +26,10 @@ import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.gui.PandemicGUI;
+import games.sushigo.SGForwardModel;
+import games.sushigo.SGGameState;
+import games.sushigo.SGParameters;
+import games.sushigo.gui.SGGUI;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
@@ -110,7 +115,18 @@ public enum GameType {
             new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
     DominionImprovements (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }})
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+    SushiGO( 2, 6,
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Probability);
+                add(Cards);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(SetCollection);
+                add(PushYourLuck);
+                add(SimultaneousActionSelection);
+            }})
     ;
 
 //    Carcassonne (2, 5,
@@ -150,6 +166,8 @@ public enum GameType {
                 return DominionSizeDistortion;
             case "dominionimprovements" :
                 return DominionImprovements;
+            case "SushiGO":
+                return SushiGO;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -218,6 +236,10 @@ public enum GameType {
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
                 break;
+            case SushiGO:
+                forwardModel = new SGForwardModel();
+                gameState = new SGGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -251,6 +273,8 @@ public enum GameType {
                 return DominionParameters.sizeDistortion(seed);
             case DominionImprovements:
                 return DominionParameters.improvements(seed);
+            case SushiGO:
+                return new SGParameters(seed);
             default:
                 throw new AssertionError("No default Parameters specified for Game " + this);
         }
@@ -309,6 +333,9 @@ public enum GameType {
             case DominionSizeDistortion:
                 gui = new DominionGUI(game, ac, human);
                 break;
+            case SushiGO:
+                gui = new SGGUI(game, ac, human);
+                //gui = new PrototypeGUI(game.getGameType(), game.getGameState(), ac, 100);
             // TODO: Diamant GUI
         }
 
@@ -317,11 +344,11 @@ public enum GameType {
 
 
     // Minimum and maximum number of players supported in this game
-    private int minPlayers, maxPlayers;
+    private final int minPlayers, maxPlayers;
 
     // boardgamegeek.com topic classification of games
-    private ArrayList<Category> categories;
-    private ArrayList<Mechanic> mechanics;
+    private final ArrayList<Category> categories;
+    private final ArrayList<Mechanic> mechanics;
 
     public enum Category {
         Strategy,
@@ -346,7 +373,8 @@ public enum GameType {
         Exploration,
         Fantasy,
         Miniatures,
-        Bluffing;
+        Bluffing,
+        Probability;
 
         /**
          * Retrieves a list of all games within this category.
