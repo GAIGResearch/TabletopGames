@@ -150,11 +150,11 @@ public class BattleloreForwardModel extends AbstractForwardModel {
                     //check possible locations size
                     for (int i = 0 ; i< state.getBoard().getWidth(); i++) {
                         if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
-                            actions.add(new MoveUnitsAction(tile, playerFaction, possibleLocations[i][0], possibleLocations[i][1], player));
+                            actions.add(new MoveUnitsAction(state, tile.getComponentID(), playerFaction, possibleLocations[i][0], possibleLocations[i][1], player));
                         }
                     }
                     if (actions.isEmpty()) {
-                        actions.add(new SkipTurnAction(tile, playerFaction, true, false, player));
+                        actions.add(new SkipTurnAction(state, tile.getComponentID(), playerFaction, true, false, player));
                     }
                 }
             }
@@ -170,11 +170,12 @@ public class BattleloreForwardModel extends AbstractForwardModel {
 
                     for (int i = 0 ; i< state.getBoard().getWidth(); i++) {
                         if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
-                            actions.add(new AttackUnitsAction(attacker, state.getBoard().getElement(possibleLocations[i][0], possibleLocations[i][1]), attacker.GetFaction(), player));
+                            actions.add(new AttackUnitsAction(state, attacker.getComponentID(), state.getBoard().getElement(possibleLocations[i][0], possibleLocations[i][1]).getComponentID(),
+                                    attacker.GetFaction(), player));
                         }
                     }
                     if (actions.isEmpty()) {
-                        actions.add(new SkipTurnAction(attacker, playerFaction, false, true, player));
+                        actions.add(new SkipTurnAction(state, attacker.getComponentID(), playerFaction, false, true, player));
                     }
                 }
             }

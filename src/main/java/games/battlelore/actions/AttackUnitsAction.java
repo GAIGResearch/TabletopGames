@@ -2,6 +2,7 @@ package games.battlelore.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Component;
 import games.battlelore.BattleloreGameParameters;
 import games.battlelore.BattleloreGameState;
 import games.battlelore.cards.CommandCard;
@@ -15,14 +16,16 @@ import java.util.Objects;
 import java.util.Random;
 
 public class AttackUnitsAction extends AbstractAction {
+    private BattleloreGameState gameState;
     private Unit.Faction playerFaction;
     private MapTile attacker;
     private MapTile defender;
     private int playerID;
 
-    public AttackUnitsAction(MapTile attackingUnitsTile, MapTile targetTile, Unit.Faction faction, int playerID) {
-        this.attacker = attackingUnitsTile;
-        this.defender = targetTile;
+    public AttackUnitsAction(BattleloreGameState gameState, int attackingUnitsTileID, int targetTileID, Unit.Faction faction, int playerID) {
+        this.gameState = gameState;
+        this.attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
+        this.defender = (MapTile) gameState.getComponentById(targetTileID);
         this.playerFaction = faction;
         this.playerID = playerID;
     }
@@ -95,7 +98,7 @@ public class AttackUnitsAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new AttackUnitsAction(attacker.copy(), defender.copy(), playerFaction, playerID);
+        return new AttackUnitsAction(gameState, attacker.getComponentID(), defender.getComponentID(), playerFaction, playerID);
     }
 
     @Override

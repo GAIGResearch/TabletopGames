@@ -11,15 +11,16 @@ import games.dotsboxes.AddGridCellEdge;
 import java.util.Objects;
 
 public class SkipTurnAction extends AbstractAction {
-
+    private BattleloreGameState gameState;
     private Unit.Faction playerFaction;
     private MapTile units;
     private boolean skipAttack;
     private boolean skipMove;
     private int playerID;
 
-    public SkipTurnAction(MapTile tile, Unit.Faction faction, boolean doesSkipMove, boolean doesSkipAttack, int playerID) {
-        this.units = tile;
+    public SkipTurnAction(BattleloreGameState gameState, int tileID, Unit.Faction faction, boolean doesSkipMove, boolean doesSkipAttack, int playerID) {
+        this.gameState = gameState;
+        this.units = (MapTile) gameState.getComponentById(tileID);
         this.playerFaction = faction;
         this.playerID = playerID;
         skipAttack = doesSkipAttack;
@@ -56,7 +57,7 @@ public class SkipTurnAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new SkipTurnAction(units.copy(), playerFaction, skipMove, skipAttack, playerID);
+        return new SkipTurnAction(gameState, units.getComponentID(), playerFaction, skipMove, skipAttack, playerID);
     }
 
     @Override
