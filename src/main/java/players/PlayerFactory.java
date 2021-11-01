@@ -44,8 +44,10 @@ public class PlayerFactory {
             AbstractPlayer retValue = fromJSONObject(json);
             retValue.setName(fileName.substring(0, fileName.indexOf(".")));
             return retValue;
-        } catch (IOException | ParseException e) {
-            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage());
+        } catch (IOException  e) {
+            throw new AssertionError("IO Error processing file " + fileName + " : " + e.getMessage());
+        } catch (ParseException e) {
+            throw new AssertionError("Parse Error processing file " + fileName + " : " + e.toString());
         }
     }
 

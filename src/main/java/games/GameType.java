@@ -1,7 +1,6 @@
 package games;
 
 import core.*;
-
 import core.turnorders.AlternatingTurnOrder;
 import games.battlelore.BattleloreForwardModel;
 import games.battlelore.BattleloreGameState;
@@ -13,54 +12,45 @@ import games.blackjack.BlackjackParameters;
 import games.blackjack.gui.BlackjackGUIManager;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
-import games.diamant.DiamantParameters;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUIManager;
 import games.dotsboxes.DBGameState;
-import games.dotsboxes.DBParameters;
-import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.LoveLetterParameters;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
-import games.pandemic.PandemicParameters;
-import games.pandemic.gui.PandemicGUIManager;
-import games.poker.PokerForwardModel;
-import games.poker.PokerGameParameters;
-import games.poker.PokerGameState;
-import games.poker.gui.PokerGUIManager;
+import games.pandemic.gui.*;
+import games.poker.*;
+import games.blackjack.*;
+import games.blackjack.gui.*;
+import games.poker.gui.*;
+import games.dicemonastery.gui.*;
 import games.tictactoe.TicTacToeForwardModel;
-import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
-import games.tictactoe.gui.TicTacToeGUIManager;
+import games.tictactoe.gui.*;
 import games.uno.UnoForwardModel;
-import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
-import games.uno.gui.UnoGUIManager;
+import games.uno.gui.*;
 import games.virus.VirusForwardModel;
-import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
+import games.dicemonastery.*;
 import games.dominion.*;
-import gui.AbstractGUIManager;
-import gui.GamePanel;
-import gui.PrototypeGUIManager;
+import gui.*;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
 import java.util.*;
-import java.util.List;
 
 import static core.CoreConstants.*;
+import static games.GameType.Category.Number;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
 
@@ -133,17 +123,12 @@ public enum GameType {
                 add(LoseATurn);
                 add(TakeThat);
             }}),
-    Diamant(2, 6,
-            new ArrayList<Category>() {{
-                add(Adventure);
-                add(Bluffing);
-                add(Exploration);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(MoveThroughDeck);
-                add(PushYourLuck);
-                add(SimultaneousActionSelection);
-            }}),
+    Diamant( 2, 6,
+            new ArrayList<Category>() {{ add(Adventure);add(Bluffing);add(Exploration); }},
+            new ArrayList<Mechanic>() {{ add(MoveThroughDeck);add(PushYourLuck);add(SimultaneousActionSelection); }}),
+    DiceMonastery(2, 4,
+            new ArrayList<Category>() {{ add(Strategy);add(Medieval);}},
+            new ArrayList<Mechanic>() {{ add(SetCollection);add(WorkerPlacement);add(EngineBuilding); }}),
     Dominion (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
             new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
@@ -153,7 +138,6 @@ public enum GameType {
     DominionImprovements (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
             new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
-
     Battlelore (2, 2,
             new ArrayList<Category>() {{ add(Fantasy); add(Miniatures); add(Wargame);}},
             new ArrayList<Mechanic>() {{ add(Campaign); add(BattleCardDriven); add(CommandCards);
@@ -202,6 +186,8 @@ public enum GameType {
                 return DominionImprovements;
             case "battlelore" :
                 return Battlelore;
+            case "dicemonastery" :
+                return DiceMonastery;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -223,7 +209,7 @@ public enum GameType {
             return null;
         }
 
-        params = (params == null) ? createParameterSet(seed) : params;
+        params = (params == null) ? ParameterFactory.getDefaultParams(this, seed) : params;
         AbstractForwardModel forwardModel;
         AbstractGameState gameState;
 
@@ -272,6 +258,10 @@ public enum GameType {
                 forwardModel = new DiamantForwardModel();
                 gameState = new DiamantGameState(params, nPlayers);
                 break;
+            case DiceMonastery:
+                forwardModel = new DiceMonasteryForwardModel();
+                gameState = new DiceMonasteryGameState(params, nPlayers);
+                break;
             case Dominion:
             case DominionImprovements:
             case DominionSizeDistortion:
@@ -287,43 +277,6 @@ public enum GameType {
         }
 
         return new Game(this, forwardModel, gameState);
-    }
-
-    public AbstractParameters createParameterSet(long seed) {
-        switch (this) {
-            case Pandemic:
-                return new PandemicParameters("data/pandemic/", seed);
-            case TicTacToe:
-                return new TicTacToeGameParameters(seed);
-            case ExplodingKittens:
-                return new ExplodingKittensParameters(seed);
-            case LoveLetter:
-                return new LoveLetterParameters(seed);
-            case Uno:
-                return new UnoGameParameters(seed);
-            case Blackjack:
-                return new BlackjackParameters(seed);
-            case Poker:
-                return new PokerGameParameters(seed);
-            case Virus:
-                return new VirusGameParameters(seed);
-            case ColtExpress:
-                return new ColtExpressParameters(seed);
-            case DotsAndBoxes:
-                return new DBParameters(seed);
-            case Diamant:
-                return new DiamantParameters(seed);
-            case Dominion:
-                return DominionParameters.firstGame(seed);
-            case DominionSizeDistortion:
-                return DominionParameters.sizeDistortion(seed);
-            case DominionImprovements:
-                return DominionParameters.improvements(seed);
-            case Battlelore:
-                return new BattleloreGameParameters("data/battlelore",seed);
-            default:
-                throw new AssertionError("No default Parameters specified for Game " + this);
-        }
     }
 
     /**
@@ -386,9 +339,12 @@ public enum GameType {
                 gui = new DominionGUIManager(parent, game, ac, human);
                 break;
             // TODO: Diamant GUI
-
             case Battlelore:
                 gui = new BattleloreGUI(parent, game, ac);
+                break;
+            case DiceMonastery:
+                gui = new DiceMonasteryGUI(parent, game, ac, human);
+                break;
         }
 
         return gui;
@@ -484,6 +440,8 @@ public enum GameType {
         GameMaster,
         DiceRolling,
         GridMovement,
+        WorkerPlacement,
+        EngineBuilding,
         LineOfSight,
         ModularBoard,
         MovementPoints,
@@ -537,19 +495,15 @@ public enum GameType {
     public int getMinPlayers() {
         return minPlayers;
     }
-
     public int getMaxPlayers() {
         return maxPlayers;
     }
-
     public ArrayList<Category> getCategories() {
         return categories;
     }
-
     public ArrayList<Mechanic> getMechanics() {
         return mechanics;
     }
-
     public static int getMinPlayersAllGames() {
         int min = Integer.MAX_VALUE;
         for (GameType gt : GameType.values()) {
@@ -557,7 +511,6 @@ public enum GameType {
         }
         return min;
     }
-
     public static int getMaxPlayersAllGames() {
         int max = Integer.MIN_VALUE;
         for (GameType gt : GameType.values()) {
@@ -573,11 +526,11 @@ public enum GameType {
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers) {
-        return createGameInstance(nPlayers, System.currentTimeMillis(), createParameterSet(System.currentTimeMillis()));
+        return createGameInstance(nPlayers, System.currentTimeMillis(), ParameterFactory.getDefaultParams(this, System.currentTimeMillis()));
     }
 
     public Game createGameInstance(int nPlayers, long seed) {
-        return createGameInstance(nPlayers, seed, createParameterSet(seed));
+        return createGameInstance(nPlayers, seed, ParameterFactory.getDefaultParams(this, seed));
     }
 
     public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {

@@ -172,6 +172,19 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         return capacity == -1 || components.size() <= capacity;
     }
 
+    public boolean add(Collection<T> d){
+        return this.add(d, 0);
+    }
+
+    public boolean add(Collection<T> d, int index){
+        components.addAll(index, d);
+        for (T comp: d) {
+            comp.setOwnerId(ownerId);
+        }
+        return capacity == -1 || components.size() <= capacity;
+    }
+
+
     /**
      * Remove the given component.
      * @param component - component to remove.

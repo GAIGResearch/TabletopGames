@@ -1,5 +1,6 @@
 package games.pandemic;
 
+import core.AbstractGameData;
 import core.interfaces.IFeatureRepresentation;
 import core.interfaces.IGamePhase;
 import core.components.*;
@@ -8,6 +9,7 @@ import core.AbstractGameState;
 import core.components.Area;
 import core.AbstractParameters;
 import games.GameType;
+import org.apache.commons.math3.analysis.function.Abs;
 import utilities.Hash;
 import utilities.Utils;
 
@@ -156,8 +158,6 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
      */
     public PandemicGameState(AbstractParameters pp, int nPlayers) {
         super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn), GameType.Pandemic);
-        data = new PandemicData();
-        data.load(((PandemicParameters)gameParameters).getDataPath());
     }
 
     // Getters & setters
@@ -212,10 +212,6 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     }
     public GraphBoard getWorld() {
         return world;
-    }
-
-    PandemicData getData() {  // Only FM should have access to this for initialisation
-        return (PandemicData)data;
     }
 
     @Override
