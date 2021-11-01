@@ -7,6 +7,10 @@ public class BattleloreGameParameters extends AbstractParameters {
     String dataPath;
     public int hexWidth = 12; //A..L in odd numbers, A..K in even numbers.
     public int hexHeight = 9; //1-9
+    public int troopCountInSquad = 3;
+    private int meleeRange = 1;
+    private int rangedRange = 5;
+
 
 
     public BattleloreGameParameters(String dataPath, long seed) {
@@ -21,6 +25,14 @@ public class BattleloreGameParameters extends AbstractParameters {
         copy.hexWidth = hexWidth;
         copy.hexHeight = hexHeight;
         return copy;
+    }
+
+    public int getTroopRange(boolean isMelee){
+        return isMelee ? meleeRange : rangedRange;
+    }
+
+    public boolean isWeakAttacker(int attackerSize){
+        return attackerSize <= 1;
     }
 
     public String getDataPath() {

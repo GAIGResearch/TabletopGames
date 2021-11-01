@@ -8,6 +8,7 @@ import core.components.GridBoard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IStateHeuristic;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
@@ -33,7 +34,6 @@ public class BattleloreGameState extends AbstractGameState {
 
     int roundExceedThreshold;
     int numberOfRounds;
-    int[] playerTurns;
     int[] playerScores;
     GridBoard<MapTile> gameBoard;
     List<Unit> unitTypes;
@@ -53,8 +53,6 @@ public class BattleloreGameState extends AbstractGameState {
         parameters = (BattleloreGameParameters) gameParameters;
         data.load(parameters.getDataPath());
         playerScores = new int[nPlayers];
-        playerTurns = new int[nPlayers];
-        numberOfRounds = 0;
         roundExceedThreshold = 100;
     }
 
@@ -93,11 +91,7 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public void IncrementTurn(int playerId) {
-        playerTurns[playerId] ++;
-    }
-
-    public int GetTotalActionsTaken(int playerID) {
-        return playerTurns[playerID];
+        turnOrder.moveToNextPlayer(this, playerId);
     }
 
     public int GetPlayerScore(int playerId) {
@@ -180,16 +174,15 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public int[][] GetPossibleTargetUnits(MapTile attackUnit) {
-        int[][] possibleLocations = new int[gameBoard.getWidth()][2];
+        int[][] possibleLocations = new int[gameBoard.getWidth()][turnOrder.nPlayers()];
         boolean isMelee = attackUnit.GetUnits().get(0).isMelee;
-
+        int range = parameters.getTroopRange(isMelee);
         int counter = 0;
-        int range = isMelee ? 1 : 5;
+
         for (int x = 0; x < gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameBoard.getHeight(); y++) {
                 possibleLocations[x][0] = -1;
                 possibleLocations[x][1] = -1;
-
                 MapTile possibleTile = gameBoard.getElement(x, y);
                 if (possibleTile.GetUnits() != null && possibleTile.GetFaction() != attackUnit.GetFaction()) {
                     double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - attackUnit.getLocationX()), 2) +

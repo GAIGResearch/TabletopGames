@@ -43,7 +43,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         int tileId = 0;
         for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
             for(int y = 0; y < gameState.gameBoard.getHeight(); y++) {
-                gameState.gameBoard.setElement(x, y, new MapTile(x, y, new ArrayList<Unit>(), null, tileId));
+                gameState.gameBoard.setElement(x, y, new MapTile(x, y, new ArrayList<Unit>(), tileId));
                 tileId++;
             }
         }

@@ -8,7 +8,6 @@ public class MapTile extends Component {
 
     protected int locationX, locationY;
     private ArrayList<Unit> units;
-    private Terrain terrain;
 
     public enum TileArea {
         NA, left, mid, right;
@@ -22,12 +21,11 @@ public class MapTile extends Component {
         return locationY;
     }
 
-    public MapTile(int locationX, int locationY, ArrayList<Unit> units, Terrain terrain, int componentID) {
+    public MapTile(int locationX, int locationY, ArrayList<Unit> units, int componentID) {
         super(Utils.ComponentType.BOARD_NODE, "MapTile", componentID);
         this.locationX = locationX;
         this.locationY = locationY;
         this.units = units;
-        this.terrain = terrain;
     }
 
     public MapTile() {
@@ -35,17 +33,11 @@ public class MapTile extends Component {
         this.locationX = -1;
         this.locationY = -1;
         this.units = new ArrayList<Unit>();
-        this.terrain = null;
     }
 
     public Boolean SetUnits(ArrayList<Unit> newUnits) {
-        if (terrain == null) {
             units = newUnits;
             return true;
-        }
-        else {
-            return false;
-        }
     }
 
     public Unit.Faction GetFaction() {
@@ -69,13 +61,8 @@ public class MapTile extends Component {
     }
 
     public Boolean AddUnit(Unit unit) {
-        if (terrain == null) {
             units.add(unit);
             return true;
-        }
-        else {
-            return false;
-        }
     }
 
     public Boolean SetAsOrderable() {
@@ -92,7 +79,7 @@ public class MapTile extends Component {
     }
 
     public Boolean RemoveUnit() {
-        if (terrain == null && !units.isEmpty()) {
+        if (!units.isEmpty()) {
             units.remove(units.size()-1);
             return true;
         }
@@ -102,7 +89,7 @@ public class MapTile extends Component {
     }
 
     public ArrayList<Unit> GetUnits() {
-        if (terrain == null && !units.isEmpty()) {
+        if (!units.isEmpty()) {
             return units;
         }
         else {
@@ -130,16 +117,6 @@ public class MapTile extends Component {
         return false;
     }
 
-    public Boolean SetTerrain(Terrain newTerrain) {
-        if (units.isEmpty()) {
-            terrain = newTerrain;
-            return true;
-        }
-        else {
-            return false;
-        }
-    }
-
     @Override
     public MapTile copy() {
         ArrayList<Unit> clonedUnits = new ArrayList<Unit>();
@@ -147,7 +124,7 @@ public class MapTile extends Component {
             clonedUnits.add((Unit)i.copy());
         }
 
-        MapTile copy = new MapTile(locationX, locationY, clonedUnits, terrain, componentID);
+        MapTile copy = new MapTile(locationX, locationY, clonedUnits, componentID);
         return copy;
     }
 
@@ -162,7 +139,6 @@ public class MapTile extends Component {
                 && locationY == mapTile.locationY
                 && units == mapTile.units
                 && type == mapTile.type
-                && terrain == mapTile.terrain
                 && componentID == componentID;
     }
 }

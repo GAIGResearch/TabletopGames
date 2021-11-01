@@ -2,6 +2,7 @@ package games.battlelore.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.battlelore.BattleloreGameParameters;
 import games.battlelore.BattleloreGameState;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.CombatDice;
@@ -42,11 +43,13 @@ public class AttackUnitsAction extends AbstractAction {
 
             int defeatedEnemyCount = 0;
             CombatDice dice = new CombatDice();
+            BattleloreGameParameters parameters = (BattleloreGameParameters) state.getGameParameters();
 
-            for (int i = 0; i < 3; i++) {
+
+            for (int i = 0; i < parameters.troopCountInSquad; i++) {
                 CombatDice.Result result = dice.getResult();
                 if (result == CombatDice.Result.Strike) {
-                    if (attackerUnits.size() > 1) {
+                    if (!parameters.isWeakAttacker(attackerUnits.size())) {
                         defeatedEnemyCount++;
                     }
                 }
