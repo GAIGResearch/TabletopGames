@@ -556,7 +556,7 @@ public class Game {
 
             GUI frame = new GUI();
             AbstractGUIManager gui = null;
-            boolean runWithVisuals = ac != null;
+
 
             if (ac != null) {
                 // Create GUI (null if not implemented; running without visuals)
@@ -565,7 +565,7 @@ public class Game {
                 gui = gameToPlay.createGUIManager(gamePanel, game, ac);
             }
 
-            frame.setFrameProperties(runWithVisuals);
+            frame.setFrameProperties();
 
             // Run!
             game.run(gui, frame);

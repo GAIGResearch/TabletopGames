@@ -8,6 +8,7 @@ public class BattleloreGameParameters extends AbstractParameters {
     public int hexWidth = 12; //A..L in odd numbers, A..K in even numbers.
     public int hexHeight = 9; //1-9
 
+
     public BattleloreGameParameters(String dataPath, long seed) {
         super(seed);
         this.dataPath = dataPath;

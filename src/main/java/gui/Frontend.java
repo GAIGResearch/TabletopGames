@@ -356,7 +356,7 @@ public class Frontend extends GUI {
         getContentPane().add(wrapper, BorderLayout.CENTER);
 
         // Frame properties
-        setFrameProperties(true);
+        setFrameProperties();
     }
 
     private HashMap<String, JComboBox<Object>> createParameterWindow(List<String> paramNames, TunableParameters pp, JFrame frame) {

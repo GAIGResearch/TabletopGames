@@ -31,16 +31,13 @@ public class BattleloreGameState extends AbstractGameState {
         Decoy, BloodHarvester, ViperLegion, CitadelGuard, YeomanArcher;
     }
 
-    int playerCount;
-    Random random;
-    BattleloreGameParameters parameters;
-
+    int roundExceedThreshold;
     int numberOfRounds;
     int[] playerTurns;
+    int[] playerScores;
     GridBoard<MapTile> gameBoard;
     List<Unit> unitTypes;
-    int[] playerScores;
-
+    BattleloreGameParameters parameters;
 
     public int getNumberOfRounds() {
         return numberOfRounds;
@@ -53,12 +50,12 @@ public class BattleloreGameState extends AbstractGameState {
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new BattleloreTurnOrder(nPlayers), GameType.Battlelore);
         data = new BattleloreData();
-        playerCount = nPlayers;
         parameters = (BattleloreGameParameters) gameParameters;
         data.load(parameters.getDataPath());
         playerScores = new int[nPlayers];
         playerTurns = new int[nPlayers];
         numberOfRounds = 0;
+        roundExceedThreshold = 100;
     }
 
     public Unit GetUnitFromType(UnitType type) {
@@ -234,8 +231,6 @@ public class BattleloreGameState extends AbstractGameState {
         }
 
         state.gameBoard = clonedBoard;
-        state.playerCount = playerCount;
-        state.random = random;
         state.parameters = parameters;
         state.unitTypes = unitTypes;
         return state;

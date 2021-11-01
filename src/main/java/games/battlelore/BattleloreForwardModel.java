@@ -19,7 +19,6 @@ import utilities.Utils;
 
 import java.util.*;
 
-
 public class BattleloreForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState initialState) {
@@ -28,10 +27,8 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         BattleloreGameState gameState = (BattleloreGameState)initialState;
         BattleloreData _data = gameState.getData();
 
-        for (int i = 0; i  < gameState.playerCount; i++) {
-            if (gameState.playerCount != 2) {
-                System.out.println("3 and more players are not supported");
-            }
+        if (gameState.getNPlayers() != 2) {
+            throw new IllegalArgumentException("3 or more players are not supported");
         }
 
         //Init player hands
@@ -65,22 +62,21 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ?
                 Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
-        switch (state.getGamePhase().toString()) {
-            case "CommandAndOrderStep":
+        switch ((BattleloreGameState.BattleloreGamePhase) state.getGamePhase()) {
+            case CommandAndOrderStep:
                 currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
                 break;
-            case "MoveStep":
+            case MoveStep:
                 if (state.GetMoveableUnitsFromTile(playerFaction).isEmpty()) {
                     currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.AttackStep);
                 }
                 break;
-            case "AttackStep":
+            case AttackStep:
                 if (state.GetReadyForAttackUnitsFromTile(playerFaction).isEmpty()) {
                     state.getTurnOrder().endPlayerTurn(state);
                     currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep);
                 }
                 break;
-
             default:
                 break;
         }
