@@ -32,7 +32,6 @@ public class BattleloreGameState extends AbstractGameState {
         Decoy, BloodHarvester, ViperLegion, CitadelGuard, YeomanArcher;
     }
 
-    int roundExceedThreshold;
     int numberOfRounds;
     int[] playerScores;
     GridBoard<MapTile> gameBoard;
@@ -49,11 +48,8 @@ public class BattleloreGameState extends AbstractGameState {
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new BattleloreTurnOrder(nPlayers), GameType.Battlelore);
-        data = new BattleloreData();
         parameters = (BattleloreGameParameters) gameParameters;
-        data.load(parameters.getDataPath());
         playerScores = new int[nPlayers];
-        roundExceedThreshold = 100;
     }
 
     public Unit GetUnitFromType(UnitType type) {
@@ -202,10 +198,6 @@ public class BattleloreGameState extends AbstractGameState {
         return gameBoard;
     }
 
-    BattleloreData getData() {
-        // Only FM should have access to this for initialisation
-        return (BattleloreData)data;
-    }
 
     @Override
     protected List<Component> _getAllComponents() {

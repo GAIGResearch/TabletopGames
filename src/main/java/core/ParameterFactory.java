@@ -2,6 +2,7 @@ package core;
 
 import evaluation.TunableParameters;
 import games.GameType;
+import games.battlelore.BattleloreGameParameters;
 import games.blackjack.BlackjackParameters;
 import games.coltexpress.ColtExpressParameters;
 import games.diamant.DiamantParameters;
@@ -48,6 +49,8 @@ public class ParameterFactory {
                 return new PokerGameParameters(seed);
             case Blackjack:
                 return new BlackjackParameters(seed);
+            case Battlelore:
+                return new BattleloreGameParameters("data/battlelore",seed);
             case DiceMonastery:
                 return new DiceMonasteryParams(seed);
             default:

@@ -1,6 +1,7 @@
 package games.battlelore;
 
 import core.AbstractForwardModel;
+import core.AbstractGameData;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
@@ -25,7 +26,8 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         Random random = new Random(initialState.getGameParameters().getRandomSeed());
         BattleloreGameParameters gameParams = (BattleloreGameParameters) initialState.getGameParameters();
         BattleloreGameState gameState = (BattleloreGameState)initialState;
-        BattleloreData _data = gameState.getData();
+        BattleloreData _data = new BattleloreData();
+        _data.load(gameParams.getDataPath());
 
         if (gameState.getNPlayers() != 2) {
             throw new IllegalArgumentException("3 or more players are not supported");
