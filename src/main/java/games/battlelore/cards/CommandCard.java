@@ -47,6 +47,7 @@ public class CommandCard extends Card {
     protected String explanation;
 
     public CommandCard(String title, String explanation, int orderCount, int bonusAttackCount, int bonusLorePoints, int bonusMoveCount) {
+        super(title);
         this.title = title;
         this.explanation = explanation;
         this.orderCount = orderCount;
@@ -67,6 +68,7 @@ public class CommandCard extends Card {
     }
 
     public CommandCard() {
+        super();
         this.title = "N/A";
         this.orderCount = 0;
         this.bonusAttackCount = 0;

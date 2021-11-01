@@ -18,14 +18,14 @@ import java.util.Random;
 public class AttackUnitsAction extends AbstractAction {
     private BattleloreGameState gameState;
     private Unit.Faction playerFaction;
-    private MapTile attacker;
-    private MapTile defender;
+    private int attackingUnitsTileID;
+    private int targetTileID;
     private int playerID;
 
     public AttackUnitsAction(BattleloreGameState gameState, int attackingUnitsTileID, int targetTileID, Unit.Faction faction, int playerID) {
         this.gameState = gameState;
-        this.attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
-        this.defender = (MapTile) gameState.getComponentById(targetTileID);
+        this.attackingUnitsTileID = attackingUnitsTileID;
+        this.targetTileID = targetTileID;
         this.playerFaction = faction;
         this.playerID = playerID;
     }
@@ -39,15 +39,15 @@ public class AttackUnitsAction extends AbstractAction {
             return false;
         }
         else {
+            MapTile attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
+            MapTile defender = (MapTile) gameState.getComponentById(targetTileID);
             ArrayList<Unit> attackerUnits = state.getBoard().getElement(attacker.getLocationX(), attacker.getLocationY()).GetUnits();
             ArrayList<Unit> defenderUnits = state.getBoard().getElement(defender.getLocationX(), defender.getLocationY()).GetUnits();
 
             //COMBAT SEQUENCE: Roll a dice
-
             int defeatedEnemyCount = 0;
             CombatDice dice = new CombatDice();
             BattleloreGameParameters parameters = (BattleloreGameParameters) state.getGameParameters();
-
 
             for (int i = 0; i < parameters.troopCountInSquad; i++) {
                 CombatDice.Result result = dice.getResult();
@@ -85,11 +85,13 @@ public class AttackUnitsAction extends AbstractAction {
     }
 
     public MapTile GetAttacker() {
+        MapTile attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
         return attacker;
     }
 
     public MapTile GetDefender() {
-        return attacker;
+        MapTile defender = (MapTile) gameState.getComponentById(targetTileID);
+        return defender;
     }
 
     public Unit.Faction GetFaction() {
@@ -98,7 +100,7 @@ public class AttackUnitsAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new AttackUnitsAction(gameState, attacker.getComponentID(), defender.getComponentID(), playerFaction, playerID);
+        return new AttackUnitsAction(gameState, attackingUnitsTileID, targetTileID, playerFaction, playerID);
     }
 
     @Override
@@ -106,20 +108,23 @@ public class AttackUnitsAction extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof AttackUnitsAction)) return false;
         AttackUnitsAction that = (AttackUnitsAction) o;
-        return Objects.equals(attacker, that.attacker) &&
-                Objects.equals(defender, that.defender) &&
+        MapTile attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
+        MapTile defender = (MapTile) gameState.getComponentById(targetTileID);
+        return Objects.equals(attacker, that.GetAttacker()) &&
+                Objects.equals(defender, that.GetDefender()) &&
                 playerFaction == that.playerFaction &&
                 playerID == that.playerID;
     }
 
     @Override
-    public int hashCode()
-    {
-        return Objects.hash(attacker, defender, playerFaction, playerID);
+    public int hashCode() {
+        return Objects.hash(attackingUnitsTileID, targetTileID, playerFaction, playerID);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
+        MapTile attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
+        MapTile defender = (MapTile) gameState.getComponentById(targetTileID);
         return playerFaction.name() + " units in " + attacker.getLocationX() + ":" +
                 attacker.getLocationY() + " attacks to " + defender.getLocationX()+ ":" + defender.getLocationY();
     }

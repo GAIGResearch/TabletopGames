@@ -23,14 +23,14 @@ public class MoveUnitsAction extends AbstractAction
 {
     private BattleloreGameState gameState;
     private Unit.Faction playerFaction;
-    private MapTile tile;
+    private int tileID;
     private int locationX;
     private int locationY;
     private int playerID;
 
     public MoveUnitsAction(BattleloreGameState gameState, int tileID, Unit.Faction faction, int locX, int locY, int playerID) {
         this.gameState = gameState;
-        this.tile = (MapTile) gameState.getComponentById(tileID);
+        this.tileID = tileID;
         this.playerFaction = faction;
         this.locationX = locX;
         this.locationY = locY;
@@ -46,6 +46,7 @@ public class MoveUnitsAction extends AbstractAction
             return false;
         }
         else {
+            MapTile tile = (MapTile) gameState.getComponentById(tileID);
             ArrayList<Unit> units = state.getBoard().getElement(tile.getLocationX(), tile.getLocationY()).GetUnits();
 
             if (units == null) {
@@ -66,7 +67,7 @@ public class MoveUnitsAction extends AbstractAction
 
     @Override
     public AbstractAction copy() {
-        return new MoveUnitsAction(gameState, tile.getComponentID(), playerFaction, locationX, locationY, playerID);
+        return new MoveUnitsAction(gameState, tileID, playerFaction, locationX, locationY, playerID);
     }
 
     @Override
@@ -74,7 +75,8 @@ public class MoveUnitsAction extends AbstractAction
         if (this == o) return true;
         if (!(o instanceof MoveUnitsAction)) return false;
         MoveUnitsAction that = (MoveUnitsAction) o;
-        return Objects.equals(tile, that.tile) &&
+
+        return Objects.equals(tileID, that.tileID) &&
                 playerFaction == that.playerFaction &&
                 locationX == that.locationX &&
                 locationY == that.locationY &&
@@ -83,11 +85,12 @@ public class MoveUnitsAction extends AbstractAction
 
     public int hashCode()
     {
-        return Objects.hash(tile, playerFaction, locationX, locationY);
+        return Objects.hash(tileID, playerFaction, locationX, locationY);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
+        MapTile tile = (MapTile) gameState.getComponentById(tileID);
         return playerFaction.name() + " moves units from " + tile.getLocationX() + ":" +
                 tile.getLocationY() + " to " + locationX + ":" + locationY;
     }

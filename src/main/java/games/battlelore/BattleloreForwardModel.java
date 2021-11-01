@@ -221,8 +221,8 @@ public class BattleloreForwardModel extends AbstractForwardModel {
      * @param gameState - game state to check game end.
      */
     private boolean checkGameEnd(BattleloreGameState gameState, int playerId) {
-        int WIN_SCORE = 4;
-        return gameState.GetPlayerScore(playerId) >= WIN_SCORE;
+        BattleloreGameParameters parameters = (BattleloreGameParameters) gameState.getGameParameters();
+        return gameState.GetPlayerScore(playerId) >= parameters.WIN_SCORE;
     }
 
 

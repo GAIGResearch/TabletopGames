@@ -3,14 +3,9 @@ package games.battlelore;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
-import core.components.Deck;
 import core.components.GridBoard;
-import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
-import core.interfaces.IStateHeuristic;
-import core.turnorders.TurnOrder;
 import games.GameType;
-import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
 
@@ -36,7 +31,6 @@ public class BattleloreGameState extends AbstractGameState {
     int[] playerScores;
     GridBoard<MapTile> gameBoard;
     List<Unit> unitTypes;
-    BattleloreGameParameters parameters;
 
     public int getNumberOfRounds() {
         return numberOfRounds;
@@ -48,7 +42,6 @@ public class BattleloreGameState extends AbstractGameState {
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new BattleloreTurnOrder(nPlayers), GameType.Battlelore);
-        parameters = (BattleloreGameParameters) gameParameters;
         playerScores = new int[nPlayers];
     }
 
@@ -172,6 +165,7 @@ public class BattleloreGameState extends AbstractGameState {
     public int[][] GetPossibleTargetUnits(MapTile attackUnit) {
         int[][] possibleLocations = new int[gameBoard.getWidth()][turnOrder.nPlayers()];
         boolean isMelee = attackUnit.GetUnits().get(0).isMelee;
+        BattleloreGameParameters parameters = (BattleloreGameParameters) gameParameters;
         int range = parameters.getTroopRange(isMelee);
         int counter = 0;
 
@@ -216,7 +210,6 @@ public class BattleloreGameState extends AbstractGameState {
         }
 
         state.gameBoard = clonedBoard;
-        state.parameters = parameters;
         state.unitTypes = unitTypes;
         return state;
     }

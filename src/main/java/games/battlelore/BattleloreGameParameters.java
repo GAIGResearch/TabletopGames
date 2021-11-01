@@ -8,6 +8,7 @@ public class BattleloreGameParameters extends AbstractParameters {
     public int hexWidth = 12; //A..L in odd numbers, A..K in even numbers.
     public int hexHeight = 9; //1-9
     public int troopCountInSquad = 3;
+    public final int WIN_SCORE = 4;
     private int meleeRange = 1;
     private int rangedRange = 5;
 

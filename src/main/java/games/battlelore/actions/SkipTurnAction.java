@@ -13,14 +13,14 @@ import java.util.Objects;
 public class SkipTurnAction extends AbstractAction {
     private BattleloreGameState gameState;
     private Unit.Faction playerFaction;
-    private MapTile units;
+    private int unitsID;
     private boolean skipAttack;
     private boolean skipMove;
     private int playerID;
 
     public SkipTurnAction(BattleloreGameState gameState, int tileID, Unit.Faction faction, boolean doesSkipMove, boolean doesSkipAttack, int playerID) {
         this.gameState = gameState;
-        this.units = (MapTile) gameState.getComponentById(tileID);
+        this.unitsID = tileID;
         this.playerFaction = faction;
         this.playerID = playerID;
         skipAttack = doesSkipAttack;
@@ -40,7 +40,7 @@ public class SkipTurnAction extends AbstractAction {
         BattleloreGameState state = (BattleloreGameState) gameState;
         state.AddToRounds();
         state.IncrementTurn(playerID);
-
+        MapTile units = (MapTile) gameState.getComponentById(unitsID);
         if (units != null) {
             for (Unit unit : units.GetUnits()) {
                 if (skipAttack) {
@@ -57,7 +57,7 @@ public class SkipTurnAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new SkipTurnAction(gameState, units.getComponentID(), playerFaction, skipMove, skipAttack, playerID);
+        return new SkipTurnAction(gameState, unitsID, playerFaction, skipMove, skipAttack, playerID);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class SkipTurnAction extends AbstractAction {
         SkipTurnAction that = (SkipTurnAction) o;
 
         return Objects.equals(playerFaction, that.playerFaction) &&
-                Objects.equals(units, that.units) &&
+                Objects.equals(unitsID, that.unitsID) &&
                 skipAttack == that.skipAttack &&
                 skipMove == that.skipMove &&
                 playerID == that.playerID;
@@ -76,15 +76,16 @@ public class SkipTurnAction extends AbstractAction {
     @Override
     public int hashCode()
     {
-        return Objects.hash(units, playerFaction);
+        return Objects.hash(unitsID, playerFaction);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
+        MapTile units = (MapTile) gameState.getComponentById(unitsID);
         if (units == null) {
             return "";
         }
-        if ( units.GetUnits().isEmpty()) {
+        if (units.GetUnits().isEmpty()) {
             return playerFaction.name() + "skips his turn.";
         }
         else {
