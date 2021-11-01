@@ -59,6 +59,20 @@ public class Unit extends Component {
         this.isMelee = isMelee;
     }
 
+    //Used by copy constructor only
+    private Unit (int componentID, Utils.ComponentType type, String id, String name, int moveRange,
+                 int strength, int health, Faction faction, String shortName, boolean isMelee) {
+        super(type, name, componentID);
+        this.name = name;
+        this.id = id;
+        this.moveRange = moveRange;
+        this.strength = strength;
+        this.health = health;
+        this.faction = faction;
+        this.shortName = shortName;
+        this.isMelee = isMelee;
+    }
+
 
     public int getTotalStrength() {
         return strength;
@@ -86,7 +100,7 @@ public class Unit extends Component {
 
     @Override
     public Component copy() {
-        Unit newUnit = new Unit(type, id, name, moveRange, strength, health, faction, shortName, isMelee);
+        Unit newUnit = new Unit(componentID, type, id, name, moveRange, strength, health, faction, shortName, isMelee);
         newUnit.id = id;
         newUnit.name = name;
         newUnit.shortName = shortName;
@@ -116,6 +130,7 @@ public class Unit extends Component {
 
         Unit unit = (Unit) o;
         return id == unit.id &&
+                componentID == unit.componentID &&
                 type == unit.type &&
                 name == unit.name &&
                 moveRange == unit.moveRange &&
@@ -152,7 +167,6 @@ public class Unit extends Component {
         try (FileReader reader = new FileReader(filename)) {
             JSONArray data = (JSONArray) jsonParser.parse(reader);
             for(Object o : data) {
-
                 Unit newUnit = new Unit();
                 newUnit.loadUnit((JSONObject) o);
                 units.add(newUnit);

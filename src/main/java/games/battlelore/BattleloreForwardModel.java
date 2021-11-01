@@ -40,11 +40,9 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         gameState.unitTypes = new ArrayList<>();
         gameState.unitTypes = _data.getUnits();
 
-        int tileId = 0;
         for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
             for(int y = 0; y < gameState.gameBoard.getHeight(); y++) {
-                gameState.gameBoard.setElement(x, y, new MapTile(x, y, new ArrayList<Unit>(), tileId));
-                tileId++;
+                gameState.gameBoard.setElement(x, y, new MapTile(x, y, new ArrayList<Unit>()));
             }
         }
 

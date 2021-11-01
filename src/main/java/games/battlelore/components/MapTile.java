@@ -21,18 +21,27 @@ public class MapTile extends Component {
         return locationY;
     }
 
-    public MapTile(int locationX, int locationY, ArrayList<Unit> units, int componentID) {
-        super(Utils.ComponentType.BOARD_NODE, "MapTile", componentID);
+    public MapTile(int locationX, int locationY, ArrayList<Unit> units) {
+        super(Utils.ComponentType.BOARD_NODE, "MapTile");
         this.locationX = locationX;
         this.locationY = locationY;
         this.units = units;
     }
 
+
     public MapTile() {
-        super(Utils.ComponentType.BOARD_NODE, "MapTile", -1);
+        super(Utils.ComponentType.BOARD_NODE, "MapTile");
         this.locationX = -1;
         this.locationY = -1;
         this.units = new ArrayList<Unit>();
+    }
+
+    //Used by copy constructor only
+    private MapTile(int componentID, int locationX, int locationY, ArrayList<Unit> units) {
+        super(Utils.ComponentType.BOARD_NODE, "MapTile", componentID);
+        this.locationX = locationX;
+        this.locationY = locationY;
+        this.units = units;
     }
 
     public Boolean SetUnits(ArrayList<Unit> newUnits) {
@@ -124,7 +133,7 @@ public class MapTile extends Component {
             clonedUnits.add((Unit)i.copy());
         }
 
-        MapTile copy = new MapTile(locationX, locationY, clonedUnits, componentID);
+        MapTile copy = new MapTile(componentID, locationX, locationY, clonedUnits);
         return copy;
     }
 

@@ -55,6 +55,17 @@ public class CommandCard extends Card {
         this.bonusMoveCount = bonusMoveCount;
     }
 
+    //Used by copy function only
+    private CommandCard(int componentID, String title, String explanation, int orderCount, int bonusAttackCount, int bonusLorePoints, int bonusMoveCount) {
+        super(title, componentID);
+        this.title = title;
+        this.explanation = explanation;
+        this.orderCount = orderCount;
+        this.bonusAttackCount = bonusAttackCount;
+        this.bonusLorePoints = bonusLorePoints;
+        this.bonusMoveCount = bonusMoveCount;
+    }
+
     public CommandCard() {
         this.title = "N/A";
         this.orderCount = 0;
@@ -95,7 +106,7 @@ public class CommandCard extends Card {
 
     @Override
     public Card copy() {
-        return new CommandCard(title,explanation, orderCount, bonusAttackCount, bonusLorePoints, bonusMoveCount);
+        return new CommandCard(componentID, title, explanation, orderCount, bonusAttackCount, bonusLorePoints, bonusMoveCount);
     }
 
     @Override
