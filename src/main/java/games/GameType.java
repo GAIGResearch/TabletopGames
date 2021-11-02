@@ -1,6 +1,15 @@
 package games;
 
 import core.*;
+import core.turnorders.AlternatingTurnOrder;
+import games.battlelore.BattleloreForwardModel;
+import games.battlelore.BattleloreGameState;
+import games.battlelore.BattleloreGameParameters;
+import games.battlelore.gui.BattleloreGUI;
+import games.blackjack.BlackjackForwardModel;
+import games.blackjack.BlackjackGameState;
+import games.blackjack.BlackjackParameters;
+import games.blackjack.gui.BlackjackGUIManager;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.gui.ColtExpressGUIManager;
@@ -128,8 +137,11 @@ public enum GameType {
             new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
     DominionImprovements (2, 4,
             new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }})
-    ;
+            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
+    Battlelore (2, 2,
+            new ArrayList<Category>() {{ add(Fantasy); add(Miniatures); add(Wargame);}},
+            new ArrayList<Mechanic>() {{ add(Campaign); add(BattleCardDriven); add(CommandCards);
+                add(DiceRolling); add(GridMovement); add(ModularBoard); add(VariablePlayerPowers); }});
 
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
@@ -172,6 +184,8 @@ public enum GameType {
                 return DominionSizeDistortion;
             case "dominionimprovements" :
                 return DominionImprovements;
+            case "battlelore" :
+                return Battlelore;
             case "dicemonastery" :
                 return DiceMonastery;
         }
@@ -254,6 +268,10 @@ public enum GameType {
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
                 break;
+            case Battlelore:
+                forwardModel = new BattleloreForwardModel();
+                gameState = new BattleloreGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -320,6 +338,10 @@ public enum GameType {
             case DominionSizeDistortion:
                 gui = new DominionGUIManager(parent, game, ac, human);
                 break;
+            // TODO: Diamant GUI
+            case Battlelore:
+                gui = new BattleloreGUI(parent, game, ac);
+                break;
             case DiceMonastery:
                 gui = new DiceMonasteryGUI(parent, game, ac, human);
                 break;
@@ -359,7 +381,8 @@ public enum GameType {
         Exploration,
         Fantasy,
         Miniatures,
-        Bluffing;
+        Bluffing,
+        Wargame;
 
         /**
          * Retrieves a list of all games within this category.
@@ -425,8 +448,10 @@ public enum GameType {
         MultipleMaps,
         Campaign,
         Enclosure,
-        MoveThroughDeck,
-        DeckManagement;
+        DeckManagement,
+        BattleCardDriven,
+        CommandCards,
+        MoveThroughDeck;
 
         /**
          * Retrieves a list of all games using this mechanic.

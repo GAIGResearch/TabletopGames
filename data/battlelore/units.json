@@ -1,0 +1,64 @@
+[
+  {
+    "id":"decoy",
+    "faction": ["Integer", -1],
+    "name": "Decoy",
+    "move": ["Integer", 0],
+    "strength": ["Integer", 0],
+    "health": ["Integer", 0],
+    "type": "soldier",
+    "special": "",
+    "unitCount": ["Integer", 1],
+    "shortname": "D",
+    "isMelee": ["Boolean", true]
+  },
+  {
+	"id":"blood_harvesters",
+    "faction": ["Integer", 0],
+    "name": "Blood Harvesters",
+    "move": ["Integer", 2],
+    "strength": ["Integer", 3],
+    "health": ["Integer", 3],
+	"type": "soldier",
+	"special": "rage",
+    "unitCount": ["Integer", 3],
+    "shortname": "BH",
+    "isMelee": ["Boolean", true]
+  },
+  {
+	"id":"viper_legion",
+    "faction": ["Integer", 0],
+    "name": "Viper Legion",
+    "move": ["Integer", 2],
+    "strength": ["Integer", 2],
+    "health": ["Integer", 3],
+	"special": "bite",
+    "unitCount": ["Integer", 3],
+    "shortname": "VL",
+    "isMelee": ["Boolean", false]
+  },
+  {
+    "id":"citadel_guard",
+    "faction": ["Integer", 1],
+    "name": "Citadel Guard",
+    "move": ["Integer", 2],
+    "strength": ["Integer", 3],
+    "health": ["Integer", 3],
+	"special": "pursue",
+    "unitCount": ["Integer", 3],
+    "shortname": "CG",
+    "isMelee": ["Boolean", true]
+  },
+  {
+	"id":"yeoman_archers",
+    "faction": ["Integer", 1],
+    "name": "Yeoman Archers",
+    "move": ["Integer", 2],
+    "strength": ["Integer", 2],
+    "health": ["Integer", 3],
+	"special": "doubleshot",
+    "unitCount": ["Integer", 3],
+    "shortname": "YA",
+    "isMelee": ["Boolean", false]
+  }
+]

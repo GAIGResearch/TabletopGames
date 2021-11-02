@@ -556,12 +556,15 @@ public class Game {
 
             GUI frame = new GUI();
             AbstractGUIManager gui = null;
+
+
             if (ac != null) {
                 // Create GUI (null if not implemented; running without visuals)
                 GamePanel gamePanel = new GamePanel();
                 frame.setContentPane(gamePanel);
                 gui = gameToPlay.createGUIManager(gamePanel, game, ac);
             }
+
             frame.setFrameProperties();
 
             // Run!
