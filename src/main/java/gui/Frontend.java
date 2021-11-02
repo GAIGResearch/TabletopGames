@@ -1,9 +1,6 @@
 package gui;
 
-import core.AbstractParameters;
-import core.AbstractPlayer;
-import core.CoreParameters;
-import core.Game;
+import core.*;
 import evaluation.TunableParameters;
 import games.GameType;
 import players.PlayerParameters;
@@ -33,7 +30,7 @@ public class Frontend extends GUI {
         playerSelect.add(nPlayers);
         JLabel nPlayersText = new JLabel("# players (max " + nMaxPlayers + "):");
         nPlayers.add(nPlayersText);
-        JTextField nPlayerField = new JTextField(""+defaultNPlayers, 10);  // integer of this is n players
+        JTextField nPlayerField = new JTextField("" + defaultNPlayers, 10);  // integer of this is n players
         nPlayers.add(nPlayerField);
 
         // Game type and parameters selection
@@ -45,7 +42,7 @@ public class Frontend extends GUI {
         JFrame[] gameParameterEditWindow = new JFrame[GameType.values().length];
         for (int i = 0; i < gameNames.length; i++) {
             gameNames[i] = GameType.values()[i].name();
-            AbstractParameters params = GameType.values()[i].createParameterSet(0);
+            AbstractParameters params = ParameterFactory.getDefaultParams(GameType.values()[i], 0);
             if (params instanceof TunableParameters) {
                 gameParameters[i] = (TunableParameters) params;
                 gameParameterEditWindow[i] = new JFrame();
@@ -57,7 +54,7 @@ public class Frontend extends GUI {
                 int idx = i;
                 JButton submit = new JButton("Submit");
                 submit.addActionListener(e -> {
-                    for (String param: paramNames) {
+                    for (String param : paramNames) {
                         gameParameters[idx].setParameterValue(param, paramValueOptions.get(param).getSelectedItem());
                     }
                     gameParameterEditWindow[idx].dispose();
@@ -65,7 +62,7 @@ public class Frontend extends GUI {
                 JButton reset = new JButton("Reset");
                 reset.addActionListener(e -> {
                     gameParameters[idx].reset();
-                    for (String param: paramNames) {
+                    for (String param : paramNames) {
                         paramValueOptions.get(param).setSelectedItem(gameParameters[idx].getDefaultParameterValue(param));
                     }
                 });
@@ -122,7 +119,7 @@ public class Frontend extends GUI {
                 int idx = i;
                 JButton submit = new JButton("Submit");
                 submit.addActionListener(e -> {
-                    for (String param: paramNames) {
+                    for (String param : paramNames) {
                         playerParameters[idx].setParameterValue(param, paramValueOptions.get(param).getSelectedItem());
                     }
                     playerParameterEditWindow[idx].dispose();
@@ -130,7 +127,7 @@ public class Frontend extends GUI {
                 JButton reset = new JButton("Reset");
                 reset.addActionListener(e -> {
                     playerParameters[idx].reset();
-                    for (String param: paramNames) {
+                    for (String param : paramNames) {
                         paramValueOptions.get(param).setSelectedItem(playerParameters[idx].getDefaultParameterValue(param));
                     }
                 });
@@ -191,7 +188,7 @@ public class Frontend extends GUI {
         nPlayers.add(updateNPlayers);
 
         // Select visuals on/off
-        
+
         JPanel visualSelect = new JPanel();
         visualSelect.add(new JLabel("Visuals ON/OFF:"));
         JComboBox<Boolean> visualOptions = new JComboBox<>(new Boolean[]{false, true}); // index here is visuals on/off
@@ -202,7 +199,7 @@ public class Frontend extends GUI {
 
         JPanel seedSelect = new JPanel();
         seedSelect.add(new JLabel("Seed:"));
-        JTextField seedOption = new JTextField(""+System.currentTimeMillis());  // integer of this is seed
+        JTextField seedOption = new JTextField("" + System.currentTimeMillis());  // integer of this is seed
         JButton seedRefresh = new JButton("Refresh");
         seedRefresh.addActionListener(e -> seedOption.setText("" + System.currentTimeMillis()));
         seedSelect.add(seedOption);
@@ -213,7 +210,7 @@ public class Frontend extends GUI {
         JPanel gameRunParamSelect = new JPanel();
         gameRunParamSelect.setLayout(new BoxLayout(gameRunParamSelect, BoxLayout.Y_AXIS));
         HashMap<String, JComboBox<Object>> coreParameterValueOptions = new HashMap<>();
-        for (String param: coreParameters.getParameterNames()) {
+        for (String param : coreParameters.getParameterNames()) {
             JPanel paramPanel = new JPanel();
             paramPanel.add(new JLabel(param));
             List<Object> values = coreParameters.getPossibleValues(param);
@@ -264,7 +261,7 @@ public class Frontend extends GUI {
                     gameRunning.reset(players);
 
                     // Find core parameters
-                    for (String param: coreParameterValueOptions.keySet()) {
+                    for (String param : coreParameterValueOptions.keySet()) {
                         coreParameters.setParameterValue(param, coreParameterValueOptions.get(param).getSelectedItem());
                     }
                     gameRunning.setCoreParameters(coreParameters);
@@ -362,7 +359,7 @@ public class Frontend extends GUI {
     private HashMap<String, JComboBox<Object>> createParameterWindow(List<String> paramNames, TunableParameters pp, JFrame frame) {
         HashMap<String, JComboBox<Object>> paramValueOptions = new HashMap<>();
         frame.getContentPane().removeAll();
-        for (String param: paramNames) {
+        for (String param : paramNames) {
             JPanel paramPanel = new JPanel();
             paramPanel.add(new JLabel(param));
             List<Object> values = pp.getPossibleValues(param);

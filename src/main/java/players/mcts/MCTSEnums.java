@@ -1,13 +1,13 @@
 package players.mcts;
 
-import core.actions.AbstractAction;
-
-import java.util.function.Function;
-
 public class MCTSEnums {
 
     public enum Strategies {
-        RANDOM
+        RANDOM, MAST, CLASS
+    }
+
+    public enum MASTType {
+        Rollout, Tree, Both
     }
 
     public enum SelectionPolicy {

@@ -25,7 +25,7 @@ public class TestMCTSPlayer extends MCTSPlayer {
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        root = new SingleTreeNode(this, null, gameState, rnd);
+        root = new SingleTreeNode(this, null, null, gameState, rnd);
         root.mctsSearch(getStatsLogger());
 
         if (debug)

@@ -85,6 +85,14 @@ public class FileStatsLogger implements IStatisticLogger {
         System.out.println("Datum ignored - FileStatsLogger only to be used with other record()");
     }
 
+    public void flush() {
+        try {
+            writer.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * This just closes the file
      */

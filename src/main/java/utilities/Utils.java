@@ -1,5 +1,6 @@
 package utilities;
 
+import core.actions.AbstractAction;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -211,6 +212,30 @@ public abstract class Utils {
         return input.keySet().stream().collect(toMap(key -> key, key -> input.get(key).doubleValue() / sum));
     }
 
+    /**
+     * This decays statistics by gamma
+     *
+     * @param pair
+     * @param gamma
+     * @return
+     */
+    public static Pair<Integer, Double> decay(Pair<Integer, Double> pair, double gamma) {
+        if (gamma < 1.0 && gamma >= 0.0) {
+            if (pair.a == 0) return new Pair<>(0, 0.0);
+            double oldCount = pair.a;
+            int newCount = (int) (oldCount * gamma);
+            double newValue =  pair.b * newCount / oldCount;
+            return new Pair<>(newCount, newValue);
+        }
+        return pair;
+    }
+
+    public static <T> Map<T, Pair<Integer, Double>> decay(Map<T, Pair<Integer, Double>> map, double gamma) {
+        return map.keySet().stream()
+                .collect(toMap(key -> key, key -> decay(map.get(key), gamma)));
+    }
+
+
     @SuppressWarnings("unchecked")
     public static <T> T getArg(String[] args, String name, T defaultValue) {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
@@ -237,7 +262,7 @@ public abstract class Utils {
             JSONParser parser = new JSONParser();
             return (JSONObject) parser.parse(reader);
         } catch (IOException | ParseException e) {
-            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage() + " : " +e.toString());
+            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage() + " : " + e.toString());
         }
     }
 
