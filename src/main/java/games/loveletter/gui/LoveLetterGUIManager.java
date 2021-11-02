@@ -261,6 +261,8 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
 //            resetActionButtons();
 
             activePlayer = gameState.getCurrentPlayer();
+            if (activePlayer == -1) return;
+            
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             int highlight = playerHands[activePlayer].handCards.getCardHighlight();
             Deck<LoveLetterCard> deck = ((LoveLetterGameState)gameState).getPlayerHandCards().get(activePlayer);
