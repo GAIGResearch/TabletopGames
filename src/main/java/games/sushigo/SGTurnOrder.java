@@ -15,7 +15,6 @@ public class SGTurnOrder extends AlternatingTurnOrder {
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
         if(gameState.getGameStatus() != Utils.GameResult.GAME_ONGOING) return;
-        SGGameState SGGS = (SGGameState) gameState;
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));
     }

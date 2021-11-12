@@ -14,6 +14,7 @@ import games.sushigo.testing.SGFileWriter;
 import utilities.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -38,11 +39,7 @@ public class SGForwardModel extends AbstractForwardModel {
         SGGS.playerScoreToAdd = new int[firstState.getNPlayers()];
         SGGS.playerChopsticksActivated = new boolean[firstState.getNPlayers()];
         SGGS.playerExtraTurns = new int[firstState.getNPlayers()];
-        for (int i = 0; i < SGGS.getPlayerCardPicks().length; i++)
-        {
-            SGGS.getPlayerCardPicks()[i] = -1;
-        }
-
+        Arrays.fill(SGGS.getPlayerCardPicks(), -1);
 
         //Setup draw & discard piles
         SetupDrawpile(SGGS);
@@ -163,10 +160,7 @@ public class SGForwardModel extends AbstractForwardModel {
                 SGGS.setPlayerScoreToAdd(i, 0);
             }
             //clear picks
-            for (int i = 0; i < SGGS.getPlayerCardPicks().length; i++)
-            {
-                SGGS.getPlayerCardPicks()[i] = -1;
-            }
+            Arrays.fill(SGGS.getPlayerCardPicks(), -1);
         }
 
 
@@ -327,9 +321,7 @@ public class SGForwardModel extends AbstractForwardModel {
             {
                 secondBest = currentBest;
                 secondPlayers.clear();
-                for(Integer x : mostPlayers){
-                    secondPlayers.add(x.intValue());
-                }
+                secondPlayers.addAll(mostPlayers);
 
                 currentBest = makiPlayerPoints[i];
                 mostPlayers.clear();
@@ -493,8 +485,6 @@ public class SGForwardModel extends AbstractForwardModel {
         SGGameState SGGS = (SGGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
-        int deckFromId = SGGS.getPlayerDecks().get(gameState.getCurrentPlayer()).getComponentID();
-        int deckToId = SGGS.getPlayerFields().get(gameState.getCurrentPlayer()).getComponentID();
         Deck<SGCard> currentPlayerHand = SGGS.getPlayerDecks().get(SGGS.getCurrentPlayer());
         for (int i = 0; i < currentPlayerHand.getSize(); i++){
             if(SGGS.getPlayerCardPicks()[SGGS.getCurrentPlayer()] == i) continue;

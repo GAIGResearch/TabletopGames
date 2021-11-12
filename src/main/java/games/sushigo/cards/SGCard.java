@@ -20,7 +20,6 @@ public class SGCard extends Card {
     }
 
     public SGCardType type;
-    public int value;
 
     public SGCard(SGCardType type)
     {
