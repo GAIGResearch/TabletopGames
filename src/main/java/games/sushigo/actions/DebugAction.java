@@ -4,9 +4,12 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 
 public class DebugAction extends AbstractAction {
+
+    boolean debug = false;
+
     @Override
     public boolean execute(AbstractGameState gs) {
-        System.out.println("Action played!");
+        if (debug)  System.out.println("Action played!");
         return true;
     }
 
