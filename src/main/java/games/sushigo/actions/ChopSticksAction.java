@@ -7,7 +7,7 @@ import games.sushigo.SGParameters;
 import games.sushigo.cards.SGCard;
 
 public class ChopSticksAction extends AbstractAction {
-    int playerId;
+    final int playerId;
 
     public ChopSticksAction(int playerId)
     {
@@ -24,18 +24,21 @@ public class ChopSticksAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new ChopSticksAction(playerId);
+        return this; // immutable
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        return obj instanceof DebugAction;
+        if (obj instanceof ChopSticksAction) {
+            return ((ChopSticksAction) obj).playerId == playerId;
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return playerId + 38923;
     }
 
     @Override

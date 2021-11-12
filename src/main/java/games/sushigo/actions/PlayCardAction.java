@@ -8,11 +8,12 @@ import games.sushigo.SGParameters;
 import games.sushigo.cards.SGCard;
 
 import java.awt.font.TextHitInfo;
+import java.util.Objects;
 
 public class PlayCardAction extends AbstractAction {
-    int playerId;
-    int cardIndex;
-    SGCard.SGCardType cardType;
+    final int playerId;
+    final int cardIndex;
+    final SGCard.SGCardType cardType;
 
     public PlayCardAction(int playerId, int cardIndex, SGCard.SGCardType cardType)
     {
@@ -81,18 +82,25 @@ public class PlayCardAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new PlayCardAction(playerId, cardIndex, cardType);
+        // immutable state
+        return this;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        return obj instanceof DebugAction;
+        if (obj instanceof PlayCardAction) {
+            // deliberately not including the cardIndex, as these actions are equivalent in play
+            PlayCardAction other = (PlayCardAction) obj;
+            return other.playerId == playerId && other.cardType == cardType;
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        // deliberately not including the cardIndex
+        return Objects.hash(playerId, cardType) - 12692;
     }
 
     @Override

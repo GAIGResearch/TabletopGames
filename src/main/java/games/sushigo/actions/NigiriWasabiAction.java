@@ -6,10 +6,12 @@ import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
 import games.sushigo.cards.SGCard;
 
+import java.util.Objects;
+
 public class NigiriWasabiAction extends AbstractAction {
-    int playerId;
-    int cardIndex;
-    SGCard.SGCardType cardType;
+    final int playerId;
+    final int cardIndex;
+    final SGCard.SGCardType cardType;
 
     public NigiriWasabiAction(int playerId, int cardIndex, SGCard.SGCardType cardType)
     {
@@ -49,18 +51,25 @@ public class NigiriWasabiAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new NigiriWasabiAction(playerId, cardIndex, cardType);
+        // immutable
+        return this;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        return obj instanceof DebugAction;
+        if (obj instanceof NigiriWasabiAction) {
+            // deliberately not including the cardIndex, as these actions are equivalent in play
+            NigiriWasabiAction other = (NigiriWasabiAction) obj;
+            return other.playerId == playerId && other.cardType == cardType;
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        // deliberately not including the cardIndex
+        return Objects.hash(playerId, cardType) - 17;
     }
 
     @Override

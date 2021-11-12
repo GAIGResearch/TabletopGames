@@ -17,7 +17,6 @@ public class DebugAction extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
         return obj instanceof DebugAction;
     }
 
