@@ -12,19 +12,27 @@ import java.util.Objects;
 
 public class PlayCardAction extends AbstractAction {
     final int playerId;
-    final int cardIndex;
     final SGCard.SGCardType cardType;
 
-    public PlayCardAction(int playerId, int cardIndex, SGCard.SGCardType cardType)
+    public PlayCardAction(int playerId, SGCard.SGCardType cardType)
     {
         this.playerId = playerId;
-        this.cardIndex = cardIndex;
         this.cardType = cardType;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         SGGameState SGGS = (SGGameState) gs;
+        Deck<SGCard> hand =  SGGS.getPlayerDecks().get(playerId);
+        int cardIndex = -1;
+        for (int i = 0; i < hand.getSize(); i++) {
+            if (hand.get(i).type == cardType) {
+                cardIndex = i;
+                break;
+            }
+        }
+        if (cardIndex == -1)
+            throw new AssertionError("No card found in hand of type " + cardType);
         if(SGGS.getPlayerChopSticksActivated(playerId) && SGGS.getPlayerExtraTurns(playerId) == 0)
         {
             SGGS.setPlayerExtraCardPick(cardIndex, playerId);
