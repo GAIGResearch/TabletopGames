@@ -2,15 +2,15 @@ package games.sushigo;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import games.GameType;
 import games.sushigo.cards.SGCard;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+
+import static core.CoreConstants.VisibilityMode.*;
 
 public class SGGameState extends AbstractGameState {
     List<Deck<SGCard>> playerHands;
@@ -29,6 +29,7 @@ public class SGGameState extends AbstractGameState {
     int[] playerChopSticksAmount;
     boolean[] playerChopsticksActivated;
     int[] playerExtraTurns;
+    Random rnd;
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -37,6 +38,7 @@ public class SGGameState extends AbstractGameState {
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new SGTurnOrder(nPlayers), GameType.SushiGO);
+        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -66,6 +68,7 @@ public class SGGameState extends AbstractGameState {
 
         copy.cardAmount = cardAmount;
 
+
         //Copy player hands
         copy.playerHands = new ArrayList<>();
         for (Deck<SGCard> d : playerHands){
@@ -81,6 +84,30 @@ public class SGGameState extends AbstractGameState {
         //Other decks
         copy.drawPile = drawPile.copy();
         copy.discardPile = discardPile.copy();
+
+        // Now we need to redeterminise
+        // discard pile and player fields are known - it is just the hands of other players we need to
+        // shuffle with the draw deck and then redraw
+        if (playerId != -1) {
+            for (int p = 0; p < playerHands.size(); p++) {
+                if (p != playerId) {
+                    drawPile.add(playerHands.get(p));
+                }
+            }
+            drawPile.shuffle(rnd);
+            // now we draw into the unknown player hands
+            for (int p = 0; p < playerHands.size(); p++) {
+                if (p != playerId) {
+                    Deck<SGCard> hand = playerHands.get(p);
+                    int handSize = hand.getSize();
+                    hand.clear();
+                    for (int i = 0; i < handSize; i++) {
+                        hand.add(drawPile.draw());
+                    }
+                }
+            }
+        }
+
         return copy;
     }
 
