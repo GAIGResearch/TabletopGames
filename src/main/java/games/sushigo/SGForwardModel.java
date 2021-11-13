@@ -6,7 +6,6 @@ import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.sushigo.actions.ChopSticksAction;
-import games.sushigo.actions.DebugAction;
 import games.sushigo.actions.NigiriWasabiAction;
 import games.sushigo.actions.PlayCardAction;
 import games.sushigo.cards.SGCard;
@@ -165,6 +164,7 @@ public class SGForwardModel extends AbstractForwardModel {
             if (SGGS.getPlayerChopSticksActivated(SGGS.getCurrentPlayer()) && SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) > 0) {
                 SGGS.setPlayerExtraTurns(SGGS.getCurrentPlayer(), SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) - 1);
                 return;
+                // if we use chopsticks it is still our go, so don't end player turn
             }
 
             //reset chopstick activation and end turn
@@ -439,9 +439,8 @@ public class SGForwardModel extends AbstractForwardModel {
                 SGGS.getPlayerDecks().get(SGGS.getCurrentPlayer()).getSize() > 1) {
             actions.add(new ChopSticksAction(SGGS.getCurrentPlayer()));
         }
-        if (actions.size() <= 0) {
-            actions.add(new DebugAction());
-        }
+        if (actions.size() <= 0)
+            throw new AssertionError("No actions valid");
         return actions;
     }
 

@@ -30,11 +30,12 @@ public class SGGameState extends AbstractGameState {
     boolean[] playerChopsticksActivated;
     int[] playerExtraTurns;
     Random rnd;
+
     /**
      * Constructor. Initialises some generic game state variables.
      *
      * @param gameParameters - game parameters.
-     * @param nPlayers      - amount of players for this game.
+     * @param nPlayers       - amount of players for this game.
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new SGTurnOrder(nPlayers), GameType.SushiGO);
@@ -71,13 +72,13 @@ public class SGGameState extends AbstractGameState {
 
         //Copy player hands
         copy.playerHands = new ArrayList<>();
-        for (Deck<SGCard> d : playerHands){
+        for (Deck<SGCard> d : playerHands) {
             copy.playerHands.add(d.copy());
         }
 
         //Copy player fields
         copy.playerFields = new ArrayList<>();
-        for (Deck<SGCard> d : playerFields){
+        for (Deck<SGCard> d : playerFields) {
             copy.playerFields.add(d.copy());
         }
 
@@ -88,21 +89,24 @@ public class SGGameState extends AbstractGameState {
         // Now we need to redeterminise
         // discard pile and player fields are known - it is just the hands of other players we need to
         // shuffle with the draw deck and then redraw
-        if (playerId != -1) {
-            for (int p = 0; p < playerHands.size(); p++) {
+        // however we do know the contents of the hands of players to our T to our left, where
+        // T is the number of player turns so far, as we saw that hand on its way through our own
+        if (playerId != -1 && CoreConstants.PARTIAL_OBSERVABLE) {
+
+            for (int p = 0; p < copy.playerHands.size(); p++) {
                 if (p != playerId) {
-                    drawPile.add(playerHands.get(p));
+                    copy.drawPile.add(playerHands.get(p));
                 }
             }
-            drawPile.shuffle(rnd);
+            copy.drawPile.shuffle(rnd);
             // now we draw into the unknown player hands
-            for (int p = 0; p < playerHands.size(); p++) {
+            for (int p = 0; p < copy.playerHands.size(); p++) {
                 if (p != playerId) {
-                    Deck<SGCard> hand = playerHands.get(p);
+                    Deck<SGCard> hand = copy.playerHands.get(p);
                     int handSize = hand.getSize();
                     hand.clear();
                     for (int i = 0; i < handSize; i++) {
-                        hand.add(drawPile.draw());
+                        hand.add(copy.drawPile.draw());
                     }
                 }
             }
@@ -111,23 +115,33 @@ public class SGGameState extends AbstractGameState {
         return copy;
     }
 
-    public int[] getPlayerScore() {return playerScore;}
+    public int[] getPlayerScore() {
+        return playerScore;
+    }
 
-    public int[] getPlayerCardPicks() {return playerCardPicks;}
+    public int[] getPlayerCardPicks() {
+        return playerCardPicks;
+    }
 
     public void setPlayerCardPick(int cardIndex, int playerId) {
         this.playerCardPicks[playerId] = cardIndex;
     }
 
-    public int[] getPlayerExtraCardPicks() {return playerExtraCardPicks;}
+    public int[] getPlayerExtraCardPicks() {
+        return playerExtraCardPicks;
+    }
 
     public void setPlayerExtraCardPick(int cardIndex, int playerId) {
         this.playerExtraCardPicks[playerId] = cardIndex;
     }
 
-    public List<Deck<SGCard>> getPlayerFields() {return playerFields;}
+    public List<Deck<SGCard>> getPlayerFields() {
+        return playerFields;
+    }
 
-    public List<Deck<SGCard>> getPlayerDecks() {return playerHands;}
+    public List<Deck<SGCard>> getPlayerDecks() {
+        return playerHands;
+    }
 
     @Override
     protected double _getHeuristicScore(int playerId) {
@@ -143,92 +157,78 @@ public class SGGameState extends AbstractGameState {
         return playerScoreToAdd[playerId];
     }
 
-    public void setGameScore(int playerId, int score)
-    {
+    public void setGameScore(int playerId, int score) {
         playerScore[playerId] = score;
     }
 
-    public int getPlayerTempuraAmount(int playerId)
-    {
-         return playerTempuraAmount[playerId];
+    public int getPlayerTempuraAmount(int playerId) {
+        return playerTempuraAmount[playerId];
     }
 
-    public int getPlayerSashimiAmount(int playerId)
-    {
+    public int getPlayerSashimiAmount(int playerId) {
         return playerSashimiAmount[playerId];
     }
 
-    public int getPlayerDumplingAmount(int playerId)
-    {
+    public int getPlayerDumplingAmount(int playerId) {
         return playerDumplingAmount[playerId];
     }
 
-    public int getPlayerWasabiAvailable(int playerId)
-    {
+    public int getPlayerWasabiAvailable(int playerId) {
         return playerWasabiAvailable[playerId];
     }
 
-    public int getPlayerChopSticksAmount(int playerId)
-    {
+    public int getPlayerChopSticksAmount(int playerId) {
         return playerChopSticksAmount[playerId];
     }
 
-    public boolean getPlayerChopSticksActivated(int playerId)
-    {
+    public boolean getPlayerChopSticksActivated(int playerId) {
         return playerChopsticksActivated[playerId];
     }
 
-    public int getPlayerExtraTurns(int playerId)
-    {
+    public int getPlayerExtraTurns(int playerId) {
         return playerExtraTurns[playerId];
     }
 
-    public void setPlayerScoreToAdd(int playerId, int amount)
-    {
+    public void setPlayerScoreToAdd(int playerId, int amount) {
         playerScoreToAdd[playerId] = amount;
     }
 
-    public void setPlayerTempuraAmount(int playerId, int amount)
-    {
+    public void setPlayerTempuraAmount(int playerId, int amount) {
         playerTempuraAmount[playerId] = amount;
     }
 
-    public void setPlayerSashimiAmount(int playerId, int amount)
-    {
+    public void setPlayerSashimiAmount(int playerId, int amount) {
         playerSashimiAmount[playerId] = amount;
     }
 
-    public void setPlayerDumplingAmount(int playerId, int amount) { playerDumplingAmount[playerId] = amount; }
+    public void setPlayerDumplingAmount(int playerId, int amount) {
+        playerDumplingAmount[playerId] = amount;
+    }
 
-    public void setPlayerWasabiAvailable(int playerId, int amount)
-    {
+    public void setPlayerWasabiAvailable(int playerId, int amount) {
         playerWasabiAvailable[playerId] = amount;
     }
 
-    public void setPlayerChopSticksAmount(int playerId, int amount)
-    {
+    public void setPlayerChopSticksAmount(int playerId, int amount) {
         playerChopSticksAmount[playerId] = amount;
     }
 
-    public void setPlayerChopsticksActivated(int playerId, boolean value)
-    {
+    public void setPlayerChopsticksActivated(int playerId, boolean value) {
         playerChopsticksActivated[playerId] = value;
     }
 
-    public void setPlayerExtraTurns(int playerId, int value)
-    {
+    public void setPlayerExtraTurns(int playerId, int value) {
         playerExtraTurns[playerId] = value;
     }
-
 
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         return new ArrayList<Integer>() {{
-            for (int i = 0; i < getNPlayers(); i++){
-                if (i != playerId){
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i != playerId) {
                     add(playerHands.get(i).getComponentID());
-                    for (Component c: playerHands.get(i).getComponents()){
+                    for (Component c : playerHands.get(i).getComponents()) {
                         add(c.getComponentID());
 
                     }
