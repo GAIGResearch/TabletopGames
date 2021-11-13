@@ -71,7 +71,7 @@ public class SingleTreeNode {
         if (newState.getCurrentPlayer() != decisionPlayer)
             throw new AssertionError("Problem: We should never have a state assigned to this node for a different deciding player");
         state = newState;
-        actionsFromState = player.getForwardModel().computeAvailableActions(state);
+        actionsFromState = state.isNotTerminal() ? player.getForwardModel().computeAvailableActions(state) : Collections.emptyList();
         /*
          * we run through the actions, and add any new ones not currently in the list
          * When in open loop, it is entirely possible that on a transition to a new state we have actions that were
@@ -133,7 +133,7 @@ public class SingleTreeNode {
             selected.backUp(delta);
             // Finished iteration
             numIters++;
-     //       System.out.printf("MCTS Iteration %d, timeLeft: %d\n", numIters, elapsedTimer.remainingTimeMillis());
+            //       System.out.printf("MCTS Iteration %d, timeLeft: %d\n", numIters, elapsedTimer.remainingTimeMillis());
             // Check stopping condition
             PlayerConstants budgetType = player.params.budgetType;
             if (budgetType == BUDGET_TIME) {
@@ -147,7 +147,7 @@ public class SingleTreeNode {
                 stop = numIters >= player.params.budget;
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop =  fmCallsCount > player.params.budget || numIters > player.params.budget;
+                stop = fmCallsCount > player.params.budget || numIters > player.params.budget;
             } else if (budgetType == BUDGET_COPY_CALLS) {
                 stop = copyCount > player.params.budget || numIters > player.params.budget;
             } else if (budgetType == BUDGET_FMANDCOPY_CALLS) {
@@ -219,6 +219,7 @@ public class SingleTreeNode {
                 .mapToInt(arr -> Arrays.stream(arr).filter(Objects::nonNull).mapToInt(n -> n.nVisits).sum())
                 .toArray();
     }
+
     /**
      * Selection + expansion steps.
      * - Tree is traversed until a node not fully expanded is found.

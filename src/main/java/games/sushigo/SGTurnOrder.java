@@ -20,6 +20,13 @@ public class SGTurnOrder extends AlternatingTurnOrder {
     }
 
     @Override
+    protected SGTurnOrder _copy() {
+        SGTurnOrder retValue = new SGTurnOrder(nPlayers);
+        retValue.direction = direction;
+        return retValue;
+    }
+
+    @Override
     public void endRound(AbstractGameState gameState) {
         //super.endRound(gameState);
         if (gameState.getGameStatus() != GAME_ONGOING) return;
