@@ -47,6 +47,7 @@ public class SGTurnOrder extends SimultaneousTurnOrder {
             {
                 SGGS.playerHands.get(i).add(SGGS.drawPile.draw());
             }
+            SGGS.deckRotations = 0;
 
             //Clear counters
             SGGS.setPlayerTempuraAmount(i, 0);
