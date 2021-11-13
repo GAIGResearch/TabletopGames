@@ -13,6 +13,7 @@ import games.explodingkittens.ExplodingKittensParameters;
 import games.loveletter.LoveLetterParameters;
 import games.pandemic.PandemicParameters;
 import games.poker.PokerGameParameters;
+import games.sushigo.SGParameters;
 import games.tictactoe.TicTacToeGameParameters;
 import games.uno.UnoGameParameters;
 import games.virus.VirusGameParameters;
@@ -50,12 +51,14 @@ public class ParameterFactory {
             case Blackjack:
                 return new BlackjackParameters(seed);
             case Battlelore:
-                return new BattleloreGameParameters("data/battlelore",seed);
+                return new BattleloreGameParameters("data/battlelore", seed);
             case DiceMonastery:
                 return new DiceMonasteryParams(seed);
-            default:
-                throw new AssertionError("No default Parameters specified for Game " + game);
+            case SushiGo:
+                return new SGParameters(seed);
         }
+        throw new AssertionError("No default Parameters specified for Game " + game);
+
     }
 
     static public AbstractParameters createFromFile(GameType game, String fileName) {

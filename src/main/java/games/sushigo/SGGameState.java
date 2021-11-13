@@ -3,6 +3,7 @@ package games.sushigo;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.CoreConstants;
+import core.CoreParameters;
 import core.components.Component;
 import core.components.Deck;
 import games.GameType;
@@ -39,7 +40,7 @@ public class SGGameState extends AbstractGameState {
      * @param nPlayers       - amount of players for this game.
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new SGTurnOrder(nPlayers), GameType.SushiGO);
+        super(gameParameters, new SGTurnOrder(nPlayers), GameType.SushiGo);
         rnd = new Random(gameParameters.getRandomSeed());
     }
 
@@ -92,7 +93,7 @@ public class SGGameState extends AbstractGameState {
         // shuffle with the draw deck and then redraw
         // however we do know the contents of the hands of players to our T to our left, where
         // T is the number of player turns so far, as we saw that hand on its way through our own
-        if (playerId != -1 && CoreConstants.PARTIAL_OBSERVABLE) {
+        if (playerId != -1) {
 
             // firstly blank out the 'unseen' actions of other players
             for (int i = 0; i < getNPlayers(); i++) {

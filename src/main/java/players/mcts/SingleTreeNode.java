@@ -107,7 +107,8 @@ public class SingleTreeNode {
     }
 
     private void setActionsFromOpenLoopState(AbstractGameState actionState) {
-        actionsFromOpenLoopState = player.getForwardModel().computeAvailableActions(actionState);
+        actionsFromOpenLoopState = actionState.isNotTerminal() ? player.getForwardModel().computeAvailableActions(actionState) :
+                Collections.emptyList();
         if (player.params.expansionPolicy == MAST) {
             advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
                     .collect(toMap(a -> a, a -> MASTFunction.applyAsDouble(a, actionState)));
@@ -194,7 +195,7 @@ public class SingleTreeNode {
                 stop = numIters >= player.params.budget;
             } else if (budgetType == BUDGET_FM_CALLS) {
                 // FM calls budget
-                stop =  fmCallsCount > player.params.budget || numIters > player.params.budget;
+                stop = fmCallsCount > player.params.budget || numIters > player.params.budget;
             } else if (budgetType == BUDGET_COPY_CALLS) {
                 stop = copyCount > player.params.budget || numIters > player.params.budget;
             } else if (budgetType == BUDGET_FMANDCOPY_CALLS) {

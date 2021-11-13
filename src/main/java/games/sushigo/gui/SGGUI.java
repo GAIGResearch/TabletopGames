@@ -1,12 +1,12 @@
 package games.sushigo.gui;
 
-import core.AbstractGUI;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
-import games.uno.gui.UnoDeckView;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -17,10 +17,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Collection;
 
-import static core.CoreConstants.ALWAYS_DISPLAY_CURRENT_PLAYER;
-import static core.CoreConstants.ALWAYS_DISPLAY_FULL_OBSERVABLE;
-
-public class SGGUI extends AbstractGUI {
+public class SGGUI extends AbstractGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 200;
@@ -40,15 +37,13 @@ public class SGGUI extends AbstractGUI {
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
     Border[] playerViewBorders;
 
-    public SGGUI(Game game, ActionController ac, int humanID) {
-        super(ac, 15);
+    public SGGUI(GamePanel parent, Game game, ActionController ac, int humanID) {
+        super(parent, ac, 15);
         this.humanID = humanID;
-        
-        if(game != null)
-        {
+
+        if (game != null) {
             AbstractGameState gameState = game.getGameState();
-            if(gameState != null)
-            {
+            if (gameState != null) {
                 //Initialise active player
                 activePlayer = gameState.getCurrentPlayer();
 
@@ -111,14 +106,15 @@ public class SGGUI extends AbstractGUI {
                 JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 
                 // Add all views to frame
-                getContentPane().add(mainGameArea, BorderLayout.CENTER);
-                getContentPane().add(infoPanel, BorderLayout.NORTH);
-                getContentPane().add(actionPanel, BorderLayout.SOUTH);
+                parent.add(mainGameArea, BorderLayout.CENTER);
+                parent.add(infoPanel, BorderLayout.NORTH);
+                parent.add(actionPanel, BorderLayout.SOUTH);
             }
 
         }
-
-        setFrameProperties();
+        parent.revalidate();
+        parent.setVisible(true);
+        parent.repaint();
     }
 
     @Override
@@ -133,9 +129,8 @@ public class SGGUI extends AbstractGUI {
             SGGameState parsedGameState = (SGGameState) gameState;
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(parsedGameState);
-                if (i == gameState.getCurrentPlayer() && ALWAYS_DISPLAY_CURRENT_PLAYER
-                        || i == humanID
-                        || ALWAYS_DISPLAY_FULL_OBSERVABLE) {
+                if (i == gameState.getCurrentPlayer()
+                        || i == humanID) {
                     playerHands[i].playerHandView.setFront(true);
                     playerHands[i].setFocusable(true);
                 } else {
@@ -157,6 +152,6 @@ public class SGGUI extends AbstractGUI {
                 updateActionButtons(player, gameState);
             }
         }
-        repaint();
+        parent.repaint();
     }
 }
