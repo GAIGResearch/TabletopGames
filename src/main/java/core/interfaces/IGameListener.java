@@ -37,6 +37,7 @@ public interface IGameListener {
      */
     default void allGamesFinished() {
         // default is to do nothing
+
     }
 
 
