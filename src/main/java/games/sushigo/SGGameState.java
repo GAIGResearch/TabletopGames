@@ -30,6 +30,7 @@ public class SGGameState extends AbstractGameState {
     boolean[] playerChopsticksActivated;
     int[] playerExtraTurns;
     Random rnd;
+    int deckRotations = 0;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -68,7 +69,7 @@ public class SGGameState extends AbstractGameState {
         copy.playerExtraTurns = playerExtraTurns.clone();
 
         copy.cardAmount = cardAmount;
-
+        copy.deckRotations = deckRotations;
 
         //Copy player hands
         copy.playerHands = new ArrayList<>();
@@ -93,15 +94,27 @@ public class SGGameState extends AbstractGameState {
         // T is the number of player turns so far, as we saw that hand on its way through our own
         if (playerId != -1 && CoreConstants.PARTIAL_OBSERVABLE) {
 
+            // firstly blank out the 'unseen' actions of other players
+            for (int i = 0; i < getNPlayers(); i++) {
+                if (i == getCurrentPlayer())
+                    continue;
+                copy.playerCardPicks[i] = -1;
+                copy.playerExtraCardPicks[i] = -1;
+                copy.playerChopsticksActivated[i] = false;
+                copy.playerScoreToAdd[i] = 0;
+                // we will now rechoose these actions with out opponent model
+                // and not have incorrect perfect information
+            }
+
             for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (p != playerId) {
+                if (!hasSeenHand(playerId, p)) {
                     copy.drawPile.add(playerHands.get(p));
                 }
             }
             copy.drawPile.shuffle(rnd);
             // now we draw into the unknown player hands
             for (int p = 0; p < copy.playerHands.size(); p++) {
-                if (p != playerId) {
+                if (!hasSeenHand(playerId, p)) {
                     Deck<SGCard> hand = copy.playerHands.get(p);
                     int handSize = hand.getSize();
                     hand.clear();
@@ -113,6 +126,13 @@ public class SGGameState extends AbstractGameState {
         }
 
         return copy;
+    }
+
+    private boolean hasSeenHand(int playerId, int opponentId) {
+        int opponentSpacesToLeft = opponentId - playerId;
+        if (opponentSpacesToLeft < 0)
+            opponentSpacesToLeft = getNPlayers() + opponentSpacesToLeft;
+        return deckRotations >= opponentSpacesToLeft;
     }
 
     public int[] getPlayerScore() {
@@ -245,6 +265,7 @@ public class SGGameState extends AbstractGameState {
         drawPile = null;
         discardPile = null;
         cardAmount = 0;
+        deckRotations = 0;
         playerScore = null;
         playerCardPicks = null;
         playerExtraCardPicks = null;
@@ -266,6 +287,7 @@ public class SGGameState extends AbstractGameState {
                 Objects.equals(playerFields, that.playerFields) &&
                 Objects.equals(drawPile, that.drawPile) &&
                 Objects.equals(discardPile, that.discardPile) &&
+                deckRotations == that.deckRotations &&
                 Arrays.equals(playerScore, that.playerScore) &&
                 Arrays.equals(playerCardPicks, that.playerCardPicks) &&
                 Arrays.equals(playerExtraCardPicks, that.playerExtraCardPicks) &&

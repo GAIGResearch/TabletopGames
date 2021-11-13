@@ -395,6 +395,7 @@ public class SGForwardModel extends AbstractForwardModel {
 
 
     void RotateDecks(SGGameState SGGS) {
+        SGGS.deckRotations++;
         Deck<SGCard> tempDeck;
         tempDeck = SGGS.getPlayerDecks().get(0).copy();
         for (int i = 1; i < SGGS.getNPlayers(); i++) {
