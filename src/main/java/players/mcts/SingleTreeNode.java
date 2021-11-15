@@ -594,7 +594,7 @@ public class SingleTreeNode {
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
         if (player.params.rolloutLength > 0) {
-            if (player.params.information != Closed_Loop) {
+            if (player.params.information == Closed_Loop) {
                 // the thinking here is that in openLoop we copy the state right at the root, and then use the forward
                 // model at each action. Hence the current state on the node is the one we have been using up to now.
                 /// Hence we do not need to copy it.

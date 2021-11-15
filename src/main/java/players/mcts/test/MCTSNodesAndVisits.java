@@ -118,7 +118,7 @@ public class MCTSNodesAndVisits {
                 if (params.maxTreeDepth == 3)
                     assertEquals(3, stats.depthReached);
                 else {
-                    assertEquals(expectedNodes[counter], stats.totalNodes);
+                    assertEquals(expectedNodes[counter], stats.totalNodes, 10);
                 }
                 counter++;
             }
