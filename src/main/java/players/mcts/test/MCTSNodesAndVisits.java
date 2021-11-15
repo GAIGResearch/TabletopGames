@@ -25,8 +25,7 @@ public class MCTSNodesAndVisits {
         params = new MCTSParams(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
-        params.redeterminise = true;
-        params.openLoop = true;
+        params.information = MCTSEnums.Information.Information_Set;
         params.maxTreeDepth = 10;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
@@ -88,8 +87,7 @@ public class MCTSNodesAndVisits {
     public void reducedDepth3MaxN() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
         params.maxTreeDepth = 3;
-        params.redeterminise = false;
-        params.openLoop = false;
+        params.information = MCTSEnums.Information.Closed_Loop;
         Game game = createGame(params);
         runGame(game, 4, new int[0]);
     }
@@ -97,8 +95,7 @@ public class MCTSNodesAndVisits {
     @Test
     public void reducedDepth3() {
         params.maxTreeDepth = 3;
-        params.redeterminise = false;
-        params.openLoop = false;
+        params.information = MCTSEnums.Information.Closed_Loop;
         Game game = createGame(params);
         runGame(game, 4, new int[0]);
     }

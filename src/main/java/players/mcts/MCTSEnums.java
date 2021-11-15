@@ -6,6 +6,10 @@ public class MCTSEnums {
         RANDOM, MAST, CLASS
     }
 
+    public enum Information {
+        Closed_Loop, Open_Loop, Information_Set
+    }
+
     public enum MASTType {
         Rollout, Tree, Both
     }

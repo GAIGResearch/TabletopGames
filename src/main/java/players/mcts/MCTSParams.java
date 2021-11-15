@@ -18,6 +18,7 @@ import java.util.Random;
 import java.util.function.ToDoubleBiFunction;
 import java.util.regex.Pattern;
 
+import static players.mcts.MCTSEnums.Information.*;
 import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
@@ -31,14 +32,14 @@ public class MCTSParams extends PlayerParameters {
     public int rolloutLength = 10;
     public int maxTreeDepth = 10;
     public double epsilon = 1e-6;
-    public boolean openLoop = false;
-    public boolean redeterminise = false;
+    public MCTSEnums.Information information = Open_Loop;
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
     public double MASTGamma = 0.0;
     public double MASTBoltzmann = 0.0;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
-    public MCTSEnums.Strategies rolloutType, oppModelType = RANDOM;
+    public MCTSEnums.Strategies rolloutType = RANDOM;
+    public MCTSEnums.Strategies oppModelType = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
@@ -65,8 +66,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("rolloutType", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("oppModelType", MCTSEnums.Strategies.RANDOM);
-        addTunableParameter("openLoop", false, Arrays.asList(false, true));
-        addTunableParameter("redeterminise", false, Arrays.asList(false, true));
+        addTunableParameter("information", Open_Loop, Arrays.asList(MCTSEnums.Information.values()));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
         addTunableParameter("treePolicy", UCB);
         addTunableParameter("opponentTreePolicy", MaxN);
@@ -95,8 +95,7 @@ public class MCTSParams extends PlayerParameters {
         epsilon = (double) getParameterValue("epsilon");
         rolloutType = (MCTSEnums.Strategies) getParameterValue("rolloutType");
         oppModelType = (MCTSEnums.Strategies) getParameterValue("oppModelType");
-        openLoop = (boolean) getParameterValue("openLoop");
-        redeterminise = (boolean) getParameterValue("redeterminise");
+        information = (MCTSEnums.Information) getParameterValue("information");
         selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
         MCTSEnums.Strategies expansionPolicy = (MCTSEnums.Strategies) getParameterValue("expansionPolicy");
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");

@@ -30,8 +30,7 @@ public class RewardsForParanoia {
         // default Parameter settings for later changes
         params = new MCTSParams(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
-        params.redeterminise = true;
-        params.openLoop = true;
+        params.information = MCTSEnums.Information.Information_Set;
         params.maxTreeDepth = 10;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;

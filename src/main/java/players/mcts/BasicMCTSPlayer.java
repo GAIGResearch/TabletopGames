@@ -38,8 +38,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
 
         // These parameters are ignored by BasicMCTS - if you want to play with these, you'll
         // need to upgrade to MCTSPlayer
-        this.params.openLoop = false;
-        this.params.redeterminise = false;
+        this.params.information = MCTSEnums.Information.Closed_Loop;
         this.params.rolloutType = RANDOM;
         this.params.selectionPolicy = ROBUST;
         this.params.opponentTreePolicy = Paranoid;

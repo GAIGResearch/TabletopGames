@@ -17,6 +17,7 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
+import static players.mcts.MCTSEnums.Information.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
 import static players.mcts.MCTSEnums.Strategies.MAST;
@@ -89,7 +90,7 @@ public class SingleTreeNode {
 
         totValue = new double[state.getNPlayers()];
         openLoopState = state;
-        if (player.params.openLoop) {
+        if (player.params.information != Closed_Loop) {
             // if we're using open loop, then we need to make sure the reference state is never changed
             root.copyCount++;
             this.state = state.copy();
@@ -144,9 +145,18 @@ public class SingleTreeNode {
         int numIters = 0;
         boolean stop = false;
         while (!stop) {
-            if (player.params.openLoop) { // this assumes that copy(id) randomises the invisible components
-                openLoopState = player.params.redeterminise ? state.copy(player.getPlayerID()) : state.copy();
-                copyCount++;
+            switch (player.params.information) {
+                case Closed_Loop:
+                    // no effect
+                    break;
+                case Open_Loop:
+                    openLoopState = state.copy();
+                    copyCount++;
+                    break;
+                case Information_Set:
+                    openLoopState = state.copy(player.getPlayerID());
+                    copyCount++;
+                    break;
             }
             double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
                     .mapToDouble(i -> player.heuristic.evaluateState(openLoopState, i)).toArray();
@@ -428,7 +438,7 @@ public class SingleTreeNode {
 
         // Only advance the state if this is open loop
         SingleTreeNode[] nodeArray = children.get(actionChosen);
-        if (player.params.openLoop) {
+        if (player.params.information != Closed_Loop) {
             // We do not need to copy the state, as we advance this as we descend the tree.
             // In open loop we never re-use the state...the only purpose of storing it on the Node is
             // to pick it up in the next uct() call as we descend the tree
@@ -584,7 +594,7 @@ public class SingleTreeNode {
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
         if (player.params.rolloutLength > 0) {
-            if (!player.params.openLoop) {
+            if (player.params.information != Closed_Loop) {
                 // the thinking here is that in openLoop we copy the state right at the root, and then use the forward
                 // model at each action. Hence the current state on the node is the one we have been using up to now.
                 /// Hence we do not need to copy it.
