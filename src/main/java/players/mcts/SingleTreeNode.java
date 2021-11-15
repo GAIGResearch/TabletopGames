@@ -17,11 +17,10 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
-import static players.mcts.MCTSEnums.Information.*;
+import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
 import static players.mcts.MCTSEnums.Strategies.MAST;
-import static players.mcts.MCTSEnums.TreePolicy.AlphaGo;
 import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
 
@@ -37,9 +36,12 @@ public class SingleTreeNode {
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     // Depth of this node
     final int depth;
+    double highReward = Double.NEGATIVE_INFINITY;
+    double lowReward = Double.POSITIVE_INFINITY;
 
     // Total value of this node
     private final double[] totValue;
+    private final double[] totSquares;
     // the id of the player who makes the decision at this node
     private final int decisionPlayer;
     // Number of visits
@@ -89,6 +91,7 @@ public class SingleTreeNode {
         };
 
         totValue = new double[state.getNPlayers()];
+        totSquares = new double[state.getNPlayers()];
         openLoopState = state;
         if (player.params.information != Closed_Loop) {
             // if we're using open loop, then we need to make sure the reference state is never changed
@@ -267,6 +270,15 @@ public class SingleTreeNode {
         return retValue;
     }
 
+    private double actionSquaredValue(AbstractAction action, int playerId) {
+        double retValue = 0.0;
+        for (SingleTreeNode node : children.get(action)) {
+            if (node != null)
+                retValue += node.totSquares[playerId];
+        }
+        return retValue;
+    }
+
     /**
      * Uses only by TreeStatistics and bestAction() after mctsSearch()
      * For this reason not converted to old-style java loop as there would be no performance gain
@@ -420,20 +432,26 @@ public class SingleTreeNode {
         if (player.params.opponentTreePolicy == SelfOnly && state.getCurrentPlayer() != player.getPlayerID())
             throw new AssertionError("An error has occurred. SelfOnly should only call uct when we are moving.");
 
+        List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState, 0);
         AbstractAction actionChosen;
-        switch (player.params.treePolicy) {
-            case UCB:
-            case AlphaGo:
-                // These just vary on the form of the exploration term in a UCB algorithm
-                actionChosen = ucb();
-                break;
-            case EXP3:
-            case RegretMatching:
-                // These construct a distribution over possible actions and then sample from it
-                actionChosen = sampleFromDistribution();
-                break;
-            default:
-                throw new AssertionError("Unknown treepolicy: " + player.params.treePolicy);
+        if (availableActions.size() == 1) {
+            actionChosen = availableActions.get(0);
+        } else {
+            switch (player.params.treePolicy) {
+                case UCB:
+                case AlphaGo:
+                case UCB_Tuned:
+                    // These just vary on the form of the exploration term in a UCB algorithm
+                    actionChosen = ucb(availableActions);
+                    break;
+                case EXP3:
+                case RegretMatching:
+                    // These construct a distribution over possible actions and then sample from it
+                    actionChosen = sampleFromDistribution(availableActions);
+                    break;
+                default:
+                    throw new AssertionError("Unknown treepolicy: " + player.params.treePolicy);
+            }
         }
 
         // Only advance the state if this is open loop
@@ -469,14 +487,13 @@ public class SingleTreeNode {
         }
     }
 
-    private AbstractAction ucb() {
+    private AbstractAction ucb(List<AbstractAction> availableActions) {
         // Find child with highest UCB value, maximising for ourselves and minimizing for opponent
         AbstractAction bestAction = null;
         double bestValue = -Double.MAX_VALUE;
 
         double nodeValue = totValue[decisionPlayer] / nVisits;
 
-        List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState, 0);
         for (AbstractAction action : availableActions) {
             SingleTreeNode[] childArray = children.get(action);
             if (childArray == null)
@@ -484,6 +501,7 @@ public class SingleTreeNode {
 
             // Find child value
             double hvVal = actionTotValue(action, decisionPlayer);
+
             int actionVisits = actionVisits(action);
             double childValue = hvVal / (actionVisits + player.params.epsilon);
 
@@ -493,11 +511,38 @@ public class SingleTreeNode {
                 childValue = (1.0 - beta) * childValue + beta * (advantagesOfActionsFromOLS.getOrDefault(action, 0.0) + nodeValue);
             }
 
+            if (player.params.normaliseRewards) {
+                childValue = Utils.normalise(childValue, root.lowReward, root.highReward);
+            }
+
             // default to standard UCB
             double explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits + 1) / (actionVisits + player.params.epsilon));
             // unless we are using a variant
-            if (player.params.treePolicy == AlphaGo)
-                explorationTerm = player.params.K * Math.sqrt(this.nVisits) / (actionVisits + 1.0);
+            switch (player.params.treePolicy) {
+                case AlphaGo:
+                    explorationTerm = player.params.K * Math.sqrt(this.nVisits) / (actionVisits + 1.0);
+                    break;
+                case UCB_Tuned:
+                    double range = root.highReward - root.lowReward;
+                    double meanSq = actionSquaredValue(action, decisionPlayer) / (actionVisits + player.params.epsilon);
+                    double standardVar = 0.25;
+                    if (player.params.normaliseRewards) {
+                        // we also need to standardise the sum of squares to calculate the variance
+                        meanSq = (meanSq
+                                + root.lowReward * root.lowReward
+                                - 2 * root.lowReward * actionTotValue(action, decisionPlayer) / (actionVisits + player.params.epsilon)
+                        ) / (range * range);
+                    } else {
+                        // we need to modify the standard variance as it is not on a 0..1 basis (which is where 0.25 comes from)
+                        standardVar = Math.sqrt(range / 2.0);
+                    }
+                    double variance = meanSq - childValue * childValue;
+                    double minTerm = Math.min(standardVar, variance + Math.sqrt(2 * Math.log(this.nVisits) / (actionVisits + player.params.epsilon)));
+                    explorationTerm = player.params.K * Math.sqrt(Math.log(this.nVisits) / (actionVisits + player.params.epsilon) * minTerm);
+                    break;
+                default:
+                    // keep default
+            }
 
             // Find 'UCB' value
             double uctValue = 0;
@@ -547,7 +592,7 @@ public class SingleTreeNode {
         return Math.max(0.0, regret);
     }
 
-    private AbstractAction sampleFromDistribution() {
+    private AbstractAction sampleFromDistribution(List<AbstractAction> availableActions) {
         // first we get a value for each of them
         Function<AbstractAction, Double> valueFn;
         switch (player.params.treePolicy) {
@@ -560,8 +605,6 @@ public class SingleTreeNode {
             default:
                 throw new AssertionError("Should not be any other options!");
         }
-
-        List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState, 0);
 
         Map<AbstractAction, Double> actionToValueMap = availableActions.stream().collect(toMap(Function.identity(), valueFn));
 
@@ -644,24 +687,43 @@ public class SingleTreeNode {
      */
     private void backUp(double[] result) {
         SingleTreeNode n = this;
+        double[] squaredResults = new double[result.length];
+        for (int i = 0; i < result.length; i++)
+            squaredResults[i] = result[i] * result[i];
+
+        if (player.params.normaliseRewards || player.params.treePolicy == MCTSEnums.TreePolicy.UCB_Tuned) {
+            DoubleSummaryStatistics stats = Arrays.stream(result).summaryStatistics();
+            if (n.root.lowReward > stats.getMin())
+                n.root.lowReward = stats.getMin();
+            if (n.root.highReward < stats.getMax())
+                n.root.highReward = stats.getMax();
+        }
         while (n != null) {
             n.nVisits++;
             switch (player.params.opponentTreePolicy) {
                 case SelfOnly:
-                    for (int j = 0; j < result.length; j++)
+                    for (int j = 0; j < result.length; j++) {
                         n.totValue[j] += result[root.decisionPlayer];
+                        n.totSquares[j] += squaredResults[root.decisionPlayer];
+                    }
                     break;
                 case Paranoid:
                     for (int j = 0; j < result.length; j++) {
-                        if (j == root.decisionPlayer)
+                        if (j == root.decisionPlayer) {
                             n.totValue[j] += result[root.decisionPlayer];
-                        else
+                            n.totSquares[j] += squaredResults[root.decisionPlayer];
+
+                        } else {
                             n.totValue[j] -= result[root.decisionPlayer];
+                            n.totSquares[j] += squaredResults[root.decisionPlayer];
+                        }
                     }
                     break;
                 case MaxN:
-                    for (int j = 0; j < result.length; j++)
+                    for (int j = 0; j < result.length; j++) {
                         n.totValue[j] += result[j];
+                        n.totSquares[j] += squaredResults[j];
+                    }
                     break;
             }
             n = n.parent;

@@ -52,6 +52,7 @@ public class MCTSParams extends PlayerParameters {
     public int biasVisits = 0;
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
     public double progressiveWideningExponent = 0.0;
+    public boolean normaliseRewards = true;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -83,6 +84,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("biasVisits", 0);
         addTunableParameter("progressiveWideningConstant", 0.0);
         addTunableParameter("progressiveWideningExponent", 0.0);
+        addTunableParameter("normaliseRewards", true);
     }
 
     @Override
@@ -112,6 +114,7 @@ public class MCTSParams extends PlayerParameters {
         biasVisits = (int) getParameterValue("biasVisits");
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
         progressiveWideningExponent = (double) getParameterValue("progressiveWideningExponent");
+        normaliseRewards = (boolean) getParameterValue("normaliseRewards");
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST) {
             useMAST = true;
         }

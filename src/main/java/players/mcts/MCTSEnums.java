@@ -19,7 +19,7 @@ public class MCTSEnums {
     }
 
     public enum TreePolicy {
-        UCB, EXP3, AlphaGo, RegretMatching
+        UCB, EXP3, AlphaGo, RegretMatching, UCB_Tuned
     }
 
     public enum OpponentTreePolicy {
