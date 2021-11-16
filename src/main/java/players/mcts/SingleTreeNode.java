@@ -43,20 +43,20 @@ public class SingleTreeNode {
     private final double[] totValue;
     private final double[] totSquares;
     // the id of the player who makes the decision at this node
-    private final int decisionPlayer;
+    final int decisionPlayer;
     // Number of visits
     private int nVisits;
     // Number of FM calls and State copies up until this node
     private int fmCallsCount;
     private int copyCount;
     // Parameters guiding the search
-    private final MCTSPlayer player;
-    private final Random rnd;
+    protected final MCTSPlayer player;
+    protected final Random rnd;
 
     // State in this node (closed loop)
-    private final AbstractAction actionToReach;
-    private final AbstractGameState state;
-    private AbstractGameState openLoopState;
+    protected final AbstractAction actionToReach;
+    protected final AbstractGameState state;
+    protected AbstractGameState openLoopState;
     List<AbstractAction> actionsFromOpenLoopState;
     Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
 
@@ -110,7 +110,7 @@ public class SingleTreeNode {
         this.rnd = rnd;
     }
 
-    private void setActionsFromOpenLoopState(AbstractGameState actionState) {
+    protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
         actionsFromOpenLoopState = actionState.isNotTerminal() ? player.getForwardModel().computeAvailableActions(actionState) :
                 Collections.emptyList();
         if (player.params.expansionPolicy == MAST) {
@@ -144,6 +144,8 @@ public class SingleTreeNode {
             elapsedTimer.setMaxTimeMillis(player.params.budget);
         }
 
+        preSearchSetup();
+
         // Tracking number of iterations for iteration budget
         int numIters = 0;
         boolean stop = false;
@@ -161,36 +163,12 @@ public class SingleTreeNode {
                     copyCount++;
                     break;
             }
-            double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
-                    .mapToDouble(i -> player.heuristic.evaluateState(openLoopState, i)).toArray();
 
             // New timer for this iteration
             ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
             // Selection + expansion: navigate tree until a node not fully expanded is found, add a new node to the tree
-            List<Pair<Integer, AbstractAction>> treeActions = new ArrayList<>();
-            SingleTreeNode selected = treePolicy(treeActions);
-            // Monte carlo rollout: return value of MC rollout from the newly added node
-            List<Pair<Integer, AbstractAction>> rolloutActions = new ArrayList<>();
-            double[] delta = selected.rollOut(rolloutActions, startingValues);
-            // Back up the value of the rollout through the tree
-            selected.backUp(delta);
-            if (player.params.useMAST) {
-                List<Pair<Integer, AbstractAction>> MASTActions = new ArrayList<>();
-                switch (player.params.MAST) {
-                    case Rollout:
-                        MASTActions = rolloutActions;
-                        break;
-                    case Tree:
-                        MASTActions = treeActions;
-                        break;
-                    case Both:
-                        MASTActions = rolloutActions;
-                        MASTActions.addAll(treeActions);
-                        break;
-                }
-                root.MASTBackup(MASTActions, delta);
-            }
+            oneSearchIteration();
 
             // Finished iteration
             numIters++;
@@ -218,6 +196,43 @@ public class SingleTreeNode {
 
         if (statsLogger != null)
             logTreeStatistics(statsLogger, numIters, elapsedTimer.elapsedMillis());
+    }
+
+    /**
+     * oneSearchIteration() implements the strategy for tree search (plus expansion, rollouts, backup and so on)
+     * Its result is purely stored in the tree generated from root
+     */
+    protected void oneSearchIteration() {
+        double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
+                .mapToDouble(i -> player.heuristic.evaluateState(openLoopState, i)).toArray();
+
+        List<Pair<Integer, AbstractAction>> treeActions = new ArrayList<>();
+        SingleTreeNode selected = treePolicy(treeActions);
+        // Monte carlo rollout: return value of MC rollout from the newly added node
+        List<Pair<Integer, AbstractAction>> rolloutActions = new ArrayList<>();
+        double[] delta = selected.rollOut(rolloutActions, startingValues);
+        // Back up the value of the rollout through the tree
+        selected.backUp(delta);
+        if (player.params.useMAST) {
+            List<Pair<Integer, AbstractAction>> MASTActions = new ArrayList<>();
+            switch (player.params.MAST) {
+                case Rollout:
+                    MASTActions = rolloutActions;
+                    break;
+                case Tree:
+                    MASTActions = treeActions;
+                    break;
+                case Both:
+                    MASTActions = rolloutActions;
+                    MASTActions.addAll(treeActions);
+                    break;
+            }
+            root.MASTBackup(MASTActions, delta);
+        }
+    }
+
+    protected void preSearchSetup() {
+        // do nothing in the single tree case
     }
 
     private void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
@@ -297,7 +312,7 @@ public class SingleTreeNode {
      *
      * @return - new node added to the tree.
      */
-    private SingleTreeNode treePolicy(List<Pair<Integer, AbstractAction>> treeActions) {
+    protected SingleTreeNode treePolicy(List<Pair<Integer, AbstractAction>> treeActions) {
 
         SingleTreeNode cur = this;
         Integer actingPlayer = cur.decisionPlayer;
@@ -317,7 +332,7 @@ public class SingleTreeNode {
         return cur;
     }
 
-    private List<AbstractAction> actionsToConsider(List<AbstractAction> allAvailable, int usedElsewhere) {
+    protected List<AbstractAction> actionsToConsider(List<AbstractAction> allAvailable, int usedElsewhere) {
         if (!allAvailable.isEmpty() && player.params.progressiveWideningConstant >= 1.0) {
             int actionsToConsider = (int) Math.floor(player.params.progressiveWideningConstant * Math.pow(nVisits + 1, player.params.progressiveWideningExponent));
             actionsToConsider = Math.min(actionsToConsider - usedElsewhere, allAvailable.size());
@@ -335,7 +350,7 @@ public class SingleTreeNode {
     /**
      * @return A list of the unexpanded Actions from this State
      */
-    private List<AbstractAction> unexpandedActions() {
+    protected List<AbstractAction> unexpandedActions() {
         // first cater for an edge case with progressive widening
         // where the expanded children may include available actions not in the current pruning width
         // this can occur where we have different available actions (actionsFromOpenLoopState) on each iteration
@@ -351,7 +366,7 @@ public class SingleTreeNode {
      *
      * @return - new child node.
      */
-    private SingleTreeNode expand(List<AbstractAction> notChosen) {
+    protected SingleTreeNode expand(List<AbstractAction> notChosen) {
         // the expansion order will use the actionValueFunction (if it exists, or the MAST order if specified)
         // else pick a random unchosen action
 
@@ -395,7 +410,7 @@ public class SingleTreeNode {
      * @param gs  - current game state
      * @param act - action to apply
      */
-    private void advance(AbstractGameState gs, AbstractAction act) {
+    protected void advance(AbstractGameState gs, AbstractAction act) {
         player.getForwardModel().next(gs, act);
         root.fmCallsCount++;
         if (player.params.opponentTreePolicy == SelfOnly && gs.getCurrentPlayer() != player.getPlayerID())
@@ -408,7 +423,7 @@ public class SingleTreeNode {
      *
      * @param id
      */
-    private void advanceToTurnOfPlayer(AbstractGameState gs, int id) {
+    protected void advanceToTurnOfPlayer(AbstractGameState gs, int id) {
         // For the moment we only have one opponent model - that of a random player
         while (gs.getCurrentPlayer() != id && gs.isNotTerminal()) {
             //       AbstractGameState preGS = gs.copy();
@@ -427,7 +442,7 @@ public class SingleTreeNode {
      *
      * @return - child node according to the tree policy
      */
-    private SingleTreeNode nextNodeInTree() {
+    protected SingleTreeNode nextNodeInTree() {
 
         if (player.params.opponentTreePolicy == SelfOnly && state.getCurrentPlayer() != player.getPlayerID())
             throw new AssertionError("An error has occurred. SelfOnly should only call uct when we are moving.");
@@ -631,7 +646,7 @@ public class SingleTreeNode {
      *
      * @return - value of rollout.
      */
-    private double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues) {
+    protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues) {
         int rolloutDepth = 0; // counting from end of tree
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
@@ -685,7 +700,7 @@ public class SingleTreeNode {
      *
      * @param result - value of rollout to backup
      */
-    private void backUp(double[] result) {
+    protected void backUp(double[] result) {
         SingleTreeNode n = this;
         double[] squaredResults = new double[result.length];
         for (int i = 0; i < result.length; i++)
@@ -731,7 +746,7 @@ public class SingleTreeNode {
     }
 
 
-    private void MASTBackup(List<Pair<Integer, AbstractAction>> rolloutActions, double[] delta) {
+    protected void MASTBackup(List<Pair<Integer, AbstractAction>> rolloutActions, double[] delta) {
         for (Pair<Integer, AbstractAction> pair : rolloutActions) {
             AbstractAction action = pair.b;
             int player = pair.a;

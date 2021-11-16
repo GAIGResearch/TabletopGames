@@ -66,7 +66,11 @@ public class MCTSPlayer extends AbstractPlayer {
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        root = new SingleTreeNode(this, null, null, gameState, rnd);
+        if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTree)
+            root = new MultiTreeNode(this, null, null, gameState, rnd);
+        else
+            root = new SingleTreeNode(this, null, null, gameState, rnd);
+
         if (MASTStats != null)
             root.MASTStatistics = MASTStats.stream()
                     .map(m -> Utils.decay(m, params.MASTGamma))

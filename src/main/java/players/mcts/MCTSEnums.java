@@ -23,7 +23,7 @@ public class MCTSEnums {
     }
 
     public enum OpponentTreePolicy {
-        SelfOnly, Paranoid, MaxN
+        SelfOnly, Paranoid, MaxN, MultiTree
     }
 
 }
