@@ -47,8 +47,8 @@ public class SingleTreeNode {
     // Number of visits
     private int nVisits;
     // Number of FM calls and State copies up until this node
-    private int fmCallsCount;
-    private int copyCount;
+    protected int fmCallsCount;
+    protected int copyCount;
     // Parameters guiding the search
     protected final MCTSPlayer player;
     protected final Random rnd;
@@ -144,8 +144,6 @@ public class SingleTreeNode {
             elapsedTimer.setMaxTimeMillis(player.params.budget);
         }
 
-        preSearchSetup();
-
         // Tracking number of iterations for iteration budget
         int numIters = 0;
         boolean stop = false;
@@ -231,10 +229,6 @@ public class SingleTreeNode {
         }
     }
 
-    protected void preSearchSetup() {
-        // do nothing in the single tree case
-    }
-
     private void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
         Map<String, Object> stats = new HashMap<>();
         TreeStatistics treeStats = new TreeStatistics(root);
@@ -315,17 +309,33 @@ public class SingleTreeNode {
     protected SingleTreeNode treePolicy(List<Pair<Integer, AbstractAction>> treeActions) {
 
         SingleTreeNode cur = this;
-        Integer actingPlayer = cur.decisionPlayer;
+        int actingPlayer = cur.decisionPlayer;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
-        while (cur.openLoopState.isNotTerminal() && cur.depth < player.params.maxTreeDepth && cur.actionsFromOpenLoopState.size() > 0) {
+        while (cur.openLoopState.isNotTerminalForPlayer(actingPlayer) && cur.depth < player.params.maxTreeDepth && cur.actionsFromOpenLoopState.size() > 0) {
             List<AbstractAction> unexpanded = cur.unexpandedActions();
             if (!unexpanded.isEmpty()) {
                 // We have an unexpanded action
-                return cur.expand(unexpanded);
+                AbstractAction chosen = cur.expand(unexpanded);
+                // copy the current state and advance it using the chosen action
+                // we first copy the action so that the one stored in the node will not have any state changes
+                AbstractGameState nextState = cur.openLoopState.copy();
+                root.copyCount++;
+                AbstractAction actionCopy = chosen.copy();
+                advance(nextState, actionCopy);
+                // then create the new node
+                return cur.expandNode(actionCopy, nextState);
             } else {
                 // Move to next child given by UCT function
-                cur = cur.nextNodeInTree();
+                AbstractAction chosen = cur.treePolicyAction();
+                if (player.params.information != Closed_Loop) {
+                    // We do not need to copy the state, as we advance this as we descend the tree.
+                    // In open loop we never re-use the state...the only purpose of storing it on the Node is
+                    // to pick it up in the next uct() call as we descend the tree
+                    AbstractAction chosenCopy = chosen.copy();
+                    advance(cur.openLoopState, chosenCopy);
+                }
+                cur = cur.nextNodeInTree(chosen);
                 treeActions.add(new Pair<>(actingPlayer, cur.actionToReach));
             }
         }
@@ -339,8 +349,6 @@ public class SingleTreeNode {
             // takes account of the expanded actions
             if (actionsToConsider <= 0) return new ArrayList<>();
             // sort in advantage order (descending)
-            ToDoubleBiFunction<AbstractAction, AbstractGameState> valueFunction = player.params.expansionPolicy == MAST ? MASTFunction : advantageFunction;
-
             allAvailable.sort(Comparator.comparingDouble(a -> -advantagesOfActionsFromOLS.getOrDefault(a, 0.0)));
             return allAvailable.subList(0, actionsToConsider);
         }
@@ -366,7 +374,7 @@ public class SingleTreeNode {
      *
      * @return - new child node.
      */
-    protected SingleTreeNode expand(List<AbstractAction> notChosen) {
+    protected AbstractAction expand(List<AbstractAction> notChosen) {
         // the expansion order will use the actionValueFunction (if it exists, or the MAST order if specified)
         // else pick a random unchosen action
 
@@ -389,18 +397,18 @@ public class SingleTreeNode {
         }
         if (chosen == null)
             throw new AssertionError("We have somehow failed to pick an action to expand");
-        // copy the current state and advance it using the chosen action
-        // we first copy the action so that the one stored in the node will not have any state changes
-        AbstractGameState nextState = openLoopState.copy();
-        root.copyCount++;
-        AbstractAction actionCopy = chosen.copy();
-        advance(nextState, actionCopy);
 
+        return chosen;
+    }
+
+    protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // then instantiate a new node
         SingleTreeNode tn = new SingleTreeNode(player, this, actionCopy, nextState, rnd);
         SingleTreeNode[] nodeArray = new SingleTreeNode[state.getNPlayers()];
         nodeArray[nextState.getCurrentPlayer()] = tn;
-        children.put(chosen, nodeArray);
+        if (player.params.opponentTreePolicy == SelfOnly && nextState.getCurrentPlayer() != decisionPlayer)
+            throw new AssertionError("Awooga!");
+        children.put(actionCopy, nodeArray);
         return tn;
     }
 
@@ -425,7 +433,7 @@ public class SingleTreeNode {
      */
     protected void advanceToTurnOfPlayer(AbstractGameState gs, int id) {
         // For the moment we only have one opponent model - that of a random player
-        while (gs.getCurrentPlayer() != id && gs.isNotTerminal()) {
+        while (gs.getCurrentPlayer() != id && gs.isNotTerminalForPlayer(id)) {
             //       AbstractGameState preGS = gs.copy();
             AbstractPlayer oppModel = player.getOpponentModel(gs.getCurrentPlayer());
             List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(gs);
@@ -442,7 +450,7 @@ public class SingleTreeNode {
      *
      * @return - child node according to the tree policy
      */
-    protected SingleTreeNode nextNodeInTree() {
+    protected AbstractAction treePolicyAction() {
 
         if (player.params.opponentTreePolicy == SelfOnly && state.getCurrentPlayer() != player.getPlayerID())
             throw new AssertionError("An error has occurred. SelfOnly should only call uct when we are moving.");
@@ -469,29 +477,13 @@ public class SingleTreeNode {
             }
         }
 
+        return actionChosen;
+    }
+
+    protected SingleTreeNode nextNodeInTree(AbstractAction actionChosen) {
         // Only advance the state if this is open loop
         SingleTreeNode[] nodeArray = children.get(actionChosen);
-        if (player.params.information != Closed_Loop) {
-            // We do not need to copy the state, as we advance this as we descend the tree.
-            // In open loop we never re-use the state...the only purpose of storing it on the Node is
-            // to pick it up in the next uct() call as we descend the tree
-            AbstractAction chosenCopy = actionChosen.copy();
-            advance(openLoopState, chosenCopy);
-            int nextPlayer = openLoopState.getCurrentPlayer();
-            SingleTreeNode nextNode = nodeArray[nextPlayer];
-            if (nextNode == null) {
-                // need to create a new node
-                nodeArray[nextPlayer] = new SingleTreeNode(player, this, chosenCopy, openLoopState, rnd);
-                nextNode = nodeArray[nextPlayer];
-            } else {
-                // pick up the existing one, and set the state
-                nextNode.openLoopState = openLoopState;
-                nextNode.setActionsFromOpenLoopState(openLoopState);
-            }
-            // we also need to check to see if there are any new actions on this transition
-            root.fmCallsCount++;
-            return nextNode;
-        } else {
+        if (player.params.information == Closed_Loop) {
             // in this case we have determinism...there should just be a single child node in the array...so we get that
             Optional<SingleTreeNode> next = Arrays.stream(nodeArray).filter(Objects::nonNull).findFirst();
             if (next.isPresent()) {
@@ -499,6 +491,20 @@ public class SingleTreeNode {
             } else {
                 throw new AssertionError("We have no node to move to...");
             }
+        } else {
+            int nextPlayer = openLoopState.getCurrentPlayer();
+            SingleTreeNode nextNode = nodeArray[nextPlayer];
+            if (nextNode == null) {
+                // need to create a new node
+                nodeArray[nextPlayer] = new SingleTreeNode(player, this, actionChosen.copy(), openLoopState, rnd);
+                nextNode = nodeArray[nextPlayer];
+            } else {
+                // pick up the existing one, and set the state
+                nextNode.openLoopState = openLoopState;
+                nextNode.setActionsFromOpenLoopState(openLoopState);
+            }
+            // we also need to check to see if there are any new actions on this transition
+            return nextNode;
         }
     }
 
@@ -660,12 +666,15 @@ public class SingleTreeNode {
                 root.copyCount++;
             }
 
-            AbstractPlayer rolloutStrategy = player.rolloutStrategy;
             while (!finishRollout(rolloutState, rolloutDepth)) {
+                // we advance to the deciding player's turn. This ensures that the other agents use the respective
+                // opponent models (if applicable) and not the rollout strategy
+                // this also means that rollout depth only increments for actions by the decisionPlayer
+                advanceToTurnOfPlayer(rolloutState, decisionPlayer);
                 List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(rolloutState);
                 if (availableActions.isEmpty())
                     break;
-                AbstractAction next = rolloutStrategy.getAction(rolloutState, availableActions);
+                AbstractAction next = player.rolloutStrategy.getAction(rolloutState, availableActions);
                 rolloutActions.add(new Pair<>(rolloutState.getCurrentPlayer(), next));
                 advance(rolloutState, next);
                 rolloutDepth++;
@@ -691,8 +700,8 @@ public class SingleTreeNode {
         if (depth >= player.params.rolloutLength)
             return true;
 
-        // End of game
-        return !rollerState.isNotTerminal();
+        // End of game (well, at least for the deciding player)
+        return rollerState.isNotTerminalForPlayer(decisionPlayer);
     }
 
     /**
@@ -723,6 +732,7 @@ public class SingleTreeNode {
                     }
                     break;
                 case Paranoid:
+                case MultiTreeParanoid:
                     for (int j = 0; j < result.length; j++) {
                         if (j == root.decisionPlayer) {
                             n.totValue[j] += result[root.decisionPlayer];
@@ -735,6 +745,7 @@ public class SingleTreeNode {
                     }
                     break;
                 case MaxN:
+                case MultiTree:
                     for (int j = 0; j < result.length; j++) {
                         n.totValue[j] += result[j];
                         n.totSquares[j] += squaredResults[j];

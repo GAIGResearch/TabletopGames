@@ -70,7 +70,8 @@ public class RewardsForParanoia {
                 logger.processDataAndFinish();
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.root);
                 List<SingleTreeNode> allNodes = mctsPlayer.allNodesInTree();
-                assertTrue(allNodes.stream().allMatch(allMatch));
+                List<SingleTreeNode> problemNodes = allNodes.stream().filter(n -> !allMatch.test(n)).collect(toList());
+                assertTrue(problemNodes.isEmpty());
                 if (allNodes.stream().anyMatch(anyMatch))
                     anyMatchTriggered = true;
                 assertTrue(aggregateCheck.test(allNodes));
@@ -112,10 +113,10 @@ public class RewardsForParanoia {
         return true;
     };
     Predicate<SingleTreeNode> selfOnlyNodes = node -> {
-        node.getChildren().values().forEach(nodeArray ->
-                assertTrue(nodeArray == null || (nodeArray[1] == null && nodeArray[2] == null)));
-        assertTrue(node.getChildren().size() < 60);
-        return true;
+        boolean passed = node.getChildren().values().stream().allMatch(nodeArray ->
+                nodeArray == null || (nodeArray[1] == null && nodeArray[2] == null));
+        passed = passed && node.getChildren().size() < 60;
+        return passed;
     };
     Predicate<SingleTreeNode> atLeastOneSplitNode = node -> node.getChildren().values().stream()
             .filter(Objects::nonNull)

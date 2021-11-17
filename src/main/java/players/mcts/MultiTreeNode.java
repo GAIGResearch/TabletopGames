@@ -1,6 +1,7 @@
 package players.mcts;
 
 import core.AbstractGameState;
+import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import utilities.Pair;
 
@@ -31,12 +32,6 @@ public class MultiTreeNode extends SingleTreeNode {
         currentLocation[this.decisionPlayer] = this;
     }
 
-    @Override
-    protected void preSearchSetup() {
-
-    }
-
-
     /**
      * oneSearchIteration() implements the strategy for tree search (plus expansion, rollouts, backup and so on)
      * Its result is purely stored in the tree generated from root
@@ -45,9 +40,18 @@ public class MultiTreeNode extends SingleTreeNode {
 
         AbstractGameState currentState = this.openLoopState;  // this will have been set correctly before calling this method
         SingleTreeNode currentNode;
-        boolean maxDepthReached = false;
+
+        double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
+                .mapToDouble(i -> player.heuristic.evaluateState(currentState, i)).toArray();
+
         if (!currentState.isNotTerminal())
             return;
+
+        // arrays to store the expansion actions taken, and whether we have expanded - indexed by player
+        AbstractAction[] expansionAction = new AbstractAction[currentLocation.length];
+        boolean[] nodeExpanded = new boolean[currentLocation.length];
+        boolean[] maxDepthReached = new boolean[currentLocation.length];
+        int rolloutActions = -1;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         do {
@@ -60,32 +64,68 @@ public class MultiTreeNode extends SingleTreeNode {
                 roots[currentActor] = pseudoRoot;
                 currentLocation[currentActor] = pseudoRoot;
             }
-
-            currentNode = currentLocation[currentActor];
-            if (currentNode == null) {
-                // TODO rollout
-            } else {
-                List<AbstractAction> unexpanded = currentNode.unexpandedActions();
-                if (!unexpanded.isEmpty()) {
-                    // We have an unexpanded action. This line creates the new node, and copies the advanced state into it
-                    SingleTreeNode nextNode =  currentNode.expand(unexpanded);
-                    currentState = nextNode.openLoopState;
-                } else {
-                    // Move to next child given by UCT function
-                    // TODO : No, this won't work. the nextNode is for the next player
-                    // TODO: We need the content of the node to be the state after it has advanced to that player's turn again.
-                    // We could either override the state once we know what it is...or hold off on creating the node until we know this
-                    // this latter approach is what we do with SelfOnly via the advanceToOurNextAction() method
-                    // This suggests that I want to break out the action selection piece from the node creation in SingleTreeNode
-                    // and just use the former here!
-                    SingleTreeNode nextNode = currentNode.nextNodeInTree();
-                    currentState = nextNode.openLoopState;
-                }
+            if (!nodeExpanded[currentActor] && expansionAction[currentActor] != null) {
+                // we now expand a node
+                currentLocation[currentActor] = expandNode(expansionAction[currentActor], currentState.copy());
+                // currentLocation now stores the last node in the tree for that player..so that we can back-propagate
+                root.copyCount++;
+                nodeExpanded[currentActor] = true;
             }
 
-        } while (currentState.isNotTerminal() && !maxDepthReached);
+            // currentNode is the last node that this actor was at in their tree
+            currentNode = currentLocation[currentActor];
+            AbstractAction chosen;
+            if (nodeExpanded[currentActor] || maxDepthReached[currentActor]) {
+                // all actions after the expansion for a player are rollout actions
+                // note that different players will enter rollout at different times, which is why
+                // we cannot have a simple rollout() method as in SingleTree search
+                AbstractPlayer agent = currentActor == decisionPlayer ? player.rolloutStrategy : player.getOpponentModel(currentActor);
+                List<AbstractAction> availableActions = getForwardModel().computeAvailableActions(currentState);
+                if (availableActions.isEmpty())
+                    throw new AssertionError("We should always have something to choose from");
+                else
+                    chosen = agent.getAction(currentState, availableActions);
+                if (decisionPlayer == currentActor)
+                    rolloutActions = Math.max(1, rolloutActions + 1);
 
+            } else {  // in the tree still for this player
+                List<AbstractAction> unexpanded = currentNode.unexpandedActions();
+                if (!unexpanded.isEmpty()) {
+                    // We have an unexpanded action
+                    if (expansionAction[currentActor] != null)
+                        throw new AssertionError("We have already picked an expansion action for this player");
+                    chosen = currentNode.expand(unexpanded);
+                    expansionAction[currentActor] = chosen.copy();
+                    // we will create the new node once we get back to a point when it is this player's action again
+                } else {
+                    chosen = currentNode.treePolicyAction();
+                    // we move on to the next node in the tree (which should definitely exist
+                    currentLocation[currentActor] = currentNode.nextNodeInTree(chosen);
+                }
+                // bit of a hack - other players will have their pseudo root at a 'depth' of 1 instead of 0
+                if (currentLocation[currentActor].depth >= player.params.maxTreeDepth + (currentActor == decisionPlayer ? 0 : 1))
+                    maxDepthReached[currentActor] = true;
+            }
+
+            // Closed_Loop is not compatible with MultiTree search
+            // This is because given an action we do not know who the next player is until we take the action
+            advance(currentState, chosen);
+
+        } while (currentState.isNotTerminalForPlayer(decisionPlayer) && rolloutActions < player.params.rolloutLength);
+
+        // Evaluate final state and return normalised score
+        double[] finalValues = new double[state.getNPlayers()];
+
+        for (int i = 0; i < finalValues.length; i++) {
+            finalValues[i] = player.heuristic.evaluateState(currentState, i) - startingValues[i];
+        }
+        for (SingleTreeNode singleTreeNode : currentLocation) {
+            if (singleTreeNode != null)
+                singleTreeNode.backUp(finalValues);
+        }
 
     }
+
+
 }
 
