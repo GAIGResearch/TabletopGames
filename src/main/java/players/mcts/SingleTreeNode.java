@@ -18,8 +18,7 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
 import static players.mcts.MCTSEnums.Information.Closed_Loop;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.Strategies.MAST;
 import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
@@ -259,9 +258,12 @@ public class SingleTreeNode {
      */
     private int actionVisits(AbstractAction action) {
         int retValue = 0;
-        for (SingleTreeNode node : children.get(action)) {
-            if (node != null)
-                retValue += node.nVisits;
+        SingleTreeNode[] nodes = children.get(action);
+        if (nodes != null) {
+            for (SingleTreeNode node : nodes) {
+                if (node != null)
+                    retValue += node.nVisits;
+            }
         }
         return retValue;
     }
@@ -335,8 +337,10 @@ public class SingleTreeNode {
                     AbstractAction chosenCopy = chosen.copy();
                     advance(cur.openLoopState, chosenCopy);
                 }
-                cur = cur.nextNodeInTree(chosen);
-                treeActions.add(new Pair<>(actingPlayer, cur.actionToReach));
+                if (isStateNonTerminal(cur.openLoopState))
+                    cur = cur.nextNodeInTree(chosen);
+                // else we keep cur, but will exit immediately
+                treeActions.add(new Pair<>(actingPlayer, chosen));
             }
         }
         return cur;
@@ -404,12 +408,23 @@ public class SingleTreeNode {
     protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // then instantiate a new node
         SingleTreeNode tn = new SingleTreeNode(player, this, actionCopy, nextState, rnd);
-        SingleTreeNode[] nodeArray = new SingleTreeNode[state.getNPlayers()];
-        nodeArray[nextState.getCurrentPlayer()] = tn;
-        if (player.params.opponentTreePolicy == SelfOnly && nextState.getCurrentPlayer() != decisionPlayer)
-            throw new AssertionError("Awooga!");
-        children.put(actionCopy, nodeArray);
+        if (isStateNonTerminal(nextState)) {
+            SingleTreeNode[] nodeArray = new SingleTreeNode[state.getNPlayers()];
+            nodeArray[nextState.getCurrentPlayer()] = tn;
+            children.put(actionCopy, nodeArray);
+        }
         return tn;
+    }
+
+    private boolean isStateNonTerminal(AbstractGameState nextState) {
+        // If using SelfOnly or a MultiTree policy, then we only care about whether we are still in the game
+        if (player.params.opponentTreePolicy == SelfOnly ||
+                player.params.opponentTreePolicy == MultiTree ||
+                player.params.opponentTreePolicy == MultiTreeParanoid) {
+            return (nextState.isNotTerminalForPlayer(this.decisionPlayer));
+        }
+        // otherwise we check for overall game over state
+        return nextState.isNotTerminal();
     }
 
     /**
@@ -495,7 +510,9 @@ public class SingleTreeNode {
             int nextPlayer = openLoopState.getCurrentPlayer();
             SingleTreeNode nextNode = nodeArray[nextPlayer];
             if (nextNode == null) {
-                // need to create a new node
+                // need to create a new node - this is because we have a different player acting than expected
+                if (player.params.opponentTreePolicy == SelfOnly || player.params.opponentTreePolicy == MultiTree || player.params.opponentTreePolicy == MultiTreeParanoid)
+                    throw new AssertionError("Not sure this should be possible though");
                 nodeArray[nextPlayer] = new SingleTreeNode(player, this, actionChosen.copy(), openLoopState, rnd);
                 nextNode = nodeArray[nextPlayer];
             } else {
@@ -853,22 +870,27 @@ public class SingleTreeNode {
         retValue.append(String.format("%s, %d total visits, value %s, with %d children, depth %d, FMCalls %d: \n",
                 player, nVisits, valueString, children.size(), depth, fmCallsCount));
         // sort all actions by visit count
-        List<AbstractAction> sortedActions = children.keySet().stream()
-                .filter(Objects::nonNull)
-                .sorted(Comparator.comparingInt(a -> -actionVisits(a)))
-                .collect(toList());
-        for (AbstractAction action : sortedActions) {
-            String actionName = action.toString();
-            int actionVisits = actionVisits(action);
-            if (actionName.length() > 50)
-                actionName = actionName.substring(0, 50);
-            valueString = String.format("%.2f", actionTotValue(action, decisionPlayer) / actionVisits);
-            if (player.params.opponentTreePolicy == MaxN) {
-                valueString = IntStream.range(0, state.getNPlayers())
-                        .mapToObj(p -> String.format("%.2f", actionTotValue(action, p) / actionVisits))
-                        .collect(joining(", "));
+        try {
+            List<AbstractAction> sortedActions = children.keySet().stream()
+                    .filter(Objects::nonNull)
+                    .sorted(Comparator.comparingInt(a -> -actionVisits(a)))
+                    .collect(toList());
+
+            for (AbstractAction action : sortedActions) {
+                String actionName = action.toString();
+                int actionVisits = actionVisits(action);
+                if (actionName.length() > 50)
+                    actionName = actionName.substring(0, 50);
+                valueString = String.format("%.2f", actionTotValue(action, decisionPlayer) / actionVisits);
+                if (player.params.opponentTreePolicy == MaxN) {
+                    valueString = IntStream.range(0, state.getNPlayers())
+                            .mapToObj(p -> String.format("%.2f", actionTotValue(action, p) / actionVisits))
+                            .collect(joining(", "));
+                }
+                retValue.append(String.format("\t%-50s  visits: %d\tvalue %s\n", actionName, actionVisits, valueString));
             }
-            retValue.append(String.format("\t%-50s  visits: %d\tvalue %s\n", actionName, actionVisits, valueString));
+        } catch (NullPointerException e) {
+            boolean stop = true;
         }
         retValue.append(new TreeStatistics(root).toString());
         return retValue.toString();

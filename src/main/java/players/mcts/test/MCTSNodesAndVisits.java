@@ -3,6 +3,8 @@ package players.mcts.test;
 import core.*;
 import core.actions.*;
 import core.interfaces.IStatisticLogger;
+import games.dominion.DominionGame;
+import games.dominion.DominionParameters;
 import games.loveletter.*;
 import org.junit.*;
 import players.PlayerConstants;
@@ -24,9 +26,9 @@ public class MCTSNodesAndVisits {
         // default Parameter settings for later changes
         params = new MCTSParams(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
         params.information = MCTSEnums.Information.Information_Set;
-        params.maxTreeDepth = 10;
+        params.maxTreeDepth = 20;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         params.budget = 200;
@@ -41,47 +43,51 @@ public class MCTSNodesAndVisits {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(244)));
-        return new LoveLetterGame(players, new LoveLetterParameters(330245));
+        return new DominionGame(players, DominionParameters.firstGame(330245));
     }
 
     @Test
     public void selfOnly() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
         Game game = createGame(params);
-        int[] expectedNodes = {201, 201, 201, 201};
-        runGame(game, 4, expectedNodes);
+        int[] expectedNodes = {200, 200, 200, 200};
+        int[] errorMargin = {10, 10, 10, 10};
+        runGame(game, 4, expectedNodes, errorMargin);
     }
 
     @Test
     public void paranoid() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.Paranoid;
         Game game = createGame(params);
-        int[] expectedNodes = {201, 201, 201, 201};
-        runGame(game, 4, expectedNodes);
+        int[] expectedNodes = {200, 200, 200, 200};
+        int[] errorMargin = {10, 10, 10, 10};
+        runGame(game, 4, expectedNodes, errorMargin);
     }
 
     @Test
     public void maxN() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
         Game game = createGame(params);
-        int[] expectedNodes = {201, 201, 201, 201};
-        runGame(game, 4, expectedNodes);
-    }
+        int[] expectedNodes = {200, 200, 200, 200};
+        int[] errorMargin = {10, 10, 10, 10};
+        runGame(game, 4, expectedNodes, errorMargin);    }
 
     @Test
     public void RegretMatching() {
         params.treePolicy = MCTSEnums.TreePolicy.RegretMatching;
         Game game = createGame(params);
-        int[] expectedNodes = {201, 201, 201, 201};
-        runGame(game, 4, expectedNodes);
+        int[] expectedNodes = {200, 200, 200, 200};
+        int[] errorMargin = {10, 10, 10, 10};
+        runGame(game, 4, expectedNodes, errorMargin);
     }
 
     @Test
     public void EXP3() {
         params.treePolicy = MCTSEnums.TreePolicy.EXP3;
         Game game = createGame(params);
-        int[] expectedNodes = {201, 201, 201, 201};
-        runGame(game, 4, expectedNodes);
-    }
+        int[] expectedNodes = {200, 200, 200, 200};
+        int[] errorMargin = {10, 10, 10, 10};
+        runGame(game, 4, expectedNodes, errorMargin);    }
 
     @Test
     public void reducedDepth3MaxN() {
@@ -89,7 +95,7 @@ public class MCTSNodesAndVisits {
         params.maxTreeDepth = 3;
         params.information = MCTSEnums.Information.Closed_Loop;
         Game game = createGame(params);
-        runGame(game, 4, new int[0]);
+        runGame(game, 4, new int[0], new int[0]);
     }
 
     @Test
@@ -97,10 +103,10 @@ public class MCTSNodesAndVisits {
         params.maxTreeDepth = 3;
         params.information = MCTSEnums.Information.Closed_Loop;
         Game game = createGame(params);
-        runGame(game, 4, new int[0]);
+        runGame(game, 4, new int[0], new int[0]);
     }
 
-    private void runGame(Game game, int moves, int[] expectedNodes) {
+    private void runGame(Game game, int moves, int[] expectedNodes, int[] errorMargin) {
         int counter = 0;
         AbstractGameState state = game.getGameState();
         AbstractForwardModel forwardModel = game.getForwardModel();
@@ -118,7 +124,8 @@ public class MCTSNodesAndVisits {
                 if (params.maxTreeDepth == 3)
                     assertEquals(3, stats.depthReached);
                 else {
-                    assertEquals(expectedNodes[counter], stats.totalNodes, 10);
+                    System.out.printf("Move %d has %d versus %d expected nodes", counter, stats.totalNodes, expectedNodes[counter]);
+                    assertEquals(expectedNodes[counter], stats.totalNodes, errorMargin[counter]);
                 }
                 counter++;
             }
