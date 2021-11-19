@@ -79,7 +79,7 @@ public class SingleTreeNode {
                 MASTStatistics.add(new HashMap<>());
         }
         this.actionToReach = actionToReach;
-        decisionPlayer = state.getCurrentPlayer();
+        decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
         MASTFunction = (a, s) -> {
             Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
             if (MAST.containsKey(a)) {
@@ -109,8 +109,15 @@ public class SingleTreeNode {
         this.rnd = rnd;
     }
 
+    private boolean terminalStateInSelfOnlyTree(AbstractGameState state) {
+        // we then have some exceptions
+        if (player.params.opponentTreePolicy.selfOnlyTree && parent != null)
+            return !state.isNotTerminalForPlayer(parent.decisionPlayer);
+        return false;
+    }
+
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
-        actionsFromOpenLoopState = actionState.isNotTerminal() ? player.getForwardModel().computeAvailableActions(actionState) :
+        actionsFromOpenLoopState = actionState.isNotTerminalForPlayer(decisionPlayer) ? player.getForwardModel().computeAvailableActions(actionState) :
                 Collections.emptyList();
         if (player.params.expansionPolicy == MAST) {
             advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
@@ -337,7 +344,6 @@ public class SingleTreeNode {
                     AbstractAction chosenCopy = chosen.copy();
                     advance(cur.openLoopState, chosenCopy);
                 }
-                if (isStateNonTerminal(cur.openLoopState))
                     cur = cur.nextNodeInTree(chosen);
                 // else we keep cur, but will exit immediately
                 treeActions.add(new Pair<>(actingPlayer, chosen));
@@ -407,25 +413,14 @@ public class SingleTreeNode {
 
     protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // then instantiate a new node
+        int nextPlayer = player.params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : nextState.getCurrentPlayer();
         SingleTreeNode tn = new SingleTreeNode(player, this, actionCopy, nextState, rnd);
-        if (isStateNonTerminal(nextState)) {
             SingleTreeNode[] nodeArray = new SingleTreeNode[state.getNPlayers()];
-            nodeArray[nextState.getCurrentPlayer()] = tn;
+            nodeArray[nextPlayer] = tn;
             children.put(actionCopy, nodeArray);
-        }
         return tn;
     }
 
-    private boolean isStateNonTerminal(AbstractGameState nextState) {
-        // If using SelfOnly or a MultiTree policy, then we only care about whether we are still in the game
-        if (player.params.opponentTreePolicy == SelfOnly ||
-                player.params.opponentTreePolicy == MultiTree ||
-                player.params.opponentTreePolicy == MultiTreeParanoid) {
-            return (nextState.isNotTerminalForPlayer(this.decisionPlayer));
-        }
-        // otherwise we check for overall game over state
-        return nextState.isNotTerminal();
-    }
 
     /**
      * Advance the current game state with the given action, count the FM call and compute the next available actions.
@@ -467,7 +462,7 @@ public class SingleTreeNode {
      */
     protected AbstractAction treePolicyAction() {
 
-        if (player.params.opponentTreePolicy == SelfOnly && state.getCurrentPlayer() != player.getPlayerID())
+        if (player.params.opponentTreePolicy.selfOnlyTree && openLoopState.getCurrentPlayer() != player.getPlayerID())
             throw new AssertionError("An error has occurred. SelfOnly should only call uct when we are moving.");
 
         List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState, 0);
@@ -507,11 +502,11 @@ public class SingleTreeNode {
                 throw new AssertionError("We have no node to move to...");
             }
         } else {
-            int nextPlayer = openLoopState.getCurrentPlayer();
+            int nextPlayer = player.params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : openLoopState.getCurrentPlayer();
             SingleTreeNode nextNode = nodeArray[nextPlayer];
             if (nextNode == null) {
                 // need to create a new node - this is because we have a different player acting than expected
-                if (player.params.opponentTreePolicy == SelfOnly || player.params.opponentTreePolicy == MultiTree || player.params.opponentTreePolicy == MultiTreeParanoid)
+                if (player.params.opponentTreePolicy.selfOnlyTree)
                     throw new AssertionError("Not sure this should be possible though");
                 nodeArray[nextPlayer] = new SingleTreeNode(player, this, actionChosen.copy(), openLoopState, rnd);
                 nextNode = nodeArray[nextPlayer];

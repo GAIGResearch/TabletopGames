@@ -12,8 +12,6 @@ import static java.util.stream.Collectors.toList;
 
 public class TestMCTSPlayer extends MCTSPlayer {
 
-    public SingleTreeNode root;
-
     public TestMCTSPlayer(MCTSParams params) {
         super(params, "TestMCTSPlayer");
     }
@@ -22,17 +20,8 @@ public class TestMCTSPlayer extends MCTSPlayer {
         this.debug = debug;
     }
 
-    @Override
-    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
-        // Search for best action from the root
-        root = new SingleTreeNode(this, null, null, gameState, rnd);
-        root.mctsSearch(getStatsLogger());
-
-        if (debug)
-            System.out.println(root.toString());
-
-        // Return best action
-        return root.bestAction();
+    public SingleTreeNode getRoot() {
+        return root;
     }
 
     public List<SingleTreeNode> allNodesInTree() {

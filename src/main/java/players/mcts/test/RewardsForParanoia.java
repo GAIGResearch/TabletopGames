@@ -68,7 +68,7 @@ public class RewardsForParanoia {
 
             if (state.getCurrentPlayer() == 0) {
                 logger.processDataAndFinish();
-                TreeStatistics stats = new TreeStatistics(mctsPlayer.root);
+                TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot());
                 List<SingleTreeNode> allNodes = mctsPlayer.allNodesInTree();
                 List<SingleTreeNode> problemNodes = allNodes.stream().filter(n -> !allMatch.test(n)).collect(toList());
                 assertTrue(problemNodes.isEmpty());
@@ -87,7 +87,7 @@ public class RewardsForParanoia {
                 .map(SingleTreeNode::getActor)
                 .collect(groupingBy(Function.identity(), counting()));
         // we then check that all players have som nodes in the tree
-        Utils.GameResult[] results = mctsPlayer.root.getState().getPlayerResults();
+        Utils.GameResult[] results = mctsPlayer.getRoot().getState().getPlayerResults();
         System.out.println("Nodes by player: " + nodeCountByDecisionMaker);
         if (results[0] == Utils.GameResult.GAME_ONGOING)
             assertTrue(nodeCountByDecisionMaker.get(0) > 10);
