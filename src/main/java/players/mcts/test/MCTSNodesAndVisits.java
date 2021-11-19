@@ -119,8 +119,8 @@ public class MCTSNodesAndVisits {
 
             if (state.getCurrentPlayer() == 0) {
                 logger.processDataAndFinish();
-                TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot());
-                assertEquals(200, mctsPlayer.getRoot().getVisits());
+                TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
+                assertEquals(200, mctsPlayer.getRoot(0).getVisits());
                 if (params.maxTreeDepth == 3)
                     assertEquals(3, stats.depthReached);
                 else {

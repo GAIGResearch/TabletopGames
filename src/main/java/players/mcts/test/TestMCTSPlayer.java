@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
+import players.mcts.MultiTreeNode;
 import players.mcts.SingleTreeNode;
 
 import java.util.*;
@@ -20,7 +21,9 @@ public class TestMCTSPlayer extends MCTSPlayer {
         this.debug = debug;
     }
 
-    public SingleTreeNode getRoot() {
+    public SingleTreeNode getRoot(int player) {
+        if (root instanceof MultiTreeNode)
+            return ((MultiTreeNode) root).getRoot(player);
         return root;
     }
 

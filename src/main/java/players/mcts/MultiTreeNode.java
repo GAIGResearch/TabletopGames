@@ -27,9 +27,9 @@ public class MultiTreeNode extends SingleTreeNode {
         if (parent != null)
             throw new AssertionError("MultiTreeNode should only be instantiated at the root of a tree");
         roots = new SingleTreeNode[state.getNPlayers()];
-        roots[this.decisionPlayer] = this;
+        roots[this.decisionPlayer] = new SingleTreeNode(player, this, actionToReach, state, rnd);
         currentLocation = new SingleTreeNode[state.getNPlayers()];
-        currentLocation[this.decisionPlayer] = this;
+        currentLocation[this.decisionPlayer] = roots[decisionPlayer];
     }
 
     /**
@@ -51,22 +51,27 @@ public class MultiTreeNode extends SingleTreeNode {
         AbstractAction[] expansionAction = new AbstractAction[currentLocation.length];
         boolean[] nodeExpanded = new boolean[currentLocation.length];
         boolean[] maxDepthReached = new boolean[currentLocation.length];
+        for (int i = 0; i < currentLocation.length; i++)
+            currentLocation[i] = roots[i];
+
         int rolloutActions = -1;
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         do {
-
             int currentActor = currentState.getCurrentPlayer();
             if (roots[currentActor] == null) {
                 // their first action in search; set a root for their tree (we link to the main root so that
                 // we know who the overall player is, and keep this consistent across all nodes)
-                SingleTreeNode pseudoRoot = new SingleTreeNode(player, root, null, currentState, rnd);
+                SingleTreeNode pseudoRoot = new SingleTreeNode(player, this, null, currentState.copy(), rnd);
                 roots[currentActor] = pseudoRoot;
                 currentLocation[currentActor] = pseudoRoot;
+            } else if (roots[currentActor] == currentLocation[currentActor]) {
+                // this is the player's first action, so we must set the ols
+                currentLocation[currentActor].setActionsFromOpenLoopState(currentState);
             }
             if (!nodeExpanded[currentActor] && expansionAction[currentActor] != null) {
                 // we now expand a node
-                currentLocation[currentActor] = expandNode(expansionAction[currentActor], currentState.copy());
+                currentLocation[currentActor] = currentLocation[currentActor].expandNode(expansionAction[currentActor], currentState.copy());
                 // currentLocation now stores the last node in the tree for that player..so that we can back-propagate
                 root.copyCount++;
                 nodeExpanded[currentActor] = true;
@@ -123,9 +128,16 @@ public class MultiTreeNode extends SingleTreeNode {
             if (singleTreeNode != null)
                 singleTreeNode.backUp(finalValues);
         }
-
     }
 
 
+    @Override
+    public AbstractAction bestAction() {
+        return roots[decisionPlayer].bestAction();
+    }
+
+    public SingleTreeNode getRoot(int player) {
+        return roots[player];
+    }
 }
 

@@ -12,9 +12,7 @@ import games.tictactoe.*;
 import org.junit.Before;
 import org.junit.Test;
 import players.PlayerConstants;
-import players.mcts.MCTSEnums;
-import players.mcts.MCTSParams;
-import players.mcts.SingleTreeNode;
+import players.mcts.*;
 import players.simple.RandomPlayer;
 
 import java.util.ArrayList;
@@ -49,18 +47,20 @@ public class TicTacToe {
         params.K = 1.0;
     }
 
-    public Game createGame(MCTSParams params) {
+    public Game createGame(MCTSParams params, int gridSize) {
         mctsPlayer = new TestMCTSPlayer(params);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
-        return new TicTacToeGame(players, new TicTacToeGameParameters(3812));
+        TicTacToeGameParameters gameParams = new TicTacToeGameParameters(3812);
+        gameParams.gridSize = gridSize;
+        return new TicTacToeGame(players, gameParams);
     }
 
     @Test
     public void nodeCreatedIfGameOver() {
-        Game ttt = createGame(params);
+        Game ttt = createGame(params, 3);
         TicTacToeGameState state = (TicTacToeGameState) ttt.getGameState();
         int board = state.getGridBoard().getComponentID();
 
@@ -74,9 +74,34 @@ public class TicTacToe {
         AbstractAction action = mctsPlayer.getAction(state, fm.computeAvailableActions(state));
         assertEquals(new SetGridValueAction<>(board, 2, 2, x), action);
 
-        SingleTreeNode root = mctsPlayer.getRoot();
+        SingleTreeNode root = mctsPlayer.getRoot(0);
         assertEquals(200, root.getVisits());
 
+    }
+
+    @Test
+    public void multiTreeTest() {
+        params.budget = 200;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        Game game = createGame(params, 4);
+        TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
+
+        AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
+                .getAction(state, fm.computeAvailableActions(state));
+
+        TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
+        System.out.println(stats);
+        System.out.println(mctsPlayer.getRoot(0));
+        assertEquals(params.budget, mctsPlayer.getRoot(0).getVisits());
+        assertEquals(params.budget + 1, stats.totalNodes);
+        assertEquals(16, mctsPlayer.getRoot(0).getChildren().size());
+
+        stats = new TreeStatistics(mctsPlayer.getRoot(1));
+        System.out.println(stats);
+        System.out.println(mctsPlayer.getRoot(1));
+        assertEquals(params.budget, mctsPlayer.getRoot(1).getVisits());
+        assertEquals(params.budget + 1, stats.totalNodes);
+        assertEquals(16, mctsPlayer.getRoot(1).getChildren().size());
     }
 
 }
