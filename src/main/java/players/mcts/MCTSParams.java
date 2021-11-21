@@ -3,7 +3,6 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.ParameterFactory;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
@@ -48,7 +47,8 @@ public class MCTSParams extends PlayerParameters {
     private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public boolean gatherExpertIterationData = false;
     public String expertIterationFileStem = "ExpertIterationData";
-    public String advantageFunction = "";
+    public String advantageFunctionString = "";
+    public ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
     public int biasVisits = 0;
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
     public double progressiveWideningExponent = 0.0;
@@ -110,7 +110,8 @@ public class MCTSParams extends PlayerParameters {
         oppModelClass = (String) getParameterValue("oppModelClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
         expertIterationFileStem = (String) getParameterValue("expIterFile");
-        advantageFunction = (String) getParameterValue("advantageFunction");
+        advantageFunctionString = (String) getParameterValue("advantageFunction");
+        advantageFunction = getAdvantageFunction();
         biasVisits = (int) getParameterValue("biasVisits");
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
         progressiveWideningExponent = (double) getParameterValue("progressiveWideningExponent");
@@ -187,9 +188,9 @@ public class MCTSParams extends PlayerParameters {
 
     @SuppressWarnings("unchecked")
     public ToDoubleBiFunction<AbstractAction, AbstractGameState> getAdvantageFunction() {
-        if (advantageFunction.isEmpty() || advantageFunction.equalsIgnoreCase("none"))
+        if (advantageFunctionString.isEmpty() || advantageFunctionString.equalsIgnoreCase("none"))
             return null;
-        String[] classAndParams = advantageFunction.split(Pattern.quote("|"));
+        String[] classAndParams = advantageFunctionString.split(Pattern.quote("|"));
         if (classAndParams.length > 2)
             throw new IllegalArgumentException("Only a single string parameter is currently supported");
         try {

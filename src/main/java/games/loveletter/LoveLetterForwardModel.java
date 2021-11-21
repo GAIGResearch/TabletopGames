@@ -246,6 +246,9 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             int bestValue = 0;
             for (int i = 0; i < llgs.getNPlayers(); i++) {
                 if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE) {
+                    if (llgs.playerHandCards.get(i).peek() == null) {
+                        boolean stop = true;
+                    }
                     int points = llgs.playerHandCards.get(i).peek().cardType.getValue();
                     if (points > bestValue){
                         bestValue = points;

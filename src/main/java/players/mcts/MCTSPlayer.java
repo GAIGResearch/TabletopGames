@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
 import core.interfaces.IGameListener;
 import core.interfaces.IStateHeuristic;
 import games.dicemonastery.DiceMonasteryStateAttributes;
@@ -18,6 +17,9 @@ import java.util.Random;
 import java.util.function.ToDoubleBiFunction;
 import java.util.stream.Collectors;
 
+import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
+
 public class MCTSPlayer extends AbstractPlayer {
 
     // Random object for this player
@@ -25,13 +27,13 @@ public class MCTSPlayer extends AbstractPlayer {
     // Parameters for this player
     protected MCTSParams params;
     // Heuristics used for the agent
-    IStateHeuristic heuristic;
-    AbstractPlayer rolloutStrategy;
-    AbstractPlayer opponentModel;
-    ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
+    protected IStateHeuristic heuristic;
+    protected AbstractPlayer rolloutStrategy;
     protected boolean debug = false;
     protected SingleTreeNode root;
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStats;
+    private AbstractPlayer opponentModel;
+    private ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -66,10 +68,10 @@ public class MCTSPlayer extends AbstractPlayer {
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTree)
-            root = new MultiTreeNode(this, null, null, gameState, rnd);
+        if (params.opponentTreePolicy == MultiTree || params.opponentTreePolicy == MultiTreeParanoid)
+            root = new MultiTreeNode(this, gameState, rnd);
         else
-            root = new SingleTreeNode(this, null, null, gameState, rnd);
+            root = SingleTreeNode.createRootNode(this, gameState, rnd);
 
         if (MASTStats != null)
             root.MASTStatistics = MASTStats.stream()
