@@ -127,7 +127,7 @@ public class SingleTreeNode {
             root.copyCount++;
             this.state = state.copy();
         } else {
-            this.state = state;
+           this.state = state;
         }
 
         if (parent != null) {
@@ -190,7 +190,7 @@ public class SingleTreeNode {
         while (!stop) {
             switch (params.information) {
                 case Closed_Loop:
-                    // no effect
+                    openLoopState = state;
                     break;
                 case Open_Loop:
                     openLoopState = state.copy();
@@ -376,7 +376,7 @@ public class SingleTreeNode {
             if (!unexpanded.isEmpty()) {
                 // We have an unexpanded action
                 AbstractAction chosen = cur.expand(unexpanded);
-                AbstractGameState nextState = cur.openLoopState; //.copy();
+                AbstractGameState nextState = cur.openLoopState;
                 if (params.information == Closed_Loop) {
                     root.copyCount++;
                     nextState = nextState.copy();
@@ -447,7 +447,7 @@ public class SingleTreeNode {
         if (valueFunction != null) {
             double bestValue = Double.NEGATIVE_INFINITY;
             for (AbstractAction action : notChosen) {
-                double estimate = valueFunction.applyAsDouble(action, state);
+                double estimate = valueFunction.applyAsDouble(action, openLoopState);
                 if (estimate > bestValue) {
                     bestValue = estimate;
                     chosen = action;
@@ -466,7 +466,7 @@ public class SingleTreeNode {
         // then instantiate a new node
         int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : nextState.getCurrentPlayer();
         SingleTreeNode tn = SingleTreeNode.createChildNode(this, actionCopy, nextState);
-        SingleTreeNode[] nodeArray = new SingleTreeNode[state.getNPlayers()];
+        SingleTreeNode[] nodeArray = new SingleTreeNode[nextState.getNPlayers()];
         nodeArray[nextPlayer] = tn;
         children.put(actionCopy, nodeArray);
         return tn;
@@ -743,7 +743,7 @@ public class SingleTreeNode {
             }
         }
         // Evaluate final state and return normalised score
-        double[] retValue = new double[state.getNPlayers()];
+        double[] retValue = new double[rolloutState.getNPlayers()];
 
         for (int i = 0; i < retValue.length; i++) {
             retValue[i] = heuristic.evaluateState(rolloutState, i) - startingValues[i];
@@ -937,7 +937,7 @@ public class SingleTreeNode {
                 actionName = actionName.substring(0, 50);
             valueString = String.format("%.2f", actionTotValue(action, decisionPlayer) / actionVisits);
             if (params.opponentTreePolicy == MaxN) {
-                valueString = IntStream.range(0, state.getNPlayers())
+                valueString = IntStream.range(0, totValue.length)
                         .mapToObj(p -> String.format("%.2f", actionTotValue(action, p) / actionVisits))
                         .collect(joining(", "));
             }
