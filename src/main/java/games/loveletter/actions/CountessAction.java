@@ -33,4 +33,11 @@ public class CountessAction extends core.actions.DrawCard implements IPrintable 
     public AbstractAction copy() {
         return new CountessAction(deckFrom, deckTo, fromIndex);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CountessAction)) return false;
+        return super.equals(o);
+    }
 }

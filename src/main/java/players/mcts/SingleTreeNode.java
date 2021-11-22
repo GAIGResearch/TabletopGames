@@ -121,14 +121,15 @@ public class SingleTreeNode {
 
         totValue = new double[state.getNPlayers()];
         totSquares = new double[state.getNPlayers()];
-        setActionsFromOpenLoopState(state);
         if (params.information != Closed_Loop) {
             // if we're using open loop, then we need to make sure the reference state is never changed
             root.copyCount++;
             this.state = state.copy();
         } else {
-           this.state = state;
+            this.state = state;
         }
+        // then set up available actions, and set openLoopState = state
+        setActionsFromOpenLoopState(state);
 
         if (parent != null) {
             depth = parent.depth + 1;
@@ -151,7 +152,7 @@ public class SingleTreeNode {
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
         openLoopState = actionState;
         actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState);
- //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
+        //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
 //                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
         if (params.expansionPolicy == MAST) {
             advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
@@ -380,6 +381,9 @@ public class SingleTreeNode {
                 if (params.information == Closed_Loop) {
                     root.copyCount++;
                     nextState = nextState.copy();
+                    // In Closed Loop why do we do this?
+                    // Because OLS = state in this case, so we need to copy it before updating it and
+                    // using it to populate a new node.
                 }
                 AbstractAction actionCopy = chosen.copy();
                 cur.advance(nextState, actionCopy);
@@ -467,7 +471,7 @@ public class SingleTreeNode {
         int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : nextState.getCurrentPlayer();
         SingleTreeNode tn = SingleTreeNode.createChildNode(this, actionCopy, nextState);
         SingleTreeNode[] nodeArray = new SingleTreeNode[nextState.getNPlayers()];
-        nodeArray[nextPlayer] = tn;
+        nodeArray[nextPlayer] = tn; // we store this by id of the player who will take their turn next
         children.put(actionCopy, nodeArray);
         return tn;
     }
@@ -576,11 +580,12 @@ public class SingleTreeNode {
     }
 
     private AbstractAction ucb(List<AbstractAction> availableActions) {
-        // Find child with highest UCB value, maximising for ourselves and minimizing for opponent
+        // Find child with highest UCB value
         AbstractAction bestAction = null;
         double bestValue = -Double.MAX_VALUE;
 
         double nodeValue = totValue[decisionPlayer] / nVisits;
+        // nodeValue is the value of the state, V(s), and is used as a baseline when we use an Advantage function later
 
         for (AbstractAction action : availableActions) {
             SingleTreeNode[] childArray = children.get(action);
@@ -612,7 +617,7 @@ public class SingleTreeNode {
                     explorationTerm = params.K * Math.sqrt(effectiveTotalVisits) / (actionVisits + 1.0);
                     break;
                 case UCB_Tuned:
-                    double range = Math.max(1.0, root.highReward - root.lowReward);
+                    double range = root.highReward - root.lowReward;
                     double meanSq = actionSquaredValue(action, decisionPlayer) / (actionVisits + params.epsilon);
                     double standardVar = 0.25;
                     if (params.normaliseRewards) {
