@@ -101,9 +101,6 @@ public class MultiTreeNode extends SingleTreeNode {
             }
             updateCurrentLocation(currentActor, currentState);
 
-            // currentNode is the last node that this actor was at in their tree
-            currentNode = currentLocation[currentActor];
-            currentNode.setActionsFromOpenLoopState(currentState);
             if (nodeExpanded[currentActor] || maxDepthReached[currentActor]) {
                 // all actions after the expansion for a player are rollout actions
                 // note that different players will enter rollout at different times, which is why
@@ -120,6 +117,9 @@ public class MultiTreeNode extends SingleTreeNode {
 
                 advance(currentState, chosen);
             } else {  // in the tree still for this player
+                // currentNode is the last node that this actor was at in their tree
+                currentNode = currentLocation[currentActor];
+                currentNode.setActionsFromOpenLoopState(currentState);
                 List<AbstractAction> unexpanded = currentNode.unexpandedActions();
                 AbstractAction chosen;
                 if (!unexpanded.isEmpty()) {

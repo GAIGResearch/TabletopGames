@@ -137,6 +137,8 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
         action.execute(gameState);
 
+        if (llgs.playerHandCards.get(gameState.getCurrentPlayer()).getSize() > 2)
+            throw new AssertionError("Hand should not get this big");
         IGamePhase gamePhase = llgs.getGamePhase();
         if (gamePhase == Draw) {
             llgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);

@@ -27,19 +27,4 @@ public class TestMCTSPlayer extends MCTSPlayer {
         return root;
     }
 
-    public List<SingleTreeNode> allNodesInTree() {
-        List<SingleTreeNode> retValue = new ArrayList<>();
-        Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
-        nodeQueue.add(root);
-        while (!nodeQueue.isEmpty()) {
-            SingleTreeNode node = nodeQueue.poll();
-            retValue.add(node);
-            nodeQueue.addAll(node.getChildren().values().stream()
-                    .filter(Objects::nonNull)
-                    .flatMap(Arrays::stream)
-                    .filter(Objects::nonNull)
-                    .collect(toList()));
-        }
-        return retValue;
-    }
 }

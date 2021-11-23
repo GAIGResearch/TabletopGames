@@ -30,7 +30,7 @@ public class DrawCard extends core.actions.DrawCard implements IPrintable {
 
     @Override
     public String toString() {
-        return "Draw a card and remove protection status." + deckTo;
+        return "Draw a card and remove protection status.";
     }
 
     @Override

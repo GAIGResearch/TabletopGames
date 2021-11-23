@@ -13,6 +13,7 @@ import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.ToDoubleBiFunction;
 import java.util.stream.IntStream;
 
@@ -55,7 +56,7 @@ public class SingleTreeNode {
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     double highReward = Double.NEGATIVE_INFINITY;
     double lowReward = Double.POSITIVE_INFINITY;
-    List<AbstractAction> actionsFromOpenLoopState;
+    List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
     Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
     ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
     ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
@@ -151,21 +152,23 @@ public class SingleTreeNode {
 
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
         openLoopState = actionState;
-        actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState);
-        //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
+        if (actionState.getCurrentPlayer() == this.decisionPlayer) {
+            actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState);
+            //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
 //                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-        if (params.expansionPolicy == MAST) {
-            advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
-                    .collect(toMap(a -> a, a -> MASTFunction.applyAsDouble(a, actionState)));
-        } else {
-            if (params.advantageFunction != null)
+            if (params.expansionPolicy == MAST) {
                 advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
-                        .collect(toMap(a -> a, a -> params.advantageFunction.applyAsDouble(a, actionState)));
-        }
-        for (AbstractAction action : actionsFromOpenLoopState) {
-            if (!children.containsKey(action)) {
-                children.put(action, null); // mark a new node to be expanded
-                // This *does* rely on a good equals method being implemented for Actions
+                        .collect(toMap(a -> a, a -> MASTFunction.applyAsDouble(a, actionState)));
+            } else {
+                if (params.advantageFunction != null)
+                    advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
+                            .collect(toMap(a -> a, a -> params.advantageFunction.applyAsDouble(a, actionState)));
+            }
+            for (AbstractAction action : actionsFromOpenLoopState) {
+                if (!children.containsKey(action)) {
+                    children.put(action, null); // mark a new node to be expanded
+                    // This *does* rely on a good equals method being implemented for Actions
+                }
             }
         }
     }
@@ -630,7 +633,7 @@ public class SingleTreeNode {
                         // we need to modify the standard variance as it is not on a 0..1 basis (which is where 0.25 comes from)
                         standardVar = Math.sqrt(range / 2.0);
                     }
-                    double variance = meanSq - childValue * childValue;
+                    double variance = Math.max(0.0, meanSq - childValue * childValue);
                     double minTerm = Math.min(standardVar, variance + Math.sqrt(2 * Math.log(effectiveTotalVisits) / (actionVisits + params.epsilon)));
                     explorationTerm = params.K * Math.sqrt(Math.log(effectiveTotalVisits) / (actionVisits + params.epsilon) * minTerm);
                     break;
@@ -646,6 +649,9 @@ public class SingleTreeNode {
 
             // Apply small noise to break ties randomly
             uctValue = noise(uctValue, params.epsilon, rnd.nextDouble());
+            if (Double.isNaN(uctValue)) {
+                boolean stop = true;
+            }
 
             // Assign value
             if (uctValue > bestValue) {
@@ -892,6 +898,10 @@ public class SingleTreeNode {
         return nVisits;
     }
 
+    public int getDepth() {
+        return depth;
+    }
+
     /**
      * The returned array has one element per player. If the Tree type supports decisions by other players (MaxN)
      * then the relevant elements will provide this information.
@@ -912,6 +922,37 @@ public class SingleTreeNode {
 
     public AbstractForwardModel getForwardModel() {
         return forwardModel;
+    }
+
+    /**
+     * This returns a list of all nodes in the tree that do not match the specificd Predicate
+     *
+     * @param allMatch
+     * @return
+     */
+    public List<SingleTreeNode> checkTree(Predicate<SingleTreeNode> allMatch) {
+        List<SingleTreeNode> allNodes = allNodesInTree();
+        return allNodes.stream().filter(n -> !allMatch.test(n)).collect(toList());
+    }
+
+    public SingleTreeNode getParent() {
+        return parent;
+    }
+
+    public List<SingleTreeNode> allNodesInTree() {
+        List<SingleTreeNode> retValue = new ArrayList<>();
+        Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
+        nodeQueue.add(this);
+        while (!nodeQueue.isEmpty()) {
+            SingleTreeNode node = nodeQueue.poll();
+            retValue.add(node);
+            nodeQueue.addAll(node.getChildren().values().stream()
+                    .filter(Objects::nonNull)
+                    .flatMap(Arrays::stream)
+                    .filter(Objects::nonNull)
+                    .collect(toList()));
+        }
+        return retValue;
     }
 
     @Override

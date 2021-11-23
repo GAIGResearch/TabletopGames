@@ -44,7 +44,7 @@ public class PrincessAction extends core.actions.DrawCard implements IPrintable 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PrinceAction)) return false;
+        if (!(o instanceof PrincessAction)) return false;
         return super.equals(o);
     }
 }

@@ -69,9 +69,9 @@ public class RewardsForParanoia {
             if (state.getCurrentPlayer() == 0) {
                 logger.processDataAndFinish();
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
-                List<SingleTreeNode> allNodes = mctsPlayer.allNodesInTree();
+                List<SingleTreeNode> allNodes = mctsPlayer.getRoot(0).allNodesInTree();
                 List<SingleTreeNode> problemNodes = allNodes.stream().filter(n -> !allMatch.test(n)).collect(toList());
-                assertTrue(problemNodes.isEmpty());
+                assertEquals(0, problemNodes.size());
                 if (allNodes.stream().anyMatch(anyMatch))
                     anyMatchTriggered = true;
                 assertTrue(aggregateCheck.test(allNodes));
