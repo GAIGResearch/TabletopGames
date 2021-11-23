@@ -41,6 +41,7 @@ public class SingleTreeNode {
     protected int fmCallsCount;
     protected int copyCount;
     protected AbstractGameState openLoopState;
+    protected int paranoidPlayer = -1;
     // Depth of this node
     int depth;
     // the id of the player who makes the decision at this node
@@ -120,10 +121,20 @@ public class SingleTreeNode {
             return 0.0;
         };
 
+
+        if (parent != null) {
+            depth = parent.depth + 1;
+        } else {
+            depth = 0;
+        }
+
         totValue = new double[state.getNPlayers()];
         totSquares = new double[state.getNPlayers()];
-        if (params.information != Closed_Loop) {
+        if (params.information != Closed_Loop && (params.maintainMasterState || depth == 0)) {
             // if we're using open loop, then we need to make sure the reference state is never changed
+            // however this is only used at the root - and we can switch the copy off for other nodes for performance
+            // these master copies *are* required if we want to do something funky with the final tree, and gather
+            // features from the nodes - if we are gathering Expert Iteration data or Learning an Advantage function
             root.copyCount++;
             this.state = state.copy();
         } else {
@@ -132,11 +143,6 @@ public class SingleTreeNode {
         // then set up available actions, and set openLoopState = state
         setActionsFromOpenLoopState(state);
 
-        if (parent != null) {
-            depth = parent.depth + 1;
-        } else {
-            depth = 0;
-        }
     }
 
     public AbstractGameState getState() {
@@ -236,8 +242,9 @@ public class SingleTreeNode {
             }
         }
 
-        if (statsLogger != null)
+        if (statsLogger != null) {
             logTreeStatistics(statsLogger, numIters, elapsedTimer.elapsedMillis());
+        }
     }
 
     /**
@@ -277,7 +284,7 @@ public class SingleTreeNode {
         }
     }
 
-    private void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
+    protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
         Map<String, Object> stats = new HashMap<>();
         TreeStatistics treeStats = new TreeStatistics(root);
         stats.put("round", state.getTurnOrder().getRoundCounter());
@@ -355,7 +362,7 @@ public class SingleTreeNode {
      * Uses only by TreeStatistics and bestAction() after mctsSearch()
      * For this reason not converted to old-style java loop as there would be no performance gain
      */
-    private int[] actionVisits() {
+    int[] actionVisits() {
         return children.values().stream()
                 .filter(Objects::nonNull)
                 .mapToInt(arr -> Arrays.stream(arr).filter(Objects::nonNull).mapToInt(n -> n.nVisits).sum())
@@ -815,14 +822,14 @@ public class SingleTreeNode {
                     break;
                 case Paranoid:
                 case MultiTreeParanoid:
+                    int paranoid = root.paranoidPlayer == -1 ? root.decisionPlayer : root.paranoidPlayer;
                     for (int j = 0; j < result.length; j++) {
-                        if (j == root.decisionPlayer) {
-                            n.totValue[j] += result[root.decisionPlayer];
-                            n.totSquares[j] += squaredResults[root.decisionPlayer];
-
+                        if (j == paranoid) {
+                            n.totValue[j] += result[paranoid];
+                            n.totSquares[j] += squaredResults[paranoid];
                         } else {
-                            n.totValue[j] -= result[root.decisionPlayer];
-                            n.totSquares[j] += squaredResults[root.decisionPlayer];
+                            n.totValue[j] -= result[paranoid];
+                            n.totSquares[j] += squaredResults[paranoid];
                         }
                     }
                     break;

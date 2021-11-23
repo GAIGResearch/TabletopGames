@@ -53,7 +53,8 @@ public class MCTSParams extends PlayerParameters {
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
     public double progressiveWideningExponent = 0.0;
     public boolean normaliseRewards = true;
-    public boolean nodesStoreScoreDelta = false;
+    public boolean nodesStoreScoreDelta = true;
+    public boolean maintainMasterState = false;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -87,7 +88,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("progressiveWideningExponent", 0.0);
         addTunableParameter("normaliseRewards", true);
         addTunableParameter("nodesStoreScoreDelta", false);
-
+        addTunableParameter("maintainMasterState", false);
     }
 
     @Override
@@ -120,6 +121,7 @@ public class MCTSParams extends PlayerParameters {
         progressiveWideningExponent = (double) getParameterValue("progressiveWideningExponent");
         normaliseRewards = (boolean) getParameterValue("normaliseRewards");
         nodesStoreScoreDelta = (boolean) getParameterValue("nodesStoreScoreDelta");
+        maintainMasterState = (boolean) getParameterValue("maintainMasterState");
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST) {
             useMAST = true;
         }

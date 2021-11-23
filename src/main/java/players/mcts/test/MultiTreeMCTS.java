@@ -64,6 +64,7 @@ public class MultiTreeMCTS {
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
         params.budget = 200;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
+        params.nodesStoreScoreDelta = false;
         params.K = 1.0;
     }
 
@@ -233,7 +234,7 @@ public class MultiTreeMCTS {
         System.out.println(mctsPlayer.getRoot(1));
 
         // the invariant then to check is that for each node in the tree, the number of visits is equal to the number of child visits + 1
-        // we allow some nodes to break this with 2000 iterations - due to game over conditions. The point is it should be small
+        // we allow some nodes to break this with 2000 iterations - due to simulation over conditions while still descending tree. The point is it should be small
         // or rollout finishing before we get back?
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(childrenVisitsAddUp);
         assertEquals(0, problemNodes.size(), 40);
@@ -322,13 +323,13 @@ public class MultiTreeMCTS {
 
         // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node ->
-                        node.getTotValue()[1] == -node.getTotValue()[0] && node.getTotValue()[0] == -node.getTotValue()[2]);
+                        node.getTotValue()[0] == -node.getTotValue()[1] && node.getTotValue()[0] == -node.getTotValue()[2]);
         assertEquals(0, problemNodes.size(), 0);
         problemNodes = mctsPlayer.getRoot(1).checkTree(node ->
-                node.getTotValue()[1] == -node.getTotValue()[0] && node.getTotValue()[1] == -node.getTotValue()[2]);
+                node.getTotValue()[0] == -node.getTotValue()[1] && node.getTotValue()[0] == -node.getTotValue()[2]);
         assertEquals(0, problemNodes.size(), 0);
         problemNodes = mctsPlayer.getRoot(2).checkTree(node ->
-                node.getTotValue()[2] == -node.getTotValue()[0] && node.getTotValue()[2] == -node.getTotValue()[1]);
+                node.getTotValue()[0] == -node.getTotValue()[1] && node.getTotValue()[0] == -node.getTotValue()[2]);
         assertEquals(0, problemNodes.size(), 0);
 
     }

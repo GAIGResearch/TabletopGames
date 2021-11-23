@@ -3,11 +3,14 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import core.interfaces.IStatisticLogger;
 import utilities.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static utilities.Utils.entropyOf;
 
 /**
  * MultiTreeNode is really a wrapper for SingleTreeNode when we are using MultiTree MCTS.
@@ -54,6 +57,8 @@ public class MultiTreeNode extends SingleTreeNode {
 
         roots = new SingleTreeNode[state.getNPlayers()];
         roots[this.decisionPlayer] = SingleTreeNode.createRootNode(player, state, rnd);
+        if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTreeParanoid)
+            roots[this.decisionPlayer].paranoidPlayer = decisionPlayer;
         currentLocation = new SingleTreeNode[state.getNPlayers()];
         currentLocation[this.decisionPlayer] = roots[decisionPlayer];
     }
@@ -96,6 +101,8 @@ public class MultiTreeNode extends SingleTreeNode {
                 // their first action in search; set a root for their tree
                 SingleTreeNode pseudoRoot = SingleTreeNode.createRootNode(mctsPlayer, currentState.copy(), rnd);
                 pseudoRoot.decisionPlayer = currentActor;
+                if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTreeParanoid)
+                    pseudoRoot.paranoidPlayer = decisionPlayer;
                 roots[currentActor] = pseudoRoot;
                 currentLocation[currentActor] = pseudoRoot;
             }
@@ -166,9 +173,8 @@ public class MultiTreeNode extends SingleTreeNode {
 
     private void expandNode(int currentActor, AbstractGameState currentState) {
         // we now expand a node
-        currentLocation[currentActor] = currentLocation[currentActor].expandNode(lastAction[currentActor], currentState.copy());
+        currentLocation[currentActor] = currentLocation[currentActor].expandNode(lastAction[currentActor], currentState);
         // currentLocation now stores the last node in the tree for that player..so that we can back-propagate
-        root.copyCount++;
         nodeExpanded[currentActor] = true;
         if (debug)
             System.out.printf("Node expanded for P%d : %s %n", currentActor, currentLocation[currentActor].unexpandedActions().stream().map(Objects::toString).collect(Collectors.joining()));
@@ -195,5 +201,41 @@ public class MultiTreeNode extends SingleTreeNode {
     public SingleTreeNode getRoot(int player) {
         return roots[player];
     }
+
+
+    @Override
+    protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
+        Map<String, Object> stats = new HashMap<>();
+        for (SingleTreeNode node : roots) {
+            if (node == null) break;
+            TreeStatistics treeStats = new TreeStatistics(node);
+            stats.put("round", state.getTurnOrder().getRoundCounter());
+            stats.put("turn", state.getTurnOrder().getTurnCounter());
+            stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
+            double[] visitProportions = Arrays.stream(actionVisits()).asDoubleStream().map(d -> d / this.getVisits()).toArray();
+            stats.put("visitEntropy", entropyOf(visitProportions));
+            stats.put("iterations", numIters);
+            int copy = node.copyCount;
+            if (node == roots[decisionPlayer])
+                copy += this.copyCount;
+            int fm = node.fmCallsCount;
+            if (node == roots[decisionPlayer])
+                fm += this.fmCallsCount;
+            stats.put("copyCalls", copy * roots.length);
+            stats.put("fmCalls", fm * roots.length);
+            stats.put("time", timeTaken);
+            stats.put("totalNodes", treeStats.totalNodes * roots.length);
+            stats.put("leafNodes", treeStats.totalLeaves * roots.length);
+            stats.put("terminalNodes", treeStats.totalTerminalNodes * roots.length);
+            stats.put("maxDepth", treeStats.depthReached);
+            stats.put("nActionsRoot", node.children.size());
+            stats.put("nActionsTree", treeStats.meanActionsAtNode);
+            stats.put("maxActionsAtNode", treeStats.maxActionsAtNode);
+            OptionalInt maxVisits = Arrays.stream(actionVisits()).max();
+            stats.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters);
+            statsLogger.record(stats);
+        }
+    }
+
 }
 

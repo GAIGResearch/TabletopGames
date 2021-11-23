@@ -18,7 +18,7 @@ import static utilities.Utils.getArg;
 public class PlayerReport {
 
     /**
-     * The idea here is that we get statistics from the the decisions of a particular agent in
+     * The idea here is that we get statistics from the decisions of a particular agent in
      * a game, or set of games
      *
      * @param args

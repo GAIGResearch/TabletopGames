@@ -21,11 +21,13 @@ public class TreeStatistics {
 
     public TreeStatistics(SingleTreeNode root) {
         Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
-        if (root instanceof MultiTreeNode)
-            nodeQueue.addAll(Arrays.asList(((MultiTreeNode) root).roots));
-        else
+        if (root instanceof MultiTreeNode) {
+            for (SingleTreeNode node : ((MultiTreeNode) root).roots)
+                if (node != null) nodeQueue.add(node);
+        } else {
             nodeQueue.add(root);
-        
+        }
+
         int greatestDepth = 0;
         int maxActions = 0;
         int totalActions = 0;
