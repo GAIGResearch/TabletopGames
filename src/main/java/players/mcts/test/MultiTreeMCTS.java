@@ -84,6 +84,7 @@ public class MultiTreeMCTS {
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
+        players.add(new RandomPlayer(new Random(3024)));
         LoveLetterParameters gameParams = new LoveLetterParameters(3812);
         return new LoveLetterGame(players, gameParams);
     }
@@ -213,7 +214,8 @@ public class MultiTreeMCTS {
 
     @Test
     public void multiTreeTestLoveLetter() {
-        params.budget = 5000;
+        params.budget = 2000;
+        params.rolloutLength = 20;
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
         fm = new LoveLetterForwardModel();
         Game game = createLoveLetter(params);
@@ -234,9 +236,11 @@ public class MultiTreeMCTS {
         // we allow some nodes to break this with 2000 iterations - due to game over conditions. The point is it should be small
         // or rollout finishing before we get back?
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(childrenVisitsAddUp);
-        assertEquals(0, problemNodes.size(), 10);
+        assertEquals(0, problemNodes.size(), 40);
         problemNodes = mctsPlayer.getRoot(1).checkTree(childrenVisitsAddUp);
-        assertEquals(0, problemNodes.size(), 10);
+        assertEquals(0, problemNodes.size(), 40);
+        problemNodes = mctsPlayer.getRoot(2).checkTree(childrenVisitsAddUp);
+        assertEquals(0, problemNodes.size(), 40);
 
         // Now each tree should only have nodes for its player
         problemNodes = mctsPlayer.getRoot(0).checkTree(node -> node.getActor() == 0 || node.getVisits() == 1);
@@ -247,20 +251,85 @@ public class MultiTreeMCTS {
         if (!problemNodes.isEmpty())
             System.out.println(problemNodes.get(0));
         assertEquals(0, problemNodes.size());
+        problemNodes = mctsPlayer.getRoot(2).checkTree(node -> node.getActor() == 2 || node.getVisits() == 1);
+        if (!problemNodes.isEmpty())
+            System.out.println(problemNodes.get(0));
+        assertEquals(0, problemNodes.size());
 
         // And each node should lead to the same player's next decision
         problemNodes = mctsPlayer.getRoot(0).checkTree(node -> node.getChildren().values().stream().allMatch(arr -> {
                     if (arr == null) return true;
-                    return arr[1] == null;
+                    return arr[1] == null && arr[2] == null;
                 }
         ));
         assertEquals(0, problemNodes.size());
         problemNodes = mctsPlayer.getRoot(1).checkTree(node -> node.getChildren().values().stream().allMatch(arr -> {
                     if (arr == null) return true;
-                    return arr[0] == null;
+                    return arr[0] == null && arr[2] == null;
                 }
         ));
         assertEquals(0, problemNodes.size());
     }
 
+
+    @Test
+    public void multiTreeTestLoveLetterRewards() {
+        params.budget = 1000;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        fm = new LoveLetterForwardModel();
+        Game game = createLoveLetter(params);
+        LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
+        state.addAffectionToken(1);
+        state.addAffectionToken(1);
+        state.addAffectionToken(1);
+        // this puts player 1 in the lead
+
+        AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
+                .getAction(state, fm.computeAvailableActions(state));
+
+
+        // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node ->
+                node.getVisits() <= 10 ||
+                        node.getTotValue()[1] > node.getTotValue()[0] && node.getTotValue()[1] > node.getTotValue()[2]);
+        assertEquals(0, problemNodes.size(), 0);
+        problemNodes = mctsPlayer.getRoot(1).checkTree(node ->
+                node.getVisits() <= 10 ||
+                        node.getTotValue()[1] > node.getTotValue()[0] && node.getTotValue()[1] > node.getTotValue()[2]);
+        assertEquals(0, problemNodes.size(), 0);
+        problemNodes = mctsPlayer.getRoot(2).checkTree(node ->
+                node.getVisits() <= 10 ||
+                        node.getTotValue()[1] > node.getTotValue()[0] && node.getTotValue()[1] > node.getTotValue()[2]);
+        assertEquals(0, problemNodes.size(), 0);
+
+    }
+
+    @Test
+    public void multiTreeTestLoveLetterRewardsParanoid() {
+        params.budget = 1000;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTreeParanoid;
+        fm = new LoveLetterForwardModel();
+        Game game = createLoveLetter(params);
+        LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
+        state.addAffectionToken(1);
+        state.addAffectionToken(1);
+        state.addAffectionToken(1);
+        // this puts player 1 in the lead
+
+        AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
+                .getAction(state, fm.computeAvailableActions(state));
+
+
+        // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node ->
+                        node.getTotValue()[1] == -node.getTotValue()[0] && node.getTotValue()[0] == -node.getTotValue()[2]);
+        assertEquals(0, problemNodes.size(), 0);
+        problemNodes = mctsPlayer.getRoot(1).checkTree(node ->
+                node.getTotValue()[1] == -node.getTotValue()[0] && node.getTotValue()[1] == -node.getTotValue()[2]);
+        assertEquals(0, problemNodes.size(), 0);
+        problemNodes = mctsPlayer.getRoot(2).checkTree(node ->
+                node.getTotValue()[2] == -node.getTotValue()[0] && node.getTotValue()[2] == -node.getTotValue()[1]);
+        assertEquals(0, problemNodes.size(), 0);
+
+    }
 }

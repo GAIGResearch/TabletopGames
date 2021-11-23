@@ -155,7 +155,7 @@ public class MultiTreeNode extends SingleTreeNode {
         double[] finalValues = new double[state.getNPlayers()];
 
         for (int i = 0; i < finalValues.length; i++) {
-            finalValues[i] = heuristic.evaluateState(currentState, i) - startingValues[i];
+            finalValues[i] = heuristic.evaluateState(currentState, i) - (params.nodesStoreScoreDelta ? startingValues[i] : 0);
         }
         for (SingleTreeNode singleTreeNode : currentLocation) {
             if (singleTreeNode != null)
