@@ -7,6 +7,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evaluation.TunableParameters;
+import org.apache.commons.math3.geometry.spherical.oned.ArcsSet;
 import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import players.PlayerParameters;
@@ -84,6 +85,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("opponentTreePolicy", MaxN);
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
+        addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("MAST", Rollout);
         addTunableParameter("MASTGamma", 0.0);
@@ -146,6 +148,8 @@ public class MCTSParams extends PlayerParameters {
                 tunableHeuristic.setParameterValue(name, this.getParameterValue("opponentHeuristic." + name));
             }
         }
+        rolloutPolicy = (AbstractPlayer) getParameterValue("rolloutPolicy");
+        // Boo!!! this doesn't work! We need to re-instantiate from the Params!
     }
 
     /**
@@ -170,9 +174,11 @@ public class MCTSParams extends PlayerParameters {
                 break;
             case "rolloutPolicy":
                 rolloutPolicy = (AbstractPlayer) child.instantiate();
+                setParameterValue("rolloutPolicy", rolloutPolicy);
                 break;
             case "opponentModel":
                 opponentModel = (AbstractPlayer) child.instantiate();
+                setParameterValue("opponentModel", opponentModel);
                 break;
             default:
                 throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
