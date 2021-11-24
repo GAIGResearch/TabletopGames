@@ -12,7 +12,7 @@ public abstract class AbstractPlayer {
     // ID of this player, assigned by the game
     int playerID;
     // Forward model for the game
-    AbstractForwardModel forwardModel;
+    private AbstractForwardModel forwardModel;
     String name;
 
     /* Final methods */
@@ -31,6 +31,9 @@ public abstract class AbstractPlayer {
      */
     public final AbstractForwardModel getForwardModel() {
         return forwardModel;
+    }
+    public void setForwardModel(AbstractForwardModel model) {
+        forwardModel = model;
     }
 
     /* Methods that should be implemented in subclass */

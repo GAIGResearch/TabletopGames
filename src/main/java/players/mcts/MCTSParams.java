@@ -8,6 +8,7 @@ import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
+import players.PlayerFactory;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
 
@@ -22,6 +23,7 @@ import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
+import static players.mcts.MCTSEnums.Strategies.PARAMS;
 import static players.mcts.MCTSEnums.Strategies.RANDOM;
 import static players.mcts.MCTSEnums.TreePolicy.UCB;
 
@@ -43,8 +45,11 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
     public String rolloutClass, oppModelClass = "";
+    public AbstractPlayer rolloutPolicy;
+    public AbstractPlayer opponentModel;
     public double exploreEpsilon = 0.1;
     private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
+    private IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
     public boolean gatherExpertIterationData = false;
     public String expertIterationFileStem = "ExpertIterationData";
     public String advantageFunctionString = "";
@@ -69,6 +74,10 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("epsilon", 1e-6);
         addTunableParameter("rolloutType", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("oppModelType", MCTSEnums.Strategies.RANDOM);
+        addTunableParameter("rolloutClass", "");
+        addTunableParameter("oppModelClass", "");
+        addTunableParameter("rolloutPolicy", new RandomPlayer());
+        addTunableParameter("opponentModel", new RandomPlayer());
         addTunableParameter("information", Open_Loop, Arrays.asList(MCTSEnums.Information.values()));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
         addTunableParameter("treePolicy", UCB);
@@ -78,8 +87,6 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("MAST", Rollout);
         addTunableParameter("MASTGamma", 0.0);
-        addTunableParameter("rolloutClass", "");
-        addTunableParameter("oppModelClass", "");
         addTunableParameter("expertIteration", false);
         addTunableParameter("expIterFile", "");
         addTunableParameter("advantageFunction", "");
@@ -132,6 +139,13 @@ public class MCTSParams extends PlayerParameters {
                 tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
             }
         }
+        opponentHeuristic = (IStateHeuristic) getParameterValue("opponentHeuristic");
+        if (opponentHeuristic instanceof TunableParameters) {
+            TunableParameters tunableHeuristic = (TunableParameters) opponentHeuristic;
+            for (String name : tunableHeuristic.getParameterNames()) {
+                tunableHeuristic.setParameterValue(name, this.getParameterValue("opponentHeuristic." + name));
+            }
+        }
     }
 
     /**
@@ -144,11 +158,24 @@ public class MCTSParams extends PlayerParameters {
      */
     @Override
     public ITunableParameters registerChild(String nameSpace, JSONObject json) {
-        // TODO: Cater for a tunable rollout policy, as well as a state heuristic
         ITunableParameters child = super.registerChild(nameSpace, json);
-        if (child instanceof IStateHeuristic) {
-            heuristic = (IStateHeuristic) child;
-            setParameterValue("heuristic", child);
+        switch (nameSpace) {
+            case "heuristic":
+                heuristic = (IStateHeuristic) child;
+                setParameterValue("heuristic", child);
+                break;
+            case "opponentHeuristic":
+                opponentHeuristic = (IStateHeuristic) child;
+                setParameterValue("opponentHeuristic", child);
+                break;
+            case "rolloutPolicy":
+                rolloutPolicy = (AbstractPlayer) child.instantiate();
+                break;
+            case "opponentModel":
+                opponentModel = (AbstractPlayer) child.instantiate();
+                break;
+            default:
+                throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
         }
         return child;
     }
@@ -159,12 +186,15 @@ public class MCTSParams extends PlayerParameters {
     }
 
 
-    /**
-     * @return Returns the AbstractPlayer policy that will take actions during an MCTS rollout.
-     * This defaults to a Random player.
-     */
+    public AbstractPlayer getOpponentModel() {
+        if (oppModelType == PARAMS && opponentModel != null)
+            return opponentModel;
+        return constructStrategy(oppModelType, oppModelClass);
+    }
+
     public AbstractPlayer getRolloutStrategy() {
-        // TODO: Cater for the rollout class being itself Tunable
+        if (rolloutType == PARAMS && rolloutPolicy != null)
+            return rolloutPolicy;
         return constructStrategy(rolloutType, rolloutClass);
     }
 
@@ -175,6 +205,7 @@ public class MCTSParams extends PlayerParameters {
             case MAST:
                 return new MASTPlayer(new Random(getRandomSeed()));
             case CLASS:
+                // we have a bespoke Class to instantiate
                 String[] classAndParams = details.split(Pattern.quote("|"));
                 if (classAndParams.length > 2)
                     throw new IllegalArgumentException("Only a single string parameter is currently supported");
@@ -187,6 +218,8 @@ public class MCTSParams extends PlayerParameters {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            case PARAMS:
+                // should not reach this point, as PARAMS should be initialised with MCTSPlayer
             default:
                 throw new AssertionError("Unknown strategy type : " + type);
         }
@@ -213,12 +246,12 @@ public class MCTSParams extends PlayerParameters {
         throw new AssertionError("Not reachable");
     }
 
-    public AbstractPlayer getOpponentModel() {
-        return constructStrategy(oppModelType, oppModelClass);
-    }
-
     public IStateHeuristic getHeuristic() {
         return heuristic;
+    }
+
+    public IStateHeuristic getOpponentHeuristic() {
+        return opponentHeuristic;
     }
 
     @Override

@@ -37,6 +37,7 @@ public class SingleTreeNode {
     protected AbstractPlayer[] opponentModels;
     protected Random rnd;
     protected IStateHeuristic heuristic;
+    protected IStateHeuristic opponentHeuristic;
     // Number of FM calls and State copies up until this node
     protected int fmCallsCount;
     protected int copyCount;
@@ -78,6 +79,7 @@ public class SingleTreeNode {
         retValue.params = player.params;
         retValue.forwardModel = player.getForwardModel();
         retValue.heuristic = player.heuristic;
+        retValue.opponentHeuristic = player.opponentHeuristic;
         retValue.rnd = rnd;
         retValue.opponentModels = new AbstractPlayer[state.getNPlayers()];
         for (int p = 0; p < retValue.opponentModels.length; p++) {
@@ -754,7 +756,7 @@ public class SingleTreeNode {
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState);
                 if (availableActions.isEmpty())
                     break;
-                AbstractAction next = opponentModels[decisionPlayer].getAction(rolloutState, availableActions);
+                AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
                 rolloutActions.add(new Pair<>(rolloutState.getCurrentPlayer(), next));
                 advance(rolloutState, next);
                 rolloutDepth++;

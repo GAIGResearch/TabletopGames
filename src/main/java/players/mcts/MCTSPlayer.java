@@ -1,5 +1,6 @@
 package players.mcts;
 
+import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
@@ -28,6 +29,7 @@ public class MCTSPlayer extends AbstractPlayer {
     protected MCTSParams params;
     // Heuristics used for the agent
     protected IStateHeuristic heuristic;
+    protected IStateHeuristic opponentHeuristic;
     protected AbstractPlayer rolloutStrategy;
     protected boolean debug = false;
     protected SingleTreeNode root;
@@ -53,6 +55,7 @@ public class MCTSPlayer extends AbstractPlayer {
         rolloutStrategy = params.getRolloutStrategy();
         opponentModel = params.getOpponentModel();
         heuristic = params.getHeuristic();
+        opponentHeuristic = params.getOpponentHeuristic();
         advantageFunction = params.getAdvantageFunction();
         setName(name);
     }
@@ -121,6 +124,15 @@ public class MCTSPlayer extends AbstractPlayer {
         if (advantageFunction instanceof IGameListener)
             ((IGameListener) advantageFunction).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
 
+    }
+
+    @Override
+    public void setForwardModel(AbstractForwardModel model) {
+        super.setForwardModel(model);
+        if (rolloutStrategy != null)
+            rolloutStrategy.setForwardModel(model);
+        if (opponentModel != null)
+            opponentModel.setForwardModel(model);
     }
 
 }

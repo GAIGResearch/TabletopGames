@@ -40,6 +40,7 @@ public class MultiTreeNode extends SingleTreeNode {
         this.params = player.params;
         this.forwardModel = player.getForwardModel();
         this.heuristic = player.heuristic;
+        this.opponentHeuristic = player.opponentHeuristic;
         this.rnd = rnd;
         this.opponentModels = new AbstractPlayer[state.getNPlayers()];
         mctsPlayer = player;
