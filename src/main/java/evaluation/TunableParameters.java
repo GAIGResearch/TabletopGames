@@ -101,6 +101,14 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         possibleValues.put(name, new ArrayList<>(allSettings));
         currentValues.put(name, defaultValue);
     }
+    public <T> void addTunableParameter(String name, Class<T> classType) {
+        if (!parameterNames.contains(name)) parameterNames.add(name);
+        defaultValues.put(name, null);
+        parameterTypes.put(name, classType);
+        possibleValues.put(name, new ArrayList<>());
+        currentValues.put(name, null);
+    }
+
 
     /**
      * Names all parameters for printing purposes.

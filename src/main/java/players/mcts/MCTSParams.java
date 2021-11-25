@@ -40,14 +40,16 @@ public class MCTSParams extends PlayerParameters {
     public double MASTGamma = 0.0;
     public double MASTBoltzmann = 0.0;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
-    public MCTSEnums.Strategies rolloutType = RANDOM;
-    public MCTSEnums.Strategies oppModelType = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
+    public MCTSEnums.Strategies rolloutType = RANDOM;
+    public MCTSEnums.Strategies oppModelType = RANDOM;
     public String rolloutClass, oppModelClass = "";
     public AbstractPlayer rolloutPolicy;
+    public ITunableParameters rolloutPolicyParams;
     public AbstractPlayer opponentModel;
+    public ITunableParameters opponentModelParams;
     public double exploreEpsilon = 0.1;
     private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     private IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
@@ -77,7 +79,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("oppModelType", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("rolloutClass", "");
         addTunableParameter("oppModelClass", "");
-        addTunableParameter("rolloutPolicy", new RandomPlayer());
+        addTunableParameter("rolloutPolicyParams", TunableParameters.class);
         addTunableParameter("opponentModel", new RandomPlayer());
         addTunableParameter("information", Open_Loop, Arrays.asList(MCTSEnums.Information.values()));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
@@ -148,8 +150,7 @@ public class MCTSParams extends PlayerParameters {
                 tunableHeuristic.setParameterValue(name, this.getParameterValue("opponentHeuristic." + name));
             }
         }
-        rolloutPolicy = (AbstractPlayer) getParameterValue("rolloutPolicy");
-        // Boo!!! this doesn't work! We need to re-instantiate from the Params!
+        rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
     }
 
     /**
@@ -172,13 +173,11 @@ public class MCTSParams extends PlayerParameters {
                 opponentHeuristic = (IStateHeuristic) child;
                 setParameterValue("opponentHeuristic", child);
                 break;
-            case "rolloutPolicy":
-                rolloutPolicy = (AbstractPlayer) child.instantiate();
-                setParameterValue("rolloutPolicy", rolloutPolicy);
+            case "rolloutPolicyParams":
+                setParameterValue("rolloutPolicyParams", child);
                 break;
             case "opponentModel":
-                opponentModel = (AbstractPlayer) child.instantiate();
-                setParameterValue("opponentModel", opponentModel);
+                setParameterValue("opponentModelParams", child);
                 break;
             default:
                 throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
@@ -193,14 +192,18 @@ public class MCTSParams extends PlayerParameters {
 
 
     public AbstractPlayer getOpponentModel() {
-        if (oppModelType == PARAMS && opponentModel != null)
+        if (opponentModel != null)
             return opponentModel;
+        if (oppModelType == PARAMS)
+            return (AbstractPlayer) opponentModelParams.instantiate();
         return constructStrategy(oppModelType, oppModelClass);
     }
 
     public AbstractPlayer getRolloutStrategy() {
-        if (rolloutType == PARAMS && rolloutPolicy != null)
+        if (rolloutPolicy != null)
             return rolloutPolicy;
+        if (rolloutType == PARAMS)
+            return (AbstractPlayer) rolloutPolicyParams.instantiate();
         return constructStrategy(rolloutType, rolloutClass);
     }
 
@@ -224,8 +227,9 @@ public class MCTSParams extends PlayerParameters {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                throw new AssertionError("Error while instantiating policy from CLASS " + details);
             case PARAMS:
-                // should not reach this point, as PARAMS should be initialised with MCTSPlayer
+                throw new AssertionError("PolicyParameters have not been set");
             default:
                 throw new AssertionError("Unknown strategy type : " + type);
         }
