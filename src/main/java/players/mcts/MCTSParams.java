@@ -79,7 +79,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("oppModelType", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("rolloutClass", "");
         addTunableParameter("oppModelClass", "");
-        addTunableParameter("rolloutPolicyParams", TunableParameters.class);
+        addTunableParameter("rolloutPolicyParams", ITunableParameters.class);
+        addTunableParameter("opponentModelParams", ITunableParameters.class);
         addTunableParameter("opponentModel", new RandomPlayer());
         addTunableParameter("information", Open_Loop, Arrays.asList(MCTSEnums.Information.values()));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
@@ -151,6 +152,11 @@ public class MCTSParams extends PlayerParameters {
             }
         }
         rolloutPolicyParams = (TunableParameters) getParameterValue("rolloutPolicyParams");
+        if (rolloutPolicyParams != null)
+            for (String name : rolloutPolicyParams.getParameterNames())
+                rolloutPolicyParams.setParameterValue(name, this.getParameterValue("rolloutPolicyParams." + name))
+                        ;
+        opponentModelParams = (TunableParameters) getParameterValue("opponentModelParams");
     }
 
     /**
@@ -176,7 +182,7 @@ public class MCTSParams extends PlayerParameters {
             case "rolloutPolicyParams":
                 setParameterValue("rolloutPolicyParams", child);
                 break;
-            case "opponentModel":
+            case "opponentModelParams":
                 setParameterValue("opponentModelParams", child);
                 break;
             default:

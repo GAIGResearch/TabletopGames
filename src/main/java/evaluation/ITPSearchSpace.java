@@ -98,6 +98,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                         // we use key as the nameSpace
                         try {
                             JSONObject subJSON = (JSONObject) data;
+                      //      System.out.println("Starting recursion on " + key);
                             ITunableParameters subitp = itp.registerChild(key, subJSON);
                             retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, subitp));
                         } catch (Exception e) {
@@ -110,6 +111,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                         JSONArray arr = (JSONArray) data;
                         String results = key + "=" + arr.stream().map(Object::toString).collect(Collectors.joining(", ")) +
                                 "\n";
+                        System.out.println(baseKey + " : adding " + results);
                         retValue.add(new Pair<>(results, itp.getDefaultParameterValue((String) baseKey).getClass()));
                     } else {
                         // this defines a default we should be using in itp
@@ -117,6 +119,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             throw new AssertionError("We have a problem with null data in JSON file using key " + key);
                         String[] namespaceSplit = key.split("\\.");
                         itp.setParameterValue(namespaceSplit[namespaceSplit.length - 1], data);
+                        System.out.println("Setting default: " + namespaceSplit[namespaceSplit.length - 1] + " = " + data);
                     }
                 } else if (!baseKey.equals("class")){
                     System.out.println("Unexpected key in JSON when loading ITPSearchSpace : " + baseKey);
