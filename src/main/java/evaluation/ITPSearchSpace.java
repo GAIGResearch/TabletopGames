@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.toMap;
  */
 public class ITPSearchSpace extends AgentSearchSpace<Object> {
 
+    static boolean debug = false;
     ITunableParameters itp;
     Map<Integer, String> tunedIndexToParameterName = new HashMap<>();
 
@@ -36,12 +37,6 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
     public ITPSearchSpace(ITunableParameters tunableParameters) {
         super(convertToSuperFormatString(tunableParameters.getJSONDescription(), tunableParameters), tunableParameters.getParameterTypes());
         initialiseITP(tunableParameters);
-    }
-
-    private void initialiseITP(ITunableParameters tunableParameters) {
-        itp = tunableParameters;
-        tunedIndexToParameterName = IntStream.range(0, nDims()).boxed()
-                .collect(toMap(i -> i, i -> getSearchKeys().get(i)));
     }
 
     /**
@@ -75,17 +70,6 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
         initialiseITP(tunableParameters);
     }
 
-    public Object getAgent(int[] settings) {
-        // we first need to update itp with the specified parameters, and then instantiate
-        for (int i = 0; i < settings.length; i++) {
-            String pName = tunedIndexToParameterName.get(i);
-            Object value = value(i, settings[i]);
-            //   Object value = itp.getPossibleValues(pName).get(settings[i]);
-            itp.setParameterValue(pName, value);
-        }
-        return itp.instantiate();
-    }
-
     private static List<Pair<String, Class<?>>> extractRecursiveParameters(String nameSpace, JSONObject json, ITunableParameters itp) {
         List<Pair<String, Class<?>>> retValue = new ArrayList<>();
         for (Object baseKey : json.keySet()) {
@@ -98,7 +82,8 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                         // we use key as the nameSpace
                         try {
                             JSONObject subJSON = (JSONObject) data;
-                      //      System.out.println("Starting recursion on " + key);
+                            if (debug)
+                                System.out.println("Starting recursion on " + key);
                             ITunableParameters subitp = itp.registerChild(key, subJSON);
                             retValue.addAll(extractRecursiveParameters(key, (JSONObject) data, subitp));
                         } catch (Exception e) {
@@ -111,7 +96,8 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                         JSONArray arr = (JSONArray) data;
                         String results = key + "=" + arr.stream().map(Object::toString).collect(Collectors.joining(", ")) +
                                 "\n";
-                        System.out.println(baseKey + " : adding " + results);
+                        if (debug)
+                            System.out.println(baseKey + " : adding " + results);
                         retValue.add(new Pair<>(results, itp.getDefaultParameterValue((String) baseKey).getClass()));
                     } else {
                         // this defines a default we should be using in itp
@@ -119,9 +105,10 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                             throw new AssertionError("We have a problem with null data in JSON file using key " + key);
                         String[] namespaceSplit = key.split("\\.");
                         itp.setParameterValue(namespaceSplit[namespaceSplit.length - 1], data);
-                        System.out.println("Setting default: " + namespaceSplit[namespaceSplit.length - 1] + " = " + data);
+                        if (debug)
+                            System.out.println("Setting default: " + namespaceSplit[namespaceSplit.length - 1] + " = " + data);
                     }
-                } else if (!baseKey.equals("class")){
+                } else if (!baseKey.equals("class")) {
                     System.out.println("Unexpected key in JSON when loading ITPSearchSpace : " + baseKey);
                 }
             }
@@ -163,6 +150,23 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
             throw new AssertionError(e.getMessage() + " : problem loading ITPSearchSpace from file " + jsonFile);
         }
 
+    }
+
+    private void initialiseITP(ITunableParameters tunableParameters) {
+        itp = tunableParameters;
+        tunedIndexToParameterName = IntStream.range(0, nDims()).boxed()
+                .collect(toMap(i -> i, i -> getSearchKeys().get(i)));
+    }
+
+    public Object getAgent(int[] settings) {
+        // we first need to update itp with the specified parameters, and then instantiate
+        for (int i = 0; i < settings.length; i++) {
+            String pName = tunedIndexToParameterName.get(i);
+            Object value = value(i, settings[i]);
+            //   Object value = itp.getPossibleValues(pName).get(settings[i]);
+            itp.setParameterValue(pName, value);
+        }
+        return itp.instantiate();
     }
 
 }
