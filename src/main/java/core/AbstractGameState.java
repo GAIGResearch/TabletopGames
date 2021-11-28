@@ -115,7 +115,7 @@ public abstract class AbstractGameState {
     public final int getNPlayers() { return turnOrder.nPlayers(); }
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
     public final boolean isNotTerminal(){ return gameStatus == GAME_ONGOING; }
-    public final boolean isNotTerminalForPlayer(int player){ return playerResults[player] == GAME_ONGOING; }
+    public final boolean isNotTerminalForPlayer(int player){ return playerResults[player] == GAME_ONGOING && gameStatus == GAME_ONGOING; }
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }

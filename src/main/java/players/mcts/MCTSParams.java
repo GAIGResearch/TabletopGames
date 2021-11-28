@@ -38,7 +38,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
     public double MASTGamma = 0.0;
-    public double MASTBoltzmann = 0.0;
+    public double MASTBoltzmann = 1.0;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
@@ -115,7 +115,7 @@ public class MCTSParams extends PlayerParameters {
         oppModelType = (MCTSEnums.Strategies) getParameterValue("oppModelType");
         information = (MCTSEnums.Information) getParameterValue("information");
         selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
-        MCTSEnums.Strategies expansionPolicy = (MCTSEnums.Strategies) getParameterValue("expansionPolicy");
+        expansionPolicy = (MCTSEnums.Strategies) getParameterValue("expansionPolicy");
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");

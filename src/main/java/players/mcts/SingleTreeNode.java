@@ -92,6 +92,14 @@ public class SingleTreeNode {
         retValue.MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
             retValue.MASTStatistics.add(new HashMap<>());
+        retValue.MASTFunction = (a, s) -> {
+            Map<AbstractAction, Pair<Integer, Double>> MAST = retValue.MASTStatistics.get(retValue.decisionPlayer);
+            if (MAST.containsKey(a)) {
+                Pair<Integer, Double> stats = MAST.get(a);
+                return stats.b / (stats.a + retValue.params.epsilon);
+            }
+            return 0.0;
+        };
         retValue.instantiate(null, null, state);
         return retValue;
     }
@@ -114,15 +122,6 @@ public class SingleTreeNode {
 
         decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
         this.actionToReach = actionToReach;
-        MASTFunction = (a, s) -> {
-            Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
-            if (MAST.containsKey(a)) {
-                Pair<Integer, Double> stats = MAST.get(a);
-                return stats.b / stats.a;
-            }
-            return 0.0;
-        };
-
 
         if (parent != null) {
             depth = parent.depth + 1;
@@ -166,7 +165,7 @@ public class SingleTreeNode {
 //                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
             if (params.expansionPolicy == MAST) {
                 advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
-                        .collect(toMap(a -> a, a -> MASTFunction.applyAsDouble(a, actionState)));
+                        .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));
             } else {
                 if (params.advantageFunction != null)
                     advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
@@ -630,6 +629,7 @@ public class SingleTreeNode {
                     break;
                 case UCB_Tuned:
                     double range = root.highReward - root.lowReward;
+                    if (range < 1e-6) range = 1e-6;
                     double meanSq = actionSquaredValue(action, decisionPlayer) / (actionVisits + params.epsilon);
                     double standardVar = 0.25;
                     if (params.normaliseRewards) {
