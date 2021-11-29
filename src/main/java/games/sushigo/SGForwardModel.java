@@ -440,8 +440,6 @@ public class SGForwardModel extends AbstractForwardModel {
                 SGGS.getPlayerDecks().get(SGGS.getCurrentPlayer()).getSize() > 1) {
             actions.add(new ChopSticksAction(SGGS.getCurrentPlayer()));
         }
-        if (actions.size() <= 0)
-            throw new AssertionError("No actions valid");
         return actions;
     }
 
