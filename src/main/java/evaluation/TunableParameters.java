@@ -75,7 +75,8 @@ public abstract class TunableParameters extends AbstractParameters implements IT
                         new ArrayList<>(((List<?>) pValue)));
             } else {
                 Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName), params);
-                params.addTunableParameter(pName, pValue);
+                if (pValue != null)
+                    params.addTunableParameter(pName, pValue);
             }
         }
         params._reset();
@@ -99,7 +100,9 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     @SuppressWarnings("unchecked")
     private static <T> T getParam(String name, JSONObject json, T defaultValue, TunableParameters params) {
         Object finalData = json.getOrDefault(name, defaultValue);
-        Object data = (finalData instanceof Long) ? new Integer(((Long) finalData).intValue()) : finalData;
+        if (finalData == null)
+            return null;
+        Object data = (finalData instanceof Long) ? Integer.valueOf(((Long) finalData).intValue()) : finalData;
         if (data.getClass() == defaultValue.getClass())
             return (T) data;
         if (finalData instanceof JSONObject) {

@@ -54,6 +54,14 @@ public class MultiTreeNode extends SingleTreeNode {
         MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
             MASTStatistics.add(new HashMap<>());
+        MASTFunction = (a, s) -> {
+            Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
+            if (MAST.containsKey(a)) {
+                Pair<Integer, Double> stats = MAST.get(a);
+                return stats.b / (stats.a + params.epsilon);
+            }
+            return 0.0;
+        };
         instantiate(null, null, state);
 
         roots = new SingleTreeNode[state.getNPlayers()];

@@ -7,9 +7,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evaluation.TunableParameters;
-import org.apache.commons.math3.geometry.spherical.oned.ArcsSet;
 import org.json.simple.JSONObject;
-import players.PlayerFactory;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
 
@@ -38,7 +36,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
     public double MASTGamma = 0.0;
-    public double MASTBoltzmann = 1.0;
+    public double MASTBoltzmann = 0.1;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
@@ -71,7 +69,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSParams(long seed) {
         super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
-        addTunableParameter("boltzmannTemp", 1.0);
+        addTunableParameter("boltzmannTemp", 0.1);
         addTunableParameter("rolloutLength", 10, Arrays.asList(6, 8, 10, 12, 20));
         addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30));
         addTunableParameter("epsilon", 1e-6);
