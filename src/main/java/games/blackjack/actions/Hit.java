@@ -78,7 +78,7 @@ public class Hit extends AbstractAction implements IPrintable {
 
     @Override
     public AbstractAction copy() {
-        return new Hit(playerID, advanceTurnOrder, hidden);
+        return this; // immutable state
     }
 
     @Override
@@ -86,12 +86,12 @@ public class Hit extends AbstractAction implements IPrintable {
         if (this == o) return true;
         if (!(o instanceof Hit)) return false;
         Hit hit = (Hit) o;
-        return playerID == hit.playerID && advanceTurnOrder == hit.advanceTurnOrder;
+        return hidden == hit.hidden && playerID == hit.playerID && advanceTurnOrder == hit.advanceTurnOrder;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, advanceTurnOrder);
+        return Objects.hash(playerID, advanceTurnOrder, hidden);
     }
 
     @Override
