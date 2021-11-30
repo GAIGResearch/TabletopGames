@@ -97,7 +97,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
             state.setPlayerResult(Utils.GameResult.DRAW, 0);
             state.setPlayerResult(Utils.GameResult.DRAW, 1);
              */
-            registerWinner(state, state.GetPlayerScore(0) >= state.GetPlayerScore(1) ? 0 : 1);
+            registerWinner(state, state.getGameScore(0) >= state.getGameScore(1) ? 0 : 1);
         }
     }
 
@@ -222,7 +222,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
      */
     private boolean checkGameEnd(BattleloreGameState gameState, int playerId) {
         BattleloreGameParameters parameters = (BattleloreGameParameters) gameState.getGameParameters();
-        return gameState.GetPlayerScore(playerId) >= parameters.WIN_SCORE;
+        return gameState.getGameScore(playerId) >= parameters.WIN_SCORE;
     }
 
 

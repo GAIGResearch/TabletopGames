@@ -83,10 +83,6 @@ public class BattleloreGameState extends AbstractGameState {
         turnOrder.moveToNextPlayer(this, playerId);
     }
 
-    public int GetPlayerScore(int playerId) {
-        return playerScores[playerId];
-    }
-
     public void SetUnitsAsOrderable(int locX, int locY) {
         MapTile tile = gameBoard.getElement(locX, locY);
         if (tile != null) {
@@ -229,7 +225,7 @@ public class BattleloreGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return 0;
+        return playerScores[playerId];
     }
 
     @Override
