@@ -140,6 +140,6 @@ public interface ITunableParameters {
      * @param json      The raw JSON detailing the parameters
      * @return          The instantiated object
      */
-    ITunableParameters registerChild(String name, JSONObject json);
+    Object registerChild(String name, JSONObject json);
 
 }

@@ -396,10 +396,9 @@ public class SingleTreeNode {
                     // Because OLS = state in this case, so we need to copy it before updating it and
                     // using it to populate a new node.
                 }
-                AbstractAction actionCopy = chosen.copy();
-                cur.advance(nextState, actionCopy);
+                cur.advance(nextState, chosen);
                 // then create the new node
-                return cur.expandNode(actionCopy, nextState);
+                return cur.expandNode(chosen, nextState);
             } else {
                 // Move to next child given by UCT function
                 AbstractAction chosen = cur.treePolicyAction();
@@ -407,8 +406,7 @@ public class SingleTreeNode {
                     // We do not need to copy the state, as we advance this as we descend the tree.
                     // In open loop we never re-use the state...the only purpose of storing it on the Node is
                     // to pick it up in the next uct() call as we descend the tree
-                    AbstractAction chosenCopy = chosen.copy();
-                    cur.advance(cur.openLoopState, chosenCopy);
+                    cur.advance(cur.openLoopState, chosen);
                 }
                 cur = cur.nextNodeInTree(chosen);
                 // else we keep cur, but will exit immediately
@@ -491,11 +489,14 @@ public class SingleTreeNode {
     /**
      * Advance the current game state with the given action, count the FM call and compute the next available actions.
      *
+     * In some case Action is mutable, and will change state when advance() is called - so this method always copies
+     * first for safety
+     *
      * @param gs  - current game state
      * @param act - action to apply
      */
     protected void advance(AbstractGameState gs, AbstractAction act) {
-        forwardModel.next(gs, act);
+        forwardModel.next(gs, act.copy());
         root.fmCallsCount++;
         if (params.opponentTreePolicy == SelfOnly && gs.getCurrentPlayer() != decisionPlayer)
             advanceToTurnOfPlayer(gs, decisionPlayer);
@@ -676,9 +677,10 @@ public class SingleTreeNode {
     }
 
     public double exp3Value(AbstractAction action) {
-        double actionValue = actionTotValue(action, decisionPlayer);
+        double range = Math.max(1.0, root.highReward - root.lowReward);
+        double actionValue = actionTotValue(action, decisionPlayer) / range;
         int actionVisits = actionVisits(action);
-        double meanAdvantageFromAction = (actionValue / actionVisits) - (totValue[decisionPlayer] / nVisits);
+        double meanAdvantageFromAction = (actionValue / actionVisits) - (totValue[decisionPlayer] / nVisits / range);
         if (params.biasVisits > 0) {
             double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
             meanAdvantageFromAction = (1.0 - beta) * meanAdvantageFromAction + beta * advantagesOfActionsFromOLS.getOrDefault(action, 0.0);
@@ -855,7 +857,7 @@ public class SingleTreeNode {
             Pair<Integer, Double> stats = MASTStatistics.get(player).getOrDefault(action, new Pair<>(0, 0.0));
             stats.a++;  // visits
             stats.b += delta[player];   // value
-            MASTStatistics.get(player).put(action, stats);
+            MASTStatistics.get(player).put(action.copy(), stats);
         }
     }
 

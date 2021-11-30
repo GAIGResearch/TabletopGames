@@ -105,6 +105,8 @@ public class MCTSPlayer extends AbstractPlayer {
 
         MASTStats = root.MASTStatistics;
         // Return best action
+        if (root.children.size() > 2 * actions.size())
+            throw new AssertionError("Unexpectedly large number");
         return root.bestAction();
     }
 

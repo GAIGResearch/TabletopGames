@@ -143,7 +143,7 @@ public class MultiTreeNode extends SingleTreeNode {
                     if (expansionActionTaken[currentActor])
                         throw new AssertionError("We have already picked an expansion action for this player");
                     chosen = currentNode.expand(unexpanded);
-                    lastAction[currentActor] = chosen.copy();
+                    lastAction[currentActor] = chosen;
                     expansionActionTaken[currentActor] = true;
                     if (debug)
                         System.out.printf("Expansion action chosen for P%d - %s %n", currentActor, chosen);
@@ -154,7 +154,7 @@ public class MultiTreeNode extends SingleTreeNode {
                     lastAction[currentActor] = chosen;
                     if (debug)
                         System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
-                    advance(currentState, chosen.copy());
+                    advance(currentState, chosen);
                     // we execute a copy(), because this can change the action, so we then don't find the node later!
                 }
                 actionsInTree.add(new Pair<>(currentActor, chosen));

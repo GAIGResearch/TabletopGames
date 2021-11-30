@@ -35,8 +35,8 @@ public class OSLAHeuristic extends TunableParameters {
      * @return The instantiated object
      */
     @Override
-    public ITunableParameters registerChild(String nameSpace, JSONObject json) {
-        ITunableParameters child = super.registerChild(nameSpace, json);
+    public Object registerChild(String nameSpace, JSONObject json) {
+        Object child = super.registerChild(nameSpace, json);
         if (child instanceof IStateHeuristic) {
             heuristic = (IStateHeuristic) child;
         }

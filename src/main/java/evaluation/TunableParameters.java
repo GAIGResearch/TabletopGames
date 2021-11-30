@@ -384,7 +384,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     }
 
     @Override
-    public ITunableParameters registerChild(String nameSpace, JSONObject json) {
+    public Object registerChild(String nameSpace, JSONObject json) {
         try {
             if (debug)
                 System.out.println("Registering " + nameSpace);
@@ -392,14 +392,17 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             if (periodIndex > -1)
                 nameSpace = nameSpace.substring(periodIndex + 1);
             Class<?> clazz = Class.forName((String) json.get("class"));
-            TunableParameters child = (TunableParameters) clazz.getConstructor().newInstance();
-            TunableParameters.loadFromJSON(child, json);
-            // we then need to 'pull up' the parameters in the sub-component into our list of parameters
-            // this is so that we have a single tunable set
-            for (String name : child.getParameterNames()) {
-                addTunableParameter(nameSpace + "." + name, child.getDefaultParameterValue(name));
-                // and then set the value
-                child.setParameterValue(name, child.getDefaultParameterValue(name));
+            Object child = clazz.getConstructor().newInstance();
+            if (child instanceof TunableParameters) {
+                TunableParameters tunableChild = (TunableParameters) child;
+                TunableParameters.loadFromJSON(tunableChild, json);
+                // we then need to 'pull up' the parameters in the sub-component into our list of parameters
+                // this is so that we have a single tunable set
+                for (String name : tunableChild.getParameterNames()) {
+                    addTunableParameter(nameSpace + "." + name, tunableChild.getDefaultParameterValue(name));
+                    // and then set the value
+                    tunableChild.setParameterValue(name, tunableChild.getDefaultParameterValue(name));
+                }
             }
             return child;
         } catch (Exception e) {

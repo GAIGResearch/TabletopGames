@@ -166,8 +166,8 @@ public class MCTSParams extends PlayerParameters {
      * @return The instantiated object
      */
     @Override
-    public ITunableParameters registerChild(String nameSpace, JSONObject json) {
-        ITunableParameters child = super.registerChild(nameSpace, json);
+    public Object registerChild(String nameSpace, JSONObject json) {
+        Object child = super.registerChild(nameSpace, json);
         switch (nameSpace) {
             case "heuristic":
                 heuristic = (IStateHeuristic) child;
