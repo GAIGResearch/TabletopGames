@@ -1,4 +1,4 @@
-# TAG: Tabletop Games Framework
+# TAG: [Tabletop Games Framework](https://hopshackle.github.io/tagsite/)
 
 [![license](https://img.shields.io/github/license/GAIGResearch/TabletopGames)](LICENSE)
 ![top-language](https://img.shields.io/github/languages/top/GAIGResearch/TabletopGames)
@@ -39,7 +39,7 @@ Alternatively, open the code directly in your IDE of choice, right click the pom
 
 ## Getting started
 
-To get started the [wiki](https://github.com/GAIGResearch/TabletopGames/wiki) provides various guides and descriptions of the framework.
+To get started the [wiki](https://hopshackle.github.io/tagsite/) provides various guides and descriptions of the framework.
 Another good resource is our continuously updated paper ["Design and Implementation of TAG: A Tabletop Games Framework"](https://arxiv.org/abs/2009.12065).
 
 ## Citing Information
