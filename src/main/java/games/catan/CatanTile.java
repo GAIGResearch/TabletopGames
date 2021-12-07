@@ -1,6 +1,5 @@
 package games.catan;
 
-import games.catan.actions.Monopoly;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
 
@@ -14,16 +13,19 @@ public class CatanTile {
     Implementation of a Hexagon structure using "even-r" representation, meaning that the hexagons are oriented with
     having their "pointy" side facing up and every odd row is offset by 0.5 * width.
     */
-    // todo (mb) variables should be private
 
     public final int radius = 40;
     // x and y are r-even representation coordinates
     public int x;
     public int y;
 
-    // x_coord, y_coord are the coordinates to the centre of the hex in pixels
-    public double x_coord;
-    public double y_coord;
+    // width and height of a hexagon in pointy rotation
+    // todo width and height may change when the tiles get resized -> make sure that they keep their ratio
+    private double width = Math.sqrt(3) * radius;
+    private double height = 2 * radius;
+    // offset used in the even-r representation
+    private double offset_y;
+    private double offset_x;
 
     Road[] roads;
     Settlement[] settlements;
@@ -32,8 +34,6 @@ public class CatanTile {
 
     // coordinates to vertices and edges to facilitate drawing roads
     // hexagon is the actual object that can be drawn on the screen
-    Point[] verticesCoords;
-    Point[][] edgeCoords;
     private Polygon hexagon;
 
     CatanParameters.TileType tileType;
@@ -46,8 +46,6 @@ public class CatanTile {
         roads = new Road[HEX_SIDES];
         harbors = new int[HEX_SIDES];
         settlements = new Settlement[HEX_SIDES];
-        verticesCoords = new Point[HEX_SIDES];
-        edgeCoords = new Point[HEX_SIDES][2];
         hexagon = createHexagon();
         robber = false;
     }
@@ -57,8 +55,6 @@ public class CatanTile {
         this.y = y;
         this.roads = edges;
         this.settlements = vertices;
-        verticesCoords = new Point[HEX_SIDES];
-        edgeCoords = new Point[HEX_SIDES][2];
         hexagon = createHexagon();
         robber = false;
     }
@@ -73,14 +69,8 @@ public class CatanTile {
     private Polygon createHexagon() {
         Polygon polygon = new Polygon();
 
-        // width and height of a hexagon in pointy rotation
-        double width = Math.sqrt(3) * radius;
-        double height = 2 * radius;
-
         // uses "even r" representation for efficiency
         // offset is the shift from the origin for the first hexagons on the board
-        double offset_y ;
-        double offset_x;
         if (y % 2 == 0) {
             // even lines
             offset_x = width;
@@ -90,19 +80,14 @@ public class CatanTile {
             offset_x = width * 0.5;
             offset_y = height * 0.5;
         }
-        x_coord = offset_x + x * width;
-        y_coord = offset_y + y * height * 0.75;
+        double x_coord = offset_x + x * width;
+        double y_coord = offset_y + y * height * 0.75;
         for (int i = 0; i < HEX_SIDES; i++) {
             double angle_deg = i * 60 - 30;
             double angle_rad = Math.PI / 180 * angle_deg;
             int xval = (int) (x_coord + radius * Math.cos(angle_rad));
             int yval = (int) (y_coord + radius * Math.sin(angle_rad));
-            verticesCoords[i] = new Point(xval, yval);
             polygon.addPoint(xval, yval);
-        }
-        // set correct coordinates for edges
-        for (int i = 0; i < verticesCoords.length; i++){
-            edgeCoords[i] = new Point[]{verticesCoords[i], verticesCoords[(i + 1) % HEX_SIDES]};
         }
         return polygon;
     }
@@ -213,12 +198,24 @@ public class CatanTile {
         return dist;
     }
 
+    public double getXCoord(double width){
+        return offset_x + x * width;
+    }
+
+    public double getYCoord(double height){
+        return offset_y + y * height * 0.75;
+    }
+
     public Point getVerticesCoords(int vertex){
-        return verticesCoords[vertex];
+        double angle_deg = vertex * 60 - 30;
+        double angle_rad = Math.PI / 180 * angle_deg;
+        int xval = (int) (getXCoord(width) + radius * Math.cos(angle_rad));
+        int yval = (int) (getYCoord(height) + radius * Math.sin(angle_rad));
+        return new Point(xval, yval);
     }
 
     public Point[] getEdgeCoords(int edge){
-        return edgeCoords[edge];
+        return new Point[]{getVerticesCoords(edge), getVerticesCoords((edge+1)%HEX_SIDES)};
     }
 
     // Static methods
@@ -272,7 +269,6 @@ public class CatanTile {
             copy.roads[i] = roads[i].copy();
         }
         copy.hasHarbor = this.hasHarbor;
-        copy.harbors = new int[HEX_SIDES];
         copy.harbors = Arrays.copyOf(harbors, harbors.length);
         copy.settlements = new Settlement[HEX_SIDES];
         for (int i = 0 ; i < settlements.length; i++){

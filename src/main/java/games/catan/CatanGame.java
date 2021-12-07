@@ -39,25 +39,23 @@ public class CatanGame extends Game {
 //        agents.add(new OSLAPlayer());
 
         // RHEA
-//        RMHCParams rmhcParams = new RMHCParams();
+        RMHCParams rmhcParams = new RMHCParams();
 ////        rmhcParams.budgetType = PlayerConstants.BUDGET_TIME;
 //        rmhcParams.fmCallsBudget = 10;
 ////        rmhcParams.iterationsBudget = 1;
-//        agents.add(new RMHCPlayer(rmhcParams));
+        agents.add(new RMHCPlayer(rmhcParams));
 
 
         // MCTS
 //        MCTSParams mctsParams = new MCTSParams();
-//        mctsParams.budgetType = PlayerConstants.BUDGET_FM_CALLS;
-//        mctsParams.fmCallsBudget = 4000;
 //        agents.add(new MCTSPlayer(mctsParams));
 
 //        agents.add(new RandomPlayer(new Random()));
-        //agents.add(new RandomPlayer(new Random()));
+        agents.add(new RandomPlayer(new Random()));
 //        agents.add(new RandomPlayer(new Random()));
 //        agents.add(new RandomPlayer(new Random()));
-        agents.add(new CatanRuleBasedPlayer(new Random()));
-        agents.add(new CatanRuleBasedPlayer(new Random()));
+//        agents.add(new CatanRuleBasedPlayer(new Random()));
+//        agents.add(new CatanRuleBasedPlayer(new Random()));
         agents.add(new CatanRuleBasedPlayer(new Random()));
         agents.add(new CatanRuleBasedPlayer(new Random()));
 

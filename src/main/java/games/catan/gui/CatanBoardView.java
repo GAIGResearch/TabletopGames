@@ -11,16 +11,26 @@ import javax.swing.*;
 import java.awt.*;
 
 public class CatanBoardView extends JComponent {
-    // todo calculate the optimal radius for the hexagons
     CatanGameState gs;
     private int width;
     private int height;
+
+    private double tileWidth;
+    private double tileHeight;
 
     public CatanBoardView(CatanGameState gs){
         this.gs = gs;
         this.height = 600;
         this.width = 600;
         setPreferredSize(new Dimension(width, height));
+        updateTileSize();
+    }
+
+    private void updateTileSize(){
+        // updates the tile width and height and keep it proportional
+        // todo work out the correct size here
+        this.tileWidth = (40 * Math.sqrt(3));//(CatanConstants.BOARD_SIZE * Math.sqrt(3));
+        this.tileHeight = (40 * 2);//(CatanConstants.BOARD_SIZE * 2) ;
     }
 
     @Override
@@ -43,15 +53,15 @@ public class CatanBoardView extends JComponent {
                 g.drawPolygon(tile.getHexagon());
 
                 if (tile.hasRobber()){
-                    drawRobber(g, new Point((int)tile.x_coord, (int)tile.y_coord));
+                    drawRobber(g, new Point((int)tile.getXCoord(this.tileWidth), (int)tile.getYCoord(this.tileHeight)));
                 }
 
                 String type = "" + tile.getType();
                 String number = "" + tile.getNumber();
-                g.drawString(type, (int) tile.x_coord - 20, (int) tile.y_coord);
+                g.drawString(type, (int) tile.getXCoord(this.tileWidth) - 20, (int) tile.getYCoord(this.tileHeight));
                 if (!number.equals("0"))
 //                    g.drawString((tile.x + " " + tile.y), (int) tile.x_coord, (int) tile.y_coord + 20);
-                    g.drawString(number, (int) tile.x_coord, (int) tile.y_coord + 20);
+                    g.drawString(number, (int) tile.getXCoord(this.tileWidth), (int) tile.getYCoord(this.tileHeight) + 20);
             }
         }
 
@@ -147,7 +157,7 @@ public class CatanBoardView extends JComponent {
 //                AffineTransform original = g.getTransform();
 //                g.rotate(Math.toRadians(-60));
                 String type = CatanParameters.HarborTypes.values()[harbors[i]].toString();
-                g.drawString((type + harbors[i]), (int)tile.x_coord, (int)tile.y_coord+10);
+                g.drawString((type + harbors[i]), (int)tile.getXCoord(this.tileWidth), (int)tile.getYCoord(this.tileHeight)+10);
 //                g.setTransform(original);
             }
         }
