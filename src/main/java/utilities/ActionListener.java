@@ -10,6 +10,9 @@ import core.interfaces.IStatisticLogger;
 import java.util.HashMap;
 import java.util.Map;
 
+import static core.CoreConstants.GameEvents.ACTION_CHOSEN;
+import static core.CoreConstants.GameEvents.GAME_EVENT;
+
 public class ActionListener implements IGameListener {
 
     private IStatisticLogger logger;
@@ -25,7 +28,7 @@ public class ActionListener implements IGameListener {
 
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-        if (type == CoreConstants.GameEvents.ACTION_CHOSEN) {
+        if (type == ACTION_CHOSEN || type == GAME_EVENT) {
             Map<String, Object> data = new HashMap<>();
             data.put("GameID", state.getGameID());
             data.put("Player", state.getCurrentPlayer());

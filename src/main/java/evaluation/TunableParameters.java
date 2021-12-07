@@ -1,8 +1,6 @@
 package evaluation;
 
 import core.AbstractParameters;
-import core.AbstractPlayer;
-import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -10,9 +8,9 @@ import org.json.simple.parser.JSONParser;
 import java.io.FileReader;
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.stream.*;
+import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A sub-class of AbstractParameters that implements the ITunableParameters interface
@@ -63,6 +61,9 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         tunable.possibleValues = new HashMap<>(possibleValues);
         tunable.defaultValues = new HashMap<>(defaultValues);
         tunable.parameterTypes = new HashMap<>(parameterTypes);
+        for (String name : parameterNames) {
+            tunable.setParameterValue(name, getParameterValue(name));
+        }
         tunable._reset();
         return tunable;
     }
@@ -71,7 +72,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      * Use this to add a non-Tunable Parameter (i.e. one with a single value that does not change)
      * While this is not tuned, it means that a value for it can be defined in a JSON input file
      * <p>
-     * A tunable parameter can be any of Integer, Double, String, Enum, Boolean.
+     * A tunable parameter can be any of Integer, Double, String, Enum, Boolean, List
      *
      * @param name  The name of the parameter
      * @param value The value this should take
@@ -82,7 +83,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     }
 
     /**
-     * Use this to add a Tunable Parameter. Parameters added using this method iwhen instantiating a Params object
+     * Use this to add a Tunable Parameter. Parameters added using this method when instantiating a Params object
      * will be the default search dimensions used in optimisation.
      * Note however, that these values are not exclusive.
      * ParameterSearch permits a JSON file to be specified that provides a way of overriding (adding to and/or
@@ -320,6 +321,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
                 return retValue;
             } catch (Exception e) {
                 System.out.println("Error loading heuristic class " + className + " : " + e.getMessage());
+                e.printStackTrace();
                 throw new AssertionError("Error loading Class");
             }
         }

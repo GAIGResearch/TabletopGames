@@ -1,7 +1,9 @@
 package evaluation;
 
+import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.Game;
+import core.ParameterFactory;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
@@ -33,6 +35,7 @@ public class GameReportII {
                             "\t               The default is 'all' to indicate that all games should be analysed.\n" +
                             "\tplayer=        The JSON file containing the details of the Player to monitor, OR\n" +
                             "\t               one of mcts|rmhc|random|osla|<className>. The default is 'random'.\n" +
+                            "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tlistener=      The full class name of an IGameListener implementation. \n" +
                             "\t               Defaults to utilities.GameReportListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
@@ -53,6 +56,7 @@ public class GameReportII {
 
         // Get Player to be used
         String playerDescriptor = getArg(args, "player", "random");
+        String gameParams = getArg(args, "gameParams", "");
         String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameReportListener").split("\\|")));
         List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
@@ -64,6 +68,9 @@ public class GameReportII {
         List<String> games = new ArrayList<>(Arrays.asList(getArg(args, "games", "all").split("\\|")));
         if (games.get(0).equals("all"))
             games = Arrays.stream(GameType.values()).map(Enum::name).collect(toList());
+
+        if (!gameParams.equals("") && games.size() > 1)
+            throw new IllegalArgumentException("Cannot yet provide a gameParams argument if running multiple games");
 
         // This creates a <MinPlayer, MaxPlayer> Pair for each game#
         List<Pair<Integer, Integer>> nPlayers = Arrays.stream(getArg(args, "nPlayers", "all").split("\\|"))
@@ -103,7 +110,10 @@ public class GameReportII {
                     continue;
                 }
 
-                Game game = gameType.createGameInstance(playerCount);
+                AbstractParameters params = ParameterFactory.createFromFile(gameType, gameParams);
+                Game game = params == null ?
+                        gameType.createGameInstance(playerCount) :
+                        gameType.createGameInstance(playerCount, params);
 
                 List<IGameListener> gameTrackers = new ArrayList<>();
                 for (int i = 0; i < listenerClasses.size(); i++) {
@@ -115,13 +125,12 @@ public class GameReportII {
                     gameTrackers.add(gameTracker);
                 }
 
+                List<AbstractPlayer> allPlayers = new ArrayList<>();
+                for (int j = 0; j < playerCount; j++) {
+                    allPlayers.add(PlayerFactory.createPlayer(playerDescriptor));
+                }
                 for (int i = 0; i < nGames; i++) {
-                    List<AbstractPlayer> allPlayers = new ArrayList<>();
-                    for (int j = 0; j < playerCount; j++) {
-                        allPlayers.add(PlayerFactory.createPlayer(playerDescriptor));
-                    }
                     // Run games, resetting the player each time
-
                     game.reset(allPlayers);
                     game.run();
                 }
