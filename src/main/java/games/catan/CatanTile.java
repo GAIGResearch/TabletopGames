@@ -4,6 +4,7 @@ import games.catan.components.Road;
 import games.catan.components.Settlement;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.Arrays;
 
 import static games.catan.CatanConstants.HEX_SIDES;
@@ -14,18 +15,9 @@ public class CatanTile {
     having their "pointy" side facing up and every odd row is offset by 0.5 * width.
     */
 
-    public final int radius = 40;
     // x and y are r-even representation coordinates
     public int x;
     public int y;
-
-    // width and height of a hexagon in pointy rotation
-    // todo width and height may change when the tiles get resized -> make sure that they keep their ratio
-    private double width = Math.sqrt(3) * radius;
-    private double height = 2 * radius;
-    // offset used in the even-r representation
-    private double offset_y;
-    private double offset_x;
 
     Road[] roads;
     Settlement[] settlements;
@@ -46,7 +38,6 @@ public class CatanTile {
         roads = new Road[HEX_SIDES];
         harbors = new int[HEX_SIDES];
         settlements = new Settlement[HEX_SIDES];
-        hexagon = createHexagon();
         robber = false;
     }
 
@@ -55,7 +46,6 @@ public class CatanTile {
         this.y = y;
         this.roads = edges;
         this.settlements = vertices;
-        hexagon = createHexagon();
         robber = false;
     }
 
@@ -66,22 +56,33 @@ public class CatanTile {
         return this.tileType;
     }
 
-    private Polygon createHexagon() {
+    public Polygon getHexagon(double radius) {
         Polygon polygon = new Polygon();
 
-        // uses "even r" representation for efficiency
-        // offset is the shift from the origin for the first hexagons on the board
-        if (y % 2 == 0) {
-            // even lines
-            offset_x = width;
-            offset_y = height * 0.5;
-        } else {
-            // odd lines
-            offset_x = width * 0.5;
-            offset_y = height * 0.5;
-        }
-        double x_coord = offset_x + x * width;
-        double y_coord = offset_y + y * height * 0.75;
+        // offset used in the even-r representation
+        double offset_y;
+        double offset_x;
+
+        // width and height of a hexagon in pointy rotation
+        double width = Math.sqrt(3) * radius;
+        double height = 2 * radius;
+
+//        // uses "even r" representation for efficiency
+//        // offset is the shift from the origin for the first hexagons on the board
+//        if (y % 2 == 0) {
+//            // even lines
+//            offset_x = width;
+//            offset_y = height * 0.5;
+//        } else {
+//            // odd lines
+//            offset_x = width * 0.5;
+//            offset_y = height * 0.5;
+//        }
+//        double x_coord = offset_x + x * width;
+//        double y_coord = offset_y + y * height * 0.75;
+        Point centreCoords = getCentreCoords(radius);
+        double x_coord = centreCoords.x;
+        double y_coord = centreCoords.y;
         for (int i = 0; i < HEX_SIDES; i++) {
             double angle_deg = i * 60 - 30;
             double angle_rad = Math.PI / 180 * angle_deg;
@@ -106,10 +107,6 @@ public class CatanTile {
             return true;
         }
         throw new AssertionError("Cannot remove robber");
-    }
-
-    public Polygon getHexagon(){
-        return hexagon;
     }
 
     public int getNumber(){
@@ -198,24 +195,40 @@ public class CatanTile {
         return dist;
     }
 
-    public double getXCoord(double width){
-        return offset_x + x * width;
+    public Point getCentreCoords(double radius){
+        // offset used in the even-r representation
+        double offset_y;
+        double offset_x;
+
+        // width and height of a hexagon in pointy rotation
+        double width = Math.sqrt(3) * radius;
+        double height = 2 * radius;
+
+        if (y % 2 == 0) {
+            // even lines
+            offset_x = width;
+            offset_y = height * 0.5;
+        } else {
+            // odd lines
+            offset_x = width * 0.5;
+            offset_y = height * 0.5;
+        }
+        double x_coord = offset_x + x * width;
+        double y_coord = offset_y + y * height * 0.75;
+        return new Point((int)x_coord, (int)y_coord);
     }
 
-    public double getYCoord(double height){
-        return offset_y + y * height * 0.75;
-    }
-
-    public Point getVerticesCoords(int vertex){
+    public Point getVerticesCoords(int vertex, double radius){
         double angle_deg = vertex * 60 - 30;
         double angle_rad = Math.PI / 180 * angle_deg;
-        int xval = (int) (getXCoord(width) + radius * Math.cos(angle_rad));
-        int yval = (int) (getYCoord(height) + radius * Math.sin(angle_rad));
+        Point centreCoords = getCentreCoords(radius);
+        int xval = (int) (centreCoords.x + radius * Math.cos(angle_rad));
+        int yval = (int) (centreCoords.y + radius * Math.sin(angle_rad));
         return new Point(xval, yval);
     }
 
-    public Point[] getEdgeCoords(int edge){
-        return new Point[]{getVerticesCoords(edge), getVerticesCoords((edge+1)%HEX_SIDES)};
+    public Point[] getEdgeCoords(int edge, double radius){
+        return new Point[]{getVerticesCoords(edge, radius), getVerticesCoords((edge+1)%HEX_SIDES, radius)};
     }
 
     // Static methods

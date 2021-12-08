@@ -17,11 +17,13 @@ public class CatanBoardView extends JComponent {
 
     private double tileWidth;
     private double tileHeight;
+    private double tileRadius;
 
     public CatanBoardView(CatanGameState gs){
         this.gs = gs;
         this.height = 600;
         this.width = 600;
+        this.tileRadius = 40;
         setPreferredSize(new Dimension(width, height));
         updateTileSize();
     }
@@ -29,8 +31,9 @@ public class CatanBoardView extends JComponent {
     private void updateTileSize(){
         // updates the tile width and height and keep it proportional
         // todo work out the correct size here
-        this.tileWidth = (40 * Math.sqrt(3));//(CatanConstants.BOARD_SIZE * Math.sqrt(3));
-        this.tileHeight = (40 * 2);//(CatanConstants.BOARD_SIZE * 2) ;
+        this.tileRadius = 40; //(double)this.height / CatanConstants.BOARD_SIZE;
+        this.tileWidth = (this.tileRadius * Math.sqrt(3));//(CatanConstants.BOARD_SIZE * Math.sqrt(3));
+        this.tileHeight = (this.tileRadius * 2);//(CatanConstants.BOARD_SIZE * 2) ;
     }
 
     @Override
@@ -47,21 +50,24 @@ public class CatanBoardView extends JComponent {
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
+                Point centreCoords = tile.getCentreCoords(tileRadius);
+
                 g.setColor(tileColourLookup(tile));
-                g.fillPolygon(tile.getHexagon());
+                Polygon tileHex = tile.getHexagon(tileRadius);
+                g.fillPolygon(tileHex);
                 g.setColor(Color.BLACK);
-                g.drawPolygon(tile.getHexagon());
+                g.drawPolygon(tileHex);
 
                 if (tile.hasRobber()){
-                    drawRobber(g, new Point((int)tile.getXCoord(this.tileWidth), (int)tile.getYCoord(this.tileHeight)));
+                    drawRobber(g, centreCoords);
                 }
 
                 String type = "" + tile.getType();
                 String number = "" + tile.getNumber();
-                g.drawString(type, (int) tile.getXCoord(this.tileWidth) - 20, (int) tile.getYCoord(this.tileHeight));
+                g.drawString(type, (int) centreCoords.x- 20, centreCoords.y);
                 if (!number.equals("0"))
 //                    g.drawString((tile.x + " " + tile.y), (int) tile.x_coord, (int) tile.y_coord + 20);
-                    g.drawString(number, (int) tile.getXCoord(this.tileWidth), (int) tile.getYCoord(this.tileHeight) + 20);
+                    g.drawString(number, centreCoords.x, centreCoords.y + 20);
             }
         }
 
@@ -78,7 +84,7 @@ public class CatanBoardView extends JComponent {
                 Road[] roads = tile.getRoads();
                 for (int i = 0; i < roads.length; i++) {
                     if (roads[i] != null && roads[i].getOwner() != -1)
-                        drawRoad(g, tile.getEdgeCoords(i), CatanConstants.PlayerColors[roads[i].getOwner()]);
+                        drawRoad(g, tile.getEdgeCoords(i, tileRadius), CatanConstants.PlayerColors[roads[i].getOwner()]);
                 }
             }
         }
@@ -92,7 +98,7 @@ public class CatanBoardView extends JComponent {
                 for (int i = 0; i < settlements.length; i++){
 //                    g.drawString("" + settlements[i].hashCode(), tile.getVerticesCoords(i).x, tile.getVerticesCoords(i).y);
                     if (settlements[i] != null && settlements[i].getOwner() != -1) {
-                        drawSettlement(g, tile.getVerticesCoords(i), CatanConstants.PlayerColors[settlements[i].getOwner()], settlements[i].getType());
+                        drawSettlement(g, tile.getVerticesCoords(i, tileRadius), CatanConstants.PlayerColors[settlements[i].getOwner()], settlements[i].getType());
                     }
                     // todo lines below are useful for debugging as they display settlement IDs
 //                    g.setFont(new Font("TimeRoman", Font.PLAIN, 20));
@@ -151,13 +157,14 @@ public class CatanBoardView extends JComponent {
                 g.setColor(color);
                 Stroke stroke = g.getStroke();
                 g.setStroke(new BasicStroke(8));
-                Point[] location = tile.getEdgeCoords(i);
+                Point[] location = tile.getEdgeCoords(i, tileRadius);
                 g.drawLine(location[0].x, location[0].y, location[1].x, location[1].y);
                 g.setStroke(stroke);
 //                AffineTransform original = g.getTransform();
 //                g.rotate(Math.toRadians(-60));
                 String type = CatanParameters.HarborTypes.values()[harbors[i]].toString();
-                g.drawString((type + harbors[i]), (int)tile.getXCoord(this.tileWidth), (int)tile.getYCoord(this.tileHeight)+10);
+                Point centreCoords = tile.getCentreCoords(tileRadius);
+                g.drawString((type + harbors[i]), centreCoords.x, centreCoords.y+10);
 //                g.setTransform(original);
             }
         }
