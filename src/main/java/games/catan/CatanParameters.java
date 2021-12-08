@@ -26,7 +26,7 @@ public class CatanParameters extends AbstractParameters {
 
     // the minimum number of knights required to take the largest army
     public final int min_army_size = 3;
-    public final int min_longest_road = 5;
+    public final int min_longest_road = 4; // only changes when road_length > min
 
     // points
     public final int settlement_value = 1;

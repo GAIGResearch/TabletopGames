@@ -45,4 +45,9 @@ public class Road implements Copiable {
     protected Object clone() throws CloneNotSupportedException {
         return this.copy();
     }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

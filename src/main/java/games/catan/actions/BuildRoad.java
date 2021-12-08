@@ -7,6 +7,10 @@ import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.CatanTile;
+import games.catan.components.Edge;
+import games.catan.components.Graph;
+import games.catan.components.Road;
+import games.catan.components.Settlement;
 
 import java.util.Objects;
 
@@ -41,6 +45,22 @@ public class BuildRoad extends AbstractAction {
                 }
             }
             board[this.x][this.y].addRoad(edge, playerID);
+
+            // find the road in the graph and set the owner to playerID
+            Graph<Settlement, Road> graph = cgs.getGraph();
+            Settlement settl1 = board[x][y].getSettlements()[edge];
+            Settlement settl2 = board[x][y].getSettlements()[(edge+1)%6];
+            // update the placed road in the graph in both directions not just on the board
+            for (Edge<Settlement, Road> e: graph.getEdges(settl1)){
+                if (e.getDest().equals(settl2)){
+                    e.getValue().setOwner(playerID);
+                }
+            }
+            for (Edge<Settlement, Road> e: graph.getEdges(settl2)){
+                if (e.getDest().equals(settl1)){
+                    e.getValue().setOwner(playerID);
+                }
+            }
             return true;
         } else {
             throw new AssertionError("Road already owned: " + this.toString());

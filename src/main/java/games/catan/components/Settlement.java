@@ -71,7 +71,6 @@ public class Settlement implements Copiable {
 
     @Override
     public int hashCode() {
-//        return super.hashCode();
         return id;
     }
 

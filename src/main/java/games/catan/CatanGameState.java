@@ -241,24 +241,12 @@ public class CatanGameState extends AbstractGameState {
         dir1.add(settl1);
         dir2.add(settl2);
 
-        // todo this should be done somewhere else in the FM
-        // update the placed road in the graph in both directions not just on the board
-        for (Edge<Settlement, Road> e: catanGraph.getEdges(settl1)){
-            if (e.getDest().equals(settl2)){
-                e.getValue().setOwner(getCurrentPlayer());
-            }
-        }
-        for (Edge<Settlement, Road> e: catanGraph.getEdges(settl2)){
-            if (e.getDest().equals(settl1)){
-                e.getValue().setOwner(getCurrentPlayer());
-            }
-        }
-
         // find longest segment, we first follow dir_1 then dir_2
         // todo look into if keeping visited on the first iteration should be kept or not
         roadSet = expandRoad(this, roadSet, new ArrayList<>(dir1), new ArrayList<>(dir2));
         roadSet.addAll(expandRoad(this, roadSet2, new ArrayList<>(dir2), new ArrayList<>(dir1)));
 
+        System.out.println("Current road length is " + roadSet.size() + " for player " + getCurrentPlayer());
         return roadSet.size();
     }
 
@@ -271,54 +259,76 @@ public class CatanGameState extends AbstractGameState {
         if (unexpanded.size() == 2) {
             // Handle branching
             int length = 0;
+            HashSet<Road> longestSegment = new HashSet<>(roadSet);
             for (Settlement settlement : unexpanded) {
                 ArrayList<Settlement> toExpand = new ArrayList<>();
                 toExpand.add(settlement);
-                HashSet roadSetCopy = new HashSet(roadSet);
+                HashSet<Road> roadSetCopy = new HashSet<>(roadSet);
                 roadSetCopy = expandRoad(gs, roadSetCopy, toExpand, expanded);
                 if (roadSetCopy.size() >= length) {
                     length = roadSetCopy.size();
-                    roadSet = roadSetCopy;
+                    longestSegment = roadSetCopy;
                 }
             }
+            roadSet.addAll(longestSegment);
             return roadSet;
         } else {
             // case of expanding a single settlement
             Settlement settlement = unexpanded.remove(0);
             expanded.add(settlement);
 
-            // find which edge took us here and add it to the visited roads
             List<Edge<Settlement, Road>> edges = gs.getGraph().getEdges(settlement);
-            boolean roadFound = false;
-            if (edges != null){
-                for (Edge<Settlement, Road> e: edges){
-                    // find road taking to new node
-                    if (expanded.contains(e.getDest())){
-                        Road road = e.getValue();
-                        if (!roadSet.contains(e.getValue())){
-                            if (road.getOwner() == gs.getCurrentPlayer()){
-                                // only add it if it's the players and unvisited
-                                roadSet.add(road);
-                                roadFound = true;
-                            }
+            if (edges!= null){
+                for (Edge<Settlement, Road> e : edges) {
+                    Road road = e.getValue();
+                    if (road.getOwner() == gs.getCurrentPlayer()){
+                        if (expanded.contains(e.getDest())){
+                        // The road used to get here
+                            roadSet.add(road);
                         }
-                    }
-                }
-                if (roadFound) {
-                    // if settlement is not taken or belongs to player we add the neighbouring settlements to the unvisited list
-                    if (settlement.getOwner() == -1 || settlement.getOwner() == gs.getCurrentPlayer()) {
-                        // Add new settlements to the unexpanded list
-                        for (Edge<Settlement, Road> e : edges) {
-                            // find road taking to new node
-                            // todo could not find destination in visited
-                            if (!expanded.contains(e.getDest())) {
+                        else{
+                            // if settlement belongs to somebody else it's a deadend
+                            if (e.getDest().getOwner() == -1 || e.getDest().getOwner() == gs.getCurrentPlayer()){
                                 unexpanded.add(e.getDest());
                             }
                         }
                     }
+
                 }
+
             }
+            // todo old logic below
+//            boolean roadFound = false;
+//            if (edges != null) {
+//                for (Edge<Settlement, Road> e : edges) {
+//                    // find road taking to new node
+//                    if (expanded.contains(e.getDest())) {
+//                        Road road = e.getValue();
+//                        if (!roadSet.contains(e.getValue())) {
+//                            if (road.getOwner() == gs.getCurrentPlayer()) {
+//                                // only add it if it's the players and unvisited
+//                                roadSet.add(road);
+//                                roadFound = true;
+//                            }
+//                        }
+//                    }
+//                }
+//                if (roadFound) {
+//                    // if settlement is not taken or belongs to player we add the neighbouring settlements to the unvisited list
+//                    if (settlement.getOwner() == -1 || settlement.getOwner() == gs.getCurrentPlayer()) {
+//                        // Add new settlements to the unexpanded list
+//                        for (Edge<Settlement, Road> e : edges) {
+//                            // find road taking to new node
+//                            // todo could not find destination in visited
+//                            if (!expanded.contains(e.getDest())) {
+//                                unexpanded.add(e.getDest());
+//                            }
+//                        }
+//                    }
+//                }
+//            }
         }
+
         // only gets here when explored a single road
         return expandRoad(gs, roadSet, unexpanded, expanded);
     }
@@ -330,7 +340,7 @@ public class CatanGameState extends AbstractGameState {
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
-                for (int i = 0; i < 6; i++) {
+                for (int i = 0; i < HEX_SIDES; i++) {
                     // Road has already been set
                     Road road = tile.getRoads()[i];
                     if (road.getOwner()!=-1) {
