@@ -287,7 +287,7 @@ public class CatanForwardModel extends AbstractForwardModel {
             for (int y = 0; y < board[x].length; y++){
                 CatanTile tile = new CatanTile(x, y);
                 // mid_x should be the same as the distance
-                if (midTile.distance(tile) >= midX){
+                if (midTile.getDistanceToTile(tile) >= midX){
                     tile.setTileType(CatanParameters.TileType.SEA);
                 }
                 else if (tileList.size() > 0) {
@@ -317,7 +317,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                         Road road = new Road(-1);
                         tile.setRoad(edge, road);
 
-                        int[] neighbourCoord = CatanTile.get_neighbour_on_edge(tile, edge);
+                        int[] neighbourCoord = CatanTile.getNeighbourOnEdge(tile, edge);
                         // need to check if neighbour is on the board
                         if (Arrays.stream(neighbourCoord).max().getAsInt() < board.length &&
                                 Arrays.stream(neighbourCoord).min().getAsInt() >= 0) {
@@ -338,7 +338,7 @@ public class CatanForwardModel extends AbstractForwardModel {
 
                         // Get the other 2 settlements along that vertex and set both of them separately
                         // has to do it in 2 steps as there could cases with only 2 tiles on along a vertex
-                        int[][] neighbourCoords = CatanTile.get_neighbours_on_vertex(tile, vertex);
+                        int[][] neighbourCoords = CatanTile.getNeighboursOnVertex(tile, vertex);
                         // check neighbour #1
                         if (Arrays.stream(neighbourCoords[0]).max().getAsInt() < board.length &&
                                 Arrays.stream(neighbourCoords[0]).min().getAsInt() >= 0) {
@@ -374,7 +374,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                         graph.addEdge(tile.settlements[i], tile.settlements[(i+1)%HEX_SIDES], roads[i]);
 
                         // last one requires a road and a settlement from a neighbour
-                        int[] otherCoords = CatanTile.get_neighbour_on_edge(tile, i);
+                        int[] otherCoords = CatanTile.getNeighbourOnEdge(tile, i);
                         if (Arrays.stream(otherCoords).max().getAsInt() < board.length &&
                                 Arrays.stream(otherCoords).min().getAsInt() >= 0) {
                             CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
@@ -406,14 +406,14 @@ public class CatanForwardModel extends AbstractForwardModel {
         CatanTile tile = board[radius][radius];
         // move along a certain edge to reach SEA tiles
         for (int i = 0; i < radius; i++){
-            int [] tileLocation = CatanTile.get_neighbour_on_edge(tile, edge);
+            int [] tileLocation = CatanTile.getNeighbourOnEdge(tile, edge);
             tile = board[tileLocation[0]][tileLocation[1]];
         }
         // go around in a circle
         int counter = 0;
         for (int i = 0; i < HEX_SIDES; i++){
             for (int j = 0; j < board.length/2; j++){
-                int [] tileLocation = CatanTile.get_neighbour_on_edge(tile, i);
+                int [] tileLocation = CatanTile.getNeighbourOnEdge(tile, i);
                 tile = board[tileLocation[0]][tileLocation[1]];
                 if (counter % 2 == 0 && harbors.size() > 0) {
                     tile.addHarbor((i + 2) % HEX_SIDES, harbors.remove(0));

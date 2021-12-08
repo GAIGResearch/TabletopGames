@@ -15,8 +15,6 @@ public class CatanBoardView extends JComponent {
     private int width;
     private int height;
 
-    private double tileWidth;
-    private double tileHeight;
     private double tileRadius;
 
     public CatanBoardView(CatanGameState gs){
@@ -25,15 +23,13 @@ public class CatanBoardView extends JComponent {
         this.width = 600;
         this.tileRadius = 40;
         setPreferredSize(new Dimension(width, height));
-        updateTileSize();
+//        updateTileSize();
     }
 
     private void updateTileSize(){
         // updates the tile width and height and keep it proportional
         // todo work out the correct size here
-        this.tileRadius = 40; //(double)this.height / CatanConstants.BOARD_SIZE;
-        this.tileWidth = (this.tileRadius * Math.sqrt(3));//(CatanConstants.BOARD_SIZE * Math.sqrt(3));
-        this.tileHeight = (this.tileRadius * 2);//(CatanConstants.BOARD_SIZE * 2) ;
+        this.tileRadius = 30; //(double)this.height / CatanConstants.BOARD_SIZE;
     }
 
     @Override

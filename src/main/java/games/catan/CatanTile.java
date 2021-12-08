@@ -4,7 +4,6 @@ import games.catan.components.Road;
 import games.catan.components.Settlement;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 import java.util.Arrays;
 
 import static games.catan.CatanConstants.HEX_SIDES;
@@ -22,13 +21,9 @@ public class CatanTile {
     Road[] roads;
     Settlement[] settlements;
     int[] harbors;
-    private boolean hasHarbor;
-
-    // coordinates to vertices and edges to facilitate drawing roads
-    // hexagon is the actual object that can be drawn on the screen
-    private Polygon hexagon;
 
     CatanParameters.TileType tileType;
+    private boolean hasHarbor;
     int number;
     boolean robber;
 
@@ -58,28 +53,6 @@ public class CatanTile {
 
     public Polygon getHexagon(double radius) {
         Polygon polygon = new Polygon();
-
-        // offset used in the even-r representation
-        double offset_y;
-        double offset_x;
-
-        // width and height of a hexagon in pointy rotation
-        double width = Math.sqrt(3) * radius;
-        double height = 2 * radius;
-
-//        // uses "even r" representation for efficiency
-//        // offset is the shift from the origin for the first hexagons on the board
-//        if (y % 2 == 0) {
-//            // even lines
-//            offset_x = width;
-//            offset_y = height * 0.5;
-//        } else {
-//            // odd lines
-//            offset_x = width * 0.5;
-//            offset_y = height * 0.5;
-//        }
-//        double x_coord = offset_x + x * width;
-//        double y_coord = offset_y + y * height * 0.75;
         Point centreCoords = getCentreCoords(radius);
         double x_coord = centreCoords.x;
         double y_coord = centreCoords.y;
@@ -187,9 +160,9 @@ public class CatanTile {
         }
     }
 
-    public int distance(CatanTile tile){
-        int[] this_coord = to_cube(this);
-        int[] other_coord = to_cube(tile);
+    public int getDistanceToTile(CatanTile tile){
+        int[] this_coord = toCube(this);
+        int[] other_coord = toCube(tile);
         int dist = (Math.abs(this_coord[0] - other_coord[0]) +
                 Math.abs(this_coord[1] - other_coord[1]) + Math.abs(this_coord[2] - other_coord[2])) / 2;
         return dist;
@@ -232,7 +205,7 @@ public class CatanTile {
     }
 
     // Static methods
-    public static int[] to_cube(CatanTile tile){
+    public static int[] toCube(CatanTile tile){
         int[] cube = new int[3];
         cube[0] = tile.x - (tile.y + (tile.y % 2)) / 2;
         cube[2] = tile.y;
@@ -240,7 +213,7 @@ public class CatanTile {
         return cube;
     }
 
-    public static int[] get_neighbour_on_edge(CatanTile tile, int edge){
+    public static int[] getNeighbourOnEdge(CatanTile tile, int edge){
         // returns coordinates to the other tile in the given direction
         // Even-r offset mapping; Different layouts require different values
         int[][][] evenr_directions = {
@@ -254,7 +227,7 @@ public class CatanTile {
         return new int[]{tile.x + direction[0], tile.y + direction[1]};
     }
 
-    public static int[][] get_neighbours_on_vertex(CatanTile tile, int vertex){
+    public static int[][] getNeighboursOnVertex(CatanTile tile, int vertex){
         // returns coordinates to the 2 other tiles on a vertex in a clockwise direction
         // Even-r offset mapping; Different layouts require different values
         int[][][] evenr_directions = {
