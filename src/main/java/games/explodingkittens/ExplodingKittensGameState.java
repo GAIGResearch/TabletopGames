@@ -36,6 +36,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     int playerGettingAFavor;
     // Current stack of actions
     Stack<AbstractAction> actionStack;
+    int[] orderOfPlayerDeath;
 
     public ExplodingKittensGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new ExplodingKittensTurnOrder(nPlayers), GameType.ExplodingKittens);
@@ -57,11 +58,12 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         ekgs.discardPile = discardPile.copy();
         ekgs.playerGettingAFavor = playerGettingAFavor;
         ekgs.actionStack = new Stack<>();
-        for (AbstractAction a: actionStack) {
+        for (AbstractAction a : actionStack) {
             ekgs.actionStack.add(a.copy());
         }
+        ekgs.orderOfPlayerDeath = orderOfPlayerDeath.clone();
         ekgs.playerHandCards = new ArrayList<>();
-        for (PartialObservableDeck<ExplodingKittensCard> d: playerHandCards) {
+        for (PartialObservableDeck<ExplodingKittensCard> d : playerHandCards) {
             ekgs.playerHandCards.add(d.copy());
         }
         ekgs.drawPile = drawPile.copy();
@@ -80,7 +82,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
                             cs.add(c);
                         }
                     }
-                    for (ExplodingKittensCard c: cs) {
+                    for (ExplodingKittensCard c : cs) {
                         ekgs.playerHandCards.get(i).remove(c);
                     }
                 }
@@ -99,7 +101,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
                         int cardIndex = 0;
                         while (!added) {
                             // if the card is visible to the player we cannot move it somewhere else
-                            if (ekgs.drawPile.getVisibilityForPlayer(cardIndex, playerId)){
+                            if (ekgs.drawPile.getVisibilityForPlayer(cardIndex, playerId)) {
                                 cardIndex++;
                                 continue;
                             }
@@ -119,7 +121,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         return ekgs;
     }
 
-    private void moveHiddenCards(PartialObservableDeck<?> from, PartialObservableDeck<?> to){
+    private void moveHiddenCards(PartialObservableDeck<?> from, PartialObservableDeck<?> to) {
 
     }
 
@@ -139,6 +141,15 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     @Override
     public double getGameScore(int playerId) {
         return 0;
+    }
+
+    @Override
+    public int getOrdinalPosition(int playerId) {
+        if (playerResults[playerId] == Utils.GameResult.WIN)
+            return 1;
+        if (playerResults[playerId] == Utils.GameResult.LOSE)
+            return getNPlayers() - orderOfPlayerDeath[playerId] + 1;
+        return 1;  // anyone still alive is jointly winning
     }
 
     @Override
@@ -170,18 +181,20 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
 
     /**
      * Marks a player as dead.
+     *
      * @param playerID - player who was killed in a kitten explosion.
      */
-    public void killPlayer(int playerID){
+    public void killPlayer(int playerID) {
         setPlayerResult(Utils.GameResult.LOSE, playerID);
         int nPlayersActive = 0;
         for (int i = 0; i < getNPlayers(); i++) {
             if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
         }
+        orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
         if (nPlayersActive == 1) {
             this.gameStatus = Utils.GameResult.GAME_END;
         }
-        ((ExplodingKittensTurnOrder)getTurnOrder()).endPlayerTurnStep(this);
+        ((ExplodingKittensTurnOrder) getTurnOrder()).endPlayerTurnStep(this);
 
     }
 
@@ -189,18 +202,23 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     public int getPlayerGettingAFavor() {
         return playerGettingAFavor;
     }
+
     public PartialObservableDeck<ExplodingKittensCard> getDrawPile() {
         return drawPile;
     }
+
     public void setPlayerGettingAFavor(int playerGettingAFavor) {
         this.playerGettingAFavor = playerGettingAFavor;
     }
+
     public Deck<ExplodingKittensCard> getDiscardPile() {
         return discardPile;
     }
+
     public Stack<AbstractAction> getActionStack() {
         return actionStack;
     }
+
     public List<PartialObservableDeck<ExplodingKittensCard>> getPlayerHandCards() {
         return playerHandCards;
     }
@@ -209,12 +227,15 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     protected void setDiscardPile(Deck<ExplodingKittensCard> discardPile) {
         this.discardPile = discardPile;
     }
+
     protected void setDrawPile(PartialObservableDeck<ExplodingKittensCard> drawPile) {
         this.drawPile = drawPile;
     }
+
     protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards) {
         this.playerHandCards = playerHandCards;
     }
+
     protected void setActionStack(Stack<AbstractAction> actionStack) {
         this.actionStack = actionStack;
     }
@@ -231,7 +252,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
 
         int currentPlayer = turnOrder.getCurrentPlayer(this);
 
-        for (int i = 0; i < getNPlayers(); i++){
+        for (int i = 0; i < getNPlayers(); i++) {
             if (currentPlayer == i)
                 s += ">>> Player " + i + ":";
             else
@@ -246,14 +267,14 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         s += discardPile.toString() + "\n";
 
         s += "Action stack: ";
-        for (AbstractAction a: actionStack) {
+        for (AbstractAction a : actionStack) {
             s += a.toString() + ",";
         }
-        s = s.substring(0, s.length()-1);
+        s = s.substring(0, s.length() - 1);
         s += "\n\n";
 
         s += "Current GamePhase: " + gamePhase + "\n";
-        s += "Missing Draws: " + ((ExplodingKittensTurnOrder)turnOrder).requiredDraws + "\n";
+        s += "Missing Draws: " + ((ExplodingKittensTurnOrder) turnOrder).requiredDraws + "\n";
         s += "============================\n";
         return s;
     }
