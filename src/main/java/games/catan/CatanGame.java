@@ -11,6 +11,8 @@ import gui.GamePanel;
 import players.PlayerConstants;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
+import players.human.HumanGUIPlayer;
+import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCParams;
@@ -36,7 +38,9 @@ public class CatanGame extends Game {
     public static void main(String[] args){
 
         List<AbstractPlayer> agents = new ArrayList<>();
-//        agents.add(new OSLAPlayer());
+//        ActionController ac = new ActionController();
+//        agents.add(new HumanGUIPlayer(ac));
+        agents.add(new OSLAPlayer());
 
         // RHEA
         RMHCParams rmhcParams = new RMHCParams();
@@ -47,16 +51,11 @@ public class CatanGame extends Game {
 
 
         // MCTS
-//        MCTSParams mctsParams = new MCTSParams();
-//        agents.add(new MCTSPlayer(mctsParams));
+        MCTSParams mctsParams = new MCTSParams();
+        mctsParams.rolloutType = MCTSEnums.Strategies.RANDOM;
+        agents.add(new MCTSPlayer(mctsParams));
 
 //        agents.add(new RandomPlayer(new Random()));
-        agents.add(new RandomPlayer(new Random()));
-//        agents.add(new RandomPlayer(new Random()));
-//        agents.add(new RandomPlayer(new Random()));
-//        agents.add(new CatanRuleBasedPlayer(new Random()));
-//        agents.add(new CatanRuleBasedPlayer(new Random()));
-        agents.add(new CatanRuleBasedPlayer(new Random()));
         agents.add(new CatanRuleBasedPlayer(new Random()));
 
         CatanParameters params = new CatanParameters("data/", System.currentTimeMillis());

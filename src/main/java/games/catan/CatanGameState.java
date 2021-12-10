@@ -228,10 +228,10 @@ public class CatanGameState extends AbstractGameState {
     }
 
     public int getRoadDistance(int x, int y, int edge){
+        // As the settlements are the nodes, we expand them to find roads
         // calculates the distance length of the road
         HashSet<Road> roadSet = new HashSet<>();
         HashSet<Road> roadSet2 = new HashSet<>();
-//        roadSet.add(board[x][y].getRoads()[edge]);
 
         ArrayList<Settlement> dir1 = new ArrayList<>();
         ArrayList<Settlement> dir2 = new ArrayList<>();
@@ -242,11 +242,10 @@ public class CatanGameState extends AbstractGameState {
         dir2.add(settl2);
 
         // find longest segment, we first follow dir_1 then dir_2
-        // todo look into if keeping visited on the first iteration should be kept or not
         roadSet = expandRoad(this, roadSet, new ArrayList<>(dir1), new ArrayList<>(dir2));
         roadSet.addAll(expandRoad(this, roadSet2, new ArrayList<>(dir2), new ArrayList<>(dir1)));
 
-        System.out.println("Current road length is " + roadSet.size() + " for player " + getCurrentPlayer());
+//        System.out.println("Current road length is " + roadSet.size() + " for player " + getCurrentPlayer());
         return roadSet.size();
     }
 
@@ -297,36 +296,6 @@ public class CatanGameState extends AbstractGameState {
                 }
 
             }
-            // todo old logic below
-//            boolean roadFound = false;
-//            if (edges != null) {
-//                for (Edge<Settlement, Road> e : edges) {
-//                    // find road taking to new node
-//                    if (expanded.contains(e.getDest())) {
-//                        Road road = e.getValue();
-//                        if (!roadSet.contains(e.getValue())) {
-//                            if (road.getOwner() == gs.getCurrentPlayer()) {
-//                                // only add it if it's the players and unvisited
-//                                roadSet.add(road);
-//                                roadFound = true;
-//                            }
-//                        }
-//                    }
-//                }
-//                if (roadFound) {
-//                    // if settlement is not taken or belongs to player we add the neighbouring settlements to the unvisited list
-//                    if (settlement.getOwner() == -1 || settlement.getOwner() == gs.getCurrentPlayer()) {
-//                        // Add new settlements to the unexpanded list
-//                        for (Edge<Settlement, Road> e : edges) {
-//                            // find road taking to new node
-//                            // todo could not find destination in visited
-//                            if (!expanded.contains(e.getDest())) {
-//                                unexpanded.add(e.getDest());
-//                            }
-//                        }
-//                    }
-//                }
-//            }
         }
 
         // only gets here when explored a single road
@@ -630,7 +599,6 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        // todo return unknown components
         return new ArrayList<Integer>() {{
             Deck<Card> resourceDeck = (Deck<Card>) getComponent(resourceDeckHash);
             Deck<Card> devDeck = (Deck<Card>) getComponent(developmentDeckHash);

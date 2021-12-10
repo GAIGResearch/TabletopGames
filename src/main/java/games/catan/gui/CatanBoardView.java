@@ -12,15 +12,11 @@ import java.awt.*;
 
 public class CatanBoardView extends JComponent {
     CatanGameState gs;
-    private int width;
-    private int height;
 
     private double tileRadius;
 
-    public CatanBoardView(CatanGameState gs){
+    public CatanBoardView(CatanGameState gs, int width, int height){
         this.gs = gs;
-        this.height = 600;
-        this.width = 600;
         this.tileRadius = 40;
         setPreferredSize(new Dimension(width, height));
 //        updateTileSize();
@@ -40,12 +36,22 @@ public class CatanBoardView extends JComponent {
     }
 
     private void drawBoard(Graphics2D g) {
-
         // Draw board
         CatanTile[][] board = gs.getBoard();
+
+        int midX = board.length/2;
+        int midY = board[0].length/2;
+        CatanTile midTile = new CatanTile(midX, midY);
+
+
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
+
+                // mid_x should be the same as the distance
+                if (midTile.getDistanceToTile(tile) >= midX+1){
+                    continue;
+                }
                 Point centreCoords = tile.getCentreCoords(tileRadius);
 
                 g.setColor(tileColourLookup(tile));
@@ -81,6 +87,12 @@ public class CatanBoardView extends JComponent {
                 for (int i = 0; i < roads.length; i++) {
                     if (roads[i] != null && roads[i].getOwner() != -1)
                         drawRoad(g, tile.getEdgeCoords(i, tileRadius), CatanConstants.PlayerColors[roads[i].getOwner()]);
+                    // todo useful for showing road IDs on the GUI
+//                        g.setFont(new Font("TimeRoman", Font.PLAIN, 10));
+//                        g.setColor(Color.BLACK);
+//                        Point[] location = tile.getEdgeCoords(i, tileRadius);
+//                        g.drawLine(location[0].x, location[0].y, location[1].x, location[1].y);
+//                        g.drawString(tile.getRoads()[i].getID() + "", ((location[0].x + location[1].x) / 2), ((location[0].y + location[1].y) / 2));
                 }
             }
         }

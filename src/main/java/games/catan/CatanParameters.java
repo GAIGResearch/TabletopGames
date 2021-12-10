@@ -8,7 +8,7 @@ public class CatanParameters extends AbstractParameters {
     private String dataPath;
     public final int n_actions_per_turn = 1;
 
-    public final int n_players= 4;
+    public final static int n_players= 4;
 
     public final int n_settlements = 5;
     public final int n_cities = 4;
