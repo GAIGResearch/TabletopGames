@@ -35,6 +35,7 @@ public class GameResultListener implements IGameListener {
             collectedData.put("Players", state.getNPlayers());
             collectedData.put("Rounds", state.getTurnOrder().getRoundCounter());
             collectedData.put("Turns", state.getTurnOrder().getTurnCounter());
+            collectedData.put("Ticks", game.getTick());
             for (int p = 0; p < 9; p++) {
                 if (p >= state.getNPlayers()) {
                     collectedData.put(String.format("P%d_Score", p), 0);
