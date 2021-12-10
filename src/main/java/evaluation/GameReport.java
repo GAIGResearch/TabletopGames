@@ -36,6 +36,7 @@ public class GameReport {
                             "\tgames=         A list of the games to be played. If there is more than one, then use a \n" +
                             "\t               pipe-delimited list, for example games=Uno|ColtExpress|Pandemic.\n" +
                             "\t               The default is 'all' to indicate that all games should be analysed.\n" +
+                            "\t               Specifying all|-name1|-name2... will run all games except for name1, name2...\n" +
                             "\tplayer=        The JSON file containing the details of the Player to monitor, OR\n" +
                             "\t               one of mcts|rmhc|random|osla|<className>. The default is 'random'.\n" +
                             "\topponent=      (Optional) JSON file containing the details of the Player to monitor, OR\n" +
@@ -76,9 +77,11 @@ public class GameReport {
             throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
 
         int nGames = getArg(args, "nGames", 1000);
-        List<String> games = new ArrayList<>(Arrays.asList(getArg(args, "games", "all").split("\\|")));
-        if (games.get(0).equals("all"))
-            games = Arrays.stream(GameType.values()).map(Enum::name).collect(toList());
+        List<String> tempGames = new ArrayList<>(Arrays.asList(getArg(args, "games", "all").split("\\|")));
+        List<String> games = tempGames;
+        if (tempGames.get(0).equals("all")) {
+            games = Arrays.stream(GameType.values()).filter(g -> !tempGames.contains("-" + g.name())).map(Enum::name).collect(toList());
+        }
 
         if (!gameParams.equals("") && games.size() > 1)
             throw new IllegalArgumentException("Cannot yet provide a gameParams argument if running multiple games");
