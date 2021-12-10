@@ -19,7 +19,7 @@ public class GameReportListener implements IGameListener {
     List<Double> scores = new ArrayList<>();
     List<Double> visibilityOnTurn = new ArrayList<>();
     List<Integer> components = new ArrayList<>();
-    Map<String, Object> collectedData = new HashMap<>();
+    Map<String, Object> collectedData = new LinkedHashMap<>();
     AbstractForwardModel fm;
     IStatisticLogger logger;
 

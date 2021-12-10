@@ -274,13 +274,11 @@ public class Game {
                     gameState.playerTimer[activePlayer].pause();
                     gameState.playerTimer[activePlayer].incrementAction();
 
-                    if (gameState.coreGameParameters.verbose) {
-                        if (action != null) {
+                    if (gameState.coreGameParameters.verbose && !(action == null)) {
                             System.out.println(action);
-                        } else {
-                            System.out.println("NULL action (player " + activePlayer + ")");
-                        }
                     }
+                    if (action == null)
+                        throw new AssertionError("We have a NULL action in the Game loop");
 
                     // Check player timeout
                     if (observation.playerTimer[activePlayer].exceededMaxTime()) {
