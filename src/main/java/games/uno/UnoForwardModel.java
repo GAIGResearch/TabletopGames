@@ -201,25 +201,6 @@ public class UnoForwardModel extends AbstractForwardModel {
     }
 
     /**
-     * Alternative rules check running total of points for the players.
-     * @param ugs - current game state, calculates new total based on this state and checks game end.
-     * @return - true if game has ended, false otherwise.
-     */
-    private boolean checkRunningTotal(UnoGameState ugs) {
-        UnoGameParameters ugp = (UnoGameParameters) ugs.getGameParameters();
-
-        int[] playerScores = new int[ugs.getNPlayers()];
-        for (int playerID = 0; playerID < ugs.getNPlayers(); playerID++) {
-            if (ugs.getPlayerResults()[playerID] == Utils.GameResult.GAME_ONGOING) {
-                int nPoints = ugs.playerScore[playerID] + ugs.calculatePlayerPoints(playerID);
-                playerScores[playerID] = nPoints;
-            }
-        }
-
-        return checkGameEnd(ugs, playerScores);
-    }
-
-    /**
      * The game is ended when a player reaches N points (as total of points from cards of all other players)
      * @param playerScores - player scores to use for checking game end
      * @param ugs - current game state

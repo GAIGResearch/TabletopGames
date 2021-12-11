@@ -172,7 +172,8 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     public double getGameScore(int playerId) {
-        return calculatePlayerPoints(playerId);
+        // we return the total score from previous rounds, plus the current estimate for this round
+        return calculatePlayerPoints(playerId) + playerScore[playerId];
     }
 
     @Override
