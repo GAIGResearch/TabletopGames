@@ -36,7 +36,7 @@ public class Pilgrimage extends Component {
     int player = -1;
     boolean active;
     int pilgrimId = -1;
-    int progress = -1;
+    public int progress = -1;
 
 
     public Pilgrimage(String destination, int minPiety, int cost, String reward, int[] duration) {

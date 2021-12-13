@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
+import games.dicemonastery.actions.GoOnPilgrimage;
 import utilities.Pair;
 
 import java.util.*;
@@ -143,6 +144,8 @@ public class MultiTreeNode extends SingleTreeNode {
                     if (expansionActionTaken[currentActor])
                         throw new AssertionError("We have already picked an expansion action for this player");
                     chosen = currentNode.expand(unexpanded);
+                    if (chosen instanceof GoOnPilgrimage && ((GoOnPilgrimage) chosen).destination.progress > -1)
+                        throw new AssertionError("Invalid");
                     lastAction[currentActor] = chosen;
                     expansionActionTaken[currentActor] = true;
                     if (debug)
@@ -155,7 +158,6 @@ public class MultiTreeNode extends SingleTreeNode {
                     if (debug)
                         System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
                     advance(currentState, chosen);
-                    // we execute a copy(), because this can change the action, so we then don't find the node later!
                 }
                 actionsInTree.add(new Pair<>(currentActor, chosen));
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
@@ -182,6 +184,8 @@ public class MultiTreeNode extends SingleTreeNode {
 
     private void expandNode(int currentActor, AbstractGameState currentState) {
         // we now expand a node
+        if (lastAction[currentActor] instanceof GoOnPilgrimage && ((GoOnPilgrimage) lastAction[currentActor]).destination.progress > -1)
+            throw new AssertionError("Invalid");
         currentLocation[currentActor] = currentLocation[currentActor].expandNode(lastAction[currentActor], currentState);
         // currentLocation now stores the last node in the tree for that player..so that we can back-propagate
         nodeExpanded[currentActor] = true;

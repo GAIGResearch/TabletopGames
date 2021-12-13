@@ -6,6 +6,8 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
+import games.dicemonastery.actions.GoOnPilgrimage;
+import games.dicemonastery.components.Pilgrimage;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 import utilities.Pair;
@@ -163,6 +165,9 @@ public class SingleTreeNode {
             actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState);
             //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
 //                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
+            if (actionsFromOpenLoopState.stream().anyMatch(action -> action instanceof  GoOnPilgrimage && ((GoOnPilgrimage) action).destination.progress > -1)) {
+                throw new AssertionError("We have an invalid action");
+            }
             if (params.expansionPolicy == MAST) {
                 advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
                         .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));
@@ -240,6 +245,12 @@ public class SingleTreeNode {
                 stop = copyCount > params.budget || numIters > params.budget;
             } else if (budgetType == BUDGET_FMANDCOPY_CALLS) {
                 stop = (copyCount + fmCallsCount) > params.budget || numIters > params.budget;
+            }
+        }
+        if (numIters > 10) {
+            AbstractAction bestAction = bestAction();
+            if (bestAction instanceof GoOnPilgrimage && ((GoOnPilgrimage) bestAction).destination.progress > -1) {
+                stop = true;
             }
         }
 
@@ -496,6 +507,7 @@ public class SingleTreeNode {
      * @param act - action to apply
      */
     protected void advance(AbstractGameState gs, AbstractAction act) {
+        // we execute a copy(), because this can change the action, so we then don't find the node later!
         forwardModel.next(gs, act.copy());
         root.fmCallsCount++;
         if (params.opponentTreePolicy == SelfOnly && gs.getCurrentPlayer() != decisionPlayer)
