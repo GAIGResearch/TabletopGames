@@ -160,14 +160,14 @@ public class SingleTreeNode {
     }
 
     protected void setActionsFromOpenLoopState(AbstractGameState actionState) {
+        // TODO: Add a check here for the root node (only) that there is not change to the OpenLoopActions
+        // TODO: However this is complicated by MultiTree MCTS, for which this invariant only holds for the acting player
+        // so check the MCTSParams as well
         openLoopState = actionState;
         if (actionState.getCurrentPlayer() == this.decisionPlayer) {
             actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState);
             //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
 //                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
-            if (actionsFromOpenLoopState.stream().anyMatch(action -> action instanceof  GoOnPilgrimage && ((GoOnPilgrimage) action).destination.progress > -1)) {
-                throw new AssertionError("We have an invalid action");
-            }
             if (params.expansionPolicy == MAST) {
                 advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
                         .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));
@@ -245,12 +245,6 @@ public class SingleTreeNode {
                 stop = copyCount > params.budget || numIters > params.budget;
             } else if (budgetType == BUDGET_FMANDCOPY_CALLS) {
                 stop = (copyCount + fmCallsCount) > params.budget || numIters > params.budget;
-            }
-        }
-        if (numIters > 10) {
-            AbstractAction bestAction = bestAction();
-            if (bestAction instanceof GoOnPilgrimage && ((GoOnPilgrimage) bestAction).destination.progress > -1) {
-                stop = true;
             }
         }
 
