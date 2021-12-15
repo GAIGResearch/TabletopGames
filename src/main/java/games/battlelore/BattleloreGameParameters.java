@@ -49,7 +49,7 @@ public class BattleloreGameParameters extends AbstractParameters {
         BattleloreGameParameters that = (BattleloreGameParameters) o;
         return hexWidth == that.hexWidth &&
                 hexHeight == that.hexHeight &&
-                dataPath == that.dataPath;
+                dataPath.equals(that.dataPath);
     }
 
     @Override
