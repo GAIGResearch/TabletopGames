@@ -38,7 +38,6 @@ public class SkipTurnAction extends AbstractAction {
         }
 
         BattleloreGameState state = (BattleloreGameState) gameState;
-        state.AddToRounds();
         state.IncrementTurn(playerID);
         MapTile units = (MapTile) gameState.getComponentById(unitsID);
         if (units != null) {

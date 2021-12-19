@@ -90,9 +90,10 @@ public class UnoForwardModel extends AbstractForwardModel {
 
     private void drawCardsToPlayers(UnoGameState ugs) {
         for (int player = 0; player < ugs.getNPlayers(); player++) {
-            for (int card = 0; card < ((UnoGameParameters) ugs.getGameParameters()).nCardsPerPlayer; card++) {
-                ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
-            }
+            if (ugs.isNotTerminalForPlayer(player))
+                for (int card = 0; card < ((UnoGameParameters) ugs.getGameParameters()).nCardsPerPlayer; card++) {
+                    ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
+                }
         }
     }
 
@@ -106,8 +107,10 @@ public class UnoForwardModel extends AbstractForwardModel {
 
         // Refresh player decks
         for (int i = 0; i < ugs.getNPlayers(); i++) {
-            ugs.drawDeck.add(ugs.playerDecks.get(i));
-            ugs.playerDecks.get(i).clear();
+            if (ugs.isNotTerminalForPlayer(i)) {
+                ugs.drawDeck.add(ugs.playerDecks.get(i));
+                ugs.playerDecks.get(i).clear();
+            }
         }
 
         // Refresh draw deck and shuffle
@@ -227,7 +230,6 @@ public class UnoForwardModel extends AbstractForwardModel {
     private boolean checkGameEnd(UnoGameState ugs, int[] playerScores) {
         UnoGameParameters ugp = (UnoGameParameters) ugs.getGameParameters();
 
-        boolean tie = false;
         List<Integer> breachers = new ArrayList<>();
 
         for (int playerID = 0; playerID < ugs.getNPlayers(); playerID++) {
@@ -276,28 +278,41 @@ public class UnoForwardModel extends AbstractForwardModel {
                     // as we need to knock out players who breach the threshold
                     int remainingPlayers = 0;
                     int lowScore = ugp.nWinPoints * 10;
-                    List<Integer> lowScoreIds = new ArrayList<>();
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
                         if (ugs.getPlayerResults()[i] == GAME_ONGOING) {
                             if (playerScores[i] >= ugp.nWinPoints) {
                                 ugs.setPlayerResult(Utils.GameResult.LOSE, i);
                                 ugs.expulsionRound[i] = ugs.getTurnOrder().getRoundCounter();
-                                if (playerScores[i] <= lowScore) {
+                                if (playerScores[i] < lowScore) {
                                     lowScore = playerScores[i];
-                                    lowScoreIds.add(i);
                                 }
                             } else {
                                 remainingPlayers++;
                             }
                         }
                     }
+                    List<Integer> lowScoreIds = new ArrayList<>();
+                    for (int i = 0; i < ugs.getNPlayers(); i++)
+                        if (ugs.getPlayerResults()[i] == GAME_ONGOING && lowScore == playerScores[i])
+                            lowScoreIds.add(i);
+
                     switch (remainingPlayers) {
                         case 0:
                             // everyone breached, so winner is the lowest score
-                            for (int p : lowScoreIds)
+                            for (int p : lowScoreIds) {
                                 ugs.setPlayerResult(Utils.GameResult.WIN, p);
-                            // we then continue to the case 1:
+                                ugs.expulsionRound[p] = ugs.getTurnOrder().getRoundCounter() + 1;
+                            }
+                            ugs.setGameStatus(Utils.GameResult.GAME_END);
+                            return true;
                         case 1:
+                            for (int p = 0; p < ugs.getNPlayers(); p++) {
+                                if (ugs.getPlayerResults()[p] == GAME_ONGOING) {
+                                    ugs.setPlayerResult(Utils.GameResult.WIN, p);
+                                    ugs.expulsionRound[p] = ugs.getTurnOrder().getRoundCounter() + 1;
+                                }
+                            }
+                            // we then continue to the case 1:
                             ugs.setGameStatus(Utils.GameResult.GAME_END);
                             return true;
                         default:

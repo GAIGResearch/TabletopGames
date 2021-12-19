@@ -1,13 +1,10 @@
 package games.battlelore;
 
 import core.AbstractForwardModel;
-import core.AbstractGameData;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 
-import core.interfaces.IGamePhase;
-import core.rules.Node;
 import games.battlelore.actions.AttackUnitsAction;
 import games.battlelore.actions.MoveUnitsAction;
 import games.battlelore.actions.PlayCommandCardAction;
@@ -21,6 +18,9 @@ import utilities.Utils;
 import java.util.*;
 
 public class BattleloreForwardModel extends AbstractForwardModel {
+
+    int maxTurnsToPlay = 100;
+
     @Override
     protected void _setup(AbstractGameState initialState) {
         BattleloreGameParameters gameParams = (BattleloreGameParameters) initialState.getGameParameters();
@@ -54,7 +54,6 @@ public class BattleloreForwardModel extends AbstractForwardModel {
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         BattleloreGameState state = (BattleloreGameState) currentState;
-        BattleloreGameParameters gameParams = (BattleloreGameParameters) currentState.getGameParameters();
         action.execute(currentState);
 
         int playerId = state.getCurrentPlayer();
@@ -86,8 +85,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
             return;
         }
 
-        int roundExceedThreshold = 100;
-        if (state.getNumberOfRounds() > roundExceedThreshold) {
+        if (state.getTurnOrder().getTurnCounter() > maxTurnsToPlay) {
             /* Decide on who should win if the game enters an infinite loop
             state.setGameStatus(Utils.GameResult.DRAW);
             //Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;

@@ -59,7 +59,6 @@ public class MoveUnitsAction extends AbstractAction
             }
 
             state.RemoveUnit(tile.getLocationX(), tile.getLocationY());
-            state.AddToRounds();
             state.IncrementTurn(playerID);
             return true;
         }

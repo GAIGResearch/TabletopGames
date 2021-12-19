@@ -180,11 +180,17 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     public double getGameScore(int playerId) {
         // Only CLASSIC scoring has a positive score as beneficial
         // so we return the negative score to indicate a high score is poor
-        if (gameStatus == GAME_ONGOING && ((UnoGameParameters) gameParameters).scoringMethod != CLASSIC)
-            return -(playerScore[playerId] + calculatePlayerPoints(playerId, true));
-        return playerScore[playerId];
+        int score = playerScore[playerId];
+        UnoGameParameters ugp = (UnoGameParameters) gameParameters;
+
+        if (gameStatus == GAME_ONGOING && ugp.scoringMethod != CLASSIC)
+            score += calculatePlayerPoints(playerId, true);
+        if (ugp.scoringMethod != CLASSIC)
+            score = -score;
+        return score;
     }
 
+    @Override
     public int getOrdinalPosition(int playerId) {
         if (playerResults[playerId] == Utils.GameResult.WIN)
             return 1;

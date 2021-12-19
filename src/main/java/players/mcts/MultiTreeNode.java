@@ -161,7 +161,7 @@ public class MultiTreeNode extends SingleTreeNode {
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
                     maxDepthReached[currentActor] = true;
             }
-        } while (currentState.isNotTerminal() && !(nodeExpanded[decisionPlayer] && actionsInRollout.size() >= params.rolloutLength));
+        } while (currentState.isNotTerminal() && !(actionsInRollout.size() >= params.rolloutLength && (nodeExpanded[decisionPlayer] || currentState.isNotTerminalForPlayer(decisionPlayer)) ));
 
         for (int i = 0; i < nodeExpanded.length; i++) {
             updateCurrentLocation(i, currentState);

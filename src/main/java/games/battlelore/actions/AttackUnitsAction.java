@@ -78,7 +78,6 @@ public class AttackUnitsAction extends AbstractAction {
                 unit.SetCanAttack(false);
             }
 
-            state.AddToRounds();
             state.IncrementTurn(playerID);
             return true;
         }

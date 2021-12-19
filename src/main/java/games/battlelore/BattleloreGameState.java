@@ -5,6 +5,8 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.interfaces.IGamePhase;
+import core.turnorders.StandardTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
@@ -27,21 +29,12 @@ public class BattleloreGameState extends AbstractGameState {
         Decoy, BloodHarvester, ViperLegion, CitadelGuard, YeomanArcher;
     }
 
-    int numberOfRounds;
     int[] playerScores;
     GridBoard<MapTile> gameBoard;
     List<Unit> unitTypes;
 
-    public int getNumberOfRounds() {
-        return numberOfRounds;
-    }
-
-    public void AddToRounds() {
-        numberOfRounds++;
-    }
-
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new BattleloreTurnOrder(nPlayers), GameType.Battlelore);
+        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.Battlelore);
         playerScores = new int[nPlayers];
     }
 
@@ -206,7 +199,7 @@ public class BattleloreGameState extends AbstractGameState {
         }
 
         state.gameBoard = clonedBoard;
-        state.unitTypes = unitTypes;
+        state.unitTypes = unitTypes; // immutable
         return state;
     }
 

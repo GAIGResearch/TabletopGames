@@ -20,7 +20,7 @@ public class UnoGameParameters extends TunableParameters {
         CLASSIC, CHALLENGE, INCREMENTAL
     }
 
-    public UnoScoring scoringMethod = UnoScoring.INCREMENTAL;
+    public UnoScoring scoringMethod = UnoScoring.CHALLENGE;
     public int nCardsPerPlayer = 7;
     public int nNumberCards = 10;
     public int nWildCards = 4;
