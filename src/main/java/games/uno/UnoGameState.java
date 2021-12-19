@@ -185,6 +185,32 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         return playerScore[playerId];
     }
 
+    public int getOrdinalPosition(int playerId) {
+        if (playerResults[playerId] == Utils.GameResult.WIN)
+            return 1;
+        UnoGameParameters ugp = (UnoGameParameters) gameParameters;
+        if (ugp.scoringMethod == CHALLENGE) {
+            double playerScore = getGameScore(playerId);
+            int ordinal = 1;
+            for (int i = 0, n = getNPlayers(); i < n; i++) {
+                if (expulsionRound[i] > expulsionRound[playerId]) {
+                    ordinal++;
+                } else if (expulsionRound[i] == expulsionRound[playerId]) {
+                    double otherScore = getGameScore(i);
+                    if (otherScore > playerScore)
+                        ordinal++;
+                    else if (otherScore == playerScore) {
+                        if (getTiebreak(i) > getTiebreak(playerId))
+                            ordinal++;
+                    }
+                }
+            }
+            return ordinal;
+        } else {
+            return super.getOrdinalPosition(playerId);
+        }
+    }
+
 
     @Override
     protected void _reset() {
