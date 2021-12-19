@@ -23,7 +23,6 @@ import java.util.*;
 public class BattleloreForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState initialState) {
-        Random random = new Random(initialState.getGameParameters().getRandomSeed());
         BattleloreGameParameters gameParams = (BattleloreGameParameters) initialState.getGameParameters();
         BattleloreGameState gameState = (BattleloreGameState)initialState;
         BattleloreData _data = new BattleloreData();
@@ -38,7 +37,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         int hexWidth = gameParams.hexWidth;
 
         //Game Area Initialization
-        gameState.gameBoard = new GridBoard<MapTile>(hexWidth, hexHeight);
+        gameState.gameBoard = new GridBoard<>(hexWidth, hexHeight);
         gameState.unitTypes = new ArrayList<>();
         gameState.unitTypes = _data.getUnits();
 

@@ -12,6 +12,15 @@ import java.util.Objects;
 public class UnoGameParameters extends TunableParameters {
     public String dataPath = "data/uno/";
 
+    // CLASSIC scoring only gives points to the winning player equal to the cards held by their opponents
+    // INCREMENTAL scores the points held in ones own hand, and the winner is the lowest score at the end
+    // CHALLENGE is the 'recommended' variant. It is as INCREMENTAL, but players are eliminated once
+    // they reach 500 points
+    public enum UnoScoring {
+        CLASSIC, CHALLENGE, INCREMENTAL
+    }
+
+    public UnoScoring scoringMethod = UnoScoring.INCREMENTAL;
     public int nCardsPerPlayer = 7;
     public int nNumberCards = 10;
     public int nWildCards = 4;

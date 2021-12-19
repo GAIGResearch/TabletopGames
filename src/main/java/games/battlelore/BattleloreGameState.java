@@ -231,6 +231,7 @@ public class BattleloreGameState extends AbstractGameState {
     @Override
     protected void _reset() {
         gameBoard = null;
+        playerScores = new int[getNPlayers()];
     }
 
     @Override
