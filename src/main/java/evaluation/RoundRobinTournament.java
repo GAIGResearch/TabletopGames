@@ -238,7 +238,7 @@ public class RoundRobinTournament extends AbstractTournament {
                     data.put("Game", g.getGameType().name());
                     data.put("PlayerNumber", p);
                     data.put("PlayerType", g.getPlayers().get(p).toString());
-                    data.put("Score", g.getGameState().getHeuristicScore(p));
+                    data.put("Score", g.getGameState().getGameScore(p));
                     data.put("Result", g.getGameState().getPlayerResults()[p].toString());
                     dataLogger.record(data);
                     dataLogger.flush();

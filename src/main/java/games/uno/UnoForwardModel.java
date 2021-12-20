@@ -10,10 +10,7 @@ import games.uno.actions.PlayCard;
 import games.uno.cards.UnoCard;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.*;
@@ -250,7 +247,7 @@ public class UnoForwardModel extends AbstractForwardModel {
                 case CLASSIC:
                     // in this case, the game ends when one player breaches the threshold
                     // and they win
-                    int maxScore = (int) IntStream.range(0, ugs.getNPlayers()).mapToDouble(ugs::getGameScore).max().orElseThrow(
+                    int maxScore = Arrays.stream(ugs.playerScore).max().orElseThrow(
                             () -> new AssertionError("Unexpected: no players have scores?")
                     );
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
@@ -265,7 +262,7 @@ public class UnoForwardModel extends AbstractForwardModel {
                 case INCREMENTAL:
                     // in this case the game ends when one player breaches the threshold.
                     // but the winner is the player with fewest points!
-                    int minScore = (int) IntStream.range(0, ugs.getNPlayers()).mapToDouble(ugs::getGameScore).min().orElseThrow(
+                    int minScore = Arrays.stream(ugs.playerScore).min().orElseThrow(
                             () -> new AssertionError("Unexpected: no players have scores?")
                     );
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
