@@ -41,6 +41,7 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
         return nextOwner;
     }
 
+
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
@@ -49,6 +50,7 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
 
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));
+        skipTurn = false;
     }
 
     @Override

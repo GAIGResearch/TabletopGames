@@ -43,6 +43,7 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.println(
                     "There are a number of possible arguments:\n" +
                             "\tgame=          The name of the game to play. Defaults to Uno.\n" +
+                            "\tnPlayers=      The number of players in each game. Defaults to 2.\n" +
                             "\tplayers=       The directory containing agent JSON files for the competing Players\n" +
                             "\t               If not specified, this defaults to very basic OSLA, RND, RHEA and MCTS players.\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
@@ -197,7 +198,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param gameIdx  - index of game to play in this evaluation.
      */
     protected void evaluateMatchUp(List<Integer> agentIDs, int gameIdx) {
-        System.out.println("Evaluate " + agentIDs.toString());
+     //   System.out.println("Evaluate " + agentIDs.toString());
         LinkedList<AbstractPlayer> matchUpPlayers = new LinkedList<>();
         for (int agentID : agentIDs)
             matchUpPlayers.add(this.agents.get(agentID));
