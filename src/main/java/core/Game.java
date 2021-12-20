@@ -291,9 +291,6 @@ public class Game {
                     }
                     tick++;
 
-                    if (!gameState.isNotTerminalForPlayer(gameState.getCurrentPlayer()))
-                        throw new AssertionError("Next player is not playing!");
-
                     // GUI update
                     updateGUI(gui, frame);
                 } else {

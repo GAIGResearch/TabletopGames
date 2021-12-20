@@ -107,10 +107,8 @@ public class UnoForwardModel extends AbstractForwardModel {
 
         // Refresh player decks
         for (int i = 0; i < ugs.getNPlayers(); i++) {
-            if (ugs.isNotTerminalForPlayer(i)) {
-                ugs.drawDeck.add(ugs.playerDecks.get(i));
-                ugs.playerDecks.get(i).clear();
-            }
+            ugs.drawDeck.add(ugs.playerDecks.get(i));
+            ugs.playerDecks.get(i).clear();
         }
 
         // Refresh draw deck and shuffle
@@ -202,7 +200,13 @@ public class UnoForwardModel extends AbstractForwardModel {
                 case INCREMENTAL:
                 case CHALLENGE:
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
-                        ugs.playerScore[i] += ugs.calculatePlayerPoints(i, true);
+                        if (ugs.getPlayerResults()[i] == GAME_ONGOING) {
+                            ugs.playerScore[i] += ugs.calculatePlayerPoints(i, true);
+                        } else {
+                            if (ugs.calculatePlayerPoints(i, true) > 0) {
+                                throw new AssertionError("Eliminated players should not have any cards");
+                            }
+                        }
                     }
                     break;
             }

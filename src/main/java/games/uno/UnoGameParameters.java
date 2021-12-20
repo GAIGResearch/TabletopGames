@@ -20,7 +20,7 @@ public class UnoGameParameters extends TunableParameters {
         CLASSIC, CHALLENGE, INCREMENTAL
     }
 
-    public UnoScoring scoringMethod = UnoScoring.CHALLENGE;
+    public UnoScoring scoringMethod = UnoScoring.INCREMENTAL;
     public int nCardsPerPlayer = 7;
     public int nNumberCards = 10;
     public int nWildCards = 4;
@@ -57,6 +57,7 @@ public class UnoGameParameters extends TunableParameters {
         addTunableParameter("nWildPoints", 50, Arrays.asList(20,30,50,80,100));
         addTunableParameter("nWildDrawPoints", 50, Arrays.asList(20,30,50,80,100));
         addTunableParameter("nWinPoints", 500, Arrays.asList(50,100,250,500));
+        addTunableParameter("scoringMethod", UnoScoring.INCREMENTAL, Arrays.asList(UnoScoring.values()));
     }
 
     @Override
@@ -73,6 +74,7 @@ public class UnoGameParameters extends TunableParameters {
         nWildPoints = (int) getParameterValue("nWildPoints");
         nWildDrawPoints = (int) getParameterValue("nWildDrawPoints");
         nWinPoints = (int) getParameterValue("nWinPoints");
+        scoringMethod = (UnoScoring) getParameterValue("scoringMethod");
     }
 
     public String getDataPath() {
@@ -92,6 +94,7 @@ public class UnoGameParameters extends TunableParameters {
         ugp.specialDrawCards = specialDrawCards.clone();
         ugp.specialWildDrawCards = specialWildDrawCards.clone();
         ugp.colors = colors.clone();
+        ugp.scoringMethod = scoringMethod;
         return ugp;
     }
 
@@ -113,6 +116,7 @@ public class UnoGameParameters extends TunableParameters {
                 nWildPoints == that.nWildPoints &&
                 nWildDrawPoints == that.nWildDrawPoints &&
                 nWinPoints == that.nWinPoints &&
+                scoringMethod == that.scoringMethod &&
                 Objects.equals(dataPath, that.dataPath) &&
                 Arrays.equals(specialDrawCards, that.specialDrawCards) &&
                 Arrays.equals(specialWildDrawCards, that.specialWildDrawCards) &&
@@ -121,7 +125,7 @@ public class UnoGameParameters extends TunableParameters {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), dataPath, nCardsPerPlayer, nNumberCards, nWildCards, nSkipCards, nReverseCards, nDrawCards, nReversePoints, nDraw2Points, nSkipPoints, nWildPoints, nWildDrawPoints, nWinPoints);
+        int result = Objects.hash(super.hashCode(), dataPath, nCardsPerPlayer, nNumberCards, nWildCards, nSkipCards, nReverseCards, nDrawCards, nReversePoints, nDraw2Points, nSkipPoints, nWildPoints, nWildDrawPoints, nWinPoints, scoringMethod);
         result = 31 * result + Arrays.hashCode(specialDrawCards);
         result = 31 * result + Arrays.hashCode(specialWildDrawCards);
         result = 31 * result + Arrays.hashCode(colors);
