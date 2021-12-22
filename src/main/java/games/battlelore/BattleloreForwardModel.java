@@ -43,7 +43,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
 
         for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
             for(int y = 0; y < gameState.gameBoard.getHeight(); y++) {
-                gameState.gameBoard.setElement(x, y, new MapTile(x, y, new ArrayList<Unit>()));
+                gameState.gameBoard.setElement(x, y, new MapTile(x, y, new ArrayList<>()));
             }
         }
 
@@ -80,20 +80,8 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         }
 
         if (checkGameEnd((BattleloreGameState) currentState, playerId)) {
-            currentState.setGameStatus(Utils.GameResult.GAME_END);
             registerWinner(state, playerId);
-            return;
-        }
-
-        if (state.getTurnOrder().getTurnCounter() > maxTurnsToPlay) {
-            /* Decide on who should win if the game enters an infinite loop
-            state.setGameStatus(Utils.GameResult.DRAW);
-            //Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
-            state.setGameStatus(Utils.GameResult.DRAW);
-            //int winningPlayer = BattleloreConstants //.playerMapping.indexOf(winnerSymbol);
-            state.setPlayerResult(Utils.GameResult.DRAW, 0);
-            state.setPlayerResult(Utils.GameResult.DRAW, 1);
-             */
+        } else if (state.getTurnOrder().getTurnCounter() > maxTurnsToPlay) {
             registerWinner(state, state.getGameScore(0) >= state.getGameScore(1) ? 0 : 1);
         }
     }
@@ -149,11 +137,11 @@ public class BattleloreForwardModel extends AbstractForwardModel {
                     //check possible locations size
                     for (int i = 0 ; i< state.getBoard().getWidth(); i++) {
                         if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
-                            actions.add(new MoveUnitsAction(state, tile.getComponentID(), playerFaction, possibleLocations[i][0], possibleLocations[i][1], player));
+                            actions.add(new MoveUnitsAction(tile.getComponentID(), playerFaction, possibleLocations[i][0], possibleLocations[i][1], player));
                         }
                     }
                     if (actions.isEmpty()) {
-                        actions.add(new SkipTurnAction(state, tile.getComponentID(), playerFaction, true, false, player));
+                        actions.add(new SkipTurnAction(tile.getComponentID(), playerFaction, true, false, player));
                     }
                 }
             }
@@ -169,19 +157,19 @@ public class BattleloreForwardModel extends AbstractForwardModel {
 
                     for (int i = 0 ; i< state.getBoard().getWidth(); i++) {
                         if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
-                            actions.add(new AttackUnitsAction(state, attacker.getComponentID(), state.getBoard().getElement(possibleLocations[i][0], possibleLocations[i][1]).getComponentID(),
+                            actions.add(new AttackUnitsAction(attacker.getComponentID(), state.getBoard().getElement(possibleLocations[i][0], possibleLocations[i][1]).getComponentID(),
                                     attacker.GetFaction(), player));
                         }
                     }
                     if (actions.isEmpty()) {
-                        actions.add(new SkipTurnAction(state, attacker.getComponentID(), playerFaction, false, true, player));
+                        actions.add(new SkipTurnAction(attacker.getComponentID(), playerFaction, false, true, player));
                     }
                 }
             }
         }
 
         if (actions.isEmpty()) {
-            actions.add(new SkipTurnAction());
+            actions.add(new SkipTurnAction(playerFaction, player));
         }
         return actions;
     }

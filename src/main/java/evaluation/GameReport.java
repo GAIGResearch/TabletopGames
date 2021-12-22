@@ -22,6 +22,8 @@ import static utilities.Utils.getArg;
 
 public class GameReport {
 
+    public static boolean debug = true;
+
     /**
      * The idea here is that we get statistics from the the decisions of a particular agent in
      * a game, or set of games
@@ -159,6 +161,8 @@ public class GameReport {
                     Collections.shuffle(allPlayers);
                     game.reset(allPlayers);
                     game.run();
+                    if (debug)
+                        System.out.printf("Game %4d finished at %tT%n", i, System.currentTimeMillis());
                 }
             }
         }

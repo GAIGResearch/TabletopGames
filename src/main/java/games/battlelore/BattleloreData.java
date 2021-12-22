@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BattleloreData extends AbstractGameData {
-    private GridBoard board;
-    private List<Deck<Card>> decks;
     private List<Unit> units;
 
     @Override

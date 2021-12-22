@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+ import java.util.Objects;
 
 public class Unit extends Component {
 
@@ -138,7 +139,7 @@ public class Unit extends Component {
                 health == unit.health &&
                 faction == unit.faction &&
                 isMelee == unit.isMelee &&
-                shortName == unit.shortName &&
+                Objects.equals(shortName, unit.shortName) &&
                 canMove == unit.canMove &&
                 canAttack == unit.canAttack;
     }

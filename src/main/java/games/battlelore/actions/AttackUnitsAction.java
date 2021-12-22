@@ -16,14 +16,12 @@ import java.util.Objects;
 import java.util.Random;
 
 public class AttackUnitsAction extends AbstractAction {
-    private BattleloreGameState gameState;
-    private Unit.Faction playerFaction;
-    private int attackingUnitsTileID;
-    private int targetTileID;
-    private int playerID;
+    private final Unit.Faction playerFaction;
+    private final int attackingUnitsTileID;
+    private final int targetTileID;
+    private final int playerID;
 
-    public AttackUnitsAction(BattleloreGameState gameState, int attackingUnitsTileID, int targetTileID, Unit.Faction faction, int playerID) {
-        this.gameState = gameState;
+    public AttackUnitsAction(int attackingUnitsTileID, int targetTileID, Unit.Faction faction, int playerID) {
         this.attackingUnitsTileID = attackingUnitsTileID;
         this.targetTileID = targetTileID;
         this.playerFaction = faction;
@@ -83,14 +81,12 @@ public class AttackUnitsAction extends AbstractAction {
         }
     }
 
-    public MapTile GetAttacker() {
-        MapTile attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
-        return attacker;
+    public MapTile GetAttacker(AbstractGameState gameState) {
+        return (MapTile) gameState.getComponentById(attackingUnitsTileID);
     }
 
-    public MapTile GetDefender() {
-        MapTile defender = (MapTile) gameState.getComponentById(targetTileID);
-        return defender;
+    public MapTile GetDefender(AbstractGameState gameState) {
+        return (MapTile) gameState.getComponentById(targetTileID);
     }
 
     public Unit.Faction GetFaction() {
@@ -99,7 +95,7 @@ public class AttackUnitsAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new AttackUnitsAction(gameState, attackingUnitsTileID, targetTileID, playerFaction, playerID);
+        return this; // immutable
     }
 
     @Override
@@ -107,10 +103,8 @@ public class AttackUnitsAction extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof AttackUnitsAction)) return false;
         AttackUnitsAction that = (AttackUnitsAction) o;
-        MapTile attacker = (MapTile) gameState.getComponentById(attackingUnitsTileID);
-        MapTile defender = (MapTile) gameState.getComponentById(targetTileID);
-        return Objects.equals(attacker, that.GetAttacker()) &&
-                Objects.equals(defender, that.GetDefender()) &&
+        return that.attackingUnitsTileID == attackingUnitsTileID &&
+                that.targetTileID == targetTileID &&
                 playerFaction == that.playerFaction &&
                 playerID == that.playerID;
     }

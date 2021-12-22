@@ -21,15 +21,13 @@ import java.util.Objects;
 
 public class MoveUnitsAction extends AbstractAction
 {
-    private BattleloreGameState gameState;
-    private Unit.Faction playerFaction;
-    private int tileID;
-    private int locationX;
-    private int locationY;
-    private int playerID;
+    private final Unit.Faction playerFaction;
+    private final int tileID;
+    private final int locationX;
+    private final int locationY;
+    private final int playerID;
 
-    public MoveUnitsAction(BattleloreGameState gameState, int tileID, Unit.Faction faction, int locX, int locY, int playerID) {
-        this.gameState = gameState;
+    public MoveUnitsAction( int tileID, Unit.Faction faction, int locX, int locY, int playerID) {
         this.tileID = tileID;
         this.playerFaction = faction;
         this.locationX = locX;
@@ -66,7 +64,7 @@ public class MoveUnitsAction extends AbstractAction
 
     @Override
     public AbstractAction copy() {
-        return new MoveUnitsAction(gameState, tileID, playerFaction, locationX, locationY, playerID);
+        return this; // immutable
     }
 
     @Override

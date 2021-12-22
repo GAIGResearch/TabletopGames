@@ -14,9 +14,9 @@ import java.util.Objects;
 
 public class PlayCommandCardAction extends AbstractAction {
 
-    private Unit.Faction playerFaction;
-    private CommandCard.CommandType type;
-    private int playerID;
+    private final Unit.Faction playerFaction;
+    private final CommandCard.CommandType type;
+    private final int playerID;
 
     public PlayCommandCardAction(CommandCard.CommandType type, Unit.Faction playerFaction, int playerID) {
         this.type = type;
@@ -63,7 +63,7 @@ public class PlayCommandCardAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new PlayCommandCardAction(type, playerFaction, playerID);
+        return this; //immutable
     }
 
     @Override
