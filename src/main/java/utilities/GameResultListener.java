@@ -32,6 +32,7 @@ public class GameResultListener implements IGameListener {
         if (type == GAME_OVER) {
             AbstractGameState state = game.getGameState();
             collectedData.put("Game", game.getGameType().name());
+            collectedData.put("GameID", game.getGameState().getGameID());
             collectedData.put("Players", state.getNPlayers());
             collectedData.put("Rounds", state.getTurnOrder().getRoundCounter());
             collectedData.put("Turns", state.getTurnOrder().getTurnCounter());

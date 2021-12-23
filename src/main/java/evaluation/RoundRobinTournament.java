@@ -23,7 +23,7 @@ import static utilities.Utils.getArg;
 
 
 public class RoundRobinTournament extends AbstractTournament {
-    private static boolean debug = true;
+    private static boolean debug = false;
     public final boolean selfPlay;
     private final int gamesPerMatchUp;
     protected List<String> listenerClasses;
@@ -235,12 +235,14 @@ public class RoundRobinTournament extends AbstractTournament {
             if (dataLogger != null) {
                 Game g = games.get(gameIdx);
                 for (int p = 0; p < g.getPlayers().size(); p++) {
-                    Map<String, Object> data = new HashMap<>();
+                    Map<String, Object> data = new LinkedHashMap<>();
                     data.put("GameId", gameCounter);
                     data.put("Game", g.getGameType().name());
+                    data.put("PlayerCount", g.getGameState().getNPlayers());
                     data.put("PlayerNumber", p);
                     data.put("PlayerType", g.getPlayers().get(p).toString());
                     data.put("Score", g.getGameState().getGameScore(p));
+                    data.put("Ordinal", g.getGameState().getOrdinalPosition(p));
                     data.put("Result", g.getGameState().getPlayerResults()[p].toString());
                     dataLogger.record(data);
                     dataLogger.flush();

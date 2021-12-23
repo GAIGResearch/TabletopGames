@@ -4,7 +4,6 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
-
 import games.battlelore.actions.AttackUnitsAction;
 import games.battlelore.actions.MoveUnitsAction;
 import games.battlelore.actions.PlayCommandCardAction;
@@ -12,10 +11,11 @@ import games.battlelore.actions.SkipTurnAction;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
-
 import utilities.Utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class BattleloreForwardModel extends AbstractForwardModel {
 
@@ -24,7 +24,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState initialState) {
         BattleloreGameParameters gameParams = (BattleloreGameParameters) initialState.getGameParameters();
-        BattleloreGameState gameState = (BattleloreGameState)initialState;
+        BattleloreGameState gameState = (BattleloreGameState) initialState;
         BattleloreData _data = new BattleloreData();
         _data.load(gameParams.getDataPath());
 
@@ -42,7 +42,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         gameState.unitTypes = _data.getUnits();
 
         for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
-            for(int y = 0; y < gameState.gameBoard.getHeight(); y++) {
+            for (int y = 0; y < gameState.gameBoard.getHeight(); y++) {
                 gameState.gameBoard.setElement(x, y, new MapTile(x, y, new ArrayList<>()));
             }
         }
@@ -81,8 +81,11 @@ public class BattleloreForwardModel extends AbstractForwardModel {
 
         if (checkGameEnd((BattleloreGameState) currentState, playerId)) {
             registerWinner(state, playerId);
-        } else if (state.getTurnOrder().getTurnCounter() > maxTurnsToPlay) {
-            registerWinner(state, state.getGameScore(0) >= state.getGameScore(1) ? 0 : 1);
+        } else if (state.getTurnOrder().getRoundCounter() > maxTurnsToPlay) {
+            if (state.getGameScore(0) == state.getGameScore(1))
+                registerWinner(state, -1);
+            else
+                registerWinner(state, state.getGameScore(0) >= state.getGameScore(1) ? 0 : 1);
         }
     }
 
@@ -129,13 +132,13 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         }
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.MoveStep) {
             ArrayList<MapTile> moveableUnitTiles = state.GetMoveableUnitsFromTile(playerFaction);
-            int[][] possibleLocations = new int[state.getBoard().getWidth()][2];
+            int[][] possibleLocations;
 
             if (!moveableUnitTiles.isEmpty()) {
                 for (MapTile tile : moveableUnitTiles) {
                     possibleLocations = state.GetPossibleLocationsForUnits(tile);
                     //check possible locations size
-                    for (int i = 0 ; i< state.getBoard().getWidth(); i++) {
+                    for (int i = 0; i < state.getBoard().getWidth(); i++) {
                         if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
                             actions.add(new MoveUnitsAction(tile.getComponentID(), playerFaction, possibleLocations[i][0], possibleLocations[i][1], player));
                         }
@@ -149,13 +152,13 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         }
         if (gameState.getGamePhase() == BattleloreGameState.BattleloreGamePhase.AttackStep) {
             ArrayList<MapTile> readyToAttackUnits = state.GetReadyForAttackUnitsFromTile(playerFaction);
-            int[][] possibleLocations = new int[state.getBoard().getWidth()][2];
+            int[][] possibleLocations;
 
             if (!readyToAttackUnits.isEmpty()) {
                 for (MapTile attacker : readyToAttackUnits) {
                     possibleLocations = state.GetPossibleTargetUnits(attacker);
 
-                    for (int i = 0 ; i< state.getBoard().getWidth(); i++) {
+                    for (int i = 0; i < state.getBoard().getWidth(); i++) {
                         if (possibleLocations[i][0] != -1 || possibleLocations[i][1] != -1) {
                             actions.add(new AttackUnitsAction(attacker.getComponentID(), state.getBoard().getElement(possibleLocations[i][0], possibleLocations[i][1]).getComponentID(),
                                     attacker.GetFaction(), player));
@@ -179,7 +182,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         boolean enemyUnitsRemainInArea = false;
 
         for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
-            for(int y = 0; y < gameState.gameBoard.getHeight(); y++) {
+            for (int y = 0; y < gameState.gameBoard.getHeight(); y++) {
                 MapTile tile = gameState.gameBoard.getElement(x, y);
                 Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
@@ -203,6 +206,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
 
     /**
      * Checks if the game ended.
+     *
      * @param gameState - game state to check game end.
      */
     private boolean checkGameEnd(BattleloreGameState gameState, int playerId) {
@@ -219,9 +223,14 @@ public class BattleloreForwardModel extends AbstractForwardModel {
     }
 
 
-    private void registerWinner(BattleloreGameState gameState, int winnerD) {
+    private void registerWinner(BattleloreGameState gameState, int winnerID) {
         gameState.setGameStatus(Utils.GameResult.GAME_END);
-        gameState.setPlayerResult(Utils.GameResult.WIN, winnerD);
-        gameState.setPlayerResult(Utils.GameResult.LOSE, winnerD == 0 ? 1 : 0);
+        if (winnerID != -1) {
+            gameState.setPlayerResult(Utils.GameResult.WIN, winnerID);
+            gameState.setPlayerResult(Utils.GameResult.LOSE, winnerID == 0 ? 1 : 0);
+        } else {
+            gameState.setPlayerResult(Utils.GameResult.DRAW, 0);
+            gameState.setPlayerResult(Utils.GameResult.DRAW, 1);
+        }
     }
 }
