@@ -22,7 +22,7 @@ import static utilities.Utils.getArg;
 
 public class GameReport {
 
-    public static boolean debug = true;
+    public static boolean debug = false;
 
     /**
      * The idea here is that we get statistics from the the decisions of a particular agent in

@@ -766,8 +766,11 @@ public class SingleTreeNode {
                     break;
                 AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
                 rolloutActions.add(new Pair<>(rolloutState.getCurrentPlayer(), next));
+                int startingFMCalls = root.fmCallsCount;
                 advance(rolloutState, next);
-                rolloutDepth++;
+                // rollout moves can be tracked by total forward model calls
+                // as these may occur for opponent moves, which should count against our budget
+                rolloutDepth += (root.fmCallsCount - startingFMCalls);
             }
         }
         // Evaluate final state and return normalised score
