@@ -1,6 +1,7 @@
 package evaluation;
 
 import core.*;
+import core.interfaces.IGameHeuristic;
 import core.interfaces.ITunableParameters;
 import evodef.EvoAlg;
 import evodef.SearchSpace;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
@@ -141,6 +143,7 @@ public class ParameterSearch {
 
     public static void runSingleNTBEA(NTupleSystem landscapeModel, String[] args) {
 
+        boolean tuningGame = Arrays.asList(args).contains("tuneGame");
         int iterationsPerRun = Integer.parseInt(args[1]);
         GameType game = GameType.valueOf(args[2]);
         int repeats = getArg(args, "repeat", 1);
@@ -171,19 +174,40 @@ public class ParameterSearch {
             }
         }
 
-        // TODO: Add Game tuning objectives that measure how close the result is, etc.
         BiFunction<Game, Integer, Double> evalFunction = null;
-        if (evalMethod.equals("Win"))
-            evalFunction = (g, playerId) -> g.getGameState().getPlayerResults()[playerId] == Utils.GameResult.WIN ? 1.0 : 0.0;
-        if (evalMethod.equals("Score"))
-            evalFunction = (g, playerId) -> g.getGameState().getGameScore(playerId);
-        if (evalMethod.equals("Heuristic"))
-            evalFunction = (g, playerId) -> g.getGameState().getHeuristicScore(playerId);
-        if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
-            evalFunction = (g, playerId) -> -(double) g.getGameState().getOrdinalPosition(playerId);
-        if (evalFunction == null)
-            throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
+        if (tuningGame) {
+            if (new File(evalMethod).exists()) {
+                // load from file
+                IGameHeuristic heur = IGameHeuristic.loadFromFile(evalMethod);
+                evalFunction = (g, dummy) -> heur.evaluateGame(g);
+            } else {
+                try {
+                    Class<?> evalClass = Class.forName("evaluation.heuristics." + evalMethod);
+                    IGameHeuristic heur = (IGameHeuristic) evalClass.getConstructor().newInstance();
+                    evalFunction = (g, dummy) -> heur.evaluateGame(g);
+                } catch (ClassNotFoundException e) {
+                    throw new AssertionError("evaluation.heuristics." + evalMethod + " not found");
+                } catch (NoSuchMethodException e) {
+                    throw new AssertionError("evaluation.heuristics." + evalMethod + " has no no-arg constructor");
+                } catch (ReflectiveOperationException e) {
+                    e.printStackTrace();
+                    throw new AssertionError("evaluation.heuristics." + evalMethod + " reflection error");
+                }
+            }
 
+
+        } else {
+            if (evalMethod.equals("Win"))
+                evalFunction = (g, playerId) -> g.getGameState().getPlayerResults()[playerId] == Utils.GameResult.WIN ? 1.0 : 0.0;
+            if (evalMethod.equals("Score"))
+                evalFunction = (g, playerId) -> g.getGameState().getGameScore(playerId);
+            if (evalMethod.equals("Heuristic"))
+                evalFunction = (g, playerId) -> g.getGameState().getHeuristicScore(playerId);
+            if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
+                evalFunction = (g, playerId) -> -(double) g.getGameState().getOrdinalPosition(playerId);
+            if (evalFunction == null)
+                throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
+        }
         // Initialise the GameEvaluator that will do all the heavy lifting
         GameEvaluator evaluator = new GameEvaluator(
                 game,
