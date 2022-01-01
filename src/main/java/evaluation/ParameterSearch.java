@@ -1,7 +1,6 @@
 package evaluation;
 
-import core.AbstractGameState;
-import core.AbstractPlayer;
+import core.*;
 import core.interfaces.ITunableParameters;
 import evodef.EvoAlg;
 import evodef.SearchSpace;
@@ -42,12 +41,21 @@ public class ParameterSearch {
                         "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
                         "\topponent=      The agent used as opponent. Default is not to use a specific opponent, but use MultiNTBEA. \n" +
-                        "\t               This can either be a json-format file detailing the parameters, or\n" +
-                        "\t               one of coop|mcts|rmhc|random|osla|<className>  \n" +
+                        "\t               This can any of: \n" +
+                        "\t               \t'coop' uses the agent being tuned (via searchSpace) for all agents (i.e. for coop games)\n" +
+                        "\t               \ta json-format file detailing the parameters, or\n" +
+                        "\t               \tone of coop|mcts|rmhc|random|osla|<className>, or\n" +
+                        "\t               \ta directory that contains one or more json-format files from which opponents will be sampled.\n" +
                         "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
                         "\t               with a no-argument constructor.\n" +
-                        "\t               'coop' means that the agent being tuned is used for all agents (i.e. if co-operative)\n" +
-                        "\teval=          Score|Ordinal|Heuristic|Win specifies what we are optimising. Defaults to Win.\n" +
+                        "\t               If tuneGame is set, then the opponent argument must be provided, and will be used for all players.\n" +
+                        "\tgameParam=     The json-format file of game parameters to use. Defaults to standard rules and options.\n" +
+                        "\ttuneGame       If supplied, then we will tune the game instead of tuning the agent.\n" +
+                        "\t               In this case the searchSpace file must be relevant for the game.\n" +
+                        "\teval=          Score|Ordinal|Heuristic|Win specifies what we are optimising (if not tuneGame). Defaults to Win.\n" +
+                        "\t               If tuneGame, then instead the name of a IGameHeuristic class in the evaluation.heuristics package\n" +
+                        "\t               must be provided, or the a json-format file that provides the requisite details. \n" +
+                        "\t               The json-format file is needed if non-default settings for the IGameHeuristic are used.\n" +
                         "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
                         "\tkExplore=      The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
                         "\t               For scores with larger ranges, we recommend scaling kExplore appropriately.\n" +
@@ -119,7 +127,11 @@ public class ParameterSearch {
         landscapeModel.setUse3Tuple(useThreeTuples);
         landscapeModel.addTuples();
 
+        boolean tuningGame = Arrays.asList(args).contains("tuneGame");
+
         if (getArg(args, "opponent", "").isEmpty()) {
+            if (tuningGame)
+                throw new AssertionError("If 'tuneGame' is set, then the opponent parameter is mandatory");
             runMultiNTBEA(landscapeModel, args);
         } else {
             runSingleNTBEA(landscapeModel, args);
@@ -140,6 +152,8 @@ public class ParameterSearch {
         long seed = getArg(args, "seed", System.currentTimeMillis());
         String logfile = getArg(args, "logFile", "");
         String evalMethod = getArg(args, "eval", "Win");
+        String paramFile = getArg(args, "gameParam", "");
+        AbstractParameters gameParams = ParameterFactory.createFromFile(game, paramFile);
 
         ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
@@ -158,15 +172,15 @@ public class ParameterSearch {
         }
 
         // TODO: Add Game tuning objectives that measure how close the result is, etc.
-        BiFunction<AbstractGameState, Integer, Double> evalFunction = null;
+        BiFunction<Game, Integer, Double> evalFunction = null;
         if (evalMethod.equals("Win"))
-            evalFunction = (state, playerId) -> state.getPlayerResults()[playerId] == Utils.GameResult.WIN ? 1.0 : 0.0;
+            evalFunction = (g, playerId) -> g.getGameState().getPlayerResults()[playerId] == Utils.GameResult.WIN ? 1.0 : 0.0;
         if (evalMethod.equals("Score"))
-            evalFunction = AbstractGameState::getGameScore;
+            evalFunction = (g, playerId) -> g.getGameState().getGameScore(playerId);
         if (evalMethod.equals("Heuristic"))
-            evalFunction = AbstractGameState::getHeuristicScore;
+            evalFunction = (g, playerId) -> g.getGameState().getHeuristicScore(playerId);
         if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
-            evalFunction = (state, playerId) -> -(double) state.getOrdinalPosition(playerId);
+            evalFunction = (g, playerId) -> -(double) g.getGameState().getOrdinalPosition(playerId);
         if (evalFunction == null)
             throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
 
@@ -174,6 +188,7 @@ public class ParameterSearch {
         GameEvaluator evaluator = new GameEvaluator(
                 game,
                 searchSpace,
+                gameParams,
                 nPlayers,
                 evalFunction,
                 opponents,

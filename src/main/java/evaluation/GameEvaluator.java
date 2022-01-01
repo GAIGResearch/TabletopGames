@@ -36,6 +36,7 @@ import static java.util.stream.Collectors.toList;
 public class GameEvaluator implements SolutionEvaluator {
 
     GameType game;
+    AbstractParameters gameParams;
     ITPSearchSpace searchSpace;
     int nPlayers;
     List<AbstractPlayer> opponents;
@@ -45,7 +46,7 @@ public class GameEvaluator implements SolutionEvaluator {
     boolean fullyCoop;
     public boolean reportStatistics;
     public IStatisticLogger statsLogger = new SummaryLogger();
-    BiFunction<AbstractGameState, Integer, Double> evalFn;
+    BiFunction<Game, Integer, Double> evalFn;
 
     /**
      * GameEvaluator
@@ -64,10 +65,12 @@ public class GameEvaluator implements SolutionEvaluator {
      *
      */
     public GameEvaluator(GameType game, ITPSearchSpace parametersToTune,
-                         int nPlayers, BiFunction<AbstractGameState, Integer, Double> evaluationFunction,
+                         AbstractParameters gameParams,
+                         int nPlayers, BiFunction<Game, Integer, Double> evaluationFunction,
                          List<AbstractPlayer> opponents, long seed,
                          boolean avoidOpponentDuplicates) {
         this.game = game;
+        this.gameParams = gameParams;
         this.searchSpace = parametersToTune;
         this.nPlayers = nPlayers;
         evalFn = evaluationFunction;
@@ -130,14 +133,13 @@ public class GameEvaluator implements SolutionEvaluator {
             }
         }
 
-        Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers);
+        Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers, gameParams);
         newGame.reset(allPlayers, rnd.nextLong());
 
         newGame.run();
-        AbstractGameState finalState = newGame.getGameState();
 
         nEvals++;
-        return evalFn.apply(finalState, playerIndex);
+        return evalFn.apply(newGame, playerIndex);
     }
 
     /**
