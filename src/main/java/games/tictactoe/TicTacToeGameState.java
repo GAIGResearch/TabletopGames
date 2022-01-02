@@ -10,6 +10,7 @@ import core.interfaces.IPrintable;
 import core.interfaces.IVectorObservation;
 import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
+import utilities.Utils;
 import utilities.VectorObservation;
 
 import java.util.ArrayList;
@@ -59,7 +60,11 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
      */
     @Override
     public double getGameScore(int playerId) {
-        return 0;
+        if (playerResults[playerId] == Utils.GameResult.WIN)
+            return 1.0;
+        else if (playerResults[playerId] == Utils.GameResult.DRAW)
+            return 0.5;
+        return 0.0;
     }
 
     @Override
