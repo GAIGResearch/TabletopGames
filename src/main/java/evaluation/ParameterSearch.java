@@ -175,7 +175,7 @@ public class ParameterSearch {
         if (tuningGame) {
             if (new File(evalMethod).exists()) {
                 // load from file
-                IGameHeuristic heur = IGameHeuristic.loadFromFile(evalMethod);
+                IGameHeuristic heur = Utils.loadFromFile(evalMethod);
                 evalFunction = (g, dummy) -> heur.evaluateGame(g);
             } else {
                 if (evalMethod.contains(".json"))
