@@ -46,8 +46,9 @@ public interface IGameHeuristic {
             for (int i = 0; i < argClasses.length; i++) {
                 Object arg = argArray.get(i);
                 args[i] = arg;
-                if (arg instanceof Integer) {
+                if (arg instanceof Long) {
                     argClasses[i] = int.class;
+                    args[i] = ((Long) arg).intValue();
                 } else if (arg instanceof Double) {
                     argClasses[i] = double.class;
                 } else if (arg instanceof String) {

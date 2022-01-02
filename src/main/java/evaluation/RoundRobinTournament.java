@@ -117,19 +117,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         if (!playerDirectory.equals("")) {
-            File dir = new File(playerDirectory);
-            if (dir.exists() && dir.isDirectory()) {
-                for (String fileName : dir.list()) {
-                    if (!fileName.endsWith(".json"))
-                        continue;
-                    System.out.println(fileName);
-                    AbstractPlayer player = PlayerFactory.createPlayer(dir.getAbsolutePath() + File.separator + fileName);
-                    agents.add(player);
-                    player.setName(fileName.substring(0, fileName.indexOf(".")));
-                }
-            } else {
-                throw new AssertionError("Specified dir argument is not a directory : " + playerDirectory);
-            }
+            agents.addAll(PlayerFactory.createPlayers(playerDirectory));
         } else {
             /* 2. Set up players */
             agents.add(new MCTSPlayer());

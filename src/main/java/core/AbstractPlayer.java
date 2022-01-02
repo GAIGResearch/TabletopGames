@@ -82,4 +82,9 @@ public abstract class AbstractPlayer {
     public void setStatsLogger(IStatisticLogger logger) {
         this.statsLogger = logger;
     }
+
+    // Override if a Player maintains any state at all
+    public AbstractPlayer copy() {
+        return this;
+    }
 }

@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
@@ -168,10 +167,8 @@ public class ParameterSearch {
         List<AbstractPlayer> opponents = new ArrayList<>();
         // if we are in coop mode, then we have no opponents. This is indicated by leaving the list empty.
         if (!opponentDescriptor.equals("coop")) {
-            for (int i = 0; i < nPlayers; i++) {
-                AbstractPlayer opponent = PlayerFactory.createPlayer(opponentDescriptor);
-                opponents.add(opponent);
-            }
+            // first check to see if we have a directory or not
+            opponents = PlayerFactory.createPlayers(opponentDescriptor);
         }
 
         BiFunction<Game, Integer, Double> evalFunction = null;
@@ -181,6 +178,8 @@ public class ParameterSearch {
                 IGameHeuristic heur = IGameHeuristic.loadFromFile(evalMethod);
                 evalFunction = (g, dummy) -> heur.evaluateGame(g);
             } else {
+                if (evalMethod.contains(".json"))
+                    throw new AssertionError("File not found : " + evalMethod);
                 try {
                     Class<?> evalClass = Class.forName("evaluation.heuristics." + evalMethod);
                     IGameHeuristic heur = (IGameHeuristic) evalClass.getConstructor().newInstance();

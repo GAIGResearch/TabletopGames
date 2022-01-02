@@ -122,10 +122,9 @@ public class GameEvaluator implements SolutionEvaluator {
         int count = 0;
         for (int i = 0; i < nPlayers; i++) {
             if (!fullyCoop && i != playerIndex) {
-                int oppIndex = (avoidOppDupes) ? count++ : rnd.nextInt(opponents.size());
-                if (count >= opponents.size())
-                    throw new AssertionError("Something has gone wrong. We seem to have insufficient opponents");
-                allPlayers.add(opponents.get(oppIndex));
+                int oppIndex = (avoidOppDupes) ? count : rnd.nextInt(opponents.size());
+                count = (count + 1) % nPlayers;
+                allPlayers.add(opponents.get(oppIndex).copy());
             } else {
                 AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(settings); // we create for each, in case this is coop
                 if (reportStatistics) tunedPlayer.setStatsLogger(statsLogger);

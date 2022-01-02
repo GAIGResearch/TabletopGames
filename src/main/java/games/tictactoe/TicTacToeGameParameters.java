@@ -9,6 +9,10 @@ public class TicTacToeGameParameters extends TunableParameters {
 
     public int gridSize = 3;
 
+    public TicTacToeGameParameters() {
+        this(System.currentTimeMillis());
+    }
+
     public TicTacToeGameParameters(long seed) {
         super(seed);
         addTunableParameter("gridSize", 3, Arrays.asList(3, 4, 5, 6));
