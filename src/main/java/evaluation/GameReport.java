@@ -12,17 +12,16 @@ import players.simple.RandomPlayer;
 import utilities.FileStatsLogger;
 import utilities.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.getArg;
 
 public class GameReport {
 
-    public static boolean debug = false;
+    public static boolean debug = true;
 
     /**
      * The idea here is that we get statistics from the the decisions of a particular agent in
@@ -161,8 +160,11 @@ public class GameReport {
                     Collections.shuffle(allPlayers);
                     game.reset(allPlayers);
                     game.run();
-                    if (debug)
+                    if (debug) {
                         System.out.printf("Game %4d finished at %tT%n", i, System.currentTimeMillis());
+                        System.out.printf("\tResult: %20s%n", game.getPlayers().stream().map(Objects::toString).collect(Collectors.joining(" | ")));
+                        System.out.printf("\tResult: %20s%n", Arrays.stream(game.getGameState().getPlayerResults()).map(Objects::toString).collect(Collectors.joining(" | ")));
+                    }
                 }
             }
         }
