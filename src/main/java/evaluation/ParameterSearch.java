@@ -1,7 +1,11 @@
 package evaluation;
 
-import core.*;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.ParameterFactory;
 import core.interfaces.IGameHeuristic;
+import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evodef.EvoAlg;
 import evodef.SearchSpace;
@@ -21,7 +25,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
@@ -171,19 +174,18 @@ public class ParameterSearch {
             opponents = PlayerFactory.createPlayers(opponentDescriptor);
         }
 
-        BiFunction<Game, Integer, Double> evalFunction = null;
+        IGameHeuristic gameHeuristic = null;
+        IStateHeuristic stateHeuristic = null;
         if (tuningGame) {
             if (new File(evalMethod).exists()) {
                 // load from file
-                IGameHeuristic heur = Utils.loadFromFile(evalMethod);
-                evalFunction = (g, dummy) -> heur.evaluateGame(g);
+                gameHeuristic = Utils.loadFromFile(evalMethod);
             } else {
                 if (evalMethod.contains(".json"))
                     throw new AssertionError("File not found : " + evalMethod);
                 try {
                     Class<?> evalClass = Class.forName("evaluation.heuristics." + evalMethod);
-                    IGameHeuristic heur = (IGameHeuristic) evalClass.getConstructor().newInstance();
-                    evalFunction = (g, dummy) -> heur.evaluateGame(g);
+                    gameHeuristic = (IGameHeuristic) evalClass.getConstructor().newInstance();
                 } catch (ClassNotFoundException e) {
                     throw new AssertionError("evaluation.heuristics." + evalMethod + " not found");
                 } catch (NoSuchMethodException e) {
@@ -194,17 +196,16 @@ public class ParameterSearch {
                 }
             }
 
-
         } else {
             if (evalMethod.equals("Win"))
-                evalFunction = (g, playerId) -> g.getGameState().getPlayerResults()[playerId] == Utils.GameResult.WIN ? 1.0 : 0.0;
+                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == Utils.GameResult.WIN ? 1.0 : 0.0;
             if (evalMethod.equals("Score"))
-                evalFunction = (g, playerId) -> g.getGameState().getGameScore(playerId);
+                stateHeuristic = AbstractGameState::getGameScore;
             if (evalMethod.equals("Heuristic"))
-                evalFunction = (g, playerId) -> g.getGameState().getHeuristicScore(playerId);
+                stateHeuristic = AbstractGameState::getHeuristicScore;
             if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
-                evalFunction = (g, playerId) -> -(double) g.getGameState().getOrdinalPosition(playerId);
-            if (evalFunction == null)
+                stateHeuristic = (s, p) -> -(double) s.getOrdinalPosition(p);
+            if (stateHeuristic == null)
                 throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
         }
         // Initialise the GameEvaluator that will do all the heavy lifting
@@ -213,9 +214,10 @@ public class ParameterSearch {
                 searchSpace,
                 gameParams,
                 nPlayers,
-                evalFunction,
                 opponents,
                 seed,
+                stateHeuristic,
+                gameHeuristic,
                 true
         );
 
@@ -256,16 +258,16 @@ public class ParameterSearch {
         String logfile = getArg(args, "logFile", "");
 
         String evalMethod = getArg(args, "eval", "Win");
-        BiFunction<AbstractGameState, Integer, Double> evalFunction = null;
+        IStateHeuristic stateHeuristic = null;
         if (evalMethod.equals("Win"))
-            evalFunction = (state, playerId) -> state.getPlayerResults()[playerId].value;
+            stateHeuristic = (s, p) -> s.getPlayerResults()[p] == Utils.GameResult.WIN ? 1.0 : 0.0;
         if (evalMethod.equals("Score"))
-            evalFunction = AbstractGameState::getGameScore;
+            stateHeuristic = AbstractGameState::getGameScore;
         if (evalMethod.equals("Heuristic"))
-            evalFunction = AbstractGameState::getHeuristicScore;
+            stateHeuristic = AbstractGameState::getHeuristicScore;
         if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
-            evalFunction = (state, playerId) -> -(double) state.getOrdinalPosition(playerId);
-        if (evalFunction == null)
+            stateHeuristic = (state, playerId) -> -(double) state.getOrdinalPosition(playerId);
+        if (stateHeuristic == null)
             throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
 
         ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
@@ -279,7 +281,7 @@ public class ParameterSearch {
                 game,
                 searchSpace,
                 nPlayers,
-                evalFunction,
+                stateHeuristic,
                 seed
         );
 

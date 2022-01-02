@@ -1,6 +1,8 @@
 package evaluation;
 
 import core.*;
+import core.interfaces.IGameHeuristic;
+import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
 import evodef.*;
 import games.GameType;
@@ -46,7 +48,8 @@ public class GameEvaluator implements SolutionEvaluator {
     boolean fullyCoop;
     public boolean reportStatistics;
     public IStatisticLogger statsLogger = new SummaryLogger();
-    BiFunction<Game, Integer, Double> evalFn;
+    IStateHeuristic stateHeuristic;
+    IGameHeuristic gameHeuristic;
 
     /**
      * GameEvaluator
@@ -66,14 +69,16 @@ public class GameEvaluator implements SolutionEvaluator {
      */
     public GameEvaluator(GameType game, ITPSearchSpace parametersToTune,
                          AbstractParameters gameParams,
-                         int nPlayers, BiFunction<Game, Integer, Double> evaluationFunction,
+                         int nPlayers,
                          List<AbstractPlayer> opponents, long seed,
+                         IStateHeuristic stateHeuristic, IGameHeuristic gameHeuristic,
                          boolean avoidOpponentDuplicates) {
         this.game = game;
         this.gameParams = gameParams;
         this.searchSpace = parametersToTune;
         this.nPlayers = nPlayers;
-        evalFn = evaluationFunction;
+        this.stateHeuristic = stateHeuristic;
+        this.gameHeuristic = gameHeuristic;
         this.opponents = opponents;
         this.rnd = new Random(seed);
         this.avoidOppDupes = avoidOpponentDuplicates;
@@ -138,7 +143,7 @@ public class GameEvaluator implements SolutionEvaluator {
         newGame.run();
 
         nEvals++;
-        return evalFn.apply(newGame, playerIndex);
+        return tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerIndex);
     }
 
     /**
