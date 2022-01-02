@@ -22,6 +22,6 @@ public class TargetScoreDelta implements IGameHeuristic {
         DoubleSummaryStatistics stats = IntStream.range(0, state.getNPlayers())
                 .mapToDouble(state::getGameScore)
                 .summaryStatistics();
-        return stats.getMax() - stats.getMin();
+        return -Math.abs(stats.getMax() - stats.getMin() - target);
     }
 }
