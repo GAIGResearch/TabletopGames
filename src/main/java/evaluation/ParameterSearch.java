@@ -53,6 +53,8 @@ public class ParameterSearch {
                         "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
                         "\t               with a no-argument constructor.\n" +
                         "\t               If tuneGame is set, then the opponent argument must be provided, and will be used for all players.\n" +
+                        "\tplayerDupes=   If false (the default), and opponent specifies multiple files in a directory, then no agent will\n" +
+                        "\t               be used twice in a single game (if there are enough agents to sample from). Set to true to allow dupes.\n" +
                         "\tgameParam=     The json-format file of game parameters to use. Defaults to standard rules and options.\n" +
                         "\ttuneGame       If supplied, then we will tune the game instead of tuning the agent.\n" +
                         "\t               In this case the searchSpace file must be relevant for the game.\n" +
@@ -152,6 +154,7 @@ public class ParameterSearch {
         int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
         double kExplore = getArg(args, "kExplore", 1.0);
         String opponentDescriptor = getArg(args, "opponent", "");
+        boolean allowDupes = getArg(args, "playerDupes", false);
         boolean verbose = Arrays.asList(args).contains("verbose");
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
         long seed = getArg(args, "seed", System.currentTimeMillis());
@@ -218,7 +221,7 @@ public class ParameterSearch {
                 seed,
                 stateHeuristic,
                 gameHeuristic,
-                true
+                !allowDupes
         );
 
         // Get the results. And then log them.
