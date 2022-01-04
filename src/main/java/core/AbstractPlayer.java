@@ -32,8 +32,9 @@ public abstract class AbstractPlayer {
     public final AbstractForwardModel getForwardModel() {
         return forwardModel;
     }
+
     public void setForwardModel(AbstractForwardModel model) {
-        forwardModel = model;
+        this.forwardModel = model;
     }
 
     /* Methods that should be implemented in subclass */
