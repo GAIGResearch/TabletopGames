@@ -22,8 +22,9 @@ public class TreeStatistics {
     public TreeStatistics(SingleTreeNode root) {
         Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
         if (root instanceof MultiTreeNode) {
-            for (SingleTreeNode node : ((MultiTreeNode) root).roots)
-                if (node != null) nodeQueue.add(node);
+            throw new AssertionError("Not expected");
+   //         for (SingleTreeNode node : ((MultiTreeNode) root).roots)
+   //             if (node != null) nodeQueue.add(node);
         } else {
             nodeQueue.add(root);
         }
