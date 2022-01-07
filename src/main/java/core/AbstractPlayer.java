@@ -8,7 +8,7 @@ import java.util.List;
 
 public abstract class AbstractPlayer {
 
-    protected IStatisticLogger statsLogger = new SummaryLogger();
+    protected IStatisticLogger statsLogger = null;
     // ID of this player, assigned by the game
     int playerID;
     // Forward model for the game

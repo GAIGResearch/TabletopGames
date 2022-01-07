@@ -240,10 +240,10 @@ public class MultiTreeNode extends SingleTreeNode {
             stats.merge("totalNodes" + suffix, treeStats.totalNodes * multiplier, addFn);
             stats.merge("leafNodes" + suffix, treeStats.totalLeaves * multiplier, addFn);
             stats.merge("terminalNodes" + suffix, treeStats.totalTerminalNodes * multiplier, addFn);
-            stats.merge("maxDepth" + suffix, treeStats.depthReached, addFn);
-            stats.merge("nActionsRoot" + suffix, node.children.size(), addFn);
-            stats.merge("nActionsTree" + suffix, treeStats.meanActionsAtNode, addFn);
-            stats.merge("maxActionsAtNode" + suffix, treeStats.maxActionsAtNode, addFn);
+            stats.merge("maxDepth" + suffix, treeStats.depthReached * multiplier, addFn);
+            stats.merge("nActionsRoot" + suffix, node.children.size() * multiplier, addFn);
+            stats.merge("nActionsTree" + suffix, treeStats.meanActionsAtNode * multiplier, addFn);
+            stats.merge("maxActionsAtNode" + suffix, treeStats.maxActionsAtNode * multiplier, addFn);
 
             OptionalInt maxVisits = Arrays.stream(node.actionVisits()).max();
             stats.merge("maxVisitProportion" + suffix, (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters * multiplier, addFn);

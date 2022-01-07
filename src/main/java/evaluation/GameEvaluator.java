@@ -81,7 +81,7 @@ public class GameEvaluator implements SolutionEvaluator {
         this.gameHeuristic = gameHeuristic;
         this.opponents = opponents;
         this.rnd = new Random(seed);
-        this.avoidOppDupes = avoidOpponentDuplicates;
+        this.avoidOppDupes = avoidOpponentDuplicates && opponents.size() > 1;
         if (avoidOppDupes && opponents.size() < nPlayers - 1)
             throw new AssertionError("Insufficient Opponents to avoid duplicates");
         if (opponents.isEmpty()) fullyCoop = true;
