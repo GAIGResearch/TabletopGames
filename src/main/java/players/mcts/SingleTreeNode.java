@@ -689,7 +689,7 @@ public class SingleTreeNode {
         double meanAdvantageFromAction = (actionValue / actionVisits) - (totValue[decisionPlayer] / nVisits / range);
         if (params.biasVisits > 0) {
             double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
-            meanAdvantageFromAction = (1.0 - beta) * meanAdvantageFromAction + beta * advantagesOfActionsFromOLS.getOrDefault(action, 0.0);
+            meanAdvantageFromAction = (1.0 - beta) * meanAdvantageFromAction + beta * advantagesOfActionsFromOLS.getOrDefault(action, 0.0) / range;
         }
         return Math.exp(meanAdvantageFromAction);
     }
