@@ -35,7 +35,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.Information information = Open_Loop;
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
-    public double MASTGamma = 0.0;
+    public double MASTGamma = 1.0;
     public double MASTBoltzmann = 0.1;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
@@ -89,7 +89,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM);
         addTunableParameter("MAST", Rollout);
-        addTunableParameter("MASTGamma", 0.0);
+        addTunableParameter("MASTGamma", 0.5);
         addTunableParameter("expertIteration", false);
         addTunableParameter("expIterFile", "");
         addTunableParameter("advantageFunction", "");
