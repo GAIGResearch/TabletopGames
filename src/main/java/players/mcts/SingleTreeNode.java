@@ -683,15 +683,20 @@ public class SingleTreeNode {
     }
 
     public double exp3Value(AbstractAction action) {
-        double range = Math.max(1.0, root.highReward - root.lowReward);
-        double actionValue = actionTotValue(action, decisionPlayer) / range;
+        double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
-        double meanAdvantageFromAction = (actionValue / actionVisits) - (totValue[decisionPlayer] / nVisits / range);
+        double meanActionValue = (actionValue / actionVisits);
         if (params.biasVisits > 0) {
             double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
-            meanAdvantageFromAction = (1.0 - beta) * meanAdvantageFromAction + beta * advantagesOfActionsFromOLS.getOrDefault(action, 0.0) / range;
+            meanActionValue = (1.0 - beta) * meanActionValue + beta * advantagesOfActionsFromOLS.getOrDefault(action, 0.0);
         }
-        return Math.exp(meanAdvantageFromAction);
+        // we then normalise to [0, 1], or we subtract the mean action value to get an advantage (and reduce risk of
+        // NaN or Infinities when we exponentiate)
+        if (params.normaliseRewards)
+            meanActionValue = Utils.normalise(meanActionValue, root.lowReward, root.highReward);
+        else
+            meanActionValue = meanActionValue - (totValue[decisionPlayer] / nVisits);
+        return Math.exp(meanActionValue);
     }
 
     public double rmValue(AbstractAction action) {

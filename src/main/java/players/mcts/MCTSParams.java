@@ -132,7 +132,8 @@ public class MCTSParams extends PlayerParameters {
         normaliseRewards = (boolean) getParameterValue("normaliseRewards");
         nodesStoreScoreDelta = (boolean) getParameterValue("nodesStoreScoreDelta");
         maintainMasterState = (boolean) getParameterValue("maintainMasterState");
-        if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST) {
+        if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST
+                || (biasVisits > 0 && advantageFunction == null)) {
             useMAST = true;
         }
         heuristic = (IStateHeuristic) getParameterValue("heuristic");

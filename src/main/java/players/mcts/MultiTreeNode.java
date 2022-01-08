@@ -224,14 +224,15 @@ public class MultiTreeNode extends SingleTreeNode {
         stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
         stats.put("iterations", numIters);
         stats.put("time", timeTaken);
+        int validRoots = (int) Arrays.stream(roots).filter(Objects::nonNull).count();
         for (SingleTreeNode node : roots) {
-            if (node == null) break;
+            if (node == null) continue;
             boolean mainPlayer = node.decisionPlayer == this.decisionPlayer;
             TreeStatistics treeStats = new TreeStatistics(node);
 
             int copy = node.copyCount + (node == roots[decisionPlayer] ? this.copyCount : 0);
             int fm = node.fmCallsCount + (node == roots[decisionPlayer] ? this.fmCallsCount : 0);
-            double multiplier = mainPlayer ? 1 : 1.0 / (roots.length - 1.0);
+            double multiplier = mainPlayer ? 1 : 1.0 / (validRoots - 1.0);
             String suffix = mainPlayer ? "-main" : "-other";
             BiFunction<Object, Object, Double> addFn = (v1, v2) -> ((double) v1 + ((double) v2));
 
