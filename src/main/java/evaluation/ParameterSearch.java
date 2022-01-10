@@ -142,7 +142,6 @@ public class ParameterSearch {
         } else {
             runSingleNTBEA(landscapeModel, args);
         }
-
     }
 
     public static void runSingleNTBEA(NTupleSystem landscapeModel, String[] args) {

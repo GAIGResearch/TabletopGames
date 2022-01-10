@@ -35,7 +35,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.Information information = Open_Loop;
     public MCTSEnums.MASTType MAST = Rollout;
     public boolean useMAST = false;
-    public double MASTGamma = 1.0;
+    public double MASTGamma = 0.5;
     public double MASTBoltzmann = 0.1;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
