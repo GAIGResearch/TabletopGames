@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static core.CoreConstants.*;
 import static games.GameType.*;
 
+
 public class Game {
 
     // Type of game
@@ -195,6 +196,16 @@ public class Game {
         while (gameState.isNotTerminal() && (frame == null || frame.isWindowOpen()) && !stop) {
 
             if (!pause) {
+
+                /*
+                 * The Game is responsible for tracking the players and the current game state
+                 * It is important that the Game never passes the main AbstractGameState to the individual players,
+                 * but instead always uses copy(playerId) to both:
+                 * i) shuffle any hidden data they cannot see
+                 * ii) ensure that any changes the player makes to the game state do not affect the genuine game state
+                 *
+                 * Players should never have access to the Game, or the main AbstractGameState, or to each other!
+                 */
 
                 // Get player to ask for actions next
                 boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder

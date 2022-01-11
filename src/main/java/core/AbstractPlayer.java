@@ -32,6 +32,18 @@ public abstract class AbstractPlayer {
     public final AbstractForwardModel getForwardModel() {
         return forwardModel;
     }
+
+    /**
+     * Sets the forward model for the current environment.
+     * This is used by Game, and also when an AbstractPlayer is a component of another agent
+     * (for example in MCTSPlayer, where the heuristic rollout policy could itself be an AbstractPlayer
+     * that needs a copy of the forward model)
+     *
+     * Anything that has a reference to an AbstractPlayer can therefore pass a ForwardModel.
+     * In competition mode this it is not currently possible for opponents to get a link to your
+     * object...and this should be avoided.
+     * @param model
+     */
     public void setForwardModel(AbstractForwardModel model) {
         forwardModel = model;
     }
