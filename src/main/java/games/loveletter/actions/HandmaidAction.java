@@ -17,12 +17,12 @@ public class HandmaidAction extends core.actions.DrawCard implements IPrintable 
     @Override
     public boolean execute(AbstractGameState gs) {
         // set the player's protection status
-        ((LoveLetterGameState)gs).setProtection(gs.getTurnOrder().getCurrentPlayer(gs), true);
+        ((LoveLetterGameState) gs).setProtection(gs.getTurnOrder().getCurrentPlayer(gs), true);
         return super.execute(gs);
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "Handmaid - get protection status";
     }
 
@@ -39,5 +39,12 @@ public class HandmaidAction extends core.actions.DrawCard implements IPrintable 
     @Override
     public AbstractAction copy() {
         return new HandmaidAction(deckFrom, deckTo, fromIndex);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof HandmaidAction)) return false;
+        return super.equals(o);
     }
 }

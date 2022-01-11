@@ -27,6 +27,13 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class TunableParameters extends AbstractParameters implements ITunableParameters {
 
+    private static boolean debug = false;
+    List<String> parameterNames = new ArrayList<>();
+    Map<String, List<Object>> possibleValues = new HashMap<>();
+    Map<String, Object> defaultValues = new HashMap<>();
+    Map<String, Object> currentValues = new HashMap<>();
+    Map<String, Class<?>> parameterTypes = new HashMap<>();
+
     /**
      * Zero-argument constructor used for auto-tuning
      */
@@ -38,11 +45,111 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         super(seed);
     }
 
-    List<String> parameterNames = new ArrayList<>();
-    Map<String, List<Object>> possibleValues = new HashMap<>();
-    Map<String, Object> defaultValues = new HashMap<>();
-    Map<String, Object> currentValues = new HashMap<>();
-    Map<String, Class<?>> parameterTypes = new HashMap<>();
+    /**
+     * Instantiate parameters from a JSON file
+     *
+     * @param filename The file with the JSON format data
+     */
+    public static void loadFromJSONFile(TunableParameters params, String filename) {
+        try {
+            FileReader reader = new FileReader(filename);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
+            loadFromJSON(params, rawData);
+        } catch (Exception e) {
+            throw new AssertionError(e.getClass().toString() + " : " + e.getMessage() + " : problem loading TunableParameters from file " + filename);
+        }
+    }
+
+    /**
+     * Instantiate parameters from a JSONObject
+     */
+    public static void loadFromJSON(TunableParameters params, JSONObject rawData) {
+        List<String> allParams = params.getParameterNames();
+        for (String pName : allParams) {
+            if (debug)
+                System.out.println("\tLoading " + pName);
+            if (isParamArray(pName, rawData)) {
+                Object pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
+                params.addTunableParameter(pName, params.getDefaultParameterValue(pName),
+                        new ArrayList<>(((List<?>) pValue)));
+            } else {
+                Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName), params);
+                if (pValue != null)
+                    params.addTunableParameter(pName, pValue);
+            }
+        }
+        params._reset();
+
+        // We should also check that there are no other properties in there
+        allParams.add("class");
+        for (Object key : rawData.keySet()) {
+            if (key instanceof String && !allParams.contains(key)) {
+                System.out.println("Unexpected key in JSON for TunableParameters : " + key);
+            }
+        }
+    }
+
+    /**
+     * @param name         Name of the parameter. This will be validated as one of a possible set of expectedKeys
+     * @param json         The JSONObject containing the data we want to extract the parameter from.
+     * @param defaultValue The default value to use for the parameter if we can't find it in json.
+     * @param <T>          The class of the parameter (anticipated as one of Integer, Double, String, Boolean)
+     * @return The value of the parameter found.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> T getParam(String name, JSONObject json, T defaultValue, TunableParameters params) {
+        Object finalData = json.getOrDefault(name, defaultValue);
+        if (finalData == null)
+            return null;
+        Object data = (finalData instanceof Long) ? Integer.valueOf(((Long) finalData).intValue()) : finalData;
+        if (data.getClass() == defaultValue.getClass())
+            return (T) data;
+        if (finalData instanceof JSONObject) {
+            JSONObject subJson = (JSONObject) finalData;
+            String className = (String) subJson.get("class");
+            if (className == null)
+                throw new AssertionError("No class name specified for " + name);
+            try {
+                Class<?> clazz = Class.forName(className);
+                Constructor<?> constructor = clazz.getConstructor();
+                T retValue = (T) constructor.newInstance();
+                if (retValue instanceof TunableParameters) {
+                    TunableParameters subParams = (TunableParameters) retValue;
+                    TunableParameters.loadFromJSON(subParams, subJson);
+                    params.registerChild(name, subJson);
+                }
+                return retValue;
+            } catch (Exception e) {
+                System.out.println("Error loading heuristic class " + className + " : " + e.getMessage());
+                e.printStackTrace();
+                throw new AssertionError("Error loading Class");
+            }
+        }
+        if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {
+            Optional<?> matchingValue = Arrays.stream(defaultValue.getClass().getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
+            if (matchingValue.isPresent()) {
+                return (T) matchingValue.get();
+            }
+            throw new AssertionError("No Enum match found for " + name + " in " + Arrays.toString(defaultValue.getClass().getEnumConstants()));
+        }
+        return defaultValue;
+    }
+
+    private static boolean isParamArray(String name, JSONObject json) {
+        return (json.get(name) instanceof List);
+    }
+
+    private static boolean isParamJSON(String name, JSONObject json) {
+        return (json.get(name) instanceof Map);
+    }
+
+    private static <T> List<T> getParamList(String name, JSONObject json, T defaultValue) {
+        Object data = json.getOrDefault(name, defaultValue);
+        if (!(data instanceof List))
+            throw new AssertionError("JSON does not contain an Array as expected for " + name);
+        return (List<T>) data;
+    }
 
     /**
      * Note that any sub-class of TunableParameters does not need to do any copying of parameters added
@@ -100,6 +207,14 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         parameterTypes.put(name, defaultValue.getClass());
         possibleValues.put(name, new ArrayList<>(allSettings));
         currentValues.put(name, defaultValue);
+    }
+
+    public <T> void addTunableParameter(String name, Class<T> classType) {
+        if (!parameterNames.contains(name)) parameterNames.add(name);
+        defaultValues.put(name, null);
+        parameterTypes.put(name, classType);
+        possibleValues.put(name, new ArrayList<>());
+        currentValues.put(name, null);
     }
 
     /**
@@ -208,25 +323,6 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         return new HashMap<>(defaultValues);
     }
 
-    /**
-     * Set the values of the parameters, according to the map passed to this method. Each entry maps the int ID of
-     * a parameter to its assigned value.
-     *
-     * @param values - mapping from int ID of parameter to its new value.
-     *               or mapping from the name of the parameter as a String
-     */
-    @Override
-    public void setParameterValues(Map<?, Object> values) {
-        for (Object key : values.keySet()) {
-            if (key instanceof String) {
-                setParameterValue((String) key, values.get(key));
-            } else {
-                String name = getParameterName((int) key);
-                setParameterValue(name, values.get(key));
-            }
-        }
-    }
-
     @Override
     public String getJSONDescription() {
         JSONObject retValue = new JSONObject();
@@ -249,104 +345,6 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     }
 
     /**
-     * Instantiate parameters from a JSON file
-     *
-     * @param filename The file with the JSON format data
-     */
-    public static void loadFromJSONFile(TunableParameters params, String filename) {
-        try {
-            FileReader reader = new FileReader(filename);
-            JSONParser jsonParser = new JSONParser();
-            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
-            loadFromJSON(params, rawData);
-        } catch (Exception e) {
-            throw new AssertionError(e.getClass().toString() + " : " + e.getMessage() + " : problem loading TunableParameters from file " + filename);
-        }
-    }
-
-    /**
-     * Instantiate parameters from a JSONObject
-     */
-    public static void loadFromJSON(TunableParameters params, JSONObject rawData) {
-        List<String> allParams = params.getParameterNames();
-        for (String pName : allParams) {
-            if (isParamSingular(pName, rawData)) {
-                Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName), params);
-                params.addTunableParameter(pName, pValue);
-            } else {
-                Object pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
-                params.addTunableParameter(pName, params.getDefaultParameterValue(pName),
-                        new ArrayList<>(((List<?>) pValue)));
-            }
-
-        }
-        params._reset();
-
-        // We should also check that there are no other properties in there
-        allParams.add("class");
-        for (Object key : rawData.keySet()) {
-            if (key instanceof String && !allParams.contains(key)) {
-                System.out.println("Unexpected key in JSON for TunableParameters : " + key);
-            }
-        }
-    }
-
-    /**
-     * @param name         Name of the parameter. This will be validated as one of a possible set of expectedKeys
-     * @param json         The JSONObject containing the data we want to extract the parameter from.
-     * @param defaultValue The default value to use for the parameter if we can't find it in json.
-     * @param <T>          The class of the parameter (anticipated as one of Integer, Double, String, Boolean)
-     * @return The value of the parameter found.
-     */
-    @SuppressWarnings("unchecked")
-    private static <T> T getParam(String name, JSONObject json, T defaultValue, TunableParameters params) {
-        Object finalData = json.getOrDefault(name, defaultValue);
-        Object data = (finalData instanceof Long) ? new Integer(((Long) finalData).intValue()) : finalData;
-        if (data.getClass() == defaultValue.getClass())
-            return (T) data;
-        if (finalData instanceof JSONObject) {
-            JSONObject subJson = (JSONObject) finalData;
-            String className = (String) subJson.get("class");
-            if (className == null)
-                throw new AssertionError("No class name specified for " + name);
-            try {
-                Class<?> clazz = Class.forName(className);
-                Constructor<?> constructor = clazz.getConstructor();
-                T retValue = (T) constructor.newInstance();
-                if (retValue instanceof TunableParameters) {
-                    TunableParameters subParams = (TunableParameters) retValue;
-                    TunableParameters.loadFromJSON(subParams, subJson);
-                    params.registerChild(name, subJson);
-                }
-                return retValue;
-            } catch (Exception e) {
-                System.out.println("Error loading heuristic class " + className + " : " + e.getMessage());
-                e.printStackTrace();
-                throw new AssertionError("Error loading Class");
-            }
-        }
-        if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {
-            Optional<?> matchingValue = Arrays.stream(defaultValue.getClass().getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
-            if (matchingValue.isPresent()) {
-                return (T) matchingValue.get();
-            }
-            throw new AssertionError("No Enum match found for " + name + " in " + Arrays.toString(defaultValue.getClass().getEnumConstants()));
-        }
-        return defaultValue;
-    }
-
-    private static boolean isParamSingular(String name, JSONObject json) {
-        return !(json.get(name) instanceof List);
-    }
-
-    private static <T> List<T> getParamList(String name, JSONObject json, T defaultValue) {
-        Object data = json.getOrDefault(name, defaultValue);
-        if (!(data instanceof List))
-            throw new AssertionError("JSON does not contain an Array as expected for " + name);
-        return (List<T>) data;
-    }
-
-    /**
      * Retrieve the values of all parameters.
      *
      * @return mapping from int ID of parameter to its current value.
@@ -354,6 +352,25 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     @Override
     public Map<String, Object> getParameterValues() {
         return new HashMap<>(currentValues);
+    }
+
+    /**
+     * Set the values of the parameters, according to the map passed to this method. Each entry maps the int ID of
+     * a parameter to its assigned value.
+     *
+     * @param values - mapping from int ID of parameter to its new value.
+     *               or mapping from the name of the parameter as a String
+     */
+    @Override
+    public void setParameterValues(Map<?, Object> values) {
+        for (Object key : values.keySet()) {
+            if (key instanceof String) {
+                setParameterValue((String) key, values.get(key));
+            } else {
+                String name = getParameterName((int) key);
+                setParameterValue(name, values.get(key));
+            }
+        }
     }
 
     /**
@@ -367,17 +384,25 @@ public abstract class TunableParameters extends AbstractParameters implements IT
     }
 
     @Override
-    public ITunableParameters registerChild(String nameSpace, JSONObject json) {
+    public Object registerChild(String nameSpace, JSONObject json) {
         try {
+            if (debug)
+                System.out.println("Registering " + nameSpace);
+            int periodIndex = nameSpace.lastIndexOf(".");
+            if (periodIndex > -1)
+                nameSpace = nameSpace.substring(periodIndex + 1);
             Class<?> clazz = Class.forName((String) json.get("class"));
-            TunableParameters child = (TunableParameters) clazz.getConstructor().newInstance();
-            TunableParameters.loadFromJSON(child, json);
-            // we then need to 'pull up' the parameters in the heuristic into our list of parameters
-            // this is so that we have a single tunable set
-            for (String name : child.getParameterNames()) {
-                addTunableParameter(nameSpace + "." + name, child.getDefaultParameterValue(name));
-                // and then set the value
-                child.setParameterValue(name, child.getDefaultParameterValue(name));
+            Object child = clazz.getConstructor().newInstance();
+            if (child instanceof TunableParameters) {
+                TunableParameters tunableChild = (TunableParameters) child;
+                TunableParameters.loadFromJSON(tunableChild, json);
+                // we then need to 'pull up' the parameters in the sub-component into our list of parameters
+                // this is so that we have a single tunable set
+                for (String name : tunableChild.getParameterNames()) {
+                    addTunableParameter(nameSpace + "." + name, tunableChild.getDefaultParameterValue(name));
+                    // and then set the value
+                    tunableChild.setParameterValue(name, tunableChild.getDefaultParameterValue(name));
+                }
             }
             return child;
         } catch (Exception e) {

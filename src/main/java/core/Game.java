@@ -116,7 +116,7 @@ public class Game {
         int id = 0;
         for (AbstractPlayer player : players) {
             // Create a FM copy for this player (different random seed)
-            player.forwardModel = this.forwardModel.copy();
+            player.setForwardModel(this.forwardModel.copy());
             // Create initial state observation
             AbstractGameState observation = gameState.copy(id);
             // Give player their ID
@@ -145,7 +145,7 @@ public class Game {
         int id = 0;
         for (AbstractPlayer player : players) {
             // Create a FM copy for this player (different random seed)
-            player.forwardModel = this.forwardModel.copy();
+            player.setForwardModel(this.forwardModel.copy());
             // Create initial state observation
             AbstractGameState observation = gameState.copy(id);
             // Give player their ID
@@ -274,13 +274,11 @@ public class Game {
                     gameState.playerTimer[activePlayer].pause();
                     gameState.playerTimer[activePlayer].incrementAction();
 
-                    if (gameState.coreGameParameters.verbose) {
-                        if (action != null) {
+                    if (gameState.coreGameParameters.verbose && !(action == null)) {
                             System.out.println(action);
-                        } else {
-                            System.out.println("NULL action (player " + activePlayer + ")");
-                        }
                     }
+                    if (action == null)
+                        throw new AssertionError("We have a NULL action in the Game loop");
 
                     // Check player timeout
                     if (observation.playerTimer[activePlayer].exceededMaxTime()) {

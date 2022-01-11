@@ -24,22 +24,23 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
         skipTurn = false;
     }
 
-    public void skip()
-    {
+    public void skip() {
         skipTurn = true;
         //turnOwner = (nPlayers + turnOwner + direction) % nPlayers;
     }
 
     @Override
     public int nextPlayer(AbstractGameState gameState) {
-        int nextOwner = (nPlayers + turnOwner + direction) % nPlayers;
-        if (skipTurn) {
-            skipTurn = false;
-            return (nPlayers + nextOwner + direction) % nPlayers;
-        }
-        else
-            return nextOwner;
+        int playersToMove = skipTurn ? 2 : 1;
+        int nextOwner = turnOwner;
+        do {
+            nextOwner = (nPlayers + nextOwner + direction) % nPlayers;
+            if (gameState.isNotTerminalForPlayer(nextOwner))
+                playersToMove--;
+        } while (playersToMove > 0);
+        return nextOwner;
     }
+
 
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
@@ -49,6 +50,7 @@ public class UnoTurnOrder extends AlternatingTurnOrder {
 
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));
+        skipTurn = false;
     }
 
     @Override

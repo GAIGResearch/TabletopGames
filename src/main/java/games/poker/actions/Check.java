@@ -43,12 +43,12 @@ public class Check extends AbstractAction implements IPrintable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId);
+        return playerId + 39128947;
     }
 
     @Override
     public Check copy() {
-        return new Check(playerId);
+        return this; // immutable
     }
 
 }

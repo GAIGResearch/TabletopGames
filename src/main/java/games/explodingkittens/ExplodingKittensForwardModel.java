@@ -81,7 +81,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         drawPile.shuffle(rnd);
 
         ekgs.setActionStack(new Stack<>());
-
+        ekgs.orderOfPlayerDeath = new int[ekgs.getNPlayers()];
         ekgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
     }
 

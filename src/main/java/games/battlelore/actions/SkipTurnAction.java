@@ -11,23 +11,24 @@ import games.dotsboxes.AddGridCellEdge;
 import java.util.Objects;
 
 public class SkipTurnAction extends AbstractAction {
-    private BattleloreGameState gameState;
-    private Unit.Faction playerFaction;
-    private int unitsID;
-    private boolean skipAttack;
-    private boolean skipMove;
-    private int playerID;
+    private final Unit.Faction playerFaction;
+    private final int unitsID;
+    private final boolean skipAttack;
+    private final boolean skipMove;
+    private final int playerID;
 
-    public SkipTurnAction(BattleloreGameState gameState, int tileID, Unit.Faction faction, boolean doesSkipMove, boolean doesSkipAttack, int playerID) {
-        this.gameState = gameState;
-        this.unitsID = tileID;
-        this.playerFaction = faction;
+    public SkipTurnAction(int tileID, Unit.Faction faction, boolean doesSkipMove, boolean doesSkipAttack, int playerID) {
+        unitsID = tileID;
+        playerFaction = faction;
         this.playerID = playerID;
         skipAttack = doesSkipAttack;
         skipMove = doesSkipMove;
     }
 
-    public SkipTurnAction() {}
+    public SkipTurnAction(Unit.Faction faction, int playerID) {
+        this(-1, faction, true, true, playerID);
+    }
+
 
     @Override
     public boolean execute(AbstractGameState gameState) {
@@ -38,7 +39,6 @@ public class SkipTurnAction extends AbstractAction {
         }
 
         BattleloreGameState state = (BattleloreGameState) gameState;
-        state.AddToRounds();
         state.IncrementTurn(playerID);
         MapTile units = (MapTile) gameState.getComponentById(unitsID);
         if (units != null) {
@@ -57,7 +57,7 @@ public class SkipTurnAction extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new SkipTurnAction(gameState, unitsID, playerFaction, skipMove, skipAttack, playerID);
+        return this; // immutable
     }
 
     @Override
@@ -76,7 +76,7 @@ public class SkipTurnAction extends AbstractAction {
     @Override
     public int hashCode()
     {
-        return Objects.hash(unitsID, playerFaction);
+        return Objects.hash(unitsID, playerFaction, skipAttack, skipMove, playerID);
     }
 
     @Override

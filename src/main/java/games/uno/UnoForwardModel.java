@@ -4,17 +4,18 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import games.uno.UnoGameParameters.UnoScoring;
 import games.uno.actions.NoCards;
 import games.uno.actions.PlayCard;
 import games.uno.cards.UnoCard;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.*;
+import static games.uno.UnoGameParameters.UnoScoring.CHALLENGE;
+import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class UnoForwardModel extends AbstractForwardModel {
 
@@ -24,6 +25,7 @@ public class UnoForwardModel extends AbstractForwardModel {
 
         // Set up scores for all players, initially 0
         ugs.playerScore = new int[firstState.getNPlayers()];
+        ugs.expulsionRound = new int[firstState.getNPlayers()];
         ugs.playerDecks = new ArrayList<>();
         for (int i = 0; i < ugs.getNPlayers(); i++) {
             ugs.playerDecks.add(new Deck<>("Player " + i + " deck", i, VISIBLE_TO_OWNER));
@@ -45,10 +47,11 @@ public class UnoForwardModel extends AbstractForwardModel {
 
     /**
      * Create all the cards and include them into the drawPile.
+     *
      * @param ugs - current game state.
      */
     private void createCards(UnoGameState ugs) {
-        UnoGameParameters ugp = (UnoGameParameters)ugs.getGameParameters();
+        UnoGameParameters ugp = (UnoGameParameters) ugs.getGameParameters();
         for (String color : ugp.colors) {
             if (!color.equals("Wild")) {
 
@@ -84,14 +87,16 @@ public class UnoForwardModel extends AbstractForwardModel {
 
     private void drawCardsToPlayers(UnoGameState ugs) {
         for (int player = 0; player < ugs.getNPlayers(); player++) {
-            for (int card = 0; card < ((UnoGameParameters)ugs.getGameParameters()).nCardsPerPlayer; card++) {
-                ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
-            }
+            if (ugs.isNotTerminalForPlayer(player))
+                for (int card = 0; card < ((UnoGameParameters) ugs.getGameParameters()).nCardsPerPlayer; card++) {
+                    ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
+                }
         }
     }
 
     /**
      * Sets up a round for the game, including draw pile, discard deck and player decks, all reset.
+     *
      * @param ugs - current game state.
      */
     private void setupRound(UnoGameState ugs) {
@@ -112,13 +117,12 @@ public class UnoForwardModel extends AbstractForwardModel {
         drawCardsToPlayers(ugs);
 
         // Get current card and set the current card and color
-        ugs.currentCard  = ugs.drawDeck.draw();
+        ugs.currentCard = ugs.drawDeck.draw();
         ugs.currentColor = ugs.currentCard.color;
 
         // The first card cannot be a wild.
         // In case, add to draw deck and shuffle again
-        while (ugs.isWildCard(ugs.currentCard))
-        {
+        while (ugs.isWildCard(ugs.currentCard)) {
             if (ugs.getCoreGameParameters().verbose) {
                 System.out.println("First card wild");
             }
@@ -135,8 +139,7 @@ public class UnoForwardModel extends AbstractForwardModel {
             }
             if (ugs.currentCard.type == UnoCard.UnoCardType.Reverse) {
                 ((UnoTurnOrder) ugs.getTurnOrder()).reverse();
-            }
-            else if (ugs.currentCard.type == UnoCard.UnoCardType.Draw) {
+            } else if (ugs.currentCard.type == UnoCard.UnoCardType.Draw) {
                 int player = ugs.getCurrentPlayer();
                 for (int i = 0; i < ugs.currentCard.drawN; i++) {
                     ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
@@ -152,13 +155,13 @@ public class UnoForwardModel extends AbstractForwardModel {
     @Override
     protected void _next(AbstractGameState gameState, AbstractAction action) {
         action.execute(gameState);
-        if (checkRoundEnd((UnoGameState)gameState)) {
+        if (checkRoundEnd((UnoGameState) gameState)) {
             return;
         }
 //        if (checkRunningTotal((UnoGameState)gameState)) {
 //            return;
 //        }
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+        if (gameState.getGameStatus() == GAME_ONGOING) {
             gameState.getTurnOrder().endPlayerTurn(gameState);
         }
     }
@@ -166,16 +169,19 @@ public class UnoForwardModel extends AbstractForwardModel {
     /**
      * Checks if the round ended (when one player runs out of cards). On round end, points for all players are added up
      * and next round is set up.
+     *
      * @param ugs - current game state
      * @return true if round ended, false otherwise
      */
     private boolean checkRoundEnd(UnoGameState ugs) {
         // Did any player run out of cards?
         boolean roundEnd = false;
+        int roundWinner = -1;
         for (int playerID = 0; playerID < ugs.getNPlayers(); playerID++) {
-            if (ugs.getPlayerResults()[playerID] == Utils.GameResult.GAME_ONGOING) {
+            if (ugs.getPlayerResults()[playerID] == GAME_ONGOING) {
                 if (ugs.playerDecks.get(playerID).getComponents().size() == 0) {
                     roundEnd = true;
+                    roundWinner = playerID;
                     break;
                 }
             }
@@ -183,9 +189,25 @@ public class UnoForwardModel extends AbstractForwardModel {
 
         if (roundEnd) {
             // Add up points
-            for (int i = 0; i < ugs.getNPlayers(); i++) {
-                ugs.playerScore[i] += ugs.calculatePlayerPoints(i);
+            UnoScoring scoring = ((UnoGameParameters) ugs.getGameParameters()).scoringMethod;
+            switch (scoring) {
+                case CLASSIC:
+                    ugs.playerScore[roundWinner] += ugs.calculatePlayerPoints(roundWinner, false);
+                    break;
+                case INCREMENTAL:
+                case CHALLENGE:
+                    for (int i = 0; i < ugs.getNPlayers(); i++) {
+                        if (ugs.getPlayerResults()[i] == GAME_ONGOING) {
+                            ugs.playerScore[i] += ugs.calculatePlayerPoints(i, true);
+                        } else {
+                            if (ugs.calculatePlayerPoints(i, true) > 0) {
+                                throw new AssertionError("Eliminated players should not have any cards");
+                            }
+                        }
+                    }
+                    break;
             }
+
 //            System.out.println("Round end " + Arrays.toString(ugs.playerScore));
             ugs.getTurnOrder().endRound(ugs);
 
@@ -201,104 +223,110 @@ public class UnoForwardModel extends AbstractForwardModel {
     }
 
     /**
-     * Alternative rules check running total of points for the players.
-     * @param ugs - current game state, calculates new total based on this state and checks game end.
-     * @return - true if game has ended, false otherwise.
-     */
-    private boolean checkRunningTotal(UnoGameState ugs) {
-        UnoGameParameters ugp = (UnoGameParameters) ugs.getGameParameters();
-
-        int[] playerScores = new int[ugs.getNPlayers()];
-        for (int playerID = 0; playerID < ugs.getNPlayers(); playerID++) {
-            if (ugs.getPlayerResults()[playerID] == Utils.GameResult.GAME_ONGOING) {
-                int nPoints = ugs.playerScore[playerID] + ugs.calculatePlayerPoints(playerID);
-                playerScores[playerID] = nPoints;
-            }
-        }
-
-        return checkGameEnd(ugs, playerScores);
-    }
-
-    /**
      * The game is ended when a player reaches N points (as total of points from cards of all other players)
+     *
      * @param playerScores - player scores to use for checking game end
-     * @param ugs - current game state
+     * @param ugs          - current game state
      */
     private boolean checkGameEnd(UnoGameState ugs, int[] playerScores) {
         UnoGameParameters ugp = (UnoGameParameters) ugs.getGameParameters();
 
-        int[] nCardsPlayer = new int[ugs.getNPlayers()];
-        boolean aWinner = false;
-        boolean noCardsWinner = false;
-        boolean tie = false;
-        int maxScore = ugp.nWinPoints;
-        int idMaxScore = -1;
+        List<Integer> breachers = new ArrayList<>();
 
         for (int playerID = 0; playerID < ugs.getNPlayers(); playerID++) {
-            nCardsPlayer[playerID] = ugs.playerDecks.get(playerID).getComponents().size();
-
+            if (ugs.getPlayerResults()[playerID] != GAME_ONGOING)
+                continue; // player is already knocked out
             // A winner!
-            if (playerScores[playerID] >= maxScore) {
-                if (playerScores[playerID] == maxScore) {
-                    tie = aWinner;
-                } else {
-                    tie = false;
-                }
-                aWinner = true;
-                maxScore = playerScores[playerID];
-                idMaxScore = playerID;
-                if (nCardsPlayer[playerID] == 0) {
-                    noCardsWinner = true;
-                }
+            if (playerScores[playerID] >= ugp.nWinPoints) {
+                breachers.add(playerID);
             }
         }
 
-        if (aWinner) {
-            // Game is over
-            HashSet<Integer> winners = new HashSet<>();
-
-            if (noCardsWinner) {
-                if (tie) {
-                    // Check all points
+        if (!breachers.isEmpty()) {
+            switch (ugp.scoringMethod) {
+                case CLASSIC:
+                    // in this case, the game ends when one player breaches the threshold
+                    // and they win
+                    int maxScore = Arrays.stream(ugs.playerScore).max().orElseThrow(
+                            () -> new AssertionError("Unexpected: no players have scores?")
+                    );
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
                         if (playerScores[i] == maxScore) {
-                            winners.add(i);
+                            ugs.setPlayerResult(Utils.GameResult.WIN, i);
+                        } else {
+                            ugs.setPlayerResult(Utils.GameResult.LOSE, i);
                         }
                     }
-                } else {
-                    winners.add(idMaxScore);
-                }
-            } else {
-                // The one with the lowest number of points wins
-                int minScore = maxScore;
-                for (int i = 0; i < ugs.getNPlayers(); i++) {
-                    if (playerScores[i] < minScore) {
-                        minScore = playerScores[i];
+                    ugs.setGameStatus(Utils.GameResult.GAME_END);
+                    return true;
+                case INCREMENTAL:
+                    // in this case the game ends when one player breaches the threshold.
+                    // but the winner is the player with fewest points!
+                    int minScore = Arrays.stream(ugs.playerScore).min().orElseThrow(
+                            () -> new AssertionError("Unexpected: no players have scores?")
+                    );
+                    for (int i = 0; i < ugs.getNPlayers(); i++) {
+                        if (playerScores[i] == minScore) {
+                            ugs.setPlayerResult(Utils.GameResult.WIN, i);
+                        } else {
+                            ugs.setPlayerResult(Utils.GameResult.LOSE, i);
+                        }
                     }
-                }
-                for (int i = 0; i < ugs.getNPlayers(); i++) {
-                    if (playerScores[i] == minScore) {
-                        winners.add(i);
+                    ugs.setGameStatus(Utils.GameResult.GAME_END);
+                    return true;
+                case CHALLENGE:
+                    // this is the most complicated case
+                    // as we need to knock out players who breach the threshold
+                    int remainingPlayers = 0;
+                    int lowScore = ugp.nWinPoints * 10;
+                    for (int i = 0; i < ugs.getNPlayers(); i++) {
+                        if (ugs.getPlayerResults()[i] == GAME_ONGOING) {
+                            if (playerScores[i] >= ugp.nWinPoints) {
+                                ugs.setPlayerResult(Utils.GameResult.LOSE, i);
+                                ugs.expulsionRound[i] = ugs.getTurnOrder().getRoundCounter();
+                                if (playerScores[i] < lowScore) {
+                                    lowScore = playerScores[i];
+                                }
+                            } else {
+                                remainingPlayers++;
+                            }
+                        }
                     }
-                }
-            }
+                    List<Integer> lowScoreIds = new ArrayList<>();
+                    for (int i = 0; i < ugs.getNPlayers(); i++)
+                        if (ugs.getPlayerResults()[i] == GAME_ONGOING && lowScore == playerScores[i])
+                            lowScoreIds.add(i);
 
-            for (int i = 0; i < ugs.getNPlayers(); i++) {
-                if (winners.contains(i)) {
-                    ugs.setPlayerResult(Utils.GameResult.WIN, i);
-                } else {
-                    ugs.setPlayerResult(Utils.GameResult.LOSE, i);
-                }
+                    switch (remainingPlayers) {
+                        case 0:
+                            // everyone breached, so winner is the lowest score
+                            for (int p : lowScoreIds) {
+                                ugs.setPlayerResult(Utils.GameResult.WIN, p);
+                                ugs.expulsionRound[p] = ugs.getTurnOrder().getRoundCounter() + 1;
+                            }
+                            ugs.setGameStatus(Utils.GameResult.GAME_END);
+                            return true;
+                        case 1:
+                            for (int p = 0; p < ugs.getNPlayers(); p++) {
+                                if (ugs.getPlayerResults()[p] == GAME_ONGOING) {
+                                    ugs.setPlayerResult(Utils.GameResult.WIN, p);
+                                    ugs.expulsionRound[p] = ugs.getTurnOrder().getRoundCounter() + 1;
+                                }
+                            }
+                            // we then continue to the case 1:
+                            ugs.setGameStatus(Utils.GameResult.GAME_END);
+                            return true;
+                        default:
+                            // continue
+                    }
             }
-            ugs.setGameStatus(Utils.GameResult.GAME_END);
-            return true;
         }
         return false;
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        UnoGameState ugs = (UnoGameState)gameState;
+        UnoGameState ugs = (UnoGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = ugs.getCurrentPlayer();
 
@@ -307,11 +335,10 @@ public class UnoForwardModel extends AbstractForwardModel {
             int cardIdx = playerHand.getComponents().indexOf(card);
             if (card.isPlayable(ugs)) {
                 if (ugs.isWildCard(card)) {
-                    for (String color : ((UnoGameParameters)ugs.getGameParameters()).colors) {
+                    for (String color : ((UnoGameParameters) ugs.getGameParameters()).colors) {
                         actions.add(new PlayCard(playerHand.getComponentID(), ugs.discardDeck.getComponentID(), cardIdx, color));
                     }
-                }
-                else {
+                } else {
                     actions.add(new PlayCard(playerHand.getComponentID(), ugs.discardDeck.getComponentID(), cardIdx));
                 }
             }

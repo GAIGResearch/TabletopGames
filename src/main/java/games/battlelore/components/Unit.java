@@ -12,6 +12,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+ import java.util.Objects;
 
 public class Unit extends Component {
 
@@ -120,7 +121,7 @@ public class Unit extends Component {
             return true;
         }
 
-        if (!(o instanceof Loot)) {
+        if (!(o instanceof Unit)) {
             return false;
         }
 
@@ -129,16 +130,16 @@ public class Unit extends Component {
         }
 
         Unit unit = (Unit) o;
-        return id == unit.id &&
+        return id.equals(unit.id) &&
                 componentID == unit.componentID &&
                 type == unit.type &&
-                name == unit.name &&
+                name.equals(unit.name) &&
                 moveRange == unit.moveRange &&
                 strength == unit.strength &&
                 health == unit.health &&
                 faction == unit.faction &&
-                isMelee == isMelee &&
-                shortName == shortName &&
+                isMelee == unit.isMelee &&
+                Objects.equals(shortName, unit.shortName) &&
                 canMove == unit.canMove &&
                 canAttack == unit.canAttack;
     }
@@ -187,7 +188,7 @@ public class Unit extends Component {
         this.name = (String) unit.get("name");
         this.faction = parseFaction(((Long) ( (JSONArray) unit.get("faction")).get(1)).intValue());
         this.shortName = (String) unit.get("shortname");
-        this.isMelee = ((Boolean) ( (JSONArray) unit.get("isMelee")).get(1)).booleanValue();
+        this.isMelee = (Boolean) ((JSONArray) unit.get("isMelee")).get(1);
 
         parseComponent(this, unit);
     }

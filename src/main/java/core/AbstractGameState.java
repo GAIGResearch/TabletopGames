@@ -115,6 +115,7 @@ public abstract class AbstractGameState {
     public final int getNPlayers() { return turnOrder.nPlayers(); }
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
     public final boolean isNotTerminal(){ return gameStatus == GAME_ONGOING; }
+    public final boolean isNotTerminalForPlayer(int player){ return playerResults[player] == GAME_ONGOING && gameStatus == GAME_ONGOING; }
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
@@ -247,6 +248,17 @@ public abstract class AbstractGameState {
     public abstract double getGameScore(int playerId);
 
     /**
+     * This is an optinal implementation and is used in getOrdinalPosition() to break any ties based on pure game score
+     * Implementing this may be a simpler approach in many cases than re-implementing getOrdinalPosition()
+     * For example in ColtExpress, the tie break is the number of bullet cards in hand - and this only affects the outcome
+     * if the score is a tie.
+     * @param playerId
+     * @return
+     */
+    public double getTiebreak(int playerId) {
+        return 0.0;
+    }
+    /**
      * Returns the ordinal position of a player using getGameScore().
      *
      * If a Game does not have a score, but does have the concept of player position (e.g. in a race)
@@ -262,11 +274,14 @@ public abstract class AbstractGameState {
         double playerScore = getGameScore(playerId);
         int ordinal = 1;
         for (int i = 0, n = getNPlayers(); i < n; i++) {
-            if (getGameScore(i) > playerScore)
+            double otherScore = getGameScore(i);
+            if (otherScore > playerScore)
                 ordinal++;
+            else if (otherScore == playerScore) {
+                if (getTiebreak(i) > getTiebreak(playerId))
+                    ordinal++;
+            }
         }
-        if (ordinal == 1 && !isNotTerminal() && playerResults[playerId] != Utils.GameResult.WIN)
-            ordinal = 1 + (int) Arrays.stream(playerResults).filter(r -> r == WIN).count();
         return ordinal;
     }
 

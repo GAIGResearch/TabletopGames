@@ -1,10 +1,10 @@
 package players.mcts;
 
+import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
 import core.interfaces.IGameListener;
 import core.interfaces.IStateHeuristic;
 import games.dicemonastery.DiceMonasteryStateAttributes;
@@ -18,6 +18,9 @@ import java.util.Random;
 import java.util.function.ToDoubleBiFunction;
 import java.util.stream.Collectors;
 
+import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
+
 public class MCTSPlayer extends AbstractPlayer {
 
     // Random object for this player
@@ -25,13 +28,14 @@ public class MCTSPlayer extends AbstractPlayer {
     // Parameters for this player
     protected MCTSParams params;
     // Heuristics used for the agent
-    IStateHeuristic heuristic;
-    AbstractPlayer rolloutStrategy;
-    AbstractPlayer opponentModel;
-    ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
+    protected IStateHeuristic heuristic;
+    protected IStateHeuristic opponentHeuristic;
+    protected AbstractPlayer rolloutStrategy;
     protected boolean debug = false;
     protected SingleTreeNode root;
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStats;
+    private AbstractPlayer opponentModel;
+    private ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -51,6 +55,7 @@ public class MCTSPlayer extends AbstractPlayer {
         rolloutStrategy = params.getRolloutStrategy();
         opponentModel = params.getOpponentModel();
         heuristic = params.getHeuristic();
+        opponentHeuristic = params.getOpponentHeuristic();
         advantageFunction = params.getAdvantageFunction();
         setName(name);
     }
@@ -66,7 +71,11 @@ public class MCTSPlayer extends AbstractPlayer {
     @Override
     public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        root = new SingleTreeNode(this, null, null, gameState, rnd);
+        if (params.opponentTreePolicy == MultiTree || params.opponentTreePolicy == MultiTreeParanoid)
+            root = new MultiTreeNode(this, gameState, rnd);
+        else
+            root = SingleTreeNode.createRootNode(this, gameState, rnd);
+
         if (MASTStats != null)
             root.MASTStatistics = MASTStats.stream()
                     .map(m -> Utils.decay(m, params.MASTGamma))
@@ -96,6 +105,8 @@ public class MCTSPlayer extends AbstractPlayer {
 
         MASTStats = root.MASTStatistics;
         // Return best action
+        if (root.children.size() > 2 * actions.size())
+            throw new AssertionError("Unexpectedly large number");
         return root.bestAction();
     }
 
@@ -115,6 +126,15 @@ public class MCTSPlayer extends AbstractPlayer {
         if (advantageFunction instanceof IGameListener)
             ((IGameListener) advantageFunction).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
 
+    }
+
+    @Override
+    public void setForwardModel(AbstractForwardModel model) {
+        super.setForwardModel(model);
+        if (rolloutStrategy != null)
+            rolloutStrategy.setForwardModel(model);
+        if (opponentModel != null)
+            opponentModel.setForwardModel(model);
     }
 
 }

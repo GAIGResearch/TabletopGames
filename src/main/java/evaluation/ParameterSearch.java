@@ -14,6 +14,7 @@ import players.PlayerFactory;
 import utilities.Pair;
 import utilities.StatSummary;
 import utilities.SummaryLogger;
+import utilities.Utils;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -159,7 +160,7 @@ public class ParameterSearch {
         // TODO: Add Game tuning objectives that measure how close the result is, etc.
         BiFunction<AbstractGameState, Integer, Double> evalFunction = null;
         if (evalMethod.equals("Win"))
-            evalFunction = (state, playerId) -> state.getPlayerResults()[playerId].value;
+            evalFunction = (state, playerId) -> state.getPlayerResults()[playerId] == Utils.GameResult.WIN ? 1.0 : 0.0;
         if (evalMethod.equals("Score"))
             evalFunction = AbstractGameState::getGameScore;
         if (evalMethod.equals("Heuristic"))

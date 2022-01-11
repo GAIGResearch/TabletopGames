@@ -39,6 +39,8 @@ public interface IStatisticLogger {
 
 
     static IStatisticLogger createLogger(String loggerClass, String logFile) {
+        if (logFile.isEmpty())
+            return null;
         IStatisticLogger logger = new SummaryLogger();
         try {
             Class<?> clazz = Class.forName(loggerClass);
