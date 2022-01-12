@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class DiceMonasteryParams extends TunableParameters {
+    public DiceMonasteryParams() {
+        this(System.currentTimeMillis());
+    }
+
     public DiceMonasteryParams(long seed) {
         super(seed);
         addTunableParameter("YEARS", 4);

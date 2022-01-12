@@ -8,7 +8,7 @@ import java.util.List;
 
 public abstract class AbstractPlayer {
 
-    protected IStatisticLogger statsLogger = new SummaryLogger();
+    protected IStatisticLogger statsLogger = null;
     // ID of this player, assigned by the game
     int playerID;
     // Forward model for the game
@@ -33,6 +33,17 @@ public abstract class AbstractPlayer {
         return forwardModel;
     }
 
+    /**
+     * Sets the forward model for the current environment.
+     * This is used by Game, and also when an AbstractPlayer is a component of another agent
+     * (for example in MCTSPlayer, where the heuristic rollout policy could itself be an AbstractPlayer
+     * that needs a copy of the forward model)
+     *
+     * Anything that has a reference to an AbstractPlayer can therefore pass a ForwardModel.
+     * In competition mode this it is not currently possible for opponents to get a link to your
+     * object...and this should be avoided.
+     * @param model
+     */
     public void setForwardModel(AbstractForwardModel model) {
         this.forwardModel = model;
     }
@@ -68,7 +79,7 @@ public abstract class AbstractPlayer {
      */
     public void registerUpdatedObservation(AbstractGameState gameState) {}
 
-    public void setName(String name) {this.name = name;}
+    public final void setName(String name) {this.name = name;}
 
     @Override
     public String toString() {
@@ -76,11 +87,13 @@ public abstract class AbstractPlayer {
         return this.getClass().getSimpleName();
     }
 
-    public IStatisticLogger getStatsLogger() {
+    public final IStatisticLogger getStatsLogger() {
         return statsLogger;
     }
 
-    public void setStatsLogger(IStatisticLogger logger) {
+    public final void setStatsLogger(IStatisticLogger logger) {
         this.statsLogger = logger;
     }
+
+    public abstract AbstractPlayer copy();
 }

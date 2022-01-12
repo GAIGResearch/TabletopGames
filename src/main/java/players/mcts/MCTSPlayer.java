@@ -11,10 +11,7 @@ import games.dicemonastery.DiceMonasteryStateAttributes;
 import utilities.Pair;
 import utilities.Utils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.ToDoubleBiFunction;
 import java.util.stream.Collectors;
 
@@ -66,6 +63,7 @@ public class MCTSPlayer extends AbstractPlayer {
         opponentModel.initializePlayer(state);
         if (advantageFunction instanceof AbstractPlayer)
             ((AbstractPlayer) advantageFunction).initializePlayer(state);
+        MASTStats = null;
     }
 
     @Override
@@ -126,6 +124,11 @@ public class MCTSPlayer extends AbstractPlayer {
         if (advantageFunction instanceof IGameListener)
             ((IGameListener) advantageFunction).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
 
+    }
+
+    @Override
+    public MCTSPlayer copy() {
+        return new MCTSPlayer((MCTSParams) params.copy());
     }
 
     @Override

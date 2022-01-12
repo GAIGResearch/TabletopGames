@@ -1,7 +1,11 @@
 package evaluation;
 
 import core.AbstractGameState;
+import core.AbstractParameters;
 import core.AbstractPlayer;
+import core.ParameterFactory;
+import core.interfaces.IGameHeuristic;
+import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evodef.EvoAlg;
 import evodef.SearchSpace;
@@ -21,7 +25,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
@@ -42,12 +45,23 @@ public class ParameterSearch {
                         "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
                         "\topponent=      The agent used as opponent. Default is not to use a specific opponent, but use MultiNTBEA. \n" +
-                        "\t               This can either be a json-format file detailing the parameters, or\n" +
-                        "\t               one of coop|mcts|rmhc|random|osla|<className>  \n" +
+                        "\t               This can any of: \n" +
+                        "\t               \t'coop' uses the agent being tuned (via searchSpace) for all agents (i.e. for coop games)\n" +
+                        "\t               \ta json-format file detailing the parameters, or\n" +
+                        "\t               \tone of coop|mcts|rmhc|random|osla|<className>, or\n" +
+                        "\t               \ta directory that contains one or more json-format files from which opponents will be sampled.\n" +
                         "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
                         "\t               with a no-argument constructor.\n" +
-                        "\t               'coop' means that the agent being tuned is used for all agents (i.e. if co-operative)\n" +
-                        "\teval=          Score|Ordinal|Heuristic|Win specifies what we are optimising. Defaults to Win.\n" +
+                        "\t               If tuneGame is set, then the opponent argument must be provided, and will be used for all players.\n" +
+                        "\tplayerDupes=   If false (the default), and opponent specifies multiple files in a directory, then no agent will\n" +
+                        "\t               be used twice in a single game (if there are enough agents to sample from). Set to true to allow dupes.\n" +
+                        "\tgameParam=     The json-format file of game parameters to use. Defaults to standard rules and options.\n" +
+                        "\ttuneGame       If supplied, then we will tune the game instead of tuning the agent.\n" +
+                        "\t               In this case the searchSpace file must be relevant for the game.\n" +
+                        "\teval=          Score|Ordinal|Heuristic|Win specifies what we are optimising (if not tuneGame). Defaults to Win.\n" +
+                        "\t               If tuneGame, then instead the name of a IGameHeuristic class in the evaluation.heuristics package\n" +
+                        "\t               must be provided, or the a json-format file that provides the requisite details. \n" +
+                        "\t               The json-format file is needed if non-default settings for the IGameHeuristic are used.\n" +
                         "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
                         "\tkExplore=      The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
                         "\t               For scores with larger ranges, we recommend scaling kExplore appropriately.\n" +
@@ -119,27 +133,34 @@ public class ParameterSearch {
         landscapeModel.setUse3Tuple(useThreeTuples);
         landscapeModel.addTuples();
 
+        boolean tuningGame = Arrays.asList(args).contains("tuneGame");
+
         if (getArg(args, "opponent", "").isEmpty()) {
+            if (tuningGame)
+                throw new AssertionError("If 'tuneGame' is set, then the opponent parameter is mandatory");
             runMultiNTBEA(landscapeModel, args);
         } else {
             runSingleNTBEA(landscapeModel, args);
         }
-
     }
 
     public static void runSingleNTBEA(NTupleSystem landscapeModel, String[] args) {
 
+        boolean tuningGame = Arrays.asList(args).contains("tuneGame");
         int iterationsPerRun = Integer.parseInt(args[1]);
         GameType game = GameType.valueOf(args[2]);
         int repeats = getArg(args, "repeat", 1);
         int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
         double kExplore = getArg(args, "kExplore", 1.0);
         String opponentDescriptor = getArg(args, "opponent", "");
+        boolean allowDupes = getArg(args, "playerDupes", false);
         boolean verbose = Arrays.asList(args).contains("verbose");
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
         long seed = getArg(args, "seed", System.currentTimeMillis());
         String logfile = getArg(args, "logFile", "");
         String evalMethod = getArg(args, "eval", "Win");
+        String paramFile = getArg(args, "gameParam", "");
+        AbstractParameters gameParams = ParameterFactory.createFromFile(game, paramFile);
 
         ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
@@ -151,34 +172,55 @@ public class ParameterSearch {
         List<AbstractPlayer> opponents = new ArrayList<>();
         // if we are in coop mode, then we have no opponents. This is indicated by leaving the list empty.
         if (!opponentDescriptor.equals("coop")) {
-            for (int i = 0; i < nPlayers; i++) {
-                AbstractPlayer opponent = PlayerFactory.createPlayer(opponentDescriptor);
-                opponents.add(opponent);
-            }
+            // first check to see if we have a directory or not
+            opponents = PlayerFactory.createPlayers(opponentDescriptor);
         }
 
-        // TODO: Add Game tuning objectives that measure how close the result is, etc.
-        BiFunction<AbstractGameState, Integer, Double> evalFunction = null;
-        if (evalMethod.equals("Win"))
-            evalFunction = (state, playerId) -> state.getPlayerResults()[playerId] == Utils.GameResult.WIN ? 1.0 : 0.0;
-        if (evalMethod.equals("Score"))
-            evalFunction = AbstractGameState::getGameScore;
-        if (evalMethod.equals("Heuristic"))
-            evalFunction = AbstractGameState::getHeuristicScore;
-        if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
-            evalFunction = (state, playerId) -> -(double) state.getOrdinalPosition(playerId);
-        if (evalFunction == null)
-            throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
+        IGameHeuristic gameHeuristic = null;
+        IStateHeuristic stateHeuristic = null;
+        if (tuningGame) {
+            if (new File(evalMethod).exists()) {
+                // load from file
+                gameHeuristic = Utils.loadFromFile(evalMethod);
+            } else {
+                if (evalMethod.contains(".json"))
+                    throw new AssertionError("File not found : " + evalMethod);
+                try {
+                    Class<?> evalClass = Class.forName("evaluation.heuristics." + evalMethod);
+                    gameHeuristic = (IGameHeuristic) evalClass.getConstructor().newInstance();
+                } catch (ClassNotFoundException e) {
+                    throw new AssertionError("evaluation.heuristics." + evalMethod + " not found");
+                } catch (NoSuchMethodException e) {
+                    throw new AssertionError("evaluation.heuristics." + evalMethod + " has no no-arg constructor");
+                } catch (ReflectiveOperationException e) {
+                    e.printStackTrace();
+                    throw new AssertionError("evaluation.heuristics." + evalMethod + " reflection error");
+                }
+            }
 
+        } else {
+            if (evalMethod.equals("Win"))
+                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == Utils.GameResult.WIN ? 1.0 : 0.0;
+            if (evalMethod.equals("Score"))
+                stateHeuristic = AbstractGameState::getGameScore;
+            if (evalMethod.equals("Heuristic"))
+                stateHeuristic = AbstractGameState::getHeuristicScore;
+            if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
+                stateHeuristic = (s, p) -> -(double) s.getOrdinalPosition(p);
+            if (stateHeuristic == null)
+                throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
+        }
         // Initialise the GameEvaluator that will do all the heavy lifting
         GameEvaluator evaluator = new GameEvaluator(
                 game,
                 searchSpace,
+                gameParams,
                 nPlayers,
-                evalFunction,
                 opponents,
                 seed,
-                true
+                stateHeuristic,
+                gameHeuristic,
+                !allowDupes
         );
 
         // Get the results. And then log them.
@@ -218,16 +260,16 @@ public class ParameterSearch {
         String logfile = getArg(args, "logFile", "");
 
         String evalMethod = getArg(args, "eval", "Win");
-        BiFunction<AbstractGameState, Integer, Double> evalFunction = null;
+        IStateHeuristic stateHeuristic = null;
         if (evalMethod.equals("Win"))
-            evalFunction = (state, playerId) -> state.getPlayerResults()[playerId].value;
+            stateHeuristic = (s, p) -> s.getPlayerResults()[p] == Utils.GameResult.WIN ? 1.0 : 0.0;
         if (evalMethod.equals("Score"))
-            evalFunction = AbstractGameState::getGameScore;
+            stateHeuristic = AbstractGameState::getGameScore;
         if (evalMethod.equals("Heuristic"))
-            evalFunction = AbstractGameState::getHeuristicScore;
+            stateHeuristic = AbstractGameState::getHeuristicScore;
         if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
-            evalFunction = (state, playerId) -> -(double) state.getOrdinalPosition(playerId);
-        if (evalFunction == null)
+            stateHeuristic = (state, playerId) -> -(double) state.getOrdinalPosition(playerId);
+        if (stateHeuristic == null)
             throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
 
         ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
@@ -241,7 +283,7 @@ public class ParameterSearch {
                 game,
                 searchSpace,
                 nPlayers,
-                evalFunction,
+                stateHeuristic,
                 seed
         );
 

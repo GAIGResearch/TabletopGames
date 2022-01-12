@@ -21,6 +21,14 @@ import static utilities.Utils.GameResult.WIN;
 
 /**
  * Contains all game state information.
+ *
+ * This is distinct from the Game, of which it is a component. The Game also controls the players in the game, and
+ * this information is not present in (and must not be present in) the AbstractGameState.
+ *
+ * A copy of the AbstractGameState is provided to each AbstractPlayer when it is their turn to act.
+ * Separately the AbstractPlayer has a ForwardModel to be used if needed - this caters for the possibility that
+ * agents may want to use a different/learned forward model in some use cases.
+ *
  */
 public abstract class AbstractGameState {
 

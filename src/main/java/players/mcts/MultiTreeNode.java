@@ -4,10 +4,10 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
-import games.dicemonastery.actions.GoOnPilgrimage;
 import utilities.Pair;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -161,7 +161,11 @@ public class MultiTreeNode extends SingleTreeNode {
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
                     maxDepthReached[currentActor] = true;
             }
-        } while (currentState.isNotTerminal() && !(actionsInRollout.size() >= params.rolloutLength && (nodeExpanded[decisionPlayer] || currentState.isNotTerminalForPlayer(decisionPlayer)) ));
+            // we terminate if the game is over, or if we have exceeded our rollout count AND we have either expanded a node
+            // for the decisionPlayer, or they are out of the game (in which case they will never get to expand a node)
+        } while (currentState.isNotTerminal() &&
+                !(actionsInRollout.size() >= params.rolloutLength &&
+                        (nodeExpanded[decisionPlayer] || !currentState.isNotTerminalForPlayer(decisionPlayer))));
 
         for (int i = 0; i < nodeExpanded.length; i++) {
             updateCurrentLocation(i, currentState);
@@ -214,36 +218,40 @@ public class MultiTreeNode extends SingleTreeNode {
 
     @Override
     protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
-        Map<String, Object> stats = new HashMap<>();
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("round", state.getTurnOrder().getRoundCounter());
+        stats.put("turn", state.getTurnOrder().getTurnCounter());
+        stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
+        stats.put("iterations", numIters);
+        stats.put("time", timeTaken);
+        int validRoots = (int) Arrays.stream(roots).filter(Objects::nonNull).count();
         for (SingleTreeNode node : roots) {
-            if (node == null) break;
+            if (node == null) continue;
+            boolean mainPlayer = node.decisionPlayer == this.decisionPlayer;
             TreeStatistics treeStats = new TreeStatistics(node);
-            stats.put("round", state.getTurnOrder().getRoundCounter());
-            stats.put("turn", state.getTurnOrder().getTurnCounter());
-            stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
-            double[] visitProportions = Arrays.stream(actionVisits()).asDoubleStream().map(d -> d / this.getVisits()).toArray();
-            stats.put("visitEntropy", entropyOf(visitProportions));
-            stats.put("iterations", numIters);
-            int copy = node.copyCount;
-            if (node == roots[decisionPlayer])
-                copy += this.copyCount;
-            int fm = node.fmCallsCount;
-            if (node == roots[decisionPlayer])
-                fm += this.fmCallsCount;
-            stats.put("copyCalls", copy * roots.length);
-            stats.put("fmCalls", fm * roots.length);
-            stats.put("time", timeTaken);
-            stats.put("totalNodes", treeStats.totalNodes * roots.length);
-            stats.put("leafNodes", treeStats.totalLeaves * roots.length);
-            stats.put("terminalNodes", treeStats.totalTerminalNodes * roots.length);
-            stats.put("maxDepth", treeStats.depthReached);
-            stats.put("nActionsRoot", node.children.size());
-            stats.put("nActionsTree", treeStats.meanActionsAtNode);
-            stats.put("maxActionsAtNode", treeStats.maxActionsAtNode);
-            OptionalInt maxVisits = Arrays.stream(actionVisits()).max();
-            stats.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters);
-            statsLogger.record(stats);
+
+            int copy = node.copyCount + (node == roots[decisionPlayer] ? this.copyCount : 0);
+            int fm = node.fmCallsCount + (node == roots[decisionPlayer] ? this.fmCallsCount : 0);
+            double multiplier = mainPlayer ? 1 : 1.0 / (validRoots - 1.0);
+            String suffix = mainPlayer ? "-main" : "-other";
+            BiFunction<Object, Object, Double> addFn = (v1, v2) -> ((double) v1 + ((double) v2));
+
+            stats.merge("copyCalls" + suffix, copy * multiplier, addFn);
+            stats.merge("fmCalls" + suffix, fm * multiplier, addFn);
+            stats.merge("totalNodes" + suffix, treeStats.totalNodes * multiplier, addFn);
+            stats.merge("leafNodes" + suffix, treeStats.totalLeaves * multiplier, addFn);
+            stats.merge("terminalNodes" + suffix, treeStats.totalTerminalNodes * multiplier, addFn);
+            stats.merge("maxDepth" + suffix, treeStats.depthReached * multiplier, addFn);
+            stats.merge("nActionsRoot" + suffix, node.children.size() * multiplier, addFn);
+            stats.merge("nActionsTree" + suffix, treeStats.meanActionsAtNode * multiplier, addFn);
+            stats.merge("maxActionsAtNode" + suffix, treeStats.maxActionsAtNode * multiplier, addFn);
+
+            OptionalInt maxVisits = Arrays.stream(node.actionVisits()).max();
+            stats.merge("maxVisitProportion" + suffix, (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters * multiplier, addFn);
+            double[] visitProportions = Arrays.stream(node.actionVisits()).asDoubleStream().map(d -> d / node.getVisits()).toArray();
+            stats.merge("visitEntropy" + suffix, entropyOf(visitProportions) * multiplier, addFn);
         }
+        statsLogger.record(stats);
     }
 
 }

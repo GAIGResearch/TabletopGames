@@ -43,10 +43,8 @@ public class ColtExpressHeuristic extends TunableParameters implements IStateHeu
         ColtExpressParameters cep = (ColtExpressParameters) gs.getGameParameters();
         Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (playerResult == Utils.GameResult.LOSE)
-            return -1;
-        if (playerResult == Utils.GameResult.WIN)
-            return 1;
+        if (!cegs.isNotTerminal())
+            return cegs.getPlayerResults()[playerId].value;
 
         // Number of bullets left for the player
         int nBulletsPlayer = cegs.bulletsLeft[playerId] / cep.nBulletsPerPlayer;

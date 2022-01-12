@@ -598,11 +598,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (playerResults[playerId] == Utils.GameResult.WIN)
-            return 1.0;
         if (isNotTerminal())
             return getGameScore(playerId) / 60.0;
-        return 0.0;
+        return playerResults[playerId].value;
     }
 
     @Override

@@ -1,16 +1,17 @@
 package games.tictactoe;
 
+import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
-import core.AbstractGameState;
 import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
 import core.interfaces.IVectorObservation;
-import games.GameType;
-import utilities.VectorObservation;
 import core.turnorders.AlternatingTurnOrder;
+import games.GameType;
+import utilities.Utils;
+import utilities.VectorObservation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +22,15 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
 
     GridBoard<Token> gridBoard;
 
-    public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers){
+    public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.TicTacToe);
     }
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>(){{ add(gridBoard); }};
+        return new ArrayList<Component>() {{
+            add(gridBoard);
+        }};
     }
 
     @Override
@@ -57,7 +60,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
      */
     @Override
     public double getGameScore(int playerId) {
-        return 0;
+        return playerResults[playerId].value;
     }
 
     @Override

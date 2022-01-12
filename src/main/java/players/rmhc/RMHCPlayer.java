@@ -21,7 +21,7 @@ public class RMHCPlayer extends AbstractPlayer {
     private double avgTimeTaken = 0, acumTimeTaken = 0;
     private int numIters = 0;
     private int fmCalls = 0;
-    private int copyCalls =0;
+    private int copyCalls = 0;
 
     public RMHCPlayer() {
         this(System.currentTimeMillis());
@@ -53,7 +53,7 @@ public class RMHCPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions){
+    public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         avgTimeTaken = 0;
         acumTimeTaken = 0;
@@ -89,8 +89,16 @@ public class RMHCPlayer extends AbstractPlayer {
         return bestIndividual.actions[0];
     }
 
+    @Override
+    public RMHCPlayer copy() {
+        RMHCParams newParams = (RMHCParams) params.copy();
+        newParams.setRandomSeed(randomGenerator.nextInt());
+        return new RMHCPlayer(newParams);
+    }
+
     /**
      * Run evolutionary process for one generation
+     *
      * @param stateObs - current game state
      */
     private void runIteration(AbstractGameState stateObs) {

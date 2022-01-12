@@ -15,6 +15,7 @@ import utilities.Utils;
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode;
+import static utilities.Utils.GameResult.*;
 
 public class ExplodingKittensGameState extends AbstractGameState implements IPrintable {
 
@@ -140,7 +141,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
      */
     @Override
     public double getGameScore(int playerId) {
-        return 0;
+        return playerResults[playerId].value;
     }
 
     @Override
