@@ -61,4 +61,9 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     public String toString() {
         return "BasicMCTS";
     }
+
+    @Override
+    public BasicMCTSPlayer copy() {
+        return this;
+    }
 }

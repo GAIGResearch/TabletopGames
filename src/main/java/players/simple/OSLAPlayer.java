@@ -74,6 +74,11 @@ public class OSLAPlayer extends AbstractPlayer {
         return bestAction;
     }
 
+    @Override
+    public OSLAPlayer copy() {
+        return new OSLAPlayer(heuristic, new Random(random.nextInt()));
+    }
+
     private void advanceToEndOfRoundWithRandomActions(AbstractGameState gsCopy, int startingPlayer) {
         // we assume that every other player now has to make a decision
         RandomPlayer rnd = new RandomPlayer(random);

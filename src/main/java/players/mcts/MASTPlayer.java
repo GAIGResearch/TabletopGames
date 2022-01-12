@@ -54,4 +54,9 @@ public class MASTPlayer extends AbstractPlayer {
         }
         throw new AssertionError("If we reach here, then something has gone wrong in the above code");
     }
+
+    @Override
+    public MASTPlayer copy() {
+        return new MASTPlayer(new Random(rnd.nextInt()));
+    }
 }

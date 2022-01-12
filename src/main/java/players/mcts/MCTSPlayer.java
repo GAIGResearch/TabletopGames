@@ -127,6 +127,11 @@ public class MCTSPlayer extends AbstractPlayer {
     }
 
     @Override
+    public MCTSPlayer copy() {
+        return new MCTSPlayer((MCTSParams) params.copy());
+    }
+
+    @Override
     public void setForwardModel(AbstractForwardModel model) {
         super.setForwardModel(model);
         if (rolloutStrategy != null)

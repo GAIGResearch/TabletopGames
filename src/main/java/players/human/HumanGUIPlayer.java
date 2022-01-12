@@ -18,5 +18,10 @@ public class HumanGUIPlayer extends AbstractPlayer {
     public AbstractAction getAction(AbstractGameState observation, List<AbstractAction> actions) {
         return ac.getAction();
     }
+
+    @Override
+    public AbstractPlayer copy() {
+        return this;
+    }
 }
 

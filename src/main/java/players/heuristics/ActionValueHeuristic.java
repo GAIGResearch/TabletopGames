@@ -50,6 +50,16 @@ public class ActionValueHeuristic extends AbstractPlayer implements ToDoubleBiFu
         initialiseFromFile();
     }
 
+    @Override
+    public ActionValueHeuristic copy() {
+        ActionValueHeuristic retValue = new ActionValueHeuristic(new HashMap<>(), RND_WEIGHT, bucketFunction, defaultValue);
+        retValue.actionValues.putAll(this.actionValues);
+        retValue.filename = this.filename;
+        retValue.rnd = new Random(rnd.nextInt());
+        retValue.actionNames.putAll(this.actionNames);
+        return retValue;
+    }
+
     @SuppressWarnings("unchecked")
     private void initialiseFromFile() {
 

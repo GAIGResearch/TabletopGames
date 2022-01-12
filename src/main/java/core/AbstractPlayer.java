@@ -79,7 +79,7 @@ public abstract class AbstractPlayer {
      */
     public void registerUpdatedObservation(AbstractGameState gameState) {}
 
-    public void setName(String name) {this.name = name;}
+    public final void setName(String name) {this.name = name;}
 
     @Override
     public String toString() {
@@ -87,16 +87,13 @@ public abstract class AbstractPlayer {
         return this.getClass().getSimpleName();
     }
 
-    public IStatisticLogger getStatsLogger() {
+    public final IStatisticLogger getStatsLogger() {
         return statsLogger;
     }
 
-    public void setStatsLogger(IStatisticLogger logger) {
+    public final void setStatsLogger(IStatisticLogger logger) {
         this.statsLogger = logger;
     }
 
-    // Override if a Player maintains any state at all
-    public AbstractPlayer copy() {
-        return this;
-    }
+    public abstract AbstractPlayer copy();
 }

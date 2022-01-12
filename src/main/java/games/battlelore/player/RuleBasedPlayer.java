@@ -99,5 +99,10 @@ public class RuleBasedPlayer extends AbstractPlayer
     public String toString() {
         return "RuleBased";
     }
+
+    @Override
+    public AbstractPlayer copy() {
+        return this;
+    }
 }
 
