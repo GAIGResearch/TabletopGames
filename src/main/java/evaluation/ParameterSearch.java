@@ -294,7 +294,7 @@ public class ParameterSearch {
         Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
             landscapeModel.reset();
-            Pair<Double, Double> r = runNTBEA(null, evaluator, searchFramework, iterationsPerRun, 500, evalGames, verbose);
+            Pair<Double, Double> r = runNTBEA(null, evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
             printDetailsOfRun(retValue, searchSpace, logfile);
             printDiversityResults(landscapeModel, kExplore);

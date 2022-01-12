@@ -19,8 +19,6 @@ import java.util.List;
 
 public class BattleloreForwardModel extends AbstractForwardModel {
 
-    int maxTurnsToPlay = 100;
-
     @Override
     protected void _setup(AbstractGameState initialState) {
         BattleloreGameParameters gameParams = (BattleloreGameParameters) initialState.getGameParameters();
@@ -60,6 +58,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ?
                 Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
+        int maxTurnsToPlay = ((BattleloreGameParameters)currentState.getGameParameters()).maxTurnsToPlay;
         switch ((BattleloreGameState.BattleloreGamePhase) state.getGamePhase()) {
             case CommandAndOrderStep:
                 currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);

@@ -45,7 +45,7 @@ public abstract class AbstractPlayer {
      * @param model
      */
     public void setForwardModel(AbstractForwardModel model) {
-        forwardModel = model;
+        this.forwardModel = model;
     }
 
     /* Methods that should be implemented in subclass */
