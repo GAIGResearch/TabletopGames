@@ -60,11 +60,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
      */
     @Override
     public double getGameScore(int playerId) {
-        if (playerResults[playerId] == Utils.GameResult.WIN)
-            return 1.0;
-        else if (playerResults[playerId] == Utils.GameResult.DRAW)
-            return 0.5;
-        return 0.0;
+        return playerResults[playerId].value;
     }
 
     @Override

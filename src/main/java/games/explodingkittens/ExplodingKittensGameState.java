@@ -141,12 +141,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
      */
     @Override
     public double getGameScore(int playerId) {
-        if (playerResults[playerId] == WIN)
-            return 1.0;
-        if (playerResults[playerId] == LOSE)
-            return -1.0;
-
-        return 0;
+        return playerResults[playerId].value;
     }
 
     @Override

@@ -21,12 +21,6 @@ public class ScoreHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         double score = gs.getGameScore(playerId);
-        if (score == 0.0) {
-            if (gs.getPlayerResults()[playerId] == WIN)
-                return 1.0;
-            if (gs.getPlayerResults()[playerId] == DRAW)
-                return 0.5;
-        }
         if (gs.getPlayerResults()[playerId] == Utils.GameResult.WIN)
             return score * 1.5;
         if (gs.getPlayerResults()[playerId] == Utils.GameResult.LOSE)

@@ -168,10 +168,8 @@ public class SGGameState extends AbstractGameState {
     @Override
     protected double _getHeuristicScore(int playerId) {
         if (isNotTerminal())
-        return playerScore[playerId] / 50.0;
-        if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
-            return 1.0;
-        return -1.0;
+            return playerScore[playerId] / 50.0;
+        return getPlayerResults()[playerId].value;
     }
 
     @Override

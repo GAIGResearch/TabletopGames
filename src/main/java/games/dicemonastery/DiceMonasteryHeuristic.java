@@ -73,12 +73,8 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
             if (scoreOnly) {
                 return gs.getGameScore(playerId) / 50.0;
             } else {
-                if (playerResult == Utils.GameResult.LOSE)
-                    return -1;
-                if (playerResult == Utils.GameResult.WIN)
-                    return 1;
+                return gs.getPlayerResults()[playerId].value;
             }
-            throw new AssertionError("Not expecting to reach this point if game is over");
         }
         int year = turnOrder.getYear() - 1;
         int season = 2; // AUTUMN or WINTER
@@ -115,7 +111,7 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
         }
         double treasure = 0.0;
         if (TREASURES[year] != 0.0) {
-            treasure = Math.min(state.getTreasures(playerId).stream().mapToInt( t -> t.vp).sum() / 36.0, 1.0);
+            treasure = Math.min(state.getTreasures(playerId).stream().mapToInt(t -> t.vp).sum() / 36.0, 1.0);
         }
         double shillings = 0.0;
         if (SHILLINGS[year] != 0.0) {
