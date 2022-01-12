@@ -153,8 +153,9 @@ public abstract class Utils {
     public static double normalise(double a_value, double a_min, double a_max) {
         if (a_min < a_max)
             return (a_value - a_min) / (a_max - a_min);
-        else    // if bounds are invalid, then return 0.0
-            return 0.0;
+        else if (a_min == a_max)
+            return 0.0; // special case
+        throw new IllegalArgumentException(String.format("Invalid args in Utils.normalise() - %.3f is not in range [%.3f, %.3f]", a_value, a_min, a_max));
     }
 
     /**
@@ -326,8 +327,9 @@ public abstract class Utils {
      * Given a filename that contains only a single class, this will instantiate the class
      * This opens the file, extracts the JSONObject, and then uses Utils.loadClassFromJSON() to
      * find and call the relevant constructor
+     *
      * @param filename - the filename
-     * @param <T> - the Class type that is to be instantiated
+     * @param <T>      - the Class type that is to be instantiated
      * @return
      */
     public static <T> T loadFromFile(String filename) {
