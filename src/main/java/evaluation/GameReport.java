@@ -154,11 +154,12 @@ public class GameReport {
                         allPlayers.add(PlayerFactory.createPlayer(opponentDescriptor));
                     }
                 }
+                long startingSeed = params == null ? System.currentTimeMillis() : params.getRandomSeed();
                 for (int i = 0; i < nGames; i++) {
                     // Run games, resetting the player each time
                     // we also randomise the position of the players for each game
                     Collections.shuffle(allPlayers);
-                    game.reset(allPlayers);
+                    game.reset(allPlayers, startingSeed + i);
                     game.run();
                     if (debug) {
                         System.out.printf("Game %4d finished at %tT%n", i, System.currentTimeMillis());

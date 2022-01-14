@@ -7,8 +7,8 @@ import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
 import gui.AbstractGUIManager;
-import gui.GamePanel;
 import gui.GUI;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
@@ -19,30 +19,29 @@ import utilities.Utils;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static core.CoreConstants.*;
-import static games.GameType.*;
+import static core.CoreConstants.GameEvents;
+import static games.GameType.TicTacToe;
 
 
 public class Game {
 
+    private static final AtomicInteger idFountain = new AtomicInteger(0);
     // Type of game
     private final GameType gameType;
-
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
-    // Current player acting
-    AbstractPlayer currentPlayer;
-
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
     protected List<IGameListener> listeners = new ArrayList<>();
 
     /* Game Statistics */
-
+    // Current player acting
+    AbstractPlayer currentPlayer;
     // Timers for various function calls
     private double nextTime, copyTime, agentTime, actionComputeTime;
     // Keeps track of action spaces for each game tick, pairs of (player ID, #actions)
@@ -53,8 +52,6 @@ public class Game {
     private int nDecisions;
     // Number of actions taken in a turn by a player
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
-
-    private static final AtomicInteger idFountain = new AtomicInteger(0);
     private int gameID;
 
     private boolean pause, stop;
@@ -85,456 +82,8 @@ public class Game {
         this.gameType = type;
         this.forwardModel = model;
         this.gameState = gameState;
-        reset();
+        reset(Collections.emptyList(), gameState.gameParameters.randomSeed);
     }
-
-    /**
-     * Resets the game. Sets up the game state to the initial state as described by game rules,
-     * and initialises all players.
-     */
-    public final void reset() {
-        gameState.reset();
-        forwardModel.abstractSetup(gameState);
-        if (players != null) {
-            for (AbstractPlayer player : players) {
-                AbstractGameState observation = gameState.copy(player.getPlayerID());
-                player.initializePlayer(observation);
-            }
-        }
-        resetStats();
-    }
-
-    /**
-     * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
-     * and their IDs, and initialises all players.
-     *
-     * @param players - new players for the game
-     */
-    public final void reset(List<AbstractPlayer> players) {
-        gameState.reset();
-        forwardModel.abstractSetup(gameState);
-        this.players = players;
-        int id = 0;
-        for (AbstractPlayer player : players) {
-            // Create a FM copy for this player (different random seed)
-            player.setForwardModel(this.forwardModel.copy());
-            // Create initial state observation
-            AbstractGameState observation = gameState.copy(id);
-            // Give player their ID
-            player.playerID = id++;
-            // Allow player to initialize
-
-            player.initializePlayer(observation);
-        }
-        gameID = idFountain.incrementAndGet();
-        gameState.setGameID(gameID);
-
-        resetStats();
-    }
-
-    /**
-     * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
-     * and their IDs, and initialises all players.
-     *
-     * @param players       - new players for the game
-     * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
-     */
-    public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
-        gameState.reset(newRandomSeed);
-        forwardModel.abstractSetup(gameState);
-        this.players = players;
-        int id = 0;
-        for (AbstractPlayer player : players) {
-            // Create a FM copy for this player (different random seed)
-            player.setForwardModel(this.forwardModel.copy());
-            // Create initial state observation
-            AbstractGameState observation = gameState.copy(id);
-            // Give player their ID
-            player.playerID = id++;
-            // Allow player to initialize
-
-            player.initializePlayer(observation);
-        }
-        gameID = idFountain.incrementAndGet();
-        gameState.setGameID(gameID);
-        resetStats();
-    }
-
-    /**
-     * All timers and game tick set to 0.
-     */
-    public void resetStats() {
-        nextTime = 0;
-        copyTime = 0;
-        agentTime = 0;
-        actionComputeTime = 0;
-        tick = 0;
-        nDecisions = 0;
-        actionSpaceSize = new ArrayList<>();
-        nActionsPerTurnSum = 0;
-        nActionsPerTurn = 1;
-        nActionsPerTurnCount = 0;
-        listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
-    }
-
-    public final void run(AbstractGUIManager gui) {
-        run(gui, null);
-    }
-
-    /**
-     * Runs the game, given a GUI. If this is null, the game runs automatically without visuals.
-     *
-     * @param gui - graphical user interface.
-     */
-    public final void run(AbstractGUIManager gui, GUI frame) {
-
-        boolean firstEnd = true;
-
-        // GUI update
-        updateGUI(gui, frame);
-
-        while (gameState.isNotTerminal() && (frame == null || frame.isWindowOpen()) && !stop) {
-
-            if (!pause) {
-
-                /*
-                 * The Game is responsible for tracking the players and the current game state
-                 * It is important that the Game never passes the main AbstractGameState to the individual players,
-                 * but instead always uses copy(playerId) to both:
-                 * i) shuffle any hidden data they cannot see
-                 * ii) ensure that any changes the player makes to the game state do not affect the genuine game state
-                 *
-                 * Players should never have access to the Game, or the main AbstractGameState, or to each other!
-                 */
-
-                // Get player to ask for actions next
-                boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
-                        && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);
-                int activePlayer = gameState.getCurrentPlayer();
-
-                // Check if this is the same player as last, count number of actions per turn
-                if (!reacting) {
-                    if (currentPlayer != null && activePlayer == currentPlayer.getPlayerID()) {
-                        nActionsPerTurn++;
-                    } else {
-                        nActionsPerTurnSum += nActionsPerTurn;
-                        nActionsPerTurn = 1;
-                        nActionsPerTurnCount++;
-                    }
-                }
-
-                // This is the next player to be asked for a decision
-                currentPlayer = players.get(activePlayer);
-
-                // Get player observation, and time how long it takes
-                double s = System.nanoTime();
-                AbstractGameState observation = gameState.copy(activePlayer);
-                copyTime += (System.nanoTime() - s);
-
-                // Get actions for the player
-                s = System.nanoTime();
-                List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
-                actionComputeTime += (System.nanoTime() - s);
-                actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
-
-                if (gameState.isNotTerminal()) {
-
-                    if (gameState.coreGameParameters.verbose) {
-                        System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
-                    }
-
-                    if (observation instanceof IPrintable && gameState.coreGameParameters.verbose) {
-                        ((IPrintable) observation).printToConsole();
-                    }
-
-                    // Start the timer for this decision
-                    gameState.playerTimer[activePlayer].resume();
-
-                    // Either ask player which action to use or, in case no actions are available, report the updated observation
-                    AbstractAction action = null;
-                    if (observedActions.size() > 0) {
-                        if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
-                            // Can only do 1 action, so do it.
-                            action = observedActions.get(0);
-                            currentPlayer.registerUpdatedObservation(observation);
-                        } else {
-                            if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
-                                while (action == null && gui.isWindowOpen()) {
-                                    action = currentPlayer.getAction(observation, observedActions);
-                                    updateGUI(gui, frame);
-                                }
-                            } else {
-                                // Get action from player, and time it
-                                s = System.nanoTime();
-                                action = currentPlayer.getAction(observation, observedActions);
-                                agentTime += (System.nanoTime() - s);
-                                nDecisions++;
-                            }
-                        }
-                        if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
-                            System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
-                            action = null;
-                        }
-                        AbstractAction finalAction = action;
-                        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
-                    } else {
-                        currentPlayer.registerUpdatedObservation(observation);
-                    }
-
-                    // End the timer for this decision
-                    gameState.playerTimer[activePlayer].pause();
-                    gameState.playerTimer[activePlayer].incrementAction();
-
-                    if (gameState.coreGameParameters.verbose && !(action == null)) {
-                            System.out.println(action);
-                    }
-                    if (action == null)
-                        throw new AssertionError("We have a NULL action in the Game loop");
-
-                    // Check player timeout
-                    if (observation.playerTimer[activePlayer].exceededMaxTime()) {
-                        forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
-                    } else {
-                        // Resolve action and game rules, time it
-                        s = System.nanoTime();
-                        forwardModel.next(gameState, action);
-                        nextTime += (System.nanoTime() - s);
-                    }
-                    tick++;
-
-                    // GUI update
-                    updateGUI(gui, frame);
-                } else {
-                    if (firstEnd) {
-                        if (gameState.coreGameParameters.verbose) {
-                            System.out.println("Ended");
-                        }
-                        terminate();
-                        firstEnd = false;
-                    }
-                }
-            } else {
-                // GUI update
-                updateGUI(gui, frame);
-            }
-        }
-
-        if (firstEnd) {
-            if (gameState.coreGameParameters.verbose) {
-                System.out.println("Ended");
-            }
-            terminate();
-        }
-    }
-
-    // Run function shortcut
-    public final void run() {
-        run(null, null);
-    }
-
-    /**
-     * Performs GUI update.
-     *
-     * @param gui - gui to update.
-     */
-    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        if (gui != null) {
-            gui.update(currentPlayer, gameState);
-            frame.repaint();
-            try {
-                Thread.sleep(gameState.coreGameParameters.frameSleepMS);
-            } catch (Exception e) {
-                System.out.println("EXCEPTION " + e);
-            }
-        }
-    }
-
-    /**
-     * Called at the end of game loop execution, when the game is over.
-     */
-    private void terminate() {
-        // Print last state
-        if (gameState instanceof IPrintable && gameState.coreGameParameters.verbose) {
-            ((IPrintable) gameState).printToConsole();
-        }
-
-        // Perform any end of game computations as required by the game
-        forwardModel.endGame(gameState);
-        listeners.forEach(l -> l.onGameEvent(GameEvents.GAME_OVER, this));
-        if (gameState.coreGameParameters.verbose) {
-            System.out.println("Game Over");
-        }
-
-        // Allow players to terminate
-        for (AbstractPlayer player : players) {
-            player.finalizePlayer(gameState.copy(player.getPlayerID()));
-        }
-
-        // Timers should average
-        terminateTimers();
-    }
-
-    /**
-     * Timers average at the end of the game.
-     */
-    private void terminateTimers() {
-        nextTime /= tick;
-        copyTime /= tick;
-        actionComputeTime /= tick;
-        agentTime /= nDecisions;
-        if (nActionsPerTurnCount > 0)
-            nActionsPerTurnSum /= nActionsPerTurnCount;
-    }
-
-    /**
-     * Retrieves the current game state.
-     *
-     * @return - current game state.
-     */
-    public final AbstractGameState getGameState() {
-        return gameState;
-    }
-
-    /**
-     * Retrieves the forward model.
-     *
-     * @return - forward model.
-     */
-    public AbstractForwardModel getForwardModel() {
-        return forwardModel;
-    }
-
-    /**
-     * Retrieves agent timer value, i.e. how long the AI players took to make decisions in this game.
-     *
-     * @return - agent time
-     */
-    public double getAgentTime() {
-        return agentTime;
-    }
-
-    /**
-     * Retrieves the copy timer value, i.e. how long the game state took to produce player observations in this game.
-     *
-     * @return - copy time
-     */
-    public double getCopyTime() {
-        return copyTime;
-    }
-
-    /**
-     * Retrieves the next timer value, i.e. how long the forward model took to advance the game state with an action.
-     *
-     * @return - next time
-     */
-    public double getNextTime() {
-        return nextTime;
-    }
-
-    /**
-     * Retrieves the action compute timer value, i.e. how long the forward model took to compute the available actions
-     * in a game state.
-     *
-     * @return - action compute time
-     */
-    public double getActionComputeTime() {
-        return actionComputeTime;
-    }
-
-    /**
-     * Retrieves the number of game loop repetitions performed in this game.
-     *
-     * @return - tick number
-     */
-    public int getTick() {
-        return tick;
-    }
-
-    /**
-     * Retrieves number of decisions made by the AI players in the game.
-     *
-     * @return - number of decisions
-     */
-    public int getNDecisions() {
-        return nDecisions;
-    }
-
-    /**
-     * Number of actions taken in a turn by a player, before turn moves to another.
-     *
-     * @return - number of actions per turn
-     */
-    public int getNActionsPerTurn() {
-        return nActionsPerTurnSum;
-    }
-
-    /**
-     * Retrieves a list with one entry per game tick, each a pair (player ID, # actions)
-     *
-     * @return - list of action space sizes
-     */
-    public ArrayList<Pair<Integer, Integer>> getActionSpaceSize() {
-        return actionSpaceSize;
-    }
-
-    /**
-     * Which game is this?
-     *
-     * @return type of game.
-     */
-    public GameType getGameType() {
-        return gameType;
-    }
-
-    public void addListener(IGameListener listener) {
-        if (!listeners.contains(listener)) {
-            listeners.add(listener);
-            gameState.turnOrder.addListener(listener);
-        }
-    }
-
-    public void clearListeners() {
-        listeners.clear();
-        getGameState().turnOrder.clearListeners();
-    }
-
-    /**
-     * Retrieves the list of players in the game.
-     *
-     * @return - players list
-     */
-    public List<AbstractPlayer> getPlayers() {
-        return players;
-    }
-
-    public boolean isPaused() {
-        return pause;
-    }
-
-    public boolean isStopped() {
-        return stop;
-    }
-
-    public void setPaused(boolean paused) {
-        this.pause = paused;
-    }
-
-    public void setStopped(boolean stopped) {
-        this.stop = stopped;
-    }
-
-    public CoreParameters getCoreParameters() {
-        return gameState.coreGameParameters;
-    }
-    public void setCoreParameters(CoreParameters coreParameters) {
-        this.gameState.setCoreGameParameters(coreParameters);
-    }
-
-    @Override
-    public String toString() {
-        return gameType.toString();
-    }
-
 
     /**
      * Runs one game.
@@ -776,5 +325,418 @@ public class Game {
 //        runMany(games, players, 100L, 100, null, false, false, null);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, null, false, false, null);
 
+    }
+
+    public final void reset(List<AbstractPlayer> players) {
+        reset(players, gameState.gameParameters.randomSeed);
+    }
+
+    /**
+     * Resets the game. Sets up the game state to the initial state as described by game rules, assigns players
+     * and their IDs, and initialises all players.
+     *
+     * @param players       - new players for the game
+     * @param newRandomSeed - random seed is updated in the game parameters object and used throughout the game.
+     */
+    public final void reset(List<AbstractPlayer> players, long newRandomSeed) {
+        gameState.reset(newRandomSeed);
+        forwardModel.abstractSetup(gameState);
+        if (players.size() == gameState.getNPlayers()) {
+            this.players = players;
+        } else if (players.isEmpty()) {
+            // keep existing players
+        } else
+            throw new IllegalArgumentException("PlayerList provided to Game.reset() must be empty, or have the same number of entries as there are players");
+        int id = 0;
+        for (AbstractPlayer player : this.players) {
+            // Create a FM copy for this player (different random seed)
+            player.setForwardModel(this.forwardModel.copy());
+            // Create initial state observation
+            AbstractGameState observation = gameState.copy(id);
+            // Give player their ID
+            player.playerID = id++;
+            // Allow player to initialize
+
+            player.initializePlayer(observation);
+        }
+        gameID = idFountain.incrementAndGet();
+        gameState.setGameID(gameID);
+        resetStats();
+    }
+
+    /**
+     * All timers and game tick set to 0.
+     */
+    public void resetStats() {
+        nextTime = 0;
+        copyTime = 0;
+        agentTime = 0;
+        actionComputeTime = 0;
+        tick = 0;
+        nDecisions = 0;
+        actionSpaceSize = new ArrayList<>();
+        nActionsPerTurnSum = 0;
+        nActionsPerTurn = 1;
+        nActionsPerTurnCount = 0;
+        listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
+    }
+
+    public final void run(AbstractGUIManager gui) {
+        run(gui, null);
+    }
+
+    /**
+     * Runs the game, given a GUI. If this is null, the game runs automatically without visuals.
+     *
+     * @param gui - graphical user interface.
+     */
+    public final void run(AbstractGUIManager gui, GUI frame) {
+
+        boolean firstEnd = true;
+
+        // GUI update
+        updateGUI(gui, frame);
+
+        while (gameState.isNotTerminal() && (frame == null || frame.isWindowOpen()) && !stop) {
+
+            if (!pause) {
+
+                /*
+                 * The Game is responsible for tracking the players and the current game state
+                 * It is important that the Game never passes the main AbstractGameState to the individual players,
+                 * but instead always uses copy(playerId) to both:
+                 * i) shuffle any hidden data they cannot see
+                 * ii) ensure that any changes the player makes to the game state do not affect the genuine game state
+                 *
+                 * Players should never have access to the Game, or the main AbstractGameState, or to each other!
+                 */
+
+                // Get player to ask for actions next
+                boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
+                        && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);
+                int activePlayer = gameState.getCurrentPlayer();
+
+                // Check if this is the same player as last, count number of actions per turn
+                if (!reacting) {
+                    if (currentPlayer != null && activePlayer == currentPlayer.getPlayerID()) {
+                        nActionsPerTurn++;
+                    } else {
+                        nActionsPerTurnSum += nActionsPerTurn;
+                        nActionsPerTurn = 1;
+                        nActionsPerTurnCount++;
+                    }
+                }
+
+                // This is the next player to be asked for a decision
+                currentPlayer = players.get(activePlayer);
+
+                // Get player observation, and time how long it takes
+                double s = System.nanoTime();
+                AbstractGameState observation = gameState.copy(activePlayer);
+                copyTime += (System.nanoTime() - s);
+
+                // Get actions for the player
+                s = System.nanoTime();
+                List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+                actionComputeTime += (System.nanoTime() - s);
+                actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
+
+                if (gameState.isNotTerminal()) {
+
+                    if (gameState.coreGameParameters.verbose) {
+                        System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
+                    }
+
+                    if (observation instanceof IPrintable && gameState.coreGameParameters.verbose) {
+                        ((IPrintable) observation).printToConsole();
+                    }
+
+                    // Start the timer for this decision
+                    gameState.playerTimer[activePlayer].resume();
+
+                    // Either ask player which action to use or, in case no actions are available, report the updated observation
+                    AbstractAction action = null;
+                    if (observedActions.size() > 0) {
+                        if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
+                            // Can only do 1 action, so do it.
+                            action = observedActions.get(0);
+                            currentPlayer.registerUpdatedObservation(observation);
+                        } else {
+                            if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
+                                while (action == null && gui.isWindowOpen()) {
+                                    action = currentPlayer.getAction(observation, observedActions);
+                                    updateGUI(gui, frame);
+                                }
+                            } else {
+                                // Get action from player, and time it
+                                s = System.nanoTime();
+                                action = currentPlayer.getAction(observation, observedActions);
+                                agentTime += (System.nanoTime() - s);
+                                nDecisions++;
+                            }
+                        }
+                        if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
+                            System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
+                            action = null;
+                        }
+                        AbstractAction finalAction = action;
+                        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
+                    } else {
+                        currentPlayer.registerUpdatedObservation(observation);
+                    }
+
+                    // End the timer for this decision
+                    gameState.playerTimer[activePlayer].pause();
+                    gameState.playerTimer[activePlayer].incrementAction();
+
+                    if (gameState.coreGameParameters.verbose && !(action == null)) {
+                        System.out.println(action);
+                    }
+                    if (action == null)
+                        throw new AssertionError("We have a NULL action in the Game loop");
+
+                    // Check player timeout
+                    if (observation.playerTimer[activePlayer].exceededMaxTime()) {
+                        forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
+                    } else {
+                        // Resolve action and game rules, time it
+                        s = System.nanoTime();
+                        forwardModel.next(gameState, action);
+                        nextTime += (System.nanoTime() - s);
+                    }
+                    tick++;
+
+                    // GUI update
+                    updateGUI(gui, frame);
+                } else {
+                    if (firstEnd) {
+                        if (gameState.coreGameParameters.verbose) {
+                            System.out.println("Ended");
+                        }
+                        terminate();
+                        firstEnd = false;
+                    }
+                }
+            } else {
+                // GUI update
+                updateGUI(gui, frame);
+            }
+        }
+
+        if (firstEnd) {
+            if (gameState.coreGameParameters.verbose) {
+                System.out.println("Ended");
+            }
+            terminate();
+        }
+    }
+
+    // Run function shortcut
+    public final void run() {
+        run(null, null);
+    }
+
+    /**
+     * Performs GUI update.
+     *
+     * @param gui - gui to update.
+     */
+    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
+        if (gui != null) {
+            gui.update(currentPlayer, gameState);
+            frame.repaint();
+            try {
+                Thread.sleep(gameState.coreGameParameters.frameSleepMS);
+            } catch (Exception e) {
+                System.out.println("EXCEPTION " + e);
+            }
+        }
+    }
+
+    /**
+     * Called at the end of game loop execution, when the game is over.
+     */
+    private void terminate() {
+        // Print last state
+        if (gameState instanceof IPrintable && gameState.coreGameParameters.verbose) {
+            ((IPrintable) gameState).printToConsole();
+        }
+
+        // Perform any end of game computations as required by the game
+        forwardModel.endGame(gameState);
+        listeners.forEach(l -> l.onGameEvent(GameEvents.GAME_OVER, this));
+        if (gameState.coreGameParameters.verbose) {
+            System.out.println("Game Over");
+        }
+
+        // Allow players to terminate
+        for (AbstractPlayer player : players) {
+            player.finalizePlayer(gameState.copy(player.getPlayerID()));
+        }
+
+        // Timers should average
+        terminateTimers();
+    }
+
+    /**
+     * Timers average at the end of the game.
+     */
+    private void terminateTimers() {
+        nextTime /= tick;
+        copyTime /= tick;
+        actionComputeTime /= tick;
+        agentTime /= nDecisions;
+        if (nActionsPerTurnCount > 0)
+            nActionsPerTurnSum /= nActionsPerTurnCount;
+    }
+
+    /**
+     * Retrieves the current game state.
+     *
+     * @return - current game state.
+     */
+    public final AbstractGameState getGameState() {
+        return gameState;
+    }
+
+    /**
+     * Retrieves the forward model.
+     *
+     * @return - forward model.
+     */
+    public AbstractForwardModel getForwardModel() {
+        return forwardModel;
+    }
+
+    /**
+     * Retrieves agent timer value, i.e. how long the AI players took to make decisions in this game.
+     *
+     * @return - agent time
+     */
+    public double getAgentTime() {
+        return agentTime;
+    }
+
+    /**
+     * Retrieves the copy timer value, i.e. how long the game state took to produce player observations in this game.
+     *
+     * @return - copy time
+     */
+    public double getCopyTime() {
+        return copyTime;
+    }
+
+    /**
+     * Retrieves the next timer value, i.e. how long the forward model took to advance the game state with an action.
+     *
+     * @return - next time
+     */
+    public double getNextTime() {
+        return nextTime;
+    }
+
+    /**
+     * Retrieves the action compute timer value, i.e. how long the forward model took to compute the available actions
+     * in a game state.
+     *
+     * @return - action compute time
+     */
+    public double getActionComputeTime() {
+        return actionComputeTime;
+    }
+
+    /**
+     * Retrieves the number of game loop repetitions performed in this game.
+     *
+     * @return - tick number
+     */
+    public int getTick() {
+        return tick;
+    }
+
+    /**
+     * Retrieves number of decisions made by the AI players in the game.
+     *
+     * @return - number of decisions
+     */
+    public int getNDecisions() {
+        return nDecisions;
+    }
+
+    /**
+     * Number of actions taken in a turn by a player, before turn moves to another.
+     *
+     * @return - number of actions per turn
+     */
+    public int getNActionsPerTurn() {
+        return nActionsPerTurnSum;
+    }
+
+    /**
+     * Retrieves a list with one entry per game tick, each a pair (player ID, # actions)
+     *
+     * @return - list of action space sizes
+     */
+    public ArrayList<Pair<Integer, Integer>> getActionSpaceSize() {
+        return actionSpaceSize;
+    }
+
+    /**
+     * Which game is this?
+     *
+     * @return type of game.
+     */
+    public GameType getGameType() {
+        return gameType;
+    }
+
+    public void addListener(IGameListener listener) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener);
+            gameState.turnOrder.addListener(listener);
+        }
+    }
+
+    public void clearListeners() {
+        listeners.clear();
+        getGameState().turnOrder.clearListeners();
+    }
+
+    /**
+     * Retrieves the list of players in the game.
+     *
+     * @return - players list
+     */
+    public List<AbstractPlayer> getPlayers() {
+        return players;
+    }
+
+    public boolean isPaused() {
+        return pause;
+    }
+
+    public void setPaused(boolean paused) {
+        this.pause = paused;
+    }
+
+    public boolean isStopped() {
+        return stop;
+    }
+
+    public void setStopped(boolean stopped) {
+        this.stop = stopped;
+    }
+
+    public CoreParameters getCoreParameters() {
+        return gameState.coreGameParameters;
+    }
+
+    public void setCoreParameters(CoreParameters coreParameters) {
+        this.gameState.setCoreGameParameters(coreParameters);
+    }
+
+    @Override
+    public String toString() {
+        return gameType.toString();
     }
 }
