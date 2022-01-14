@@ -348,17 +348,18 @@ public class Game {
         } else
             throw new IllegalArgumentException("PlayerList provided to Game.reset() must be empty, or have the same number of entries as there are players");
         int id = 0;
-        for (AbstractPlayer player : this.players) {
-            // Create a FM copy for this player (different random seed)
-            player.setForwardModel(this.forwardModel.copy());
-            // Create initial state observation
-            AbstractGameState observation = gameState.copy(id);
-            // Give player their ID
-            player.playerID = id++;
-            // Allow player to initialize
+        if (this.players != null)
+            for (AbstractPlayer player : this.players) {
+                // Create a FM copy for this player (different random seed)
+                player.setForwardModel(this.forwardModel.copy());
+                // Create initial state observation
+                AbstractGameState observation = gameState.copy(id);
+                // Give player their ID
+                player.playerID = id++;
+                // Allow player to initialize
 
-            player.initializePlayer(observation);
-        }
+                player.initializePlayer(observation);
+            }
         gameID = idFountain.incrementAndGet();
         gameState.setGameID(gameID);
         resetStats();
