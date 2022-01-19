@@ -172,7 +172,7 @@ public abstract class AbstractGameState {
         s.playerResults = playerResults.clone();
         s.gamePhase = gamePhase;
 
-        if (coreGameParameters.competitionMode) {
+        if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
             s.historyText = new ArrayList<>(historyText);
             // we do not copy individual actions in history, as these are now dead and should not change
@@ -180,7 +180,7 @@ public abstract class AbstractGameState {
             // formally hidden to some participants. For this reason, in COMPETITION_MODE we explicitly do not copy
             // any history over in case a sneaky agent tries to take advantage of it.
             // If there is any information only available in History that could legitimately be used, then this should
-            // be incorporated in the game-specific data in GameState where the correct hiding protocls can be enforced.
+            // be incorporated in the game-specific data in GameState where the correct hiding protocols can be enforced.
         }
         s.actionsInProgress = new Stack<>();
         actionsInProgress.forEach(

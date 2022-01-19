@@ -433,6 +433,8 @@ public class Game {
 
                 // Get player observation, and time how long it takes
                 double s = System.nanoTime();
+                // copying the gamestate also copies the game parameters and resets the random seed (so agents cannot use this
+                // to reconstruct the starting hands etc.)
                 AbstractGameState observation = gameState.copy(activePlayer);
                 copyTime += (System.nanoTime() - s);
 
