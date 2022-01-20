@@ -338,7 +338,7 @@ public class Game {
      * @param gui - gui to update.
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        if (gui != null) {
+        if (gui != null && frame != null) {
             gui.update(currentPlayer, gameState);
             frame.repaint();
             try {
@@ -563,18 +563,18 @@ public class Game {
             // Reset game instance, passing the players for this game
             game.reset(players);
 
-            GUI frame = new GUI();
+            GUI frame = null;
             AbstractGUIManager gui = null;
 
 
             if (ac != null) {
                 // Create GUI (null if not implemented; running without visuals)
+                frame = new GUI();
                 GamePanel gamePanel = new GamePanel();
                 frame.setContentPane(gamePanel);
                 gui = gameToPlay.createGUIManager(gamePanel, game, ac);
+                frame.setFrameProperties();
             }
-
-            frame.setFrameProperties();
 
             // Run!
             game.run(gui, frame);
