@@ -69,7 +69,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
             trashValue = ((TrashCard) action).trashedCard.cost;
             if (state.cardsToBuy().stream().noneMatch(c -> c.isTreasure && c.cost <= trashValue + BONUS_OVER_TRASHED_VALUE))
                 gainedCard = true; // there are no valid cards to gain, so we skip the next decision
-            // this is rare, but can happen if COPPER is exhausted with random players, say
+            // this is rare, but can happen if SILVER is exhausted with random players, say
         }
         if (!gainedCard && action instanceof GainCard && ((GainCard) action).buyingPlayer == player) {
             gainedCard = true;

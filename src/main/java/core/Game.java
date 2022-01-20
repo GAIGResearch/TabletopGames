@@ -284,49 +284,6 @@ public class Game {
         }
     }
 
-    /**
-     * Main class used to run the framework. The user must specify:
-     * 1. Action controller for GUI interactions / null for no visuals
-     * 2. Random seed for the game
-     * 3. Players for the game
-     * 4. Mode of running
-     * and then run this class.
-     */
-    public static void main(String[] args) {
-        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = new ActionController(); //null;
-
-        /* 2. Game seed */
-        long seed = System.currentTimeMillis(); //0;
-
-        /* 3. Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>();
-
-        MCTSParams params1 = new MCTSParams();
-
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new MCTSPlayer());
-//        players.add(new MCTSPlayer(params1));
-        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-//        players.add(new FirstActionPlayer());
-//        players.add(new HumanConsolePlayer());
-
-        /* 4. Run! */
-        runOne(TicTacToe, players, seed, ac, false, null);
-
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.remove(LoveLetter);
-//        games.remove(Pandemic);
-//        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, null, false, false, null);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, null, false, false, null);
-
-    }
-
     public final void reset(List<AbstractPlayer> players) {
         reset(players, gameState.gameParameters.randomSeed);
     }
@@ -742,4 +699,49 @@ public class Game {
     public String toString() {
         return gameType.toString();
     }
+
+
+    /**
+     * Main class used to run the framework. The user must specify:
+     * 1. Action controller for GUI interactions / null for no visuals
+     * 2. Random seed for the game
+     * 3. Players for the game
+     * 4. Mode of running
+     * and then run this class.
+     */
+    public static void main(String[] args) {
+        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
+        ActionController ac = new ActionController(); //null;
+
+        /* 2. Game seed */
+        long seed = System.currentTimeMillis(); //0;
+
+        /* 3. Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>();
+
+        MCTSParams params1 = new MCTSParams();
+
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new MCTSPlayer());
+//        players.add(new MCTSPlayer(params1));
+        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
+        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanConsolePlayer());
+//        players.add(new FirstActionPlayer());
+//        players.add(new HumanConsolePlayer());
+
+        /* 4. Run! */
+        runOne(TicTacToe, players, seed, ac, false, null);
+
+//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        games.remove(LoveLetter);
+//        games.remove(Pandemic);
+//        games.remove(TicTacToe);
+//        runMany(games, players, 100L, 100, null, false, false, null);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, null, false, false, null);
+
+    }
+
 }
