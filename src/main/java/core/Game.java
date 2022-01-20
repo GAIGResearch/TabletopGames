@@ -502,7 +502,7 @@ public class Game {
      * @param gui - gui to update.
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        if (gui != null) {
+        if (gui != null && frame != null) {
             gui.update(currentPlayer, gameState);
             frame.repaint();
             try {
