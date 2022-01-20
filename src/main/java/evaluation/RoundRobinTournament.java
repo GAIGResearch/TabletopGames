@@ -204,9 +204,10 @@ public class RoundRobinTournament extends AbstractTournament {
         }
 
         // Run the game N = gamesPerMatchUp times with these players
+        long currentSeed = games.get(gameIdx).getGameState().getGameParameters().getRandomSeed();
         for (int i = 0; i < this.gamesPerMatchUp; i++) {
             gameCounter++;
-            games.get(gameIdx).reset(matchUpPlayers);
+            games.get(gameIdx).reset(matchUpPlayers, currentSeed + i + 1);
 
 
             games.get(gameIdx).run(null);  // Always running tournaments without visuals

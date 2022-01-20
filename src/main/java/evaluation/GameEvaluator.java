@@ -138,6 +138,7 @@ public class GameEvaluator implements SolutionEvaluator {
         }
 
         Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers, gameParams);
+        // always reset the random seed for each new game
         newGame.reset(allPlayers, rnd.nextLong());
 
         newGame.run();
