@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import utilities.GameReportListener;
+import utilities.GameStatisticsListener;
 
 import java.lang.reflect.Constructor;
 
@@ -42,7 +42,7 @@ public interface IGameListener {
 
 
     static IGameListener createListener(String listenerClass, IStatisticLogger logger) {
-        IGameListener listener = new GameReportListener(logger);
+        IGameListener listener = new GameStatisticsListener(logger);
         if (!listenerClass.equals("")) {
             try {
                 Class<?> clazz = Class.forName(listenerClass);
@@ -62,7 +62,7 @@ public interface IGameListener {
     }
 
     static IGameListener createListener(String listenerClass) {
-        IGameListener listener = new GameReportListener();
+        IGameListener listener = new GameStatisticsListener();
         try {
             Class<?> clazz = Class.forName(listenerClass);
             Constructor<?> constructor;
