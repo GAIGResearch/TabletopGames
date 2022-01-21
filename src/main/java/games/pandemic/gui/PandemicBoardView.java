@@ -12,8 +12,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.util.*;
 import java.util.List;
 
@@ -358,7 +356,7 @@ public class PandemicBoardView extends JComponent {
         // Draw infection rate marker
         Counter infectionRateCounter = (Counter) gameState.getComponent(PandemicConstants.infectionRateHash);
         int idx = infectionRateCounter.getValue();
-        int[] infectionArray = ((PandemicParameters)gameState.getGameParameters()).getInfection_rate();
+        int[] infectionArray = ((PandemicParameters)gameState.getGameParameters()).getInfectionRate();
 
         g.setFont(labelFontS);
         for (int i = 0; i < infectionArray.length; i++) {

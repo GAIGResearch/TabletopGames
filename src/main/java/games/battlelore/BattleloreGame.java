@@ -55,7 +55,7 @@ public class BattleloreGame extends Game {
         //players.add(new HumanConsolePlayer());
         players.add(new OSLAPlayer());
         players.add(new RuleBasedPlayer());
-        runOne(Battlelore, players, seed, ac, false, null);
+        runOne(Battlelore, null, players, seed, ac, false, null);
 
 
         //------------------------UNCOMMENT FOR SIMULATIONS----------------------------------------//

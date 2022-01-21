@@ -46,7 +46,7 @@ public class DiceMonasteryGame extends Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(DiceMonastery, players, seed, ac, false, null);
+        runOne(DiceMonastery, null, players, seed, ac, false, null);
 
     }
 }

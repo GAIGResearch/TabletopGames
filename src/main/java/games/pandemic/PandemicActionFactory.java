@@ -63,7 +63,7 @@ class PandemicActionFactory {
                 boolean treatAll = false;
                 if (roleString.equals("Medic")) treatAll = true;
 
-                actions.add(new TreatDisease(pp.n_initial_disease_cubes, colors[i], playerLocationName.value, treatAll));
+                actions.add(new TreatDisease(pp.nInitialDiseaseCubes, colors[i], playerLocationName.value, treatAll));
             }
         }
 
@@ -110,9 +110,9 @@ class PandemicActionFactory {
         }
         for (int i = 0 ; i < colorCounter.length; i++){
             if (colorCounter[i] != null){
-                if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.n_cards_for_cure_reduced){
+                if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.nCardsForCure - pp.nCardsForCureReducedBy){
                     actions.add(new CureDisease(colors[i], colorCounter[i]));
-                } else if (colorCounter[i].size() >= pp.n_cards_for_cure){
+                } else if (colorCounter[i].size() >= pp.nCardsForCure){
                     actions.add(new CureDisease(colors[i], colorCounter[i]));
                 }
             }
@@ -428,7 +428,7 @@ class PandemicActionFactory {
         Set<AbstractAction> actions = new HashSet<>();
         Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
         int nInfectCards = infectionDeck.getSize();
-        int n = Math.min(nInfectCards, pp.n_forecast_cards);
+        int n = Math.min(nInfectCards, pp.nForecastCards);
         ArrayList<int[]> permutations = new ArrayList<>();
         int[] order = new int[n];
         for (int i = 0; i < n; i++) {

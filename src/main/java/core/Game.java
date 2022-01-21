@@ -18,6 +18,7 @@ import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -546,10 +547,15 @@ public class Game {
      * @param randomizeParameters - if true, parameters are randomized for each run of each game (if possible).
      * @return - game instance created for the run
      */
-    public static Game runOne(GameType gameToPlay, List<AbstractPlayer> players, long seed, ActionController ac,
+    public static Game runOne(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, ActionController ac,
                               boolean randomizeParameters, List<IGameListener> listeners) {
         // Creating game instance (null if not implemented)
-        Game game = gameToPlay.createGameInstance(players.size(), seed);
+        Game game;
+        if (parameterConfigFile != null) {
+            AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, parameterConfigFile);
+            game = gameToPlay.createGameInstance(players.size(), seed, params);
+        }
+        else game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
             if (listeners != null)
                 listeners.forEach(game::addListener);
@@ -627,7 +633,7 @@ public class Game {
                 Long s = seed;
                 if (s == null) s = System.currentTimeMillis();
                 s += offset;
-                game = runOne(gt, players, s, ac, randomizeParameters, listeners);
+                game = runOne(gt, null, players, s, ac, randomizeParameters, listeners);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                     offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
@@ -695,7 +701,7 @@ public class Game {
 
             // Play n repetitions of this game and record player results
             for (int i = 0; i < nRepetitions; i++) {
-                Game game = runOne(gt, players, seeds[i], ac, randomizeParameters, listeners);
+                Game game = runOne(gt, null, players, seeds[i], ac, randomizeParameters, listeners);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                 }
@@ -740,7 +746,8 @@ public class Game {
      * 1. Action controller for GUI interactions / null for no visuals
      * 2. Random seed for the game
      * 3. Players for the game
-     * 4. Mode of running
+     * 4. Game parameter configuration
+     * 5. Mode of running
      * and then run this class.
      */
     public static void main(String[] args) {
@@ -766,8 +773,11 @@ public class Game {
 //        players.add(new FirstActionPlayer());
 //        players.add(new HumanConsolePlayer());
 
-        /* 4. Run! */
-        runOne(TicTacToe, players, seed, ac, false, null);
+        /* 4. Game parameter configuration */
+        String gameParams = "data/pandemic/param-config.json";
+
+        /* 5. Run! */
+        runOne(Pandemic, gameParams, players, seed, ac, false, null);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);

@@ -2,6 +2,9 @@ package games.pandemic;
 
 import utilities.Hash;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PandemicConstants {
     public final static String[] colors = new String[]{"yellow", "red", "blue", "black"};
 
@@ -26,4 +29,41 @@ public class PandemicConstants {
 
     // for contingency planner
     public final static int plannerDeckHash = Hash.GetInstance().hash("plannerDeck");
+
+    public enum PlayerRole {
+        Any,
+        Scientist,
+        QuarantineSpecialist,
+        Researcher,
+        Dispatcher,
+        ContingencyPlanner,
+        Medic,
+        OperationsExpert;
+
+        public static List<String> getRoleList() {
+            ArrayList<String> list = new ArrayList<>();
+            for (PlayerRole pr: values()) {
+                if (pr != Any) {
+                    list.add(pr.name());
+                }
+            }
+            return list;
+        }
+        public static List<String> getRoleListIncludeAny() {
+            ArrayList<String> list = new ArrayList<>();
+            for (PlayerRole pr: values()) {
+                list.add(pr.name());
+            }
+            return list;
+        }
+    }
+
+    public enum EventCards {
+        All,
+        ResilientPopulation,
+        Airlift,
+        GovernmentGrant,
+        OneQuietNight,
+        Forecast
+    }
 }

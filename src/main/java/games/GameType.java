@@ -323,7 +323,11 @@ public enum GameType {
             return null;
         }
 
-        params = (params == null) ? ParameterFactory.getDefaultParams(this, seed) : params;
+        if (params == null) {
+            params = ParameterFactory.getDefaultParams(this, seed);
+        } else {
+            params.setRandomSeed(seed);
+        }
         AbstractForwardModel forwardModel;
         AbstractGameState gameState;
 

@@ -1,7 +1,6 @@
 package games.pandemic;
 
 import core.AbstractGameState;
-import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Counter;
 import core.components.Deck;
@@ -50,10 +49,10 @@ public class PandemicHeuristic extends TunableParameters implements IStateHeuris
         // Compute a score
         Counter outbreaks = (Counter) pgs.getComponent(PandemicConstants.outbreaksHash);
         int nOutbreaks = outbreaks.getValue() / outbreaks.getMaximum();
-        int nTotalCardsPlayerDeck = pp.n_city_cards + pp.n_event_cards + pp.n_epidemic_cards;
+        int nTotalCardsPlayerDeck = pp.nCityCards + pp.nEventCards + pp.nEpidemicCards;
         int nCardsInPile = ((Deck) pgs.getComponent(PandemicConstants.playerDeckHash)).getSize() / nTotalCardsPlayerDeck;
-        int nCardsInHand = ((Deck) pgs.getComponentActingPlayer(CoreConstants.playerHandHash)).getSize() / (pp.max_cards_per_player + 2);
-        int nResearchStations = ((Counter) pgs.getComponent(PandemicConstants.researchStationHash)).getValue() / pp.n_research_stations;
+        int nCardsInHand = ((Deck) pgs.getComponentActingPlayer(CoreConstants.playerHandHash)).getSize() / (pp.maxCardsPerPlayer + 2);
+        int nResearchStations = ((Counter) pgs.getComponent(PandemicConstants.researchStationHash)).getValue() / pp.nResearchStations;
         double nCuresDiscovered = 0;
         double nDiseaseCubes = 0;
 
@@ -65,7 +64,7 @@ public class PandemicHeuristic extends TunableParameters implements IStateHeuris
 
         return (nCuresDiscovered / PandemicConstants.colors.length) * FACTOR_CURES
                 + nCardsInHand * FACTOR_CARDS_IN_HAND
-                + (nDiseaseCubes / pp.n_initial_disease_cubes) * FACTOR_CUBES
+                + (nDiseaseCubes / pp.nInitialDiseaseCubes) * FACTOR_CUBES
                 + nCardsInPile * FACTOR_CARDS_IN_PILE
                 + nOutbreaks * FACTOR_OUTBREAKS
                 + nResearchStations * FACTOR_RS
