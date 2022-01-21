@@ -9,16 +9,21 @@ import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
+import io.humble.video.*;
+import io.humble.video.awt.MediaPictureConverter;
+import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
-import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
-import java.lang.reflect.Parameter;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,8 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.GameEvents;
 import static games.GameType.Pandemic;
-import static games.GameType.TicTacToe;
-
+import static utilities.Utils.componentToImage;
 
 public class Game {
 
@@ -57,6 +61,19 @@ public class Game {
     private int gameID;
 
     private boolean pause, stop;
+
+    // Video recording
+    private Rectangle areaBounds;
+    private MediaPictureConverter converter = null;
+    private MediaPacket packet;
+    private MediaPicture picture;
+    private Encoder encoder;
+    private Muxer muxer;
+    private boolean recordingVideo = true;
+    String fileName = "output.mp4";
+    String formatName = "mp4";
+    String codecName = null;
+    int snapsPerSecond = 10;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -121,7 +138,6 @@ public class Game {
 
             GUI frame = new GUI();
             AbstractGUIManager gui = null;
-
 
             if (ac != null) {
                 // Create GUI (null if not implemented; running without visuals)
@@ -359,6 +375,12 @@ public class Game {
 
         boolean firstEnd = true;
 
+        // Video recording setup
+        if (frame != null) {
+            areaBounds = new Rectangle(0, 0, frame.getWidth(), frame.getHeight());
+        }
+        setupVideoRecording(fileName, formatName, codecName, snapsPerSecond);
+
         // GUI update
         updateGUI(gui, frame);
 
@@ -512,6 +534,9 @@ public class Game {
         if (gui != null && frame != null) {
             gui.update(currentPlayer, gameState);
             frame.repaint();
+
+            videoRecordFrame(frame);
+
             try {
                 Thread.sleep(gameState.coreGameParameters.frameSleepMS);
             } catch (Exception e) {
@@ -543,6 +568,9 @@ public class Game {
 
         // Timers should average
         terminateTimers();
+
+        // Close video recording writer
+        terminateVideoRecording();
     }
 
     /**
@@ -707,6 +735,117 @@ public class Game {
         return gameType.toString();
     }
 
+    public void setupVideoRecording(String filename, String formatname,
+                                    String codecname, int snapsPerSecond) {
+        if (recordingVideo) {
+            try {
+                final Rational framerate = Rational.make(1, snapsPerSecond);
+
+                // First we create a muxer using the passed in filename and formatname if given.
+                muxer = Muxer.make(filename, null, formatname);
+
+                /* Now, we need to decide what type of codec to use to encode video. Muxers
+                 * have limited sets of codecs they can use. We're going to pick the first one that
+                 * works, or if the user supplied a codec name, we're going to force-fit that
+                 * in instead.
+                 */
+                final MuxerFormat format = muxer.getFormat();
+                final Codec codec;
+                if (codecname != null) {
+                    codec = Codec.findEncodingCodecByName(codecname);
+                } else {
+                    codec = Codec.findEncodingCodec(format.getDefaultVideoCodecId());
+                }
+
+                // Now that we know what codec, we need to create an encoder
+                encoder = Encoder.make(codec);
+
+                /*
+                 * Video encoders need to know at a minimum:
+                 *   width
+                 *   height
+                 *   pixel format
+                 * Some also need to know frame-rate (older codecs that had a fixed rate at which video files could
+                 * be written needed this). There are many other options you can set on an encoder, but we're
+                 * going to keep it simpler here.
+                 */
+                encoder.setWidth(areaBounds.width);
+                encoder.setHeight(areaBounds.height);
+                // We are going to use 420P as the format because that's what most video formats these days use
+                final PixelFormat.Type pixelformat = PixelFormat.Type.PIX_FMT_YUV420P;
+                encoder.setPixelFormat(pixelformat);
+                encoder.setTimeBase(framerate);
+
+                /* An annoynace of some formats is that they need global (rather than per-stream) headers,
+                 * and in that case you have to tell the encoder. And since Encoders are decoupled from
+                 * Muxers, there is no easy way to know this beyond
+                 */
+                if (format.getFlag(MuxerFormat.Flag.GLOBAL_HEADER))
+                    encoder.setFlag(Encoder.Flag.FLAG_GLOBAL_HEADER, true);
+
+                // Open the encoder.
+                encoder.open(null, null);
+                // Add this stream to the muxer.
+                muxer.addNewStream(encoder);
+                // And open the muxer for business.
+                muxer.open(null, null);
+
+                /* Next, we need to make sure we have the right MediaPicture format objects
+                 * to encode data with. Java (and most on-screen graphics programs) use some
+                 * variant of Red-Green-Blue image encoding (a.k.a. RGB or BGR). Most video
+                 * codecs use some variant of YCrCb formatting. So we're going to have to
+                 * convert. To do that, we'll introduce a MediaPictureConverter object later. object.
+                 */
+                picture = MediaPicture.make(
+                        encoder.getWidth(),
+                        encoder.getHeight(),
+                        pixelformat);
+                picture.setTimeBase(framerate);
+
+                /* Now begin our main loop of taking screen snaps.
+                 * We're going to encode and then write out any resulting packets. */
+                packet = MediaPacket.make();
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void videoRecordFrame(JFrame gui) {
+        if (recordingVideo) {
+            // Make the screen capture && convert image to TYPE_3BYTE_BGR
+            final BufferedImage screen = componentToImage(gui, BufferedImage.TYPE_3BYTE_BGR);
+
+            // This is LIKELY not in YUV420P format, so we're going to convert it using some handy utilities.
+            if (converter == null)
+                converter = MediaPictureConverterFactory.createConverter(screen, picture);
+            converter.toPicture(picture, screen, tick);
+
+            do {
+                encoder.encode(packet, picture);
+                if (packet.isComplete())
+                    muxer.write(packet, false);
+            } while (packet.isComplete());
+        }
+    }
+
+    private void terminateVideoRecording() {
+        if (recordingVideo) {
+            /* Encoders, like decoders, sometimes cache pictures so it can do the right key-frame optimizations.
+             * So, they need to be flushed as well. As with the decoders, the convention is to pass in a null
+             * input until the output is not complete.
+             */
+            do {
+                encoder.encode(packet, null);
+                if (packet.isComplete())
+                    muxer.write(packet, false);
+            } while (packet.isComplete());
+
+            // Finally, let's clean up after ourselves.
+            muxer.close();
+        }
+    }
+
 
     /**
      * Main class used to run the framework. The user must specify:
@@ -729,13 +868,13 @@ public class Game {
 
         MCTSParams params1 = new MCTSParams();
 
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
 //        players.add(new MCTSPlayer(params1));
-        players.add(new OSLAPlayer());
+//        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 //        players.add(new HumanConsolePlayer());

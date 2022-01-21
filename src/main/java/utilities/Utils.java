@@ -6,6 +6,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -349,6 +350,30 @@ public abstract class Utils {
             e.printStackTrace();
             throw new AssertionError("Problem parsing JSON in " + filename);
         }
+    }
+
+    public static BufferedImage convertToType(BufferedImage sourceImage, int targetType) {
+        BufferedImage image;
+
+        // if the source image is already the target type, return the source image
+        if (sourceImage.getType() == targetType)
+            image = sourceImage;
+
+            // otherwise create a new image of the target type and draw the new image
+        else {
+            image = new BufferedImage(sourceImage.getWidth(), sourceImage.getHeight(), targetType);
+            image.getGraphics().drawImage(sourceImage, 0, 0, null);
+        }
+
+        return image;
+    }
+
+    public static BufferedImage componentToImage(Component component, int type) {
+        BufferedImage img = new BufferedImage(component.getWidth(), component.getHeight(), type);
+        Graphics2D g2d = img.createGraphics();
+        component.printAll(g2d);
+        g2d.dispose();
+        return img;
     }
 
     public enum ComponentType {
