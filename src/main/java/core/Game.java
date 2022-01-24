@@ -396,6 +396,9 @@ public class Game {
 
         boolean firstEnd = true;
 
+        this.gui = gui;
+        this.frame = frame;
+
         // GUI update
         updateGUI(gui, frame);
 
@@ -432,8 +435,6 @@ public class Game {
 
                     oneAction();
 
-                    // GUI update
-                    updateGUI(gui, frame);
                 } else {
                     if (firstEnd) {
                         if (gameState.coreGameParameters.verbose) {
@@ -496,10 +497,12 @@ public class Game {
                 currentPlayer.registerUpdatedObservation(observation);
             } else {
                 if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
+                    System.out.println("Human to act");
                     while (action == null && gui.isWindowOpen()) {
                         action = currentPlayer.getAction(observation, observedActions);
                         updateGUI(gui, frame);
                     }
+                    System.out.println("Human has chosen");
                 } else {
                     // Get action from player, and time it
                     s = System.nanoTime();
@@ -539,6 +542,9 @@ public class Game {
         }
         tick++;
 
+        if (gui != null)
+            // GUI update
+            updateGUI(gui, frame);
     }
 
     // Run function shortcut
