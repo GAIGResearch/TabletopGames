@@ -39,8 +39,7 @@ public class Game {
     protected AbstractForwardModel forwardModel;
     protected List<IGameListener> listeners = new ArrayList<>();
     /* Game Statistics */
-    // Current player acting
-    AbstractPlayer currentPlayer;
+    private int lastPlayer; // used to track actions per 'turn'
     private AbstractGUIManager gui;
     private JFrame frame;
     // Timers for various function calls
@@ -53,7 +52,6 @@ public class Game {
     private int nDecisions;
     // Number of actions taken in a turn by a player
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
-    private int gameID;
 
     private boolean pause, stop;
 
@@ -361,7 +359,7 @@ public class Game {
 
                 player.initializePlayer(observation);
             }
-        gameID = idFountain.incrementAndGet();
+        int gameID = idFountain.incrementAndGet();
         gameState.setGameID(gameID);
         resetStats();
     }
@@ -380,6 +378,7 @@ public class Game {
         nActionsPerTurnSum = 0;
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
+        lastPlayer = -1;
         listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
     }
 
@@ -403,7 +402,12 @@ public class Game {
         updateGUI(gui, frame);
 
         while (gameState.isNotTerminal() && (frame == null || frame.isWindowOpen()) && !stop) {
-            if (!pause) {
+
+            int activePlayer = gameState.getCurrentPlayer();
+            AbstractPlayer currentPlayer = players.get(activePlayer);
+            boolean humanToMove = this.getPlayers().get(activePlayer) instanceof HumanGUIPlayer;
+
+            if (humanToMove || !pause) {
 
                 /*
                  * The Game is responsible for tracking the players and the current game state
@@ -415,14 +419,14 @@ public class Game {
                  * Players should never have access to the Game, or the main AbstractGameState, or to each other!
                  */
 
+
                 // Get player to ask for actions next
                 boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
                         && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);
-                int activePlayer = gameState.getCurrentPlayer();
 
                 // Check if this is the same player as last, count number of actions per turn
                 if (!reacting) {
-                    if (currentPlayer != null && activePlayer == currentPlayer.getPlayerID()) {
+                    if (currentPlayer != null && activePlayer == lastPlayer) {
                         nActionsPerTurn++;
                     } else {
                         nActionsPerTurnSum += nActionsPerTurn;
@@ -462,7 +466,7 @@ public class Game {
 
         // This is the next player to be asked for a decision
         int activePlayer = gameState.getCurrentPlayer();
-        currentPlayer = players.get(activePlayer);
+        AbstractPlayer currentPlayer = players.get(activePlayer);
 
         // Get player observation, and time how long it takes
         double s = System.nanoTime();
@@ -542,6 +546,8 @@ public class Game {
         }
         tick++;
 
+        lastPlayer = activePlayer;
+
         if (gui != null)
             // GUI update
             updateGUI(gui, frame);
@@ -559,7 +565,7 @@ public class Game {
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
         if (gui != null) {
-            gui.update(currentPlayer, gameState);
+            gui.update(players.get(gameState.getCurrentPlayer()), gameState);
             frame.repaint();
             try {
                 Thread.sleep(gameState.coreGameParameters.frameSleepMS);
