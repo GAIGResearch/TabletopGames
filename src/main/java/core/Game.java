@@ -405,9 +405,8 @@ public class Game {
 
             int activePlayer = gameState.getCurrentPlayer();
             AbstractPlayer currentPlayer = players.get(activePlayer);
-            boolean humanToMove = this.getPlayers().get(activePlayer) instanceof HumanGUIPlayer;
 
-            if (humanToMove || !pause) {
+            if (isHumanToMove() || !pause) {
 
                 /*
                  * The Game is responsible for tracking the players and the current game state
@@ -460,6 +459,11 @@ public class Game {
             }
             terminate();
         }
+    }
+
+    public final boolean isHumanToMove() {
+        int activePlayer = gameState.getCurrentPlayer();
+        return this.getPlayers().get(activePlayer) instanceof HumanGUIPlayer;
     }
 
     public final void oneAction() {

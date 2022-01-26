@@ -318,7 +318,9 @@ public class Frontend extends GUI {
                 // if the thread is running then we pause it first
                 gameRunning.setPaused(true);
                 // and then take a single action
-                gameRunning.oneAction();
+                // as long as it is not a human to move...as in this case the GUI is already in control
+                if (!gameRunning.isHumanToMove())
+                    gameRunning.oneAction();
                 // TODO: We also then want to display the actions available to the current player
                 // either a different mode, or standard?
             }
