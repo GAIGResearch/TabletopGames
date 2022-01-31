@@ -21,6 +21,7 @@ public class Frontend extends GUI {
     private Game gameRunning;
     private boolean showAll;
     private ActionController humanInputQueue;
+    Timer guiUpdater;
 
     public Frontend() {
 
@@ -272,15 +273,15 @@ public class Frontend extends GUI {
                     revalidate();
                     pack();
 
-                    Timer guiUpdater = new Timer((int) coreParameters.frameSleepMS, event -> updateGUI(gui, frame));
+                    guiUpdater = new Timer((int) coreParameters.frameSleepMS, event -> {
+                        updateGUI(gui, frame);
+                    });
                     guiUpdater.start();
-
                     gameRunning.run();
                     System.out.println("Game over: " + Arrays.toString(gameRunning.getGameState().getPlayerResults()));
                     guiUpdater.stop();
                     // and update GUI to final game state
                     updateGUI(gui, frame);
-
                 }
             };
 
@@ -294,7 +295,10 @@ public class Frontend extends GUI {
         stopGame.addActionListener(e -> {
             if (gameRunning != null) {
                 gameRunning.setStopped(true);
+                if (guiUpdater != null)
+                    guiUpdater.stop();
                 gameThread.interrupt();
+                guiUpdater.stop();
             }
         });
         gameControlButtons.add(stopGame);
@@ -304,18 +308,16 @@ public class Frontend extends GUI {
         JButton pauseGame = new JButton("Pause");
         pauseGame.addActionListener(e -> {
             if (gameRunning != null) {
-                gameRunning.setPaused(true);
+                if (gameRunning.isPaused()) {
+                    gameRunning.setPaused(false);
+                    pauseGame.setText("Pause");
+                } else {
+                    gameRunning.setPaused(true);
+                    pauseGame.setText("Resume");
+                }
             }
         });
         gameControlButtons.add(pauseGame);
-        // Resume game button
-        JButton resumeGame = new JButton("Resume");
-        resumeGame.addActionListener(e -> {
-            if (gameRunning != null) {
-                gameRunning.setPaused(false);
-            }
-        });
-        gameControlButtons.add(resumeGame);
 
         JButton oneAction = new JButton("Next Action");
         oneAction.addActionListener(e -> {
