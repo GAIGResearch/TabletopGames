@@ -36,7 +36,7 @@ public class DiamantGame extends Game {
             AbstractParameters gameParameters = new DiamantParameters(System.currentTimeMillis());
 
             Game game = new DiamantGame(agents, gameParameters);
-            game.run(null);
+            game.run();
 
             Utils.GameResult [] results =  game.getGameState().getPlayerResults();
             for (int j=0; j<agents.size(); j++)

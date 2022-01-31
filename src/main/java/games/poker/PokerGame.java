@@ -58,9 +58,9 @@ public class PokerGame extends Game {
         //agents.add(new MCTSPlayer());
 
         AbstractParameters gameParameters = new PokerGameParameters(System.currentTimeMillis());
-        Game game           = new PokerGame(agents, gameParameters);
+        Game game = new PokerGame(agents, gameParameters);
 
-        game.run(null);
+        game.run();
     }
 
 }

@@ -6,9 +6,6 @@ import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
-import gui.AbstractGUIManager;
-import gui.GUI;
-import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
@@ -40,7 +37,6 @@ public class Game {
     protected List<IGameListener> listeners = new ArrayList<>();
     /* Game Statistics */
     private int lastPlayer; // used to track actions per 'turn'
-    private AbstractGUIManager gui;
     private JFrame frame;
     // Timers for various function calls
     private double nextTime, copyTime, agentTime, actionComputeTime;
@@ -111,21 +107,8 @@ public class Game {
             // Reset game instance, passing the players for this game
             game.reset(players);
 
-            GUI frame = new GUI();
-            AbstractGUIManager gui = null;
-
-
-            if (ac != null) {
-                // Create GUI (null if not implemented; running without visuals)
-                GamePanel gamePanel = new GamePanel();
-                frame.setContentPane(gamePanel);
-                gui = gameToPlay.createGUIManager(gamePanel, game, ac);
-            }
-
-            frame.setFrameProperties();
-
             // Run!
-            game.run(gui, frame);
+            game.run();
         } else {
             System.out.println("Error game: " + gameToPlay);
         }
@@ -382,26 +365,14 @@ public class Game {
         listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
     }
 
-    public final void run(AbstractGUIManager gui) {
-        run(gui, null);
-    }
-
     /**
-     * Runs the game, given a GUI. If this is null, the game runs automatically without visuals.
-     *
-     * @param gui - graphical user interface.
+     * Runs the game,
      */
-    public final void run(AbstractGUIManager gui, GUI frame) {
+    public final void run() {
 
         boolean firstEnd = true;
 
-        this.gui = gui;
-        this.frame = frame;
-
-        // GUI update
-        updateGUI(gui, frame);
-
-        while (gameState.isNotTerminal() && (frame == null || frame.isWindowOpen()) && !stop) {
+        while (gameState.isNotTerminal() && !stop) {
 
             int activePlayer = gameState.getCurrentPlayer();
             AbstractPlayer currentPlayer = players.get(activePlayer);
@@ -447,9 +418,6 @@ public class Game {
                         firstEnd = false;
                     }
                 }
-            } else {
-                // GUI update
-                updateGUI(gui, frame);
             }
         }
 
@@ -504,20 +472,11 @@ public class Game {
                 action = observedActions.get(0);
                 currentPlayer.registerUpdatedObservation(observation);
             } else {
-                if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
-                    System.out.println("Human to act");
-                    while (action == null && gui.isWindowOpen()) {
-                        action = currentPlayer.getAction(observation, observedActions);
-                        updateGUI(gui, frame);
-                    }
-                    System.out.println("Human has chosen");
-                } else {
-                    // Get action from player, and time it
-                    s = System.nanoTime();
-                    action = currentPlayer.getAction(observation, observedActions);
-                    agentTime += (System.nanoTime() - s);
-                    nDecisions++;
-                }
+                // Get action from player, and time it
+                s = System.nanoTime();
+                action = currentPlayer.getAction(observation, observedActions);
+                agentTime += (System.nanoTime() - s);
+                nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
                 System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
@@ -552,31 +511,6 @@ public class Game {
 
         lastPlayer = activePlayer;
 
-        if (gui != null)
-            // GUI update
-            updateGUI(gui, frame);
-    }
-
-    // Run function shortcut
-    public final void run() {
-        run(null, null);
-    }
-
-    /**
-     * Performs GUI update.
-     *
-     * @param gui - gui to update.
-     */
-    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        if (gui != null) {
-            gui.update(players.get(gameState.getCurrentPlayer()), gameState, isHumanToMove());
-            frame.repaint();
-            try {
-                Thread.sleep(gameState.coreGameParameters.frameSleepMS);
-            } catch (Exception e) {
-                System.out.println("EXCEPTION " + e);
-            }
-        }
     }
 
     /**

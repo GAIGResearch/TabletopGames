@@ -4,15 +4,17 @@ import core.actions.AbstractAction;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 
 public class ActionController {
 
-    private Queue<AbstractAction> actionsQueue;
+    private BlockingQueue<AbstractAction> actionsQueue;
     private AbstractAction lastActionPlayed;
 
-    public ActionController()
-    {
-        actionsQueue = new ArrayDeque<>();
+    public ActionController() {
+        actionsQueue = new ArrayBlockingQueue<>(1);
     }
 
     public void addAction(AbstractAction candidate) {
@@ -22,12 +24,18 @@ public class ActionController {
     }
 
     public AbstractAction getAction() {
-        lastActionPlayed = actionsQueue.poll();
+        try {
+            lastActionPlayed = actionsQueue.take();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return lastActionPlayed;
     }
 
-    private ActionController(Queue<AbstractAction> otherQueue) {
-        actionsQueue = new ArrayDeque<>(otherQueue);
+    private ActionController(BlockingQueue<AbstractAction> otherQueue) {
+        actionsQueue = new ArrayBlockingQueue<>(1);
+        if (otherQueue.size() > 0)
+            actionsQueue.add(otherQueue.peek());
     }
 
     public ActionController copy() {

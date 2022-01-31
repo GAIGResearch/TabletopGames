@@ -9,6 +9,8 @@ import players.human.ActionController;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -266,15 +268,18 @@ public class Frontend extends GUI {
                     }
                     gameRunning.setCoreParameters(coreParameters);
 
-                    AbstractGUIManager gui = null;
-                    if (ac != null) {
-                        // Create GUI (null if not implemented; running without visuals)
-                        gui = gameType.createGUIManager(gamePanel, gameRunning, ac);
-                    }
+                    AbstractGUIManager gui = (ac != null) ? gameType.createGUIManager(gamePanel, gameRunning, ac) : null;
                     revalidate();
                     pack();
-                    gameRunning.run(gui, frame);
+
+                    Timer guiUpdater = new Timer((int) coreParameters.frameSleepMS, event -> updateGUI(gui, frame));
+                    guiUpdater.start();
+
+                    gameRunning.run();
                     System.out.println("Game over: " + Arrays.toString(gameRunning.getGameState().getPlayerResults()));
+                    guiUpdater.stop();
+                    // and update GUI to final game state
+                    updateGUI(gui, frame);
 
                 }
             };
@@ -367,6 +372,27 @@ public class Frontend extends GUI {
         // Frame properties
         setFrameProperties();
     }
+
+    /**
+     * Performs GUI update.
+     *
+     * @param gui - gui to update.
+     */
+    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
+        AbstractGameState gameState = gameRunning.getGameState();
+        int currentPlayer = gameState.getCurrentPlayer();
+        AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
+        if (gui != null) {
+            gui.update(player, gameState, gameRunning.isHumanToMove());
+            frame.repaint();
+            try {
+                Thread.sleep(gameRunning.getCoreParameters().frameSleepMS);
+            } catch (Exception e) {
+                System.out.println("EXCEPTION " + e);
+            }
+        }
+    }
+
 
     private HashMap<String, JComboBox<Object>> createParameterWindow(List<String> paramNames, TunableParameters pp, JFrame frame) {
         HashMap<String, JComboBox<Object>> paramValueOptions = new HashMap<>();
