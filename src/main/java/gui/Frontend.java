@@ -9,8 +9,6 @@ import players.human.ActionController;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +19,8 @@ public class Frontend extends GUI {
     private final int defaultNPlayers = 2;
     private Thread gameThread;
     private Game gameRunning;
+    private boolean showAll;
+    private ActionController humanInputQueue;
 
     public Frontend() {
 
@@ -237,14 +237,14 @@ public class Frontend extends GUI {
             GUI frame = this;
             Runnable runnable = () -> {
 
-                ActionController ac = new ActionController();
-                if (visualOptions.getSelectedIndex() == 0) ac = null;
+                humanInputQueue = (visualOptions.getSelectedIndex() == 0) ? null : new ActionController();
                 long seed = Long.parseLong(seedOption.getText());
                 ArrayList<AbstractPlayer> players = new ArrayList<>();
                 int nP = Integer.parseInt(nPlayerField.getText());
                 String[] playerNames = new String[nP];
                 for (int i = 0; i < nP; i++) {
-                    AbstractPlayer player = PlayerType.valueOf(playerOptionsChoice[i].getItemAt(playerOptionsChoice[i].getSelectedIndex())).createPlayerInstance(seed, ac, playerParameters[i]);
+                    AbstractPlayer player = PlayerType.valueOf(playerOptionsChoice[i].getItemAt(playerOptionsChoice[i].getSelectedIndex()))
+                            .createPlayerInstance(seed, humanInputQueue, playerParameters[i]);
                     playerNames[i] = player.toString();
                     players.add(player);
                 }
@@ -268,7 +268,7 @@ public class Frontend extends GUI {
                     }
                     gameRunning.setCoreParameters(coreParameters);
 
-                    AbstractGUIManager gui = (ac != null) ? gameType.createGUIManager(gamePanel, gameRunning, ac) : null;
+                    AbstractGUIManager gui = (humanInputQueue != null) ? gameType.createGUIManager(gamePanel, gameRunning, humanInputQueue) : null;
                     revalidate();
                     pack();
 
@@ -329,6 +329,13 @@ public class Frontend extends GUI {
         });
         gameControlButtons.add(oneAction);
 
+        JButton allActions = new JButton("Show All!");
+        allActions.addActionListener(e -> {
+            showAll = !showAll;
+            allActions.setText(showAll ? "Show Self" : "Show All");
+        });
+        gameControlButtons.add(allActions);
+
         // todo tournaments, game report, player report etc
 
         // Put all together
@@ -383,7 +390,9 @@ public class Frontend extends GUI {
         int currentPlayer = gameState.getCurrentPlayer();
         AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
         if (gui != null) {
-            gui.update(player, gameState, gameRunning.isHumanToMove());
+            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll);
+            if (!gameRunning.isHumanToMove())
+                humanInputQueue.reset(); // clear out any actions clicked before their turn
             frame.repaint();
             try {
                 Thread.sleep(gameRunning.getCoreParameters().frameSleepMS);
