@@ -264,12 +264,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
             trainView.update(cegs);
             roundView.update(cegs);
 
-            // Update actions
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 
     private String getRuleText() {

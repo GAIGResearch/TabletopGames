@@ -314,15 +314,12 @@ public class Frontend extends GUI {
 
         JButton oneAction = new JButton("Next Action");
         oneAction.addActionListener(e -> {
-            if (gameRunning != null) {
+            if (gameRunning != null && !gameRunning.isHumanToMove()) {
                 // if the thread is running then we pause it first
-                gameRunning.setPaused(true);
                 // and then take a single action
-                // as long as it is not a human to move...as in this case the GUI is already in control
-                if (!gameRunning.isHumanToMove())
-                    gameRunning.oneAction();
-                // TODO: We also then want to display the actions available to the current player
-                // either a different mode, or standard?
+                // (as long as it is not a human to move...as in this case the GUI is already in control)
+                gameRunning.setPaused(true);
+                gameRunning.oneAction();
             }
         });
         gameControlButtons.add(oneAction);

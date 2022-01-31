@@ -44,6 +44,5 @@ public class BattleloreGUI extends AbstractGUIManager {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         view.updateComponent(((BattleloreGameState)gameState).getBoard());
-        parent.repaint();
     }
 }

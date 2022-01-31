@@ -366,12 +366,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                     reserve.setFront(true);
             }
 
-            // Update actions
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 
     private String getRuleText() {

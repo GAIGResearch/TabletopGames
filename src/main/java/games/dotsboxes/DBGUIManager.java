@@ -130,11 +130,7 @@ public class DBGUIManager extends AbstractGUIManager {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             view.updateGameState(((DBGameState)gameState));
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 
     private String getRuleText() {

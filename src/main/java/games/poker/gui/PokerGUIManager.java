@@ -294,7 +294,6 @@ public class PokerGUIManager extends AbstractGUIManager {
                         playerHands[i].setBorder(playerViewBorders[i]);
                     }
                 }
-                parent.repaint();
 
                 Pair<HashMap<Integer, Integer>, HashMap<Integer, HashSet<Integer>>> translated = pfm.translatePokerHands(pgs);
                 HashMap<Integer, Integer> ranks = translated.a;
@@ -353,12 +352,7 @@ public class PokerGUIManager extends AbstractGUIManager {
             communityPile.updateComponent(pgs.getCommunityCards());
             communityPile.setFocusable(true);
 
-            // Update actions
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 
 

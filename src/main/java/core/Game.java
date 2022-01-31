@@ -569,7 +569,7 @@ public class Game {
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
         if (gui != null) {
-            gui.update(players.get(gameState.getCurrentPlayer()), gameState);
+            gui.update(players.get(gameState.getCurrentPlayer()), gameState, isHumanToMove());
             frame.repaint();
             try {
                 Thread.sleep(gameState.coreGameParameters.frameSleepMS);

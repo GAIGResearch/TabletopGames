@@ -128,12 +128,6 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
             }
 
             mainBoard.update(state);
-
-            // Update actions
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 }
