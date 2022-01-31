@@ -37,8 +37,8 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
     List<PlayerBoard> playerBoards;
     MainBoard mainBoard;
 
-    public DiceMonasteryGUI(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, ac, 20);
+    public DiceMonasteryGUI(GamePanel p, Game game, ActionController ac, int humanID) {
+        super(p, ac, 20);
         this.humanId = humanID;
 
         if (game != null && game.getGameState() != null) {
