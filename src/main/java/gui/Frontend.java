@@ -17,11 +17,11 @@ import java.util.List;
 public class Frontend extends GUI {
     private final int nMaxPlayers = 20;
     private final int defaultNPlayers = 2;
+    Timer guiUpdater;
     private Thread gameThread;
     private Game gameRunning;
     private boolean showAll;
     private ActionController humanInputQueue;
-    Timer guiUpdater;
 
     public Frontend() {
 
@@ -230,14 +230,9 @@ public class Frontend extends GUI {
         gamePanel.setVisible(false);
 
         // Play button, runs game in separate thread to allow for proper updates
-
-        JPanel gameControlButtons = new JPanel();
-        JButton startGame = new JButton("Play!");
-        startGame.addActionListener(e -> {
-
+        java.awt.event.ActionListener startTrigger = e -> {
             GUI frame = this;
             Runnable runnable = () -> {
-
                 humanInputQueue = (visualOptions.getSelectedIndex() == 0) ? null : new ActionController();
                 long seed = Long.parseLong(seedOption.getText());
                 ArrayList<AbstractPlayer> players = new ArrayList<>();
@@ -270,8 +265,8 @@ public class Frontend extends GUI {
                     gameRunning.setCoreParameters(coreParameters);
 
                     AbstractGUIManager gui = (humanInputQueue != null) ? gameType.createGUIManager(gamePanel, gameRunning, humanInputQueue) : null;
-                   // revalidate();
-                   // pack();
+                    // revalidate();
+                    // pack();
                     setFrameProperties();
 
                     guiUpdater = new Timer((int) coreParameters.frameSleepMS, event -> {
@@ -285,15 +280,11 @@ public class Frontend extends GUI {
                     updateGUI(gui, frame);
                 }
             };
-
             gameThread = new Thread(runnable);
             gameThread.start();
-        });
-        gameControlButtons.add(startGame);
+        };
 
-        // Stop game button
-        JButton stopGame = new JButton("Stop");
-        stopGame.addActionListener(e -> {
+        java.awt.event.ActionListener stopTrigger = e -> {
             if (gameRunning != null) {
                 gameRunning.setStopped(true);
                 if (guiUpdater != null)
@@ -301,9 +292,20 @@ public class Frontend extends GUI {
                 gameThread.interrupt();
                 guiUpdater.stop();
             }
+        };
+
+        JPanel gameControlButtons = new JPanel();
+        JButton startGame = new JButton("Play!");
+        startGame.addActionListener(e -> {
+            if (startGame.getText().equals("Play!")) {
+                startTrigger.actionPerformed(e);
+                startGame.setText("Stop!");
+            } else {
+                stopTrigger.actionPerformed(e);
+                startGame.setText("Play!");
+            }
         });
-        gameControlButtons.add(stopGame);
-        gameControlButtons.add(new JSeparator());
+        gameControlButtons.add(startGame);
 
         // Pause game button
         JButton pauseGame = new JButton("Pause");
@@ -383,6 +385,10 @@ public class Frontend extends GUI {
         setFrameProperties();
     }
 
+    public static void main(String[] args) {
+        new Frontend();
+    }
+
     /**
      * Performs GUI update.
      *
@@ -405,7 +411,6 @@ public class Frontend extends GUI {
         }
     }
 
-
     private HashMap<String, JComboBox<Object>> createParameterWindow(List<String> paramNames, TunableParameters pp, JFrame frame) {
         HashMap<String, JComboBox<Object>> paramValueOptions = new HashMap<>();
         frame.getContentPane().removeAll();
@@ -420,10 +425,6 @@ public class Frontend extends GUI {
             frame.getContentPane().add(paramPanel);
         }
         return paramValueOptions;
-    }
-
-    public static void main(String[] args) {
-        new Frontend();
     }
 
 }
