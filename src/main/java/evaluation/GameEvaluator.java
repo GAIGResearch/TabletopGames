@@ -152,7 +152,7 @@ public class GameEvaluator implements SolutionEvaluator {
      * Method used to return more information about the game run (e.g. for map elites)
      *
      * The behaviours specified at the end of this method should match (in name, and type of data recorded) to those defined in:
-     * @see ParameterSearchMapElites#getSearchFramework
+     * @see ParameterSearch#getSearchFramework
      */
     public Pair<Double, TreeMap<String, Object>> evaluateWithStats(int[] point) {
         Object configuredThing = searchSpace.getAgent(point);
