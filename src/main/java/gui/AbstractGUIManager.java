@@ -11,6 +11,8 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
@@ -70,12 +72,20 @@ public abstract class AbstractGUIManager {
      * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+            int totalActionCount = (int) sampledActions.values().stream().mapToLong(i -> i).sum();
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
+                if (!sampledActions.isEmpty()) {
+                    double percentChosen = sampledActions.getOrDefault(actions.get(i), 0L).doubleValue() / totalActionCount;
+                    Color background = new Color(0.0f, 0.5f, 0.0f, (float) percentChosen);
+                    actionButtons[i].setBackground(background);
+                } else {
+                    actionButtons[i].setBackground(Color.white);
+                }
             }
             for (int i = actions.size(); i < actionButtons.length; i++) {
                 actionButtons[i].setVisible(false);
@@ -192,12 +202,12 @@ public abstract class AbstractGUIManager {
      * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions) {
+    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions, Map<AbstractAction, Long> sampledActions) {
         updateGameStateInfo(gameState);
         _update(player, gameState);
         if (actionButtons != null)
             if (showActions)
-                updateActionButtons(player, gameState);
+                updateActionButtons(player, gameState, sampledActions);
             else
                 resetActionButtons();
         parent.repaint();

@@ -27,6 +27,7 @@ import java.awt.event.MouseEvent;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 public class LoveLetterGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -256,7 +257,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
     }
 
     @Override
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
 //            resetActionButtons();
 

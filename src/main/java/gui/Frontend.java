@@ -7,21 +7,24 @@ import players.PlayerParameters;
 import players.PlayerType;
 import players.human.ActionController;
 
+import javax.swing.Timer;
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Frontend extends GUI {
     private final int nMaxPlayers = 20;
     private final int defaultNPlayers = 2;
+    private final int actionsToSample = 20;
     Timer guiUpdater;
     private Thread gameThread;
     private Game gameRunning;
     private boolean showAll, paused, started;
     private ActionController humanInputQueue;
+    private Map<core.actions.AbstractAction, Long> nextDecision = new HashMap<>();
 
     public Frontend() {
 
@@ -231,12 +234,16 @@ public class Frontend extends GUI {
 
         JPanel gameControlButtons = new JPanel();
         // Pause game button
+        JButton oneAction = new JButton("Next Action");
+        oneAction.setEnabled(paused && started);
+
         JButton pauseGame = new JButton("Pause");
         pauseGame.addActionListener(e -> {
             paused = !paused;
             pauseGame.setText(paused ? "Resume" : "Pause");
             if (gameRunning != null)
                 gameRunning.setPaused(paused);
+            oneAction.setEnabled(paused && started);
         });
 
         // Play button, runs game in separate thread to allow for proper updates
@@ -314,17 +321,32 @@ public class Frontend extends GUI {
             } else {
                 stopTrigger.actionPerformed(e);
             }
+            oneAction.setEnabled(paused && started);
             startGame.setText(started ? "Stop!" : "Play!");
         });
 
-        JButton oneAction = new JButton("Next Action");
+
         oneAction.addActionListener(e -> {
             if (gameRunning != null && !gameRunning.isHumanToMove()) {
                 // if the thread is running then we pause it first
                 // and then take a single action
                 // (as long as it is not a human to move...as in this case the GUI is already in control)
-                gameRunning.setPaused(true);
                 gameRunning.oneAction();
+                // Now we can work out what actions the agent is going to take next
+                // TODO: This could go into a thread of its own...so that the longer one waits, the more data we get?
+                if (showAll & !gameRunning.isHumanToMove()) {
+                    AbstractGameState state = gameRunning.getGameState();
+                    int nextPlayerID = state.getCurrentPlayer();
+                    AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
+                    nextDecision.clear();
+                    Map<core.actions.AbstractAction, Long> temp = IntStream.range(0, actionsToSample).mapToObj(i -> {
+                        AbstractGameState copyState = state.copy(nextPlayerID);
+                        List<core.actions.AbstractAction> availableActions = gameRunning.getForwardModel().computeAvailableActions(copyState);
+                        return nextPlayer.getAction(copyState, availableActions);
+                    }).collect(Collectors.groupingBy(action -> action, Collectors.counting()));
+                    nextDecision.putAll(temp);
+                    // nextDecision is then used as a means of passing the data to the actionPanel
+                }
             }
         });
 
@@ -397,7 +419,7 @@ public class Frontend extends GUI {
         int currentPlayer = gameState.getCurrentPlayer();
         AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
         if (gui != null) {
-            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll);
+            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, nextDecision);
             if (!gameRunning.isHumanToMove())
                 humanInputQueue.reset(); // clear out any actions clicked before their turn
             frame.repaint();
