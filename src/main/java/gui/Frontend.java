@@ -270,8 +270,9 @@ public class Frontend extends GUI {
                     gameRunning.setCoreParameters(coreParameters);
 
                     AbstractGUIManager gui = (humanInputQueue != null) ? gameType.createGUIManager(gamePanel, gameRunning, humanInputQueue) : null;
-                    revalidate();
-                    pack();
+                   // revalidate();
+                   // pack();
+                    setFrameProperties();
 
                     guiUpdater = new Timer((int) coreParameters.frameSleepMS, event -> {
                         updateGUI(gui, frame);

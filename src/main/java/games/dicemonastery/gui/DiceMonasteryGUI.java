@@ -97,6 +97,7 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
             parent.add(infoPanel, BorderLayout.NORTH);
             parent.add(actionPanel, BorderLayout.SOUTH);
 
+            parent.setPreferredSize(new Dimension(width, height));
             parent.revalidate();
             parent.setVisible(true);
             parent.repaint();

@@ -73,7 +73,7 @@ public abstract class AbstractGUIManager {
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
-            for (int i = 0; i < actions.size(); i++) {
+            for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
             }
@@ -195,10 +195,11 @@ public abstract class AbstractGUIManager {
     public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions) {
         updateGameStateInfo(gameState);
         _update(player, gameState);
-        if (showActions)
-            updateActionButtons(player, gameState);
-        else
-            resetActionButtons();
+        if (actionButtons != null)
+            if (showActions)
+                updateActionButtons(player, gameState);
+            else
+                resetActionButtons();
         parent.repaint();
     }
 
