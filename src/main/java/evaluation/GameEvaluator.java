@@ -6,6 +6,7 @@ import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
 import evodef.*;
 import games.GameType;
+import utilities.Pair;
 import utilities.SummaryLogger;
 
 import java.util.*;
@@ -145,6 +146,59 @@ public class GameEvaluator implements SolutionEvaluator {
 
         nEvals++;
         return tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerIndex);
+    }
+
+    /**
+     * Method used to return more information about the game run (e.g. for map elites)
+     *
+     * The behaviours specified at the end of this method should match (in name, and type of data recorded) to those defined in:
+     * @see ParameterSearchMapElites#getSearchFramework
+     */
+    public Pair<Double, TreeMap<String, Object>> evaluateWithStats(int[] point) {
+        Object configuredThing = searchSpace.getAgent(point);
+        boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
+        boolean tuningGame = configuredThing instanceof Game;
+
+        List<AbstractPlayer> allPlayers = new ArrayList<>(nPlayers);
+
+        // We can reduce variance here by cycling the playerIndex on each iteration
+        // If we're not tuning the player, then setting index to -99 means we just use the provided opponents list
+        int playerIndex = tuningPlayer ? nEvals % nPlayers : -99;
+
+        // create a random permutation of opponents - this is used if we want to avoid opponent duplicates
+        // if we allow duplicates, then we randomise them all independently
+        List<Integer> opponentOrdering = IntStream.range(0, opponents.size()).boxed().collect(toList());
+        Collections.shuffle(opponentOrdering);
+        int count = 0;
+        for (int i = 0; i < nPlayers; i++) {
+            if (!fullyCoop && i != playerIndex) {
+                int oppIndex = (avoidOppDupes) ? count : rnd.nextInt(opponents.size());
+                count = (count + 1) % nPlayers;
+                allPlayers.add(opponents.get(oppIndex).copy());
+            } else {
+                AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(point); // we create for each, in case this is coop
+                if (reportStatistics) tunedPlayer.setStatsLogger(statsLogger);
+                allPlayers.add(tunedPlayer);
+            }
+        }
+
+        Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers, gameParams);
+        // always reset the random seed for each new game
+        newGame.reset(allPlayers, rnd.nextLong());
+
+        newGame.run();
+
+        nEvals++;
+        // Value
+        double value = tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerIndex);
+
+        // Behaviours
+        TreeMap<String, Object> behaviours = new TreeMap<>();
+        behaviours.put("length", newGame.getGameState().getTurnOrder().getRoundCounter());
+        // TODO record behaviour data
+
+        // Return stats
+        return new Pair<Double, TreeMap<String, Object>>(value, behaviours);
     }
 
     /**
