@@ -20,7 +20,7 @@ public class Frontend extends GUI {
     Timer guiUpdater;
     private Thread gameThread;
     private Game gameRunning;
-    private boolean showAll;
+    private boolean showAll, paused, started;
     private ActionController humanInputQueue;
 
     public Frontend() {
@@ -229,18 +229,14 @@ public class Frontend extends GUI {
         GamePanel gamePanel = new GamePanel();
         gamePanel.setVisible(false);
 
+        JPanel gameControlButtons = new JPanel();
         // Pause game button
         JButton pauseGame = new JButton("Pause");
         pauseGame.addActionListener(e -> {
-            if (pauseGame.getText().equals("Resume")) {
-                if (gameRunning != null)
-                    gameRunning.setPaused(false);
-                pauseGame.setText("Pause");
-            } else {
-                if (gameRunning != null)
-                    gameRunning.setPaused(true);
-                pauseGame.setText("Resume");
-            }
+            paused = !paused;
+            pauseGame.setText(paused ? "Resume" : "Pause");
+            if (gameRunning != null)
+                gameRunning.setPaused(paused);
         });
 
         // Play button, runs game in separate thread to allow for proper updates
@@ -288,8 +284,7 @@ public class Frontend extends GUI {
                     });
                     guiUpdater.start();
                     // if Pause button has been pressed, then pause at the start so we can track all actions
-                    if (pauseGame.getText().equals("Resume"))
-                        gameRunning.setPaused(true);
+                    gameRunning.setPaused(paused);
                     gameRunning.run();
                     System.out.println("Game over: " + Arrays.toString(gameRunning.getGameState().getPlayerResults()));
                     guiUpdater.stop();
@@ -311,20 +306,16 @@ public class Frontend extends GUI {
             }
         };
 
-        JPanel gameControlButtons = new JPanel();
         JButton startGame = new JButton("Play!");
         startGame.addActionListener(e -> {
-            if (startGame.getText().equals("Play!")) {
+            started = !started;
+            if (started) {
                 startTrigger.actionPerformed(e);
-                startGame.setText("Stop!");
             } else {
                 stopTrigger.actionPerformed(e);
-                startGame.setText("Play!");
             }
+            startGame.setText(started ? "Stop!" : "Play!");
         });
-
-        gameControlButtons.add(startGame);
-        gameControlButtons.add(pauseGame);
 
         JButton oneAction = new JButton("Next Action");
         oneAction.addActionListener(e -> {
@@ -336,13 +327,16 @@ public class Frontend extends GUI {
                 gameRunning.oneAction();
             }
         });
-        gameControlButtons.add(oneAction);
 
         JButton allActions = new JButton("Show All!");
         allActions.addActionListener(e -> {
             showAll = !showAll;
             allActions.setText(showAll ? "Show Self" : "Show All");
         });
+
+        gameControlButtons.add(startGame);
+        gameControlButtons.add(pauseGame);
+        gameControlButtons.add(oneAction);
         gameControlButtons.add(allActions);
 
         // todo tournaments, game report, player report etc
