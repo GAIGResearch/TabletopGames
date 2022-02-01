@@ -27,5 +27,6 @@ public class MainBoard extends JComponent {
 
     public void update(DiceMonasteryGameState state) {
         actionSpaces.forEach(view -> view.update(state));
+        revalidate();
     }
 }

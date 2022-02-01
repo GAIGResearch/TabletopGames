@@ -23,12 +23,8 @@ public class ActionController {
         }
     }
 
-    public AbstractAction getAction() {
-        try {
-            lastActionPlayed = actionsQueue.take();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public AbstractAction getAction() throws InterruptedException {
+        lastActionPlayed = actionsQueue.take();
         return lastActionPlayed;
     }
 
