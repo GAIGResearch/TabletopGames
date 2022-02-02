@@ -18,7 +18,7 @@ public class ActionController {
     }
 
     public void addAction(AbstractAction candidate) {
-        if (candidate != null) {
+        if (candidate != null && actionsQueue.isEmpty()) {
             actionsQueue.add(candidate);
         }
     }
