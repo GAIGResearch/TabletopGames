@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.GameEvents;
+import static games.GameType.Stratego;
 import static games.GameType.TicTacToe;
 
 
@@ -733,7 +734,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Run! */
-        runOne(TicTacToe, players, seed, ac, false, null);
+        runOne(Stratego, players, seed, ac, false, null);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
