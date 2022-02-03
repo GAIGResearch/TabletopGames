@@ -1,6 +1,8 @@
 package gui;
 
 import core.*;
+import core.actions.AbstractAction;
+import core.interfaces.IGameListener;
 import evaluation.TunableParameters;
 import games.GameType;
 import players.PlayerParameters;
@@ -19,12 +21,12 @@ public class Frontend extends GUI {
     private final int nMaxPlayers = 20;
     private final int defaultNPlayers = 2;
     private final int actionsToSample = 20;
+    private final Map<core.actions.AbstractAction, Long> sampledActionsForNextDecision = new HashMap<>();
     Timer guiUpdater;
     private Thread gameThread;
     private Game gameRunning;
     private boolean showAll, paused, started;
     private ActionController humanInputQueue;
-    private Map<core.actions.AbstractAction, Long> nextDecision = new HashMap<>();
 
     public Frontend() {
 
@@ -271,7 +273,6 @@ public class Frontend extends GUI {
                 }
                 gameRunning = gameType.createGameInstance(players.size(), params);
                 if (gameRunning != null) {
-
                     // Reset game instance, passing the players for this game
                     gameRunning.reset(players);
 
@@ -292,6 +293,8 @@ public class Frontend extends GUI {
                     guiUpdater.start();
                     // if Pause button has been pressed, then pause at the start so we can track all actions
                     gameRunning.setPaused(paused);
+                    // set up sample for the first action
+                    listenForDecisions();
                     gameRunning.run();
                     System.out.println("Game over: " + Arrays.toString(gameRunning.getGameState().getPlayerResults()));
                     guiUpdater.stop();
@@ -332,21 +335,6 @@ public class Frontend extends GUI {
                 // and then take a single action
                 // (as long as it is not a human to move...as in this case the GUI is already in control)
                 gameRunning.oneAction();
-                // Now we can work out what actions the agent is going to take next
-                // TODO: This could go into a thread of its own...so that the longer one waits, the more data we get?
-                if (showAll & !gameRunning.isHumanToMove()) {
-                    AbstractGameState state = gameRunning.getGameState();
-                    int nextPlayerID = state.getCurrentPlayer();
-                    AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
-                    nextDecision.clear();
-                    Map<core.actions.AbstractAction, Long> temp = IntStream.range(0, actionsToSample).mapToObj(i -> {
-                        AbstractGameState copyState = state.copy(nextPlayerID);
-                        List<core.actions.AbstractAction> availableActions = gameRunning.getForwardModel().computeAvailableActions(copyState);
-                        return nextPlayer.getAction(copyState, availableActions);
-                    }).collect(Collectors.groupingBy(action -> action, Collectors.counting()));
-                    nextDecision.putAll(temp);
-                    // nextDecision is then used as a means of passing the data to the actionPanel
-                }
             }
         });
 
@@ -409,6 +397,40 @@ public class Frontend extends GUI {
         new Frontend();
     }
 
+    private void listenForDecisions() {
+        // add a listener to detect every time an action has been taken
+        gameRunning.addListener(new IGameListener() {
+            @Override
+            public void onGameEvent(CoreConstants.GameEvents type, Game game) {
+                // Do nothing
+            }
+
+            @Override
+            public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
+                if (type == CoreConstants.GameEvents.ACTION_TAKEN) {
+                    updateSampleActions();
+                }
+            }
+        });
+        // and then do this at the start of the game
+        updateSampleActions();
+    }
+
+    private void updateSampleActions() {
+        if (showAll && !gameRunning.isHumanToMove()) {
+            AbstractGameState state = gameRunning.getGameState();
+            int nextPlayerID = state.getCurrentPlayer();
+            AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
+            sampledActionsForNextDecision.clear();
+            Map<core.actions.AbstractAction, Long> temp = IntStream.range(0, actionsToSample).mapToObj(i -> {
+                AbstractGameState copyState = state.copy(nextPlayerID);
+                List<core.actions.AbstractAction> availableActions = gameRunning.getForwardModel().computeAvailableActions(copyState);
+                return nextPlayer.getAction(copyState, availableActions);
+            }).collect(Collectors.groupingBy(action -> action, Collectors.counting()));
+            sampledActionsForNextDecision.putAll(temp);
+        }
+    }
+
     /**
      * Performs GUI update.
      *
@@ -419,7 +441,7 @@ public class Frontend extends GUI {
         int currentPlayer = gameState.getCurrentPlayer();
         AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
         if (gui != null) {
-            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, nextDecision);
+            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, sampledActionsForNextDecision);
             if (!gameRunning.isHumanToMove())
                 humanInputQueue.reset(); // clear out any actions clicked before their turn
             frame.repaint();

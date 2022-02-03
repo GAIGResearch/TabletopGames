@@ -482,6 +482,7 @@ public class Game {
                 System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
                 action = null;
             }
+            // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
             AbstractAction finalAction = action;
             listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
         } else {
@@ -510,6 +511,11 @@ public class Game {
         tick++;
 
         lastPlayer = activePlayer;
+
+        // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
+        // (such as the next player)
+        AbstractAction finalAction1 = action;
+        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_TAKEN, gameState, finalAction1));
 
     }
 

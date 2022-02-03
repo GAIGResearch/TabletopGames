@@ -25,7 +25,7 @@ public class CoreConstants {
     public final static int backgroundImgHash = Hash.GetInstance().hash("backgroundImg");
 
     public enum GameEvents {
-        ABOUT_TO_START, GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN, GAME_EVENT
+        ABOUT_TO_START, GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN, ACTION_TAKEN, GAME_EVENT
     }
 
     /**
