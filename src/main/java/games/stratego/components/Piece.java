@@ -7,16 +7,15 @@ import games.stratego.StrategoParams;
 import games.stratego.actions.AttackMove;
 import games.stratego.actions.Move;
 import games.stratego.actions.NormalMove;
+import utilities.Distance;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.List;
 
 public class Piece extends Token {
 
     protected int[] position;
-    protected final int rank;
     protected final PieceType pieceType;
     protected final Alliance alliance;
     private boolean pieceKnown;
@@ -25,7 +24,6 @@ public class Piece extends Token {
 
     public Piece(PieceType pieceType, Alliance alliance, int[] position) {
         super(pieceType.name());
-        this.rank = pieceType.pieceRank;
         this.pieceType = pieceType;
         this.alliance = alliance;
         this.position = new int[] {position[0], position[1]};
@@ -34,7 +32,6 @@ public class Piece extends Token {
 
     protected Piece(PieceType pieceType, Alliance alliance, int[] position, int ID) {
         super(pieceType.name(), ID);
-        this.rank = pieceType.pieceRank;
         this.pieceType = pieceType;
         this.alliance = alliance;
         this.position = new int[] {position[0], position[1]};
@@ -46,7 +43,7 @@ public class Piece extends Token {
     }
 
     public void setPiecePosition(int[] coordinate){
-        this.position = new int[] {coordinate[0], coordinate[1]};
+        this.position = coordinate.clone();
     }
 
     public int getPieceRank(){
@@ -61,11 +58,11 @@ public class Piece extends Token {
         return this.alliance;
     }
 
-    public boolean getPieceKnownFlag(){
+    public boolean isPieceKnown(){
         return this.pieceKnown;
     }
 
-    public void changePieceKnownFlag(boolean bool){
+    public void setPieceKnown(boolean bool){
         this.pieceKnown = bool;
     }
 
@@ -74,49 +71,39 @@ public class Piece extends Token {
         GridBoard<Piece> board = gs.getGridBoard();
         StrategoParams params = (StrategoParams) gs.getGameParameters();
 
-        final List<Move> moves = new ArrayList<>();
+        List<Move> moves = new ArrayList<>();
 
-        if (this.pieceType == PieceType.BOMB || this.pieceType == PieceType.FLAG){
+        if (!getPieceType().isMovable()){
             return moves;
         }
 
-        if (this.pieceType == PieceType.SCOUT){
-            for (final int move : MOVE_VECTOR){
-                for (int i =0; i<=params.moveSpeed; i++){
-                    int[] currentPos = {position[0], position[1]};
+        if (pieceType == PieceType.SCOUT){
+            for (int move : MOVE_VECTOR){  // positive or negative
+                for (int i =0; i<2; i++){  // horizontal and vertical
+                    int[] newPos = position.clone();
 
-                    while(params.isTileValid(currentPos[0],currentPos[1])){
-                        currentPos[i] += move;
+                    while(true){
+                        newPos[i] += move;
 
-                        if(params.isTileValid(currentPos[0],currentPos[1])){
-                            final Piece pieceAtTile = board.getElement(currentPos[0],currentPos[1]);
-                            if (pieceAtTile == null){
-                                moves.add(new NormalMove(getComponentID(), currentPos));
-                            } else{
-                                final Alliance pieceAtTileAlliance = pieceAtTile.getPieceAlliance();
-                                if (this.alliance != pieceAtTileAlliance){
-                                    moves.add(new AttackMove(getComponentID(), currentPos, pieceAtTile.getComponentID()));
-                                }
+                        if (params.isTileValid(newPos[0],newPos[1])){
+                            if (addMove(board, params, moves, newPos)) {
                                 break;
                             }
+                        } else {
+                            break;
                         }
                     }
                 }
             }
-        } else{
-            for(final int move : MOVE_VECTOR){
-                for (int i=0;i<= params.moveSpeed;i++){
-                    int[] currentPos = {position[0], position[1]};
-                    currentPos[i] += move;
-                    if (params.isTileValid(currentPos[0], currentPos[1])){
-                        final Piece pieceAtTile = board.getElement(currentPos[0], currentPos[1]);
-                        if (pieceAtTile == null){
-                            moves.add(new NormalMove(getComponentID(), currentPos));
-                        } else{
-                            final Alliance pieceAtTileAlliance = pieceAtTile.getPieceAlliance();
-                            if (this.alliance != pieceAtTileAlliance){
-                                moves.add(new AttackMove(getComponentID(), currentPos, pieceAtTile.getComponentID()));
-                            }
+        } else {
+            for(int move : MOVE_VECTOR){  // positive or negative
+                for (int i=0; i<2; i++){  // horizontal or vertical
+                    for (int j = 1; j <= params.moveSpeed; j++) {  // according to movement speed
+                        int[] newPos = position.clone();
+                        newPos[i] += move * j;
+
+                        if (params.isTileValid(newPos[0], newPos[1])) {
+                            if (addMove(board, params, moves, newPos)) break;
                         }
                     }
                 }
@@ -125,17 +112,55 @@ public class Piece extends Token {
         return moves;
     }
 
+    private boolean addMove(GridBoard<Piece> board, StrategoParams params, List<Move> moves, int[] newPos) {
+        Piece pieceAtTile = board.getElement(newPos[0], newPos[1]);
+        if (pieceAtTile == null) {
+            moves.add(new NormalMove(getComponentID(), newPos));
+        } else {
+            if (Distance.manhattan_distance(position, newPos) <= params.attackRange &&
+                    alliance != pieceAtTile.getPieceAlliance()) {
+                moves.add(new AttackMove(getComponentID(), pieceAtTile.getComponentID()));
+            }
+            // Reached another piece and cannot occupy same square or jump over, finish
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public Piece copy() {
-        Piece copy = new Piece(pieceType, alliance, new int[] {position[0], position[1]}, componentID);
+        Piece copy = new Piece(pieceType, alliance, position.clone(), componentID);
+        copy.pieceKnown = pieceKnown;
         copyComponentTo(copy);
         return copy;
     }
 
     public Piece partialCopy(PieceType hiddenPieceType){
-        Piece copy = new Piece(hiddenPieceType, alliance, new int[] {position[0], position[1]}, componentID);
+        Piece copy = new Piece(hiddenPieceType, alliance, position.clone(), componentID);
+        copy.pieceKnown = pieceKnown;
         copyComponentTo(copy);
         return copy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Piece piece = (Piece) o;
+        return pieceKnown == piece.pieceKnown && Arrays.equals(position, piece.position) && pieceType == piece.pieceType && alliance == piece.alliance;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), pieceType, alliance, pieceKnown);
+        result = 31 * result + Arrays.hashCode(position);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return pieceType.pieceRank + " " + pieceType.name();
     }
 
     public enum PieceType {
@@ -159,6 +184,10 @@ public class Piece extends Token {
         }
 
         public String rankToString(){return String.valueOf(this.pieceRank);}
+
+        public boolean isMovable() {
+            return this != FLAG && this != BOMB;
+        }
 
     }
 

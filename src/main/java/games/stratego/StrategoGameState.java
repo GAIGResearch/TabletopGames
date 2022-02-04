@@ -36,8 +36,8 @@ public class StrategoGameState extends AbstractGameState {
         for (Piece piece : gridBoard.getComponents()){
             if (piece != null){
                 if (playerId != -1){
-                    String playerAlliance = StrategoConstants.playerMapping.get(playerId);
-                    if (playerAlliance.equals(piece.getPieceAlliance().toString()) || piece.getPieceKnownFlag()) {
+                    Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);
+                    if (playerAlliance == piece.getPieceAlliance() || piece.isPieceKnown()) {
                         s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
                     } else{
                         Piece.PieceType hiddenPieceType = getHiddenPieceType(playerId);
@@ -95,8 +95,8 @@ public class StrategoGameState extends AbstractGameState {
         for (Piece piece : gridBoard.getComponents()){
             if (piece != null){
                 if (playerId != -1){
-                    String playerAlliance = StrategoConstants.playerMapping.get(playerId);
-                    if (!playerAlliance.equals(piece.getPieceAlliance().toString())) {
+                    Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);
+                    if (playerAlliance != piece.getPieceAlliance()) {
                         pieceList.add(piece.getComponentID());
                     }
                 }

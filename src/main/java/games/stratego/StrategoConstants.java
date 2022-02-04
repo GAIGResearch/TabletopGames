@@ -7,20 +7,15 @@ import java.util.Arrays;
 
 public class StrategoConstants {
 
-    public static final ArrayList<String> playerMapping = new ArrayList<String>(){{
-       add("RED");
-       add("BLUE");
+    public static final ArrayList<Piece.Alliance> playerMapping = new ArrayList<Piece.Alliance>(){{
+       add(Piece.Alliance.RED);
+       add(Piece.Alliance.BLUE);
     }};
 
-    public static final String emptyCell = "-";
     public static final String waterCell = "X";
 
-    public static ArrayList<PieceSetups> returnPieceSetups (){
-        return new ArrayList<PieceSetups>(Arrays.asList(PieceSetups.values()));
-    }
-
     public enum PieceSetups{
-        Setup1("Setup1", 1){
+        Setup1 {
             @Override
             protected ArrayList<Piece> getRedSetup() {
                 return new ArrayList<>(redPieces);
@@ -117,7 +112,7 @@ public class StrategoConstants {
                 add(new Piece(Piece.PieceType.MARSHAL, Piece.Alliance.BLUE, new int[]{9,7}));
             }};
         },
-        Setup2("Setup2", 2){
+        Setup2 {
             @Override
             protected ArrayList<Piece> getRedSetup() {
                 return new ArrayList<>(redPieces);
@@ -214,7 +209,7 @@ public class StrategoConstants {
                 add(new Piece(Piece.PieceType.SCOUT, Piece.Alliance.BLUE, new int[]{0,6}));
             }};
         },
-        Setup3("Setup3", 3){
+        Setup3 {
             @Override
             protected ArrayList<Piece> getRedSetup() {
                 return new ArrayList<>(redPieces);
@@ -312,9 +307,6 @@ public class StrategoConstants {
             }};
         }
         ;
-
-        PieceSetups(String setupName, int setupNumber) {
-        }
 
         protected abstract ArrayList<Piece> getRedSetup();
         protected abstract ArrayList<Piece> getBlueSetup();

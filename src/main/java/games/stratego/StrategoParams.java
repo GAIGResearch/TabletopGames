@@ -7,6 +7,10 @@ public class StrategoParams extends AbstractParameters {
     public int[] xRestrictedTiles = {2,3,6,7};
     public int[] yRestrictedTiles = {4,5};
     public int moveSpeed = 1;
+    public int attackRange = 1;
+    public int[] pieceSetupCount = {1,8,5,4,4,4,3,2,1,1}; // {1,1,2,3,4,4,4,5,8,1};
+    public int pieceSetupNBombs = 6;
+    public int pieceSetupNFlags = 1;
 
     public boolean isTileValid(final int x, final int y){
         if ((x>=0 && x<gridSize) && (y>=0 && y<gridSize)){

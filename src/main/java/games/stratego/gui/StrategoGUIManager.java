@@ -7,6 +7,7 @@ import core.actions.AbstractAction;
 import games.stratego.StrategoConstants;
 import games.stratego.StrategoGameState;
 import games.stratego.actions.Move;
+import games.stratego.actions.NormalMove;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
@@ -24,12 +25,17 @@ public class StrategoGUIManager extends AbstractGUIManager {
     StrategoBoardView view;
 
     public StrategoGUIManager(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 1);
+        super(parent, ac, 100);
 
         if (game == null) return;
 
         StrategoGameState gameState = (StrategoGameState) game.getGameState();
-        view = new StrategoBoardView(gameState.getGridBoard());
+        view = new StrategoBoardView(gameState);
+        for (AbstractPlayer p: game.getPlayers()) {
+            if (p instanceof HumanGUIPlayer) {
+                view.addHumanPlayerID(p.getPlayerID());
+            }
+        }
 
         // Set width/height of display
         this.width = Math.max(defaultDisplayWidth, defaultItemSize * gameState.getGridBoard().getWidth());
@@ -43,7 +49,7 @@ public class StrategoGUIManager extends AbstractGUIManager {
         parent.add(view, BorderLayout.CENTER);
         parent.add(infoPanel, BorderLayout.NORTH);
         parent.add(actionPanel, BorderLayout.SOUTH);
-        parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + defaultCardHeight + 20));
+        parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + 10));
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
@@ -60,17 +66,32 @@ public class StrategoGUIManager extends AbstractGUIManager {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             ArrayList<Rectangle> highlight = view.getHighlight();
 
-            if (highlight.size() > 0) {
-                Rectangle r = highlight.get(0);
+            boolean activated = false;
+            StrategoGameState gs = (StrategoGameState) gameState;
+            if (highlight.size() == 2) {  // Need from and to squares
+                Rectangle r1 = highlight.get(0);
+                Rectangle r2 = highlight.get(1);
+                int i = 1;
                 for (AbstractAction abstractAction : actions) {
                     Move action = (Move) abstractAction;
-                    if (action.getDestinationCoordinate()[0] == r.x/defaultItemSize && action.getDestinationCoordinate()[1] == r.y/defaultItemSize) {
+                    if (action.from(gs)[0] == r1.x/defaultItemSize && action.from(gs)[1] == r1.y/defaultItemSize &&
+                        action.to(gs)[0] == r2.x/defaultItemSize && action.to(gs)[1] == r2.y/defaultItemSize ||
+                        action.from(gs)[0] == r2.x/defaultItemSize && action.from(gs)[1] == r2.y/defaultItemSize &&
+                        action.to(gs)[0] == r1.x/defaultItemSize && action.to(gs)[1] == r1.y/defaultItemSize) {
                         actionButtons[0].setVisible(true);
-                        actionButtons[0].setButtonAction(action, action.getString(gameState));
+                        actionButtons[0].setButtonAction(action, action.getPOString(gs));
+                        activated = true;
                         break;
                     }
+//                    if (action instanceof NormalMove) {
+//                        actionButtons[i].setVisible(true);
+//                        actionButtons[i].setButtonAction(action, action.getString(gameState));
+//                        i++;
+//                        activated = true;
+//                    }
                 }
-            } else {
+            }
+            if (!activated){
                 actionButtons[0].setVisible(false);
                 actionButtons[0].setButtonAction(null, "");
             }

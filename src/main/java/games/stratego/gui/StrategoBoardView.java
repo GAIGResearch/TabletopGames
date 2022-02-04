@@ -1,8 +1,8 @@
 package games.stratego.gui;
 
 import core.components.GridBoard;
-import core.components.Token;
 import games.stratego.StrategoConstants;
+import games.stratego.StrategoGameState;
 import games.stratego.components.Piece;
 import gui.views.ComponentView;
 
@@ -10,29 +10,32 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.HashSet;
 
-import static games.stratego.components.Piece.PieceType.BOMB;
-import static games.stratego.components.Piece.PieceType.FLAG;
 import static gui.GUI.defaultItemSize;
 
 public class StrategoBoardView extends ComponentView {
 
     Rectangle[] rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;
+    StrategoGameState gs;
+    HashSet<Integer> humanPlayerID;
 
-    public StrategoBoardView(GridBoard<Piece> gridBoard) {
-        super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
-        rects = new Rectangle[gridBoard.getWidth() * gridBoard.getHeight()];
+    public StrategoBoardView(StrategoGameState gs) {
+        super(gs.getGridBoard(), gs.getGridBoard().getWidth() * defaultItemSize,
+                gs.getGridBoard().getHeight() * defaultItemSize);
+        rects = new Rectangle[gs.getGridBoard().getWidth() * gs.getGridBoard().getHeight()];
         highlight = new ArrayList<>();
+        this.gs = gs;
+        humanPlayerID = new HashSet<>();
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
+                if (e.getButton() == MouseEvent.BUTTON1 && highlight.size() < 2) {  // Can select up to 2 squares, then clear
                     // Left click, highlight cell
                     for (Rectangle r: rects) {
                         if (r != null && r.contains(e.getPoint())) {
-                            highlight.clear();
                             highlight.add(r);
                             break;
                         }
@@ -47,20 +50,21 @@ public class StrategoBoardView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoard((Graphics2D)g, (GridBoard<Token>) component, 0, 0);
+        drawGridBoard((Graphics2D)g, (GridBoard<Piece>) component, 0, 0);
 
         if (highlight.size() > 0) {
             g.setColor(Color.green);
             Stroke s = ((Graphics2D) g).getStroke();
             ((Graphics2D) g).setStroke(new BasicStroke(3));
 
-            Rectangle r = highlight.get(0);
-            g.drawRect(r.x, r.y, r.width, r.height);
+            for(Rectangle r: highlight) {
+                g.drawRect(r.x, r.y, r.width, r.height);
+            }
             ((Graphics2D) g).setStroke(s);
         }
     }
 
-    public void drawGridBoard(Graphics2D g, GridBoard<Token> gridBoard, int x, int y) {
+    public void drawGridBoard(Graphics2D g, GridBoard<Piece> gridBoard, int x, int y) {
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;
 
@@ -85,12 +89,11 @@ public class StrategoBoardView extends ComponentView {
         }
     }
 
-    private void drawCell(Graphics2D g, Token element, int x, int y) {
+    private void drawCell(Graphics2D g, Piece piece, int x, int y) {
         // Paint cell background
         g.setColor(Color.lightGray);
         g.fillRect(x, y, defaultItemSize, defaultItemSize);
 
-        Piece piece = (Piece) element;
         if (piece != null){
             g.setColor(piece.getPieceAlliance().getColor());
         } else {g.setColor(Color.black);}
@@ -107,17 +110,33 @@ public class StrategoBoardView extends ComponentView {
         }
 
         // Paint element in cell
-        if (element != null) {
+        if (piece != null) {
             Font f = g.getFont();
             g.setFont(new Font(f.getName(), Font.BOLD, 9 * 3 / 2));
-            String elementName = element.toString();
-            if (piece.getPieceType() != FLAG && piece.getPieceType() != BOMB){
-                elementName = piece.getPieceType().rankToString();
-                g.setFont(new Font(f.getName(), Font.BOLD, 15 * 3 / 2));
+            String elementName = piece.toString();
+            if (gs.getCoreGameParameters().partialObservable && !gs.getCoreGameParameters().alwaysDisplayFullObservable && !piece.isPieceKnown()) {
+                // Need to hide piece?
+                if (!gs.getCoreGameParameters().alwaysDisplayCurrentPlayer || piece.getOwnerId() != gs.getCurrentPlayer()) {
+                    if (!humanPlayerID.contains(piece.getOwnerId())) {
+                        elementName = "?";
+                    }
+                }
             }
+//            if (piece.getPieceType() != FLAG && piece.getPieceType() != BOMB){
+//                elementName = piece.getPieceType().rankToString();
+//                g.setFont(new Font(f.getName(), Font.BOLD, 15 * 3 / 2));
+//            }
             g.drawString(elementName, x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
             g.setFont(f);
         }
+    }
+
+    public void setHumanPlayerID(HashSet<Integer> humanPlayerID) {
+        this.humanPlayerID = humanPlayerID;
+    }
+
+    public void addHumanPlayerID(int human) {
+        this.humanPlayerID.add(human);
     }
 
     public ArrayList<Rectangle> getHighlight() {

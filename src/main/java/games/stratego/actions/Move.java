@@ -1,6 +1,8 @@
 package games.stratego.actions;
 
 import core.actions.AbstractAction;
+import games.stratego.StrategoGameState;
+import games.stratego.components.Piece;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -8,11 +10,9 @@ import java.util.Objects;
 public abstract class Move extends AbstractAction {
 
     protected final int movedPieceID;
-    protected final int[] destinationCoordinate;
 
-    protected Move(int movedPieceID, int[] destinationCoordinate) {
+    protected Move(int movedPieceID) {
         this.movedPieceID = movedPieceID;
-        this.destinationCoordinate = destinationCoordinate;
     }
 
     @Override
@@ -20,21 +20,24 @@ public abstract class Move extends AbstractAction {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Move move = (Move) o;
-        return movedPieceID == move.movedPieceID && Arrays.equals(destinationCoordinate, move.destinationCoordinate);
+        return movedPieceID == move.movedPieceID;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(movedPieceID);
-        result = 31 * result + Arrays.hashCode(destinationCoordinate);
-        return result;
+        return Objects.hash(movedPieceID);
     }
 
     public int getMovedPieceID() {
         return movedPieceID;
     }
 
-    public int[] getDestinationCoordinate() {
-        return destinationCoordinate;
+    public int[] from(StrategoGameState gs) {
+        Piece movedPiece = (Piece) gs.getComponentById(movedPieceID);
+        return movedPiece.getPiecePosition();
     }
+    public abstract int[] to(StrategoGameState gs);
+
+    public abstract String getPOString(StrategoGameState gs);
+
 }
