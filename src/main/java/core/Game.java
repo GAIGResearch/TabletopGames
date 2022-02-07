@@ -6,6 +6,9 @@ import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
+import gui.AbstractGUIManager;
+import gui.GUI;
+import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
@@ -15,9 +18,8 @@ import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import javax.swing.Timer;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.GameEvents;
@@ -87,12 +89,11 @@ public class Game {
      * @param gameToPlay          - game to play
      * @param players             - list of players for the game
      * @param seed                - random seed for the game
-     * @param ac                  - Action Controller object allowing GUI interaction. If null, runs without visuals.
      * @param randomizeParameters - if true, parameters are randomized for each run of each game (if possible).
      * @return - game instance created for the run
      */
-    public static Game runOne(GameType gameToPlay, List<AbstractPlayer> players, long seed, ActionController ac,
-                              boolean randomizeParameters, List<IGameListener> listeners) {
+    public static Game runOne(GameType gameToPlay, List<AbstractPlayer> players, long seed,
+                              boolean randomizeParameters, List<IGameListener> listeners, ActionController ac) {
         // Creating game instance (null if not implemented)
         Game game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
@@ -108,13 +109,54 @@ public class Game {
             // Reset game instance, passing the players for this game
             game.reset(players);
 
-            // Run!
-            game.run();
+            if (ac != null) {
+                // We spawn the GUI off in another thread
+
+                GUI frame = new GUI();
+                GamePanel gamePanel = new GamePanel();
+                frame.setContentPane(gamePanel);
+
+                AbstractGUIManager gui = gameToPlay.createGUIManager(gamePanel, game, ac);
+
+                frame.setFrameProperties();
+                frame.validate();
+                frame.pack();
+
+                Timer guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, event -> game.updateGUI(gui, frame));
+                guiUpdater.start();
+
+                game.run();
+                guiUpdater.stop();
+                // and update GUI to final game state
+                game.updateGUI(gui, frame);
+
+            } else {
+
+                // Run!
+                game.run();
+            }
         } else {
             System.out.println("Error game: " + gameToPlay);
         }
 
         return game;
+    }
+
+
+    /**
+     * Performs GUI update.
+     *
+     * @param gui - gui to update.
+     */
+    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
+        // synchronise on game to avoid updating GUI in middle of action being taken
+        AbstractGameState gameState = getGameState();
+        int currentPlayer = gameState.getCurrentPlayer();
+        AbstractPlayer player = getPlayers().get(currentPlayer);
+        if (gui != null) {
+            gui.update(player, gameState, isHumanToMove(), new HashMap<>());
+            frame.repaint();
+        }
     }
 
     /**
@@ -124,12 +166,11 @@ public class Game {
      * @param players             - list of players for the game.
      * @param nRepetitions        - number of repetitions of each game.
      * @param seed                - random seed for all games. If null, a new random seed is used for each game.
-     * @param ac                  - action controller for GUI interactions, null if playing without visuals.
      * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
      * @param detailedStatistics  - if true, detailed statistics are printed, otherwise just average of wins
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
-                               int nRepetitions, ActionController ac, boolean randomizeParameters,
+                               int nRepetitions, boolean randomizeParameters,
                                boolean detailedStatistics, List<IGameListener> listeners) {
         int nPlayers = players.size();
 
@@ -159,7 +200,7 @@ public class Game {
                 Long s = seed;
                 if (s == null) s = System.currentTimeMillis();
                 s += offset;
-                game = runOne(gt, players, s, ac, randomizeParameters, listeners);
+                game = runOne(gt, players, s, randomizeParameters, listeners, null);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                     offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
@@ -227,7 +268,7 @@ public class Game {
 
             // Play n repetitions of this game and record player results
             for (int i = 0; i < nRepetitions; i++) {
-                Game game = runOne(gt, players, seeds[i], ac, randomizeParameters, listeners);
+                Game game = runOne(gt, players, seeds[i], randomizeParameters, listeners, null);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                 }
@@ -268,7 +309,10 @@ public class Game {
     }
 
     /**
-     * Main class used to run the framework. The user must specify:
+     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
+     * some games for some screen sizes due to the vagaries of Java Swing...
+     * <p>
+     * Test class used to run a specific game. The user must specify:
      * 1. Action controller for GUI interactions / null for no visuals
      * 2. Random seed for the game
      * 3. Players for the game
@@ -276,14 +320,15 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
+        String gameType = Utils.getArg(args, "game", "LoveLetter");
+        boolean useGUI = Utils.getArg(args, "gui", false);
+        int playerCount = Utils.getArg(args, "nPlayers", 2);
+        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+
         ActionController ac = new ActionController(); //null;
 
-        /* 2. Game seed */
-        long seed = System.currentTimeMillis(); //0;
-
-        /* 3. Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>();
+        /* Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
 
         MCTSParams params1 = new MCTSParams();
 
@@ -298,15 +343,8 @@ public class Game {
 //        players.add(new FirstActionPlayer());
 //        players.add(new HumanConsolePlayer());
 
-        /* 4. Run! */
-        runOne(TicTacToe, players, seed, ac, false, null);
-
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.remove(LoveLetter);
-//        games.remove(Pandemic);
-//        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, null, false, false, null);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, null, false, false, null);
+        /* Run! */
+        runOne(GameType.valueOf(gameType), players, seed, false, null, useGUI ? ac : null);
 
     }
 

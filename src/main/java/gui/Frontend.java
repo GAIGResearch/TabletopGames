@@ -294,9 +294,7 @@ public class Frontend extends GUI {
                     // pack();
                     setFrameProperties();
 
-                    guiUpdater = new Timer((int) coreParameters.frameSleepMS, event -> {
-                        updateGUI(gui, frame);
-                    });
+                    guiUpdater = new Timer((int) coreParameters.frameSleepMS, event -> updateGUI(gui, frame));
                     guiUpdater.start();
                     // if Pause button has been pressed, then pause at the start so we can track all actions
                     gameRunning.setPaused(paused);
@@ -473,12 +471,6 @@ public class Frontend extends GUI {
             gameRunning.notifyAll();
 
         }
-        try {
-            Thread.sleep(gameRunning.getCoreParameters().frameSleepMS);
-        } catch (Exception e) {
-            System.out.println("EXCEPTION " + e);
-        }
-
     }
 
     private HashMap<String, JComboBox<Object>> createParameterWindow(List<String> paramNames, TunableParameters pp, JFrame frame) {
