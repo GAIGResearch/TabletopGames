@@ -50,6 +50,7 @@ public class Game {
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
 
     private boolean pause, stop;
+    private boolean debug = false;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -374,10 +375,28 @@ public class Game {
 
         while (gameState.isNotTerminal() && !stop) {
 
-            int activePlayer = gameState.getCurrentPlayer();
-            AbstractPlayer currentPlayer = players.get(activePlayer);
+            synchronized (this) {
 
-            if (isHumanToMove() || !pause) {
+                // Now synchronized with possible intervention from the GUI
+                // This is only relevant if the game has been paused...so should not affect
+                // performance in non-GUI situations
+                while (pause && !isHumanToMove()) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        // Meh.
+                    }
+                }
+
+                int activePlayer = gameState.getCurrentPlayer();
+                if (debug) System.out.printf("Entered synchronized block in Game for player %s%n", activePlayer);
+
+                AbstractPlayer currentPlayer = players.get(activePlayer);
+
+                // we check via a volatile boolean, otherwise GUI button presses do not trigger this
+                // as the JVM hoists pause and isHumanToMove() ouside the while loop on the basis that
+                // they cannot be changed in this thread....
+
 
                 /*
                  * The Game is responsible for tracking the players and the current game state
@@ -407,6 +426,7 @@ public class Game {
 
                 if (gameState.isNotTerminal()) {
 
+                    if (debug) System.out.printf("Invoking oneAction from Game for player %d%n", activePlayer);
                     oneAction();
 
                 } else {
@@ -418,7 +438,9 @@ public class Game {
                         firstEnd = false;
                     }
                 }
+
             }
+            if (debug) System.out.println("Exiting synchronized block in Game");
         }
 
         if (firstEnd) {
@@ -439,6 +461,7 @@ public class Game {
         // This is the next player to be asked for a decision
         int activePlayer = gameState.getCurrentPlayer();
         AbstractPlayer currentPlayer = players.get(activePlayer);
+        if (debug) System.out.printf("Starting oneAction for player %s%n", activePlayer);
 
         // Get player observation, and time how long it takes
         double s = System.nanoTime();
@@ -474,6 +497,7 @@ public class Game {
             } else {
                 // Get action from player, and time it
                 s = System.nanoTime();
+                if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
                 agentTime += (System.nanoTime() - s);
                 nDecisions++;
@@ -483,8 +507,11 @@ public class Game {
                 action = null;
             }
             // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
-            AbstractAction finalAction = action;
-            listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
+            // this includes a full copy of the state, so we turn off during competitions
+            if (!getCoreParameters().competitionMode) {
+                AbstractAction finalAction = action;
+                listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState.copy(), finalAction));
+            }
         } else {
             currentPlayer.registerUpdatedObservation(observation);
         }
@@ -514,9 +541,12 @@ public class Game {
 
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
         // (such as the next player)
-        AbstractAction finalAction1 = action;
-        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_TAKEN, gameState, finalAction1));
-
+        // This does however send a perfect copy of the game state, so we need to turn this off in Competitions!
+        if (!getCoreParameters().competitionMode) {
+            AbstractAction finalAction1 = action;
+            listeners.forEach(l -> l.onEvent(GameEvents.ACTION_TAKEN, gameState.copy(), finalAction1.copy()));
+        }
+        if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
     }
 
     /**

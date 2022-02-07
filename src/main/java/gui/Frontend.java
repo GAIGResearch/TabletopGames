@@ -243,8 +243,15 @@ public class Frontend extends GUI {
         pauseGame.addActionListener(e -> {
             paused = !paused;
             pauseGame.setText(paused ? "Resume" : "Pause");
-            if (gameRunning != null)
+            if (gameRunning != null) {
                 gameRunning.setPaused(paused);
+                if (!paused && !gameRunning.isHumanToMove()) {
+                    // in this case we need to notify the game loop to get going again
+                    synchronized (gameRunning) {
+                        gameRunning.notifyAll();
+                    }
+                }
+            }
             oneAction.setEnabled(paused && started);
         });
 
@@ -330,11 +337,15 @@ public class Frontend extends GUI {
 
 
         oneAction.addActionListener(e -> {
-            if (gameRunning != null && !gameRunning.isHumanToMove()) {
-                // if the thread is running then we pause it first
+            if (paused && gameRunning != null && !gameRunning.isHumanToMove()) {
+                // if the thread is running and paused (or human to move)
                 // and then take a single action
                 // (as long as it is not a human to move...as in this case the GUI is already in control)
-                gameRunning.oneAction();
+                System.out.printf("Invoking oneAction from FrontEnd for player %d%n", gameRunning.getGameState().getCurrentPlayer());
+                synchronized (gameRunning) {
+                    gameRunning.oneAction();
+                    gameRunning.notifyAll();
+                }
             }
         });
 
@@ -408,17 +419,16 @@ public class Frontend extends GUI {
             @Override
             public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
                 if (type == CoreConstants.GameEvents.ACTION_TAKEN) {
-                    updateSampleActions();
+                    updateSampleActions(state);
                 }
             }
         });
         // and then do this at the start of the game
-        updateSampleActions();
+        updateSampleActions(gameRunning.getGameState());
     }
 
-    private void updateSampleActions() {
-        if (showAll && !gameRunning.isHumanToMove()) {
-            AbstractGameState state = gameRunning.getGameState();
+    private void updateSampleActions(AbstractGameState state) {
+        if (showAll && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
             int nextPlayerID = state.getCurrentPlayer();
             AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
             sampledActionsForNextDecision.clear();
@@ -431,26 +441,44 @@ public class Frontend extends GUI {
         }
     }
 
+
     /**
      * Performs GUI update.
      *
      * @param gui - gui to update.
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        AbstractGameState gameState = gameRunning.getGameState();
-        int currentPlayer = gameState.getCurrentPlayer();
-        AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
-        if (gui != null) {
-            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, sampledActionsForNextDecision);
-            if (!gameRunning.isHumanToMove())
-                humanInputQueue.reset(); // clear out any actions clicked before their turn
-            frame.repaint();
-            try {
-                Thread.sleep(gameRunning.getCoreParameters().frameSleepMS);
-            } catch (Exception e) {
-                System.out.println("EXCEPTION " + e);
+        // synchronise on game to avoid updating GUI in middle of action being taken
+        synchronized (gameRunning) {
+            AbstractGameState gameState = gameRunning.getGameState();
+            int currentPlayer = gameState.getCurrentPlayer();
+            AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
+            if (gui != null) {
+                gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, sampledActionsForNextDecision);
+                if (!gameRunning.isHumanToMove() && paused && showAll) {
+                    // in this case we allow a human to override an AI decision
+                    try {
+                        if (humanInputQueue.hasAction()) {
+                            gameRunning.getForwardModel().next(gameState, humanInputQueue.getAction());
+                        }
+                    } catch (InterruptedException e) {
+                        // Really shouldn't happen as we checked first
+                        e.printStackTrace();
+                    }
+                }
+                if (!gameRunning.isHumanToMove())
+                    humanInputQueue.reset(); // clear out any actions clicked before their turn
+                frame.repaint();
             }
+            gameRunning.notifyAll();
+
         }
+        try {
+            Thread.sleep(gameRunning.getCoreParameters().frameSleepMS);
+        } catch (Exception e) {
+            System.out.println("EXCEPTION " + e);
+        }
+
     }
 
     private HashMap<String, JComboBox<Object>> createParameterWindow(List<String> paramNames, TunableParameters pp, JFrame frame) {

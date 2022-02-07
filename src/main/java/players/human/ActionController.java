@@ -10,6 +10,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class ActionController {
 
+    private boolean debug = true;
     private BlockingQueue<AbstractAction> actionsQueue;
     private AbstractAction lastActionPlayed;
 
@@ -18,13 +19,15 @@ public class ActionController {
     }
 
     public void addAction(AbstractAction candidate) {
-        if (candidate != null && actionsQueue.isEmpty()) {
+        if (candidate != null && actionsQueue.remainingCapacity() > 0) {
             actionsQueue.add(candidate);
+            if (debug) System.out.printf("Action %s added to ActionController%n", candidate.toString());
         }
     }
 
     public AbstractAction getAction() throws InterruptedException {
         lastActionPlayed = actionsQueue.take();
+        if (debug) System.out.printf("Action %s taken via getAction()%n", lastActionPlayed.toString());
         return lastActionPlayed;
     }
 
@@ -39,6 +42,8 @@ public class ActionController {
     }
 
     public void reset() {
+        if (debug && actionsQueue.size() > 0)
+            System.out.printf("Action Queue being cleared with %d actions%n", actionsQueue.size());
         actionsQueue.clear();
     }
 
@@ -48,5 +53,9 @@ public class ActionController {
 
     public void setLastActionPlayed(AbstractAction a) {
         lastActionPlayed = a;
+    }
+
+    public boolean hasAction() {
+        return !actionsQueue.isEmpty();
     }
 }
