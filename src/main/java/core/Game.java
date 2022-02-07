@@ -18,12 +18,13 @@ import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
-import javax.swing.Timer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.GameEvents;
-import static games.GameType.TicTacToe;
 
 
 public class Game {
@@ -140,23 +141,6 @@ public class Game {
         }
 
         return game;
-    }
-
-
-    /**
-     * Performs GUI update.
-     *
-     * @param gui - gui to update.
-     */
-    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        // synchronise on game to avoid updating GUI in middle of action being taken
-        AbstractGameState gameState = getGameState();
-        int currentPlayer = gameState.getCurrentPlayer();
-        AbstractPlayer player = getPlayers().get(currentPlayer);
-        if (gui != null) {
-            gui.update(player, gameState, isHumanToMove(), new HashMap<>());
-            frame.repaint();
-        }
     }
 
     /**
@@ -308,6 +292,62 @@ public class Game {
         }
     }
 
+    /**
+     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
+     * some games for some screen sizes due to the vagaries of Java Swing...
+     * <p>
+     * Test class used to run a specific game. The user must specify:
+     * 1. Action controller for GUI interactions / null for no visuals
+     * 2. Random seed for the game
+     * 3. Players for the game
+     * 4. Mode of running
+     * and then run this class.
+     */
+    public static void main(String[] args) {
+        String gameType = Utils.getArg(args, "game", "LoveLetter");
+        boolean useGUI = Utils.getArg(args, "gui", false);
+        int playerCount = Utils.getArg(args, "nPlayers", 2);
+        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+
+        ActionController ac = new ActionController(); //null;
+
+        /* Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
+
+        MCTSParams params1 = new MCTSParams();
+
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new MCTSPlayer());
+//        players.add(new MCTSPlayer(params1));
+        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
+        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanConsolePlayer());
+//        players.add(new FirstActionPlayer());
+//        players.add(new HumanConsolePlayer());
+
+        /* Run! */
+        runOne(GameType.valueOf(gameType), players, seed, false, null, useGUI ? ac : null);
+
+    }
+
+    /**
+     * Performs GUI update.
+     *
+     * @param gui - gui to update.
+     */
+    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
+        // synchronise on game to avoid updating GUI in middle of action being taken
+        AbstractGameState gameState = getGameState();
+        int currentPlayer = gameState.getCurrentPlayer();
+        AbstractPlayer player = getPlayers().get(currentPlayer);
+        if (gui != null) {
+            gui.update(player, gameState, isHumanToMove(), new HashMap<>());
+            frame.repaint();
+        }
+    }
+
     public final void reset(List<AbstractPlayer> players) {
         reset(players, gameState.gameParameters.randomSeed);
     }
@@ -378,14 +418,13 @@ public class Game {
                 // Now synchronized with possible intervention from the GUI
                 // This is only relevant if the game has been paused...so should not affect
                 // performance in non-GUI situations
-                while (pause && !isHumanToMove()) {
-                    try {
+                try {
+                    while (pause && !isHumanToMove()) {
                         wait();
-                    } catch (InterruptedException e) {
-                        // Meh.
                     }
+                } catch (InterruptedException e) {
+                    // Meh.
                 }
-
                 int activePlayer = gameState.getCurrentPlayer();
                 if (debug) System.out.printf("Entered synchronized block in Game for player %s%n", activePlayer);
 
@@ -437,10 +476,9 @@ public class Game {
                     }
                 }
 
+                if (debug) System.out.println("Exiting synchronized block in Game");
             }
-            if (debug) System.out.println("Exiting synchronized block in Game");
         }
-
         if (firstEnd) {
             if (gameState.coreGameParameters.verbose) {
                 System.out.println("Ended");
@@ -732,47 +770,6 @@ public class Game {
     @Override
     public String toString() {
         return gameType.toString();
-    }
-
-
-    /**
-     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
-     * some games for some screen sizes due to the vagaries of Java Swing...
-     * <p>
-     * Test class used to run a specific game. The user must specify:
-     * 1. Action controller for GUI interactions / null for no visuals
-     * 2. Random seed for the game
-     * 3. Players for the game
-     * 4. Mode of running
-     * and then run this class.
-     */
-    public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "LoveLetter");
-        boolean useGUI = Utils.getArg(args, "gui", false);
-        int playerCount = Utils.getArg(args, "nPlayers", 2);
-        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
-
-        ActionController ac = new ActionController(); //null;
-
-        /* Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
-
-        MCTSParams params1 = new MCTSParams();
-
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new MCTSPlayer());
-//        players.add(new MCTSPlayer(params1));
-        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-//        players.add(new FirstActionPlayer());
-//        players.add(new HumanConsolePlayer());
-
-        /* Run! */
-        runOne(GameType.valueOf(gameType), players, seed, false, null, useGUI ? ac : null);
-
     }
 
 }
