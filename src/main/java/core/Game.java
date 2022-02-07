@@ -308,46 +308,6 @@ public class Game {
         }
     }
 
-    /**
-     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
-     * some games for some screen sizes due to the vagaries of Java Swing...
-     * <p>
-     * Test class used to run a specific game. The user must specify:
-     * 1. Action controller for GUI interactions / null for no visuals
-     * 2. Random seed for the game
-     * 3. Players for the game
-     * 4. Mode of running
-     * and then run this class.
-     */
-    public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "LoveLetter");
-        boolean useGUI = Utils.getArg(args, "gui", false);
-        int playerCount = Utils.getArg(args, "nPlayers", 2);
-        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
-
-        ActionController ac = new ActionController(); //null;
-
-        /* Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
-
-        MCTSParams params1 = new MCTSParams();
-
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new MCTSPlayer());
-//        players.add(new MCTSPlayer(params1));
-        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-//        players.add(new FirstActionPlayer());
-//        players.add(new HumanConsolePlayer());
-
-        /* Run! */
-        runOne(GameType.valueOf(gameType), players, seed, false, null, useGUI ? ac : null);
-
-    }
-
     public final void reset(List<AbstractPlayer> players) {
         reset(players, gameState.gameParameters.randomSeed);
     }
@@ -773,4 +733,46 @@ public class Game {
     public String toString() {
         return gameType.toString();
     }
+
+
+    /**
+     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
+     * some games for some screen sizes due to the vagaries of Java Swing...
+     * <p>
+     * Test class used to run a specific game. The user must specify:
+     * 1. Action controller for GUI interactions / null for no visuals
+     * 2. Random seed for the game
+     * 3. Players for the game
+     * 4. Mode of running
+     * and then run this class.
+     */
+    public static void main(String[] args) {
+        String gameType = Utils.getArg(args, "game", "LoveLetter");
+        boolean useGUI = Utils.getArg(args, "gui", false);
+        int playerCount = Utils.getArg(args, "nPlayers", 2);
+        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+
+        ActionController ac = new ActionController(); //null;
+
+        /* Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
+
+        MCTSParams params1 = new MCTSParams();
+
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new MCTSPlayer());
+//        players.add(new MCTSPlayer(params1));
+        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
+        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanConsolePlayer());
+//        players.add(new FirstActionPlayer());
+//        players.add(new HumanConsolePlayer());
+
+        /* Run! */
+        runOne(GameType.valueOf(gameType), players, seed, false, null, useGUI ? ac : null);
+
+    }
+
 }
