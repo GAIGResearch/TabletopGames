@@ -14,6 +14,7 @@ import players.human.HumanGUIPlayer;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
+import java.util.HashMap;
 
 public class PrototypeGUIManager extends AbstractGUIManager {
     JComponent view;
@@ -96,7 +97,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
                 view = new AreaView(gameState.getAllComponents(), width, height);
             }
             if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
+                updateActionButtons(player, gameState, new HashMap<>());
             }
         }
         parent.repaint();

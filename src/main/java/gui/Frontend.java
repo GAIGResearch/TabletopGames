@@ -1,24 +1,32 @@
 package gui;
 
 import core.*;
+import core.actions.AbstractAction;
+import core.interfaces.IGameListener;
 import evaluation.TunableParameters;
 import games.GameType;
 import players.PlayerParameters;
 import players.PlayerType;
 import players.human.ActionController;
 
+import javax.swing.Timer;
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Frontend extends GUI {
     private final int nMaxPlayers = 20;
     private final int defaultNPlayers = 2;
+    private final int actionsToSample = 20;
+    private final Map<core.actions.AbstractAction, Long> sampledActionsForNextDecision = new HashMap<>();
+    Timer guiUpdater;
     private Thread gameThread;
     private Game gameRunning;
+    private boolean showAll, paused, started;
+    private ActionController humanInputQueue;
 
     public Frontend() {
 
@@ -226,23 +234,41 @@ public class Frontend extends GUI {
         GamePanel gamePanel = new GamePanel();
         gamePanel.setVisible(false);
 
-        // Play button, runs game in separate thread to allow for proper updates
-
         JPanel gameControlButtons = new JPanel();
-        JButton startGame = new JButton("Play!");
-        startGame.addActionListener(e -> {
+        // Pause game button
+        JButton oneAction = new JButton("Next Action");
+        oneAction.setToolTipText("Use to take the next AI action when the game is Paused.");
+        oneAction.setEnabled(paused && started);
 
+        JButton pauseGame = new JButton("Pause");
+        pauseGame.setToolTipText("Toggles pause on and off. When Paused you can use NextAction to move through AI turns.");
+        pauseGame.addActionListener(e -> {
+            paused = !paused;
+            pauseGame.setText(paused ? "Resume" : "Pause");
+            if (gameRunning != null) {
+                gameRunning.setPaused(paused);
+                if (!paused && !gameRunning.isHumanToMove()) {
+                    // in this case we need to notify the game loop to get going again
+                    synchronized (gameRunning) {
+                        gameRunning.notifyAll();
+                    }
+                }
+            }
+            oneAction.setEnabled(paused && started);
+        });
+
+        // Play button, runs game in separate thread to allow for proper updates
+        java.awt.event.ActionListener startTrigger = e -> {
             GUI frame = this;
             Runnable runnable = () -> {
-
-                ActionController ac = new ActionController();
-                if (visualOptions.getSelectedIndex() == 0) ac = null;
+                humanInputQueue = (visualOptions.getSelectedIndex() == 0) ? null : new ActionController();
                 long seed = Long.parseLong(seedOption.getText());
                 ArrayList<AbstractPlayer> players = new ArrayList<>();
                 int nP = Integer.parseInt(nPlayerField.getText());
                 String[] playerNames = new String[nP];
                 for (int i = 0; i < nP; i++) {
-                    AbstractPlayer player = PlayerType.valueOf(playerOptionsChoice[i].getItemAt(playerOptionsChoice[i].getSelectedIndex())).createPlayerInstance(seed, ac, playerParameters[i]);
+                    AbstractPlayer player = PlayerType.valueOf(playerOptionsChoice[i].getItemAt(playerOptionsChoice[i].getSelectedIndex()))
+                            .createPlayerInstance(seed, humanInputQueue, playerParameters[i]);
                     playerNames[i] = player.toString();
                     players.add(player);
                 }
@@ -256,7 +282,6 @@ public class Frontend extends GUI {
                 }
                 gameRunning = gameType.createGameInstance(players.size(), params);
                 if (gameRunning != null) {
-
                     // Reset game instance, passing the players for this game
                     gameRunning.reset(players);
 
@@ -266,51 +291,76 @@ public class Frontend extends GUI {
                     }
                     gameRunning.setCoreParameters(coreParameters);
 
-                    AbstractGUIManager gui = null;
-                    if (ac != null) {
-                        // Create GUI (null if not implemented; running without visuals)
-                        gui = gameType.createGUIManager(gamePanel, gameRunning, ac);
-                    }
-                    revalidate();
-                    pack();
-                    gameRunning.run(gui, frame);
-                    System.out.println("Game over: " + Arrays.toString(gameRunning.getGameState().getPlayerResults()));
+                    AbstractGUIManager gui = (humanInputQueue != null) ? gameType.createGUIManager(gamePanel, gameRunning, humanInputQueue) : null;
+                    // revalidate();
+                    // pack();
+                    setFrameProperties();
 
+                    guiUpdater = new Timer((int) coreParameters.frameSleepMS, event -> updateGUI(gui, frame));
+                    guiUpdater.start();
+                    // if Pause button has been pressed, then pause at the start so we can track all actions
+                    gameRunning.setPaused(paused);
+                    // set up sample for the first action
+                    listenForDecisions();
+                    gameRunning.run();
+                    System.out.println("Game over: " + Arrays.toString(gameRunning.getGameState().getPlayerResults()));
+                    guiUpdater.stop();
+                    // and update GUI to final game state
+                    updateGUI(gui, frame);
                 }
             };
-
             gameThread = new Thread(runnable);
             gameThread.start();
-        });
-        gameControlButtons.add(startGame);
+        };
 
-        // Stop game button
-        JButton stopGame = new JButton("Stop");
-        stopGame.addActionListener(e -> {
+        java.awt.event.ActionListener stopTrigger = e -> {
             if (gameRunning != null) {
                 gameRunning.setStopped(true);
+                if (guiUpdater != null)
+                    guiUpdater.stop();
                 gameThread.interrupt();
+                guiUpdater.stop();
             }
-        });
-        gameControlButtons.add(stopGame);
-        gameControlButtons.add(new JSeparator());
+        };
 
-        // Pause game button
-        JButton pauseGame = new JButton("Pause");
-        pauseGame.addActionListener(e -> {
-            if (gameRunning != null) {
-                gameRunning.setPaused(true);
+        JButton startGame = new JButton("Play!");
+        startGame.setToolTipText("Starts a game (if none running), or Stops a runing game.");
+        startGame.addActionListener(e -> {
+            started = !started;
+            if (started) {
+                startTrigger.actionPerformed(e);
+            } else {
+                stopTrigger.actionPerformed(e);
+            }
+            oneAction.setEnabled(paused && started);
+            startGame.setText(started ? "Stop!" : "Play!");
+        });
+
+
+        oneAction.addActionListener(e -> {
+            if (paused && gameRunning != null && !gameRunning.isHumanToMove()) {
+                // if the thread is running and paused (or human to move)
+                // and then take a single action
+                // (as long as it is not a human to move...as in this case the GUI is already in control)
+                System.out.printf("Invoking oneAction from FrontEnd for player %d%n", gameRunning.getGameState().getCurrentPlayer());
+                synchronized (gameRunning) {
+                    gameRunning.oneAction();
+                    gameRunning.notifyAll();
+                }
             }
         });
+
+        JButton allActions = new JButton("Show All!");
+        allActions.setToolTipText("Set to either show actions for all players on their turn (All), or just those of a human player (Self).");
+        allActions.addActionListener(e -> {
+            showAll = !showAll;
+            allActions.setText(showAll ? "Show Self" : "Show All");
+        });
+
+        gameControlButtons.add(startGame);
         gameControlButtons.add(pauseGame);
-        // Resume game button
-        JButton resumeGame = new JButton("Resume");
-        resumeGame.addActionListener(e -> {
-            if (gameRunning != null) {
-                gameRunning.setPaused(false);
-            }
-        });
-        gameControlButtons.add(resumeGame);
+        gameControlButtons.add(oneAction);
+        gameControlButtons.add(allActions);
 
         // todo tournaments, game report, player report etc
 
@@ -356,6 +406,72 @@ public class Frontend extends GUI {
         setFrameProperties();
     }
 
+    public static void main(String[] args) {
+        new Frontend();
+    }
+
+    private void listenForDecisions() {
+        // add a listener to detect every time an action has been taken
+        gameRunning.addListener(new IGameListener() {
+            @Override
+            public void onGameEvent(CoreConstants.GameEvents type, Game game) {
+                // Do nothing
+            }
+
+            @Override
+            public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
+                if (type == CoreConstants.GameEvents.ACTION_TAKEN) {
+                    updateSampleActions(state);
+                }
+            }
+        });
+        // and then do this at the start of the game
+        updateSampleActions(gameRunning.getGameState());
+    }
+
+    private void updateSampleActions(AbstractGameState state) {
+        if (showAll && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
+            int nextPlayerID = state.getCurrentPlayer();
+            AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
+            sampledActionsForNextDecision.clear();
+            Map<core.actions.AbstractAction, Long> temp = IntStream.range(0, actionsToSample).mapToObj(i -> {
+                AbstractGameState copyState = state.copy(nextPlayerID);
+                List<core.actions.AbstractAction> availableActions = gameRunning.getForwardModel().computeAvailableActions(copyState);
+                return nextPlayer.getAction(copyState, availableActions);
+            }).collect(Collectors.groupingBy(action -> action, Collectors.counting()));
+            sampledActionsForNextDecision.putAll(temp);
+        }
+    }
+
+
+    /**
+     * Performs GUI update.
+     *
+     * @param gui - gui to update.
+     */
+    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
+        AbstractGameState gameState = gameRunning.getGameState();
+        int currentPlayer = gameState.getCurrentPlayer();
+        AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
+        if (gui != null && gameState.isNotTerminal()) {
+            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, sampledActionsForNextDecision);
+            if (!gameRunning.isHumanToMove() && paused && showAll) {
+                // in this case we allow a human to override an AI decision
+                try {
+                    if (humanInputQueue.hasAction()) {
+                        gameRunning.getForwardModel().next(gameState, humanInputQueue.getAction());
+                    }
+                } catch (InterruptedException e) {
+                    // Really shouldn't happen as we checked first
+                    e.printStackTrace();
+                }
+            }
+            if (!gameRunning.isHumanToMove())
+                humanInputQueue.reset(); // clear out any actions clicked before their turn
+            frame.repaint();
+        }
+    }
+
     private HashMap<String, JComboBox<Object>> createParameterWindow(List<String> paramNames, TunableParameters pp, JFrame frame) {
         HashMap<String, JComboBox<Object>> paramValueOptions = new HashMap<>();
         frame.getContentPane().removeAll();
@@ -370,10 +486,6 @@ public class Frontend extends GUI {
             frame.getContentPane().add(paramPanel);
         }
         return paramValueOptions;
-    }
-
-    public static void main(String[] args) {
-        new Frontend();
     }
 
 }
