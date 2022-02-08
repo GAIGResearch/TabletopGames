@@ -505,11 +505,8 @@ public class Game {
                 action = null;
             }
             // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
-            // this includes a full copy of the state, so we turn off during competitions
-            if (!getCoreParameters().competitionMode) {
-                AbstractAction finalAction = action;
-                listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState.copy(), finalAction));
-            }
+            AbstractAction finalAction = action;
+            listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
         } else {
             currentPlayer.registerUpdatedObservation(observation);
         }
@@ -539,11 +536,8 @@ public class Game {
 
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
         // (such as the next player)
-        // This does however send a perfect copy of the game state, so we need to turn this off in Competitions!
-        if (!getCoreParameters().competitionMode) {
-            AbstractAction finalAction1 = action;
-            listeners.forEach(l -> l.onEvent(GameEvents.ACTION_TAKEN, gameState.copy(), finalAction1.copy()));
-        }
+        AbstractAction finalAction1 = action;
+        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_TAKEN, gameState.copy(), finalAction1.copy()));
         if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
     }
 
