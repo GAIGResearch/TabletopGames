@@ -237,9 +237,11 @@ public class Frontend extends GUI {
         JPanel gameControlButtons = new JPanel();
         // Pause game button
         JButton oneAction = new JButton("Next Action");
+        oneAction.setToolTipText("Use to take the next AI action when the game is Paused.");
         oneAction.setEnabled(paused && started);
 
         JButton pauseGame = new JButton("Pause");
+        pauseGame.setToolTipText("Toggles pause on and off. When Paused you can use NextAction to move through AI turns.");
         pauseGame.addActionListener(e -> {
             paused = !paused;
             pauseGame.setText(paused ? "Resume" : "Pause");
@@ -322,6 +324,7 @@ public class Frontend extends GUI {
         };
 
         JButton startGame = new JButton("Play!");
+        startGame.setToolTipText("Starts a game (if none running), or Stops a runing game.");
         startGame.addActionListener(e -> {
             started = !started;
             if (started) {
@@ -348,6 +351,7 @@ public class Frontend extends GUI {
         });
 
         JButton allActions = new JButton("Show All!");
+        allActions.setToolTipText("Set to either show actions for all players on their turn (All), or just those of a human player (Self).");
         allActions.addActionListener(e -> {
             showAll = !showAll;
             allActions.setText(showAll ? "Show Self" : "Show All");
