@@ -21,13 +21,13 @@ public class ActionController {
     public void addAction(AbstractAction candidate) {
         if (candidate != null && actionsQueue.remainingCapacity() > 0) {
             actionsQueue.add(candidate);
-            if (debug) System.out.printf("Action %s added to ActionController%n", candidate.toString());
+            if (debug) System.out.printf("Action %s added to ActionController%n", candidate);
         }
     }
 
     public AbstractAction getAction() throws InterruptedException {
         lastActionPlayed = actionsQueue.take();
-        if (debug) System.out.printf("Action %s taken via getAction()%n", lastActionPlayed.toString());
+        if (debug) System.out.printf("Action %s taken via getAction()%n", lastActionPlayed);
         return lastActionPlayed;
     }
 

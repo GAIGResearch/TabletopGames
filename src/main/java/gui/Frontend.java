@@ -446,30 +446,25 @@ public class Frontend extends GUI {
      * @param gui - gui to update.
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        // synchronise on game to avoid updating GUI in middle of action being taken
-        synchronized (gameRunning) {
-            AbstractGameState gameState = gameRunning.getGameState();
-            int currentPlayer = gameState.getCurrentPlayer();
-            AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
-            if (gui != null) {
-                gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, sampledActionsForNextDecision);
-                if (!gameRunning.isHumanToMove() && paused && showAll) {
-                    // in this case we allow a human to override an AI decision
-                    try {
-                        if (humanInputQueue.hasAction()) {
-                            gameRunning.getForwardModel().next(gameState, humanInputQueue.getAction());
-                        }
-                    } catch (InterruptedException e) {
-                        // Really shouldn't happen as we checked first
-                        e.printStackTrace();
+        AbstractGameState gameState = gameRunning.getGameState();
+        int currentPlayer = gameState.getCurrentPlayer();
+        AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
+        if (gui != null && gameState.isNotTerminal()) {
+            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, sampledActionsForNextDecision);
+            if (!gameRunning.isHumanToMove() && paused && showAll) {
+                // in this case we allow a human to override an AI decision
+                try {
+                    if (humanInputQueue.hasAction()) {
+                        gameRunning.getForwardModel().next(gameState, humanInputQueue.getAction());
                     }
+                } catch (InterruptedException e) {
+                    // Really shouldn't happen as we checked first
+                    e.printStackTrace();
                 }
-                if (!gameRunning.isHumanToMove())
-                    humanInputQueue.reset(); // clear out any actions clicked before their turn
-                frame.repaint();
             }
-            gameRunning.notifyAll();
-
+            if (!gameRunning.isHumanToMove())
+                humanInputQueue.reset(); // clear out any actions clicked before their turn
+            frame.repaint();
         }
     }
 

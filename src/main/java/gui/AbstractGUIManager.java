@@ -79,8 +79,10 @@ public abstract class AbstractGUIManager {
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
-                if (!sampledActions.isEmpty()) {
+                if (totalActionCount > 0) {
                     double percentChosen = sampledActions.getOrDefault(actions.get(i), 0L).doubleValue() / totalActionCount;
+                    if (percentChosen < 0.0) percentChosen = 0.0;
+                    if (percentChosen > 1.0) percentChosen = 1.0;
                     int[] targetRGB = new int[]{60, 179, 113};
                     // percentChosen of 1.0 gives us the target colour (green), and 0.0 gives White
                     Color background = new Color(
