@@ -6,12 +6,10 @@ import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.turnorders.SimultaneousTurnOrder;
+import core.turnorders.StandardTurnOrder;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import kotlin.Triple;
-import players.PlayerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +61,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers      - number of players for this game.
      */
     public DiamantGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new SimultaneousTurnOrder(nPlayers), GameType.Diamant);
+        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.Diamant);
     }
 
     @Override

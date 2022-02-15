@@ -77,6 +77,11 @@ public abstract class AbstractGameState {
         this.gameType = gameType;
         this.coreGameParameters = new CoreParameters();
     }
+    protected AbstractGameState(AbstractParameters gameParameters, GameType type) {
+        this.gameParameters = gameParameters;
+        this.gameType = type;
+    }
+
 
     /**
      * Resets variables initialised for this game state.
@@ -171,6 +176,7 @@ public abstract class AbstractGameState {
         s.gameStatus = gameStatus;
         s.playerResults = playerResults.clone();
         s.gamePhase = gamePhase;
+        s.coreGameParameters = coreGameParameters;
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
