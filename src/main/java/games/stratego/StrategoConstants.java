@@ -3,7 +3,6 @@ package games.stratego;
 import games.stratego.components.Piece;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class StrategoConstants {
 

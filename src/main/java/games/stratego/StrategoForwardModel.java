@@ -37,6 +37,8 @@ public class StrategoForwardModel extends AbstractForwardModel {
             piece.setOwnerId(1);
             state.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
         }
+
+        state.getTurnOrder().setStartingPlayer(0);
     }
 
     @Override
@@ -46,12 +48,6 @@ public class StrategoForwardModel extends AbstractForwardModel {
         int player = gameState.getCurrentPlayer();
         Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
         List<Piece> pieces = state.gridBoard.getComponents();
-
-        if (pieces.isEmpty()){
-            System.out.println("Error: No Pieces Found");
-            state.setGameStatus(Utils.GameResult.GAME_END);
-            return actions;
-        }
 
         for (Piece piece : pieces){
             if (piece != null){
@@ -80,6 +76,13 @@ public class StrategoForwardModel extends AbstractForwardModel {
             currentState.setGameStatus(Utils.GameResult.GAME_END);
             currentState.setPlayerResult(Utils.GameResult.LOSE, currentState.getCurrentPlayer());
             currentState.setPlayerResult(Utils.GameResult.WIN, 1-currentState.getCurrentPlayer());
+        } else {
+            if (currentState.getTurnOrder().getRoundCounter() >= ((StrategoParams)currentState.getGameParameters()).maxRounds) {
+                // Max rounds reached, draw
+                currentState.setGameStatus(Utils.GameResult.GAME_END);
+                currentState.setPlayerResult(Utils.GameResult.DRAW, currentState.getCurrentPlayer());
+                currentState.setPlayerResult(Utils.GameResult.DRAW, 1-currentState.getCurrentPlayer());
+            }
         }
     }
 

@@ -10,6 +10,7 @@ import games.stratego.components.Piece;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class StrategoGameState extends AbstractGameState {
     GridBoard<Piece> gridBoard;
@@ -23,6 +24,10 @@ public class StrategoGameState extends AbstractGameState {
         super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Stratego);
     }
 
+    protected StrategoGameState(AbstractParameters gameParameters) {
+        super(gameParameters, GameType.Stratego);
+    }
+
     @Override
     protected List<Component> _getAllComponents() {
         return new ArrayList<Component>() {{ add(gridBoard);}};
@@ -30,37 +35,37 @@ public class StrategoGameState extends AbstractGameState {
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        StrategoGameState s = new StrategoGameState(gameParameters.copy(), getNPlayers());
+        StrategoGameState s = new StrategoGameState(gameParameters);
         s.gridBoard = gridBoard.emptyCopy();
+        Piece.Alliance playerAlliance = null;
 
+        // All piece types that will be hidden for opponent
+        ArrayList<Piece.PieceType> pieceTypesHidden = new ArrayList<>();
+        if (playerId != -1 && getCoreGameParameters().partialObservable){
+            playerAlliance = StrategoConstants.playerMapping.get(playerId);
+
+            for (Piece p: gridBoard.getComponents()) {
+                if (p != null && p.getPieceAlliance() != playerAlliance && !p.isPieceKnown()) {
+                    pieceTypesHidden.add(p.getPieceType());
+                }
+            }
+        }
+
+        Random random = new Random(gameParameters.getRandomSeed());
         for (Piece piece : gridBoard.getComponents()){
-            if (piece != null){
-                if (playerId != -1){
-                    Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);
-                    if (playerAlliance == piece.getPieceAlliance() || piece.isPieceKnown()) {
-                        s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
-                    } else{
-                        Piece.PieceType hiddenPieceType = getHiddenPieceType(playerId);
-                        s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.partialCopy(hiddenPieceType));
-                    }
+            if (piece != null) {
+                if (playerId != -1 && getCoreGameParameters().partialObservable && playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()){
+                    // Hide type, everything else is known
+                    int typeIdx = random.nextInt(pieceTypesHidden.size());
+                    Piece.PieceType hiddenPieceType = pieceTypesHidden.get(typeIdx);
+                    pieceTypesHidden.remove(typeIdx);
+                    s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.partialCopy(hiddenPieceType));
                 } else{
                     s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
                 }
             }
         }
         return s;
-    }
-
-    protected Piece.PieceType getHiddenPieceType(int ownerID){
-        ArrayList<Piece.PieceType> hiddenPieces = new ArrayList<>();
-        for (Piece piece : this.gridBoard.getComponents()){
-            if (piece != null){
-                if (piece.getOwnerId() != ownerID){
-                    hiddenPieces.add(piece.getPieceType());
-                }
-            }
-        }
-        return hiddenPieces.get((int) (Math.random()*hiddenPieces.size()));
     }
 
     @Override
@@ -96,7 +101,7 @@ public class StrategoGameState extends AbstractGameState {
             if (piece != null){
                 if (playerId != -1){
                     Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);
-                    if (playerAlliance != piece.getPieceAlliance()) {
+                    if (playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()) {
                         pieceList.add(piece.getComponentID());
                     }
                 }

@@ -11,49 +11,47 @@ public class StrategoHeuristic implements IStateHeuristic {
 
     double bombValue = 0.0;
     double flagValue = 1.0;
-    double pieceValueMultiplier = 0.1;
+
+    double maxRankSum = -1;
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         StrategoGameState state = (StrategoGameState) gs;
         Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if(playerResult == Utils.GameResult.LOSE) {
-            return -1;
-        }
-        if(playerResult == Utils.GameResult.WIN) {
-            return 1;
+        if (maxRankSum == -1) {
+            StrategoParams params = (StrategoParams) state.getGameParameters();
+            maxRankSum = 0;
+            for (int i = 0; i < params.pieceSetupCount.length; i++) {
+                maxRankSum += (i+1)*params.pieceSetupCount[i];
+            }
+            maxRankSum += bombValue * params.pieceSetupNBombs;
+            maxRankSum += flagValue * params.pieceSetupNFlags;
         }
 
+        if (!gs.isNotTerminal())
+            return playerResult.value;
+
         Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);
-        ArrayList<Double> playerRanks = new ArrayList<>();
-        ArrayList<Double> opponentRanks = new ArrayList<>();
-        double pieceValue;
+        double sumP = 0.0;
+        double sumOpp = 0.0;
 
         for (Piece piece : state.gridBoard.getComponents()){
             if (piece != null){
+                double pieceValue = piece.getPieceRank();
                 if (piece.getPieceType() == Piece.PieceType.BOMB) pieceValue = bombValue;
                 else if (piece.getPieceType() == Piece.PieceType.FLAG) pieceValue = flagValue;
-                else pieceValue = piece.getPieceRank() * pieceValueMultiplier;
                 if (playerAlliance == piece.getPieceAlliance()) {
-                    playerRanks.add(pieceValue);
+                    sumP += pieceValue;
                 } else{
-                    opponentRanks.add(pieceValue);
+                    sumOpp += pieceValue;
                 }
             }
         }
-        double sum = 0.0;
-        for (double item : playerRanks){
-            sum += item;
-        }
-        double avgPlayerRank = sum/playerRanks.size();
-        sum=0.0;
-        for (double item : opponentRanks){
-            sum += item;
-        }
-        double avgOpponentRank = sum/opponentRanks.size();
+        double playerScore = sumP/maxRankSum;
+        double oppScore = sumOpp/maxRankSum;
 
-        return avgPlayerRank - avgOpponentRank;
+        return playerScore - oppScore;
     }
 
 
