@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameEvents.*;
 
-public class GameReportListener implements IGameListener {
+public class GameStatisticsListener implements IGameListener {
 
     List<Double> scores = new ArrayList<>();
     List<Double> visibilityOnTurn = new ArrayList<>();
@@ -23,10 +23,10 @@ public class GameReportListener implements IGameListener {
     AbstractForwardModel fm;
     IStatisticLogger logger;
 
-    public GameReportListener(IStatisticLogger logger) {
+    public GameStatisticsListener(IStatisticLogger logger) {
         this.logger = logger;
     }
-    public GameReportListener() {
+    public GameStatisticsListener() {
         this.logger = null;
     }
 

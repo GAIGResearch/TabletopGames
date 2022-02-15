@@ -160,12 +160,7 @@ public class UnoGUIManager extends AbstractGUIManager {
                 drawPile.setFront(true);
             }
 
-            // Update actions
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 
 }

@@ -20,6 +20,7 @@ import utilities.Utils;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,10 +40,9 @@ public class Game {
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
     protected List<IGameListener> listeners = new ArrayList<>();
-
     /* Game Statistics */
-    // Current player acting
-    AbstractPlayer currentPlayer;
+    private int lastPlayer; // used to track actions per 'turn'
+    private JFrame frame;
     // Timers for various function calls
     private double nextTime, copyTime, agentTime, actionComputeTime;
     // Keeps track of action spaces for each game tick, pairs of (player ID, #actions)
@@ -53,9 +53,9 @@ public class Game {
     private int nDecisions;
     // Number of actions taken in a turn by a player
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
-    private int gameID;
 
     private boolean pause, stop;
+    private boolean debug = false;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -92,12 +92,11 @@ public class Game {
      * @param gameToPlay          - game to play
      * @param players             - list of players for the game
      * @param seed                - random seed for the game
-     * @param ac                  - Action Controller object allowing GUI interaction. If null, runs without visuals.
      * @param randomizeParameters - if true, parameters are randomized for each run of each game (if possible).
      * @return - game instance created for the run
      */
-    public static Game runOne(GameType gameToPlay, List<AbstractPlayer> players, long seed, ActionController ac,
-                              boolean randomizeParameters, List<IGameListener> listeners) {
+    public static Game runOne(GameType gameToPlay, List<AbstractPlayer> players, long seed,
+                              boolean randomizeParameters, List<IGameListener> listeners, ActionController ac) {
         // Creating game instance (null if not implemented)
         Game game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
@@ -113,21 +112,32 @@ public class Game {
             // Reset game instance, passing the players for this game
             game.reset(players);
 
-            GUI frame = new GUI();
-            AbstractGUIManager gui = null;
-
-
             if (ac != null) {
-                // Create GUI (null if not implemented; running without visuals)
+                // We spawn the GUI off in another thread
+
+                GUI frame = new GUI();
                 GamePanel gamePanel = new GamePanel();
                 frame.setContentPane(gamePanel);
-                gui = gameToPlay.createGUIManager(gamePanel, game, ac);
+
+                AbstractGUIManager gui = gameToPlay.createGUIManager(gamePanel, game, ac);
+
+                frame.setFrameProperties();
+                frame.validate();
+                frame.pack();
+
+                Timer guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, event -> game.updateGUI(gui, frame));
+                guiUpdater.start();
+
+                game.run();
+                guiUpdater.stop();
+                // and update GUI to final game state
+                game.updateGUI(gui, frame);
+
+            } else {
+
+                // Run!
+                game.run();
             }
-
-            frame.setFrameProperties();
-
-            // Run!
-            game.run(gui, frame);
         } else {
             System.out.println("Error game: " + gameToPlay);
         }
@@ -142,12 +152,11 @@ public class Game {
      * @param players             - list of players for the game.
      * @param nRepetitions        - number of repetitions of each game.
      * @param seed                - random seed for all games. If null, a new random seed is used for each game.
-     * @param ac                  - action controller for GUI interactions, null if playing without visuals.
      * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
      * @param detailedStatistics  - if true, detailed statistics are printed, otherwise just average of wins
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
-                               int nRepetitions, ActionController ac, boolean randomizeParameters,
+                               int nRepetitions, boolean randomizeParameters,
                                boolean detailedStatistics, List<IGameListener> listeners) {
         int nPlayers = players.size();
 
@@ -177,7 +186,7 @@ public class Game {
                 Long s = seed;
                 if (s == null) s = System.currentTimeMillis();
                 s += offset;
-                game = runOne(gt, players, s, ac, randomizeParameters, listeners);
+                game = runOne(gt, players, s, randomizeParameters, listeners, null);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                     offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
@@ -245,7 +254,7 @@ public class Game {
 
             // Play n repetitions of this game and record player results
             for (int i = 0; i < nRepetitions; i++) {
-                Game game = runOne(gt, players, seeds[i], ac, randomizeParameters, listeners);
+                Game game = runOne(gt, players, seeds[i], randomizeParameters, listeners, null);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                 }
@@ -285,6 +294,62 @@ public class Game {
         }
     }
 
+    /**
+     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
+     * some games for some screen sizes due to the vagaries of Java Swing...
+     * <p>
+     * Test class used to run a specific game. The user must specify:
+     * 1. Action controller for GUI interactions / null for no visuals
+     * 2. Random seed for the game
+     * 3. Players for the game
+     * 4. Mode of running
+     * and then run this class.
+     */
+    public static void main(String[] args) {
+        String gameType = Utils.getArg(args, "game", "LoveLetter");
+        boolean useGUI = Utils.getArg(args, "gui", false);
+        int playerCount = Utils.getArg(args, "nPlayers", 2);
+        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+
+        ActionController ac = new ActionController(); //null;
+
+        /* Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
+
+        MCTSParams params1 = new MCTSParams();
+
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new MCTSPlayer());
+//        players.add(new MCTSPlayer(params1));
+        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
+        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanConsolePlayer());
+//        players.add(new FirstActionPlayer());
+//        players.add(new HumanConsolePlayer());
+
+        /* Run! */
+        runOne(GameType.valueOf(gameType), players, seed, false, null, useGUI ? ac : null);
+
+    }
+
+    /**
+     * Performs GUI update.
+     *
+     * @param gui - gui to update.
+     */
+    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
+        // synchronise on game to avoid updating GUI in middle of action being taken
+        AbstractGameState gameState = getGameState();
+        int currentPlayer = gameState.getCurrentPlayer();
+        AbstractPlayer player = getPlayers().get(currentPlayer);
+        if (gui != null) {
+            gui.update(player, gameState, isHumanToMove(), new HashMap<>());
+            frame.repaint();
+        }
+    }
+
     public final void reset(List<AbstractPlayer> players) {
         reset(players, gameState.gameParameters.randomSeed);
     }
@@ -318,7 +383,7 @@ public class Game {
 
                 player.initializePlayer(observation);
             }
-        gameID = idFountain.incrementAndGet();
+        int gameID = idFountain.incrementAndGet();
         gameState.setGameID(gameID);
         resetStats();
     }
@@ -337,28 +402,40 @@ public class Game {
         nActionsPerTurnSum = 0;
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
+        lastPlayer = -1;
         listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
     }
 
-    public final void run(AbstractGUIManager gui) {
-        run(gui, null);
-    }
-
     /**
-     * Runs the game, given a GUI. If this is null, the game runs automatically without visuals.
-     *
-     * @param gui - graphical user interface.
+     * Runs the game,
      */
-    public final void run(AbstractGUIManager gui, GUI frame) {
+    public final void run() {
 
         boolean firstEnd = true;
 
-        // GUI update
-        updateGUI(gui, frame);
+        while (gameState.isNotTerminal() && !stop) {
 
-        while (gameState.isNotTerminal() && (frame == null || frame.isWindowOpen()) && !stop) {
+            synchronized (this) {
 
-            if (!pause) {
+                // Now synchronized with possible intervention from the GUI
+                // This is only relevant if the game has been paused...so should not affect
+                // performance in non-GUI situations
+                try {
+                    while (pause && !isHumanToMove()) {
+                        wait();
+                    }
+                } catch (InterruptedException e) {
+                    // Meh.
+                }
+                int activePlayer = gameState.getCurrentPlayer();
+                if (debug) System.out.printf("Entered synchronized block in Game for player %s%n", activePlayer);
+
+                AbstractPlayer currentPlayer = players.get(activePlayer);
+
+                // we check via a volatile boolean, otherwise GUI button presses do not trigger this
+                // as the JVM hoists pause and isHumanToMove() ouside the while loop on the basis that
+                // they cannot be changed in this thread....
+
 
                 /*
                  * The Game is responsible for tracking the players and the current game state
@@ -370,14 +447,14 @@ public class Game {
                  * Players should never have access to the Game, or the main AbstractGameState, or to each other!
                  */
 
+
                 // Get player to ask for actions next
                 boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
                         && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);
-                int activePlayer = gameState.getCurrentPlayer();
 
                 // Check if this is the same player as last, count number of actions per turn
                 if (!reacting) {
-                    if (currentPlayer != null && activePlayer == currentPlayer.getPlayerID()) {
+                    if (currentPlayer != null && activePlayer == lastPlayer) {
                         nActionsPerTurn++;
                     } else {
                         nActionsPerTurnSum += nActionsPerTurn;
@@ -386,89 +463,11 @@ public class Game {
                     }
                 }
 
-                // This is the next player to be asked for a decision
-                currentPlayer = players.get(activePlayer);
-
-                // Get player observation, and time how long it takes
-                double s = System.nanoTime();
-                // copying the gamestate also copies the game parameters and resets the random seed (so agents cannot use this
-                // to reconstruct the starting hands etc.)
-                AbstractGameState observation = gameState.copy(activePlayer);
-                copyTime += (System.nanoTime() - s);
-
-                // Get actions for the player
-                s = System.nanoTime();
-                List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
-                actionComputeTime += (System.nanoTime() - s);
-                actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
-
                 if (gameState.isNotTerminal()) {
 
-                    if (gameState.coreGameParameters.verbose) {
-                        System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
-                    }
+                    if (debug) System.out.printf("Invoking oneAction from Game for player %d%n", activePlayer);
+                    oneAction();
 
-                    if (observation instanceof IPrintable && gameState.coreGameParameters.verbose) {
-                        ((IPrintable) observation).printToConsole();
-                    }
-
-                    // Start the timer for this decision
-                    gameState.playerTimer[activePlayer].resume();
-
-                    // Either ask player which action to use or, in case no actions are available, report the updated observation
-                    AbstractAction action = null;
-                    if (observedActions.size() > 0) {
-                        if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
-                            // Can only do 1 action, so do it.
-                            action = observedActions.get(0);
-                            currentPlayer.registerUpdatedObservation(observation);
-                        } else {
-                            if (currentPlayer instanceof HumanGUIPlayer && gui != null) {
-                                while (action == null && gui.isWindowOpen()) {
-                                    action = currentPlayer.getAction(observation, observedActions);
-                                    updateGUI(gui, frame);
-                                }
-                            } else {
-                                // Get action from player, and time it
-                                s = System.nanoTime();
-                                action = currentPlayer.getAction(observation, observedActions);
-                                agentTime += (System.nanoTime() - s);
-                                nDecisions++;
-                            }
-                        }
-                        if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
-                            System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
-                            action = null;
-                        }
-                        AbstractAction finalAction = action;
-                        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
-                    } else {
-                        currentPlayer.registerUpdatedObservation(observation);
-                    }
-
-                    // End the timer for this decision
-                    gameState.playerTimer[activePlayer].pause();
-                    gameState.playerTimer[activePlayer].incrementAction();
-
-                    if (gameState.coreGameParameters.verbose && !(action == null)) {
-                        System.out.println(action);
-                    }
-                    if (action == null)
-                        throw new AssertionError("We have a NULL action in the Game loop");
-
-                    // Check player timeout
-                    if (observation.playerTimer[activePlayer].exceededMaxTime()) {
-                        forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
-                    } else {
-                        // Resolve action and game rules, time it
-                        s = System.nanoTime();
-                        forwardModel.next(gameState, action);
-                        nextTime += (System.nanoTime() - s);
-                    }
-                    tick++;
-
-                    // GUI update
-                    updateGUI(gui, frame);
                 } else {
                     if (firstEnd) {
                         if (gameState.coreGameParameters.verbose) {
@@ -478,12 +477,10 @@ public class Game {
                         firstEnd = false;
                     }
                 }
-            } else {
-                // GUI update
-                updateGUI(gui, frame);
+
+                if (debug) System.out.println("Exiting synchronized block in Game");
             }
         }
-
         if (firstEnd) {
             if (gameState.coreGameParameters.verbose) {
                 System.out.println("Ended");
@@ -492,26 +489,96 @@ public class Game {
         }
     }
 
-    // Run function shortcut
-    public final void run() {
-        run(null, null);
+    public final boolean isHumanToMove() {
+        int activePlayer = gameState.getCurrentPlayer();
+        return this.getPlayers().get(activePlayer) instanceof HumanGUIPlayer;
     }
 
-    /**
-     * Performs GUI update.
-     *
-     * @param gui - gui to update.
-     */
-    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        if (gui != null && frame != null) {
-            gui.update(currentPlayer, gameState);
-            frame.repaint();
-            try {
-                Thread.sleep(gameState.coreGameParameters.frameSleepMS);
-            } catch (Exception e) {
-                System.out.println("EXCEPTION " + e);
-            }
+    public final void oneAction() {
+
+        // This is the next player to be asked for a decision
+        int activePlayer = gameState.getCurrentPlayer();
+        AbstractPlayer currentPlayer = players.get(activePlayer);
+        if (debug) System.out.printf("Starting oneAction for player %s%n", activePlayer);
+
+        // Get player observation, and time how long it takes
+        double s = System.nanoTime();
+        // copying the gamestate also copies the game parameters and resets the random seed (so agents cannot use this
+        // to reconstruct the starting hands etc.)
+        AbstractGameState observation = gameState.copy(activePlayer);
+        copyTime += (System.nanoTime() - s);
+
+        // Get actions for the player
+        s = System.nanoTime();
+        List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+        actionComputeTime += (System.nanoTime() - s);
+        actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
+
+        if (gameState.coreGameParameters.verbose) {
+            System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
         }
+
+        if (observation instanceof IPrintable && gameState.coreGameParameters.verbose) {
+            ((IPrintable) observation).printToConsole();
+        }
+
+        // Start the timer for this decision
+        gameState.playerTimer[activePlayer].resume();
+
+        // Either ask player which action to use or, in case no actions are available, report the updated observation
+        AbstractAction action = null;
+        if (observedActions.size() > 0) {
+            if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
+                // Can only do 1 action, so do it.
+                action = observedActions.get(0);
+                currentPlayer.registerUpdatedObservation(observation);
+            } else {
+                // Get action from player, and time it
+                s = System.nanoTime();
+                if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
+                action = currentPlayer.getAction(observation, observedActions);
+                agentTime += (System.nanoTime() - s);
+                nDecisions++;
+            }
+            if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
+                System.out.printf("Action played that was not in the list of available actions: %s%n", action.getString(gameState));
+                action = null;
+            }
+            // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
+            AbstractAction finalAction = action;
+            listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
+        } else {
+            currentPlayer.registerUpdatedObservation(observation);
+        }
+
+        // End the timer for this decision
+        gameState.playerTimer[activePlayer].pause();
+        gameState.playerTimer[activePlayer].incrementAction();
+
+        if (gameState.coreGameParameters.verbose && !(action == null)) {
+            System.out.println(action);
+        }
+        if (action == null)
+            throw new AssertionError("We have a NULL action in the Game loop");
+
+        // Check player timeout
+        if (observation.playerTimer[activePlayer].exceededMaxTime()) {
+            forwardModel.disqualifyOrRandomAction(gameState.coreGameParameters.disqualifyPlayerOnTimeout, gameState);
+        } else {
+            // Resolve action and game rules, time it
+            s = System.nanoTime();
+            forwardModel.next(gameState, action);
+            nextTime += (System.nanoTime() - s);
+        }
+        tick++;
+
+        lastPlayer = activePlayer;
+
+        // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
+        // (such as the next player)
+        AbstractAction finalAction1 = action;
+        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_TAKEN, gameState.copy(), finalAction1.copy()));
+        if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
     }
 
     /**
@@ -700,49 +767,4 @@ public class Game {
     public String toString() {
         return gameType.toString();
     }
-
-
-    /**
-     * Main class used to run the framework. The user must specify:
-     * 1. Action controller for GUI interactions / null for no visuals
-     * 2. Random seed for the game
-     * 3. Players for the game
-     * 4. Mode of running
-     * and then run this class.
-     */
-    public static void main(String[] args) {
-        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = new ActionController(); //null;
-
-        /* 2. Game seed */
-        long seed = System.currentTimeMillis(); //0;
-
-        /* 3. Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>();
-
-        MCTSParams params1 = new MCTSParams();
-
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new MCTSPlayer());
-//        players.add(new MCTSPlayer(params1));
-        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-//        players.add(new FirstActionPlayer());
-//        players.add(new HumanConsolePlayer());
-
-        /* 4. Run! */
-        runOne(Stratego, players, seed, ac, false, null);
-
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.remove(LoveLetter);
-//        games.remove(Pandemic);
-//        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, null, false, false, null);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, null, false, false, null);
-
-    }
-
 }

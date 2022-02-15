@@ -53,7 +53,7 @@ public class PandemicGame extends Game {
         PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
         for (int i = 0; i < 10000; i++) {
             PandemicGame game = new PandemicGame(players, params);
-            game.run(null);
+            game.run();
             Utils.GameResult result = game.gameState.getGameStatus();
             int prevCount = results.get(result);
             results.put(result, prevCount + 1);

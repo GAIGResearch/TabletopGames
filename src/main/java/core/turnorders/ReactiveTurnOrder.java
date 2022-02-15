@@ -23,7 +23,9 @@ public class ReactiveTurnOrder extends TurnOrder {
 
     @Override
     public int getCurrentPlayer(AbstractGameState gameState) {
-        if (reactivePlayers.size() > 0) return reactivePlayers.peek();
+        if (reactivePlayers.size() > 0) {
+            return reactivePlayers.peek();
+        }
         else return turnOwner;
     }
 

@@ -220,13 +220,7 @@ public class BlackjackGUIManager extends AbstractGUIManager {
                     playerHands[i].setBorder(playerViewBorders[i]);
                 }
             }
-
-            // Update actions
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 
     private String getRuleText() {

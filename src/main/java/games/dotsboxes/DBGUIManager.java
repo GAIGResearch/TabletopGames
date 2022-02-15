@@ -15,6 +15,7 @@ import utilities.ImageIO;
 import utilities.Utils;
 
 import java.util.List;
+import java.util.Map;
 
 public class DBGUIManager extends AbstractGUIManager {
     DBGridBoardView view;
@@ -108,7 +109,7 @@ public class DBGUIManager extends AbstractGUIManager {
     }
 
     @Override
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
         DBEdge db = view.getHighlight();
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && db != null) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
@@ -130,11 +131,7 @@ public class DBGUIManager extends AbstractGUIManager {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             view.updateGameState(((DBGameState)gameState));
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 
     private String getRuleText() {

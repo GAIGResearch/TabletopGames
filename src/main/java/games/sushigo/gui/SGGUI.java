@@ -147,11 +147,6 @@ public class SGGUI extends AbstractGUIManager {
                 }
             }
 
-            // Update actions
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 }

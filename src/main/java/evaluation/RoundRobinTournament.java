@@ -210,7 +210,7 @@ public class RoundRobinTournament extends AbstractTournament {
             games.get(gameIdx).reset(matchUpPlayers, currentSeed + i + 1);
 
 
-            games.get(gameIdx).run(null);  // Always running tournaments without visuals
+            games.get(gameIdx).run();  // Always running tournaments without visuals
 
             for (IGameListener gameTracker : gameTrackers) {
                 gameTracker.allGamesFinished();
