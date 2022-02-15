@@ -17,6 +17,8 @@ public class ReactiveTurnOrder extends TurnOrder {
         reactivePlayers = new LinkedList<>();
     }
 
+    protected ReactiveTurnOrder() {}
+
     public ReactiveTurnOrder(int nPlayers, int nMaxRounds) {
         super(nPlayers, nMaxRounds);
     }
@@ -31,7 +33,7 @@ public class ReactiveTurnOrder extends TurnOrder {
 
     @Override
     protected TurnOrder _copy() {
-        ReactiveTurnOrder to = new ReactiveTurnOrder(nPlayers);
+        ReactiveTurnOrder to = new ReactiveTurnOrder();
         to.reactivePlayers = new LinkedList<>(reactivePlayers);
         return to;
     }
