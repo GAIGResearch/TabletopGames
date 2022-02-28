@@ -1,17 +1,18 @@
 package games.sushigo;
 
 import core.AbstractGameState;
-import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.SimultaneousTurnOrder;
+import core.turnorders.StandardTurnOrder;
+import core.turnorders.TurnOrder;
 import games.sushigo.cards.SGCard;
 import utilities.Utils;
 
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
-public class SGTurnOrder extends SimultaneousTurnOrder {
+public class SGTurnOrder extends StandardTurnOrder {
     public SGTurnOrder(int nPlayers) {
         super(nPlayers);
     }
+    public SGTurnOrder() {}
 
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
@@ -22,7 +23,7 @@ public class SGTurnOrder extends SimultaneousTurnOrder {
 
     @Override
     protected SGTurnOrder _copy() {
-        return new SGTurnOrder(nPlayers);
+        return new SGTurnOrder();
     }
 
     @Override
