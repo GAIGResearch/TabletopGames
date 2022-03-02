@@ -9,6 +9,8 @@ import games.GameType;
 import games.stratego.components.Piece;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class StrategoGameState extends AbstractGameState {
@@ -33,6 +35,8 @@ public class StrategoGameState extends AbstractGameState {
         StrategoGameState s = new StrategoGameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.emptyCopy();
 
+        Iterator<Piece.PieceType> hiddenPieces = playerId != -1 ? getHiddenPieces(playerId) : null;
+
         for (Piece piece : gridBoard.getComponents()){
             if (piece != null){
                 if (playerId != -1){
@@ -40,7 +44,7 @@ public class StrategoGameState extends AbstractGameState {
                     if (playerAlliance == piece.getPieceAlliance() || piece.isPieceKnown()) {
                         s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
                     } else{
-                        Piece.PieceType hiddenPieceType = getHiddenPieceType(playerId);
+                        Piece.PieceType hiddenPieceType = hiddenPieces.next();
                         s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.partialCopy(hiddenPieceType));
                     }
                 } else{
@@ -51,7 +55,7 @@ public class StrategoGameState extends AbstractGameState {
         return s;
     }
 
-    protected Piece.PieceType getHiddenPieceType(int ownerID){
+    protected Iterator<Piece.PieceType> getHiddenPieces(int ownerID){
         ArrayList<Piece.PieceType> hiddenPieces = new ArrayList<>();
         for (Piece piece : this.gridBoard.getComponents()){
             if (piece != null){
@@ -60,7 +64,8 @@ public class StrategoGameState extends AbstractGameState {
                 }
             }
         }
-        return hiddenPieces.get((int) (Math.random()*hiddenPieces.size()));
+        Collections.shuffle(hiddenPieces);
+        return hiddenPieces.iterator();
     }
 
     @Override
