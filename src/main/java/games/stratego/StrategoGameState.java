@@ -67,7 +67,7 @@ public class StrategoGameState extends AbstractGameState {
                 }
             }
         }
-        if (hiddenPieces != null && hiddenPieces.hasNext()) {
+        if (!pieceTypesHidden.isEmpty()) {
             throw new AssertionError("We have a hidden piece that has not been placed on the copied board");
         }
         return s;
