@@ -48,9 +48,9 @@ public class StrategoForwardModel extends AbstractForwardModel {
         List<Piece> pieces = state.gridBoard.getComponents();
 
         if (pieces.isEmpty()){
-            System.out.println("Error: No Pieces Found");
-            state.setGameStatus(Utils.GameResult.GAME_END);
-            return actions;
+            throw new AssertionError("Error: No Pieces Found");
+//            state.setGameStatus(Utils.GameResult.GAME_END);
+ //           return actions;
         }
 
         for (Piece piece : pieces){
@@ -75,6 +75,12 @@ public class StrategoForwardModel extends AbstractForwardModel {
         currentState.getTurnOrder().endPlayerTurn(currentState);
 
         List<AbstractAction> actions = _computeAvailableActions(currentState);
+        if (currentState.getTurnOrder().getRoundCounter() > 1000) {
+            // ok - this is getting silly - both players are clearly dreadful
+            currentState.setGameStatus(Utils.GameResult.GAME_END);
+            currentState.setPlayerResult(Utils.GameResult.DRAW, currentState.getCurrentPlayer());
+            currentState.setPlayerResult(Utils.GameResult.DRAW, 1-currentState.getCurrentPlayer());
+        }
         if (actions.isEmpty()){
             // If the player can't take any actions, they lose
             currentState.setGameStatus(Utils.GameResult.GAME_END);

@@ -52,6 +52,9 @@ public class StrategoGameState extends AbstractGameState {
                 }
             }
         }
+        if (hiddenPieces != null && hiddenPieces.hasNext()) {
+            throw new AssertionError("We have a hidden piece that has not been placed on the copied board");
+        }
         return s;
     }
 
@@ -59,7 +62,7 @@ public class StrategoGameState extends AbstractGameState {
         ArrayList<Piece.PieceType> hiddenPieces = new ArrayList<>();
         for (Piece piece : this.gridBoard.getComponents()){
             if (piece != null){
-                if (piece.getOwnerId() != ownerID){
+                if (piece.getOwnerId() != ownerID && !piece.isPieceKnown()){
                     hiddenPieces.add(piece.getPieceType());
                 }
             }
