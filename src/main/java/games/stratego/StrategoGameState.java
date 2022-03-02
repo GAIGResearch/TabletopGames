@@ -76,7 +76,6 @@ public class StrategoGameState extends AbstractGameState {
     @Override
     public double getGameScore(int playerId) {
         return playerResults[playerId].value;
-
     }
 
     @Override
@@ -86,6 +85,10 @@ public class StrategoGameState extends AbstractGameState {
 
     @Override
     protected boolean _equals(Object o) {
+        if (o instanceof StrategoGameState) {
+            StrategoGameState other = (StrategoGameState) o;
+            return gridBoard.equals(other.gridBoard);
+        }
         return false;
     }
 
