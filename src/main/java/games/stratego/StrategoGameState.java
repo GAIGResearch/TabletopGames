@@ -75,7 +75,8 @@ public class StrategoGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return 0;
+        return playerResults[playerId].value;
+
     }
 
     @Override
