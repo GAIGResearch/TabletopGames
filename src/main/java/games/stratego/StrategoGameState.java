@@ -105,7 +105,7 @@ public class StrategoGameState extends AbstractGameState {
             if (piece != null){
                 if (playerId != -1){
                     Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);
-                    if (playerAlliance != piece.getPieceAlliance()) {
+                    if (playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()) {
                         pieceList.add(piece.getComponentID());
                     }
                 }
