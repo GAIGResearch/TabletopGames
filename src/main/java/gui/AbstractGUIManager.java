@@ -11,6 +11,8 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
@@ -56,23 +58,42 @@ public abstract class AbstractGUIManager {
 
     /**
      * Updates all GUI elements. Must be implemented by subclass.
-     * @param player - current player acting.
+     *
+     * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {}
+    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
+    }
 
     /**
      * Updates which action buttons should be visible to the players, and which should not.
      * By default all actions are transformed into visible buttons.
-     * @param player - current player acting.
+     *
+     * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+            int totalActionCount = (int) sampledActions.values().stream().mapToLong(i -> i).sum();
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
-            for (int i = 0; i < actions.size(); i++) {
+            for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
+                if (totalActionCount > 0) {
+                    double percentChosen = sampledActions.getOrDefault(actions.get(i), 0L).doubleValue() / totalActionCount;
+                    if (percentChosen < 0.0) percentChosen = 0.0;
+                    if (percentChosen > 1.0) percentChosen = 1.0;
+                    int[] targetRGB = new int[]{60, 179, 113};
+                    // percentChosen of 1.0 gives us the target colour (green), and 0.0 gives White
+                    Color background = new Color(
+                            targetRGB[0] + (int) ((1.0 - percentChosen) * (255 - targetRGB[0])),
+                            targetRGB[1] + (int) ((1.0 - percentChosen) * (255 - targetRGB[1])),
+                            targetRGB[2] + (int) ((1.0 - percentChosen) * (255 - targetRGB[2]))
+                    );
+                    actionButtons[i].setBackground(background);
+                } else {
+                    actionButtons[i].setBackground(Color.white);
+                }
             }
             for (int i = actions.size(); i < actionButtons.length; i++) {
                 actionButtons[i].setVisible(false);
@@ -83,15 +104,17 @@ public abstract class AbstractGUIManager {
 
     /**
      * Creates a panel containing all action buttons; all not visible by default.
+     *
      * @param highlights - when button is clicked, any GUI highlights are cleared. This array contains all lists of
      *                   highlights maintained by the GUI. Can be null if not used.
-     * @param width - width of this panel.
-     * @param height - height of this panel.
+     * @param width      - width of this panel.
+     * @param height     - height of this panel.
      * @return - JComponent containing all action buttons.
      */
     protected JComponent createActionPanel(Collection[] highlights, int width, int height) {
         return createActionPanel(highlights, width, height, true);
     }
+
     protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
         JPanel actionPanel = new JPanel();
         if (boxLayout) {
@@ -119,6 +142,7 @@ public abstract class AbstractGUIManager {
 
     /**
      * Creates a JPanel containing labels with default game state information.
+     *
      * @param gameTitle - title of the game, displayed first at the top
      * @param gameState - initial game state.
      * @return - JPanel containing several JLabels with game state information.
@@ -138,21 +162,22 @@ public abstract class AbstractGUIManager {
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
 
-        gameInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+        gameInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
 
         JPanel wrapper = new JPanel();
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        historyInfo.setPreferredSize(new Dimension(width/2 - 10, height));
+        historyInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
         historyContainer = new JScrollPane(historyInfo);
-        historyContainer.setPreferredSize(new Dimension(width/2 - 25, height));
+        historyContainer.setPreferredSize(new Dimension(width / 2 - 25, height));
         wrapper.add(historyContainer);
         return wrapper;
     }
 
     /**
      * Updates the information stored in the JLabels with new game state information.
+     *
      * @param gameState - current game state to be used for the update.
      */
     protected void updateGameStateInfo(AbstractGameState gameState) {
@@ -181,13 +206,19 @@ public abstract class AbstractGUIManager {
     /**
      * Updates the GUI, public method called from the Game class. Updates game state info panels, resets action buttons
      * and then calls the _update() method to allow subclasses to update their inner state.
-     * @param player - current player acting.
+     *
+     * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    public void update(AbstractPlayer player, AbstractGameState gameState){
+    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions, Map<AbstractAction, Long> sampledActions) {
         updateGameStateInfo(gameState);
-//        resetActionButtons();
         _update(player, gameState);
+        if (actionButtons != null)
+            if (showActions)
+                updateActionButtons(player, gameState, sampledActions);
+            else
+                resetActionButtons();
+        parent.repaint();
     }
 
     protected void resetActionButtons() {
@@ -199,6 +230,7 @@ public abstract class AbstractGUIManager {
 
     /**
      * Checks if the window is open.
+     *
      * @return true if open, false otherwise
      */
     public final boolean isWindowOpen() {

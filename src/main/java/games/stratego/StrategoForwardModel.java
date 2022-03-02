@@ -37,6 +37,8 @@ public class StrategoForwardModel extends AbstractForwardModel {
             piece.setOwnerId(1);
             state.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
         }
+
+        state.getTurnOrder().setStartingPlayer(0);
     }
 
     @Override
@@ -75,17 +77,18 @@ public class StrategoForwardModel extends AbstractForwardModel {
         currentState.getTurnOrder().endPlayerTurn(currentState);
 
         List<AbstractAction> actions = _computeAvailableActions(currentState);
-        if (currentState.getTurnOrder().getRoundCounter() > 1000) {
-            // ok - this is getting silly - both players are clearly dreadful
-            currentState.setGameStatus(Utils.GameResult.GAME_END);
-            currentState.setPlayerResult(Utils.GameResult.DRAW, currentState.getCurrentPlayer());
-            currentState.setPlayerResult(Utils.GameResult.DRAW, 1-currentState.getCurrentPlayer());
-        }
         if (actions.isEmpty()){
             // If the player can't take any actions, they lose
             currentState.setGameStatus(Utils.GameResult.GAME_END);
             currentState.setPlayerResult(Utils.GameResult.LOSE, currentState.getCurrentPlayer());
             currentState.setPlayerResult(Utils.GameResult.WIN, 1-currentState.getCurrentPlayer());
+        } else {
+            if (currentState.getTurnOrder().getRoundCounter() >= ((StrategoParams)currentState.getGameParameters()).maxRounds) {
+                // Max rounds reached, draw
+                currentState.setGameStatus(Utils.GameResult.GAME_END);
+                currentState.setPlayerResult(Utils.GameResult.DRAW, currentState.getCurrentPlayer());
+                currentState.setPlayerResult(Utils.GameResult.DRAW, 1-currentState.getCurrentPlayer());
+            }
         }
     }
 

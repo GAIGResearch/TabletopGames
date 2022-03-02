@@ -6,7 +6,7 @@ import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.turnorders.SimultaneousTurnOrder;
+import core.turnorders.StandardTurnOrder;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
@@ -25,6 +25,21 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     List<Counter> treasureChests;
     List<Counter> hands;
     List<Boolean> playerInCave;
+
+    // helper data class to store interesting information
+    static class PlayerTurnRecord {
+        public final int player;
+        public final int round;
+        public final int turnLeft;
+
+        PlayerTurnRecord(int player, int round, int turn) {
+            this.player = player;
+            this.round = round;
+            this.turnLeft = turn;
+        }
+    }
+
+    List<PlayerTurnRecord> recordOfPlayerActions = new ArrayList<>();
 
     int nGemsOnPath             = 0;
     int nHazardPoissonGasOnPath = 0;
@@ -46,7 +61,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers      - number of players for this game.
      */
     public DiamantGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new SimultaneousTurnOrder(nPlayers), GameType.Diamant);
+        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.Diamant);
     }
 
     @Override
@@ -84,6 +99,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         dgs.hands          = new ArrayList<>();
         dgs.treasureChests = new ArrayList<>();
         dgs.playerInCave   = new ArrayList<>();
+        dgs.recordOfPlayerActions.addAll(recordOfPlayerActions);
 
         for (Counter c : hands)
             dgs.hands.add(c.copy());
@@ -201,6 +217,10 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         for (Boolean b: playerInCave)
             if (b) n++;
         return n;
+    }
+
+    public List<PlayerTurnRecord> getRecordOfPlayerActions() {
+        return recordOfPlayerActions;
     }
 
     @Override

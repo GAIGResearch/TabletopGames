@@ -5,7 +5,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
-import core.turnorders.SimultaneousTurnOrder;
+import core.turnorders.StandardTurnOrder;
 
 import java.util.List;
 import java.util.Random;
@@ -52,7 +52,7 @@ public class OSLAPlayer extends AbstractPlayer {
 
             getForwardModel().next(gsCopy, action);
 
-            if (gsCopy.getTurnOrder() instanceof SimultaneousTurnOrder) {
+            if (gsCopy.getTurnOrder() instanceof StandardTurnOrder) {
                 advanceToEndOfRoundWithRandomActions(gsCopy, playerID);
             }
 

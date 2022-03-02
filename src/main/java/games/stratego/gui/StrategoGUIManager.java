@@ -19,6 +19,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public class StrategoGUIManager extends AbstractGUIManager {
 
@@ -61,7 +62,7 @@ public class StrategoGUIManager extends AbstractGUIManager {
      * @param gameState - current game state to be used in updating visuals.
      */
     @Override
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             ArrayList<Rectangle> highlight = view.getHighlight();
@@ -102,10 +103,6 @@ public class StrategoGUIManager extends AbstractGUIManager {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             view.updateComponent(((StrategoGameState)gameState).getGridBoard());
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 }

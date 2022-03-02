@@ -17,19 +17,23 @@ public class ReactiveTurnOrder extends TurnOrder {
         reactivePlayers = new LinkedList<>();
     }
 
+    protected ReactiveTurnOrder() {}
+
     public ReactiveTurnOrder(int nPlayers, int nMaxRounds) {
         super(nPlayers, nMaxRounds);
     }
 
     @Override
     public int getCurrentPlayer(AbstractGameState gameState) {
-        if (reactivePlayers.size() > 0) return reactivePlayers.peek();
+        if (reactivePlayers.size() > 0) {
+            return reactivePlayers.peek();
+        }
         else return turnOwner;
     }
 
     @Override
     protected TurnOrder _copy() {
-        ReactiveTurnOrder to = new ReactiveTurnOrder(nPlayers);
+        ReactiveTurnOrder to = new ReactiveTurnOrder();
         to.reactivePlayers = new LinkedList<>(reactivePlayers);
         return to;
     }

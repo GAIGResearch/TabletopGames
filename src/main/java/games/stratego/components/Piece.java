@@ -26,16 +26,16 @@ public class Piece extends Token {
         super(pieceType.name());
         this.pieceType = pieceType;
         this.alliance = alliance;
-        this.position = new int[] {position[0], position[1]};
+        this.position = position;
         this.pieceKnown = false;
     }
 
-    protected Piece(PieceType pieceType, Alliance alliance, int[] position, int ID) {
+    protected Piece(PieceType pieceType, Alliance alliance, int[] position, boolean known, int ID) {
         super(pieceType.name(), ID);
         this.pieceType = pieceType;
         this.alliance = alliance;
-        this.position = new int[] {position[0], position[1]};
-        this.pieceKnown = false;
+        this.position = position;
+        this.pieceKnown = known;
     }
 
     public int[] getPiecePosition(){
@@ -129,15 +129,13 @@ public class Piece extends Token {
 
     @Override
     public Piece copy() {
-        Piece copy = new Piece(pieceType, alliance, position.clone(), componentID);
-        copy.pieceKnown = pieceKnown;
+        Piece copy = new Piece(pieceType, alliance, position.clone(), pieceKnown, componentID);
         copyComponentTo(copy);
         return copy;
     }
 
     public Piece partialCopy(PieceType hiddenPieceType){
-        Piece copy = new Piece(hiddenPieceType, alliance, position.clone(), componentID);
-        copy.pieceKnown = pieceKnown;
+        Piece copy = new Piece(hiddenPieceType, alliance, position.clone(), false, componentID);
         copyComponentTo(copy);
         return copy;
     }
@@ -183,11 +181,10 @@ public class Piece extends Token {
             this.pieceRank = pieceRank;
         }
 
-        public String rankToString(){return String.valueOf(this.pieceRank);}
-
         public boolean isMovable() {
             return this != FLAG && this != BOMB;
         }
+
 
     }
 

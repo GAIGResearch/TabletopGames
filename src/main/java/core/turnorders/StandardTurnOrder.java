@@ -5,6 +5,7 @@ public class StandardTurnOrder extends TurnOrder{
     public StandardTurnOrder(int playerCount) {
         super(playerCount);
     }
+    public StandardTurnOrder() {}
 
     @Override
     protected void _reset() {
@@ -13,6 +14,6 @@ public class StandardTurnOrder extends TurnOrder{
 
     @Override
     protected TurnOrder _copy() {
-        return new StandardTurnOrder(this.nPlayers);
+        return new StandardTurnOrder();
     }
 }
