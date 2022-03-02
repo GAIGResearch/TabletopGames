@@ -55,12 +55,28 @@ public class MapElites implements EvoAlg {
                     }
                 }
             }
-            Pair<Double, TreeMap<String, Object>> stats = ((GameEvaluator)solutionEvaluator).evaluateWithStats(point);
-            double performance = stats.a;
-            TreeMap<String, Object> behaviours = stats.b;
-            model.addPoint(point, performance, behaviours);
+            try {
+                Pair<Double, TreeMap<String, Object>> stats = ((GameEvaluator) solutionEvaluator).evaluateWithStats(point);
+                double performance = stats.a;
+                TreeMap<String, Object> behaviours = stats.b;
+                model.addPoint(point, performance, behaviours);
+            } catch (Exception ignored) {
+//                System.out.println("Invalid configuration: " + Arrays.toString(point));
+            }
         }
         return model.getBestOfSampled();
+    }
+
+    public void logResults() {
+        // Print elite map
+        System.out.println("\nElite Map\n\n");
+        for (int i = 0; i < model.solutionMap.length; i++) {
+            if (model.solutionMap[i] != null) {
+                TreeMap<String, Object> behaviourDescriptors = model.findBehavioursByIndex(i);
+                double performance = model.valueMap[i];
+                System.out.println(Arrays.toString(model.solutionMap[i]) + " ; " + behaviourDescriptors + " ; " + performance);
+            }
+        }
     }
 
     /**
@@ -79,7 +95,7 @@ public class MapElites implements EvoAlg {
             for (Object[] b: behaviourDescriptors.values()) {
                 mapSize *= b.length;
             }
-            this.solutionMap = new double[mapSize][searchSpace.nDims()];
+            this.solutionMap = new double[mapSize][];
             this.valueMap = new double[mapSize];
             this.behaviourDescriptors = behaviourDescriptors;
         }
@@ -130,16 +146,18 @@ public class MapElites implements EvoAlg {
 
         private int findIndex(TreeMap<String, Object> behaviours) {
             int[] indexes = new int[behaviours.size()];
+            int[] lengths = new int[behaviours.size()];
             int count = 0;
             for (String s: behaviourDescriptors.descendingKeySet()) {
                 indexes[count] = findIndex(s, behaviours.get(s));
+                lengths[count] = behaviourDescriptors.get(s).length;
                 count++;
             }
             int idx = indexes[0];
             for (int i = 1; i < indexes.length; i++) {
-                int mult = 1;
-                for (int j = 0; j <= i; j++) {
-                    mult *= indexes[j];
+                int mult = indexes[i];
+                for (int j = 0; j < i; j++) {
+                    mult *= lengths[j];
                 }
                 idx += mult;
             }
@@ -148,19 +166,43 @@ public class MapElites implements EvoAlg {
 
         private int findIndex(String behaviour, Object value) {
             Object[] allValues = behaviourDescriptors.get(behaviour);
-            if (value instanceof Comparable) {
+            if (value instanceof Number) {
                 for (int i = 0; i < allValues.length; i++) {
-                    if (allValues[i] instanceof Comparable)
-                    if (((Comparable) value).compareTo(allValues[i]) <= 0) {
-                        return i;
-                    }
+                    int val1 = ((Number)value).intValue();
+                    int val2 = ((Number)allValues[i]).intValue();
+                    if (val1 <= val2) return i;
                 }
             } else {
                 for (int i = 0; i < allValues.length; i++) {
                     if (allValues[i].equals(value)) return i;
                 }
             }
-            return -1;
+            return allValues.length-1;
+        }
+
+        public TreeMap<String, Object> findBehavioursByIndex(int idx) {
+            int nBehaviours = behaviourDescriptors.size();
+
+            int[] indexes = new int[nBehaviours];
+            int[] lengths = new int[nBehaviours];
+            int count = 0;
+            for (String s: behaviourDescriptors.descendingKeySet()) {
+                lengths[count] = behaviourDescriptors.get(s).length;
+                count++;
+            }
+
+            for (int i = 0; i < nBehaviours; i++) {
+                indexes[i] = idx % lengths[i];
+                idx = idx / lengths[i];
+            }
+
+            TreeMap<String, Object> retValue = new TreeMap<>();
+            count = 0;
+            for (String s: behaviourDescriptors.descendingKeySet()) {
+                retValue.put(s, behaviourDescriptors.get(s)[indexes[count]]);
+                count++;
+            }
+            return retValue;
         }
 
         @Override

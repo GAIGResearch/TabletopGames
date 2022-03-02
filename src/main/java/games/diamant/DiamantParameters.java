@@ -13,6 +13,7 @@ public class DiamantParameters extends TunableParameters {
     public int nHazardsToDead      = 2;
     public int[] treasures         = new int[]{1, 2, 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17};
 
+    public DiamantParameters() {this(System.currentTimeMillis());}
     public DiamantParameters(long seed) {
         super(seed);
         addTunableParameter("nCaves", 5, Arrays.asList(3,5,7,10));
