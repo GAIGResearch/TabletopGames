@@ -320,10 +320,9 @@ public class PandemicGUIManager extends AbstractGUIManager {
             }
         }
 
-        // Update actions for human
+        // Update display for human
         if (player instanceof HumanGUIPlayer) {
             updateCardHighlightDisplay();
-            updateActionButtons(player, gameState);
             if (newTurn) {
                 PropertyString playerLocationProperty = (PropertyString) this.gameState.getComponent(playerCardHash, activePlayer)
                         .getProperty(playerLocationHash);
@@ -336,7 +335,6 @@ public class PandemicGUIManager extends AbstractGUIManager {
             updateCardHighlightDisplay();
         }
 
-        parent.repaint();
     }
 
     private void updateCardHighlightDisplay() {

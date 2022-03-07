@@ -86,12 +86,13 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               the same number of games in total.\n" +
                             "\tmatchups=      The total number of matchups to run if mode=random\n" +
                             "\tlistener=      (Optional) The full class name of an IGameListener implementation. \n" +
-                            "\t               Defaults to utilities.GameReportListener. \n" +
+                            "\t               Defaults to utilities.GameResultListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games." +
                             "\tlogger=        (Optional) The full class name of an IStatisticsLogger implementation.\n" +
                             "\t               Defaults to FileStatsLogger. \n" +
-                            "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file (FileStatsLogger only)\n" +
+                            "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file (FileStatsLogger only).\n" +
+                            "\t               Defaults to RoundRobinReport.txt" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
                             "\t               use a different log file.\n");
             return;
@@ -108,8 +109,8 @@ public class RoundRobinTournament extends AbstractTournament {
         String gameParams = getArg(args, "gameParams", "");
 
 
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameReportListener").split("\\|")));
-        List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "GameReport.txt").split("\\|")));
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameResultListener").split("\\|")));
+        List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
 
         if (listenerClasses.size() > 1 && listenerFiles.size() > 1 && listenerClasses.size() != listenerFiles.size())
             throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
@@ -209,13 +210,7 @@ public class RoundRobinTournament extends AbstractTournament {
             gameCounter++;
             games.get(gameIdx).reset(matchUpPlayers, currentSeed + i + 1);
 
-
-            games.get(gameIdx).run(null);  // Always running tournaments without visuals
-
-            for (IGameListener gameTracker : gameTrackers) {
-                gameTracker.allGamesFinished();
-            }
-            games.get(gameIdx).clearListeners();
+            games.get(gameIdx).run();  // Always running tournaments without visuals
 
             GameResult[] results = games.get(gameIdx).getGameState().getPlayerResults();
             for (int j = 0; j < matchUpPlayers.size(); j++) {
@@ -237,6 +232,10 @@ public class RoundRobinTournament extends AbstractTournament {
                     dataLogger.flush();
                 }
             }
+        }
+        games.get(gameIdx).clearListeners();
+        for (IGameListener gameTracker : gameTrackers) {
+            gameTracker.allGamesFinished();
         }
         matchUpsRun++;
     }

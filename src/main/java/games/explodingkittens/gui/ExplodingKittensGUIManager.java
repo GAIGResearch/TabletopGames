@@ -159,12 +159,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
             if (activePlayer == humanID || gameState.getCoreGameParameters().alwaysDisplayFullObservable)
                 drawPile.setFront(true);
 
-            // Update actions
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 
 }

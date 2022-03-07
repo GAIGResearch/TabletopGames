@@ -26,27 +26,4 @@ public class DiceMonasteryGame extends Game {
         super(GameType.DiceMonastery, realModel, state);
     }
 
-
-    public static void main(String[] args) {
-        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = new ActionController(); //null;
-
-        /* 2. Game seed */
-        long seed = System.currentTimeMillis(); //0;
-
-        /* 3. Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>();
-
-        MCTSParams params1 = new MCTSParams();
-
-        players.add(new RandomPlayer());
-        players.add(new RMHCPlayer());
-        players.add(new MCTSPlayer(params1));
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-
-        /* 4. Run! */
-        runOne(DiceMonastery, null, players, seed, ac, false, null);
-
-    }
 }

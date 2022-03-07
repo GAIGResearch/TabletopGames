@@ -29,6 +29,10 @@ import games.blackjack.*;
 import games.blackjack.gui.*;
 import games.poker.gui.*;
 import games.dicemonastery.gui.*;
+import games.stratego.StrategoForwardModel;
+import games.stratego.StrategoGameState;
+import games.stratego.StrategoParams;
+import games.stratego.gui.StrategoGUIManager;
 import games.sushigo.SGForwardModel;
 import games.sushigo.SGGameState;
 import games.sushigo.gui.SGGUI;
@@ -165,6 +169,7 @@ public enum GameType {
                 add(ComicBook);
                 add(Number);
                 add(MoviesTVRadio);
+                add(Bluffing);
             }},
 
             new ArrayList<Mechanic>() {{
@@ -253,6 +258,17 @@ public enum GameType {
                 add(SetCollection);
                 add(PushYourLuck);
                 add(SimultaneousActionSelection);
+            }}),
+    Stratego(2, 2,
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Bluffing);
+                add(Deduction);
+                add(Abstract);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(Memory);
+                add(GridMovement);
             }});
 
 //    Carcassonne (2, 5,
@@ -302,6 +318,8 @@ public enum GameType {
                 return DiceMonastery;
             case "sushigo":
                 return SushiGo;
+            case "stratego":
+                return Stratego;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -394,6 +412,10 @@ public enum GameType {
                 forwardModel = new SGForwardModel();
                 gameState = new SGGameState(params, nPlayers);
                 break;
+            case Stratego:
+                forwardModel = new StrategoForwardModel();
+                gameState = new StrategoGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -469,6 +491,9 @@ public enum GameType {
                 break;
             case SushiGo:
                 gui = new SGGUI(parent, game, ac, human);
+                break;
+            case Stratego:
+                gui = new StrategoGUIManager(parent, game, ac);
                 break;
         }
 

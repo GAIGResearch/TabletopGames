@@ -25,6 +25,6 @@ public class TicTacToeGame extends Game {
 
         TicTacToeGameParameters params = new TicTacToeGameParameters(System.currentTimeMillis());
         Game game = new TicTacToeGame(agents, params);
-        game.run(null);
+        game.run();
     }
 }

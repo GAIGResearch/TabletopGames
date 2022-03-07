@@ -58,6 +58,13 @@ public class GridBoard<T extends Component> extends Component implements ICompon
         this.grid = grid;
     }
 
+    protected GridBoard(int width, int height, int ID) {
+        super(Utils.ComponentType.BOARD, ID);
+        this.width = width;
+        this.height = height;
+        this.grid = new Component[height][width];
+    }
+
     public GridBoard(GridBoard<T> orig) {
         super(Utils.ComponentType.BOARD);
         this.width = orig.getWidth();
@@ -222,6 +229,12 @@ public class GridBoard<T extends Component> extends Component implements ICompon
             if (width >= 0) System.arraycopy(grid[i], 0, gridCopy[i], 0, width);
         }
         GridBoard<T> g = new GridBoard<>(gridCopy, componentID);
+        copyComponentTo(g);
+        return g;
+    }
+
+    public GridBoard<T> emptyCopy() {
+        GridBoard<T> g = new GridBoard<>(getWidth(), getHeight(), componentID);
         copyComponentTo(g);
         return g;
     }

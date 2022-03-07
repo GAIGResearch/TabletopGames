@@ -155,11 +155,6 @@ public class DominionGUIManager extends AbstractGUIManager {
             // MarketView however needs to be updated
             marketView.update(state);
 
-            // Update actions
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 }

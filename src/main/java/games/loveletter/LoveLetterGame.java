@@ -34,7 +34,7 @@ public class LoveLetterGame extends Game {
             Game game = new LoveLetterGame(agents, params);
 
             // run game
-            game.run(null);
+            game.run();
         }
     }
 

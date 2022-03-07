@@ -86,7 +86,7 @@ public class Token extends Component {
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return componentID;
     }
 
