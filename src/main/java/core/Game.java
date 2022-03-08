@@ -76,6 +76,7 @@ public class Game {
     String formatName = "mp4";
     String codecName = null;
     int snapsPerSecond = 10;
+    private int turnPause;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -116,7 +117,7 @@ public class Game {
      * @return - game instance created for the run
      */
     public static Game runOne(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                              boolean randomizeParameters, List<IGameListener> listeners, ActionController ac) {
+                              boolean randomizeParameters, List<IGameListener> listeners, ActionController ac, int turnPause) {
         // Creating game instance (null if not implemented)
         Game game;
         if (parameterConfigFile != null) {
@@ -136,6 +137,7 @@ public class Game {
 
             // Reset game instance, passing the players for this game
             game.reset(players);
+            game.setTurnPause(turnPause);
 
             if (ac != null) {
                 // We spawn the GUI off in another thread
@@ -176,6 +178,10 @@ public class Game {
         return game;
     }
 
+    public void setTurnPause(int turnPause) {
+        this.turnPause = turnPause;
+    }
+
     /**
      * Runs several games with a given random seed.
      *
@@ -188,7 +194,7 @@ public class Game {
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
                                int nRepetitions, boolean randomizeParameters,
-                               boolean detailedStatistics, List<IGameListener> listeners) {
+                               boolean detailedStatistics, List<IGameListener> listeners, int turnPause) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -217,7 +223,7 @@ public class Game {
                 Long s = seed;
                 if (s == null) s = System.currentTimeMillis();
                 s += offset;
-                game = runOne(gt, null, players, s, randomizeParameters, listeners, null);
+                game = runOne(gt, null, players, s, randomizeParameters, listeners, null, turnPause);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                     offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
@@ -265,7 +271,7 @@ public class Game {
      * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, int nRepetitions,
-                               long[] seeds, ActionController ac, boolean randomizeParameters, List<IGameListener> listeners) {
+                               long[] seeds, ActionController ac, boolean randomizeParameters, List<IGameListener> listeners, int turnPause) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -285,7 +291,7 @@ public class Game {
 
             // Play n repetitions of this game and record player results
             for (int i = 0; i < nRepetitions; i++) {
-                Game game = runOne(gt, null, players, seeds[i], randomizeParameters, listeners, null);
+                Game game = runOne(gt, null, players, seeds[i], randomizeParameters, listeners, null, turnPause);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
                 }
@@ -487,6 +493,16 @@ public class Game {
     }
 
     public final void oneAction() {
+
+        // we pause before each action is taken if running with a delay (e.g. for video recording with random players)
+        if (turnPause > 0)
+            synchronized (this) {
+                try {
+                    wait(turnPause);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
 
         // This is the next player to be asked for a decision
         int activePlayer = gameState.getCurrentPlayer();
@@ -891,6 +907,7 @@ public class Game {
         String gameType = Utils.getArg(args, "game", "Pandemic");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int playerCount = Utils.getArg(args, "nPlayers", 2);
+        int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
 
         ActionController ac = new ActionController(); //null;
@@ -915,7 +932,7 @@ public class Game {
         String gameParams = "data/pandemic/param-config.json"; //null;
 
         /* 5. Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null);
+        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);

@@ -11,6 +11,7 @@ import players.human.ActionController;
 
 import javax.swing.Timer;
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
@@ -34,17 +35,17 @@ public class Frontend extends GUI {
 
         JPanel playerSelect = new JPanel();
         playerSelect.setLayout(new BoxLayout(playerSelect, BoxLayout.Y_AXIS));
-        JPanel nPlayers = new JPanel();
+        JPanel nPlayers = new JPanel(new BorderLayout(5, 5));
         playerSelect.add(nPlayers);
-        JLabel nPlayersText = new JLabel("# players (max " + nMaxPlayers + "):");
-        nPlayers.add(nPlayersText);
+        JLabel nPlayersText = new JLabel("  # players (max " + nMaxPlayers + "):");
+        nPlayers.add(BorderLayout.WEST, nPlayersText);
         JTextField nPlayerField = new JTextField("" + defaultNPlayers, 10);  // integer of this is n players
-        nPlayers.add(nPlayerField);
+        nPlayers.add(BorderLayout.CENTER, nPlayerField);
 
         // Game type and parameters selection
 
-        JPanel gameSelect = new JPanel();
-        gameSelect.add(new JLabel("Game type:"));
+        JPanel gameSelect = new JPanel(new BorderLayout(5, 5));
+        gameSelect.add(BorderLayout.WEST, new JLabel("  Game type:"));
         String[] gameNames = new String[GameType.values().length];
         TunableParameters[] gameParameters = new TunableParameters[GameType.values().length];
         JFrame[] gameParameterEditWindow = new JFrame[GameType.values().length];
@@ -82,21 +83,20 @@ public class Frontend extends GUI {
             }
         }
         GameType firstGameType = GameType.valueOf(gameNames[0]);
-        nPlayersText.setText("# players (min " + firstGameType.getMinPlayers() + ", max " + firstGameType.getMaxPlayers() + "):");
+        nPlayersText.setText("  # players (min " + firstGameType.getMinPlayers() + ", max " + firstGameType.getMaxPlayers() + "):");
 
         JComboBox<String> gameOptions = new JComboBox<>(gameNames);  // index of this selection is game
-        gameSelect.add(gameOptions);
+        gameSelect.add(BorderLayout.CENTER, gameOptions);
         JButton gameParameterEdit = new JButton("Edit");
-        gameParameterEdit.setVisible(false);
         gameOptions.addActionListener(e -> {
             int idx = gameOptions.getSelectedIndex();
             gameParameterEdit.setVisible(gameParameterEditWindow[idx] != null);
 
             GameType gameType = GameType.valueOf((String) gameOptions.getSelectedItem());
-            nPlayersText.setText("# players (min " + gameType.getMinPlayers() + ", max " + gameType.getMaxPlayers() + "):");
+            nPlayersText.setText("  # players (min " + gameType.getMinPlayers() + ", max " + gameType.getMaxPlayers() + "):");
             pack();
         });
-        gameSelect.add(gameParameterEdit);
+        gameSelect.add(BorderLayout.EAST, gameParameterEdit);
         gameParameterEdit.addActionListener(e -> {
             int idx = gameOptions.getSelectedIndex();
             if (gameParameterEditWindow[idx] != null) {
@@ -147,11 +147,11 @@ public class Frontend extends GUI {
             }
         }
         for (int i = 0; i < nMaxPlayers; i++) {
-            playerOptions[i] = new JPanel();
+            playerOptions[i] = new JPanel(new BorderLayout(5, 5));
             if (i >= defaultNPlayers) {
                 playerOptions[i].setVisible(false);
             }
-            playerOptions[i].add(new JLabel("Player " + i + ":"));
+            playerOptions[i].add(BorderLayout.WEST, new JLabel("  Player " + i + ":"));
             JButton paramButton = new JButton("Edit");
             paramButton.setVisible(false);
             playerOptionsChoice[i] = new JComboBox<>(playerOptionsString);
@@ -170,8 +170,8 @@ public class Frontend extends GUI {
                 });
                 pack();
             });
-            playerOptions[i].add(playerOptionsChoice[i]);
-            playerOptions[i].add(paramButton);
+            playerOptions[i].add(BorderLayout.CENTER, playerOptionsChoice[i]);
+            playerOptions[i].add(BorderLayout.EAST, paramButton);
             playerSelect.add(playerOptions[i]);
         }
         JButton updateNPlayers = new JButton("Update");
@@ -193,25 +193,28 @@ public class Frontend extends GUI {
                 }
             }
         });
-        nPlayers.add(updateNPlayers);
+        nPlayers.add(BorderLayout.EAST, updateNPlayers);
 
         // Select visuals on/off
-
-        JPanel visualSelect = new JPanel();
-        visualSelect.add(new JLabel("Visuals ON/OFF:"));
+        JPanel visualSelect = new JPanel(new BorderLayout(5, 5));
+        visualSelect.add(BorderLayout.WEST, new JLabel("  Visuals ON/OFF:"));
         JComboBox<Boolean> visualOptions = new JComboBox<>(new Boolean[]{false, true}); // index here is visuals on/off
         visualOptions.setSelectedItem(true);
-        visualSelect.add(visualOptions);
+        visualSelect.add(BorderLayout.EAST, visualOptions);
+
+        JPanel turnPause = new JPanel(new BorderLayout(5, 5));
+        turnPause.add(BorderLayout.WEST, new JLabel("  Pause between turns (ms):"));
+        JTextField turnPauseValue = new JTextField("    200");
+        turnPause.add(BorderLayout.EAST, turnPauseValue);
 
         // Select random seed
-
-        JPanel seedSelect = new JPanel();
-        seedSelect.add(new JLabel("Seed:"));
+        JPanel seedSelect = new JPanel(new BorderLayout(5, 5));
+        seedSelect.add(BorderLayout.WEST, new JLabel("  Seed:"));
         JTextField seedOption = new JTextField("" + System.currentTimeMillis());  // integer of this is seed
         JButton seedRefresh = new JButton("Refresh");
         seedRefresh.addActionListener(e -> seedOption.setText("" + System.currentTimeMillis()));
-        seedSelect.add(seedOption);
-        seedSelect.add(seedRefresh);
+        seedSelect.add(BorderLayout.CENTER,seedOption);
+        seedSelect.add(BorderLayout.EAST, seedRefresh);
 
         // Game run core parameters select
         CoreParameters coreParameters = new CoreParameters();
@@ -220,13 +223,15 @@ public class Frontend extends GUI {
         HashMap<String, JComboBox<Object>> coreParameterValueOptions = new HashMap<>();
         for (String param : coreParameters.getParameterNames()) {
             JPanel paramPanel = new JPanel();
-            paramPanel.add(new JLabel(param));
+            paramPanel.setLayout(new BorderLayout(5, 5));
+            paramPanel.add(BorderLayout.WEST, new JLabel(String.format("  %-40s", param)));
+            paramPanel.add(BorderLayout.CENTER, new JPanel());
             List<Object> values = coreParameters.getPossibleValues(param);
             JComboBox<Object> valueOptions = new JComboBox<>(values.toArray());
             valueOptions.setSelectedItem(coreParameters.getDefaultParameterValue(param));
             coreParameterValueOptions.put(param, valueOptions);
-            paramPanel.add(valueOptions);
-            gameRunParamSelect.add(paramPanel);
+            paramPanel.add(BorderLayout.EAST, valueOptions);
+            gameRunParamSelect.add(leftJustify(paramPanel));
         }
 
         // Empty panel to hold game when play button is pressed
@@ -284,7 +289,11 @@ public class Frontend extends GUI {
                 if (gameRunning != null) {
                     // Reset game instance, passing the players for this game
                     gameRunning.reset(players);
-
+                    try {
+                        gameRunning.setTurnPause(Integer.parseInt(turnPauseValue.getText().trim()));
+                    } catch (NumberFormatException notAnInteger) {
+                        // just proceed without collapsing in a heap
+                    }
                     // Find core parameters
                     for (String param : coreParameterValueOptions.keySet()) {
                         coreParameters.setParameterValue(param, coreParameterValueOptions.get(param).getSelectedItem());
@@ -368,10 +377,11 @@ public class Frontend extends GUI {
 
         JPanel gameOptionFullPanel = new JPanel();
         gameOptionFullPanel.setLayout(new BoxLayout(gameOptionFullPanel, BoxLayout.Y_AXIS));
-        gameOptionFullPanel.add(gameSelect);
-        gameOptionFullPanel.add(playerSelect);
-        gameOptionFullPanel.add(visualSelect);
-        gameOptionFullPanel.add(seedSelect);
+        gameOptionFullPanel.add(leftJustify(gameSelect));
+        gameOptionFullPanel.add(leftJustify(playerSelect));
+        gameOptionFullPanel.add(leftJustify(visualSelect));
+        gameOptionFullPanel.add(leftJustify(turnPause));
+        gameOptionFullPanel.add(leftJustify(seedSelect));
         gameOptionFullPanel.add(new JSeparator());
         gameOptionFullPanel.add(gameRunParamSelect);
         gameOptionFullPanel.add(new JSeparator());
@@ -404,6 +414,15 @@ public class Frontend extends GUI {
 
         // Frame properties
         setFrameProperties();
+    }
+
+    private Component leftJustify(JPanel panel) {
+        Box b = Box.createHorizontalBox();
+//        b.add(Box.createHorizontalStrut(10));
+        b.add(panel);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        b.add(Box.createHorizontalGlue());
+        return b;
     }
 
     public static void main(String[] args) {
@@ -476,13 +495,13 @@ public class Frontend extends GUI {
         HashMap<String, JComboBox<Object>> paramValueOptions = new HashMap<>();
         frame.getContentPane().removeAll();
         for (String param : paramNames) {
-            JPanel paramPanel = new JPanel();
-            paramPanel.add(new JLabel(param));
+            JPanel paramPanel = new JPanel(new BorderLayout());
+            paramPanel.add(BorderLayout.WEST, new JLabel("  " + param));
             List<Object> values = pp.getPossibleValues(param);
             JComboBox<Object> valueOptions = new JComboBox<>(values.toArray());
             valueOptions.setSelectedItem(pp.getDefaultParameterValue(param));
             paramValueOptions.put(param, valueOptions);
-            paramPanel.add(valueOptions);
+            paramPanel.add(BorderLayout.EAST, valueOptions);
             frame.getContentPane().add(paramPanel);
         }
         return paramValueOptions;
