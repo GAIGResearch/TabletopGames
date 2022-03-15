@@ -486,6 +486,21 @@ public class Frontend extends GUI {
                 return nextPlayer.getAction(copyState, availableActions);
             }).collect(Collectors.groupingBy(action -> action, Collectors.counting()));
             sampledActionsForNextDecision.putAll(temp);
+
+            if (showAIWindow) {
+                JFrame AI_debug = new JFrame();
+                AI_debug.setTitle(String.format("Player %d, Tick %3d", nextPlayerID, gameRunning.getTick()));
+                AITableModel AIDecisions = new AITableModel(sampledActionsForNextDecision);
+                JTable table = new JTable(AIDecisions);
+                JScrollPane scrollPane = new JScrollPane(table);
+                table.setFillsViewportHeight(true);
+                AI_debug.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                AI_debug.add(scrollPane);
+                AI_debug.revalidate();
+                AI_debug.pack();
+                AI_debug.setVisible(true);
+                // AI_debug.repaint();
+            }
         }
     }
 
@@ -501,18 +516,6 @@ public class Frontend extends GUI {
         AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
         if (gui != null && gameState.isNotTerminal()) {
             gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, sampledActionsForNextDecision);
-            if (!gameRunning.isHumanToMove() && showAIWindow) {
-                JFrame AI_debug = new JFrame();
-                AITableModel AIDecisions = new AITableModel(sampledActionsForNextDecision);
-                JTable table = new JTable(AIDecisions);
-                JScrollPane scrollPane = new JScrollPane(table);
-                table.setFillsViewportHeight(true);
-                AI_debug.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                AI_debug.add(scrollPane);
-                AI_debug.setVisible(false);
-                AI_debug.revalidate();
-                AI_debug.pack();
-            }
             if (!gameRunning.isHumanToMove() && paused && showAll) {
                 // in this case we allow a human to override an AI decision
                 try {

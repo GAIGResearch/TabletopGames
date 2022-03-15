@@ -6,6 +6,7 @@ import javax.swing.*;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ public class AITableModel extends AbstractTableModel {
     Class<?>[] columnClasses = new Class[]{String.class, int.class, double.class};
 
     public AITableModel(Map<core.actions.AbstractAction, Long> decisionCounts) {
-        this.decisionCounts = decisionCounts;
+        this.decisionCounts = new HashMap<>(decisionCounts);
         N = decisionCounts.values().stream().mapToInt(Long::intValue).sum();
         keys = decisionCounts.entrySet().stream()
                 .sorted((e1, e2)  -> (int) (e2.getValue() - e1.getValue()))
@@ -53,11 +54,11 @@ public class AITableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return keys.get(columnIndex).toString();
+                return keys.get(rowIndex).toString();
             case 1:
-                return decisionCounts.get(keys.get(columnIndex)).intValue();
+                return decisionCounts.get(keys.get(rowIndex)).intValue();
             case 2:
-                return ((int) (1000.0 * decisionCounts.get(keys.get(columnIndex)).intValue() / N)) / 10.0;
+                return ((int) (1000.0 * decisionCounts.get(keys.get(rowIndex)).intValue() / N)) / 10.0;
             default:
                 throw new IllegalArgumentException("Unexpected columnIndex " + columnIndex);
         }
