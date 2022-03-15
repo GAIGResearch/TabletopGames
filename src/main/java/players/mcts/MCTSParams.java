@@ -17,7 +17,7 @@ import java.util.Random;
 import java.util.function.ToDoubleBiFunction;
 import java.util.regex.Pattern;
 
-import static players.mcts.MCTSEnums.Information.*;
+import static players.mcts.MCTSEnums.Information.Open_Loop;
 import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
@@ -49,8 +49,6 @@ public class MCTSParams extends PlayerParameters {
     public AbstractPlayer opponentModel;
     public ITunableParameters opponentModelParams;
     public double exploreEpsilon = 0.1;
-    private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
-    private IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
     public boolean gatherExpertIterationData = false;
     public String expertIterationFileStem = "ExpertIterationData";
     public String advantageFunctionString = "";
@@ -61,6 +59,8 @@ public class MCTSParams extends PlayerParameters {
     public boolean normaliseRewards = true;
     public boolean nodesStoreScoreDelta = true;
     public boolean maintainMasterState = false;
+    private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
+    private IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -70,11 +70,11 @@ public class MCTSParams extends PlayerParameters {
         super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
         addTunableParameter("boltzmannTemp", 0.1);
-        addTunableParameter("rolloutLength", 10, Arrays.asList(6, 8, 10, 12, 20));
-        addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30));
+        addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
+        addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30, 100));
         addTunableParameter("epsilon", 1e-6);
-        addTunableParameter("rolloutType", MCTSEnums.Strategies.RANDOM);
-        addTunableParameter("oppModelType", MCTSEnums.Strategies.RANDOM);
+        addTunableParameter("rolloutType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
+        addTunableParameter("oppModelType", RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
         addTunableParameter("rolloutClass", "");
         addTunableParameter("oppModelClass", "");
         addTunableParameter("rolloutPolicyParams", ITunableParameters.class);
@@ -82,20 +82,20 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("opponentModel", new RandomPlayer());
         addTunableParameter("information", Open_Loop, Arrays.asList(MCTSEnums.Information.values()));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
-        addTunableParameter("treePolicy", UCB);
-        addTunableParameter("opponentTreePolicy", MaxN);
+        addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
+        addTunableParameter("opponentTreePolicy", MaxN, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
-        addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM);
-        addTunableParameter("MAST", Rollout);
-        addTunableParameter("MASTGamma", 0.5);
+        addTunableParameter("expansionPolicy", MCTSEnums.Strategies.RANDOM, Arrays.asList(MCTSEnums.Strategies.values()));
+        addTunableParameter("MAST", Rollout, Arrays.asList(MCTSEnums.MASTType.values()));
+        addTunableParameter("MASTGamma", 0.5, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("expertIteration", false);
         addTunableParameter("expIterFile", "");
         addTunableParameter("advantageFunction", "");
-        addTunableParameter("biasVisits", 0);
-        addTunableParameter("progressiveWideningConstant", 0.0);
-        addTunableParameter("progressiveWideningExponent", 0.0);
+        addTunableParameter("biasVisits", 0, Arrays.asList(0, 1, 3, 10, 30, 100));
+        addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
+        addTunableParameter("progressiveWideningExponent", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.5));
         addTunableParameter("normaliseRewards", true);
         addTunableParameter("nodesStoreScoreDelta", false);
         addTunableParameter("maintainMasterState", false);
