@@ -69,6 +69,7 @@ public class SingleTreeNode {
     private double[] totSquares;
     // Number of visits
     private int nVisits;
+    private int decisionNumber;
 
     protected SingleTreeNode() {
 
@@ -293,6 +294,7 @@ public class SingleTreeNode {
     protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
         Map<String, Object> stats = new LinkedHashMap<>();
         TreeStatistics treeStats = new TreeStatistics(root);
+        stats.put("decision", decisionNumber++);
         stats.put("round", state.getTurnOrder().getRoundCounter());
         stats.put("turn", state.getTurnOrder().getTurnCounter());
         stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
