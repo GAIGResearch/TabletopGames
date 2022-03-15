@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IGameListener;
 import evaluation.TunableParameters;
 import games.GameType;
+import gui.models.AITableModel;
 import players.PlayerParameters;
 import players.PlayerType;
 import players.human.ActionController;
@@ -27,7 +28,7 @@ public class Frontend extends GUI {
     PlayerParameters[] playerParameters, agentParameters;
     private Thread gameThread;
     private Game gameRunning;
-    private boolean showAll, paused, started;
+    private boolean showAll, paused, started, showAIWindow;
     private ActionController humanInputQueue;
 
     public Frontend() {
@@ -283,8 +284,6 @@ public class Frontend extends GUI {
                     gameRunning.setCoreParameters(coreParameters);
 
                     AbstractGUIManager gui = (humanInputQueue != null) ? gameType.createGUIManager(gamePanel, gameRunning, humanInputQueue) : null;
-                    // revalidate();
-                    // pack();
                     setFrameProperties();
 
                     guiUpdater = new Timer((int) coreParameters.frameSleepMS, event -> updateGUI(gui, frame));
@@ -315,7 +314,7 @@ public class Frontend extends GUI {
         };
 
         JButton startGame = new JButton("Play!");
-        startGame.setToolTipText("Starts a game (if none running), or Stops a runing game.");
+        startGame.setToolTipText("Starts a game (if none running), or Stops a running game.");
         startGame.addActionListener(e -> {
             started = !started;
             if (started) {
@@ -333,7 +332,6 @@ public class Frontend extends GUI {
                 // if the thread is running and paused (or human to move)
                 // and then take a single action
                 // (as long as it is not a human to move...as in this case the GUI is already in control)
-                System.out.printf("Invoking oneAction from FrontEnd for player %d%n", gameRunning.getGameState().getCurrentPlayer());
                 synchronized (gameRunning) {
                     gameRunning.oneAction();
                     gameRunning.notifyAll();
@@ -341,17 +339,32 @@ public class Frontend extends GUI {
             }
         });
 
+        JButton AIAnalysis = new JButton("AI Window OFF");
+        AIAnalysis.setToolTipText("Toggle ON/OFF for AI Window");
+        AIAnalysis.setEnabled(false);
+        AIAnalysis.addActionListener(e -> {
+            showAIWindow = !showAIWindow;
+            AIAnalysis.setText(showAIWindow ? "AI Window ON" : "AI Window OFF");
+        });
+
         JButton allActions = new JButton("Show All!");
         allActions.setToolTipText("Set to either show actions for all players on their turn (All), or just those of a human player (Self).");
         allActions.addActionListener(e -> {
             showAll = !showAll;
+            AIAnalysis.setEnabled(showAll);
+            if (!showAll) {
+                showAIWindow = false;
+                AIAnalysis.setText("AI Window OFF");
+            }
             allActions.setText(showAll ? "Show Self" : "Show All");
         });
+
 
         gameControlButtons.add(startGame);
         gameControlButtons.add(pauseGame);
         gameControlButtons.add(oneAction);
         gameControlButtons.add(allActions);
+        gameControlButtons.add(AIAnalysis);
 
         // todo tournaments, game report, player report etc
 
@@ -411,7 +424,6 @@ public class Frontend extends GUI {
             JButton submit = new JButton("Submit");
             submit.addActionListener(e -> {
                 for (String param : paramNames) {
-                    System.out.printf("Setting %s%n", param);
                     playerParameters[playerIndex].setParameterValue(param, paramValueOptions.get(param).getSelectedItem());
                     agentParameters[agentIndex].setParameterValue(param, paramValueOptions.get(param).getSelectedItem());
                     // we also update the central copy, so this change is inherited by future new players
@@ -489,6 +501,18 @@ public class Frontend extends GUI {
         AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
         if (gui != null && gameState.isNotTerminal()) {
             gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, sampledActionsForNextDecision);
+            if (!gameRunning.isHumanToMove() && showAIWindow) {
+                JFrame AI_debug = new JFrame();
+                AITableModel AIDecisions = new AITableModel(sampledActionsForNextDecision);
+                JTable table = new JTable(AIDecisions);
+                JScrollPane scrollPane = new JScrollPane(table);
+                table.setFillsViewportHeight(true);
+                AI_debug.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                AI_debug.add(scrollPane);
+                AI_debug.setVisible(false);
+                AI_debug.revalidate();
+                AI_debug.pack();
+            }
             if (!gameRunning.isHumanToMove() && paused && showAll) {
                 // in this case we allow a human to override an AI decision
                 try {

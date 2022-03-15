@@ -104,7 +104,7 @@ public class MCTSPlayer extends AbstractPlayer {
         MASTStats = root.MASTStatistics;
         // Return best action
         if (root.children.size() > 2 * actions.size())
-            throw new AssertionError("Unexpectedly large number");
+            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
         return root.bestAction();
     }
 
