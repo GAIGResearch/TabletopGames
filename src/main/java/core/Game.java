@@ -343,7 +343,7 @@ public class Game {
         int currentPlayer = gameState.getCurrentPlayer();
         AbstractPlayer player = getPlayers().get(currentPlayer);
         if (gui != null) {
-            gui.update(player, gameState, isHumanToMove(), new HashMap<>());
+            gui.update(player, gameState, isHumanToMove());
             frame.repaint();
             videoRecordFrame(frame);
         }

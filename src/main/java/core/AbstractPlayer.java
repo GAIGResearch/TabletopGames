@@ -4,7 +4,9 @@ import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import utilities.SummaryLogger;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractPlayer {
 
@@ -96,4 +98,9 @@ public abstract class AbstractPlayer {
     }
 
     public abstract AbstractPlayer copy();
+
+    // override this to provide information on the last decision taken
+    public Map<AbstractAction, Map<String, Object>> getDecisionStats() {
+            return Collections.emptyMap();
+    }
 }

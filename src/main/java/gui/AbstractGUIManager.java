@@ -11,33 +11,28 @@ import java.awt.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
 
 @SuppressWarnings("rawtypes")
 public abstract class AbstractGUIManager {
-    protected GamePanel parent;
-
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
     public static int defaultInfoPanelHeight = 180;
     public static int defaultCardWidth = 100, defaultCardHeight = 80;
     public static int defaultBoardWidth = 400, defaultBoardHeight = 300;
     public static int defaultDisplayWidth = 500, defaultDisplayHeight = 400;
-
+    protected GamePanel parent;
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
     protected ActionController ac;
     protected JLabel gameStatus, playerStatus, turnOwner, turn, currentPlayer, gamePhase, playerScores;
     protected JTextPane historyInfo;
     protected JScrollPane historyContainer;
+    protected int width, height;
     private int actionsAtLastUpdate;
     private WindowInput wi;
-
-    protected int width, height;
 
     public AbstractGUIManager(GamePanel parent, ActionController ac, int maxActionSpace) {
         this.ac = ac;
@@ -72,28 +67,13 @@ public abstract class AbstractGUIManager {
      * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
-            int totalActionCount = (int) sampledActions.values().stream().mapToLong(i -> i).sum();
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
-                if (totalActionCount > 0) {
-                    double percentChosen = sampledActions.getOrDefault(actions.get(i), 0L).doubleValue() / totalActionCount;
-                    if (percentChosen < 0.0) percentChosen = 0.0;
-                    if (percentChosen > 1.0) percentChosen = 1.0;
-                    int[] targetRGB = new int[]{60, 179, 113};
-                    // percentChosen of 1.0 gives us the target colour (green), and 0.0 gives White
-                    Color background = new Color(
-                            targetRGB[0] + (int) ((1.0 - percentChosen) * (255 - targetRGB[0])),
-                            targetRGB[1] + (int) ((1.0 - percentChosen) * (255 - targetRGB[1])),
-                            targetRGB[2] + (int) ((1.0 - percentChosen) * (255 - targetRGB[2]))
-                    );
-                    actionButtons[i].setBackground(background);
-                } else {
-                    actionButtons[i].setBackground(Color.white);
-                }
+                actionButtons[i].setBackground(Color.white);
             }
             for (int i = actions.size(); i < actionButtons.length; i++) {
                 actionButtons[i].setVisible(false);
@@ -210,12 +190,12 @@ public abstract class AbstractGUIManager {
      * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions, Map<AbstractAction, Long> sampledActions) {
+    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions) {
         updateGameStateInfo(gameState);
         _update(player, gameState);
         if (actionButtons != null)
             if (showActions)
-                updateActionButtons(player, gameState, sampledActions);
+                updateActionButtons(player, gameState);
             else
                 resetActionButtons();
         parent.repaint();

@@ -15,14 +15,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Frontend extends GUI {
     private final int nMaxPlayers = 20;
     private final int defaultNPlayers = 2;
-    private final int actionsToSample = 20;
-    private final Map<core.actions.AbstractAction, Long> sampledActionsForNextDecision = new HashMap<>();
     Timer guiUpdater;
     JFrame[] gameParameterEditWindow, playerParameterEditWindow;
     PlayerParameters[] playerParameters, agentParameters;
@@ -139,9 +135,8 @@ public class Frontend extends GUI {
 
             playerOptionsChoice[i].addActionListener(e -> {
                 int agentIndex = playerOptionsChoice[playerIdx].getSelectedIndex();
-                PlayerParameters defaultParams = agentParameters[agentIndex];
                 // set Edit button visible if we have parameters to edit; else make it invisible
-                paramButton.setVisible(defaultParams != null);
+                paramButton.setVisible(agentParameters[agentIndex] != null);
                 paramButton.removeAll();
                 // we now reset the (invisible JFrame with player parameters to match the default agent type params
                 initialisePlayerParameterWindow(playerIdx, agentIndex);
@@ -340,15 +335,15 @@ public class Frontend extends GUI {
         });
 
         JButton AIAnalysis = new JButton("AI Window OFF");
-        AIAnalysis.setToolTipText("Toggle ON/OFF for AI Window");
+        AIAnalysis.setToolTipText("Click to Toggle. If ON, pop-up window shows AI decision statistics prior to each decision.");
         AIAnalysis.setEnabled(false);
         AIAnalysis.addActionListener(e -> {
             showAIWindow = !showAIWindow;
             AIAnalysis.setText(showAIWindow ? "AI Window ON" : "AI Window OFF");
         });
 
-        JButton allActions = new JButton("Show All!");
-        allActions.setToolTipText("Set to either show actions for all players on their turn (All), or just those of a human player (Self).");
+        JButton allActions = new JButton("Showing Self");
+        allActions.setToolTipText("Click to Toggle. Either show actions for all players (All), or just those of a human player (Self).");
         allActions.addActionListener(e -> {
             showAll = !showAll;
             AIAnalysis.setEnabled(showAll);
@@ -356,7 +351,7 @@ public class Frontend extends GUI {
                 showAIWindow = false;
                 AIAnalysis.setText("AI Window OFF");
             }
-            allActions.setText(showAll ? "Show Self" : "Show All");
+            allActions.setText(showAll ? "Showing All" : "Showing Self");
         });
 
 
@@ -419,7 +414,7 @@ public class Frontend extends GUI {
         if (agentParameters[agentIndex] != null) {
             playerParameters[playerIndex] = (PlayerParameters) agentParameters[agentIndex].copy();
             List<String> paramNames = agentParameters[agentIndex].getParameterNames();
-            HashMap<String, JComboBox<Object>> paramValueOptions = createParameterWindow(paramNames, agentParameters[agentIndex], playerParameterEditWindow[playerIndex]);
+            HashMap<String, JComboBox<Object>> paramValueOptions = createParameterWindow(paramNames, playerParameters[playerIndex], playerParameterEditWindow[playerIndex]);
 
             JButton submit = new JButton("Submit");
             submit.addActionListener(e -> {
@@ -476,22 +471,23 @@ public class Frontend extends GUI {
     }
 
     private void updateSampleActions(AbstractGameState state) {
-        if (showAll && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
+        if (showAIWindow && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
             int nextPlayerID = state.getCurrentPlayer();
             AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
-            sampledActionsForNextDecision.clear();
-            Map<core.actions.AbstractAction, Long> temp = IntStream.range(0, actionsToSample).mapToObj(i -> {
-                AbstractGameState copyState = state.copy(nextPlayerID);
-                List<core.actions.AbstractAction> availableActions = gameRunning.getForwardModel().computeAvailableActions(copyState);
-                return nextPlayer.getAction(copyState, availableActions);
-            }).collect(Collectors.groupingBy(action -> action, Collectors.counting()));
-            sampledActionsForNextDecision.putAll(temp);
+            nextPlayer.getAction(state, gameRunning.getForwardModel().computeAvailableActions(state));
 
-            if (showAIWindow) {
-                JFrame AI_debug = new JFrame();
-                AI_debug.setTitle(String.format("Player %d, Tick %3d", nextPlayerID, gameRunning.getTick()));
-                AITableModel AIDecisions = new AITableModel(sampledActionsForNextDecision);
+            JFrame AI_debug = new JFrame();
+            AI_debug.setTitle(String.format("Player %d, Tick %d, Round %d, Turn %d",
+                    nextPlayerID,
+                    gameRunning.getTick(),
+                    state.getTurnOrder().getRoundCounter(),
+                    state.getTurnOrder().getTurnCounter()));
+            Map<AbstractAction, Map<String, Object>> decisionStats = nextPlayer.getDecisionStats();
+            if (decisionStats.size() > 1) {
+                AITableModel AIDecisions = new AITableModel(nextPlayer.getDecisionStats());
                 JTable table = new JTable(AIDecisions);
+                table.setAutoCreateRowSorter(true);
+                table.setDefaultRenderer(Double.class, (table1, value, isSelected, hasFocus, row, column) -> new JLabel( String.format("%.2f", value)));
                 JScrollPane scrollPane = new JScrollPane(table);
                 table.setFillsViewportHeight(true);
                 AI_debug.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -499,7 +495,6 @@ public class Frontend extends GUI {
                 AI_debug.revalidate();
                 AI_debug.pack();
                 AI_debug.setVisible(true);
-                // AI_debug.repaint();
             }
         }
     }
@@ -511,11 +506,11 @@ public class Frontend extends GUI {
      * @param gui - gui to update.
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        AbstractGameState gameState = gameRunning.getGameState();
+        AbstractGameState gameState = gameRunning.getGameState().copy();
         int currentPlayer = gameState.getCurrentPlayer();
         AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
         if (gui != null && gameState.isNotTerminal()) {
-            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, sampledActionsForNextDecision);
+            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll);
             if (!gameRunning.isHumanToMove() && paused && showAll) {
                 // in this case we allow a human to override an AI decision
                 try {
@@ -541,7 +536,7 @@ public class Frontend extends GUI {
             paramPanel.add(BorderLayout.WEST, new JLabel("  " + param));
             List<Object> values = pp.getPossibleValues(param);
             JComboBox<Object> valueOptions = new JComboBox<>(values.toArray());
-            valueOptions.setSelectedItem(pp.getDefaultParameterValue(param));
+            valueOptions.setSelectedItem(pp.getParameterValue(param));
             paramValueOptions.put(param, valueOptions);
             paramPanel.add(BorderLayout.EAST, valueOptions);
             frame.getContentPane().add(paramPanel);
