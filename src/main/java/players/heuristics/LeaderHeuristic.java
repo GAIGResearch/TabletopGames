@@ -16,10 +16,9 @@ public class LeaderHeuristic implements IStateHeuristic {
                     bestOtherScore = otherScore;
             }
         }
-        score = score - bestOtherScore;
 
         if (gs.getPlayerResults()[playerId] == Utils.GameResult.WIN)
-            return score * 2.0;
-        return score;
+            return gs.getGameScore(playerId) * 2.0 - bestOtherScore;
+        return score - bestOtherScore;
     }
 }
