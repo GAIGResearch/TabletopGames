@@ -12,7 +12,10 @@ import players.human.ActionController;
 
 import javax.swing.Timer;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 import java.util.*;
 
@@ -120,6 +123,7 @@ public class Frontend extends GUI {
         playerParameters = new PlayerParameters[nMaxPlayers];
         playerParameterEditWindow = new JFrame[nMaxPlayers];
         for (int i = 0; i < nMaxPlayers; i++) {
+            int playerIdx = i;
             playerOptions[i] = new JPanel(new BorderLayout(5, 5));
             if (i >= defaultNPlayers) {
                 playerOptions[i].setVisible(false);
@@ -127,9 +131,37 @@ public class Frontend extends GUI {
             playerOptions[i].add(BorderLayout.WEST, new JLabel("  Player " + i + ":"));
             JButton paramButton = new JButton("Edit");
             paramButton.setVisible(false);
+
+            JButton fileButton = new JButton("Load JSON");
+            fileButton.setVisible(false);
+
+            JPanel paramButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            paramButtonPanel.add(paramButton);
+            paramButtonPanel.add(fileButton);
+
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.addChoosableFileFilter(
+                    new FileNameExtensionFilter("JSON files only", "json")
+            );
+
+            fileButton.addActionListener(e -> {
+                        int retVal = fileChooser.showOpenDialog(this);
+                        if (retVal == JFileChooser.APPROVE_OPTION) {
+                            try {
+                                PlayerParameters.loadFromJSONFile(playerParameters[playerIdx], fileChooser.getSelectedFile().getPath());
+                            } catch (Exception loadingException) {
+                                System.out.println("File not loadable : " + loadingException.getMessage());
+                                int agentIdx = playerOptionsChoice[playerIdx].getSelectedIndex();
+                                playerParameters[playerIdx] = (PlayerParameters) agentParameters[agentIdx].copy();
+                            }
+                        }
+                    }
+            );
+
             playerOptionsChoice[i] = new JComboBox<>(playerOptionsString);
             playerOptionsChoice[i].setSelectedItem("Random");
-            int playerIdx = i;
+
             playerParameterEditWindow[i] = new JFrame();
             playerParameterEditWindow[i].getContentPane().setLayout(new BoxLayout(playerParameterEditWindow[i].getContentPane(), BoxLayout.Y_AXIS));
 
@@ -137,10 +169,13 @@ public class Frontend extends GUI {
                 int agentIndex = playerOptionsChoice[playerIdx].getSelectedIndex();
                 // set Edit button visible if we have parameters to edit; else make it invisible
                 paramButton.setVisible(agentParameters[agentIndex] != null);
+                fileButton.setVisible(agentParameters[agentIndex] != null);
+                // set up the player parameters with the current saved default for that agent type
+                playerParameters[playerIdx] = (PlayerParameters) agentParameters[agentIndex].copy();
+
                 paramButton.removeAll();
-                // we now reset the (invisible JFrame with player parameters to match the default agent type params
-                initialisePlayerParameterWindow(playerIdx, agentIndex);
                 paramButton.addActionListener(f -> {
+                    initialisePlayerParameterWindow(playerIdx, agentIndex);
                     playerParameterEditWindow[playerIdx].setTitle("Edit parameters " + playerOptionsChoice[playerIdx].getSelectedItem());
                     playerParameterEditWindow[playerIdx].pack();
                     playerParameterEditWindow[playerIdx].setVisible(true);
@@ -149,7 +184,7 @@ public class Frontend extends GUI {
                 pack();
             });
             playerOptions[i].add(BorderLayout.CENTER, playerOptionsChoice[i]);
-            playerOptions[i].add(BorderLayout.EAST, paramButton);
+            playerOptions[i].add(BorderLayout.EAST, paramButtonPanel);
             playerSelect.add(playerOptions[i]);
         }
         JButton updateNPlayers = new JButton("Update");
@@ -411,9 +446,8 @@ public class Frontend extends GUI {
     }
 
     private void initialisePlayerParameterWindow(int playerIndex, int agentIndex) {
-        if (agentParameters[agentIndex] != null) {
-            playerParameters[playerIndex] = (PlayerParameters) agentParameters[agentIndex].copy();
-            List<String> paramNames = agentParameters[agentIndex].getParameterNames();
+        if (playerParameters[playerIndex] != null) {
+            List<String> paramNames = playerParameters[playerIndex].getParameterNames();
             HashMap<String, JComboBox<Object>> paramValueOptions = createParameterWindow(paramNames, playerParameters[playerIndex], playerParameterEditWindow[playerIndex]);
 
             JButton submit = new JButton("Submit");
@@ -444,7 +478,6 @@ public class Frontend extends GUI {
 
     private Component leftJustify(JPanel panel) {
         Box b = Box.createHorizontalBox();
-//        b.add(Box.createHorizontalStrut(10));
         b.add(panel);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
         b.add(Box.createHorizontalGlue());
@@ -487,7 +520,7 @@ public class Frontend extends GUI {
                 AITableModel AIDecisions = new AITableModel(nextPlayer.getDecisionStats());
                 JTable table = new JTable(AIDecisions);
                 table.setAutoCreateRowSorter(true);
-                table.setDefaultRenderer(Double.class, (table1, value, isSelected, hasFocus, row, column) -> new JLabel( String.format("%.2f", value)));
+                table.setDefaultRenderer(Double.class, (table1, value, isSelected, hasFocus, row, column) -> new JLabel(String.format("%.2f", value)));
                 JScrollPane scrollPane = new JScrollPane(table);
                 table.setFillsViewportHeight(true);
                 AI_debug.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
