@@ -6,8 +6,6 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
-import games.dicemonastery.actions.GoOnPilgrimage;
-import games.dicemonastery.components.Pilgrimage;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 import utilities.Pair;
@@ -495,7 +493,7 @@ public class SingleTreeNode {
 
     /**
      * Advance the current game state with the given action, count the FM call and compute the next available actions.
-     *
+     * <p>
      * In some case Action is mutable, and will change state when advance() is called - so this method always copies
      * first for safety
      *
@@ -1017,7 +1015,8 @@ public class SingleTreeNode {
             retValue.append(String.format("\t%-50s  visits: %d (%d)\tvalue %s\n", actionName, actionVisits, effectiveVisits, valueString));
         }
 
-        retValue.append(new TreeStatistics(root));
+        if (!(root instanceof MultiTreeNode))
+            retValue.append(new TreeStatistics(root));
         return retValue.toString();
     }
 }
