@@ -1,4 +1,4 @@
-package players.mcts.test;
+package test.players.mcts;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;

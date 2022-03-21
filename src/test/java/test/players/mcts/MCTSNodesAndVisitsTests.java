@@ -1,11 +1,10 @@
-package players.mcts.test;
+package test.players.mcts;
 
 import core.*;
 import core.actions.*;
 import core.interfaces.IStatisticLogger;
 import games.dominion.DominionGame;
 import games.dominion.DominionParameters;
-import games.loveletter.*;
 import org.junit.*;
 import players.PlayerConstants;
 import players.mcts.*;
@@ -16,7 +15,7 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class MCTSNodesAndVisits {
+public class MCTSNodesAndVisitsTests {
 
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;

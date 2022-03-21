@@ -1,4 +1,4 @@
-package games.dominion.test;
+package test.games.dominion;
 
 import core.AbstractPlayer;
 import core.CoreConstants;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
-public class CoreGameLoop {
+public class TestCoreGameLoop {
 
     List<AbstractPlayer> players = Arrays.asList(new TestPlayer(),
             new TestPlayer(),
@@ -53,7 +53,7 @@ public class CoreGameLoop {
     @Test
     public void purchaseOptionsAreCorrect() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+        state.setGamePhase(DominionGamePhase.Buy);
         for (int i = 0; i < 10; i++) {
             state.spend(state.availableSpend(0));
             state.spend(-i);
@@ -90,7 +90,7 @@ public class CoreGameLoop {
     @Test
     public void endOfRoundCleanUpAsExpected() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+        state.setGamePhase(DominionGamePhase.Buy);
         state.addCard(CardType.COPPER, 0, DeckType.TABLE);
         state.addCard(CardType.COPPER, 1, DeckType.TABLE);
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
@@ -100,13 +100,13 @@ public class CoreGameLoop {
         assertEquals(0, state.getDeck(DeckType.TABLE, 0).getSize());
         assertEquals(1, state.getDeck(DeckType.TABLE, 1).getSize());
         assertEquals(6, state.getDeck(DeckType.DISCARD, 0).getSize());
-        assertEquals(DominionGameState.DominionGamePhase.Play, state.getGamePhase());
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
     }
 
     @Test
     public void buyingACard() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+        state.setGamePhase(DominionGamePhase.Buy);
         int silverAvailable = state.cardsOfType(CardType.SILVER, 0, DeckType.SUPPLY);
         BuyCard newBuy = new BuyCard(CardType.SILVER, 0);
         state.spend(-1); // to guarantee they can afford it
@@ -127,7 +127,7 @@ public class CoreGameLoop {
     @Test
     public void canBuyMoreThanOneCard() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+        state.setGamePhase(DominionGamePhase.Buy);
         BuyCard newBuy = new BuyCard(CardType.COPPER, 0);
         state.changeBuys(3);
         for (int i = 0; i < 4; i++) {
@@ -191,7 +191,7 @@ public class CoreGameLoop {
     public void cannotPlayAnActionCardDuringBuyPhase() {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.VILLAGE, 0, DeckType.HAND);
-        state.setGamePhase(DominionGameState.DominionGamePhase.Buy);
+        state.setGamePhase(DominionGamePhase.Buy);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertTrue(actions.contains(new EndPhase()));
         assertFalse(actions.contains(new SimpleAction(CardType.VILLAGE, 0)));

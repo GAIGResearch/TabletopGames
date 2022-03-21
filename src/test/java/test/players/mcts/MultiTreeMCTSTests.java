@@ -1,4 +1,4 @@
-package players.mcts.test;
+package test.players.mcts;
 
 
 import core.AbstractForwardModel;
@@ -28,7 +28,7 @@ import java.util.function.Predicate;
 
 import static org.junit.Assert.assertEquals;
 
-public class MultiTreeMCTS {
+public class MultiTreeMCTSTests {
 
 
     TestMCTSPlayer mctsPlayer;

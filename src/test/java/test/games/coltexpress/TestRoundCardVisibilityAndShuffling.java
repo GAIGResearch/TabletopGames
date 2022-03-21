@@ -1,4 +1,4 @@
-package games.coltexpress.test;
+package test.games.coltexpress;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
@@ -22,7 +22,7 @@ import static core.CoreConstants.GameEvents.ROUND_OVER;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
-public class RoundCardVisibilityAndShuffling {
+public class TestRoundCardVisibilityAndShuffling {
 
     List<AbstractPlayer> players = Arrays.asList(new RandomPlayer(),
             new RandomPlayer(),

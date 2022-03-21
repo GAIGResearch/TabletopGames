@@ -1,4 +1,4 @@
-package games.dicemonastery.test;
+package test.games.dicemonastery;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
 
-public class CoreGameLoop {
+public class CoreGameLoopTests {
 
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
     DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 4));

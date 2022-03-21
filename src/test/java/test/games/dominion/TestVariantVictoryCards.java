@@ -1,19 +1,22 @@
-package games.dominion.test;
+package test.games.dominion;
 
 import core.AbstractPlayer;
-import games.dominion.*;
-
+import games.dominion.DominionForwardModel;
+import games.dominion.DominionGame;
+import games.dominion.DominionGameState;
+import games.dominion.DominionParameters;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
-import org.junit.*;
+import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
-import static games.dominion.DominionConstants.*;
-import static java.util.stream.Collectors.*;
-import static org.junit.Assert.*;
+import static games.dominion.DominionConstants.DeckType;
+import static org.junit.Assert.assertEquals;
 
-public class VariantVictoryCards {
+public class TestVariantVictoryCards {
 
 
     Random rnd = new Random(373);

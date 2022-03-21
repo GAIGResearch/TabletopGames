@@ -1,21 +1,29 @@
-package games.dominion.test;
+package test.games.dominion;
 
 import core.AbstractPlayer;
-import core.actions.*;
+import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.PartialObservableDeck;
-import games.dominion.*;
-import games.dominion.DominionConstants.*;
+import games.dominion.DominionConstants.DeckType;
+import games.dominion.DominionForwardModel;
+import games.dominion.DominionGame;
+import games.dominion.DominionGameState;
+import games.dominion.DominionGameState.DominionGamePhase;
+import games.dominion.DominionParameters;
 import games.dominion.actions.*;
-import games.dominion.cards.*;
-import games.dominion.DominionGameState.*;
-import org.junit.*;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
+import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
-public class BaseActionCards {
+public class BaseActionCardsTest {
 
     Random rnd = new Random(373);
     List<AbstractPlayer> players = Arrays.asList(new TestPlayer(),

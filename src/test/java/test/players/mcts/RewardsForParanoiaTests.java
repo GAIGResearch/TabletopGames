@@ -1,11 +1,9 @@
-package players.mcts.test;
+package test.players.mcts;
 
 import core.*;
 import core.actions.*;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
-import games.loveletter.*;
-import games.virus.*;
 import org.junit.*;
 import players.PlayerConstants;
 import players.mcts.*;
@@ -20,7 +18,7 @@ import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
 
-public class RewardsForParanoia {
+public class RewardsForParanoiaTests {
 
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;

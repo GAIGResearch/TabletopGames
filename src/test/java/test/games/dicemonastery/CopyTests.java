@@ -1,4 +1,4 @@
-package games.dicemonastery.test;
+package test.games.dicemonastery;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;

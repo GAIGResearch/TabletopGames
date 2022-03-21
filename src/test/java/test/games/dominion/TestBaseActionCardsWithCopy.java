@@ -1,9 +1,8 @@
-package games.dominion.test;
+package test.games.dominion;
 
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.components.PartialObservableDeck;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGame;
@@ -19,9 +18,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
-public class BaseActionCardsWithCopy {
+public class TestBaseActionCardsWithCopy {
 
     Random rnd = new Random(373);
     List<AbstractPlayer> players = Arrays.asList(new TestPlayer(),

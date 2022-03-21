@@ -1,4 +1,4 @@
-package games.dicemonastery.test;
+package test.games.dicemonastery;
 
 import core.components.Component;
 import games.dicemonastery.DiceMonasteryConstants.ActionArea;
@@ -15,7 +15,7 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea.DORMITORY;
 import static java.util.stream.Collectors.toMap;
 import static org.junit.Assert.assertEquals;
 
-public class vOneEight {
+public class vOneEightTests {
 
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
     DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 3));

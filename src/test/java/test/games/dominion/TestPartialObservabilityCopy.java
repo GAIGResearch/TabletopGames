@@ -1,24 +1,32 @@
-package games.dominion.test;
+package test.games.dominion;
 
 
 import core.AbstractPlayer;
-import core.components.*;
-import games.dominion.*;
-import games.dominion.DominionConstants.*;
+import core.components.Deck;
+import core.components.PartialObservableDeck;
+import games.dominion.DominionConstants.DeckType;
+import games.dominion.DominionForwardModel;
+import games.dominion.DominionGame;
+import games.dominion.DominionGameState;
+import games.dominion.DominionParameters;
 import games.dominion.actions.MoatReaction;
 import games.dominion.actions.MoveCard;
-import games.dominion.cards.*;
-import org.junit.*;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
+import org.junit.Before;
+import org.junit.Test;
 
-import static games.dominion.cards.CardType.*;
-import static org.junit.Assert.*;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.*;
+import static games.dominion.cards.CardType.*;
+import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.groupingBy;
+import static org.junit.Assert.*;
 
-public class PartialObservabilityCopy {
+public class TestPartialObservabilityCopy {
 
     List<AbstractPlayer> players = Arrays.asList(new TestPlayer(),
             new TestPlayer(),
