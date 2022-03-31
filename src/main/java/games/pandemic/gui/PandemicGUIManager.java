@@ -81,6 +81,9 @@ public class PandemicGUIManager extends AbstractGUIManager {
         highlights[1] = boardView.getHighlights().keySet();
         System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
 
+        boardView.setPlayerHighlights(playerHighlights);
+        boardView.setCardHandHighlights(handCardHighlights);
+
         gameTurnStep = new JLabel();
         JPanel gameStateInfo = createGameStateInfoPanel(gameState);
         JPanel playerAreas = createPlayerAreas();
