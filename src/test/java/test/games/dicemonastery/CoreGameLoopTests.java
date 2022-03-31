@@ -450,7 +450,7 @@ public class CoreGameLoopTests {
 
         int newPips = state.monksIn(null, 1).stream().mapToInt(Monk::getPiety).sum();
         assertEquals(totalPips - monksP1.size() + totalOners + monksInChapelWhoWillPipUp + monksOnPilgrimage - monksInChapelWhoWillRetire * 6, newPips);
-        assertEquals(10 - monksP1.size() + monksOnPilgrimage, state.getVictoryPoints(1));
+        assertEquals(10 - monksP1.size() + monksOnPilgrimage, state.getVictoryPoints(1), 1);
     }
 
     @Test
@@ -531,6 +531,7 @@ public class CoreGameLoopTests {
 
         assertEquals(0, state.getCurrentPlayer());
         state.monksIn(DORMITORY, 1).forEach(state::retireMonk);  // retire all of P1's monks
+        state.monksIn(PILGRIMAGE, 1).forEach(state::retireMonk);  // retire all of P1's monks on pilgrimage
         state.createMonk(6, 1); // and give them a P6 monk to retire
         assertEquals(1, state.monksIn(DORMITORY, 1).size());
         fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));

@@ -803,9 +803,9 @@ public class ActionTests {
 
         // first we clear out any items the player may have acquired to date
         state.addResource(player, VELLUM, -state.getResource(player, VELLUM, STOREROOM));
-        state.addResource(player, CANDLE, -state.getResource(player, VELLUM, STOREROOM));
+        state.addResource(player, CANDLE, -state.getResource(player, CANDLE, STOREROOM));
         for (Resource ink : Resource.values()) {
-            if (ink.isInk)
+            if (ink.isInk || ink.isPigment)
                 state.addResource(player, ink, -state.getResource(player, ink, STOREROOM));
         }
 
@@ -863,10 +863,15 @@ public class ActionTests {
 
         int player = state.getCurrentPlayer();
 
+        // we reset ink inventory (as a player may have bought one in the Market at random)
+        state.addResource(player, PALE_GREEN_INK, -state.getResource(player, PALE_GREEN_INK, STOREROOM));
         state.addResource(player, PALE_GREEN_INK, 1);
+        state.addResource(player, PALE_BLUE_INK, -state.getResource(player, PALE_BLUE_INK, STOREROOM));
         state.addResource(player, PALE_BLUE_INK, 2);
+        state.addResource(player, PALE_RED_INK, -state.getResource(player, PALE_RED_INK, STOREROOM));
         state.addResource(player, PALE_RED_INK, 3);
         state.addResource(player, VELLUM, 3);
+        state.addResource(player, CANDLE, -state.getResource(player, CANDLE, STOREROOM));
         state.addResource(player, CANDLE, 3);
 
         WriteText writeText = new WriteText(epistle, 4);
@@ -878,6 +883,8 @@ public class ActionTests {
         assertTrue(availableActions.contains(new ChooseInk(PALE_BLUE_INK)));
         assertTrue(availableActions.contains(new ChooseInk(PALE_RED_INK)));
         assertTrue(availableActions.contains(new ChooseInk(PALE_GREEN_INK)));
+
+        assertEquals(3, state.getResource(player, PALE_RED_INK, STOREROOM));
 
         fm.next(state, new ChooseInk(PALE_RED_INK));
         availableActions = fm.computeAvailableActions(state);
@@ -950,8 +957,8 @@ public class ActionTests {
         int retired = state.monksIn(RETIRED, player).size();
         int pietyCount = state.monksIn(null, player).stream().mapToInt(Monk::getPiety).sum();
 
-        Map<Integer, Integer> startingPieties = state.monksIn(CHAPEL, player).stream()
-                .collect(toMap(Monk::getComponentID, Monk::getPiety));
+        Map<Integer, List<Monk>> startingPieties = state.monksIn(CHAPEL, player).stream()
+                .collect(groupingBy(Monk::getPiety));
         assertEquals(startingPieties.keySet().size(), fm.computeAvailableActions(state).size());
         assertTrue(fm.computeAvailableActions(state).stream().allMatch(a -> a instanceof PromoteMonk));
         PromoteMonk action = (PromoteMonk) fm.computeAvailableActions(state).get(0);
