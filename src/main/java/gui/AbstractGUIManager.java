@@ -72,7 +72,7 @@ public abstract class AbstractGUIManager {
      * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && !(actionButtons == null)) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {

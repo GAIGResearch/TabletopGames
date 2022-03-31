@@ -403,7 +403,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
     }
 
     @Override
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         int id = player.getPlayerID();
         List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
         resetActionButtons();
