@@ -556,7 +556,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
                         }
                     } else {
                         int deckId = ((DrawCard) action).getDeckTo();
-                        int otherId = gameState.getComponentById(deckId).getOwnerId();
+                        int otherId = gameState.getComponentById(deckId).getOwnerId();  // TODO: Sometimes this deck is not found and throws null exception, investigate
                         if (isCardHighlighted(action.getCard(gameState), id) && playerHighlights.contains(otherId)) {
                             // Give card
                             // card in hand selected and other player, show this action as available

@@ -27,13 +27,13 @@ import games.pandemic.rules.gameOver.GameOverDrawCards;
 import games.pandemic.rules.gameOver.GameOverInfection;
 import games.pandemic.rules.gameOver.GameOverOutbreak;
 import games.pandemic.rules.rules.*;
+import gui.GameFlowDiagram;
 import utilities.Hash;
 
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
-import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
@@ -57,7 +57,8 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
 
         // Rules
         RuleNode infectCities = new InfectCities(pp.infectionRate, pp.maxCubesPerCity, pp.nCubesInfection);
-        RuleNode forceDiscardReaction = new ForceDiscardReaction();
+        RuleNode forceDiscardReaction1 = new ForceDiscardReaction();
+        RuleNode forceDiscardReaction2 = new ForceDiscardReaction();
         RuleNode epidemic2 = new EpidemicIntensify(new Random(pp.getRandomSeed()));
         RuleNode forceRPreaction = new ForceRPReaction();
         RuleNode epidemic1 = new EpidemicInfect(pp.maxCubesPerCity, pp.nCubesEpidemic);
@@ -89,8 +90,9 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         // Player hand may end up over capacity after give/take card actions, ideally this should receive parameter from other rule
         playerAction.setNext(playerHandOverCapacity1);
         playerHandOverCapacity1.setParent(playerAction);
-        playerHandOverCapacity1.setYesNo(playerActionInterrupt3, enoughActions);
-        playerActionInterrupt3.setNext(enoughActions);
+        playerHandOverCapacity1.setYesNo(forceDiscardReaction1, enoughActions);
+        forceDiscardReaction1.setNext(playerActionInterrupt3);
+        playerActionInterrupt3.setNext(playerHandOverCapacity1);
         enoughActions.setYesNo(drawCards, playerAction);  // Loop
         drawCards.setNext(firstEpidemic);
         firstEpidemic.setYesNo(epidemic1, enoughDraws);
@@ -100,9 +102,9 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         playerActionInterrupt1.setNext(epidemic2);
         epidemic2.setNext(enoughDraws);  // Loop
         enoughDraws.setYesNo(playerHandOverCapacity2, drawCards);  // Only asks current player for reaction. Loop
-        playerHandOverCapacity2.setYesNo(forceDiscardReaction, infectCities);
-        forceDiscardReaction.setNext(playerActionInterrupt2);
-        playerActionInterrupt2.setNext(infectCities);
+        playerHandOverCapacity2.setYesNo(forceDiscardReaction2, infectCities);
+        forceDiscardReaction2.setNext(playerActionInterrupt2);
+        playerActionInterrupt2.setNext(playerHandOverCapacity2);
 
         // Player reactions for playing events at the end of turn, one for each player
         RuleNode forceAllPlayersEventReaction = new ForceAllPlayerReaction();
