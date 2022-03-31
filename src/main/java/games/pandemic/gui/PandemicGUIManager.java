@@ -9,6 +9,7 @@ import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
+import core.properties.PropertyColor;
 import core.properties.PropertyString;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
@@ -20,6 +21,7 @@ import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Hash;
+import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
@@ -29,16 +31,16 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
 
+import static core.CoreConstants.*;
 import static games.pandemic.PandemicConstants.*;
 import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction;
 import static games.pandemic.gui.PandemicCardView.*;
 import static javax.swing.ScrollPaneConstants.*;
-import static core.CoreConstants.nameHash;
-import static core.CoreConstants.playerHandHash;
 
 @SuppressWarnings("rawtypes")
 public class PandemicGUIManager extends AbstractGUIManager {
     PandemicCardView[] playerCards;
+    JLabel[][] playerHandCardCounts;
     ArrayList<PandemicCardView>[] playerHands;
     ArrayList<PandemicCardView> bufferDeck;
     PandemicBoardView boardView;
@@ -112,6 +114,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
         JPanel playerHandPanel = new JPanel();
         playerCards = new PandemicCardView[nPlayers];
         playerHands = new ArrayList[nPlayers];
+        playerHandCardCounts = new JLabel[nPlayers][];
 
         JPanel playerAreas = new JPanel();
         playerAreas.setLayout(new BoxLayout(playerAreas, BoxLayout.Y_AXIS));
@@ -141,7 +144,24 @@ public class PandemicGUIManager extends AbstractGUIManager {
                 }
             });
             playerCards[i] = cv;
-            playerDef.add(cv);
+            JPanel wrapInfo = new JPanel();
+            wrapInfo.setLayout(new BoxLayout(wrapInfo, BoxLayout.Y_AXIS));
+            wrapInfo.add(cv);
+            String[] txts = new String[colors.length/2+1];
+            txts[txts.length-1] = "event: 0";
+            int idx = -1;
+            for (int c = 0; c < colors.length; c++) {
+                if (c % 2 == 0) idx++;
+                if (txts[idx] == null) txts[idx] = "";
+                txts[idx] += colors[c] + ": 0; ";
+            }
+            JLabel[] counts = new JLabel[txts.length];
+            for (int c = 0; c < txts.length; c++) {
+                counts[c] = new JLabel(txts[c]);
+                wrapInfo.add(counts[c]);
+            }
+            playerHandCardCounts[i] = counts;
+            playerDef.add(wrapInfo);
 
             JPanel hand = new JPanel();
             hand.setLayout(new BoxLayout(hand, BoxLayout.X_AXIS));
@@ -297,6 +317,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
         cK.updateComponent(cnK);
 
         for (int i = 0; i < nPlayers; i++) {
+
             Card playerCard = (Card) this.gameState.getComponent(PandemicConstants.playerCardHash, i);
             playerCards[i].updateComponent(playerCard);
 //            playerCards[i].setUsingSecondary(i == activePlayer);
@@ -304,6 +325,9 @@ public class PandemicGUIManager extends AbstractGUIManager {
 
             Deck<Card> playerHand = (Deck<Card>) this.gameState.getComponent(playerHandHash, i);
             int nCards = playerHand.getSize();
+            int[] colourCount = new int[colors.length];
+            int eventCount = 0;
+
             for (int j = 0; j < nCards; j++) {
                 Card c = playerHand.peek(j);
                 if (j < playerHands[i].size()) {
@@ -312,11 +336,25 @@ public class PandemicGUIManager extends AbstractGUIManager {
                 } else {
                     getCardView(i, c, j);
                 }
+                colourCount[Utils.indexOf(colors, ((PropertyColor)c.getProperty(colorHash)).valueStr)] ++;
+                if (c.getProperty(countryHash) == null) eventCount++;
             }
             for (int j = nCards; j < playerHands[i].size(); j++) {
                 playerHands[i].get(j).updateComponent(null);
-                if (j == 0) playerHands[i].get(j).setVisible(true);
-                else playerHands[i].get(j).setVisible(false);
+                playerHands[i].get(j).setVisible(j == 0);
+            }
+
+            // Update count of cards of colour in hand
+            String[] txts = new String[colors.length/2+1];
+            txts[txts.length-1] = "event: " + eventCount;
+            int idx = -1;
+            for (int c = 0; c < colors.length; c++) {
+                if (c % 2 == 0) idx++;
+                if (txts[idx] == null) txts[idx] = "";
+                txts[idx] += colors[c] + ": " + colourCount[c] + "; ";
+            }
+            for (int c = 0; c < txts.length; c++) {
+                playerHandCardCounts[i][c].setText(txts[c]);
             }
         }
 
