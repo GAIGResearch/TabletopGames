@@ -339,8 +339,11 @@ public class PandemicGUIManager extends AbstractGUIManager {
                 } else {
                     getCardView(i, c, j);
                 }
-                colourCount[Utils.indexOf(colors, ((PropertyColor)c.getProperty(colorHash)).valueStr)] ++;
-                if (c.getProperty(countryHash) == null) eventCount++;
+                if (c.getProperty(colorHash) != null) {
+                    colourCount[Utils.indexOf(colors, ((PropertyColor) c.getProperty(colorHash)).valueStr)]++;
+                } else {
+                    eventCount++;
+                }
             }
             for (int j = nCards; j < playerHands[i].size(); j++) {
                 playerHands[i].get(j).updateComponent(null);

@@ -83,24 +83,26 @@ class PandemicActionFactory {
         }
 
         // Discover a cure, cards of the same colour at a research station
-        ArrayList<Integer>[] colorCounter = new ArrayList[colors.length];
-        for (Card card: playerHand.getComponents()){
-            Property p  = card.getProperty(colorHash);
-            if (p != null){
-                // Only city cards have colours, events don't
-                String color = ((PropertyColor)p).valueStr;
-                int idx = indexOf(colors, color);
-                if (colorCounter[idx] == null)
-                    colorCounter[idx] = new ArrayList<>();
-                colorCounter[idx].add(card.getComponentID());
+        if (((PropertyBoolean) playerLocationNode.getProperty(researchStationHash)).value) {
+            ArrayList<Integer>[] colorCounter = new ArrayList[colors.length];
+            for (Card card : playerHand.getComponents()) {
+                Property p = card.getProperty(colorHash);
+                if (p != null) {
+                    // Only city cards have colours, events don't
+                    String color = ((PropertyColor) p).valueStr;
+                    int idx = indexOf(colors, color);
+                    if (colorCounter[idx] == null)
+                        colorCounter[idx] = new ArrayList<>();
+                    colorCounter[idx].add(card.getComponentID());
+                }
             }
-        }
-        for (int i = 0 ; i < colorCounter.length; i++){
-            if (colorCounter[i] != null){
-                if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.nCardsForCure - pp.nCardsForCureReducedBy){
-                    actions.add(new CureDisease(colors[i], colorCounter[i]));
-                } else if (colorCounter[i].size() >= pp.nCardsForCure){
-                    actions.add(new CureDisease(colors[i], colorCounter[i]));
+            for (int i = 0; i < colorCounter.length; i++) {
+                if (colorCounter[i] != null) {
+                    if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.nCardsForCure - pp.nCardsForCureReducedBy) {
+                        actions.add(new CureDisease(colors[i], colorCounter[i]));
+                    } else if (colorCounter[i].size() >= pp.nCardsForCure) {
+                        actions.add(new CureDisease(colors[i], colorCounter[i]));
+                    }
                 }
             }
         }
