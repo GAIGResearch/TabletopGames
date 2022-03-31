@@ -44,6 +44,8 @@ public class DrawCard extends AbstractAction {
         this.toIndex = 0;
     }
 
+    public DrawCard(){}
+
     @Override
     public boolean execute(AbstractGameState gs) {
         executed = true;
