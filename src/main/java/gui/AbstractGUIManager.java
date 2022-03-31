@@ -73,7 +73,7 @@ public abstract class AbstractGUIManager {
      * @param gameState - current game state to be used in updating visuals.
      */
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && !(actionButtons == null)) {
             int totalActionCount = (int) sampledActions.values().stream().mapToLong(i -> i).sum();
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
@@ -213,19 +213,19 @@ public abstract class AbstractGUIManager {
     public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions, Map<AbstractAction, Long> sampledActions) {
         updateGameStateInfo(gameState);
         _update(player, gameState);
-        if (actionButtons != null)
-            if (showActions)
-                updateActionButtons(player, gameState, sampledActions);
-            else
-                resetActionButtons();
+        if (showActions)
+            updateActionButtons(player, gameState, sampledActions);
+        else
+            resetActionButtons();
         parent.repaint();
     }
 
     protected void resetActionButtons() {
-        for (ActionButton actionButton : actionButtons) {
-            actionButton.setVisible(false);
-            actionButton.setButtonAction(null, "");
-        }
+        if (actionButtons != null)
+            for (ActionButton actionButton : actionButtons) {
+                actionButton.setVisible(false);
+                actionButton.setButtonAction(null, "");
+            }
     }
 
     /**
