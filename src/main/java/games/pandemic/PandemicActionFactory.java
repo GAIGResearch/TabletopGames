@@ -60,8 +60,7 @@ class PandemicActionFactory {
         PropertyIntArray cityInfections = (PropertyIntArray)playerLocationNode.getProperty(infectionHash);
         for (int i = 0; i < cityInfections.getValues().length; i++){
             if (cityInfections.getValues()[i] > 0){
-                boolean treatAll = false;
-                if (roleString.equals("Medic")) treatAll = true;
+                boolean treatAll = roleString.equals("Medic");
 
                 actions.add(new TreatDisease(pp.nInitialDiseaseCubes, colors[i], playerLocationName.value, treatAll));
             }

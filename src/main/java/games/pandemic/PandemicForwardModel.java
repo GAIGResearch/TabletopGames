@@ -33,6 +33,7 @@ import java.util.*;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
@@ -322,7 +323,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         }
         Deck<Card> subset = new Deck<>("Temp", HIDDEN_TO_ALL);
         for (Card c: cards.getComponents()) {
-            if (roles.contains(c.getComponentName())) {
+            if (roles.contains(c.toString())) {
                 if (roles.size() == 1) return c;
                 subset.add(c);
             }
