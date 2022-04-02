@@ -402,7 +402,8 @@ public class PandemicGUIManager extends AbstractGUIManager {
         boardView.getHighlights().clear();
     }
 
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+    @Override
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
         int id = player.getPlayerID();
         List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
         resetActionButtons();
