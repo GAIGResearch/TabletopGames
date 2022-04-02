@@ -1,4 +1,4 @@
-package players.mcts.test;
+package test.players.mcts;
 
 
 import core.AbstractForwardModel;
@@ -28,7 +28,7 @@ import java.util.function.Predicate;
 
 import static org.junit.Assert.assertEquals;
 
-public class MultiTreeMCTS {
+public class MultiTreeMCTSTests {
 
 
     TestMCTSPlayer mctsPlayer;
@@ -222,6 +222,7 @@ public class MultiTreeMCTS {
         Game game = createLoveLetter(params);
         LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
 
+        // need to call this to set up root
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
                 .getAction(state, fm.computeAvailableActions(state));
 
@@ -237,11 +238,14 @@ public class MultiTreeMCTS {
         // we allow some nodes to break this with 2000 iterations - due to simulation over conditions while still descending tree. The point is it should be small
         // or rollout finishing before we get back?
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(childrenVisitsAddUp);
-        assertEquals(0, problemNodes.size(), 40);
+        System.out.println("Problem nodes for player 0 : " + problemNodes.size());
+        assertEquals(0, problemNodes.size(), 20);
         problemNodes = mctsPlayer.getRoot(1).checkTree(childrenVisitsAddUp);
+        System.out.println("Problem nodes for player 1 : " + problemNodes.size());
         assertEquals(0, problemNodes.size(), 40);
         problemNodes = mctsPlayer.getRoot(2).checkTree(childrenVisitsAddUp);
-        assertEquals(0, problemNodes.size(), 40);
+        System.out.println("Problem nodes for player 2 : " + problemNodes.size());
+        assertEquals(0, problemNodes.size(), 80);
 
         // Now each tree should only have nodes for its player
         problemNodes = mctsPlayer.getRoot(0).checkTree(node -> node.getActor() == 0 || node.getVisits() == 1);

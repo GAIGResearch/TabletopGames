@@ -6,8 +6,6 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
-import games.dicemonastery.actions.GoOnPilgrimage;
-import games.dicemonastery.components.Pilgrimage;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 import utilities.Pair;
@@ -69,7 +67,6 @@ public class SingleTreeNode {
     private double[] totSquares;
     // Number of visits
     private int nVisits;
-    private int decisionNumber;
 
     protected SingleTreeNode() {
 
@@ -294,7 +291,6 @@ public class SingleTreeNode {
     protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
         Map<String, Object> stats = new LinkedHashMap<>();
         TreeStatistics treeStats = new TreeStatistics(root);
-        stats.put("decision", decisionNumber++);
         stats.put("round", state.getTurnOrder().getRoundCounter());
         stats.put("turn", state.getTurnOrder().getTurnCounter());
         stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
@@ -313,6 +309,12 @@ public class SingleTreeNode {
         stats.put("maxActionsAtNode", treeStats.maxActionsAtNode);
         OptionalInt maxVisits = Arrays.stream(actionVisits()).max();
         stats.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters);
+        AbstractAction bestAction = bestAction();
+        stats.put("bestAction", bestAction);
+        stats.put("bestValue", this.actionTotValue(bestAction, decisionPlayer) / this.actionVisits(bestAction));
+        stats.put("normalisedBestValue", Utils.normalise(this.actionTotValue(bestAction, decisionPlayer) / this.actionVisits(bestAction), lowReward, highReward));
+        stats.put("lowReward", this.lowReward);
+        stats.put("highReward", this.highReward);
         statsLogger.record(stats);
     }
 
@@ -495,7 +497,7 @@ public class SingleTreeNode {
 
     /**
      * Advance the current game state with the given action, count the FM call and compute the next available actions.
-     *
+     * <p>
      * In some case Action is mutable, and will change state when advance() is called - so this method always copies
      * first for safety
      *
@@ -1017,7 +1019,8 @@ public class SingleTreeNode {
             retValue.append(String.format("\t%-50s  visits: %d (%d)\tvalue %s\n", actionName, actionVisits, effectiveVisits, valueString));
         }
 
-        retValue.append(new TreeStatistics(root));
+        if (!(root instanceof MultiTreeNode))
+            retValue.append(new TreeStatistics(root));
         return retValue.toString();
     }
 }

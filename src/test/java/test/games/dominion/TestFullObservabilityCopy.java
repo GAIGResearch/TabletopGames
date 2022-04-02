@@ -1,21 +1,23 @@
-package games.dominion.test;
+package test.games.dominion;
 
-import core.AbstractPlayer;
-import core.actions.*;
 import core.components.PartialObservableDeck;
-import games.dominion.*;
-import games.dominion.DominionConstants.*;
-import games.dominion.actions.*;
-import games.dominion.cards.*;
-import games.dominion.DominionGameState.*;
-import org.junit.*;
+import games.dominion.DominionConstants.DeckType;
+import games.dominion.DominionForwardModel;
+import games.dominion.DominionGame;
+import games.dominion.DominionGameState;
+import games.dominion.DominionParameters;
+import games.dominion.actions.AttackReaction;
+import games.dominion.actions.DominionAction;
+import games.dominion.actions.Militia;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
+import org.junit.Test;
 
-import java.util.*;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
-public class FullObservabilityCopy {
+public class TestFullObservabilityCopy {
 
     DominionForwardModel fm = new DominionForwardModel();
 

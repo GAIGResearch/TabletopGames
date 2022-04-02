@@ -1,4 +1,4 @@
-package games.dicemonastery.test;
+package test.games.dicemonastery;
 
 import games.dicemonastery.*;
 import games.dicemonastery.components.Monk;

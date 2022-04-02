@@ -91,7 +91,8 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers());
 
         // Add 1 random end round card
-        // A deck works on a First In Last Out basis - so we deal the last card to be drawn first (it goes to the bottom of the deck)
+        // A deck works on a First In Last Out basis - so we deal the last card to be drawn first (it goes to the bottom of the deck
+
         cegs.rounds.add(cegs.getRandomEndRoundCard(cep));
 
         // Add random round cards

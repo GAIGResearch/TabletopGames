@@ -1,14 +1,13 @@
-package games.dominion.test;
+package test.games.dominion;
 
-import games.dominion.cards.*;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
 import org.junit.Test;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
-import static org.junit.Assert.*;
-
-public class EqualityTests {
+public class TestEquality {
 
 
     @Test

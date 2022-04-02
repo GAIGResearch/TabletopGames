@@ -1,6 +1,5 @@
-package games.dominion.test;
+package test.games.dominion;
 
-import core.*;
 import players.simple.RandomPlayer;
 
 public class TestPlayer extends RandomPlayer {

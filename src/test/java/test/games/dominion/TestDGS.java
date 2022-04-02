@@ -1,4 +1,4 @@
-package games.dominion.test;
+package test.games.dominion;
 
 import core.AbstractParameters;
 import games.dominion.DominionGameState;

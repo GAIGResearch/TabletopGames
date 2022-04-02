@@ -1,4 +1,4 @@
-package games.coltexpress.test;
+package test.games.coltexpress;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
@@ -22,7 +22,7 @@ import static core.CoreConstants.GameEvents.ROUND_OVER;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
-public class RoundCardVisibilityAndShuffling {
+public class TestRoundCardVisibilityAndShuffling {
 
     List<AbstractPlayer> players = Arrays.asList(new RandomPlayer(),
             new RandomPlayer(),
@@ -36,8 +36,9 @@ public class RoundCardVisibilityAndShuffling {
 
         // We now run through Game making random decision. Each time the round changes, we copy the state x10 and
         // check shuffling. The work is done in TestRoundEndListener()
-        game.addListener(new TestRoundEndListener());
 
+        // This checks the counts of
+        game.addListener(new TestRoundEndListener());
         game.run();
     }
 
@@ -52,7 +53,7 @@ public class RoundCardVisibilityAndShuffling {
             if (type == ROUND_OVER) {
                 ColtExpressGameState state = (ColtExpressGameState) gameState;
                 long visibleRoundCards = state.getRounds().getVisibleComponents(0).stream().filter(Objects::nonNull).count();
-       //         System.out.printf("End of Round: %d, Visible Cards: %d%n", state.getTurnOrder().getRoundCounter(), visibleRoundCards);
+                System.out.printf("End of Round: %d, Visible Cards: %d%n", state.getTurnOrder().getRoundCounter(), visibleRoundCards);
                 for (int i = 0; i < state.getTurnOrder().getRoundCounter(); i++)
                     assertTrue(state.getRounds().getVisibilityForPlayer(i, 0));
                 assertEquals(visibleRoundCards, state.getTurnOrder().getRoundCounter() + 1);
@@ -87,10 +88,16 @@ public class RoundCardVisibilityAndShuffling {
                         }
                     }
                 }
-          //      System.out.printf("Matches: %d of %d%n", matches, matches + nonMatches);
+                System.out.printf("Matches: %d of %d%n", matches, matches + nonMatches);
                 if (visibleRoundCards < 5) {// on the last round we know everything
-                    assertTrue(nonMatches > matches);
-                    assertTrue(matches > 0); // we should have something match by chance!
+                    if (visibleRoundCards == 4) {
+                        // in this case we have 1 of 3 possible cards, so expect a mean of 10/30 matches
+                        assertEquals((double) matches / (matches + nonMatches), 0.333, 0.333);
+                        assertTrue(matches > 0);
+                    } else {
+                        assertTrue(nonMatches > matches);
+                        assertTrue(matches > 0); // we should have something match by chance!
+                    }
                 }
             }
 
