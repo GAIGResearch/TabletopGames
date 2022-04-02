@@ -60,8 +60,7 @@ class PandemicActionFactory {
         PropertyIntArray cityInfections = (PropertyIntArray)playerLocationNode.getProperty(infectionHash);
         for (int i = 0; i < cityInfections.getValues().length; i++){
             if (cityInfections.getValues()[i] > 0){
-                boolean treatAll = false;
-                if (roleString.equals("Medic")) treatAll = true;
+                boolean treatAll = roleString.equals("Medic");
 
                 actions.add(new TreatDisease(pp.nInitialDiseaseCubes, colors[i], playerLocationName.value, treatAll));
             }
@@ -69,51 +68,41 @@ class PandemicActionFactory {
 
         // Share knowledge, give or take card, player can only have 7 cards
         // Both players have to be at the same city
-        List<Integer> players = ((PropertyIntArrayList)playerLocationNode.getProperty(playersHash)).getValues();
-        for (int i : players) {
+        List<Integer> playersInSameLocation = ((PropertyIntArrayList)playerLocationNode.getProperty(playersHash)).getValues();
+        for (int i : playersInSameLocation) {
             if (i != activePlayer) {
-                Deck<Card> otherDeck = (Deck<Card>) pgs.getComponent(playerHandHash, i);
-                String otherRoleString = pgs.getPlayerRole(i);
-
                 // Give card
-                for (int j = 0; j < playerHand.getSize(); j++) {
-                    Card card = playerHand.getComponents().get(j);
-                    // Researcher can give any card, others only the card that matches the city name
-                    if (roleString.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocationName)) {
-                        actions.add(new DrawCard(playerHand.getComponentID(), otherDeck.getComponentID(), j));
-                    }
-                }
+                addShareKnowledgeActions(playerLocationName, actions, activePlayer, playerHand, roleString, i);
 
                 // Take card
                 // Can take any card from the researcher or the card that matches the city if the player is in that city
-                for (int j = 0; j < otherDeck.getSize(); j++) {
-                    Card card = otherDeck.getComponents().get(j);
-                    if (otherRoleString.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocationName)) {
-                        actions.add(new DrawCard(otherDeck.getComponentID(), playerHand.getComponentID(), j));
-                    }
-                }
+                Deck<Card> otherDeck = (Deck<Card>) pgs.getComponent(playerHandHash, i);
+                String otherRoleString = pgs.getPlayerRole(i);
+                addShareKnowledgeActions(playerLocationName, actions, i, otherDeck, otherRoleString, activePlayer);
             }
         }
 
         // Discover a cure, cards of the same colour at a research station
-        ArrayList<Integer>[] colorCounter = new ArrayList[colors.length];
-        for (Card card: playerHand.getComponents()){
-            Property p  = card.getProperty(colorHash);
-            if (p != null){
-                // Only city cards have colours, events don't
-                String color = ((PropertyColor)p).valueStr;
-                int idx = indexOf(colors, color);
-                if (colorCounter[idx] == null)
-                    colorCounter[idx] = new ArrayList<>();
-                colorCounter[idx].add(card.getComponentID());
+        if (((PropertyBoolean) playerLocationNode.getProperty(researchStationHash)).value) {
+            ArrayList<Integer>[] colorCounter = new ArrayList[colors.length];
+            for (Card card : playerHand.getComponents()) {
+                Property p = card.getProperty(colorHash);
+                if (p != null) {
+                    // Only city cards have colours, events don't
+                    String color = ((PropertyColor) p).valueStr;
+                    int idx = indexOf(colors, color);
+                    if (colorCounter[idx] == null)
+                        colorCounter[idx] = new ArrayList<>();
+                    colorCounter[idx].add(card.getComponentID());
+                }
             }
-        }
-        for (int i = 0 ; i < colorCounter.length; i++){
-            if (colorCounter[i] != null){
-                if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.nCardsForCure - pp.nCardsForCureReducedBy){
-                    actions.add(new CureDisease(colors[i], colorCounter[i]));
-                } else if (colorCounter[i].size() >= pp.nCardsForCure){
-                    actions.add(new CureDisease(colors[i], colorCounter[i]));
+            for (int i = 0; i < colorCounter.length; i++) {
+                if (colorCounter[i] != null) {
+                    if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.nCardsForCure - pp.nCardsForCureReducedBy) {
+                        actions.add(new CureDisease(colors[i], colorCounter[i]));
+                    } else if (colorCounter[i].size() >= pp.nCardsForCure) {
+                        actions.add(new CureDisease(colors[i], colorCounter[i]));
+                    }
                 }
             }
         }
@@ -127,6 +116,25 @@ class PandemicActionFactory {
 
         // Done!
         return new ArrayList<>(actions);
+    }
+
+    /**
+     * Calculate possible share knowledge actions
+     * @param playerLocation - current location of players
+     * @param actions - list of actions to put the new objects in
+     * @param giver - ID of player giving a card
+     * @param giverDeck - deck of player giving a card
+     * @param giverRole - role of player giving a card
+     * @param receiver - ID of player receiving a card
+     */
+    private static void addShareKnowledgeActions(PropertyString playerLocation, Set<AbstractAction> actions,
+                                                 int giver, Deck<Card> giverDeck, String giverRole, int receiver) {
+        for (int j = 0; j < giverDeck.getSize(); j++) {
+            Card card = giverDeck.getComponents().get(j);
+            if (giverRole.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocation)) {
+                actions.add(new ShareKnowledge(giver, receiver, j));
+            }
+        }
     }
 
     /**

@@ -29,12 +29,8 @@ public class ForceDiscardReaction extends RuleNode {
     @Override
     protected boolean run(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
-        // player needs to discard N cards
-        Deck<Card> playerDeck = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
-        int nDiscards = playerDeck.getSize() - playerDeck.getCapacity();
-        for (int i = 0; i < nDiscards; i++) {
-            ((PandemicTurnOrder)pgs.getTurnOrder()).addCurrentPlayerReaction(gs);
-        }
+        // player needs to discard cards (doing 1 at a time)
+        ((PandemicTurnOrder)pgs.getTurnOrder()).addCurrentPlayerReaction(gs);
         pgs.setGamePhase(DiscardReaction);
         return false;
     }

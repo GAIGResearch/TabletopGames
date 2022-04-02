@@ -171,16 +171,18 @@ public class Frontend extends GUI {
                 paramButton.setVisible(agentParameters[agentIndex] != null);
                 fileButton.setVisible(agentParameters[agentIndex] != null);
                 // set up the player parameters with the current saved default for that agent type
-                playerParameters[playerIdx] = (PlayerParameters) agentParameters[agentIndex].copy();
 
                 paramButton.removeAll();
-                paramButton.addActionListener(f -> {
-                    initialisePlayerParameterWindow(playerIdx, agentIndex);
-                    playerParameterEditWindow[playerIdx].setTitle("Edit parameters " + playerOptionsChoice[playerIdx].getSelectedItem());
-                    playerParameterEditWindow[playerIdx].pack();
-                    playerParameterEditWindow[playerIdx].setVisible(true);
-                    playerParameterEditWindow[playerIdx].setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                });
+                try {
+                    playerParameters[playerIdx] = (PlayerParameters) agentParameters[agentIndex].copy();
+                    paramButton.addActionListener(f -> {
+                        initialisePlayerParameterWindow(playerIdx, agentIndex);
+                        playerParameterEditWindow[playerIdx].setTitle("Edit parameters " + playerOptionsChoice[playerIdx].getSelectedItem());
+                        playerParameterEditWindow[playerIdx].pack();
+                        playerParameterEditWindow[playerIdx].setVisible(true);
+                        playerParameterEditWindow[playerIdx].setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                    });
+                } catch (Exception ignored) {}
                 pack();
             });
             playerOptions[i].add(BorderLayout.CENTER, playerOptionsChoice[i]);
