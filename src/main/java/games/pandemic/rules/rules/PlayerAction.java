@@ -69,8 +69,8 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
                 // Player hand may be over capacity, set parameter to inform next decision
                 Deck<Card> deckTo = (Deck<Card>) gs.getComponentById(((DrawCard) action).getDeckTo());
                 Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
-                if (deckTo.isOverCapacity()) playerHandOverCapacity = deckTo.getOwnerId();
-                else if (playerHand.isOverCapacity()) playerHandOverCapacity = playerIdx;
+                if (deckTo != null && deckTo.isOverCapacity()) playerHandOverCapacity = deckTo.getOwnerId();
+                else if (playerHand != null && playerHand.isOverCapacity()) playerHandOverCapacity = playerIdx;
                 else playerHandOverCapacity = -1;
             }
 
