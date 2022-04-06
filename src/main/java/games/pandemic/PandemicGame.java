@@ -66,10 +66,9 @@ public class PandemicGame extends Game {
         return game;
     }
 
-    public static void runWithStats() {
+    public static void runWithStats(String config, int nPlayers) {
         String logFile = "results.csv";
-        ActionController ac = null; // new ActionController();
-        int nPlayers = 4;
+        ActionController ac =  null; // new ActionController();
         int nRepetition = 10;
 
         // logging setup
@@ -81,12 +80,12 @@ public class PandemicGame extends Game {
         List<AbstractPlayer> players = new ArrayList<>();
 
         for (int i = 0; i < nPlayers; i++){
-//            players.add(new MCTSPlayer());
-            players.add(new RandomPlayer());
+            players.add(new MCTSPlayer());
+//            players.add(new RandomPlayer());
         }
 
         PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
-        runCompetition("data/pandemic/param-config-easy.json", players, params.getRandomSeed(), false, listeners, nRepetition, ac);
+        runCompetition(config, players, params.getRandomSeed(), false, listeners, nRepetition, ac);
         logger.processDataAndFinish();
     }
 
@@ -152,9 +151,9 @@ public class PandemicGame extends Game {
          * Settings: configuration file, ac (visuals on if initialised, off if null), number of players,
          * number of repetitions per player, list of players to test.
          */
-        String configFile = "data/pandemic/param-config-easy.json";
+        String configFile = "data/pandemic/train/param-config-v1.json";
         ActionController ac = null; // new ActionController();
-        int nPlayers = 4;
+        int nPlayers = 2;
         int nRepetition = 10;
         PlayerType[] playersToTest = new PlayerType[] {
            PlayerType.Random, PlayerType.MCTS, PlayerType.OSLA
@@ -195,7 +194,10 @@ public class PandemicGame extends Game {
     }
 
     public static void main(String[] args){
-        runCompetition();
-//        runWithStats();
+        int nPlayers = 2;
+        String config = "data/pandemic/train/param-config-v1.json";
+//        String config = "data/pandemic/param-config-easy.json";
+//        runCompetition();
+        runWithStats(config, nPlayers);
     }
 }
