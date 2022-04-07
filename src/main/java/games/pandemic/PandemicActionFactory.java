@@ -156,7 +156,12 @@ class PandemicActionFactory {
                     actions.addAll(getResearchStationActions(pgs, playerLocation, null, -1));
                 } else {
                     // List all the other nodes with combination of all the city cards in hand
+                    PropertyString playerLocationProperty = (PropertyString) pgs.getComponent(playerCardHash, playerIdx)
+                            .getProperty(playerLocationHash);
+                    String playerLocationName = playerLocationProperty.value;
                     for (BoardNode bn : pgs.world.getBoardNodes()) {
+                        if (playerLocationName.equals(((PropertyString)bn.getProperty(nameHash)).value)) continue;
+
                         for (int c = 0; c < playerHand.getSize(); c++) {
                             if (playerHand.getComponents().get(c).getProperty(colorHash) != null) {
                                 actions.add(new MovePlayerWithCard(playerIdx, ((PropertyString) bn.getProperty(nameHash)).value, c));
@@ -192,13 +197,13 @@ class PandemicActionFactory {
             case "Contingency Planner":
                 Deck<Card> plannerDeck = (Deck<Card>) pgs.getComponent(plannerDeckHash);
                 if (plannerDeck.getSize() == 0) {
-                    // then can pick up an event card
-                    Deck<Card> infectionDiscardDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
-                    List<Card> infDiscard = infectionDiscardDeck.getComponents();
+                    // then can pick up an event card from player discard pile
+                    Deck<Card> playerDiscardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
+                    List<Card> infDiscard = playerDiscardDeck.getComponents();
                     for (int i = 0; i < infDiscard.size(); i++) {
                         Card card = infDiscard.get(i);
                         if (card.getProperty(colorHash) != null) {
-                            actions.add(new DrawCard(infectionDiscardDeck.getComponentID(), plannerDeck.getComponentID(), i));
+                            actions.add(new DrawCard(playerDiscardDeck.getComponentID(), plannerDeck.getComponentID(), i));
                         }
                     }
                 }

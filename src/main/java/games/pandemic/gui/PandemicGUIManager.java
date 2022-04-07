@@ -73,6 +73,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
 
         handCardHighlights = new ArrayList[nPlayers];
         playerHighlights = new HashSet<>();
+        bufferHighlights = new ArrayList<>();
         for (int i = 0; i < nPlayers; i++) {
             handCardHighlights[i] = new ArrayList<>();
         }
@@ -113,8 +114,6 @@ public class PandemicGUIManager extends AbstractGUIManager {
 
     private JPanel createPlayerAreas() {
         JPanel cardAreas = new JPanel();
-        JPanel playerCardsPanel = new JPanel();
-        JPanel playerHandPanel = new JPanel();
         playerCards = new PandemicCardView[nPlayers];
         playerHands = new ArrayList[nPlayers];
         playerHandCardCounts = new JLabel[nPlayers][];
@@ -235,8 +234,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
                 }
             }
         });
-        if (c == null) cv2.setVisible(false);
-        else cv2.setVisible(true);
+        cv2.setVisible(c != null);
         playerHands[player].add(cv2);
         return cv2;
     }
@@ -509,8 +507,11 @@ public class PandemicGUIManager extends AbstractGUIManager {
                     // Show top N card of infection discard deck for player to select order
                     for (int i = 0; i < nCards; i++) {
                         Card c = deckFrom.peek();
-                        if (c != null && !bufferDeck.get(i).getComponent().equals(c)) {
+                        if (c != null && (bufferDeck.get(i).getComponent() == null || !bufferDeck.get(i).getComponent().equals(c))) {
                             bufferDeck.get(i).updateComponent(c);
+                            bufferDeck.get(i).setVisible(true);
+                        } else {
+                            bufferDeck.get(i).setVisible(false);
                         }
                     }
 
@@ -540,8 +541,11 @@ public class PandemicGUIManager extends AbstractGUIManager {
                     for (int i = 0; i < deck.getSize(); i++) {
                         if (i < maxBufferCards) {
                             Card c = deck.peek();
-                            if (c != null && !bufferDeck.get(i).getComponent().equals(c)) {
+                            if (c != null && (bufferDeck.get(i).getComponent() == null || !bufferDeck.get(i).getComponent().equals(c))) {
                                 bufferDeck.get(i).updateComponent(c);
+                                bufferDeck.get(i).setVisible(true);
+                            } else {
+                                bufferDeck.get(i).setVisible(false);
                             }
                         } else {
                             System.out.println("More cards in deck that are not displayed");
@@ -578,8 +582,11 @@ public class PandemicGUIManager extends AbstractGUIManager {
                                 for (int i = 0; i < deck.getSize(); i++) {
                                     if (i < maxBufferCards) {
                                         Card c = deck.peek();
-                                        if (c != null && !bufferDeck.get(i).getComponent().equals(c)) {
+                                        if (c != null && (bufferDeck.get(i).getComponent() == null || !bufferDeck.get(i).getComponent().equals(c))) {
                                             bufferDeck.get(i).updateComponent(c);
+                                            bufferDeck.get(i).setVisible(true);
+                                        } else {
+                                            bufferDeck.get(i).setVisible(false);
                                         }
                                     } else {
                                         System.out.println("More cards in deck that are not displayed");
@@ -601,18 +608,21 @@ public class PandemicGUIManager extends AbstractGUIManager {
                             }
                         }
                     } else {
-                        int deckId = ((DrawCard) action).getDeckTo();
-                        int otherId = gameState.getComponentById(deckId).getOwnerId();  // TODO: Sometimes this deck is not found and throws null exception, investigate
-                        if (isCardHighlighted(action.getCard(gameState), id) && playerHighlights.contains(otherId)) {
-                            // Give card
-                            // card in hand selected and other player, show this action as available
-                            actionButtons[k].setVisible(true);
-                            actionButtons[k++].setButtonAction(action, gameState);
-                        } else if (isCardHighlighted(action.getCard(gameState), otherId)) {
-                            //Take card
-                            // A card from another player selected
-                            actionButtons[k].setVisible(true);
-                            actionButtons[k++].setButtonAction(action, gameState);
+                        // Share knowledge
+                        int giverID = ((ShareKnowledge)action).getGiver();
+                        int receiverID = ((ShareKnowledge)action).getReceiver();
+                        if (isCardHighlighted(action.getCard(gameState), giverID)) {
+                            if (id == giverID && playerHighlights.contains(receiverID)){
+                                // Give card
+                                // card in hand selected and other player, show this action as available
+                                actionButtons[k].setVisible(true);
+                                actionButtons[k++].setButtonAction(action, gameState);
+                            } else if (id == receiverID) {
+                                //Take card
+                                // A card from another player selected
+                                actionButtons[k].setVisible(true);
+                                actionButtons[k++].setButtonAction(action, gameState);
+                            }
                         }
                     }
                 }

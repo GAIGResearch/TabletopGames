@@ -256,11 +256,11 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             if (i == 0 && !pp.player0Role.equals("Any"))
                 c = getPlayerCardWithRole(playerRoles, pp.player0Role, pp);
             else if (i == 1 && !pp.player1Role.equals("Any"))
-                c = getPlayerCardWithRole(playerRoles, pp.player0Role, pp);
+                c = getPlayerCardWithRole(playerRoles, pp.player1Role, pp);
             else if (i == 2 && !pp.player2Role.equals("Any"))
-                c = getPlayerCardWithRole(playerRoles, pp.player0Role, pp);
+                c = getPlayerCardWithRole(playerRoles, pp.player2Role, pp);
             else if (i == 3 && !pp.player3Role.equals("Any"))
-                c = getPlayerCardWithRole(playerRoles, pp.player0Role, pp);
+                c = getPlayerCardWithRole(playerRoles, pp.player3Role, pp);
             if (c == null)
                 c = playerRoles.draw();
 
