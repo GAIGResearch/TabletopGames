@@ -114,6 +114,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
 
     private JPanel createPlayerAreas() {
         JPanel cardAreas = new JPanel();
+        cardAreas.setLayout(new BoxLayout(cardAreas, BoxLayout.Y_AXIS));
         playerCards = new PandemicCardView[nPlayers];
         playerHands = new ArrayList[nPlayers];
         playerHandCardCounts = new JLabel[nPlayers][];
@@ -121,6 +122,9 @@ public class PandemicGUIManager extends AbstractGUIManager {
         JPanel playerAreas = new JPanel();
         playerAreas.setLayout(new BoxLayout(playerAreas, BoxLayout.Y_AXIS));
         JPanel[] playerDefs = new JPanel[nPlayers];
+
+        Dimension size = new Dimension(cardWidth * 3+offset, cardHeight+offset*2);
+        Dimension size2 = new Dimension((int)(cardWidth * 4.5), cardHeight*4+offset*2);
 
         for (int i = 0; i < nPlayers; i++) {
             playerDefs[i] = new JPanel();
@@ -147,6 +151,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
             });
             playerCards[i] = cv;
             JPanel wrapInfo = new JPanel();
+            wrapInfo.setPreferredSize(new Dimension(cardWidth, (int)(cardHeight*1.5)+offset));
             wrapInfo.setLayout(new BoxLayout(wrapInfo, BoxLayout.Y_AXIS));
             wrapInfo.add(cv);
             String[] txts = new String[colors.length/2+1];
@@ -163,6 +168,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
                 wrapInfo.add(counts[c]);
             }
             playerHandCardCounts[i] = counts;
+            playerDef.add(Box.createRigidArea(new Dimension(5,0)));
             playerDef.add(wrapInfo);
 
             JPanel hand = new JPanel();
@@ -178,14 +184,24 @@ public class PandemicGUIManager extends AbstractGUIManager {
                 hand.add(cv2);
             }
             JScrollPane scrollPane = new JScrollPane(hand);
-            scrollPane.setPreferredSize(new Dimension(cardWidth * 3 + offset, cardHeight + offset*2));
+            scrollPane.setPreferredSize(size);
+            scrollPane.setMinimumSize(size);
+            scrollPane.setMaximumSize(size);
             scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
             scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
             playerDef.add(scrollPane);
+            playerDef.add(Box.createRigidArea(new Dimension(5,0)));
             playerAreas.add(playerDefs[i]);
         }
 
-        cardAreas.add(playerAreas);
+        JScrollPane scrollPane1 = new JScrollPane(playerAreas);
+        scrollPane1.setPreferredSize(size2);
+        scrollPane1.setMinimumSize(size2);
+        scrollPane1.setMaximumSize(size2);
+        scrollPane1.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane1.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
+        cardAreas.add(scrollPane1);
+//        cardAreas.add(playerAreas);
 
         // Buffer deck space
         JPanel bufferDeckArea = new JPanel();
@@ -212,10 +228,12 @@ public class PandemicGUIManager extends AbstractGUIManager {
         }
 
         JScrollPane scrollPane = new JScrollPane(bufferDeckArea);
-        scrollPane.setPreferredSize(new Dimension(cardWidth *3 + offset, cardHeight + offset*2));
+        scrollPane.setMaximumSize(size);
+        scrollPane.setMinimumSize(size);
+        scrollPane.setPreferredSize(size);
         scrollPane.setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
-        cardAreas.add(bufferDeckArea);
+        cardAreas.add(scrollPane);
 
         return cardAreas;
     }
@@ -586,7 +604,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
                                             bufferDeck.get(i).updateComponent(c);
                                             bufferDeck.get(i).setVisible(true);
                                         } else {
-                                            bufferDeck.get(i).setVisible(false);
+//                                            bufferDeck.get(i).setVisible(false);
                                         }
                                     } else {
                                         System.out.println("More cards in deck that are not displayed");
