@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -97,10 +98,18 @@ public abstract class AbstractGUIManager {
      * @return - JComponent containing all action buttons.
      */
     protected JComponent createActionPanel(Collection[] highlights, int width, int height) {
-        return createActionPanel(highlights, width, height, true);
+        return createActionPanel(highlights, width, height, true, null);
     }
 
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height, Consumer<ActionButton> onActionSelected) {
+        return createActionPanel(highlights, width, height, true, onActionSelected);
+    }
+
+    protected JComponent createActionPanel (Collection[]highlights,int width, int height, boolean boxLayout){
+        return createActionPanel(highlights, width, height, boxLayout, null);
+    }
+
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout, Consumer<ActionButton> onActionSelected) {
         JPanel actionPanel = new JPanel();
         if (boxLayout) {
             actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
@@ -108,7 +117,7 @@ public abstract class AbstractGUIManager {
 
         actionButtons = new ActionButton[maxActionSpace];
         for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton(ac, highlights);
+            ActionButton ab = new ActionButton(ac, highlights, onActionSelected);
             actionButtons[i] = ab;
             actionButtons[i].setVisible(false);
             actionPanel.add(actionButtons[i]);
@@ -235,6 +244,10 @@ public abstract class AbstractGUIManager {
         ActionButton[] actionButtons;
 
         public ActionButton(ActionController ac, Collection[] highlights) {
+            this(ac, highlights, null);
+        }
+
+        public ActionButton(ActionController ac, Collection[] highlights, Consumer<ActionButton> onActionSelected) {
             addActionListener(e -> {
                 ac.addAction(action);
                 if (highlights != null) {
@@ -243,6 +256,8 @@ public abstract class AbstractGUIManager {
                     }
                 }
                 resetActionButtons();
+                if (onActionSelected!= null)
+                    onActionSelected.accept(this);
             });
         }
 

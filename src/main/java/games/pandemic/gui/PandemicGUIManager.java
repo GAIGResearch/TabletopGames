@@ -77,10 +77,11 @@ public class PandemicGUIManager extends AbstractGUIManager {
         for (int i = 0; i < nPlayers; i++) {
             handCardHighlights[i] = new ArrayList<>();
         }
-        Collection[] highlights = new Collection[2+nPlayers];
+        Collection[] highlights = new Collection[3+nPlayers];
         highlights[0] = playerHighlights;
         highlights[1] = boardView.getHighlights().keySet();
-        System.arraycopy(handCardHighlights, 0, highlights, 2, nPlayers);
+        highlights[2] = bufferHighlights;
+        System.arraycopy(handCardHighlights, 0, highlights, 3, nPlayers);
 
         boardView.setPlayerHighlights(playerHighlights);
         boardView.setCardHandHighlights(handCardHighlights);
@@ -89,7 +90,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
         JPanel gameStateInfo = createGameStateInfoPanel(gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
-        JComponent actionPanel = createActionPanel(highlights, 300, 80);
+        JComponent actionPanel = createActionPanel(highlights, 300, 80, this::bufferReset);
         JPanel side = new JPanel();
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
         side.add(gameStateInfo);
@@ -110,6 +111,12 @@ public class PandemicGUIManager extends AbstractGUIManager {
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
+    }
+
+    private void bufferReset(ActionButton ab) {
+        for (PandemicCardView pcv: bufferDeck) {
+            pcv.setVisible(false);
+        }
     }
 
     private JPanel createPlayerAreas() {
@@ -423,6 +430,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
         int id = player.getPlayerID();
         List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
         resetActionButtons();
+
         int k = 0;
 
         Set<String> highlights = boardView.getHighlights().keySet();
@@ -524,12 +532,10 @@ public class PandemicGUIManager extends AbstractGUIManager {
 
                     // Show top N card of infection discard deck for player to select order
                     for (int i = 0; i < nCards; i++) {
-                        Card c = deckFrom.peek();
+                        Card c = deckFrom.get(i);
                         if (c != null && (bufferDeck.get(i).getComponent() == null || !bufferDeck.get(i).getComponent().equals(c))) {
                             bufferDeck.get(i).updateComponent(c);
                             bufferDeck.get(i).setVisible(true);
-                        } else {
-                            bufferDeck.get(i).setVisible(false);
                         }
                     }
 
@@ -558,12 +564,10 @@ public class PandemicGUIManager extends AbstractGUIManager {
 
                     for (int i = 0; i < deck.getSize(); i++) {
                         if (i < maxBufferCards) {
-                            Card c = deck.peek();
+                            Card c = deck.get(i);
                             if (c != null && (bufferDeck.get(i).getComponent() == null || !bufferDeck.get(i).getComponent().equals(c))) {
                                 bufferDeck.get(i).updateComponent(c);
                                 bufferDeck.get(i).setVisible(true);
-                            } else {
-                                bufferDeck.get(i).setVisible(false);
                             }
                         } else {
                             System.out.println("More cards in deck that are not displayed");
@@ -599,28 +603,26 @@ public class PandemicGUIManager extends AbstractGUIManager {
                             if (deck != null) {
                                 for (int i = 0; i < deck.getSize(); i++) {
                                     if (i < maxBufferCards) {
-                                        Card c = deck.peek();
+                                        Card c = deck.get(i);
                                         if (c != null && (bufferDeck.get(i).getComponent() == null || !bufferDeck.get(i).getComponent().equals(c))) {
                                             bufferDeck.get(i).updateComponent(c);
                                             bufferDeck.get(i).setVisible(true);
-                                        } else {
-//                                            bufferDeck.get(i).setVisible(false);
                                         }
                                     } else {
                                         System.out.println("More cards in deck that are not displayed");
                                     }
                                 }
-                            }
 
-                            if (bufferHighlights.size() == 1) {
-                                int selected = bufferHighlights.get(0);
+                                if (bufferHighlights.size() == 1) {
+                                    int selected = bufferHighlights.get(0);
 
-                                if (((DrawCard) action).getFromIndex() == selected) {
-                                    Card c = (Card) playerHands[id].get(selected).getComponent();
-                                    if (c != null) {
-                                        String name = ((PropertyString) c.getProperty(nameHash)).value;
-                                        actionButtons[k].setVisible(true);
-                                        actionButtons[k++].setButtonAction(action, "Choose: " + name);
+                                    if (((DrawCard) action).getFromIndex() == selected) {
+                                        Card c = deck.get(selected);
+                                        if (c != null) {
+                                            String name = ((PropertyString) c.getProperty(nameHash)).value;
+                                            actionButtons[k].setVisible(true);
+                                            actionButtons[k++].setButtonAction(action, "Choose: " + name);
+                                        }
                                     }
                                 }
                             }

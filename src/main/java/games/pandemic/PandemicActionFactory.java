@@ -202,7 +202,7 @@ class PandemicActionFactory {
                     List<Card> infDiscard = playerDiscardDeck.getComponents();
                     for (int i = 0; i < infDiscard.size(); i++) {
                         Card card = infDiscard.get(i);
-                        if (card.getProperty(colorHash) != null) {
+                        if (card.getProperty(countryHash) == null) {
                             actions.add(new DrawCard(playerDiscardDeck.getComponentID(), plannerDeck.getComponentID(), i));
                         }
                     }

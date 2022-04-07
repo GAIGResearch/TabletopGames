@@ -34,6 +34,7 @@ public class AddResearchStationWithCard extends AddResearchStation {
 
     public Card getCard(AbstractGameState gs) {
         if (!executed) {
+            if (cardIdx == -1) return null;
             Deck<Card> deck = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
             return deck.getComponents().get(cardIdx);
         }
