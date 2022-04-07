@@ -574,15 +574,16 @@ public class PandemicGUIManager extends AbstractGUIManager {
                     if (this.gameState.getPlayerRole(id).equals("Contingency Planner")) {  // Special role
                         if (deckHighlights.contains("playerDiscard")) {
                             Deck<Card> deck = (Deck<Card>) gameState.getComponentById(((DrawCard) action).getDeckFrom());
-
-                            for (int i = 0; i < deck.getSize(); i++) {
-                                if (i < maxBufferCards) {
-                                    Card c = deck.peek();
-                                    if (c != null && !bufferDeck.get(i).getComponent().equals(c)) {
-                                        bufferDeck.get(i).updateComponent(c);
+                            if (deck != null) {
+                                for (int i = 0; i < deck.getSize(); i++) {
+                                    if (i < maxBufferCards) {
+                                        Card c = deck.peek();
+                                        if (c != null && !bufferDeck.get(i).getComponent().equals(c)) {
+                                            bufferDeck.get(i).updateComponent(c);
+                                        }
+                                    } else {
+                                        System.out.println("More cards in deck that are not displayed");
                                     }
-                                } else {
-                                    System.out.println("More cards in deck that are not displayed");
                                 }
                             }
 
