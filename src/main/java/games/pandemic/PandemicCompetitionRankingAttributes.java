@@ -11,10 +11,15 @@ import java.util.function.Function;
 
 import static games.pandemic.PandemicConstants.colors;
 import static games.pandemic.PandemicConstants.infectionHash;
+import static utilities.Utils.GameResult.WIN;
 
 public enum PandemicCompetitionRankingAttributes implements IGameAttribute {
-    GAME_WIN((s) -> s.getGameState().getGameStatus().value),
-    GAME_TICKS(Game::getTick),
+    GAME_WIN((s) -> Math.max(0,s.getGameState().getGameStatus().value)),
+    // Exception: game ticks lower are better if win rate > winNeutralRange[1],
+    //              and higher are better if win rate < winNeutralRange[0] (otherwise considered equal)
+    // ~ reward finishing winning games quickly, but finishing losing games slowly (with neutral range allowance)
+    GAME_TICKS((s) -> s.getGameState().getGameStatus()==WIN? s.getTick() : -s.getTick()),
+    GAME_TICKS_RAW(Game::getTick),
     N_DISEASE_CURED((s) -> countDisease(s, 1, false)),
     N_OUTBREAKS((s) -> ((Counter) ((PandemicGameState)s.getGameState()).getComponent(PandemicConstants.outbreaksHash)).getValue()),
     N_CITY_DANGER(PandemicCompetitionRankingAttributes::countCityDanger),

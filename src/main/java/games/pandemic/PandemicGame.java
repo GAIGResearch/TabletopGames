@@ -145,20 +145,9 @@ public class PandemicGame extends Game {
      * Print statistics for each player type
      * Print final ranking as per competition rules
      */
-    public static void runCompetition() {
+    public static void runCompetition(String configFile, int nPlayers, PlayerType[] playersToTest, int nRepetitions) {
 
-        /*
-         * Settings: configuration file, ac (visuals on if initialised, off if null), number of players,
-         * number of repetitions per player, list of players to test.
-         */
-        String configFile = "data/pandemic/train/param-config-v1.json";
         ActionController ac = null; // new ActionController();
-        int nPlayers = 2;
-        int nRepetition = 10;
-        PlayerType[] playersToTest = new PlayerType[] {
-           PlayerType.Random, PlayerType.MCTS, PlayerType.OSLA
-        };
-
         SummaryLogger[] sumLogs = new SummaryLogger[playersToTest.length];
         for (int p = 0; p < playersToTest.length; p++) {
 
@@ -174,7 +163,7 @@ public class PandemicGame extends Game {
             for (int i = 0; i < nPlayers; i++){
                 players.add(playersToTest[p].createPlayerInstance(params.getRandomSeed()));
             }
-            runCompetition(configFile, players, params.getRandomSeed(), false, listeners, nRepetition, ac);
+            runCompetition(configFile, players, params.getRandomSeed(), false, listeners, nRepetitions, ac);
 
             System.out.println(playersToTest[p].name());
             System.out.println("-----------------");
@@ -194,10 +183,21 @@ public class PandemicGame extends Game {
     }
 
     public static void main(String[] args){
-        int nPlayers = 2;
+
+        /*
+         * Settings: configuration file, ac (visuals on if initialised, off if null), number of players,
+         * number of repetitions per player, list of players to test.
+         */
         String config = "data/pandemic/train/param-config-v1.json";
 //        String config = "data/pandemic/param-config-easy.json";
-//        runCompetition();
-        runWithStats(config, nPlayers);
+        int nPlayers = 2;
+        PlayerType[] playersToTest = new PlayerType[] {
+                PlayerType.Random, PlayerType.MCTS, PlayerType.OSLA
+        };
+        int nRepetitions = 10;
+
+        // Run
+        runCompetition(config, nPlayers, playersToTest, nRepetitions);
+//        runWithStats(config, nPlayers);
     }
 }
