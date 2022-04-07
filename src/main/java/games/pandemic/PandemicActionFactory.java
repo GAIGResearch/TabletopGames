@@ -52,7 +52,9 @@ class PandemicActionFactory {
                 }
             }
             if (card_in_hand != -1) {
-                actions.addAll(getResearchStationActions(pgs, playerLocationName.value, playerHand.getComponents().get(card_in_hand), card_in_hand));
+                actions.addAll(getResearchStationActions(pgs, playerLocationName.value,
+                        playerHand.getComponents().get(card_in_hand), playerHand.getComponentID(),
+                        pgs.getComponent(playerDeckDiscardHash).getComponentID(), card_in_hand));
             }
         }
 
@@ -153,7 +155,7 @@ class PandemicActionFactory {
             // Operations expert special actions
             case "Operations Expert":
                 if (!(pgs.researchStationLocations.contains(playerLocation))) {
-                    actions.addAll(getResearchStationActions(pgs, playerLocation, null, -1));
+                    actions.addAll(getResearchStationActions(pgs, playerLocation, null, -1, -1,-1));
                 } else {
                     // List all the other nodes with combination of all the city cards in hand
                     PropertyString playerLocationProperty = (PropertyString) pgs.getComponent(playerCardHash, playerIdx)
@@ -206,6 +208,10 @@ class PandemicActionFactory {
                             actions.add(new DrawCard(playerDiscardDeck.getComponentID(), plannerDeck.getComponentID(), i));
                         }
                     }
+                } else {
+                    // Play event card in planner deck
+                    Card c = plannerDeck.get(0);
+                    actions.addAll(actionsFromEventCard(pgs, c, plannerDeck.getComponentID(), -1, 0));
                 }
                 break;
         }
@@ -219,7 +225,7 @@ class PandemicActionFactory {
      * @param cardIdx - index of card used to play this action (from player hand).
      * @return - list of AddResearchStation* actions
      */
-    static List<AbstractAction> getResearchStationActions(PandemicGameState pgs, String playerLocation, Card card, int cardIdx) {
+    static List<AbstractAction> getResearchStationActions(PandemicGameState pgs, String playerLocation, Card card, int deckFrom, int deckTo, int cardIdx) {
         Set<AbstractAction> actions = new HashSet<>();
         Counter rStationCounter = (Counter) pgs.getComponent(researchStationHash);
 
@@ -228,12 +234,12 @@ class PandemicActionFactory {
             // If all research stations are used, then take one from board
             for (String station : pgs.researchStationLocations) {
                 if (card == null) actions.add(new AddResearchStationFrom(station, playerLocation));
-                else actions.add(new AddResearchStationWithCardFrom(station, playerLocation, cardIdx));
+                else actions.add(new AddResearchStationWithCardFrom(station, playerLocation, deckFrom, deckTo, cardIdx));
             }
         } else {
             // Otherwise can just build here
             if (card == null) actions.add(new AddResearchStation(playerLocation));
-            else actions.add(new AddResearchStationWithCard(playerLocation, cardIdx));
+            else actions.add(new AddResearchStationWithCard(playerLocation, deckFrom, deckTo, cardIdx));
         }
         return new ArrayList<>(actions);
     }
@@ -340,7 +346,6 @@ class PandemicActionFactory {
      * @return - list of all actions available based on event cards owned by the player.
      */
     static List<AbstractAction> getEventActions(PandemicGameState pgs) {
-        PandemicParameters pp = (PandemicParameters) pgs.getGameParameters();
         Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
         Deck<Card> playerDiscard = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
         int fromDeck = playerHand.getComponentID();
@@ -354,20 +359,7 @@ class PandemicActionFactory {
             if (p == null){
                 // Event cards don't have colour
                 int cardIdx = playerHand.getComponents().indexOf(card);
-                actions.addAll(actionsFromEventCard(pgs, card, pp, fromDeck, toDeck, cardIdx));
-            }
-        }
-
-        // Contingency planner gets also special deck card
-        Card playerCard = ((Card) pgs.getComponentActingPlayer(playerCardHash));
-        String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
-        if (roleString.equals("Contingency Planner")){
-            Deck<Card> plannerDeck = (Deck<Card>) pgs.getComponent(plannerDeckHash);
-            if (plannerDeck.getSize() > 0){
-                // then can pick up an event card
-                Card card = plannerDeck.peek();
-                int cardIdx = playerHand.getComponents().indexOf(card);
-                actions.addAll(actionsFromEventCard(pgs, card, pp, fromDeck, toDeck, cardIdx));
+                actions.addAll(actionsFromEventCard(pgs, card, fromDeck, toDeck, cardIdx));
             }
         }
 
@@ -377,11 +369,9 @@ class PandemicActionFactory {
     /**
      * Calculates action variations based on event card type.
      * @param card - event card to be played
-     * @param pp - game parameters
      * @return list of actions corresponding to the event card.
      */
-    static List<AbstractAction> actionsFromEventCard(PandemicGameState pgs,
-                                                      Card card, PandemicParameters pp, int deckFrom, int deckTo, int cardIdx){
+    static List<AbstractAction> actionsFromEventCard(PandemicGameState pgs, Card card, int deckFrom, int deckTo, int cardIdx){
         Set<AbstractAction> actions = new HashSet<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
 
@@ -399,19 +389,19 @@ class PandemicActionFactory {
                     }
                 }
 
-                Deck<Card> infDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
-                Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
-
-                for (int i = 0; i < infDeck.getSize(); i++){
-                    actions.add(new DrawCard(infDeck.getComponentID(), discardDeck.getComponentID(), i));
-                }
+//                Deck<Card> infDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
+//                Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
+//
+//                for (int i = 0; i < infDeck.getSize(); i++){
+//                    actions.add(new DrawCard(infDeck.getComponentID(), discardDeck.getComponentID(), i));
+//                }
                 break;
             case "Government Grant":
                 // "Add 1 research station to any city (no City card needed)."
                 for (BoardNode bn: pgs.world.getBoardNodes()) {
                     if (!((PropertyBoolean) bn.getProperty(researchStationHash)).value) {
                         String cityName = ((PropertyString) bn.getProperty(nameHash)).value;
-                        actions.addAll(getResearchStationActions(pgs, cityName, card, cardIdx));
+                        actions.addAll(getResearchStationActions(pgs, cityName, card, deckFrom, deckTo, cardIdx));
                     }
                 }
                 break;

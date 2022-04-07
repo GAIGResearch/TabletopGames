@@ -34,6 +34,7 @@ import java.util.*;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
 import static games.pandemic.PandemicActionFactory.*;
 import static games.pandemic.PandemicConstants.*;
@@ -106,18 +107,21 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         forceDiscardReaction2.setNext(playerActionInterrupt2);
         playerActionInterrupt2.setNext(playerHandOverCapacity2);
 
+        infectCities.setNext(nextPlayerRule);
+
         // Player reactions for playing events at the end of turn, one for each player
-        RuleNode forceAllPlayersEventReaction = new ForceAllPlayerReaction();
-        infectCities.setNext(forceAllPlayersEventReaction);  // End of turn, event reactions coming next
-        RuleNode[] eventActionInterrupt = new PlayerAction[nPlayers];
-        for (int i = 0; i < nPlayers; i++) {
-            eventActionInterrupt[i] = new PlayerAction(pp.nInitialDiseaseCubes);
-        }
-        for (int i = 0; i < nPlayers-1; i++) {
-            eventActionInterrupt[i].setNext(eventActionInterrupt[i+1]);
-        }
-        forceAllPlayersEventReaction.setNext(eventActionInterrupt[0]);
-        eventActionInterrupt[nPlayers-1].setNext(nextPlayerRule);  // Next player!
+//        RuleNode forceAllPlayersEventReaction = new ForceAllPlayerReaction();
+//        infectCities.setNext(forceAllPlayersEventReaction);  // End of turn, event reactions coming next
+//        RuleNode[] eventActionInterrupt = new PlayerAction[nPlayers];
+//        for (int i = 0; i < nPlayers; i++) {
+//            eventActionInterrupt[i] = new PlayerAction(pp.nInitialDiseaseCubes);
+//        }
+//        for (int i = 0; i < nPlayers-1; i++) {
+//            eventActionInterrupt[i].setNext(eventActionInterrupt[i+1]);
+//        }
+//        forceAllPlayersEventReaction.setNext(eventActionInterrupt[0]);
+//        eventActionInterrupt[nPlayers-1].setNext(nextPlayerRule);  // Next player!
+
         nextPlayerRule.setNext(root);
 
         // Next rule to execute is root
@@ -214,7 +218,8 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         Deck<Card> eventCards = _data.findDeck("Events");
         pp.nEventCards = 0;
         for (Card c: eventCards.getComponents()) {
-            if (pp.survivalRules && !c.getComponentName().equals("Airlift") && !c.getComponentName().equals("Government Grant")) continue;
+            String name = ((PropertyString)c.getProperty(nameHash)).value;
+            if (pp.survivalRules && !name.equals("Airlift") && !name.equals("Government Grant")) continue;
             playerDeck.add(c);
             pp.nEventCards++;
         }

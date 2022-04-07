@@ -11,6 +11,7 @@ import core.rules.Node;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicTurnOrder;
+import games.pandemic.actions.Forecast;
 import games.pandemic.actions.MovePlayer;
 import games.pandemic.actions.QuietNight;
 import games.pandemic.actions.TreatDisease;
@@ -49,7 +50,9 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
             int playerIdx = pto.getCurrentPlayer(gs);
 
             if (action instanceof QuietNight) {
-                ((PandemicGameState) gs).setQuietNight(true);
+                pgs.setQuietNight(true);
+            } else if (action instanceof Forecast) {
+                pgs.setGamePhase(PandemicGameState.PandemicGamePhase.Forecast);
             } else if (action instanceof MovePlayer) {
                 // if player is Medic and a disease has been cured, then it should remove all cubes when entering the city
                 Card playerCard = (Card) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);

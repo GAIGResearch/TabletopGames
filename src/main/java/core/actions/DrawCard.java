@@ -59,7 +59,7 @@ public class DrawCard extends AbstractAction {
                 cardId = card.getComponentID();
             }
         }
-        return card != null && to.add(card, toIndex);
+        return card != null && (to == null || to.add(card, toIndex));
     }
 
     @Override

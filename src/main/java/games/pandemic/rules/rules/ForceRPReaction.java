@@ -9,6 +9,7 @@ import core.components.Deck;
 import core.properties.PropertyString;
 import games.pandemic.PandemicGameState;
 
+import static games.pandemic.PandemicConstants.plannerDeckHash;
 import static games.pandemic.PandemicGameState.PandemicGamePhase.RPReaction;
 import static core.CoreConstants.nameHash;
 import static core.CoreConstants.playerHandHash;
@@ -37,11 +38,26 @@ public class ForceRPReaction extends RuleNode {
             Deck<Card> ph = (Deck<Card>) pgs.getComponent(playerHandHash, i);
             int nCards = ph.getSize();
             for (int cp = 0; cp < nCards; cp++) {
-                Card card = ph.getComponents().get(cp);
+                Card card = ph.get(cp);
                 if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
                     ((PandemicTurnOrder)pgs.getTurnOrder()).addReactivePlayer(i);
                     pgs.setGamePhase(RPReaction);
                     return false;
+                }
+            }
+        }
+        Deck<Card> plannerDeck = (Deck<Card>) pgs.getComponent(plannerDeckHash);
+        int nCards = plannerDeck.getSize();
+        if (nCards > 0) {
+            Card card = plannerDeck.get(0);
+            if (((PropertyString)card.getProperty(nameHash)).value.equals("Resilient Population")) {
+                // Find planner player
+                for (int p = 0; p < pgs.getNPlayers(); p++) {
+                    if (pgs.getPlayerRole(p).equals("Contingency Planner")) {
+                        ((PandemicTurnOrder)pgs.getTurnOrder()).addReactivePlayer(p);
+                        pgs.setGamePhase(RPReaction);
+                        return false;
+                    }
                 }
             }
         }

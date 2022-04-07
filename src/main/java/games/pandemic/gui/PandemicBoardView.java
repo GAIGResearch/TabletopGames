@@ -536,7 +536,8 @@ public class PandemicBoardView extends JComponent {
             if (handCardHighlights[i].size() > 0) {
                 Deck<Card> handCards = (Deck<Card>) gameState.getComponent(playerHandHash, i);
                 for (int j : handCardHighlights[i]) {
-                    highlights.add(((PropertyString) handCards.get(j).getProperty(nameHash)).value);
+                    if (j < handCards.getSize())
+                        highlights.add(((PropertyString) handCards.get(j).getProperty(nameHash)).value);
                 }
             }
         }
