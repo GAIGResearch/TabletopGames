@@ -436,10 +436,9 @@ public class CoreGameLoopTests {
         int totalPips = monksP1.stream().mapToInt(Monk::getPiety).sum();
         int totalOners = (int) monksP1.stream().filter(m -> m.getPiety() == 1).count();
         assertTrue(totalOners > 0);
-        int monksInChapelWhoWillPipUp = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() < 6).count();
+        int monksInChapel = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() < 6).count();
         int monksInChapelWhoWillRetire = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 6).count();
         int pietyOneMonksInChapel = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 1).count();
-        totalOners -= pietyOneMonksInChapel; // they won't be oners when they get to feeding time
 
         do {
             fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // last few actions of Autumn -> WINTER
@@ -448,8 +447,14 @@ public class CoreGameLoopTests {
         int monksOnPilgrimage = state.monksIn(PILGRIMAGE, 1).size();
         assertEquals(monksP1.size() - monksOnPilgrimage, state.monksIn(DORMITORY, 1).size());
 
+        int monksInChapelWhoWillPipUp = monksInChapel > 0 ? 1 : 0;
+        if (pietyOneMonksInChapel > 0 && pietyOneMonksInChapel == monksInChapel)
+            totalOners--;
+        int error = pietyOneMonksInChapel > 0 && pietyOneMonksInChapel != monksInChapel ? 1 : 0;
+        // in this case we may have an answer 1 less than expected - if the piety 1 monk is promoted
         int newPips = state.monksIn(null, 1).stream().mapToInt(Monk::getPiety).sum();
-        assertEquals(totalPips - monksP1.size() + totalOners + monksInChapelWhoWillPipUp + monksOnPilgrimage - monksInChapelWhoWillRetire * 6, newPips);
+        System.out.printf("Actual: %d, Start: %d, Monks: %d (%d), InChapel: %d (%d, %d), Pilgrims: %d, Error: %d%n ", newPips, totalPips, monksP1.size(), totalOners, monksInChapel, pietyOneMonksInChapel, monksInChapelWhoWillRetire, monksOnPilgrimage, error);
+        assertEquals(totalPips - monksP1.size() + totalOners + monksInChapelWhoWillPipUp + monksOnPilgrimage - monksInChapelWhoWillRetire * 6, newPips, error);
         assertEquals(10 - monksP1.size() + monksOnPilgrimage, state.getVictoryPoints(1), 1);
     }
 
