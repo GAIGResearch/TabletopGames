@@ -1,0 +1,19 @@
+{
+  "class" : "games.pandemic.PandemicParameters",
+  "loseMaxOutbreak" : 8,
+  "nCardsForCure" : 5,
+  "maxCardsPerPlayer" : 7,
+  "maxCubesPerCity" : 3,
+  "nEpidemicCards" : 4,
+  "nCubesEpidemic" : 3,
+  "nInfectionCardsSetup" : 3,
+  "nInfectionsSetup" : 3,
+  "nCubesInfection" : 1,
+  "nInitialDiseaseCubes" : 24,
+  "nCardsDraw" : 2,
+  "survivalRules" : true,
+  "player0Role" : "Medic",
+  "player1Role" : "Quarantine Specialist",
+  "player2Role" : "Operations Expert",
+  "player3Role" : "Scientist"
+}
