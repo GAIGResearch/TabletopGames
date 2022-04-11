@@ -7,17 +7,22 @@ import evaluation.TunableParameters;
 import utilities.Utils;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHeuristic {
 
     double POINT_ADVANTAGE = 0.05;
     double POINTS_UNDER_LEADER = -0.10;
     double POINTS = 0.01;
+    double THREE_BOXES = 0.0;
+    double TWO_BOXES = 0.0;
 
     public DotsAndBoxesHeuristic() {
         addTunableParameter("POINT_ADVANTAGE", 0.05);
         addTunableParameter("POINTS_UNDER_LEADER", -0.10);
         addTunableParameter("POINTS", 0.01);
+        addTunableParameter("THREE_BOXES", 0.0);
+        addTunableParameter("TWO_BOXES", 0.0);
     }
 
     /**
@@ -33,6 +38,8 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
         POINTS = (double) getParameterValue("POINTS");
         POINT_ADVANTAGE = (double) getParameterValue("POINT_ADVANTAGE");
         POINTS_UNDER_LEADER = (double) getParameterValue("POINTS_UNDER_LEADER");
+        THREE_BOXES = (double) getParameterValue("THREE_BOXES");
+        TWO_BOXES = (double) getParameterValue("TWO_BOXES");
     }
 
     /**
@@ -57,8 +64,18 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
             deltaToPlayer[p] = state.nCellsPerPlayer[playerId] - state.nCellsPerPlayer[p];
             retValue += deltaToPlayer[p] * POINT_ADVANTAGE / state.getNPlayers();
         }
-        int maxScore = Arrays.stream(deltaToPlayer).max().getAsInt();
 
+        if (TWO_BOXES > 0.0 || THREE_BOXES > 0.0) {
+            int[] cellCountByEdges = new int[5];
+            for (DBCell cell : state.cells) {
+                int edges = state.countCompleteEdges(cell);
+                cellCountByEdges[edges]++;
+            }
+            retValue += THREE_BOXES * cellCountByEdges[3];
+            retValue += TWO_BOXES * cellCountByEdges[2];
+        }
+
+        int maxScore = Arrays.stream(deltaToPlayer).max().orElse(0);
         retValue += POINTS_UNDER_LEADER * (maxScore - state.nCellsPerPlayer[playerId]);
         retValue += POINTS * state.nCellsPerPlayer[playerId];
 
@@ -76,6 +93,8 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
         retValue.POINTS_UNDER_LEADER = POINTS_UNDER_LEADER;
         retValue.POINTS = POINTS;
         retValue.POINT_ADVANTAGE = POINT_ADVANTAGE;
+        retValue.THREE_BOXES = THREE_BOXES;
+        retValue.TWO_BOXES = TWO_BOXES;
         return retValue;
     }
 
@@ -91,6 +110,7 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
             DotsAndBoxesHeuristic other = (DotsAndBoxesHeuristic) o;
             return other.POINT_ADVANTAGE == POINT_ADVANTAGE &&
                     other.POINTS_UNDER_LEADER == POINTS_UNDER_LEADER &&
+                    other.TWO_BOXES == TWO_BOXES && other.THREE_BOXES == THREE_BOXES &&
                     other.POINTS == POINTS;
         }
         return false;
