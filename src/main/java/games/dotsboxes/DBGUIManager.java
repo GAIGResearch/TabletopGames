@@ -109,7 +109,7 @@ public class DBGUIManager extends AbstractGUIManager {
     }
 
     @Override
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         DBEdge db = view.getHighlight();
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && db != null) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);

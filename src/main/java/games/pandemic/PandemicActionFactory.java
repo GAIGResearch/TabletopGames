@@ -52,7 +52,9 @@ class PandemicActionFactory {
                 }
             }
             if (card_in_hand != -1) {
-                actions.addAll(getResearchStationActions(pgs, playerLocationName.value, playerHand.getComponents().get(card_in_hand), card_in_hand));
+                actions.addAll(getResearchStationActions(pgs, playerLocationName.value,
+                        playerHand.getComponents().get(card_in_hand), playerHand.getComponentID(),
+                        pgs.getComponent(playerDeckDiscardHash).getComponentID(), card_in_hand));
             }
         }
 
@@ -60,60 +62,49 @@ class PandemicActionFactory {
         PropertyIntArray cityInfections = (PropertyIntArray)playerLocationNode.getProperty(infectionHash);
         for (int i = 0; i < cityInfections.getValues().length; i++){
             if (cityInfections.getValues()[i] > 0){
-                boolean treatAll = false;
-                if (roleString.equals("Medic")) treatAll = true;
+                boolean treatAll = roleString.equals("Medic");
 
-                actions.add(new TreatDisease(pp.n_initial_disease_cubes, colors[i], playerLocationName.value, treatAll));
+                actions.add(new TreatDisease(pp.nInitialDiseaseCubes, colors[i], playerLocationName.value, treatAll));
             }
         }
 
         // Share knowledge, give or take card, player can only have 7 cards
         // Both players have to be at the same city
-        List<Integer> players = ((PropertyIntArrayList)playerLocationNode.getProperty(playersHash)).getValues();
-        for (int i : players) {
+        List<Integer> playersInSameLocation = ((PropertyIntArrayList)playerLocationNode.getProperty(playersHash)).getValues();
+        for (int i : playersInSameLocation) {
             if (i != activePlayer) {
-                Deck<Card> otherDeck = (Deck<Card>) pgs.getComponent(playerHandHash, i);
-                String otherRoleString = pgs.getPlayerRole(i);
-
                 // Give card
-                for (int j = 0; j < playerHand.getSize(); j++) {
-                    Card card = playerHand.getComponents().get(j);
-                    // Researcher can give any card, others only the card that matches the city name
-                    if (roleString.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocationName)) {
-                        actions.add(new DrawCard(playerHand.getComponentID(), otherDeck.getComponentID(), j));
-                    }
-                }
+                addShareKnowledgeActions(playerLocationName, actions, activePlayer, playerHand, roleString, i);
 
                 // Take card
                 // Can take any card from the researcher or the card that matches the city if the player is in that city
-                for (int j = 0; j < otherDeck.getSize(); j++) {
-                    Card card = otherDeck.getComponents().get(j);
-                    if (otherRoleString.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocationName)) {
-                        actions.add(new DrawCard(otherDeck.getComponentID(), playerHand.getComponentID(), j));
-                    }
-                }
+                Deck<Card> otherDeck = (Deck<Card>) pgs.getComponent(playerHandHash, i);
+                String otherRoleString = pgs.getPlayerRole(i);
+                addShareKnowledgeActions(playerLocationName, actions, i, otherDeck, otherRoleString, activePlayer);
             }
         }
 
         // Discover a cure, cards of the same colour at a research station
-        ArrayList<Integer>[] colorCounter = new ArrayList[colors.length];
-        for (Card card: playerHand.getComponents()){
-            Property p  = card.getProperty(colorHash);
-            if (p != null){
-                // Only city cards have colours, events don't
-                String color = ((PropertyColor)p).valueStr;
-                int idx = indexOf(colors, color);
-                if (colorCounter[idx] == null)
-                    colorCounter[idx] = new ArrayList<>();
-                colorCounter[idx].add(card.getComponentID());
+        if (((PropertyBoolean) playerLocationNode.getProperty(researchStationHash)).value) {
+            ArrayList<Integer>[] colorCounter = new ArrayList[colors.length];
+            for (Card card : playerHand.getComponents()) {
+                Property p = card.getProperty(colorHash);
+                if (p != null) {
+                    // Only city cards have colours, events don't
+                    String color = ((PropertyColor) p).valueStr;
+                    int idx = indexOf(colors, color);
+                    if (colorCounter[idx] == null)
+                        colorCounter[idx] = new ArrayList<>();
+                    colorCounter[idx].add(card.getComponentID());
+                }
             }
-        }
-        for (int i = 0 ; i < colorCounter.length; i++){
-            if (colorCounter[i] != null){
-                if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.n_cards_for_cure_reduced){
-                    actions.add(new CureDisease(colors[i], colorCounter[i]));
-                } else if (colorCounter[i].size() >= pp.n_cards_for_cure){
-                    actions.add(new CureDisease(colors[i], colorCounter[i]));
+            for (int i = 0; i < colorCounter.length; i++) {
+                if (colorCounter[i] != null) {
+                    if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.nCardsForCure - pp.nCardsForCureReducedBy) {
+                        actions.add(new CureDisease(colors[i], colorCounter[i]));
+                    } else if (colorCounter[i].size() >= pp.nCardsForCure) {
+                        actions.add(new CureDisease(colors[i], colorCounter[i]));
+                    }
                 }
             }
         }
@@ -127,6 +118,25 @@ class PandemicActionFactory {
 
         // Done!
         return new ArrayList<>(actions);
+    }
+
+    /**
+     * Calculate possible share knowledge actions
+     * @param playerLocation - current location of players
+     * @param actions - list of actions to put the new objects in
+     * @param giver - ID of player giving a card
+     * @param giverDeck - deck of player giving a card
+     * @param giverRole - role of player giving a card
+     * @param receiver - ID of player receiving a card
+     */
+    private static void addShareKnowledgeActions(PropertyString playerLocation, Set<AbstractAction> actions,
+                                                 int giver, Deck<Card> giverDeck, String giverRole, int receiver) {
+        for (int j = 0; j < giverDeck.getSize(); j++) {
+            Card card = giverDeck.getComponents().get(j);
+            if (giverRole.equals("Researcher") || (card.getProperty(nameHash)).equals(playerLocation)) {
+                actions.add(new ShareKnowledge(giver, receiver, j));
+            }
+        }
     }
 
     /**
@@ -145,10 +155,15 @@ class PandemicActionFactory {
             // Operations expert special actions
             case "Operations Expert":
                 if (!(pgs.researchStationLocations.contains(playerLocation))) {
-                    actions.addAll(getResearchStationActions(pgs, playerLocation, null, -1));
+                    actions.addAll(getResearchStationActions(pgs, playerLocation, null, -1, -1,-1));
                 } else {
                     // List all the other nodes with combination of all the city cards in hand
+                    PropertyString playerLocationProperty = (PropertyString) pgs.getComponent(playerCardHash, playerIdx)
+                            .getProperty(playerLocationHash);
+                    String playerLocationName = playerLocationProperty.value;
                     for (BoardNode bn : pgs.world.getBoardNodes()) {
+                        if (playerLocationName.equals(((PropertyString)bn.getProperty(nameHash)).value)) continue;
+
                         for (int c = 0; c < playerHand.getSize(); c++) {
                             if (playerHand.getComponents().get(c).getProperty(colorHash) != null) {
                                 actions.add(new MovePlayerWithCard(playerIdx, ((PropertyString) bn.getProperty(nameHash)).value, c));
@@ -184,15 +199,19 @@ class PandemicActionFactory {
             case "Contingency Planner":
                 Deck<Card> plannerDeck = (Deck<Card>) pgs.getComponent(plannerDeckHash);
                 if (plannerDeck.getSize() == 0) {
-                    // then can pick up an event card
-                    Deck<Card> infectionDiscardDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
-                    List<Card> infDiscard = infectionDiscardDeck.getComponents();
+                    // then can pick up an event card from player discard pile
+                    Deck<Card> playerDiscardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
+                    List<Card> infDiscard = playerDiscardDeck.getComponents();
                     for (int i = 0; i < infDiscard.size(); i++) {
                         Card card = infDiscard.get(i);
-                        if (card.getProperty(colorHash) != null) {
-                            actions.add(new DrawCard(infectionDiscardDeck.getComponentID(), plannerDeck.getComponentID(), i));
+                        if (card.getProperty(countryHash) == null) {
+                            actions.add(new DrawCard(playerDiscardDeck.getComponentID(), plannerDeck.getComponentID(), i));
                         }
                     }
+                } else {
+                    // Play event card in planner deck
+                    Card c = plannerDeck.get(0);
+                    actions.addAll(actionsFromEventCard(pgs, c, plannerDeck.getComponentID(), -1, 0));
                 }
                 break;
         }
@@ -206,7 +225,7 @@ class PandemicActionFactory {
      * @param cardIdx - index of card used to play this action (from player hand).
      * @return - list of AddResearchStation* actions
      */
-    static List<AbstractAction> getResearchStationActions(PandemicGameState pgs, String playerLocation, Card card, int cardIdx) {
+    static List<AbstractAction> getResearchStationActions(PandemicGameState pgs, String playerLocation, Card card, int deckFrom, int deckTo, int cardIdx) {
         Set<AbstractAction> actions = new HashSet<>();
         Counter rStationCounter = (Counter) pgs.getComponent(researchStationHash);
 
@@ -215,12 +234,12 @@ class PandemicActionFactory {
             // If all research stations are used, then take one from board
             for (String station : pgs.researchStationLocations) {
                 if (card == null) actions.add(new AddResearchStationFrom(station, playerLocation));
-                else actions.add(new AddResearchStationWithCardFrom(station, playerLocation, cardIdx));
+                else actions.add(new AddResearchStationWithCardFrom(station, playerLocation, deckFrom, deckTo, cardIdx));
             }
         } else {
             // Otherwise can just build here
             if (card == null) actions.add(new AddResearchStation(playerLocation));
-            else actions.add(new AddResearchStationWithCard(playerLocation, cardIdx));
+            else actions.add(new AddResearchStationWithCard(playerLocation, deckFrom, deckTo, cardIdx));
         }
         return new ArrayList<>(actions);
     }
@@ -327,7 +346,6 @@ class PandemicActionFactory {
      * @return - list of all actions available based on event cards owned by the player.
      */
     static List<AbstractAction> getEventActions(PandemicGameState pgs) {
-        PandemicParameters pp = (PandemicParameters) pgs.getGameParameters();
         Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
         Deck<Card> playerDiscard = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
         int fromDeck = playerHand.getComponentID();
@@ -341,20 +359,7 @@ class PandemicActionFactory {
             if (p == null){
                 // Event cards don't have colour
                 int cardIdx = playerHand.getComponents().indexOf(card);
-                actions.addAll(actionsFromEventCard(pgs, card, pp, fromDeck, toDeck, cardIdx));
-            }
-        }
-
-        // Contingency planner gets also special deck card
-        Card playerCard = ((Card) pgs.getComponentActingPlayer(playerCardHash));
-        String roleString = ((PropertyString)playerCard.getProperty(nameHash)).value;
-        if (roleString.equals("Contingency Planner")){
-            Deck<Card> plannerDeck = (Deck<Card>) pgs.getComponent(plannerDeckHash);
-            if (plannerDeck.getSize() > 0){
-                // then can pick up an event card
-                Card card = plannerDeck.peek();
-                int cardIdx = playerHand.getComponents().indexOf(card);
-                actions.addAll(actionsFromEventCard(pgs, card, pp, fromDeck, toDeck, cardIdx));
+                actions.addAll(actionsFromEventCard(pgs, card, fromDeck, toDeck, cardIdx));
             }
         }
 
@@ -364,11 +369,9 @@ class PandemicActionFactory {
     /**
      * Calculates action variations based on event card type.
      * @param card - event card to be played
-     * @param pp - game parameters
      * @return list of actions corresponding to the event card.
      */
-    static List<AbstractAction> actionsFromEventCard(PandemicGameState pgs,
-                                                      Card card, PandemicParameters pp, int deckFrom, int deckTo, int cardIdx){
+    static List<AbstractAction> actionsFromEventCard(PandemicGameState pgs, Card card, int deckFrom, int deckTo, int cardIdx){
         Set<AbstractAction> actions = new HashSet<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
 
@@ -386,19 +389,19 @@ class PandemicActionFactory {
                     }
                 }
 
-                Deck<Card> infDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
-                Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
-
-                for (int i = 0; i < infDeck.getSize(); i++){
-                    actions.add(new DrawCard(infDeck.getComponentID(), discardDeck.getComponentID(), i));
-                }
+//                Deck<Card> infDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
+//                Deck<Card> discardDeck = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
+//
+//                for (int i = 0; i < infDeck.getSize(); i++){
+//                    actions.add(new DrawCard(infDeck.getComponentID(), discardDeck.getComponentID(), i));
+//                }
                 break;
             case "Government Grant":
                 // "Add 1 research station to any city (no City card needed)."
                 for (BoardNode bn: pgs.world.getBoardNodes()) {
                     if (!((PropertyBoolean) bn.getProperty(researchStationHash)).value) {
                         String cityName = ((PropertyString) bn.getProperty(nameHash)).value;
-                        actions.addAll(getResearchStationActions(pgs, cityName, card, cardIdx));
+                        actions.addAll(getResearchStationActions(pgs, cityName, card, deckFrom, deckTo, cardIdx));
                     }
                 }
                 break;
@@ -428,7 +431,7 @@ class PandemicActionFactory {
         Set<AbstractAction> actions = new HashSet<>();
         Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
         int nInfectCards = infectionDeck.getSize();
-        int n = Math.min(nInfectCards, pp.n_forecast_cards);
+        int n = Math.min(nInfectCards, pp.nForecastCards);
         ArrayList<int[]> permutations = new ArrayList<>();
         int[] order = new int[n];
         for (int i = 0; i < n; i++) {

@@ -97,7 +97,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
                 view = new AreaView(gameState.getAllComponents(), width, height);
             }
             if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState, new HashMap<>());
+                updateActionButtons(player, gameState);
             }
         }
         parent.repaint();

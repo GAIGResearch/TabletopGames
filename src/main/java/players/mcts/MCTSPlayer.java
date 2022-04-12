@@ -104,7 +104,7 @@ public class MCTSPlayer extends AbstractPlayer {
         MASTStats = root.MASTStatistics;
         // Return best action
         if (root.children.size() > 2 * actions.size())
-            throw new AssertionError("Unexpectedly large number");
+            throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
         return root.bestAction();
     }
 
@@ -138,6 +138,31 @@ public class MCTSPlayer extends AbstractPlayer {
             rolloutStrategy.setForwardModel(model);
         if (opponentModel != null)
             opponentModel.setForwardModel(model);
+    }
+
+    @Override
+    public Map<AbstractAction, Map<String, Object>> getDecisionStats() {
+        Map<AbstractAction, Map<String, Object>> retValue = new LinkedHashMap<>();
+
+        if (root != null && root.getVisits() > 1) {
+            for (AbstractAction action : root.children.keySet()) {
+                int visits = Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToInt(SingleTreeNode::getVisits).sum();
+                double visitProportion = visits / (double) root.getVisits();
+                double meanValue =  Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToDouble(n -> n.getTotValue()[root.decisionPlayer]).sum()/ visits;
+                double heuristicValue = heuristic != null ? heuristic.evaluateState(root.state, root.decisionPlayer) : 0.0;
+                double advantageValue = advantageFunction != null ? advantageFunction.applyAsDouble(action, root.state) : 0.0;
+
+                Map<String, Object> actionValues = new HashMap<>();
+                actionValues.put("visits", visits);
+                actionValues.put("visitProportion", visitProportion);
+                actionValues.put("meanValue", meanValue);
+                actionValues.put("heuristic", heuristicValue);
+                actionValues.put("advantage", advantageValue);
+                retValue.put(action, actionValues);
+            }
+        }
+
+        return retValue;
     }
 
 }

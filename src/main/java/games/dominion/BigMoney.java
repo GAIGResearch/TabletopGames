@@ -63,4 +63,9 @@ public class BigMoney extends AbstractPlayer {
     public BigMoney copy() {
         return this;
     }
+
+    @Override
+    public Map<AbstractAction, Map<String, Object>> getDecisionStats() {
+        return Collections.emptyMap();
+    }
 }

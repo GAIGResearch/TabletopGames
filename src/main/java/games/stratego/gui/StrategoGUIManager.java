@@ -62,7 +62,7 @@ public class StrategoGUIManager extends AbstractGUIManager {
      * @param gameState - current game state to be used in updating visuals.
      */
     @Override
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             ArrayList<Rectangle> highlight = view.getHighlight();

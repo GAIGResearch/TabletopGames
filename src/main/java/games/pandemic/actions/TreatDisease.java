@@ -50,7 +50,7 @@ public class TreatDisease extends AbstractAction {
 
             boolean disease_cured = diseaseToken.getValue() > 0;
 
-            if (!disease_cured || !treatAll) {  // Only remove 1 cube
+            if (!disease_cured && !treatAll) {  // Only remove 1 cube
                 diseaseCubeCounter.increment(Math.min(array[colorIdx], 1));
                 array[colorIdx] = Math.max(0, array[colorIdx] - 1);
             } else {

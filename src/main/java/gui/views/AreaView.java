@@ -2,7 +2,6 @@ package gui.views;
 
 import core.components.*;
 import core.components.Component;
-import gui.TokenView;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
