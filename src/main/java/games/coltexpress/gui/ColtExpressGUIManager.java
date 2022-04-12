@@ -137,7 +137,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
                 JPanel infoPanel = createGameStateInfoPanel("Colt Express", gameState, width, defaultInfoPanelHeight);
                 infoPanel.setOpaque(false);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true);
+                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
                 actionPanel.setOpaque(false);
 
                 main.add(infoPanel, BorderLayout.NORTH);
@@ -220,7 +220,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
     IGamePhase currentGamePhase;
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
                 activePlayer = gameState.getCurrentPlayer();

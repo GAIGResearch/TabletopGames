@@ -325,7 +325,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements ScreenHigh
     IGamePhase currentGamePhase;
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken){
+    protected void _update(AbstractPlayer player, AbstractGameState gameState){
         this.gameState = (PandemicGameState) gameState;
         boardView.gameState = this.gameState;
         boolean newTurn = gameState.getTurnOrder().getCurrentPlayer(gameState) != activePlayer || currentGamePhase == null || !currentGamePhase.equals(gameState.getGamePhase());

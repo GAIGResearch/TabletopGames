@@ -19,7 +19,6 @@ import utilities.Vector2D;
 
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static games.terraformingmars.TMGameState.TMPhase.CorporationSelect;
 
 public class TMGameState extends AbstractGameState {
@@ -217,7 +216,7 @@ public class TMGameState extends AbstractGameState {
         // Player-specific hidden info
         copy.playerHands = new Deck[getNPlayers()];
         copy.playerCardChoice = new Deck[getNPlayers()];
-        if (playerId != -1 && PARTIAL_OBSERVABLE) {
+        if (playerId != -1 && getCoreGameParameters().partialObservable) {
             for (int i = 0; i < getNPlayers(); i++) {
                 copy.playerHands[i] = playerHands[i].copy();
                 copy.playerCardChoice[i] = playerCardChoice[i].copy();

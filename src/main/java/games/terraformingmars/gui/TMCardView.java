@@ -21,7 +21,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashSet;
 
-import static core.AbstractGUI.defaultItemSize;
+import static gui.AbstractGUIManager.defaultItemSize;
 import static games.terraformingmars.gui.Utils.*;
 
 public class TMCardView extends JComponent {

@@ -12,6 +12,8 @@ import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.requirements.Requirement;
+import gui.AbstractGUIManager;
+import gui.GamePanel;
 import gui.ScreenHighlight;
 import gui.TiledImage;
 import players.human.ActionController;
@@ -31,7 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class TMGUI extends AbstractGUI {
+public class TMGUI extends AbstractGUIManager {
 
     TMBoardView view;
     TMPlayerView playerView;
@@ -59,8 +61,8 @@ public class TMGUI extends AbstractGUI {
     boolean updateButtons = false;
     HashMap<TMTypes.ActionType, JMenu> actionMenus;
 
-    public TMGUI(Game game, ActionController ac) {
-        super(ac, 500);
+    public TMGUI(GamePanel parent, Game game, ActionController ac) {
+        super(parent, ac, 500);
         if (game == null) return;
 
         // Make backgroundImage the content pane.
@@ -68,7 +70,7 @@ public class TMGUI extends AbstractGUI {
 //        TexturePaint space = new TexturePaint(bg, new Rectangle2D.Float(0,0, bg.getWidth(), bg.getHeight()));
 //        TiledImage backgroundImage = new TiledImage(space);
 //        setContentPane(backgroundImage);
-        setBackground(bgColor);
+        parent.setBackground(bgColor);
 
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
@@ -97,7 +99,7 @@ public class TMGUI extends AbstractGUI {
             actionMenus.put(t, menu);
             menuBar.add(menu);
         }
-        this.setJMenuBar(menuBar);
+        parent.setJMenuBar(menuBar);
 
         try {
             GraphicsEnvironment ge =
@@ -222,7 +224,7 @@ public class TMGUI extends AbstractGUI {
         actionLabel.setFont(defaultFont);
         actionLabel.setForeground(fontColor);
         actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false, null);
         JPanel actionWrapper = new JPanel();
         actionWrapper.add(actionLabel);
         actionWrapper.add(actionPanel);
@@ -297,10 +299,9 @@ public class TMGUI extends AbstractGUI {
         tabs.setIconAt(1, new ImageIcon(qmark));
 //        menuBar.add(Box.createHorizontalGlue());
 
-        getContentPane().add(tabs);
+        parent.add(tabs);
 
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setFrameProperties();
+        parent.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         // TODO: display end of game scoring and winner (separate window?)
     }
@@ -483,17 +484,19 @@ public class TMGUI extends AbstractGUI {
     boolean stateChange;
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
 
             if (player instanceof HumanGUIPlayer) {
-                if (actionTaken) {
-                    createActionMenu(player, (TMGameState) gameState);
-                }
-                if (actionTaken || stateChange) {
-                    updateActionButtons(player, gameState);
-                    stateChange = false;
-                }
+                createActionMenu(player, (TMGameState) gameState);
+                updateActionButtons(player, gameState);
+//                if (actionTaken) {
+//                    createActionMenu(player, (TMGameState) gameState);
+//                }
+//                if (actionTaken || stateChange) {
+//                    updateActionButtons(player, gameState);
+//                    stateChange = false;
+//                }
             } else {
                 resetActionButtons();
             }
@@ -525,7 +528,7 @@ public class TMGUI extends AbstractGUI {
             playerCorporation.update(gs, corp, -1);
 
         }
-        repaint();
+        parent.repaint();
     }
 
     private Image getScaledImage(Image srcImg, int w, int h){

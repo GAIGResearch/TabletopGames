@@ -112,7 +112,7 @@ public class BlackjackGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Blackjack", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false);
 
                 // Add all views to frame
                 main.add(mainGameArea, BorderLayout.CENTER);
@@ -134,7 +134,7 @@ public class BlackjackGUIManager extends AbstractGUIManager {
 
 
     @Override
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
+    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
         JPanel actionPanel = new JPanel();
         actionPanel.setOpaque(false);
         if (boxLayout) {

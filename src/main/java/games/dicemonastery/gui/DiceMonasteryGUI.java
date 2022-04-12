@@ -6,6 +6,7 @@ import core.Game;
 import games.dicemonastery.DiceMonasteryGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -90,7 +91,7 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
             // Top area will show state information
             JPanel infoPanel = createGameStateInfoPanel("Dice Monastery", gameState, width, defaultInfoPanelHeight);
             // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+            JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false);
 
             // Add all views to frame
             parent.add(mainGameArea, BorderLayout.CENTER);

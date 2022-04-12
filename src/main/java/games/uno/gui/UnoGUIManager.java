@@ -109,7 +109,7 @@ public class UnoGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Uno", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true);
+                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
 
                 // Add all views to frame
                 parent.setLayout(new BorderLayout());
@@ -124,7 +124,7 @@ public class UnoGUIManager extends AbstractGUIManager {
     }
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
                 playerHands[activePlayer].playerHandView.setCardHighlight(-1);

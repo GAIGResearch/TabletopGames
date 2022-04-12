@@ -61,7 +61,7 @@ public abstract class AbstractGUIManager {
      * @param gameState - current game state to be used in updating visuals.
      * @param actionTaken - true if an action was taken and game state updated, false otherwise
      */
-    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
     }
 
     /**
@@ -215,9 +215,9 @@ public abstract class AbstractGUIManager {
      * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    public void update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken, boolean showActions){
+    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions){
         updateGameStateInfo(gameState);
-        _update(player, gameState, actionTaken);
+        _update(player, gameState);
         if (showActions)
             updateActionButtons(player, gameState);
         else

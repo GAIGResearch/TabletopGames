@@ -492,7 +492,7 @@ public enum GameType {
                 break;
             // TODO: Diamant GUI
             case TerraformingMars:
-                gui = new TMGUI(game, ac);
+                gui = new TMGUI(parent, game, ac);
                 break;
             case Battlelore:
                 gui = new BattleloreGUI(parent, game, ac);

@@ -98,7 +98,7 @@ public class DominionGUIManager extends AbstractGUIManager {
             // Top area will show state information
             JPanel infoPanel = createGameStateInfoPanel("Dominion", gameState, width, defaultInfoPanelHeight);
             // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true);
+            JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
 
             // Add all views to frame
             parent.setLayout(new BorderLayout());
@@ -119,7 +119,7 @@ public class DominionGUIManager extends AbstractGUIManager {
      * @param actionTaken
      */
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
                 playerViews[activePlayer].playerHand.setCardHighlight(-1);
