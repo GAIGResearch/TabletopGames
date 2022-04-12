@@ -42,6 +42,8 @@ public class InfectCities extends RuleNode {
             Counter infectionCounter = (Counter)((PandemicGameState)gs).getComponent(infectionRateHash);
             int noCardsDrawn = infection_rate[infectionCounter.getValue()];
             Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
+            if (infectionDeck != null && infectionDeck.getSize() <= 0) return false;
+
             Deck<Card> infectionDiscardDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
             for (int c = 0; c < noCardsDrawn; c++) {  // Check the drawn cards and infect cities
                 new InfectCity(infectionDeck.getComponentID(), infectionDiscardDeck.getComponentID(), 0,

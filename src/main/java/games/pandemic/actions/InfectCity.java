@@ -21,8 +21,8 @@ import static core.CoreConstants.*;
 
 public class InfectCity extends DrawCard {
 
-    private int count;
-    private int maxCubesPerCity;
+    private final int count;
+    private final int maxCubesPerCity;
 
     public InfectCity(int deckFrom, int deckTo, int fromIndex, int maxCubesPerCity, int count) {
         super(deckFrom, deckTo, fromIndex);

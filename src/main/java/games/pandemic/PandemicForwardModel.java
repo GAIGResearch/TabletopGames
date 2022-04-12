@@ -22,10 +22,7 @@ import core.rules.rulenodes.ForceAllPlayerReaction;
 import games.pandemic.actions.AddResearchStation;
 import games.pandemic.actions.InfectCity;
 import games.pandemic.rules.conditions.*;
-import games.pandemic.rules.gameOver.GameOverDiseasesCured;
-import games.pandemic.rules.gameOver.GameOverDrawCards;
-import games.pandemic.rules.gameOver.GameOverInfection;
-import games.pandemic.rules.gameOver.GameOverOutbreak;
+import games.pandemic.rules.gameOver.*;
 import games.pandemic.rules.rules.*;
 import gui.GameFlowDiagram;
 import utilities.Hash;
@@ -54,6 +51,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         GameOverCondition infectLose = new GameOverInfection();
         GameOverCondition outbreakLose = new GameOverOutbreak(pp.loseMaxOutbreak);
         GameOverCondition drawCardsLose = new GameOverDrawCards();
+        GameOverCondition infectionCardsLose = new GameOverDrawInfectionCards();
         GameOverCondition win = new GameOverDiseasesCured();
 
         // Rules
@@ -81,6 +79,8 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         // Set up game over conditions in all rules
         playerAction.addGameOverCondition(win);  // Can win after playing an action, but not reactions
         drawCards.addGameOverCondition(drawCardsLose);
+        epidemic1.addGameOverCondition(infectionCardsLose);
+        infectCities.addGameOverCondition(infectionCardsLose);
         epidemic2.addGameOverCondition(infectLose);
         epidemic2.addGameOverCondition(outbreakLose);
         infectCities.addGameOverCondition(infectLose);
