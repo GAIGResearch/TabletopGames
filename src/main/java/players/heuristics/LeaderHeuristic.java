@@ -2,6 +2,7 @@ package players.heuristics;
 
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
+import org.graalvm.compiler.core.common.type.ArithmeticOpTable;
 import utilities.Utils;
 
 public class LeaderHeuristic implements IStateHeuristic {
