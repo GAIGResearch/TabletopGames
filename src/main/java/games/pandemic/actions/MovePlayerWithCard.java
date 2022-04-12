@@ -16,7 +16,7 @@ import static core.CoreConstants.playerHandHash;
 @SuppressWarnings("unchecked")
 public class MovePlayerWithCard extends MovePlayer {
 
-    private int cardIdx;
+    public final int cardIdx;
     private int cardId;
     private boolean executed;
 
@@ -28,9 +28,9 @@ public class MovePlayerWithCard extends MovePlayer {
     @Override
     public boolean execute(AbstractGameState gs) {
         executed = true;
-        Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
+        Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerHandHash, playerIdx);
         Deck<Card> discardPile = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerDeckDiscardHash);
-        cardId = playerHand.getComponents().get(cardIdx).getComponentID();
+        cardId = playerHand.get(cardIdx).getComponentID();
         return super.execute(gs) & new DrawCard(playerHand.getComponentID(), discardPile.getComponentID(), cardIdx).execute(gs);
     }
 
