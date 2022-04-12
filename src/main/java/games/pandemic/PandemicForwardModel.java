@@ -223,6 +223,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             playerDeck.add(c);
             pp.nEventCards++;
         }
+        playerDeck.shuffle(rnd);
 
         Deck<Card> playerRoles = _data.findDeck("Player Roles");
         Deck<Card> infectionDeck =  _data.findDeck("Infections");
@@ -281,7 +282,6 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             // Set up player hands
             Deck<Card> playerHandDeck = (Deck<Card>) playerArea.getComponent(playerHandHash);
 
-            playerDeck.shuffle(rnd);
             for (int j = 0; j < nCardsPlayer; j++) {
                 new DrawCard(playerDeck.getComponentID(), playerHandDeck.getComponentID()).execute(state);
             }

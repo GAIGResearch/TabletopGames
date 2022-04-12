@@ -16,19 +16,20 @@ import static core.CoreConstants.playerHandHash;
 @SuppressWarnings("unchecked")
 public class MovePlayerWithCard extends MovePlayer {
 
-    public final int cardIdx;
+    public final int cardIdx, playerDiscarding;
     private int cardId;
     private boolean executed;
 
-    public MovePlayerWithCard(int playerIdx, String city, int cardIdx) {
-        super(playerIdx, city);
+    public MovePlayerWithCard(MoveType type, int playerToMove, String city, int cardIdx, int playerDiscarding) {
+        super(type, playerToMove, city);
         this.cardIdx = cardIdx;
+        this.playerDiscarding = playerDiscarding;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         executed = true;
-        Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerHandHash, playerIdx);
+        Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerHandHash, playerDiscarding);
         Deck<Card> discardPile = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerDeckDiscardHash);
         cardId = playerHand.get(cardIdx).getComponentID();
         return super.execute(gs) & new DrawCard(playerHand.getComponentID(), discardPile.getComponentID(), cardIdx).execute(gs);
@@ -58,11 +59,11 @@ public class MovePlayerWithCard extends MovePlayer {
 
     @Override
     public String toString() {
-        return "Move Player " + playerIdx + " to " + destination + " with card " + cardIdx;
+        return moveType.name() + ": p" + playerToMove + " to " + destination + " with card " + cardIdx + " of p" + playerDiscarding;
     }
 
     @Override
     public AbstractAction copy() {
-        return new MovePlayerWithCard(playerIdx, destination, cardIdx);
+        return new MovePlayerWithCard(moveType, playerToMove, destination, cardIdx, playerDiscarding);
     }
 }
