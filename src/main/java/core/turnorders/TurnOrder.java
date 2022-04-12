@@ -82,6 +82,7 @@ public abstract class TurnOrder {
         turnOrder.roundCounter = roundCounter;
         turnOrder.firstPlayer = firstPlayer;
         turnOrder.nMaxRounds = nMaxRounds;
+        turnOrder.nPlayers = nPlayers;
         // we deliberately do not copy the listeners, as they only apply to the master turnorder
         return turnOrder;
     }
@@ -232,5 +233,7 @@ public abstract class TurnOrder {
         listeners.clear();
     }
 
-
+    public int getFirstPlayer() {
+        return firstPlayer;
+    }
 }

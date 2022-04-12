@@ -3,15 +3,6 @@ package core;
 import utilities.Hash;
 
 public class CoreConstants {
-    public final static boolean VERBOSE = false;
-    public final static boolean PARTIAL_OBSERVABLE = true;
-    public final static boolean COMPETITION_MODE = false;
-    public final static boolean DISQUALIFY_PLAYER_ON_ILLEGAL_ACTION_PLAYED = false;
-    public final static boolean DISQUALIFY_PLAYER_ON_TIMEOUT = false;
-    public final static boolean ALWAYS_DISPLAY_FULL_OBSERVABLE = false;
-    public final static boolean ALWAYS_DISPLAY_CURRENT_PLAYER = false;
-    public final static long FRAME_SLEEP_MS = 100;
-
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_BLACK = "\u001B[30m";
     public static final String ANSI_RED = "\u001B[31m";
@@ -34,7 +25,14 @@ public class CoreConstants {
     public final static int backgroundImgHash = Hash.GetInstance().hash("backgroundImg");
 
     public enum GameEvents {
-        ABOUT_TO_START, GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN
+        ABOUT_TO_START, GAME_OVER, ROUND_OVER, TURN_OVER, ACTION_CHOSEN, ACTION_TAKEN, GAME_EVENT
+        // Mostly self-explanatory, except:
+        // GAME_EVENT is some game-specific event that is worthy of notice and is not linked directly to a player action
+        //     An example might be the draw of a Epidemic card in Pandemic
+        // ACTION_CHOSEN is triggered immediately after a decision is made, but before it is implemented.
+        //     Hence it contains the Game State used to make the decision - this is important in Expert Iteration for example.
+        // ACTION_TAKEN is triggered after a decision is implemented. The state hence contains the results of the action.
+        //     This is useful if we want to update a GUI or similar.
     }
 
     /**

@@ -34,4 +34,9 @@ public class RandomPlayer extends AbstractPlayer {
     public String toString() {
         return "Random";
     }
+
+    @Override
+    public RandomPlayer copy() {
+        return new RandomPlayer(new Random(rnd.nextInt()));
+    }
 }

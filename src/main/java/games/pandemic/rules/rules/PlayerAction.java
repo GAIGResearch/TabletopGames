@@ -7,14 +7,17 @@ import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
 import core.properties.PropertyString;
+import core.rules.Node;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicTurnOrder;
+import games.pandemic.actions.Forecast;
 import games.pandemic.actions.MovePlayer;
 import games.pandemic.actions.QuietNight;
 import games.pandemic.actions.TreatDisease;
 import utilities.Hash;
 
+import static core.CoreConstants.playerHandHash;
 import static games.pandemic.PandemicConstants.countryHash;
 import static core.CoreConstants.nameHash;
 
@@ -29,17 +32,29 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
         this.playerHandOverCapacity = -1;
     }
 
+    /**
+     * Copy constructor
+     * @param playerAction - Node to be copied
+     */
+    public PlayerAction(PlayerAction playerAction) {
+        super(playerAction);
+        this.n_initial_disease_cubes = playerAction.n_initial_disease_cubes;
+        this.playerHandOverCapacity = playerAction.playerHandOverCapacity;
+    }
+
     @Override
     protected boolean run(AbstractGameState gs) {
         if(super.run(gs)) {
             PandemicGameState pgs = (PandemicGameState) gs;
             PandemicTurnOrder pto = (PandemicTurnOrder) pgs.getTurnOrder();
+            int playerIdx = pto.getCurrentPlayer(gs);
 
             if (action instanceof QuietNight) {
-                ((PandemicGameState) gs).setQuietNight(true);
+                pgs.setQuietNight(true);
+            } else if (action instanceof Forecast) {
+                pgs.setGamePhase(PandemicGameState.PandemicGamePhase.Forecast);
             } else if (action instanceof MovePlayer) {
                 // if player is Medic and a disease has been cured, then it should remove all cubes when entering the city
-                int playerIdx = pto.getCurrentPlayer(gs);
                 Card playerCard = (Card) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx);
                 String roleString = ((PropertyString) playerCard.getProperty(nameHash)).value;
 
@@ -56,7 +71,9 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
             } else if (action instanceof DrawCard) {
                 // Player hand may be over capacity, set parameter to inform next decision
                 Deck<Card> deckTo = (Deck<Card>) gs.getComponentById(((DrawCard) action).getDeckTo());
-                if (deckTo.isOverCapacity()) playerHandOverCapacity = deckTo.getOwnerId();
+                Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
+                if (deckTo != null && deckTo.isOverCapacity()) playerHandOverCapacity = deckTo.getOwnerId();
+                else if (playerHand != null && playerHand.isOverCapacity()) playerHandOverCapacity = playerIdx;
                 else playerHandOverCapacity = -1;
             }
 
@@ -80,5 +97,10 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
 
     public void setPlayerHandOverCapacity(int playerHandOverCapacity) {
         this.playerHandOverCapacity = playerHandOverCapacity;
+    }
+
+    @Override
+    protected Node _copy() {
+        return new PlayerAction(this);
     }
 }

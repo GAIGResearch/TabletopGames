@@ -1,0 +1,18 @@
+{
+  "class" : "games.pandemic.PandemicParameters",
+  "loseMaxOutbreak" : 8,
+  "nCardsForCure" : 5,
+  "maxCardsPerPlayer" : 7,
+  "maxCubesPerCity" : 3,
+  "nEpidemicCards" : 4,
+  "nCubesEpidemic" : 3,
+  "nInfectionCardsSetup" : 3,
+  "nInfectionsSetup" : 3,
+  "nCubesInfection" : 1,
+  "nInitialDiseaseCubes" : 24,
+  "survivalRules" : true,
+  "player0Role" : "Any",
+  "player1Role" : "Any",
+  "player2Role" : "Any",
+  "player3Role" : "Any"
+}

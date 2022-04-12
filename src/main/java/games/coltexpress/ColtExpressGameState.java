@@ -15,12 +15,13 @@ import games.coltexpress.cards.RoundCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 import utilities.Pair;
+import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
 import static core.CoreConstants.VisibilityMode;
 import static java.util.stream.Collectors.toList;
+import static utilities.Utils.GameResult.WIN;
 
 public class ColtExpressGameState extends AbstractGameState implements IPrintable {
 
@@ -81,25 +82,25 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
         // These are modified in PO
         copy.playerHandCards = new ArrayList<>();
-        for (Deck<ColtExpressCard> d: playerHandCards) {
+        for (Deck<ColtExpressCard> d : playerHandCards) {
             copy.playerHandCards.add(d.copy());
         }
         copy.playerDecks = new ArrayList<>();
-        for (Deck<ColtExpressCard> d: playerDecks) {
+        for (Deck<ColtExpressCard> d : playerDecks) {
             copy.playerDecks.add(d.copy());
         }
         copy.playerLoot = new ArrayList<>();
-        for (Deck<Loot> d: playerLoot) {
+        for (Deck<Loot> d : playerLoot) {
             copy.playerLoot.add(d.copy());
         }
         copy.plannedActions = plannedActions.copy();
         copy.rounds = rounds.copy();
         copy.trainCompartments = new LinkedList<>();
-        for (Compartment d: trainCompartments) {
+        for (Compartment d : trainCompartments) {
             copy.trainCompartments.add((Compartment) d.copy());
         }
 
-        if (PARTIAL_OBSERVABLE && playerId != -1) {
+        if (getCoreGameParameters().partialObservable && playerId != -1) {
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId) {
                     // Other player hands are hidden, but it's known what's in a player's deck
@@ -120,7 +121,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
                     // Random value for loot of this same type
                     Loot realLoot = playerLoot.get(i).get(j);
-                    ArrayList<Pair<Integer,Integer>> lootOptions = ((ColtExpressParameters)copy.gameParameters).loot.get(realLoot.getLootType());
+                    ArrayList<Pair<Integer, Integer>> lootOptions = ((ColtExpressParameters) copy.gameParameters).loot.get(realLoot.getLootType());
                     int randomValue = lootOptions.get(rnd.nextInt(lootOptions.size())).a;
                     dLoot.add(new Loot(realLoot.getLootType(), randomValue));
                 }
@@ -135,14 +136,14 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
                 for (int j = 0; j < realCompartment.lootOnTop.getSize(); j++) {
                     // Random value for loot of this same type
                     Loot realLoot = realCompartment.lootOnTop.get(j);
-                    ArrayList<Pair<Integer,Integer>> lootOptions = ((ColtExpressParameters)copy.gameParameters).loot.get(realLoot.getLootType());
+                    ArrayList<Pair<Integer, Integer>> lootOptions = ((ColtExpressParameters) copy.gameParameters).loot.get(realLoot.getLootType());
                     int randomValue = lootOptions.get(rnd.nextInt(lootOptions.size())).a;
                     copyCompartment.lootOnTop.add(new Loot(realLoot.getLootType(), randomValue));
                 }
                 for (int j = 0; j < realCompartment.lootInside.getSize(); j++) {
                     // Random value for loot of this same type
                     Loot realLoot = realCompartment.lootInside.get(j);
-                    ArrayList<Pair<Integer,Integer>> lootOptions = ((ColtExpressParameters)copy.gameParameters).loot.get(realLoot.getLootType());
+                    ArrayList<Pair<Integer, Integer>> lootOptions = ((ColtExpressParameters) copy.gameParameters).loot.get(realLoot.getLootType());
                     int randomValue = lootOptions.get(rnd.nextInt(lootOptions.size())).a;
                     copyCompartment.lootInside.add(new Loot(realLoot.getLootType(), randomValue));
                 }
@@ -166,11 +167,11 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             }
 
             // Then we randomise the invisible ones
-            for (Map.Entry<Integer, ArrayList<Integer>> e: cardReplacements.entrySet()) {
+            for (Map.Entry<Integer, ArrayList<Integer>> e : cardReplacements.entrySet()) {
                 // loop over each player, and shuffle their decks (which now includes all cards we can't see)
                 copy.playerDecks.get(e.getKey()).shuffle(rnd);
                 Deck<ColtExpressCard> bulletCards = new Deck<>("tempDeck", VisibilityMode.HIDDEN_TO_ALL);
-                for (int i: e.getValue()) {
+                for (int i : e.getValue()) {
                     // This might be a bullet card...
                     ColtExpressCard topCard = copy.playerDecks.get(e.getKey()).draw();
                     if (topCard.cardType == ColtExpressCard.CardType.Bullet) {
@@ -211,8 +212,35 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     @Override
     public double getGameScore(int playerId) {
-        return getLoot(playerId).sumInt(Loot::getValue);
+        double retValue = getLoot(playerId).sumInt(Loot::getValue);
+        if (getBestShooters().contains(playerId)) {
+            ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) turnOrder;
+            ColtExpressParameters cep = (ColtExpressParameters) gameParameters;
+            // the full shooter reward is given at the end of the game
+            // so we only partially incorporate this into the 'score'
+            double gameProgress = ceto.getRoundCounter() / (double) cep.nMaxRounds;
+            if (!isNotTerminal() && gameProgress != 1.0)
+                throw new AssertionError("Unexpected");
+            retValue += cep.shooterReward * gameProgress;
+        }
+    return retValue;
     }
+
+    @Override
+    public double getTiebreak(int playerId) {
+        // we use the number of bullet cards
+        // in the players own deck and hands
+        // fewer is better - so we return a negative number
+        int bulletsTaken = 0;
+        for (ColtExpressCard card : playerDecks.get(playerId).getComponents())
+            if (card.cardType == ColtExpressCard.CardType.Bullet)
+                bulletsTaken++;
+        for (ColtExpressCard card : playerHandCards.get(playerId).getComponents())
+            if (card.cardType == ColtExpressCard.CardType.Bullet)
+                bulletsTaken++;
+        return -bulletsTaken;
+    }
+
 
     @Override
     protected void _reset() {
@@ -254,8 +282,9 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     /**
      * Adds loot collected by player
+     *
      * @param playerID - ID of player collecting loot
-     * @param loot - loot collected
+     * @param loot     - loot collected
      */
     public void addLoot(Integer playerID, Loot loot) {
         playerLoot.get(playerID).add(loot);
@@ -263,6 +292,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     /**
      * Adds a neutral bullet for player
+     *
      * @param playerID - ID of player receiving the bullet
      */
     public void addNeutralBullet(Integer playerID) {
@@ -271,7 +301,8 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     /**
      * Adds a bullet from another player
-     * @param playerID - player receiving the bullet
+     *
+     * @param playerID  - player receiving the bullet
      * @param shooterID - player sending the bullet
      */
     public void addBullet(Integer playerID, Integer shooterID) {
@@ -284,6 +315,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
     /**
      * Calculates the current best shooters depending on the number of bullets left per player
+     *
      * @return - list of player IDs tied for lowest number of bullets left
      */
     public List<Integer> getBestShooters() {
@@ -291,7 +323,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         List<Integer> playersWithMostSuccessfulShots = new LinkedList<>();
         int bestValue = cep.nBulletsPerPlayer;
         for (int i = 0; i < getNPlayers(); i++) {
-            if (bulletsLeft[i] < bestValue){
+            if (bulletsLeft[i] < bestValue) {
                 bestValue = bulletsLeft[i];
                 playersWithMostSuccessfulShots.clear();
                 playersWithMostSuccessfulShots.add(i);
@@ -306,27 +338,35 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     public LinkedList<Compartment> getTrainCompartments() {
         return trainCompartments;
     }
+
     public Deck<Loot> getLoot(int playerID) {
         return playerLoot.get(playerID);
     }
+
     public PartialObservableDeck<ColtExpressCard> getPlannedActions() {
         return plannedActions;
     }
+
     public List<Deck<ColtExpressCard>> getPlayerDecks() {
         return playerDecks;
     }
+
     public PartialObservableDeck<RoundCard> getRounds() {
         return rounds;
     }
+
     public HashMap<Integer, CharacterType> getPlayerCharacters() {
         return playerCharacters;
     }
+
     public List<Deck<ColtExpressCard>> getPlayerHandCards() {
         return playerHandCards;
     }
+
     public int[] getBulletsLeft() {
         return bulletsLeft;
     }
+
     public List<Deck<Loot>> getPlayerLoot() {
         return playerLoot;
     }
@@ -338,10 +378,10 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
         int currentPlayer = turnOrder.getCurrentPlayer(this);
 
-        for (int i = 0; i < getNPlayers(); i++){
+        for (int i = 0; i < getNPlayers(); i++) {
             if (currentPlayer == i)
                 System.out.print(">>> ");
-            System.out.print("Player " + i + " = "+ playerCharacters.get(i).name() + ":  ");
+            System.out.print("Player " + i + " = " + playerCharacters.get(i).name() + ":  ");
             System.out.print("Hand=");
             System.out.print(playerHandCards.get(i).toString());
             System.out.print("; Deck=");
@@ -359,7 +399,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
 
         System.out.println();
         int i = 0;
-        for (RoundCard round : rounds.getComponents()){
+        for (RoundCard round : rounds.getComponents()) {
             if (i == turnOrder.getRoundCounter()) {
                 System.out.print("->");
             }
@@ -372,15 +412,14 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         System.out.println("Current GamePhase: " + gamePhase);
     }
 
-    public String printTrain(){
+    public String printTrain() {
         StringBuilder sb = new StringBuilder();
         sb.append("Train:\n");
-        for (Compartment compartment : trainCompartments)
-        {
+        for (Compartment compartment : trainCompartments) {
             sb.append(compartment.toString());
             sb.append("\n");
         }
-        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length() - 1);
 
         return sb.toString();
     }

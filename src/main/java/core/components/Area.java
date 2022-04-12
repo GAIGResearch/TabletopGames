@@ -37,6 +37,19 @@ public class Area extends Component implements IComponentContainer<Component> {
     }
 
     /**
+     * This is used to avoid a full recursive copy of all the contents of an area
+     * This can be useful when we need for other reasons to copy those locally, and it
+     * is easier to put them into the Area once this is done.
+     *
+     * The main use case for this is in AbstractGameState.copy() and the creation of allComponents.
+     *
+     * @return An empty Area that has the same ComponentID as the original
+     */
+    public Area emptyCopy() {
+        return new Area(ownerId, componentName, componentID);
+    }
+
+    /**
      * Clears the collection of components.
      */
     public void clear() {
@@ -91,6 +104,16 @@ public class Area extends Component implements IComponentContainer<Component> {
                     putComponent(nestedC);
                 }
             }
+        }
+    }
+
+    public void removeComponent(Component component) {
+        if (component instanceof Deck || component instanceof Area)
+            throw new IllegalArgumentException("Not yet implemented for Decks or Areas");
+        if (components.containsKey(component.componentID)) {
+            this.components.remove(component.componentID);
+        } else {
+            throw new IllegalArgumentException("Cannot remove Component as it is not here : " + component.componentID);
         }
     }
 

@@ -1,4 +1,5 @@
 package games.virus;
+
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
 import games.virus.components.VirusOrgan;
@@ -13,17 +14,14 @@ public class VirusHeuristic implements IStateHeuristic {
         VirusGameState vgs = (VirusGameState) gs;
         Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (playerResult == Utils.GameResult.LOSE)
-            return -1;
-        if (playerResult == Utils.GameResult.WIN)
-            return 1;
-
+        if (!vgs.isNotTerminal())
+            return playerResult.value;
         int nHealthyOrgans = 0;
-        for (VirusOrgan o: vgs.playerBodies.get(playerId).organs.values()) {
+        for (VirusOrgan o : vgs.playerBodies.get(playerId).organs.values()) {
             if (o.isHealthy()) {
-                nHealthyOrgans ++;
+                nHealthyOrgans++;
             }
         }
-        return nHealthyOrgans*1.0/vgs.playerBodies.get(playerId).organs.size();
+        return nHealthyOrgans * 1.0 / vgs.playerBodies.get(playerId).organs.size();
     }
 }

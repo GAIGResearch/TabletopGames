@@ -7,33 +7,35 @@ import core.AbstractGameState;
 import core.interfaces.IPrintable;
 import games.GameType;
 import games.uno.cards.*;
+import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.PARTIAL_OBSERVABLE;
+import static games.uno.UnoGameParameters.UnoScoring.*;
 import static games.uno.cards.UnoCard.UnoCardType.Wild;
+import static utilities.Utils.GameResult.*;
 
 public class UnoGameState extends AbstractGameState implements IPrintable {
-    List<Deck<UnoCard>>  playerDecks;
-    Deck<UnoCard>        drawDeck;
-    Deck<UnoCard>        discardDeck;
-    UnoCard              currentCard;
-    String               currentColor;
-    int[]                playerScore;
+    List<Deck<UnoCard>> playerDecks;
+    Deck<UnoCard> drawDeck;
+    Deck<UnoCard> discardDeck;
+    UnoCard currentCard;
+    String currentColor;
+    int[] playerScore;
+    int[] expulsionRound;
 
     /**
      * Constructor. Initialises some generic game state variables.
      *
      * @param gameParameters - game parameters.
-     * @param nPlayers      - number of players for this game.
+     * @param nPlayers       - number of players for this game.
      */
     public UnoGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new UnoTurnOrder(nPlayers), GameType.Uno);
     }
 
     @Override
-    protected List<Component> _getAllComponents()
-    {
+    protected List<Component> _getAllComponents() {
         return new ArrayList<Component>() {{
             addAll(playerDecks);
             add(drawDeck);
@@ -51,12 +53,12 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     }
 
     public void updateCurrentCard(UnoCard card) {
-        currentCard  = card;
+        currentCard = card;
         currentColor = card.color;
     }
 
     public void updateCurrentCard(UnoCard card, String color) {
-        currentCard  = card;
+        currentCard = card;
         currentColor = color;
     }
 
@@ -86,14 +88,16 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
 
     /**
      * Calculates points for all players, as sum of values of cards in the hands of all other players in the game.
+     * Note that this is formally a UNO variant (but stops the game going on for ever)
+     *
      * @param playerID - ID of player to calculate points for
      * @return - integer, point total
      */
-    public int calculatePlayerPoints(int playerID) {
+    public int calculatePlayerPoints(int playerID, boolean selfOnly) {
         UnoGameParameters ugp = (UnoGameParameters) getGameParameters();
         int nPoints = 0;
         for (int otherPlayer = 0; otherPlayer < getNPlayers(); otherPlayer++) {
-            if (otherPlayer != playerID) {
+            if ((selfOnly && otherPlayer == playerID) || (!selfOnly && otherPlayer != playerID)) {
                 for (UnoCard card : playerDecks.get(otherPlayer).getComponents()) {
                     switch (card.type) {
                         case Number:
@@ -129,7 +133,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         }
         copy.drawDeck = drawDeck.copy();
 
-        if (PARTIAL_OBSERVABLE && playerId != -1) {
+        if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Other player cards and the draw deck are unknown.
             // Combine all into one deck, shuffle, then deal random cards to the other players (hand size kept)
             Random r = new Random(copy.gameParameters.getRandomSeed());
@@ -155,6 +159,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         copy.currentCard = (UnoCard) currentCard.copy();
         copy.currentColor = currentColor;
         copy.playerScore = playerScore.clone();
+        copy.expulsionRound = expulsionRound.clone();
         return copy;
     }
 
@@ -173,8 +178,45 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     public double getGameScore(int playerId) {
-        return calculatePlayerPoints(playerId);
+        // Only CLASSIC scoring has a positive score as beneficial
+        // so we return the negative score to indicate a high score is poor
+        int score = playerScore[playerId];
+        UnoGameParameters ugp = (UnoGameParameters) gameParameters;
+
+        if (gameStatus == GAME_ONGOING && ugp.scoringMethod != CLASSIC)
+            score += calculatePlayerPoints(playerId, true);
+        if (ugp.scoringMethod != CLASSIC)
+            score = -score;
+        return score;
     }
+
+    @Override
+    public int getOrdinalPosition(int playerId) {
+        if (playerResults[playerId] == Utils.GameResult.WIN)
+            return 1;
+        UnoGameParameters ugp = (UnoGameParameters) gameParameters;
+        if (ugp.scoringMethod == CHALLENGE) {
+            double playerScore = getGameScore(playerId);
+            int ordinal = 1;
+            for (int i = 0, n = getNPlayers(); i < n; i++) {
+                if (expulsionRound[i] > expulsionRound[playerId]) {
+                    ordinal++;
+                } else if (expulsionRound[i] == expulsionRound[playerId]) {
+                    double otherScore = getGameScore(i);
+                    if (otherScore > playerScore)
+                        ordinal++;
+                    else if (otherScore == playerScore) {
+                        if (getTiebreak(i) > getTiebreak(playerId))
+                            ordinal++;
+                    }
+                }
+            }
+            return ordinal;
+        } else {
+            return super.getOrdinalPosition(playerId);
+        }
+    }
+
 
     @Override
     protected void _reset() {
@@ -226,7 +268,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         strings[4] = sb.toString();
         strings[5] = "----------------------------------------------------";
 
-        for (String s : strings){
+        for (String s : strings) {
             System.out.println(s);
         }
     }

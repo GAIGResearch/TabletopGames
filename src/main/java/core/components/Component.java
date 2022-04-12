@@ -236,5 +236,4 @@ public abstract class Component {
     public int hashCode() {
         return componentID;
     }
-
 }

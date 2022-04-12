@@ -1,6 +1,7 @@
 package core.interfaces;
 
 import core.AbstractGameState;
+import core.Game;
 import core.actions.AbstractAction;
 
 public interface IGameAttribute {
@@ -25,6 +26,8 @@ public interface IGameAttribute {
     default Object get(AbstractGameState state, int player) {
         return 0;
     }
+
+    default Object get(Game game) { return 0; }
 
     String name();
 

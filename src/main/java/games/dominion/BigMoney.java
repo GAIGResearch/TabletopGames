@@ -3,6 +3,7 @@ package games.dominion;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import games.dicemonastery.heuristics.DontPassPolicy;
 import games.dominion.actions.BuyCard;
 import games.dominion.actions.EndPhase;
 import games.dominion.cards.CardType;
@@ -56,5 +57,15 @@ public class BigMoney extends AbstractPlayer {
     @Override
     public String toString() {
         return "BigMoney";
+    }
+
+    @Override
+    public BigMoney copy() {
+        return this;
+    }
+
+    @Override
+    public Map<AbstractAction, Map<String, Object>> getDecisionStats() {
+        return Collections.emptyMap();
     }
 }

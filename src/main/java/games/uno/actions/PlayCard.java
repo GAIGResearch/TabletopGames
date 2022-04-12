@@ -7,13 +7,17 @@ import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IPrintable;
+import games.uno.UnoGameParameters;
 import games.uno.UnoTurnOrder;
 import games.uno.cards.UnoCard;
 import games.uno.UnoGameState;
+import utilities.Utils;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+
+import static games.uno.UnoGameParameters.UnoScoring.CHALLENGE;
 
 public class PlayCard extends DrawCard implements IPrintable {
 
@@ -22,6 +26,7 @@ public class PlayCard extends DrawCard implements IPrintable {
     public PlayCard(int deckFrom, int deckTo, int cardToBePlayed) {
         super(deckFrom, deckTo, cardToBePlayed);
     }
+
     public PlayCard(int deckFrom, int deckTo, int cardToBePlayed, String color) {
         super(deckFrom, deckTo, cardToBePlayed);
         this.color = color;
@@ -29,10 +34,11 @@ public class PlayCard extends DrawCard implements IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gameState) {
-        UnoGameState ugs = (UnoGameState)gameState;
+        UnoGameState ugs = (UnoGameState) gameState;
+        UnoGameParameters ugp = (UnoGameParameters) gameState.getGameParameters();
         super.execute(gameState);
 
-        Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getTurnOrder().getRoundCounter());
+        Random r = new Random(ugp.getRandomSeed() + ugs.getTurnOrder().getRoundCounter());
 
         UnoCard cardToBePlayed = (UnoCard) gameState.getComponentById(cardId);
         ugs.updateCurrentCard(cardToBePlayed);
@@ -42,9 +48,22 @@ public class PlayCard extends DrawCard implements IPrintable {
         Deck<UnoCard> discardDeck = ugs.getDiscardDeck();
         List<Deck<UnoCard>> playerDecks = ugs.getPlayerDecks();
 
+        int players = ugs.getNPlayers();
+        if (ugp.scoringMethod == CHALLENGE) {
+            players = 0;
+            for (int p = 0; p < ugs.getNPlayers(); p++) {
+                if (ugs.getPlayerResults()[p] == Utils.GameResult.GAME_ONGOING)
+                    players++;
+            }
+        }
+
         switch (cardToBePlayed.type) {
             case Reverse:
-                ((UnoTurnOrder) gameState.getTurnOrder()).reverse();
+                if (players == 2) { // Reverse cards are SKIP for 2 players
+                    ((UnoTurnOrder) gameState.getTurnOrder()).skip();
+                } else {
+                    ((UnoTurnOrder) gameState.getTurnOrder()).reverse();
+                }
                 break;
             case Skip:
                 ((UnoTurnOrder) gameState.getTurnOrder()).skip();
@@ -68,7 +87,7 @@ public class PlayCard extends DrawCard implements IPrintable {
             case Wild:
                 ugs.updateCurrentCard(cardToBePlayed, color);
 
-                for (int i = 0; i < cardToBePlayed.drawN; i ++) {
+                for (int i = 0; i < cardToBePlayed.drawN; i++) {
                     if (drawDeck.getSize() == 0) {
                         drawDeck.add(discardDeck);
                         discardDeck.clear();
@@ -117,7 +136,7 @@ public class PlayCard extends DrawCard implements IPrintable {
     public Card getCard(AbstractGameState gs) {
         if (!executed) {
             Deck<UnoCard> deck = (Deck<UnoCard>) gs.getComponentById(deckFrom);
-            if (fromIndex == deck.getSize()) return deck.get(fromIndex-1);
+            if (fromIndex == deck.getSize()) return deck.get(fromIndex - 1);
             return deck.get(fromIndex);
         }
         return (UnoCard) gs.getComponentById(cardId);

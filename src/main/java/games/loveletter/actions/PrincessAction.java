@@ -8,7 +8,7 @@ import games.loveletter.LoveLetterGameState;
 /**
  * In case the princess is discarded or played the player is immediately removed from the game.
  */
-public class PrincessAction extends DrawCard implements IPrintable {
+public class PrincessAction extends core.actions.DrawCard implements IPrintable {
 
     public PrincessAction(int deckFrom, int deckTo, int fromIndex) {
         super(deckFrom, deckTo, fromIndex);
@@ -39,5 +39,12 @@ public class PrincessAction extends DrawCard implements IPrintable {
     @Override
     public AbstractAction copy() {
         return new PrincessAction(deckFrom, deckTo, fromIndex);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PrincessAction)) return false;
+        return super.equals(o);
     }
 }

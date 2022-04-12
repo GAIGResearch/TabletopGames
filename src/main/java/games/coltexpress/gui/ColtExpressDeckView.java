@@ -22,7 +22,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 
-import static games.coltexpress.gui.ColtExpressGUI.*;
+import static games.coltexpress.gui.ColtExpressGUIManager.*;
 
 public class ColtExpressDeckView<T extends Component> extends ComponentView {
 

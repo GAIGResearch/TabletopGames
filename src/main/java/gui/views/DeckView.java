@@ -74,7 +74,7 @@ public abstract class DeckView<T extends Component> extends ComponentView {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == 1) {
+                if (e.getButton() == 1 && rects != null) {
                     // Left click, highlight
                     for (int i = 0; i < rects.length; i++) {
                         if (rects[i].contains(e.getPoint())) {

@@ -1,4 +1,4 @@
-# TAG: Tabletop Games Framework
+# TAG: [Tabletop Games Framework](https://hopshackle.github.io/tagsite/)
 
 [![license](https://img.shields.io/github/license/GAIGResearch/TabletopGames)](LICENSE)
 ![top-language](https://img.shields.io/github/languages/top/GAIGResearch/TabletopGames)
@@ -6,7 +6,7 @@
 [![twitter](https://img.shields.io/twitter/follow/gameai_qmul?style=social)](https://twitter.com/intent/follow?screen_name=gameai_qmul)
 [![](https://img.shields.io/github/stars/GAIGResearch/TabletopGames.svg?label=Stars&style=social)](https://github.com/GAIGResearch/TabletopGames)
 
-The Tabletop Games Framework (TAG) is a Java-based benchmark for developing modern board games for AI research.  TAG provides a common skeleton for implementing tabletop games based on a common API for AI agents, a set of components and classes to easily add new games and an import module for defining data in JSON format. At present, this platform includes the implementation of seven different tabletop games that can also be used as an example for further developments. Additionally, TAG also incorporates logging functionality that allows the user to perform a detailed analysis of the game, in terms of action space, branching factor, hidden information, and other measures of interest for Game AI research.
+The [Tabletop Games Framework (TAG)](http://tabletopgames.ai) is a Java-based benchmark for developing modern board games for AI research.  TAG provides a common skeleton for implementing tabletop games based on a common API for AI agents, a set of components and classes to easily add new games and an import module for defining data in JSON format. At present, this platform includes the implementation of seven different tabletop games that can also be used as an example for further developments. Additionally, TAG also incorporates logging functionality that allows the user to perform a detailed analysis of the game, in terms of action space, branching factor, hidden information, and other measures of interest for Game AI research.
 ![Pandemic](data/imgs/Pandemic.png)
 *Example GUI for Pandemic*
 
@@ -22,6 +22,8 @@ Currently implemented games:
 - [x] Pandemic (Matt Leacock 2008)
 - [x] Diamant (Bruno Faidutti and Alan R. Moon 2005)
 - [x] Dominion (Donald X. Vaccarino 2008)
+- [x] Poker Texas Hold'em 
+- [x] Blackjack
 
 Games in progress:
 - [ ] Settlers of Catan (Klaus Teuber 1995)
@@ -37,8 +39,8 @@ Alternatively, open the code directly in your IDE of choice, right click the pom
 
 ## Getting started
 
-To get started the [wiki](https://github.com/GAIGResearch/TabletopGames/wiki) provides various guides and descriptions of the framework.
-Another good resource is our continuously updated paper ["Design and Implementation of TAG: A Tabletop Games Framework"](https://arxiv.org/abs/2009.12065).
+To get started the [website](http://tabletopgames.ai) provides various guides and descriptions of the framework.
+Another good resource is our paper ["Design and Implementation of TAG: A Tabletop Games Framework"](https://arxiv.org/abs/2009.12065).
 
 ## Citing Information
 

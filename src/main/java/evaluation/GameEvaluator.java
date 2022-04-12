@@ -1,5 +1,16 @@
 package evaluation;
 
+import core.*;
+import core.interfaces.IGameHeuristic;
+import core.interfaces.IStateHeuristic;
+import core.interfaces.IStatisticLogger;
+import evodef.*;
+import games.GameType;
+import utilities.SummaryLogger;
+
+import java.util.*;
+import java.util.stream.*;
+import static java.util.stream.Collectors.*;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
@@ -27,6 +38,7 @@ import static java.util.stream.Collectors.toList;
 public class GameEvaluator implements SolutionEvaluator {
 
     GameType game;
+    AbstractParameters gameParams;
     ITPSearchSpace searchSpace;
     int nPlayers;
     List<AbstractPlayer> opponents;
@@ -36,7 +48,8 @@ public class GameEvaluator implements SolutionEvaluator {
     boolean fullyCoop;
     public boolean reportStatistics;
     public IStatisticLogger statsLogger = new SummaryLogger();
-    BiFunction<AbstractGameState, Integer, Double> evalFn;
+    IStateHeuristic stateHeuristic;
+    IGameHeuristic gameHeuristic;
 
     /**
      * GameEvaluator
@@ -55,16 +68,20 @@ public class GameEvaluator implements SolutionEvaluator {
      *
      */
     public GameEvaluator(GameType game, ITPSearchSpace parametersToTune,
-                         int nPlayers, BiFunction<AbstractGameState, Integer, Double> evaluationFunction,
+                         AbstractParameters gameParams,
+                         int nPlayers,
                          List<AbstractPlayer> opponents, long seed,
+                         IStateHeuristic stateHeuristic, IGameHeuristic gameHeuristic,
                          boolean avoidOpponentDuplicates) {
         this.game = game;
+        this.gameParams = gameParams;
         this.searchSpace = parametersToTune;
         this.nPlayers = nPlayers;
-        evalFn = evaluationFunction;
+        this.stateHeuristic = stateHeuristic;
+        this.gameHeuristic = gameHeuristic;
         this.opponents = opponents;
         this.rnd = new Random(seed);
-        this.avoidOppDupes = avoidOpponentDuplicates;
+        this.avoidOppDupes = avoidOpponentDuplicates && opponents.size() > 1;
         if (avoidOppDupes && opponents.size() < nPlayers - 1)
             throw new AssertionError("Insufficient Opponents to avoid duplicates");
         if (opponents.isEmpty()) fullyCoop = true;
@@ -110,10 +127,9 @@ public class GameEvaluator implements SolutionEvaluator {
         int count = 0;
         for (int i = 0; i < nPlayers; i++) {
             if (!fullyCoop && i != playerIndex) {
-                int oppIndex = (avoidOppDupes) ? count++ : rnd.nextInt(opponents.size());
-                if (count >= opponents.size())
-                    throw new AssertionError("Something has gone wrong. We seem to have insufficient opponents");
-                allPlayers.add(opponents.get(oppIndex));
+                int oppIndex = (avoidOppDupes) ? count : rnd.nextInt(opponents.size());
+                count = (count + 1) % nPlayers;
+                allPlayers.add(opponents.get(oppIndex).copy());
             } else {
                 AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(settings); // we create for each, in case this is coop
                 if (reportStatistics) tunedPlayer.setStatsLogger(statsLogger);
@@ -121,14 +137,14 @@ public class GameEvaluator implements SolutionEvaluator {
             }
         }
 
-        Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers);
+        Game newGame = tuningGame ? (Game) configuredThing : game.createGameInstance(nPlayers, gameParams);
+        // always reset the random seed for each new game
         newGame.reset(allPlayers, rnd.nextLong());
 
         newGame.run();
-        AbstractGameState finalState = newGame.getGameState();
 
         nEvals++;
-        return evalFn.apply(finalState, playerIndex);
+        return tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerIndex);
     }
 
     /**

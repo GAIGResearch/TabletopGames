@@ -50,6 +50,16 @@ public class Distance {
         }
         return ret;
     }
+    public static double manhattan_distance(int[] x, int[] y) {
+        if (x.length != y.length)
+            throw new IllegalArgumentException(String.format("Arrays have different length: x[%d], y[%d]", x.length, y.length));
+
+        double ret = 0.0;
+        for (int i = 0; i < x.length; i++) {
+            ret += Math.abs(x[i]-y[i]);
+        }
+        return ret;
+    }
 
     /**
      * Java port by Raluca D. Gaina 2020, from https://github.com/mavillan/py-hausdorff
@@ -60,6 +70,16 @@ public class Distance {
      * Distance between arrays
      */
     public static double euclidian_distance(double[] x, double[] y) {
+        if (x.length != y.length)
+            throw new IllegalArgumentException(String.format("Arrays have different length: x[%d], y[%d]", x.length, y.length));
+
+        double ret = 0.0;
+        for (int i = 0; i < x.length; i++) {
+            ret += Math.pow((x[i]-y[i]), 2);
+        }
+        return Math.sqrt(ret);
+    }
+    public static double euclidian_distance(int[] x, int[] y) {
         if (x.length != y.length)
             throw new IllegalArgumentException(String.format("Arrays have different length: x[%d], y[%d]", x.length, y.length));
 

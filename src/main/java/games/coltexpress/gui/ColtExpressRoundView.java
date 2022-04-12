@@ -6,8 +6,6 @@ import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.actions.roundcardevents.RoundEvent;
 import games.coltexpress.cards.RoundCard;
 import games.coltexpress.components.Compartment;
-import games.coltexpress.components.Loot;
-import utilities.ImageIO;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +14,7 @@ import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.List;
 
-import static games.coltexpress.gui.ColtExpressGUI.*;
+import static games.coltexpress.gui.ColtExpressGUIManager.*;
 
 public class ColtExpressRoundView extends JComponent {
 

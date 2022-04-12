@@ -27,7 +27,7 @@ public class UnoGame extends Game {
         AbstractParameters gameParameters = new UnoGameParameters(System.currentTimeMillis());
         Game game           = new UnoGame(agents, gameParameters);
 
-        game.run(null);
+        game.run();
     }
 }
 

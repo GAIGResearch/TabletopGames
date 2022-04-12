@@ -2,8 +2,7 @@ package players;
 
 import core.AbstractPlayer;
 import evaluation.TunableParameters;
-import org.apache.commons.math3.analysis.function.Abs;
-import org.json.simple.*;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import players.mcts.BasicMCTSPlayer;
@@ -14,8 +13,15 @@ import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Factory class for creating AbstractPlayers from JSON configuration file.
@@ -45,8 +51,10 @@ public class PlayerFactory {
             AbstractPlayer retValue = fromJSONObject(json);
             retValue.setName(fileName.substring(0, fileName.indexOf(".")));
             return retValue;
-        } catch (IOException | ParseException e) {
-            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage());
+        } catch (IOException e) {
+            throw new AssertionError("IO Error processing file " + fileName + " : " + e.getMessage());
+        } catch (ParseException e) {
+            throw new AssertionError("Parse Error processing file " + fileName + " : " + e.toString());
         }
     }
 
@@ -125,4 +133,20 @@ public class PlayerFactory {
         }
     }
 
+    public static List<AbstractPlayer> createPlayers(String opponentDescriptor) {
+        List<AbstractPlayer> retValue = new ArrayList<>();
+        File od = new File(opponentDescriptor);
+        if (od.exists() && od.isDirectory()) {
+            for (String fileName : Objects.requireNonNull(od.list())) {
+                if (!fileName.endsWith(".json"))
+                    continue;
+                AbstractPlayer player = PlayerFactory.createPlayer(od.getAbsolutePath() + File.separator + fileName);
+                retValue.add(player);
+                player.setName(fileName.substring(0, fileName.indexOf(".")));
+            }
+        } else {
+            return Collections.singletonList(createPlayer(opponentDescriptor));
+        }
+        return retValue;
+    }
 }

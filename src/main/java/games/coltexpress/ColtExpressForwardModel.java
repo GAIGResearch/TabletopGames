@@ -19,9 +19,10 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.VERBOSE;
 import static core.CoreConstants.VisibilityMode;
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanActions;
+import static utilities.Utils.GameResult.LOSE;
+import static utilities.Utils.GameResult.WIN;
 
 public class ColtExpressForwardModel extends AbstractForwardModel {
 
@@ -90,7 +91,8 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers());
 
         // Add 1 random end round card
-        // A deck works on a First In Last Out basis - so we deal the last card to be drawn first (it goes to the bottom of the deck)
+        // A deck works on a First In Last Out basis - so we deal the last card to be drawn first (it goes to the bottom of the deck
+
         cegs.rounds.add(cegs.getRandomEndRoundCard(cep));
 
         // Add random round cards
@@ -119,7 +121,7 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
         if (action != null) {
             action.execute(gameState);
         } else {
-            if (VERBOSE)
+            if (gameState.getCoreGameParameters().verbose)
                 System.out.println("Player cannot do anything since he has drawn cards or " +
                     " doesn't have any targets available");
         }
@@ -181,63 +183,14 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     @Override
     protected void endGame(AbstractGameState gameState) {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
-        ColtExpressParameters cep = (ColtExpressParameters) gameState.getGameParameters();
 
-        Arrays.fill(cegs.getPlayerResults(), Utils.GameResult.LOSE);
+        Arrays.fill(cegs.getPlayerResults(), LOSE);
 
-        int[] pointsPerPlayer = new int[cegs.getNPlayers()];
-        int[] bulletCardsPerPlayer = new int[cegs.getNPlayers()];
-
-        List<Integer> playersWithMostSuccessfulShots = cegs.getBestShooters();
-        for (int i = 0; i < cegs.getNPlayers(); i++) {
-            for (Loot loot : cegs.playerLoot.get(i).getComponents())
-                pointsPerPlayer[i] += loot.getValue();
-            for (ColtExpressCard card : cegs.playerDecks.get(i).getComponents())
-                if (card.cardType == ColtExpressCard.CardType.Bullet)
-                    bulletCardsPerPlayer[i]++;
-            for (ColtExpressCard card : cegs.playerHandCards.get(i).getComponents())
-                if (card.cardType == ColtExpressCard.CardType.Bullet)
-                    bulletCardsPerPlayer[i]++;
+        for (int p = 0; p < cegs.getNPlayers(); p++) {
+            cegs.setPlayerResult(cegs.getOrdinalPosition(p) == 1 ? WIN : LOSE, p);
         }
 
-        for (Integer bestShooter : playersWithMostSuccessfulShots)
-            pointsPerPlayer[bestShooter] += cep.shooterReward;
-
-        LinkedList<Integer> potentialWinnersByPoints = new LinkedList<>();
-        int bestValue = 0;
-        for (int i = 0; i < cegs.getNPlayers(); i++) {
-            if (pointsPerPlayer[i] > bestValue){
-                bestValue = pointsPerPlayer[i];
-                potentialWinnersByPoints.clear();
-                potentialWinnersByPoints.add(i);
-            } else if (pointsPerPlayer[i] == bestValue) {
-                potentialWinnersByPoints.add(i);
-            }
-        }
-
-        if (potentialWinnersByPoints.size() == 1) {
-            cegs.setPlayerResult(Utils.GameResult.WIN, potentialWinnersByPoints.get(0));
-        } else {
-
-            //In case of a tie, the winner is the tied player who has received the fewest
-            // Bullet cards from other players and Events during the game.
-            LinkedList<Integer> potentialWinnerByBulletCards = new LinkedList<>();
-            bestValue = -1;
-            for (Integer potentialWinner : potentialWinnersByPoints) {
-                if (bestValue == -1 || bulletCardsPerPlayer[potentialWinner] < bestValue) {
-                    bestValue = bulletCardsPerPlayer[potentialWinner];
-                    potentialWinnerByBulletCards.clear();
-                    potentialWinnerByBulletCards.add(potentialWinner);
-                } else if (bulletCardsPerPlayer[potentialWinner] == bestValue) {
-                    potentialWinnerByBulletCards.add(potentialWinner);
-                }
-            }
-
-            for (Integer playerID : potentialWinnerByBulletCards)
-                cegs.setPlayerResult(Utils.GameResult.WIN, playerID);
-        }
-
-        if (VERBOSE) {
+        if (gameState.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(cegs.getPlayerResults()));
         }
     }
@@ -310,8 +263,8 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
 
         ColtExpressCard plannedActionCard = cegs.plannedActions.peek(cardIdx);
         if (plannedActionCard.playerID == -1 || plannedActionCard.cardType == ColtExpressCard.CardType.Bullet) {
-            if (VERBOSE) {
-                System.out.println("Player on planned action card is -1: " + plannedActionCard.toString());
+            if (cegs.getCoreGameParameters().verbose) {
+                System.out.println("Player on planned action card is -1: " + plannedActionCard);
             }
             new DrawCard(deckFromID, deckToID, cardIdx).execute(cegs);
             actions.add(new DoNothing());

@@ -25,6 +25,7 @@ public abstract class RuleNode extends Node {
         gameOverConditions = new ArrayList<>();
     }
 
+
     /**
      * Specialised constructor to use for rule nodes requiring actions.
      * @param actionNode - true if action node.
@@ -33,6 +34,15 @@ public abstract class RuleNode extends Node {
         super();
         this.actionNode = actionNode;
         gameOverConditions = new ArrayList<>();
+    }
+
+    /**
+     * Copy constructor, does not copy childNext to avoid endless recursion in looping graphs.
+     * @param node - Node to be copied
+     */
+    protected RuleNode(RuleNode node) {
+        super(node);
+        this.gameOverConditions = node.gameOverConditions;
     }
 
     /**

@@ -7,7 +7,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static core.AbstractGUI.defaultItemSize;
+import static gui.GUI.defaultItemSize;
 
 public class DBGridBoardView extends JComponent {
 
