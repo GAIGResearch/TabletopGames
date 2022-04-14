@@ -11,21 +11,19 @@ import java.util.Arrays;
 public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHeuristic, IStateFeatureVector<DBGameState> {
 
     double POINT_ADVANTAGE = 0.05;
-    double POINTS_UNDER_LEADER = -0.10;
     double POINTS = 0.01;
-    double THREE_BOXES_US = 0.0;
-    double THREE_BOXES_THEM = 0.0;
-    double TWO_BOXES_US = 0.0;
-    double TWO_BOXES_THEM = 0.0;
+    double THREE_BOXES = 0.0;
+    double TWO_BOXES = 0.0;
+    double ORDINAL = 0.0;
+
+    String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES"};
 
     public DotsAndBoxesHeuristic() {
-        addTunableParameter("POINTS", 0.01);
-        addTunableParameter("POINT_ADVANTAGE", 0.05);
-        addTunableParameter("POINTS_UNDER_LEADER", -0.10);
-        addTunableParameter("THREE_BOXES_US", 0.0);
-        addTunableParameter("THREE_BOXES_THEM", 0.0);
-        addTunableParameter("TWO_BOXES_US", 0.0);
-        addTunableParameter("TWO_BOXES_THEM", 0.0);
+        addTunableParameter(names[0], 0.01);
+        addTunableParameter(names[1], 0.05);
+        addTunableParameter(names[2], 0.0);
+        addTunableParameter(names[3], 0.0);
+        addTunableParameter(names[4], 0.0);
     }
 
     /**
@@ -38,13 +36,11 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
      */
     @Override
     public void _reset() {
-        POINTS = (double) getParameterValue("POINTS");
-        POINT_ADVANTAGE = (double) getParameterValue("POINT_ADVANTAGE");
-        POINTS_UNDER_LEADER = (double) getParameterValue("POINTS_UNDER_LEADER");
-        THREE_BOXES_US = (double) getParameterValue("THREE_BOXES_US");
-        TWO_BOXES_US = (double) getParameterValue("TWO_BOXES_US");
-        THREE_BOXES_THEM = (double) getParameterValue("THREE_BOXES_THEM");
-        TWO_BOXES_THEM = (double) getParameterValue("TWO_BOXES_THEM");
+        POINTS = (double) getParameterValue(names[0]);
+        POINT_ADVANTAGE = (double) getParameterValue(names[1]);
+        TWO_BOXES = (double) getParameterValue(names[2]);
+        THREE_BOXES = (double) getParameterValue(names[3]);
+        ORDINAL = (double) getParameterValue(names[4]);
     }
 
     /**
@@ -63,31 +59,16 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
         if (!state.isNotTerminal())
             return playerResult.value;
 
-        int[] deltaToPlayer = new int[state.getNPlayers()];
-        double retValue = 0.0;
-        for (int p = 0; p < state.getNPlayers(); p++) {
-            deltaToPlayer[p] = state.nCellsPerPlayer[playerId] - state.nCellsPerPlayer[p];
-            retValue += deltaToPlayer[p] * POINT_ADVANTAGE / state.getNPlayers();
-        }
-        if (POINTS_UNDER_LEADER != 0.0) {
-            int maxScore = Arrays.stream(deltaToPlayer).max().orElse(0);
-            retValue += POINTS_UNDER_LEADER * (maxScore - state.nCellsPerPlayer[playerId]);
-        }
-        retValue += POINTS * state.nCellsPerPlayer[playerId];
+        double[] featureVector = featureVector(state, playerId);
 
-        boolean collectData = (state.getCurrentPlayer() == playerId && (TWO_BOXES_US != 0.0 || THREE_BOXES_US != 0.0))
-                ||
-                (state.getCurrentPlayer() != playerId && (TWO_BOXES_THEM != 0.0 || THREE_BOXES_THEM != 0.0));
+        double maxPoints = 20.0;
+        double totalCells = 10.0;
 
-        if (collectData) {
-            int[] cellCountByEdges = new int[5];
-            for (DBCell cell : state.cells) {
-                int edges = state.countCompleteEdges(cell);
-                cellCountByEdges[edges]++;
-            }
-            retValue += (state.getCurrentPlayer() == playerId ? THREE_BOXES_US : THREE_BOXES_THEM) * cellCountByEdges[3];
-            retValue += (state.getCurrentPlayer() == playerId ? TWO_BOXES_US : TWO_BOXES_THEM) * cellCountByEdges[2];
-        }
+        double retValue = POINTS * featureVector[0] / maxPoints +
+                POINT_ADVANTAGE * featureVector[1] / maxPoints +
+                TWO_BOXES * featureVector[2] * (featureVector[5] - 0.5) / totalCells +
+                THREE_BOXES * featureVector[3] * (featureVector[5] - 0.5) / totalCells +
+                ORDINAL * featureVector[4] / state.getNPlayers();
 
         return retValue;
     }
@@ -100,13 +81,11 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
     @Override
     protected DotsAndBoxesHeuristic _copy() {
         DotsAndBoxesHeuristic retValue = new DotsAndBoxesHeuristic();
-        retValue.POINTS_UNDER_LEADER = POINTS_UNDER_LEADER;
         retValue.POINTS = POINTS;
         retValue.POINT_ADVANTAGE = POINT_ADVANTAGE;
-        retValue.THREE_BOXES_US = THREE_BOXES_US;
-        retValue.TWO_BOXES_US = TWO_BOXES_US;
-        retValue.THREE_BOXES_THEM = THREE_BOXES_THEM;
-        retValue.TWO_BOXES_THEM = TWO_BOXES_THEM;
+        retValue.THREE_BOXES = THREE_BOXES;
+        retValue.TWO_BOXES = TWO_BOXES;
+        retValue.ORDINAL = ORDINAL;
         return retValue;
     }
 
@@ -121,9 +100,8 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
         if (o instanceof DotsAndBoxesHeuristic) {
             DotsAndBoxesHeuristic other = (DotsAndBoxesHeuristic) o;
             return other.POINT_ADVANTAGE == POINT_ADVANTAGE &&
-                    other.POINTS_UNDER_LEADER == POINTS_UNDER_LEADER &&
-                    other.TWO_BOXES_US == TWO_BOXES_US && other.THREE_BOXES_US == THREE_BOXES_US &&
-                    other.TWO_BOXES_THEM == TWO_BOXES_THEM && other.THREE_BOXES_THEM == THREE_BOXES_THEM &&
+                    other.ORDINAL == ORDINAL &&
+                    other.TWO_BOXES == TWO_BOXES && other.THREE_BOXES == THREE_BOXES &&
                     other.POINTS == POINTS;
         }
         return false;
@@ -140,6 +118,42 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
 
     @Override
     public double[] featureVector(DBGameState state, int playerID) {
-        return new double[0];
+        double[] retValue = new double[names.length];
+        // POINTS
+        retValue[0] = state.nCellsPerPlayer[playerID];
+
+        // POINT_ADVANTAGE
+        int ordinal = 1;
+        int maxOtherScore = -1;
+        for (int p = 0; p < state.getNPlayers(); p++) {
+            if (p == playerID) continue;
+            if (state.nCellsPerPlayer[p] > maxOtherScore) {
+                maxOtherScore = state.nCellsPerPlayer[p];
+                if (state.nCellsPerPlayer[p] > state.nCellsPerPlayer[playerID])
+                    ordinal++;
+            }
+        }
+
+        // POINT_ADVANTAGE
+        retValue[1] = state.nCellsPerPlayer[playerID] - maxOtherScore;
+
+        // CELLS
+        int[] cellCountByEdges = new int[5];
+        for (DBCell cell : state.cells) {
+            int edges = state.countCompleteEdges(cell);
+            cellCountByEdges[edges]++;
+        }
+        retValue[2] = cellCountByEdges[2];
+        retValue[3] = cellCountByEdges[3];
+        retValue[4] = ordinal;
+        retValue[5] = state.getCurrentPlayer() == playerID ? 1 : 0;
+        retValue[6] = cellCountByEdges[4];
+
+        return retValue;
+    }
+
+    @Override
+    public String[] names() {
+        return names;
     }
 }

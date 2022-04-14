@@ -6,4 +6,6 @@ public interface IStateFeatureVector<S extends AbstractGameState> {
 
     double[] featureVector(S state, int playerID);
 
+    String[] names();
+
 }
