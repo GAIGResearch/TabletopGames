@@ -2,9 +2,9 @@ package core.interfaces;
 
 import core.AbstractGameState;
 
-public interface IStateFeatureVector<S extends AbstractGameState> {
+public interface IStateFeatureVector {
 
-    double[] featureVector(S state, int playerID);
+    double[] featureVector(AbstractGameState state, int playerID);
 
     String[] names();
 

@@ -8,7 +8,7 @@ import utilities.Utils;
 
 import java.util.Arrays;
 
-public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHeuristic, IStateFeatureVector<DBGameState> {
+public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHeuristic, IStateFeatureVector {
 
     double POINT_ADVANTAGE = 0.05;
     double POINTS = 0.01;
@@ -16,7 +16,7 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
     double TWO_BOXES = 0.0;
     double ORDINAL = 0.0;
 
-    String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES"};
+    String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES", "TURN"};
 
     public DotsAndBoxesHeuristic() {
         addTunableParameter(names[0], 0.01);
@@ -117,8 +117,9 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
     }
 
     @Override
-    public double[] featureVector(DBGameState state, int playerID) {
+    public double[] featureVector(AbstractGameState gs, int playerID) {
         double[] retValue = new double[names.length];
+        DBGameState state = (DBGameState) gs;
         // POINTS
         retValue[0] = state.nCellsPerPlayer[playerID];
 
@@ -148,6 +149,7 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
         retValue[4] = ordinal;
         retValue[5] = state.getCurrentPlayer() == playerID ? 1 : 0;
         retValue[6] = cellCountByEdges[4];
+        retValue[7] = state.getTurnOrder().getTurnCounter();
 
         return retValue;
     }
