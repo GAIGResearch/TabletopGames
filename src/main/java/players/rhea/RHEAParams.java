@@ -13,6 +13,8 @@ public class RHEAParams extends PlayerParameters
     public int populationSize = 10;
     public int eliteCount = 2;
     public int childCount = 10;
+    RHEAEnums.SelectionType selectionType = RHEAEnums.SelectionType.TOURNAMENT;
+    public int tournamentSize = 4;
 
     public RHEAParams() {
         this(System.currentTimeMillis());
@@ -25,6 +27,8 @@ public class RHEAParams extends PlayerParameters
         addTunableParameter("populationSize", 10, Arrays.asList(6, 8, 10, 12, 14, 16, 18, 20));
         addTunableParameter("eliteCount", 2, Arrays.asList(2, 4, 6, 8, 10, 12, 14, 16, 18, 20));
         addTunableParameter("childCount", 10, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        addTunableParameter("selectionType", RHEAEnums.SelectionType.TOURNAMENT, Arrays.asList(RHEAEnums.SelectionType.values()));
+        addTunableParameter("tournamentSize", 4, Arrays.asList(1, 2, 3, 4, 5, 6));
     }
 
     @Override
@@ -35,6 +39,8 @@ public class RHEAParams extends PlayerParameters
         populationSize = (int) getParameterValue("populationSize");
         eliteCount = (int) getParameterValue("eliteCount");
         childCount = (int) getParameterValue("childCount");
+        selectionType = (RHEAEnums.SelectionType) getParameterValue("selectionType");
+        tournamentSize = (int) getParameterValue("tournamentSize");
     }
 
     @Override

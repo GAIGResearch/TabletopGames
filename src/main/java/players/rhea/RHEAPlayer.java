@@ -117,6 +117,56 @@ public class RHEAPlayer extends AbstractPlayer
         return child;
     }
 
+    RHEAIndividual[] selectParents()
+    {
+        RHEAIndividual[] parents = new RHEAIndividual[2];
+
+        switch (params.selectionType)
+        {
+            case TOURNAMENT:
+                parents[0] = tournamentSelection();
+                parents[1] = tournamentSelection();
+                break;
+            case RANK:
+                parents[0] = rankSelection();
+                parents[1] = rankSelection();
+                break;
+            default:
+                throw new RuntimeException("Unexpected selection type");
+        }
+
+        return parents;
+    }
+
+    RHEAIndividual tournamentSelection()
+    {
+        int rand = randomGenerator.nextInt(0,population.size() - params.tournamentSize);
+        RHEAIndividual best = population.get(rand);
+        for(int i = rand + 1; i < rand + params.tournamentSize; ++i)
+        {
+            RHEAIndividual current = population.get(i);
+            if(current.value > best.value)
+                best = current;
+        }
+        return best;
+    }
+
+    RHEAIndividual rankSelection()
+    {
+        population.sort(Comparator.naturalOrder());
+        int rankSum = 0;
+        for(int i = 0; i < population.size(); ++i)
+            rankSum += i;
+        int ran = randomGenerator.nextInt(0, rankSum);
+        int p = 0;
+        for(int i = 0; i < population.size(); ++i)
+        {
+            p += i;
+            if(i >= ran)
+                return population.get(i);
+        }
+        throw new RuntimeException("Random Generator generated an invalid goal");
+    }
     /**
      * Run evolutionary process for one generation
      * @param stateObs - current game state
@@ -135,10 +185,9 @@ public class RHEAPlayer extends AbstractPlayer
 
         for(int i = 0; i < params.childCount; ++i)
         {
-            RHEAIndividual p1 = population.get(0);
-            RHEAIndividual p2 = population.get(1);
+            RHEAIndividual[] parents = selectParents();
 
-            RHEAIndividual child = crossover(p1, p2);
+            RHEAIndividual child = crossover(parents[0], parents[1]);
             statesUpdated += child.mutate(getForwardModel(), getPlayerID());
             //fmCalls += child.rollout(child.gameStates[0], getForwardModel(), 0, child.actions.length, getPlayerID());
             population.add(child);
