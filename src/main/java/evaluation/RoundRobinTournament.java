@@ -88,11 +88,11 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\tlistener=      (Optional) The full class name of an IGameListener implementation. \n" +
                             "\t               Defaults to utilities.GameResultListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
-                            "\t               from the same set of games." +
+                            "\t               from the same set of games.\n" +
                             "\tlogger=        (Optional) The full class name of an IStatisticsLogger implementation.\n" +
                             "\t               Defaults to FileStatsLogger. \n" +
                             "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file (FileStatsLogger only).\n" +
-                            "\t               Defaults to RoundRobinReport.txt" +
+                            "\t               Defaults to RoundRobinReport.txt\n" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
                             "\t               use a different log file.\n");
             return;

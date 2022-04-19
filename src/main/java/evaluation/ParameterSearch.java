@@ -69,7 +69,7 @@ public class ParameterSearch {
                         "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation \n" +
                         "\tverbose        Will log the results marginalised to each dimension, and the Top 10 best tuples for each run \n" +
                         "\tseed=          Random seed for Game use (not used by NTBEA itself). Defaults to System.currentTimeMillis()\n" +
-                        "\tlogFile=       Output file with results of each run for easier statistical analysis"
+                        "\tlogFile=       Output file with results of each run for easier statistical analysis\n"
         );
 
         if (argsList.size() < 3)
