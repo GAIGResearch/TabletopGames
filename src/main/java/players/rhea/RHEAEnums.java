@@ -1,5 +1,6 @@
-package players.RHEA;
+package players.rhea;
 
 public class RHEAEnums
 {
+
 }

@@ -1,0 +1,41 @@
+package players.rhea;
+
+import core.AbstractParameters;
+import players.PlayerParameters;
+
+import java.util.Arrays;
+
+public class RHEAParams extends PlayerParameters
+{
+
+    public int horizon = 10;
+    public double discountFactor = 0.9;
+
+    public RHEAParams() {
+        this(System.currentTimeMillis());
+    }
+
+    public RHEAParams(long seed) {
+        super(seed);
+        addTunableParameter("horizon", 10, Arrays.asList(1, 3, 5, 10, 20, 30));
+        addTunableParameter("discountFactor", 0.9, Arrays.asList(0.5, 0.8, 0.9, 0.95, 0.99, 0.999, 1.0));
+    }
+
+    @Override
+    public void _reset() {
+        super._reset();
+        horizon = (int) getParameterValue("horizon");
+        discountFactor = (double) getParameterValue("discountFactor");
+    }
+
+    @Override
+    protected AbstractParameters _copy() {
+        return new RHEAParams(System.currentTimeMillis());
+    }
+
+
+    @Override
+    public RHEAPlayer instantiate() {
+        return new RHEAPlayer(this);
+    }
+}
