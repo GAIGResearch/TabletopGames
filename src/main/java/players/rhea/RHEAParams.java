@@ -10,6 +10,9 @@ public class RHEAParams extends PlayerParameters
 
     public int horizon = 10;
     public double discountFactor = 0.9;
+    public int populationSize = 10;
+    public int eliteCount = 2;
+    public int childCount = 10;
 
     public RHEAParams() {
         this(System.currentTimeMillis());
@@ -19,6 +22,9 @@ public class RHEAParams extends PlayerParameters
         super(seed);
         addTunableParameter("horizon", 10, Arrays.asList(1, 3, 5, 10, 20, 30));
         addTunableParameter("discountFactor", 0.9, Arrays.asList(0.5, 0.8, 0.9, 0.95, 0.99, 0.999, 1.0));
+        addTunableParameter("populationSize", 10, Arrays.asList(6, 8, 10, 12, 14, 16, 18, 20));
+        addTunableParameter("eliteCount", 2, Arrays.asList(2, 4, 6, 8, 10, 12, 14, 16, 18, 20));
+        addTunableParameter("childCount", 10, Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
     }
 
     @Override
@@ -26,6 +32,9 @@ public class RHEAParams extends PlayerParameters
         super._reset();
         horizon = (int) getParameterValue("horizon");
         discountFactor = (double) getParameterValue("discountFactor");
+        populationSize = (int) getParameterValue("populationSize");
+        eliteCount = (int) getParameterValue("eliteCount");
+        childCount = (int) getParameterValue("childCount");
     }
 
     @Override

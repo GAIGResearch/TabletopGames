@@ -7,6 +7,8 @@ import core.interfaces.IStateHeuristic;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
@@ -14,6 +16,8 @@ public class RHEAPlayer extends AbstractPlayer
 {
     RHEAParams params;
     private RHEAIndividual bestIndividual;
+
+    private ArrayList<RHEAIndividual> population;
     private final Random randomGenerator;
     IStateHeuristic heuristic;
 
@@ -61,9 +65,13 @@ public class RHEAPlayer extends AbstractPlayer
         fmCalls = 0;
         copyCalls = 0;
 
-        // Initialise individual
-        bestIndividual = new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic);
-        fmCalls += bestIndividual.length;
+        // Initialise individuals
+        population = new ArrayList<RHEAIndividual>();
+        for(int i = 0; i < params.populationSize; ++i)
+        {
+            population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic));
+            fmCalls += population.get(i).length;
+        }
 
         // Run evolution
         boolean keepIterating = true;
@@ -96,25 +104,53 @@ public class RHEAPlayer extends AbstractPlayer
         return new RHEAPlayer(newParams);
     }
 
+    private RHEAIndividual crossover(RHEAIndividual p1, RHEAIndividual p2)
+    {
+        RHEAIndividual child = new RHEAIndividual(p1);
+        copyCalls += child.length;
+
+        for(int i = child.length / 2; i < child.length; ++i)
+        {
+            child.actions[i] = p2.actions[i];
+            child.gameStates[i] = p2.gameStates[i].copy();
+        }
+        return child;
+    }
+
     /**
      * Run evolutionary process for one generation
-     *
      * @param stateObs - current game state
      */
     private void runIteration(AbstractGameState stateObs) {
         ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
-        // Create new individual through mutation
-        RHEAIndividual newIndividual = new RHEAIndividual(bestIndividual);
-        copyCalls += newIndividual.length;
-        int statesUpdated = newIndividual.mutate(getForwardModel(), getPlayerID());
+        population.sort(Comparator.naturalOrder());
+
+        ArrayList<RHEAIndividual> newPopulation = new ArrayList<RHEAIndividual>();
+        int statesUpdated = 0;
+        for(int i = 0; i < params.eliteCount; ++i)
+        {
+            newPopulation.add(population.get(i));
+        }
+
+        for(int i = 0; i < params.childCount; ++i)
+        {
+            RHEAIndividual p1 = population.get(0);
+            RHEAIndividual p2 = population.get(1);
+
+            RHEAIndividual child = crossover(p1, p2);
+            statesUpdated += child.mutate(getForwardModel(), getPlayerID());
+            //fmCalls += child.rollout(child.gameStates[0], getForwardModel(), 0, child.actions.length, getPlayerID());
+            population.add(child);
+        }
+        population.sort(Comparator.naturalOrder());
+        for(int i = 0; i < params.populationSize - params.eliteCount; ++i)
+        {
+            newPopulation.add(population.get(i));
+        }
+        population = newPopulation;
         fmCalls += statesUpdated;
         copyCalls += statesUpdated; // as mutate() copyies once each time it applies the forward model
-
-        // Keep new individual if better than current
-        if (newIndividual.value > bestIndividual.value)
-            bestIndividual = newIndividual;
-
         // Update budgets
         numIters++;
         acumTimeTaken += (elapsedTimerIteration.elapsedMillis());

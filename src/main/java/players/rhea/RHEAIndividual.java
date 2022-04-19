@@ -86,7 +86,7 @@ public class RHEAIndividual implements Comparable {
      * @param playerID - ID of player, used in state evaluation
      * @return - number of calls to the FM.next() function
      */
-    private int rollout(AbstractGameState gs, AbstractForwardModel fm, int startIndex, int endIndex, int playerID) {
+    public int rollout(AbstractGameState gs, AbstractForwardModel fm, int startIndex, int endIndex, int playerID) {
         length = 0;
         int fmCalls = 0;
         double delta = 0;
