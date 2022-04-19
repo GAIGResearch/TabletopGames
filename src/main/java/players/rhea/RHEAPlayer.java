@@ -106,6 +106,35 @@ public class RHEAPlayer extends AbstractPlayer
 
     private RHEAIndividual crossover(RHEAIndividual p1, RHEAIndividual p2)
     {
+        switch (params.crossoverType)
+        {
+            case UNIFORM:
+                return uniformCrossover(p1, p2);
+            case ONE_POINT:
+                return onepointCrossover(p1, p2);
+            default:
+                throw new RuntimeException("Unexpected crossover type");
+        }
+    }
+
+    private RHEAIndividual uniformCrossover(RHEAIndividual p1, RHEAIndividual p2)
+    {
+        RHEAIndividual child = new RHEAIndividual(p1);
+        copyCalls += child.length;
+
+        for(int i = 0; i < child.length; ++i)
+        {
+            if(randomGenerator.nextFloat() >= 0.5f)
+            {
+                child.actions[i] = p2.actions[i];
+                child.gameStates[i] = p2.gameStates[i].copy();
+            }
+        }
+        return child;
+    }
+
+    private RHEAIndividual onepointCrossover(RHEAIndividual p1, RHEAIndividual p2)
+    {
         RHEAIndividual child = new RHEAIndividual(p1);
         copyCalls += child.length;
 

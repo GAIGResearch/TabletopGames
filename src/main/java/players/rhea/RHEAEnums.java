@@ -8,4 +8,10 @@ public class RHEAEnums
         RANK,
         TOURNAMENT
     }
+
+    enum CrossoverType
+    {
+        UNIFORM,
+        ONE_POINT
+    }
 }
