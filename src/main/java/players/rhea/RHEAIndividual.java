@@ -64,7 +64,7 @@ public class RHEAIndividual implements Comparable {
             // Find index from which to mutate individual, random in range of currently valid length
             int startIndex = 0;
             if (length > 1) {
-                gen.nextInt(length - 1);
+                startIndex = gen.nextInt(length - 1);
             }
             // Last index is maximum intended individual length
             int endIndex = actions.length;
