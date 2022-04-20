@@ -2,15 +2,26 @@ package players.rhea;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
+import evaluation.ParameterSearch;
+import evaluation.RoundRobinTournament;
+import org.jetbrains.annotations.NotNull;
 import players.PlayerConstants;
+import players.human.ActionController;
+import players.mcts.MCTSPlayer;
+import players.rmhc.RMHCPlayer;
+import players.simple.OSLAPlayer;
 import utilities.ElapsedCpuTimer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
+
+import static core.Game.runOne;
+import static games.GameType.LoveLetter;
 
 public class RHEAPlayer extends AbstractPlayer
 {
@@ -34,7 +45,7 @@ public class RHEAPlayer extends AbstractPlayer
     public RHEAPlayer(RHEAParams params) {
         randomGenerator = new Random(params.getRandomSeed());
         this.params = params;
-        setName("RHEA");
+        setName("rhea");
     }
 
     public RHEAPlayer(long seed) {
@@ -94,7 +105,7 @@ public class RHEAPlayer extends AbstractPlayer
         }
 
         // Return first action of best individual
-        return bestIndividual.actions[0];
+        return population.get(0).actions[0];
     }
 
     @Override
@@ -112,6 +123,8 @@ public class RHEAPlayer extends AbstractPlayer
                 return uniformCrossover(p1, p2);
             case ONE_POINT:
                 return onePointCrossover(p1, p2);
+            case TWO_POINT:
+                return twoPointCrossover(p1, p2);
             default:
                 throw new RuntimeException("Unexpected crossover type");
         }
@@ -121,8 +134,8 @@ public class RHEAPlayer extends AbstractPlayer
     {
         RHEAIndividual child = new RHEAIndividual(p1);
         copyCalls += child.length;
-
-        for(int i = 0; i < child.length; ++i)
+        int min = (p1.length > p2.length ? p2.length : p1.length);
+        for(int i = 0; i < min; ++i)
         {
             if(randomGenerator.nextFloat() >= 0.5f)
             {
@@ -133,15 +146,15 @@ public class RHEAPlayer extends AbstractPlayer
         return child;
     }
 
-    private RHEAIndividual onePointCrossover(RHEAIndividual p1, RHEAIndividual p2)
-    {
+
+    private RHEAIndividual onePointCrossover(RHEAIndividual p1, RHEAIndividual p2) {
         RHEAIndividual child = new RHEAIndividual(p1);
         copyCalls += child.length;
+        int tailLength = Math.min(p1.length, p2.length) / 2;
 
-        for(int i = child.length / 2; i < child.length; ++i)
-        {
-            child.actions[i] = p2.actions[i];
-            child.gameStates[i] = p2.gameStates[i].copy();
+        for (int i = 0; i < tailLength; ++i) {
+            child.actions[child.length - 1 - i] = p2.actions[child.length - 1 - i];
+            child.gameStates[child.length - 1 - i] = p2.gameStates[child.length - 1 - i].copy();
         }
         return child;
     }
@@ -150,11 +163,14 @@ public class RHEAPlayer extends AbstractPlayer
     {
         RHEAIndividual child = new RHEAIndividual(p1);
         copyCalls += child.length;
+        int tailLength = Math.min(p1.length, p2.length) / 3;
 
-        for(int i = child.length / 3; i < child.length * 2/3; i++)
+        for(int i = 0; i < tailLength; ++i)
         {
             child.actions[i] = p2.actions[i];
             child.gameStates[i] = p2.gameStates[i].copy();
+            child.actions[child.length - 1 - i] = p2.actions[child.length - 1 - i];
+            child.gameStates[child.length - 1 - i] = p2.gameStates[child.length - 1 - i].copy();
         }
         return child;
     }
@@ -204,10 +220,10 @@ public class RHEAPlayer extends AbstractPlayer
         for(int i = 0; i < population.size(); ++i)
         {
             p += i;
-            if(i >= ran)
+            if(p >= ran)
                 return population.get(i);
         }
-        throw new RuntimeException("Random Generator generated an invalid goal");
+        throw new RuntimeException("Random Generator generated an invalid goal, goal: " + ran + " p: " + p);
     }
     /**
      * Run evolutionary process for one generation
@@ -246,5 +262,66 @@ public class RHEAPlayer extends AbstractPlayer
         numIters++;
         acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
         avgTimeTaken = acumTimeTaken / numIters;
+    }
+
+    public static void main(String[] args)
+    {
+        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
+        ActionController ac = null; //null;
+        /* 2. Game seed */
+        Optimize();
+        //RunFast();
+        //RoundRobin();
+
+    }
+
+    private static void RoundRobin() {
+        String[] args;
+        args = new String[6];
+        args[0] = "game=Uno";
+        args[1] = "nPlayers=4";
+        args[2] = "players=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames\\json";
+        args[3] = "gamesPerMatchup=100";
+        args[4] = "selfPlay=false";
+        args[5] = "mode=exhaustive";
+        RoundRobinTournament.main(args);
+    }
+
+    private static void Optimize() {
+        String[] args;
+        long seed = System.currentTimeMillis(); //0
+        args = new String[6];
+        args[0] = "C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\optimization\\rheaoptimization.json";
+        args[1] = "100";
+        args[2] = "LoveLetter";
+        args[3] = "nPlayers=4";
+        args[4] = "opponent=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json\\osla.json";
+        args[5] = "repeat=10";
+        ParameterSearch.main(args);
+    }
+
+    private static void RunFast() {
+        ArrayList<AbstractPlayer> players = new ArrayList<>();
+        players.add(new RHEAPlayer());
+        players.add(new MCTSPlayer());
+        players.add(new RMHCPlayer());
+        players.add(new OSLAPlayer());
+        /* 4. Run! */
+        int rheaWonGames = 0;
+        int mctsWonGames = 0;
+        int rmhcWonGames = 0;
+        int oslaWonGames = 0;
+        for (int i = 0; i < 1000; i++) {
+            Game game = runOne(LoveLetter, null, players, 0, false, null, null, 0);
+            rheaWonGames += game.getGameState().getPlayerResults()[0].value;
+            mctsWonGames += game.getGameState().getPlayerResults()[1].value;
+            rmhcWonGames += game.getGameState().getPlayerResults()[2].value;
+            oslaWonGames += game.getGameState().getPlayerResults()[3].value;
+        }
+        System.out.println("RHEA won: " + rheaWonGames);
+        System.out.println("MCTS won: " + mctsWonGames);
+        System.out.println("RMHC won: " + rmhcWonGames);
+        System.out.println("OSLA won: " + oslaWonGames);
+
     }
 }
