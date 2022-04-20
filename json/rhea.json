@@ -1,0 +1,14 @@
+{
+	"class" : "players.rhea.RHEAParams",
+	"horizon": 5,
+	"discountFactor": 0.800,
+	"populationSize": 10,
+	"offspringCount": 2,
+	"crossoverType": "ONE_POINT",
+	"eliteCount": 4,
+	"selectionType" : "TOURNAMENT",
+	"tournamentSize" : 1,
+	"budgetType" : "BUDGET_TIME",
+	"budget" : 40,
+	"breakMS" : 0
+}
