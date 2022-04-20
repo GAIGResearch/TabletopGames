@@ -198,7 +198,7 @@ public class RHEAPlayer extends AbstractPlayer
 
     RHEAIndividual tournamentSelection()
     {
-        int rand = randomGenerator.nextInt(0,population.size() - params.tournamentSize);
+        int rand = randomGenerator.nextInt(population.size() - params.tournamentSize);
         RHEAIndividual best = population.get(rand);
         for(int i = rand + 1; i < rand + params.tournamentSize; ++i)
         {
@@ -214,12 +214,12 @@ public class RHEAPlayer extends AbstractPlayer
         population.sort(Comparator.naturalOrder());
         int rankSum = 0;
         for(int i = 0; i < population.size(); ++i)
-            rankSum += i;
-        int ran = randomGenerator.nextInt(0, rankSum);
+            rankSum += i + 1;
+        int ran = randomGenerator.nextInt(rankSum);
         int p = 0;
         for(int i = 0; i < population.size(); ++i)
         {
-            p += i;
+            p += population.size() - (i + 1);
             if(p >= ran)
                 return population.get(i);
         }
@@ -232,15 +232,18 @@ public class RHEAPlayer extends AbstractPlayer
     private void runIteration(AbstractGameState stateObs) {
         ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
 
+        //selection
         population.sort(Comparator.naturalOrder());
 
+        //copy elites
         ArrayList<RHEAIndividual> newPopulation = new ArrayList<RHEAIndividual>();
         int statesUpdated = 0;
         for(int i = 0; i < params.eliteCount; ++i)
         {
-            newPopulation.add(population.get(i));
+            newPopulation.add(new RHEAIndividual(population.get(i))); // todo: possibly cheating, needs to update copy calls?
         }
 
+        //crossover & mutation
         for(int i = 0; i < params.childCount; ++i)
         {
             RHEAIndividual[] parents = selectParents();
@@ -250,7 +253,11 @@ public class RHEAPlayer extends AbstractPlayer
             //fmCalls += child.rollout(child.gameStates[0], getForwardModel(), 0, child.actions.length, getPlayerID());
             population.add(child);
         }
+
+        //sort
         population.sort(Comparator.naturalOrder());
+
+        //best ones get moved to the new population
         for(int i = 0; i < params.populationSize - params.eliteCount; ++i)
         {
             newPopulation.add(population.get(i));
@@ -269,18 +276,17 @@ public class RHEAPlayer extends AbstractPlayer
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
         ActionController ac = null; //null;
         /* 2. Game seed */
-        Optimize();
+        //Optimize();
         //RunFast();
-        //RoundRobin();
-
+        RoundRobin();
     }
 
     private static void RoundRobin() {
         String[] args;
         args = new String[6];
-        args[0] = "game=Uno";
+        args[0] = "game=LoveLetter";
         args[1] = "nPlayers=4";
-        args[2] = "players=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames\\json";
+        args[2] = "players=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json";
         args[3] = "gamesPerMatchup=100";
         args[4] = "selfPlay=false";
         args[5] = "mode=exhaustive";

@@ -7,6 +7,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
+import players.rhea.RHEAParams;
+import players.rhea.RHEAPlayer;
 import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
@@ -126,6 +128,8 @@ public class PlayerFactory {
                 return new MCTSPlayer(new MCTSParams(System.currentTimeMillis()));
             case "rmhc":
                 return new RMHCPlayer(new RMHCParams(System.currentTimeMillis()));
+            case "rhea":
+                return new RHEAPlayer(new RHEAParams(System.currentTimeMillis()));
             default:
                 throw new AssertionError("Unknown player key : " + input);
         }
