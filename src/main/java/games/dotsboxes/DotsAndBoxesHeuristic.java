@@ -16,7 +16,7 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
     double TWO_BOXES = 0.0;
     double ORDINAL = 0.0;
 
-    String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES", "TURN"};
+    String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES"};
 
     public DotsAndBoxesHeuristic() {
         addTunableParameter(names[0], 0.01);
@@ -149,7 +149,6 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
         retValue[4] = ordinal;
         retValue[5] = state.getCurrentPlayer() == playerID ? 1 : 0;
         retValue[6] = cellCountByEdges[4];
-        retValue[7] = state.getTurnOrder().getTurnCounter();
 
         return retValue;
     }

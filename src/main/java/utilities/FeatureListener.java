@@ -31,7 +31,16 @@ public abstract class FeatureListener implements IGameListener {
             // now we can update the result
             int totP = game.getGameState().getNPlayers();
             double[] finalScores = IntStream.range(0, totP).mapToDouble(game.getGameState()::getGameScore).toArray();
-            double[] winLoss = Arrays.stream(game.getGameState().getPlayerResults()).mapToDouble(r -> r.value).toArray();
+            double[] winLoss = Arrays.stream(game.getGameState().getPlayerResults()).mapToDouble(r -> {
+                switch(r) {
+                    case WIN:
+                        return 1.0;
+                    case DRAW:
+                        return 0.5;
+                    default:
+                        return 0.0;
+                }
+            }).toArray();
             double[] ordinal = IntStream.range(0, totP).mapToDouble(game.getGameState()::getOrdinalPosition).toArray();
 
             for (StateFeatureListener.LocalDataWrapper record : currentData) {
