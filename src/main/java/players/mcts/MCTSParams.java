@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import core.interfaces.IActionFeatureVector;
+import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evaluation.TunableParameters;
@@ -12,6 +14,7 @@ import players.PlayerParameters;
 import players.simple.RandomPlayer;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.function.ToDoubleBiFunction;
@@ -51,6 +54,10 @@ public class MCTSParams extends PlayerParameters {
     public double exploreEpsilon = 0.1;
     public boolean gatherExpertIterationData = false;
     public String expertIterationFileStem = "ExpertIterationData";
+    public String expertIterationStateFeatures = "";
+    public IStateFeatureVector EIStateFeatureVector;
+    public String expertIterationActionFeatures = "";
+    public IActionFeatureVector EIActionFeatureVector;
     public String advantageFunctionString = "";
     public ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
     public int biasVisits = 0;
@@ -92,6 +99,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MASTGamma", 0.5, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("expertIteration", false);
         addTunableParameter("expIterFile", "");
+        addTunableParameter("expertIterationStateFeatures", "");
+        addTunableParameter("expertIterationActionFeatures", "");
         addTunableParameter("advantageFunction", "");
         addTunableParameter("biasVisits", 0, Arrays.asList(0, 1, 3, 10, 30, 100));
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
@@ -124,6 +133,20 @@ public class MCTSParams extends PlayerParameters {
         oppModelClass = (String) getParameterValue("oppModelClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
         expertIterationFileStem = (String) getParameterValue("expIterFile");
+        expertIterationStateFeatures = (String) getParameterValue("expertIterationStateFeatures");
+        if (!expertIterationStateFeatures.equals(""))
+            try {
+                EIStateFeatureVector = (IStateFeatureVector) Class.forName(expertIterationStateFeatures).getConstructor().newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        expertIterationActionFeatures = (String) getParameterValue("expertIterationActionFeatures");
+        if (!expertIterationActionFeatures.equals(""))
+            try {
+                EIActionFeatureVector = (IActionFeatureVector) Class.forName(expertIterationActionFeatures).getConstructor().newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         advantageFunctionString = (String) getParameterValue("advantageFunction");
         advantageFunction = getAdvantageFunction();
         biasVisits = (int) getParameterValue("biasVisits");
