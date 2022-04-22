@@ -14,6 +14,7 @@ import utilities.Hash;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static games.pandemic.PandemicConstants.infectionHash;
 import static games.pandemic.PandemicConstants.playerDeckHash;
 
 public class PandemicListener implements IGameListener {
@@ -29,7 +30,7 @@ public class PandemicListener implements IGameListener {
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("Game", game.getGameType().name());
             data.put("GameID", game.getGameState().getGameID());
-            data.put("Seed", game.getCoreParameters().getRandomSeed());
+            data.put("Seed", game.getGameState().getGameParameters().getRandomSeed());
             data.put("Players", state.getNPlayers());
             data.put("PlayerType", game.getPlayers().get(0).toString());
             data.put("Rounds", state.getTurnOrder().getRoundCounter());
@@ -37,6 +38,7 @@ public class PandemicListener implements IGameListener {
             data.put("Ticks", game.getTick());
             data.put("GameStatus", state.getGameStatus());
             data.put("playerCardsLeft", ((Deck<Card>) state.getComponent(playerDeckHash)).getSize());
+            data.put("infectionDeckSize", ((Deck<Card>) state.getComponent(infectionHash)).getSize());
             data.put("infectionRateCounter", ((Counter) state.getComponent(PandemicConstants.infectionRateHash)).getValue());
             data.put("outbreakCounter", ((Counter) state.getComponent(PandemicConstants.outbreaksHash)).getValue());
             data.put("yellowDisease", ((Counter) state.getComponent(Hash.GetInstance().hash("Disease yellow"))).getValue());

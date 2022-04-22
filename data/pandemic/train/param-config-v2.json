@@ -1,7 +1,7 @@
 {
   "class" : "games.pandemic.PandemicParameters",
   "loseMaxOutbreak" : 8,
-  "nCardsForCure" : 5,
+  "nCardsForCure" : 2,
   "maxCardsPerPlayer" : 7,
   "maxCubesPerCity" : 5,
   "nEpidemicCards" : 4,
