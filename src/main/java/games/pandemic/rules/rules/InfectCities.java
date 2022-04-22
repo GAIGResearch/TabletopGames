@@ -40,12 +40,12 @@ public class InfectCities extends RuleNode {
         if (!pgs.isQuietNight()) {
             // Infecting with top cards of infection deck if it's not a quiet night
             Counter infectionCounter = (Counter)((PandemicGameState)gs).getComponent(infectionRateHash);
-            int noCardsDrawn = infection_rate[infectionCounter.getValue()];
+            int nCardsToDraw = infection_rate[infectionCounter.getValue()];
             Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);
-            if (infectionDeck != null && infectionDeck.getSize() <= 0) return false;
 
             Deck<Card> infectionDiscardDeck = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
-            for (int c = 0; c < noCardsDrawn; c++) {  // Check the drawn cards and infect cities
+            for (int c = 0; c < nCardsToDraw; c++) {  // Check the drawn cards and infect cities
+                if (infectionDeck.getSize() <= 0) return false;
                 new InfectCity(infectionDeck.getComponentID(), infectionDiscardDeck.getComponentID(), 0,
                         max_cubes_per_city, n_cubes_infection).execute(gs);
             }

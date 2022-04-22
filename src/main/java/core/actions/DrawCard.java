@@ -49,17 +49,19 @@ public class DrawCard extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        executed = true;
         Deck<Card> from = (Deck<Card>) gs.getComponentById(deckFrom);
         Deck<Card> to = (Deck<Card>) gs.getComponentById(deckTo);
-        Card card = null;
-        if (from != null) {
-            card = from.pick(fromIndex);
+        if (from != null && to != null) {
+            Card card = from.pick(fromIndex);
             if (card != null) {
                 cardId = card.getComponentID();
+                if (to.add(card, toIndex)) {
+                    executed = true;
+                    return true;
+                }
             }
         }
-        return card != null && (to == null || to.add(card, toIndex));
+        return false;
     }
 
     @Override
