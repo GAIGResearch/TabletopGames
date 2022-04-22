@@ -302,14 +302,15 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         playerDeck.shuffle(rnd);
         int noCards = playerDeck.getSize();
         int noEpidemicCards = pp.nEpidemicCards;
-        int range = noCards / noEpidemicCards;
-        for (int i = 0; i < noEpidemicCards; i++) {
-            int index = i * range + i + rnd.nextInt(range);
+        if (noEpidemicCards > 0) {
+            int range = noCards / noEpidemicCards;
+            for (int i = 0; i < noEpidemicCards; i++) {
+                int index = i * range + i + rnd.nextInt(range);
 
-            Card card = new Card("Epidemic");
-            card.setProperty(new PropertyString("name", "epidemic"));
-            playerDeck.add(card, index);
-
+                Card card = new Card("Epidemic");
+                card.setProperty(new PropertyString("name", "epidemic"));
+                playerDeck.add(card, index);
+            }
         }
 
         // Research station in Atlanta
