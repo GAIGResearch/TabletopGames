@@ -70,8 +70,8 @@ public class RHEAIndividual implements Comparable {
             int endIndex = actions.length;
             // Game state to start from
             AbstractGameState gs = gameStates[startIndex];
-            // Perform rollout and return number of FM calls taken
-            return rollout(gs, fm, startIndex, endIndex, playerID);
+            // Perform rollout and return number of FM calls taken. Always rollout from 0 due to preceeding crossover changing previous actions.
+            return rollout(gs, fm, 0, endIndex, playerID);
         }
         return 0;
     }
