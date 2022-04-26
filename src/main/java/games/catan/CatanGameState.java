@@ -530,7 +530,7 @@ public class CatanGameState extends AbstractGameState {
         HashMap<Integer, Area> copy = new HashMap<>();
         for(int key : areas.keySet()) {
             Area a = areas.get(key);
-            if (getCoreGameParameters().partialObservable && key != -1) {
+            if ( key != -1) {
                 List<Component> oldComponents = areas.get(key).getComponents();
                 // todo need to handle PO
                 // todo create a cardpool that players may have, shuffle and distribute them
