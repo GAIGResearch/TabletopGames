@@ -32,7 +32,7 @@ public class CatanGUI extends AbstractGUIManager {
     JLabel devCards;
     JLabel playerColourLabel;
 
-    public CatanGUI(GamePanel parent, Game game, ActionController ac){
+    public CatanGUI(GamePanel parent, Game game, ActionController ac) {
         super(parent, ac, 25);
 
         parent.setPreferredSize(new Dimension(1000, 600));
@@ -47,8 +47,9 @@ public class CatanGUI extends AbstractGUIManager {
         parent.add(createGameStateInfoPanel(gs), new FlowLayout(FlowLayout.LEADING));
 
         // each player have their own panel
-        playerPanels = new PlayerPanel[CatanParameters.n_players];
-        for (int i = 0; i< CatanParameters.n_players; i++){
+        CatanParameters pp = (CatanParameters) gs.getGameParameters();
+        playerPanels = new PlayerPanel[pp.n_players];
+        for (int i = 0; i < pp.n_players; i++) {
             playerPanels[i] = new PlayerPanel(i);
         }
 
@@ -74,7 +75,7 @@ public class CatanGUI extends AbstractGUIManager {
 
     public CatanGUI(Game game, ActionController ac, GamePanel gp) {
         super(gp, ac, 25);
-        gs = (CatanGameState)game.getGameState();
+        gs = (CatanGameState) game.getGameState();
         board = gs.getBoard();
         gp.setPreferredSize(new Dimension(1000, 600));
 
@@ -87,8 +88,9 @@ public class CatanGUI extends AbstractGUIManager {
         gp.add(createGameStateInfoPanel(gs), new FlowLayout(FlowLayout.LEADING));
 
         // each player have their own panel
-        playerPanels = new PlayerPanel[CatanParameters.n_players];
-        for (int i = 0; i< CatanParameters.n_players; i++){
+        CatanParameters pp = (CatanParameters) gs.getGameParameters();
+        playerPanels = new PlayerPanel[pp.n_players];
+        for (int i = 0; i < pp.n_players; i++) {
             playerPanels[i] = new PlayerPanel(i);
         }
 
@@ -116,7 +118,7 @@ public class CatanGUI extends AbstractGUIManager {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         scoreLabel.setText("Score: " + Arrays.toString(gs.getScores()));
-        diceRollLabel.setText("Dice Roll: " + ((CatanGameState)gameState).getRollValue());
+        diceRollLabel.setText("Dice Roll: " + ((CatanGameState) gameState).getRollValue());
         knightCount.setText("Knights: " + Arrays.toString(gs.getKnights()));
         longestRoad.setText("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());
         victoryPointsLabel.setText("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
@@ -129,9 +131,9 @@ public class CatanGUI extends AbstractGUIManager {
 //        playerResources.setText(playerResources.getText() + "</html>");
 //
 //        devCards.setText("<html>Dev. Cards: ");
-        for (int i = 0 ; i < gameState.getNPlayers(); i++){
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
 //            devCards.setText(devCards.getText() + "<br/>" + i + " : " + Arrays.toString(gs.getPLayerDevCards(i)));
-            playerPanels[i]._update((CatanGameState)gameState);
+            playerPanels[i]._update((CatanGameState) gameState);
         }
 //        devCards.setText(devCards.getText() + "</html>");
 
@@ -153,17 +155,17 @@ public class CatanGUI extends AbstractGUIManager {
         longestRoad = new JLabel("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());
         victoryPointsLabel = new JLabel("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
         scoreLabel = new JLabel("Scores: " + Arrays.toString(gs.getScores()));
-        diceRollLabel = new JLabel("Dice Roll: " + ((CatanGameState)gameState).getRollValue());
+        diceRollLabel = new JLabel("Dice Roll: " + ((CatanGameState) gameState).getRollValue());
 
         playerResources = new JLabel("<html>Resources: ");
         playerResources.setText(playerResources.getText() + "<br/>K : [B, L, O, G, W]");
-        for (int i = 0 ; i < gameState.getNPlayers(); i++){
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
             playerResources.setText(playerResources.getText() + "<br/>" + i + " : " + Arrays.toString(gs.getPlayerResources(i)));
         }
         playerResources.setText(playerResources.getText() + "</html>");
 
         devCards = new JLabel("<html>Dev. Cards: ");
-        for (int i = 0 ; i < gameState.getNPlayers(); i++){
+        for (int i = 0; i < gameState.getNPlayers(); i++) {
             devCards.setText(devCards.getText() + "<br/>" + i + " : " + Arrays.toString(gs.getPLayerDevCards(i)));
         }
         devCards.setText(devCards.getText() + "</html>");
@@ -185,7 +187,7 @@ public class CatanGUI extends AbstractGUIManager {
     }
 }
 
-class PlayerPanel extends JPanel{
+class PlayerPanel extends JPanel {
     int playerID;
     JLabel playerLabel;
     JLabel scoreLabel;
@@ -197,7 +199,7 @@ class PlayerPanel extends JPanel{
     JLabel devCards;
     JLabel playerColourLabel;
 
-    PlayerPanel(int playerID){
+    PlayerPanel(int playerID) {
         this.playerID = playerID;
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         playerLabel = new JLabel();
@@ -221,7 +223,7 @@ class PlayerPanel extends JPanel{
 
     }
 
-    void _update(CatanGameState gs){
+    void _update(CatanGameState gs) {
         playerLabel.setText("Player " + playerID);
 
         scoreLabel.setText("Scores: " + gs.getScores()[playerID]);

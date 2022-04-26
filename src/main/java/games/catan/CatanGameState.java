@@ -33,10 +33,10 @@ public class CatanGameState extends AbstractGameState {
     protected int victoryPoints[]; // secret points from victory cards
     protected int knights[]; // knight count for each player
     protected int exchangeRates[][]; // exchange rate with bank for each resource
-    protected int largestArmy = -1; // playerID of the player currently holding the largest army
-    protected int longestRoad = -1; // playerID of the player currently holding the longest road
-    protected int longestRoadLength = 0;
-    protected OfferPlayerTrade currentTradeOffer = null; // Holds the current trade offer to allow access between players TODO make primitive
+    protected int largestArmy; // playerID of the player currently holding the largest army
+    protected int longestRoad; // playerID of the player currently holding the longest road
+    protected int longestRoadLength;
+    protected OfferPlayerTrade currentTradeOffer; // Holds the current trade offer to allow access between players TODO make primitive
     int rollValue;
 
     // GamePhases that may occur in Catan
@@ -56,13 +56,7 @@ public class CatanGameState extends AbstractGameState {
 
     public CatanGameState(AbstractParameters pp, int nPlayers) {
         super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters)pp).n_actions_per_turn), GameType.Catan);
-        scores = new int[((CatanParameters) pp).n_players];
-        knights = new int[((CatanParameters) pp).n_players];
-        exchangeRates = new int[((CatanParameters) pp).n_players][CatanParameters.Resources.values().length];
-        for (int i = 0; i < exchangeRates.length; i++)
-            Arrays.fill(exchangeRates[i], ((CatanParameters)pp).default_exchange_rate);
-        victoryPoints = new int[((CatanParameters) pp).n_players];
-        longestRoadLength = ((CatanParameters) pp).min_longest_road;
+        _reset();
     }
 
     @Override
@@ -89,6 +83,21 @@ public class CatanGameState extends AbstractGameState {
     protected void _reset() {
         // set everything to null
         this.areas = null;
+        boughtDevCard = null;
+        board = null;
+        currentTradeOffer = null;
+        catanGraph = null;
+
+        CatanParameters pp = (CatanParameters) gameParameters;
+        scores = new int[pp.n_players];
+        knights = new int[pp.n_players];
+        exchangeRates = new int[ pp.n_players][CatanParameters.Resources.values().length];
+        for (int i = 0; i < exchangeRates.length; i++)
+            Arrays.fill(exchangeRates[i], pp.default_exchange_rate);
+        victoryPoints = new int[pp.n_players];
+        longestRoadLength = pp.min_longest_road;
+        largestArmy  = -1;
+        longestRoad = -1;
     }
 
     @Override
