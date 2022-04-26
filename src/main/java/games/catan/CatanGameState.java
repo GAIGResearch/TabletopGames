@@ -3,7 +3,6 @@ package games.catan;
 import core.AbstractParameters;
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.actions.AbstractAction;
 import core.components.Area;
 import core.components.Card;
 import core.components.Component;
@@ -18,12 +17,9 @@ import games.catan.components.Settlement;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static core.CoreConstants.*;
 import static games.catan.CatanConstants.*;
-import static games.pandemic.PandemicConstants.infectionHash;
-import static games.pandemic.PandemicConstants.playerDeckHash;
 
 public class CatanGameState extends AbstractGameState {
     protected CatanTile[][] board;
@@ -196,7 +192,7 @@ public class CatanGameState extends AbstractGameState {
         return devCards;
     }
 
-    public int updateLargestArmy(CatanParameters params) {
+    public void updateLargestArmy(CatanParameters params) {
         /* Checks the army sizes and updates the scores accordingly */
         if (largestArmy == -1) {
             // check if any of them meets the minimum required army size
@@ -219,7 +215,6 @@ public class CatanGameState extends AbstractGameState {
                 }
             }
         }
-        return largestArmy;
     }
 
 
@@ -477,7 +472,7 @@ public class CatanGameState extends AbstractGameState {
         CatanGameState copy = new CatanGameState(getGameParameters(), getNPlayers());
         copy.gamePhase = gamePhase;
         copy.board = copyBoard();
-        copy.boughtDevCard = boughtDevCard.copy();
+        copy.boughtDevCard = boughtDevCard == null ? null : boughtDevCard.copy();
         copy.catanGraph = catanGraph.copy();
         copy.areas = copyAreas();
         copy.gameStatus = gameStatus;

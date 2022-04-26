@@ -1,7 +1,6 @@
-package games.dicemonastery.actions;
+package core.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 
 public class LogEvent extends AbstractAction {
 

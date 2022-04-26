@@ -27,7 +27,7 @@ public class MoveRobber extends AbstractAction {
             cgs.getBoard()[x][y].placeRobber();
             return true;
         } else {
-            throw new AssertionError("Cannot move robber from " + robberTile.toString() + " to " + cgs.getBoard()[x][y].toString());
+            throw new AssertionError("Cannot move robber from " + robberTile + " to " + cgs.getBoard()[x][y].toString());
         }
     }
 

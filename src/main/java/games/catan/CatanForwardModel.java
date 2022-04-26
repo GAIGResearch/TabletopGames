@@ -1,11 +1,14 @@
 package games.catan;
 
-import core.AbstractGameState;
 import core.AbstractForwardModel;
+import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.components.*;
+import core.components.Area;
+import core.components.Card;
+import core.components.Counter;
+import core.components.Deck;
 import core.properties.PropertyString;
 import games.catan.actions.*;
 import games.catan.components.Graph;
@@ -19,11 +22,12 @@ import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.*;
 
 public class CatanForwardModel extends AbstractForwardModel {
-    private int rollCounter;
     CatanParameters params;
     int nPlayers;
+    private int rollCounter;
 
-    public CatanForwardModel(){}
+    public CatanForwardModel() {
+    }
 
     public CatanForwardModel(CatanParameters pp, int nPlayers) {
         this.params = pp;
@@ -35,7 +39,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         CatanGameState state = (CatanGameState) firstState;
-        params = (CatanParameters)state.getGameParameters();
+        params = (CatanParameters) state.getGameParameters();
 
         state.setBoard(generateBoard(params));
         state.setGraph(extractGraphFromBoard(state.getBoard()));
@@ -67,7 +71,7 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         // create resource deck
         Deck<Card> resourceDeck = new Deck("resourceDeck", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
-        for (CatanParameters.Resources res: CatanParameters.Resources.values()) {
+        for (CatanParameters.Resources res : CatanParameters.Resources.values()) {
             for (int i = 0; i < params.n_resource_cards; i++) {
                 Card c = new Card();
                 c.setProperty(new PropertyString("cardType", res.name()));
@@ -77,8 +81,8 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         // create and shuffle developmentDeck
         Deck<Card> developmentDeck = new Deck("developmentDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
-        for (Map.Entry<CatanParameters.CardTypes, Integer> entry: params.developmentCardCount.entrySet()){
-            for (int i = 0; i < entry.getValue(); i++){
+        for (Map.Entry<CatanParameters.CardTypes, Integer> entry : params.developmentCardCount.entrySet()) {
+            for (int i = 0; i < entry.getValue(); i++) {
                 Card card = new Card();
                 card.setProperty(new PropertyString("cardType", entry.getKey().toString()));
                 developmentDeck.add(card);
@@ -99,7 +103,7 @@ public class CatanForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         CatanGameState gs = (CatanGameState) currentState;
         CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
-        if (action != null){
+        if (action != null) {
             action.execute(gs);
         } else {
             throw new AssertionError("No action selected by current player");
@@ -124,7 +128,7 @@ public class CatanForwardModel extends AbstractForwardModel {
             if (gs.getCoreGameParameters().verbose) {
                 System.out.println("Calculated road length: " + new_length);
             }
-        } else if (action instanceof PlaceSettlementWithRoad){
+        } else if (action instanceof PlaceSettlementWithRoad) {
             // As player always places a settlement in the setup phase it is awarded the score for it
             gs.addScore(gs.getCurrentPlayer(), params.settlement_value);
         } else if (action instanceof BuildSettlement) {
@@ -135,7 +139,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         // win condition
-        if (gs.getGameScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win){
+        if (gs.getGameScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win) {
             for (int i = 0; i < gs.getNPlayers(); i++) {
                 if (i == gs.getCurrentPlayer()) {
                     gs.setPlayerResult(Utils.GameResult.WIN, i);
@@ -144,10 +148,10 @@ public class CatanForwardModel extends AbstractForwardModel {
                 }
             }
             gs.setGameStatus(Utils.GameResult.GAME_END);
-            if(gs.getCoreGameParameters().verbose){
+            if (gs.getCoreGameParameters().verbose) {
                 System.out.println("Game over! winner = " + gs.getCurrentPlayer());
             }
-        } else if (params.max_round_count!=-1 && gs.getTurnOrder().getRoundCounter()>params.max_round_count) { // end in tie if round limit exceeded
+        } else if (params.max_round_count != -1 && gs.getTurnOrder().getRoundCounter() > params.max_round_count) { // end in tie if round limit exceeded
             for (int i = 0; i < gs.getNPlayers(); i++) {
                 gs.setPlayerResult(Utils.GameResult.DRAW, i);
             }
@@ -155,35 +159,37 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         // prevents multiple DoNothing actions with multi-action turn stages
-        if(action instanceof DoNothing
-                && (gs.getGamePhase()==CatanGameState.CatanGamePhase.Trade
-                || gs.getGamePhase()==CatanGameState.CatanGamePhase.Build)){
+        if (action instanceof DoNothing
+                && (gs.getGamePhase() == CatanGameState.CatanGamePhase.Trade
+                || gs.getGamePhase() == CatanGameState.CatanGamePhase.Build)) {
             cto.skipTurnStage(gs);
         }
 
         // end player's turn; roll dice and allocate resources
         cto.endTurnStage(gs);
 
-        if (action instanceof OfferPlayerTrade){
-            cto.handleTradeOffer(gs,((OfferPlayerTrade) action).otherPlayerID);
+        if (action instanceof OfferPlayerTrade) {
+            cto.handleTradeOffer(gs, ((OfferPlayerTrade) action).otherPlayerID);
         }
 
         if (gs.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {
             // reset recently bought dev card to null
             gs.boughtDevCard = null;
-            rollDiceAndallocateResources(gs);
+            rollDiceAndAllocateResources(gs);
         }
 
     }
 
-    private void rollDiceAndallocateResources(CatanGameState gs){
+    private void rollDiceAndAllocateResources(CatanGameState gs) {
         /* Gives players the resources depending on the current rollValue stored in the game state */
         // roll dice
         gs.setRollValue(getDiceRoll(gs.getGameParameters().getRandomSeed()));
 
         int value = gs.getRollValue();
+        CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
+        cto.logEvent(() -> "Dice roll of " + value, gs);
         CatanTile[][] board = gs.getBoard();
-        if(value!=7){
+        if (value != 7) {
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
@@ -198,9 +204,10 @@ public class CatanForwardModel extends AbstractForwardModel {
                                     Card card = resourceDeck.get(i);
                                     if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())) {
                                         // remove from deck and give it to player
-                                        if(gs.getCoreGameParameters().verbose){
-                                            System.out.println("With Roll value " + gs.rollValue + " Player" + settl.getOwner() + " got " + card.getProperty(cardType));
+                                        if (gs.getCoreGameParameters().verbose) {
+                                            System.out.println("With Roll value " + gs.rollValue + " Player " + settl.getOwner() + " got " + card.getProperty(cardType));
                                         }
+                                        cto.logEvent(() -> " Player " + settl.getOwner() + " got " + card.getProperty(cardType), gs);
                                         ((Deck<Card>) gs.getComponent(resourceDeckHash)).remove(card);
                                         ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
                                         counter++;
@@ -222,30 +229,30 @@ public class CatanForwardModel extends AbstractForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        CatanGameState cgs = (CatanGameState)gameState;
-        if (cgs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main){
+        CatanGameState cgs = (CatanGameState) gameState;
+        if (cgs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main) {
             // special case -> rolling only happens in the Main phase
-            ((CatanTurnOrder)cgs.getTurnOrder()).endTurnStage(cgs);
+            ((CatanTurnOrder) cgs.getTurnOrder()).endTurnStage(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Setup){
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Setup) {
             return CatanActionFactory.getSetupActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Robber){
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Robber) {
             return CatanActionFactory.getRobberActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Steal){
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Steal) {
             return CatanActionFactory.getStealActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Discard){
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Discard) {
             return CatanActionFactory.getDiscardActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Trade){
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Trade) {
             return CatanActionFactory.getTradeStageActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Build){
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Build) {
             return CatanActionFactory.getBuildStageActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.TradeReaction){
+        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.TradeReaction) {
             return CatanActionFactory.getTradeReactionActions(cgs);
         }
         throw new AssertionError("GamePhase is not in the defined set of options");
@@ -258,19 +265,19 @@ public class CatanForwardModel extends AbstractForwardModel {
         return copy;
     }
 
-    private CatanTile[][] generateBoard(CatanParameters params){
+    private CatanTile[][] generateBoard(CatanParameters params) {
         // Shuffle the tile types
         ArrayList<CatanParameters.TileType> tileList = new ArrayList<>();
-        for (Map.Entry tileCount : params.tileCounts.entrySet()){
-            for (int i = 0; i < (int)tileCount.getValue(); i++) {
-                tileList.add((CatanParameters.TileType)tileCount.getKey());
+        for (Map.Entry tileCount : params.tileCounts.entrySet()) {
+            for (int i = 0; i < (int) tileCount.getValue(); i++) {
+                tileList.add((CatanParameters.TileType) tileCount.getKey());
             }
         }
         // Shuffle number tokens
         ArrayList<Integer> numberList = new ArrayList<>();
-        for (Map.Entry numberCount : params.numberTokens.entrySet()){
-            for (int i = 0; i < (int)numberCount.getValue(); i++) {
-                numberList.add((Integer)numberCount.getKey());
+        for (Map.Entry numberCount : params.numberTokens.entrySet()) {
+            for (int i = 0; i < (int) numberCount.getValue(); i++) {
+                numberList.add((Integer) numberCount.getKey());
             }
         }
         // shuffle collections so we get randomized tiles and tokens on them
@@ -278,25 +285,23 @@ public class CatanForwardModel extends AbstractForwardModel {
         Collections.shuffle(numberList);
 
         CatanTile[][] board = new CatanTile[7][7];
-        int midX = board.length/2;
-        int midY = board[0].length/2;
+        int midX = board.length / 2;
+        int midY = board[0].length / 2;
 
         CatanTile midTile = new CatanTile(midX, midY);
 
-        for (int x = 0; x < board.length; x++){
-            for (int y = 0; y < board[x].length; y++){
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = new CatanTile(x, y);
                 // mid_x should be the same as the distance
-                if (midTile.getDistanceToTile(tile) >= midX){
+                if (midTile.getDistanceToTile(tile) >= midX) {
                     tile.setTileType(CatanParameters.TileType.SEA);
-                }
-                else if (tileList.size() > 0) {
+                } else if (tileList.size() > 0) {
                     tile.setTileType(tileList.remove(0));
                     // desert has no number and has to place the robber there
-                    if (tile.getType().equals(CatanParameters.TileType.DESERT)){
+                    if (tile.getType().equals(CatanParameters.TileType.DESERT)) {
                         tile.placeRobber();
-                    }
-                    else {
+                    } else {
                         tile.setNumber(numberList.remove(0));
                     }
 
@@ -330,9 +335,9 @@ public class CatanForwardModel extends AbstractForwardModel {
                 }
 
                 // ------ Settlement ------------
-                for (int vertex = 0; vertex < HEX_SIDES; vertex++){
+                for (int vertex = 0; vertex < HEX_SIDES; vertex++) {
                     // settlement has already been set so skip this loop
-                    if (tile.getSettlements()[vertex] == null){
+                    if (tile.getSettlements()[vertex] == null) {
                         Settlement settlement = new Settlement(-1);
                         tile.setSettlement(vertex, settlement);
 
@@ -358,20 +363,20 @@ public class CatanForwardModel extends AbstractForwardModel {
         return board;
     }
 
-    private Graph extractGraphFromBoard(CatanTile[][] board){
+    private Graph extractGraphFromBoard(CatanTile[][] board) {
         Graph<Settlement, Road> graph = new Graph<>();
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
                 // logic to generate the graph from the board representation
                 // We are not interested in references to DESERT or SEA tiles
-                if (!(tile.getType() == CatanParameters.TileType.DESERT || tile.getType() == CatanParameters.TileType.SEA)){
+                if (!(tile.getType() == CatanParameters.TileType.DESERT || tile.getType() == CatanParameters.TileType.SEA)) {
                     Settlement[] settlements = tile.getSettlements();
                     Road[] roads = tile.getRoads();
-                    for (int i = 0; i < settlements.length; i++){
+                    for (int i = 0; i < settlements.length; i++) {
                         //  2 roads are along the same HEX
-                        graph.addEdge(tile.settlements[i], tile.settlements[(i+5)%HEX_SIDES], roads[(i+5)%HEX_SIDES]);
-                        graph.addEdge(tile.settlements[i], tile.settlements[(i+1)%HEX_SIDES], roads[i]);
+                        graph.addEdge(tile.settlements[i], tile.settlements[(i + 5) % HEX_SIDES], roads[(i + 5) % HEX_SIDES]);
+                        graph.addEdge(tile.settlements[i], tile.settlements[(i + 1) % HEX_SIDES], roads[i]);
 
                         // last one requires a road and a settlement from a neighbour
                         int[] otherCoords = CatanTile.getNeighbourOnEdge(tile, i);
@@ -379,7 +384,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                                 Arrays.stream(otherCoords).min().getAsInt() >= 0) {
                             CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
                             Road[] neighbourRoads = neighbour.getRoads();
-                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i+5)%HEX_SIDES], neighbourRoads[(i+4)%HEX_SIDES]);
+                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i + 5) % HEX_SIDES], neighbourRoads[(i + 4) % HEX_SIDES]);
                         }
                     }
                 }
@@ -388,16 +393,16 @@ public class CatanForwardModel extends AbstractForwardModel {
         return graph;
     }
 
-    private void setHarbors(CatanTile[][] board){
+    private void setHarbors(CatanTile[][] board) {
         // set harbors along the tiles where the SEA borders the land
         ArrayList<Integer> harbors = new ArrayList<>();
-        for (Map.Entry<CatanParameters.HarborTypes, Integer> entry: CatanParameters.harborCount.entrySet()){
+        for (Map.Entry<CatanParameters.HarborTypes, Integer> entry : CatanParameters.harborCount.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++)
                 harbors.add(CatanParameters.HarborTypes.valueOf(entry.getKey().toString()).ordinal());
         }
         Collections.shuffle(harbors);
 
-        int radius = board.length/2;
+        int radius = board.length / 2;
         // todo edge 4 can work, but random would be better, the math changes with different directions.
         //Random random = new Random(params.getRandomSeed());
         //int edge = random.nextInt(HEX_SIDES);
@@ -405,15 +410,15 @@ public class CatanForwardModel extends AbstractForwardModel {
         // Get mid tile
         CatanTile tile = board[radius][radius];
         // move along a certain edge to reach SEA tiles
-        for (int i = 0; i < radius; i++){
-            int [] tileLocation = CatanTile.getNeighbourOnEdge(tile, edge);
+        for (int i = 0; i < radius; i++) {
+            int[] tileLocation = CatanTile.getNeighbourOnEdge(tile, edge);
             tile = board[tileLocation[0]][tileLocation[1]];
         }
         // go around in a circle
         int counter = 0;
-        for (int i = 0; i < HEX_SIDES; i++){
-            for (int j = 0; j < board.length/2; j++){
-                int [] tileLocation = CatanTile.getNeighbourOnEdge(tile, i);
+        for (int i = 0; i < HEX_SIDES; i++) {
+            for (int j = 0; j < board.length / 2; j++) {
+                int[] tileLocation = CatanTile.getNeighbourOnEdge(tile, i);
                 tile = board[tileLocation[0]][tileLocation[1]];
                 if (counter % 2 == 0 && harbors.size() > 0) {
                     tile.addHarbor((i + 2) % HEX_SIDES, harbors.remove(0));
@@ -423,7 +428,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
     }
 
-    public int getDiceRoll(long seed){
+    public int getDiceRoll(long seed) {
         /* Rolls 2 random dices given a single random seed */
         Random r1 = new Random(seed + rollCounter);
         rollCounter += 1;

@@ -2,11 +2,16 @@ package core.turnorders;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.actions.AbstractAction;
+import core.actions.LogEvent;
 import core.interfaces.IGameListener;
+import games.dicemonastery.DiceMonasteryGameState;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
@@ -131,6 +136,13 @@ public abstract class TurnOrder {
         else {
             moveToNextPlayer(gameState, nextPlayer(gameState));
         }
+    }
+
+    public void logEvent(Supplier<String> eventText, AbstractGameState state) {
+        if (listeners.isEmpty())
+            return; // to avoid expensive string manipulations
+        AbstractAction logAction = new LogEvent(eventText.get());
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.GAME_EVENT, state, logAction));
     }
 
     /**
