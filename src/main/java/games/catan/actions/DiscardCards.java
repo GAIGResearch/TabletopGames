@@ -76,7 +76,12 @@ public class DiscardCards extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString() {
         return "DiscardCards cards= " + Arrays.toString(cardsToDiscard);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

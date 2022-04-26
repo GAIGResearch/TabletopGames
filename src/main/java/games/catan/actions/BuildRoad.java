@@ -88,8 +88,15 @@ public class BuildRoad extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
         return "Buildroad in x=" + x + " y=" + y + " edge=" + edge + " free = " + free;
     }
+
+
 
     public int getX() {
         return x;

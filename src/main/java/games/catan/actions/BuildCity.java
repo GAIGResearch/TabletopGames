@@ -72,6 +72,11 @@ public class BuildCity extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
         return String.format("BuildCity: row=%d col=%d vertex=%d player=%d",row,col,vertex,playerID);
     }
 }

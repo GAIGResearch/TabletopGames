@@ -101,7 +101,12 @@ public class BuildSettlement extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString() {
         return "BuildSettlement x= " + x + " y= " + y + " vertex=" + vertex + " free =" + free;
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

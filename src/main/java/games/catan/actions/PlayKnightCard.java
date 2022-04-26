@@ -60,7 +60,11 @@ public class PlayKnightCard extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString() {
         return "Play Knight Card";
+    }
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

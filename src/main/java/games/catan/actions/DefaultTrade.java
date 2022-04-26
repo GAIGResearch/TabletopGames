@@ -69,7 +69,12 @@ public class DefaultTrade extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString() {
         return "Trade getting 1" + resourceToGet + " in exchange of " +  exchangeRate + " " + resourceOffer;
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

@@ -56,7 +56,11 @@ public class MoveRobber extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString() {
         return "MoveRobber to x=" + x + " y=" + y;
+    }
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

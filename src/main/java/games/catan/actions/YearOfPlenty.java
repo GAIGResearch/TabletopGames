@@ -87,7 +87,11 @@ public class YearOfPlenty extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString() {
         return "Year of Plenty with resource1 = " + resource1.toString() + " and resource 2 = " + resource2.toString();
+    }
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

@@ -57,11 +57,14 @@ public class OfferPlayerTrade extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString() {
         //todo expand this string method
         return "Player " + offeringPlayerID + " offering trade to player "
                 + otherPlayerID;
-
+    }
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 
     public int getNegotiationCount() {

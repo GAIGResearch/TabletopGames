@@ -52,7 +52,12 @@ public class BuyDevelopmentCard extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString() {
         return "Buy Development Card";
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

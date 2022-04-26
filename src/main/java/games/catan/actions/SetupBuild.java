@@ -114,7 +114,11 @@ public class SetupBuild extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString(){
         return "Setup Build IExtendedSequence: BuiltSettlement =" + builtSettlement + "BuiltRoad =" + builtRoad + " X =" + X + " Y =" + Y;
+    }
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

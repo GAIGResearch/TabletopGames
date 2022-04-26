@@ -63,7 +63,11 @@ public class StealResource extends AbstractAction {
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
+    public String toString() {
         return "Stealing a resource card from player " + targetPlayerID;
+    }
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
     }
 }

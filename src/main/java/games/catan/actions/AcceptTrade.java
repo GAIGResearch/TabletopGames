@@ -55,6 +55,11 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
         return "Player " + offeringPlayer + " trading" + Arrays.toString(resourcesOffered) + " for " + Arrays.toString(resourcesRequested) + " with Player "
                 + receivingPlayer;
     }
