@@ -55,8 +55,8 @@ public class CatanGame extends Game {
         mctsParams.rolloutType = MCTSEnums.Strategies.RANDOM;
         agents.add(new MCTSPlayer(mctsParams));
 
-//        agents.add(new RandomPlayer(new Random()));
-        agents.add(new CatanRuleBasedPlayer(new Random()));
+        agents.add(new RandomPlayer(new Random()));
+//        agents.add(new CatanRuleBasedPlayer(new Random()));
 
         CatanParameters params = new CatanParameters("data/", System.currentTimeMillis());
         CatanForwardModel forwardModel = new CatanForwardModel(params, agents.size());
@@ -64,15 +64,16 @@ public class CatanGame extends Game {
 
         CatanGame game = new CatanGame(agents, params, forwardModel, gs);
 
-        GamePanel panel = new GamePanel();
-        GamePanel gamePanel = new GamePanel();
+//        GamePanel panel = new GamePanel();
+//        GamePanel gamePanel = new GamePanel();
 
-        GUI frame = new GUI();
-        frame.setContentPane(panel);
-        AbstractGUIManager gui = new CatanGUI(game, new ActionController(), panel);
-        frame.setFrameProperties();
+//        GUI frame = new GUI();
+//        frame.setContentPane(panel);
+//        AbstractGUIManager gui = new CatanGUI(game, new ActionController(), panel);
+//        frame.setFrameProperties();
+        ActionController ac = new ActionController();
 
-        game.run(gui, frame);
+        game.runOne(GameType.Catan, agents, System.currentTimeMillis(), false, null, ac);
         System.out.println(game.gameState.getGameStatus());
 
 //        runMany(players, forwardModel);

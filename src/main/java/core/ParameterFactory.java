@@ -4,6 +4,7 @@ import evaluation.TunableParameters;
 import games.GameType;
 import games.battlelore.BattleloreGameParameters;
 import games.blackjack.BlackjackParameters;
+import games.catan.CatanParameters;
 import games.coltexpress.ColtExpressParameters;
 import games.diamant.DiamantParameters;
 import games.dicemonastery.DiceMonasteryParams;
@@ -56,6 +57,8 @@ public class ParameterFactory {
                 return new DiceMonasteryParams(seed);
             case SushiGo:
                 return new SGParameters(seed);
+            case Catan:
+                return new CatanParameters(seed);
         }
         throw new AssertionError("No default Parameters specified for Game " + game);
 

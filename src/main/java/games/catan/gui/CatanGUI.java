@@ -32,6 +32,46 @@ public class CatanGUI extends AbstractGUIManager {
     JLabel devCards;
     JLabel playerColourLabel;
 
+    public CatanGUI(GamePanel parent, Game game, ActionController ac){
+        super(parent, ac, 25);
+
+        parent.setPreferredSize(new Dimension(1000, 600));
+        this.gs = (CatanGameState) game.getGameState();
+
+        boardView = new CatanBoardView(gs, 500, 500);
+
+        // Bottom area will show actions available
+        JComponent actionPanel = createActionPanel(new Collection[0], 400, defaultActionPanelHeight, false);
+
+        parent.setLayout(new FlowLayout());
+        parent.add(createGameStateInfoPanel(gs), new FlowLayout(FlowLayout.LEADING));
+
+        // each player have their own panel
+        playerPanels = new PlayerPanel[CatanParameters.n_players];
+        for (int i = 0; i< CatanParameters.n_players; i++){
+            playerPanels[i] = new PlayerPanel(i);
+        }
+
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        leftPanel.add(playerPanels[0]);
+        leftPanel.add(playerPanels[1]);
+        parent.add(leftPanel, new FlowLayout(FlowLayout.LEFT));
+
+        parent.add(boardView, new FlowLayout(FlowLayout.CENTER));
+
+        JPanel rightPanel = new JPanel();
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
+        rightPanel.add(playerPanels[2]);
+        rightPanel.add(playerPanels[3]);
+        parent.add(rightPanel, new FlowLayout(FlowLayout.RIGHT));
+
+        parent.add(actionPanel, new FlowLayout(FlowLayout.TRAILING));
+
+        parent.revalidate();
+        parent.repaint();
+    }
+
     public CatanGUI(Game game, ActionController ac, GamePanel gp) {
         super(gp, ac, 25);
         gs = (CatanGameState)game.getGameState();
@@ -75,7 +115,7 @@ public class CatanGUI extends AbstractGUIManager {
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
-        scoreLabel.setText("Scores: " + Arrays.toString(gs.getScores()));
+        scoreLabel.setText("Score: " + Arrays.toString(gs.getScores()));
         diceRollLabel.setText("Dice Roll: " + ((CatanGameState)gameState).getRollValue());
         knightCount.setText("Knights: " + Arrays.toString(gs.getKnights()));
         longestRoad.setText("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());

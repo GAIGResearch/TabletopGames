@@ -498,4 +498,9 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         return sumArray(arraySubtraction(resources1,resources2));
     }
 
+    @Override
+    public AbstractPlayer copy() {
+        // todo
+        return this;
+    }
 }

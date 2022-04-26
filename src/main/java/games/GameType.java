@@ -400,6 +400,7 @@ public enum GameType {
             case Catan:
                 forwardModel = new CatanForwardModel();
                 gameState = new CatanGameState(params, nPlayers);
+                break;
             case Battlelore:
                 forwardModel = new BattleloreForwardModel();
                 gameState = new BattleloreGameState(params, nPlayers);
@@ -475,8 +476,8 @@ public enum GameType {
                 gui = new DominionGUIManager(parent, game, ac, human);
                 break;
             case Catan:
-                gui = new CatanGUI(game, ac, parent);
-
+                gui = new CatanGUI(parent, game, ac);
+                break;
             // TODO: Diamant GUI
             case Battlelore:
                 gui = new BattleloreGUI(parent, game, ac);
