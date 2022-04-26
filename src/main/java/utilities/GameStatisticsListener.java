@@ -14,19 +14,19 @@ import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameEvents.*;
 
-public class GameReportListener implements IGameListener {
+public class GameStatisticsListener implements IGameListener {
 
     List<Double> scores = new ArrayList<>();
     List<Double> visibilityOnTurn = new ArrayList<>();
     List<Integer> components = new ArrayList<>();
-    Map<String, Object> collectedData = new HashMap<>();
+    Map<String, Object> collectedData = new LinkedHashMap<>();
     AbstractForwardModel fm;
     IStatisticLogger logger;
 
-    public GameReportListener(IStatisticLogger logger) {
+    public GameStatisticsListener(IStatisticLogger logger) {
         this.logger = logger;
     }
-    public GameReportListener() {
+    public GameStatisticsListener() {
         this.logger = null;
     }
 

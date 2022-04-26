@@ -307,4 +307,9 @@ public class LearnedValue extends AbstractPlayer implements IGameListener, ITree
                     ));
                 }));
     }
+
+    @Override
+    public LearnedValue copy() {
+        throw new AssertionError("Not yet supported");
+    }
 }

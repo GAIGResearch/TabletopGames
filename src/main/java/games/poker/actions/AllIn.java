@@ -52,12 +52,12 @@ public class AllIn extends AbstractAction implements IPrintable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId);
+        return playerId - 479245298;
     }
 
     @Override
     public AllIn copy() {
-        return new AllIn(playerId);
+        return this; // immutable
     }
 
 }

@@ -40,4 +40,11 @@ public class PrincessAction extends core.actions.DrawCard implements IPrintable 
     public AbstractAction copy() {
         return new PrincessAction(deckFrom, deckTo, fromIndex);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PrincessAction)) return false;
+        return super.equals(o);
+    }
 }

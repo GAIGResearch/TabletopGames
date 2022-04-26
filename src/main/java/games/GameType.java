@@ -248,7 +248,7 @@ public enum GameType {
                 add(ModularBoard);
                 add(VariablePlayerPowers);
             }}),
-    SushiGo(2, 6,
+    SushiGo(2, 5,
             new ArrayList<Category>() {{
                 add(Strategy);
                 add(Cards);

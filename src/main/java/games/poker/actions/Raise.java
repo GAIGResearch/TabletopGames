@@ -60,12 +60,12 @@ public class Raise extends AbstractAction implements IPrintable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId, multiplier);
+        return Objects.hash(playerId, multiplier) - 309;
     }
 
     @Override
     public Raise copy() {
-        return new Raise(playerId, multiplier);
+        return this; // immutable
     }
 
 }

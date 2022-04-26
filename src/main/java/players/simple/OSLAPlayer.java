@@ -43,6 +43,7 @@ public class OSLAPlayer extends AbstractPlayer {
 
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
+        int playerID = gs.getCurrentPlayer();
 
         double[] valState = new double[actions.size()];
         for (int actionIndex = 0; actionIndex < actions.size(); actionIndex++) {
@@ -52,17 +53,17 @@ public class OSLAPlayer extends AbstractPlayer {
             getForwardModel().next(gsCopy, action);
 
             if (gsCopy.getTurnOrder() instanceof SimultaneousTurnOrder) {
-                advanceToEndOfRoundWithRandomActions(gsCopy);
+                advanceToEndOfRoundWithRandomActions(gsCopy, playerID);
             }
 
             if (heuristic != null) {
-                valState[actionIndex] = heuristic.evaluateState(gsCopy, this.getPlayerID());
+                valState[actionIndex] = heuristic.evaluateState(gsCopy, playerID);
             } else {
-                valState[actionIndex] = gsCopy.getHeuristicScore(this.getPlayerID());
+                valState[actionIndex] = gsCopy.getHeuristicScore(playerID);
             }
 
             double Q = noise(valState[actionIndex], this.epsilon, this.random.nextDouble());
-       //     System.out.println(Arrays.stream(valState).mapToObj(v -> String.format("%1.3f", v)).collect(Collectors.joining("\t")));
+            //     System.out.println(Arrays.stream(valState).mapToObj(v -> String.format("%1.3f", v)).collect(Collectors.joining("\t")));
 
             if (Q > maxQ) {
                 maxQ = Q;
@@ -73,16 +74,34 @@ public class OSLAPlayer extends AbstractPlayer {
         return bestAction;
     }
 
-    private void advanceToEndOfRoundWithRandomActions(AbstractGameState gsCopy) {
+    @Override
+    public OSLAPlayer copy() {
+        return new OSLAPlayer(heuristic, new Random(random.nextInt()));
+    }
+
+    private void advanceToEndOfRoundWithRandomActions(AbstractGameState gsCopy, int startingPlayer) {
         // we assume that every other player now has to make a decision
         RandomPlayer rnd = new RandomPlayer(random);
         AbstractForwardModel fm = getForwardModel();
-        for (int p = 0; p < gsCopy.getNPlayers() - 1; p++) {
-            if (gsCopy.getCurrentPlayer() == getPlayerID()) {
-                throw new AssertionError("Not expecting to return to player " + getPlayerID());
+        if (gsCopy.getCurrentPlayer() == startingPlayer) {
+            // first get to the end of our actions
+            while (gsCopy.getCurrentPlayer() == startingPlayer && gsCopy.isNotTerminal()) {
+                AbstractAction action = rnd.getAction(gsCopy, fm.computeAvailableActions(gsCopy));
+                fm.next(gsCopy, action);
             }
-            AbstractAction action = rnd.getAction(gsCopy, fm.computeAvailableActions(gsCopy));
-            fm.next(gsCopy, action);
+        }
+        // then each other player gets their round
+        if (gsCopy.isNotTerminal()) {
+            for (int p = 0; p < gsCopy.getNPlayers() - 1; p++) {
+                int currentPlayer = gsCopy.getCurrentPlayer();
+                if (currentPlayer == startingPlayer) {
+                    throw new AssertionError("Not expecting to return to player " + getPlayerID());
+                }
+                while (gsCopy.getCurrentPlayer() == currentPlayer && gsCopy.isNotTerminal()) {
+                    AbstractAction action = rnd.getAction(gsCopy, fm.computeAvailableActions(gsCopy));
+                    fm.next(gsCopy, action);
+                }
+            }
         }
     }
 }

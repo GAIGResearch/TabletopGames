@@ -44,10 +44,8 @@ public class PandemicHeuristic extends TunableParameters implements IStateHeuris
         PandemicParameters pp = (PandemicParameters) gs.getGameParameters();
         Utils.GameResult gameStatus = gs.getGameStatus();
 
-        if (gameStatus == Utils.GameResult.LOSE)
-            return -1;
-        if (gameStatus == Utils.GameResult.WIN)
-            return 1;
+        if (!pgs.isNotTerminal())
+            return pgs.getPlayerResults()[playerId].value;
 
         // Compute a score
         Counter outbreaks = (Counter) pgs.getComponent(PandemicConstants.outbreaksHash);

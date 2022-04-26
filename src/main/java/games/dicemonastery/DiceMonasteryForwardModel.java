@@ -264,7 +264,7 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                                                 .map(Monk::getPiety)
                                                 .filter(piety -> piety >= topCard.minPiety && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
 
-                                        validPieties.forEach(p -> retValue.add(new GoOnPilgrimage(topCard, p)));
+                                        validPieties.forEach(p -> retValue.add(new GoOnPilgrimage(topCard.copy(), p)));
                                     }
                                 }
                             }

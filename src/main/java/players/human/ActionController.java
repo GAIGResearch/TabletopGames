@@ -4,30 +4,37 @@ import core.actions.AbstractAction;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
 
 public class ActionController {
 
-    private Queue<AbstractAction> actionsQueue;
+    private boolean debug = false;
+    private BlockingQueue<AbstractAction> actionsQueue;
     private AbstractAction lastActionPlayed;
 
-    public ActionController()
-    {
-        actionsQueue = new ArrayDeque<>();
+    public ActionController() {
+        actionsQueue = new ArrayBlockingQueue<>(1);
     }
 
     public void addAction(AbstractAction candidate) {
-        if (candidate != null) {
+        if (candidate != null && actionsQueue.remainingCapacity() > 0) {
             actionsQueue.add(candidate);
+            if (debug) System.out.printf("Action %s added to ActionController%n", candidate);
         }
     }
 
-    public AbstractAction getAction() {
-        lastActionPlayed = actionsQueue.poll();
+    public AbstractAction getAction() throws InterruptedException {
+        lastActionPlayed = actionsQueue.take();
+        if (debug) System.out.printf("Action %s taken via getAction()%n", lastActionPlayed);
         return lastActionPlayed;
     }
 
-    private ActionController(Queue<AbstractAction> otherQueue) {
-        actionsQueue = new ArrayDeque<>(otherQueue);
+    private ActionController(BlockingQueue<AbstractAction> otherQueue) {
+        actionsQueue = new ArrayBlockingQueue<>(1);
+        if (otherQueue.size() > 0)
+            actionsQueue.add(otherQueue.peek());
     }
 
     public ActionController copy() {
@@ -35,6 +42,8 @@ public class ActionController {
     }
 
     public void reset() {
+        if (debug && actionsQueue.size() > 0)
+            System.out.printf("Action Queue being cleared with %d actions%n", actionsQueue.size());
         actionsQueue.clear();
     }
 
@@ -44,5 +53,9 @@ public class ActionController {
 
     public void setLastActionPlayed(AbstractAction a) {
         lastActionPlayed = a;
+    }
+
+    public boolean hasAction() {
+        return !actionsQueue.isEmpty();
     }
 }

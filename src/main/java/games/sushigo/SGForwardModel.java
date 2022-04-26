@@ -9,7 +9,6 @@ import games.sushigo.actions.ChopSticksAction;
 import games.sushigo.actions.NigiriWasabiAction;
 import games.sushigo.actions.PlayCardAction;
 import games.sushigo.cards.SGCard;
-import games.sushigo.testing.SGFileWriter;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -217,21 +216,18 @@ public class SGForwardModel extends AbstractForwardModel {
                 }
                 for (int i = 0; i < trueWinners.size(); i++) {
                     SGGS.setPlayerResult(Utils.GameResult.DRAW, trueWinners.get(i));
-                    SGFileWriter.AddWinner(trueWinners.get(i));
                 }
             } else {
                 for (int i = 0; i < SGGS.getNPlayers(); i++) {
                     SGGS.setPlayerResult(Utils.GameResult.LOSE, i);
                 }
                 SGGS.setPlayerResult(Utils.GameResult.WIN, trueWinners.get(0));
-                SGFileWriter.AddWinner(trueWinners.get(0));
             }
         } else {
             for (int i = 0; i < SGGS.getNPlayers(); i++) {
                 SGGS.setPlayerResult(Utils.GameResult.LOSE, i);
             }
             SGGS.setPlayerResult(Utils.GameResult.WIN, winners.get(0));
-            SGFileWriter.AddWinner(winners.get(0));
         }
     }
 
@@ -440,8 +436,6 @@ public class SGForwardModel extends AbstractForwardModel {
                 SGGS.getPlayerDecks().get(SGGS.getCurrentPlayer()).getSize() > 1) {
             actions.add(new ChopSticksAction(SGGS.getCurrentPlayer()));
         }
-        if (actions.size() <= 0)
-            throw new AssertionError("No actions valid");
         return actions;
     }
 

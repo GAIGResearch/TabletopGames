@@ -152,7 +152,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
         List<Integer> bidPerPlayer = IntStream.range(0, getNPlayers()).map(player -> {
                     Map<Resource, Integer> bid = playerBids.get(player);
-            return bid.getOrDefault(BEER, 0) + bid.getOrDefault(MEAD, 0) * 2;
+                    return bid.getOrDefault(BEER, 0) + bid.getOrDefault(MEAD, 0) * 2;
                 }
         ).boxed().collect(toList());
 
@@ -388,7 +388,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             }
         }
         if (retValue == null)
-            throw new AssertionError(String.format("Top card %s is not found",  destination));
+            throw new AssertionError(String.format("Top card %s is not found", destination));
         retValue.startPilgrimage(monk, this);
         pilgrimagesStarted.add(retValue);
         return retValue;
@@ -598,7 +598,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return getGameScore(playerId);
+        if (isNotTerminal())
+            return getGameScore(playerId) / 60.0;
+        return playerResults[playerId].value;
     }
 
     @Override

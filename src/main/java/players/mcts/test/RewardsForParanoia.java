@@ -30,8 +30,7 @@ public class RewardsForParanoia {
         // default Parameter settings for later changes
         params = new MCTSParams(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
-        params.redeterminise = true;
-        params.openLoop = true;
+        params.information = MCTSEnums.Information.Information_Set;
         params.maxTreeDepth = 10;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
@@ -69,9 +68,10 @@ public class RewardsForParanoia {
 
             if (state.getCurrentPlayer() == 0) {
                 logger.processDataAndFinish();
-                TreeStatistics stats = new TreeStatistics(mctsPlayer.root);
-                List<SingleTreeNode> allNodes = mctsPlayer.allNodesInTree();
-                assertTrue(allNodes.stream().allMatch(allMatch));
+                TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
+                List<SingleTreeNode> allNodes = mctsPlayer.getRoot(0).allNodesInTree();
+                List<SingleTreeNode> problemNodes = allNodes.stream().filter(n -> !allMatch.test(n)).collect(toList());
+                assertEquals(0, problemNodes.size());
                 if (allNodes.stream().anyMatch(anyMatch))
                     anyMatchTriggered = true;
                 assertTrue(aggregateCheck.test(allNodes));
@@ -87,7 +87,7 @@ public class RewardsForParanoia {
                 .map(SingleTreeNode::getActor)
                 .collect(groupingBy(Function.identity(), counting()));
         // we then check that all players have som nodes in the tree
-        Utils.GameResult[] results = mctsPlayer.root.getState().getPlayerResults();
+        Utils.GameResult[] results = mctsPlayer.getRoot(0).getState().getPlayerResults();
         System.out.println("Nodes by player: " + nodeCountByDecisionMaker);
         if (results[0] == Utils.GameResult.GAME_ONGOING)
             assertTrue(nodeCountByDecisionMaker.get(0) > 10);
@@ -113,10 +113,10 @@ public class RewardsForParanoia {
         return true;
     };
     Predicate<SingleTreeNode> selfOnlyNodes = node -> {
-        node.getChildren().values().forEach(nodeArray ->
-                assertTrue(nodeArray == null || (nodeArray[1] == null && nodeArray[2] == null)));
-        assertTrue(node.getChildren().size() < 60);
-        return true;
+        boolean passed = node.getChildren().values().stream().allMatch(nodeArray ->
+                nodeArray == null || (nodeArray[1] == null && nodeArray[2] == null));
+        passed = passed && node.getChildren().size() < 60;
+        return passed;
     };
     Predicate<SingleTreeNode> atLeastOneSplitNode = node -> node.getChildren().values().stream()
             .filter(Objects::nonNull)

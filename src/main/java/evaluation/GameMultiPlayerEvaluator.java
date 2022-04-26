@@ -3,6 +3,7 @@ package evaluation;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
 import evodef.MultiSolutionEvaluator;
 import evodef.SearchSpace;
@@ -27,7 +28,7 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
     Random rnd;
     public boolean reportStatistics;
     public IStatisticLogger statsLogger = new SummaryLogger();
-    BiFunction<AbstractGameState, Integer, Double> evalFn;
+    IStateHeuristic stateHeuristic;
 
 
     /**
@@ -39,11 +40,11 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
      * @param seed             Random seed to use
      */
     public <T> GameMultiPlayerEvaluator(GameType game, ITPSearchSpace parametersToTune,
-                                        int nPlayers, BiFunction<AbstractGameState, Integer, Double> evaluationFunction,
+                                        int nPlayers, IStateHeuristic stateHeuristic,
                                         long seed) {
         this.game = game;
         this.searchSpace = parametersToTune;
-        evalFn = evaluationFunction;
+        this.stateHeuristic = stateHeuristic;
         this.nPlayers = nPlayers;
         this.rnd = new Random(seed);
     }
@@ -85,7 +86,7 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
         nEvals++;
         double[] retValue = new double[nPlayers];
         for (int i = 0; i < nPlayers; i++)
-            retValue[i] = evalFn.apply(finalState, i);
+            retValue[i] = stateHeuristic.evaluateState(finalState, i);
 
      //   System.out.printf("Result : %s%n", Arrays.toString(retValue));
         return retValue;

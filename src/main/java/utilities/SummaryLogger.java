@@ -57,7 +57,7 @@ public class SummaryLogger implements IStatisticLogger {
     @Override
     public void processDataAndFinish() {
         if (printToConsole)
-            System.out.println(toString());
+            System.out.println(this);
 
         if (logFile != null) {
             // We now write this to the file

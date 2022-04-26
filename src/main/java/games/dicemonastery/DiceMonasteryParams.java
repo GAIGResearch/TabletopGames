@@ -6,10 +6,14 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class DiceMonasteryParams extends TunableParameters {
+    public DiceMonasteryParams() {
+        this(System.currentTimeMillis());
+    }
+
     public DiceMonasteryParams(long seed) {
         super(seed);
         addTunableParameter("YEARS", 4);
-        addTunableParameter("dataPath", "data/dicemonastery");
+        addTunableParameter("dataPath", "data/dicemonastery/");
         addTunableParameter("mandateTreasureLoss", false);
         addTunableParameter("calfSkinsRotInWinter", true);
         addTunableParameter("libraryWritingSets", false);
@@ -25,7 +29,7 @@ public class DiceMonasteryParams extends TunableParameters {
         addTunableParameter("waxPerCandle", 1);
     }
 
-    public String dataPath = "data/dicemonastery";
+    public String dataPath = "data/dicemonastery/";
     public int YEARS = 4;
     public int[] BONUS_TOKENS_PER_PLAYER = {0, 0, 1, 2, 2};
     public boolean mandateTreasureLoss = false;

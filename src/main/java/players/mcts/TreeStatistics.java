@@ -21,7 +21,14 @@ public class TreeStatistics {
 
     public TreeStatistics(SingleTreeNode root) {
         Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
-        nodeQueue.add(root);
+        if (root instanceof MultiTreeNode) {
+            throw new AssertionError("Not expected");
+   //         for (SingleTreeNode node : ((MultiTreeNode) root).roots)
+   //             if (node != null) nodeQueue.add(node);
+        } else {
+            nodeQueue.add(root);
+        }
+
         int greatestDepth = 0;
         int maxActions = 0;
         int totalActions = 0;

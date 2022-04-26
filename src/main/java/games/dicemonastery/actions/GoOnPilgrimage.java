@@ -16,6 +16,8 @@ public class GoOnPilgrimage extends UseMonk {
     public GoOnPilgrimage(Pilgrimage destination, int piety) {
         super(piety);
         this.destination = destination;
+        if (destination.isActive())
+            throw new AssertionError("We cannot start a pilgrimage that is already in progress");
     }
 
     @Override

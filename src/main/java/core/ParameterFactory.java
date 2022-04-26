@@ -51,7 +51,7 @@ public class ParameterFactory {
             case Blackjack:
                 return new BlackjackParameters(seed);
             case Battlelore:
-                return new BattleloreGameParameters("data/battlelore", seed);
+                return new BattleloreGameParameters("data/battlelore/", seed);
             case DiceMonastery:
                 return new DiceMonasteryParams(seed);
             case SushiGo:

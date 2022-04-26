@@ -58,4 +58,9 @@ public class DontPassPolicy extends AbstractPlayer {
 
         return possibleActions.get(rnd.nextInt(possibleActions.size()));
     }
+
+    @Override
+    public DontPassPolicy copy() {
+        return this;
+    }
 }

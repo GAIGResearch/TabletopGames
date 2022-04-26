@@ -8,6 +8,7 @@ import core.components.Component;
 import core.components.Deck;
 import games.GameType;
 import games.sushigo.cards.SGCard;
+import utilities.Utils;
 
 import java.util.*;
 
@@ -166,7 +167,9 @@ public class SGGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return 0;
+        if (isNotTerminal())
+            return playerScore[playerId] / 50.0;
+        return getPlayerResults()[playerId].value;
     }
 
     @Override

@@ -71,7 +71,7 @@ public class RuleBasedPlayer extends AbstractPlayer
                     //Aggressive Gameplay
                     if (playerUnitPower > enemyUnitPower)  {
                         AttackUnitsAction act = (AttackUnitsAction) action;
-                        if (act.GetAttacker().GetUnits().get(0).getTotalStrength() > act.GetDefender().GetUnits().get(0).getTotalStrength()) {
+                        if (act.GetAttacker(observation).GetUnits().get(0).getTotalStrength() > act.GetDefender(observation).GetUnits().get(0).getTotalStrength()) {
                             return action;
                         }
                     }
@@ -98,6 +98,11 @@ public class RuleBasedPlayer extends AbstractPlayer
     @Override
     public String toString() {
         return "RuleBased";
+    }
+
+    @Override
+    public AbstractPlayer copy() {
+        return this;
     }
 }
 

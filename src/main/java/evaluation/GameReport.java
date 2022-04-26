@@ -1,434 +1,185 @@
 package evaluation;
 
-import core.AbstractForwardModel;
-import core.AbstractGameState;
+import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.Game;
-import evaluation.testplayers.RandomTestPlayer;
+import core.ParameterFactory;
+import core.interfaces.IGameListener;
+import core.interfaces.IStatisticLogger;
 import games.GameType;
+import players.PlayerFactory;
 import players.simple.RandomPlayer;
-import utilities.BoxPlot;
-import utilities.LineChart;
+import utilities.FileStatsLogger;
 import utilities.Pair;
-import utilities.TAGStatSummary;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static games.GameType.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+import static utilities.Utils.getArg;
 
 public class GameReport {
 
-    static boolean VERBOSE = true;
-    static int nRep = 1000;
+    public static boolean debug = false;
 
     /**
-     * Number of actions available from any one game state.
+     * The idea here is that we get statistics from the the decisions of a particular agent in
+     * a game, or set of games
      *
-     * @param game     - game to test.
-     * @param nPlayers - number of players taking part in this test.
-     * @param lc       - line chart to add this data to, can be null if only printing required
-     */
-    public static TAGStatSummary actionSpace(GameType game, int nPlayers, LineChart lc) {
-        if (VERBOSE) {
-            System.out.println("--------------------\nAction Space Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
-        }
-
-        TAGStatSummary actionSpace = new TAGStatSummary(game.name() + "-" + nPlayers + "p");
-        TAGStatSummary actionSpaceOnePerRep = new TAGStatSummary(game.name() + "-" + nPlayers + "p");
-        ArrayList<TAGStatSummary> sumData = new ArrayList<>();
-
-        for (int i = 0; i < nRep; i++) {
-            TAGStatSummary ss = new TAGStatSummary();
-
-            Game g = game.createGameInstance(nPlayers);
-            List<AbstractPlayer> players = new ArrayList<>();
-            for (int j = 0; j < nPlayers; j++) {
-                players.add(new RandomPlayer());
-            }
-
-            if (g != null) {
-                g.reset(players);
-                g.run();
-                for (int j = 0; j < g.getTick(); j++) {
-                    double size = g.getActionSpaceSize().get(j).b;
-                    actionSpace.add(size);
-                    ss.add(size);
-
-                    if (j >= sumData.size()) {
-                        sumData.add(new TAGStatSummary(nPlayers + "-" + j));
-                    }
-                    sumData.get(j).add(size);
-                }
-            }
-
-            actionSpaceOnePerRep.add(ss.mean());
-        }
-
-        if (actionSpace.n() != 0) {
-
-            if (lc != null) {
-                // Add to plot
-                double[] yData = new double[sumData.size()];
-                for (int i = 0; i < sumData.size(); i++) {
-                    yData[i] = sumData.get(i).mean();
-                }
-                lc.addSeries(yData, game.name() + "-" + nPlayers + "p");
-            }
-
-            if (VERBOSE) {
-                System.out.println(actionSpace.shortString());
-            }
-        }
-
-        if (VERBOSE) {
-            System.out.println();
-        }
-        return actionSpaceOnePerRep;
-    }
-
-    /**
-     * General game tests, available after setup:
-     * - State size: size of a game state, i.e. number of components.
-     * - Hidden information: Amount of hidden information in the game, i.e. number of hidden components
-     *
-     * @param game     - game to test.
-     * @param nPlayers - number of players taking part in this test.
-     */
-    public static Pair<Integer, TAGStatSummary> generalTest(GameType game, int nPlayers) {
-        if (VERBOSE) {
-            System.out.println("--------------------\nGeneral Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
-        }
-
-        Game g = game.createGameInstance(nPlayers);
-        Pair<Integer, TAGStatSummary> ret = null;
-        if (g != null) {
-            AbstractGameState gs = g.getGameState();
-            if (VERBOSE) {
-                System.out.println("State size: " + gs.getAllComponents().size());
-            }
-
-            // TODO: run games
-            TAGStatSummary ss = new TAGStatSummary();
-            for (int i = 0; i < nPlayers; i++) {
-                ss.add(gs.getUnknownComponentsIds(i).size());
-            }
-            if (VERBOSE) {
-                System.out.println("Hidden information: " + ss.shortString());
-            }
-
-            ret = new Pair<>(gs.getAllComponents().size(), ss);
-        }
-
-        if (VERBOSE) {
-            System.out.println();
-        }
-        return ret;
-    }
-
-    /**
-     * How fast the game works.
-     * - ForwardModel.setup()
-     * - ForwardModel.next()
-     * - ForwardModel.computeAvailableActions()
-     * - GameState.copy()
-     *
-     * @param game     - game to test.
-     * @param nPlayers - number of players taking part in this test.
-     */
-    public static TAGStatSummary[] gameSpeed(GameType game, int nPlayers) {
-        if (VERBOSE) {
-            System.out.println("--------------------\nSpeed Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
-        }
-
-        TAGStatSummary[] ret = new TAGStatSummary[4];
-        TAGStatSummary nextT = new TAGStatSummary();
-        ret[0] = nextT;
-        TAGStatSummary copyT = new TAGStatSummary();
-        ret[1] = copyT;
-        TAGStatSummary actionT = new TAGStatSummary();
-        ret[2] = actionT;
-        TAGStatSummary setupT = new TAGStatSummary();
-        ret[3] = setupT;
-
-        for (int i = 0; i < nRep; i++) {
-            Game g = game.createGameInstance(nPlayers);
-            List<AbstractPlayer> players = new ArrayList<>();
-            for (int j = 0; j < nPlayers; j++) {
-                players.add(new RandomPlayer());
-            }
-
-            if (g != null) {
-                // Setup timer
-                AbstractForwardModel fm = g.getForwardModel();
-                long s = System.nanoTime();
-                fm.setup(g.getGameState());
-                setupT.add(1e+9 / (System.nanoTime() - s));
-
-                // Run timers
-                g.reset(players);
-                g.run();
-                nextT.add(1e+9 / g.getNextTime());
-                copyT.add(1e+9 / g.getCopyTime());
-                actionT.add(1e+9 / g.getActionComputeTime());
-
-            }
-        }
-
-        if (nextT.n() != 0 && VERBOSE) {
-            System.out.println("GS.copy(): " + String.format("%6.3e", (copyT.mean())) + " executions/second");
-            System.out.println("FM.setup(): " + String.format("%6.3e", (setupT.mean())) + " executions/second");
-            System.out.println("FM.next(): " + String.format("%6.3e", (nextT.mean())) + " executions/second");
-            System.out.println("FM.computeAvailableActions(): " + String.format("%6.3e", (actionT.mean())) + " executions/second");
-        }
-
-        if (VERBOSE) {
-            System.out.println();
-        }
-        return ret;
-    }
-
-    /**
-     * How many decisions players take in a game from beginning to end. Alternatively, number of rounds.
-     *
-     * @param game     - game to test.
-     * @param nPlayers - number of players taking part in this test.
-     */
-    public static TAGStatSummary[] gameLength(GameType game, int nPlayers) {
-        if (VERBOSE) {
-            System.out.println("--------------------\nGame Length Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
-        }
-
-        TAGStatSummary[] ret = new TAGStatSummary[4];
-        TAGStatSummary nDecisions = new TAGStatSummary();
-        TAGStatSummary nTicks = new TAGStatSummary();
-        TAGStatSummary nRounds = new TAGStatSummary();
-        TAGStatSummary nActionsPerTurn = new TAGStatSummary();
-        ret[0] = nDecisions;
-        ret[1] = nTicks;
-        ret[2] = nRounds;
-        ret[3] = nActionsPerTurn;
-
-        for (int i = 0; i < nRep; i++) {
-            Game g = game.createGameInstance(nPlayers);
-            List<AbstractPlayer> players = new ArrayList<>();
-            for (int j = 0; j < nPlayers; j++) {
-                players.add(new RandomPlayer());
-            }
-
-            if (g != null) {
-                g.reset(players);
-                g.run();
-                nDecisions.add(g.getNDecisions());
-                nTicks.add(g.getTick());
-                nRounds.add(g.getGameState().getTurnOrder().getRoundCounter());
-                nActionsPerTurn.add(g.getNActionsPerTurn());
-            }
-        }
-
-        if (nDecisions.n() != 0) {
-            if (VERBOSE) {
-                System.out.println("# decisions: " + (nDecisions.mean()));
-                System.out.println("# ticks: " + (nTicks.mean()));
-                System.out.println("# rounds: " + (nRounds.mean()));
-                System.out.println("# actions/turn: " + (nActionsPerTurn.mean()));
-            }
-        }
-
-        if (VERBOSE) {
-            System.out.println();
-        }
-        return ret;
-    }
-
-    /**
-     * Several tests involving player playing and gathering statistics about their observations:
-     * - Reward sparsity: How sparse is the reward signal in the scoring function? Calculates granularity of possible
-     * values between -1 and 1.
-     * - Branching factor: Number of distinct states that can be reached from any one game state.
-     *
-     * @param game     - game to test.
-     * @param nPlayers - number of players taking part in this test.
-     */
-    public static Pair<TAGStatSummary, TAGStatSummary> playerObservationTest(GameType game, int nPlayers) {
-        if (VERBOSE) {
-            System.out.println("--------------------\nPlayer Observation Test: " + game.name() + " [" + nPlayers + " players]\n--------------------");
-        }
-
-        TAGStatSummary rs = new TAGStatSummary("Reward Sparsity");
-        TAGStatSummary bf = new TAGStatSummary("Branching Factor");
-        for (int i = 0; i < nRep; i++) {
-            Game g = game.createGameInstance(nPlayers);
-            List<AbstractPlayer> players = new ArrayList<>();
-            for (int j = 0; j < nPlayers; j++) {
-                players.add(new RandomTestPlayer());
-            }
-
-            if (g != null) {
-                g.reset(players);
-                g.run();
-
-                for (AbstractPlayer p : players) {
-                    RandomTestPlayer rtp = (RandomTestPlayer) p;
-                    rs.add(rtp.getScores());
-                    bf.add(rtp.getBranchingFactor());
-                }
-            }
-        }
-
-        if (rs.n() != 0) {
-            if (VERBOSE) {
-                System.out.println(rs.toString());
-                System.out.println(bf.toString());
-            }
-        }
-
-        if (VERBOSE) {
-            System.out.println();
-        }
-        return new Pair<>(rs, bf);
-    }
-
-    /* Helper methods */
-
-    /**
-     * Calculates and plots together all games for each number of players (if the game can support the given number).
-     *
-     * @param games - games to plot.
-     */
-    public static void actionSpaceTestAllGames(ArrayList<GameType> games) {
-        int min = GameType.getMinPlayersAllGames();
-        int max = GameType.getMaxPlayersAllGames();
-
-        for (int p = min; p <= max; p++) {
-
-            LineChart lc = new LineChart("Action Space Size " + p + "p", "game tick", "action space size");
-            lc.setVisible(false);
-            BoxPlot bp = new BoxPlot("Action Space Size " + p + "p", "game", "action space size");
-            bp.setVisible(false);
-
-            for (GameType gt : games) {
-                if (gt.getMinPlayers() > p && gt.getMaxPlayers() < p) continue;
-                TAGStatSummary ss = actionSpace(gt, p, lc);
-
-                bp.addSeries(ss.getElements(), gt.name());
-                lc.setVisible(true);
-                bp.setVisible(true);
-            }
-        }
-    }
-
-    /**
-     * Calculates and plots together all player numbers for each game, one plot per game.
-     *
-     * @param games - games to plot.
-     */
-    public static void actionSpaceTestAllPlayers(ArrayList<GameType> games) {
-        for (GameType gt : games) {
-
-            LineChart lc = new LineChart("Action Space Size " + gt.name(), "game tick", "action space size");
-            lc.setVisible(false);
-            BoxPlot bp = new BoxPlot("Action Space Size " + gt.name(), "game", "action space size");
-            bp.setVisible(false);
-
-            for (int p = gt.getMinPlayers(); p <= gt.getMaxPlayers(); p++) {
-                TAGStatSummary ss = actionSpace(gt, p, lc);
-
-                bp.addSeries(ss.getElements(), p + "p");
-                lc.setVisible(true);
-                bp.setVisible(true);
-            }
-        }
-    }
-
-    /**
-     * Main method to run this class, with various options/examples given
-     *
-     * @param args - program arguments, ignored
+     * @param args
      */
     public static void main(String[] args) {
-
-        // 1. Action space tests, plots per game with all player numbers, or per player number with all games
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.remove(GameType.Uno);
-//        actionSpaceTestAllGames(games);
-//        actionSpaceTestAllPlayers(games);
-
-        // 2. Run action space test on Pandemic with 2 players, plots only
-//        LineChart lc = new LineChart("Action Space Size (Pandemic 2p)", "game tick", "action space size");
-//        VERBOSE = false;
-//        actionSpace(Pandemic, 2, lc);
-
-        // 3. Run action space test on Pandemic with 2 players, printed report
-//        VERBOSE = true;
-//        actionSpace(Pandemic, 2, null);
-
-        // 4. Run each test with printed reports on each game
-//        int nPlayers = 2;
-        VERBOSE = false;
-        for (GameType gt : GameType.values()) {
-            if (gt == Pandemic) continue;
-            if (gt == Virus) continue;
-            if (gt == Uno) continue;
-            if (gt == ExplodingKittens) continue;
-            if (gt == LoveLetter) continue;
-            if (gt == TicTacToe) continue;
-            if (gt == ColtExpress) continue;
-            //     if (gt == Dominion) continue;
-
-            TAGStatSummary as = new TAGStatSummary("Action space size (" + gt.name() + ")");
-            TAGStatSummary ss = new TAGStatSummary("State size (" + gt.name() + ")");
-            TAGStatSummary hidi = new TAGStatSummary("Hidden info size (" + gt.name() + ")");
-            TAGStatSummary cp = new TAGStatSummary("GS.copy() (" + gt.name() + ") exe/sec");
-            TAGStatSummary sp = new TAGStatSummary("FM.setup() (" + gt.name() + ") exe/sec");
-            TAGStatSummary ne = new TAGStatSummary("FM.next() (" + gt.name() + ") exe/sec");
-            TAGStatSummary ac = new TAGStatSummary("FM.actions() (" + gt.name() + ") exe/sec");
-            TAGStatSummary nd = new TAGStatSummary("#decisions (" + gt.name() + ")");
-            TAGStatSummary nt = new TAGStatSummary("#ticks (" + gt.name() + ")");
-            TAGStatSummary nr = new TAGStatSummary("#rounds (" + gt.name() + ")");
-            TAGStatSummary napt = new TAGStatSummary("#apt (" + gt.name() + ")");
-            TAGStatSummary rs = new TAGStatSummary("Reward Sparsity (" + gt.name() + ")");
-            TAGStatSummary bf = new TAGStatSummary("Branching Factor (" + gt.name() + ")");
-
-            for (int i = gt.getMinPlayers(); i <= gt.getMaxPlayers(); i++) {
-                System.out.println(gt.name() + " " + i);
-                as.add(actionSpace(gt, i, null));
-
-                Pair<Integer, TAGStatSummary> ret = generalTest(gt, i);
-                ss.add(ret.a);
-                hidi.add(ret.b);
-
-                TAGStatSummary[] rett = gameSpeed(gt, i);
-                cp.add(rett[0]);
-                sp.add(rett[1]);
-                ne.add(rett[2]);
-                ac.add(rett[3]);
-
-                TAGStatSummary[] rettt = gameLength(gt, i);
-                nd.add(rettt[0]);
-                nt.add(rettt[1]);
-                nr.add(rettt[2]);
-                napt.add(rettt[3]);
-
-                Pair<TAGStatSummary, TAGStatSummary> retttt = playerObservationTest(gt, i);
-                rs.add(retttt.a);
-                bf.add(retttt.b);
-            }
-
-            System.out.println(as.shortString());
-            System.out.println(ss.shortString());
-            System.out.println(hidi.shortString());
-            System.out.println("Hidden info perc: " + (hidi.mean() * 100.0 / ss.mean()));
-            System.out.println(cp.shortString(true));
-            System.out.println(sp.shortString(true));
-            System.out.println(ne.shortString(true));
-            System.out.println(ac.shortString(true));
-            System.out.println(nd.shortString());
-            System.out.println(nt.shortString());
-            System.out.println(nr.shortString());
-            System.out.println(napt.shortString());
-            System.out.println(rs.shortString());
-            System.out.println(bf.shortString());
+        List<String> argsList = Arrays.asList(args);
+        if (argsList.contains("--help") || argsList.contains("-h")) {
+            System.out.println(
+                    "There are a number of possible arguments:\n" +
+                            "\tgames=         A list of the games to be played. If there is more than one, then use a \n" +
+                            "\t               pipe-delimited list, for example games=Uno|ColtExpress|Pandemic.\n" +
+                            "\t               The default is 'all' to indicate that all games should be analysed.\n" +
+                            "\t               Specifying all|-name1|-name2... will run all games except for name1, name2...\n" +
+                            "\tplayer=        The JSON file containing the details of the Player to monitor, OR\n" +
+                            "\t               one of mcts|rmhc|random|osla|<className>. The default is 'random'.\n" +
+                            "\topponent=      (Optional) JSON file containing the details of the Player to monitor, OR\n" +
+                            "\t               one of mcts|rmhc|random|osla|<className>." +
+                            "\t               If not specified then *all* of the players use the same agent type as specified" +
+                            "\t               with the previous parameter." +
+                            "\tgameParam=     (Optional) A JSON file from which the game parameters will be initialised.\n" +
+                            "\tnPlayers=      The total number of players in each game (the default is 'all') \n " +
+                            "\t               A range can also be specified, for example 3-5. \n " +
+                            "\t               Different player counts can be specified for each game in pipe-delimited format.\n" +
+                            "\t               If 'all' is specified, then every possible playerCount for the game will be analysed.\n" +
+                            "\tnGames=        The number of games to run for each game type. Defaults to 1000.\n" +
+                            "\tlistener=      The full class name of an IGameListener implementation. \n" +
+                            "\t               Defaults to utilities.GameStatisticsListener. \n" +
+                            "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
+                            "\t               from the same set of games." +
+                            "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
+                            "\t               Defaults to utilities.SummaryLogger. \n" +
+                            "\tlogFile=       Will be used as the IStatisticsLogger log file (FileStatsLogger only)\n" +
+                            "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
+                            "\t               use a different log file.\n" +
+                            "\tstatsLog=      (Optional) If specified this file will be used to log statistics generated by the " +
+                            "\t               agent's decision making process (e.g. MCTS node count, depth etc.)"
+            );
+            return;
         }
+
+        // Get Player to be used
+        String playerDescriptor = getArg(args, "player", "");
+        String opponentDescriptor = getArg(args, "opponent", "random");
+        String gameParams = getArg(args, "gameParam", "");
+        String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
+        String statsLog = getArg(args, "statsLog", "");
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameStatisticsListener").split("\\|")));
+        List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
+
+        if (listenerClasses.size() > 1 && logFiles.size() > 1 && listenerClasses.size() != logFiles.size())
+            throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
+
+        int nGames = getArg(args, "nGames", 1000);
+        List<String> tempGames = new ArrayList<>(Arrays.asList(getArg(args, "games", "all").split("\\|")));
+        List<String> games = tempGames;
+        if (tempGames.get(0).equals("all")) {
+            games = Arrays.stream(GameType.values()).map(Enum::name).filter(name -> !tempGames.contains("-" + name)).collect(toList());
+        }
+
+        if (!gameParams.equals("") && games.size() > 1)
+            throw new IllegalArgumentException("Cannot yet provide a gameParams argument if running multiple games");
+
+        // This creates a <MinPlayer, MaxPlayer> Pair for each game#
+        List<Pair<Integer, Integer>> nPlayers = Arrays.stream(getArg(args, "nPlayers", "all").split("\\|"))
+                .map(str -> {
+                    if (str.contains("-")) {
+                        int hyphenIndex = str.indexOf("-");
+                        return new Pair<>(Integer.valueOf(str.substring(0, hyphenIndex)), Integer.valueOf(str.substring(hyphenIndex + 1)));
+                    } else if (str.equals("all")) {
+                        return new Pair<>(-1, -1); // this is later interpreted as "All the player counts"
+                    } else
+                        return new Pair<>(Integer.valueOf(str), Integer.valueOf(str));
+                }).collect(toList());
+
+        // if only one game size was provided, then it applies to all games in the list
+        if (games.size() == 1 && nPlayers.size() > 1) {
+            for (int loop = 0; loop < nPlayers.size() - 1; loop++)
+                games.add(games.get(0));
+        }
+        if (nPlayers.size() > 1 && nPlayers.size() != games.size())
+            throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list");
+
+        List<IGameListener> gameTrackers = new ArrayList<>();
+        for (int i = 0; i < listenerClasses.size(); i++) {
+            String logFile = logFiles.size() == 1 ? logFiles.get(0) : logFiles.get(i);
+            String listenerClass = listenerClasses.size() == 1 ? listenerClasses.get(0) : listenerClasses.get(i);
+            IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
+            IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
+            gameTrackers.add(gameTracker);
+        }
+
+        IStatisticLogger statsLogger = IStatisticLogger.createLogger(loggerClass, statsLog);
+
+        // Then iterate over the Game Types
+        for (int gameIndex = 0; gameIndex < games.size(); gameIndex++) {
+            GameType gameType = GameType.valueOf(games.get(gameIndex));
+
+            Pair<Integer, Integer> playerCounts = nPlayers.size() == 1 ? nPlayers.get(0) : nPlayers.get(gameIndex);
+            int minPlayers = playerCounts.a > -1 ? playerCounts.a : gameType.getMinPlayers();
+            int maxPlayers = playerCounts.b > -1 ? playerCounts.b : gameType.getMaxPlayers();
+            for (int playerCount = minPlayers; playerCount <= maxPlayers; playerCount++) {
+                System.out.printf("Game: %s, Players: %d\n", gameType.name(), playerCount);
+                if (gameType.getMinPlayers() > playerCount) {
+                    System.out.printf("Skipping game - minimum player count is %d%n", gameType.getMinPlayers());
+                    continue;
+                }
+                if (gameType.getMaxPlayers() < playerCount) {
+                    System.out.printf("Skipping game - maximum player count is %d%n", gameType.getMaxPlayers());
+                    continue;
+                }
+
+                AbstractParameters params = ParameterFactory.createFromFile(gameType, gameParams);
+                Game game = params == null ?
+                        gameType.createGameInstance(playerCount) :
+                        gameType.createGameInstance(playerCount, params);
+                for (IGameListener gameTracker : gameTrackers)
+                    game.addListener(gameTracker);
+
+                if (playerDescriptor.isEmpty() && opponentDescriptor.isEmpty()) {
+                    opponentDescriptor = "random";
+                }
+                List<AbstractPlayer> allPlayers = new ArrayList<>();
+                for (int j = 0; j < playerCount; j++) {
+                    if (opponentDescriptor.isEmpty() || (j == 0 && !playerDescriptor.isEmpty())) {
+                        allPlayers.add(PlayerFactory.createPlayer(playerDescriptor));
+                        if (!statsLog.isEmpty()) {
+                            allPlayers.get(j).setStatsLogger(statsLogger);
+                        }
+                    } else {
+                        allPlayers.add(PlayerFactory.createPlayer(opponentDescriptor));
+                    }
+                }
+                long startingSeed = params == null ? System.currentTimeMillis() : params.getRandomSeed();
+                for (int i = 0; i < nGames; i++) {
+                    // Run games, resetting the player each time
+                    // we also randomise the position of the players for each game
+                    Collections.shuffle(allPlayers);
+                    game.reset(allPlayers, startingSeed + i);
+                    game.run();
+                    if (debug) {
+                        System.out.printf("Game %4d finished at %tT%n", i, System.currentTimeMillis());
+                        System.out.printf("\tResult: %20s%n", game.getPlayers().stream().map(Objects::toString).collect(Collectors.joining(" | ")));
+                        System.out.printf("\tResult: %20s%n", Arrays.stream(game.getGameState().getPlayerResults()).map(Objects::toString).collect(Collectors.joining(" | ")));
+                    }
+                }
+            }
+        }
+
+        // Once all games are complete, let the gameTracker know
+        for (IGameListener gameTracker : gameTrackers) {
+            gameTracker.allGamesFinished();
+        }
+        if (statsLogger != null)
+            statsLogger.processDataAndFinish();
     }
 }
+
+

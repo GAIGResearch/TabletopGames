@@ -32,11 +32,9 @@ public class LoveLetterHeuristic extends TunableParameters implements IStateHeur
         LoveLetterParameters llp = (LoveLetterParameters) gs.getGameParameters();
         Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (playerResult == Utils.GameResult.LOSE)
-            return -1;
-        if (playerResult == Utils.GameResult.WIN)
-            return 1;
-
+        if (!gs.isNotTerminal()) {
+            return playerResult.value;
+        }
         double cardValues = 0;
 
         Random r = new Random(llgs.getGameParameters().getRandomSeed());

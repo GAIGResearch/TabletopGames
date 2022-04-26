@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.*;
 
 public class BlackjackGameState extends AbstractGameState implements IPrintable {
-    List<PartialObservableDeck<FrenchCard>>  playerDecks;
-    Deck<FrenchCard>        drawDeck;
+    List<PartialObservableDeck<FrenchCard>> playerDecks;
+    Deck<FrenchCard> drawDeck;
     int dealerPlayer;
 
 
@@ -23,7 +23,7 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
      * Constructor. Initialises some generic game state variables.
      *
      * @param gameParameters - game parameters.
-     * @param nPlayers      - number of players for this game.
+     * @param nPlayers       - number of players for this game.
      */
     public BlackjackGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new BlackjackTurnOrder(nPlayers), GameType.Blackjack);
@@ -31,28 +31,32 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
 
     @Override
     protected List<Component> _getAllComponents() {
-        return new ArrayList<Component>(){{
+        return new ArrayList<Component>() {{
             addAll(playerDecks);
             add(drawDeck);
         }};
     }
 
 
-    public Deck<FrenchCard> getDrawDeck() {  return drawDeck;}
+    public Deck<FrenchCard> getDrawDeck() {
+        return drawDeck;
+    }
 
-    public List<PartialObservableDeck<FrenchCard>> getPlayerDecks() { return playerDecks; }
+    public List<PartialObservableDeck<FrenchCard>> getPlayerDecks() {
+        return playerDecks;
+    }
 
     public int getDealerPlayer() {
         return dealerPlayer;
     }
 
-    public int calculatePoints(int playerID){
+    public int calculatePoints(int playerID) {
         BlackjackParameters params = (BlackjackParameters) gameParameters;
         int points = 0;
         int aces = 0;
 
-        for (FrenchCard card : playerDecks.get(playerID).getComponents()){
-            switch (card.type){
+        for (FrenchCard card : playerDecks.get(playerID).getComponents()) {
+            switch (card.type) {
                 case Number:
                     points += card.number;
                     break;
@@ -66,7 +70,7 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
                     points += params.kingCard;
                     break;
                 case Ace:
-                    aces ++;
+                    aces++;
                     break;
             }
         }
@@ -90,7 +94,7 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
     protected AbstractGameState _copy(int playerId) {
         BlackjackGameState copy = new BlackjackGameState(gameParameters.copy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
-        for (PartialObservableDeck<FrenchCard> d : playerDecks){
+        for (PartialObservableDeck<FrenchCard> d : playerDecks) {
             copy.playerDecks.add(d.copy());
         }
         copy.drawDeck = drawDeck.copy();
@@ -133,13 +137,13 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
-        return new ArrayList<Integer>(){{
+        return new ArrayList<Integer>() {{
             add(drawDeck.getComponentID());
-            for (Component c: drawDeck.getComponents()){
+            for (Component c : drawDeck.getComponents()) {
                 add(c.getComponentID());
             }
-            for (int i = 0; i < playerDecks.get(dealerPlayer).getSize(); i++){
-                if (!playerDecks.get(dealerPlayer).isComponentVisible(i, playerId)){
+            for (int i = 0; i < playerDecks.get(dealerPlayer).getSize(); i++) {
+                if (!playerDecks.get(dealerPlayer).isComponentVisible(i, playerId)) {
                     add(playerDecks.get(dealerPlayer).get(i).getComponentID());
                 }
             }
@@ -167,12 +171,12 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
     }
 
     @Override
-    public void printToConsole(){
+    public void printToConsole() {
         // TODO fix
         String[] strings = new String[4];
 
         strings[0] = "Player      : " + getCurrentPlayer();
-        strings[1] = "Points      : " +  calculatePoints(getCurrentPlayer());
+        strings[1] = "Points      : " + calculatePoints(getCurrentPlayer());
         StringBuilder sb = new StringBuilder();
         sb.append("Player Hand : ");
 
@@ -184,7 +188,7 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
         strings[2] = sb.toString();
         strings[3] = "----------------------------------------------------";
 
-        for (String s : strings){
+        for (String s : strings) {
             System.out.println(s);
         }
     }

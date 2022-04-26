@@ -40,6 +40,14 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     // Affection tokens per player
     int[] affectionTokens;
 
+    /**
+     * For unit testing
+     * @param playerId
+     */
+    public void addAffectionToken(int playerId) {
+        affectionTokens[playerId]++;
+    }
+
     public LoveLetterGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new LoveLetterTurnOrder(nPlayers), GameType.LoveLetter);
         gamePhase = Draw;

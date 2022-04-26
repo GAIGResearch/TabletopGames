@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class Fold extends AbstractAction implements IPrintable {
 
-    int playerId;
+    final int playerId;
 
     public Fold(int playerId) {
         this.playerId = playerId;
@@ -48,12 +48,12 @@ public class Fold extends AbstractAction implements IPrintable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId);
+        return playerId - 1318;
     }
 
     @Override
     public AbstractAction copy() {
-        return new Fold(playerId);
+        return this; // immutable
     }
 
 }

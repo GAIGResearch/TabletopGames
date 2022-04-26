@@ -21,13 +21,20 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
 
     double[][] coefficients = new double[300][20];
     Map<Integer, Integer> hashToRowIndex = new HashMap<>();
-    List<DiceMonasteryStateAttributes> features;
+    List<DiceMonasteryStateAttributes> features = new ArrayList<>();
     String name;
 
     Set<Integer> unknownHashCodes = new HashSet<>();
 
-    public Advantage003() {
-        this("Advantage003.csv");
+    private Advantage003(Advantage003 toCopy) {
+        //only used for copying
+        this.RND_WEIGHT = toCopy.RND_WEIGHT;
+        this.rnd = new Random(toCopy.rnd.nextInt());
+        this.coefficients = toCopy.coefficients.clone();
+        this.hashToRowIndex.putAll(toCopy.hashToRowIndex);
+        this.features.addAll(toCopy.features);
+        this.name = toCopy.name;
+        this.unknownHashCodes.addAll(toCopy.unknownHashCodes);
     }
     public Advantage003(String filename) {
         name = filename;
@@ -132,5 +139,10 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
     @Override
     public String toString() {
         return "Advantage003 : " + name;
+    }
+
+    @Override
+    public Advantage003 copy() {
+        return new Advantage003(this);
     }
 }
