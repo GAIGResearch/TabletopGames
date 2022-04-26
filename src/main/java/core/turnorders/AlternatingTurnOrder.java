@@ -7,6 +7,8 @@ import java.util.Objects;
 public class AlternatingTurnOrder extends TurnOrder {
     protected int direction;
 
+    protected AlternatingTurnOrder() {}
+
     public AlternatingTurnOrder(int nPlayers){
         super(nPlayers);
         direction = 1;
@@ -14,7 +16,7 @@ public class AlternatingTurnOrder extends TurnOrder {
 
     @Override
     protected TurnOrder _copy() {
-        AlternatingTurnOrder to = new AlternatingTurnOrder(nPlayers);
+        AlternatingTurnOrder to = new AlternatingTurnOrder();
         to.direction = direction;
         return to;
     }

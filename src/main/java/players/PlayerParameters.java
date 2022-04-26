@@ -17,8 +17,8 @@ public abstract class PlayerParameters extends TunableParameters {
 
     public PlayerParameters(long seed) {
         super(seed);
-        addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS);
-        addTunableParameter("budget", 4000);
+        addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS, Arrays.asList(PlayerConstants.values()));
+        addTunableParameter("budget", 4000, Arrays.asList(100, 300, 1000, 3000, 10000, 30000, 100000));
         addTunableParameter("breakMS", 10);
     }
 

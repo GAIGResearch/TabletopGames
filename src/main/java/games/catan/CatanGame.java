@@ -73,7 +73,7 @@ public class CatanGame extends Game {
 //        frame.setFrameProperties();
         ActionController ac = new ActionController();
 
-        game.runOne(GameType.Catan, agents, System.currentTimeMillis(), false, null, ac);
+        game.runOne(GameType.Catan, "",  agents, System.currentTimeMillis(), false, null, ac, 200);
         System.out.println(game.gameState.getGameStatus());
 
 //        runMany(players, forwardModel);

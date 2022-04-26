@@ -14,6 +14,7 @@ import games.explodingkittens.ExplodingKittensParameters;
 import games.loveletter.LoveLetterParameters;
 import games.pandemic.PandemicParameters;
 import games.poker.PokerGameParameters;
+import games.stratego.StrategoParams;
 import games.sushigo.SGParameters;
 import games.tictactoe.TicTacToeGameParameters;
 import games.uno.UnoGameParameters;
@@ -59,6 +60,8 @@ public class ParameterFactory {
                 return new SGParameters(seed);
             case Catan:
                 return new CatanParameters(seed);
+            case Stratego:
+                return new StrategoParams(seed);
         }
         throw new AssertionError("No default Parameters specified for Game " + game);
 

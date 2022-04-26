@@ -11,29 +11,25 @@ import java.util.Objects;
 
 public class PandemicParameters extends TunableParameters {
 
-    String dataPath;
+    int loseMaxOutbreak = 8;
+    int maxCubesPerCity = 3;  // More cause outbreak
+    int nEpidemicCards = 4;
+    int nCubesEpidemic = 3;
+    int[] infectionRate = new int[]{2, 2, 2, 3, 3, 4, 4};  // How many cards are drawn for each counter
+    int nInfectionCardsSetup = 3;
+    int nInfectionsSetup = 3;
+    int nCubesInfection = 1;
+    int nInitialDiseaseCubes = 24;
+    int nCardsForCure = 5;
+    int nCardsForCureReducedBy = 1;  // How many cards less are needed if rules say less are needed (e.g. Scientist role)
+    int nForecastCards = 6;  // How many cards should be viewed and rearranged for the Forecast event card
+    int maxCardsPerPlayer = 7;  // Max cards in hand per player
+    int nCardsDraw = 2;  // Number of cards players draw each turn
+    int nActionsPerTurn = 4;
+    int nResearchStations = 6;
 
-    int lose_max_outbreak = 8;
-    int max_cubes_per_city = 3;  // More cause outbreak
-    int n_city_cards = 48;
-    int n_event_cards = 5;
-    int n_epidemic_cards = 4;
-    int n_cubes_epidemic = 3;
-    int[] infection_rate = new int[]{2, 2, 2, 3, 3, 4, 4};  // How many cards are drawn for each counter
-    int n_infection_cards_setup = 3;
-    int n_infections_setup = 3;
-    int n_cubes_infection = 1;
-    int n_initial_disease_cubes = 24;
-    int n_cards_for_cure = 5;
-    int n_cards_for_cure_reduced = 4;
-    int n_forecast_cards = 6;  // How many cards should be viewed and rearranged for the Forecast event card
-    int max_cards_per_player = 7;  // Max cards in hand per player
-    int n_cards_draw = 2;  // Number of cards players draw each turn
-    int n_actions_per_turn = 4;
-    int n_research_stations = 6;
-
-    // Number of cards each player receives.
-    HashMap<Integer, Integer> n_cards_per_player = new HashMap<Integer, Integer>() {  // Mapping n_players : n_cards_per_player
+    // Number of cards each player receives at the start of the game.
+    HashMap<Integer, Integer> nCardsPerPlayer = new HashMap<Integer, Integer>() {  // Mapping n_players : n_cards_per_player
         {
             put(2, 4);
             put(3, 3);
@@ -41,127 +37,180 @@ public class PandemicParameters extends TunableParameters {
         }
     };
 
+    boolean survivalRules = false;  // Only keeps 2 event cards: Airlift and Government Grant
+
+    // Player roles from PandemicConstants.PlayerRole (.name()). Possible to have multiple roles separated by ","
+    String player0Role = "Any";
+    String player1Role = "Any";
+    String player2Role = "Any";
+    String player3Role = "Any";
+
+    // Not parameters, just init state definitions. Should be adjusted based on game setup in FM.setup()
+    int nCityCards = 48;
+    int nEventCards = 5;
+
+    // Not parameter
+    String dataPath;
+
     public PandemicParameters(String dataPath, long seed) {
         super(seed);
         this.dataPath = dataPath;
 
-        addTunableParameter("lose_max_outbreak", 8, Arrays.asList(5,8,10,15));
-        addTunableParameter("max_cubes_per_city", 3, Arrays.asList(3,5,8,10));
-        addTunableParameter("n_epidemic_cards", 4, Arrays.asList(1,2,3,4,5,6));
-        addTunableParameter("n_cubes_epidemic", 3, Arrays.asList(3,5,8,10));
-        addTunableParameter("n_infection_cards_setup", 3, Arrays.asList(1,3,5,8));
-        addTunableParameter("n_infections_setup", 3, Arrays.asList(1,3,5,8));
-        addTunableParameter("n_cubes_infection", 1, Arrays.asList(1,2,3));
-        addTunableParameter("n_initial_disease_cubes", 24, Arrays.asList(15,20,24,30,50));
-        addTunableParameter("n_cards_for_cure", 5, Arrays.asList(3,4,5,6,7));
-        addTunableParameter("n_cards_for_cure_reduced", 4, Arrays.asList(2,3,4,5,6));
-        addTunableParameter("n_forecast_cards", 6, Arrays.asList(3,4,5,6,7,8));
-        addTunableParameter("max_cards_per_player", 7, Arrays.asList(5,7,10,15));
-        addTunableParameter("n_cards_draw", 2, Arrays.asList(1,2,3,4,5));
-        addTunableParameter("n_actions_per_turn", 4, Arrays.asList(1,2,3,4,5,6,7,8));
-        addTunableParameter("n_research_stations", 6, Arrays.asList(4,5,6,7,8));
+        addTunableParameter("loseMaxOutbreak", 8, Arrays.asList(3,5,8,10,15));
+        addTunableParameter("maxCubesPerCity", 3, Arrays.asList(2,3,5,8,10));
+        addTunableParameter("nEpidemicCards", 4, Arrays.asList(0,1,2,3,4,5,6));
+        addTunableParameter("nCubesEpidemic", 3, Arrays.asList(1,2,3,4,5));
+        addTunableParameter("nInfectionCardsSetup", 3, Arrays.asList(1,2,3,4,5));
+        addTunableParameter("nInfectionsSetup", 3, Arrays.asList(1,2,3,4,5));
+        addTunableParameter("nCubesInfection", 1, Arrays.asList(1,2,3));
+        addTunableParameter("nInitialDiseaseCubes", 24, Arrays.asList(15,20,24,30,50));
+        addTunableParameter("nCardsForCure", 5, Arrays.asList(2,3,4,5,6,7));
+        addTunableParameter("nCardsForCureReducedBy", 1, Arrays.asList(1,2,3));
+        addTunableParameter("nForecastCards", 6, Arrays.asList(3,4,5,6,7,8));
+        addTunableParameter("maxCardsPerPlayer", 7, Arrays.asList(5,7,10,15));
+        addTunableParameter("nCardsDraw", 2, Arrays.asList(1,2,3,4,5));
+        addTunableParameter("nActionsPerTurn", 4, Arrays.asList(1,2,3,4,5,6,7,8));
+        addTunableParameter("nResearchStations", 6, Arrays.asList(4,5,6,7,8));
+        addTunableParameter("survivalRules", false, Arrays.asList(false,true));
+        addTunableParameter("player0Role", "Any", PandemicConstants.PlayerRole.getRoleListIncludeAny());
+        addTunableParameter("player1Role", "Any", PandemicConstants.PlayerRole.getRoleListIncludeAny());
+        addTunableParameter("player2Role", "Any", PandemicConstants.PlayerRole.getRoleListIncludeAny());
+        addTunableParameter("player3Role", "Any", PandemicConstants.PlayerRole.getRoleListIncludeAny());
     }
 
     public PandemicParameters(PandemicParameters pandemicParameters) {
         this(pandemicParameters.dataPath, System.currentTimeMillis());
 
-        this.lose_max_outbreak = pandemicParameters.lose_max_outbreak;
-        this.max_cubes_per_city = pandemicParameters.max_cubes_per_city;  // More cause outbreak
-        this.n_city_cards = pandemicParameters.n_city_cards;
-        this.n_event_cards = pandemicParameters.n_event_cards;
-        this.n_epidemic_cards = pandemicParameters.n_epidemic_cards;
-        this.n_cubes_epidemic = pandemicParameters.n_cubes_epidemic;
-        this.n_infection_cards_setup = pandemicParameters.n_infection_cards_setup;
-        this.n_infections_setup = pandemicParameters.n_infections_setup;
-        this.n_cubes_infection = pandemicParameters.n_cubes_infection;
-        this.n_initial_disease_cubes = pandemicParameters.n_initial_disease_cubes;
-        this.n_cards_for_cure = pandemicParameters.n_cards_for_cure;
-        this.n_cards_for_cure_reduced = pandemicParameters.n_cards_for_cure_reduced;
-        this.max_cards_per_player = pandemicParameters.max_cards_per_player;  // Max cards in hand per player
-        this.n_cards_draw = pandemicParameters.n_cards_draw;  // Number of cards players draw each turn
-        this.n_actions_per_turn = pandemicParameters.n_actions_per_turn;
-        this.n_research_stations = pandemicParameters.n_research_stations;
-        this.n_forecast_cards = pandemicParameters.n_forecast_cards;
+        this.loseMaxOutbreak = pandemicParameters.loseMaxOutbreak;
+        this.maxCubesPerCity = pandemicParameters.maxCubesPerCity;  // More cause outbreak
+        this.nCityCards = pandemicParameters.nCityCards;
+        this.nEventCards = pandemicParameters.nEventCards;
+        this.nEpidemicCards = pandemicParameters.nEpidemicCards;
+        this.nCubesEpidemic = pandemicParameters.nCubesEpidemic;
+        this.nInfectionCardsSetup = pandemicParameters.nInfectionCardsSetup;
+        this.nInfectionsSetup = pandemicParameters.nInfectionsSetup;
+        this.nCubesInfection = pandemicParameters.nCubesInfection;
+        this.nInitialDiseaseCubes = pandemicParameters.nInitialDiseaseCubes;
+        this.nCardsForCure = pandemicParameters.nCardsForCure;
+        this.nCardsForCureReducedBy = pandemicParameters.nCardsForCureReducedBy;
+        this.maxCardsPerPlayer = pandemicParameters.maxCardsPerPlayer;  // Max cards in hand per player
+        this.nCardsDraw = pandemicParameters.nCardsDraw;  // Number of cards players draw each turn
+        this.nActionsPerTurn = pandemicParameters.nActionsPerTurn;
+        this.nResearchStations = pandemicParameters.nResearchStations;
+        this.nForecastCards = pandemicParameters.nForecastCards;
+        this.survivalRules = pandemicParameters.survivalRules;
+        this.player0Role = pandemicParameters.player0Role;
+        this.player1Role = pandemicParameters.player1Role;
+        this.player2Role = pandemicParameters.player2Role;
+        this.player3Role = pandemicParameters.player3Role;
 
         // How many cards are drawn for each counter
-        this.infection_rate = new int[infection_rate.length];
-        System.arraycopy(pandemicParameters.infection_rate, 0, infection_rate, 0, infection_rate.length);
+        this.infectionRate = new int[infectionRate.length];
+        System.arraycopy(pandemicParameters.infectionRate, 0, infectionRate, 0, infectionRate.length);
 
         // Number of cards each player receives.
-        this.n_cards_per_player = new HashMap<>();
-        for(int key : pandemicParameters.n_cards_per_player.keySet())
-            this.n_cards_per_player.put(key, pandemicParameters.n_cards_per_player.get(key));
+        this.nCardsPerPlayer = new HashMap<>();
+        for(int key : pandemicParameters.nCardsPerPlayer.keySet())
+            this.nCardsPerPlayer.put(key, pandemicParameters.nCardsPerPlayer.get(key));
     }
 
-    public int getLose_max_outbreak() {
-        return lose_max_outbreak;
+    public int getLoseMaxOutbreak() {
+        return loseMaxOutbreak;
     }
 
-    public int getMax_cubes_per_city() {
-        return max_cubes_per_city;
+    public int getMaxCubesPerCity() {
+        return maxCubesPerCity;
     }
 
-    public int getN_epidemic_cards() {
-        return n_epidemic_cards;
+    public int getnEpidemicCards() {
+        return nEpidemicCards;
     }
 
-    public int getN_cubes_epidemic() {
-        return n_cubes_epidemic;
+    public int getnCubesEpidemic() {
+        return nCubesEpidemic;
     }
 
-    public int[] getInfection_rate() {
-        return infection_rate;
+    public int[] getInfectionRate() {
+        return infectionRate;
     }
 
-    public int getN_infection_cards_setup() {
-        return n_infection_cards_setup;
+    public int getnInfectionCardsSetup() {
+        return nInfectionCardsSetup;
     }
 
-    public int getN_infections_setup() {
-        return n_infections_setup;
+    public int getnInfectionsSetup() {
+        return nInfectionsSetup;
     }
 
-    public int getN_cubes_infection() {
-        return n_cubes_infection;
+    public int getnCubesInfection() {
+        return nCubesInfection;
     }
 
-    public int getN_initial_disease_cubes() {
-        return n_initial_disease_cubes;
+    public int getnInitialDiseaseCubes() {
+        return nInitialDiseaseCubes;
     }
 
-    public int getN_cards_for_cure() {
-        return n_cards_for_cure;
+    public int getnCardsForCure() {
+        return nCardsForCure;
     }
 
-    public int getN_cards_for_cure_reduced() {
-        return n_cards_for_cure_reduced;
+    public int getnCardsForCureReducedBy() {
+        return nCardsForCureReducedBy;
     }
 
-    public int getN_forecast_cards() {
-        return n_forecast_cards;
+    public int getnForecastCards() {
+        return nForecastCards;
     }
 
-    public int getMax_cards_per_player() {
-        return max_cards_per_player;
+    public int getMaxCardsPerPlayer() {
+        return maxCardsPerPlayer;
     }
 
-    public int getN_cards_draw() {
-        return n_cards_draw;
+    public int getnCardsDraw() {
+        return nCardsDraw;
     }
 
-    public HashMap<Integer, Integer> getN_cards_per_player() {
-        return n_cards_per_player;
+    public HashMap<Integer, Integer> getnCardsPerPlayer() {
+        return nCardsPerPlayer;
     }
 
-    public int getN_actions_per_turn() {
-        return n_actions_per_turn;
+    public int getnActionsPerTurn() {
+        return nActionsPerTurn;
     }
 
-    public int getN_research_stations() {
-        return n_research_stations;
+    public int getnResearchStations() {
+        return nResearchStations;
     }
 
     public String getDataPath(){return dataPath;}
+
+    public String getPlayer0Role() {
+        return player0Role;
+    }
+
+    public String getPlayer1Role() {
+        return player1Role;
+    }
+
+    public String getPlayer2Role() {
+        return player2Role;
+    }
+
+    public String getPlayer3Role() {
+        return player3Role;
+    }
+
+    public boolean isSurvivalRules() {
+        return survivalRules;
+    }
+
+    public int getnCityCards() {
+        return nCityCards;
+    }
+
+    public int getnEventCards() {
+        return nEventCards;
+    }
 
     @Override
     protected AbstractParameters _copy() {
@@ -169,56 +218,42 @@ public class PandemicParameters extends TunableParameters {
     }
 
     @Override
-    protected boolean _equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PandemicParameters)) return false;
-        if (!super.equals(o)) return false;
-        PandemicParameters that = (PandemicParameters) o;
-        return lose_max_outbreak == that.lose_max_outbreak &&
-                max_cubes_per_city == that.max_cubes_per_city &&
-                n_city_cards == that.n_city_cards &&
-                n_event_cards == that.n_event_cards &&
-                n_epidemic_cards == that.n_epidemic_cards &&
-                n_cubes_epidemic == that.n_cubes_epidemic &&
-                n_infection_cards_setup == that.n_infection_cards_setup &&
-                n_infections_setup == that.n_infections_setup &&
-                n_cubes_infection == that.n_cubes_infection &&
-                n_initial_disease_cubes == that.n_initial_disease_cubes &&
-                n_cards_for_cure == that.n_cards_for_cure &&
-                n_cards_for_cure_reduced == that.n_cards_for_cure_reduced &&
-                n_forecast_cards == that.n_forecast_cards &&
-                max_cards_per_player == that.max_cards_per_player &&
-                n_cards_draw == that.n_cards_draw &&
-                n_actions_per_turn == that.n_actions_per_turn &&
-                n_research_stations == that.n_research_stations &&
-                Objects.equals(dataPath, that.dataPath) &&
-                Arrays.equals(infection_rate, that.infection_rate) &&
-                Objects.equals(n_cards_per_player, that.n_cards_per_player);
+    public void _reset() {
+        loseMaxOutbreak = (int) getParameterValue("loseMaxOutbreak");
+        maxCubesPerCity = (int) getParameterValue("maxCubesPerCity");
+        nEpidemicCards = (int) getParameterValue("nEpidemicCards");
+        nCubesEpidemic = (int) getParameterValue("nCubesEpidemic");
+        nInfectionCardsSetup = (int) getParameterValue("nInfectionCardsSetup");
+        nInfectionsSetup = (int) getParameterValue("nInfectionsSetup");
+        nCubesInfection = (int) getParameterValue("nCubesInfection");
+        nInitialDiseaseCubes = (int) getParameterValue("nInitialDiseaseCubes");
+        nCardsForCure = (int) getParameterValue("nCardsForCure");
+        nCardsForCureReducedBy = (int) getParameterValue("nCardsForCureReducedBy");
+        nForecastCards = (int) getParameterValue("nForecastCards");
+        maxCardsPerPlayer = (int) getParameterValue("maxCardsPerPlayer");
+        nCardsDraw = (int) getParameterValue("nCardsDraw");
+        nActionsPerTurn = (int) getParameterValue("nActionsPerTurn");
+        nResearchStations = (int) getParameterValue("nResearchStations");
+        survivalRules = (boolean) getParameterValue("survivalRules");
+        player0Role = (String) getParameterValue("player0Role");
+        player1Role = (String) getParameterValue("player1Role");
+        player2Role = (String) getParameterValue("player2Role");
+        player3Role = (String) getParameterValue("player3Role");
     }
 
     @Override
-    public void _reset() {
-        lose_max_outbreak = (int) getParameterValue("lose_max_outbreak");
-        max_cubes_per_city = (int) getParameterValue("max_cubes_per_city");
-        n_epidemic_cards = (int) getParameterValue("n_epidemic_cards");
-        n_cubes_epidemic = (int) getParameterValue("n_cubes_epidemic");
-        n_infection_cards_setup = (int) getParameterValue("n_infection_cards_setup");
-        n_infections_setup = (int) getParameterValue("n_infections_setup");
-        n_cubes_infection = (int) getParameterValue("n_cubes_infection");
-        n_initial_disease_cubes = (int) getParameterValue("n_initial_disease_cubes");
-        n_cards_for_cure = (int) getParameterValue("n_cards_for_cure");
-        n_cards_for_cure_reduced = (int) getParameterValue("n_cards_for_cure_reduced");
-        n_forecast_cards = (int) getParameterValue("n_forecast_cards");
-        max_cards_per_player = (int) getParameterValue("max_cards_per_player");
-        n_cards_draw = (int) getParameterValue("n_cards_draw");
-        n_actions_per_turn = (int) getParameterValue("n_actions_per_turn");
-        n_research_stations = (int) getParameterValue("n_research_stations");
+    public boolean _equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        PandemicParameters that = (PandemicParameters) o;
+        return loseMaxOutbreak == that.loseMaxOutbreak && maxCubesPerCity == that.maxCubesPerCity && nEpidemicCards == that.nEpidemicCards && nCubesEpidemic == that.nCubesEpidemic && nInfectionCardsSetup == that.nInfectionCardsSetup && nInfectionsSetup == that.nInfectionsSetup && nCubesInfection == that.nCubesInfection && nInitialDiseaseCubes == that.nInitialDiseaseCubes && nCardsForCure == that.nCardsForCure && nCardsForCureReducedBy == that.nCardsForCureReducedBy && nForecastCards == that.nForecastCards && maxCardsPerPlayer == that.maxCardsPerPlayer && nCardsDraw == that.nCardsDraw && nActionsPerTurn == that.nActionsPerTurn && nResearchStations == that.nResearchStations && survivalRules == that.survivalRules && nCityCards == that.nCityCards && nEventCards == that.nEventCards && Arrays.equals(infectionRate, that.infectionRate) && Objects.equals(nCardsPerPlayer, that.nCardsPerPlayer) && Objects.equals(player0Role, that.player0Role) && Objects.equals(player1Role, that.player1Role) && Objects.equals(player2Role, that.player2Role) && Objects.equals(player3Role, that.player3Role) && Objects.equals(dataPath, that.dataPath);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), dataPath, lose_max_outbreak, max_cubes_per_city, n_city_cards, n_event_cards, n_epidemic_cards, n_cubes_epidemic, n_infection_cards_setup, n_infections_setup, n_cubes_infection, n_initial_disease_cubes, n_cards_for_cure, n_cards_for_cure_reduced, n_forecast_cards, max_cards_per_player, n_cards_draw, n_cards_per_player, n_actions_per_turn, n_research_stations);
-        result = 31 * result + Arrays.hashCode(infection_rate);
+        int result = Objects.hash(super.hashCode(), loseMaxOutbreak, maxCubesPerCity, nEpidemicCards, nCubesEpidemic, nInfectionCardsSetup, nInfectionsSetup, nCubesInfection, nInitialDiseaseCubes, nCardsForCure, nCardsForCureReducedBy, nForecastCards, maxCardsPerPlayer, nCardsDraw, nActionsPerTurn, nResearchStations, nCardsPerPlayer, survivalRules, player0Role, player1Role, player2Role, player3Role, nCityCards, nEventCards, dataPath);
+        result = 31 * result + Arrays.hashCode(infectionRate);
         return result;
     }
 

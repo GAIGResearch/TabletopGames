@@ -5,27 +5,29 @@ import core.actions.AbstractAction;
 import core.interfaces.IGameListener;
 import evaluation.TunableParameters;
 import games.GameType;
+import gui.models.AITableModel;
 import players.PlayerParameters;
 import players.PlayerType;
 import players.human.ActionController;
 
 import javax.swing.Timer;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Frontend extends GUI {
     private final int nMaxPlayers = 20;
     private final int defaultNPlayers = 2;
-    private final int actionsToSample = 20;
-    private final Map<core.actions.AbstractAction, Long> sampledActionsForNextDecision = new HashMap<>();
     Timer guiUpdater;
+    JFrame[] gameParameterEditWindow, playerParameterEditWindow;
+    PlayerParameters[] playerParameters, agentParameters;
     private Thread gameThread;
     private Game gameRunning;
-    private boolean showAll, paused, started;
+    private boolean showAll, paused, started, showAIWindow;
     private ActionController humanInputQueue;
 
     public Frontend() {
@@ -34,20 +36,20 @@ public class Frontend extends GUI {
 
         JPanel playerSelect = new JPanel();
         playerSelect.setLayout(new BoxLayout(playerSelect, BoxLayout.Y_AXIS));
-        JPanel nPlayers = new JPanel();
+        JPanel nPlayers = new JPanel(new BorderLayout(5, 5));
         playerSelect.add(nPlayers);
-        JLabel nPlayersText = new JLabel("# players (max " + nMaxPlayers + "):");
-        nPlayers.add(nPlayersText);
+        JLabel nPlayersText = new JLabel("  # players (max " + nMaxPlayers + "):");
+        nPlayers.add(BorderLayout.WEST, nPlayersText);
         JTextField nPlayerField = new JTextField("" + defaultNPlayers, 10);  // integer of this is n players
-        nPlayers.add(nPlayerField);
+        nPlayers.add(BorderLayout.CENTER, nPlayerField);
 
         // Game type and parameters selection
 
-        JPanel gameSelect = new JPanel();
-        gameSelect.add(new JLabel("Game type:"));
+        JPanel gameSelect = new JPanel(new BorderLayout(5, 5));
+        gameSelect.add(BorderLayout.WEST, new JLabel("  Game type:"));
         String[] gameNames = new String[GameType.values().length];
         TunableParameters[] gameParameters = new TunableParameters[GameType.values().length];
-        JFrame[] gameParameterEditWindow = new JFrame[GameType.values().length];
+        gameParameterEditWindow = new JFrame[GameType.values().length];
         for (int i = 0; i < gameNames.length; i++) {
             gameNames[i] = GameType.values()[i].name();
             AbstractParameters params = ParameterFactory.getDefaultParams(GameType.values()[i], 0);
@@ -82,21 +84,20 @@ public class Frontend extends GUI {
             }
         }
         GameType firstGameType = GameType.valueOf(gameNames[0]);
-        nPlayersText.setText("# players (min " + firstGameType.getMinPlayers() + ", max " + firstGameType.getMaxPlayers() + "):");
+        nPlayersText.setText("  # players (min " + firstGameType.getMinPlayers() + ", max " + firstGameType.getMaxPlayers() + "):");
 
         JComboBox<String> gameOptions = new JComboBox<>(gameNames);  // index of this selection is game
-        gameSelect.add(gameOptions);
+        gameSelect.add(BorderLayout.CENTER, gameOptions);
         JButton gameParameterEdit = new JButton("Edit");
-        gameParameterEdit.setVisible(false);
         gameOptions.addActionListener(e -> {
             int idx = gameOptions.getSelectedIndex();
             gameParameterEdit.setVisible(gameParameterEditWindow[idx] != null);
 
             GameType gameType = GameType.valueOf((String) gameOptions.getSelectedItem());
-            nPlayersText.setText("# players (min " + gameType.getMinPlayers() + ", max " + gameType.getMaxPlayers() + "):");
+            nPlayersText.setText("  # players (min " + gameType.getMinPlayers() + ", max " + gameType.getMaxPlayers() + "):");
             pack();
         });
-        gameSelect.add(gameParameterEdit);
+        gameSelect.add(BorderLayout.EAST, gameParameterEdit);
         gameParameterEdit.addActionListener(e -> {
             int idx = gameOptions.getSelectedIndex();
             if (gameParameterEditWindow[idx] != null) {
@@ -112,66 +113,80 @@ public class Frontend extends GUI {
         JPanel[] playerOptions = new JPanel[nMaxPlayers];
         JComboBox<String>[] playerOptionsChoice = new JComboBox[nMaxPlayers];  // player is index of this selection
         String[] playerOptionsString = new String[PlayerType.values().length];
-        PlayerParameters[] playerParameters = new PlayerParameters[PlayerType.values().length];
-        JFrame[] playerParameterEditWindow = new JFrame[PlayerType.values().length];
+        // agentParameters contains the defaults (last edited set) of parameters for each agent type
+        agentParameters = new PlayerParameters[PlayerType.values().length];
         for (int i = 0; i < playerOptionsString.length; i++) {
             playerOptionsString[i] = PlayerType.values()[i].name();
-            playerParameters[i] = PlayerType.values()[i].createParameterSet(0);
-            playerParameterEditWindow[i] = new JFrame();
-            playerParameterEditWindow[i].getContentPane().setLayout(new BoxLayout(playerParameterEditWindow[i].getContentPane(), BoxLayout.Y_AXIS));
-
-            if (playerParameters[i] != null) {
-                List<String> paramNames = playerParameters[i].getParameterNames();
-                HashMap<String, JComboBox<Object>> paramValueOptions = createParameterWindow(paramNames, playerParameters[i], playerParameterEditWindow[i]);
-
-                int idx = i;
-                JButton submit = new JButton("Submit");
-                submit.addActionListener(e -> {
-                    for (String param : paramNames) {
-                        playerParameters[idx].setParameterValue(param, paramValueOptions.get(param).getSelectedItem());
-                    }
-                    playerParameterEditWindow[idx].dispose();
-                });
-                JButton reset = new JButton("Reset");
-                reset.addActionListener(e -> {
-                    playerParameters[idx].reset();
-                    for (String param : paramNames) {
-                        paramValueOptions.get(param).setSelectedItem(playerParameters[idx].getDefaultParameterValue(param));
-                    }
-                });
-                JPanel buttons = new JPanel();
-                buttons.add(submit);
-                buttons.add(reset);
-
-                playerParameterEditWindow[i].getContentPane().add(buttons);
-            }
+            agentParameters[i] = PlayerType.values()[i].createParameterSet(0);
         }
+        // We have one JFrame per player, as different players may use the same agent type with different parameters
+        playerParameters = new PlayerParameters[nMaxPlayers];
+        playerParameterEditWindow = new JFrame[nMaxPlayers];
         for (int i = 0; i < nMaxPlayers; i++) {
-            playerOptions[i] = new JPanel();
+            int playerIdx = i;
+            playerOptions[i] = new JPanel(new BorderLayout(5, 5));
             if (i >= defaultNPlayers) {
                 playerOptions[i].setVisible(false);
             }
-            playerOptions[i].add(new JLabel("Player " + i + ":"));
+            playerOptions[i].add(BorderLayout.WEST, new JLabel("  Player " + i + ":"));
             JButton paramButton = new JButton("Edit");
             paramButton.setVisible(false);
+
+            JButton fileButton = new JButton("Load JSON");
+            fileButton.setVisible(false);
+
+            JPanel paramButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            paramButtonPanel.add(paramButton);
+            paramButtonPanel.add(fileButton);
+
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setAcceptAllFileFilterUsed(false);
+            fileChooser.addChoosableFileFilter(
+                    new FileNameExtensionFilter("JSON files only", "json")
+            );
+
+            fileButton.addActionListener(e -> {
+                        int retVal = fileChooser.showOpenDialog(this);
+                        if (retVal == JFileChooser.APPROVE_OPTION) {
+                            try {
+                                PlayerParameters.loadFromJSONFile(playerParameters[playerIdx], fileChooser.getSelectedFile().getPath());
+                            } catch (Exception loadingException) {
+                                System.out.println("File not loadable : " + loadingException.getMessage());
+                                int agentIdx = playerOptionsChoice[playerIdx].getSelectedIndex();
+                                playerParameters[playerIdx] = (PlayerParameters) agentParameters[agentIdx].copy();
+                            }
+                        }
+                    }
+            );
+
             playerOptionsChoice[i] = new JComboBox<>(playerOptionsString);
             playerOptionsChoice[i].setSelectedItem("Random");
-            int playerIdx = i;
+
+            playerParameterEditWindow[i] = new JFrame();
+            playerParameterEditWindow[i].getContentPane().setLayout(new BoxLayout(playerParameterEditWindow[i].getContentPane(), BoxLayout.Y_AXIS));
+
             playerOptionsChoice[i].addActionListener(e -> {
-                int idx = playerOptionsChoice[playerIdx].getSelectedIndex();
-                PlayerParameters pp = playerParameters[idx];
-                paramButton.setVisible(pp != null);
+                int agentIndex = playerOptionsChoice[playerIdx].getSelectedIndex();
+                // set Edit button visible if we have parameters to edit; else make it invisible
+                paramButton.setVisible(agentParameters[agentIndex] != null);
+                fileButton.setVisible(agentParameters[agentIndex] != null);
+                // set up the player parameters with the current saved default for that agent type
+
                 paramButton.removeAll();
-                paramButton.addActionListener(f -> {
-                    playerParameterEditWindow[idx].setTitle("Edit parameters " + playerOptionsChoice[playerIdx].getSelectedItem());
-                    playerParameterEditWindow[idx].pack();
-                    playerParameterEditWindow[idx].setVisible(true);
-                    playerParameterEditWindow[idx].setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                });
+                try {
+                    playerParameters[playerIdx] = (PlayerParameters) agentParameters[agentIndex].copy();
+                    paramButton.addActionListener(f -> {
+                        initialisePlayerParameterWindow(playerIdx, agentIndex);
+                        playerParameterEditWindow[playerIdx].setTitle("Edit parameters " + playerOptionsChoice[playerIdx].getSelectedItem());
+                        playerParameterEditWindow[playerIdx].pack();
+                        playerParameterEditWindow[playerIdx].setVisible(true);
+                        playerParameterEditWindow[playerIdx].setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                    });
+                } catch (Exception ignored) {}
                 pack();
             });
-            playerOptions[i].add(playerOptionsChoice[i]);
-            playerOptions[i].add(paramButton);
+            playerOptions[i].add(BorderLayout.CENTER, playerOptionsChoice[i]);
+            playerOptions[i].add(BorderLayout.EAST, paramButtonPanel);
             playerSelect.add(playerOptions[i]);
         }
         JButton updateNPlayers = new JButton("Update");
@@ -193,25 +208,28 @@ public class Frontend extends GUI {
                 }
             }
         });
-        nPlayers.add(updateNPlayers);
+        nPlayers.add(BorderLayout.EAST, updateNPlayers);
 
         // Select visuals on/off
-
-        JPanel visualSelect = new JPanel();
-        visualSelect.add(new JLabel("Visuals ON/OFF:"));
+        JPanel visualSelect = new JPanel(new BorderLayout(5, 5));
+        visualSelect.add(BorderLayout.WEST, new JLabel("  Visuals ON/OFF:"));
         JComboBox<Boolean> visualOptions = new JComboBox<>(new Boolean[]{false, true}); // index here is visuals on/off
         visualOptions.setSelectedItem(true);
-        visualSelect.add(visualOptions);
+        visualSelect.add(BorderLayout.EAST, visualOptions);
+
+        JPanel turnPause = new JPanel(new BorderLayout(5, 5));
+        turnPause.add(BorderLayout.WEST, new JLabel("  Pause between turns (ms):"));
+        JTextField turnPauseValue = new JTextField("    200");
+        turnPause.add(BorderLayout.EAST, turnPauseValue);
 
         // Select random seed
-
-        JPanel seedSelect = new JPanel();
-        seedSelect.add(new JLabel("Seed:"));
+        JPanel seedSelect = new JPanel(new BorderLayout(5, 5));
+        seedSelect.add(BorderLayout.WEST, new JLabel("  Seed:"));
         JTextField seedOption = new JTextField("" + System.currentTimeMillis());  // integer of this is seed
         JButton seedRefresh = new JButton("Refresh");
         seedRefresh.addActionListener(e -> seedOption.setText("" + System.currentTimeMillis()));
-        seedSelect.add(seedOption);
-        seedSelect.add(seedRefresh);
+        seedSelect.add(BorderLayout.CENTER, seedOption);
+        seedSelect.add(BorderLayout.EAST, seedRefresh);
 
         // Game run core parameters select
         CoreParameters coreParameters = new CoreParameters();
@@ -220,13 +238,15 @@ public class Frontend extends GUI {
         HashMap<String, JComboBox<Object>> coreParameterValueOptions = new HashMap<>();
         for (String param : coreParameters.getParameterNames()) {
             JPanel paramPanel = new JPanel();
-            paramPanel.add(new JLabel(param));
+            paramPanel.setLayout(new BorderLayout(5, 5));
+            paramPanel.add(BorderLayout.WEST, new JLabel(String.format("  %-40s", param)));
+            paramPanel.add(BorderLayout.CENTER, new JPanel());
             List<Object> values = coreParameters.getPossibleValues(param);
             JComboBox<Object> valueOptions = new JComboBox<>(values.toArray());
             valueOptions.setSelectedItem(coreParameters.getDefaultParameterValue(param));
             coreParameterValueOptions.put(param, valueOptions);
-            paramPanel.add(valueOptions);
-            gameRunParamSelect.add(paramPanel);
+            paramPanel.add(BorderLayout.EAST, valueOptions);
+            gameRunParamSelect.add(leftJustify(paramPanel));
         }
 
         // Empty panel to hold game when play button is pressed
@@ -284,7 +304,11 @@ public class Frontend extends GUI {
                 if (gameRunning != null) {
                     // Reset game instance, passing the players for this game
                     gameRunning.reset(players);
-
+                    try {
+                        gameRunning.setTurnPause(Integer.parseInt(turnPauseValue.getText().trim()));
+                    } catch (NumberFormatException notAnInteger) {
+                        // just proceed without collapsing in a heap
+                    }
                     // Find core parameters
                     for (String param : coreParameterValueOptions.keySet()) {
                         coreParameters.setParameterValue(param, coreParameterValueOptions.get(param).getSelectedItem());
@@ -292,8 +316,6 @@ public class Frontend extends GUI {
                     gameRunning.setCoreParameters(coreParameters);
 
                     AbstractGUIManager gui = (humanInputQueue != null) ? gameType.createGUIManager(gamePanel, gameRunning, humanInputQueue) : null;
-                    // revalidate();
-                    // pack();
                     setFrameProperties();
 
                     guiUpdater = new Timer((int) coreParameters.frameSleepMS, event -> updateGUI(gui, frame));
@@ -324,7 +346,7 @@ public class Frontend extends GUI {
         };
 
         JButton startGame = new JButton("Play!");
-        startGame.setToolTipText("Starts a game (if none running), or Stops a runing game.");
+        startGame.setToolTipText("Starts a game (if none running), or Stops a running game.");
         startGame.addActionListener(e -> {
             started = !started;
             if (started) {
@@ -342,7 +364,6 @@ public class Frontend extends GUI {
                 // if the thread is running and paused (or human to move)
                 // and then take a single action
                 // (as long as it is not a human to move...as in this case the GUI is already in control)
-                System.out.printf("Invoking oneAction from FrontEnd for player %d%n", gameRunning.getGameState().getCurrentPlayer());
                 synchronized (gameRunning) {
                     gameRunning.oneAction();
                     gameRunning.notifyAll();
@@ -350,17 +371,32 @@ public class Frontend extends GUI {
             }
         });
 
-        JButton allActions = new JButton("Show All!");
-        allActions.setToolTipText("Set to either show actions for all players on their turn (All), or just those of a human player (Self).");
+        JButton AIAnalysis = new JButton("AI Window OFF");
+        AIAnalysis.setToolTipText("Click to Toggle. If ON, pop-up window shows AI decision statistics prior to each decision.");
+        AIAnalysis.setEnabled(false);
+        AIAnalysis.addActionListener(e -> {
+            showAIWindow = !showAIWindow;
+            AIAnalysis.setText(showAIWindow ? "AI Window ON" : "AI Window OFF");
+        });
+
+        JButton allActions = new JButton("Showing Self");
+        allActions.setToolTipText("Click to Toggle. Either show actions for all players (All), or just those of a human player (Self).");
         allActions.addActionListener(e -> {
             showAll = !showAll;
-            allActions.setText(showAll ? "Show Self" : "Show All");
+            AIAnalysis.setEnabled(showAll);
+            if (!showAll) {
+                showAIWindow = false;
+                AIAnalysis.setText("AI Window OFF");
+            }
+            allActions.setText(showAll ? "Showing All" : "Showing Self");
         });
+
 
         gameControlButtons.add(startGame);
         gameControlButtons.add(pauseGame);
         gameControlButtons.add(oneAction);
         gameControlButtons.add(allActions);
+        gameControlButtons.add(AIAnalysis);
 
         // todo tournaments, game report, player report etc
 
@@ -368,10 +404,11 @@ public class Frontend extends GUI {
 
         JPanel gameOptionFullPanel = new JPanel();
         gameOptionFullPanel.setLayout(new BoxLayout(gameOptionFullPanel, BoxLayout.Y_AXIS));
-        gameOptionFullPanel.add(gameSelect);
-        gameOptionFullPanel.add(playerSelect);
-        gameOptionFullPanel.add(visualSelect);
-        gameOptionFullPanel.add(seedSelect);
+        gameOptionFullPanel.add(leftJustify(gameSelect));
+        gameOptionFullPanel.add(leftJustify(playerSelect));
+        gameOptionFullPanel.add(leftJustify(visualSelect));
+        gameOptionFullPanel.add(leftJustify(turnPause));
+        gameOptionFullPanel.add(leftJustify(seedSelect));
         gameOptionFullPanel.add(new JSeparator());
         gameOptionFullPanel.add(gameRunParamSelect);
         gameOptionFullPanel.add(new JSeparator());
@@ -410,6 +447,45 @@ public class Frontend extends GUI {
         new Frontend();
     }
 
+    private void initialisePlayerParameterWindow(int playerIndex, int agentIndex) {
+        if (playerParameters[playerIndex] != null) {
+            List<String> paramNames = playerParameters[playerIndex].getParameterNames();
+            HashMap<String, JComboBox<Object>> paramValueOptions = createParameterWindow(paramNames, playerParameters[playerIndex], playerParameterEditWindow[playerIndex]);
+
+            JButton submit = new JButton("Submit");
+            submit.addActionListener(e -> {
+                for (String param : paramNames) {
+                    playerParameters[playerIndex].setParameterValue(param, paramValueOptions.get(param).getSelectedItem());
+                    agentParameters[agentIndex].setParameterValue(param, paramValueOptions.get(param).getSelectedItem());
+                    // we also update the central copy, so this change is inherited by future new players
+                }
+                playerParameterEditWindow[playerIndex].dispose();
+            });
+            JButton reset = new JButton("Reset");
+            reset.addActionListener(e -> {
+                playerParameters[playerIndex].reset();
+                PlayerParameters defaultParams = PlayerType.values()[agentIndex].createParameterSet(0);
+                if (defaultParams != null)
+                    for (String param : paramNames) {
+                        paramValueOptions.get(param).setSelectedItem(defaultParams.getDefaultParameterValue(param));
+                    }
+            });
+            JPanel buttons = new JPanel();
+            buttons.add(submit);
+            buttons.add(reset);
+
+            playerParameterEditWindow[playerIndex].getContentPane().add(buttons);
+        }
+    }
+
+    private Component leftJustify(JPanel panel) {
+        Box b = Box.createHorizontalBox();
+        b.add(panel);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        b.add(Box.createHorizontalGlue());
+        return b;
+    }
+
     private void listenForDecisions() {
         // add a listener to detect every time an action has been taken
         gameRunning.addListener(new IGameListener() {
@@ -430,16 +506,31 @@ public class Frontend extends GUI {
     }
 
     private void updateSampleActions(AbstractGameState state) {
-        if (showAll && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
+        if (showAIWindow && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
             int nextPlayerID = state.getCurrentPlayer();
             AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
-            sampledActionsForNextDecision.clear();
-            Map<core.actions.AbstractAction, Long> temp = IntStream.range(0, actionsToSample).mapToObj(i -> {
-                AbstractGameState copyState = state.copy(nextPlayerID);
-                List<core.actions.AbstractAction> availableActions = gameRunning.getForwardModel().computeAvailableActions(copyState);
-                return nextPlayer.getAction(copyState, availableActions);
-            }).collect(Collectors.groupingBy(action -> action, Collectors.counting()));
-            sampledActionsForNextDecision.putAll(temp);
+            nextPlayer.getAction(state, gameRunning.getForwardModel().computeAvailableActions(state));
+
+            JFrame AI_debug = new JFrame();
+            AI_debug.setTitle(String.format("Player %d, Tick %d, Round %d, Turn %d",
+                    nextPlayerID,
+                    gameRunning.getTick(),
+                    state.getTurnOrder().getRoundCounter(),
+                    state.getTurnOrder().getTurnCounter()));
+            Map<AbstractAction, Map<String, Object>> decisionStats = nextPlayer.getDecisionStats();
+            if (decisionStats.size() > 1) {
+                AITableModel AIDecisions = new AITableModel(nextPlayer.getDecisionStats());
+                JTable table = new JTable(AIDecisions);
+                table.setAutoCreateRowSorter(true);
+                table.setDefaultRenderer(Double.class, (table1, value, isSelected, hasFocus, row, column) -> new JLabel(String.format("%.2f", value)));
+                JScrollPane scrollPane = new JScrollPane(table);
+                table.setFillsViewportHeight(true);
+                AI_debug.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                AI_debug.add(scrollPane);
+                AI_debug.revalidate();
+                AI_debug.pack();
+                AI_debug.setVisible(true);
+            }
         }
     }
 
@@ -450,11 +541,11 @@ public class Frontend extends GUI {
      * @param gui - gui to update.
      */
     private void updateGUI(AbstractGUIManager gui, JFrame frame) {
-        AbstractGameState gameState = gameRunning.getGameState();
+        AbstractGameState gameState = gameRunning.getGameState().copy();
         int currentPlayer = gameState.getCurrentPlayer();
         AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
         if (gui != null && gameState.isNotTerminal()) {
-            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll, sampledActionsForNextDecision);
+            gui.update(player, gameState, gameRunning.isHumanToMove() || showAll);
             if (!gameRunning.isHumanToMove() && paused && showAll) {
                 // in this case we allow a human to override an AI decision
                 try {
@@ -476,13 +567,13 @@ public class Frontend extends GUI {
         HashMap<String, JComboBox<Object>> paramValueOptions = new HashMap<>();
         frame.getContentPane().removeAll();
         for (String param : paramNames) {
-            JPanel paramPanel = new JPanel();
-            paramPanel.add(new JLabel(param));
+            JPanel paramPanel = new JPanel(new BorderLayout());
+            paramPanel.add(BorderLayout.WEST, new JLabel("  " + param));
             List<Object> values = pp.getPossibleValues(param);
             JComboBox<Object> valueOptions = new JComboBox<>(values.toArray());
-            valueOptions.setSelectedItem(pp.getDefaultParameterValue(param));
+            valueOptions.setSelectedItem(pp.getParameterValue(param));
             paramValueOptions.put(param, valueOptions);
-            paramPanel.add(valueOptions);
+            paramPanel.add(BorderLayout.EAST, valueOptions);
             frame.getContentPane().add(paramPanel);
         }
         return paramValueOptions;

@@ -3,9 +3,11 @@ package evaluation;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import games.GameType;
-import org.apache.commons.math3.analysis.function.Abs;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 import java.util.function.IntSupplier;
 import java.util.stream.IntStream;
 
@@ -72,12 +74,12 @@ public class RandomRRTournament extends RoundRobinTournament {
         /**
          * Uses the $famousName algorithm for shuffling an array in situ
          * <p>
-         * the only tweak is to ensure that on the reshuffle we don;t have an overlap of ids within the nPlayer range
+         * the only tweak is to ensure that on the reshuffle we don't have an overlap of ids within the nPlayer range
          */
         private void shuffle() {
-            int[] leastEntries = new int[nPlayers];
-            for (int i = 0; i < nPlayers; i++)
-                leastEntries[i] = currentPermutation[currentPermutation.length - nPlayers + i];
+            int[] leastEntries = new int[nPlayers - 1];
+            for (int i = 0; i < leastEntries.length; i++)
+                leastEntries[i] = currentPermutation[currentPermutation.length - (nPlayers - 1) + i];
             for (int i = 0; i < currentPermutation.length - 1; i++) {
                 int swapPosition = rnd.nextInt(currentPermutation.length - i) + i;
                 if (swapPosition != i && !overlapRisk(i, swapPosition, leastEntries)) {
@@ -89,11 +91,11 @@ public class RandomRRTournament extends RoundRobinTournament {
         }
 
         private boolean overlapRisk(int i1, int i2, int[] lastValues) {
-            // the problem only occurs if we are populating one of the first nPlayer indices (i1), with a value that
-            // is in the last (nPlayer - i1) values of the previous permutation
+            // the problem only occurs if we are populating one of the first (i1) nPlayer indices, with a value that
+            // is in the last (nPlayer - i1 - 1) values of the previous permutation
             if (i1 >= nPlayers) return false;
             if (currentPermutation.length == nPlayers) return false;
-            for (int i = nPlayers - 1; i >= i1; i--) {
+            for (int i = nPlayers - 2; i >= i1; i--) {
                 if (lastValues[i] == currentPermutation[i2]) {
                     return true;
                 }

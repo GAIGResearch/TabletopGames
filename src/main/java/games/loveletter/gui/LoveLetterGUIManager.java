@@ -257,7 +257,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
     }
 
     @Override
-    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState, Map<AbstractAction, Long> sampledActions) {
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
 //            resetActionButtons();
 

@@ -12,8 +12,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.util.*;
 import java.util.List;
 
@@ -72,6 +70,10 @@ public class PandemicBoardView extends JComponent {
     HashMap<String, Rectangle> highlights;
     int maxHighlights = 3;
 
+    ArrayList<Integer> bufferHighlights;
+    HashSet<Integer> playerHighlights;
+    ArrayList<Integer>[] handCardHighlights;
+
     int panX, panY;
 
     public PandemicBoardView(AbstractGameState gs) {
@@ -79,7 +81,7 @@ public class PandemicBoardView extends JComponent {
         this.graphBoard = ((PandemicGameState) gs).getWorld();
         String dataPath = ((PandemicParameters)gs.getGameParameters()).getDataPath() + "img/";
 
-        // Background and card bakcs
+        // Background and card backs
         this.background = ImageIO.GetInstance().getImage(dataPath + ((PropertyString) graphBoard.getProperty(imgHash)).value);
         cardBackInf = ImageIO.GetInstance().getImage(dataPath + "CardBackInfections.png");
         cardBackPD = ImageIO.GetInstance().getImage(dataPath + "CardBackPD.png");
@@ -285,14 +287,28 @@ public class PandemicBoardView extends JComponent {
             g.drawString(((PropertyString)b.getProperty(nameHash)).value, pos.getX(), pos.getY() - nodeSize/2 - playerPawnSize);
         }
 
+        HashSet<String> locationsHighlights = getLocationsHighlighted();
         for (BoardNode b : bList) {
+            String name = ((PropertyString)b.getProperty(nameHash)).value;
             Vector2D poss = ((PropertyVector2D) b.getProperty(coordinateHash)).values;
             Vector2D pos = new Vector2D((int)(poss.getX()*scale) + panX, (int)(poss.getY()*scale) + panY);
 
+            Stroke s = g.getStroke();
+            if (locationsHighlights.contains(name)) {
+                g.setStroke(new BasicStroke(10));
+                g.setColor(new Color(211, 252, 209));
+                g.drawOval(pos.getX() - nodeSize /2, pos.getY() - nodeSize /2, nodeSize, nodeSize);
+            }
+
             g.setColor(Utils.stringToColor(((PropertyColor) b.getProperty(colorHash)).valueStr));
             g.fillOval(pos.getX() - nodeSize /2, pos.getY() - nodeSize /2, nodeSize, nodeSize);
-            g.setColor(new Color(30, 108, 47));
-            g.drawOval(pos.getX() - nodeSize /2, pos.getY() - nodeSize /2, nodeSize, nodeSize);
+
+            if (!locationsHighlights.contains(name)) {
+                g.setColor(new Color(30, 108, 47));
+                g.drawOval(pos.getX() - nodeSize /2, pos.getY() - nodeSize /2, nodeSize, nodeSize);
+            }
+
+            g.setStroke(s);
             g.setColor(Color.black);
 
             // Check if a research stations is here, draw just underneath the node
@@ -311,12 +327,24 @@ public class PandemicBoardView extends JComponent {
             ArrayList<Integer> players = prop.getValues();
             for (int p: players) {
                 // This player is here, draw them just above the node
+
+                // Position
+                int x = pos.getX() + nPlayers * playerPawnSize / 2 - p * playerPawnSize - playerPawnSize /2;
+                int y = pos.getY() - nodeSize /2 - playerPawnSize /2;
+
+                // Highlight
+                Stroke s2 = g.getStroke();
+                if (playerHighlights.contains(p)) {
+                    g.setStroke(new BasicStroke(10));
+                    g.setColor(new Color(211, 252, 209));
+                    g.drawOval(x, y, playerPawnSize, playerPawnSize);
+                }
+                g.setStroke(s2);
+
                 // Find color of player
                 Card playerCard = (Card) gameState.getComponent(PandemicConstants.playerCardHash, p);
                 PropertyColor color = (PropertyColor) playerCard.getProperty(colorHash);
                 g.setColor(Utils.stringToColor(color.valueStr));
-                int x = pos.getX() + nPlayers * playerPawnSize / 2 - p * playerPawnSize - playerPawnSize /2;
-                int y = pos.getY() - nodeSize /2 - playerPawnSize /2;
                 g.fillOval(x, y, playerPawnSize, playerPawnSize);
                 g.setColor(Color.black);
                 g.drawOval(x, y, playerPawnSize, playerPawnSize);
@@ -358,7 +386,7 @@ public class PandemicBoardView extends JComponent {
         // Draw infection rate marker
         Counter infectionRateCounter = (Counter) gameState.getComponent(PandemicConstants.infectionRateHash);
         int idx = infectionRateCounter.getValue();
-        int[] infectionArray = ((PandemicParameters)gameState.getGameParameters()).getInfection_rate();
+        int[] infectionArray = ((PandemicParameters)gameState.getGameParameters()).getInfectionRate();
 
         g.setFont(labelFontS);
         for (int i = 0; i < infectionArray.length; i++) {
@@ -487,6 +515,32 @@ public class PandemicBoardView extends JComponent {
     }
 
     public HashMap<String, Rectangle> getHighlights() {
+        return highlights;
+    }
+
+    public void setBufferHighlights(ArrayList<Integer> bufferHighlights) {
+        this.bufferHighlights = bufferHighlights;
+    }
+
+    public void setPlayerHighlights(HashSet<Integer> playerHighlights) {
+        this.playerHighlights = playerHighlights;
+    }
+
+    public void setCardHandHighlights(ArrayList<Integer>[] handCardHighlights) {
+        this.handCardHighlights = handCardHighlights;
+    }
+
+    public HashSet<String> getLocationsHighlighted() {
+        HashSet<String> highlights = new HashSet<>();
+        for (int i = 0; i < handCardHighlights.length; i++) {
+            if (handCardHighlights[i].size() > 0) {
+                Deck<Card> handCards = (Deck<Card>) gameState.getComponent(playerHandHash, i);
+                for (int j : handCardHighlights[i]) {
+                    if (j < handCards.getSize())
+                        highlights.add(((PropertyString) handCards.get(j).getProperty(nameHash)).value);
+                }
+            }
+        }
         return highlights;
     }
 }

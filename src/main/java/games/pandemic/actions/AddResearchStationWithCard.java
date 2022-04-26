@@ -15,26 +15,28 @@ import static core.CoreConstants.playerHandHash;
 
 public class AddResearchStationWithCard extends AddResearchStation {
 
-    private int cardIdx;
+    private final int deckFrom, deckTo, cardIdx;
     private int cardId;
     private boolean executed;
 
-    public AddResearchStationWithCard(String city, int cardIdx) {
+    public AddResearchStationWithCard(String city, int deckFrom, int deckTo, int cardIdx) {
         super(city);
         this.cardIdx = cardIdx;
+        this.deckFrom = deckFrom;
+        this.deckTo = deckTo;
     }
 
     public boolean execute(AbstractGameState gs) {
         executed = true;
-        Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
-        Deck<Card> discardPile = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerDeckDiscardHash);
-        cardId = playerHand.getComponents().get(cardIdx).getComponentID();
-        return super.execute(gs) & new DrawCard(playerHand.getComponentID(), discardPile.getComponentID(), cardIdx).execute(gs);
+        Deck<Card> deck = (Deck<Card>) gs.getComponentById(deckFrom);
+        cardId = deck.getComponents().get(cardIdx).getComponentID();
+        return super.execute(gs) & new DrawCard(deckFrom, deckTo, cardIdx).execute(gs);
     }
 
     public Card getCard(AbstractGameState gs) {
         if (!executed) {
-            Deck<Card> deck = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
+            if (cardIdx == -1) return null;
+            Deck<Card> deck = (Deck<Card>) gs.getComponentById(deckFrom);
             return deck.getComponents().get(cardIdx);
         }
         return (Card) gs.getComponentById(cardId);
@@ -56,7 +58,7 @@ public class AddResearchStationWithCard extends AddResearchStation {
 
     @Override
     public AbstractAction copy() {
-        return new AddResearchStationWithCard(this.city, this.cardIdx);
+        return new AddResearchStationWithCard(this.city, deckFrom, deckTo, this.cardIdx);
     }
 
     @Override
