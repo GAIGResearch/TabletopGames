@@ -468,13 +468,27 @@ public class CatanGameState extends AbstractGameState {
         }
         return true;
     }
+/*
+    protected CatanTile[][] board;
+    protected Graph<Settlement, Road> catanGraph;
+    protected Card boughtDevCard; // used to keep a reference to a dev card bought in the current turn to avoid playing it
+    protected int scores[]; // score for each player
+    protected int victoryPoints[]; // secret points from victory cards
+    protected int knights[]; // knight count for each player
+    protected int exchangeRates[][]; // exchange rate with bank for each resource
+    protected int largestArmy; // playerID of the player currently holding the largest army
+    protected int longestRoad; // playerID of the player currently holding the longest road
+    protected int longestRoadLength;
+    protected OfferPlayerTrade currentTradeOffer; // Holds the current trade offer to allow access between players TODO make primitive
+    int rollValue;
+    */
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        // todo check if has anything else
         CatanGameState copy = new CatanGameState(getGameParameters(), getNPlayers());
         copy.gamePhase = gamePhase;
         copy.board = copyBoard();
+        copy.boughtDevCard = boughtDevCard.copy();
         copy.catanGraph = catanGraph.copy();
         copy.areas = copyAreas();
         copy.gameStatus = gameStatus;
@@ -486,7 +500,9 @@ public class CatanGameState extends AbstractGameState {
             copy.exchangeRates[i] = exchangeRates[i].clone();
         }
         copy.victoryPoints = victoryPoints.clone();
-        copy.longestRoadLength = longestRoad;
+        copy.longestRoadLength = longestRoadLength;
+        copy.largestArmy = largestArmy;
+        copy.longestRoad = longestRoad;
         copy.rollValue = rollValue;
         if (currentTradeOffer == null){
             copy.currentTradeOffer = null;
