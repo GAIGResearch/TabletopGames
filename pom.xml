@@ -10,6 +10,8 @@
         <java.version>8</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.test.skip>true</maven.test.skip>
+        <build.documentation>www.tabletopgames.ai/wiki/maven</build.documentation>
     </properties>
 
     <groupId>ai.tabletopgames</groupId>
