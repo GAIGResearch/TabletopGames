@@ -76,6 +76,12 @@ public class RHEAIndividual implements Comparable {
         return 0;
     }
 
+    /**
+     * Repairs this individual by advancing through every action and checking if it's valid.
+     * If an illegal action is found, a new one is picked randomly from all available actions.
+     * @param fm forward model
+     * @return number of calls to the fm.next() function
+     */
     public int repair(AbstractForwardModel fm)
     {
         int fmCalls = 0;
@@ -90,6 +96,11 @@ public class RHEAIndividual implements Comparable {
         return fmCalls;
     }
 
+    /**
+     * Evaluates the individuals score
+     * @param playerID ID of player, used in state evaluation
+     * @return number of calls to the fm.next() function
+     */
     private double evaluate(int playerID)
     {
         double delta = 0;
@@ -108,6 +119,7 @@ public class RHEAIndividual implements Comparable {
 
     /**
      * Performs a rollout with random actions from startIndex to endIndex in the individual, from root game state gs.
+     * Starts by repairing the full individual, then mutates it, and finally evaluates it.
      * Evaluates the final state reached and returns the number of calls to the FM.next() function.
      * @param gs - root game state from which to start rollout
      * @param fm - forward model
