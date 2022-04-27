@@ -104,6 +104,7 @@ public class RHEAIndividual implements Comparable {
     private double evaluate(int playerID)
     {
         double delta = 0;
+        double previousScore = 0;
         for (int i = 0; i < length; i++) {
             double score;
             if (this.heuristic != null){
@@ -111,8 +112,8 @@ public class RHEAIndividual implements Comparable {
             } else {
                 score = gameStates[i+1].getGameScore(playerID);
             }
-
-            delta += Math.pow(discountFactor, i) * score;
+            delta += Math.pow(discountFactor, i) * (score - previousScore);
+            previousScore = score;
         }
         return delta;
     }
