@@ -176,6 +176,10 @@ public class CatanForwardModel extends AbstractForwardModel {
             // reset recently bought dev card to null
             gs.boughtDevCard = null;
             rollDiceAndAllocateResources(gs);
+            if (gs.getRollValue() == 7)
+                gs.setGamePhase(CatanGameState.CatanGamePhase.Robber);
+            else
+                gs.setGamePhase(CatanGameState.CatanGamePhase.Trade);
         }
 
     }
@@ -189,7 +193,10 @@ public class CatanForwardModel extends AbstractForwardModel {
         CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
         cto.logEvent(() -> "Dice roll of " + value, gs);
         CatanTile[][] board = gs.getBoard();
-        if (value != 7) {
+        if (value == 7) {
+            // Dice roll was 7 so we change the phase
+            gs.setGamePhase(CatanGameState.CatanGamePhase.Robber);
+        } else {
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
@@ -228,12 +235,7 @@ public class CatanForwardModel extends AbstractForwardModel {
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
         CatanGameState cgs = (CatanGameState) gameState;
-        if (cgs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main) {
-            // special case -> rolling only happens in the Main phase
-            ((CatanTurnOrder) cgs.getTurnOrder()).endTurnStage(cgs);
-        }
         if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Setup) {
             return CatanActionFactory.getSetupActions(cgs);
         }
