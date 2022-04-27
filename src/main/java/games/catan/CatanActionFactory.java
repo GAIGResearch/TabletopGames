@@ -126,10 +126,11 @@ public class CatanActionFactory {
     static List<AbstractAction> getAcceptTradeActions(CatanGameState gs) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
-        int[] resources = gs.getPlayerResources(gs.getCurrentPlayer());
+        int[] resources = gs.getPlayerResources(offeredPlayerTrade.otherPlayerID);
 
         if (CatanGameState.checkCost(resources, offeredPlayerTrade.getResourcesRequested())) {
-            actions.add(new AcceptTrade(offeredPlayerTrade.offeringPlayerID, offeredPlayerTrade.otherPlayerID, offeredPlayerTrade.resourcesRequested, offeredPlayerTrade.resourcesOffered));
+            actions.add(new AcceptTrade(offeredPlayerTrade.offeringPlayerID, offeredPlayerTrade.otherPlayerID,
+                    offeredPlayerTrade.resourcesRequested, offeredPlayerTrade.resourcesOffered));
         }
 
         return actions;

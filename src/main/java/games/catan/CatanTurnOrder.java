@@ -11,7 +11,7 @@ import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class CatanTurnOrder extends ReactiveTurnOrder {
     protected int turnStep;
-    protected int actionsTakenInCurrentStage = 0;
+    protected int actionsTakenInCurrentStage;
     protected boolean developmentCardPlayed; // Tracks whether a player has played a development card this turn
     private IGamePhase nextGamePhase; // tracks the game phase where it should be reset after a reaction
 
@@ -26,6 +26,8 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         super._reset();
         turnStep = 0;
         nextGamePhase = AbstractGameState.DefaultGamePhase.Main;
+        actionsTakenInCurrentStage = 0;
+        developmentCardPlayed = false;
     }
 
     @Override
@@ -88,13 +90,15 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         // We finish the overall Trade/TradeReaction pair once we run out of actions (and a Trade has been terminated either
         // with an EndNegotiation or an AcceptTrade action. If we still have actions left, then we
         // can initiate another Trade
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Trade) || gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Trade)) {
             if (actionsTakenInCurrentStage++ >= ((CatanParameters) gameState.getGameParameters()).max_trade_actions_allowed) {
                 setGamePhase(CatanGameState.CatanGamePhase.Build, gameState);
-            } else {
-                gameState.setGamePhase(CatanGameState.CatanGamePhase.Trade);
-                // this deliberately does not use the local setGamePhase method to avoid resetting actionsTakenInCurrentStage
             }
+            return;
+        }
+        if (gamePhase == CatanGameState.CatanGamePhase.TradeReaction) {
+            nextGamePhase = CatanGameState.CatanGamePhase.Trade;
+            endReaction(gameState);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Build)) {
@@ -112,12 +116,12 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         }
 
         if (gamePhase.equals(CatanGameState.CatanGamePhase.PlaceRoad)) {
-            endPlayerTurn(gameState);
+            // endPlayerTurn(gameState);
             setGamePhase(nextGamePhase, gameState);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Steal)) {
-            endPlayerTurn(gameState);
+            // endPlayerTurn(gameState);
             setGamePhase(CatanGameState.CatanGamePhase.Trade, gameState);
             return;
         }
