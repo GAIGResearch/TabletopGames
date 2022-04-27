@@ -70,7 +70,7 @@ public class DefaultTrade extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Trade getting 1" + resourceToGet + " in exchange of " +  exchangeRate + " " + resourceOffer;
+        return "Trade getting 1 " + resourceToGet + " in exchange for " +  exchangeRate + " " + resourceOffer;
     }
 
     @Override

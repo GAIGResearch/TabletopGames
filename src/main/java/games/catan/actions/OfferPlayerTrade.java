@@ -2,7 +2,9 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.catan.CatanConstants;
 import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 import games.catan.CatanParameters.Resources;
 
 import java.util.Arrays;
@@ -58,10 +60,22 @@ public class OfferPlayerTrade extends AbstractAction {
 
     @Override
     public String toString() {
-        //todo expand this string method
-        return "Player " + offeringPlayerID + " offering trade to player "
-                + otherPlayerID;
+        return String.format("Player %d offers trade to player %d : %s for %s", offeringPlayerID, otherPlayerID,
+                resourceArrayToString(resourcesOffered), resourceArrayToString(resourcesRequested));
     }
+
+    public static String resourceArrayToString(int[] resources) {
+        StringBuilder retValue = new StringBuilder();
+        for (int i = 0; i < resources.length; i++) {
+            if (resources[i] > 0) {
+                if (retValue.length() > 0)
+                    retValue.append(", ");
+                retValue.append(resources[i]).append(" ").append(Resources.values()[i]);
+            }
+        }
+        return retValue.toString();
+    }
+
     @Override
     public String getString(AbstractGameState gameState) {
         return toString();

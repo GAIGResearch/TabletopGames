@@ -37,8 +37,6 @@ public class PlaceSettlementWithRoad extends AbstractAction {
         BuildSettlement buildSettlement  = new BuildSettlement(x,y,i,player,true);
         BuildRoad buildRoad = new BuildRoad(x,y,i,player,true);
 
-        String test = this.getString(gs);
-
         if (buildSettlement.execute(gs) && buildRoad.execute(gs)){
             // players get the resources in the second round after the settlements they placed
             if (gs.getTurnOrder().getRoundCounter() == 1){

@@ -22,8 +22,8 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        if(CatanGameState.swapResources((CatanGameState) gs, receivingPlayer, offeringPlayer, resourcesRequested, resourcesOffered)){
-           return true;
+        if (CatanGameState.swapResources((CatanGameState) gs, receivingPlayer, offeringPlayer, resourcesRequested, resourcesOffered)) {
+            return true;
         } else {
             throw new AssertionError("A partner did not have sufficient resources");
         }
@@ -37,9 +37,9 @@ public class AcceptTrade extends AbstractAction {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (obj instanceof AcceptTrade){
-            AcceptTrade otherAction = (AcceptTrade)obj;
-            return otherAction.offeringPlayer==offeringPlayer
+        if (obj instanceof AcceptTrade) {
+            AcceptTrade otherAction = (AcceptTrade) obj;
+            return otherAction.offeringPlayer == offeringPlayer
                     && otherAction.receivingPlayer == receivingPlayer
                     && Arrays.equals(otherAction.resourcesRequested, resourcesRequested)
                     && Arrays.equals(otherAction.resourcesOffered, resourcesOffered);
@@ -49,7 +49,7 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public int hashCode() {
-        int retValue = Objects.hash(offeringPlayer,receivingPlayer);
+        int retValue = Objects.hash(offeringPlayer, receivingPlayer);
         return retValue + 41 * Arrays.hashCode(resourcesOffered) + 163 * Arrays.hashCode(resourcesRequested);
     }
 
@@ -60,7 +60,7 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Player " + offeringPlayer + " trading" + Arrays.toString(resourcesOffered) + " for " + Arrays.toString(resourcesRequested) + " with Player "
-                + receivingPlayer;
+        return String.format("Player %s accepts trade offered by %d : %s for %s ", receivingPlayer, offeringPlayer,
+                OfferPlayerTrade.resourceArrayToString(resourcesRequested), OfferPlayerTrade.resourceArrayToString(resourcesOffered));
     }
 }

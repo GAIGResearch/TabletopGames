@@ -102,7 +102,7 @@ public class BuildSettlement extends AbstractAction {
 
     @Override
     public String toString() {
-        return "BuildSettlement x= " + x + " y= " + y + " vertex=" + vertex + " free =" + free;
+        return "BuildSettlement x= " + x + " y= " + y + " vertex= " + vertex + " free= " + free;
     }
 
     @Override
