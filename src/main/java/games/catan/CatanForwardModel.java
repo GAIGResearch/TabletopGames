@@ -159,18 +159,20 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         // prevents multiple DoNothing actions with multi-action turn stages
-        if (action instanceof DoNothing
-                && (gs.getGamePhase() == CatanGameState.CatanGamePhase.Trade
-                || gs.getGamePhase() == CatanGameState.CatanGamePhase.Build)) {
+        if (action instanceof DoNothing &&
+            //    (gs.getGamePhase() == CatanGameState.CatanGamePhase.Trade ||
+                 gs.getGamePhase() == CatanGameState.CatanGamePhase.Build) {
             cto.skipTurnStage(gs);
         }
 
-        // end player's turn; roll dice and allocate resources
-        cto.endTurnStage(gs);
-
         if (action instanceof OfferPlayerTrade) {
             cto.handleTradeOffer(gs, ((OfferPlayerTrade) action).otherPlayerID);
+            // we then skip the endTurn stuff until this negotiation comes to an end
+        } else {
+            // end player's turn; roll dice and allocate resources
+            cto.endTurnStage(gs);
         }
+
 
         if (gs.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {
             // reset recently bought dev card to null

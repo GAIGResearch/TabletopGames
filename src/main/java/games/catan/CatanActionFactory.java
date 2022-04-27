@@ -114,7 +114,7 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
 
-        actions.add(new DoNothing()); // rejects the trade offer
+        actions.add(new EndNegotiation()); // rejects the trade offer
         if (offeredPlayerTrade.getNegotiationCount() < ((CatanParameters) gs.getGameParameters()).max_negotiation_count + 1) { // check that the maximum number of negotiations has not been exceeded to prevent AI looping
             actions.addAll(getResponsePlayerTradeOfferActions(gs));
         }
@@ -124,7 +124,7 @@ public class CatanActionFactory {
     }
 
     static List<AbstractAction> getAcceptTradeActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
         int[] resources = gs.getPlayerResources(gs.getCurrentPlayer());
 
@@ -144,7 +144,7 @@ public class CatanActionFactory {
      * @return
      */
     static List<AbstractAction> getResponsePlayerTradeOfferActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
         int exchangeRate = ((CatanParameters) gs.getGameParameters()).default_exchange_rate;
         int[] playerResources = gs.getPlayerResources(gs.getCurrentPlayer());
@@ -169,7 +169,7 @@ public class CatanActionFactory {
                 if (!(quantityAvailableToOfferIndex == resourcesRequested[resourceRequestedIndex] && quantityAvailableToRequestIndex == resourcesOffered[resourceOfferedIndex])) {
                     resourcesToOffer[resourceRequestedIndex] += quantityAvailableToOfferIndex; // add the amount of resources to offer to the list
                     resourcesToRequest[resourceOfferedIndex] += quantityAvailableToRequestIndex; // add the amount of resources to request to the list
-                    if (!(resourcesToOffer.equals(resourcesRequested) && resourcesToRequest.equals(resourcesOffered))) { // ensures the trade offer is not the same as the existing trade offer
+                    if (!(Arrays.equals(resourcesToOffer, resourcesRequested) && Arrays.equals(resourcesToRequest, resourcesOffered))) { // ensures the trade offer is not the same as the existing trade offer
                         actions.add(new OfferPlayerTrade(resourcesToOffer.clone(), resourcesToRequest.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount() + 1)); // create the action
                     }
                     Arrays.fill(resourcesToOffer, 0);

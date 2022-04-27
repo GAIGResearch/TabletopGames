@@ -44,6 +44,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
      * By default it resets the turnStep counter to 0 and increases the turn counter.
      * Then moves to the next alive player. If this is the last player, the round ends.
      * If the game has ended, turn owner is not changed. If there are no players still playing, game ends and method returns.
+     *
      * @param gameState - current game state.
      */
     @Override
@@ -59,11 +60,11 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         }
     }
 
-    public void endReaction(AbstractGameState gs){
+    public void endReaction(AbstractGameState gs) {
         reactivePlayers.poll();
-        if (reactionsFinished()){
+        if (reactionsFinished()) {
             // discard only happens when a knight card has been played or a 7 has been rolled
-            if (gs.getGamePhase().equals(CatanGameState.CatanGamePhase.Discard)){
+            if (gs.getGamePhase().equals(CatanGameState.CatanGamePhase.Discard)) {
                 setGamePhase(CatanGameState.CatanGamePhase.Steal, gs);
             } else {
                 // should only happen from a trade reaction
@@ -73,54 +74,56 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
     }
 
     // todo check if transitions are correct in all cases
-    public void endTurnStage(AbstractGameState gameState){
+    public void endTurnStage(AbstractGameState gameState) {
         /* Robber -> Discard
            Trade -> Build
         *  */
         IGamePhase gamePhase = gameState.getGamePhase();
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Robber)){
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Robber)) {
             nextGamePhase = gamePhase;
             setGamePhase(CatanGameState.CatanGamePhase.Discard, gameState);
-            ((CatanTurnOrder)gameState.getTurnOrder()).addAllReactivePlayers(gameState);
+            ((CatanTurnOrder) gameState.getTurnOrder()).addAllReactivePlayers(gameState);
             return;
         }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Trade)){
-            if(actionsTakenInCurrentStage++==((CatanParameters)gameState.getGameParameters()).max_trade_actions_allowed){
+        // We finish the overall Trade/TradeReaction pair once we run out of actions (and a Trade has been terminated either
+        // with an EndNegotiation or an AcceptTrade action. If we still have actions left, then we
+        // can initiate another Trade
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Trade) || gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
+            if (actionsTakenInCurrentStage++ >= ((CatanParameters) gameState.getGameParameters()).max_trade_actions_allowed) {
                 setGamePhase(CatanGameState.CatanGamePhase.Build, gameState);
+            } else {
+                gameState.setGamePhase(CatanGameState.CatanGamePhase.Trade);
+                // this deliberately does not use the local setGamePhase method to avoid resetting actionsTakenInCurrentStage
             }
             return;
         }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Build)){
-            if(actionsTakenInCurrentStage++==((CatanParameters)gameState.getGameParameters()).max_build_actions_allowed){
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Build)) {
+            if (actionsTakenInCurrentStage++ == ((CatanParameters) gameState.getGameParameters()).max_build_actions_allowed) {
                 endPlayerTurn(gameState);
                 gameState.setMainGamePhase();
             }
             return;
         }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Discard)){
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Discard)) {
             endReaction(gameState);
             if (reactionsFinished())
                 setGamePhase(CatanGameState.CatanGamePhase.Steal, gameState);
             return;
         }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
-            nextGamePhase = CatanGameState.CatanGamePhase.Build;
-            endReaction(gameState);
-            return;
-        }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.PlaceRoad)){
+
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.PlaceRoad)) {
             endPlayerTurn(gameState);
             setGamePhase(nextGamePhase, gameState);
             return;
         }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Steal)){
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Steal)) {
             endPlayerTurn(gameState);
             setGamePhase(CatanGameState.CatanGamePhase.Trade, gameState);
             return;
         }
-        if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
+        if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)) {
             endPlayerTurn(gameState);
-            if (getRoundCounter() >= 2){
+            if (getRoundCounter() >= 2) {
                 // After 2 rounds of setup the main game phase starts
                 gameState.setMainGamePhase();
             }
@@ -132,17 +135,17 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         actionsTakenInCurrentStage = 0;
     }
 
-    public void handleTradeOffer(CatanGameState gameState, int player){
+    public void handleTradeOffer(CatanGameState gameState, int player) {
         gameState.setGamePhase(CatanGameState.CatanGamePhase.TradeReaction);
         addReactivePlayer(player);
     }
 
     // Skips remaining actions in turn stage, called for DoNothing actions in multi-action turn stages
-    public void skipTurnStage(CatanGameState gameState){
-        if(gameState.getGamePhase()== CatanGameState.CatanGamePhase.Trade){
-            actionsTakenInCurrentStage = ((CatanParameters)gameState.getGameParameters()).max_trade_actions_allowed;
+    public void skipTurnStage(CatanGameState gameState) {
+        if (gameState.getGamePhase() == CatanGameState.CatanGamePhase.Trade) {
+            actionsTakenInCurrentStage = ((CatanParameters) gameState.getGameParameters()).max_trade_actions_allowed;
         } else {
-            actionsTakenInCurrentStage = ((CatanParameters)gameState.getGameParameters()).max_build_actions_allowed;
+            actionsTakenInCurrentStage = ((CatanParameters) gameState.getGameParameters()).max_build_actions_allowed;
         }
     }
 
@@ -159,6 +162,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
      * Method executed after all player turns.
      * By default it resets the turn counter, the turn owner to the first alive player and increases round counter.
      * If maximum number of rounds reached, game ends.
+     *
      * @param gameState - current game state.
      */
     public void endRound(AbstractGameState gameState) {
