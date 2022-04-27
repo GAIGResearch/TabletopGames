@@ -64,10 +64,10 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         if (reactionsFinished()){
             // discard only happens when a knight card has been played or a 7 has been rolled
             if (gs.getGamePhase().equals(CatanGameState.CatanGamePhase.Discard)){
-                gs.setGamePhase(CatanGameState.CatanGamePhase.Steal);
+                setGamePhase(CatanGameState.CatanGamePhase.Steal, gs);
             } else {
                 // should only happen from a trade reaction
-                gs.setGamePhase(nextGamePhase);
+                setGamePhase(nextGamePhase, gs);
             }
         }
     }
@@ -78,29 +78,20 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
            Trade -> Build
         *  */
         IGamePhase gamePhase = gameState.getGamePhase();
-        if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
-            if (((CatanGameState)gameState).getRollValue() == 7){
-                gameState.setGamePhase(CatanGameState.CatanGamePhase.Robber);
-            } else {
-                gameState.setGamePhase(CatanGameState.CatanGamePhase.Trade);
-            }
-        }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Robber)){
             nextGamePhase = gamePhase;
-            gameState.setGamePhase(CatanGameState.CatanGamePhase.Discard);
+            setGamePhase(CatanGameState.CatanGamePhase.Discard, gameState);
             ((CatanTurnOrder)gameState.getTurnOrder()).addAllReactivePlayers(gameState);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Trade)){
             if(actionsTakenInCurrentStage++==((CatanParameters)gameState.getGameParameters()).max_trade_actions_allowed){
-                actionsTakenInCurrentStage=0;
-                gameState.setGamePhase(CatanGameState.CatanGamePhase.Build);
+                setGamePhase(CatanGameState.CatanGamePhase.Build, gameState);
             }
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Build)){
             if(actionsTakenInCurrentStage++==((CatanParameters)gameState.getGameParameters()).max_build_actions_allowed){
-                actionsTakenInCurrentStage=0;
                 endPlayerTurn(gameState);
                 gameState.setMainGamePhase();
             }
@@ -109,7 +100,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Discard)){
             endReaction(gameState);
             if (reactionsFinished())
-                gameState.setGamePhase(CatanGameState.CatanGamePhase.Steal);
+                setGamePhase(CatanGameState.CatanGamePhase.Steal, gameState);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.TradeReaction)) {
@@ -119,12 +110,12 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.PlaceRoad)){
             endPlayerTurn(gameState);
-            gameState.setGamePhase(nextGamePhase);
+            setGamePhase(nextGamePhase, gameState);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Steal)){
             endPlayerTurn(gameState);
-            gameState.setGamePhase(CatanGameState.CatanGamePhase.Trade);
+            setGamePhase(CatanGameState.CatanGamePhase.Trade, gameState);
             return;
         }
         if (gamePhase.equals(CatanGameState.CatanGamePhase.Setup)){
@@ -134,6 +125,11 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
                 gameState.setMainGamePhase();
             }
         }
+    }
+
+    protected void setGamePhase(IGamePhase phase, AbstractGameState state) {
+        state.setGamePhase(phase);
+        actionsTakenInCurrentStage = 0;
     }
 
     public void handleTradeOffer(CatanGameState gameState, int player){

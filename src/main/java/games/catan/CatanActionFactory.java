@@ -59,7 +59,7 @@ public class CatanActionFactory {
     static List<AbstractAction> getTradeStageActions(CatanGameState gs) {
         CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
 
-        ArrayList<AbstractAction> actions = new ArrayList();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         actions.add(new DoNothing());
         actions.addAll(getTradeActions(gs));
         actions.addAll(getPlayerTradeOfferActions(gs));
@@ -92,15 +92,11 @@ public class CatanActionFactory {
                     if (resources[resourceToOfferIndex] > 0) { // don't continue if the player has none of the current resource
                         for (int resourceToRequestIndex = 0; resourceToRequestIndex < resources.length; resourceToRequestIndex++) { // loop through current players resources to request
                             if (resourceToRequestIndex != resourceToOfferIndex) { // exclude the currently offered resource
-                                for (int quantityAvailableToOfferIndex = 1; quantityAvailableToOfferIndex < resources[resourceToOfferIndex] + 1; quantityAvailableToOfferIndex++) { // loop through the quantity of resources to offer
-                                    for (int quantityAvailableToRequestIndex = 1; quantityAvailableToRequestIndex < (exchangeRate * quantityAvailableToOfferIndex) - (quantityAvailableToOfferIndex - 1); quantityAvailableToRequestIndex++) { // loop to generate all possible combinations of offer for the current resource pair
-                                        for (int quantityToOffer = 1; quantityToOffer < (quantityAvailableToOfferIndex + 1); quantityToOffer++) { // add the amount of resources to offer to the list
-                                            resourcesOffered[resourceToOfferIndex]++;
-                                        }
-                                        for (int quantityToRequest = 1; quantityToRequest < (quantityAvailableToRequestIndex + 1); quantityToRequest++) { // add the amount of resources to request to the list
-                                            resourcesRequested[resourceToRequestIndex]++;
-                                        }
-                                        actions.add(new OfferPlayerTrade(resourcesOffered.clone(), resourcesRequested.clone(), currentPlayer, playerIndex,0)); // create the action
+                                for (int quantityToOffer = 1; quantityToOffer < Math.min(3, resources[resourceToOfferIndex]) + 1; quantityToOffer++) { // loop through the quantity of resources to offer
+                                    for (int quantityToRequest = 1; quantityToRequest < (exchangeRate * quantityToOffer) - (quantityToOffer - 1); quantityToRequest++) { // loop to generate all possible combinations of offer for the current resource pair
+                                        resourcesOffered[resourceToOfferIndex] += quantityToOffer;
+                                        resourcesRequested[resourceToRequestIndex] += quantityToRequest;
+                                        actions.add(new OfferPlayerTrade(resourcesOffered.clone(), resourcesRequested.clone(), currentPlayer, playerIndex, 0)); // create the action
                                         Arrays.fill(resourcesOffered, 0);
                                         Arrays.fill(resourcesRequested, 0);
                                     }
@@ -174,7 +170,7 @@ public class CatanActionFactory {
                     resourcesToOffer[resourceRequestedIndex] += quantityAvailableToOfferIndex; // add the amount of resources to offer to the list
                     resourcesToRequest[resourceOfferedIndex] += quantityAvailableToRequestIndex; // add the amount of resources to request to the list
                     if (!(resourcesToOffer.equals(resourcesRequested) && resourcesToRequest.equals(resourcesOffered))) { // ensures the trade offer is not the same as the existing trade offer
-                        actions.add(new OfferPlayerTrade(resourcesToOffer.clone(), resourcesToRequest.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount()+1)); // create the action
+                        actions.add(new OfferPlayerTrade(resourcesToOffer.clone(), resourcesToRequest.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount() + 1)); // create the action
                     }
                     Arrays.fill(resourcesToOffer, 0);
                     Arrays.fill(resourcesToRequest, 0);
@@ -243,7 +239,7 @@ public class CatanActionFactory {
             int r = n / 2; // remove half of the resources
             if (deckSize < DISCARD_COMBINATION_LIMIT) {
                 int[] resources = new int[5];
-                playerResourceDeck.stream().forEach(card -> resources[CatanParameters.Resources.valueOf(card.getProperty(cardType).toString()).ordinal()]+=1);
+                playerResourceDeck.stream().forEach(card -> resources[CatanParameters.Resources.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1);
                 List<int[]> combinations = new ArrayList<>();
                 //TODO identify which combinations method is faster
 //                for( int brickIndex = 0; brickIndex <= resources[0]; brickIndex++){
@@ -282,35 +278,35 @@ public class CatanActionFactory {
 //                    }
 //                }
 
-                for( int brickIndex = resources[0]; brickIndex >= 0; brickIndex--){
-                    if(brickIndex == r){
+                for (int brickIndex = resources[0]; brickIndex >= 0; brickIndex--) {
+                    if (brickIndex == r) {
                         combinations.add(new int[]{brickIndex, 0, 0, 0, 0});
                     }
-                    if(brickIndex >= r){
+                    if (brickIndex >= r) {
                         continue;
                     }
-                    for( int lumberIndex = resources[1]; lumberIndex >= 0; lumberIndex--){
+                    for (int lumberIndex = resources[1]; lumberIndex >= 0; lumberIndex--) {
                         if (brickIndex + lumberIndex == r) {
                             combinations.add(new int[]{brickIndex, lumberIndex, 0, 0, 0});
                         }
                         if (brickIndex + lumberIndex >= r) {
                             continue;
                         }
-                        for( int oreIndex = resources[2]; oreIndex >= 0; oreIndex--){
+                        for (int oreIndex = resources[2]; oreIndex >= 0; oreIndex--) {
                             if (brickIndex + lumberIndex + oreIndex == r) {
                                 combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, 0, 0});
                             }
                             if (brickIndex + lumberIndex + oreIndex >= r) {
                                 continue;
                             }
-                            for( int grainIndex = resources[3]; grainIndex >= 0; grainIndex--){
+                            for (int grainIndex = resources[3]; grainIndex >= 0; grainIndex--) {
                                 if (brickIndex + lumberIndex + oreIndex + grainIndex == r) {
                                     combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, grainIndex, 0});
                                 }
                                 if (brickIndex + lumberIndex + oreIndex + grainIndex >= r) {
                                     continue;
                                 }
-                                for( int woolIndex = resources[4]; woolIndex >= 0; woolIndex--){
+                                for (int woolIndex = resources[4]; woolIndex >= 0; woolIndex--) {
                                     if (brickIndex + lumberIndex + oreIndex + grainIndex + woolIndex == r) {
                                         combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, grainIndex, woolIndex});
                                     } else if (brickIndex + lumberIndex + oreIndex + grainIndex + woolIndex < r) {
@@ -322,11 +318,11 @@ public class CatanActionFactory {
                     }
                 }
                 CatanParameters.Resources[] values = CatanParameters.Resources.values();
-                for (int[] combination : combinations){
+                for (int[] combination : combinations) {
                     CatanParameters.Resources[] cardsToDiscard = new CatanParameters.Resources[r];
                     int counter = 0;
-                    for (int i = 0; i < combination.length; i++){
-                        for (int k = 0; k < combination[i]; k++){
+                    for (int i = 0; i < combination.length; i++) {
+                        for (int k = 0; k < combination[i]; k++) {
                             cardsToDiscard[counter] = values[i];
                             counter++;
                         }
@@ -338,18 +334,18 @@ public class CatanActionFactory {
                 Random rnd = new Random();
                 CatanParameters.Resources[] cardsToDiscard = new CatanParameters.Resources[r];
                 int[] combination = new int[r];
-                for(int i = 0; i < combination.length; i++){
+                for (int i = 0; i < combination.length; i++) {
                     boolean comb_not_set = true;
-                    while(comb_not_set){
+                    while (comb_not_set) {
                         int temp = rnd.nextInt(deckSize);
-                        if(Arrays.stream(combination).sequential().noneMatch(value -> value == temp)){
+                        if (Arrays.stream(combination).sequential().noneMatch(value -> value == temp)) {
                             combination[i] = temp;
                             comb_not_set = false;
                         }
                     }
                 }
-                for (int i = 0; i < r; i++){
-                    cardsToDiscard[i]= CatanParameters.Resources.valueOf(playerResourceDeck.get(combination[i]).getProperty(CatanConstants.cardType).toString());
+                for (int i = 0; i < r; i++) {
+                    cardsToDiscard[i] = CatanParameters.Resources.valueOf(playerResourceDeck.get(combination[i]).getProperty(CatanConstants.cardType).toString());
                 }
                 actions.add(new DiscardCards(cardsToDiscard, gs.getCurrentPlayer()));
             }
@@ -413,7 +409,7 @@ public class CatanActionFactory {
         int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
         int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
         int[] resources = gs.getPlayerResources(activePlayer);
-        if (gs.getCoreGameParameters().verbose){
+        if (gs.getCoreGameParameters().verbose) {
             System.out.println("Player " + gs.getCurrentPlayer() + " has " + Arrays.toString(resources));
         }
         ArrayList<AbstractAction> actions = new ArrayList();
@@ -446,7 +442,7 @@ public class CatanActionFactory {
 
                     if (settlement.getOwner() == activePlayer && settlement.getType() == 1) {
                         if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("city"))
-                                && !(((Counter) gs.getComponentActingPlayer(CatanConstants.cityCounterHash)).isMaximum()))  {
+                                && !(((Counter) gs.getComponentActingPlayer(CatanConstants.cityCounterHash)).isMaximum())) {
                             actions.add(new BuildCity(x, y, i, activePlayer));
                         }
                     }
@@ -454,8 +450,7 @@ public class CatanActionFactory {
             }
         }
         if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("developmentCard"))
-                && ((Deck<Card>)gs.getComponent(CatanConstants.developmentDeckHash)).getSize()>0)
-        {
+                && ((Deck<Card>) gs.getComponent(CatanConstants.developmentDeckHash)).getSize() > 0) {
             actions.add(new BuyDevelopmentCard());
         }
         return actions;
@@ -503,11 +498,11 @@ public class CatanActionFactory {
                     continue;
                 } else {
                     yearOfPlentyCard = true;
-                    Deck<Card> resourceDeck = (Deck<Card>)gs.getComponent(CatanConstants.resourceDeckHash);
+                    Deck<Card> resourceDeck = (Deck<Card>) gs.getComponent(CatanConstants.resourceDeckHash);
                     CatanParameters.Resources[] resources = CatanParameters.Resources.values();
                     ArrayList<CatanParameters.Resources> resourcesAvailable = new ArrayList<>();
 
-                    for(int i = 0; i < resources.length; i++){
+                    for (int i = 0; i < resources.length; i++) {
                         int index = i;
                         Optional<Card> resource = resourceDeck.stream().filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(resources[index].toString())).findFirst();
                         if (resource.isPresent()) resourcesAvailable.add(resources[i]);

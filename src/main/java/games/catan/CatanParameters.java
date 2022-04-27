@@ -18,10 +18,10 @@ public class CatanParameters extends AbstractParameters {
 
     // rules
     public final int max_round_count = 300; // stops play after this number of rounds, ends with tie, set to -1 for infinite
-    public final int max_negotiation_count = 3; // max number of attempts to renegotiate player trade
+    public final int max_negotiation_count = 2; // max number of attempts to renegotiate player trade
     public final int default_exchange_rate = 4; // trading with the bank 1:4 ratio by default
     public final int max_cards_without_discard = 7; // max number of resources a player may hold in hand without risking discarding
-    public final int max_trade_actions_allowed = 1; // max number of trade actions per turn
+    public final int max_trade_actions_allowed = 2; // max number of trade actions per turn
     public final int max_build_actions_allowed = 1; // max number of build actions per turn
 
     // the minimum number of knights required to take the largest army
