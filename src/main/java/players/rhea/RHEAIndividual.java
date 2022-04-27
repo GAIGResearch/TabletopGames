@@ -71,9 +71,39 @@ public class RHEAIndividual implements Comparable {
             // Game state to start from
             AbstractGameState gs = gameStates[startIndex];
             // Perform rollout and return number of FM calls taken. Always rollout from 0 due to preceeding crossover changing previous actions.
-            return rollout(gs, fm, 0, endIndex, playerID);
+            return rollout(gs, fm, startIndex, endIndex, playerID);
         }
         return 0;
+    }
+
+    public int repair(AbstractForwardModel fm)
+    {
+        int fmCalls = 0;
+        for(int i = 0; i < length; ++i)
+        {
+            List<AbstractAction> currentActions = fm.computeAvailableActions(gameStates[i]);
+            if(!currentActions.contains(actions[i]))
+                actions[i] = currentActions.get(gen.nextInt(currentActions.size()));
+            fm.next(gameStates[i + 1], actions[i]);
+            fmCalls++;
+        }
+        return fmCalls;
+    }
+
+    private double evaluate(int playerID)
+    {
+        double delta = 0;
+        for (int i = 0; i < length; i++) {
+            double score;
+            if (this.heuristic != null){
+                score = heuristic.evaluateState(gameStates[i+1], playerID);
+            } else {
+                score = gameStates[i+1].getGameScore(playerID);
+            }
+
+            delta += Math.pow(discountFactor, i) * score;
+        }
+        return delta;
     }
 
     /**
@@ -88,18 +118,9 @@ public class RHEAIndividual implements Comparable {
      */
     public int rollout(AbstractGameState gs, AbstractForwardModel fm, int startIndex, int endIndex, int playerID) {
         length = 0;
-        int fmCalls = 0;
+        int fmCalls = repair(fm);
         double delta = 0;
-        for (int i = 0; i < startIndex; i++) {
-            double score;
-            if (this.heuristic != null){
-                score = heuristic.evaluateState(gameStates[i+1], playerID);
-            } else {
-                score = gameStates[i+1].getHeuristicScore(playerID);
-            }
 
-            delta += Math.pow(discountFactor, i) * score;
-        }
         for (int i = startIndex; i < endIndex; i++){
             // Rolls from chosen index to the end, randomly changing actions and game states
             // Length of individual is updated depending on if it reaches a terminal game state
@@ -124,15 +145,6 @@ public class RHEAIndividual implements Comparable {
 
                     // Individual length increased
                     length++;
-
-                    // Add value of state, discounted
-                    double score;
-                    if (this.heuristic != null){
-                        score = heuristic.evaluateState(gameStates[i+1], playerID);
-                    } else {
-                        score = gameStates[i+1].getHeuristicScore(playerID);
-                    }
-                    delta += Math.pow(discountFactor, i) * score;
                 } else {
                     i--;
                 }
@@ -143,7 +155,7 @@ public class RHEAIndividual implements Comparable {
             }
         }
 //        this.value = gs.getScore(playerID);
-        this.value = delta;
+        this.value = evaluate(playerID);
         return fmCalls;
     }
 

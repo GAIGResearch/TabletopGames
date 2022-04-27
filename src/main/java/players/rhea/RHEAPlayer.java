@@ -13,6 +13,7 @@ import players.human.ActionController;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
+import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.Random;
 
 import static core.Game.runOne;
 import static games.GameType.LoveLetter;
+import static games.GameType.Pandemic;
 
 public class RHEAPlayer extends AbstractPlayer
 {
@@ -153,8 +155,9 @@ public class RHEAPlayer extends AbstractPlayer
         int tailLength = Math.min(p1.length, p2.length) / 2;
 
         for (int i = 0; i < tailLength; ++i) {
-            child.actions[child.length - 1 - i] = p2.actions[child.length - 1 - i];
-            child.gameStates[child.length - 1 - i] = p2.gameStates[child.length - 1 - i].copy();
+
+            child.actions[child.length - 1 - i] = p2.actions[p2.length - 1 - i];
+            child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i].copy();
         }
         return child;
     }
@@ -164,13 +167,12 @@ public class RHEAPlayer extends AbstractPlayer
         RHEAIndividual child = new RHEAIndividual(p1);
         copyCalls += child.length;
         int tailLength = Math.min(p1.length, p2.length) / 3;
-
         for(int i = 0; i < tailLength; ++i)
         {
             child.actions[i] = p2.actions[i];
             child.gameStates[i] = p2.gameStates[i].copy();
-            child.actions[child.length - 1 - i] = p2.actions[child.length - 1 - i];
-            child.gameStates[child.length - 1 - i] = p2.gameStates[child.length - 1 - i].copy();
+            child.actions[child.length - 1 - i] = p2.actions[p2.length - 1 - i];
+            child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i].copy();
         }
         return child;
     }
@@ -219,7 +221,7 @@ public class RHEAPlayer extends AbstractPlayer
         int p = 0;
         for(int i = 0; i < population.size(); ++i)
         {
-            p += population.size() - (i + 1);
+            p += population.size() - (i);
             if(p >= ran)
                 return population.get(i);
         }
@@ -242,12 +244,10 @@ public class RHEAPlayer extends AbstractPlayer
         {
             newPopulation.add(new RHEAIndividual(population.get(i))); // todo: possibly cheating, needs to update copy calls?
         }
-
         //crossover & mutation
         for(int i = 0; i < params.childCount; ++i)
         {
             RHEAIndividual[] parents = selectParents();
-
             RHEAIndividual child = crossover(parents[0], parents[1]);
             statesUpdated += child.mutate(getForwardModel(), getPlayerID());
             //fmCalls += child.rollout(child.gameStates[0], getForwardModel(), 0, child.actions.length, getPlayerID());
@@ -276,16 +276,20 @@ public class RHEAPlayer extends AbstractPlayer
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
         ActionController ac = null; //null;
         /* 2. Game seed */
-        //Optimize();
+        //
+        //
+        Optimize();
         //RunFast();
-        RoundRobin();
+        //RoundRobin();
+        //Visual(args);
     }
 
     private static void RoundRobin() {
         String[] args;
+        
         args = new String[6];
-        args[0] = "game=LoveLetter";
-        args[1] = "nPlayers=4";
+        args[0] = "game=TicTacToe";
+        args[1] = "nPlayers=2";
         args[2] = "players=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json";
         args[3] = "gamesPerMatchup=100";
         args[4] = "selfPlay=false";
@@ -299,35 +303,39 @@ public class RHEAPlayer extends AbstractPlayer
         args = new String[6];
         args[0] = "C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\optimization\\rheaoptimization.json";
         args[1] = "100";
-        args[2] = "LoveLetter";
+        args[2] = "Pandemic";
         args[3] = "nPlayers=4";
-        args[4] = "opponent=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json\\osla.json";
+        //args[4] = "opponent=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json\\osla.json";
+        args[4] = "opponent=coop";
+
         args[5] = "repeat=10";
         ParameterSearch.main(args);
     }
 
     private static void RunFast() {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        players.add(new RHEAPlayer());
         players.add(new MCTSPlayer());
-        players.add(new RMHCPlayer());
-        players.add(new OSLAPlayer());
+        players.add(new MCTSPlayer());
+        players.add(new MCTSPlayer());
+        players.add(new MCTSPlayer());
         /* 4. Run! */
         int rheaWonGames = 0;
         int mctsWonGames = 0;
         int rmhcWonGames = 0;
         int oslaWonGames = 0;
         for (int i = 0; i < 1000; i++) {
-            Game game = runOne(LoveLetter, null, players, 0, false, null, null, 0);
-            rheaWonGames += game.getGameState().getPlayerResults()[0].value;
-            mctsWonGames += game.getGameState().getPlayerResults()[1].value;
-            rmhcWonGames += game.getGameState().getPlayerResults()[2].value;
-            oslaWonGames += game.getGameState().getPlayerResults()[3].value;
+            System.out.println(i);
+            Game game = runOne(Pandemic, null, players, 0, false, null, null, 0);
         }
         System.out.println("RHEA won: " + rheaWonGames);
         System.out.println("MCTS won: " + mctsWonGames);
         System.out.println("RMHC won: " + rmhcWonGames);
         System.out.println("OSLA won: " + oslaWonGames);
 
+    }
+
+    private static void Visual(String[] args)
+    {
+        gui.Frontend.main(args);
     }
 }
