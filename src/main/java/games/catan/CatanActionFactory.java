@@ -12,7 +12,6 @@ import java.util.*;
 
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.cardType;
-import static games.catan.CatanConstants.resourceDeckHash;
 
 public class CatanActionFactory {
     /**
@@ -115,7 +114,7 @@ public class CatanActionFactory {
     }
 
     static List<AbstractAction> getTradeReactionActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
 
         actions.add(new EndNegotiation()); // rejects the trade offer
@@ -151,6 +150,8 @@ public class CatanActionFactory {
     static List<AbstractAction> getResponsePlayerTradeOfferActions(CatanGameState gs) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
+        if (offeredPlayerTrade.otherPlayerID != gs.getCurrentPlayer())
+            throw new AssertionError("We should always be alternating Offer and Counter-Offer");
         int exchangeRate = ((CatanParameters) gs.getGameParameters()).default_exchange_rate;
         int[] playerResources = gs.getPlayerResources(gs.getCurrentPlayer());
         int[] resourcesOffered = offeredPlayerTrade.getResourcesOffered();
@@ -169,11 +170,13 @@ public class CatanActionFactory {
             }
         }
 
-        for (int quantityAvailableToOfferIndex = 1; quantityAvailableToOfferIndex < playerResources[resourceRequestedIndex] + 1; quantityAvailableToOfferIndex++) { // loop through the quantity of resources to offer
-            for (int quantityAvailableToRequestIndex = 1; quantityAvailableToRequestIndex < (exchangeRate * quantityAvailableToOfferIndex) - (quantityAvailableToOfferIndex - 1); quantityAvailableToRequestIndex++) { // loop to generate all possible combinations of offer for the current resource pair
-                if (!(quantityAvailableToOfferIndex == resourcesRequested[resourceRequestedIndex] && quantityAvailableToRequestIndex == resourcesOffered[resourceOfferedIndex])) {
-                    resourcesToOffer[resourceRequestedIndex] += quantityAvailableToOfferIndex; // add the amount of resources to offer to the list
-                    resourcesToRequest[resourceOfferedIndex] += quantityAvailableToRequestIndex; // add the amount of resources to request to the list
+        int maxRequest = gs.getPlayerResources(offeredPlayerTrade.offeringPlayerID)[resourceOfferedIndex];
+        // TODO: Once we have partial observability of player hands, we need to modify this to take account of uncertainty (add new type of UNKNOWN in result)
+        for (int quantityAvailableToOffer = 1; quantityAvailableToOffer < playerResources[resourceRequestedIndex] + 1; quantityAvailableToOffer++) { // loop through the quantity of resources to offer
+            for (int quantityAvailableToRequest = 1; quantityAvailableToRequest <= maxRequest; quantityAvailableToRequest++) { // loop to generate all possible combinations of offer for the current resource pair
+                if (!(quantityAvailableToOffer == resourcesRequested[resourceRequestedIndex] && quantityAvailableToRequest == resourcesOffered[resourceOfferedIndex])) {
+                    resourcesToOffer[resourceRequestedIndex] = quantityAvailableToOffer;
+                    resourcesToRequest[resourceOfferedIndex] = quantityAvailableToRequest;
                     if (!(Arrays.equals(resourcesToOffer, resourcesRequested) && Arrays.equals(resourcesToRequest, resourcesOffered))) { // ensures the trade offer is not the same as the existing trade offer
                         actions.add(new OfferPlayerTrade(resourcesToOffer.clone(), resourcesToRequest.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount() + 1)); // create the action
                     }
@@ -188,7 +191,7 @@ public class CatanActionFactory {
     }
 
     static List<AbstractAction> getStealActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         int[] stealingFrom = {0, 0, 0, 0};
         CatanTile[][] board = gs.getBoard();
         for (int x = 0; x < board.length; x++) {
