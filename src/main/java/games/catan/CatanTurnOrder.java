@@ -98,10 +98,10 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
             }
             return;
         }
-        if (gamePhase.equals(Build)) {
+        if (gamePhase == Build) {
             if (actionsTakenInCurrentStage >= ((CatanParameters) gameState.getGameParameters()).max_build_actions_allowed) {
                 endPlayerTurn(gameState);
-                gameState.setMainGamePhase();
+                setGamePhase(AbstractGameState.DefaultGamePhase.Main, gameState);
             }
             return;
         }
@@ -120,7 +120,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
             endPlayerTurn(gameState);
             if (getRoundCounter() >= 2) {
                 // After 2 rounds of setup the main game phase starts
-                gameState.setMainGamePhase();
+                setGamePhase(AbstractGameState.DefaultGamePhase.Main, gameState);
             }
         }
     }

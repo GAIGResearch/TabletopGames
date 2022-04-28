@@ -138,10 +138,15 @@ public abstract class TurnOrder {
         }
     }
 
+    // helper function to avoid time-consuming string manipulations is the message is not actually
+    // going to be logged anywhere
     public void logEvent(Supplier<String> eventText, AbstractGameState state) {
         if (listeners.isEmpty())
             return; // to avoid expensive string manipulations
-        AbstractAction logAction = new LogEvent(eventText.get());
+        logEvent(eventText.get(), state);
+    }
+    public void logEvent(String eventText, AbstractGameState state) {
+        AbstractAction logAction = new LogEvent(eventText);
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.GAME_EVENT, state, logAction));
     }
 

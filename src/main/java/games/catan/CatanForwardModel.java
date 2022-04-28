@@ -194,9 +194,9 @@ public class CatanForwardModel extends AbstractForwardModel {
         CatanTile[][] board = gs.getBoard();
         if (value == 7) {
             // Dice roll was 7 so we change the phase
-            gs.setGamePhase(Robber);
+            cto.setGamePhase(Robber, gs);
         } else {
-            gs.setGamePhase(Trade);
+            cto.setGamePhase(Trade, gs);
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
