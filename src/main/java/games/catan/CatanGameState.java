@@ -42,8 +42,7 @@ public class CatanGameState extends AbstractGameState {
         Build,
         Robber,
         Discard,
-        Steal,
-        PlaceRoad,
+        Steal
     }
 
     // Collection of areas, mapped to player ID, -1 is the general game area containing the board, counters and several decks.

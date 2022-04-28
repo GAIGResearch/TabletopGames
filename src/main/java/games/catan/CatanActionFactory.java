@@ -387,15 +387,13 @@ public class CatanActionFactory {
      * @return - ArrayList, various action types (unique).
      */
     static List<AbstractAction> getRobberActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList();
-        if (gs.getRollValue() == 7) {
-            CatanTile[][] board = gs.getBoard();
-            for (int x = 0; x < board.length; x++) {
-                for (int y = 0; y < board[x].length; y++) {
-                    CatanTile tile = board[x][y];
-                    if (!(tile.getType().equals(CatanParameters.TileType.SEA)))
-                        actions.add(new MoveRobber(x, y));
-                }
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        CatanTile[][] board = gs.getBoard();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                if (!(tile.getType().equals(CatanParameters.TileType.SEA)))
+                    actions.add(new MoveRobber(x, y));
             }
         }
 

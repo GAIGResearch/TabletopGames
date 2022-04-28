@@ -228,13 +228,6 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                     }
                 }
                 break;
-            case PlaceRoad:
-                for(AbstractAction action : possibleActions){
-                    if(placeRoadCheck(cgs,action)){
-                        actionPriorityLists.get(0).add(action);
-                    }
-                }
-                break;
             case Discard:
                 for (AbstractAction action : possibleActions) {
                     if (action.getClass().getSimpleName().equals("DoNothing")){

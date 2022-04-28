@@ -111,12 +111,6 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
                 setGamePhase(Steal, gameState);
             return;
         }
-
-        if (gamePhase.equals(PlaceRoad)) {
-            // endPlayerTurn(gameState);
-            setGamePhase(nextGamePhase, gameState);
-            return;
-        }
         if (gamePhase.equals(Steal)) {
             // endPlayerTurn(gameState);
             setGamePhase(Trade, gameState);
@@ -144,7 +138,6 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
             actionsTakenInCurrentStage = ((CatanParameters) gameState.getGameParameters()).max_build_actions_allowed;
         }
     }
-
 
     public boolean isDevelopmentCardPlayed() {
         return developmentCardPlayed;
