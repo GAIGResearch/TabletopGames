@@ -23,8 +23,6 @@ public class AcceptTrade extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         if (CatanGameState.swapResources((CatanGameState) gs, receivingPlayer, offeringPlayer, resourcesRequested, resourcesOffered)) {
-            CatanGameState cgs = (CatanGameState) gs;
-            cgs.setCurrentTradeOffer(null);
             return true;
         } else {
             throw new AssertionError("A partner did not have sufficient resources");

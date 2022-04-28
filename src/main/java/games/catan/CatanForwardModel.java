@@ -20,6 +20,7 @@ import java.util.*;
 
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.*;
+import static games.catan.CatanGameState.CatanGamePhase.TradeReaction;
 
 public class CatanForwardModel extends AbstractForwardModel {
     CatanParameters params;
@@ -166,13 +167,13 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         if (action instanceof OfferPlayerTrade) {
-            cto.handleTradeOffer(gs, ((OfferPlayerTrade) action).otherPlayerID);
-            // we then skip the endTurn stuff until this negotiation comes to an end
+            cto.endReaction(gs);  // remove previous player to act
+            cto.addReactivePlayer(((OfferPlayerTrade) action).otherPlayerID);  // add new one
+            // We do not consider the end of a turn until the back-and-forth of negotiation finishes
         } else {
             // end player's turn; roll dice and allocate resources
             cto.endTurnStage(gs);
         }
-
 
         if (gs.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {
             // reset recently bought dev card to null
