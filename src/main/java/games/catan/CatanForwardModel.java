@@ -168,6 +168,8 @@ public class CatanForwardModel extends AbstractForwardModel {
             cto.endReaction(gs);  // remove previous player to act...this is safe if called (the first time) with no reactive player
             cto.addReactivePlayer(((OfferPlayerTrade) action).otherPlayerID);  // add new one
             // We do not consider the end of a turn until the back-and-forth of negotiation finishes
+        } else if (action instanceof PlayKnightCard) {
+            // continue...we skip endTurn as we now need to execute the ensuing Robber phase
         } else {
             // end player's turn; roll dice and allocate resources
             cto.endTurnStage(gs);
