@@ -88,19 +88,23 @@ public class CatanActionFactory {
 
         for (int playerIndex = 0; playerIndex < n_players; playerIndex++) { // loop through players
             if (playerIndex != currentPlayer) { // exclude current player
+                int[] otherPlayerInventory = gs.getPlayerResources(playerIndex);
                 for (int resourceToOfferIndex = 0; resourceToOfferIndex < resources.length; resourceToOfferIndex++) { // loop through current players resources to offer
                     if (resources[resourceToOfferIndex] > 0) { // don't continue if the player has none of the current resource
                         for (int resourceToRequestIndex = 0; resourceToRequestIndex < resources.length; resourceToRequestIndex++) { // loop through current players resources to request
                             if (resourceToRequestIndex != resourceToOfferIndex) { // exclude the currently offered resource
-                                for (int quantityToOffer = 1; quantityToOffer < Math.min(3, resources[resourceToOfferIndex]) + 1; quantityToOffer++) { // loop through the quantity of resources to offer
-                                    for (int quantityToRequest = 1; quantityToRequest < (exchangeRate * quantityToOffer) - (quantityToOffer - 1); quantityToRequest++) { // loop to generate all possible combinations of offer for the current resource pair
-                                        resourcesOffered[resourceToOfferIndex] += quantityToOffer;
-                                        resourcesRequested[resourceToRequestIndex] += quantityToRequest;
-                                        actions.add(new OfferPlayerTrade(resourcesOffered.clone(), resourcesRequested.clone(), currentPlayer, playerIndex, 1)); // create the action
-                                        Arrays.fill(resourcesOffered, 0);
-                                        Arrays.fill(resourcesRequested, 0);
-                                    }
-                                }
+                                int maxToRequest = otherPlayerInventory[resourceToRequestIndex];
+                                if (maxToRequest == 0)
+                                    continue;
+                                // we simplify this to be aggressive in our initial bid, on the basis that we are open to a counter-offer.
+                                // Effectively this creates one bid per player and possible pair of resources (which slightly reduces the combinatorial explosion of actions here)
+                                int offerQuantity = Math.max(1, maxToRequest / exchangeRate); // offer at least one
+                                offerQuantity = Math.min(offerQuantity, resources[resourceToOfferIndex]); // do not offer more than we have
+                                resourcesOffered[resourceToOfferIndex] = offerQuantity;
+                                resourcesRequested[resourceToRequestIndex] = Math.min(maxToRequest, offerQuantity * exchangeRate);
+                                actions.add(new OfferPlayerTrade(resourcesOffered.clone(), resourcesRequested.clone(), currentPlayer, playerIndex, 1)); // create the action
+                                Arrays.fill(resourcesOffered, 0);
+                                Arrays.fill(resourcesRequested, 0);
                             }
                         }
                     }
@@ -542,23 +546,22 @@ public class CatanActionFactory {
 
     public static List<AbstractAction> getTradeActions(CatanGameState gs) {
         // Player can buy dev card and play one
-        ArrayList<AbstractAction> actions = new ArrayList();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
 
         // get playerHand; for each card add a new action
         int[] resources = gs.getPlayerResources(gs.getCurrentPlayer());
 
         // default trade
-        int playerExchangeRate[] = gs.getExchangeRates(gs.getCurrentPlayer());
+        int[] playerExchangeRate = gs.getExchangeRates(gs.getCurrentPlayer());
         for (int i = 0; i < resources.length; i++) {
             if (resources[i] >= playerExchangeRate[i]) {
                 for (int j = 0; j < resources.length; j++) {
                     if (j != i) {
-                        // list all possible trades
+                        // list all possible trades with the bank / harbours
                         actions.add(new DefaultTrade(CatanParameters.Resources.values()[i], CatanParameters.Resources.values()[j], playerExchangeRate[i]));
                     }
                 }
             }
-            // todo make trade offers
         }
 
 
