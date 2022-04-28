@@ -96,7 +96,7 @@ public class CatanActionFactory {
                                     for (int quantityToRequest = 1; quantityToRequest < (exchangeRate * quantityToOffer) - (quantityToOffer - 1); quantityToRequest++) { // loop to generate all possible combinations of offer for the current resource pair
                                         resourcesOffered[resourceToOfferIndex] += quantityToOffer;
                                         resourcesRequested[resourceToRequestIndex] += quantityToRequest;
-                                        actions.add(new OfferPlayerTrade(resourcesOffered.clone(), resourcesRequested.clone(), currentPlayer, playerIndex, 0)); // create the action
+                                        actions.add(new OfferPlayerTrade(resourcesOffered.clone(), resourcesRequested.clone(), currentPlayer, playerIndex, 1)); // create the action
                                         Arrays.fill(resourcesOffered, 0);
                                         Arrays.fill(resourcesRequested, 0);
                                     }

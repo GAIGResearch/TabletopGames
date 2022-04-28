@@ -88,7 +88,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                         && sumArray(resourcesRequiredToAffordCosts[0])==0)
                 {
                     for (AbstractAction action : possibleActions) {
-                        if (action.getClass().getSimpleName().equals("DoNothing")){
+                        if (action instanceof DoNothing || action instanceof EndNegotiation) {
                             return action;
                         }
                     }
@@ -148,7 +148,6 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
             case Build:
                 for (AbstractAction action : possibleActions) {
                     actionType = ActionType.valueOf(action.getClass().getSimpleName());
-                    tempResources = currentResources.clone();
                     switch (actionType){
                         case PlayKnightCard:
                             if(KnightCardCheck(cgs, action)){
@@ -233,66 +232,6 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                 for(AbstractAction action : possibleActions){
                     if(placeRoadCheck(cgs,action)){
                         actionPriorityLists.get(0).add(action);
-                    }
-                }
-                break;
-            case TradeReaction:
-                // If the player has the resources to get a city or settlement already don't do anything
-                if(sumArray(resourcesRequiredToAffordCosts[1])==0
-                        || sumArray(resourcesRequiredToAffordCosts[2])==0
-                        || (roadBlocked && sumArray(resourcesRequiredToAffordCosts[0])==0))
-                {
-                    for (AbstractAction action : possibleActions) {
-                        if (action.getClass().getSimpleName().equals("DoNothing")){
-                            return action;
-                        }
-                    }
-                }
-                // Loop through and prioritise trade reaction actions
-                for (AbstractAction action : possibleActions) {
-                    actionType = ActionType.valueOf(action.getClass().getSimpleName());
-                    tempResources = currentResources.clone();
-                    switch (actionType) {
-                        case AcceptTrade:
-                            AcceptTrade acceptTrade = (AcceptTrade) action;
-                            for(int i = 0; i < tempResources.length; i++){
-                                tempResources[i]= Math.max(0,(tempResources[i]+acceptTrade.resourcesOffered[i]-acceptTrade.resourcesRequested[i]));
-                            }
-                            if(!roadBlocked){
-                                if( calculateTotalResourceDifference(resourceCosts[2],tempResources)==0
-                                        || calculateTotalResourceDifference(resourceCosts[1],tempResources)==0)
-                                {
-                                    actionPriorityLists.get(0).add(action);
-                                } else if ( calculateTotalResourceDifference(resourceCosts[2],tempResources)<calculateTotalResourceDifference(resourceCosts[2],currentResources)
-                                        || calculateTotalResourceDifference(resourceCosts[1],tempResources)<calculateTotalResourceDifference(resourceCosts[1],currentResources))
-                                {
-                                    if (sumArray(currentResources) > 6){
-                                        actionPriorityLists.get(0).add(action);
-                                    } else if (rnd.nextBoolean()){
-                                        actionPriorityLists.get(0).add(action);
-                                    }
-                                }
-                            } else if(calculateTotalResourceDifference(resourceCosts[1],tempResources)==0
-                                    && sumArray(acceptTrade.resourcesRequested)==sumArray(acceptTrade.resourcesOffered))
-                            {
-                                actionPriorityLists.get(0).add(action);
-                            } else {
-                                if(calculateTotalResourceDifference(resourceCosts[0],tempResources)<calculateTotalResourceDifference(resourceCosts[0],currentResources)){
-                                    if (sumArray(currentResources) > 6){
-                                        actionPriorityLists.get(0).add(action);
-                                    } else if (rnd.nextBoolean()){
-                                        actionPriorityLists.get(0).add(action);
-                                    }
-                                }
-                            }
-                            break;
-                        case OfferPlayerTrade:
-                            OfferPlayerTrade offerPlayerTrade = (OfferPlayerTrade) action;
-                            checkOfferPlayerTrade(tempResources, actionPriorityLists, action, offerPlayerTrade);
-                            break;
-                        default:
-                            // add to lowest priority list as default
-                            actionPriorityLists.get(actionPriorityLists.size()-1).add(action);
                     }
                 }
                 break;

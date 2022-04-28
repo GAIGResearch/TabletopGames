@@ -20,7 +20,7 @@ import java.util.*;
 
 import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.*;
-import static games.catan.CatanGameState.CatanGamePhase.TradeReaction;
+import static games.catan.CatanGameState.CatanGamePhase.*;
 
 public class CatanForwardModel extends AbstractForwardModel {
     CatanParameters params;
@@ -96,7 +96,7 @@ public class CatanForwardModel extends AbstractForwardModel {
         gameArea.putComponent(developmentDiscardDeck, new Deck("DevelopmentDiscardDeck", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
 
         state.addComponents();
-        state.setGamePhase(CatanGameState.CatanGamePhase.Setup);
+        state.setGamePhase(Setup);
 
     }
 
@@ -160,14 +160,12 @@ public class CatanForwardModel extends AbstractForwardModel {
         }
 
         // prevents multiple DoNothing actions with multi-action turn stages
-        if (action instanceof DoNothing &&
-            //    (gs.getGamePhase() == CatanGameState.CatanGamePhase.Trade ||
-                 gs.getGamePhase() == CatanGameState.CatanGamePhase.Build) {
+        if (action instanceof DoNothing && (gs.getGamePhase() == Build || gs.getGamePhase() == Trade)) {
             cto.skipTurnStage(gs);
         }
 
         if (action instanceof OfferPlayerTrade) {
-            cto.endReaction(gs);  // remove previous player to act
+            cto.endReaction(gs);  // remove previous player to act...this is safe if called (the first time) with no reactive player
             cto.addReactivePlayer(((OfferPlayerTrade) action).otherPlayerID);  // add new one
             // We do not consider the end of a turn until the back-and-forth of negotiation finishes
         } else {
@@ -175,14 +173,10 @@ public class CatanForwardModel extends AbstractForwardModel {
             cto.endTurnStage(gs);
         }
 
-        if (gs.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {
+        if (gs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main) {
             // reset recently bought dev card to null
             gs.boughtDevCard = null;
             rollDiceAndAllocateResources(gs);
-            if (gs.getRollValue() == 7)
-                gs.setGamePhase(CatanGameState.CatanGamePhase.Robber);
-            else
-                gs.setGamePhase(CatanGameState.CatanGamePhase.Trade);
         }
 
     }
@@ -198,8 +192,9 @@ public class CatanForwardModel extends AbstractForwardModel {
         CatanTile[][] board = gs.getBoard();
         if (value == 7) {
             // Dice roll was 7 so we change the phase
-            gs.setGamePhase(CatanGameState.CatanGamePhase.Robber);
+            gs.setGamePhase(Robber);
         } else {
+            gs.setGamePhase(Trade);
             for (int x = 0; x < board.length; x++) {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
@@ -239,26 +234,25 @@ public class CatanForwardModel extends AbstractForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         CatanGameState cgs = (CatanGameState) gameState;
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Setup) {
+        if (cgs.getGamePhase() == Setup) {
             return CatanActionFactory.getSetupActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Robber) {
+        if (cgs.getGamePhase() == Robber) {
             return CatanActionFactory.getRobberActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Steal) {
+        if (cgs.getGamePhase() == Steal) {
             return CatanActionFactory.getStealActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Discard) {
+        if (cgs.getGamePhase() == Discard) {
             return CatanActionFactory.getDiscardActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Trade) {
+        if (cgs.getGamePhase() == Trade) {
+            if (cgs.getCurrentTradeOffer() != null)
+                return CatanActionFactory.getTradeReactionActions(cgs);
             return CatanActionFactory.getTradeStageActions(cgs);
         }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.Build) {
+        if (cgs.getGamePhase() == Build) {
             return CatanActionFactory.getBuildStageActions(cgs);
-        }
-        if (cgs.getGamePhase() == CatanGameState.CatanGamePhase.TradeReaction) {
-            return CatanActionFactory.getTradeReactionActions(cgs);
         }
         throw new AssertionError("GamePhase is not in the defined set of options");
     }

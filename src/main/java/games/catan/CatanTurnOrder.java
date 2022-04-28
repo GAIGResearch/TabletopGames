@@ -8,7 +8,6 @@ import core.turnorders.TurnOrder;
 import java.util.LinkedList;
 
 import static games.catan.CatanGameState.CatanGamePhase.*;
-import static games.catan.CatanGameState.CatanGamePhase.TradeReaction;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class CatanTurnOrder extends ReactiveTurnOrder {
@@ -27,8 +26,8 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
     protected void _reset() {
         super._reset();
         turnStep = 0;
-        nextGamePhase = AbstractGameState.DefaultGamePhase.Main;
         actionsTakenInCurrentStage = 0;
+        nextGamePhase = AbstractGameState.DefaultGamePhase.Main;
         developmentCardPlayed = false;
     }
 
@@ -68,11 +67,8 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         reactivePlayers.poll();
         if (reactionsFinished()) {
             // discard only happens when a knight card has been played or a 7 has been rolled
-            if (gs.getGamePhase().equals(Discard)) {
+            if (gs.getGamePhase() == Discard) {
                 setGamePhase(Steal, gs);
-            } else {
-                // should only happen from a trade reaction
-                setGamePhase(nextGamePhase, gs);
             }
         }
     }
@@ -93,16 +89,17 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         // We finish the overall Trade/TradeReaction pair once we run out of actions (and a Trade has been terminated either
         // with an EndNegotiation or an AcceptTrade action. If we still have actions left, then we
         // can initiate another Trade
-        if (gamePhase == Trade || gamePhase == TradeReaction) {
+        actionsTakenInCurrentStage++;
+        if (gamePhase == Trade) {
             gameState.setCurrentTradeOffer(null);
             reactivePlayers.clear(); // negotiation now finished
-            if (actionsTakenInCurrentStage++ >= ((CatanParameters) gameState.getGameParameters()).max_trade_actions_allowed) {
+            if (actionsTakenInCurrentStage >= ((CatanParameters) gameState.getGameParameters()).max_trade_actions_allowed) {
                 setGamePhase(Build, gameState);
             }
             return;
         }
         if (gamePhase.equals(Build)) {
-            if (actionsTakenInCurrentStage++ == ((CatanParameters) gameState.getGameParameters()).max_build_actions_allowed) {
+            if (actionsTakenInCurrentStage >= ((CatanParameters) gameState.getGameParameters()).max_build_actions_allowed) {
                 endPlayerTurn(gameState);
                 gameState.setMainGamePhase();
             }

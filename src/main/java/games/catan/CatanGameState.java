@@ -43,7 +43,6 @@ public class CatanGameState extends AbstractGameState {
         Robber,
         Discard,
         Steal,
-        TradeReaction,
         PlaceRoad,
     }
 
