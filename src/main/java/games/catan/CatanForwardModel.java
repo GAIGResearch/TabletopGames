@@ -25,7 +25,6 @@ import static games.catan.CatanGameState.CatanGamePhase.*;
 public class CatanForwardModel extends AbstractForwardModel {
     CatanParameters params;
     int nPlayers;
-    private int rollCounter;
 
     public CatanForwardModel() {
     }
@@ -37,7 +36,6 @@ public class CatanForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
-        Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         CatanGameState state = (CatanGameState) firstState;
         params = (CatanParameters) state.getGameParameters();
@@ -89,7 +87,7 @@ public class CatanForwardModel extends AbstractForwardModel {
                 developmentDeck.add(card);
             }
         }
-        developmentDeck.shuffle(rnd);
+        developmentDeck.shuffle(state.rnd);
 
         gameArea.putComponent(resourceDeckHash, resourceDeck);
         gameArea.putComponent(developmentDeckHash, developmentDeck);
@@ -186,7 +184,7 @@ public class CatanForwardModel extends AbstractForwardModel {
     private void rollDiceAndAllocateResources(CatanGameState gs) {
         /* Gives players the resources depending on the current rollValue stored in the game state */
         // roll dice
-        gs.setRollValue(getDiceRoll(gs.getGameParameters().getRandomSeed()));
+        gs.rollDice();
 
         int value = gs.getRollValue();
         CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
@@ -262,7 +260,6 @@ public class CatanForwardModel extends AbstractForwardModel {
     @Override
     protected AbstractForwardModel _copy() {
         CatanForwardModel copy = new CatanForwardModel(params, nPlayers);
-        copy.rollCounter = rollCounter;
         return copy;
     }
 
@@ -428,17 +425,4 @@ public class CatanForwardModel extends AbstractForwardModel {
             }
         }
     }
-
-    public int getDiceRoll(long seed) {
-        /* Rolls 2 random dices given a single random seed */
-        Random r1 = new Random(seed + rollCounter);
-        rollCounter += 1;
-        Random r2 = new Random(seed + rollCounter);
-        rollCounter += 1;
-        int num1 = r1.nextInt(6);
-        int num2 = r2.nextInt(6);
-
-        return num1 + num2 + 2;
-    }
-
 }

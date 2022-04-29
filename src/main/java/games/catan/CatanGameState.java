@@ -34,6 +34,7 @@ public class CatanGameState extends AbstractGameState {
     protected int longestRoadLength;
     protected OfferPlayerTrade currentTradeOffer; // Holds the current trade offer to allow access between players TODO make primitive
     int rollValue;
+    protected Random rnd;
 
     // GamePhases that may occur in Catan
     public enum CatanGamePhase implements IGamePhase {
@@ -78,7 +79,7 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected void _reset() {
-        // set everything to null
+        // set everything to null (except for Random number generator)
         this.areas = null;
         boughtDevCard = null;
         board = null;
@@ -95,6 +96,8 @@ public class CatanGameState extends AbstractGameState {
         longestRoadLength = pp.min_longest_road;
         largestArmy = -1;
         longestRoad = -1;
+        if (rnd == null)
+            rnd = new Random(pp.getRandomSeed());
     }
 
     @Override
@@ -122,8 +125,12 @@ public class CatanGameState extends AbstractGameState {
         return rollValue;
     }
 
-    public void setRollValue(int rollValue) {
-        this.rollValue = rollValue;
+    public void rollDice() {
+        /* Rolls 2 random dice given a single random seed */
+        int num1 = rnd.nextInt(6);
+        int num2 = rnd.nextInt(6);
+
+        rollValue = num1 + num2 + 2;
     }
 
     public CatanTile getRobber(CatanTile[][] board) {
@@ -473,6 +480,10 @@ public class CatanGameState extends AbstractGameState {
         copy.boughtDevCard = boughtDevCard == null ? null : boughtDevCard.copy();
         copy.catanGraph = catanGraph.copy();
         copy.areas = copyAreas();
+        if (playerId != -1) {
+            copy.shuffleDevelopmentCards(playerId);
+        }
+
         copy.gameStatus = gameStatus;
         copy.playerResults = playerResults.clone();
         copy.scores = scores.clone();
@@ -491,6 +502,7 @@ public class CatanGameState extends AbstractGameState {
         } else {
             copy.currentTradeOffer = (OfferPlayerTrade) this.currentTradeOffer.copy();
         }
+        copy.rnd = new Random(rnd.nextLong());
         return copy;
     }
 
@@ -514,8 +526,9 @@ public class CatanGameState extends AbstractGameState {
             Area a = areas.get(key);
             if (key != -1) {
                 List<Component> oldComponents = areas.get(key).getComponents();
-                // todo need to handle PO
-                // todo create a cardpool that players may have, shuffle and distribute them
+                // TODO: Partial Observability of Resource cards is not currently supported
+                // Most Resource cards are countable - except as a result of the Steal action
+                // (And, depending on one's interpretation, of Discard.)
                 for (Component comp : oldComponents) {
                     a.putComponent(comp.copy());
                 }
@@ -524,6 +537,35 @@ public class CatanGameState extends AbstractGameState {
         }
         return copy;
     }
+
+    private void shuffleDevelopmentCards(int playerId) {
+        Deck<Card> developmentDeck = (Deck<Card>) getComponent(developmentDeckHash, -1);
+        int startingCardsInDeck = developmentDeck.getSize();
+        if (getCurrentPlayer() != playerId && boughtDevCard != null) {
+            developmentDeck.add(boughtDevCard);
+        }
+        for (int p = 0; p < getNPlayers(); p++) {
+            if (p == playerId)
+                continue;
+            developmentDeck.add((Deck<Card>) getComponent(developmentDeckHash, p));
+        }
+        developmentDeck.shuffle(rnd);
+        if (getCurrentPlayer() != playerId && boughtDevCard != null) {
+            boughtDevCard = developmentDeck.draw();
+        }
+        for (int p = 0; p < getNPlayers(); p++) {
+            if (p == playerId)
+                continue;
+            Deck<Card> playerDevDeck = (Deck<Card>) getComponent(developmentDeckHash, p);
+            int cardsToDraw = playerDevDeck.getSize();
+            playerDevDeck.clear();
+            for (int i = 0; i < cardsToDraw; i++)
+                playerDevDeck.add(developmentDeck.draw());
+        }
+        if (developmentDeck.getSize() != startingCardsInDeck)
+            throw new AssertionError("We should have the same number of cards before as after");
+    }
+
 
     public boolean checkRoadPlacement(int roadId, CatanTile tile, int player) {
         /*
