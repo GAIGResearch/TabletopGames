@@ -80,7 +80,7 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int[] resources = gs.getPlayerResources(gs.getCurrentPlayer());
         int exchangeRate = ((CatanParameters) gs.getGameParameters()).default_exchange_rate;
-        int n_players = ((CatanParameters) gs.getGameParameters()).n_players;
+        int n_players = gs.getNPlayers();
         int currentPlayer = gs.getCurrentPlayer();
         int[] resourcesOffered = new int[5];
         int[] resourcesRequested = new int[5];

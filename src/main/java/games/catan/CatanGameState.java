@@ -87,12 +87,12 @@ public class CatanGameState extends AbstractGameState {
         catanGraph = null;
 
         CatanParameters pp = (CatanParameters) gameParameters;
-        scores = new int[pp.n_players];
-        knights = new int[pp.n_players];
-        exchangeRates = new int[pp.n_players][CatanParameters.Resources.values().length];
+        scores = new int[getNPlayers()];
+        knights = new int[getNPlayers()];
+        exchangeRates = new int[getNPlayers()][CatanParameters.Resources.values().length];
         for (int i = 0; i < exchangeRates.length; i++)
             Arrays.fill(exchangeRates[i], pp.default_exchange_rate);
-        victoryPoints = new int[pp.n_players];
+        victoryPoints = new int[getNPlayers()];
         longestRoadLength = pp.min_longest_road;
         largestArmy = -1;
         longestRoad = -1;
