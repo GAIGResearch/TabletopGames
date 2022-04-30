@@ -43,7 +43,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param gamesPerMatchUp - number of games for each combination of players.
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
-    public RoundRobinTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
+    public RoundRobinTournament(List<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                                 int gamesPerMatchUp, boolean selfPlay, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, gameParams);
         if (!selfPlay && playersPerGame > this.agents.size()) {
@@ -89,8 +89,6 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               Defaults to utilities.GameResultListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
-                            "\tlogger=        (Optional) The full class name of an IStatisticsLogger implementation.\n" +
-                            "\t               Defaults to FileStatsLogger. \n" +
                             "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file (FileStatsLogger only).\n" +
                             "\t               Defaults to RoundRobinReport.txt\n" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +

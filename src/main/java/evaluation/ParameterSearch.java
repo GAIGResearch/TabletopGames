@@ -181,7 +181,7 @@ public class ParameterSearch {
         if (tuningGame) {
             if (new File(evalMethod).exists()) {
                 // load from file
-                gameHeuristic = Utils.loadFromFile(evalMethod);
+                gameHeuristic = Utils.loadClassFromFile(evalMethod);
             } else {
                 if (evalMethod.contains(".json"))
                     throw new AssertionError("File not found : " + evalMethod);

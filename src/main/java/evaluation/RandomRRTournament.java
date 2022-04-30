@@ -25,7 +25,7 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param gamesPerMatchUp - number of games for each combination of players.
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
-    public RandomRRTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
+    public RandomRRTournament(List<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                               int gamesPerMatchUp, boolean selfPlay, int totalMatchUps, long seed, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, gamesPerMatchUp, selfPlay, gameParams);
         this.totalMatchups = totalMatchUps;

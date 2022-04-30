@@ -12,13 +12,11 @@ import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
+import utilities.Utils;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.function.ToDoubleBiFunction;
-import java.util.regex.Pattern;
 
 import static players.mcts.MCTSEnums.Information.Open_Loop;
 import static players.mcts.MCTSEnums.MASTType.Rollout;
@@ -243,19 +241,7 @@ public class MCTSParams extends PlayerParameters {
                 return new MASTPlayer(new Random(getRandomSeed()));
             case CLASS:
                 // we have a bespoke Class to instantiate
-                String[] classAndParams = details.split(Pattern.quote("|"));
-                if (classAndParams.length > 2)
-                    throw new IllegalArgumentException("Only a single string parameter is currently supported");
-                try {
-                    Class<?> rollout = Class.forName(classAndParams[0]);
-                    if (classAndParams.length == 1)
-                        return (AbstractPlayer) rollout.getConstructor().newInstance();
-                    return (AbstractPlayer) rollout.getConstructor(String.class).newInstance(classAndParams[1]);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                throw new AssertionError("Error while instantiating policy from CLASS " + details);
+                return Utils.loadClassFromString(details);
             case PARAMS:
                 throw new AssertionError("PolicyParameters have not been set");
             default:
@@ -263,25 +249,8 @@ public class MCTSParams extends PlayerParameters {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public ToDoubleBiFunction<AbstractAction, AbstractGameState> getAdvantageFunction() {
-        if (advantageFunctionString.isEmpty() || advantageFunctionString.equalsIgnoreCase("none"))
-            return null;
-        String[] classAndParams = advantageFunctionString.split(Pattern.quote("|"));
-        if (classAndParams.length > 2)
-            throw new IllegalArgumentException("Only a single string parameter is currently supported");
-        try {
-            Class<?> rollout = Class.forName(classAndParams[0]);
-            if (classAndParams.length == 1)
-                return (ToDoubleBiFunction<AbstractAction, AbstractGameState>) rollout.getConstructor().newInstance();
-            Constructor<ToDoubleBiFunction<AbstractAction, AbstractGameState>> con = (Constructor<ToDoubleBiFunction<AbstractAction, AbstractGameState>>) rollout.getConstructor(String.class);
-            return con.newInstance(classAndParams[1]);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        throw new AssertionError("Not reachable");
+        return Utils.loadClassFromString(advantageFunctionString);
     }
 
     public IStateHeuristic getHeuristic() {

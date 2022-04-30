@@ -7,10 +7,9 @@ import org.json.simple.parser.ParseException;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.*;
 
@@ -333,7 +332,7 @@ public abstract class Utils {
      * @param <T>      - the Class type that is to be instantiated
      * @return
      */
-    public static <T> T loadFromFile(String filename) {
+    public static <T> T loadClassFromFile(String filename) {
         try {
             FileReader reader = new FileReader(filename);
             JSONParser jsonParser = new JSONParser();
@@ -351,6 +350,41 @@ public abstract class Utils {
             throw new AssertionError("Problem parsing JSON in " + filename);
         }
     }
+
+    /**
+     * Given a string that contains the JSON for a single class, this will instantiate the class
+     *
+     * @param rawData - the JSON as a raw string
+     * @param <T>      - the Class type that is to be instantiated
+     * @return
+     */
+    public static <T> T loadClassFromString(String rawData) {
+        try {
+            if (!rawData.contains("{")) {
+                // we assume this is a class name with a no-arg constructor as a special case
+                Class<?> clazz = Class.forName(rawData);
+                Constructor<?> constructor = clazz.getConstructor();
+                return (T) constructor.newInstance();
+            }
+            Reader reader = new StringReader(rawData);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject json = (JSONObject) jsonParser.parse(reader);
+            // We expect a class field to tell us the Class to use
+            // then a set of parameter values
+            return Utils.loadClassFromJSON(json);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem parsing JSON in " + rawData);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem processing String in " + rawData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem processing String as classname with no-arg constructor : " + rawData);
+        }
+    }
+
 
     public static BufferedImage convertToType(BufferedImage sourceImage, int targetType) {
         BufferedImage image;

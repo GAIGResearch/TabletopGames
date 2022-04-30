@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Factory class for creating AbstractPlayers from JSON configuration file.
@@ -44,12 +45,10 @@ public class PlayerFactory {
 
     private static final JSONParser parser = new JSONParser();
 
-    private static AbstractPlayer fromJSONFile(FileReader reader, String fileName) {
+    private static String readJSONFile(FileReader reader, String fileName) {
         try {
             JSONObject json = (JSONObject) parser.parse(reader);
-            AbstractPlayer retValue = fromJSONObject(json);
-            retValue.setName(fileName.substring(0, fileName.indexOf(".")));
-            return retValue;
+            return json.toJSONString();
         } catch (IOException e) {
             throw new AssertionError("IO Error processing file " + fileName + " : " + e.getMessage());
         } catch (ParseException e) {
@@ -104,13 +103,28 @@ public class PlayerFactory {
      * @return
      */
     public static AbstractPlayer createPlayer(String data) {
+        return createPlayer(data, Function.identity());
+    }
+
+    /**
+     * This allows the raw file to be modified first
+     *
+     * @param data
+     * @param preprocessor - a function to be applied to the raw JSON string before the player is instantiated from it
+     * @return
+     */
+    public static AbstractPlayer createPlayer(String data, Function<String, String> preprocessor) {
         // The idea here is that we first check to see if data is a filename.
         // If it is then we go the JSON route
         // If not then we now support a short-hand method for some simple defaults
 
         try {
             FileReader reader = new FileReader(data);
-            return fromJSONFile(reader, data);
+            String json = readJSONFile(reader, data);
+            if (preprocessor != null)
+                json = preprocessor.apply(json);
+            AbstractPlayer retValue = fromJSONString(json);
+            retValue.setName(data.substring(0, data.indexOf(".")));
         } catch (FileNotFoundException e) {
             // this is fine...we move along
         }
@@ -127,7 +141,7 @@ public class PlayerFactory {
             case "rmhc":
                 return new RMHCPlayer(new RMHCParams(System.currentTimeMillis()));
             default:
-                throw new AssertionError("Unknown player key : " + input);
+                throw new AssertionError("Unknown file or player key : " + input);
         }
     }
 
