@@ -125,6 +125,7 @@ public class PlayerFactory {
                 json = preprocessor.apply(json);
             AbstractPlayer retValue = fromJSONString(json);
             retValue.setName(data.substring(0, data.indexOf(".")));
+            return retValue;
         } catch (FileNotFoundException e) {
             // this is fine...we move along
         }

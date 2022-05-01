@@ -71,9 +71,9 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             if (debug)
                 System.out.println("\tLoading " + pName);
             if (isParamArray(pName, rawData)) {
-                Object pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
+                List<?> pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
                 params.addTunableParameter(pName, params.getDefaultParameterValue(pName),
-                        new ArrayList<>(((List<?>) pValue)));
+                        new ArrayList<>(pValue));
             } else {
                 Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName), params);
                 if (pValue != null)

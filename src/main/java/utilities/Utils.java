@@ -290,7 +290,7 @@ public abstract class Utils {
         try {
             String cl = (String) json.getOrDefault("class", "");
             Class<T> outputClass = (Class<T>) Class.forName(cl);
-            JSONArray argArray = (JSONArray) json.getOrDefault("args", Collections.emptyList());
+            JSONArray argArray = (JSONArray) json.getOrDefault("args", new JSONArray());
             Class<?>[] argClasses = new Class[argArray.size()];
             Object[] args = new Object[argArray.size()];
             for (int i = 0; i < argClasses.length; i++) {

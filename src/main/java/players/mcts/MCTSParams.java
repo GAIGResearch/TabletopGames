@@ -4,10 +4,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IActionFeatureVector;
-import core.interfaces.IStateFeatureVector;
-import core.interfaces.IStateHeuristic;
-import core.interfaces.ITunableParameters;
+import core.interfaces.*;
 import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
@@ -56,8 +53,7 @@ public class MCTSParams extends PlayerParameters {
     public IStateFeatureVector EIStateFeatureVector;
     public String expertIterationActionFeatures = "";
     public IActionFeatureVector EIActionFeatureVector;
-    public String advantageFunctionString = "";
-    public ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
+    public IActionHeuristic advantageFunction;
     public int biasVisits = 0;
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
     public double progressiveWideningExponent = 0.0;
@@ -106,6 +102,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("normaliseRewards", true);
         addTunableParameter("nodesStoreScoreDelta", false);
         addTunableParameter("maintainMasterState", false);
+        addTunableParameter("advantageFunction", IActionHeuristic.nullReturn);
     }
 
     @Override
@@ -145,8 +142,7 @@ public class MCTSParams extends PlayerParameters {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        advantageFunctionString = (String) getParameterValue("advantageFunction");
-        advantageFunction = getAdvantageFunction();
+        advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         biasVisits = (int) getParameterValue("biasVisits");
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
         progressiveWideningExponent = (double) getParameterValue("progressiveWideningExponent");
@@ -164,6 +160,7 @@ public class MCTSParams extends PlayerParameters {
                 tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
             }
         }
+        // TODO: opponentHeuristic is not currently used
         opponentHeuristic = (IStateHeuristic) getParameterValue("opponentHeuristic");
         if (opponentHeuristic instanceof TunableParameters) {
             TunableParameters tunableHeuristic = (TunableParameters) opponentHeuristic;
@@ -247,10 +244,6 @@ public class MCTSParams extends PlayerParameters {
             default:
                 throw new AssertionError("Unknown strategy type : " + type);
         }
-    }
-
-    public ToDoubleBiFunction<AbstractAction, AbstractGameState> getAdvantageFunction() {
-        return Utils.loadClassFromString(advantageFunctionString);
     }
 
     public IStateHeuristic getHeuristic() {
