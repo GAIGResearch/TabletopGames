@@ -3,14 +3,17 @@ package evaluation;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.ParameterFactory;
+import core.interfaces.IActionFeatureVector;
+import core.interfaces.ILearner;
+import core.interfaces.IStateFeatureVector;
 import games.GameType;
 import players.PlayerFactory;
+import utilities.FileStatsLogger;
+import utilities.StateFeatureListener;
+import utilities.Utils;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static utilities.Utils.getArg;
@@ -19,13 +22,12 @@ public class ProgressiveLearner {
 
     GameType gameToPlay;
     String dataDir, player;
-    List<String> listenerClasses;
-    List<String> listenerFiles;
     AbstractParameters params;
     List<AbstractPlayer> agents;
-    String learnerClass;
+    ILearner learner;
     int nPlayers, matchups, iterations, iter;
     AbstractPlayer[] agentsPerGeneration;
+    IStateFeatureVector phi;
 
     public ProgressiveLearner(String[] args) {
 
@@ -45,16 +47,16 @@ public class ProgressiveLearner {
         String gameParams = getArg(args, "gameParams", "");
         dataDir = getArg(args, "dir", "");
 
-        listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameResultListener").split("\\|")));
-        listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
-
-        if (listenerClasses.size() > 1 && listenerFiles.size() > 1 && listenerClasses.size() != listenerFiles.size())
-            throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
-
         params = ParameterFactory.createFromFile(gameToPlay, gameParams);
-        learnerClass = getArg(args, "learner", "");
+        String learnerClass = getArg(args, "learner", "");
         if (learnerClass.equals(""))
             throw new IllegalArgumentException("Must specify a learner class");
+        learner = Utils.loadClassFromString(learnerClass);
+
+        String phiClass = getArg(args, "statePhi", "");
+        if (phiClass.equals(""))
+            throw new IllegalArgumentException("Must specify a state feature vector");
+        phi = Utils.loadClassFromString(phiClass);
 
     }
 
@@ -66,19 +68,16 @@ public class ProgressiveLearner {
                             "\tgame=          The name of the game to play. Required. \n" +
                             "\tnPlayers=      The number of players in each game. Defaults to the minimum for the game.\n" +
                             "\tplayer=        The JSON file of the agent definition to be used. \n" +
-                            "\t               This will need to use a heuristic that can be injected at instantiation.\n" +
+                            "\t               This will need to use a heuristic that takes a file input.\n" +
                             "\t               This location(s) for this injection in the JSON file must be marked with '*HEURISTIC*'\n" +
+                            "\tlearner=       The full class name of an ILearner implementation.\n" +
+                            "\t               This learner must be compatible with the heuristic - in that it must \n" +
+                            "\t               generate a file that the heuristic can read.\n" +
                             "\tdir=           The directory containing agent JSON files for learned heuristics and raw data\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tmatchups=      Defaults to 1. The number of games to play before the learning process is called.\n" +
-                            "\tlistener=      The full class name of an IGameListener implementation. \n" +
-                            "\t               Usually this is what will record data from game trajectories. \n" +
-                            "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
-                            "\t               from the same set of games." +
-                            "\tlistenerFile=  Will be used as the IStatisticsLogger log file (FileStatsLogger only).\n" +
-                            "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
-                            "\t               use a different log file.\n" +
-                            "\tlearner=       The full class name of an ILearner implementation.\n" +
+                            "\tstatePhi=      The full class name of an IStateFeatureVector implementation that defines the inputs \n" +
+                            "\t               to the heuristic used in the player files.\n" +
                             "\titerations=    Stop after this number of learning iterations. Defaults to 100."
             );
             return;
@@ -116,16 +115,13 @@ public class ProgressiveLearner {
 
     private void loadAgents() {
         // For the moment we always use the previous agent - so this is brittle self-play - to be changed later
-        String[] learnerName = learnerClass.split("\\.");
-        String fileName = iter == 0 ? "" : String.format("%tF-%s_%d.txt", System.currentTimeMillis(), learnerName[learnerName.length - 1], iter);
+        String fileName = iter == 0 ? "" : String.format("%tF-%s_%d.txt", System.currentTimeMillis(), learner.getClass().getSimpleName(), iter);
         agents = new LinkedList<>();
         File playerLoc = new File(player);
         if (playerLoc.isDirectory()) {
-            agents.addAll(PlayerFactory.createPlayers(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"),
-                    String.format("{\"class\" : \"%s\", \"args\" : [\"%s\"] }", learnerClass, fileName))));
+            agents.addAll(PlayerFactory.createPlayers(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"), fileName)));
         } else {
-            agents.add(PlayerFactory.createPlayer(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"),
-                    String.format("{\"class\" : \"%s\", \"args\" : [\"%s\"] }", learnerClass, fileName))));
+            agents.add(PlayerFactory.createPlayer(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"), fileName)));
         }
     }
 
@@ -133,12 +129,16 @@ public class ProgressiveLearner {
         // Run!
         RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers, 1, true, matchups,
                 System.currentTimeMillis(), params);
-        tournament.listenerFiles = listenerFiles;
-        tournament.listenerClasses = listenerClasses;
+
+        String fileName = String.format("%tF-%s_%d.data", System.currentTimeMillis(), phi.getClass().getSimpleName(), iter);
+        StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi);
+        tournament.listeners = Collections.singletonList(dataTracker);
         tournament.runTournament();
     }
 
     private void learnFromNewData() {
-
+        // How do we know the file that has been written with data?
+        // Why not just gather trajectory data in PL? (Because I also want the date available for offline learning)
+        learner.learnFrom();
     }
 }

@@ -6,7 +6,6 @@ import core.turnorders.TurnOrder;
 
 import java.util.Objects;
 
-import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public class UnoTurnOrder extends AlternatingTurnOrder {

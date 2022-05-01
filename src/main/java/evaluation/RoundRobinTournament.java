@@ -26,8 +26,7 @@ public class RoundRobinTournament extends AbstractTournament {
     private static boolean debug = false;
     public final boolean selfPlay;
     private final int gamesPerMatchUp;
-    protected List<String> listenerClasses;
-    protected List<String> listenerFiles;
+    protected List<IGameListener> listeners;
     int[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
@@ -133,8 +132,13 @@ public class RoundRobinTournament extends AbstractTournament {
                 new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay, params) :
                 new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay, totalMatchups,
                         System.currentTimeMillis(), params);
-        tournament.listenerFiles = listenerFiles;
-        tournament.listenerClasses = listenerClasses;
+
+        tournament.listeners = new ArrayList<>();
+        for (int l = 0; l < listenerClasses.size(); l++) {
+            IStatisticLogger logger = new FileStatsLogger(listenerFiles.get(l));
+            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), logger);
+            tournament.listeners.add(gameTracker);
+        }
         tournament.dataLogger = logFile.equals("") ? null : new FileStatsLogger(logFile, "\t", true);
         tournament.runTournament();
     }
@@ -192,14 +196,8 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int agentID : agentIDs)
             matchUpPlayers.add(this.agents.get(agentID));
 
-        List<IGameListener> gameTrackers = new ArrayList<>();
-        for (int l = 0; l < listenerClasses.size(); l++) {
-            String logFile = listenerFiles.size() == 1 ? listenerFiles.get(0) : listenerFiles.get(l);
-            IStatisticLogger logger = new FileStatsLogger(logFile);
-            String listenerClass = listenerClasses.size() == 1 ? listenerClasses.get(0) : listenerClasses.get(l);
-            IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
-            games.get(gameIdx).addListener(gameTracker);
-            gameTrackers.add(gameTracker);
+        for (IGameListener listener : listeners) {
+            games.get(gameIdx).addListener(listener);
         }
 
         // Run the game N = gamesPerMatchUp times with these players
@@ -232,9 +230,9 @@ public class RoundRobinTournament extends AbstractTournament {
             }
         }
         games.get(gameIdx).clearListeners();
-        for (IGameListener gameTracker : gameTrackers) {
-            gameTracker.allGamesFinished();
-        }
+  //      for (IGameListener gameTracker : listeners) {
+  //          gameTracker.allGamesFinished();
+ //       }
         matchUpsRun++;
     }
 }
