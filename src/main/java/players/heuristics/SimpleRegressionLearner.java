@@ -58,8 +58,8 @@ public class SimpleRegressionLearner implements ILearner {
             ordinal[i] = allData[header.length - 2];
             finalScore[i] = allData[header.length - 1];
             currentScore[i] = allData[4];
-            double[] regressionData = new double[header.length - 5];
-            System.arraycopy(allData, 2, regressionData, 0, regressionData.length);
+            double[] regressionData = new double[header.length - 8];
+            System.arraycopy(allData, 5, regressionData, 0, regressionData.length);
             dataArray[i] = regressionData;
         }
 
@@ -70,7 +70,7 @@ public class SimpleRegressionLearner implements ILearner {
         LinearRegression regression = new LinearRegression(X, Y, 0.01);
         coefficients = regression.getCoefficients();
         descriptions = new String[coefficients.length];
-        System.arraycopy(header, 2, descriptions, 0, coefficients.length);
+        System.arraycopy(header, 5, descriptions, 0, coefficients.length);
 
     }
 

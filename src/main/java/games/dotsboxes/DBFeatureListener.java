@@ -5,6 +5,6 @@ import utilities.StateFeatureListener;
 
 public class DBFeatureListener extends StateFeatureListener {
     public DBFeatureListener(IStatisticLogger logger) {
-        super(logger, new DotsAndBoxesHeuristic());
+        super(logger, new DBStateFeatures());
     }
 }
