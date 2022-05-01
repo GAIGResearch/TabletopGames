@@ -114,6 +114,16 @@ public class FileStatsLogger implements IStatisticLogger {
         }
     }
 
+    @Override
+    public void processDataAndNotFinish() {
+        try {
+            writer.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem flushing file " + writer.toString() + " : " + e.getMessage());
+        }
+    }
+
     /**
      * This always returns an empty Map
      *

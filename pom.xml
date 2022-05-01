@@ -49,6 +49,11 @@
             <artifactId>humble-video-all</artifactId>
             <version>0.3.0</version>
         </dependency>
+        <dependency>
+            <groupId>nz.ac.waikato.cms.weka</groupId>
+            <artifactId>weka-stable</artifactId>
+            <version>3.8.6</version>
+        </dependency>
     </dependencies>
 
 

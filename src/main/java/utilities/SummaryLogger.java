@@ -105,6 +105,11 @@ public class SummaryLogger implements IStatisticLogger {
         }
     }
 
+    @Override
+    public void processDataAndNotFinish() {
+        // do nothing until we have full finished
+    }
+
 
     @Override
     public String toString() {

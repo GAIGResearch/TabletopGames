@@ -30,6 +30,8 @@ public interface IStatisticLogger {
      */
     void processDataAndFinish();
 
+    void processDataAndNotFinish();
+
     /**
      * This should return a Map with one entry for each type of data
      *

@@ -60,6 +60,7 @@ public abstract class FeatureListener implements IGameListener {
                 data.put("FinalScore", finalScores[record.player]);
                 logger.record(data);
             }
+            logger.processDataAndNotFinish();
             currentData = new ArrayList<>();
         }
     }

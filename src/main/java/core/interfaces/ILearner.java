@@ -6,4 +6,6 @@ public interface ILearner {
 
     boolean writeToFile(String file);
 
+    String name();
+
 }

@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static utilities.Utils.getArg;
+import static utilities.Utils.loadClassFromFile;
 
 public class ProgressiveLearner {
 
@@ -27,6 +28,8 @@ public class ProgressiveLearner {
     ILearner learner;
     int nPlayers, matchups, iterations, iter;
     AbstractPlayer[] agentsPerGeneration;
+    String[] dataFilesByIteration;
+    String[] learnedFilesByIteration;
     IStateFeatureVector phi;
 
     public ProgressiveLearner(String[] args) {
@@ -43,6 +46,8 @@ public class ProgressiveLearner {
         matchups = getArg(args, "matchups", 1);
         iterations = getArg(args, "iterations", 100);
         agentsPerGeneration = new AbstractPlayer[iterations];
+        dataFilesByIteration = new String[iterations];
+        learnedFilesByIteration = new String[iterations];
         player = getArg(args, "player", "");
         String gameParams = getArg(args, "gameParams", "");
         dataDir = getArg(args, "dir", "");
@@ -115,7 +120,7 @@ public class ProgressiveLearner {
 
     private void loadAgents() {
         // For the moment we always use the previous agent - so this is brittle self-play - to be changed later
-        String fileName = iter == 0 ? "" : String.format("%tF-%s_%d.txt", System.currentTimeMillis(), learner.getClass().getSimpleName(), iter);
+        String fileName = iter == 0 ? "" : learnedFilesByIteration[iter-1];
         agents = new LinkedList<>();
         File playerLoc = new File(player);
         if (playerLoc.isDirectory()) {
@@ -131,14 +136,18 @@ public class ProgressiveLearner {
                 System.currentTimeMillis(), params);
 
         String fileName = String.format("%tF-%s_%d.data", System.currentTimeMillis(), phi.getClass().getSimpleName(), iter);
+        dataFilesByIteration[iter] = fileName;
         StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi);
         tournament.listeners = Collections.singletonList(dataTracker);
         tournament.runTournament();
     }
 
     private void learnFromNewData() {
-        // How do we know the file that has been written with data?
-        // Why not just gather trajectory data in PL? (Because I also want the date available for offline learning)
-        learner.learnFrom();
+        // for the moment we will just supply the most recent file
+        learner.learnFrom(dataFilesByIteration[iter]);
+
+        String fileName = String.format("%tF-%s-%s_%d.txt", System.currentTimeMillis(), learner.name(), phi.getClass().getSimpleName(), iter);
+        learnedFilesByIteration[iter] = fileName;
+        learner.writeToFile(fileName);
     }
 }
