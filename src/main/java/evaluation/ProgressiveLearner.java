@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static utilities.Utils.getArg;
 
@@ -22,7 +23,9 @@ public class ProgressiveLearner {
     List<String> listenerFiles;
     AbstractParameters params;
     List<AbstractPlayer> agents;
-    int nPlayers, matchups, iterations;
+    String learnerClass;
+    int nPlayers, matchups, iterations, iter;
+    AbstractPlayer[] agentsPerGeneration;
 
     public ProgressiveLearner(String[] args) {
 
@@ -37,6 +40,7 @@ public class ProgressiveLearner {
         nPlayers = getArg(args, "nPlayers", 2);
         matchups = getArg(args, "matchups", 1);
         iterations = getArg(args, "iterations", 100);
+        agentsPerGeneration = new AbstractPlayer[iterations];
         player = getArg(args, "player", "");
         String gameParams = getArg(args, "gameParams", "");
         dataDir = getArg(args, "dir", "");
@@ -48,10 +52,13 @@ public class ProgressiveLearner {
             throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
 
         params = ParameterFactory.createFromFile(gameToPlay, gameParams);
+        learnerClass = getArg(args, "learner", "");
+        if (learnerClass.equals(""))
+            throw new IllegalArgumentException("Must specify a learner class");
 
     }
 
-    public void main(String[] args) {
+    public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
         if (argsList.contains("--help") || argsList.contains("-h") || argsList.isEmpty()) {
             System.out.println(
@@ -85,10 +92,6 @@ public class ProgressiveLearner {
          - class
          - constructor parameters (will need a file as a standard here)
 
-         This is supported for IGameHeuristic in GameEvaluator (but not currently used for IStateHeuristic)
-         This uses Utils.loadFromFile|loadClassFromJSON, which work for a single class only.
-         A bit of a detour...but I should use this as standard for any nesting of objects.
-
          Then I insert the whole JSONObject - class name, plus the assumption of a single argument for a config file
          which is what we are learning. The name of this file can be controlled from here - say ILearner name, date, iteration
          The ILearner will generate the file - the idea is that we decide what data to use here; load it into memory, pass this
@@ -96,29 +99,34 @@ public class ProgressiveLearner {
          For the moment we will use a synchronous, single-threaded method, and wait between game runs.
          */
 
-        boolean finished = false;
+        pl.run();
+    }
+
+    public void run() {
+        iter = 0;
         do {
-            pl.loadAgents();
+            loadAgents();
 
-            pl.runGamesWithAgents();
+            runGamesWithAgents();
 
-            pl.learnFromNewData();
-        } while (!finished);
-
-
-
+            learnFromNewData();
+            iter++;
+        } while (iter < iterations);
     }
 
     private void loadAgents() {
+        // For the moment we always use the previous agent - so this is brittle self-play - to be changed later
+        String[] learnerName = learnerClass.split("\\.");
+        String fileName = iter == 0 ? "" : String.format("%tF-%s_%d.txt", System.currentTimeMillis(), learnerName[learnerName.length - 1], iter);
         agents = new LinkedList<>();
         File playerLoc = new File(player);
         if (playerLoc.isDirectory()) {
-            agents.addAll(PlayerFactory.createPlayers(player));
+            agents.addAll(PlayerFactory.createPlayers(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"),
+                    String.format("{\"class\" : \"%s\", \"args\" : [\"%s\"] }", learnerClass, fileName))));
         } else {
-            agents.add(PlayerFactory.createPlayer(player));
+            agents.add(PlayerFactory.createPlayer(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"),
+                    String.format("{\"class\" : \"%s\", \"args\" : [\"%s\"] }", learnerClass, fileName))));
         }
-
-
     }
 
     private void runGamesWithAgents() {

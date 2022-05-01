@@ -64,7 +64,15 @@ public class RandomRRTournament extends RoundRobinTournament {
         Random rnd;
 
         public PermutationCycler(int maxNumberExclusive, long seed, int nPlayers) {
-            currentPermutation = IntStream.range(0, maxNumberExclusive).toArray();
+            if (maxNumberExclusive >= nPlayers)
+                currentPermutation = IntStream.range(0, maxNumberExclusive).toArray();
+            else {
+                // in this case we ensure the agents we do have are all equally represented - self-play will occur
+                currentPermutation = IntStream.range(0, maxNumberExclusive * nPlayers).toArray();
+                for (int i = maxNumberExclusive; i < currentPermutation.length; i++) {
+                    currentPermutation[i] = i % maxNumberExclusive;
+                }
+            }
             currentPosition = -1;
             rnd = new Random(seed);
             this.nPlayers = nPlayers;

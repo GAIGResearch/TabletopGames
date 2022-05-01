@@ -147,13 +147,16 @@ public class PlayerFactory {
     }
 
     public static List<AbstractPlayer> createPlayers(String opponentDescriptor) {
+        return createPlayers(opponentDescriptor, Function.identity());
+    }
+    public static List<AbstractPlayer> createPlayers(String opponentDescriptor, Function<String, String> preprocessor) {
         List<AbstractPlayer> retValue = new ArrayList<>();
         File od = new File(opponentDescriptor);
         if (od.exists() && od.isDirectory()) {
             for (String fileName : Objects.requireNonNull(od.list())) {
                 if (!fileName.endsWith(".json"))
                     continue;
-                AbstractPlayer player = PlayerFactory.createPlayer(od.getAbsolutePath() + File.separator + fileName);
+                AbstractPlayer player = PlayerFactory.createPlayer(od.getAbsolutePath() + File.separator + fileName, preprocessor);
                 retValue.add(player);
                 player.setName(fileName.substring(0, fileName.indexOf(".")));
             }
