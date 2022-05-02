@@ -3,20 +3,23 @@ package games.dotsboxes;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
-import org.junit.AssumptionViolatedException;
+import utilities.Utils;
 
 import java.io.*;
 import java.util.Arrays;
 
 public class DBStateFeatures implements IStateFeatureVector, IStateHeuristic {
 
-    String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES", "BIAS"};
-    double[] coefficients = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    boolean logistic = false;
+    String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES", "HAS_WON", "FINAL_POSITION", "BIAS"};
+    double[] coefficients = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
     public DBStateFeatures() {
-        this("");
+        this("", false);
     }
-    public DBStateFeatures(String file) {
+
+    public DBStateFeatures(String file, boolean logistic) {
+        this.logistic = logistic;
         if (!file.isEmpty()) {
             File coeffFile = new File(file);
             try (BufferedReader br = new BufferedReader(new FileReader(coeffFile))) {
@@ -69,7 +72,9 @@ public class DBStateFeatures implements IStateFeatureVector, IStateHeuristic {
         retValue[4] = ordinal;
         retValue[5] = state.getCurrentPlayer() == playerID ? 1 : 0;
         retValue[6] = cellCountByEdges[4] * multiplier;
-        retValue[7] = 1.0;
+        retValue[7] = state.getPlayerResults()[playerID] == Utils.GameResult.WIN ? 1.0 : 0.0;
+        retValue[8] = state.isNotTerminal() ? 0.0 : state.getOrdinalPosition(playerID);
+        retValue[9] = 1.0;
 
         return retValue;
     }
@@ -86,6 +91,8 @@ public class DBStateFeatures implements IStateFeatureVector, IStateHeuristic {
         for (int i = 0; i < phi.length; i++) {
             retValue += phi[i] * coefficients[i];
         }
+        if (logistic)
+            return 1.0 / ( 1.0 + Math.exp(retValue));
         return retValue;
     }
 }
