@@ -33,19 +33,7 @@ public class SimpleLogisticLearner extends AbstractLearner {
     public void learnFrom(String... files) {
         loadData(files);
 
-        List<String> values = new ArrayList<>();
-        values.add("0");
-        values.add("1");
-        attributes.add(new Attribute("Win", values));
-        Instances dataInstances = new Instances("data", attributes, dataArray.length);
-        for (int i = 0; i < dataArray.length; i++) {
-            double[] record = dataArray[i];
-            double[] XandY = new double[record.length + 1];
-            System.arraycopy(record, 0, XandY, 0, record.length);
-            XandY[record.length] = win[i][0];
-            dataInstances.add(new DenseInstance(1.0, XandY));
-        }
-        dataInstances.setClassIndex(attributes.size() - 1);
+        Instances dataInstances = createInstances();
 
         // BUGGER - this is only available as a classifier!
         Logistic regressor = new Logistic();
