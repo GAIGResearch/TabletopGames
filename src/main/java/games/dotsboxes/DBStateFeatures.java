@@ -92,7 +92,7 @@ public class DBStateFeatures implements IStateFeatureVector, IStateHeuristic {
             retValue += phi[i] * coefficients[i];
         }
         if (logistic)
-            return 1.0 / ( 1.0 + Math.exp(retValue));
+            return 1.0 / ( 1.0 + Math.exp(-retValue));
         return retValue;
     }
 }
