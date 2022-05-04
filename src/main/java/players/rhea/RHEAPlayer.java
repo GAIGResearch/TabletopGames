@@ -72,6 +72,8 @@ public class RHEAPlayer extends AbstractPlayer
     @Override
     public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
+        timer.setMaxTimeMillis(params.budget);
+        long t = timer.remainingTimeMillis();
         avgTimeTaken = 0;
         acumTimeTaken = 0;
         numIters = 0;
@@ -88,6 +90,7 @@ public class RHEAPlayer extends AbstractPlayer
 
         // Run evolution
         boolean keepIterating = true;
+        int iterations = 0;
         while (keepIterating) {
             runIteration(stateObs);
 
@@ -233,10 +236,8 @@ public class RHEAPlayer extends AbstractPlayer
      */
     private void runIteration(AbstractGameState stateObs) {
         ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
-
         //selection
         population.sort(Comparator.naturalOrder());
-
         //copy elites
         ArrayList<RHEAIndividual> newPopulation = new ArrayList<RHEAIndividual>();
         int statesUpdated = 0;
@@ -244,14 +245,21 @@ public class RHEAPlayer extends AbstractPlayer
         {
             newPopulation.add(new RHEAIndividual(population.get(i))); // todo: possibly cheating, needs to update copy calls?
         }
-        //crossover & mutation
+        //crossover
         for(int i = 0; i < params.childCount; ++i)
         {
             RHEAIndividual[] parents = selectParents();
             RHEAIndividual child = crossover(parents[0], parents[1]);
-            statesUpdated += child.mutate(getForwardModel(), getPlayerID());
+            //statesUpdated += child.mutate(getForwardModel(), getPlayerID());
             //fmCalls += child.rollout(child.gameStates[0], getForwardModel(), 0, child.actions.length, getPlayerID());
             population.add(child);
+        }
+
+        ElapsedCpuTimer test = new ElapsedCpuTimer();
+        // mutation
+        for(int i = 0; i < population.size(); ++i)
+        {
+            statesUpdated += population.get(i).mutate(getForwardModel(), getPlayerID());
         }
 
         //sort
@@ -262,7 +270,10 @@ public class RHEAPlayer extends AbstractPlayer
         {
             newPopulation.add(population.get(i));
         }
+
         population = newPopulation;
+
+        population.sort(Comparator.naturalOrder());
         fmCalls += statesUpdated;
         copyCalls += statesUpdated; // as mutate() copyies once each time it applies the forward model
         // Update budgets
@@ -288,8 +299,8 @@ public class RHEAPlayer extends AbstractPlayer
         String[] args;
         
         args = new String[6];
-        args[0] = "game=TicTacToe";
-        args[1] = "nPlayers=2";
+        args[0] = "game=LoveLetter";
+        args[1] = "nPlayers=4";
         args[2] = "players=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json";
         args[3] = "gamesPerMatchup=100";
         args[4] = "selfPlay=false";
@@ -303,10 +314,10 @@ public class RHEAPlayer extends AbstractPlayer
         args = new String[6];
         args[0] = "C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\optimization\\rheaoptimization.json";
         args[1] = "100";
-        args[2] = "Pandemic";
+        args[2] = "LoveLetter";
         args[3] = "nPlayers=4";
-        //args[4] = "opponent=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json\\osla.json";
-        args[4] = "opponent=coop";
+        args[4] = "opponent=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json\\osla.json";
+        //args[4] = "opponent=coop";
 
         args[5] = "repeat=10";
         ParameterSearch.main(args);
