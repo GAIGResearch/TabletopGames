@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import static core.CoreConstants.playerHandHash;
+import static games.pandemic.PandemicConstants.playerDeckDiscardHash;
 
 @SuppressWarnings("unchecked")
 public class CureDisease extends AbstractAction {
@@ -34,8 +35,11 @@ public class CureDisease extends AbstractAction {
 
             // Discard cards from player hand
             Deck<Card> playerHand = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
+            Deck<Card> playerDiscard = (Deck<Card>) pgs.getComponent(playerDeckDiscardHash);
             for (Integer cardId: cardIds) {
-                playerHand.remove((Card)gs.getComponentById(cardId));
+                Card c = (Card)gs.getComponentById(cardId);
+                playerHand.remove(c);
+                playerDiscard.add(c);
             }
 
             return true;

@@ -166,7 +166,7 @@ class PandemicActionFactory {
 
                         for (int c = 0; c < playerHand.getSize(); c++) {
                             if (playerHand.getComponents().get(c).getProperty(colorHash) != null) {
-                                actions.add(new MovePlayerWithCard(playerIdx, ((PropertyString) bn.getProperty(nameHash)).value, c));
+                                actions.add(new MovePlayerWithCard(MovePlayer.MoveType.OperationsExpert, playerIdx, ((PropertyString) bn.getProperty(nameHash)).value, c, playerIdx));
                             }
                         }
                     }
@@ -183,7 +183,7 @@ class PandemicActionFactory {
                 for (int j = 0; j < pgs.getNPlayers(); j++) {
                     for (int i = 0; i < pgs.getNPlayers(); i++) {
                         if (i != j) {
-                            actions.add(new MovePlayer(i, locations[j]));
+                            actions.add(new MovePlayer(MovePlayer.MoveType.Dispatcher, i, locations[j]));
                         }
                     }
                 }
@@ -261,7 +261,7 @@ class PandemicActionFactory {
 
         // Drive / Ferry add actions for travelling to immediate cities
         for (BoardNode otherCity : neighbours){
-            actions.add(new MovePlayer(playerId, ((PropertyString)otherCity.getProperty(nameHash)).value));
+            actions.add(new MovePlayer(MovePlayer.MoveType.DriveFerry, playerId, ((PropertyString)otherCity.getProperty(nameHash)).value));
         }
 
         // Iterate over all the cities in the world
@@ -279,11 +279,11 @@ class PandemicActionFactory {
                             // Charter flight, discard card that matches your city and travel to any city
                             // Only add the ones that are different from the current location
                             if (!destination.equals(playerLocationName)) {
-                                actions.add(new MovePlayerWithCard(playerId, destination, c));
+                                actions.add(new MovePlayerWithCard(MovePlayer.MoveType.CharterFlight, playerId, destination, c, playerId));
                             }
                         } else if (destination.equals(cardCity)) {
                             // Direct Flight, discard city card and travel to that city
-                            actions.add(new MovePlayerWithCard(playerId, cardCity, c));
+                            actions.add(new MovePlayerWithCard(MovePlayer.MoveType.DirectFlight, playerId, cardCity, c, playerId));
                         }
                     }
                 }
@@ -294,7 +294,7 @@ class PandemicActionFactory {
         // If current city has research station, add every city that has research stations
         if (((PropertyBoolean)playerLocationNode.getProperty(researchStationHash)).value) {
             for (String station: pgs.researchStationLocations){
-                actions.add(new MovePlayer(playerId, station));
+                actions.add(new MovePlayer(MovePlayer.MoveType.ShuttleFlight, playerId, station));
             }
         }
 
@@ -374,6 +374,7 @@ class PandemicActionFactory {
     static List<AbstractAction> actionsFromEventCard(PandemicGameState pgs, Card card, int deckFrom, int deckTo, int cardIdx){
         Set<AbstractAction> actions = new HashSet<>();
         String cardString = ((PropertyString)card.getProperty(nameHash)).value;
+        int playerIdx = pgs.getCurrentPlayer();
 
         switch (cardString) {
             case "Airlift":
@@ -385,7 +386,7 @@ class PandemicActionFactory {
                         // Check if player is already there
                         String pLocation = ((PropertyString) pgs.getComponent(playerCardHash, i).getProperty(playerLocationHash)).value;
                         if (pLocation.equals(cityName)) continue;
-                        actions.add(new MovePlayerWithCard(i, cityName, cardIdx));
+                        actions.add(new MovePlayerWithCard(MovePlayer.MoveType.Airlift, i, cityName, cardIdx, playerIdx));
                     }
                 }
 

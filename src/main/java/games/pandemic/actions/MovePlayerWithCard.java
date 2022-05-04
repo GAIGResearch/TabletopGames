@@ -16,27 +16,32 @@ import static core.CoreConstants.playerHandHash;
 @SuppressWarnings("unchecked")
 public class MovePlayerWithCard extends MovePlayer {
 
-    private int cardIdx;
+    public final int cardIdx, playerDiscarding;
     private int cardId;
     private boolean executed;
 
-    public MovePlayerWithCard(int playerIdx, String city, int cardIdx) {
-        super(playerIdx, city);
+    public MovePlayerWithCard(MoveType type, int playerToMove, String city, int cardIdx, int playerDiscarding) {
+        super(type, playerToMove, city);
         this.cardIdx = cardIdx;
+        this.playerDiscarding = playerDiscarding;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        executed = true;
-        Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
+        Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerHandHash, playerDiscarding);
         Deck<Card> discardPile = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerDeckDiscardHash);
-        cardId = playerHand.getComponents().get(cardIdx).getComponentID();
-        return super.execute(gs) & new DrawCard(playerHand.getComponentID(), discardPile.getComponentID(), cardIdx).execute(gs);
+        DrawCard cardDiscardAction = new DrawCard(playerHand.getComponentID(), discardPile.getComponentID(), cardIdx);
+        if (super.execute(gs) && cardDiscardAction.execute(gs)) {
+            executed = true;
+            cardId = cardDiscardAction.getCardId();
+            return true;
+        }
+        return false;
     }
 
     public Card getCard(AbstractGameState gs) {
         if (!executed) {
-            Deck<Card> deck = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
+            Deck<Card> deck = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerHandHash, playerDiscarding);
             return deck.getComponents().get(cardIdx);
         }
         return (Card) gs.getComponentById(cardId);
@@ -58,11 +63,11 @@ public class MovePlayerWithCard extends MovePlayer {
 
     @Override
     public String toString() {
-        return "Move Player " + playerIdx + " to " + destination + " with card " + cardIdx;
+        return moveType.name() + ": p" + playerToMove + " to " + destination + " with card " + cardIdx + " of p" + playerDiscarding;
     }
 
     @Override
     public AbstractAction copy() {
-        return new MovePlayerWithCard(playerIdx, destination, cardIdx);
+        return new MovePlayerWithCard(moveType, playerToMove, destination, cardIdx, playerDiscarding);
     }
 }
