@@ -47,9 +47,8 @@ public class CatanGUI extends AbstractGUIManager {
         parent.add(createGameStateInfoPanel(gs), new FlowLayout(FlowLayout.LEADING));
 
         // each player have their own panel
-        CatanParameters pp = (CatanParameters) gs.getGameParameters();
-        playerPanels = new PlayerPanel[pp.n_players];
-        for (int i = 0; i < pp.n_players; i++) {
+        playerPanels = new PlayerPanel[gs.getNPlayers()];
+        for (int i = 0; i < gs.getNPlayers(); i++) {
             playerPanels[i] = new PlayerPanel(i);
         }
 
@@ -64,7 +63,8 @@ public class CatanGUI extends AbstractGUIManager {
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         rightPanel.add(playerPanels[2]);
-        rightPanel.add(playerPanels[3]);
+        if (playerPanels.length > 3)
+            rightPanel.add(playerPanels[3]);
         parent.add(rightPanel, new FlowLayout(FlowLayout.RIGHT));
 
         parent.add(actionPanel, new FlowLayout(FlowLayout.TRAILING));
@@ -88,9 +88,8 @@ public class CatanGUI extends AbstractGUIManager {
         gp.add(createGameStateInfoPanel(gs), new FlowLayout(FlowLayout.LEADING));
 
         // each player have their own panel
-        CatanParameters pp = (CatanParameters) gs.getGameParameters();
-        playerPanels = new PlayerPanel[pp.n_players];
-        for (int i = 0; i < pp.n_players; i++) {
+        playerPanels = new PlayerPanel[gs.getNPlayers()];
+        for (int i = 0; i < gs.getNPlayers(); i++) {
             playerPanels[i] = new PlayerPanel(i);
         }
 
