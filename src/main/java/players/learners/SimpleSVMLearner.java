@@ -42,10 +42,16 @@ public class SimpleSVMLearner extends AbstractLearner {
         svm_problem data = new svm_problem();
         data.l = dataArray.length;
         data.y = new double[dataArray.length];
-        for (int i = 0; i < dataArray.length; i++)
-            data.y[i] = win[i][0];
-
         data.x = new svm_node[dataArray.length][dataArray[0].length];
+
+        for (int i = 0; i < dataArray.length; i++) {
+            data.y[i] = win[i][0];
+            for (int feature = 0; feature < dataArray[0].length; feature++) {
+                data.x[i][feature] = new svm_node();
+                data.x[i][feature].index = i;
+                data.x[i][feature].value = dataArray[i][feature];
+            }
+        }
 
         model = svm.svm_train(data, params);
 
