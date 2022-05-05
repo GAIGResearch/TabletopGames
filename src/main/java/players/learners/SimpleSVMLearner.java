@@ -35,9 +35,9 @@ public class SimpleSVMLearner extends AbstractLearner {
 
         svm_parameter params = new svm_parameter();
         params.gamma = 0.5;
-        params.kernel_type = svm_parameter.LINEAR;
+        params.kernel_type = svm_parameter.RBF;
         params.svm_type = svm_parameter.EPSILON_SVR;
-        params.C = 100;
+        params.C = 10;
 
         svm_problem data = new svm_problem();
         data.l = dataArray.length;

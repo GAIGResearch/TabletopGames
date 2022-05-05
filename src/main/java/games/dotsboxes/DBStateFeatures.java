@@ -66,14 +66,15 @@ public class DBStateFeatures implements IStateFeatureVector, IStateHeuristic {
             int edges = state.countCompleteEdges(cell);
             cellCountByEdges[edges]++;
         }
+        double totalCells = state.cells.size();
         int multiplier = state.getCurrentPlayer() == playerID ? 1 : -1;
-        retValue[2] = cellCountByEdges[2] * multiplier;
+        retValue[2] = cellCountByEdges[2] * multiplier / totalCells;
         retValue[3] = cellCountByEdges[3] * multiplier;
-        retValue[4] = ordinal;
+        retValue[4] = ordinal / (double) state.getNPlayers();
         retValue[5] = state.getCurrentPlayer() == playerID ? 1 : 0;
-        retValue[6] = cellCountByEdges[4] * multiplier;
+        retValue[6] = cellCountByEdges[4] / totalCells;
         retValue[7] = state.getPlayerResults()[playerID] == Utils.GameResult.WIN ? 1.0 : 0.0;
-        retValue[8] = state.isNotTerminal() ? 0.0 : state.getOrdinalPosition(playerID);
+        retValue[8] = state.isNotTerminal() ? 0.0 : state.getOrdinalPosition(playerID) / (double) state.getNPlayers();
         retValue[9] = 1.0;
 
         return retValue;

@@ -21,6 +21,7 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
     double provinceCount = 0.1;
     double duchyCount = 0.0;
     double estateCount = -0.1;
+    double totalCards = 0.0;
 
     public DominionHeuristic() {
         addTunableParameter("victoryPoints", 0.5);
@@ -33,6 +34,7 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
         addTunableParameter("provinceCount", 0.2);
         addTunableParameter("duchyCount", 0.0);
         addTunableParameter("estateCount", -0.1);
+        addTunableParameter("totalCards", 0.0);
     }
 
     @Override
@@ -47,6 +49,7 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
         provinceCount = (double) getParameterValue("provinceCount");
         duchyCount = (double) getParameterValue("duchyCount");
         estateCount = (double) getParameterValue("estateCount");
+        totalCards = (double) getParameterValue("totalCards");
     }
 
 
@@ -111,6 +114,9 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
         if (estateCount != 0.0)
             retValue += estateCount * state.getTotal(playerId, c -> c.cardType() == CardType.ESTATE ? 1 : 0) / 12.0;
 
+        if (totalCards != 0.0)
+            retValue += totalCards * state.getTotalCards(playerId) / 40.0;
+
         return retValue;
     }
 
@@ -128,6 +134,7 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
         retValue.provinceCount = provinceCount;
         retValue.duchyCount = duchyCount;
         retValue.estateCount = estateCount;
+        retValue.totalCards = totalCards;
         return retValue;
     }
 
@@ -138,7 +145,8 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
             return other.victoryPoints == victoryPoints && other.buysLeft == buysLeft && other.actionCards == actionCards &&
                     other.treasureInHand == treasureInHand && other.treasureValue == other.treasureValue &&
                     other.actionCardsInHand == actionCardsInHand && other.actionsLeft == actionsLeft &&
-                    other.estateCount == estateCount && other.duchyCount == duchyCount && other.provinceCount == provinceCount;
+                    other.estateCount == estateCount && other.duchyCount == duchyCount && other.provinceCount == provinceCount &&
+                    other.totalCards == totalCards;
         }
         return false;
     }
