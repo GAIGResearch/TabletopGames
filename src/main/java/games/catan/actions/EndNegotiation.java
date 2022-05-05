@@ -1,14 +1,16 @@
-package games.dicemonastery.actions;
+package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
+import games.catan.CatanGameState;
 
-public class LogEvent extends AbstractAction {
+public class EndNegotiation extends AbstractAction {
+    // This is used as an indication that we are stopping this round of negotiation
 
-    public final String text;
-
-    public LogEvent(String message) {
-        text = message;
+    @Override
+    public String toString() {
+        return "Ends Negotiation";
     }
 
     @Override
@@ -23,21 +25,16 @@ public class LogEvent extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        return (obj instanceof LogEvent) && ((LogEvent) obj).text.equals(text);
+        return obj instanceof EndNegotiation;
     }
 
     @Override
     public int hashCode() {
-        return text.hashCode() - 31;
+        return -322042;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return text;
-    }
-
-    @Override
-    public String toString() {
-        return text;
+        return toString();
     }
 }

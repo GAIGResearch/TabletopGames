@@ -7,6 +7,10 @@ import games.battlelore.gui.BattleloreGUI;
 import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.gui.BlackjackGUIManager;
+import games.catan.CatanForwardModel;
+import games.catan.CatanGameState;
+import games.catan.CatanParameters;
+import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.gui.ColtExpressGUIManager;
@@ -259,17 +263,26 @@ public enum GameType {
                 add(PushYourLuck);
                 add(SimultaneousActionSelection);
             }}),
-    Stratego(2, 2,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(Bluffing);
-                add(Deduction);
-                add(Abstract);
-            }},
+    Catan(3, 4,
+                    new ArrayList<Category>() {{
+        add(Strategy);
+        add(Cards);
+    }},
             new ArrayList<Mechanic>() {{
-                add(Memory);
-                add(GridMovement);
-            }});
+        add(ModularBoard);
+
+    }}),
+        Stratego(2, 2,
+        new ArrayList<Category>() {{
+        add(Strategy);
+        add(Bluffing);
+        add(Deduction);
+        add(Abstract);
+        }},
+        new ArrayList<Mechanic>() {{
+        add(Memory);
+        add(GridMovement);
+        }});
 
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
@@ -312,6 +325,8 @@ public enum GameType {
                 return DominionSizeDistortion;
             case "dominionimprovements":
                 return DominionImprovements;
+            case "catan":
+                return Catan;
             case "battlelore":
                 return Battlelore;
             case "dicemonastery":
@@ -404,6 +419,10 @@ public enum GameType {
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
                 break;
+            case Catan:
+                forwardModel = new CatanForwardModel();
+                gameState = new CatanGameState(params, nPlayers);
+                break;
             case Battlelore:
                 forwardModel = new BattleloreForwardModel();
                 gameState = new BattleloreGameState(params, nPlayers);
@@ -481,6 +500,9 @@ public enum GameType {
             case DominionImprovements:
             case DominionSizeDistortion:
                 gui = new DominionGUIManager(parent, game, ac, human);
+                break;
+            case Catan:
+                gui = new CatanGUI(parent, game, ac);
                 break;
             // TODO: Diamant GUI
             case Battlelore:
