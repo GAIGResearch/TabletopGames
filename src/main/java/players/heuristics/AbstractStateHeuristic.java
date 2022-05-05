@@ -13,6 +13,7 @@ public abstract class AbstractStateHeuristic implements IStateHeuristic {
 
     protected IStateFeatureVector features;
     protected double[] coefficients;
+    protected IStateHeuristic defaultHeuristic = new LeaderHeuristic();
 
     public AbstractStateHeuristic(String featureVectorClassName, String coefficientsFile) {
         try {
@@ -30,7 +31,7 @@ public abstract class AbstractStateHeuristic implements IStateHeuristic {
     }
     private void loadModel(String coefficientsFile) {
         if (coefficientsFile.isEmpty()) {
-            throw new AssertionError("No file for coefficients specified for AbstractStateHeuristic");
+            // in this case will default to the LeaderHeuristic
         } else {
             File coeffFile = new File(coefficientsFile);
             try (BufferedReader br = new BufferedReader(new FileReader(coeffFile))) {

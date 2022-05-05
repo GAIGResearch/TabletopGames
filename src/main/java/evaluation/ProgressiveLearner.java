@@ -3,7 +3,6 @@ package evaluation;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.ParameterFactory;
-import core.interfaces.IActionFeatureVector;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
 import games.GameType;
@@ -13,11 +12,14 @@ import utilities.StateFeatureListener;
 import utilities.Utils;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static utilities.Utils.getArg;
-import static utilities.Utils.loadClassFromFile;
 
 public class ProgressiveLearner {
 
@@ -25,12 +27,13 @@ public class ProgressiveLearner {
     String dataDir, player;
     AbstractParameters params;
     List<AbstractPlayer> agents;
-    ILearner learner;
+    List<ILearner> learners;
     int nPlayers, matchups, iterations, iter;
     AbstractPlayer[] agentsPerGeneration;
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
     IStateFeatureVector phi;
+    String phiClass;
 
     public ProgressiveLearner(String[] args) {
 
@@ -47,18 +50,21 @@ public class ProgressiveLearner {
         iterations = getArg(args, "iterations", 100);
         agentsPerGeneration = new AbstractPlayer[iterations];
         dataFilesByIteration = new String[iterations];
+        String learnerClass = getArg(args, "learner", "");
+        if (learnerClass.equals(""))
+            throw new IllegalArgumentException("Must specify a learner class");
+        String[] learnerStrings = learnerClass.split("\\|");
+        learners = Arrays.stream(learnerStrings).map(Utils::loadClassFromString).map(o -> (ILearner) o).collect(Collectors.toList());
+
         learnedFilesByIteration = new String[iterations];
         player = getArg(args, "player", "");
         String gameParams = getArg(args, "gameParams", "");
         dataDir = getArg(args, "dir", "");
 
         params = ParameterFactory.createFromFile(gameToPlay, gameParams);
-        String learnerClass = getArg(args, "learner", "");
-        if (learnerClass.equals(""))
-            throw new IllegalArgumentException("Must specify a learner class");
-        learner = Utils.loadClassFromString(learnerClass);
 
-        String phiClass = getArg(args, "statePhi", "");
+
+        phiClass = getArg(args, "statePhi", "");
         if (phiClass.equals(""))
             throw new IllegalArgumentException("Must specify a state feature vector");
         phi = Utils.loadClassFromString(phiClass);
@@ -75,6 +81,8 @@ public class ProgressiveLearner {
                             "\tplayer=        The JSON file of the agent definition to be used. \n" +
                             "\t               This will need to use a heuristic that takes a file input.\n" +
                             "\t               This location(s) for this injection in the JSON file must be marked with '*HEURISTIC*'\n" +
+                            "\t               It can also optionally have class to be used as FeatureVector marked with '*PHI*'\n" +
+                            "\t               in which case the value specifies in the statePhi argument will be injected.\n" +
                             "\tlearner=       The full class name of an ILearner implementation.\n" +
                             "\t               This learner must be compatible with the heuristic - in that it must \n" +
                             "\t               generate a file that the heuristic can read.\n" +
@@ -120,13 +128,15 @@ public class ProgressiveLearner {
 
     private void loadAgents() {
         // For the moment we always use the previous agent - so this is brittle self-play - to be changed later
-        String fileName = iter == 0 ? "" : learnedFilesByIteration[iter-1];
+        String fileName = iter == 0 ? "" : learnedFilesByIteration[iter - 1];
         agents = new LinkedList<>();
         File playerLoc = new File(player);
         if (playerLoc.isDirectory()) {
-            agents.addAll(PlayerFactory.createPlayers(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"), fileName)));
+            agents.addAll(PlayerFactory.createPlayers(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"), fileName)
+                    .replaceAll(Pattern.quote("*PHI*"), phiClass)));
         } else {
-            agents.add(PlayerFactory.createPlayer(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"), fileName)));
+            agents.add(PlayerFactory.createPlayer(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"), fileName)
+                    .replaceAll(Pattern.quote("*PHI*"), phiClass)));
         }
     }
 
@@ -144,10 +154,12 @@ public class ProgressiveLearner {
 
     private void learnFromNewData() {
         // for the moment we will just supply the most recent file
-        learner.learnFrom(dataFilesByIteration[iter]);
+        for (ILearner learner : learners) {
+            learner.learnFrom(dataFilesByIteration[iter]);
 
-        String fileName = String.format("%tF-%s-%s_%d.txt", System.currentTimeMillis(), learner.name(), phi.getClass().getSimpleName(), iter);
-        learnedFilesByIteration[iter] = fileName;
-        learner.writeToFile(fileName);
+            String fileName = String.format("%tF-%s-%s_%d.txt", System.currentTimeMillis(), learner.name(), phi.getClass().getSimpleName(), iter);
+            learnedFilesByIteration[iter] = fileName;
+            learner.writeToFile(fileName);
+        }
     }
 }

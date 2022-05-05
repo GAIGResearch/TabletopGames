@@ -15,6 +15,8 @@ public class LinearStateHeuristic extends AbstractStateHeuristic {
 
     @Override
     public double evaluateState(AbstractGameState state, int playerId) {
+        if (coefficients == null)
+            return defaultHeuristic.evaluateState(state, playerId);
         double[] phi = features.featureVector(state, playerId);
         double retValue = 0.0;
         for (int i = 0; i < phi.length; i++) {
