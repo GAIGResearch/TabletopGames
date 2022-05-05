@@ -42,8 +42,7 @@ public class DBStateFeatures implements IStateFeatureVector, IStateHeuristic {
     public double[] featureVector(AbstractGameState gs, int playerID) {
         double[] retValue = new double[names.length];
         DBGameState state = (DBGameState) gs;
-        // POINTS
-        retValue[0] = state.nCellsPerPlayer[playerID];
+
 
         // POINT_ADVANTAGE
         int ordinal = 1;
@@ -57,9 +56,6 @@ public class DBStateFeatures implements IStateFeatureVector, IStateHeuristic {
             }
         }
 
-        // POINT_ADVANTAGE
-        retValue[1] = state.nCellsPerPlayer[playerID] - maxOtherScore;
-
         // CELLS
         int[] cellCountByEdges = new int[5];
         for (DBCell cell : state.cells) {
@@ -67,9 +63,14 @@ public class DBStateFeatures implements IStateFeatureVector, IStateHeuristic {
             cellCountByEdges[edges]++;
         }
         double totalCells = state.cells.size();
+
+        // POINTS
+        retValue[0] = state.nCellsPerPlayer[playerID] / totalCells * state.getNPlayers();
+        // POINT_ADVANTAGE
+        retValue[1] = (state.nCellsPerPlayer[playerID] - maxOtherScore) / 10.0;
         int multiplier = state.getCurrentPlayer() == playerID ? 1 : -1;
         retValue[2] = cellCountByEdges[2] * multiplier / totalCells;
-        retValue[3] = cellCountByEdges[3] * multiplier;
+        retValue[3] = cellCountByEdges[3] * multiplier / 5.0;
         retValue[4] = ordinal / (double) state.getNPlayers();
         retValue[5] = state.getCurrentPlayer() == playerID ? 1 : 0;
         retValue[6] = cellCountByEdges[4] / totalCells;

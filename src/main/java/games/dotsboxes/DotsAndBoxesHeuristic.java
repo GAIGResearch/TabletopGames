@@ -62,14 +62,11 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
 
         double[] featureVector = featureDefinition.featureVector(state, playerId);
 
-        double maxPoints = 20.0;
-        double totalCells = 10.0;
-
-        double retValue = POINTS * featureVector[0] / maxPoints +
-                POINT_ADVANTAGE * featureVector[1] / maxPoints +
-                TWO_BOXES * featureVector[2] / totalCells +
-                THREE_BOXES * featureVector[3] / totalCells +
-                ORDINAL * featureVector[4] / state.getNPlayers();
+        double retValue = POINTS * featureVector[0]  +
+                POINT_ADVANTAGE * featureVector[1]  +
+                TWO_BOXES * featureVector[2] +
+                THREE_BOXES * featureVector[3] +
+                ORDINAL * featureVector[4];
 
         return retValue;
     }
