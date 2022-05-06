@@ -38,6 +38,7 @@ class PandemicActionFactory {
 
         // Create a list for possible actions, including first move actions
         Set<AbstractAction> actions = new HashSet<>(getMoveActions(pgs, activePlayer, playerHand));
+        actions.add(new EndTurn()); // Player may take up to 4 actions, but can finish the turn earlier if needed
 
         // Build research station, discard card corresponding to current player location to build one, if not already there.
         if (!((PropertyBoolean) playerLocationNode.getProperty(researchStationHash)).value

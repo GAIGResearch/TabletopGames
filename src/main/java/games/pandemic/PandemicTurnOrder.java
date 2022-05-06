@@ -14,6 +14,8 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
     protected int nStepsPerTurn;  // Number of steps in a turn before player's turn is finished
     protected int turnStep;  // 1 turn = n steps (by default n = 1)
 
+    protected boolean skipTurn;
+
     PandemicTurnOrder(int nPlayers, int nActionsPerTurn){
         super(nPlayers);
         turnStep = 0;
@@ -21,7 +23,11 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
     }
 
     public void endPlayerTurnStep() {
-        if (reactivePlayers.size() > 0) reactivePlayers.poll();
+        if (reactivePlayers.size() > 0){ reactivePlayers.poll();}
+        else if (this.skipTurn){
+            turnStep = nStepsPerTurn;
+            this.skipTurn = false;
+        }
         else turnStep++;
     }
 
@@ -75,6 +81,10 @@ public class PandemicTurnOrder extends ReactiveTurnOrder {
             turnCounter = 0;
             moveToNextPlayer(gameState, nextPlayer(gameState));
         }
+    }
+
+    public void skipTurn(){
+        this.skipTurn = true;
     }
 
     @Override

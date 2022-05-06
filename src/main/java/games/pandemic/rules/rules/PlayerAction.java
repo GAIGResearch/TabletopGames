@@ -11,10 +11,7 @@ import core.rules.Node;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicTurnOrder;
-import games.pandemic.actions.Forecast;
-import games.pandemic.actions.MovePlayer;
-import games.pandemic.actions.QuietNight;
-import games.pandemic.actions.TreatDisease;
+import games.pandemic.actions.*;
 import utilities.Hash;
 
 import static core.CoreConstants.playerHandHash;
@@ -85,6 +82,9 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
 //                // Notify turn step only if an event card was not played, or if this was a reaction.
 //                // Event cards are free.
 //            }
+            else if (action instanceof EndTurn){
+                pto.skipTurn();
+            }
             pto.endPlayerTurnStep();
             return true;
         }

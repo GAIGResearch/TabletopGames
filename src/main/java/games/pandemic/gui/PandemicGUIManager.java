@@ -488,7 +488,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
                         actionButtons[k++].setButtonAction(action, gameState);
                     }
                 }
-            } else if (actions.size() > 0 && action instanceof DoNothing || action instanceof TreatDisease) {
+            } else if (actions.size() > 0 && action instanceof DoNothing || action instanceof TreatDisease || action instanceof EndTurn) {
                 actionButtons[k].setVisible(true);
                 actionButtons[k++].setButtonAction(action, gameState);
             } else if (action instanceof CureDisease) {
