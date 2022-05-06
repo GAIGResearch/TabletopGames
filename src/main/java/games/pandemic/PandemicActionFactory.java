@@ -7,6 +7,7 @@ import core.components.Counter;
 import core.components.Deck;
 import core.properties.*;
 import games.pandemic.actions.*;
+import utilities.Hash;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -101,10 +102,13 @@ class PandemicActionFactory {
             }
             for (int i = 0; i < colorCounter.length; i++) {
                 if (colorCounter[i] != null) {
-                    if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.nCardsForCure - pp.nCardsForCureReducedBy) {
-                        actions.add(new CureDisease(colors[i], colorCounter[i]));
-                    } else if (colorCounter[i].size() >= pp.nCardsForCure) {
-                        actions.add(new CureDisease(colors[i], colorCounter[i]));
+                    // Only CureDisease if it has not been already cured
+                    if (((Counter) pgs.getComponent(Hash.GetInstance().hash("Disease " + colors[i]))).getValue() == 0){
+                        if (roleString.equals("Scientist") && colorCounter[i].size() >= pp.nCardsForCure - pp.nCardsForCureReducedBy) {
+                            actions.add(new CureDisease(colors[i], colorCounter[i]));
+                        } else if (colorCounter[i].size() >= pp.nCardsForCure) {
+                            actions.add(new CureDisease(colors[i], colorCounter[i]));
+                        }
                     }
                 }
             }
@@ -295,7 +299,9 @@ class PandemicActionFactory {
         // If current city has research station, add every city that has research stations
         if (((PropertyBoolean)playerLocationNode.getProperty(researchStationHash)).value) {
             for (String station: pgs.researchStationLocations){
-                actions.add(new MovePlayer(MovePlayer.MoveType.ShuttleFlight, playerId, station));
+                if (!station.equals(playerLocationName)) {
+                    actions.add(new MovePlayer(MovePlayer.MoveType.ShuttleFlight, playerId, station));
+                }
             }
         }
 
