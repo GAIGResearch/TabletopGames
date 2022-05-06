@@ -121,6 +121,8 @@ class PandemicActionFactory {
         actions.addAll(getEventActions(pgs));
         actions.remove(new DoNothing());  // Players can't just do nothing in main game phase
 
+        // TODO add 'end turn' action
+
         // Done!
         return new ArrayList<>(actions);
     }

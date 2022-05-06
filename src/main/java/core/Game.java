@@ -143,6 +143,7 @@ public class Game {
                 // We spawn the GUI off in another thread
 
                 GUI frame = new GUI();
+                // TODO: maybe pass frame, to not make window for every new game run (if running multiple). only make new frame if null passed
                 GamePanel gamePanel = new GamePanel();
                 frame.setContentPane(gamePanel);
 
