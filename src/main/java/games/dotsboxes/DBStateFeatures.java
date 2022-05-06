@@ -8,18 +8,12 @@ import utilities.Utils;
 import java.io.*;
 import java.util.Arrays;
 
-public class DBStateFeatures implements IStateFeatureVector, IStateHeuristic {
+public class DBStateFeatures implements IStateFeatureVector {
 
-    boolean logistic = false;
     String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES", "HAS_WON", "FINAL_POSITION", "BIAS"};
     double[] coefficients = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
-    public DBStateFeatures() {
-        this("", false);
-    }
-
-    public DBStateFeatures(String file, boolean logistic) {
-        this.logistic = logistic;
+    public DBStateFeatures(String file) {
         if (!file.isEmpty()) {
             File coeffFile = new File(file);
             try (BufferedReader br = new BufferedReader(new FileReader(coeffFile))) {
@@ -86,15 +80,4 @@ public class DBStateFeatures implements IStateFeatureVector, IStateHeuristic {
         return names;
     }
 
-    @Override
-    public double evaluateState(AbstractGameState state, int playerId) {
-        double[] phi = featureVector(state, playerId);
-        double retValue = 0.0;
-        for (int i = 0; i < phi.length; i++) {
-            retValue += phi[i] * coefficients[i];
-        }
-        if (logistic)
-            return 1.0 / ( 1.0 + Math.exp(-retValue));
-        return retValue;
-    }
 }
