@@ -2,11 +2,7 @@ package games.dotsboxes;
 
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
-import core.interfaces.IStateHeuristic;
 import utilities.Utils;
-
-import java.io.*;
-import java.util.Arrays;
 
 public class DBStateFeatures implements IStateFeatureVector {
 

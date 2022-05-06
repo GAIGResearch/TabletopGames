@@ -13,6 +13,7 @@ public class SVMStateHeuristic implements IStateHeuristic {
 
     IStateFeatureVector features;
     svm_model model;
+    IStateHeuristic defaultHeuristic = new LeaderHeuristic();
 
     public SVMStateHeuristic(String featureVectorClassName, String svmModelLocation) {
         try {
@@ -29,6 +30,8 @@ public class SVMStateHeuristic implements IStateHeuristic {
         loadModel(svmModelLocation);
     }
     private void loadModel(String svmModelLocation) {
+        if (svmModelLocation.isEmpty())
+            return;
         try {
             model = svm.svm_load_model(svmModelLocation);
         } catch (IOException e) {
@@ -39,6 +42,8 @@ public class SVMStateHeuristic implements IStateHeuristic {
 
     @Override
     public double evaluateState(AbstractGameState state, int playerId) {
+        if (model == null)
+            return defaultHeuristic.evaluateState(state, playerId);
         double[] phi = features.featureVector(state, playerId);
         svm_node[] data = new svm_node[phi.length];
         for (int i=0; i < phi.length; i++) {

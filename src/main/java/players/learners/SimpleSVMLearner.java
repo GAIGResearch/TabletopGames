@@ -1,5 +1,6 @@
 package players.learners;
 
+import utilities.Pair;
 import weka.core.Instances;
 
 import java.io.File;
@@ -14,6 +15,18 @@ import libsvm.*;
 public class SimpleSVMLearner extends AbstractLearner {
 
     svm_model model;
+    svm_parameter params = new svm_parameter();
+
+    public SimpleSVMLearner() {
+        params.gamma = 100000.0;
+        params.kernel_type = svm_parameter.RBF;
+        params.degree = 2;
+        params.svm_type = svm_parameter.EPSILON_SVR;
+        params.C = 0.3;
+        params.eps = 0.001;
+        params.p = 0.1;
+        params.shrinking = 1;
+    }
 
     public static void main(String[] args) {
         File dir = new File(args[0]);
@@ -24,7 +37,7 @@ public class SimpleSVMLearner extends AbstractLearner {
 
         SimpleSVMLearner learner = new SimpleSVMLearner();
         learner.learnFrom(files);
-        learner.writeToFile("test_SVM.txt");
+        learner.writeToFile("test_SVM_POLY_def.txt");
     }
 
     @Override
@@ -32,13 +45,6 @@ public class SimpleSVMLearner extends AbstractLearner {
         loadData(files);
 
         // SVM is at least available as a regressor
-
-        svm_parameter params = new svm_parameter();
-        params.gamma = 0.5;
-        params.kernel_type = svm_parameter.RBF;
-        params.svm_type = svm_parameter.EPSILON_SVR;
-        params.C = 10;
-
         svm_problem data = new svm_problem();
         data.l = dataArray.length;
         data.y = new double[dataArray.length];
@@ -54,8 +60,31 @@ public class SimpleSVMLearner extends AbstractLearner {
         }
 
         model = svm.svm_train(data, params);
+    }
+
+    public Pair<Double, Double> validate(String... files) {
+        loadData(files);
+
+        double medianDiff = 0.0;
+        double squaredDiff = 0.0;
+        for (int i = 0; i < dataArray.length; i++) {
+            svm_node[] data = new svm_node[dataArray[0].length];
+            for (int feature = 0; feature < dataArray[0].length; feature++) {
+                data[feature] = new svm_node();
+                data[feature].index = i;
+                data[feature].value = dataArray[i][feature];
+            }
+
+            double prediction = svm.svm_predict(model, data);
+            medianDiff += Math.abs(prediction - win[i][0]);
+            squaredDiff += (prediction - win[i][0])  * (prediction - win[i][0]);
+        }
+
+        return new Pair<>(medianDiff / dataArray.length, squaredDiff / dataArray.length);
 
     }
+
+
 
     @Override
     public boolean writeToFile(String file) {
@@ -73,4 +102,6 @@ public class SimpleSVMLearner extends AbstractLearner {
     public String name() {
         return "SVM";
     }
+
+    public svm_parameter getParams() {return params;}
 }
