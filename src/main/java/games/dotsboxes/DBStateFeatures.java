@@ -11,26 +11,6 @@ import java.util.Arrays;
 public class DBStateFeatures implements IStateFeatureVector {
 
     String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES", "HAS_WON", "FINAL_POSITION", "BIAS"};
-    double[] coefficients = new double[]{0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-
-    public DBStateFeatures(String file) {
-        if (!file.isEmpty()) {
-            File coeffFile = new File(file);
-            try (BufferedReader br = new BufferedReader(new FileReader(coeffFile))) {
-                String[] headers = br.readLine().split("\\t");
-                if (!Arrays.equals(headers, names)) {
-                    throw new AssertionError("Incompatible data in file " + coeffFile);
-                }
-                coefficients = Arrays.stream(br.readLine().split("\\t")).mapToDouble(Double::parseDouble).toArray();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                throw new AssertionError("File not found : " + coeffFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new AssertionError("Error accessing : " + coeffFile);
-            }
-        }
-    }
 
     @Override
     public double[] featureVector(AbstractGameState gs, int playerID) {

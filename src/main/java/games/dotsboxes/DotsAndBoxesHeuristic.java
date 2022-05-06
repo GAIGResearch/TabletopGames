@@ -1,12 +1,10 @@
 package games.dotsboxes;
 
 import core.AbstractGameState;
-import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import utilities.Utils;
 
-import java.util.Arrays;
 
 public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHeuristic {
 
