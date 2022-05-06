@@ -69,6 +69,9 @@ public class InfectCity extends DrawCard {
                 array[colorIdx] += count;
 
                 if (array[colorIdx] > maxCubesPerCity) {  // Outbreak!
+
+                    // TODO: add city where outbreak happen to list in Gamestate (ordered list please)
+
                     Counter outbreakCounter = (Counter) pgs.getComponent(PandemicConstants.outbreaksHash);
 
                     diseaseCubeCounter.decrement(maxCubesPerCity - array[colorIdx]);
@@ -76,6 +79,9 @@ public class InfectCity extends DrawCard {
                     HashSet<BoardNode> allCityOutbreaks = new HashSet<>();  // Make sure we don't get stuck in loop
                     ArrayList<BoardNode> outbreaks = outbreak(bn, gs, colorIdx, diseaseCubeCounter, outbreakCounter);
                     while (outbreaks.size() > 0) {  // Chain reaction
+
+                        // TODO: add these cities where outbreak happen to list in Gamestate
+
                         ArrayList<BoardNode> outbreaks2 = new ArrayList<>();
                         for (BoardNode b2 : outbreaks) {
                             if (!allCityOutbreaks.contains(b2)) {

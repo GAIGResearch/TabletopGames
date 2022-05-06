@@ -42,6 +42,8 @@ public class CureDisease extends AbstractAction {
                 playerDiscard.add(c);
             }
 
+            // TODO also remove cubes of this colour from the city where the medic is, if any
+
             return true;
         }
 
