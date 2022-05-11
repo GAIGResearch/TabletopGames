@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class AbstractLearner implements ILearner {
 
@@ -47,10 +48,10 @@ public abstract class AbstractLearner implements ILearner {
         // we assume (for the moment) that the columns are: GameID, Player, Round, Turn, CurrentScore... Win, Ordinal, FinalScore
         // with ... representing the game specific features
         if (!header[0].equals("GameID") || !header[1].equals("Player") || !header[2].equals("Round") || !header[3].equals("Turn") || !header[4].equals("CurrentScore")) {
-            throw new AssertionError("Unexpected starting header entries");
+            throw new AssertionError("Unexpected starting header entries " + String.join("", header));
         }
         if (!header[header.length - 1].equals("FinalScore") || !header[header.length - 2].equals("Ordinal") || !header[header.length - 3].equals("Win")) {
-            throw new AssertionError("Unexpected final header entries");
+            throw new AssertionError("Unexpected final header entries " + String.join("", header));
         }
         attributes = new ArrayList<>();
         for (int i = 5; i < header.length - 3; i++)
