@@ -27,13 +27,13 @@ public class ProgressiveLearner {
     String dataDir, player;
     AbstractParameters params;
     List<AbstractPlayer> agents;
-    List<ILearner> learners;
+    ILearner learner;
     int nPlayers, matchups, iterations, iter;
     AbstractPlayer[] agentsPerGeneration;
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
     IStateFeatureVector phi;
-    String phiClass;
+    String phiClass, prefix;
 
     public ProgressiveLearner(String[] args) {
 
@@ -53,8 +53,7 @@ public class ProgressiveLearner {
         String learnerClass = getArg(args, "learner", "");
         if (learnerClass.equals(""))
             throw new IllegalArgumentException("Must specify a learner class");
-        String[] learnerStrings = learnerClass.split("\\|");
-        learners = Arrays.stream(learnerStrings).map(Utils::loadClassFromString).map(o -> (ILearner) o).collect(Collectors.toList());
+        learner = Utils.loadClassFromString(learnerClass);
 
         learnedFilesByIteration = new String[iterations];
         player = getArg(args, "player", "");
@@ -63,11 +62,12 @@ public class ProgressiveLearner {
 
         params = ParameterFactory.createFromFile(gameToPlay, gameParams);
 
-
         phiClass = getArg(args, "statePhi", "");
         if (phiClass.equals(""))
             throw new IllegalArgumentException("Must specify a state feature vector");
         phi = Utils.loadClassFromString(phiClass);
+        prefix = getArg(args, "fileName", String.format("%tF-%s", System.currentTimeMillis(), phi.getClass().getSimpleName()));
+
 
     }
 
@@ -83,6 +83,8 @@ public class ProgressiveLearner {
                             "\t               This location(s) for this injection in the JSON file must be marked with '*HEURISTIC*'\n" +
                             "\t               It can also optionally have class to be used as FeatureVector marked with '*PHI*'\n" +
                             "\t               in which case the value specifies in the statePhi argument will be injected.\n" +
+                            "\tfileName=      The prefix to use on the files generate on each learning iteration.\n" +
+                            "\t               The default will use the name of the learner and the system date.\n" +
                             "\tlearner=       The full class name of an ILearner implementation.\n" +
                             "\t               This learner must be compatible with the heuristic - in that it must \n" +
                             "\t               generate a file that the heuristic can read.\n" +
@@ -145,7 +147,7 @@ public class ProgressiveLearner {
         RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers, 1, true, matchups,
                 System.currentTimeMillis(), params);
 
-        String fileName = String.format("%tF-%s_%d.data", System.currentTimeMillis(), phi.getClass().getSimpleName(), iter);
+        String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
         StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi);
         tournament.listeners = Collections.singletonList(dataTracker);
@@ -154,12 +156,10 @@ public class ProgressiveLearner {
 
     private void learnFromNewData() {
         // for the moment we will just supply the most recent file
-        for (ILearner learner : learners) {
             learner.learnFrom(dataFilesByIteration[iter]);
 
-            String fileName = String.format("%tF-%s-%s_%d.txt", System.currentTimeMillis(), learner.name(), phi.getClass().getSimpleName(), iter);
+            String fileName = String.format("%s_%d.txt", prefix, iter);
             learnedFilesByIteration[iter] = fileName;
             learner.writeToFile(fileName);
         }
-    }
 }
