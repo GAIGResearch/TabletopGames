@@ -67,8 +67,6 @@ public class ProgressiveLearner {
             throw new IllegalArgumentException("Must specify a state feature vector");
         phi = Utils.loadClassFromString(phiClass);
         prefix = getArg(args, "fileName", String.format("%tF-%s", System.currentTimeMillis(), phi.getClass().getSimpleName()));
-
-
     }
 
     public static void main(String[] args) {

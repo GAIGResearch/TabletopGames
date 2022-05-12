@@ -2,15 +2,16 @@ package players.heuristics;
 
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStateHeuristic;
 
 
 public class LogisticStateHeuristic extends AbstractStateHeuristic {
 
-    public LogisticStateHeuristic(String featureVectorClassName, String coefficientsFile) {
-        super(featureVectorClassName, coefficientsFile);
+    public LogisticStateHeuristic(String featureVectorClassName, String coefficientsFile, String defaultHeuristicClass) {
+        super(featureVectorClassName, coefficientsFile, defaultHeuristicClass);
     }
-    public LogisticStateHeuristic(IStateFeatureVector featureVector, String coefficientsFile) {
-        super(featureVector, coefficientsFile);
+    public LogisticStateHeuristic(IStateFeatureVector featureVector, String coefficientsFile, IStateHeuristic defaultHeuristic) {
+        super(featureVector, coefficientsFile, defaultHeuristic);
     }
 
     @Override

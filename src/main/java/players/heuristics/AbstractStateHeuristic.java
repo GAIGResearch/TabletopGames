@@ -13,20 +13,27 @@ public abstract class AbstractStateHeuristic implements IStateHeuristic {
 
     protected IStateFeatureVector features;
     protected double[] coefficients;
-    protected IStateHeuristic defaultHeuristic = new LeaderHeuristic();
+    protected IStateHeuristic defaultHeuristic;
 
-    public AbstractStateHeuristic(String featureVectorClassName, String coefficientsFile) {
+    public AbstractStateHeuristic(String featureVectorClassName, String coefficientsFile, String defaultHeuristicClassName) {
         try {
             features = (IStateFeatureVector) Class.forName(featureVectorClassName).getConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
             throw new AssertionError("Problem with Class : " + featureVectorClassName);
         }
+        try {
+            defaultHeuristic = (IStateHeuristic) Class.forName(defaultHeuristicClassName).getConstructor().newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem with Class : " + defaultHeuristicClassName);
+        }
         loadModel(coefficientsFile);
     }
 
-    public AbstractStateHeuristic(IStateFeatureVector featureVector, String coefficientsFile) {
+    public AbstractStateHeuristic(IStateFeatureVector featureVector, String coefficientsFile, IStateHeuristic defaultHeuristic) {
         this.features = featureVector;
+        this.defaultHeuristic = defaultHeuristic;
         loadModel(coefficientsFile);
     }
     private void loadModel(String coefficientsFile) {
