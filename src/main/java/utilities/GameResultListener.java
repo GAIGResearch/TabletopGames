@@ -1,6 +1,5 @@
 package utilities;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
@@ -10,7 +9,6 @@ import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameEvents.*;
 

@@ -3,8 +3,10 @@ package evaluation;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.ParameterFactory;
+import core.interfaces.IGameListener;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStatisticLogger;
 import games.GameType;
 import players.PlayerFactory;
 import utilities.FileStatsLogger;
@@ -12,10 +14,7 @@ import utilities.StateFeatureListener;
 import utilities.Utils;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -28,7 +27,7 @@ public class ProgressiveLearner {
     AbstractParameters params;
     List<AbstractPlayer> agents;
     ILearner learner;
-    int nPlayers, matchups, iterations, iter;
+    int nPlayers, matchups, iterations, iter, finalMatchups;
     AbstractPlayer[] agentsPerGeneration;
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
@@ -47,6 +46,7 @@ public class ProgressiveLearner {
 
         nPlayers = getArg(args, "nPlayers", 2);
         matchups = getArg(args, "matchups", 1);
+        finalMatchups = getArg(args, "finalMatchups", 1000);
         iterations = getArg(args, "iterations", 100);
         agentsPerGeneration = new AbstractPlayer[iterations];
         dataFilesByIteration = new String[iterations];
@@ -91,7 +91,8 @@ public class ProgressiveLearner {
                             "\tmatchups=      Defaults to 1. The number of games to play before the learning process is called.\n" +
                             "\tstatePhi=      The full class name of an IStateFeatureVector implementation that defines the inputs \n" +
                             "\t               to the heuristic used in the player files.\n" +
-                            "\titerations=    Stop after this number of learning iterations. Defaults to 100."
+                            "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n" +
+                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000."
             );
             return;
         }
@@ -124,6 +125,25 @@ public class ProgressiveLearner {
             learnFromNewData();
             iter++;
         } while (iter < iterations);
+
+        // Now we can run a tournament of everyone
+        if (agents.size() == 1) {
+            List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
+            // then add in the default agent that we started with
+            AbstractPlayer defaultAgent = PlayerFactory.createPlayer(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"), "")
+                    .replaceAll(Pattern.quote("*PHI*"), phiClass));
+            defaultAgent.setName("Default Agent");
+            finalAgents.add(defaultAgent);
+            RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers, 1, true, finalMatchups,
+                    System.currentTimeMillis(), params);
+
+            tournament.listeners = new ArrayList<>();
+            IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
+            IGameListener gameTracker = IGameListener.createListener("utilities.GameResultListener", logger);
+            tournament.listeners.add(gameTracker);
+            tournament.runTournament();
+            gameTracker.allGamesFinished();
+        }
     }
 
     private void loadAgents() {
@@ -144,6 +164,7 @@ public class ProgressiveLearner {
         // Run!
         RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers, 1, true, matchups,
                 System.currentTimeMillis(), params);
+        tournament.verbose = false;
 
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
@@ -154,10 +175,17 @@ public class ProgressiveLearner {
 
     private void learnFromNewData() {
         // for the moment we will just supply the most recent file
-            learner.learnFrom(dataFilesByIteration[iter]);
+        learner.learnFrom(dataFilesByIteration[iter]);
 
-            String fileName = String.format("%s_%d.txt", prefix, iter);
-            learnedFilesByIteration[iter] = fileName;
-            learner.writeToFile(fileName);
+        String fileName = String.format("%s_%d.txt", prefix, iter);
+        learnedFilesByIteration[iter] = fileName;
+        learner.writeToFile(fileName);
+
+        // if we only have one agent type, then we can create one agent as the result of this round
+        if (agents.size() == 1) {
+            agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, s -> s.replaceAll(Pattern.quote("*HEURISTIC*"), fileName)
+                    .replaceAll(Pattern.quote("*PHI*"), phiClass));
+            agentsPerGeneration[iter].setName(String.format("Iteration %2d", iter));
         }
+    }
 }

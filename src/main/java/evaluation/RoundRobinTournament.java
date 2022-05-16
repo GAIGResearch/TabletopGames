@@ -32,6 +32,7 @@ public class RoundRobinTournament extends AbstractTournament {
     private int matchUpsRun;
     private int gameCounter;
     private FileStatsLogger dataLogger;
+    public boolean verbose = true;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -149,15 +150,17 @@ public class RoundRobinTournament extends AbstractTournament {
     @Override
     public void runTournament() {
         for (int g = 0; g < games.size(); g++) {
-            System.out.println("Playing " + games.get(g).getGameType().name());
+            if (verbose)
+                System.out.println("Playing " + games.get(g).getGameType().name());
 
             LinkedList<Integer> matchUp = new LinkedList<>();
             createAndRunMatchUp(matchUp, g);
 
-            for (int i = 0; i < this.agents.size(); i++) {
-                System.out.printf("%s got %d points %n", agents.get(i), pointsPerPlayer[i]);
-                System.out.printf("%s won %.1f%% of the games %n", agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun));
-            }
+            if (verbose)
+                for (int i = 0; i < this.agents.size(); i++) {
+                    System.out.printf("%s got %d points %n", agents.get(i), pointsPerPlayer[i]);
+                    System.out.printf("%s won %.1f%% of the games %n", agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun));
+                }
         }
         if (dataLogger != null)
             dataLogger.processDataAndFinish();
@@ -230,9 +233,6 @@ public class RoundRobinTournament extends AbstractTournament {
             }
         }
         games.get(gameIdx).clearListeners();
-  //      for (IGameListener gameTracker : listeners) {
-  //          gameTracker.allGamesFinished();
- //       }
         matchUpsRun++;
     }
 }
