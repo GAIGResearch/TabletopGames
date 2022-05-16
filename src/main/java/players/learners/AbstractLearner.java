@@ -79,8 +79,8 @@ public abstract class AbstractLearner implements ILearner {
 
     protected Instances createInstances() {
         List<String> values = new ArrayList<>();
+        values.add("1");  // so that 'Win' is the first category, which means the coefficients are easier to interpret
         values.add("0");
-        values.add("1");
         attributes.add(new Attribute("Win", values));
         Instances dataInstances = new Instances("data", attributes, dataArray.length);
         for (int i = 0; i < dataArray.length; i++) {

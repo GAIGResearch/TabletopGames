@@ -66,7 +66,7 @@ public class SimpleLogisticLearner extends AbstractLearner {
             double[][] temp = regressor.coefficients();
             coefficients = new double[temp.length];
             for (int i = 0; i < temp.length; i++)
-                coefficients[i] = temp[i][1];
+                coefficients[i] = temp[i][0];
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -87,6 +87,8 @@ public class SimpleLogisticLearner extends AbstractLearner {
 
     @Override
     public boolean writeToFile(String file) {
+        // TODO: The intercept is actually the first parameter, and the BIAS attribute (if it exists) has been excised from order.
+        // To be fixed.
         try (FileWriter writer = new FileWriter(file, false)) {
             writer.write(String.join("\t", descriptions) + "\n");
             writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.4g", d)).collect(Collectors.joining("\t")));
