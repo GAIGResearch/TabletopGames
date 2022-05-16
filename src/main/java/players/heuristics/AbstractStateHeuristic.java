@@ -36,6 +36,7 @@ public abstract class AbstractStateHeuristic implements IStateHeuristic {
         this.defaultHeuristic = defaultHeuristic;
         loadModel(coefficientsFile);
     }
+
     private void loadModel(String coefficientsFile) {
         if (coefficientsFile.isEmpty()) {
             // in this case will default to the LeaderHeuristic
@@ -43,7 +44,9 @@ public abstract class AbstractStateHeuristic implements IStateHeuristic {
             File coeffFile = new File(coefficientsFile);
             try (BufferedReader br = new BufferedReader(new FileReader(coeffFile))) {
                 String[] headers = br.readLine().split("\\t");
-                if (!Arrays.equals(headers, features.names())) {
+                String[] withoutBias = new String[headers.length - 1];
+                System.arraycopy(headers, 1, withoutBias, 0, withoutBias.length);
+                if (!Arrays.equals(withoutBias, features.names())) {
                     throw new AssertionError("Incompatible data in file " + coeffFile);
                 }
                 coefficients = Arrays.stream(br.readLine().split("\\t")).mapToDouble(Double::parseDouble).toArray();

@@ -54,6 +54,7 @@ public abstract class AbstractLearner implements ILearner {
             throw new AssertionError("Unexpected final header entries " + String.join("", header));
         }
         attributes = new ArrayList<>();
+        attributes.add(new Attribute("BIAS"));
         for (int i = 5; i < header.length - 3; i++)
             attributes.add(new Attribute(header[i]));
         dataArray = new double[data.size()][];
@@ -70,8 +71,9 @@ public abstract class AbstractLearner implements ILearner {
             ordinal[i][0] = allData[header.length - 2];
             finalScore[i][0] = allData[header.length - 1];
             currentScore[i][0] = allData[4];
-            double[] regressionData = new double[header.length - 8];
-            System.arraycopy(allData, 5, regressionData, 0, regressionData.length);
+            double[] regressionData = new double[header.length - 7];
+            regressionData[0] = 1.0; // the bias term
+            System.arraycopy(allData, 5, regressionData, 1, regressionData.length - 1);
             dataArray[i] = regressionData;
         }
 
@@ -79,15 +81,16 @@ public abstract class AbstractLearner implements ILearner {
 
     protected Instances createInstances() {
         List<String> values = new ArrayList<>();
-        values.add("1");  // so that 'Win' is the first category, which means the coefficients are easier to interpret
         values.add("0");
+        values.add("1");
         attributes.add(new Attribute("Win", values));
-        Instances dataInstances = new Instances("data", attributes, dataArray.length);
+        Instances dataInstances = new Instances("data", attributes, dataArray.length - 1);
         for (int i = 0; i < dataArray.length; i++) {
             double[] record = dataArray[i];
             double[] XandY = new double[record.length + 1];
             System.arraycopy(record, 0, XandY, 0, record.length);
-            XandY[record.length] = win[i][0];
+            XandY[record.length] = 1.0 - win[i][0]; // this puts the first category (0) for a win, and the second (1) as a loss.
+            // this means that we learn a classifier to identify wins, and the coefficients are more naturally interpretable
             dataInstances.add(new DenseInstance(1.0, XandY));
         }
         dataInstances.setClassIndex(attributes.size() - 1);

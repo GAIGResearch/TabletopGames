@@ -6,7 +6,7 @@ import utilities.Utils;
 
 public class DBStateFeatures implements IStateFeatureVector {
 
-    String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES", "HAS_WON", "FINAL_POSITION", "BIAS"};
+    String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES", "HAS_WON", "FINAL_POSITION"};
 
     @Override
     public double[] featureVector(AbstractGameState gs, int playerID) {
@@ -46,7 +46,6 @@ public class DBStateFeatures implements IStateFeatureVector {
         retValue[6] = cellCountByEdges[4] / totalCells;
         retValue[7] = state.getPlayerResults()[playerID] == Utils.GameResult.WIN ? 1.0 : 0.0;
         retValue[8] = state.isNotTerminal() ? 0.0 : state.getOrdinalPosition(playerID) / (double) state.getNPlayers();
-        retValue[9] = 1.0;
 
         return retValue;
     }

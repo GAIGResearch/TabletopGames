@@ -87,10 +87,8 @@ public class SimpleLogisticLearner extends AbstractLearner {
 
     @Override
     public boolean writeToFile(String file) {
-        // TODO: The intercept is actually the first parameter, and the BIAS attribute (if it exists) has been excised from order.
-        // To be fixed.
         try (FileWriter writer = new FileWriter(file, false)) {
-            writer.write(String.join("\t", descriptions) + "\n");
+            writer.write("Bias\t" + String.join("\t", descriptions) + "\n");
             writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.4g", d)).collect(Collectors.joining("\t")));
         } catch (Exception e) {
             e.printStackTrace();
