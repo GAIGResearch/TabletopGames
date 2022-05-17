@@ -28,7 +28,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
     public boolean opponents;  // tiles or tags by opponent players (if false, own cards only)
     public boolean onMars;  // tiles placed on mars only?
 
-    public boolean complete;
+    transient public boolean complete;
 
     public ModifyPlayerResource(int player, int change, TMTypes.Resource resource, boolean production) {
         // Used for other free effects

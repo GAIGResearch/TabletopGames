@@ -34,6 +34,11 @@ public class GlobalParameterEffect extends Effect {
     }
 
     @Override
+    public Effect copySerializable() {
+        return new GlobalParameterEffect(mustBeCurrentPlayer, effectAction.copySerializable(), globalParameter);
+    }
+
+    @Override
     public boolean canExecute(TMGameState gameState, TMAction actionTaken, int player) {
         if (!(actionTaken instanceof ModifyGlobalParameter) || !super.canExecute(gameState, actionTaken, player)) return false;
         ModifyGlobalParameter action = (ModifyGlobalParameter) actionTaken;

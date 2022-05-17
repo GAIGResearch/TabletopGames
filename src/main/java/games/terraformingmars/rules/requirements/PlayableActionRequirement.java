@@ -55,6 +55,11 @@ public class PlayableActionRequirement implements Requirement<TMGameState> {
     }
 
     @Override
+    public Requirement<TMGameState> copySerializable() {
+        return new PlayableActionRequirement((action != null? action.copySerializable() : null));
+    }
+
+    @Override
     public String toString() {
         return "Playable Action";
     }

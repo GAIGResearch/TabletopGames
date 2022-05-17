@@ -1,5 +1,7 @@
 package games.terraformingmars.components;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import core.components.Card;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -27,12 +29,12 @@ public class TMCard extends Card {
 
     public Effect[] persistingEffects;
     public TMAction firstAction;  // first action for the player is already decided to be this
-    public boolean firstActionExecuted;
-    public boolean actionPlayed;
+    transient public boolean firstActionExecuted;
+    transient public boolean actionPlayed;
     public TMAction[] actions;  // new actions available to the player
     public TMAction[] immediateEffects; // effect of this card, executed immediately
 
-    public int mapTileIDTilePlaced = -1;  // Location where tile was placed, ID of grid cell
+    transient public int mapTileIDTilePlaced = -1;  // Location where tile was placed, ID of grid cell
 
     public double nPoints;
     public TMTypes.Resource pointsResource;  // Type of resource placed on this card earning points, number of points will be nPoints * nResources
@@ -42,7 +44,7 @@ public class TMCard extends Card {
     public boolean pointsTileAdjacent;  // If true, only count tiles of type adjacent to tile placed by card
 
     public TMTypes.Resource resourceOnCard;
-    public int nResourcesOnCard;  // One count for each type of token
+    transient public int nResourcesOnCard;  // One count for each type of token
     public boolean canResourcesBeRemoved = true;
 
     public TMCard() {
@@ -56,7 +58,7 @@ public class TMCard extends Card {
         requirements = new HashSet<>();
     }
 
-    public TMCard(String name, int componentID) {
+    private TMCard(String name, int componentID) {
         super(name, componentID);
     }
 
@@ -589,6 +591,71 @@ public class TMCard extends Card {
         copy.nResourcesOnCard = nResourcesOnCard;
         copy.canResourcesBeRemoved = canResourcesBeRemoved;
         copyComponentTo(copy);
+        return copy;
+    }
+
+    public TMCard copySerializable() {
+        TMCard copy = new TMCard(componentName, componentID);
+        copy.number = number;
+        copy.cardType = cardType;
+        copy.annotation = annotation;
+        copy.cost = cost;
+        if (requirements != null && requirements.size() > 0) {
+            copy.requirements = new HashSet<>();
+            for (Requirement r: requirements) {
+                copy.requirements.add(r.copySerializable());
+            }
+        } else copy.requirements = null;
+        if (tags != null && tags.length > 0) {
+            copy.tags = tags.clone();
+        } else copy.tags = null;
+        if (discountEffects != null && discountEffects.size() > 0) {
+            copy.discountEffects = new HashMap<>();
+            for (Requirement r: discountEffects.keySet()) {
+                copy.discountEffects.put(r.copySerializable(), discountEffects.get(r));
+            }
+        } else copy.discountEffects = null;
+        if (resourceMappings != null && resourceMappings.size() > 0) {
+            copy.resourceMappings = new HashSet<>();
+            for (TMGameState.ResourceMapping rm: resourceMappings) {
+                copy.resourceMappings.add(rm.copy());
+            }
+        } else copy.resourceMappings = null;
+        if (persistingEffects != null && persistingEffects.length > 0) {
+            copy.persistingEffects =  new Effect[persistingEffects.length];
+            for (int i = 0; i < persistingEffects.length; i++) {
+                if (persistingEffects[i] != null) {
+                    copy.persistingEffects[i] = persistingEffects[i].copySerializable();
+                }
+            }
+        } else copy.persistingEffects = null;
+        if (firstAction != null) {
+            copy.firstAction = firstAction.copySerializable();
+        } else copy.firstAction = null;
+        if (actions != null && actions.length > 0) {
+            copy.actions = new TMAction[actions.length];
+            for (int i = 0; i < actions.length; i++) {
+                copy.actions[i] = actions[i].copySerializable();
+            }
+        } else copy.actions = null;
+        if (immediateEffects != null && immediateEffects.length > 0) {
+            copy.immediateEffects = new TMAction[immediateEffects.length];
+            for (int i = 0; i < immediateEffects.length; i++) {
+                copy.immediateEffects[i] = immediateEffects[i].copySerializable();
+            }
+        } else copy.immediateEffects = null;
+        copy.mapTileIDTilePlaced = mapTileIDTilePlaced;
+        copy.nPoints = nPoints;
+        copy.pointsResource = pointsResource;
+        copy.pointsThreshold = pointsThreshold;
+        copy.pointsTag = pointsTag;
+        copy.pointsTile = pointsTile;
+        copy.pointsTileAdjacent = pointsTileAdjacent;
+        copy.resourceOnCard = resourceOnCard;
+        copy.nResourcesOnCard = nResourcesOnCard;
+        copy.canResourcesBeRemoved = canResourcesBeRemoved;
+        copyComponentTo(copy);
+        if (properties.size() == 0) copy.properties = null;
         return copy;
     }
 }

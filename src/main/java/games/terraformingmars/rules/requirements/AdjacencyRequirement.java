@@ -79,6 +79,18 @@ public class AdjacencyRequirement implements Requirement<Group<TMGameState, TMMa
     }
 
     @Override
+    public Requirement<Group<TMGameState, TMMapTile, Integer>> copySerializable() {
+        AdjacencyRequirement copy = new AdjacencyRequirement();
+        if (tileTypes != null && tileTypes.size() > 0) {
+            copy.tileTypes = new HashMap<>(tileTypes);
+        }
+        copy.noneAdjacent = noneAdjacent;
+        copy.owned = owned;
+        copy.reversed = reversed;
+        return copy;
+    }
+
+    @Override
     public String toString() {
         return "Adjacency";
     }

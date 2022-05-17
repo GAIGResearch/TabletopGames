@@ -41,4 +41,5 @@ public abstract class Effect {
     }
 
     public abstract Effect copy();
+    public abstract Effect copySerializable();
 }

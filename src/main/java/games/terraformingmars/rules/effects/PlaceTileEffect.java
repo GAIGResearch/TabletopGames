@@ -60,4 +60,13 @@ public class PlaceTileEffect extends Effect {
         }
         return ef;
     }
+
+    @Override
+    public Effect copySerializable() {
+        PlaceTileEffect ef = new PlaceTileEffect(mustBeCurrentPlayer, effectAction.copySerializable(), onMars, tile, resourceTypeGained);
+        if (resourceTypeGained != null && resourceTypeGained.length > 0) {
+            ef.resourceTypeGained = resourceTypeGained.clone();
+        }
+        return ef;
+    }
 }

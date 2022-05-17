@@ -33,4 +33,11 @@ public class PayForActionEffect extends Effect {
         copy.minCost = minCost;
         return copy;
     }
+
+    @Override
+    public Effect copySerializable() {
+        PayForActionEffect copy = new PayForActionEffect(mustBeCurrentPlayer, effectAction.copySerializable(), actionType);
+        copy.minCost = minCost;
+        return copy;
+    }
 }

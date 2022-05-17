@@ -20,8 +20,10 @@ public class ResourcesOnCardsRequirement implements Requirement<TMGameState> {
         this.nMin = nMin;
 
         nResources = 0;
-        for (int k = 0; k < resources.length; k++) {
-            nResources += nMin[k];
+        if (resources != null) {
+            for (int k = 0; k < resources.length; k++) {
+                nResources += nMin[k];
+            }
         }
     }
 
@@ -96,6 +98,11 @@ public class ResourcesOnCardsRequirement implements Requirement<TMGameState> {
     @Override
     public ResourcesOnCardsRequirement copy() {
         return new ResourcesOnCardsRequirement(resources.clone(), nMin.clone());
+    }
+
+    @Override
+    public Requirement<TMGameState> copySerializable() {
+        return new ResourcesOnCardsRequirement(resources != null && resources.length > 0 ? resources.clone() : null, nMin != null && nMin.length > 0 ? nMin.clone() : null);
     }
 
     @Override

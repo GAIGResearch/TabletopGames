@@ -902,8 +902,8 @@ public class TMCardView extends JComponent {
         drawShadowStringCentered(g, text, new Rectangle(x, y, textWidth, size));
 
         TMTypes.Tag tag = aa.tagRequirement;
-        Class<? extends TMAction> actionClass = aa.actionClass;
-        if (actionClass.equals(ModifyPlayerResource.class)) {
+        String actionClassName = aa.actionClassName;
+        if (actionClassName.equalsIgnoreCase("ModifyPlayerResource")) {
             boolean prod = aa.production;
             Image resImg = ImageIO.GetInstance().getImage(tag.getImagePath());
             drawResource(g, resImg, production, prod, x + spacing/5 + textWidth, y, size, 0.6);

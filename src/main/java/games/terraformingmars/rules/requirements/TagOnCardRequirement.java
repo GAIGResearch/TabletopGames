@@ -64,6 +64,13 @@ public class TagOnCardRequirement implements Requirement<TMCard> {
     }
 
     @Override
+    public Requirement<TMCard> copySerializable() {
+        TagOnCardRequirement t = new TagOnCardRequirement(tags);
+        if (tags != null && tags.length > 0) t.tags = tags.clone();
+        return t;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TagOnCardRequirement)) return false;

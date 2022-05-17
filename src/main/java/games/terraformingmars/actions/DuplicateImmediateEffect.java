@@ -13,21 +13,21 @@ import java.util.Objects;
 
 public class DuplicateImmediateEffect extends TMAction implements IExtendedSequence {
     final public TMTypes.Tag tagRequirement;  // tag card chosen must have
-    final public Class<? extends TMAction> actionClass;  // what type of effect can be duplicated
+    final public String actionClassName;  // what type of effect can be duplicated
     final public boolean production;  // If modify player resource, must it be production?
 
-    public DuplicateImmediateEffect(TMTypes.Tag tagRequirement, Class<? extends TMAction> actionClass, boolean production) {
+    public DuplicateImmediateEffect(TMTypes.Tag tagRequirement, String actionClassName, boolean production) {
         super(-1, true);
-        this.actionClass = actionClass;
+        this.actionClassName = actionClassName;
         this.tagRequirement = tagRequirement;
         this.production = production;
         this.setCardID(-1);
     }
 
-    public DuplicateImmediateEffect(int player, int cardID, Class<? extends TMAction> actionClass, TMTypes.Tag tagRequirement, boolean production) {
+    public DuplicateImmediateEffect(int player, int cardID, String actionClassName, TMTypes.Tag tagRequirement, boolean production) {
         super(player, true);
         this.setCardID(cardID);
-        this.actionClass = actionClass;
+        this.actionClassName = actionClassName;
         this.tagRequirement = tagRequirement;
         this.production = production;
     }
@@ -41,7 +41,7 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
                 for (TMTypes.Tag t : card.tags) {
                     if (t == tagRequirement) {
                         for (TMAction action : card.immediateEffects) {
-                            if (action.getClass().equals(actionClass) && (!actionClass.equals(ModifyPlayerResource.class) || ((ModifyPlayerResource) action).production == production)) {
+                            if (action.getClass().getSimpleName().equalsIgnoreCase(actionClassName) && (!actionClassName.equalsIgnoreCase("ModifyPlayerResource") || ((ModifyPlayerResource) action).production == production)) {
                                 gameState.getPlayerCardChoice()[player].add(card);
                                 found = true;
                                 break;
@@ -59,7 +59,7 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
             // Execute all effects that match this on the card
             TMCard card = (TMCard) gameState.getComponentById(getCardID());
             for (TMAction action : card.immediateEffects) {
-                if (action.getClass().equals(actionClass) && (!actionClass.equals(ModifyPlayerResource.class) || ((ModifyPlayerResource) action).production == production)) {
+                if (action.getClass().getSimpleName().equalsIgnoreCase(actionClassName) && (!actionClassName.equalsIgnoreCase("ModifyPlayerResource") || ((ModifyPlayerResource) action).production == production)) {
                     action.player = player;
                     action.execute(gameState);
                 }
@@ -74,7 +74,7 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
         TMGameState gs = (TMGameState) state;
         List<AbstractAction> actions = new ArrayList<>();
         for (TMCard card: gs.getPlayerCardChoice()[player].getComponents()) {
-            actions.add(new DuplicateImmediateEffect(player, card.getComponentID(), actionClass, tagRequirement, production));
+            actions.add(new DuplicateImmediateEffect(player, card.getComponentID(), actionClassName, tagRequirement, production));
         }
         return actions;
     }
@@ -103,7 +103,7 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
 
     @Override
     public DuplicateImmediateEffect _copy() {
-        return new DuplicateImmediateEffect(player, getCardID(), actionClass, tagRequirement, production);
+        return new DuplicateImmediateEffect(player, getCardID(), actionClassName, tagRequirement, production);
     }
 
     @Override
@@ -112,11 +112,11 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
         if (!(o instanceof DuplicateImmediateEffect)) return false;
         if (!super.equals(o)) return false;
         DuplicateImmediateEffect that = (DuplicateImmediateEffect) o;
-        return production == that.production && tagRequirement == that.tagRequirement && Objects.equals(actionClass, that.actionClass);
+        return production == that.production && tagRequirement == that.tagRequirement && Objects.equals(actionClassName, that.actionClassName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), tagRequirement, actionClass, production);
+        return Objects.hash(super.hashCode(), tagRequirement, actionClassName, production);
     }
 }

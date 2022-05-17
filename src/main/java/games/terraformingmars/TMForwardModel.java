@@ -1,5 +1,6 @@
 package games.terraformingmars;
 
+import com.google.gson.*;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
@@ -12,10 +13,13 @@ import games.terraformingmars.components.Award;
 import games.terraformingmars.components.Milestone;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
+import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.TagOnCardRequirement;
 import utilities.Utils;
 import utilities.Vector2D;
 
+import java.io.FileWriter;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.*;
@@ -95,6 +99,26 @@ public class TMForwardModel extends AbstractForwardModel {
             }
             e.loadBoard(gs.board, gs.extraTiles, gs.bonuses, gs.milestones, gs.awards, gs.globalParameters);
         }
+
+//        TMCard cccc = null;
+//        try {
+//            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//
+//            FileWriter fw = new FileWriter("data/terraformingmars/projectCards/jsonCards.json");
+//            fw.write("[");
+//            for (TMCard c: gs.projectCards.getComponents()) {
+//                cccc = c;
+//                fw.write(gson.toJson(c.copySerializable()) + ",");
+//                fw.flush();
+//            }
+//            fw.write("]");
+//            fw.flush();
+//            fw.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            System.out.println(cccc.toString());
+//        }
+
         if (gs.getNPlayers() == 1) {
             // Disable milestones and awards for solo play
             gs.milestones = new HashSet<>();

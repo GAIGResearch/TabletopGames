@@ -39,4 +39,5 @@ public interface Requirement<T> {
     }
 
     Requirement<T> copy();
+    default Requirement<T> copySerializable() {return copy();}
 }

@@ -20,6 +20,7 @@ public class TagsPlayedRequirement implements Requirement<TMGameState> {
         this.nMin = nMin;
 
         nTags = 0;
+        if (tags != null && nMin != null)
         for (int k = 0; k < tags.length; k++) {
             nTags += nMin[k];
         }
@@ -88,6 +89,11 @@ public class TagsPlayedRequirement implements Requirement<TMGameState> {
     @Override
     public TagsPlayedRequirement copy() {
         return new TagsPlayedRequirement(tags.clone(), nMin.clone());
+    }
+
+    @Override
+    public Requirement<TMGameState> copySerializable() {
+        return new TagsPlayedRequirement(tags != null && tags.length > 0 ? tags.clone() : null, nMin != null && nMin.length > 0 ? nMin.clone() : null);
     }
 
     @Override

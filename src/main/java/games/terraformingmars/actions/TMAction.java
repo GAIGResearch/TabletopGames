@@ -32,8 +32,8 @@ public class TMAction extends AbstractAction {
 
     private int cost = 0;
     private TMTypes.Resource costResource;
-    private int playCardID = -1;  // Card used to play this action (factors into the cost of the action)
-    private int cardID = -1;  // Card related to the action (does not factor into the cost)
+    transient private int playCardID = -1;  // Card used to play this action (factors into the cost of the action)
+    transient private int cardID = -1;  // Card related to the action (does not factor into the cost)
 
     public TMAction(TMTypes.ActionType actionType, int player, boolean free) {
         this.player = player;
@@ -208,6 +208,30 @@ public class TMAction extends AbstractAction {
                 action.requirements.add(r.copy());
             }
         }
+        action.actionType = actionType;
+        action.standardProject = standardProject;
+        action.basicResourceAction = basicResourceAction;
+        action.cost = cost;
+        action.costResource = costResource;
+        action.playCardID = playCardID;
+        action.cardID = cardID;
+        return action;
+    }
+
+    public TMAction copySerializable() {
+        TMAction action = _copy();
+        action.freeActionPoint = freeActionPoint;
+        action.player = player;
+        action.pass = pass;
+        if (costRequirement != null) {
+            action.costRequirement = costRequirement.copy();
+        }
+        if (requirements != null && requirements.size() > 0) {
+            action.requirements = new HashSet<>();
+            for (Requirement r : requirements) {
+                action.requirements.add(r.copy());
+            }
+        } else action.requirements = null;
         action.actionType = actionType;
         action.standardProject = standardProject;
         action.basicResourceAction = basicResourceAction;
@@ -530,9 +554,7 @@ public class TMAction extends AbstractAction {
             // Duplicate action, format: duplicate-Building-ModifyPlayerResource-true
             String[] split = encoding.split("-");
             TMTypes.Tag t = Utils.searchEnum(TMTypes.Tag.class, split[1]);
-            if (split[2].equalsIgnoreCase("ModifyPlayerResource")) {
-                effect = new DuplicateImmediateEffect(t, ModifyPlayerResource.class, split[3].equalsIgnoreCase("true"));
-            }
+            effect = new DuplicateImmediateEffect(t, split[2], split[3].equalsIgnoreCase("true"));
         } else if (encoding.contains("look")) {
             // Look at top X cards, keep/buy N cards, discard the rest: look-nLook-nKeep-buy
             String[] split = encoding.split("-");
@@ -540,10 +562,6 @@ public class TMAction extends AbstractAction {
             int nCardsKeep = Integer.parseInt(split[2]);
             boolean buy = Boolean.parseBoolean(split[3]);
             effect = new TopCardDecision(nCardsLook, nCardsKeep, buy);
-        }
-
-        if (effect == null) {
-            int a = 0;
         }
         return new Pair<>(effect, effectString);
     }

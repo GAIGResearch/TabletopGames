@@ -35,6 +35,11 @@ public class PlayCardEffect extends Effect {
     }
 
     @Override
+    public Effect copySerializable() {
+        return new PlayCardEffect(mustBeCurrentPlayer, (effectAction != null? effectAction.copySerializable() : null), (tagsOnCard != null && tagsOnCard.size() > 0 ? new HashSet<>(tagsOnCard) : null));
+    }
+
+    @Override
     public boolean canExecute(TMGameState gameState, TMAction actionTaken, int player) {
         // PlayCard is always wrapped in PayForAction
         if (!(actionTaken instanceof PayForAction) || !super.canExecute(gameState, actionTaken, player)) return false;

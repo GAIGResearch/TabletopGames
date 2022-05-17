@@ -9,11 +9,11 @@ import java.util.Objects;
 
 public class ClaimableAwardMilestoneRequirement implements Requirement<TMGameState> {
 
-    final int amID;
+    final int awardMilestoneID;
     final int player;
 
     public ClaimableAwardMilestoneRequirement(int amID, int player) {
-        this.amID = amID;
+        this.awardMilestoneID = amID;
         this.player = player;
     }
 
@@ -23,7 +23,7 @@ public class ClaimableAwardMilestoneRequirement implements Requirement<TMGameSta
         if (p == -1) {
             p = gs.getCurrentPlayer();
         }
-        Award am = (Award) gs.getComponentById(amID);
+        Award am = (Award) gs.getComponentById(awardMilestoneID);
         return am.canClaim(gs, p);
     }
 
@@ -44,7 +44,7 @@ public class ClaimableAwardMilestoneRequirement implements Requirement<TMGameSta
 
     @Override
     public String getReasonForFailure(TMGameState gs) {
-        Award am = (Award) gs.getComponentById(amID);
+        Award am = (Award) gs.getComponentById(awardMilestoneID);
         String reasons = "";
         if (am.isClaimed()) reasons += "Already claimed. ";
         else if ((am instanceof Milestone && gs.getnMilestonesClaimed().isMaximum()) || (!(am instanceof Milestone) && gs.getnAwardsFunded().isMaximum())) {
@@ -61,7 +61,7 @@ public class ClaimableAwardMilestoneRequirement implements Requirement<TMGameSta
 
     @Override
     public ClaimableAwardMilestoneRequirement copy() {
-        return new ClaimableAwardMilestoneRequirement(amID, player);
+        return new ClaimableAwardMilestoneRequirement(awardMilestoneID, player);
     }
 
     @Override
@@ -74,11 +74,11 @@ public class ClaimableAwardMilestoneRequirement implements Requirement<TMGameSta
         if (this == o) return true;
         if (!(o instanceof ClaimableAwardMilestoneRequirement)) return false;
         ClaimableAwardMilestoneRequirement that = (ClaimableAwardMilestoneRequirement) o;
-        return amID == that.amID && player == that.player;
+        return awardMilestoneID == that.awardMilestoneID && player == that.player;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(amID, player);
+        return Objects.hash(awardMilestoneID, player);
     }
 }
