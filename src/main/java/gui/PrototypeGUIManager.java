@@ -87,7 +87,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
     }
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (view instanceof AreaView) {
                 ((AreaView) view).updateComponent(gameState.getAllComponents());

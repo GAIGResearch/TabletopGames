@@ -99,7 +99,8 @@ public class TMGUI extends AbstractGUIManager {
             actionMenus.put(t, menu);
             menuBar.add(menu);
         }
-        parent.setJMenuBar(menuBar);
+
+//        parent.setJMenuBar(menuBar);
 
         try {
             GraphicsEnvironment ge =
@@ -299,9 +300,17 @@ public class TMGUI extends AbstractGUIManager {
         tabs.setIconAt(1, new ImageIcon(qmark));
 //        menuBar.add(Box.createHorizontalGlue());
 
-        parent.add(tabs);
+//        parent.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//        tabs.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
 
-        parent.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        parent.setLayout(new BorderLayout());
+        parent.add(tabs, BorderLayout.CENTER);
+        parent.add(menuBar, BorderLayout.NORTH);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        parent.setPreferredSize(new Dimension((int)(screenSize.width*0.95), (int)(screenSize.height*0.95)));
+        parent.revalidate();
+        parent.setVisible(true);
+        parent.repaint();
 
         // TODO: display end of game scoring and winner (separate window?)
     }

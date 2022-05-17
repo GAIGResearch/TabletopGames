@@ -15,6 +15,7 @@ import games.pandemic.PandemicParameters;
 import games.poker.PokerGameParameters;
 import games.stratego.StrategoParams;
 import games.sushigo.SGParameters;
+import games.terraformingmars.TMGameParameters;
 import games.tictactoe.TicTacToeGameParameters;
 import games.uno.UnoGameParameters;
 import games.virus.VirusGameParameters;
@@ -59,6 +60,8 @@ public class ParameterFactory {
                 return new SGParameters(seed);
             case Stratego:
                 return new StrategoParams(seed);
+            case TerraformingMars:
+                return new TMGameParameters(seed);
         }
         throw new AssertionError("No default Parameters specified for Game " + game);
 

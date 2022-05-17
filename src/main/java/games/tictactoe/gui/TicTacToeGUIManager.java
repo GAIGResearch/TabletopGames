@@ -80,7 +80,7 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
     }
 
     @Override
-    protected void _update(AbstractPlayer player, AbstractGameState gameState, boolean actionTaken) {
+    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             view.updateComponent(((TicTacToeGameState)gameState).getGridBoard());
         }

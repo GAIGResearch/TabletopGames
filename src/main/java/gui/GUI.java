@@ -25,6 +25,7 @@ public class GUI extends JFrame {
         pack();
         this.setVisible(true);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         repaint();
     }
 
