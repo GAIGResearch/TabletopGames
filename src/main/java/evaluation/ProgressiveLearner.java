@@ -23,7 +23,7 @@ import static utilities.Utils.getArg;
 public class ProgressiveLearner {
 
     GameType gameToPlay;
-    String dataDir, player, defaultHeuristic;
+    String dataDir, player, defaultHeuristic, heuristic;
     AbstractParameters params;
     List<AbstractPlayer> agents;
     ILearner learner;
@@ -68,6 +68,7 @@ public class ProgressiveLearner {
         phi = Utils.loadClassFromString(phiClass);
         prefix = getArg(args, "fileName", String.format("%tF-%s", System.currentTimeMillis(), phi.getClass().getSimpleName()));
         defaultHeuristic = getArg(args, "defaultHeuristic", "players.heuristics.NullHeuristic");
+        heuristic = getArg(args, "heuristic", "players.heuristics.LinearStateHeuristic");
     }
 
     public static void main(String[] args) {
@@ -80,7 +81,8 @@ public class ProgressiveLearner {
                             "\tplayer=        The JSON file of the agent definition to be used. \n" +
                             "\t               This will need to use a heuristic that takes a file input.\n" +
                             "\t               This location(s) for this injection in the JSON file must be marked with '*FILE*'\n" +
-                            "\t               It can also optionally have class to be used as FeatureVector marked with '*PHI*'\n" +
+                            "\t               The content of the 'heuristic' argument will be injected to replace *HEURISTIC* in the file.\n"  +
+                            "\t               It can also optionally have the class to be used as FeatureVector marked with '*PHI*'\n" +
                             "\t               in which case the value specifies in the statePhi argument will be injected.\n" +
                             "\t               A default heuristic can be specified for the initial iteration with '*DEFAULT*'\n" +
                             "\t               in which case the defaultHeuristic argument will be used.\n" +
@@ -94,6 +96,8 @@ public class ProgressiveLearner {
                             "\tmatchups=      Defaults to 1. The number of games to play before the learning process is called.\n" +
                             "\tstatePhi=      The full class name of an IStateFeatureVector implementation that defines the inputs \n" +
                             "\t               to the heuristic used in the player files.\n" +
+                            "\theuristic=     A class name for a heuristic to inject into the Agent JSON defintition (see 'player')\n" +
+                            "\t               Defaults to players.heuristics.LinearStateHeuristic\n" +
                             "\tdefaultHeuristic=Defaults to a null heuristic (random play). This is only used in the first iteration\n" +
                             "\t               when we have no data.  \n" +
                             "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n" +
@@ -166,6 +170,7 @@ public class ProgressiveLearner {
         String fileName = iter == 0 ? "" : learnedFilesByIteration[iter - 1];
         return raw.replaceAll(Pattern.quote("*FILE*"), fileName)
                 .replaceAll(Pattern.quote("*PHI*"), phiClass)
+                .replaceAll(Pattern.quote("*HEURISTIC*"), heuristic)
                 .replaceAll(Pattern.quote("*DEFAULT*"), defaultHeuristic);
     }
 

@@ -19,9 +19,9 @@ public class LinearStateHeuristic extends AbstractStateHeuristic {
         if (coefficients == null)
             return defaultHeuristic.evaluateState(state, playerId);
         double[] phi = features.featureVector(state, playerId);
-        double retValue = 0.0;
+        double retValue = coefficients[0]; // the bias term
         for (int i = 0; i < phi.length; i++) {
-            retValue += phi[i] * coefficients[i];
+            retValue += phi[i] * coefficients[i+1];
         }
         return retValue;
     }

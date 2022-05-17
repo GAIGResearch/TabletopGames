@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.toList;
 
 public class LLStateFeatures implements IStateFeatureVector {
 
-    String[] names = new String[]{"AFFECTION", "ADVANTAGE", "OUR_TURN", "HAS_WON", "FINAL_POSITION", "BIAS",
+    String[] names = new String[]{"AFFECTION", "ADVANTAGE", "OUR_TURN", "HAS_WON", "FINAL_POSITION", "PROTECTED",
             "GUARD", "PRIEST", "BARON", "HANDMAID", "PRINCE", "COUNTESS", "PRINCESS",
             "GUARD_KNOWN", "PRIEST_KNOWN", "BARON_KNOWN", "HANDMAID_KNOWN", "PRINCE_KNOWN", "COUNTESS_KNOWN", "PRINCESS_KNOWN",
             "GUARD_DISCARD", "PRIEST_DISCARD", "BARON_DISCARD", "HANDMAID_DISCARD", "PRINCE_DISCARD", "COUNTESS_DISCARD",
@@ -38,13 +38,11 @@ public class LLStateFeatures implements IStateFeatureVector {
         int otherOffset = 25;
 
         double cardValues = 0;
-        Set<LoveLetterCard.CardType> cardTypes = new HashSet<>();
         PartialObservableDeck<LoveLetterCard> hand = state.getPlayerHandCards().get(playerID);
         for (int i = 0; i < hand.getSize(); i++) {
             boolean[] visibility = hand.getVisibilityOfComponent(i);
             LoveLetterCard card = hand.get(i);
             cardValues += card.cardType.getValue();
-            cardTypes.add(card.cardType);
             int value = card.cardType.getValue();
             retValue[cardsOwnedOffset + value] = 1.0;
             for (int j = 0; j < visibility.length; j++) {
@@ -94,7 +92,7 @@ public class LLStateFeatures implements IStateFeatureVector {
         retValue[2] = state.getCurrentPlayer() == playerID ? 1.0 : 0.0;
         retValue[3] = playerResult == Utils.GameResult.WIN ? 1.0 : 0.0;
         retValue[4] = state.isNotTerminal() ? 0.0 : state.getOrdinalPosition(playerID);
-        retValue[5] = 1.0;
+        retValue[5] = state.isNotProtected(playerID) ? 0.0 : 1.0;
         retValue[names.length - 2] = cardValues / maxCardValue;
         retValue[names.length - 3] = visibleCards / (state.getNPlayers() - 1.0);
         retValue[names.length - 1] = state.getDrawPile().getSize() / 16.0;

@@ -62,7 +62,7 @@ public class SimpleLogisticLearner extends AbstractLearner {
         try {
             //      regressor.setDebug(true);
             regressor.buildClassifier(trainingData);
-            System.out.println(regressor);
+           // System.out.println(regressor);
             double[][] temp = regressor.coefficients();
             coefficients = new double[temp.length];
             for (int i = 0; i < temp.length; i++)
@@ -88,7 +88,7 @@ public class SimpleLogisticLearner extends AbstractLearner {
     @Override
     public boolean writeToFile(String file) {
         try (FileWriter writer = new FileWriter(file, false)) {
-            writer.write("Bias\t" + String.join("\t", descriptions) + "\n");
+            writer.write("BIAS\t" + String.join("\t", descriptions) + "\n");
             writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.4g", d)).collect(Collectors.joining("\t")));
         } catch (Exception e) {
             e.printStackTrace();

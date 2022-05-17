@@ -39,7 +39,7 @@ public abstract class AbstractStateHeuristic implements IStateHeuristic {
 
     private void loadModel(String coefficientsFile) {
         if (coefficientsFile.isEmpty()) {
-            // in this case will default to the LeaderHeuristic
+            // in this case will default to the defaultHeuristic
         } else {
             File coeffFile = new File(coefficientsFile);
             try (BufferedReader br = new BufferedReader(new FileReader(coeffFile))) {

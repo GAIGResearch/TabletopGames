@@ -13,22 +13,30 @@ public class SVMStateHeuristic implements IStateHeuristic {
 
     IStateFeatureVector features;
     svm_model model;
-    IStateHeuristic defaultHeuristic = new LeaderHeuristic();
+    IStateHeuristic defaultHeuristic;
 
-    public SVMStateHeuristic(String featureVectorClassName, String svmModelLocation) {
+    public SVMStateHeuristic(String featureVectorClassName, String svmModelLocation, String defaultHeuristicClassName) {
         try {
             features = (IStateFeatureVector) Class.forName(featureVectorClassName).getConstructor().newInstance();
         } catch (Exception e) {
             e.printStackTrace();
             throw new AssertionError("Problem with Class : " + featureVectorClassName);
         }
+        try {
+            defaultHeuristic = (IStateHeuristic) Class.forName(defaultHeuristicClassName).getConstructor().newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem with Class : " + defaultHeuristicClassName);
+        }
         loadModel(svmModelLocation);
     }
 
-    public SVMStateHeuristic(IStateFeatureVector featureVector, String svmModelLocation) {
+    public SVMStateHeuristic(IStateFeatureVector featureVector, String svmModelLocation, IStateHeuristic defaultHeuristic) {
         this.features = featureVector;
+        this.defaultHeuristic = defaultHeuristic;
         loadModel(svmModelLocation);
     }
+
     private void loadModel(String svmModelLocation) {
         if (svmModelLocation.isEmpty())
             return;
@@ -45,11 +53,14 @@ public class SVMStateHeuristic implements IStateHeuristic {
         if (model == null)
             return defaultHeuristic.evaluateState(state, playerId);
         double[] phi = features.featureVector(state, playerId);
-        svm_node[] data = new svm_node[phi.length];
-        for (int i=0; i < phi.length; i++) {
-            data[i] = new svm_node();
-            data[i].index = i;
-            data[i].value = phi[i];
+        svm_node[] data = new svm_node[phi.length + 1];
+        data[0] = new svm_node(); // bias
+        data[0].index = 0;
+        data[0].value = 1.0;
+        for (int i = 0; i < phi.length; i++) {
+            data[i + 1] = new svm_node();
+            data[i + 1].index = i + 1;
+            data[i + 1].value = phi[i];
         }
         return svm.svm_predict(model, data);
     }
