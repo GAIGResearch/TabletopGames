@@ -82,6 +82,7 @@ public class BoardNode extends Component {
         BoardNode bn = new BoardNode(maxNeighbours, componentName, componentID);
         bn.neighbours = new HashSet<>(neighbours);
         bn.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
+        copyComponentTo(bn);
         return bn;
     }
 

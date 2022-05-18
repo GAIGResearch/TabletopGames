@@ -22,33 +22,19 @@ public class DescentTypes {
     }};
 
     public enum Campaign {
-        HeirsOfBlood("data/descent/campaigns/heirsOfBlood.json");
+        HeirsOfBlood;
 
-        private String dataPath;
-        private String name;
         private Quest[] quests;
-
-        Campaign(String path) {
-            this.dataPath = path;
-        }
-
-        public String getDataPath() {
-            return dataPath;
-        }
-        public String getName() {
-            return name;
-        }
         public Quest[] getQuests() {
             return quests;
         }
 
-        public void load(DescentGameData _data) {
+        public void load(DescentGameData _data, String filePath) {
             JSONParser jsonParser = new JSONParser();
             ArrayList<GridBoard> gridBoards = new ArrayList<>();
 
-            try (FileReader reader = new FileReader(dataPath)) {
+            try (FileReader reader = new FileReader(filePath + "campaigns/" + name() + ".json")) {
                 JSONObject data = (JSONObject) jsonParser.parse(reader);
-                name = (String) data.get("name");
                 JSONArray qs = (JSONArray) data.get("quests");
                 quests = new Quest[qs.size()];
                 int i = 0;

@@ -1,6 +1,7 @@
  [
    {
      "name": ["String","Runemaster"],
+     "visibility" : "VISIBLE_TO_ALL",
      "cards":
      [
       {

@@ -1,6 +1,7 @@
  [
    {
      "name": ["String","Disciple"],
+     "visibility" : "VISIBLE_TO_ALL",
      "cards":
      [
       {

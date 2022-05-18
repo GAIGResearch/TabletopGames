@@ -129,6 +129,8 @@ public class DescentGridBoardView extends ComponentView {
     }
 
     private void drawCell(Graphics2D g, BoardNode bn, int x, int y, int gridWidth, int gridHeight, int offsetX, int offsetY) {
+        if (bn == null) return;
+
         int xC = offsetX + x * defaultItemSize;
         int yC = offsetY + y * defaultItemSize;
 
@@ -137,7 +139,7 @@ public class DescentGridBoardView extends ComponentView {
         g.fillRect(xC, yC, defaultItemSize, defaultItemSize);
 
         // Find connectivity in the graph and draw borders to the cell where connection doesn't exist
-        String terrain = ((PropertyString)bn.getProperty(terrainHash)).value;
+        String terrain = bn.getComponentName();
 
         Stroke s = g.getStroke();
 

@@ -76,10 +76,12 @@ public abstract class AbstractGameState {
         this.turnOrder = turnOrder;
         this.gameType = gameType;
         this.coreGameParameters = new CoreParameters();
+        reset();
     }
     protected AbstractGameState(AbstractParameters gameParameters, GameType type) {
         this.gameParameters = gameParameters;
         this.gameType = type;
+        reset();
     }
 
 
@@ -157,7 +159,7 @@ public abstract class AbstractGameState {
     /**
      * Adds all components given by the game to the allComponents map in the correct way, first clearing the map.
      */
-    protected final void addAllComponents() {
+    public final void addAllComponents() {
         allComponents.clear();
         allComponents.putComponents(_getAllComponents());
     }

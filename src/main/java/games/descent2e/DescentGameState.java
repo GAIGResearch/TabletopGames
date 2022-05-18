@@ -3,8 +3,8 @@ package games.descent2e;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
-import core.components.GraphBoard;
 import core.components.GridBoard;
+import core.components.Token;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
@@ -26,13 +26,13 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     HashMap<Integer, GridBoard> tiles;  // Mapping from board node ID in board configuration to tile configuration
     int[][] tileReferences;  // int corresponds to component ID of tile at that location in master board
     HashMap<String, HashSet<Vector2D>> gridReferences;  // Mapping from tile name to list of coordinates in master board for each cell
+    boolean initData;
+
 
     GridBoard masterBoard;
-
     ArrayList<Hero> heroes;
     Figure overlord;
     ArrayList<ArrayList<Monster>> monsters;
-
     int overlordPlayer;
 
     /**
@@ -45,7 +45,6 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         super(gameParameters, new DescentTurnOrder(nPlayers), GameType.Descent2e);
         tiles = new HashMap<>();
         data = new DescentGameData();
-        data.load(((DescentParameters)gameParameters).getDataPath());
 
         heroes = new ArrayList<>();
         monsters = new ArrayList<>();
@@ -54,6 +53,18 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     @Override
     protected List<Component> _getAllComponents() {
         ArrayList<Component> components = new ArrayList<>();
+        if (!initData) {
+            // Data, only add once at the start to have ready for fm compute
+            components.addAll(data.decks);
+            components.addAll(data.tiles);
+            components.addAll(data.heroes);
+            components.addAll(data.boardConfigurations);
+            for (HashMap<String, Token> m : data.monsters.values()) {
+                components.addAll(m.values());
+            }
+            initData = true;
+        }
+        // Current state
         components.add(masterBoard);
         // TODO
         return components;
@@ -79,6 +90,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         }
         copy.tileReferences = tileReferences.clone();  // TODO deep
         copy.gridReferences = new HashMap<>(gridReferences); // TODO deep
+        copy.initData = initData;
         // TODO
         return copy;
     }

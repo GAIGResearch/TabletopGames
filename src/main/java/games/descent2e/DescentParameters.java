@@ -8,7 +8,7 @@ import static games.descent2e.DescentTypes.Campaign.HeirsOfBlood;
 
 public class DescentParameters extends AbstractParameters {
 
-    public String dataPath = "data/descent/";
+    public String dataPath = "data/descent2e/";
     public DescentTypes.Campaign campaign = HeirsOfBlood;
 
     public int nActionsPerPlayer = 1;  // TODO: 2 move actions?

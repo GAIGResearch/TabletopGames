@@ -30,13 +30,17 @@ public class DescentForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DescentGameState dgs = (DescentGameState) firstState;
+        DescentParameters descentParameters = (DescentParameters) firstState.getGameParameters();
+        dgs.data.load(descentParameters.getDataPath());
+        dgs.initData = false;
+        dgs.addAllComponents();
         DescentGameData _data = dgs.getData();
 
         // TODO: epic play options (pg 19)
 
         // Get campaign from game parameters, load all the necessary information
         Campaign campaign = ((DescentParameters)dgs.getGameParameters()).campaign;
-        campaign.load(_data);
+        campaign.load(_data, descentParameters.dataPath);
         // TODO: Separate shop items (+shuffle), monster and lieutenent cards into 2 acts.
 
         Quest firstQuest = campaign.getQuests()[0];
@@ -308,6 +312,8 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
             GridBoard tile = _data.findGridBoard(tileName);
             if (tile != null) {
+                tile = tile.copy();
+                tile.setComponentName(name);
                 dgs.tiles.put(bn.getComponentID(), tile);
                 dgs.gridReferences.put(name, new HashSet<>());
             }
@@ -388,6 +394,10 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // This is the master board!
             dgs.masterBoard = new GridBoard(trimBoard);
+            for (BoardNode bn: dgs.masterBoard.getComponents()) {
+                if (bn == null) continue;
+                bn.setProperty(new PropertyInt("players", -1));
+            }
             dgs.masterBoard.setNeighbours(neighbours);
         } else {
             System.out.println("Tiles for the map not found");
@@ -412,7 +422,6 @@ public class DescentForwardModel extends AbstractForwardModel {
      * @param bounds - bounds of contents of the master grid board
      */
     // TODO: set property "players" (int) to -1 for all board nodes
-    // TODO: set neighbours directly in the board nodes
     private void addTilesToBoard(BoardNode bn, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
                                  HashMap<Integer, GridBoard> tiles,
@@ -442,7 +451,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                         if (TerrainType.isWalkable(tileGrid[point.getY() - y][point.getX() - x].getComponentName())) {
                             // Connect each cell that can connect to the master board with all possible connections
                             for (Vector2D n2 : boardNs) {
-                                if (TerrainType.isWalkable(board[n2.getY()][n2.getX()].getComponentName()) &&
+                                if (board[n2.getY()][n2.getX()] != null &&
+                                        TerrainType.isWalkable(board[n2.getY()][n2.getX()].getComponentName()) &&
                                         !n2.equals(point)) {
                                     if (Math.abs(point.getY() - n2.getY()) <= 1 && Math.abs(point.getX() - n2.getX()) <= 1) {
                                         neighbours.add(new Pair<>(point.copy(), n2.copy()));
@@ -455,7 +465,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                         List<Vector2D> possible = getNeighbourhood(j, i, board[0].length, board.length, false);
                         Vector2D other = null;
                         for (Vector2D p: possible) {
-                            if (TerrainType.isInsideTile(board[p.getY()][p.getX()].getComponentName())) {
+                            if (board[p.getY()][p.getX()] != null && TerrainType.isInsideTile(board[p.getY()][p.getX()].getComponentName())) {
                                 other = p;
                                 break;
                             }
@@ -496,12 +506,13 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Add cells from new tile to the master board
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
-                    if (board[i][j] != null && (tileGrid[i-y][j-x] == null || tileGrid[i-y][j-x].equals("edge")
-                            || tileGrid[i-y][j-x].equals("null") || tileGrid[i-y][j-x].equals("open"))) continue;
+                    if (board[i][j] != null && (tileGrid[i-y][j-x] == null || tileGrid[i-y][j-x].getComponentName().equals("edge")
+                            || tileGrid[i-y][j-x].getComponentName().equals("open"))) continue;
                     // Avoid removing already set tiles
                     board[i][j] = tileGrid[i-y][j-x];
 
-                    if (board[i][j].equals("edge") || board[i][j].equals("null") || board[i][j].equals("open")) continue;
+                    if (board[i][j] == null || board[i][j].getComponentName().equals("edge")
+                            || board[i][j].getComponentName().equals("open")) continue;
                     // Don't keep references for edge tiles
                     tileReferences[i][j] = tile.getComponentID();
                     for (String s: gridReferences.keySet()) {
@@ -758,7 +769,6 @@ public class DescentForwardModel extends AbstractForwardModel {
                             hpModifierMinion += amount;
                         }
                     } else {
-                        int a = 0;
                         // TODO: other properties modified
                         // TODO: this could be adding/removing abilities too
                     }
