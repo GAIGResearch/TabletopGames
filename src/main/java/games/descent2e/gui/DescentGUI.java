@@ -27,7 +27,7 @@ public class DescentGUI extends AbstractGUIManager {
         width = view.getPreferredSize().width;
         height = view.getPreferredSize().height;
 
-        JPanel infoPanel = createGameStateInfoPanel("Descent", gameState, width, defaultInfoPanelHeight);
+        JPanel infoPanel = createGameStateInfoPanel("Descent2e", gameState, width, defaultInfoPanelHeight);
         JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight);
 
         JPanel north = new JPanel();

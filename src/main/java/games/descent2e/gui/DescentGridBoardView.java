@@ -1,7 +1,6 @@
 package games.descent2e.gui;
 
 import core.components.BoardNode;
-import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.properties.PropertyColor;
 import core.properties.PropertyString;
@@ -23,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 
 import static core.CoreConstants.*;
-import static games.descent2e.DescentConstants.terrainHash;
 import static gui.AbstractGUIManager.defaultItemSize;
 import static utilities.Utils.getNeighbourhood;
 import static utilities.Utils.stringToColor;
@@ -111,6 +109,12 @@ public class DescentGridBoardView extends ComponentView {
                 drawCell(g, gridBoard.getElement(j, i), j, i, gridBoard.getWidth(), gridBoard.getHeight(), x, y);
             }
         }
+        // Draw connectivity graph
+        for (int i = 0; i < gridBoard.getHeight(); i++) {
+            for (int j = 0; j < gridBoard.getWidth(); j++) {
+                drawNeighbourConnections(g, gridBoard.getElement(j, i), j, i, x, y);
+            }
+        }
 
         // Draw grid references
         g.setColor(Color.black);
@@ -140,7 +144,6 @@ public class DescentGridBoardView extends ComponentView {
 
         // Find connectivity in the graph and draw borders to the cell where connection doesn't exist
         String terrain = bn.getComponentName();
-
         Stroke s = g.getStroke();
 
         if (DescentTypes.TerrainType.isWalkable(terrain)) {
@@ -149,11 +152,12 @@ public class DescentGridBoardView extends ComponentView {
             g.drawRect(xC, yC, defaultItemSize, defaultItemSize);
             g.setStroke(new BasicStroke(5));
 
-            List<Vector2D> neighbours = getNeighbourhood(x, y, gridWidth, gridHeight, false);
-            for (Vector2D n : neighbours) {
+            List<Vector2D> neighbourCells = getNeighbourhood(x, y, gridWidth, gridHeight, false);
+            for (Vector2D n : neighbourCells) {
                 BoardNode other = null;
                 for (int nnid : bn.getNeighbours()) {
                     BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
+                    if (nn == null) continue;
                     Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
                     if (location.equals(n)) {
                         other = nn;
@@ -161,6 +165,7 @@ public class DescentGridBoardView extends ComponentView {
                     }
                 }
                 if (other == null) {
+                    // Not a connection between these neighbours, drawing a thick black line on the edge to indicate this
                     if (n.getX() - x == 0) {
                         // Vertical neighbours, draw horizontal line
                         if (n.getY() > y) {
@@ -190,11 +195,18 @@ public class DescentGridBoardView extends ComponentView {
             }
         }
         g.setStroke(s);
+    }
+
+    private void drawNeighbourConnections(Graphics2D g, BoardNode bn, int x, int y, int offsetX, int offsetY) {
+        if (bn == null) return;
+        int xC = offsetX + x * defaultItemSize;
+        int yC = offsetY + y * defaultItemSize;
 
         // Draw underlying graph
         g.setColor(Color.green);
         for (int nnid : bn.getNeighbours()) {
             BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
+            if (nn == null) continue;
             Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
             int xC2 = offsetX + location.getX() * defaultItemSize;
             int yC2 = offsetY + location.getY() * defaultItemSize;
@@ -202,7 +214,6 @@ public class DescentGridBoardView extends ComponentView {
             g.drawLine(xC + defaultItemSize/2, yC + defaultItemSize/2, xC2 + defaultItemSize/2, yC2 + defaultItemSize/2);
         }
         g.setColor(Color.black);
-
     }
 
 }

@@ -69,8 +69,8 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
     @Override
     public int nextPlayer(AbstractGameState gameState) {
+        int nMonsters = ((DescentGameState)gameState).getMonsters().size();
         if (turnOwner == 0) {
-            int nMonsters = ((DescentGameState)gameState).getMonsters().size();
             monsterGroupActingNext = (nMonsters+monsterGroupActingNext+1)%nMonsters;
             return 1+heroPlayerActingNext;
         } else {
@@ -94,6 +94,8 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
             }
         }
         dgs.overlord.resetRound();
+        monsterGroupActingNext = 0;
+        monsterActingNext = 0;
     }
 
     @Override

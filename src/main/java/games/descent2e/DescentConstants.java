@@ -60,7 +60,6 @@ public class DescentConstants {
     }};
     
     public final static int connectionHash = Hash.GetInstance().hash("connections");
-    public final static int terrainHash = Hash.GetInstance().hash("terrain");
     public final static int archetypeHash = Hash.GetInstance().hash("archetype");
     public final static int classHash = Hash.GetInstance().hash("class");
     public final static int xpHash = Hash.GetInstance().hash("XP");

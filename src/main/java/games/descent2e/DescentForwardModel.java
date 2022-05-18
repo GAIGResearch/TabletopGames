@@ -268,6 +268,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Find valid neighbours in master graph, can move there
             for (int neighbourCompID : currentTile.getNeighbours()) {
                 BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
+                if (neighbour == null) continue;
                 Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
                 // TODO: size of figure moving, take into account large monster "expansion" rule, location saved on figure is always top-left corner
 
@@ -310,7 +311,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             if (name.contains("-")) {  // There may be multiples of one tile in the board, which follow format "tilename-#"
                 tileName = tileName.split("-")[0];
             }
-            GridBoard tile = _data.findGridBoard(tileName);
+            GridBoard tile = _data.findGridBoard(tileName); // TODO component ID should be different for tiles of the same type
             if (tile != null) {
                 tile = tile.copy();
                 tile.setComponentName(name);
@@ -346,26 +347,25 @@ public class DescentForwardModel extends AbstractForwardModel {
         BoardNode[][] board = new BoardNode[height][width];
         dgs.tileReferences = new int[height][width];
         HashSet<BoardNode> drawn = new HashSet<>();
-        ArrayList<Pair<Vector2D, Vector2D>> neighbours = new ArrayList<>();  // Holds neighbouring cells information
 
-        BoardNode bn0 = null;
-        for (BoardNode b : config.getBoardNodes()) {
-            if (b != null) {
-                GridBoard tile = dgs.tiles.get(b.getComponentID());
+        BoardNode firstTile = null;
+        for (BoardNode t : config.getBoardNodes()) {
+            if (t != null) {
+                GridBoard tile = dgs.tiles.get(t.getComponentID());
                 if (tile != null) {
-                    bn0 = b;
+                    firstTile = t;
                     break;
                 }
             }
         }
-        if (bn0 != null) {
-            GridBoard tile = dgs.tiles.get(bn0.getComponentID());
-            int orientation = ((PropertyInt) bn0.getProperty(orientationHash)).value;
+        if (firstTile != null) {
+            GridBoard tile = dgs.tiles.get(firstTile.getComponentID());
+            int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
             BoardNode[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
             int startY = height / 2 - rotated.length / 2;
             Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
-            addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, neighbours, bounds, dgs);
+            addTilesToBoard(firstTile, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, bounds, dgs);
 
             // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
             bounds.x -= 1;
@@ -380,11 +380,11 @@ public class DescentForwardModel extends AbstractForwardModel {
                     System.arraycopy(dgs.tileReferences[i + bounds.y], bounds.x, trimTileRef[i], 0, bounds.width);
             }
             dgs.tileReferences = trimTileRef;
-            // Also trim neighbour records
-            for (Pair<Vector2D, Vector2D> p : neighbours) {
-                p.a.subtract(bounds.x, bounds.y);
-                p.b.subtract(bounds.x, bounds.y);
-            }
+            // Also trim neighbour records TODO: commented out after changes, does this matter?
+//            for (Pair<Vector2D, Vector2D> p : neighbours) {
+//                p.a.subtract(bounds.x, bounds.y);
+//                p.b.subtract(bounds.x, bounds.y);
+//            }
             // And grid references
             for (Map.Entry<String, HashSet<Vector2D>> e: dgs.gridReferences.entrySet()) {
                 for (Vector2D v: e.getValue()) {
@@ -394,11 +394,16 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // This is the master board!
             dgs.masterBoard = new GridBoard(trimBoard);
-            for (BoardNode bn: dgs.masterBoard.getComponents()) {
-                if (bn == null) continue;
-                bn.setProperty(new PropertyInt("players", -1));
+            // Init each node (cell) properties - not occupied ("players" int property), and its position in the master grid
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    BoardNode bn = dgs.masterBoard.getElement(j, i);
+                    if (bn != null) {
+                        bn.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
+                        bn.setProperty(new PropertyInt("players", -1));
+                    }
+                }
             }
-            dgs.masterBoard.setNeighbours(neighbours);
         } else {
             System.out.println("Tiles for the map not found");
         }
@@ -408,7 +413,7 @@ public class DescentForwardModel extends AbstractForwardModel {
      * Recursively adds tiles to the board, iterating through all neighbours and updating references from grid
      * to tiles, list of valid neighbours for movement graph according to Descent movement rules, and bounds for
      * the resulting grid of the master board (with all tiles put together).
-     * @param bn - board node representing tile to add to board
+     * @param tileToAdd - board node representing tile to add to board
      * @param x - top-left x-coordinate for this tile's location in the master board
      * @param y - top-left y-coordinate for this tile's location in the master board
      * @param board - the master grid board representation
@@ -418,23 +423,20 @@ public class DescentForwardModel extends AbstractForwardModel {
      * @param tileReferences - references from each cell in the grid to the component ID of the GridBoard representing
      *                       the tile at that location
      * @param drawn - a list of board nodes already drawn, to avoid drawing twice during recursive calls.
-     * @param neighbours - a list of pairs of neighbouring cells
      * @param bounds - bounds of contents of the master grid board
      */
-    // TODO: set property "players" (int) to -1 for all board nodes
-    private void addTilesToBoard(BoardNode bn, int x, int y, BoardNode[][] board,
+    private void addTilesToBoard(BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
                                  HashMap<Integer, GridBoard> tiles,
                                  int[][] tileReferences,  HashMap<String, HashSet<Vector2D>> gridReferences,
                                  HashSet<BoardNode> drawn,
-                                 ArrayList<Pair<Vector2D, Vector2D>> neighbours,
                                  Rectangle bounds,
                                  DescentGameState dgs) {
-        if (!drawn.contains(bn)) {
+        if (!drawn.contains(tileToAdd)) {
             // Draw this tile in the big board at x, y location
-            GridBoard tile = tiles.get(bn.getComponentID());
+            GridBoard tile = tiles.get(tileToAdd.getComponentID());
             if (tileGrid == null) {
-                tileGrid = tile.rotate(((PropertyInt) bn.getProperty(orientationHash)).value);
+                tileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
             }
             int height = tileGrid.length;
             int width = tileGrid[0].length;
@@ -448,14 +450,15 @@ public class DescentForwardModel extends AbstractForwardModel {
 
                         // Add connections from this point to points on the master board
                         List<Vector2D> boardNs = getNeighbourhood(j, i, board[0].length, board.length, true);
-                        if (TerrainType.isWalkable(tileGrid[point.getY() - y][point.getX() - x].getComponentName())) {
+                        if (tileGrid[point.getY() - y][point.getX() - x] != null && TerrainType.isWalkable(tileGrid[point.getY() - y][point.getX() - x].getComponentName())) {
                             // Connect each cell that can connect to the master board with all possible connections
                             for (Vector2D n2 : boardNs) {
                                 if (board[n2.getY()][n2.getX()] != null &&
                                         TerrainType.isWalkable(board[n2.getY()][n2.getX()].getComponentName()) &&
                                         !n2.equals(point)) {
                                     if (Math.abs(point.getY() - n2.getY()) <= 1 && Math.abs(point.getX() - n2.getX()) <= 1) {
-                                        neighbours.add(new Pair<>(point.copy(), n2.copy()));
+                                        board[n2.getY()][n2.getX()].addNeighbour(board[i][j]);
+                                        board[i][j].addNeighbour(board[n2.getY()][n2.getX()]);
                                     }
                                 }
                             }
@@ -479,7 +482,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                                 if (TerrainType.isWalkable(tileGrid[n2.getY()][n2.getX()].getComponentName()) &&
                                         !pointInBoard.equals(other)) {
                                     if (Math.abs(other.getY() - pointInBoard.getY()) <= 1 && Math.abs(other.getX() - pointInBoard.getX()) <= 1) {
-                                        neighbours.add(new Pair<>(other.copy(), pointInBoard.copy()));
+                                        board[other.getY()][other.getX()].addNeighbour(board[pointInBoard.getY()][pointInBoard.getX()]);
+                                        board[pointInBoard.getY()][pointInBoard.getX()].addNeighbour(board[other.getY()][other.getX()]);
                                     }
                                 }
                             }
@@ -496,7 +500,12 @@ public class DescentForwardModel extends AbstractForwardModel {
                         for (Vector2D nn : ns) {
                             if (TerrainType.isWalkable(tileGrid[nn.getY()][nn.getX()].getComponentName()) &&
                                     !(nn.getX() == j && nn.getY() == i)) {
-                                neighbours.add(new Pair<>(new Vector2D(j + x, i + y), new Vector2D(nn.getX() + x, nn.getY() + y)));
+                                Vector2D point1 = new Vector2D(j + x, i + y);
+                                Vector2D point2 = new Vector2D(nn.getX() + x, nn.getY() + y);
+                                if (board[point1.getY()][point1.getX()] != null && board[point2.getY()][point2.getX()] != null) {
+                                    board[point1.getY()][point1.getX()].addNeighbour(board[point2.getY()][point2.getX()]);
+                                    board[point2.getY()][point2.getX()].addNeighbour(board[point1.getY()][point1.getX()]);
+                                }
                             }
                         }
                     }
@@ -523,14 +532,14 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             // This tile was drawn
-            drawn.add(bn);
+            drawn.add(tileToAdd);
 
             // Draw neighbours
-            for (int neighbourCompId: bn.getNeighbours()) {
+            for (int neighbourCompId: tileToAdd.getNeighbours()) {
                 BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompId);
 
                 // Find location to start drawing neighbour
-                Pair<String, Vector2D> connectionToNeighbour = findConnection(bn, neighbour, findOpenings(tileGrid));
+                Pair<String, Vector2D> connectionToNeighbour = findConnection(tileToAdd, neighbour, findOpenings(tileGrid));
 
                 if (connectionToNeighbour != null) {
                     connectionToNeighbour.b.add(x, y);
@@ -540,7 +549,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                         BoardNode[][] tileGridN = tileN.rotate(((PropertyInt) neighbour.getProperty(orientationHash)).value);
 
                         // Find location to start drawing neighbour
-                        Pair<String, Vector2D> conn2 = findConnection(neighbour, bn, findOpenings(tileGridN));
+                        Pair<String, Vector2D> conn2 = findConnection(neighbour, tileToAdd, findOpenings(tileGridN));
 
                         int w = tileGridN[0].length;
                         int h = tileGridN.length;
@@ -592,7 +601,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
                             // Draw neighbour recursively
                             addTilesToBoard(neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
-                                    tiles, tileReferences, gridReferences, drawn, neighbours, bounds, dgs);
+                                    tiles, tileReferences, gridReferences, drawn, bounds, dgs);
                         }
                     }
                 }
