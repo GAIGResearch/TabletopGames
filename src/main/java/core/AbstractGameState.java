@@ -21,6 +21,14 @@ import static utilities.Utils.GameResult.WIN;
 
 /**
  * Contains all game state information.
+ *
+ * This is distinct from the Game, of which it is a component. The Game also controls the players in the game, and
+ * this information is not present in (and must not be present in) the AbstractGameState.
+ *
+ * A copy of the AbstractGameState is provided to each AbstractPlayer when it is their turn to act.
+ * Separately the AbstractPlayer has a ForwardModel to be used if needed - this caters for the possibility that
+ * agents may want to use a different/learned forward model in some use cases.
+ *
  */
 public abstract class AbstractGameState {
 
@@ -52,9 +60,6 @@ public abstract class AbstractGameState {
     // Current game phase
     protected IGamePhase gamePhase;
 
-    // Data for this game
-    protected AbstractGameData data;
-
     // Stack for extended actions
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
 
@@ -72,6 +77,11 @@ public abstract class AbstractGameState {
         this.gameType = gameType;
         this.coreGameParameters = new CoreParameters();
     }
+    protected AbstractGameState(AbstractParameters gameParameters, GameType type) {
+        this.gameParameters = gameParameters;
+        this.gameType = type;
+    }
+
 
     /**
      * Resets variables initialised for this game state.
@@ -118,6 +128,7 @@ public abstract class AbstractGameState {
     public final int getNPlayers() { return turnOrder.nPlayers(); }
     public final Utils.GameResult[] getPlayerResults() { return playerResults; }
     public final boolean isNotTerminal(){ return gameStatus == GAME_ONGOING; }
+    public final boolean isNotTerminalForPlayer(int player){ return playerResults[player] == GAME_ONGOING && gameStatus == GAME_ONGOING; }
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
@@ -161,13 +172,13 @@ public abstract class AbstractGameState {
         AbstractGameState s = _copy(playerId);
         // Copy super class things
         s.turnOrder = turnOrder.copy();
-        s.allComponents = new Area(-1, "All components");
+        s.allComponents = allComponents.emptyCopy();
         s.gameStatus = gameStatus;
         s.playerResults = playerResults.clone();
         s.gamePhase = gamePhase;
-        s.data = data;  // Should never be modified
+        s.coreGameParameters = coreGameParameters;
 
-        if (coreGameParameters.competitionMode) {
+        if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
             s.historyText = new ArrayList<>(historyText);
             // we do not copy individual actions in history, as these are now dead and should not change
@@ -175,7 +186,7 @@ public abstract class AbstractGameState {
             // formally hidden to some participants. For this reason, in COMPETITION_MODE we explicitly do not copy
             // any history over in case a sneaky agent tries to take advantage of it.
             // If there is any information only available in History that could legitimately be used, then this should
-            // be incorporated in the game-specific data in GameState where the correct hiding protocls can be enforced.
+            // be incorporated in the game-specific data in GameState where the correct hiding protocols can be enforced.
         }
         s.actionsInProgress = new Stack<>();
         actionsInProgress.forEach(
@@ -251,6 +262,17 @@ public abstract class AbstractGameState {
     public abstract double getGameScore(int playerId);
 
     /**
+     * This is an optinal implementation and is used in getOrdinalPosition() to break any ties based on pure game score
+     * Implementing this may be a simpler approach in many cases than re-implementing getOrdinalPosition()
+     * For example in ColtExpress, the tie break is the number of bullet cards in hand - and this only affects the outcome
+     * if the score is a tie.
+     * @param playerId
+     * @return
+     */
+    public double getTiebreak(int playerId) {
+        return 0.0;
+    }
+    /**
      * Returns the ordinal position of a player using getGameScore().
      *
      * If a Game does not have a score, but does have the concept of player position (e.g. in a race)
@@ -266,11 +288,14 @@ public abstract class AbstractGameState {
         double playerScore = getGameScore(playerId);
         int ordinal = 1;
         for (int i = 0, n = getNPlayers(); i < n; i++) {
-            if (getGameScore(i) > playerScore)
+            double otherScore = getGameScore(i);
+            if (otherScore > playerScore)
                 ordinal++;
+            else if (otherScore == playerScore) {
+                if (getTiebreak(i) > getTiebreak(playerId))
+                    ordinal++;
+            }
         }
-        if (ordinal == 1 && !isNotTerminal() && playerResults[playerId] != Utils.GameResult.WIN)
-            ordinal = 1 + (int) Arrays.stream(playerResults).filter(r -> r == WIN).count();
         return ordinal;
     }
 
@@ -446,7 +471,7 @@ public abstract class AbstractGameState {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, allComponents, gameStatus, gamePhase, data);
+        int result = Objects.hash(gameParameters, turnOrder, allComponents, gameStatus, gamePhase);
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }

@@ -45,9 +45,12 @@ public class PlayerHandOverCapacity extends ConditionNode {
             playerDeck = (Deck<Card>) pgs.getComponent(playerHandHash, playerId);
         }
 
-        if (parent instanceof PlayerAction) {
-            ((PlayerAction) parent).setPlayerHandOverCapacity(-1);
-        }
+//        if (playerDeck != null && !playerDeck.isOverCapacity()) {
+//            if (parent instanceof PlayerAction) {
+//                ((PlayerAction) parent).setPlayerHandOverCapacity(-1);
+//            }
+//            playerId = -1;
+//        }
 
         return playerDeck != null && playerDeck.isOverCapacity();
     }

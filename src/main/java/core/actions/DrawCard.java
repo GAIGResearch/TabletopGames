@@ -1,6 +1,7 @@
 package core.actions;
 
 import core.components.Card;
+import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 
@@ -44,16 +45,23 @@ public class DrawCard extends AbstractAction {
         this.toIndex = 0;
     }
 
+    public DrawCard(){}
+
     @Override
     public boolean execute(AbstractGameState gs) {
-        executed = true;
         Deck<Card> from = (Deck<Card>) gs.getComponentById(deckFrom);
         Deck<Card> to = (Deck<Card>) gs.getComponentById(deckTo);
-        Card card = from.pick(fromIndex);
-        if (card != null) {
-            cardId = card.getComponentID();
+        if (from != null && to != null) {
+            Card card = from.pick(fromIndex);
+            if (card != null) {
+                cardId = card.getComponentID();
+                if (to.add(card, toIndex)) {
+                    executed = true;
+                    return true;
+                }
+            }
         }
-        return card != null && to.add(card, toIndex);
+        return false;
     }
 
     @Override
@@ -61,7 +69,8 @@ public class DrawCard extends AbstractAction {
         if (!executed) {
             if (fromIndex == -1) return null;
             Deck<Card> deck = (Deck<Card>) gs.getComponentById(deckFrom);
-            return deck.get(fromIndex);
+            if (deck != null) return deck.get(fromIndex);
+            return (Card) gs.getComponentById(cardId);
         }
         return (Card) gs.getComponentById(cardId);
     }
@@ -106,10 +115,13 @@ public class DrawCard extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        Component deckF = gameState.getComponentById(deckFrom);
+        Component deckT = gameState.getComponentById(deckTo);
+        Component card = getCard(gameState);
         return "DrawCard{" +
-                "deckFrom=" + gameState.getComponentById(deckFrom).getComponentName() +
-                ", deckTo=" + gameState.getComponentById(deckTo).getComponentName() +
-                ", card=" + getCard(gameState).getComponentName() +
+                "deckFrom=" + (deckF != null? deckF.getComponentName() : "deck-from-not-found") +
+                ", deckTo=" + (deckT != null? deckT.getComponentName() : "deck-to-not-found") +
+                ", card=" + (card != null? card.getComponentName() : "card-not-found") +
                 ", toIndex=" + toIndex +
                 '}';
     }

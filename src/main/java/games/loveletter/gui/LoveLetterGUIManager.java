@@ -27,6 +27,7 @@ import java.awt.event.MouseEvent;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 public class LoveLetterGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -366,12 +367,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                     reserve.setFront(true);
             }
 
-            // Update actions
-            if (player instanceof HumanGUIPlayer) {
-                updateActionButtons(player, gameState);
-            }
         }
-        parent.repaint();
     }
 
     private String getRuleText() {

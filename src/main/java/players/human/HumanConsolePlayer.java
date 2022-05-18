@@ -48,5 +48,10 @@ public class HumanConsolePlayer extends AbstractPlayer {
         Scanner in = new Scanner(System.in);
         in.next();
     }
+
+    @Override
+    public AbstractPlayer copy() {
+        return this;
+    }
 }
 

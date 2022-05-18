@@ -55,12 +55,12 @@ public class Bet extends AbstractAction implements IPrintable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId, amount);
+        return Objects.hash(playerId, amount) + 2912;
     }
 
     @Override
     public Bet copy() {
-        return new Bet(playerId, amount);
+        return this; // immutable
     }
 
 }

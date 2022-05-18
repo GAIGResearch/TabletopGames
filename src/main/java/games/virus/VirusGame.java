@@ -37,7 +37,7 @@ public class VirusGame extends Game {
             System.out.println(i);
             AbstractParameters gameParameters = new VirusGameParameters(System.currentTimeMillis());
             Game game = new VirusGame(agents, gameParameters);
-            game.run(null);
+            game.run();
 
             Utils.GameResult [] results =  game.getGameState().getPlayerResults();
             for (int j=0; j<agents.size(); j++)

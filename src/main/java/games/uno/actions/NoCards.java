@@ -36,6 +36,9 @@ public class NoCards extends AbstractAction implements IPrintable {
 
         UnoCard card = drawDeck.draw();
 
+        if (card == null)
+            throw new AssertionError("Game should have already finished!");
+
         if (card.isPlayable((UnoGameState) gs)) {
             discardDeck.add(card);
             ugs.updateCurrentCard(card);

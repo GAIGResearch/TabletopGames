@@ -29,6 +29,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     public BasicMCTSPlayer(long seed) {
         this.params = new MCTSParams(seed);
         rnd = new Random(seed);
+        setName("Basic MCTS");
 
         // These parameters can be changed, and will impact the Basic MCTS algorithm
         this.params.K = Math.sqrt(2);
@@ -38,12 +39,17 @@ public class BasicMCTSPlayer extends AbstractPlayer {
 
         // These parameters are ignored by BasicMCTS - if you want to play with these, you'll
         // need to upgrade to MCTSPlayer
-        this.params.openLoop = false;
-        this.params.redeterminise = false;
+        this.params.information = MCTSEnums.Information.Closed_Loop;
         this.params.rolloutType = RANDOM;
         this.params.selectionPolicy = ROBUST;
         this.params.opponentTreePolicy = Paranoid;
         this.params.treePolicy = UCB;
+    }
+
+    public BasicMCTSPlayer(MCTSParams params) {
+        this.params = params;
+        rnd = new Random(params.getRandomSeed());
+        setName("Basic MCTS");
     }
 
     @Override
@@ -61,5 +67,10 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     @Override
     public String toString() {
         return "BasicMCTS";
+    }
+
+    @Override
+    public BasicMCTSPlayer copy() {
+        return this;
     }
 }

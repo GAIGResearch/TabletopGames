@@ -1,0 +1,59 @@
+[
+  {
+	"title":"Line Advance",
+    "explanation": "Order 1 unit in each section.",
+    "orderCount": ["Integer", 3],
+    "hasCondition": ["Boolean", false],
+    "bonusLorePoints": ["Integer", 0],
+    "bonusMove": ["Integer", 0]
+  },
+  {
+    "title":"Patrol Left",
+    "explanation": "Order 2 units in each section.",
+    "orderCount": ["Integer", 2],
+    "hasCondition": ["Boolean", false],
+    "bonusLorePoints": ["Integer", 0],
+    "bonusMove": ["Integer", 0]
+  },
+  {
+    "title":"Onslaught",
+    "explanation": "Order 3 infantry units. After your Move step, each infantry unit may move 1 hex.",
+    "orderCount": ["Integer", 3],
+    "hasCondition": ["Boolean", true],
+    "bonusLorePoints": ["Integer", 0],
+    "bonusMove": ["Integer", 3]
+  },
+  {
+    "title":"Wedge",
+    "explanation": "Order 1 unit in the left section, 2 units in the center section, and 1 unit in the right section.",
+    "orderCount": ["Integer", 4],
+    "hasCondition": ["Boolean", false],
+    "bonusLorePoints": ["Integer", 0],
+    "bonusMove": ["Integer", 0]
+  },
+  {
+    "title":"Patrol Left",
+    "explanation": "Order 2 units in each section.",
+    "orderCount": ["Integer", 2],
+    "hasCondition": ["Boolean", false],
+    "bonusLorePoints": ["Integer", 0],
+    "bonusMove": ["Integer", 0]
+  },
+  {
+    "title":"Attack Right",
+    "explanation": "Order 3 units in right section.",
+    "orderCount": ["Integer", 3],
+    "hasCondition": ["Boolean", false],
+    "bonusLorePoints": ["Integer", 0],
+    "bonusMove": ["Integer", 0]
+  },
+  {
+    "title":"BattleMarch",
+    "explanation": "Order 3 units that are not weak.",
+    "orderCount": ["Integer", 3],
+    "hasCondition": ["Boolean", true],
+    "bonusLorePoints": ["Integer", 0],
+    "bonusMove": ["Integer", 0]
+  }
+
+]

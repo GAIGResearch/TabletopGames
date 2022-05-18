@@ -81,7 +81,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         drawPile.shuffle(rnd);
 
         ekgs.setActionStack(new Stack<>());
-
+        ekgs.orderOfPlayerDeath = new int[ekgs.getNPlayers()];
         ekgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
     }
 
@@ -122,13 +122,13 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                     }
                     //Action was successfully noped
                     ((IsNopeable) actionStack.pop()).nopedExecute(gameState);
-                    if (gameState.getCoreGameParameters().verbose) {
-                        System.out.println("Action was successfully noped");
-                    }
+//                    if (gameState.getCoreGameParameters().verbose) {
+//                        System.out.println("Action was successfully noped");
+//                    }
                 } else {
-                    if (actionStack.size() > 2 && gameState.getCoreGameParameters().verbose) {
-                        System.out.println("All nopes were noped");
-                    }
+//                    if (actionStack.size() > 2 && gameState.getCoreGameParameters().verbose) {
+//                        System.out.println("All nopes were noped");
+//                    }
 
                     while (actionStack.size() > 1) {
                         actionStack.pop();

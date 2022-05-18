@@ -6,6 +6,7 @@ import core.components.Deck;
 import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 import games.pandemic.PandemicGameState;
+import games.pandemic.PandemicParameters;
 import games.pandemic.PandemicTurnOrder;
 
 import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction;
@@ -29,11 +30,12 @@ public class ForceDiscardReaction extends RuleNode {
     @Override
     protected boolean run(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
-        // player needs to discard N cards
-        Deck<Card> playerDeck = (Deck<Card>) pgs.getComponentActingPlayer(playerHandHash);
-        int nDiscards = playerDeck.getSize() - playerDeck.getCapacity();
-        for (int i = 0; i < nDiscards; i++) {
-            ((PandemicTurnOrder)pgs.getTurnOrder()).addCurrentPlayerReaction(gs);
+        // player needs to discard cards (doing 1 at a time)
+        for (int i = 0; i < pgs.getNPlayers(); i++) {
+            if (((Deck<Card>)pgs.getComponent(playerHandHash, i)).isOverCapacity()) {
+                ((PandemicTurnOrder) pgs.getTurnOrder()).addReactivePlayer(i);
+                break;
+            }
         }
         pgs.setGamePhase(DiscardReaction);
         return false;

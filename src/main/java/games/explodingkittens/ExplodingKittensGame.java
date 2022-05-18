@@ -24,7 +24,7 @@ public class ExplodingKittensGame extends Game {
 
         for (int i=0; i<1000; i++) {
             Game game = new ExplodingKittensGame(agents, forwardModel, new ExplodingKittensGameState(params, agents.size()));
-            game.run(null);
+            game.run();
         }
     }
 }

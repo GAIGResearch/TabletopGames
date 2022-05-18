@@ -52,12 +52,12 @@ public class Call extends AbstractAction implements IPrintable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerId);
+        return playerId + 3783;
     }
 
     @Override
     public Call copy() {
-        return new Call(playerId);
+        return this; // immutable
     }
 
 }

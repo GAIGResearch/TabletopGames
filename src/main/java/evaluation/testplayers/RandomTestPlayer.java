@@ -50,6 +50,11 @@ public class RandomTestPlayer extends AbstractPlayer {
         return actions.get(random.nextInt(actions.size()));
     }
 
+    @Override
+    public RandomTestPlayer copy() {
+        return this;
+    }
+
     public TAGStatSummary getBranchingFactor() {
         return bf;
     }

@@ -51,7 +51,7 @@ public class Mine extends DominionAction implements IExtendedSequence {
             throw new AssertionError("Should not be here if we have already both trashed and gained a card");
         }
         if (retValue.isEmpty()) {
-            retValue.add(new DoNothing());
+            throw new AssertionError("We should always be able to gain a COPPER");
         }
         return retValue;
     }
@@ -62,10 +62,14 @@ public class Mine extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void registerActionTaken(AbstractGameState gs, AbstractAction action) {
+        DominionGameState state = (DominionGameState) gs;
         if (!trashedCard && action instanceof TrashCard && ((TrashCard) action).player == player) {
             trashedCard = true;
             trashValue = ((TrashCard) action).trashedCard.cost;
+            if (state.cardsToBuy().stream().noneMatch(c -> c.isTreasure && c.cost <= trashValue + BONUS_OVER_TRASHED_VALUE))
+                gainedCard = true; // there are no valid cards to gain, so we skip the next decision
+            // this is rare, but can happen if SILVER is exhausted with random players, say
         }
         if (!gainedCard && action instanceof GainCard && ((GainCard) action).buyingPlayer == player) {
             gainedCard = true;

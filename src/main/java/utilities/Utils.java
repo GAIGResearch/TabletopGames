@@ -1,17 +1,19 @@
 package utilities;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.lang.reflect.Constructor;
 import java.util.List;
-import java.util.function.Function;
+import java.util.*;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public abstract class Utils {
@@ -40,32 +42,6 @@ public abstract class Utils {
                 return Color.GREEN;
             default:
                 return null;
-        }
-    }
-
-    public enum ComponentType {
-        DECK,
-        AREA,
-        BOARD,
-        BOARD_NODE,
-        CARD,
-        COUNTER,
-        DICE,
-        TOKEN
-    }
-
-    public enum GameResult {
-        WIN(1),
-        DRAW(0),
-        LOSE(0),
-        DISQUALIFY(-2),
-        GAME_ONGOING(2),
-        GAME_END(3);
-
-        public final double value;
-
-        GameResult(double value) {
-            this.value = value;
         }
     }
 
@@ -178,8 +154,9 @@ public abstract class Utils {
     public static double normalise(double a_value, double a_min, double a_max) {
         if (a_min < a_max)
             return (a_value - a_min) / (a_max - a_min);
-        else    // if bounds are invalid, then return same value
-            return a_value;
+        else if (a_min == a_max)
+            return 0.0; // special case
+        throw new IllegalArgumentException(String.format("Invalid args in Utils.normalise() - %.3f is not in range [%.3f, %.3f]", a_value, a_min, a_max));
     }
 
     /**
@@ -211,6 +188,29 @@ public abstract class Utils {
         return input.keySet().stream().collect(toMap(key -> key, key -> input.get(key).doubleValue() / sum));
     }
 
+    /**
+     * This decays statistics by gamma
+     *
+     * @param pair
+     * @param gamma
+     * @return
+     */
+    public static Pair<Integer, Double> decay(Pair<Integer, Double> pair, double gamma) {
+        if (gamma < 1.0 && gamma >= 0.0) {
+            if (pair.a == 0) return new Pair<>(0, 0.0);
+            double oldCount = pair.a;
+            int newCount = (int) (oldCount * gamma);
+            double newValue = pair.b * newCount / oldCount;
+            return new Pair<>(newCount, newValue);
+        }
+        return pair;
+    }
+
+    public static <T> Map<T, Pair<Integer, Double>> decay(Map<T, Pair<Integer, Double>> map, double gamma) {
+        return map.keySet().stream()
+                .collect(toMap(key -> key, key -> decay(map.get(key), gamma)));
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getArg(String[] args, String name, T defaultValue) {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
@@ -237,19 +237,20 @@ public abstract class Utils {
             JSONParser parser = new JSONParser();
             return (JSONObject) parser.parse(reader);
         } catch (IOException | ParseException e) {
-            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage() + " : " +e.toString());
+            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage() + " : " + e.toString());
         }
     }
 
     /**
      * Recursively computes combinations of numbers in an array, taken {r} at a time. Each combination is added into the
      * allData list.
-     * @param arr - Input Array
-     * @param data - Temporary array to store current combination
+     *
+     * @param arr   - Input Array
+     * @param data  - Temporary array to store current combination
      * @param start - Staring index in arr for current iteration
-     * @param end - Ending index in arr for current iteration
-     * @param index  - Current index in data
-     * @param r ---> Size of a combination
+     * @param end   - Ending index in arr for current iteration
+     * @param index - Current index in data
+     * @param r     ---> Size of a combination
      */
     public static void combinationUtil(int[] arr, int[] data, int start, int end, int index, int r, ArrayList<int[]> allData) {
         if (index == r) {
@@ -257,24 +258,148 @@ public abstract class Utils {
             return;
         }
 
-        for (int i = start; i <= end && end-i+1 >= r-index; i++) {
+        for (int i = start; i <= end && end - i + 1 >= r - index; i++) {
             data[index] = arr[i];
-            combinationUtil(arr, data, i+1, end, index+1, r, allData);
+            combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
         }
     }
 
     /**
      * Auxiliary function shortcut to generate combinations of numbers in an array, each of size r.
-     * @param arr - input array
-     * @param r - size of one combination
      *
+     * @param arr - input array
+     * @param r   - size of one combination
      * @return a list of all possible combinations of values (!not indexes)
      */
     public static ArrayList<int[]> generateCombinations(int[] arr, int r) {
         int[] data = new int[r];
         ArrayList<int[]> allData = new ArrayList<>();
-        combinationUtil(arr, data, 0, arr.length-1, 0, r, allData);
+        combinationUtil(arr, data, 0, arr.length - 1, 0, r, allData);
         return allData;
+    }
+
+    /**
+     * Given a JSONObject, this will load the instance of the class.
+     * this assumes that the JSON object has:
+     * - a "class" attribute with the full name of the Class
+     * - an (optional) "args" Array attribute with the values to feed into the class constructor
+     * - only int, double, boolean and string parameters are allowed
+     * - the relevant constructor of the class is then called, and the result returned
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T loadClassFromJSON(JSONObject json) {
+        try {
+            String cl = (String) json.getOrDefault("class", "");
+            Class<T> outputClass = (Class<T>) Class.forName(cl);
+            JSONArray argArray = (JSONArray) json.getOrDefault("args", Collections.emptyList());
+            Class<?>[] argClasses = new Class[argArray.size()];
+            Object[] args = new Object[argArray.size()];
+            for (int i = 0; i < argClasses.length; i++) {
+                Object arg = argArray.get(i);
+                args[i] = arg;
+                if (arg instanceof Long) {
+                    argClasses[i] = int.class;
+                    args[i] = ((Long) arg).intValue();
+                } else if (arg instanceof Double) {
+                    argClasses[i] = double.class;
+                } else if (arg instanceof Boolean) {
+                    argClasses[i] = boolean.class;
+                } else if (arg instanceof String) {
+                    argClasses[i] = String.class;
+                } else {
+                    throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
+                }
+            }
+            Class<?> clazz = Class.forName(cl);
+            Constructor<?> constructor = clazz.getConstructor(argClasses);
+            return outputClass.cast(constructor.newInstance(args));
+        } catch (ClassNotFoundException e) {
+            throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            throw new AssertionError("No matching constructor for class found using " + json.toJSONString());
+        } catch (ReflectiveOperationException e) {
+            e.printStackTrace();
+            throw new AssertionError("Error constructing class using " + json.toJSONString());
+        }
+    }
+
+    /**
+     * Given a filename that contains only a single class, this will instantiate the class
+     * This opens the file, extracts the JSONObject, and then uses Utils.loadClassFromJSON() to
+     * find and call the relevant constructor
+     *
+     * @param filename - the filename
+     * @param <T>      - the Class type that is to be instantiated
+     * @return
+     */
+    public static <T> T loadFromFile(String filename) {
+        try {
+            FileReader reader = new FileReader(filename);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject rawData = (JSONObject) jsonParser.parse(reader);
+            // We expect a class field to tell us the Class to use
+            // then a set of parameter values
+            return Utils.loadClassFromJSON(rawData);
+
+        } catch (FileNotFoundException e) {
+            throw new AssertionError("File not found to load IGameHeuristic : " + filename);
+        } catch (IOException e) {
+            throw new AssertionError("Problem reading file " + filename + " : " + e);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            throw new AssertionError("Problem parsing JSON in " + filename);
+        }
+    }
+
+    public static BufferedImage convertToType(BufferedImage sourceImage, int targetType) {
+        BufferedImage image;
+
+        // if the source image is already the target type, return the source image
+        if (sourceImage.getType() == targetType)
+            image = sourceImage;
+
+            // otherwise create a new image of the target type and draw the new image
+        else {
+            image = new BufferedImage(sourceImage.getWidth(), sourceImage.getHeight(), targetType);
+            image.getGraphics().drawImage(sourceImage, 0, 0, null);
+        }
+
+        return image;
+    }
+
+    public static BufferedImage componentToImage(Component component, int type) {
+        BufferedImage img = new BufferedImage(component.getWidth(), component.getHeight(), type);
+        Graphics2D g2d = img.createGraphics();
+        component.printAll(g2d);
+        g2d.dispose();
+        return img;
+    }
+
+    public enum ComponentType {
+        DECK,
+        AREA,
+        BOARD,
+        BOARD_NODE,
+        CARD,
+        COUNTER,
+        DICE,
+        TOKEN
+    }
+
+    public enum GameResult {
+        WIN(1),
+        DRAW(0),
+        LOSE(-1),
+        DISQUALIFY(-2),
+        GAME_ONGOING(0),
+        GAME_END(3);
+
+        public final double value;
+
+        GameResult(double value) {
+            this.value = value;
+        }
     }
 
 }

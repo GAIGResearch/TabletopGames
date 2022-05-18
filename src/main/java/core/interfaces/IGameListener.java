@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import utilities.GameReportListener;
+import utilities.GameStatisticsListener;
 
 import java.lang.reflect.Constructor;
 
@@ -12,6 +12,9 @@ public interface IGameListener {
 
     /**
      * This is used to register Game Start and Game Over events
+     *
+     * It provides a link to the Game, from which the state can be obtained, or
+     * details of the players. Any changes to the State will then apply in the game.
      *
      * @param type Either ABOUT_TO_START or GAME_OVER
      * @param game The Game
@@ -21,6 +24,10 @@ public interface IGameListener {
     /**
      * Registers all other event types.
      * The state will always be provided, but action will be null except for ACTION_CHOSEN events
+     *
+     * The state provided is *deliberately* not a copy, but the actual state to avoid performance overheads
+     * Hence it is *vital* that any implementation of this method only reads data from the state
+     * and does not modify it!
      *
      * @param type   The GameEvent
      * @param state  The current Game state
@@ -37,11 +44,12 @@ public interface IGameListener {
      */
     default void allGamesFinished() {
         // default is to do nothing
+
     }
 
 
     static IGameListener createListener(String listenerClass, IStatisticLogger logger) {
-        IGameListener listener = new GameReportListener(logger);
+        IGameListener listener = new GameStatisticsListener(logger);
         if (!listenerClass.equals("")) {
             try {
                 Class<?> clazz = Class.forName(listenerClass);
@@ -61,7 +69,7 @@ public interface IGameListener {
     }
 
     static IGameListener createListener(String listenerClass) {
-        IGameListener listener = new GameReportListener();
+        IGameListener listener = new GameStatisticsListener();
         try {
             Class<?> clazz = Class.forName(listenerClass);
             Constructor<?> constructor;

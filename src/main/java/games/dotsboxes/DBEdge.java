@@ -36,4 +36,7 @@ public class DBEdge extends Component {
     public DBEdge copy() {
         return this;  // Immutable
     }
+
+    @Override
+    public String toString() {return from.toString() + " -> " + to.toString();}
 }

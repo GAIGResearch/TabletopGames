@@ -2,6 +2,7 @@ package utilities;
 
 import core.interfaces.IStatisticLogger;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -17,6 +18,7 @@ public class FileStatsLogger implements IStatisticLogger {
     private FileWriter writer;
     public String doubleFormat = "%.3g";
     public String intFormat = "%d";
+    private boolean headerNeeded = true;
 
     private Set<String> allKeys = new LinkedHashSet<>();
 
@@ -30,6 +32,9 @@ public class FileStatsLogger implements IStatisticLogger {
     public FileStatsLogger(String fileName, String delimiter, boolean append) {
         this.delimiter = delimiter;
         try {
+            File file = new File(fileName);
+            if (file.exists() && append)
+                headerNeeded = false;
             writer = new FileWriter(fileName, append);
         } catch (Exception e) {
             e.printStackTrace();
@@ -53,8 +58,10 @@ public class FileStatsLogger implements IStatisticLogger {
             if (allKeys.isEmpty()) {
                 allKeys = data.keySet();
                 // then write a header line to the file
-                String outputLine = String.join(delimiter, allKeys) + "\n";
-                writer.write(outputLine);
+                if (headerNeeded) {
+                    String outputLine = String.join(delimiter, allKeys) + "\n";
+                    writer.write(outputLine);
+                }
             } else {
                 data.keySet().forEach(s -> {
                             if (!allKeys.contains(s)) {
@@ -83,6 +90,14 @@ public class FileStatsLogger implements IStatisticLogger {
     @Override
     public void record(String key, Object datum) {
         System.out.println("Datum ignored - FileStatsLogger only to be used with other record()");
+    }
+
+    public void flush() {
+        try {
+            writer.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

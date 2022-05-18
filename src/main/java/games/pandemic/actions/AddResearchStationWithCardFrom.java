@@ -16,28 +16,30 @@ import static core.CoreConstants.playerHandHash;
 @SuppressWarnings("unchecked")
 public class AddResearchStationWithCardFrom extends AddResearchStationFrom {
 
-    private int cardIdx;
+    private final int deckFrom, deckTo, cardIdx;
     private int cardId;
     private boolean executed;
 
-    public AddResearchStationWithCardFrom(String from, String to, int cardIdx) {
+    public AddResearchStationWithCardFrom(String from, String to, int deckFrom, int deckTo, int cardIdx) {
         super(from, to);
         this.cardIdx = cardIdx;
+        this.deckFrom = deckFrom;
+        this.deckTo = deckTo;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         executed = true;
-        Deck<Card> playerHand = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
-        Deck<Card> discardPile = (Deck<Card>) ((PandemicGameState)gs).getComponent(playerDeckDiscardHash);
-        cardId = playerHand.getComponents().get(cardIdx).getComponentID();
-        return super.execute(gs) & new DrawCard(playerHand.getComponentID(), discardPile.getComponentID(), cardIdx).execute(gs);
+        Deck<Card> from = (Deck<Card>) gs.getComponentById(deckFrom);
+        cardId = from.getComponents().get(cardIdx).getComponentID();
+        return super.execute(gs) & new DrawCard(deckFrom, deckTo, cardIdx).execute(gs);
     }
 
     public Card getCard(AbstractGameState gs) {
         if (!executed) {
-            Deck<Card> deck = (Deck<Card>) ((PandemicGameState)gs).getComponentActingPlayer(playerHandHash);
-            return deck.getComponents().get(cardIdx);
+            if (cardIdx == -1) return null;
+            Deck<Card> from = (Deck<Card>) gs.getComponentById(deckFrom);
+            return from.getComponents().get(cardIdx);
         }
         return (Card) gs.getComponentById(cardId);
     }
@@ -58,7 +60,7 @@ public class AddResearchStationWithCardFrom extends AddResearchStationFrom {
 
     @Override
     public AbstractAction copy() {
-        return new AddResearchStationWithCardFrom(this.fromCity, this.city, this.cardIdx);
+        return new AddResearchStationWithCardFrom(this.fromCity, this.city, this.deckFrom, this.deckTo, this.cardIdx);
     }
 
     @Override

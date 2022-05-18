@@ -14,6 +14,7 @@ import players.human.HumanGUIPlayer;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
+import java.util.HashMap;
 
 public class PrototypeGUIManager extends AbstractGUIManager {
     JComponent view;

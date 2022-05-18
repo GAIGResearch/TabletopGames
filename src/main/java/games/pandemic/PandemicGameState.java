@@ -88,7 +88,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
         HashMap<HashMap<Integer, Double>, Utils.GameResult> terminals = new HashMap<>();
         terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, Utils.GameResult.WIN);
         terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, Utils.GameResult.LOSE);
-        terminals.put(new HashMap<Integer, Double>() {{ put(2, (double) ((PandemicParameters)gameParameters).lose_max_outbreak); }},
+        terminals.put(new HashMap<Integer, Double>() {{ put(2, (double) ((PandemicParameters)gameParameters).loseMaxOutbreak); }},
                 Utils.GameResult.LOSE);
         int i = 3;
         for (String color: colors) {
@@ -155,9 +155,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
      * @param nPlayers - number of players.
      */
     public PandemicGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).n_actions_per_turn), GameType.Pandemic);
-        data = new PandemicData();
-        data.load(((PandemicParameters)gameParameters).getDataPath());
+        super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).nActionsPerTurn), GameType.Pandemic);
     }
 
     // Getters & setters
@@ -214,10 +212,6 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
         return world;
     }
 
-    PandemicData getData() {  // Only FM should have access to this for initialisation
-        return (PandemicData)data;
-    }
-
     @Override
     protected AbstractGameState _copy(int playerId) {
         PandemicGameState gs = new PandemicGameState(gameParameters.copy(), getNPlayers());
@@ -236,7 +230,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
                         Deck<Card> hiddenDeck = (Deck<Card>) e.getValue().copy();
                         if (gamePhase == Forecast && e.getKey() == infectionHash) {
                             // Top N cards should be left the same, the rest shuffled
-                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).n_forecast_cards, hiddenDeck.getSize(), r);
+                            hiddenDeck.shuffle(((PandemicParameters)gameParameters).nForecastCards, hiddenDeck.getSize(), r);
                         } else {
                             hiddenDeck.shuffle(r);  // We know what cards are in there, a simple shuffle is enough
                         }

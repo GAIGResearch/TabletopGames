@@ -16,20 +16,17 @@ public class Stand extends AbstractAction implements IPrintable {
 
     @Override
     public AbstractAction copy() {
-        return new Stand();
+        return this; //immutable
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Stand)) return false;
-        Stand that = (Stand) o;
-        return true;
+        return o instanceof Stand;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash();
+        return 904344;
     }
 
     @Override

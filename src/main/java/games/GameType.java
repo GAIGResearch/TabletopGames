@@ -1,64 +1,63 @@
 package games;
 
 import core.*;
+import games.battlelore.BattleloreForwardModel;
+import games.battlelore.BattleloreGameState;
+import games.battlelore.gui.BattleloreGUI;
 import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
-import games.blackjack.BlackjackParameters;
 import games.blackjack.gui.BlackjackGUIManager;
+import games.catan.CatanForwardModel;
+import games.catan.CatanGameState;
+import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
-import games.descent.DescentForwardModel;
-import games.descent.DescentGameState;
-import games.descent.DescentParameters;
-import games.descent.gui.DescentGUI;
+import games.descent2e.DescentForwardModel;
+import games.descent2e.DescentGameState;
+import games.descent2e.DescentParameters;
+import games.descent2e.gui.DescentGUI;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
-import games.diamant.DiamantParameters;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUIManager;
 import games.dotsboxes.DBGameState;
-import games.dotsboxes.DBParameters;
-import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
-import games.loveletter.LoveLetterForwardModel;
-import games.loveletter.LoveLetterGameState;
-import games.loveletter.LoveLetterParameters;
+import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
-import games.pandemic.PandemicParameters;
-import games.pandemic.gui.PandemicGUIManager;
-import games.poker.PokerForwardModel;
-import games.poker.PokerGameParameters;
-import games.poker.PokerGameState;
-import games.poker.gui.PokerGUIManager;
+import games.pandemic.gui.*;
+import games.poker.*;
+import games.poker.gui.*;
+import games.dicemonastery.gui.*;
+import games.stratego.StrategoForwardModel;
+import games.stratego.StrategoGameState;
+import games.stratego.gui.StrategoGUIManager;
+import games.sushigo.SGForwardModel;
+import games.sushigo.SGGameState;
+import games.sushigo.gui.SGGUI;
 import games.tictactoe.TicTacToeForwardModel;
-import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
-import games.tictactoe.gui.TicTacToeGUIManager;
+import games.tictactoe.gui.*;
 import games.uno.UnoForwardModel;
-import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
-import games.uno.gui.UnoGUIManager;
+import games.uno.gui.*;
 import games.virus.VirusForwardModel;
-import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
+import games.dicemonastery.*;
 import games.dominion.*;
-import gui.AbstractGUIManager;
-import gui.GamePanel;
-import gui.PrototypeGUIManager;
+import gui.*;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
 import java.util.*;
-import java.util.List;
 
 import static core.CoreConstants.*;
+import static games.GameType.Category.Number;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
 
@@ -74,29 +73,91 @@ public enum GameType {
      * Add here all games, planned or implemented.
      */
     Pandemic(2, 4,
-            new ArrayList<Category>() {{ add(Strategy); add(Medical); }},
-            new ArrayList<Mechanic>() {{ add(ActionPoints); add(Cooperative); add(HandManagement);
-            add(PointToPointMovement); add(SetCollection); add(Trading); add(VariablePlayerPowers); }}),
-    TicTacToe (2, 2,
-            new ArrayList<Category>() {{ add(Simple); add(Abstract); }},
-            new ArrayList<Mechanic>() {{ add(PatternBuilding); }}),
-    ExplodingKittens (2, 5,
-            new ArrayList<Category>() {{ add(Strategy); add(Animals); add(Cards); add(ComicBook); add(Humour); }},
-            new ArrayList<Mechanic>() {{ add(HandManagement); add(HotPotato); add(PlayerElimination); add(PushYourLuck);
-            add(SetCollection); add(TakeThat); }}),
-    LoveLetter (2, 4,
-            new ArrayList<Category>() {{ add(Cards); add(Deduction); add(Renaissance); }},
-            new ArrayList<Mechanic>() {{ add(HandManagement); add(PlayerElimination); }}),
-    Uno (2, 10,
-            new ArrayList<Category>() {{ add(Cards); add(ComicBook); add(Number); add(MoviesTVRadio); }},
-            new ArrayList<Mechanic>() {{ add(HandManagement); add(LoseATurn); add(TakeThat); }}),
-    Virus (2, 6,
-            new ArrayList<Category>() {{ add(Cards); add(Medical); }},
-            new ArrayList<Mechanic>() {{ add(CardDrafting); add(SetCollection); add(TakeThat); }}),
-    ColtExpress (2, 6,
-            new ArrayList<Category>() {{ add(Strategy); add(AmericanWest); add(Fighting); add(Trains); }},
-            new ArrayList<Mechanic>() {{ add(ActionQueue); add(HandManagement); add(Memory); add(ProgrammedEvent);
-            add(SimultaneousActionSelection); add(TakeThat); add(VariablePlayerPowers); }}),
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Medical);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(ActionPoints);
+                add(Cooperative);
+                add(HandManagement);
+                add(PointToPointMovement);
+                add(SetCollection);
+                add(Trading);
+                add(VariablePlayerPowers);
+            }}),
+    TicTacToe(2, 2,
+            new ArrayList<Category>() {{
+                add(Simple);
+                add(Abstract);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(PatternBuilding);
+            }}),
+    ExplodingKittens(2, 5,
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Animals);
+                add(Cards);
+                add(ComicBook);
+                add(Humour);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(HandManagement);
+                add(HotPotato);
+                add(PlayerElimination);
+                add(PushYourLuck);
+                add(SetCollection);
+                add(TakeThat);
+            }}),
+    LoveLetter(2, 4,
+            new ArrayList<Category>() {{
+                add(Cards);
+                add(Deduction);
+                add(Renaissance);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(HandManagement);
+                add(PlayerElimination);
+            }}),
+    Uno(2, 10,
+            new ArrayList<Category>() {{
+                add(Cards);
+                add(ComicBook);
+                add(Number);
+                add(MoviesTVRadio);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(HandManagement);
+                add(LoseATurn);
+                add(TakeThat);
+            }}),
+    Virus(2, 6,
+            new ArrayList<Category>() {{
+                add(Cards);
+                add(Medical);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(CardDrafting);
+                add(SetCollection);
+                add(TakeThat);
+            }}),
+    ColtExpress(2, 6,
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(AmericanWest);
+                add(Fighting);
+                add(Trains);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(ActionQueue);
+                add(HandManagement);
+                add(Memory);
+                add(ProgrammedEvent);
+                add(SimultaneousActionSelection);
+                add(TakeThat);
+                add(VariablePlayerPowers);
+            }}),
     DotsAndBoxes(2, 6,
             new ArrayList<Category>() {{
                 add(Simple);
@@ -112,6 +173,7 @@ public enum GameType {
                 add(ComicBook);
                 add(Number);
                 add(MoviesTVRadio);
+                add(Bluffing);
             }},
 
             new ArrayList<Mechanic>() {{
@@ -131,7 +193,7 @@ public enum GameType {
                 add(LoseATurn);
                 add(TakeThat);
             }}),
-    Diamant( 2, 6,
+    Diamant(2, 6,
             new ArrayList<Category>() {{
                 add(Adventure);
                 add(Bluffing);
@@ -142,21 +204,90 @@ public enum GameType {
                 add(PushYourLuck);
                 add(SimultaneousActionSelection);
             }}),
-    Dominion (2, 4,
-            new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
-    DominionSizeDistortion (2, 4,
-            new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
-    DominionImprovements (2, 4,
-            new ArrayList<Category>() {{ add(Cards); add(Strategy);}},
-            new ArrayList<Mechanic>() {{ add(DeckManagement); }}),
-    Descent (2, 5, new ArrayList<Category>() {{ add(Adventure); add(Strategy); add(Exploration);
+    DiceMonastery(2, 4,
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Medieval);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(SetCollection);
+                add(WorkerPlacement);
+                add(EngineBuilding);
+            }}),
+    Dominion(2, 4,
+            new ArrayList<Category>() {{
+                add(Cards);
+                add(Strategy);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(DeckManagement);
+            }}),
+    DominionSizeDistortion(2, 4,
+            new ArrayList<Category>() {{
+                add(Cards);
+                add(Strategy);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(DeckManagement);
+            }}),
+    DominionImprovements(2, 4,
+            new ArrayList<Category>() {{
+                add(Cards);
+                add(Strategy);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(DeckManagement);
+            }}),
+    Battlelore(2, 2,
+            new ArrayList<Category>() {{
+                add(Fantasy);
+                add(Miniatures);
+                add(Wargame);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(Campaign);
+                add(BattleCardDriven);
+                add(CommandCards);
+                add(DiceRolling);
+                add(GridMovement);
+                add(ModularBoard);
+                add(VariablePlayerPowers);
+            }}),
+    SushiGo(2, 5,
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Cards);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(SetCollection);
+                add(PushYourLuck);
+                add(SimultaneousActionSelection);
+            }}),
+    Catan(3, 4,
+                    new ArrayList<Category>() {{
+        add(Strategy);
+        add(Cards);
+    }},
+            new ArrayList<Mechanic>() {{
+        add(ModularBoard);
+
+    }}),
+        Stratego(2, 2,
+        new ArrayList<Category>() {{
+        add(Strategy);
+        add(Bluffing);
+        add(Deduction);
+        add(Abstract);
+        }},
+        new ArrayList<Mechanic>() {{
+        add(Memory);
+        add(GridMovement);
+        }}),
+    Descent2e(2, 5, new ArrayList<Category>() {{ add(Adventure); add(Strategy); add(Exploration);
         add(Fantasy); add(Fighting); add(Miniatures); }},
             new ArrayList<Mechanic>() {{ add(ActionPoints); add(DiceRolling); add(GridMovement); add(HandManagement);
                 add(LineOfSight); add(ModularBoard); add(MovementPoints); add(MultipleMaps); add(Campaign); add(Cooperative);
                 add(VariablePlayerPowers); add(GameMaster); }});
-    ;
 
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
@@ -188,7 +319,7 @@ public enum GameType {
             case "coltexpress":
                 return ColtExpress;
             case "descent":
-                return Descent;
+                return Descent2e;
             case "dotsandboxes":
                 return DotsAndBoxes;
             case "diamant":
@@ -199,8 +330,18 @@ public enum GameType {
                 return Dominion;
             case "dominionsizedistortion":
                 return DominionSizeDistortion;
-            case "dominionimprovements" :
+            case "dominionimprovements":
                 return DominionImprovements;
+            case "catan":
+                return Catan;
+            case "battlelore":
+                return Battlelore;
+            case "dicemonastery":
+                return DiceMonastery;
+            case "sushigo":
+                return SushiGo;
+            case "stratego":
+                return Stratego;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -217,12 +358,16 @@ public enum GameType {
      */
     public Game createGameInstance(int nPlayers, long seed, AbstractParameters params) {
         if (nPlayers < minPlayers || nPlayers > maxPlayers) {
-                System.out.println("Unsupported number of players: " + nPlayers
-                        + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
+            System.out.println("Unsupported number of players: " + nPlayers
+                    + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
             return null;
         }
 
-        params = (params == null) ? createParameterSet(seed) : params;
+        if (params == null) {
+            params = ParameterFactory.getDefaultParams(this, seed);
+        } else {
+            params.setRandomSeed(seed);
+        }
         AbstractForwardModel forwardModel;
         AbstractGameState gameState;
 
@@ -263,7 +408,7 @@ public enum GameType {
                 forwardModel = new ColtExpressForwardModel();
                 gameState = new ColtExpressGameState(params, nPlayers);
                 break;
-            case Descent:
+            case Descent2e:
                 params = new DescentParameters(seed);
                 forwardModel = new DescentForwardModel();
                 gameState = new DescentGameState(params, nPlayers);
@@ -276,52 +421,37 @@ public enum GameType {
                 forwardModel = new DiamantForwardModel();
                 gameState = new DiamantGameState(params, nPlayers);
                 break;
+            case DiceMonastery:
+                forwardModel = new DiceMonasteryForwardModel();
+                gameState = new DiceMonasteryGameState(params, nPlayers);
+                break;
             case Dominion:
             case DominionImprovements:
             case DominionSizeDistortion:
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
                 break;
+            case Catan:
+                forwardModel = new CatanForwardModel();
+                gameState = new CatanGameState(params, nPlayers);
+                break;
+            case Battlelore:
+                forwardModel = new BattleloreForwardModel();
+                gameState = new BattleloreGameState(params, nPlayers);
+                break;
+            case SushiGo:
+                forwardModel = new SGForwardModel();
+                gameState = new SGGameState(params, nPlayers);
+                break;
+            case Stratego:
+                forwardModel = new StrategoForwardModel();
+                gameState = new StrategoGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
 
         return new Game(this, forwardModel, gameState);
-    }
-
-    public AbstractParameters createParameterSet(long seed) {
-        switch (this) {
-            case Pandemic:
-                return new PandemicParameters("data/pandemic/", seed);
-            case TicTacToe:
-                return new TicTacToeGameParameters(seed);
-            case ExplodingKittens:
-                return new ExplodingKittensParameters(seed);
-            case LoveLetter:
-                return new LoveLetterParameters(seed);
-            case Uno:
-                return new UnoGameParameters(seed);
-            case Blackjack:
-                return new BlackjackParameters(seed);
-            case Poker:
-                return new PokerGameParameters(seed);
-            case Virus:
-                return new VirusGameParameters(seed);
-            case ColtExpress:
-                return new ColtExpressParameters(seed);
-            case DotsAndBoxes:
-                return new DBParameters(seed);
-            case Diamant:
-                return new DiamantParameters(seed);
-            case Dominion:
-                return DominionParameters.firstGame(seed);
-            case DominionSizeDistortion:
-                return DominionParameters.sizeDistortion(seed);
-            case DominionImprovements:
-                return DominionParameters.improvements(seed);
-            default:
-                throw new AssertionError("No default Parameters specified for Game " + this);
-        }
     }
 
     /**
@@ -365,7 +495,7 @@ public enum GameType {
             case ExplodingKittens:
                 gui = new ExplodingKittensGUIManager(parent, game, ac, human);
                 break;
-            case Descent:
+            case Descent2e:
                 if (game != null) {
                     gui = new DescentGUI(parent, game.getGameState(), ac);
                 }
@@ -388,7 +518,22 @@ public enum GameType {
             case DominionSizeDistortion:
                 gui = new DominionGUIManager(parent, game, ac, human);
                 break;
+            case Catan:
+                gui = new CatanGUI(parent, game, ac);
+                break;
             // TODO: Diamant GUI
+            case Battlelore:
+                gui = new BattleloreGUI(parent, game, ac);
+                break;
+            case DiceMonastery:
+                gui = new DiceMonasteryGUI(parent, game, ac, human);
+                break;
+            case SushiGo:
+                gui = new SGGUI(parent, game, ac, human);
+                break;
+            case Stratego:
+                gui = new StrategoGUIManager(parent, game, ac);
+                break;
         }
 
         return gui;
@@ -425,7 +570,8 @@ public enum GameType {
         Exploration,
         Fantasy,
         Miniatures,
-        Bluffing;
+        Bluffing,
+        Wargame;
 
         /**
          * Retrieves a list of all games within this category.
@@ -483,14 +629,18 @@ public enum GameType {
         GameMaster,
         DiceRolling,
         GridMovement,
+        WorkerPlacement,
+        EngineBuilding,
         LineOfSight,
         ModularBoard,
         MovementPoints,
         MultipleMaps,
         Campaign,
         Enclosure,
-        MoveThroughDeck,
-        DeckManagement;
+        DeckManagement,
+        BattleCardDriven,
+        CommandCards,
+        MoveThroughDeck;
 
         /**
          * Retrieves a list of all games using this mechanic.
@@ -570,11 +720,11 @@ public enum GameType {
      * @return - instance of Game object; null if game not implemented.
      */
     public Game createGameInstance(int nPlayers) {
-        return createGameInstance(nPlayers, System.currentTimeMillis(), createParameterSet(System.currentTimeMillis()));
+        return createGameInstance(nPlayers, System.currentTimeMillis(), ParameterFactory.getDefaultParams(this, System.currentTimeMillis()));
     }
 
     public Game createGameInstance(int nPlayers, long seed) {
-        return createGameInstance(nPlayers, seed, createParameterSet(seed));
+        return createGameInstance(nPlayers, seed, ParameterFactory.getDefaultParams(this, seed));
     }
 
     public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {
@@ -588,7 +738,7 @@ public enum GameType {
     @Override
     public String toString() {
         boolean implemented = createGameInstance(minPlayers) != null;
-        AbstractGUIManager g = createGUIManager(null,null, null);
+        AbstractGUIManager g = createGUIManager(null, null, null);
         boolean gui = g != null;
         boolean prototypeGUI = g instanceof PrototypeGUIManager;
         return (gui ? prototypeGUI ? ANSI_CYAN : ANSI_BLUE : implemented ? ANSI_GREEN : ANSI_RED) + this.name() + ANSI_RESET + " {" +

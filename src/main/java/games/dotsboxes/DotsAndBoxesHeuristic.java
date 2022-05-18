@@ -48,12 +48,8 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
         DBGameState state = (DBGameState) gs;
         Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (playerResult == Utils.GameResult.LOSE)
-            return -1;
-        if (playerResult == Utils.GameResult.WIN)
-            return 1;
-        if (playerResult == Utils.GameResult.DRAW)
-            return 0;
+        if (!state.isNotTerminal())
+            return playerResult.value;
 
         int[] deltaToPlayer = new int[state.getNPlayers()];
         double retValue = 0.0;

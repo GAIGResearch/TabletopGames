@@ -26,4 +26,9 @@ public class FirstActionPlayer extends AbstractPlayer{
     public String toString() {
         return "FirstAction";
     }
+
+    @Override
+    public FirstActionPlayer copy() {
+        return this;
+    }
 }
