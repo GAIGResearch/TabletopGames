@@ -24,7 +24,7 @@ public class AttackMove extends Move {
         boolean destinationTileEmptied = true;
         boolean destinationTileSet = true;
 
-        GridBoard<Piece> board = ((StrategoGameState)gs).getGridBoard();
+        GridBoard board = ((StrategoGameState)gs).getGridBoard();
         Piece movedPiece = (Piece) gs.getComponentById(movedPieceID);
         Piece attackedPiece = (Piece) gs.getComponentById(attackedPieceID);
         int movedPieceRank = movedPiece.getPieceRank();

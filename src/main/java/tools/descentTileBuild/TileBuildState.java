@@ -12,7 +12,7 @@ import java.util.Objects;
 
 public class TileBuildState extends AbstractGameState {
 
-    GridBoard<String> tile;
+    GridBoard tile;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -20,7 +20,7 @@ public class TileBuildState extends AbstractGameState {
      * @param gameParameters - game parameters.
      */
     public TileBuildState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers));
+        super(gameParameters, new AlternatingTurnOrder(nPlayers), null);
     }
 
     @Override
@@ -35,6 +35,16 @@ public class TileBuildState extends AbstractGameState {
         TileBuildState copy = new TileBuildState(gameParameters, getNPlayers());
         copy.tile = tile.copy();
         return copy;
+    }
+
+    @Override
+    protected double _getHeuristicScore(int playerId) {
+        return 0;
+    }
+
+    @Override
+    public double getGameScore(int playerId) {
+        return 0;
     }
 
     @Override

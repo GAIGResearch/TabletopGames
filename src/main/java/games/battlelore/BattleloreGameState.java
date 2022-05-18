@@ -6,7 +6,6 @@ import core.components.Component;
 import core.components.GridBoard;
 import core.interfaces.IGamePhase;
 import core.turnorders.StandardTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
@@ -30,7 +29,7 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     int[] playerScores;
-    GridBoard<MapTile> gameBoard;
+    GridBoard gameBoard;
     List<Unit> unitTypes;
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
@@ -39,7 +38,7 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public Unit GetUnitFromType(UnitType type) {
-        int unitType = 0;
+        int unitType;
         switch (type) {
             case BloodHarvester:
                 unitType = 1;
@@ -57,14 +56,13 @@ public class BattleloreGameState extends AbstractGameState {
                 unitType = 0;
                 break;
         }
-        Unit unit = (Unit)unitTypes.get(unitType).copy();
-        return unit;
+        return (Unit)unitTypes.get(unitType).copy();
     }
 
     public void AddUnit(int locX, int locY, Unit unit) {
-        MapTile tile = gameBoard.getElement(locX, locY);
+        MapTile tile = (MapTile) gameBoard.getElement(locX, locY);
         if (tile != null) {
-            gameBoard.getElement(locX, locY).AddUnit(unit);
+            tile.addUnit(unit);
         }
     }
 
@@ -77,16 +75,16 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public void SetUnitsAsOrderable(int locX, int locY) {
-        MapTile tile = gameBoard.getElement(locX, locY);
+        MapTile tile = (MapTile) gameBoard.getElement(locX, locY);
         if (tile != null) {
-            gameBoard.getElement(locX, locY).SetAsOrderable();
+            tile.SetAsOrderable();
         }
     }
 
     public void RemoveUnit(int locX, int locY) {
-        MapTile tile = gameBoard.getElement(locX, locY);
+        MapTile tile = (MapTile) gameBoard.getElement(locX, locY);
         if (tile != null) {
-            gameBoard.getElement(locX, locY).RemoveUnit();
+            tile.RemoveUnit();
         }
     }
 
@@ -95,7 +93,7 @@ public class BattleloreGameState extends AbstractGameState {
 
         for (int x = 0; x < gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameBoard.getHeight(); y++) {
-                MapTile tile = gameBoard.getElement(x, y);
+                MapTile tile = (MapTile) gameBoard.getElement(x, y);
                 if (tile.GetUnits() != null && tile.GetFaction() == faction &&
                         tile.GetUnits().get(0).CanMove()) {
                     tiles.add(tile);
@@ -109,7 +107,7 @@ public class BattleloreGameState extends AbstractGameState {
         ArrayList<MapTile> tiles = new ArrayList<MapTile>();
         for (int x = 0; x < gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameBoard.getHeight(); y++) {
-                MapTile tile = gameBoard.getElement(x, y);
+                MapTile tile = (MapTile) gameBoard.getElement(x, y);
                 if (tile.GetUnits() != null && tile.GetFaction() == faction &&
                         tile.GetUnits().get(0).CanAttack()) {
                     tiles.add(tile);
@@ -136,7 +134,7 @@ public class BattleloreGameState extends AbstractGameState {
                 possibleLocations[x][0] = -1;
                 possibleLocations[x][1] = -1;
 
-                MapTile possibleTile = gameBoard.getElement(x, y);
+                MapTile possibleTile = (MapTile) gameBoard.getElement(x, y);
                 if (possibleTile.GetUnits() == null) {
                     double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - tile.getLocationX()), 2) +
                             Math.pow(Math.abs(possibleTile.getLocationY() - tile.getLocationY()), 2));
@@ -162,7 +160,7 @@ public class BattleloreGameState extends AbstractGameState {
             for (int y = 0; y < gameBoard.getHeight(); y++) {
                 possibleLocations[x][0] = -1;
                 possibleLocations[x][1] = -1;
-                MapTile possibleTile = gameBoard.getElement(x, y);
+                MapTile possibleTile = (MapTile) gameBoard.getElement(x, y);
                 if (possibleTile.GetUnits() != null && possibleTile.GetFaction() != attackUnit.GetFaction()) {
                     double distance = Math.sqrt(Math.pow(Math.abs(possibleTile.getLocationX() - attackUnit.getLocationX()), 2) +
                             Math.pow(Math.abs(possibleTile.getLocationY() - attackUnit.getLocationY()), 2));
@@ -177,7 +175,7 @@ public class BattleloreGameState extends AbstractGameState {
         return possibleLocations;
     }
 
-    public GridBoard<MapTile> getBoard() {
+    public GridBoard getBoard() {
         return gameBoard;
     }
 
@@ -190,7 +188,7 @@ public class BattleloreGameState extends AbstractGameState {
     @Override
     protected AbstractGameState _copy(int playerId) {
         BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), getNPlayers());
-        GridBoard<MapTile> clonedBoard = new GridBoard<MapTile>(gameBoard.getWidth(), gameBoard.getHeight());
+        GridBoard clonedBoard = new GridBoard(gameBoard.getWidth(), gameBoard.getHeight());
 
         for (int x = 0; x < gameBoard.getWidth(); x++) {
             for(int y = 0; y < gameBoard.getHeight(); y++) {

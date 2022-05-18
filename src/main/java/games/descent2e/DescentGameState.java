@@ -7,6 +7,7 @@ import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import games.GameType;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -19,15 +20,14 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     public enum DescentPhase implements IGamePhase {
         ForceMove  // Used when a figure started a (possibly valid move action) and is currently overlapping a friendly figure
     }
+    DescentGameData data;
 
     // For reference only
     HashMap<Integer, GridBoard> tiles;  // Mapping from board node ID in board configuration to tile configuration
     int[][] tileReferences;  // int corresponds to component ID of tile at that location in master board
     HashMap<String, HashSet<Vector2D>> gridReferences;  // Mapping from tile name to list of coordinates in master board for each cell
 
-    GridBoard<String> masterBoard;
-    GridBoard<Integer> masterBoardOccupancy;
-    GraphBoard masterGraph;
+    GridBoard masterBoard;
 
     ArrayList<Hero> heroes;
     Figure overlord;
@@ -42,7 +42,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers       - number of players for this game.
      */
     public DescentGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new DescentTurnOrder(nPlayers));
+        super(gameParameters, new DescentTurnOrder(nPlayers), GameType.Descent2e);
         tiles = new HashMap<>();
         data = new DescentGameData();
         data.load(((DescentParameters)gameParameters).getDataPath());
@@ -64,8 +64,6 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
         copy.tiles = new HashMap<>(tiles);  // TODO: deep copy
         copy.masterBoard = masterBoard.copy();
-        copy.masterBoardOccupancy = masterBoardOccupancy.copy();
-        copy.masterGraph = masterGraph.copy();
         copy.overlord = overlord.copy();
         copy.heroes = new ArrayList<>();
         for (Hero f: heroes) {
@@ -86,7 +84,13 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected double _getScore(int playerId) {
+    protected double _getHeuristicScore(int playerId) {
+        // TODO
+        return 0;
+    }
+
+    @Override
+    public double getGameScore(int playerId) {
         // TODO
         return 0;
     }
@@ -113,8 +117,6 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 Arrays.equals(tileReferences, that.tileReferences) &&
                 Objects.equals(gridReferences, that.gridReferences) &&
                 Objects.equals(masterBoard, that.masterBoard) &&
-                Objects.equals(masterBoardOccupancy, that.masterBoardOccupancy) &&
-                Objects.equals(masterGraph, that.masterGraph) &&
                 Objects.equals(heroes, that.heroes) &&
                 Objects.equals(overlord, that.overlord) &&
                 Objects.equals(monsters, that.monsters);
@@ -122,21 +124,17 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), tiles, gridReferences, masterBoard, masterBoardOccupancy, masterGraph, heroes, overlord, monsters, overlordPlayer);
+        int result = Objects.hash(super.hashCode(), tiles, gridReferences, masterBoard, heroes, overlord, monsters, overlordPlayer);
         result = 31 * result + Arrays.hashCode(tileReferences);
         return result;
     }
 
     DescentGameData getData() {
-        return (DescentGameData) data;
+        return data;
     }
 
-    public GridBoard<String> getMasterBoard() {
+    public GridBoard getMasterBoard() {
         return masterBoard;
-    }
-
-    public GraphBoard getMasterGraph() {
-        return masterGraph;
     }
 
     public ArrayList<Hero> getHeroes() {
@@ -153,10 +151,6 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public HashMap<String, HashSet<Vector2D>> getGridReferences() {
         return gridReferences;
-    }
-
-    public GridBoard<Integer> getMasterBoardOccupancy() {
-        return masterBoardOccupancy;
     }
 
     @Override

@@ -3,6 +3,7 @@ package games.stratego;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.BoardNode;
 import core.components.GridBoard;
 import games.stratego.actions.Move;
 import games.stratego.components.Piece;
@@ -19,7 +20,7 @@ public class StrategoForwardModel extends AbstractForwardModel {
     protected void _setup(AbstractGameState firstState) {
         StrategoParams params = (StrategoParams) firstState.getGameParameters();
         StrategoGameState state = (StrategoGameState) firstState;
-        state.gridBoard = new GridBoard<>(params.gridSize, params.gridSize);
+        state.gridBoard = new GridBoard(params.gridSize, params.gridSize);
         Random random = new Random(params.getRandomSeed());
 
         StrategoConstants.PieceSetups[] setups = StrategoConstants.PieceSetups.values();
@@ -47,7 +48,7 @@ public class StrategoForwardModel extends AbstractForwardModel {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getCurrentPlayer();
         Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
-        List<Piece> pieces = state.gridBoard.getComponents();
+        List<BoardNode> pieces = state.gridBoard.getComponents();
 
         if (pieces.isEmpty()){
             throw new AssertionError("Error: No Pieces Found");
@@ -55,7 +56,8 @@ public class StrategoForwardModel extends AbstractForwardModel {
  //           return actions;
         }
 
-        for (Piece piece : pieces){
+        for (BoardNode bn : pieces){
+            Piece piece = (Piece) bn;
             if (piece != null){
                 if (piece.getPieceAlliance() == playerAlliance) {
                     Collection<Move> moves = piece.calculateMoves(state);

@@ -2,6 +2,7 @@ package games.stratego;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
 import core.turnorders.AlternatingTurnOrder;
@@ -9,13 +10,11 @@ import games.GameType;
 import games.stratego.components.Piece;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 public class StrategoGameState extends AbstractGameState {
-    GridBoard<Piece> gridBoard;
+    GridBoard gridBoard;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -46,7 +45,8 @@ public class StrategoGameState extends AbstractGameState {
         if (playerId != -1 && getCoreGameParameters().partialObservable){
             playerAlliance = StrategoConstants.playerMapping.get(playerId);
 
-            for (Piece p: gridBoard.getComponents()) {
+            for (BoardNode bn: gridBoard.getComponents()) {
+                Piece p = (Piece) bn;
                 if (p != null && p.getPieceAlliance() != playerAlliance && !p.isPieceKnown()) {
                     pieceTypesHidden.add(p.getPieceType());
                 }
@@ -54,7 +54,8 @@ public class StrategoGameState extends AbstractGameState {
         }
 
         Random random = new Random(gameParameters.getRandomSeed());
-        for (Piece piece : gridBoard.getComponents()){
+        for (BoardNode bn : gridBoard.getComponents()){
+            Piece piece = (Piece) bn;
             if (piece != null) {
                 if (playerId != -1 && getCoreGameParameters().partialObservable && playerAlliance != piece.getPieceAlliance() && !piece.isPieceKnown()){
                     // Hide type, everything else is known
@@ -98,7 +99,7 @@ public class StrategoGameState extends AbstractGameState {
     }
 
 
-    public GridBoard<Piece> getGridBoard() {
+    public GridBoard getGridBoard() {
         return gridBoard;
     }
 
@@ -106,7 +107,8 @@ public class StrategoGameState extends AbstractGameState {
     protected List<Integer> _getUnknownComponentsIds(int playerId) {
         ArrayList<Integer> pieceList = new ArrayList<>();
 
-        for (Piece piece : gridBoard.getComponents()){
+        for (BoardNode bn : gridBoard.getComponents()){
+            Piece piece = (Piece) bn;
             if (piece != null){
                 if (playerId != -1){
                     Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(playerId);

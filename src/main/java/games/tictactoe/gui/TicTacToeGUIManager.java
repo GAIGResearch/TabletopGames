@@ -5,13 +5,11 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
-import core.components.Token;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 import utilities.Utils;
 
 import javax.swing.*;
@@ -19,7 +17,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public class TicTacToeGUIManager extends AbstractGUIManager {
 
@@ -65,7 +62,7 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
             if (highlight.size() > 0) {
                 Rectangle r = highlight.get(0);
                 for (AbstractAction abstractAction : actions) {
-                    SetGridValueAction<Token> action = (SetGridValueAction<Token>) abstractAction;
+                    SetGridValueAction action = (SetGridValueAction) abstractAction;
                     if (action.getX() == r.x/defaultItemSize && action.getY() == r.y/defaultItemSize) {
                         actionButtons[0].setVisible(true);
                         actionButtons[0].setButtonAction(action, "Play " + TicTacToeConstants.playerMapping.get(player.getPlayerID()));

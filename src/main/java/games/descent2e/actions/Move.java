@@ -2,6 +2,8 @@ package games.descent2e.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.BoardNode;
+import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTurnOrder;
@@ -54,16 +56,18 @@ public class Move extends AbstractAction {
         boolean toLava = false;
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-                String currentTile = dgs.getMasterBoard().getElement(oldLocation.getX() + j, oldLocation.getY() + i);
-                String destinationTile = dgs.getMasterBoard().getElement(location.getX() + j, location.getY() + i);
+                BoardNode currentTile = dgs.getMasterBoard().getElement(oldLocation.getX() + j, oldLocation.getY() + i);
+                BoardNode destinationTile = dgs.getMasterBoard().getElement(location.getX() + j, location.getY() + i);
 
-                dgs.getMasterBoardOccupancy().setElement(f.getLocation().getX() + j, f.getLocation().getY() + i, -1);
-                dgs.getMasterBoardOccupancy().setElement(location.getX() + j, location.getY() + i, f.getComponentID());
+                PropertyInt prop1 = new PropertyInt("players", -1);
+                PropertyInt prop2 = new PropertyInt("players", f.getComponentID());
+                currentTile.setProperty(prop1);
+                destinationTile.setProperty(prop2);
 
-                if (currentTile.equals("pit")) {
+                if (currentTile.getComponentName().equals("pit")) {
                     inPit = true;
                 }
-                switch (destinationTile) {
+                switch (destinationTile.getComponentName()) {
                     case "water":
                         toWater = true;
                         break;

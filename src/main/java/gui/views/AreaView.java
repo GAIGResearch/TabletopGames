@@ -416,9 +416,9 @@ public class AreaView extends ComponentView {
 
             // Draw component itself (decks and areas already drawn)
             if (c instanceof GridBoard) {
-                Rectangle toDraw = getRectangle(e.getKey(),((GridBoard<?>) c).getWidth() * defaultItemSize,
-                        ((GridBoard<?>) c).getHeight() * defaultItemSize, drawMap, dependencies, translation);
-                GridBoardView.drawGridBoard(g, (GridBoard<?>) c, toDraw);
+                Rectangle toDraw = getRectangle(e.getKey(),((GridBoard) c).getWidth() * defaultItemSize,
+                        ((GridBoard) c).getHeight() * defaultItemSize, drawMap, dependencies, translation);
+                GridBoardView.drawGridBoard(g, (GridBoard) c, toDraw);
             } else if (c instanceof Counter) {
                 Rectangle toDraw = getRectangle(e.getKey(), defaultItemSize, defaultItemSize, drawMap, dependencies, translation);
                 CounterView.drawCounter(g, (Counter) c, toDraw);

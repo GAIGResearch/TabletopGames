@@ -1,5 +1,6 @@
 package tools.descentTileBuild;
 
+import core.components.BoardNode;
 import core.components.GridBoard;
 import games.descent2e.gui.DescentGridBoardView;
 import gui.views.ComponentView;
@@ -9,19 +10,19 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import static core.AbstractGUI.defaultItemSize;
+import static gui.AbstractGUIManager.defaultItemSize;
 
 public class TileBuildGridBoardView extends ComponentView {
 
     Vector2D highlight;
 
-    public TileBuildGridBoardView(GridBoard<String> gridBoard) {
+    public TileBuildGridBoardView(GridBoard gridBoard) {
         super(gridBoard, (gridBoard.getWidth()+1) * defaultItemSize, (gridBoard.getHeight()+1) * defaultItemSize);
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                GridBoard<String> gridBoard = (GridBoard<String>) component;
+                GridBoard gridBoard = (GridBoard) component;
                 for (int i = 0; i < gridBoard.getHeight(); i++) {
                     boolean found = false;
                     for (int j = 0; j < gridBoard.getWidth(); j++) {
@@ -40,7 +41,7 @@ public class TileBuildGridBoardView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        GridBoard<String> gridBoard = (GridBoard<String>) component;
+        GridBoard gridBoard = (GridBoard) component;
 
         int width = gridBoard.getWidth() * defaultItemSize;
         int height = gridBoard.getHeight() * defaultItemSize;
@@ -67,13 +68,13 @@ public class TileBuildGridBoardView extends ComponentView {
         }
     }
 
-    private static void drawCell(Graphics2D g, String element, int x, int y, int gridWidth, int gridHeight,
+    private static void drawCell(Graphics2D g, BoardNode element, int x, int y, int gridWidth, int gridHeight,
                                  int offsetX, int offsetY) {
         int xC = offsetX + x * defaultItemSize;
         int yC = offsetY + y * defaultItemSize;
 
         // Paint cell background
-        g.setColor(DescentGridBoardView.colorMap.get(element));
+        g.setColor(DescentGridBoardView.colorMap.get(element.getComponentName()));
         g.fillRect(xC, yC, defaultItemSize, defaultItemSize);
         g.setColor(Color.black);
         g.drawRect(xC, yC, defaultItemSize, defaultItemSize);

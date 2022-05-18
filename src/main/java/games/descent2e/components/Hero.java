@@ -1,5 +1,6 @@
 package games.descent2e.components;
 
+import core.CoreConstants;
 import core.components.Card;
 import core.components.Deck;
 import core.properties.Property;
@@ -29,9 +30,9 @@ public class Hero extends Figure {
     public Hero(String name) {
         super(name);
 
-        skills = new Deck<>("Skills");
-        handEquipment = new Deck<>("Hands");
-        otherEquipment = new Deck<>("OtherItems");
+        skills = new Deck<>("Skills", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        handEquipment = new Deck<>("Hands", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        otherEquipment = new Deck<>("OtherItems", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
 
         equipSlotsAvailable = new HashMap<>();
         equipSlotsAvailable.put("hand", 2);

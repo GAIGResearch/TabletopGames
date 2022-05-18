@@ -1,5 +1,6 @@
 package games.stratego.components;
 
+import core.components.BoardNode;
 import core.components.GridBoard;
 import core.components.Token;
 import games.stratego.StrategoGameState;
@@ -13,7 +14,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-public class Piece extends Token {
+public class Piece extends BoardNode {
 
     protected int[] position;
     protected final PieceType pieceType;
@@ -23,7 +24,7 @@ public class Piece extends Token {
     private final static int[] MOVE_VECTOR = {-1, 1};
 
     public Piece(PieceType pieceType, Alliance alliance, int[] position) {
-        super(pieceType.name());
+        super(-1, pieceType.name());
         this.pieceType = pieceType;
         this.alliance = alliance;
         this.position = position;
@@ -31,7 +32,7 @@ public class Piece extends Token {
     }
 
     protected Piece(PieceType pieceType, Alliance alliance, int[] position, boolean known, int ID) {
-        super(pieceType.name(), ID);
+        super(-1, pieceType.name(), ID);
         this.pieceType = pieceType;
         this.alliance = alliance;
         this.position = position;
@@ -68,7 +69,7 @@ public class Piece extends Token {
 
     public Collection<Move> calculateMoves(StrategoGameState gs) {
 
-        GridBoard<Piece> board = gs.getGridBoard();
+        GridBoard board = gs.getGridBoard();
         StrategoParams params = (StrategoParams) gs.getGameParameters();
 
         List<Move> moves = new ArrayList<>();
@@ -112,8 +113,8 @@ public class Piece extends Token {
         return moves;
     }
 
-    private boolean addMove(GridBoard<Piece> board, StrategoParams params, List<Move> moves, int[] newPos) {
-        Piece pieceAtTile = board.getElement(newPos[0], newPos[1]);
+    private boolean addMove(GridBoard board, StrategoParams params, List<Move> moves, int[] newPos) {
+        Piece pieceAtTile = (Piece) board.getElement(newPos[0], newPos[1]);
         if (pieceAtTile == null) {
             moves.add(new NormalMove(getComponentID(), newPos));
         } else {

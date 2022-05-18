@@ -22,9 +22,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import static core.AbstractGUI.defaultItemSize;
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.terrainHash;
+import static gui.AbstractGUIManager.defaultItemSize;
 import static utilities.Utils.getNeighbourhood;
 import static utilities.Utils.stringToColor;
 
@@ -45,7 +45,7 @@ public class DescentGridBoardView extends ComponentView {
 
     private DescentGameState gameState;
 
-    public DescentGridBoardView(GridBoard<String> gridBoard, DescentGameState gameState) {
+    public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState) {
         super(gridBoard, (gridBoard.getWidth()+1) * defaultItemSize, (gridBoard.getHeight()+1) * defaultItemSize);
         this.gameState = gameState;
     }
@@ -56,8 +56,7 @@ public class DescentGridBoardView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard<String>) component, 0, 0,
-                gameState.getMasterGraph(), gameState.getGridReferences(), gameState.getTileReferences());
+        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard) component, 0, 0, gameState.getGridReferences(), gameState.getTileReferences());
 
         // Draw heroes
         for (Figure f: gameState.getHeroes()) {
@@ -95,8 +94,7 @@ public class DescentGridBoardView extends ComponentView {
     }
 
 
-    public static void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard<String> gridBoard, int x, int y,
-                                                          GraphBoard graphBoard,
+    public static void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
                                                           HashMap<String, HashSet<Vector2D>> gridReferences,
                                                           int[][] tileReferences) {
         int width = gridBoard.getWidth() * defaultItemSize;
@@ -110,8 +108,7 @@ public class DescentGridBoardView extends ComponentView {
         // Draw cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
-                drawCell(g, gridBoard.getElement(j, i), j, i, gridBoard.getWidth(), gridBoard.getHeight(), graphBoard,
-                        x, y);
+                drawCell(g, gridBoard.getElement(j, i), j, i, gridBoard.getWidth(), gridBoard.getHeight(), x, y);
             }
         }
 
@@ -131,81 +128,77 @@ public class DescentGridBoardView extends ComponentView {
 //        }
     }
 
-    private static void drawCell(Graphics2D g, String element, int x, int y, int gridWidth, int gridHeight, GraphBoard graph,
-                                 int offsetX, int offsetY) {
+    private static void drawCell(Graphics2D g, BoardNode bn, int x, int y, int gridWidth, int gridHeight, int offsetX, int offsetY) {
         int xC = offsetX + x * defaultItemSize;
         int yC = offsetY + y * defaultItemSize;
 
         // Paint cell background
-        g.setColor(colorMap.get(element));
+        g.setColor(colorMap.get(bn.getComponentName()));
         g.fillRect(xC, yC, defaultItemSize, defaultItemSize);
 
         // Find connectivity in the graph and draw borders to the cell where connection doesn't exist
-        BoardNode bn = graph.getNodeByProperty(coordinateHash, new PropertyVector2D("coordinates", new Vector2D(x, y)));
-        if (bn != null) {
-            String terrain = ((PropertyString)bn.getProperty(terrainHash)).value;
+        String terrain = ((PropertyString)bn.getProperty(terrainHash)).value;
 
-            Stroke s = g.getStroke();
+        Stroke s = g.getStroke();
 
-            if (DescentTypes.TerrainType.isWalkable(terrain)) {
+        if (DescentTypes.TerrainType.isWalkable(terrain)) {
 
+            g.setColor(Color.black);
+            g.drawRect(xC, yC, defaultItemSize, defaultItemSize);
+            g.setStroke(new BasicStroke(5));
+
+            List<Vector2D> neighbours = getNeighbourhood(x, y, gridWidth, gridHeight, false);
+            for (Vector2D n : neighbours) {
+                BoardNode other = null;
+                for (BoardNode nn : bn.getNeighbours()) {
+                    Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
+                    if (location.equals(n)) {
+                        other = nn;
+                        break;
+                    }
+                }
+                if (other == null) {
+                    if (n.getX() - x == 0) {
+                        // Vertical neighbours, draw horizontal line
+                        if (n.getY() > y) {
+                            // Neighbour is below, separation line is y + cell size
+                            g.drawLine(xC, yC + defaultItemSize, xC + defaultItemSize, yC + defaultItemSize);
+                        } else {
+                            // Neighbour is above, separation line is y
+                            g.drawLine(xC, yC, xC + defaultItemSize, yC);
+                        }
+                    } else if (n.getY() - y == 0) {
+                        // Horizontal neighbours, draw vertical line
+                        if (n.getX() > x) {
+                            // Neighbour is to the right, separation line is x + cell size
+                            g.drawLine(xC + defaultItemSize, yC, xC + defaultItemSize, yC + defaultItemSize);
+                        } else {
+                            // Neighbour is to the left, separation line is x
+                            g.drawLine(xC, yC, xC, yC + defaultItemSize);
+                        }
+                    }
+                }
+            }
+        } else {
+            if (terrain.equals("block")) {
+                g.setStroke(new BasicStroke(5));
                 g.setColor(Color.black);
                 g.drawRect(xC, yC, defaultItemSize, defaultItemSize);
-                g.setStroke(new BasicStroke(5));
-
-                List<Vector2D> neighbours = getNeighbourhood(x, y, gridWidth, gridHeight, false);
-                for (Vector2D n : neighbours) {
-                    BoardNode other = null;
-                    for (BoardNode nn : bn.getNeighbours()) {
-                        Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
-                        if (location.equals(n)) {
-                            other = nn;
-                            break;
-                        }
-                    }
-                    if (other == null) {
-                        if (n.getX() - x == 0) {
-                            // Vertical neighbours, draw horizontal line
-                            if (n.getY() > y) {
-                                // Neighbour is below, separation line is y + cell size
-                                g.drawLine(xC, yC + defaultItemSize, xC + defaultItemSize, yC + defaultItemSize);
-                            } else {
-                                // Neighbour is above, separation line is y
-                                g.drawLine(xC, yC, xC + defaultItemSize, yC);
-                            }
-                        } else if (n.getY() - y == 0) {
-                            // Horizontal neighbours, draw vertical line
-                            if (n.getX() > x) {
-                                // Neighbour is to the right, separation line is x + cell size
-                                g.drawLine(xC + defaultItemSize, yC, xC + defaultItemSize, yC + defaultItemSize);
-                            } else {
-                                // Neighbour is to the left, separation line is x
-                                g.drawLine(xC, yC, xC, yC + defaultItemSize);
-                            }
-                        }
-                    }
-                }
-            } else {
-                if (terrain.equals("block")) {
-                    g.setStroke(new BasicStroke(5));
-                    g.setColor(Color.black);
-                    g.drawRect(xC, yC, defaultItemSize, defaultItemSize);
-                }
             }
-            g.setStroke(s);
-
-            // Draw underlying graph
-            g.setColor(Color.green);
-            for (BoardNode nn : bn.getNeighbours()) {
-                Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
-                int xC2 = offsetX + location.getX() * defaultItemSize;
-                int yC2 = offsetY + location.getY() * defaultItemSize;
-
-                g.drawLine(xC + defaultItemSize/2, yC + defaultItemSize/2, xC2 + defaultItemSize/2, yC2 + defaultItemSize/2);
-            }
-            g.setColor(Color.black);
-
         }
+        g.setStroke(s);
+
+        // Draw underlying graph
+        g.setColor(Color.green);
+        for (BoardNode nn : bn.getNeighbours()) {
+            Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
+            int xC2 = offsetX + location.getX() * defaultItemSize;
+            int yC2 = offsetY + location.getY() * defaultItemSize;
+
+            g.drawLine(xC + defaultItemSize/2, yC + defaultItemSize/2, xC2 + defaultItemSize/2, yC2 + defaultItemSize/2);
+        }
+        g.setColor(Color.black);
+
     }
 
 }

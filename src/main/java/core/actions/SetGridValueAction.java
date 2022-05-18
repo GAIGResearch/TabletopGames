@@ -1,20 +1,20 @@
 package core.actions;
 
 import core.AbstractGameState;
-import core.components.Component;
+import core.components.BoardNode;
 import core.interfaces.IPrintable;
 import core.components.GridBoard;
 
 import java.util.Objects;
 
-public class SetGridValueAction<T extends Component> extends AbstractAction implements IPrintable {
+public class SetGridValueAction extends AbstractAction implements IPrintable {
 
     private final int gridBoard;
     private final int x;
     private final int y;
-    private final T value;
+    private final BoardNode value;
 
-    public SetGridValueAction (int gridBoard, int x, int y, T value){
+    public SetGridValueAction (int gridBoard, int x, int y, BoardNode value){
         this.gridBoard = gridBoard;
         this.x = x;
         this.y = y;
@@ -28,19 +28,19 @@ public class SetGridValueAction<T extends Component> extends AbstractAction impl
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        return ((GridBoard<T>)gs.getComponentById(gridBoard)).setElement(x, y, value);
+        return ((GridBoard)gs.getComponentById(gridBoard)).setElement(x, y, value);
     }
 
     @Override
     public AbstractAction copy() {
-        return new SetGridValueAction<>(gridBoard, x, y, value);
+        return new SetGridValueAction(gridBoard, x, y, value);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SetGridValueAction)) return false;
-        SetGridValueAction<?> that = (SetGridValueAction<?>) o;
+        SetGridValueAction that = (SetGridValueAction) o;
         return gridBoard == that.gridBoard &&
                 x == that.x &&
                 y == that.y &&
@@ -74,7 +74,7 @@ public class SetGridValueAction<T extends Component> extends AbstractAction impl
         return y;
     }
 
-    public T getValue() {
+    public BoardNode getValue() {
         return value;
     }
 

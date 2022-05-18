@@ -22,7 +22,7 @@ public class NormalMove extends Move{
     @Override
     public boolean execute(AbstractGameState gs) {
         Piece movedPiece = (Piece) gs.getComponentById(movedPieceID);
-        GridBoard<Piece> board = ((StrategoGameState)gs).getGridBoard();
+        GridBoard board = ((StrategoGameState)gs).getGridBoard();
 
         board.setElement(movedPiece.getPiecePosition()[0], movedPiece.getPiecePosition()[1], null);
         board.setElement(destinationCoordinate[0], destinationCoordinate[1], movedPiece);

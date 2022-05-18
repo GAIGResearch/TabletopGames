@@ -10,7 +10,6 @@ import core.interfaces.IPrintable;
 import core.interfaces.IVectorObservation;
 import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
-import utilities.Utils;
 import utilities.VectorObservation;
 
 import java.util.ArrayList;
@@ -18,9 +17,9 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Token>, IVectorObservation {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState, IVectorObservation {
 
-    GridBoard<Token> gridBoard;
+    GridBoard gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.TicTacToe);
@@ -83,7 +82,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    public GridBoard<Token> getGridBoard() {
+    public GridBoard getGridBoard() {
         return gridBoard;
     }
 

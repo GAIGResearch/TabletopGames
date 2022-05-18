@@ -68,7 +68,7 @@ public class TileBuildGUI extends AbstractGUIManager {
 
         JButton getjson = new JButton("Generate JSON");
         getjson.addActionListener(e -> {
-            GridBoard<String> tile = ((TileBuildState) gameState).tile.copy();
+            GridBoard tile = ((TileBuildState) gameState).tile.copy();
 
             // Add edge tiles around the grid
             int minX = tile.getWidth()-1;
@@ -77,7 +77,7 @@ public class TileBuildGUI extends AbstractGUIManager {
             int maxY = 0;
             for (int i = 0; i < tile.getHeight(); i++) {
                 for (int j = 0; j < tile.getWidth(); j++) {
-                    if (DescentTypes.TerrainType.isInsideTile(tile.getElement(j, i))) {
+                    if (DescentTypes.TerrainType.isInsideTile(tile.getElement(j, i).getComponentName())) {
                         if (j < minX) minX = j;
                         if (i < minY) minY = i;
                         if (i > maxY) maxY = i;
@@ -194,7 +194,7 @@ public class TileBuildGUI extends AbstractGUIManager {
             for (AbstractAction a: actions) {
                 if (a instanceof SetGridValueAction) {
                     if (((SetGridValueAction) a).getX() == cell.getX() && ((SetGridValueAction) a).getY() == cell.getY()) {
-                        String actionStr = (String)((SetGridValueAction) a).getValue();
+                        String actionStr = ((SetGridValueAction) a).getValue().getComponentName();
                         if (actionStr.equalsIgnoreCase(terrainType.a)){
                             ac.addAction(a);
 //                            terrainOptionsView.highlight = null;

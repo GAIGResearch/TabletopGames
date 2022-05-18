@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static core.AbstractGUI.defaultItemSize;
+import static gui.AbstractGUIManager.defaultItemSize;
 
 public class TerrainOptionsView extends JComponent {
 

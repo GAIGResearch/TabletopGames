@@ -4,6 +4,7 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
+import core.components.BoardNode;
 import core.components.GridBoard;
 import utilities.Vector2D;
 
@@ -22,11 +23,12 @@ public class TileBuildFM extends AbstractForwardModel {
         int size = ((TileBuildParameters)firstState.getGameParameters()).defaultGridSize;
 
         // By default filled with plain, and with a null border
-        tbs.tile = new GridBoard<>(size, size, String.class, "plain");
+        BoardNode bn = new BoardNode(-1, "plain");
+        tbs.tile = new GridBoard(size, size, bn.copy());
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (i == 0 || j == 0 || i == size - 1 || j == size - 1) {
-                    tbs.tile.setElement(j, i, "null");
+                    tbs.tile.setElement(j, i, null);
                 }
             }
         }
@@ -50,20 +52,21 @@ public class TileBuildFM extends AbstractForwardModel {
         // Only place "open" spaces outside edges of tile (should have only 1 orthogonal neighbour that's inside terrain)
         // and also disable actions for other types of terrains if placed next to "open" and that would be invalid "open" placement as above
         for (String t: terrains) {
+            BoardNode bn = new BoardNode(-1, t);
             for (int i = 0; i < tbs.tile.getHeight(); i++) {
                 for (int j = 0; j < tbs.tile.getWidth(); j++) {
                     if (t.equals("open")) {
                         int nInsideNeighbours = countInsideNeighboursOpenTile(j, i, tbs.tile.getWidth(), tbs.tile.getHeight(), tbs.tile).size();
                         if (nInsideNeighbours <= 1) {
-                            actions.add(new SetGridValueAction<>(tbs.tile.getComponentID(), j, i, t));
+                            actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, bn.copy()));
                         }
                     } else {
                         if (!t.equals("null")) {
                             List<Vector2D> neighbours = getNeighbourhood(j, i, tbs.tile.getWidth(), tbs.tile.getHeight(), false);
                             boolean anyOpen = false;
                             for (Vector2D n : neighbours) {
-                                String el = tbs.tile.getElement(n.getX(), n.getY());
-                                if (el != null && el.equals("open")) {
+                                BoardNode el = tbs.tile.getElement(n.getX(), n.getY());
+                                if (el != null && el.getComponentName().equals("open")) {
                                     anyOpen = true;
                                     // Check if this would be valid placement
                                     List<Vector2D> insideNeighbours = countInsideNeighboursOpenTile(n.getX(), n.getY(), tbs.tile.getWidth(), tbs.tile.getHeight(), tbs.tile);
@@ -77,15 +80,15 @@ public class TileBuildFM extends AbstractForwardModel {
                                     int nInsideNeighbours = insideNeighbours.size();
                                     if (add) nInsideNeighbours += 1;
                                     if (nInsideNeighbours <= 1) {
-                                        actions.add(new SetGridValueAction<>(tbs.tile.getComponentID(), j, i, t));
+                                        actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, bn.copy()));
                                     }
                                 }
                             }
                             if (!anyOpen) {
-                                actions.add(new SetGridValueAction<>(tbs.tile.getComponentID(), j, i, t));
+                                actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, bn.copy()));
                             }
                         } else {
-                            actions.add(new SetGridValueAction<>(tbs.tile.getComponentID(), j, i, t));
+                            actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, bn.copy()));
                         }
                     }
                 }
@@ -95,11 +98,11 @@ public class TileBuildFM extends AbstractForwardModel {
         return actions;
     }
 
-    private List<Vector2D> countInsideNeighboursOpenTile(int x, int y, int width, int height, GridBoard<String> tile) {
+    private List<Vector2D> countInsideNeighboursOpenTile(int x, int y, int width, int height, GridBoard tile) {
         List<Vector2D> neighbours = getNeighbourhood(x, y, width, height, false);
         List<Vector2D> insideTileNeighbours = new ArrayList<>();
         for (Vector2D n: neighbours) {
-            if (TerrainType.isInsideTile(tile.getElement(n.getX(), n.getY()))) {
+            if (TerrainType.isInsideTile(tile.getElement(n.getX(), n.getY()).getComponentName())) {
                 insideTileNeighbours.add(n.copy());
             }
         }
