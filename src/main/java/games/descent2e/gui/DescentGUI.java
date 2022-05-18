@@ -1,8 +1,8 @@
-package games.descent.gui;
+package games.descent2e.gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import games.descent.DescentGameState;
+import games.descent2e.DescentGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;

@@ -1,10 +1,10 @@
-package games.descent;
+package games.descent2e;
 
 import core.AbstractGameData;
 import core.components.*;
 import core.properties.PropertyString;
-import games.descent.components.Hero;
-import games.descent.concepts.Quest;
+import games.descent2e.components.Hero;
+import games.descent2e.concepts.Quest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static core.components.Component.parseComponent;
-import static games.descent.DescentConstants.archetypeHash;
+import static games.descent2e.DescentConstants.archetypeHash;
 
 
 public class DescentGameData extends AbstractGameData {

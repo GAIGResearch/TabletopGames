@@ -1,4 +1,4 @@
-package games.descent;
+package games.descent2e;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
@@ -7,11 +7,11 @@ import core.actions.DoNothing;
 import core.components.*;
 import core.properties.*;
 import games.GameType;
-import games.descent.actions.Move;
-import games.descent.components.Figure;
-import games.descent.components.Hero;
-import games.descent.components.Monster;
-import games.descent.concepts.Quest;
+import games.descent2e.actions.Move;
+import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
+import games.descent2e.components.Monster;
+import games.descent2e.concepts.Quest;
 import utilities.Pair;
 import utilities.Vector2D;
 
@@ -19,10 +19,10 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-import games.descent.DescentTypes.*;
+import games.descent2e.DescentTypes.*;
 
 import static core.CoreConstants.*;
-import static games.descent.DescentConstants.*;
+import static games.descent2e.DescentConstants.*;
 import static utilities.Utils.getNeighbourhood;
 
 public class DescentForwardModel extends AbstractForwardModel {
@@ -778,7 +778,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                     nMinions = monsterSetup[monsterSetup.length-1];
                 } else {
                     // Respect group limits
-                    nMinions = monsterSetup[dgs.getNPlayers()- GameType.Descent.getMinPlayers()];
+                    nMinions = monsterSetup[dgs.getNPlayers()- GameType.Descent2e.getMinPlayers()];
                 }
             } else {
                 // Format name:#minions

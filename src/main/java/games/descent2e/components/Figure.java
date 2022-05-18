@@ -1,9 +1,8 @@
-package games.descent.components;
+package games.descent2e.components;
 
-import core.components.Component;
 import core.components.Token;
 import core.properties.PropertyInt;
-import games.descent.DescentTypes;
+import games.descent2e.DescentTypes;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -15,7 +14,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static games.descent.DescentConstants.*;
+import static games.descent2e.DescentConstants.*;
 
 // TODO: figure out how to do ability/heroic-feat
 public class Figure extends Token {

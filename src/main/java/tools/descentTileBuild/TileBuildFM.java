@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import static games.descent.DescentTypes.*;
+import static games.descent2e.DescentTypes.*;
 import static utilities.Utils.getNeighbourhood;
 
 public class TileBuildFM extends AbstractForwardModel {

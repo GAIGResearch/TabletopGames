@@ -1,7 +1,7 @@
 package tools.descentTileBuild;
 
 import core.components.GridBoard;
-import games.descent.gui.DescentGridBoardView;
+import games.descent2e.gui.DescentGridBoardView;
 import gui.views.ComponentView;
 import utilities.Vector2D;
 

@@ -1,10 +1,10 @@
-package games.descent;
+package games.descent2e;
 
 import core.AbstractGameState;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
-import games.descent.components.Figure;
-import games.descent.components.Monster;
+import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

@@ -1,4 +1,4 @@
-package games.descent.concepts;
+package games.descent2e.concepts;
 
 import utilities.Vector2D;
 

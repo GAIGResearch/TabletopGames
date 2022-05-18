@@ -1,4 +1,4 @@
-package games.descent;
+package games.descent2e;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
@@ -7,9 +7,9 @@ import core.components.GraphBoard;
 import core.components.GridBoard;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import games.descent.components.Figure;
-import games.descent.components.Hero;
-import games.descent.components.Monster;
+import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
+import games.descent2e.components.Monster;
 import utilities.Vector2D;
 
 import java.util.*;

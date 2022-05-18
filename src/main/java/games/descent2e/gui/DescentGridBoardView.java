@@ -1,4 +1,4 @@
-package games.descent.gui;
+package games.descent2e.gui;
 
 import core.components.BoardNode;
 import core.components.GraphBoard;
@@ -6,11 +6,11 @@ import core.components.GridBoard;
 import core.properties.PropertyColor;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
-import games.descent.DescentGameState;
-import games.descent.DescentParameters;
-import games.descent.DescentTypes;
-import games.descent.components.Figure;
-import games.descent.components.Monster;
+import games.descent2e.DescentGameState;
+import games.descent2e.DescentParameters;
+import games.descent2e.DescentTypes;
+import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
 import gui.views.ComponentView;
 import utilities.ImageIO;
 import utilities.Pair;
@@ -24,7 +24,7 @@ import java.util.List;
 
 import static core.AbstractGUI.defaultItemSize;
 import static core.CoreConstants.*;
-import static games.descent.DescentConstants.terrainHash;
+import static games.descent2e.DescentConstants.terrainHash;
 import static utilities.Utils.getNeighbourhood;
 import static utilities.Utils.stringToColor;
 

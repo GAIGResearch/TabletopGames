@@ -1,10 +1,10 @@
-package games.descent;
+package games.descent2e;
 
 import core.AbstractParameters;
 
 import java.util.Objects;
 
-import static games.descent.DescentTypes.Campaign.HeirsOfBlood;
+import static games.descent2e.DescentTypes.Campaign.HeirsOfBlood;
 
 public class DescentParameters extends AbstractParameters {
 

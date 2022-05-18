@@ -1,7 +1,7 @@
 package tools.descentTileBuild;
 
-import games.descent.DescentTypes;
-import games.descent.gui.DescentGridBoardView;
+import games.descent2e.DescentTypes;
+import games.descent2e.gui.DescentGridBoardView;
 import utilities.Pair;
 
 import javax.swing.*;

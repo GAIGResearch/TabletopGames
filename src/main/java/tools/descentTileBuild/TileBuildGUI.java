@@ -5,7 +5,7 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
-import games.descent.DescentTypes;
+import games.descent2e.DescentTypes;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;

@@ -1,4 +1,4 @@
-package games.descent;
+package games.descent2e;
 
 import utilities.Hash;
 

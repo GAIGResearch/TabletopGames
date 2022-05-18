@@ -1,12 +1,12 @@
-package games.descent.actions;
+package games.descent2e.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import games.descent.DescentGameState;
-import games.descent.DescentParameters;
-import games.descent.DescentTurnOrder;
-import games.descent.components.Figure;
-import games.descent.components.Monster;
+import games.descent2e.DescentGameState;
+import games.descent2e.DescentParameters;
+import games.descent2e.DescentTurnOrder;
+import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
 import utilities.Vector2D;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package games.descent.actions;
+package games.descent2e.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;

@@ -1,7 +1,7 @@
-package games.descent;
+package games.descent2e;
 
 import core.components.GridBoard;
-import games.descent.concepts.Quest;
+import games.descent2e.concepts.Quest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

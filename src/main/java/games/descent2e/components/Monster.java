@@ -1,11 +1,11 @@
-package games.descent.components;
+package games.descent2e.components;
 
 import core.properties.Property;
 import core.properties.PropertyInt;
 
 import java.util.HashMap;
 
-import static games.descent.DescentConstants.*;
+import static games.descent2e.DescentConstants.*;
 
 public class Monster extends Figure {
 
