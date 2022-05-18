@@ -337,7 +337,7 @@ public class Game {
      *
      * @param gui - gui to update.
      */
-    private void updateGUI(AbstractGUIManager gui, JFrame frame) {
+    public void updateGUI(AbstractGUIManager gui, JFrame frame) {
         // synchronise on game to avoid updating GUI in middle of action being taken
         AbstractGameState gameState = getGameState();
         int currentPlayer = gameState.getCurrentPlayer();

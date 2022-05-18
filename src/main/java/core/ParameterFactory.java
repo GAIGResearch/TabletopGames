@@ -6,6 +6,7 @@ import games.battlelore.BattleloreGameParameters;
 import games.blackjack.BlackjackParameters;
 import games.catan.CatanParameters;
 import games.coltexpress.ColtExpressParameters;
+import games.descent2e.DescentParameters;
 import games.diamant.DiamantParameters;
 import games.dicemonastery.DiceMonasteryParams;
 import games.dominion.DominionParameters;
@@ -62,6 +63,8 @@ public class ParameterFactory {
                 return new CatanParameters(seed);
             case Stratego:
                 return new StrategoParams(seed);
+            case Descent2e:
+                return new DescentParameters(seed);
         }
         throw new AssertionError("No default Parameters specified for Game " + game);
 

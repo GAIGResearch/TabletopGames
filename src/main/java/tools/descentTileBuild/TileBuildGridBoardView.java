@@ -70,6 +70,8 @@ public class TileBuildGridBoardView extends ComponentView {
 
     private static void drawCell(Graphics2D g, BoardNode element, int x, int y, int gridWidth, int gridHeight,
                                  int offsetX, int offsetY) {
+        if (element == null) return;
+
         int xC = offsetX + x * defaultItemSize;
         int yC = offsetY + y * defaultItemSize;
 

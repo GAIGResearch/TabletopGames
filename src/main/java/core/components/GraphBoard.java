@@ -1,5 +1,6 @@
 package core.components;
 
+import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IComponentContainer;
 import core.properties.*;
@@ -57,19 +58,7 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         HashMap<Integer, BoardNode> nodeCopies = new HashMap<>();
         // Copy board nodes
         for (BoardNode bn: boardNodes) {
-            BoardNode bnCopy = new BoardNode(bn.getMaxNeighbours(), "", bn.getComponentID());
-            bn.copyComponentTo(bnCopy);
-            nodeCopies.put(bn.getComponentID(), bnCopy);
-        }
-        // Assign neighbours
-        for (BoardNode bn: boardNodes) {
-            BoardNode bnCopy = nodeCopies.get(bn.getComponentID());
-            for (BoardNode neighbour: bn.getNeighbours()) {
-                bnCopy.addNeighbour(nodeCopies.get(neighbour.getComponentID()));
-            }
-            for (Map.Entry<BoardNode, Integer> e: bn.getNeighbourSideMapping().entrySet()) {
-                bnCopy.addNeighbour(nodeCopies.get(e.getKey().componentID), e.getValue());
-            }
+            nodeCopies.put(bn.getComponentID(), bn.copy());
         }
         // Assign new neighbours
         b.setBoardNodes(new ArrayList<>(nodeCopies.values()));
@@ -142,13 +131,14 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         this.boardNodes.remove(bn);
     }
 
-    public void breakConnection(BoardNode bn1, BoardNode bn2) {
+    public void breakConnection(AbstractGameState gs, BoardNode bn1, BoardNode bn2) {
         bn1.removeNeighbour(bn2);
         bn2.removeNeighbour(bn1);
 
         // Check if they have at least 1 more neighbour on this board. If not, remove node from this board
         boolean inBoard = false;
-        for (BoardNode n: bn1.getNeighbours()) {
+        for (int nid: bn1.getNeighbours()) {
+            BoardNode n = (BoardNode) gs.getComponentById(nid);
             if (boardNodes.contains(n)) {
                 inBoard = true;
                 break;
@@ -157,7 +147,8 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         if (!inBoard) boardNodes.remove(bn1);
 
         inBoard = false;
-        for (BoardNode n: bn2.getNeighbours()) {
+        for (int nid: bn2.getNeighbours()) {
+            BoardNode n = (BoardNode) gs.getComponentById(nid);
             if (boardNodes.contains(n)) {
                 inBoard = true;
                 break;

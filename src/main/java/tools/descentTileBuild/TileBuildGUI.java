@@ -77,7 +77,7 @@ public class TileBuildGUI extends AbstractGUIManager {
             int maxY = 0;
             for (int i = 0; i < tile.getHeight(); i++) {
                 for (int j = 0; j < tile.getWidth(); j++) {
-                    if (DescentTypes.TerrainType.isInsideTile(tile.getElement(j, i).getComponentName())) {
+                    if (tile.getElement(j, i) != null && DescentTypes.TerrainType.isInsideTile(tile.getElement(j, i).getComponentName())) {
                         if (j < minX) minX = j;
                         if (i < minY) minY = i;
                         if (i > maxY) maxY = i;
@@ -112,7 +112,11 @@ public class TileBuildGUI extends AbstractGUIManager {
             for (int i = 0; i < tile.getHeight(); i++) {
                 gridValues += "\n[";
                 for (int j = 0; j < tile.getWidth(); j++) {
-                    gridValues += "\"" + tile.getElement(j, i) + "\", ";
+                    if (tile.getElement(j, i) == null) {
+                        gridValues += "\"" + tile.getElement(j, i) + "\", ";
+                    } else {
+                        gridValues += "\"" + tile.getElement(j, i).getComponentName() + "\", ";
+                    }
                 }
                 gridValues = gridValues.substring(0, gridValues.length()-2);
                 gridValues += "],";
@@ -194,8 +198,13 @@ public class TileBuildGUI extends AbstractGUIManager {
             for (AbstractAction a: actions) {
                 if (a instanceof SetGridValueAction) {
                     if (((SetGridValueAction) a).getX() == cell.getX() && ((SetGridValueAction) a).getY() == cell.getY()) {
-                        String actionStr = ((SetGridValueAction) a).getValue().getComponentName();
-                        if (actionStr.equalsIgnoreCase(terrainType.a)){
+                        String actionStr;
+                        if (((SetGridValueAction) a).getValue() != null) {
+                            actionStr = ((SetGridValueAction) a).getValue().getComponentName();
+                        } else {
+                            actionStr = "null";
+                        }
+                        if (actionStr.equalsIgnoreCase(terrainType.a)) {
                             ac.addAction(a);
 //                            terrainOptionsView.highlight = null;
                             view.highlight = null;

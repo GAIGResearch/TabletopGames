@@ -10,8 +10,8 @@ import java.util.HashSet;
 
 public class BoardNode extends Component {
 
-    private HashSet<BoardNode> neighbours;  // Neighbours of this board node
-    private HashMap<BoardNode, Integer> neighbourSideMapping;  // Neighbours mapping to a side of this board node
+    private HashSet<Integer> neighbours;  // Neighbours of this board node, component IDs
+    private HashMap<Integer, Integer> neighbourSideMapping;  // Neighbours mapping to a side of this board node, component ID -> side idx
     private int maxNeighbours;  // Maximum number of neighbours for this board node
 
     public BoardNode(int maxNeighbours, String name) {
@@ -38,7 +38,7 @@ public class BoardNode extends Component {
      */
     public void addNeighbour(BoardNode neighbour) {
         if (neighbours.size() <= maxNeighbours || maxNeighbours == -1) {
-            neighbours.add(neighbour);
+            neighbours.add(neighbour.componentID);
         }
     }
 
@@ -48,9 +48,9 @@ public class BoardNode extends Component {
      * @return - true if removed successfully, false otherwise. may fail if neighbour didn't exist in the first place.
      */
     public boolean removeNeighbour(BoardNode neighbour) {
-        if (neighbours.contains(neighbour)) {
-            neighbours.remove(neighbour);
-            neighbourSideMapping.remove(neighbour);
+        if (neighbours.contains(neighbour.componentID)) {
+            neighbours.remove(neighbour.componentID);
+            neighbourSideMapping.remove(neighbour.componentID);
             return true;
         }
         return false;
@@ -64,9 +64,9 @@ public class BoardNode extends Component {
      */
     public boolean addNeighbour(BoardNode neighbour, int side) {
         if (neighbours.size() <= maxNeighbours && side <= maxNeighbours || maxNeighbours == -1) {
-            if (!(neighbours.contains(neighbour)) && !(neighbourSideMapping.containsKey(neighbour))) {
-                neighbours.add(neighbour);
-                neighbourSideMapping.put(neighbour, side);
+            if (!(neighbours.contains(neighbour.componentID)) && !(neighbourSideMapping.containsKey(neighbour.componentID))) {
+                neighbours.add(neighbour.componentID);
+                neighbourSideMapping.put(neighbour.componentID, side);
                 return true;
             }
         }
@@ -79,21 +79,23 @@ public class BoardNode extends Component {
      */
     @Override
     public BoardNode copy() {
-        // WARNING: DO not copy this directly, the GraphBoard copies it to correctly assign neighbour references!
-        return null;
+        BoardNode bn = new BoardNode(maxNeighbours, componentName, componentID);
+        bn.neighbours = new HashSet<>(neighbours);
+        bn.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
+        return bn;
     }
 
     /**
      * @return the neighbours of this node.
      */
-    public HashSet<BoardNode> getNeighbours() {
+    public HashSet<Integer> getNeighbours() {
         return neighbours;
     }
 
     /**
      * @return the neighbours mapping to sides of this node.
      */
-    public HashMap<BoardNode, Integer> getNeighbourSideMapping() {
+    public HashMap<Integer, Integer> getNeighbourSideMapping() {
         return neighbourSideMapping;
     }
 
@@ -124,7 +126,7 @@ public class BoardNode extends Component {
         sb.append("{id: " + componentID + "; maxNeighbours: " + maxNeighbours + "; ");
         for(int prop_key : properties.keySet()) {
             Property prop = properties.get(prop_key);
-            sb.append(prop.getHashString() + ": " +  prop.toString() + "; ");
+            sb.append(prop.getHashString() + ": " + prop + "; ");
         }
 
         return sb.toString();

@@ -94,7 +94,7 @@ public class DescentGridBoardView extends ComponentView {
     }
 
 
-    public static void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
+    public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
                                                           HashMap<String, HashSet<Vector2D>> gridReferences,
                                                           int[][] tileReferences) {
         int width = gridBoard.getWidth() * defaultItemSize;
@@ -128,7 +128,7 @@ public class DescentGridBoardView extends ComponentView {
 //        }
     }
 
-    private static void drawCell(Graphics2D g, BoardNode bn, int x, int y, int gridWidth, int gridHeight, int offsetX, int offsetY) {
+    private void drawCell(Graphics2D g, BoardNode bn, int x, int y, int gridWidth, int gridHeight, int offsetX, int offsetY) {
         int xC = offsetX + x * defaultItemSize;
         int yC = offsetY + y * defaultItemSize;
 
@@ -150,7 +150,8 @@ public class DescentGridBoardView extends ComponentView {
             List<Vector2D> neighbours = getNeighbourhood(x, y, gridWidth, gridHeight, false);
             for (Vector2D n : neighbours) {
                 BoardNode other = null;
-                for (BoardNode nn : bn.getNeighbours()) {
+                for (int nnid : bn.getNeighbours()) {
+                    BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
                     Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
                     if (location.equals(n)) {
                         other = nn;
@@ -190,7 +191,8 @@ public class DescentGridBoardView extends ComponentView {
 
         // Draw underlying graph
         g.setColor(Color.green);
-        for (BoardNode nn : bn.getNeighbours()) {
+        for (int nnid : bn.getNeighbours()) {
+            BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
             Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
             int xC2 = offsetX + location.getX() * defaultItemSize;
             int yC2 = offsetY + location.getY() * defaultItemSize;

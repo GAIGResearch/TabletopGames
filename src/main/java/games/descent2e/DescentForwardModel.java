@@ -262,7 +262,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         if (currentTile.getComponentName().equals("pit") || f.getMovePoints() > 0) {
 
             // Find valid neighbours in master graph, can move there
-            for (BoardNode neighbour : currentTile.getNeighbours()) {
+            for (int neighbourCompID : currentTile.getNeighbours()) {
+                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
                 Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
                 // TODO: size of figure moving, take into account large monster "expansion" rule, location saved on figure is always top-left corner
 
@@ -358,7 +359,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             int startX = width / 2 - rotated[0].length / 2;
             int startY = height / 2 - rotated.length / 2;
             Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
-            addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, neighbours, bounds);
+            addTilesToBoard(bn0, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, neighbours, bounds, dgs);
 
             // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
             bounds.x -= 1;
@@ -418,7 +419,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                                  int[][] tileReferences,  HashMap<String, HashSet<Vector2D>> gridReferences,
                                  HashSet<BoardNode> drawn,
                                  ArrayList<Pair<Vector2D, Vector2D>> neighbours,
-                                 Rectangle bounds) {
+                                 Rectangle bounds,
+                                 DescentGameState dgs) {
         if (!drawn.contains(bn)) {
             // Draw this tile in the big board at x, y location
             GridBoard tile = tiles.get(bn.getComponentID());
@@ -513,7 +515,8 @@ public class DescentForwardModel extends AbstractForwardModel {
             drawn.add(bn);
 
             // Draw neighbours
-            for (BoardNode neighbour: bn.getNeighbours()) {
+            for (int neighbourCompId: bn.getNeighbours()) {
+                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompId);
 
                 // Find location to start drawing neighbour
                 Pair<String, Vector2D> connectionToNeighbour = findConnection(bn, neighbour, findOpenings(tileGrid));
@@ -578,7 +581,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
                             // Draw neighbour recursively
                             addTilesToBoard(neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
-                                    tiles, tileReferences, gridReferences, drawn, neighbours, bounds);
+                                    tiles, tileReferences, gridReferences, drawn, neighbours, bounds, dgs);
                         }
                     }
                 }

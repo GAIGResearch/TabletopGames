@@ -45,9 +45,8 @@ public class TileBuildFM extends AbstractForwardModel {
         TileBuildState tbs = (TileBuildState) gameState;
 
         HashSet<String> terrains = TerrainType.getWalkableStringTiles();
-        terrains.add("open");
+        terrains.addAll(TerrainType.getMarginStringTiles());
         terrains.add("block");
-        terrains.add("null");
 
         // Only place "open" spaces outside edges of tile (should have only 1 orthogonal neighbour that's inside terrain)
         // and also disable actions for other types of terrains if placed next to "open" and that would be invalid "open" placement as above
@@ -102,7 +101,8 @@ public class TileBuildFM extends AbstractForwardModel {
         List<Vector2D> neighbours = getNeighbourhood(x, y, width, height, false);
         List<Vector2D> insideTileNeighbours = new ArrayList<>();
         for (Vector2D n: neighbours) {
-            if (TerrainType.isInsideTile(tile.getElement(n.getX(), n.getY()).getComponentName())) {
+            BoardNode t = tile.getElement(n.getX(), n.getY());
+            if (t != null && TerrainType.isInsideTile(t.getComponentName())) {
                 insideTileNeighbours.add(n.copy());
             }
         }
