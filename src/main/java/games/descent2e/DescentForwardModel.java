@@ -311,9 +311,9 @@ public class DescentForwardModel extends AbstractForwardModel {
             if (name.contains("-")) {  // There may be multiples of one tile in the board, which follow format "tilename-#"
                 tileName = tileName.split("-")[0];
             }
-            GridBoard tile = _data.findGridBoard(tileName); // TODO component ID should be different for tiles of the same type
+            GridBoard tile = _data.findGridBoard(tileName);
             if (tile != null) {
-                tile = tile.copy();
+                tile = tile.copyNewID();
                 tile.setComponentName(name);
                 dgs.tiles.put(bn.getComponentID(), tile);
                 dgs.gridReferences.put(name, new HashSet<>());
@@ -456,7 +456,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                             || tileGrid[i-y][j-x].getComponentName().equals("open"))) continue;
 
                     // Set
-                    board[i][j] = tileGrid[i-y][j-x];
+                    board[i][j] = tileGrid[i-y][j-x].copy();
 
                     // Don't keep references for edge tiles
                     if (board[i][j] == null || board[i][j].getComponentName().equals("edge")
@@ -471,20 +471,17 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
 
-            // Connect the new tile with current board. Tile overlapping here has 8-way connectivity,
-            // as do its neighbours on new tile
+            // Add neighbour connections for spaces in the tile. 8-way connectivity.
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
                     BoardNode currentSpace = board[i][j];
-                    if (currentSpace != null) {
-                        String terrain = currentSpace.getComponentName();
-                        if ((i == y || i == y+height-1 || j==x || j==x+width-1) && TerrainType.isWalkable(terrain)) {
-                            // This was on the open edge on the tile we just added
+                    if (currentSpace != null && TerrainType.isWalkable(currentSpace.getComponentName())) {
+                        if ((i == y || i == y+height-1 || j==x || j==x+width-1)) {
                             if (i==y && originalTileGrid[i-y][j-x].getComponentName().equalsIgnoreCase("open") ||
                                     i == y+height-1 && originalTileGrid[i-y+1][j-x].getComponentName().equalsIgnoreCase("open") ||
                                     j==x && originalTileGrid[i-y][j-x].getComponentName().equalsIgnoreCase("open") ||
                                     j==x+width-1 && originalTileGrid[i-y][j-x+1].getComponentName().equalsIgnoreCase("open")) {
-                                // This cell was specifically at the opening
+                                // This cell was oat the opening on the tile we just added, connect to neighbours
 
                                 // The point on the grid has to connect with all of its valid neighbours on the master board
                                 List<Vector2D> boardNs = getNeighbourhood(j, i, board[0].length, board.length, true);
@@ -495,23 +492,13 @@ public class DescentForwardModel extends AbstractForwardModel {
                                     }
                                 }
                             }
-                        }
-                    }
-                }
-            }
-
-            // Add connections between all tiles just placed, unless blocked (no blocked tiles are connected)
-            for (int i = 0; i < height; i++) {
-                for (int j = 0; j < width; j++) {
-                    BoardNode point1 = board[i + y][j + x];
-                    if (point1 != null && TerrainType.isWalkable(board[i + y][j + x].getComponentName())) {
-                        List<Vector2D> ns = getNeighbourhood(j, i, width, height, true);
-                        for (Vector2D nn : ns) {
-                            if (board[nn.getY() + y][nn.getX() + x] != null && TerrainType.isWalkable(board[nn.getY() + y][nn.getX() + x].getComponentName())) {
-                                BoardNode point2 = board[nn.getY() + y][nn.getX() + x];
-                                if (point2 != null) {
-                                    point1.addNeighbour(point2);
-                                    point2.addNeighbour(point1);
+                        } else {
+                            // Add connections between all inner tiles just placed, unless blocked (no blocked tiles are connected)
+                            List<Vector2D> ns = getNeighbourhood(j, i, board[0].length, board.length, true);
+                            for (Vector2D n2 : ns) {
+                                if (board[n2.getY()][n2.getX()] != null && TerrainType.isWalkable(board[n2.getY()][n2.getX()].getComponentName())) {
+                                    board[n2.getY()][n2.getX()].addNeighbour(board[i][j]);
+                                    board[i][j].addNeighbour(board[n2.getY()][n2.getX()]);
                                 }
                             }
                         }

@@ -6,12 +6,12 @@
     "class": "String",
     "grid":
       [
-        ["edge", "edge", "edge", "edge", "edge", "edge"],
-        ["edge", "plain", "plain", "plain", "plain", "edge"],
+        ["null", "null", "null", "null", "null", "null"],
+        ["null", "plain", "plain", "plain", "plain", "null"],
         ["open", "plain", "plain", "plain", "plain", "open"],
         ["open", "plain", "plain", "plain", "plain", "open"],
-        ["edge", "plain", "plain", "plain", "plain", "edge"],
-        ["edge", "edge", "edge", "edge", "edge", "edge"]
+        ["null", "plain", "plain", "plain", "plain", "null"],
+        ["null", "null", "null", "null", "null", "null"]
       ]
   },
   {
@@ -21,12 +21,12 @@
     "class": "String",
     "grid" :
       [
-        ["edge", "edge", "edge", "edge", "edge", "edge"],
-        ["edge", "plain", "plain", "plain", "plain", "edge"],
+        ["null", "null", "null", "null", "null", "null"],
+        ["null", "plain", "plain", "plain", "plain", "null"],
         ["open", "plain", "plain", "plain", "plain", "open"],
         ["open", "plain", "plain", "plain", "plain", "open"],
-        ["edge", "plain", "plain", "plain", "plain", "edge"],
-        ["edge", "edge", "edge", "edge", "edge", "edge"]
+        ["null", "plain", "plain", "plain", "plain", "null"],
+        ["null", "null", "null", "null", "null", "null"]
       ]
   },
   {
@@ -36,12 +36,12 @@
   "class": "String",
   "grid":
   [
-    ["edge", "edge", "edge", "edge", "edge", "edge"],
-    ["edge", "plain", "plain", "plain", "plain", "edge"],
+    ["null", "null", "null", "null", "null", "null"],
+    ["null", "plain", "plain", "plain", "plain", "null"],
     ["open", "plain", "plain", "plain", "plain", "open"],
     ["open", "plain", "plain", "plain", "plain", "open"],
-    ["edge", "plain", "plain", "plain", "plain", "edge"],
-    ["edge", "edge", "edge", "edge", "edge", "edge"]
+    ["null", "plain", "plain", "plain", "plain", "null"],
+    ["null", "null", "null", "null", "null", "null"]
   ]
 },
   {
@@ -51,12 +51,12 @@
     "class": "String",
     "grid" :
     [
-      ["edge", "edge", "edge", "edge", "edge", "edge"],
-      ["edge", "plain", "plain", "plain", "plain", "edge"],
+      ["null", "null", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "null"],
       ["open", "plain", "plain", "plain", "plain", "open"],
       ["open", "plain", "plain", "plain", "plain", "open"],
-      ["edge", "plain", "plain", "plain", "plain", "edge"],
-      ["edge", "edge", "edge", "edge", "edge", "edge"]
+      ["null", "plain", "plain", "plain", "plain", "null"],
+      ["null", "null", "null", "null", "null", "null"]
     ]
   },
   {
@@ -66,16 +66,16 @@
     "class": "String",
     "grid" :
       [
-        ["edge", "open", "open", "edge", "edge"],
-        ["edge", "plain", "plain", "plain", "edge"],
-        ["edge", "plain", "plain", "plain", "edge"],
-        ["null", "edge", "plain", "plain", "edge"],
-        ["null", "edge", "plain", "plain", "edge"],
-        ["null", "edge", "plain", "plain", "edge"],
-        ["null", "edge", "plain", "plain", "edge"],
-        ["open", "plain", "plain", "plain", "edge"],
-        ["open", "plain", "plain", "plain", "edge"],
-        ["edge", "edge", "edge", "edge", "edge"]
+        ["null", "open", "open", "null", "null"],
+        ["null", "plain", "plain", "plain", "null"],
+        ["null", "plain", "plain", "plain", "null"],
+        ["null", "null", "plain", "plain", "null"],
+        ["null", "null", "plain", "plain", "null"],
+        ["null", "null", "plain", "plain", "null"],
+        ["null", "null", "plain", "plain", "null"],
+        ["open", "plain", "plain", "plain", "null"],
+        ["open", "plain", "plain", "plain", "null"],
+        ["null", "null", "null", "null", "null"]
       ]
   },
   {
@@ -85,16 +85,16 @@
     "class": "String",
     "grid":
       [
-        ["edge", "edge", "open", "open", "edge"],
-        ["edge", "plain", "plain", "plain", "edge"],
-        ["edge", "plain", "plain", "plain", "edge"],
-        ["edge", "plain", "plain", "edge", "null"],
-        ["edge", "plain", "plain", "edge", "null"],
-        ["edge", "plain", "plain", "edge", "null"],
-        ["edge", "plain", "plain", "edge", "null"],
-        ["edge", "plain", "plain", "plain", "open"],
-        ["edge", "plain", "plain", "plain", "open"],
-        ["edge", "edge", "edge", "edge", "edge"]
+        ["null", "null", "open", "open", "null"],
+        ["null", "plain", "plain", "plain", "null"],
+        ["null", "plain", "plain", "plain", "null"],
+        ["null", "plain", "plain", "null", "null"],
+        ["null", "plain", "plain", "null", "null"],
+        ["null", "plain", "plain", "null", "null"],
+        ["null", "plain", "plain", "null", "null"],
+        ["null", "plain", "plain", "plain", "open"],
+        ["null", "plain", "plain", "plain", "open"],
+        ["null", "null", "null", "null", "null"]
       ]
   },
   {
@@ -104,9 +104,9 @@
     "class": "String",
     "grid":
       [
-        ["edge", "edge", "open", "open", "edge", "edge"],
-        ["edge","plain", "plain", "plain", "plain", "edge"],
-        ["edge", "edge", "open", "open", "edge", "edge"]
+        ["null", "null", "open", "open", "null", "null"],
+        ["null","plain", "plain", "plain", "plain", "null"],
+        ["null", "null", "open", "open", "null", "null"]
       ]
   },
   {
@@ -116,13 +116,13 @@
     "class": "String",
     "grid":
     [
-      ["edge", "edge","edge", "open", "open", "edge", "edge", "edge"],
-      ["edge", "plain", "plain", "plain", "plain", "plain", "plain", "edge"],
-      ["edge", "plain", "plain", "plain", "plain", "plain", "plain", "edge"],
-      ["edge", "plain", "plain", "plain", "plain", "plain", "plain", "edge"],
-      ["edge", "plain", "plain", "edge", "edge", "edge", "edge", "edge"],
-      ["edge", "plain", "plain", "edge", "null", "null", "null", "null"],
-      ["edge", "open", "open", "edge", "null", "null", "null", "null"]
+      ["null", "null","null", "open", "open", "null", "null", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "plain", "plain", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null", "null", "null", "null", "null"],
+      ["null", "plain", "plain", "null", "null", "null", "null", "null"],
+      ["null", "open", "open", "null", "null", "null", "null", "null"]
     ]
   },{
   "id": "28A",
@@ -873,9 +873,9 @@
     "class": "String",
     "grid":
     [
-      ["edge", "open", "open", "edge"],
-      ["edge", "plain", "plain", "edge"],
-      ["edge", "edge", "edge", "edge"]
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "null", "null", "null"]
     ]
   },
   {
@@ -885,9 +885,9 @@
     "class": "String",
     "grid":
     [
-      ["edge", "open", "open", "edge"],
-      ["edge", "plain", "plain", "edge"],
-      ["edge", "open", "open", "edge"]
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "open", "open", "null"]
     ]
   },
   {
@@ -897,10 +897,10 @@
     "class": "String",
     "grid":
     [
-      ["edge", "open", "open", "edge"],
-      ["edge", "plain", "plain", "edge"],
-      ["edge", "plain", "plain", "edge"],
-      ["edge", "open", "open", "edge"]
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "open", "open", "null"]
     ]
   },
   {
@@ -910,10 +910,10 @@
     "class": "String",
     "grid":
     [
-      ["edge", "open", "open", "edge"],
-      ["edge", "plain", "plain", "edge"],
-      ["edge", "plain", "plain", "edge"],
-      ["edge", "edge", "edge", "edge"]
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "null", "null", "null"]
     ]
   },
   {
@@ -923,10 +923,10 @@
     "class": "String",
     "grid":
     [
-      ["edge", "open", "open", "edge"],
-      ["edge", "plain", "plain", "edge"],
-      ["edge", "plain", "plain", "edge"],
-      ["edge", "edge", "edge", "edge"]
+      ["null", "open", "open", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "plain", "plain", "null"],
+      ["null", "null", "null", "null"]
     ]
   }
 ]

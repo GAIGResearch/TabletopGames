@@ -34,11 +34,11 @@ public class DescentGUI extends AbstractGUIManager {
         north.setLayout(new BoxLayout(north, BoxLayout.Y_AXIS));
         north.add(infoPanel);
 
-        JScrollPane pane = new JScrollPane(view);
-        pane.setPreferredSize(new Dimension(maxWidth, maxHeight));
+//        JScrollPane pane = new JScrollPane(view);
+//        pane.setPreferredSize(new Dimension(maxWidth, maxHeight));
 
         panel.setLayout(new BorderLayout());
-        panel.add(pane, BorderLayout.CENTER);
+        panel.add(view, BorderLayout.CENTER);
         panel.add(north, BorderLayout.NORTH);
         panel.add(actionPanel, BorderLayout.SOUTH);
     }

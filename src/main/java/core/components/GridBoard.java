@@ -108,6 +108,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         setWidthHeight(width, height, 0, 0);
     }
 
+    // TODO: I don't understand this method
     public void setWidthHeight(int width, int height, int offsetX, int offsetY) {
         if (offsetX + this.width > width) offsetX = 0;
         if (offsetY + this.height > height) offsetY = 0;
@@ -120,7 +121,9 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
 
         BoardNode[][] grid = new BoardNode[height][width];
         for (int i = 0; i < h; i++) {
-            if (w >= 0) System.arraycopy(this.grid[i], 0, grid[i + offsetY], offsetX, w);
+            for (int j = 0; j < w; j++) {
+                grid[i+offsetY][j+offsetX] = grid[i][j].copy();
+            }
         }
         this.grid = grid;
     }
@@ -216,8 +219,11 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
     public BoardNode[] flattenGrid() {
         int length = getHeight() * getWidth();
         BoardNode[] array = new BoardNode[length];
-        for (int i = 0; i < getHeight(); i++) {
-            System.arraycopy(grid[i], 0, array, i * getWidth(), grid[i].length);
+        int k = 0;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                array[k++] = grid[i][j];
+            }
         }
         return array;
     }
@@ -226,9 +232,23 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
     public GridBoard copy() {
         BoardNode[][] gridCopy = new BoardNode[getHeight()][getWidth()];
         for (int i = 0; i < height; i++) {
-            if (width >= 0) System.arraycopy(grid[i], 0, gridCopy[i], 0, width);
+            for (int j = 0; j < width; j++) {
+                if (grid[i][j] != null) gridCopy[i][j] = grid[i][j].copy();
+            }
         }
         GridBoard g = new GridBoard(gridCopy, componentID);
+        copyComponentTo(g);
+        return g;
+    }
+
+    public GridBoard copyNewID() {
+        BoardNode[][] gridCopy = new BoardNode[getHeight()][getWidth()];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                if (grid[i][j] != null) gridCopy[i][j] = grid[i][j].copy();
+            }
+        }
+        GridBoard g = new GridBoard(gridCopy);
         copyComponentTo(g);
         return g;
     }
