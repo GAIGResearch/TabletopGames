@@ -299,12 +299,12 @@ public class DescentForwardModel extends AbstractForwardModel {
 
     private void setupBoard(DescentGameState dgs, DescentGameData _data, String bConfig) {
 
-        // 1. Read the graph board configuration for the master grid board
+        // 1. Read the graph board configuration for the master grid board; a graph board where nodes are individual tiles (grid boards) and connections between them
         GraphBoard config = _data.findGraphBoard(bConfig);
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
-        dgs.tiles = new HashMap<>();
-        dgs.gridReferences = new HashMap<>();
+        dgs.tiles = new HashMap<>();  // Maps from component ID to gridboard object
+        dgs.gridReferences = new HashMap<>();  // Maps from tile name to list of positions in the master grid board that its cells occupy
         for (BoardNode bn : config.getBoardNodes()) {
             String name = bn.getComponentName();
             String tileName = name;
@@ -344,30 +344,35 @@ public class DescentForwardModel extends AbstractForwardModel {
         height *= 2;
 
         // Create big board
-        BoardNode[][] board = new BoardNode[height][width];
-        dgs.tileReferences = new int[height][width];
-        HashSet<BoardNode> drawn = new HashSet<>();
+        BoardNode[][] board = new BoardNode[height][width];  // Board nodes here will be the individual cells in the tiles
+        dgs.tileReferences = new int[height][width];  // Reference to component ID of tile placed at that position
+        HashSet<BoardNode> drawn = new HashSet<>();  // Keeps track of which tiles have been added to the board already, for recursive purposes
 
-        BoardNode firstTile = null;
-        for (BoardNode t : config.getBoardNodes()) {
-            if (t != null) {
-                GridBoard tile = dgs.tiles.get(t.getComponentID());
-                if (tile != null) {
-                    firstTile = t;
-                    break;
-                }
-            }
-        }
+        // Find first tile, as board node in the board configuration graph board
+        BoardNode firstTile = config.getBoardNodes().get(0);
+//        BoardNode firstTile = null;
+//        for (BoardNode t : config.getBoardNodes()) {
+//            if (t != null) {
+//                GridBoard tile = dgs.tiles.get(t.getComponentID());
+//                if (tile != null) {
+//                    firstTile = t;
+//                    break;
+//                }
+//            }
+//        }
         if (firstTile != null) {
+            // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
             GridBoard tile = dgs.tiles.get(firstTile.getComponentID());
             int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
             BoardNode[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
             int startY = height / 2 - rotated.length / 2;
-            Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
+            Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);  // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
+            // Recursive call, will add all tiles in relation to their neighbours as per the board configuration TODO: if tiles are disconnected, they won't be drawn
             addTilesToBoard(firstTile, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, bounds, dgs);
 
             // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
+            // Gives 1 extra tile on the edges
             bounds.x -= 1;
             bounds.y -= 1;
             bounds.width += 2;
@@ -375,9 +380,10 @@ public class DescentForwardModel extends AbstractForwardModel {
             BoardNode[][] trimBoard = new BoardNode[bounds.height][bounds.width];
             int[][] trimTileRef = new int[bounds.height][bounds.width];
             for (int i = 0; i < bounds.height; i++) {
-                if (bounds.width >= 0) System.arraycopy(board[i + bounds.y], bounds.x, trimBoard[i], 0, bounds.width);
-                if (bounds.width >= 0)
+                if (bounds.width >= 0) {
+                    System.arraycopy(board[i + bounds.y], bounds.x, trimBoard[i], 0, bounds.width);
                     System.arraycopy(dgs.tileReferences[i + bounds.y], bounds.x, trimTileRef[i], 0, bounds.width);
+                }
             }
             dgs.tileReferences = trimTileRef;
             // Also trim neighbour records TODO: commented out after changes, does this matter?
@@ -392,7 +398,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
 
-            // This is the master board!
+            // This is the final master board!
             dgs.masterBoard = new GridBoard(trimBoard);
             // Init each node (cell) properties - not occupied ("players" int property), and its position in the master grid
             for (int i = 0; i < height; i++) {
@@ -440,6 +446,29 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
             int height = tileGrid.length;
             int width = tileGrid[0].length;
+
+            // Add cells from new tile to the master board
+            for (int i = y; i < y + height; i++) {
+                for (int j = x; j < x + width; j++) {
+                    // Avoid removing already set tiles
+                    if (board[i][j] != null && (tileGrid[i-y][j-x] == null || tileGrid[i-y][j-x].getComponentName().equals("edge")
+                            || tileGrid[i-y][j-x].getComponentName().equals("open"))) continue;
+
+                    // Set
+                    board[i][j] = tileGrid[i-y][j-x];
+
+                    // Don't keep references for edge tiles
+                    if (board[i][j] == null || board[i][j].getComponentName().equals("edge")
+                            || board[i][j].getComponentName().equals("open")) continue;
+
+                    // Set references
+                    tileReferences[i][j] = tile.getComponentID();
+                    for (String s: gridReferences.keySet()) {
+                        gridReferences.get(s).remove(new Vector2D(j, i));
+                    }
+                    gridReferences.get(tile.getComponentName()).add(new Vector2D(j, i));
+                }
+            }
 
             // Connect the new tile with current board. Tile overlapping here has 8-way connectivity,
             // as do its neighbours on new tile
@@ -509,25 +538,6 @@ public class DescentForwardModel extends AbstractForwardModel {
                             }
                         }
                     }
-                }
-            }
-
-            // Add cells from new tile to the master board
-            for (int i = y; i < y + height; i++) {
-                for (int j = x; j < x + width; j++) {
-                    if (board[i][j] != null && (tileGrid[i-y][j-x] == null || tileGrid[i-y][j-x].getComponentName().equals("edge")
-                            || tileGrid[i-y][j-x].getComponentName().equals("open"))) continue;
-                    // Avoid removing already set tiles
-                    board[i][j] = tileGrid[i-y][j-x];
-
-                    if (board[i][j] == null || board[i][j].getComponentName().equals("edge")
-                            || board[i][j].getComponentName().equals("open")) continue;
-                    // Don't keep references for edge tiles
-                    tileReferences[i][j] = tile.getComponentID();
-                    for (String s: gridReferences.keySet()) {
-                        gridReferences.get(s).remove(new Vector2D(j, i));
-                    }
-                    gridReferences.get(tile.getComponentName()).add(new Vector2D(j, i));
                 }
             }
 

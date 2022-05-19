@@ -142,29 +142,31 @@ public class DescentGridBoardView extends ComponentView {
         g.setColor(colorMap.get(bn.getComponentName()));
         g.fillRect(xC, yC, defaultItemSize, defaultItemSize);
 
-        // Find connectivity in the graph and draw borders to the cell where connection doesn't exist
         String terrain = bn.getComponentName();
         Stroke s = g.getStroke();
 
         if (DescentTypes.TerrainType.isWalkable(terrain)) {
-
             g.setColor(Color.black);
             g.drawRect(xC, yC, defaultItemSize, defaultItemSize);
             g.setStroke(new BasicStroke(5));
 
+            // Find connectivity in the graph and draw borders to the cell where connection doesn't exist
             List<Vector2D> neighbourCells = getNeighbourhood(x, y, gridWidth, gridHeight, false);
+            // Explore all neighbourhood of this cell
             for (Vector2D n : neighbourCells) {
-                BoardNode other = null;
+
+                // Check if this node is a connected neighbour
+                boolean connected = false;
                 for (int nnid : bn.getNeighbours()) {
                     BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
                     if (nn == null) continue;
                     Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
                     if (location.equals(n)) {
-                        other = nn;
+                        connected = true;
                         break;
                     }
                 }
-                if (other == null) {
+                if (!connected) {
                     // Not a connection between these neighbours, drawing a thick black line on the edge to indicate this
                     if (n.getX() - x == 0) {
                         // Vertical neighbours, draw horizontal line
@@ -188,6 +190,7 @@ public class DescentGridBoardView extends ComponentView {
                 }
             }
         } else {
+            // Bocked terrain can never be occupied, not connected to anything
             if (terrain.equals("block")) {
                 g.setStroke(new BasicStroke(5));
                 g.setColor(Color.black);

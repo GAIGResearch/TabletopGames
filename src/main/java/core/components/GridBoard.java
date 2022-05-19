@@ -305,7 +305,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
                     JSONArray row = (JSONArray) o;
                     int x = 0;
                     for (Object o1 : row) {
-                        BoardNode bn = new BoardNode(4, (String) o1);
+                        BoardNode bn = new BoardNode(-1, (String) o1);
                         setElement(x, y, bn);
                         x++;
                     }
@@ -315,7 +315,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
                 JSONArray row = (JSONArray) g;
                 int x = 0;
                 for (Object o1 : row) {
-                    BoardNode bn = new BoardNode(4, (String) o1);
+                    BoardNode bn = new BoardNode(-1, (String) o1);
                     setElement(x, y, bn);
                     x++;
                 }
