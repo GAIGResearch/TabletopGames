@@ -219,4 +219,10 @@ public class DescentGridBoardView extends ComponentView {
         g.setColor(Color.black);
     }
 
+    @Override
+    public void scrollRectToVisible(Rectangle rect) {
+        // Disable autoscroll
+//        super.scrollRectToVisible(rect);
+    }
+
 }

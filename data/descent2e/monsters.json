@@ -1,5 +1,7 @@
 [
   {
+    "monster-sources": "https://descent2e.fandom.com/wiki/Monster",
+
     "id": "Goblin Archer",
     "type": ["String", "Monster"],
     "setup": ["Integer[]", [2, 3, 4]],
