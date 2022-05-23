@@ -1,30 +1,31 @@
 package games.dotsboxes;
 
 import core.AbstractGameState;
-import core.interfaces.IStateFeatureVector;
-import utilities.Utils;
+import players.heuristics.AbstractStateFeature;
 
-public class DBStateFeatures implements IStateFeatureVector {
+public class DBStateFeatures extends AbstractStateFeature {
 
-    String[] names = new String[]{"POINTS", "POINT_ADVANTAGE", "TWO_BOXES", "THREE_BOXES", "ORDINAL", "OUR_TURN", "FILLED_BOXES", "HAS_WON", "FINAL_POSITION"};
+    String[] localNames = new String[]{"TWO_BOXES", "THREE_BOXES", "FILLED_BOXES"};
 
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerID) {
-        double[] retValue = new double[names.length];
+    protected double maxScore() {
+        return 20.0;
+    }
+
+    @Override
+    protected double maxRounds() {
+        return 100.0;
+    }
+
+    @Override
+    protected String[] localNames() {
+        return localNames;
+    }
+
+    @Override
+    protected double[] localFeatureVector(AbstractGameState gs, int playerID) {
         DBGameState state = (DBGameState) gs;
-
-
-        // POINT_ADVANTAGE
-        int ordinal = 1;
-        int maxOtherScore = -1;
-        for (int p = 0; p < state.getNPlayers(); p++) {
-            if (p == playerID) continue;
-            if (state.nCellsPerPlayer[p] > maxOtherScore) {
-                maxOtherScore = state.nCellsPerPlayer[p];
-                if (state.nCellsPerPlayer[p] > state.nCellsPerPlayer[playerID])
-                    ordinal++;
-            }
-        }
+        double[] retValue = new double[localNames.length];
 
         // CELLS
         int[] cellCountByEdges = new int[5];
@@ -34,25 +35,12 @@ public class DBStateFeatures implements IStateFeatureVector {
         }
         double totalCells = state.cells.size();
 
-        // POINTS
-        retValue[0] = state.nCellsPerPlayer[playerID] / totalCells * state.getNPlayers();
-        // POINT_ADVANTAGE
-        retValue[1] = (state.nCellsPerPlayer[playerID] - maxOtherScore) / 10.0;
         int multiplier = state.getCurrentPlayer() == playerID ? 1 : -1;
-        retValue[2] = cellCountByEdges[2] * multiplier / totalCells;
-        retValue[3] = cellCountByEdges[3] * multiplier / 5.0;
-        retValue[4] = ordinal / (double) state.getNPlayers();
-        retValue[5] = state.getCurrentPlayer() == playerID ? 1 : 0;
-        retValue[6] = cellCountByEdges[4] / totalCells;
-        retValue[7] = state.getPlayerResults()[playerID] == Utils.GameResult.WIN ? 1.0 : 0.0;
-        retValue[8] = state.isNotTerminal() ? 0.0 : state.getOrdinalPosition(playerID) / (double) state.getNPlayers();
+        retValue[0] = cellCountByEdges[2] * multiplier / totalCells;
+        retValue[1] = cellCountByEdges[3] * multiplier / 5.0;
+        retValue[2] = cellCountByEdges[4] / totalCells;
 
         return retValue;
-    }
-
-    @Override
-    public String[] names() {
-        return names;
     }
 
 }

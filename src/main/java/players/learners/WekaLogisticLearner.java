@@ -53,22 +53,21 @@ public class WekaLogisticLearner extends AbstractLearner {
         validationStart = dataArray.length - (int) (dataArray.length * validationProportion);
 
         this.addNoise = true; // to avoid weka.Logistic silently discarding constants
-        dataInstances = createInstances(); // all data
-        // BUGGER - this is only available as a classifier!
+        dataInstances = createInstances(false); // all data
 
         Instances trainingData = new Instances(dataInstances, 0, validationStart);
 
-        regressor.setRidge(0.01);
+        regressor.setRidge(0.1);
         regressor.setDoNotStandardizeAttributes(true);
         try {
             //      regressor.setDebug(true);
             regressor.buildClassifier(trainingData);
-            System.out.println(regressor);
+     //       System.out.println(regressor);
             double[][] temp = regressor.coefficients();
+            // this has the Bias term at the start of the array, where we want it
             coefficients = new double[temp.length];
-            coefficients[0] = temp[temp.length - 1][0];
-            for (int i = 1; i < temp.length; i++)
-                coefficients[i] = temp[i - 1][0];
+            for (int i = 0; i < temp.length; i++)
+                coefficients[i] = temp[i][0];
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -91,7 +90,8 @@ public class WekaLogisticLearner extends AbstractLearner {
     public boolean writeToFile(String file) {
         try (FileWriter writer = new FileWriter(file, false)) {
             writer.write("BIAS\t" + String.join("\t", descriptions) + "\n");
-            writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.4g", d)).collect(Collectors.joining("\t")));
+            writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.3g", d)).collect(Collectors.joining("\t")));
+            writer.write("\n");
         } catch (Exception e) {
             e.printStackTrace();
             return false;

@@ -68,6 +68,7 @@ public class DomStateFeatures implements IStateFeatureVector {
         retValue[7] = state.getTotalCards(playerId) / 40.0;
 
         // The next set are probably most efficiently done by going through the supply, player deck and hand
+        // This avoids computational effort on all the cards that are not in the game
         for (CardType card : state.cardsIncludedInGame()) {
             int index = cardTypes.indexOf(card);
      //       retValue[baseFeatureCount + index * 4] = 1.0;

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 public abstract class AbstractLearner implements ILearner {
 
@@ -23,9 +22,9 @@ public abstract class AbstractLearner implements ILearner {
     protected double[][] finalScore;
     protected double[][] currentScore;
     protected ArrayList<Attribute> attributes;
-    String[] descriptions;
     protected boolean addNoise = false;
     protected double noiseLevel = 0.01;
+    String[] descriptions;
     private Random rnd = new Random(System.currentTimeMillis());
 
     protected void loadData(String... files) {
@@ -58,7 +57,7 @@ public abstract class AbstractLearner implements ILearner {
             throw new AssertionError("Unexpected final header entries " + String.join("", header));
         }
         attributes = new ArrayList<>();
-    //    attributes.add(new Attribute("BIAS"));
+        attributes.add(new Attribute("BIAS"));
         for (int i = 5; i < header.length - 3; i++)
             attributes.add(new Attribute(header[i]));
         dataArray = new double[data.size()][];
@@ -83,18 +82,20 @@ public abstract class AbstractLearner implements ILearner {
 
     }
 
-    protected Instances createInstances() {
+    protected Instances createInstances(boolean includeBias) {
         List<String> values = new ArrayList<>();
         values.add("0");
         values.add("1");
         attributes.add(new Attribute("Win", values));
         Instances dataInstances = new Instances("data", attributes, dataArray.length - 1);
+        if (!includeBias)
+            attributes.remove(0);
         for (int i = 0; i < dataArray.length; i++) {
             double[] record = new double[dataArray[i].length - 1];
-            System.arraycopy(dataArray[i], 1, record, 0, record.length);
-            // we skip the bias term in dataArray at position 0
+            System.arraycopy(dataArray[i], includeBias ? 0 : 1, record, 0, record.length);
+            // we may skip the bias term in dataArray at position 0
             if (addNoise)
-                for (int j = 0; j < record.length; j++)
+                for (int j = 1; j < record.length; j++)  // we do not add noise to the BIAS term
                     record[j] += rnd.nextDouble() * noiseLevel; // to avoid WEKA removing
             double[] XandY = new double[record.length + 1];
             System.arraycopy(record, 0, XandY, 0, record.length);
