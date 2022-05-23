@@ -3,39 +3,49 @@ package games.loveletter;
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import core.interfaces.IComponentContainer;
-import core.interfaces.IStateFeatureVector;
 import games.loveletter.cards.LoveLetterCard;
-import utilities.Utils;
+import players.heuristics.AbstractStateFeature;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 import static games.loveletter.cards.LoveLetterCard.CardType.getMaxCardValue;
 import static java.util.stream.Collectors.toList;
 
-public class LLStateFeatures implements IStateFeatureVector {
+public class LLStateFeatures extends AbstractStateFeature {
 
-    String[] names = new String[]{"AFFECTION", "ADVANTAGE", "OUR_TURN", "HAS_WON", "FINAL_POSITION", "PROTECTED",
-            "GUARD", "PRIEST", "BARON", "HANDMAID", "PRINCE", "COUNTESS", "PRINCESS",
-            "GUARD_KNOWN", "PRIEST_KNOWN", "BARON_KNOWN", "HANDMAID_KNOWN", "PRINCE_KNOWN", "COUNTESS_KNOWN", "PRINCESS_KNOWN",
-            "GUARD_DISCARD", "PRIEST_DISCARD", "BARON_DISCARD", "HANDMAID_DISCARD", "PRINCE_DISCARD", "COUNTESS_DISCARD",
-            "GUARD_OTHER", "PRIEST_OTHER", "BARON_OTHER", "HANDMAID_OTHER", "PRINCE_OTHER", "COUNTESS_OTHER", "PRINCESS_OTHER",
-            "HIDDEN", "CARDS", "DRAW_DECK"
+    String[] localNames = new String[]{
+            "PROTECTED", "HIDDEN", "CARDS", "DRAW_DECK",
+            "GUARD", "PRIEST", "BARON", "HANDMAID", "PRINCE", "KING", "COUNTESS", "PRINCESS",
+            "GUARD_KNOWN", "PRIEST_KNOWN", "BARON_KNOWN", "HANDMAID_KNOWN", "PRINCE_KNOWN", "KING_KNOWN", "COUNTESS_KNOWN", "PRINCESS_KNOWN",
+            "GUARD_DISCARD", "PRIEST_DISCARD", "BARON_DISCARD", "HANDMAID_DISCARD", "PRINCE_DISCARD", "KING_DISCARD", "COUNTESS_DISCARD", "PRINCESS_DISCARD",
+            "GUARD_OTHER", "PRIEST_OTHER", "BARON_OTHER", "HANDMAID_OTHER", "PRINCE_OTHER", "KING_OTHER", "COUNTESS_OTHER", "PRINCESS_OTHER"
     };
 
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerID) {
-        LoveLetterGameState state = (LoveLetterGameState) gs;
-        LoveLetterParameters params = (LoveLetterParameters) gs.getGameParameters();
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerID];
+    protected double maxScore() {
+        return 5.0;
+    }
 
-        double[] retValue = new double[names.length];
-        int cardsOwnedOffset = 5;
-        int cardsKnownOffset = 12;
+    @Override
+    protected double maxRounds() {
+        return 10.0;
+    }
+
+    @Override
+    protected String[] localNames() {
+        return localNames;
+    }
+
+    @Override
+    protected double[] localFeatureVector(AbstractGameState gs, int playerID) {
+        LoveLetterGameState state = (LoveLetterGameState) gs;
+
+        double[] retValue = new double[localNames.length];
+        int cardsOwnedOffset = 3;
+        int cardsKnownOffset = 11;
         int discardOffset = 19;
-        int otherOffset = 25;
+        int otherOffset = 27;
 
         double cardValues = 0;
         PartialObservableDeck<LoveLetterCard> hand = state.getPlayerHandCards().get(playerID);
@@ -56,8 +66,6 @@ public class LLStateFeatures implements IStateFeatureVector {
         }
 
         double maxCardValue = 1 + state.getPlayerHandCards().get(playerID).getSize() * getMaxCardValue();
-        double nRequiredTokens = (state.getNPlayers() == 2 ? params.nTokensWin2 : state.getNPlayers() == 3 ? params.nTokensWin3 : params.nTokensWin4);
-        if (nRequiredTokens < state.affectionTokens[playerID]) nRequiredTokens = state.affectionTokens[playerID];
 
         int visibleCards = 0;
         for (int player = 0; player < state.getNPlayers(); player++) {
@@ -83,25 +91,12 @@ public class LLStateFeatures implements IStateFeatureVector {
         for (int i = 2; i <= 5; i++)
             retValue[i + discardOffset] /= 2.0;
 
-        int maxOtherScore = IntStream.range(0, state.getNPlayers())
-                .filter(p -> p != playerID)
-                .map(p -> (int) state.getGameScore(p)).max().orElseThrow(() -> new AssertionError("??"));
-
-        retValue[0] = state.affectionTokens[playerID] / nRequiredTokens;
-        retValue[1] = ((state.affectionTokens[playerID] - maxOtherScore) / nRequiredTokens);
-        retValue[2] = state.getCurrentPlayer() == playerID ? 1.0 : 0.0;
-        retValue[3] = playerResult == Utils.GameResult.WIN ? 1.0 : 0.0;
-        retValue[4] = state.isNotTerminal() ? 0.0 : state.getOrdinalPosition(playerID);
-        retValue[5] = state.isNotProtected(playerID) ? 0.0 : 1.0;
-        retValue[names.length - 2] = cardValues / maxCardValue;
-        retValue[names.length - 3] = visibleCards / (state.getNPlayers() - 1.0);
-        retValue[names.length - 1] = state.getDrawPile().getSize() / 16.0;
+        retValue[0] = state.isNotProtected(playerID) ? 0.0 : 1.0;
+        retValue[1] = visibleCards / (state.getNPlayers() - 1.0);
+        retValue[2] = cardValues / maxCardValue;
+        retValue[3] = state.getDrawPile().getSize() / 16.0;
 
         return retValue;
     }
 
-    @Override
-    public String[] names() {
-        return names;
-    }
 }

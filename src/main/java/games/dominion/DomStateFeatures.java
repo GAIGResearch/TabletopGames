@@ -5,6 +5,7 @@ import core.components.Deck;
 import core.interfaces.IStateFeatureVector;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
+import players.heuristics.AbstractStateFeature;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,33 +16,29 @@ import static games.dominion.DominionConstants.DeckType.*;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 
-public class DomStateFeatures implements IStateFeatureVector {
+public class DomStateFeatures extends AbstractStateFeature {
 
-    String[] names;
+    String[] localNames;
     List<CardType> cardTypes = Arrays.stream(CardType.values()).collect(Collectors.toList());
     String[] cardNames = Arrays.stream(CardType.values()).map(CardType::name).toArray(String[]::new);
-    int baseFeatureCount = 8;
+    int baseFeatureCount = 7;
 
     public DomStateFeatures() {
-        String[] baseFeatureNames = new String[]{"VP", "TREASURE", "ACTION", "TR_H", "AC_H", "AC_LEFT", "BUY_LEFT", "TOT_CRDS"};
-        names = new String[baseFeatureNames.length + cardNames.length * 3];
+        String[] baseFeatureNames = new String[]{"TREASURE", "ACTION", "TR_H", "AC_H", "AC_LEFT", "BUY_LEFT", "TOT_CRDS"};
+        localNames = new String[baseFeatureNames.length + cardNames.length * 3];
         // In owned, in hand, left to buy
-        System.arraycopy(baseFeatureNames, 0, names, 0, baseFeatureNames.length);
+        System.arraycopy(baseFeatureNames, 0, localNames, 0, baseFeatureNames.length);
         for (int i = 0; i < cardNames.length; i++) {
-     //       names[baseFeatureCount + i * 4] = cardNames[i] + "_IN_GAME";
-            names[baseFeatureCount + i * 3 + 0] = cardNames[i] + "_IN_DECK";
-            names[baseFeatureCount + i * 3 + 1] = cardNames[i] + "_IN_HAND";
-            names[baseFeatureCount + i * 3 + 2] = cardNames[i] + "_IN_SUPPLY";
+            localNames[baseFeatureCount + i * 3 + 0] = cardNames[i] + "_IN_DECK";
+            localNames[baseFeatureCount + i * 3 + 1] = cardNames[i] + "_IN_HAND";
+            localNames[baseFeatureCount + i * 3 + 2] = cardNames[i] + "_IN_SUPPLY";
         }
     }
 
     @Override
-    public double[] featureVector(AbstractGameState gs, int playerId) {
+    public double[] localFeatureVector(AbstractGameState gs, int playerId) {
         DominionGameState state = (DominionGameState) gs;
-        double[] retValue = new double[names.length];
-
-        // victoryPoints - simply the current score divided by 50
-        retValue[0] = state.getGameScore(playerId) / 50.0;
+        double[] retValue = new double[localNames.length];
 
         // treasureValue - total treasure divided by 50
         retValue[1] = state.getTotal(playerId, DominionCard::treasureValue) / 50.0;
@@ -89,7 +86,17 @@ public class DomStateFeatures implements IStateFeatureVector {
     }
 
     @Override
-    public String[] names() {
-        return names;
+    protected double maxScore() {
+        return 50.0;
+    }
+
+    @Override
+    protected double maxRounds() {
+        return 50.0;
+    }
+
+    @Override
+    public String[] localNames() {
+        return localNames;
     }
 }

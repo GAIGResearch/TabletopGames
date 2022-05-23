@@ -35,7 +35,7 @@ public abstract class AbstractStateFeature implements IStateFeatureVector {
         // POINTS
         retValue[0] = ourSc / maxScore();
         // POINT_ADVANTAGE
-        retValue[1] = (ourSc - maxOtherScore) / maxScore() / 2.0;
+        retValue[1] = (ourSc - maxOtherScore) / maxScore() * 2.0;
         retValue[2] = ordinal / (double) state.getNPlayers();
         retValue[3] = state.getCurrentPlayer() == playerID ? 1 : 0;
         retValue[4] = state.getPlayerResults()[playerID] == Utils.GameResult.WIN ? 1.0 : 0.0;
@@ -50,6 +50,7 @@ public abstract class AbstractStateFeature implements IStateFeatureVector {
     public String[] names() {
         String[] localNames = localNames();
         String[] retValue = new String[coreNames.length + localNames.length];
+        System.arraycopy(coreNames, 0, retValue, 0, coreNames.length);
         System.arraycopy(localNames, 0, retValue, coreNames.length, localNames.length);
         return retValue;
     }
