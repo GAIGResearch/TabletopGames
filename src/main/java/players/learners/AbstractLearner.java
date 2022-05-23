@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public abstract class AbstractLearner implements ILearner {
@@ -23,6 +24,9 @@ public abstract class AbstractLearner implements ILearner {
     protected double[][] currentScore;
     protected ArrayList<Attribute> attributes;
     String[] descriptions;
+    protected boolean addNoise = false;
+    protected double noiseLevel = 0.01;
+    private Random rnd = new Random(System.currentTimeMillis());
 
     protected void loadData(String... files) {
         List<double[]> data = new ArrayList<>();
@@ -54,7 +58,7 @@ public abstract class AbstractLearner implements ILearner {
             throw new AssertionError("Unexpected final header entries " + String.join("", header));
         }
         attributes = new ArrayList<>();
-        attributes.add(new Attribute("BIAS"));
+    //    attributes.add(new Attribute("BIAS"));
         for (int i = 5; i < header.length - 3; i++)
             attributes.add(new Attribute(header[i]));
         dataArray = new double[data.size()][];
@@ -86,7 +90,12 @@ public abstract class AbstractLearner implements ILearner {
         attributes.add(new Attribute("Win", values));
         Instances dataInstances = new Instances("data", attributes, dataArray.length - 1);
         for (int i = 0; i < dataArray.length; i++) {
-            double[] record = dataArray[i];
+            double[] record = new double[dataArray[i].length - 1];
+            System.arraycopy(dataArray[i], 1, record, 0, record.length);
+            // we skip the bias term in dataArray at position 0
+            if (addNoise)
+                for (int j = 0; j < record.length; j++)
+                    record[j] += rnd.nextDouble() * noiseLevel; // to avoid WEKA removing
             double[] XandY = new double[record.length + 1];
             System.arraycopy(record, 0, XandY, 0, record.length);
             XandY[record.length] = 1.0 - win[i][0]; // this puts the first category (0) for a win, and the second (1) as a loss.

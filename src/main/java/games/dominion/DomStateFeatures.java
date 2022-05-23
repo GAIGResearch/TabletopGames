@@ -24,14 +24,14 @@ public class DomStateFeatures implements IStateFeatureVector {
 
     public DomStateFeatures() {
         String[] baseFeatureNames = new String[]{"VP", "TREASURE", "ACTION", "TR_H", "AC_H", "AC_LEFT", "BUY_LEFT", "TOT_CRDS"};
-        names = new String[baseFeatureNames.length + cardNames.length * 4];
-        // In game, owned, in hand, left to buy
+        names = new String[baseFeatureNames.length + cardNames.length * 3];
+        // In owned, in hand, left to buy
         System.arraycopy(baseFeatureNames, 0, names, 0, baseFeatureNames.length);
         for (int i = 0; i < cardNames.length; i++) {
-            names[baseFeatureCount + i * 4] = cardNames[i] + "_IN_GAME";
-            names[baseFeatureCount + i * 4 + 1] = cardNames[i] + "_IN_DECK";
-            names[baseFeatureCount + i * 4 + 2] = cardNames[i] + "_IN_HAND";
-            names[baseFeatureCount + i * 4 + 3] = cardNames[i] + "_IN_SUPPLY";
+     //       names[baseFeatureCount + i * 4] = cardNames[i] + "_IN_GAME";
+            names[baseFeatureCount + i * 3 + 0] = cardNames[i] + "_IN_DECK";
+            names[baseFeatureCount + i * 3 + 1] = cardNames[i] + "_IN_HAND";
+            names[baseFeatureCount + i * 3 + 2] = cardNames[i] + "_IN_SUPPLY";
         }
     }
 
@@ -70,8 +70,8 @@ public class DomStateFeatures implements IStateFeatureVector {
         // The next set are probably most efficiently done by going through the supply, player deck and hand
         for (CardType card : state.cardsIncludedInGame()) {
             int index = cardTypes.indexOf(card);
-            retValue[baseFeatureCount + index * 4] = 1.0;
-            retValue[baseFeatureCount + index * 4 + 3] = state.cardsOfType(card, -1, DominionConstants.DeckType.SUPPLY) / 10.0;
+     //       retValue[baseFeatureCount + index * 4] = 1.0;
+            retValue[baseFeatureCount + index * 3 + 2] = state.cardsOfType(card, -1, DominionConstants.DeckType.SUPPLY) / 10.0;
         }
         List<CardType> hand = state.getDeck(HAND, playerId).stream().map(DominionCard::cardType).collect(Collectors.toList());
         Deck<DominionCard> deck = state.getDeck(DRAW, playerId);
@@ -79,9 +79,9 @@ public class DomStateFeatures implements IStateFeatureVector {
         Map<CardType, Long> allCards = deck.stream().collect(groupingBy(DominionCard::cardType, counting()));
         for (CardType card : allCards.keySet()) {
             int index = cardTypes.indexOf(card);
-            retValue[baseFeatureCount + index * 4 + 1] = allCards.get(card) / 5.0;
+            retValue[baseFeatureCount + index * 3 + 0] = allCards.get(card) / 5.0;
             if (hand.contains(card))
-                retValue[baseFeatureCount + index * 4 + 2] = 1.0;
+                retValue[baseFeatureCount + index * 3 + 1] = 1.0;
         }
 
         return retValue;

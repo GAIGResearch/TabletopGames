@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class SimpleLogisticLearner extends AbstractLearner {
+public class WekaLogisticLearner extends AbstractLearner {
 
     double[] coefficients;
     int validationStart = 0;
@@ -19,7 +19,7 @@ public class SimpleLogisticLearner extends AbstractLearner {
 
     public static void main(String[] args) {
         File dir = new File(args[0]);
-        SimpleLogisticLearner learner = new SimpleLogisticLearner();
+        WekaLogisticLearner learner = new WekaLogisticLearner();
 
         String[] files = new String[1];
         if (dir.isDirectory()) {
@@ -38,7 +38,7 @@ public class SimpleLogisticLearner extends AbstractLearner {
         double sumErrorSquares = 0.0;
         for (int i = 0; i < prediction.length; i++) {
             double error = prediction[i][1] - learner.win[i][0];
-            System.out.printf("Win: %.2f, Prediction: %.2f\n",learner.win[i][0],  prediction[i][1]);
+            System.out.printf("Win: %.2f, Prediction: %.2f\n", learner.win[i][0], prediction[i][1]);
             sumError += Math.abs(error);
             sumErrorSquares += error * error;
         }
@@ -52,6 +52,7 @@ public class SimpleLogisticLearner extends AbstractLearner {
         loadData(files);
         validationStart = dataArray.length - (int) (dataArray.length * validationProportion);
 
+        this.addNoise = true; // to avoid weka.Logistic silently discarding constants
         dataInstances = createInstances(); // all data
         // BUGGER - this is only available as a classifier!
 
@@ -62,11 +63,12 @@ public class SimpleLogisticLearner extends AbstractLearner {
         try {
             //      regressor.setDebug(true);
             regressor.buildClassifier(trainingData);
-           // System.out.println(regressor);
+            System.out.println(regressor);
             double[][] temp = regressor.coefficients();
             coefficients = new double[temp.length];
-            for (int i = 0; i < temp.length; i++)
-                coefficients[i] = temp[i][0];
+            coefficients[0] = temp[temp.length - 1][0];
+            for (int i = 1; i < temp.length; i++)
+                coefficients[i] = temp[i - 1][0];
         } catch (Exception e) {
             e.printStackTrace();
         }
