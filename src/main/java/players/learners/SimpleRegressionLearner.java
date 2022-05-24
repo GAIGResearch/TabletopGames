@@ -27,6 +27,7 @@ public class SimpleRegressionLearner extends AbstractLearner {
         try (FileWriter writer = new FileWriter(file, false)) {
             writer.write("BIAS\t" + String.join("\t", descriptions) + "\n");
             writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.4g", d)).collect(Collectors.joining("\t")));
+            writer.write("/n");
         } catch (Exception e) {
             e.printStackTrace();
             return false;
