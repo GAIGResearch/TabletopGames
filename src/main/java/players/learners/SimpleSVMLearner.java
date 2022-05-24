@@ -15,7 +15,7 @@ public class SimpleSVMLearner extends AbstractLearner {
     svm_parameter params = new svm_parameter();
 
     public SimpleSVMLearner() {
-        params.gamma = 100.0;
+        params.gamma = 10.0;
         params.kernel_type = svm_parameter.RBF;
         params.degree = 2;
         params.svm_type = svm_parameter.NU_SVR;
@@ -38,7 +38,7 @@ public class SimpleSVMLearner extends AbstractLearner {
 
         SimpleSVMLearner learner = new SimpleSVMLearner();
         learner.learnFrom(files);
-        learner.writeToFile("test_SVM_POLY_def.txt");
+        learner.writeToFile("test_SVM_NU_06.txt");
     }
 
     @Override
@@ -53,7 +53,7 @@ public class SimpleSVMLearner extends AbstractLearner {
         data.x = new svm_node[dataArray.length][dataArray[0].length];
 
         for (int i = 0; i < dataArray.length; i++) {
-            data.y[i] = win[i][0];
+            data.y[i] = target[i][0];
             for (int feature = 0; feature < dataArray[0].length; feature++) {
                 data.x[i][feature] = new svm_node();
                 data.x[i][feature].index = i;
@@ -78,8 +78,8 @@ public class SimpleSVMLearner extends AbstractLearner {
             }
 
             double prediction = svm.svm_predict(model, data);
-            medianDiff += Math.abs(prediction - win[i][0]);
-            squaredDiff += (prediction - win[i][0])  * (prediction - win[i][0]);
+            medianDiff += Math.abs(prediction - target[i][0]);
+            squaredDiff += (prediction - target[i][0])  * (prediction - target[i][0]);
         }
 
         return new Pair<>(medianDiff / dataArray.length, squaredDiff / dataArray.length);

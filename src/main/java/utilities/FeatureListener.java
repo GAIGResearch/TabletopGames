@@ -42,6 +42,7 @@ public abstract class FeatureListener implements IGameListener {
                 }
             }).toArray();
             double[] ordinal = IntStream.range(0, totP).mapToDouble(game.getGameState()::getOrdinalPosition).toArray();
+            double finalRound = game.getGameState().getTurnOrder().getRoundCounter();
 
             for (StateFeatureListener.LocalDataWrapper record : currentData) {
                 // we use a LinkedHashMap so that the order of the keys is preserved, and hence the
@@ -55,6 +56,8 @@ public abstract class FeatureListener implements IGameListener {
                 for (int i = 0; i < record.array.length; i++) {
                     data.put(names()[i], record.array[i]);
                 }
+                data.put("PlayerCount", (double) game.getPlayers().size());
+                data.put("TotalRounds", finalRound);
                 data.put("Win", winLoss[record.player]);
                 data.put("Ordinal", ordinal[record.player]);
                 data.put("FinalScore", finalScores[record.player]);

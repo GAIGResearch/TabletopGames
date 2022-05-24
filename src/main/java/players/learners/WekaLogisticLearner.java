@@ -37,8 +37,8 @@ public class WekaLogisticLearner extends AbstractLearner {
         double sumError = 0.0;
         double sumErrorSquares = 0.0;
         for (int i = 0; i < prediction.length; i++) {
-            double error = prediction[i][1] - learner.win[i][0];
-            System.out.printf("Win: %.2f, Prediction: %.2f\n", learner.win[i][0], prediction[i][1]);
+            double error = prediction[i][1] - learner.target[i][0];
+            System.out.printf("Win: %.2f, Prediction: %.2f\n", learner.target[i][0], prediction[i][1]);
             sumError += Math.abs(error);
             sumErrorSquares += error * error;
         }

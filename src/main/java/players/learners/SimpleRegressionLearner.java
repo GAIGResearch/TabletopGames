@@ -16,7 +16,7 @@ public class SimpleRegressionLearner extends AbstractLearner {
         loadData(files);
         // We now have all the data loaded, so can run regression
         Matrix X = new Matrix(dataArray);
-        Matrix Y = new Matrix(win);
+        Matrix Y = new Matrix(target);
 
         LinearRegression regression = new LinearRegression(X, Y, 0.01);
         coefficients = regression.getCoefficients();

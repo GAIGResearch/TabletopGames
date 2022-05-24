@@ -17,15 +17,36 @@ public abstract class AbstractLearner implements ILearner {
 
     protected double[][] dataArray;
     protected String[] header;
-    protected double[][] win;
-    protected double[][] ordinal;
-    protected double[][] finalScore;
+    protected double[][] target;
     protected double[][] currentScore;
     protected ArrayList<Attribute> attributes;
     protected boolean addNoise = false;
     protected double noiseLevel = 0.01;
     String[] descriptions;
-    private Random rnd = new Random(System.currentTimeMillis());
+    private final Random rnd = new Random(System.currentTimeMillis());
+    double gamma;
+    Target targetType;
+
+    enum Target {
+        WIN(3, false), ORDINAL(2, false), SCORE(1, false),
+        WIN_MEAN(3, true), ORD_MEAN(2, true);
+        public final int indexOffset;
+        public final boolean discountToMean;
+
+        Target(int i, boolean d) {
+            indexOffset = i;
+            discountToMean = d;
+        }
+    }
+
+    public AbstractLearner() {
+        this(1.0, Target.WIN);
+    }
+
+    public AbstractLearner(double gamma, Target target) {
+        this.gamma = gamma;
+        this.targetType = target;
+    }
 
     protected void loadData(String... files) {
         List<double[]> data = new ArrayList<>();
@@ -53,7 +74,9 @@ public abstract class AbstractLearner implements ILearner {
         if (!header[0].equals("GameID") || !header[1].equals("Player") || !header[2].equals("Round") || !header[3].equals("Turn") || !header[4].equals("CurrentScore")) {
             throw new AssertionError("Unexpected starting header entries " + String.join("", header));
         }
-        if (!header[header.length - 1].equals("FinalScore") || !header[header.length - 2].equals("Ordinal") || !header[header.length - 3].equals("Win")) {
+        if (!header[header.length - 1].equals("FinalScore") || !header[header.length - 2].equals("Ordinal")
+                || !header[header.length - 3].equals("Win") || !header[header.length - 4].equals("TotalRounds")
+                || !header[header.length - 5].equals("PlayerCount")) {
             throw new AssertionError("Unexpected final header entries " + String.join("", header));
         }
         attributes = new ArrayList<>();
@@ -61,25 +84,25 @@ public abstract class AbstractLearner implements ILearner {
         for (int i = 5; i < header.length - 3; i++)
             attributes.add(new Attribute(header[i]));
         dataArray = new double[data.size()][];
-        win = new double[data.size()][1];
-        ordinal = new double[data.size()][1];
-        finalScore = new double[data.size()][1];
+        target = new double[data.size()][1];
         currentScore = new double[data.size()][1];
-        double maxRound = 0.0;
         for (int i = 0; i < dataArray.length; i++) {
             double[] allData = data.get(i);
-            if (allData[2] > maxRound)
-                maxRound = allData[2];
-            win[i][0] = allData[header.length - 3];
-            ordinal[i][0] = allData[header.length - 2];
-            finalScore[i][0] = allData[header.length - 1];
+            // calculate the number of turns from this point until the end of the game
+            double turns = allData[header.length - 4] - allData[2];
+            // discount target (towards expected result where relevant)
+            double expectedAverage = 0.0;
+            if (targetType == Target.WIN_MEAN)
+                expectedAverage = 1.0 / allData[header.length - 5];
+            if (targetType == Target.ORD_MEAN)
+                expectedAverage = (1.0 + allData[header.length - 5]) / 2.0;
+            target[i][0] = (allData[header.length - targetType.indexOffset] - expectedAverage) * Math.pow(turns, gamma) + expectedAverage;
             currentScore[i][0] = allData[4];
-            double[] regressionData = new double[header.length - 7];
+            double[] regressionData = new double[header.length - 9];
             regressionData[0] = 1.0; // the bias term
             System.arraycopy(allData, 5, regressionData, 1, regressionData.length - 1);
             dataArray[i] = regressionData;
         }
-
     }
 
     protected Instances createInstances(boolean includeBias) {
@@ -99,7 +122,7 @@ public abstract class AbstractLearner implements ILearner {
                     record[j] += rnd.nextDouble() * noiseLevel; // to avoid WEKA removing
             double[] XandY = new double[record.length + 1];
             System.arraycopy(record, 0, XandY, 0, record.length);
-            XandY[record.length] = 1.0 - win[i][0]; // this puts the first category (0) for a win, and the second (1) as a loss.
+            XandY[record.length] = 1.0 - target[i][0]; // this puts the first category (0) for a win, and the second (1) as a loss.
             // this means that we learn a classifier to identify wins, and the coefficients are more naturally interpretable
             dataInstances.add(new DenseInstance(1.0, XandY));
         }
