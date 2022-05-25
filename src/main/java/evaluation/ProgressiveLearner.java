@@ -9,6 +9,7 @@ import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
 import players.PlayerFactory;
+import players.learners.AbstractLearner;
 import utilities.FileStatsLogger;
 import utilities.StateFeatureListener;
 import utilities.Utils;
@@ -54,6 +55,10 @@ public class ProgressiveLearner {
         if (learnerClass.equals(""))
             throw new IllegalArgumentException("Must specify a learner class");
         learner = Utils.loadClassFromString(learnerClass);
+        if (learner instanceof AbstractLearner) {
+            ((AbstractLearner) learner).setGamma(getArg(args, "gamma", 1.0));
+            ((AbstractLearner) learner).setTarget(getArg(args, "target", AbstractLearner.Target.WIN));
+        }
 
         learnedFilesByIteration = new String[iterations];
         player = getArg(args, "player", "");
@@ -91,6 +96,8 @@ public class ProgressiveLearner {
                             "\tlearner=       The full class name of an ILearner implementation.\n" +
                             "\t               This learner must be compatible with the heuristic - in that it must \n" +
                             "\t               generate a file that the heuristic can read.\n" +
+                            "\ttarget=        The target to use (WIN, ORDINAL, SCORE, WIN_MEAN, ORD_MEAN)\n" +
+                            "\tgamma=         The discount factor to use - this is applied per round, not per action\n" +
                             "\tdir=           The directory containing agent JSON files for learned heuristics and raw data\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tmatchups=      Defaults to 1. The number of games to play before the learning process is called.\n" +

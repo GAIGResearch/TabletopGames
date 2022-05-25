@@ -27,7 +27,7 @@ public abstract class AbstractLearner implements ILearner {
     double gamma;
     Target targetType;
 
-    enum Target {
+    public enum Target {
         WIN(3, false), ORDINAL(2, false), SCORE(1, false),
         WIN_MEAN(3, true), ORD_MEAN(2, true);
         public final int indexOffset;
@@ -47,13 +47,15 @@ public abstract class AbstractLearner implements ILearner {
         this.gamma = gamma;
         this.targetType = target;
     }
+    public void setGamma(double newGamma) {gamma = newGamma;}
+    public void setTarget(Target newTarget) {targetType = newTarget;}
 
     protected void loadData(String... files) {
         List<double[]> data = new ArrayList<>();
         for (String file : files) {
             try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                 header = reader.readLine().split("\\t");
-                descriptions = new String[header.length - 8];
+                descriptions = new String[header.length - 10];
                 System.arraycopy(header, 5, descriptions, 0, descriptions.length);
                 while (reader.ready()) {
                     double[] datum = Arrays.stream(reader.readLine().split("\\t")).mapToDouble(Double::parseDouble).toArray();
@@ -81,7 +83,7 @@ public abstract class AbstractLearner implements ILearner {
         }
         attributes = new ArrayList<>();
         attributes.add(new Attribute("BIAS"));
-        for (int i = 5; i < header.length - 3; i++)
+        for (int i = 5; i < header.length - 5; i++)
             attributes.add(new Attribute(header[i]));
         dataArray = new double[data.size()][];
         target = new double[data.size()][1];

@@ -2,7 +2,6 @@ package games.dominion;
 
 import core.AbstractGameState;
 import core.components.Deck;
-import core.interfaces.IStateFeatureVector;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
 import players.heuristics.AbstractStateFeature;
@@ -25,7 +24,9 @@ public class DomStateFeatures extends AbstractStateFeature {
 
     public DomStateFeatures() {
         String[] baseFeatureNames = new String[]{"TREASURE", "ACTION", "TR_H", "AC_H", "AC_LEFT", "BUY_LEFT", "TOT_CRDS"};
-        localNames = new String[baseFeatureNames.length + cardNames.length * 3];
+        if (baseFeatureNames.length != baseFeatureCount)
+            throw new AssertionError("Inconsistent Data in DomStateFeatures");
+        localNames = new String[baseFeatureCount + cardNames.length * 3];
         // In owned, in hand, left to buy
         System.arraycopy(baseFeatureNames, 0, localNames, 0, baseFeatureNames.length);
         for (int i = 0; i < cardNames.length; i++) {
@@ -41,28 +42,28 @@ public class DomStateFeatures extends AbstractStateFeature {
         double[] retValue = new double[localNames.length];
 
         // treasureValue - total treasure divided by 50
-        retValue[1] = state.getTotal(playerId, DominionCard::treasureValue) / 50.0;
+        retValue[0] = state.getTotal(playerId, DominionCard::treasureValue) / 50.0;
 
         // actionCards - percentage of deck made of action cards
-        retValue[2] = state.getTotal(playerId, c -> c.isActionCard() ? 1 : 0) /
+        retValue[1] = state.getTotal(playerId, c -> c.isActionCard() ? 1 : 0) /
                 (double) state.getTotalCards(playerId);
 
         // treasureInHand - total treasure in hand divided by 20
-        retValue[3] = state.getTotal(playerId, HAND, DominionCard::treasureValue) / 20.0;
+        retValue[2] = state.getTotal(playerId, HAND, DominionCard::treasureValue) / 20.0;
 
         // actionCardsInHand - number / 5 of actionCards In Hand
-        retValue[4] = state.getTotal(playerId, HAND, c -> c.isActionCard() ? 1 : 0) / 5.0;
+        retValue[3] = state.getTotal(playerId, HAND, c -> c.isActionCard() ? 1 : 0) / 5.0;
 
         // actionsLeft / 5.
         if (state.getCurrentPlayer() == playerId)
-            retValue[5] = state.actionsLeft() / 5.0;
+            retValue[4] = state.actionsLeft() / 5.0;
 
         // buysLeft / 5
         if (state.getCurrentPlayer() == playerId)
-            retValue[6] = state.buysLeft() / 5.0;
+            retValue[5] = state.buysLeft() / 5.0;
 
         // Total cards / 40
-        retValue[7] = state.getTotalCards(playerId) / 40.0;
+        retValue[6] = state.getTotalCards(playerId) / 40.0;
 
         // The next set are probably most efficiently done by going through the supply, player deck and hand
         // This avoids computational effort on all the cards that are not in the game

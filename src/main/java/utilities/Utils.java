@@ -215,7 +215,13 @@ public abstract class Utils {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
         if (raw.isPresent()) {
             String rawString = raw.get().split("=")[1];
-            if (defaultValue instanceof Integer) {
+            if (defaultValue instanceof Enum) {
+                T[] constants = (T[]) defaultValue.getClass().getEnumConstants();
+                for (T o : constants) {
+                    if (o.toString().equals(rawString))
+                        return o;
+                }
+            } else if (defaultValue instanceof Integer) {
                 return (T) Integer.valueOf(rawString);
             } else if (defaultValue instanceof Double) {
                 return (T) Double.valueOf(rawString);
@@ -355,7 +361,7 @@ public abstract class Utils {
      * Given a string that contains the JSON for a single class, this will instantiate the class
      *
      * @param rawData - the JSON as a raw string
-     * @param <T>      - the Class type that is to be instantiated
+     * @param <T>     - the Class type that is to be instantiated
      * @return
      */
     public static <T> T loadClassFromString(String rawData) {
