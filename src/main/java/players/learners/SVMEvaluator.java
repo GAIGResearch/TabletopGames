@@ -120,7 +120,7 @@ public class SVMEvaluator implements SolutionEvaluator {
         long endTime = System.currentTimeMillis();
         System.out.printf("Training: %d, Evaluating: %d%n", trainTime - startTime, endTime - trainTime);
         nEvals++;
-        return meanResult / gamesPerEval;
+        return -meanResult / gamesPerEval;
     }
 
     @Override
