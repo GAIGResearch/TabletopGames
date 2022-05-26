@@ -141,6 +141,10 @@ public class MCTSPlayer extends AbstractPlayer {
             opponentModel.setForwardModel(model);
     }
 
+    public void setStateHeuristic(IStateHeuristic heuristic) {
+        this.heuristic = heuristic;
+    }
+
     @Override
     public Map<AbstractAction, Map<String, Object>> getDecisionStats() {
         Map<AbstractAction, Map<String, Object>> retValue = new LinkedHashMap<>();
