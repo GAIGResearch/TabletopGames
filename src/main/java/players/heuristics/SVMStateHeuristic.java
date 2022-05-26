@@ -36,6 +36,11 @@ public class SVMStateHeuristic implements IStateHeuristic {
         this.defaultHeuristic = defaultHeuristic;
         loadModel(svmModelLocation);
     }
+    public SVMStateHeuristic(IStateFeatureVector featureVector, svm_model model, IStateHeuristic defaultHeuristic) {
+        this.features = featureVector;
+        this.defaultHeuristic = defaultHeuristic;
+        this.model = model;
+    }
 
     private void loadModel(String svmModelLocation) {
         if (svmModelLocation.isEmpty())

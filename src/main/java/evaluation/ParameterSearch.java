@@ -9,6 +9,7 @@ import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
 import evodef.EvoAlg;
 import evodef.SearchSpace;
+import evodef.SolutionEvaluator;
 import games.GameType;
 import ntbea.MultiNTupleBanditEA;
 import ntbea.NTupleBanditEA;
@@ -320,7 +321,7 @@ public class ParameterSearch {
      *                    a more accurate estimate of their utility).
      * @param searchSpace The relevant searchSpace
      */
-    private static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace, String logFile) {
+    public static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace, String logFile) {
         System.out.printf("Recommended settings have score %.3g +/- %.3g:\t%s\n %s%n",
                 data.a.a, data.a.b,
                 Arrays.stream(data.b).mapToObj(it -> String.format("%.0f", it)).collect(joining(", ")),
@@ -473,7 +474,7 @@ public class ParameterSearch {
      *                        really matter.
      * @return This returns Pair<Mean, Std Error on Mean> as calculated from the evaluation games
      */
-    public static Pair<Double, Double> runNTBEA(GameEvaluator evaluator,
+    public static Pair<Double, Double> runNTBEA(SolutionEvaluator evaluator,
                                                 GameMultiPlayerEvaluator multiPlayerEvaluator,
                                                 EvoAlg searchFramework,
                                                 int totalRuns, int reportEvery,
@@ -532,8 +533,8 @@ public class ParameterSearch {
             }
         }
         // now run the evaluation games on the final recommendation
-        if (evaluator != null && evalGames > 0) {
-            evaluator.reportStatistics = true;
+        if (evaluator instanceof GameEvaluator && evalGames > 0) {
+            ((GameEvaluator) evaluator).reportStatistics = true;
             double[] results = IntStream.range(0, evalGames)
                     .mapToDouble(answer -> {
                         int[] settings = Arrays.stream(landscapeModel.getBestOfSampled())
@@ -546,7 +547,7 @@ public class ParameterSearch {
             double stdErr = Math.sqrt(Arrays.stream(results)
                     .map(d -> Math.pow(d - avg, 2.0)).sum()) / (evalGames - 1.0);
 
-            evaluator.reportStatistics = false;
+            ((GameEvaluator) evaluator).reportStatistics = false;
             return new Pair<>(avg, stdErr);
         } else {
             return new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled()), 0.0);

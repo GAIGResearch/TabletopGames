@@ -12,8 +12,8 @@ public class SVMParams extends TunableParameters {
     SVM_CONSTANTS type;
     double nu, C, eps, p, gamma, coef0;
     int degree;
-    public SVMParams(long seed) {
-        super(seed);
+    public SVMParams() {
+        super(System.currentTimeMillis());
         addTunableParameter("kernel", RBF);
         addTunableParameter("type", NU_SVR);
         addTunableParameter("nu", 0.5);
@@ -40,7 +40,7 @@ public class SVMParams extends TunableParameters {
 
     @Override
     protected SVMParams _copy() {
-        SVMParams retValue = new SVMParams(getRandomSeed());
+        SVMParams retValue = new SVMParams();
         retValue.kernel = kernel;
         retValue.type = type;
         retValue.nu = nu;
