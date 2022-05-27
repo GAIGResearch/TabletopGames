@@ -108,7 +108,11 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         setWidthHeight(width, height, 0, 0);
     }
 
-    // TODO: I don't understand this method
+    // Pads the grid with null on the edges, old grid being placed starting at point offsetX and offsetY within the new larger grid
+    // ***
+    // *A*
+    // ***
+    // A = old grid, top-left corner in new larger grid given by (offsetX, offsetY) coordinates.
     public void setWidthHeight(int width, int height, int offsetX, int offsetY) {
         if (offsetX + this.width > width) offsetX = 0;
         if (offsetY + this.height > height) offsetY = 0;
@@ -122,7 +126,9 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         BoardNode[][] grid = new BoardNode[height][width];
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
-                grid[i+offsetY][j+offsetX] = grid[i][j].copy();
+                if (this.grid[i][j] != null) {
+                    grid[i + offsetY][j + offsetX] = this.grid[i][j].copy();
+                }
             }
         }
         this.grid = grid;
