@@ -215,7 +215,7 @@ public class DescentGridBoardView extends ComponentView {
 
                 // Check if this node is a connected neighbour
                 boolean connected = false;
-                for (int nnid : bn.getNeighbours()) {
+                for (int nnid : bn.getNeighbours().keySet()) {
                     BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
                     if (nn == null) continue;
                     Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
@@ -265,7 +265,7 @@ public class DescentGridBoardView extends ComponentView {
 
         // Draw underlying graph
         g.setColor(Color.green);
-        for (int nnid : bn.getNeighbours()) {
+        for (int nnid : bn.getNeighbours().keySet()) {
             BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
             if (nn == null) continue;
             Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;

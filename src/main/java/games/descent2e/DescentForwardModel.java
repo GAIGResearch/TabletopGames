@@ -266,7 +266,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         if (currentTile.getComponentName().equals("pit") || f.getMovePoints() > 0) {
 
             // Find valid neighbours in master graph, can move there
-            for (int neighbourCompID : currentTile.getNeighbours()) {
+            for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
                 BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
                 if (neighbour == null) continue;
                 Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
@@ -510,7 +510,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             drawn.add(tileToAdd);
 
             // Draw neighbours
-            for (int neighbourCompId: tileToAdd.getNeighbours()) {
+            for (int neighbourCompId: tileToAdd.getNeighbours().keySet()) {
                 BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompId);
 
                 // Find location to start drawing neighbour
