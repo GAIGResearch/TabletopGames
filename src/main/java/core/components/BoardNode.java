@@ -10,7 +10,7 @@ import java.util.HashSet;
 
 public class BoardNode extends Component {
 
-    final double defaultCost = 1.0;
+    final static double defaultCost = 1.0;
     private HashMap<Integer, Double> neighbours;  // Neighbours of this board node, <component IDs, cost to traverse>
     private HashMap<Integer, Integer> neighbourSideMapping;  // Neighbours mapping to a side of this board node, component ID -> side idx
     private int maxNeighbours;  // Maximum number of neighbours for this board node
