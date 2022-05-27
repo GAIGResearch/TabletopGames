@@ -65,8 +65,16 @@ public class DescentConstants {
     public final static int xpHash = Hash.GetInstance().hash("XP");
     public final static int costHash = Hash.GetInstance().hash("cost");
     public final static int equipSlotHash = Hash.GetInstance().hash("equipSlots");
+    public final static int defenceHash = Hash.GetInstance().hash("defence");
     public final static int movementHash = Hash.GetInstance().hash("movement");
     public final static int fatigueHash = Hash.GetInstance().hash("fatigue");
     public final static int healthHash = Hash.GetInstance().hash("hp");
+
+    public final static int mightHash = Hash.GetInstance().hash("might");
+    public final static int knowledgeHash = Hash.GetInstance().hash("knowledge");
+    public final static int willpowerHash = Hash.GetInstance().hash("willpower");
+    public final static int awarenessHash = Hash.GetInstance().hash("awareness");
+    public final static int heroicFeatHash = Hash.GetInstance().hash("heroicFeat");
+    public final static int abilityHash = Hash.GetInstance().hash("ability");
     public final static int setupHash = Hash.GetInstance().hash("setup");
 }
