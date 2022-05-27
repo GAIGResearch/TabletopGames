@@ -452,8 +452,8 @@ public class DescentForwardModel extends AbstractForwardModel {
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
                     // Avoid removing already set tiles
-                    if (board[i][j] != null && (tileGrid[i-y][j-x] == null || tileGrid[i-y][j-x].getComponentName().equals("edge")
-                            || tileGrid[i-y][j-x].getComponentName().equals("open"))) continue;
+                    if (board[i][j] != null && !board[i][j].getComponentName().equalsIgnoreCase ("null") &&
+                            (tileGrid[i-y][j-x] == null || !TerrainType.isWalkable(tileGrid[i-y][j-x].getComponentName()))) continue;
 
                     // Set
                     board[i][j] = tileGrid[i-y][j-x].copy();
@@ -471,6 +471,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
 
+            // TODO disable pit-pit connections
             // Add neighbour connections for spaces in the tile. 8-way connectivity.
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
@@ -481,7 +482,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                                     i == y+height-1 && originalTileGrid[i-y+1][j-x].getComponentName().equalsIgnoreCase("open") ||
                                     j==x && originalTileGrid[i-y][j-x].getComponentName().equalsIgnoreCase("open") ||
                                     j==x+width-1 && originalTileGrid[i-y][j-x+1].getComponentName().equalsIgnoreCase("open")) {
-                                // This cell was oat the opening on the tile we just added, connect to neighbours
+                                // This cell was at the opening on the tile we just added, connect to neighbours
 
                                 // The point on the grid has to connect with all of its valid neighbours on the master board
                                 List<Vector2D> boardNs = getNeighbourhood(j, i, board[0].length, board.length, true);
