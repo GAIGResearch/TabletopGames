@@ -12,6 +12,7 @@ import utilities.Vector2D;
 
 import java.awt.*;
 import java.util.HashSet;
+import java.util.Set;
 
 import static gui.GUI.defaultItemSize;
 import static core.CoreConstants.*;
@@ -55,7 +56,7 @@ public class GraphBoardView extends ComponentView {
                 Vector2D pos = new Vector2D((int) (poss.getX() * scaleW), (int) (poss.getY() * scaleH));
                 PropertyBoolean edge = ((PropertyBoolean) b.getProperty(edgeHash));
 
-                HashSet<Integer> neighbours = b.getNeighbours();
+                Set<Integer> neighbours = b.getNeighbours().keySet();
                 for (int b2id : neighbours) {
                     BoardNode b2 = (BoardNode) gs.getComponentById(b2id);
                     PropertyVector2D posProp2 = (PropertyVector2D) b2.getProperty(coordinateHash);
