@@ -24,12 +24,15 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     final Vector2D target;
     final int weaponCardId;
     final int attackingFigure;
+    final int attackingPlayer;
     AttackPhase phase = NOT_STARTED;
+    int interruptPlayer;
 
-    public MeleeAttack(Vector2D target, int weaponCardId, int attackingFigure) {
+    public MeleeAttack(Vector2D target, int weaponCardId, int attackingFigure, int attackingPlayer) {
         this.target = target;
         this.weaponCardId = weaponCardId;
         this.attackingFigure = attackingFigure;
+        this.attackingPlayer = attackingPlayer;
     }
 
     @Override
@@ -38,6 +41,11 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         DescentGameState state = (DescentGameState) gs;
 
         phase = PRE_ATTACK_ROLL;
+        interruptPlayer = (attackingPlayer + 1) % gs.getNPlayers();
+        // TODO : We really want to whizz through here to find the
+        // possible interrupts, which may mean we do not need to go
+        // back through the overhead of the main game loop at all.
+        interruptPlayer = nextPlayerToInterrupt(state, attackingPlayer, )
         Component weaponCard = state.getComponentById(weaponCardId);
         Figure figure = (Figure) state.getComponentById(attackingFigure);
 
@@ -96,7 +104,23 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        return 0;
+        switch (phase) {
+            case NOT_STARTED:
+                throw new AssertionError("Should not be reachable");
+            case PRE_ATTACK_ROLL:
+                return interruptPlayer;
+            case POST_ATTACK_ROLL:
+                break;
+            case SURGE_DECISIONS:
+                break;
+            case PRE_DEFENCE_ROLL:
+                break;
+            case POST_DEFENCE_ROLL:
+                break;
+            case POST_DAMAGE:
+                break;
+        }
+        throw new AssertionError("Not implemented");
     }
 
     @Override
