@@ -7,9 +7,9 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 
 // Draw random search card and add to player
-public class SearchAction extends DescentAction {
+public class SearchAction extends TokenAction {
     public SearchAction() {
-        super(Triggers.ACTION_POINT_SPEND);
+        super(-1, Triggers.ACTION_POINT_SPEND);
     }
 
     @Override

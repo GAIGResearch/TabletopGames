@@ -1,5 +1,6 @@
 package games.descent2e.components;
 
+import core.components.Counter;
 import core.properties.Property;
 import core.properties.PropertyInt;
 
@@ -16,8 +17,10 @@ public class Monster extends Figure {
         properties.clear();
         properties.putAll(props);
 
-        this.movePoints = ((PropertyInt)getProperty(movementHash)).value;
-        this.hp = ((PropertyInt)getProperty(healthHash)).value;
+        int mp = ((PropertyInt)getProperty(movementHash)).value;
+        this.setAttribute(Attribute.MovePoints, new Counter(0, 0, mp, "Move points"));
+        int hp = ((PropertyInt)getProperty(healthHash)).value;
+        this.setAttribute(Attribute.Health, new Counter(hp, 0, hp, "Health"));
 
         tokenType = "Monster";
     }

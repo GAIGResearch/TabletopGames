@@ -7,6 +7,7 @@ import core.actions.DoNothing;
 import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.Move;
+import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -91,7 +92,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Assign starting skills and equipment from chosen class
             Deck<Card> classDeck = _data.findDeck(heroClass);
             for (Card c: classDeck.getComponents()) {
-                if (((PropertyInt)c.getProperty(xpHash)).value <= figure.getXP()) {
+                if (((PropertyInt)c.getProperty(xpHash)).value <= figure.getAttribute(Figure.Attribute.XP).getValue()) {
                     figure.equip(c);
                 }
             }
@@ -157,6 +158,11 @@ public class DescentForwardModel extends AbstractForwardModel {
                     if (idx == dgs.overlordPlayer) idx++;
                     token.setOwnerId(idx, dgs);
                 }
+                token.setEffects(def.getEffects());
+                for (TokenAction ta: token.getEffects()) {
+                    ta.setTokenID(token.getComponentID());
+                }
+                token.setAttributeModifiers(def.getAttributeModifiers());
                 dgs.tokens.add(token);
             }
         }
@@ -256,10 +262,10 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // Can we do a move action? Can't if already done max actions & not currently executing a move, or immobilized
             boolean canMove = !actingFigure.hasCondition(DescentCondition.Immobilize) &&
-                    (actingFigure.getNActionsExecuted() != nActions || actingFigure.getMovePoints() > 0);
+                    (actingFigure.getNActionsExecuted() != nActions || actingFigure.getAttribute(Figure.Attribute.MovePoints).getValue() > 0);
             if (canMove) {
                 // Is this a new move action? It is if player can move, but all move points spent in first move action
-                if (actingFigure.getMovePoints() == 0) {
+                if (actingFigure.getAttribute(Figure.Attribute.MovePoints).getValue() == 0) {
                     // TODO: This is a second move action, reset move points for calculation + if agent actually chooses it
                 }
                 actions.addAll(moveActions(dgs, actingFigure));
@@ -307,7 +313,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // Check if figure can still move
         PropertyInt moveSpeed = (PropertyInt)f.getProperty(movementHash);
-        if (currentTile.getComponentName().equals("pit") || f.getMovePoints() > 0) {
+        if (currentTile.getComponentName().equals("pit") || f.getAttribute(Figure.Attribute.MovePoints).getValue() > 0) {
 
             // Find valid neighbours in master graph, can move there
             for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
@@ -320,7 +326,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 BoardNode tile = dgs.getMasterBoard().getElement(loc.getX(), loc.getY());
                 if ((currentTile.getComponentName().equals("pit") && !tile.getComponentName().equals("pit") // Moving from pit
                         || !tile.getComponentName().equals("water")  // Normal move
-                        || f.getMovePoints() > ((DescentParameters)dgs.getGameParameters()).waterMoveCost) // Difficult terrain
+                        || f.getAttribute(Figure.Attribute.MovePoints).getValue() > ((DescentParameters)dgs.getGameParameters()).waterMoveCost) // Difficult terrain
                         && ((PropertyInt)tile.getProperty(playersHash)).value == -1) {  // Empty space?
                     // TODO: allow move in non-empty space if figure has move points left that allow it to finish the move action afterwards in an empty space
                     // TODO: if moving to non-empty space, change game phase to ForceMove; otherwise, change game phase to main phase (if in force move).

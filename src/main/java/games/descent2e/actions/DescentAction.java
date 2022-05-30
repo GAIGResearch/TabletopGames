@@ -8,7 +8,7 @@ import java.util.HashSet;
 
 public abstract class DescentAction extends AbstractAction {
 
-    HashSet<Triggers> triggerPoints;
+    final HashSet<Triggers> triggerPoints;
 
     public DescentAction(Triggers triggerPoint) {
         this.triggerPoints = new HashSet<>();
@@ -23,5 +23,4 @@ public abstract class DescentAction extends AbstractAction {
         return execute((DescentGameState) gs);
     }
     public abstract boolean execute(DescentGameState gs);
-
 }

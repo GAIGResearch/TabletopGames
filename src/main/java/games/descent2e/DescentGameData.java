@@ -3,6 +3,9 @@ package games.descent2e;
 import core.AbstractGameData;
 import core.components.*;
 import core.properties.PropertyString;
+import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.tokens.TokenAction;
+import games.descent2e.components.Figure;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Hero;
@@ -16,6 +19,7 @@ import utilities.Vector2D;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static core.components.Component.parseComponent;
@@ -192,7 +196,28 @@ public class DescentGameData extends AbstractGameData {
                         def.setAltName((String) tDef.get(1));
                         def.setSetupHowMany((String) tDef.get(2));
                         def.setLocations(jsonArrayToStringArray((JSONArray) tDef.get(3)));
-                        def.setRule((String) tDef.get(4));
+
+                        String[] rules = ((String) tDef.get(4)).split(";");
+                        ArrayList<TokenAction> effects = new ArrayList<>();
+                        HashMap<Figure.Attribute, Integer> attributeModifiers = new HashMap<>();
+                        for (String rule: rules) {
+                            if (rule.contains("AttributeModifier")) {
+                                // An attribute modifier
+                                String[] split = rule.split(":");
+                                attributeModifiers.put(Figure.Attribute.valueOf(split[1]), Integer.parseInt(split[2]));
+                            } else if (rule.contains("Effect")) {
+                                // An effect, needs a no-arg constructor
+                                try {
+                                    Class<?> clazz = Class.forName("games.descent2e.actions.tokens." + rule.split(":")[1]);
+                                    TokenAction effect = (TokenAction) clazz.getDeclaredConstructor().newInstance();
+                                    effects.add(effect);
+                                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        def.setEffects(effects);
+                        def.setAttributeModifiers(attributeModifiers);
                         qTokens.add(def);
                     }
                     q.setTokens(qTokens);
