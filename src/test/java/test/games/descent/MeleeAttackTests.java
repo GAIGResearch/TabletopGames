@@ -23,10 +23,13 @@ public class MeleeAttackTests {
     }
 
     @Test
-    public void meleeAttackDoesDamage() {
+    public void firstPlayerIsNotOverlord() {
         assertEquals(1, state.getCurrentPlayer());
-        Figure f = state.getActingFigure();
-        f.getLocation();
+    }
+
+    @Test
+    public void attackRollsDicePool() {
+        state.getActingFigure().getWeapons();
     }
 
 }

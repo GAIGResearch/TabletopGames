@@ -112,6 +112,10 @@ public class Figure extends Token {
         return conditions.contains(condition);
     }
 
+    public List<Integer> getWeapons() {
+        return new ArrayList<>();
+    }
+
     @Override
     public Figure copy() {
         Figure copy = new Figure(componentName, componentID);
