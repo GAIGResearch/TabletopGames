@@ -4,12 +4,12 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
-import games.descent2e.actions.InterruptPoints;
+import games.descent2e.actions.Triggers;
 
 // Draw random search card and add to player
 public class SearchAction extends DescentAction {
     public SearchAction() {
-        super(InterruptPoints.ACTION_POINT_SPEND);
+        super(Triggers.ACTION_POINT_SPEND);
     }
 
     @Override

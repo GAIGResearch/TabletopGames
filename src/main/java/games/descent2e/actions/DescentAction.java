@@ -8,13 +8,13 @@ import java.util.HashSet;
 
 public abstract class DescentAction extends AbstractAction {
 
-    HashSet<InterruptPoints> triggerPoints;
+    HashSet<Triggers> triggerPoints;
 
-    public DescentAction(InterruptPoints triggerPoint) {
+    public DescentAction(Triggers triggerPoint) {
         this.triggerPoints = new HashSet<>();
         this.triggerPoints.add(triggerPoint);
     }
-    public DescentAction(HashSet<InterruptPoints> triggerPoints) {
+    public DescentAction(HashSet<Triggers> triggerPoints) {
         this.triggerPoints = triggerPoints;
     }
 

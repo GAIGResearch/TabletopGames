@@ -4,11 +4,12 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
-import games.descent2e.actions.InterruptPoints;
+
+import static games.descent2e.actions.Triggers.END_TURN;
 
 public class AcolyteAction extends DescentAction {
     public AcolyteAction() {
-        super(InterruptPoints.END_TURN);
+        super(END_TURN);
     }
 
     @Override
