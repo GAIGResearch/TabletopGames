@@ -79,4 +79,13 @@ public class Path
         }
     }
 
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder("Path from " + originID + " to " + destinationID + " with cost "  + cost + " goes through: ");
+        for (Integer point : points) {
+            sb.append(point).append(", ");
+        }
+        return sb.toString();
+    }
+
 }

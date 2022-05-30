@@ -47,7 +47,8 @@ public class Pathfinder {
             for (int j = 0; j < h; j++)
             {
                 BoardNode n = graph.getElement(i,j);
-                initShortestPaths(n);
+                if(n != null)
+                    initShortestPaths(n);
             }
         }
     }
@@ -250,8 +251,7 @@ public class Pathfinder {
 
                     //Set cost, used by priority queue to navigate more efficiently
                     nodeComparator.nodeGCosts.put(connectedID, pc.p.cost);
-                    pc.heuristicCost = heuristic(currentNode, destinationNode);
-                    nodeComparator.nodeHCosts.put(connectedID, pc.heuristicCost);
+                    nodeComparator.nodeHCosts.put(connectedID, heuristic(connected, destinationNode));
 
                     //connected.m_g = pc.p.cost;
                     //connected.m_f = pc.heuristicCost = pc.p.cost + heuristic(currentNode, destinationNode);

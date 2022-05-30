@@ -13,6 +13,8 @@ import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
 import utilities.Pair;
+import utilities.Path;
+import utilities.Pathfinder;
 import utilities.Vector2D;
 
 import java.awt.*;
@@ -397,6 +399,17 @@ public class DescentForwardModel extends AbstractForwardModel {
         } else {
             System.out.println("Tiles for the map not found");
         }
+
+
+        // Pathfinder utility (TEST).
+        dgs.addAllComponents();
+        Pathfinder pf = new Pathfinder(dgs.masterBoard);
+        int orig = dgs.masterBoard.getElement(10,3).getComponentID();
+        int dest = dgs.masterBoard.getElement(10,5).getComponentID();
+        Path p = pf.getPath(dgs, orig, dest);
+
+        System.out.println(p.toString());
+        int a = 0; //10,4 -> 10,5
     }
 
     /**
