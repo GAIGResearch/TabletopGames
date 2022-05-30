@@ -2,14 +2,13 @@ package games.descent2e.gui;
 
 import core.components.BoardNode;
 import core.components.GridBoard;
-import core.components.Token;
 import core.properties.PropertyColor;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
-import games.descent2e.components.DToken;
+import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import gui.views.ComponentView;

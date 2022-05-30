@@ -1,10 +1,6 @@
 package games.descent2e.concepts;
 
-import core.components.Token;
-import games.descent2e.DescentTypes;
-import games.descent2e.components.DToken;
-import utilities.Group;
-import utilities.Pair;
+import games.descent2e.components.tokens.DToken;
 import utilities.Vector2D;
 
 import java.util.ArrayList;

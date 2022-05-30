@@ -3,7 +3,7 @@ package games.descent2e;
 import core.AbstractGameData;
 import core.components.*;
 import core.properties.PropertyString;
-import games.descent2e.components.DToken;
+import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Hero;
 import games.descent2e.concepts.Quest;

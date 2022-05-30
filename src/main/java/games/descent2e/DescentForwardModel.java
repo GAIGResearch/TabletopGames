@@ -6,11 +6,8 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.*;
 import core.properties.*;
-import games.GameType;
 import games.descent2e.actions.Move;
-import games.descent2e.components.DToken;
-import games.descent2e.actions.RollDie;
-import games.descent2e.components.DescentDice;
+import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -158,7 +155,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                     // Make a player owner of it TODO: players choose?
                     int idx = r.nextInt(dgs.getNPlayers()-1);
                     if (idx == dgs.overlordPlayer) idx++;
-                    token.setOwnerId(idx);
+                    token.setOwnerId(idx, dgs);
                 }
                 dgs.tokens.add(token);
             }

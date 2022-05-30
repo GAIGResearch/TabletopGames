@@ -8,7 +8,7 @@ import core.components.Token;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
-import games.descent2e.components.DToken;
+import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;

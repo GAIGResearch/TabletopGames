@@ -1,6 +1,7 @@
-package games.descent2e.components;
+package games.descent2e.components.tokens;
 
 import core.components.Token;
+import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import utilities.Vector2D;
 
@@ -20,6 +21,10 @@ public class DToken extends Token {
         super(tokenType.name(), componentID);
         this.tokenType = tokenType;
         this.position = pos;
+    }
+
+    public void setOwnerId(int ownerId, DescentGameState dgs) {
+        super.setOwnerId(ownerId);
     }
 
     @Override

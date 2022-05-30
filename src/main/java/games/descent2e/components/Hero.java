@@ -8,6 +8,7 @@ import core.properties.Property;
 import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import games.descent2e.actions.DescentAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -27,9 +28,9 @@ public class Hero extends Figure {
     Deck<Card> otherEquipment;
     HashMap<String, Integer> equipSlotsAvailable;
 
-     // TODO: reset this every quest to max fatigue
-    Counter movement;
+    Counter speed;
     Counter health;
+    // TODO: reset this every quest to max fatigue
     Counter fatigue;
     String[] defence;
 
@@ -42,6 +43,8 @@ public class Hero extends Figure {
     boolean featAvailable;
 
     String ability;
+
+    ArrayList<DescentAction> abilities;
 
     public Hero(String name) {
         super(name);
@@ -56,6 +59,7 @@ public class Hero extends Figure {
         equipSlotsAvailable.put("other", 2);
 
         tokenType = "Hero";
+        abilities = new ArrayList<>();
     }
 
     protected Hero(String name, int ID) {
@@ -114,7 +118,7 @@ public class Hero extends Figure {
         if (armor != null) {
             copy.armor = armor.copy();
         }
-        copy.movement = movement.copy();
+        copy.speed = speed.copy();
         copy.health = health.copy();
         copy.fatigue = fatigue.copy();
         copy.defence = new String[this.defence.length];
@@ -133,6 +137,20 @@ public class Hero extends Figure {
         return copy;
     }
 
+    public Counter getSpeed() {
+        return speed;
+    }
+
+    public void addAbility(DescentAction ability) {
+        this.abilities.add(ability);
+    }
+    public void removeAbility(DescentAction ability) {
+        this.abilities.remove(ability);
+    }
+    public ArrayList<DescentAction> getAbilities() {
+        return abilities;
+    }
+
     /**
      * Creates a Token objects from a JSON object.
      * @param figure - JSON to parse into Figure object.
@@ -149,7 +167,7 @@ public class Hero extends Figure {
         int awareness = ((PropertyInt)getProperty(awarenessHash)).value;
 
         // Setup counters
-        this.movement = new Counter(movement, 0, movement, "movementCounter");
+        this.speed = new Counter(movement, 0, movement, "movementCounter");
         this.fatigue = new Counter(fatigue, 0, fatigue, "fatigueCounter");
         this.health = new Counter(health, 0, health, "healthCounter");
         this.defence = ((PropertyStringArray)getProperty(defenceHash)).getValues();
