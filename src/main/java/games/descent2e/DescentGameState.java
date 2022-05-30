@@ -29,18 +29,18 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     DescentGameData data;
 
     // For reference only
-    HashMap<Integer, GridBoard> tiles;  // Mapping from board node ID in board configuration to tile configuration
+    Map<Integer, GridBoard> tiles;  // Mapping from board node ID in board configuration to tile configuration
     int[][] tileReferences;  // int corresponds to component ID of tile at that location in master board
-    HashMap<String, HashSet<Vector2D>> gridReferences;  // Mapping from tile name to list of coordinates in master board for each cell
+    Map<String, Set<Vector2D>> gridReferences;  // Mapping from tile name to list of coordinates in master board for each cell
     boolean initData;
 
 
     GridBoard masterBoard;
     List<DescentDice> dice;
     Map<String, List<DescentDice>> dicePool;
-    ArrayList<Hero> heroes;
+    List<Hero> heroes;
     Figure overlord;
-    ArrayList<ArrayList<Monster>> monsters;
+    List<List<Monster>> monsters;
     int overlordPlayer;
 
     /**
@@ -92,8 +92,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             copy.heroes.add(f.copy());
         }
         copy.monsters = new ArrayList<>();
-        for (ArrayList<Monster> ma: monsters) {
-            ArrayList<Monster> maC = new ArrayList<>();
+        for (List<Monster> ma: monsters) {
+            List<Monster> maC = new ArrayList<>();
             for (Monster m: ma) {
                 maC.add(m.copy());
             }
@@ -164,7 +164,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return masterBoard;
     }
 
-    public ArrayList<Hero> getHeroes() {
+    public List<Hero> getHeroes() {
         return heroes;
     }
 
@@ -178,14 +178,14 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         dicePool = newPool;
     }
 
-    public ArrayList<ArrayList<Monster>> getMonsters() {
+    public List<List<Monster>> getMonsters() {
         return monsters;
     }
 
     public Figure getActingFigure() {
         // Find current monster group + monster playing
         int monsterGroupIdx = ((DescentTurnOrder) getTurnOrder()).monsterGroupActingNext;
-        ArrayList<Monster> monsterGroup = getMonsters().get(monsterGroupIdx);
+        List<Monster> monsterGroup = getMonsters().get(monsterGroupIdx);
         int nextMonster = ((DescentTurnOrder) getTurnOrder()).monsterActingNext;
 
         // Find currently acting figure (hero or monster)
@@ -201,6 +201,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     }
 
     public boolean playerHasAvailableInterrupt(int player, Triggers trigger) {
+        // TODO: implement with look through Abilities/Items/Actions which fit
         return false;
     }
     public List<AbstractAction> getInterruptActionsFor(int player, Triggers trigger) {
@@ -215,7 +216,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return tileReferences;
     }
 
-    public HashMap<String, HashSet<Vector2D>> getGridReferences() {
+    public Map<String, Set<Vector2D>> getGridReferences() {
         return gridReferences;
     }
 

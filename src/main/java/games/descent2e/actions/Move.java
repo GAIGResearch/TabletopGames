@@ -12,6 +12,7 @@ import games.descent2e.components.Monster;
 import utilities.Vector2D;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class Move extends AbstractAction {
@@ -31,7 +32,7 @@ public class Move extends AbstractAction {
         if (currentPlayer == 0) {
             // Move monsters
             int monsterGroupIdx = ((DescentTurnOrder)dgs.getTurnOrder()).getMonsterGroupActingNext();
-            ArrayList<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
+            List<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
             f = monsterGroup.get(((DescentTurnOrder)dgs.getTurnOrder()).getMonsterActingNext());
         }
         else {

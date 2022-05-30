@@ -123,7 +123,7 @@ public class DescentGridBoardView extends ComponentView {
             g.drawOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
         }
         // Draw monsters
-        for (ArrayList<Monster> monsterGroup: gameState.getMonsters()) {
+        for (List<Monster> monsterGroup: gameState.getMonsters()) {
             String dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
             String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
 
@@ -152,7 +152,7 @@ public class DescentGridBoardView extends ComponentView {
 
 
     public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
-                                                          HashMap<String, HashSet<Vector2D>> gridReferences,
+                                                          Map<String, Set<Vector2D>> gridReferences,
                                                           int[][] tileReferences) {
         int width = gridBoard.getWidth() * itemSize;
         int height = gridBoard.getHeight() * itemSize;

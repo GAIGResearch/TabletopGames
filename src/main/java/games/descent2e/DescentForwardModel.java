@@ -56,6 +56,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Overlord will also have a figure, but not on the board (to store xp and skill info)
         dgs.overlord = new Figure("Overlord");
         dgs.overlord.setTokenType("Overlord");
+        dgs.getTurnOrder().setStartingPlayer(1);
+
         // TODO: Shuffle overlord deck and give overlord nPlayers cards.
 
         // TODO: is this quest phase or campaign phase?
@@ -199,7 +201,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         // These three lines were almost refactored by James, but he left them
         // in to keep Raluca happy
         int monsterGroupIdx = ((DescentTurnOrder) dgs.getTurnOrder()).monsterGroupActingNext;
-        ArrayList<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
+        List<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
         ((DescentTurnOrder) dgs.getTurnOrder()).nextMonster(monsterGroup.size());
 
         if (!(dgs.getGamePhase() == DescentGameState.DescentPhase.ForceMove)) {
@@ -374,7 +376,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
             dgs.tileReferences = trimTileRef;
             // And grid references
-            for (Map.Entry<String, HashSet<Vector2D>> e: dgs.gridReferences.entrySet()) {
+            for (Map.Entry<String, Set<Vector2D>> e: dgs.gridReferences.entrySet()) {
                 for (Vector2D v: e.getValue()) {
                     v.subtract(bounds.x, bounds.y);
                 }
@@ -415,9 +417,9 @@ public class DescentForwardModel extends AbstractForwardModel {
      */
     private void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
-                                 HashMap<Integer, GridBoard> tiles,
-                                 int[][] tileReferences,  HashMap<String, HashSet<Vector2D>> gridReferences,
-                                 HashMap<BoardNode, BoardNode> drawn,
+                                 Map<Integer, GridBoard> tiles,
+                                 int[][] tileReferences,  Map<String, Set<Vector2D>> gridReferences,
+                                 Map<BoardNode, BoardNode> drawn,
                                  Rectangle bounds,
                                  DescentGameState dgs,
                                  String sideWithOpening) {
@@ -810,7 +812,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             String nameDef = mDef[0];
             String name = nameDef.split(":")[0];
             String tile = mDef[1];
-            HashSet<Vector2D> tileCoords = dgs.gridReferences.get(tile);
+            Set<Vector2D> tileCoords = dgs.gridReferences.get(tile);
 
             // Check property modifiers
             int hpModifierMaster = 0;
