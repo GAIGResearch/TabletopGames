@@ -2,12 +2,15 @@ package games.descent2e;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.Component;
 import core.components.GridBoard;
 import core.components.Token;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
+import games.descent2e.actions.InterruptPoints;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -173,6 +176,17 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             actingFigure = monsterGroup.get(nextMonster);
         }
         return actingFigure;
+    }
+
+    public boolean playerHasAvailableInterrupt(int player, InterruptPoints trigger) {
+        return false;
+    }
+    public List<AbstractAction> getInterruptActionsFor(int player, InterruptPoints trigger) {
+        List<AbstractAction> retValue = new ArrayList<>();
+        // TODO: Run through the inventory or items/cards/abilities to see which have
+        // an action that can be used at this trigger
+        retValue.add(new DoNothing());
+        return retValue;
     }
 
     public int[][] getTileReferences() {

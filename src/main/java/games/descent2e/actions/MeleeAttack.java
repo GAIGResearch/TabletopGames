@@ -6,33 +6,57 @@ import core.components.Component;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.components.Figure;
-import utilities.Vector2D;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static games.descent2e.actions.MeleeAttack.AttackPhase.NOT_STARTED;
-import static games.descent2e.actions.MeleeAttack.AttackPhase.PRE_ATTACK_ROLL;
+import static games.descent2e.actions.InterruptPoints.*;
+import static games.descent2e.actions.MeleeAttack.AttackPhase.*;
+import static games.descent2e.actions.MeleeAttack.Interrupters.*;
 
 public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
-    public enum AttackPhase {
-        NOT_STARTED, PRE_ATTACK_ROLL, POST_ATTACK_ROLL, SURGE_DECISIONS, PRE_DEFENCE_ROLL,
-        POST_DEFENCE_ROLL, POST_DAMAGE
+    enum Interrupters {
+        ATTACKER, DEFENDER, OTHERS, ALL
     }
-    final Vector2D target;
+
+    public enum AttackPhase {
+        NOT_STARTED,
+        PRE_ATTACK_ROLL(START_ATTACK, DEFENDER),
+        POST_ATTACK_ROLL(ROLL_OWN_DICE, ATTACKER),
+        SURGE_DECISIONS,
+        PRE_DEFENCE_ROLL,
+        POST_DEFENCE_ROLL(ROLL_OWN_DICE, DEFENDER),
+        POST_DAMAGE(ROLL_OWN_DICE, DEFENDER),
+        ALL_DONE;
+
+        public final InterruptPoints interrupt;
+        public final Interrupters interrupters;
+
+        AttackPhase(InterruptPoints interruptType, Interrupters who) {
+            interrupt = interruptType;
+            interrupters = who;
+        }
+
+        AttackPhase() {
+            interrupt = null;
+            interrupters = null;
+        }
+    }
+
     final int weaponCardId;
     final int attackingFigure;
     final int attackingPlayer;
+    final int defendingFigure;
+    final int defendingPlayer;
     AttackPhase phase = NOT_STARTED;
     int interruptPlayer;
 
-    public MeleeAttack(Vector2D target, int weaponCardId, int attackingFigure, int attackingPlayer) {
-        this.target = target;
+    public MeleeAttack(int weaponCardId, int attackingFigure, int attackingPlayer, int defendingFigure, int defendingPlayer) {
         this.weaponCardId = weaponCardId;
         this.attackingFigure = attackingFigure;
         this.attackingPlayer = attackingPlayer;
+        this.defendingFigure = defendingFigure;
+        this.defendingPlayer = defendingPlayer;
     }
 
     @Override
@@ -41,13 +65,10 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         DescentGameState state = (DescentGameState) gs;
 
         phase = PRE_ATTACK_ROLL;
-        interruptPlayer = (attackingPlayer + 1) % gs.getNPlayers();
-        // TODO : We really want to whizz through here to find the
-        // possible interrupts, which may mean we do not need to go
-        // back through the overhead of the main game loop at all.
-        interruptPlayer = nextPlayerToInterrupt(state, attackingPlayer, )
+        interruptPlayer = attackingPlayer;
         Component weaponCard = state.getComponentById(weaponCardId);
         Figure figure = (Figure) state.getComponentById(attackingFigure);
+        movePhaseForward(state);
 
         // When executing a melee attack we need to:
         // 1) roll the dice (with possible interrupt beforehand)
@@ -60,77 +81,143 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         return true;
     }
 
+    private void movePhaseForward(DescentGameState state) {
+        // The goal here is to work out which player may have an interrupt for the phase we are in
+        // If none do, then we can move forward to the next phase directly.
+        // If one (or more) does, then we stop, and go back to the main game loop for this
+        // decision to be made
+        boolean foundInterrupt = false;
+        do {
+            // check next player
+            interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
+            if (phase.interrupt == null || interruptPlayer == attackingPlayer) {
+                // we have completed the loop
+                executePhase();
+                interruptPlayer = attackingPlayer;
+            }
+            if (playerHasInterruptOption(state)) {
+                foundInterrupt = true;
+                // we need to get a decision from this player
+            }
+        } while (!foundInterrupt && phase != ALL_DONE);
+    }
+
+    private boolean playerHasInterruptOption(DescentGameState state) {
+        if (phase.interrupt == null || phase.interrupters == null) return false;
+        // first we see if the interruptPlayer is one who may interrupt
+        switch (phase.interrupters) {
+            case ATTACKER:
+                if (interruptPlayer != attackingPlayer)
+                    return false;
+            case DEFENDER:
+                if (interruptPlayer != defendingPlayer)
+                    return false;
+            case OTHERS:
+                if (interruptPlayer == attackingPlayer)
+                    return false;
+            case ALL:
+                // always fine
+        }
+        // second we see if they can interrupt (i.e. have a relevant card/ability)
+        return state.playerHasAvailableInterrupt(interruptPlayer, phase.interrupt);
+    }
+
+    private void executePhase() {
+        switch (phase) {
+            case NOT_STARTED:
+            case ALL_DONE:
+                throw new AssertionError("Should never be executed");
+            case PRE_ATTACK_ROLL:
+                // TODO : Roll dice
+                phase = POST_ATTACK_ROLL;
+                break;
+            case POST_ATTACK_ROLL:
+                // Any rerolls are executed via interrupts
+                phase = SURGE_DECISIONS;
+                break;
+            case SURGE_DECISIONS:
+                // any surge decisions are executed via interrupts
+                phase = PRE_DEFENCE_ROLL;
+                break;
+            case PRE_DEFENCE_ROLL:
+                if (attackMissed()) // no damage done, so can skip the defence roll
+                    phase = ALL_DONE;
+                else
+                    phase = POST_DEFENCE_ROLL;
+                break;
+            case POST_DEFENCE_ROLL:
+                phase = POST_DAMAGE;
+                break;
+            case POST_DAMAGE:
+                // TODO: Implement the damage done
+                phase = ALL_DONE;
+                break;
+        }
+    }
+
+    protected boolean attackMissed() {
+        // TODO: Interrogate the current dice pool on the game state
+        // if there are no damage icons, then we missed
+        return false;
+    }
+
     @Override
     public MeleeAttack copy() {
-        return this;
+        MeleeAttack retValue = new MeleeAttack(weaponCardId, attackingFigure, attackingPlayer, defendingFigure, defendingPlayer);
+        retValue.phase = phase;
+        retValue.interruptPlayer = interruptPlayer;
+        return retValue;
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof MeleeAttack;
+        if (obj instanceof MeleeAttack) {
+            MeleeAttack other = (MeleeAttack) obj;
+            return other.weaponCardId == weaponCardId && other.attackingFigure == attackingFigure &&
+                    other.attackingPlayer == attackingPlayer && other.defendingFigure == defendingFigure &&
+                    other.defendingPlayer == defendingPlayer && other.phase == phase && other.interruptPlayer == interruptPlayer;
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(weaponCardId, attackingFigure, attackingPlayer, defendingFigure, defendingPlayer, phase.ordinal(), interruptPlayer);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "MeleeAttack";
+        return toString();
+        // TODO: Extend this to pull in details of card and figures involved
     }
 
+    @Override
+    public String toString() {
+        return String.format("Melee Attack (Wpn: %d by %d on %d", weaponCardId, attackingPlayer, attackingFigure);
+    }
 
     @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        switch (phase) {
-            case NOT_STARTED:
-                throw new AssertionError("Should not be reachable");
-            case PRE_ATTACK_ROLL:
-                break;
-            case POST_ATTACK_ROLL:
-                break;
-            case SURGE_DECISIONS:
-                break;
-            case PRE_DEFENCE_ROLL:
-                break;
-            case POST_DEFENCE_ROLL:
-                break;
-            case POST_DAMAGE:
-                break;
-        }
-        throw new AssertionError("Not implemented");
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        if (phase.interrupt == null)
+            throw new AssertionError("Should not be reachable");
+        DescentGameState state = (DescentGameState) gs;
+        return state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
     }
 
     @Override
     public int getCurrentPlayer(AbstractGameState state) {
-        switch (phase) {
-            case NOT_STARTED:
-                throw new AssertionError("Should not be reachable");
-            case PRE_ATTACK_ROLL:
-                return interruptPlayer;
-            case POST_ATTACK_ROLL:
-                break;
-            case SURGE_DECISIONS:
-                break;
-            case PRE_DEFENCE_ROLL:
-                break;
-            case POST_DEFENCE_ROLL:
-                break;
-            case POST_DAMAGE:
-                break;
-        }
-        throw new AssertionError("Not implemented");
+        return interruptPlayer;
     }
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-
+        // after the interrupt action has been taken, we can continue to see who interrupts next
+        movePhaseForward((DescentGameState) state);
     }
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return false;
+        return phase == ALL_DONE;
     }
 
 }

@@ -8,7 +8,6 @@ package games.descent2e.actions;
  * this enum.
  */
 public enum InterruptPoints {
-
     MOVE_INTO_SPACE,
     FATIGUE_INTO_SPACE,
     START_ATTACK,
