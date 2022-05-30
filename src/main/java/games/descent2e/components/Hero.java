@@ -2,9 +2,11 @@ package games.descent2e.components;
 
 import core.CoreConstants;
 import core.components.Card;
+import core.components.Counter;
 import core.components.Deck;
 import core.properties.Property;
 import core.properties.PropertyInt;
+import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -25,7 +27,21 @@ public class Hero extends Figure {
     Deck<Card> otherEquipment;
     HashMap<String, Integer> equipSlotsAvailable;
 
-    int fatigue;  // TODO: reset this every quest to max fatigue
+     // TODO: reset this every quest to max fatigue
+    Counter movement;
+    Counter health;
+    Counter fatigue;
+    String[] defence;
+
+    Counter might;
+    Counter knowledge;
+    Counter willpower;
+    Counter awareness;
+
+    String heroicFeat;
+    boolean featAvailable;
+
+    String ability;
 
     public Hero(String name) {
         super(name);
@@ -85,14 +101,6 @@ public class Hero extends Figure {
         }
     }
 
-    public int getFatigue() {
-        return fatigue;
-    }
-
-    public void setFatigue(int fatigue) {
-        this.fatigue = fatigue;
-    }
-
     @Override
     public Hero copy() {
         Hero copy = new Hero(componentName, componentID);
@@ -106,7 +114,21 @@ public class Hero extends Figure {
         if (armor != null) {
             copy.armor = armor.copy();
         }
-        copy.fatigue = fatigue;
+        copy.movement = movement.copy();
+        copy.health = health.copy();
+        copy.fatigue = fatigue.copy();
+        copy.defence = new String[this.defence.length];
+        for (int i =0 ; i < this.defence.length; i++){
+            copy.defence[i] = this.defence[i];
+        }
+        copy.might = this.might.copy();
+        copy.knowledge = this.knowledge.copy();
+        copy.willpower = this.willpower.copy();
+        copy.awareness = this.awareness.copy();
+        copy.heroicFeat = this.heroicFeat;
+        copy.featAvailable = this.featAvailable;
+        copy.ability = this.ability;
+
         super.copyComponentTo(copy);
         return copy;
     }
@@ -117,8 +139,30 @@ public class Hero extends Figure {
      */
     protected void loadHero(JSONObject figure) {
         super.loadFigure(figure);
-        // TODO: custom load of figure properties
-        this.fatigue = ((PropertyInt)getProperty(fatigueHash)).value;
+        // custom load of figure properties
+        int movement = ((PropertyInt)getProperty(movementHash)).value;
+        int fatigue = ((PropertyInt)getProperty(fatigueHash)).value;
+        int health = ((PropertyInt)getProperty(healthHash)).value;
+        int might = ((PropertyInt)getProperty(mightHash)).value;
+        int knowledge = ((PropertyInt)getProperty(knowledgeHash)).value;
+        int willpower = ((PropertyInt)getProperty(willpowerHash)).value;
+        int awareness = ((PropertyInt)getProperty(awarenessHash)).value;
+
+        // Setup counters
+        this.movement = new Counter(movement, 0, movement, "movementCounter");
+        this.fatigue = new Counter(fatigue, 0, fatigue, "fatigueCounter");
+        this.health = new Counter(health, 0, health, "healthCounter");
+        this.defence = ((PropertyStringArray)getProperty(defenceHash)).getValues();
+
+        this.might = new Counter(might, 0, might, "mightCounter");
+        this.knowledge = new Counter(knowledge, 0, knowledge, "knowledgeCounter");
+        this.willpower = new Counter(willpower, 0, willpower, "willpowerCounter");
+        this.awareness = new Counter(awareness, 0, awareness, "awarenessCounter");
+
+        this.featAvailable = true;
+        this.heroicFeat = ((PropertyString)getProperty(heroicFeatHash)).value;
+        this.ability = ((PropertyString)getProperty(abilityHash)).value;
+
     }
 
     /**
