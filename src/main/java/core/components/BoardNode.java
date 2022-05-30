@@ -85,6 +85,13 @@ public class BoardNode extends Component {
         copyComponentTo(bn);
         return bn;
     }
+    public BoardNode copyNewID() {
+        BoardNode bn = new BoardNode(maxNeighbours, componentName);
+        bn.neighbours = new HashSet<>(neighbours);
+        bn.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
+        copyComponentTo(bn);
+        return bn;
+    }
 
     /**
      * @return the neighbours of this node.

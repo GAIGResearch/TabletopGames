@@ -30,7 +30,7 @@ public class TileBuildGUI extends AbstractGUIManager {
     private TileBuildState gameState;
 
     public TileBuildGUI(GamePanel parent, AbstractGameState gameState, ActionController ac) {
-        super(parent, ac, (DescentTypes.TerrainType.getWalkableTiles().size()+2)
+        super(parent, ac, (DescentTypes.TerrainType.getWalkableTerrains().size()+2)
                 *((TileBuildParameters)gameState.getGameParameters()).maxGridSize
                 *((TileBuildParameters)gameState.getGameParameters()).maxGridSize);
 
@@ -77,7 +77,7 @@ public class TileBuildGUI extends AbstractGUIManager {
             int maxY = 0;
             for (int i = 0; i < tile.getHeight(); i++) {
                 for (int j = 0; j < tile.getWidth(); j++) {
-                    if (tile.getElement(j, i) != null && DescentTypes.TerrainType.isInsideTile(tile.getElement(j, i).getComponentName())) {
+                    if (tile.getElement(j, i) != null && DescentTypes.TerrainType.isInsideTerrain(tile.getElement(j, i).getComponentName())) {
                         if (j < minX) minX = j;
                         if (i < minY) minY = i;
                         if (i > maxY) maxY = i;
