@@ -8,6 +8,7 @@ import core.components.Token;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
+import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -24,9 +25,13 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     DescentGameData data;
 
     // For reference only
-    HashMap<Integer, GridBoard> tiles;  // Mapping from board node ID in board configuration to tile configuration
-    int[][] tileReferences;  // int corresponds to component ID of tile at that location in master board
-    HashMap<String, HashSet<Vector2D>> gridReferences;  // Mapping from tile name to list of coordinates in master board for each cell
+
+    // Mapping from board node ID in board configuration to tile configuration
+    HashMap<Integer, GridBoard> tiles;
+    // int corresponds to component ID of tile at that location in master board
+    int[][] tileReferences;
+    // Mapping from tile name to list of coordinates in master board for each cell (and corresponding coordinates on original tile)
+    HashMap<String, HashMap<Vector2D, Vector2D>> gridReferences;
     boolean initData;
 
 
@@ -37,6 +42,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     Figure overlord;
     ArrayList<ArrayList<Monster>> monsters;
     int overlordPlayer;
+    ArrayList<DToken> tokens;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -72,6 +78,9 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         }
         // Current state
         components.add(masterBoard);
+        if (tokens != null) {
+            components.addAll(tokens);
+        }
         // TODO
         return components;
     }
@@ -97,6 +106,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         copy.tileReferences = tileReferences.clone();  // TODO deep
         copy.gridReferences = new HashMap<>(gridReferences); // TODO deep
         copy.initData = initData;
+        copy.tokens = new ArrayList<>();
+        for (DToken t: tokens) {
+            copy.tokens.add(t.copy());
+        }
         for (DescentDice d : dice) {
             copy.dice.add(d.copy());
         }
@@ -199,8 +212,12 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return tileReferences;
     }
 
-    public HashMap<String, HashSet<Vector2D>> getGridReferences() {
+    public HashMap<String, HashMap<Vector2D, Vector2D>> getGridReferences() {
         return gridReferences;
+    }
+
+    public ArrayList<DToken> getTokens() {
+        return tokens;
     }
 
     @Override

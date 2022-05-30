@@ -9,10 +9,12 @@ package games.descent2e.actions;
  */
 public enum InterruptPoints {
 
+    ACTION_POINT_SPEND,
     MOVE_INTO_SPACE,
     FATIGUE_INTO_SPACE,
     START_ATTACK,
     END_ATTACK,
     ROLL_OWN_DICE,
-    ROLL_OTHER_DICE
+    ROLL_OTHER_DICE,
+    END_TURN
 }

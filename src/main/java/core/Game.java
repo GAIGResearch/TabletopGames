@@ -919,6 +919,9 @@ public class Game {
 
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());

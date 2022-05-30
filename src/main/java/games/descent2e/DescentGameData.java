@@ -3,6 +3,7 @@ package games.descent2e;
 import core.AbstractGameData;
 import core.components.*;
 import core.properties.PropertyString;
+import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Hero;
 import games.descent2e.concepts.Quest;
@@ -180,6 +181,23 @@ public class DescentGameData extends AbstractGameData {
                     q.setMonsters(qMonsters);
                 }
 
+                // Find tokens
+                ArrayList<DToken.DTokenDef> qTokens = new ArrayList<>();
+                JSONArray ts = (JSONArray) obj.get("tokens");
+                if (ts != null) {
+                    for (Object o1 : ts) {
+                        JSONArray tDef = (JSONArray) o1;
+                        DToken.DTokenDef def = new DToken.DTokenDef();
+                        def.setTokenType(DescentTypes.DescentToken.valueOf((String) tDef.get(0)));
+                        def.setAltName((String) tDef.get(1));
+                        def.setSetupHowMany((String) tDef.get(2));
+                        def.setLocations(jsonArrayToStringArray((JSONArray) tDef.get(3)));
+                        def.setRule((String) tDef.get(4));
+                        qTokens.add(def);
+                    }
+                    q.setTokens(qTokens);
+                }
+
                 // Quest read complete
                 quests.add(q);
             }
@@ -189,6 +207,14 @@ public class DescentGameData extends AbstractGameData {
         }
 
         return quests;
+    }
+
+    private static String[] jsonArrayToStringArray(JSONArray ar) {
+        String[] ar2 = new String[ar.size()];
+        for (int i = 0; i < ar.size(); i++) {
+            ar2[i] = (String) ar.get(i);
+        }
+        return ar2;
     }
 
     private static HashMap<String, HashMap<String, Token>> loadMonsters(String dataPath) {
