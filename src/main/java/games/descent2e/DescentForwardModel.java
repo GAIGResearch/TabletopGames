@@ -114,8 +114,10 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Create and place monsters
         createMonsters(dgs, firstQuest, _data, rnd);
 
-        // Set up dice?
-        dgs.dice = (ArrayList<DescentDice>) _data.dice;
+        // Set up dice!
+        dgs.dice = _data.dice;
+        dgs.dicePool = new HashMap<>();
+
 
         // Shuffle search cards deck
 

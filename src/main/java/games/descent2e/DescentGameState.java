@@ -31,7 +31,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
 
     GridBoard masterBoard;
-    ArrayList<DescentDice> dice;
+    List<DescentDice> dice;
+    Map<String, List<DescentDice>> dicePool;
     ArrayList<Hero> heroes;
     Figure overlord;
     ArrayList<ArrayList<Monster>> monsters;
@@ -48,6 +49,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         tiles = new HashMap<>();
         data = new DescentGameData();
         dice = new ArrayList<>();
+        dicePool = new HashMap<>();
 
         heroes = new ArrayList<>();
         monsters = new ArrayList<>();
@@ -162,6 +164,14 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     }
 
     public List<DescentDice> getDice(){return dice;}
+
+    public Map<String, List<DescentDice>> getDicePool(){
+        return dicePool;
+    }
+
+    public void setDicePool(Map<String, List<DescentDice>> newPool){
+        dicePool = newPool;
+    }
 
     public ArrayList<ArrayList<Monster>> getMonsters() {
         return monsters;
