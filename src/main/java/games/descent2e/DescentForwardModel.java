@@ -346,20 +346,13 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Create big board
         BoardNode[][] board = new BoardNode[height][width];  // Board nodes here will be the individual cells in the tiles
         dgs.tileReferences = new int[height][width];  // Reference to component ID of tile placed at that position
-        HashSet<BoardNode> drawn = new HashSet<>();  // Keeps track of which tiles have been added to the board already, for recursive purposes
+        HashMap<BoardNode, BoardNode> drawn = new HashMap<>();  // Keeps track of which tiles have been added to the board already, for recursive purposes
+
+        // TODO iterate all that are not already drawn, to make sure disconnected tiles are also placed.
+        // StartX / Y Will need to be adjusted to not draw on top of existing things
 
         // Find first tile, as board node in the board configuration graph board
         BoardNode firstTile = config.getBoardNodes().get(0);
-//        BoardNode firstTile = null;
-//        for (BoardNode t : config.getBoardNodes()) {
-//            if (t != null) {
-//                GridBoard tile = dgs.tiles.get(t.getComponentID());
-//                if (tile != null) {
-//                    firstTile = t;
-//                    break;
-//                }
-//            }
-//        }
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
             GridBoard tile = dgs.tiles.get(firstTile.getComponentID());
@@ -367,16 +360,12 @@ public class DescentForwardModel extends AbstractForwardModel {
             BoardNode[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
             int startY = height / 2 - rotated.length / 2;
-            Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);  // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
-            // Recursive call, will add all tiles in relation to their neighbours as per the board configuration TODO: if tiles are disconnected, they won't be drawn
-            addTilesToBoard(firstTile, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, bounds, dgs, null);
+            // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
+            Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
+            // Recursive call, will add all tiles in relation to their neighbours as per the board configuration
+            addTilesToBoard(null, firstTile, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, bounds, dgs, null);
 
             // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
-            // Gives 1 extra tile on the edges
-            bounds.x -= 1;
-            bounds.y -= 1;
-            bounds.width += 2;
-            bounds.height += 2;
             BoardNode[][] trimBoard = new BoardNode[bounds.height][bounds.width];
             int[][] trimTileRef = new int[bounds.height][bounds.width];
             for (int i = 0; i < bounds.height; i++) {
@@ -386,11 +375,6 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
             dgs.tileReferences = trimTileRef;
-            // Also trim neighbour records TODO: commented out after changes, does this matter?
-//            for (Pair<Vector2D, Vector2D> p : neighbours) {
-//                p.a.subtract(bounds.x, bounds.y);
-//                p.b.subtract(bounds.x, bounds.y);
-//            }
             // And grid references
             for (Map.Entry<String, HashSet<Vector2D>> e: dgs.gridReferences.entrySet()) {
                 for (Vector2D v: e.getValue()) {
@@ -431,15 +415,15 @@ public class DescentForwardModel extends AbstractForwardModel {
      * @param drawn - a list of board nodes already drawn, to avoid drawing twice during recursive calls.
      * @param bounds - bounds of contents of the master grid board
      */
-    private void addTilesToBoard(BoardNode tileToAdd, int x, int y, BoardNode[][] board,
+    private void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
                                  HashMap<Integer, GridBoard> tiles,
                                  int[][] tileReferences,  HashMap<String, HashSet<Vector2D>> gridReferences,
-                                 HashSet<BoardNode> drawn,
+                                 HashMap<BoardNode, BoardNode> drawn,
                                  Rectangle bounds,
                                  DescentGameState dgs,
                                  String sideWithOpening) {
-        if (!drawn.contains(tileToAdd)) {
+        if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
             GridBoard tile = tiles.get(tileToAdd.getComponentID());
             BoardNode[][] originalTileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
@@ -452,23 +436,10 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Add cells from new tile to the master board
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
-                    if (tileGrid[i-y][j-x] == null || tileGrid[i-y][j-x].getComponentName().equalsIgnoreCase("null")) continue;
-
-                    // Check if a connection should be drawn to an existing tile (that is not on the connecting side)
-                    if (!TerrainType.isInsideTerrain(tileGrid[i-y][j-x].getComponentName())
-                            && board[i][j] != null && !board[i][j].getComponentName().equalsIgnoreCase("null")) {
-                        if (tileGrid[i-y][j-x].getComponentName().equalsIgnoreCase("open")) {
-                            // Check if tiles here are neighbours
-                            int id = ((PropertyInt)board[i][j].getProperty("connections")).value;
-                            if (tileToAdd.getNeighbours().contains(id)) {
-                                //  TODO Add connections on other sides to already placed tiles
-                            }
-                        }
-                    }
-
                     // Avoid removing already set tiles
-                    if (board[i][j] != null && !board[i][j].getComponentName().equalsIgnoreCase ("null")
-                        || !TerrainType.isInsideTerrain(tileGrid[i-y][j-x].getComponentName())) continue;
+                    if (tileGrid[i-y][j-x] == null || tileGrid[i-y][j-x].getComponentName().equalsIgnoreCase("null")
+                            || board[i][j] != null && !board[i][j].getComponentName().equalsIgnoreCase ("null")
+                            || !TerrainType.isInsideTerrain(tileGrid[i-y][j-x].getComponentName())) continue;
 
                     // Set
                     board[i][j] = tileGrid[i - y][j - x].copy();
@@ -487,7 +458,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
 
-            // Add connections at opening with existing tiles
+            // Add connections at opening side with existing tiles
             addConnectionsAtOpeningOnSide(board, originalTileGrid, x, y, width, height, sideWithOpening);
 
             // Add connections inside the tile, ignoring blocked spaces
@@ -508,7 +479,8 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             // This tile was drawn
-            drawn.add(tileToAdd);
+//            drawn.add(tileToAdd);
+            drawn.put(parentTile, tileToAdd);
 
             // Draw neighbours
             for (int neighbourCompId: tileToAdd.getNeighbours()) {
@@ -576,7 +548,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                             if (deltaMaxY > 0) bounds.height += deltaMaxY;
 
                             // Draw neighbour recursively
-                            addTilesToBoard(neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
+                            addTilesToBoard(tileToAdd, neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
                                     tiles, tileReferences, gridReferences, drawn, bounds, dgs, side);
                         }
                     }
