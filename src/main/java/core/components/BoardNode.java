@@ -110,7 +110,7 @@ public class BoardNode extends Component {
     }
     public BoardNode copyNewID() {
         BoardNode bn = new BoardNode(maxNeighbours, componentName);
-        bn.neighbours = new HashSet<>(neighbours);
+        bn.neighbours = new HashMap<>(neighbours);
         bn.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
         copyComponentTo(bn);
         return bn;
