@@ -266,7 +266,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         if (currentTile.getComponentName().equals("pit") || f.getMovePoints() > 0) {
 
             // Find valid neighbours in master graph, can move there
-            for (int neighbourCompID : currentTile.getNeighbours()) {
+            for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
                 BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
                 if (neighbour == null) continue;
                 Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
@@ -311,7 +311,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             if (name.contains("-")) {  // There may be multiples of one tile in the board, which follow format "tilename-#"
                 tileName = tileName.split("-")[0];
             }
-            GridBoard tile = _data.findGridBoard(tileName);
+            GridBoard tile = _data.findGridBoard(tileName).copyNewID();
             if (tile != null) {
                 tile = tile.copyNewID();
                 tile.setComponentName(name);
@@ -346,20 +346,13 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Create big board
         BoardNode[][] board = new BoardNode[height][width];  // Board nodes here will be the individual cells in the tiles
         dgs.tileReferences = new int[height][width];  // Reference to component ID of tile placed at that position
-        HashSet<BoardNode> drawn = new HashSet<>();  // Keeps track of which tiles have been added to the board already, for recursive purposes
+        HashMap<BoardNode, BoardNode> drawn = new HashMap<>();  // Keeps track of which tiles have been added to the board already, for recursive purposes
+
+        // TODO iterate all that are not already drawn, to make sure disconnected tiles are also placed.
+        // StartX / Y Will need to be adjusted to not draw on top of existing things
 
         // Find first tile, as board node in the board configuration graph board
         BoardNode firstTile = config.getBoardNodes().get(0);
-//        BoardNode firstTile = null;
-//        for (BoardNode t : config.getBoardNodes()) {
-//            if (t != null) {
-//                GridBoard tile = dgs.tiles.get(t.getComponentID());
-//                if (tile != null) {
-//                    firstTile = t;
-//                    break;
-//                }
-//            }
-//        }
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
             GridBoard tile = dgs.tiles.get(firstTile.getComponentID());
@@ -367,16 +360,12 @@ public class DescentForwardModel extends AbstractForwardModel {
             BoardNode[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
             int startY = height / 2 - rotated.length / 2;
-            Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);  // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
-            // Recursive call, will add all tiles in relation to their neighbours as per the board configuration TODO: if tiles are disconnected, they won't be drawn
-            addTilesToBoard(firstTile, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, bounds, dgs);
+            // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
+            Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
+            // Recursive call, will add all tiles in relation to their neighbours as per the board configuration
+            addTilesToBoard(null, firstTile, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, bounds, dgs, null);
 
             // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
-            // Gives 1 extra tile on the edges
-            bounds.x -= 1;
-            bounds.y -= 1;
-            bounds.width += 2;
-            bounds.height += 2;
             BoardNode[][] trimBoard = new BoardNode[bounds.height][bounds.width];
             int[][] trimTileRef = new int[bounds.height][bounds.width];
             for (int i = 0; i < bounds.height; i++) {
@@ -386,11 +375,6 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
             dgs.tileReferences = trimTileRef;
-            // Also trim neighbour records TODO: commented out after changes, does this matter?
-//            for (Pair<Vector2D, Vector2D> p : neighbours) {
-//                p.a.subtract(bounds.x, bounds.y);
-//                p.b.subtract(bounds.x, bounds.y);
-//            }
             // And grid references
             for (Map.Entry<String, HashSet<Vector2D>> e: dgs.gridReferences.entrySet()) {
                 for (Vector2D v: e.getValue()) {
@@ -431,14 +415,15 @@ public class DescentForwardModel extends AbstractForwardModel {
      * @param drawn - a list of board nodes already drawn, to avoid drawing twice during recursive calls.
      * @param bounds - bounds of contents of the master grid board
      */
-    private void addTilesToBoard(BoardNode tileToAdd, int x, int y, BoardNode[][] board,
+    private void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
                                  HashMap<Integer, GridBoard> tiles,
                                  int[][] tileReferences,  HashMap<String, HashSet<Vector2D>> gridReferences,
-                                 HashSet<BoardNode> drawn,
+                                 HashMap<BoardNode, BoardNode> drawn,
                                  Rectangle bounds,
-                                 DescentGameState dgs) {
-        if (!drawn.contains(tileToAdd)) {
+                                 DescentGameState dgs,
+                                 String sideWithOpening) {
+        if (!drawn.containsKey(parentTile) || !drawn.get(parentTile).equals(tileToAdd)) {
             // Draw this tile in the big board at x, y location
             GridBoard tile = tiles.get(tileToAdd.getComponentID());
             BoardNode[][] originalTileGrid = tile.rotate(((PropertyInt) tileToAdd.getProperty(orientationHash)).value);
@@ -452,54 +437,41 @@ public class DescentForwardModel extends AbstractForwardModel {
             for (int i = y; i < y + height; i++) {
                 for (int j = x; j < x + width; j++) {
                     // Avoid removing already set tiles
-                    if (board[i][j] != null && (tileGrid[i-y][j-x] == null || tileGrid[i-y][j-x].getComponentName().equals("edge")
-                            || tileGrid[i-y][j-x].getComponentName().equals("open"))) continue;
+                    if (tileGrid[i-y][j-x] == null || tileGrid[i-y][j-x].getComponentName().equalsIgnoreCase("null")
+                            || board[i][j] != null && !board[i][j].getComponentName().equalsIgnoreCase ("null")
+                            || !TerrainType.isInsideTerrain(tileGrid[i-y][j-x].getComponentName())) continue;
 
                     // Set
-                    board[i][j] = tileGrid[i-y][j-x].copy();
+                    board[i][j] = tileGrid[i - y][j - x].copy();
+                    board[i][j].setProperty(new PropertyInt("connections", tileToAdd.getComponentID()));
 
                     // Don't keep references for edge tiles
-                    if (board[i][j] == null || board[i][j].getComponentName().equals("edge")
-                            || board[i][j].getComponentName().equals("open")) continue;
+//                    if (board[i][j] == null || board[i][j].getComponentName().equals("edge")
+//                            || board[i][j].getComponentName().equals("open")) continue;
 
                     // Set references
                     tileReferences[i][j] = tile.getComponentID();
-                    for (String s: gridReferences.keySet()) {
+                    for (String s : gridReferences.keySet()) {
                         gridReferences.get(s).remove(new Vector2D(j, i));
                     }
                     gridReferences.get(tile.getComponentName()).add(new Vector2D(j, i));
                 }
             }
 
-            // Add neighbour connections for spaces in the tile. 8-way connectivity.
-            for (int i = y; i < y + height; i++) {
-                for (int j = x; j < x + width; j++) {
-                    BoardNode currentSpace = board[i][j];
-                    if (currentSpace != null && TerrainType.isWalkable(currentSpace.getComponentName())) {
-                        if ((i == y || i == y+height-1 || j==x || j==x+width-1)) {
-                            if (i==y && originalTileGrid[i-y][j-x].getComponentName().equalsIgnoreCase("open") ||
-                                    i == y+height-1 && originalTileGrid[i-y+1][j-x].getComponentName().equalsIgnoreCase("open") ||
-                                    j==x && originalTileGrid[i-y][j-x].getComponentName().equalsIgnoreCase("open") ||
-                                    j==x+width-1 && originalTileGrid[i-y][j-x+1].getComponentName().equalsIgnoreCase("open")) {
-                                // This cell was oat the opening on the tile we just added, connect to neighbours
+            // Add connections at opening side with existing tiles
+            addConnectionsAtOpeningOnSide(board, originalTileGrid, x, y, width, height, sideWithOpening);
 
-                                // The point on the grid has to connect with all of its valid neighbours on the master board
-                                List<Vector2D> boardNs = getNeighbourhood(j, i, board[0].length, board.length, true);
-                                for (Vector2D n2 : boardNs) {
-                                    if (board[n2.getY()][n2.getX()] != null && TerrainType.isWalkable(board[n2.getY()][n2.getX()].getComponentName())) {
-                                        board[n2.getY()][n2.getX()].addNeighbour(board[i][j]);
-                                        board[i][j].addNeighbour(board[n2.getY()][n2.getX()]);
-                                    }
-                                }
-                            }
-                        } else {
-                            // Add connections between all inner tiles just placed, unless blocked (no blocked tiles are connected)
-                            List<Vector2D> ns = getNeighbourhood(j, i, board[0].length, board.length, true);
-                            for (Vector2D n2 : ns) {
-                                if (board[n2.getY()][n2.getX()] != null && TerrainType.isWalkable(board[n2.getY()][n2.getX()].getComponentName())) {
-                                    board[n2.getY()][n2.getX()].addNeighbour(board[i][j]);
-                                    board[i][j].addNeighbour(board[n2.getY()][n2.getX()]);
-                                }
+            // Add connections inside the tile, ignoring blocked spaces
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    BoardNode currentSpace = tileGrid[i][j];
+                    if (currentSpace != null && (TerrainType.isWalkableTerrain(currentSpace.getComponentName())
+                            || currentSpace.getComponentName().equalsIgnoreCase("pit"))) {  // pits connect to walkable spaces only (pit-pit not allowed)
+                        List<Vector2D> boardNs = getNeighbourhood(j, i, width, height, true);
+                        for (Vector2D n2 : boardNs) {
+                            if (tileGrid[n2.getY()][n2.getX()] != null && TerrainType.isWalkableTerrain(tileGrid[n2.getY()][n2.getX()].getComponentName())) {
+                                board[n2.getY()+y][n2.getX()+x].addNeighbour(board[i+y][j+x]);
+                                board[i+y][j+x].addNeighbour(board[n2.getY()+y][n2.getX()+x]);
                             }
                         }
                     }
@@ -507,10 +479,11 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             // This tile was drawn
-            drawn.add(tileToAdd);
+//            drawn.add(tileToAdd);
+            drawn.put(parentTile, tileToAdd);
 
             // Draw neighbours
-            for (int neighbourCompId: tileToAdd.getNeighbours()) {
+            for (int neighbourCompId: tileToAdd.getNeighbours().keySet()) {
                 BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompId);
 
                 // Find location to start drawing neighbour
@@ -575,8 +548,119 @@ public class DescentForwardModel extends AbstractForwardModel {
                             if (deltaMaxY > 0) bounds.height += deltaMaxY;
 
                             // Draw neighbour recursively
-                            addTilesToBoard(neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
-                                    tiles, tileReferences, gridReferences, drawn, bounds, dgs);
+                            addTilesToBoard(tileToAdd, neighbour, topLeftCorner.getX(), topLeftCorner.getY(), board, tileGridN,
+                                    tiles, tileReferences, gridReferences, drawn, bounds, dgs, side);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void addConnectionsAtOpeningOnSide(BoardNode[][] board, BoardNode[][] originalTileGrid,
+                                               int x, int y, int width, int height, String side) {
+        if (side != null) {
+            if (side.equalsIgnoreCase("n")) {
+                // Nodes at opening that should connect are on the top row. Above them on original tile grid there is an "open" space
+                int i = 0;
+                for (int j = 0; j < width; j++) {
+                    if (originalTileGrid[i][j] != null &&  // Same row, in the tile that was placed this is trimmed
+                            originalTileGrid[i][j].getComponentName().equalsIgnoreCase("open")
+                            && board[i + y - 1][j + x] != null) {
+                        // Add connections for this node
+                        for (int x1 = x-1; x1 <= x+1; x1++) {
+                            if (j+x1 >= 0 && j+x1 < board[0].length) {
+                                if (board[i + y][j + x] != null && board[i + y - 1][j + x1] != null) {
+                                    board[i + y][j + x].addNeighbour(board[i + y - 1][j + x1]);
+                                    board[i + y - 1][j + x1].addNeighbour(board[i + y][j + x]);
+                                }
+                            }
+                        }
+                        // And connections back from the node in front too
+                        for (int x1 = x-1; x1 <= x+1; x1++) {
+                            if (j+x1 >= 0 && j+x1 < board[0].length) {
+                                if (board[i + y - 1][j + x] != null && board[i + y][j + x1] != null) {
+                                    board[i + y - 1][j + x].addNeighbour(board[i + y][j + x1]);
+                                    board[i + y][j + x1].addNeighbour(board[i + y - 1][j + x]);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (side.equalsIgnoreCase("s")) {
+                // Nodes at opening that should connect are on the bottom row. Below them is an "open" space
+                int i = height-1;
+                for (int j = 0; j < width; j++) {
+                    if (originalTileGrid[i+1][j] != null &&  // Next row
+                            originalTileGrid[i+1][j].getComponentName().equalsIgnoreCase("open")
+                            && board[i + y + 1][j + x] != null) {
+                        // Add connections for this node
+                        for (int x1 = x-1; x1 <= x+1; x1++) {
+                            if (j + x1 >= 0 && j + x1 < board[0].length) {
+                                if (board[i + y][j + x] != null && board[i + y + 1][j + x1] != null) {
+                                    board[i + y][j + x].addNeighbour(board[i + y + 1][j + x1]);
+                                    board[i + y + 1][j + x1].addNeighbour(board[i + y][j + x]);
+                                }
+                            }
+                        }
+                        // And connections back from the node in front too
+                        for (int x1 = x-1; x1 <= x+1; x1++) {
+                            if (j + x1 >= 0 && j + x1 < board[0].length) {
+                                if (board[i + y + 1][j + x] != null && board[i + y][j + x1] != null) {
+                                    board[i + y + 1][j + x].addNeighbour(board[i + y][j + x1]);
+                                    board[i + y][j + x1].addNeighbour(board[i + y + 1][j + x]);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else if (side.equalsIgnoreCase("e")) {
+                // Nodes are on the rightmost column. To their right is "open"
+                int j = width-1;
+                for (int i = 0; i < height; i++) {
+                    if (originalTileGrid[i][j+1] != null &&  // Next column
+                            originalTileGrid[i][j+1].getComponentName().equalsIgnoreCase("open")
+                            && board[i + y][j + x + 1] != null) {
+                        // Add connections for this node
+                        for (int y1 = y-1; y1 <= y+1; y1++) {
+                            if (i + y1 >= 0 && i + y1 < board.length
+                                    && board[i + y][j + x] != null && board[i + y1][j + x + 1] != null) {
+                                board[i + y][j + x].addNeighbour(board[i + y1][j + x + 1]);
+                                board[i + y1][j + x + 1].addNeighbour(board[i + y][j + x]);
+                            }
+                        }
+                        // And connections back from the node in front too
+                        for (int y1 = y-1; y1 <= y+1; y1++) {
+                            if (i + y1 >= 0 && i + y1 < board.length
+                                    && board[i + y][j + x + 1] != null && board[i + y1][j + x] != null) {
+                                board[i + y][j + x + 1].addNeighbour(board[i + y1][j + x]);
+                                board[i + y1][j + x].addNeighbour(board[i + y][j + x + 1]);
+                            }
+                        }
+                    }
+                }
+            } else if (side.equalsIgnoreCase("w")) {
+                // Nodes are in the first column (leftmost). To their left is "open"
+                int j = 0;
+                for (int i = 0; i < height; i++) {
+                    if (originalTileGrid[i][j] != null &&  // Same column, trimmed in tile that was placed
+                            originalTileGrid[i][j].getComponentName().equalsIgnoreCase("open")
+                            && board[i + y][j + x - 1] != null) {
+                        // Add connections for this node
+                        for (int y1 = y-1; y1 <= y+1; y1++) {
+                            if (i + y1 >= 0 && i + y1 < board.length
+                                    && board[i + y][j + x] != null && board[i + y1][j + x - 1] != null) {
+                                board[i + y][j + x].addNeighbour(board[i + y1][j + x - 1]);
+                                board[i + y1][j + x - 1].addNeighbour(board[i + y][j + x]);
+                            }
+                        }
+                        // And connections back from the node in front too
+                        for (int y1 = y-1; y1 <= y+1; y1++) {
+                            if (i + y1 >= 0 && i + y1 < board.length
+                                    && board[i + y][j + x - 1] != null && board[i + y1][j + x] != null) {
+                                board[i + y][j + x - 1].addNeighbour(board[i + y1][j + x]);
+                                board[i + y1][j + x].addNeighbour(board[i + y][j + x - 1]);
+                            }
                         }
                     }
                 }
@@ -627,14 +711,15 @@ public class DescentForwardModel extends AbstractForwardModel {
         // TOP, check each column, stop at the first encounter in each column.
         for (int j = 0; j < width; j++) {
             for (int i = 0; i < height; i++) {
-                if (tileGrid[i][j].getComponentName().equalsIgnoreCase("open")) {
+                if (tileGrid[i][j] != null && tileGrid[i][j].getComponentName().equalsIgnoreCase("open")) {
                     // Check valid: nothing, null, or edge tile above
                     if (i == 0 || tileGrid[i-1][j].getComponentName().equalsIgnoreCase("null") ||
                             tileGrid[i-1][j].getComponentName().equalsIgnoreCase("edge")) {
                         // Check valid: nothing or not "open" to the left (already included, all openings 2-wide)
                         // But another "open" to the right
-                        if ((j == 0 || !tileGrid[i][j-1].getComponentName().equalsIgnoreCase("open")) &&
-                                (j < width-1 && tileGrid[i][j+1].getComponentName().equalsIgnoreCase("open"))) {
+                        if ((j == 0 || tileGrid[i][j-1] != null && j < width-1 && tileGrid[i][j+1] != null
+                                && !tileGrid[i][j-1].getComponentName().equalsIgnoreCase("open"))
+                                && (j < width-1 && tileGrid[i][j+1].getComponentName().equalsIgnoreCase("open"))) {
                             if (!openings.containsKey("N")) {
                                 openings.put("N", new ArrayList<>());
                             }
@@ -648,7 +733,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         // BOTTOM, check each column, stop at the first encounter in each column (read from bottom to top).
         for (int j = 0; j < width; j++) {
             for (int i = height-1; i >= 0; i--) {
-                if (tileGrid[i][j].getComponentName().equalsIgnoreCase("open")) {
+                if (tileGrid[i][j] != null && tileGrid[i][j].getComponentName().equalsIgnoreCase("open")) {
                     // Check valid: nothing, null, or edge tile below
                     if (i == height-1 || tileGrid[i+1][j].getComponentName().equalsIgnoreCase("null") ||
                             tileGrid[i+1][j].getComponentName().equalsIgnoreCase("edge")) {
@@ -669,7 +754,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         // LEFT, check each row, stop at the first encounter in each row.
         for (int i = 0; i < height; i++){
             for (int j = 0; j < width; j++) {
-                if (tileGrid[i][j].getComponentName().equalsIgnoreCase("open")) {
+                if (tileGrid[i][j] != null && tileGrid[i][j].getComponentName().equalsIgnoreCase("open")) {
                     // Check valid: nothing, null, or edge tile to the left
                     if (j == 0 || tileGrid[i][j-1].getComponentName().equalsIgnoreCase("null") ||
                             tileGrid[i][j-1].getComponentName().equalsIgnoreCase("edge")) {
@@ -690,7 +775,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         // RIGHT, check each row, stop at the first encounter in each row (read from right to left).
         for (int i = 0; i < height; i++){
             for (int j = width-1; j >= 0; j--) {
-                if (tileGrid[i][j].getComponentName().equalsIgnoreCase("open")) {
+                if (tileGrid[i][j] != null && tileGrid[i][j].getComponentName().equalsIgnoreCase("open")) {
                     // Check valid: nothing, null, or edge tile to the right
                     if (j == width-1 || tileGrid[i][j+1].getComponentName().equalsIgnoreCase("null") ||
                             tileGrid[i][j+1].getComponentName().equalsIgnoreCase("edge")) {
@@ -833,7 +918,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                         if (i == 0 && j == 0) continue;
                         Vector2D thisTile = new Vector2D(option.getX() + j, option.getY() + i);
                         BoardNode tile = dgs.masterBoard.getElement(thisTile.getX(), thisTile.getY());
-                        if (!tile.getComponentName().equals("plain") ||
+                        if (tile == null || !tile.getComponentName().equals("plain") ||
                                 !tileCoords.contains(thisTile) ||
                                 ((PropertyInt)tile.getProperty(playersHash)).value != -1) {
                             canPlace = false;

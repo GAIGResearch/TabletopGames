@@ -129,6 +129,7 @@ public class DescentGridBoardView extends ComponentView {
 
             for (Monster m: monsterGroup) {
                 Vector2D loc = m.getLocation();
+                if (loc == null) continue;
                 int orientation = m.getOrientation();
 
                 Pair<Integer, Integer> size = m.getSize();
@@ -203,7 +204,7 @@ public class DescentGridBoardView extends ComponentView {
         String terrain = bn.getComponentName();
         Stroke s = g.getStroke();
 
-        if (DescentTypes.TerrainType.isWalkable(terrain)) {
+        if (DescentTypes.TerrainType.isWalkableTerrain(terrain)) {
             g.setColor(Color.black);
             g.drawRect(xC, yC, itemSize, itemSize);
             g.setStroke(new BasicStroke(5));
@@ -215,7 +216,7 @@ public class DescentGridBoardView extends ComponentView {
 
                 // Check if this node is a connected neighbour
                 boolean connected = false;
-                for (int nnid : bn.getNeighbours()) {
+                for (int nnid : bn.getNeighbours().keySet()) {
                     BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
                     if (nn == null) continue;
                     Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
@@ -265,7 +266,7 @@ public class DescentGridBoardView extends ComponentView {
 
         // Draw underlying graph
         g.setColor(Color.green);
-        for (int nnid : bn.getNeighbours()) {
+        for (int nnid : bn.getNeighbours().keySet()) {
             BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
             if (nn == null) continue;
             Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
