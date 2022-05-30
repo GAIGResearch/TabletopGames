@@ -5,8 +5,12 @@ import games.descent2e.DescentForwardModel;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
+import games.descent2e.components.Item;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -29,7 +33,9 @@ public class MeleeAttackTests {
 
     @Test
     public void attackRollsDicePool() {
-        state.getActingFigure().getWeapons();
+        List<Item> weapons = ((Hero)state.getActingFigure()).getWeapons();
+        // TODO: check this works for a Hero
+        // then generalise to monsters too
     }
 
 }

@@ -19,15 +19,19 @@ public class Item {
     public AttackType getAttackType() {
         return attackType;
     }
+
     public boolean isMeleeAttack() {
         return attackType == AttackType.MELEE;
     }
+
     public boolean isRangedAttack() {
         return attackType == AttackType.RANGED;
     }
-    public boolean isAttack(){
+
+    public boolean isAttack() {
         return attackType != AttackType.NONE;
     }
+
     public boolean isAOE() {
         return attackType == AttackType.BLAST;
     }

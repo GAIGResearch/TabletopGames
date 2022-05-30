@@ -132,7 +132,7 @@ public abstract class Component {
         properties.put(prop.getHashKey(), prop);
     }
 
-    public void setProperties(HashMap<Integer, Property> props) {
+    public void setProperties(Map<Integer, Property> props) {
         for (Property p: props.values()) {
             setProperty(p);
         }

@@ -164,7 +164,7 @@ public class DescentGridBoardView extends ComponentView {
 
 
     public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
-                                                          Map<String, HashMap<Vector2D,Vector2D>> gridReferences,
+                                                          Map<String, Map<Vector2D,Vector2D>> gridReferences,
                                                           int[][] tileReferences) {
         int width = gridBoard.getWidth() * itemSize;
         int height = gridBoard.getHeight() * itemSize;

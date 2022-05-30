@@ -27,7 +27,7 @@ public class Hero extends Figure {
     Deck<Card> handEquipment;
     Card armor;
     Deck<Card> otherEquipment;
-    HashMap<String, Integer> equipSlotsAvailable;
+    Map<String, Integer> equipSlotsAvailable;
 
     // TODO: reset fatigue every quest to max fatigue
     String[] defence;
@@ -67,7 +67,7 @@ public class Hero extends Figure {
             // Equipment! Check if it's legal to equip
             String[] equip = ((PropertyStringArray)c.getProperty(equipSlotHash)).getValues();
             boolean canEquip = true;
-            HashMap<String, Integer> equipSlots = new HashMap<>(equipSlotsAvailable);
+            Map<String, Integer> equipSlots = new HashMap<>(equipSlotsAvailable);
             for (String e: equip) {
                 if (equipSlots.get(e) < 1) {
                     canEquip = false;
@@ -97,6 +97,17 @@ public class Hero extends Figure {
             skills.add(c);
             return true;
         }
+    }
+
+    public List<Item> getWeapons() {
+        List<Item> retValue =  new ArrayList<>();
+        for (int i = 0; i < handEquipment.getSize(); i++) {
+            Item c = new Item(handEquipment.get(i));
+            if (c.isAttack()) {
+                retValue.add(c);
+            }
+        }
+        return retValue;
     }
 
     @Override

@@ -132,7 +132,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                     tileName = split[0];
                     String[] splitPos = split[1].split(";");
                     Vector2D locOnTile = new Vector2D(Integer.parseInt(splitPos[0]), Integer.parseInt(splitPos[1]));
-                    HashMap<Vector2D, Vector2D> map = dgs.gridReferences.get(tileName);
+                    Map<Vector2D, Vector2D> map = dgs.gridReferences.get(tileName);
                     for (Map.Entry<Vector2D, Vector2D> e: map.entrySet()) {
                         if (e.getValue().equals(locOnTile)) {
                             location = e.getKey();
@@ -897,7 +897,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             int act = quest.getAct();
-            HashMap<String, Token> monsterDef = _data.findMonster(name);
+            Map<String, Token> monsterDef = _data.findMonster(name);
             Token superDef = monsterDef.get("super");
             int[] monsterSetup = ((PropertyIntArray)superDef.getProperty(setupHash)).getValues();
 
@@ -939,7 +939,7 @@ public class DescentForwardModel extends AbstractForwardModel {
      * @param tileCoords - coordinate options for the monster
      * @param rnd - random generator
      */
-    private void placeMonster(DescentGameState dgs, Monster monster, ArrayList<Vector2D> tileCoords, Random rnd,
+    private void placeMonster(DescentGameState dgs, Monster monster, List<Vector2D> tileCoords, Random rnd,
                               int hpModifier, Token superDef) {
         // Finish setup of monster
         monster.setProperties(superDef.getProperties());

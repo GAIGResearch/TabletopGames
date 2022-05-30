@@ -10,6 +10,7 @@ import utilities.Utils.ComponentType;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static core.CoreConstants.VisibilityMode;
 
@@ -198,6 +199,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
         }
         return false;
     }
+
 
     /**
      * Remove the component at the given index.
