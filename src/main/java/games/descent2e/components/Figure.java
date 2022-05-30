@@ -1,5 +1,6 @@
 package games.descent2e.components;
 
+import core.components.Counter;
 import core.components.Token;
 import core.properties.PropertyInt;
 import games.descent2e.DescentTypes;
@@ -15,12 +16,23 @@ import java.io.IOException;
 import java.util.*;
 
 import static games.descent2e.DescentConstants.*;
+import static games.descent2e.components.Figure.Attribute.*;
 
 // TODO: figure out how to do ability/heroic-feat
 public class Figure extends Token {
-    int xp;
-    int movePoints;
-    int hp;  // TODO: reset this every quest to max HP
+
+    public enum Attribute {
+        MovePoints,
+        Health,
+        XP,
+        Fatigue,
+        Might,
+        Willpower,
+        Knowledge,
+        Awareness
+    }
+
+    HashMap<Attribute, Counter> attributes;
 
     int nActionsExecuted;
     Vector2D location;
@@ -30,9 +42,11 @@ public class Figure extends Token {
 
     public Figure(String name) {
         super(name);
-        xp = 0;
+        Counter xp = new Counter(0, 0, -1, "XP");
         size = new Pair<>(1,1);
         conditions = new HashSet<>();
+        attributes = new HashMap<>();
+        attributes.put(XP, xp);
     }
 
     protected Figure(String name, int ID) {
@@ -40,36 +54,36 @@ public class Figure extends Token {
     }
 
     public void resetRound() {
-        if (getProperty(movementHash) != null) {
-            this.movePoints = ((PropertyInt) getProperty(movementHash)).value;
-        } else {
-            this.movePoints = 0;
-        }
+        this.attributes.get(MovePoints).setToMax();
         this.nActionsExecuted = 0;
     }
 
-    public int getXP() {
-        return xp;
+    public Counter getAttribute(Attribute attribute) {
+        return attributes.get(attribute);
     }
-
-    public void setXP(int xp) {
-        this.xp = xp;
+    public int getAttributeValue(Attribute a) {
+        return attributes.get(a).getValue();
     }
-
-    public int getMovePoints() {
-        return movePoints;
+    public int getAttributeMax(Attribute a) {
+        return attributes.get(a).getMaximum();
     }
-
-    public void setMovePoints(int movePoints) {
-        this.movePoints = movePoints;
+    public int getAttributeMin(Attribute a) {
+        return attributes.get(a).getMinimum();
     }
-
-    public int getHp() {
-        return hp;
+    public void setAttribute(Attribute a, Counter c) {
+        attributes.put(a, c);
     }
-
-    public void setHp(int hp) {
-        this.hp = hp;
+    public void setAttribute(Attribute a, int value) {
+        attributes.get(a).setValue(value);
+    }
+    public void incrementAttribute(Attribute a, int increment) {
+        attributes.get(a).increment(increment);
+    }
+    public void setAttributeToMax(Attribute a) {
+        attributes.get(a).setToMax();
+    }
+    public void setAttributeToMin(Attribute a) {
+        attributes.get(a).setToMin();
     }
 
     public Vector2D getLocation() {
@@ -121,10 +135,11 @@ public class Figure extends Token {
 
     public void copyComponentTo(Figure copyTo) {
         super.copyComponentTo(copyTo);
-        copyTo.xp = xp;
         copyTo.tokenType = tokenType;
-        copyTo.movePoints = movePoints;
-        copyTo.hp = hp;
+        copyTo.attributes = new HashMap<>();
+        for (Map.Entry<Attribute, Counter> e: attributes.entrySet()) {
+            copyTo.attributes.put(e.getKey(), e.getValue().copy());
+        }
         if (location != null) {
             copyTo.location = location.copy();
         }
@@ -142,8 +157,15 @@ public class Figure extends Token {
         this.tokenType = (String) ( (JSONArray) figure.get("type")).get(1);
         // TODO: custom load of figure properties
         parseComponent(this, figure);
-        this.movePoints = ((PropertyInt)getProperty(movementHash)).value;
-        this.hp = ((PropertyInt)getProperty(healthHash)).value;
+
+        for (Attribute a: Attribute.values()) {
+            PropertyInt prop = ((PropertyInt)getProperty(a.name()));
+            if (prop != null) {
+                int max = prop.value;
+                this.attributes.put(a, new Counter(max, 0, max, a.name()));
+            }
+        }
+        this.setAttribute(MovePoints, 0);
     }
 
     /**

@@ -1,17 +1,18 @@
-package games.descent2e.actions;
+package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
+import games.descent2e.actions.Triggers;
 import games.descent2e.components.Figure;
 
 import java.util.*;
 
 import static games.descent2e.actions.Triggers.*;
-import static games.descent2e.actions.MeleeAttack.AttackPhase.*;
-import static games.descent2e.actions.MeleeAttack.Interrupters.*;
+import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
+import static games.descent2e.actions.attack.MeleeAttack.Interrupters.*;
 
 public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 

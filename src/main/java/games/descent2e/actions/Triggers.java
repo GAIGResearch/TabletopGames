@@ -8,10 +8,14 @@ package games.descent2e.actions;
  * this enum.
  */
 public enum Triggers {
+    ACTION_POINT_SPEND,
     MOVE_INTO_SPACE,
     FATIGUE_INTO_SPACE,
     START_ATTACK,
     END_ATTACK,
     ROLL_OWN_DICE,
-    ROLL_OTHER_DICE
+    ROLL_OTHER_DICE,
+    END_TURN,
+    FORCED,
+    ANYTIME
 }
