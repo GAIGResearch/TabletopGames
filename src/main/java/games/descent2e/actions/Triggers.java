@@ -7,7 +7,7 @@ package games.descent2e.actions;
  * Each item or ability or overlord card should indicate the point at which it can be used using
  * this enum.
  */
-public enum InterruptPoints {
+public enum Triggers {
     MOVE_INTO_SPACE,
     FATIGUE_INTO_SPACE,
     START_ATTACK,

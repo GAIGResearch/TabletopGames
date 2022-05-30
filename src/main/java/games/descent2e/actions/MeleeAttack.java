@@ -9,7 +9,7 @@ import games.descent2e.components.Figure;
 
 import java.util.*;
 
-import static games.descent2e.actions.InterruptPoints.*;
+import static games.descent2e.actions.Triggers.*;
 import static games.descent2e.actions.MeleeAttack.AttackPhase.*;
 import static games.descent2e.actions.MeleeAttack.Interrupters.*;
 
@@ -19,6 +19,8 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         ATTACKER, DEFENDER, OTHERS, ALL
     }
 
+    // The two argument constructor for AttackPhase specifies
+    // which trigger is relevant (the first), and which players can use actions at this point (the second)
     public enum AttackPhase {
         NOT_STARTED,
         PRE_ATTACK_ROLL(START_ATTACK, DEFENDER),
@@ -29,10 +31,10 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         POST_DAMAGE(ROLL_OWN_DICE, DEFENDER),
         ALL_DONE;
 
-        public final InterruptPoints interrupt;
+        public final Triggers interrupt;
         public final Interrupters interrupters;
 
-        AttackPhase(InterruptPoints interruptType, Interrupters who) {
+        AttackPhase(Triggers interruptType, Interrupters who) {
             interrupt = interruptType;
             interrupters = who;
         }

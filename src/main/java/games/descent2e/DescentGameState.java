@@ -10,7 +10,7 @@ import core.components.Token;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
-import games.descent2e.actions.InterruptPoints;
+import games.descent2e.actions.Triggers;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -178,10 +178,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return actingFigure;
     }
 
-    public boolean playerHasAvailableInterrupt(int player, InterruptPoints trigger) {
+    public boolean playerHasAvailableInterrupt(int player, Triggers trigger) {
         return false;
     }
-    public List<AbstractAction> getInterruptActionsFor(int player, InterruptPoints trigger) {
+    public List<AbstractAction> getInterruptActionsFor(int player, Triggers trigger) {
         List<AbstractAction> retValue = new ArrayList<>();
         // TODO: Run through the inventory or items/cards/abilities to see which have
         // an action that can be used at this trigger
