@@ -1,5 +1,10 @@
 package games.descent2e.concepts;
 
+import core.components.Token;
+import games.descent2e.DescentTypes;
+import games.descent2e.components.DToken;
+import utilities.Group;
+import utilities.Pair;
 import utilities.Vector2D;
 
 import java.util.ArrayList;
@@ -11,7 +16,7 @@ public class Quest {
 
     private String name;
     private ArrayList<String[]> monsters;  // name, tile, bonus effects for each monster type
-//    private ArrayList<Group<Pair<Token, String>, Integer, String>> tokens;  // token, meaning, how many, where
+    private ArrayList<DToken.DTokenDef> tokens;  // token, meaning, how many, where
 //    private ArrayList<DescentRule> rules;  // define these in code
 //    private ArrayList<DescentWinCondition> heroWins;
 //    private int heroWinsMinSatisfied;
@@ -81,6 +86,14 @@ public class Quest {
         return act;
     }
 
+    public void setTokens(ArrayList<DToken.DTokenDef> tokens) {
+        this.tokens = tokens;
+    }
+
+    public ArrayList<DToken.DTokenDef> getTokens() {
+        return tokens;
+    }
+
     public Quest copy() {
         Quest q = new Quest();
         q.boards = new ArrayList<>(boards);
@@ -94,6 +107,7 @@ public class Quest {
             q.monsters.add(s.clone());
         }
         q.act = act;
+        q.tokens = new ArrayList<>(tokens);  // todo deep?
         return q; // TODO
     }
 }
