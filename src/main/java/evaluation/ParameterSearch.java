@@ -7,7 +7,9 @@ import core.ParameterFactory;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.ITunableParameters;
+import evaluation.optimisers.MapElites;
 import evodef.EvoAlg;
+import evodef.LandscapeModel;
 import evodef.SearchSpace;
 import games.GameType;
 import ntbea.MultiNTupleBanditEA;
@@ -34,46 +36,98 @@ import static utilities.Utils.loadJSONFile;
 
 public class ParameterSearch {
 
+    enum SearchFramework {
+        NTBEA,
+        MultiNTBEA,
+        MapElites
+    }
+
+    /**
+     * Returns optimiser to use for parameter search, depending on argument "searchFramework". Defaults to NTBEA.
+     *
+     * For MapElites, the behaviours listed here must specify a name, and possible values. If comparable (int/double),
+     * the closest value in the list will be used to index solutions. These behaviours can be modified but should match
+     * (in name, and value type) those defined in:
+     * @see GameEvaluator#evaluateWithStats
+     *
+     * @param searchSpace - search space definition
+     * @param args - program arguments, to define details on the optimisers
+     * @param nPlayers - number of players in the game, only needed for MultiNTBEA
+     * @return - optimiser object
+     */
+    private static EvoAlg getSearchFramework(ITPSearchSpace searchSpace, String[] args, int nPlayers) {
+        SearchFramework sf = SearchFramework.valueOf(getArg(args, "searchFramework", "NTBEA"));
+        EvoAlg searchFramework = null;
+        int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
+
+        // NTBEA stuff
+        boolean useThreeTuples = Arrays.asList(args).contains("useThreeTuples");
+        int hood = getArg(args, "hood", Math.min(50, searchSpaceSize / 100));
+        double kExplore = getArg(args, "kExplore", 1.0);
+        NTupleSystem landscapeModel = new NTupleSystem(searchSpace);
+        landscapeModel.setUse3Tuple(useThreeTuples);
+        landscapeModel.addTuples();
+
+        switch(sf) {
+            case NTBEA:
+                searchFramework = new NTupleBanditEA(landscapeModel, kExplore, hood);
+                break;
+            case MultiNTBEA:
+                searchFramework = new MultiNTupleBanditEA(landscapeModel, kExplore, hood, nPlayers);
+                break;
+            case MapElites:
+                TreeMap<String, Object[]> behaviours = new TreeMap<>();
+                behaviours.put("length", new Integer[]{10, 50, 80, 100, 200, 500, 1000, 2500, 5000});
+                // TODO: list behaviours... should match those defined in GameEvaluator class
+                searchFramework = new MapElites(searchSpace, behaviours);
+                break;
+        }
+
+        return searchFramework;
+    }
+
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
         if (argsList.isEmpty() || argsList.contains("--help") || argsList.contains("-h")) System.out.println(
                 "The first three arguments must be \n" +
                         "\t<filename for searchSpace definition> or <ITunableParameters classname>\n" +
-                        "\t<number of NTBEA iterations>\n" +
+                        "\t<number of iterations>\n" +
                         "\t<game type> \n" +
                         "Then there are a number of optional arguments:\n" +
-                        "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
-                        "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
-                        "\topponent=      The agent used as opponent. Default is not to use a specific opponent, but use MultiNTBEA. \n" +
-                        "\t               This can any of: \n" +
-                        "\t               \t'coop' uses the agent being tuned (via searchSpace) for all agents (i.e. for coop games)\n" +
-                        "\t               \ta json-format file detailing the parameters, or\n" +
-                        "\t               \tone of coop|mcts|rmhc|random|osla|<className>, or\n" +
-                        "\t               \ta directory that contains one or more json-format files from which opponents will be sampled.\n" +
-                        "\t               If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
-                        "\t               with a no-argument constructor.\n" +
-                        "\t               If tuneGame is set, then the opponent argument must be provided, and will be used for all players.\n" +
-                        "\tplayerDupes=   If false (the default), and opponent specifies multiple files in a directory, then no agent will\n" +
-                        "\t               be used twice in a single game (if there are enough agents to sample from). Set to true to allow dupes.\n" +
-                        "\tgameParam=     The json-format file of game parameters to use. Defaults to standard rules and options.\n" +
-                        "\ttuneGame       If supplied, then we will tune the game instead of tuning the agent.\n" +
-                        "\t               In this case the searchSpace file must be relevant for the game.\n" +
-                        "\teval=          Score|Ordinal|Heuristic|Win specifies what we are optimising (if not tuneGame). Defaults to Win.\n" +
-                        "\t               If tuneGame, then instead the name of a IGameHeuristic class in the evaluation.heuristics package\n" +
-                        "\t               must be provided, or the a json-format file that provides the requisite details. \n" +
-                        "\t               The json-format file is needed if non-default settings for the IGameHeuristic are used.\n" +
-                        "\tuseThreeTuples If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
-                        "\tkExplore=      The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
-                        "\t               For scores with larger ranges, we recommend scaling kExplore appropriately.\n" +
-                        "\thood=          The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100) \n" +
-                        "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation \n" +
-                        "\tverbose        Will log the results marginalised to each dimension, and the Top 10 best tuples for each run \n" +
-                        "\tseed=          Random seed for Game use (not used by NTBEA itself). Defaults to System.currentTimeMillis()\n" +
-                        "\tlogFile=       Output file with results of each run for easier statistical analysis"
+                        "\tnPlayers=          The total number of players in each game (the default is game.Min#players) \n " +
+                        "\tevalGames=         The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
+                        "\topponent=          The agent used as opponent. Default is not to use a specific opponent, but use MultiNTBEA. \n" +
+                        "\t                   This can any of: \n" +
+                        "\t                   \t'coop' uses the agent being tuned (via searchSpace) for all agents (i.e. for coop games)\n" +
+                        "\t                   \ta json-format file detailing the parameters, or\n" +
+                        "\t                   \tone of coop|mcts|rmhc|random|osla|<className>, or\n" +
+                        "\t                   \ta directory that contains one or more json-format files from which opponents will be sampled.\n" +
+                        "\t                   If className is specified, this must be the full name of a class implementing AbstractPlayer\n" +
+                        "\t                   with a no-argument constructor.\n" +
+                        "\t                   If tuneGame is set, then the opponent argument must be provided, and will be used for all players.\n" +
+                        "\tplayerDupes=       If false (the default), and opponent specifies multiple files in a directory, then no agent will\n" +
+                        "\t                   be used twice in a single game (if there are enough agents to sample from). Set to true to allow dupes.\n" +
+                        "\tgameParam=         The json-format file of game parameters to use. Defaults to standard rules and options.\n" +
+                        "\ttuneGame           If supplied, then we will tune the game instead of tuning the agent.\n" +
+                        "\t                   In this case the searchSpace file must be relevant for the game.\n" +
+                        "\teval=              Score|Ordinal|Heuristic|Win specifies what we are optimising (if not tuneGame). Defaults to Win.\n" +
+                        "\t                   If tuneGame, then instead the name of a IGameHeuristic class in the evaluation.heuristics package\n" +
+                        "\t                   must be provided, or the a json-format file that provides the requisite details. \n" +
+                        "\t                   The json-format file is needed if non-default settings for the IGameHeuristic are used.\n" +
+                        "\tverbose            Will log the results marginalised to each dimension, and the Top 10 best tuples for each run \n" +
+                        "\tsearchFramework=   Optimiser to run. one of NTBEA|MapElites. \n" +
+                        "\tseed=              Random seed for Game use (not used by optimiser itself). Defaults to System.currentTimeMillis()\n" +
+                        "\tlogFile=           Output file with results of each run for easier statistical analysis\n" +
+                        "\trepeat=            The number of times the optimiser should be re-run, to find a single best recommendation \n" +
+                        "\tuseThreeTuples     If specified then we use 3-tuples as well as 1-, 2- and N-tuples \n" +
+                        "\tkExplore=          The k to use in NTBEA - defaults to 1.0 - this makes sense for win/lose games with a score in {0, 1}\n" +
+                        "\t                   For scores with larger ranges, we recommend scaling kExplore appropriately.\n" +
+                        "\thood=              The size of neighbourhood to look at in NTBEA. Default is min(50, |searchSpace|/100)"
+
         );
 
         if (argsList.size() < 3)
-            throw new AssertionError("Must specify at least three parameters: searchSpace/ITunableParameters, NTBEA iterations, game");
+            throw new AssertionError("Must specify at least three parameters: searchSpace/ITunableParameters, iterations, game");
 
         // Create the SearchSpace, and report some useful stuff to the console.
         ITPSearchSpace searchSpace;
@@ -128,30 +182,24 @@ public class ParameterSearch {
             System.out.printf("%30s has %d values %s%n", searchSpace.name(i), searchSpace.nValues(i), allValues);
         }
 
-        // Now initialise the other bits and pieces needed for the NTBEA package
-        NTupleSystem landscapeModel = new NTupleSystem(searchSpace);
-        landscapeModel.setUse3Tuple(useThreeTuples);
-        landscapeModel.addTuples();
-
         boolean tuningGame = Arrays.asList(args).contains("tuneGame");
 
         if (getArg(args, "opponent", "").isEmpty()) {
             if (tuningGame)
                 throw new AssertionError("If 'tuneGame' is set, then the opponent parameter is mandatory");
-            runMultiNTBEA(landscapeModel, args);
+            runMulti(searchSpace, args);
         } else {
-            runSingleNTBEA(landscapeModel, args);
+            runSingle(searchSpace, args);
         }
     }
 
-    public static void runSingleNTBEA(NTupleSystem landscapeModel, String[] args) {
+    public static void runSingle(ITPSearchSpace searchSpace, String[] args) {
 
         boolean tuningGame = Arrays.asList(args).contains("tuneGame");
         int iterationsPerRun = Integer.parseInt(args[1]);
         GameType game = GameType.valueOf(args[2]);
         int repeats = getArg(args, "repeat", 1);
         int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
-        double kExplore = getArg(args, "kExplore", 1.0);
         String opponentDescriptor = getArg(args, "opponent", "");
         boolean allowDupes = getArg(args, "playerDupes", false);
         boolean verbose = Arrays.asList(args).contains("verbose");
@@ -162,11 +210,8 @@ public class ParameterSearch {
         String paramFile = getArg(args, "gameParam", "");
         AbstractParameters gameParams = ParameterFactory.createFromFile(game, paramFile);
 
-        ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
-        int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
-        int hood = getArg(args, "hood", Math.min(50, searchSpaceSize / 100));
-
-        NTupleBanditEA searchFramework = new NTupleBanditEA(landscapeModel, kExplore, hood);
+        // Optimiser to run
+        EvoAlg searchFramework = getSearchFramework(searchSpace, args, nPlayers);
 
         // Set up opponents
         List<AbstractPlayer> opponents = new ArrayList<>();
@@ -224,17 +269,24 @@ public class ParameterSearch {
         );
 
         // Get the results. And then log them.
-        // This loops once for each complete repetition of NTBEA specified.
+        // This loops once for each complete repetition
         // runNTBEA runs a complete set of trials, and spits out the mean and std error on the mean of the best sampled result
         // These mean statistics are calculated from the evaluation trials that are run after NTBEA is complete. (evalGames)
         Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
-            landscapeModel.reset();
-            Pair<Double, Double> r = runNTBEA(evaluator, null, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
-            Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
+
+            // Algorithm reset
+            searchFramework.getModel().reset();
+
+            // Algorithm run
+            Pair<Double, Double> r = runSearch(evaluator, null, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
+
+            // Get returned solution and associated value
+            Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, searchFramework.getModel().getBestOfSampled());
+
             printDetailsOfRun(retValue, searchSpace, logfile);
             if (verbose) {
-                System.out.println("MCTS Statistics: ");
+                System.out.println("MCTS Statistics: ");  // todo is this MCTS?
                 System.out.println(evaluator.statsLogger.toString());
             }
             evaluator.statsLogger = new SummaryLogger();
@@ -247,13 +299,13 @@ public class ParameterSearch {
         printDetailsOfRun(bestResult, searchSpace, "");
     }
 
-    public static void runMultiNTBEA(NTupleSystem landscapeModel, String[] args) {
+
+    public static void runMulti(ITPSearchSpace searchSpace, String[] args) {
 
         int iterationsPerRun = Integer.parseInt(args[1]);
         GameType game = GameType.valueOf(args[2]);
         int repeats = getArg(args, "repeat", 1);
         int evalGames = getArg(args, "evalGames", iterationsPerRun / 5);
-        double kExplore = getArg(args, "kExplore", 1.0);
         boolean verbose = Arrays.asList(args).contains("verbose");
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
         long seed = getArg(args, "seed", System.currentTimeMillis());
@@ -272,11 +324,7 @@ public class ParameterSearch {
         if (stateHeuristic == null)
             throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
 
-        ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
-        int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
-        int hood = getArg(args, "hood", Math.min(50, searchSpaceSize / 100));
-
-        MultiNTupleBanditEA searchFramework = new MultiNTupleBanditEA(landscapeModel, kExplore, hood, nPlayers);
+        EvoAlg searchFramework = getSearchFramework(searchSpace, args, nPlayers);
 
         // Initialise the GameEvaluator that will do all the heavy lifting
         GameMultiPlayerEvaluator evaluator = new GameMultiPlayerEvaluator(
@@ -293,11 +341,14 @@ public class ParameterSearch {
         // These mean statistics are calculated from the evaluation trials that are run after NTBEA is complete. (evalGames)
         Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
-            landscapeModel.reset();
-            Pair<Double, Double> r = runNTBEA(null, evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
-            Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
+            searchFramework.getModel().reset();
+            Pair<Double, Double> r = runSearch(null, evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
+            Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, searchFramework.getModel().getBestOfSampled());
             printDetailsOfRun(retValue, searchSpace, logfile);
-            printDiversityResults(landscapeModel, kExplore);
+
+            if (searchFramework instanceof NTupleBanditEA) {
+                printDiversityResults((NTupleSystem) searchFramework.getModel(), ((NTupleBanditEA) searchFramework).kExplore);
+            }
 
             if (retValue.a.a > bestResult.a.a)
                 bestResult = retValue;
@@ -460,12 +511,12 @@ public class ParameterSearch {
      * The workhorse.
      *
      * @param evaluator       The SolutionEvaluator that provides a sample score for a set of parameters
-     * @param searchFramework The NTBEA search framework. This maintains the model of parameter space
+     * @param searchFramework The search framework. This maintains the model of parameter space
      *                        and decides what settings to try next.
-     * @param totalRuns       The total number of NTBEA trials.
+     * @param totalRuns       The total number of iterations.
      * @param reportEvery     This can be used to report interim progress (but only used if logResults=true)
-     *                        Will report current NTBEA stats after this number of trials.
-     * @param evalGames       The number of evaluation trials to run on the final NBEA recommendation.
+     *                        Will report current stats after this number of trials.
+     * @param evalGames       The number of evaluation trials to run on the final recommendation.
      *                        This is to get a good estimate of the true value of the recommendation.
      * @param logResults      If true, then logs lots of data on the process. (Marginal statistics in each dimension
      *                        and the Top 10 Tuples by trials.) This can be useful to visualise the parameter
@@ -473,14 +524,14 @@ public class ParameterSearch {
      *                        really matter.
      * @return This returns Pair<Mean, Std Error on Mean> as calculated from the evaluation games
      */
-    public static Pair<Double, Double> runNTBEA(GameEvaluator evaluator,
-                                                GameMultiPlayerEvaluator multiPlayerEvaluator,
-                                                EvoAlg searchFramework,
-                                                int totalRuns, int reportEvery,
-                                                int evalGames, boolean logResults) {
+    public static Pair<Double, Double> runSearch(GameEvaluator evaluator,
+                                                 GameMultiPlayerEvaluator multiPlayerEvaluator,
+                                                 EvoAlg searchFramework,
+                                                 int totalRuns, int reportEvery,
+                                                 int evalGames, boolean logResults) {
 
-        NTupleSystem landscapeModel = (NTupleSystem) searchFramework.getModel();
-        SearchSpace searchSpace = landscapeModel.getSearchSpace();
+        LandscapeModel model = searchFramework.getModel();
+        SearchSpace searchSpace = model.getSearchSpace();
 
         // If reportEvery == totalRuns, then this will just loop once
         // (Which is the usual default)
@@ -495,48 +546,54 @@ public class ParameterSearch {
 
             if (logResults) {
                 System.out.println("Current best sampled point (using mean estimate): " +
-                        Arrays.toString(landscapeModel.getBestOfSampled()) +
-                        String.format(", %.3g", landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled())));
+                        Arrays.toString(model.getBestOfSampled()) +
+                        String.format(", %.3g", model.getMeanEstimate(model.getBestOfSampled())));
 
-                String tuplesExploredBySize = Arrays.toString(IntStream.rangeClosed(1, searchSpace.nDims())
-                        .map(size -> landscapeModel.getTuples().stream()
-                                .filter(t -> t.tuple.length == size)
-                                .mapToInt(it -> it.ntMap.size())
-                                .sum()
-                        ).toArray());
+                if (model instanceof NTupleSystem) {
+                    NTupleSystem landscapeModel = (NTupleSystem) model;
+                    String tuplesExploredBySize = Arrays.toString(IntStream.rangeClosed(1, searchSpace.nDims())
+                            .map(size -> landscapeModel.getTuples().stream()
+                                    .filter(t -> t.tuple.length == size)
+                                    .mapToInt(it -> it.ntMap.size())
+                                    .sum()
+                            ).toArray());
 
-                System.out.println("Tuples explored by size: " + tuplesExploredBySize);
-                System.out.printf("Summary of 1-tuple statistics after %d samples:%n", landscapeModel.numberOfSamples());
+                    System.out.println("Tuples explored by size: " + tuplesExploredBySize);
+                    System.out.printf("Summary of 1-tuple statistics after %d samples:%n", landscapeModel.numberOfSamples());
 
-                IntStream.range(0, searchSpace.nDims()) // assumes that the first N tuples are the 1-dimensional ones
-                        .mapToObj(i -> new Pair<>(searchSpace.name(i), landscapeModel.getTuples().get(i)))
-                        .forEach(nameTuplePair ->
-                                nameTuplePair.b.ntMap.keySet().stream().sorted().forEach(k -> {
-                                    StatSummary v = nameTuplePair.b.ntMap.get(k);
-                                    System.out.printf("\t%20s\t%s\t%d trials\t mean %.3g +/- %.2g%n", nameTuplePair.a, k, v.n(), v.mean(), v.stdErr());
-                                })
-                        );
+                    IntStream.range(0, searchSpace.nDims()) // assumes that the first N tuples are the 1-dimensional ones
+                            .mapToObj(i -> new Pair<>(searchSpace.name(i), landscapeModel.getTuples().get(i)))
+                            .forEach(nameTuplePair ->
+                                    nameTuplePair.b.ntMap.keySet().stream().sorted().forEach(k -> {
+                                        StatSummary v = nameTuplePair.b.ntMap.get(k);
+                                        System.out.printf("\t%20s\t%s\t%d trials\t mean %.3g +/- %.2g%n", nameTuplePair.a, k, v.n(), v.mean(), v.stdErr());
+                                    })
+                            );
 
-                System.out.println("\nSummary of 10 most tried full-tuple statistics:");
-                landscapeModel.getTuples().stream()
-                        .filter(t -> t.tuple.length == searchSpace.nDims())
-                        .forEach(t -> t.ntMap.keySet().stream()
-                                .map(k -> new Pair<>(k, t.ntMap.get(k)))
-                                .sorted(Comparator.comparing(p -> -p.b.n()))
-                                .limit(10)
-                                .forEach(item ->
-                                        System.out.printf("\t%s\t%d trials\t mean %.3g +/- %.2g\t(NTuple estimate: %.3g)%n",
-                                                item.a, item.b.n(), item.b.mean(), item.b.stdErr(), landscapeModel.getMeanEstimate(item.a.v))
-                                )
-                        );
+                    System.out.println("\nSummary of 10 most tried full-tuple statistics:");
+                    landscapeModel.getTuples().stream()
+                            .filter(t -> t.tuple.length == searchSpace.nDims())
+                            .forEach(t -> t.ntMap.keySet().stream()
+                                    .map(k -> new Pair<>(k, t.ntMap.get(k)))
+                                    .sorted(Comparator.comparing(p -> -p.b.n()))
+                                    .limit(10)
+                                    .forEach(item ->
+                                            System.out.printf("\t%s\t%d trials\t mean %.3g +/- %.2g\t(NTuple estimate: %.3g)%n",
+                                                    item.a, item.b.n(), item.b.mean(), item.b.stdErr(), landscapeModel.getMeanEstimate(item.a.v))
+                                    )
+                            );
+                }
+
+
             }
         }
+
         // now run the evaluation games on the final recommendation
         if (evaluator != null && evalGames > 0) {
             evaluator.reportStatistics = true;
             double[] results = IntStream.range(0, evalGames)
                     .mapToDouble(answer -> {
-                        int[] settings = Arrays.stream(landscapeModel.getBestOfSampled())
+                        int[] settings = Arrays.stream(model.getBestOfSampled())
                                 .mapToInt(d -> (int) d)
                                 .toArray();
                         return evaluator.evaluate(settings);
@@ -549,7 +606,7 @@ public class ParameterSearch {
             evaluator.reportStatistics = false;
             return new Pair<>(avg, stdErr);
         } else {
-            return new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled()), 0.0);
+            return new Pair<>(model.getMeanEstimate(model.getBestOfSampled()), 0.0);
         }
     }
 
