@@ -59,7 +59,7 @@ public class RollDie extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public RollDie copy() {
         return new RollDie(desiredDice);
     }
 
