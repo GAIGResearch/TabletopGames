@@ -23,7 +23,7 @@ public class TerrainOptionsView extends JComponent {
     Pair<String, Rectangle> highlight;
 
     public TerrainOptionsView() {
-        terrains = DescentTypes.TerrainType.getWalkableStringTiles();
+        terrains = DescentTypes.TerrainType.getWalkableStringTerrains();
         terrains.add("open");
         terrains.add("block");
         terrains.add("null");

@@ -10,14 +10,16 @@ import java.util.HashSet;
 
 public class BoardNode extends Component {
 
-    private HashSet<Integer> neighbours;  // Neighbours of this board node, component IDs
+    final static double defaultCost = 1.0;
+    private HashMap<Integer, Double> neighbours;  // Neighbours of this board node, <component IDs, cost to traverse>
     private HashMap<Integer, Integer> neighbourSideMapping;  // Neighbours mapping to a side of this board node, component ID -> side idx
     private int maxNeighbours;  // Maximum number of neighbours for this board node
+
 
     public BoardNode(int maxNeighbours, String name) {
         super(Utils.ComponentType.BOARD_NODE, name);
         this.maxNeighbours = maxNeighbours;
-        this.neighbours = new HashSet<>();
+        this.neighbours = new HashMap<>();
         this.neighbourSideMapping = new HashMap<>();
     }
 
@@ -28,7 +30,7 @@ public class BoardNode extends Component {
     protected BoardNode(int maxNeighbours, String name, int ID) {
         super(Utils.ComponentType.BOARD_NODE, name, ID);
         this.maxNeighbours = maxNeighbours;
-        this.neighbours = new HashSet<>();
+        this.neighbours = new HashMap<>();
         this.neighbourSideMapping = new HashMap<>();
     }
 
@@ -37,8 +39,18 @@ public class BoardNode extends Component {
      * @param neighbour - new neighbour of this node.
      */
     public void addNeighbour(BoardNode neighbour) {
+        addNeighbour(neighbour, defaultCost);
+    }
+
+
+    /**
+     * Adds a neighbour for this node, with a cost to reach it.
+     * @param neighbour - new neighbour of this node.
+     * @param cost - cost to reach this neighbour from 'this'
+     */
+    public void addNeighbour(BoardNode neighbour, double cost) {
         if (neighbours.size() <= maxNeighbours || maxNeighbours == -1) {
-            neighbours.add(neighbour.componentID);
+            neighbours.put(neighbour.componentID, cost);
         }
     }
 
@@ -48,7 +60,7 @@ public class BoardNode extends Component {
      * @return - true if removed successfully, false otherwise. may fail if neighbour didn't exist in the first place.
      */
     public boolean removeNeighbour(BoardNode neighbour) {
-        if (neighbours.contains(neighbour.componentID)) {
+        if (neighbours.containsKey(neighbour.componentID)) {
             neighbours.remove(neighbour.componentID);
             neighbourSideMapping.remove(neighbour.componentID);
             return true;
@@ -63,9 +75,20 @@ public class BoardNode extends Component {
      * @return - true if added successfully, false otherwise. may fail if too many neighbours added already.
      */
     public boolean addNeighbour(BoardNode neighbour, int side) {
+        return addNeighbour(neighbour, side, defaultCost);
+    }
+
+    /**
+     * Adds neighbour to specific side of this node.
+     * @param neighbour - new neighbour to be added.
+     * @param side - side of this node to be added in.
+     * @param cost - cost to reach this neighbour from 'this'
+     * @return - true if added successfully, false otherwise. may fail if too many neighbours added already.
+     */
+    public boolean addNeighbour(BoardNode neighbour, int side, double cost) {
         if (neighbours.size() <= maxNeighbours && side <= maxNeighbours || maxNeighbours == -1) {
-            if (!(neighbours.contains(neighbour.componentID)) && !(neighbourSideMapping.containsKey(neighbour.componentID))) {
-                neighbours.add(neighbour.componentID);
+            if (!(neighbours.containsKey(neighbour.componentID)) && !(neighbourSideMapping.containsKey(neighbour.componentID))) {
+                neighbours.put(neighbour.componentID, cost);
                 neighbourSideMapping.put(neighbour.componentID, side);
                 return true;
             }
@@ -80,7 +103,14 @@ public class BoardNode extends Component {
     @Override
     public BoardNode copy() {
         BoardNode bn = new BoardNode(maxNeighbours, componentName, componentID);
-        bn.neighbours = new HashSet<>(neighbours);
+        bn.neighbours = new HashMap<>(neighbours);
+        bn.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
+        copyComponentTo(bn);
+        return bn;
+    }
+    public BoardNode copyNewID() {
+        BoardNode bn = new BoardNode(maxNeighbours, componentName);
+        bn.neighbours = new HashMap<>(neighbours);
         bn.neighbourSideMapping = new HashMap<>(neighbourSideMapping);
         copyComponentTo(bn);
         return bn;
@@ -89,8 +119,20 @@ public class BoardNode extends Component {
     /**
      * @return the neighbours of this node.
      */
-    public HashSet<Integer> getNeighbours() {
+    public HashMap<Integer, Double> getNeighbours() {
         return neighbours;
+    }
+
+    /**
+     * Returns the cost of a neighbour to this node. Throws exception if the neighbour is not.
+     * @param neighbour neighbour to return the cost of traveling to that neighbour
+     * @return the cost.
+     */
+    public double getNeighbourCost(BoardNode neighbour)
+    {
+        if(neighbours.containsKey(neighbour.componentID))
+            return neighbours.get(neighbour.componentID);
+        throw new RuntimeException("BoardNode.getNeighbourCost(): Accessing cost of a non-neighbour");
     }
 
     /**

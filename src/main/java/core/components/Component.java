@@ -3,6 +3,7 @@ package core.components;
 import core.properties.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import utilities.Hash;
 import utilities.Utils.ComponentType;
 
 import java.util.*;
@@ -116,6 +117,10 @@ public abstract class Component {
     public Property getProperty(int propId)
     {
         return properties.get(propId);
+    }
+
+    public Property getProperty(String hashString) {
+        return properties.get(Hash.GetInstance().hash(hashString));
     }
 
     /**

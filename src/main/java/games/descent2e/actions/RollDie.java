@@ -10,7 +10,6 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-// TODO: allows rolling dice with some effect
 public class RollDie extends AbstractAction {
     HashMap<String, Integer> desiredDice;
 

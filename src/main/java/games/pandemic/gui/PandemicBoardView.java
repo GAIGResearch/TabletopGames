@@ -266,7 +266,7 @@ public class PandemicBoardView extends JComponent {
             Vector2D pos = new Vector2D((int)(poss.getX()*scale) + panX, (int)(poss.getY()*scale) + panY);
             PropertyBoolean edge = ((PropertyBoolean)b.getProperty(edgeHash));
 
-            HashSet<Integer> neighbourIds = b.getNeighbours();
+            Set<Integer> neighbourIds = b.getNeighbours().keySet();
             for (int b2id: neighbourIds) {
                 BoardNode b2 = (BoardNode) gameState.getComponentById(b2id);
                 Vector2D poss2 = ((PropertyVector2D) b2.getProperty(coordinateHash)).values;
