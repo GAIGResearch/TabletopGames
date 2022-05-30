@@ -5,12 +5,14 @@ import core.actions.AbstractAction;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Map;
 
 // TODO: allows rolling dice with some effect
 public class RollDie extends AbstractAction {
-    HashMap<Color, Integer> dice;
+    // TODO: Change to enum over dice colours
+    Map<String, Integer> dice;
 
-    public RollDie(HashMap<Color, Integer> dice) {
+    public RollDie(Map<String, Integer> dice) {
         // Maps from color of die to how many of that color should be rolled
         this.dice = dice;
     }

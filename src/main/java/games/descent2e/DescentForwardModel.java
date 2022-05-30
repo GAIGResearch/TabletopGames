@@ -236,23 +236,16 @@ public class DescentForwardModel extends AbstractForwardModel {
         int currentPlayer = gameState.getCurrentPlayer();
         int nActions = ((DescentParameters) dgs.getGameParameters()).nActionsPerPlayer;
 
-        // Find current monster group + monster playing
-        int monsterGroupIdx = ((DescentTurnOrder) dgs.getTurnOrder()).monsterGroupActingNext;
-        ArrayList<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
-        int nextMonster = ((DescentTurnOrder) dgs.getTurnOrder()).monsterActingNext;
-
-        // Find currently acting figure (hero or monster)
-        Figure actingFigure;
-        if (currentPlayer != 0) {
-            // If hero player, get corresponding hero
-            actingFigure = dgs.getHeroes().get(currentPlayer - 1);
-        } else {
-            // Otherwise, monster is playing
-            actingFigure = monsterGroup.get(nextMonster);
-        }
 
         // Init action list
         ArrayList<AbstractAction> actions = new ArrayList<>();
+        Figure actingFigure = dgs.getActingFigure();
+
+        // These three lines were almost refactored by James, but he left them
+        // in to keep Raluca happy
+        int monsterGroupIdx = ((DescentTurnOrder) dgs.getTurnOrder()).monsterGroupActingNext;
+        ArrayList<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
+        ((DescentTurnOrder) dgs.getTurnOrder()).nextMonster(monsterGroup.size());
 
         if (!(dgs.getGamePhase() == DescentGameState.DescentPhase.ForceMove)) {
             // Can do actions other than move
@@ -292,7 +285,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             if (currentPlayer == 0) {
                 // This monster is finished, move to next monster
                 // TODO: barghest minions never move, find out why
-                ((DescentTurnOrder) dgs.getTurnOrder()).nextMonster(monsterGroup.size());
+                int nextMonster = ((DescentTurnOrder) dgs.getTurnOrder()).monsterActingNext;
                 if (nextMonster == monsterGroup.size() - 1) {
                     // Overlord is finished with this monster group
                     dgs.overlord.setNActionsExecuted(nActions);

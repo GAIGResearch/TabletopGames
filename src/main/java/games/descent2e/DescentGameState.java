@@ -170,6 +170,24 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return monsters;
     }
 
+    public Figure getActingFigure() {
+        // Find current monster group + monster playing
+        int monsterGroupIdx = ((DescentTurnOrder) getTurnOrder()).monsterGroupActingNext;
+        ArrayList<Monster> monsterGroup = getMonsters().get(monsterGroupIdx);
+        int nextMonster = ((DescentTurnOrder) getTurnOrder()).monsterActingNext;
+
+        // Find currently acting figure (hero or monster)
+        Figure actingFigure;
+        if (getCurrentPlayer() != 0) {
+            // If hero player, get corresponding hero
+            actingFigure = getHeroes().get(getCurrentPlayer() - 1);
+        } else {
+            // Otherwise, monster is playing
+            actingFigure = monsterGroup.get(nextMonster);
+        }
+        return actingFigure;
+    }
+
     public int[][] getTileReferences() {
         return tileReferences;
     }
