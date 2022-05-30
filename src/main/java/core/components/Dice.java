@@ -13,8 +13,8 @@ import org.json.simple.parser.ParseException;
 import utilities.Utils.ComponentType;
 
 public class Dice extends Component {
-    private int nSides;  // Number of sides
-    private int value;  // Current value after last roll
+    protected int nSides;  // Number of sides
+    protected int value;  // Current value after last roll
 
     public Dice() {
         this(6);  // By default d6

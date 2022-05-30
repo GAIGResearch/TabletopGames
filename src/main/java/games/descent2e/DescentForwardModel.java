@@ -8,6 +8,8 @@ import core.components.*;
 import core.properties.*;
 import games.GameType;
 import games.descent2e.actions.Move;
+import games.descent2e.actions.RollDie;
+import games.descent2e.components.DescentDice;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -112,7 +114,10 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Create and place monsters
         createMonsters(dgs, firstQuest, _data, rnd);
 
-        // Set up dice?
+        // Set up dice!
+        dgs.dice = _data.dice;
+        dgs.dicePool = new HashMap<>();
+
 
         // Shuffle search cards deck
 
