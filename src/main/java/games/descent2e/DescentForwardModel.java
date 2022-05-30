@@ -8,6 +8,8 @@ import core.components.*;
 import core.properties.*;
 import games.GameType;
 import games.descent2e.actions.Move;
+import games.descent2e.actions.RollDie;
+import games.descent2e.components.DescentDice;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -113,6 +115,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         createMonsters(dgs, firstQuest, _data, rnd);
 
         // Set up dice?
+        dgs.dice = (ArrayList<DescentDice>) _data.dice;
 
         // Shuffle search cards deck
 
@@ -121,6 +124,12 @@ public class DescentForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
+        HashMap<String, Integer> tmap = new HashMap<>();
+        tmap.put("black", 2);
+        tmap.put("yellow", 1);
+        tmap.put("red", 1);
+        RollDie test = new RollDie(tmap);
+        test.execute(currentState);
         action.execute(currentState);
         if (checkEndOfGame()) return;
 

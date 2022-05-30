@@ -3,7 +3,7 @@ package games.descent2e;
 import core.AbstractGameData;
 import core.components.*;
 import core.properties.PropertyString;
-import games.descent2e.components.DamageDice;
+import games.descent2e.components.DescentDice;
 import games.descent2e.components.Hero;
 import games.descent2e.concepts.Quest;
 import org.json.simple.JSONArray;
@@ -26,7 +26,7 @@ public class DescentGameData extends AbstractGameData {
     List<GraphBoard> boardConfigurations;
     List<Hero> heroes;
     List<Deck<Card>> decks;
-    List<Dice> dice;
+    List<DescentDice> dice;
     List<Quest> quests;
     List<Quest> sideQuests;
     HashMap<String, HashMap<String, Token>> monsters;
@@ -38,8 +38,7 @@ public class DescentGameData extends AbstractGameData {
 
         heroes = Hero.loadHeroes(dataPath + "heroes.json");
         monsters = loadMonsters(dataPath + "monsters.json");
-        dice = DamageDice.loadDice(dataPath + "/components/dice.json");
-        dice.get(0).roll(new Random(2));
+        dice = DescentDice.loadDice(dataPath + "/components/dice.json");
 
         quests = loadQuests(dataPath + "mainQuests.json");
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");

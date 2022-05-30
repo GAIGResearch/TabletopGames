@@ -8,6 +8,7 @@ import core.components.Token;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
+import games.descent2e.components.DescentDice;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -30,6 +31,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
 
     GridBoard masterBoard;
+    ArrayList<DescentDice> dice;
     ArrayList<Hero> heroes;
     Figure overlord;
     ArrayList<ArrayList<Monster>> monsters;
@@ -45,6 +47,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         super(gameParameters, new DescentTurnOrder(nPlayers), GameType.Descent2e);
         tiles = new HashMap<>();
         data = new DescentGameData();
+        dice = new ArrayList<>();
 
         heroes = new ArrayList<>();
         monsters = new ArrayList<>();
@@ -59,6 +62,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             components.addAll(data.tiles);
             components.addAll(data.heroes);
             components.addAll(data.boardConfigurations);
+            components.addAll(data.dice);
             for (HashMap<String, Token> m : data.monsters.values()) {
                 components.addAll(m.values());
             }
@@ -91,6 +95,9 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         copy.tileReferences = tileReferences.clone();  // TODO deep
         copy.gridReferences = new HashMap<>(gridReferences); // TODO deep
         copy.initData = initData;
+        for (DescentDice d : dice) {
+            copy.dice.add(d.copy());
+        }
         // TODO
         return copy;
     }
@@ -131,12 +138,13 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                 Objects.equals(masterBoard, that.masterBoard) &&
                 Objects.equals(heroes, that.heroes) &&
                 Objects.equals(overlord, that.overlord) &&
-                Objects.equals(monsters, that.monsters);
+                Objects.equals(monsters, that.monsters) &&
+                Objects.equals(dice, that.dice);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), tiles, gridReferences, masterBoard, heroes, overlord, monsters, overlordPlayer);
+        int result = Objects.hash(super.hashCode(), tiles, gridReferences, masterBoard, heroes, overlord, dice, monsters, overlordPlayer);
         result = 31 * result + Arrays.hashCode(tileReferences);
         return result;
     }
@@ -152,6 +160,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     public ArrayList<Hero> getHeroes() {
         return heroes;
     }
+
+    public List<DescentDice> getDice(){return dice;}
 
     public ArrayList<ArrayList<Monster>> getMonsters() {
         return monsters;
