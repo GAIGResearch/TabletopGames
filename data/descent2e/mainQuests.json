@@ -16,8 +16,9 @@
     ],
     "hero-win": ["monster:barghest", "count", 0],
     "overlord-win": ["property:fatigue", "count", 7],
-    "overlord-reward": ["2XP", "heroes discard all but 1 Villager"],
-    "hero-reward": ["1XP", "25G x Villager"],
+    "all-reward": ["1XP"],
+    "overlord-reward": ["1XP", "heroes discard all but 1 Villager"],
+    "hero-reward": ["25G x Villager"],
     "boards": [
       "board1"
     ],

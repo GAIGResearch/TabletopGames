@@ -129,6 +129,7 @@ public class DescentGridBoardView extends ComponentView {
 
             for (Monster m: monsterGroup) {
                 Vector2D loc = m.getLocation();
+                if (loc == null) continue;
                 int orientation = m.getOrientation();
 
                 Pair<Integer, Integer> size = m.getSize();
@@ -203,7 +204,7 @@ public class DescentGridBoardView extends ComponentView {
         String terrain = bn.getComponentName();
         Stroke s = g.getStroke();
 
-        if (DescentTypes.TerrainType.isWalkable(terrain)) {
+        if (DescentTypes.TerrainType.isWalkableTerrain(terrain)) {
             g.setColor(Color.black);
             g.drawRect(xC, yC, itemSize, itemSize);
             g.setStroke(new BasicStroke(5));
