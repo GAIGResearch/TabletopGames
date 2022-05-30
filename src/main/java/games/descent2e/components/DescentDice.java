@@ -26,6 +26,10 @@ public class DescentDice extends Component {
         this.sides = new HashMap<>();
     }
 
+    private DescentDice(int ID){
+        super(Utils.ComponentType.DICE, ID);
+    }
+
     public int roll(Random r){
         int roll = r.nextInt(this.nSides) + 1;
         this.damage = sides.get(roll).get("damage");
