@@ -64,25 +64,25 @@ public class DescentTypes {
         Pit,
         Block;
 
-        public static HashSet<TerrainType> getWalkableTiles() {
+        public static HashSet<TerrainType> getWalkableTerrains() {
             return new HashSet<TerrainType>() {{
                 add(Plain);
                 add(Water);
                 add(Lava);
                 add(Hazard);
-                add(Pit);
+//                add(Pit);
             }};
         }
 
-        public static HashSet<String> getWalkableStringTiles() {
+        public static HashSet<String> getWalkableStringTerrains() {
             HashSet<String> walkable = new HashSet<>();
-            for (TerrainType t: getWalkableTiles()) {
+            for (TerrainType t: getWalkableTerrains()) {
                 walkable.add(t.name().toLowerCase());
             }
             return walkable;
         }
 
-        public static HashSet<TerrainType> getMarginTiles() {
+        public static HashSet<TerrainType> getMarginTerrains() {
             return new HashSet<TerrainType>() {{
                 add(Edge);
                 add(Open);
@@ -90,20 +90,24 @@ public class DescentTypes {
             }};
         }
 
-        public static HashSet<String> getMarginStringTiles() {
+        public static HashSet<String> getMarginStringTerrains() {
             HashSet<String> margins = new HashSet<>();
-            for (TerrainType t: getMarginTiles()) {
+            for (TerrainType t: getMarginTerrains()) {
                 margins.add(t.name().toLowerCase());
             }
             return margins;
         }
 
-        public static boolean isWalkable(String terrain) {
-            return terrain != null && (getWalkableStringTiles().contains(terrain));
+        public static boolean isWalkableTerrain(String terrain) {
+            return terrain != null && (getWalkableStringTerrains().contains(terrain));
         }
 
-        public static boolean isInsideTile(String terrain) {
-            return terrain != null && (!getMarginStringTiles().contains(terrain));
+        public static boolean isInsideTerrain(String terrain) {
+            return terrain != null && (!getMarginStringTerrains().contains(terrain));
+        }
+
+        public static boolean isMarginTerrain(String terrain) {
+            return terrain != null && getMarginStringTerrains().contains(terrain);
         }
     }
 

@@ -251,7 +251,7 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         BoardNode[][] gridCopy = new BoardNode[getHeight()][getWidth()];
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                if (grid[i][j] != null) gridCopy[i][j] = grid[i][j].copy();
+                if (grid[i][j] != null) gridCopy[i][j] = grid[i][j].copyNewID();
             }
         }
         GridBoard g = new GridBoard(gridCopy);
@@ -328,26 +328,25 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
             if (((JSONArray) g).get(0) instanceof JSONArray) {
                 y = 0;
                 for (Object o : (JSONArray) g) {
-                    JSONArray row = (JSONArray) o;
-                    int x = 0;
-                    for (Object o1 : row) {
-                        BoardNode bn = new BoardNode(-1, (String) o1);
-                        setElement(x, y, bn);
-                        x++;
-                    }
-                    y++;
+                    y = parseElements(y, (JSONArray) o);
                 }
             } else {
-                JSONArray row = (JSONArray) g;
-                int x = 0;
-                for (Object o1 : row) {
-                    BoardNode bn = new BoardNode(-1, (String) o1);
-                    setElement(x, y, bn);
-                    x++;
-                }
-                y++;
+                y = parseElements(y, (JSONArray) g);
             }
         }
+    }
+
+    private int parseElements(int y, JSONArray row) {
+        int x = 0;
+        for (Object o1 : row) {
+//            if (!((String)o1).equalsIgnoreCase("null")) {
+                BoardNode bn = new BoardNode(-1, (String) o1);
+                setElement(x, y, bn);
+//            }
+            x++;
+        }
+        y++;
+        return y;
     }
 
     /**
