@@ -124,12 +124,6 @@ public class DescentForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
-        HashMap<String, Integer> tmap = new HashMap<>();
-        tmap.put("black", 2);
-        tmap.put("yellow", 1);
-        tmap.put("red", 1);
-        RollDie test = new RollDie(tmap);
-        test.execute(currentState);
         action.execute(currentState);
         if (checkEndOfGame()) return;
 

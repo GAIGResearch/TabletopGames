@@ -15,12 +15,24 @@ public class RollDie extends AbstractAction {
     HashMap<String, Integer> desiredDice;
     HashMap<String, List<DescentDice>> actualDice;
 
+
+    /**
+     *
+     * @param dice A map comprising of coloured dice to be rolled (key) and how many (values)
+     *
+     * Rolled dice can be retrieved through getDice()
+     * In the form of a Map<String, List<DescentDice>>
+     */
     public RollDie(HashMap<String, Integer> dice) {
         // Maps from color of die to how many of that color should be rolled
         this.desiredDice = dice;
         this.actualDice = new HashMap<>();
     }
 
+
+    /** Rolls dice specified in desiredDice
+     * @param gs - game state which should be modified by this action.
+     */
     @Override
     public boolean execute(AbstractGameState gs) {
         DescentGameState dgs = (DescentGameState) gs;
@@ -33,7 +45,7 @@ public class RollDie extends AbstractAction {
                     .collect(Collectors.toList());
             int amount = entry.getValue();
             for (int i = 0; i < amount; i++) {
-                DescentDice d = result.get(i);
+                DescentDice d = result.get(0).copy();
                 d.roll(r);
                 if (actualDice.get(entry.getKey()) == null) {
                     List<DescentDice> init = new ArrayList<DescentDice>();
@@ -64,5 +76,9 @@ public class RollDie extends AbstractAction {
     @Override
     public String getString(AbstractGameState gameState) {
         return "Roll die";
+    }
+
+    public Map<String, List<DescentDice>> getDice() {
+        return actualDice;
     }
 }
