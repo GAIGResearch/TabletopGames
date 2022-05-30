@@ -8,6 +8,7 @@ import core.properties.Property;
 import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import games.descent2e.actions.DescentAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -21,27 +22,23 @@ import static games.descent2e.DescentConstants.*;
 
 // TODO: figure out how to do ability/heroic-feat
 public class Hero extends Figure {
+
     Deck<Card> skills;
     Deck<Card> handEquipment;
     Card armor;
     Deck<Card> otherEquipment;
     HashMap<String, Integer> equipSlotsAvailable;
 
-     // TODO: reset this every quest to max fatigue
-    Counter movement;
-    Counter health;
-    Counter fatigue;
+    // TODO: reset fatigue every quest to max fatigue
     String[] defence;
-
-    Counter might;
-    Counter knowledge;
-    Counter willpower;
-    Counter awareness;
 
     String heroicFeat;
     boolean featAvailable;
 
     String ability;
+
+    ArrayList<DescentAction> abilities;
+
 
     public Hero(String name) {
         super(name);
@@ -56,6 +53,7 @@ public class Hero extends Figure {
         equipSlotsAvailable.put("other", 2);
 
         tokenType = "Hero";
+        abilities = new ArrayList<>();
     }
 
     protected Hero(String name, int ID) {
@@ -102,29 +100,34 @@ public class Hero extends Figure {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Hero)) return false;
+        if (!super.equals(o)) return false;
+        Hero hero = (Hero) o;
+        return featAvailable == hero.featAvailable && Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment) && Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) && Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) && Arrays.equals(defence, hero.defence) && Objects.equals(heroicFeat, hero.heroicFeat) && Objects.equals(ability, hero.ability) && Objects.equals(abilities, hero.abilities);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment, equipSlotsAvailable, heroicFeat, featAvailable, ability, abilities);
+        result = 31 * result + Arrays.hashCode(defence);
+        return result;
+    }
+
+    @Override
     public Hero copy() {
         Hero copy = new Hero(componentName, componentID);
         copy.equipSlotsAvailable = new HashMap<>();
-        for (Map.Entry<String, Integer> e: equipSlotsAvailable.entrySet()) {
-            copy.equipSlotsAvailable.put(e.getKey(), e.getValue());
-        }
+        copy.equipSlotsAvailable.putAll(equipSlotsAvailable);
         copy.skills = skills.copy();
         copy.handEquipment = handEquipment.copy();
         copy.otherEquipment = otherEquipment.copy();
         if (armor != null) {
             copy.armor = armor.copy();
         }
-        copy.movement = movement.copy();
-        copy.health = health.copy();
-        copy.fatigue = fatigue.copy();
         copy.defence = new String[this.defence.length];
-        for (int i =0 ; i < this.defence.length; i++){
-            copy.defence[i] = this.defence[i];
-        }
-        copy.might = this.might.copy();
-        copy.knowledge = this.knowledge.copy();
-        copy.willpower = this.willpower.copy();
-        copy.awareness = this.awareness.copy();
+        System.arraycopy(this.defence, 0, copy.defence, 0, this.defence.length);
         copy.heroicFeat = this.heroicFeat;
         copy.featAvailable = this.featAvailable;
         copy.ability = this.ability;
@@ -133,32 +136,23 @@ public class Hero extends Figure {
         return copy;
     }
 
+    public void addAbility(DescentAction ability) {
+        this.abilities.add(ability);
+    }
+    public void removeAbility(DescentAction ability) {
+        this.abilities.remove(ability);
+    }
+    public ArrayList<DescentAction> getAbilities() {
+        return abilities;
+    }
+
     /**
      * Creates a Token objects from a JSON object.
      * @param figure - JSON to parse into Figure object.
      */
     protected void loadHero(JSONObject figure) {
         super.loadFigure(figure);
-        // custom load of figure properties
-        int movement = ((PropertyInt)getProperty(movementHash)).value;
-        int fatigue = ((PropertyInt)getProperty(fatigueHash)).value;
-        int health = ((PropertyInt)getProperty(healthHash)).value;
-        int might = ((PropertyInt)getProperty(mightHash)).value;
-        int knowledge = ((PropertyInt)getProperty(knowledgeHash)).value;
-        int willpower = ((PropertyInt)getProperty(willpowerHash)).value;
-        int awareness = ((PropertyInt)getProperty(awarenessHash)).value;
-
-        // Setup counters
-        this.movement = new Counter(movement, 0, movement, "movementCounter");
-        this.fatigue = new Counter(fatigue, 0, fatigue, "fatigueCounter");
-        this.health = new Counter(health, 0, health, "healthCounter");
         this.defence = ((PropertyStringArray)getProperty(defenceHash)).getValues();
-
-        this.might = new Counter(might, 0, might, "mightCounter");
-        this.knowledge = new Counter(knowledge, 0, knowledge, "knowledgeCounter");
-        this.willpower = new Counter(willpower, 0, willpower, "willpowerCounter");
-        this.awareness = new Counter(awareness, 0, awareness, "awarenessCounter");
-
         this.featAvailable = true;
         this.heroicFeat = ((PropertyString)getProperty(heroicFeatHash)).value;
         this.ability = ((PropertyString)getProperty(abilityHash)).value;

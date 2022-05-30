@@ -86,21 +86,21 @@ public class Move extends AbstractAction {
         if (!inPit) {
             // Can't spend move points in pit, it's just one action
             if (toWater) {
-                f.setMovePoints(f.getMovePoints() - dp.waterMoveCost);  // Difficult terrain
+                f.incrementAttribute(Figure.Attribute.MovePoints, - dp.waterMoveCost);  // Difficult terrain
             } else {
-                f.setMovePoints(f.getMovePoints() - 1);  // Normal move
+                f.incrementAttribute(Figure.Attribute.MovePoints, - 1);  // Normal move
             }
         }
 
         if (toPit) {
-            f.setHp(f.getHp() - dp.pitFallHpCost);  // Hurts
+            f.incrementAttribute(Figure.Attribute.Health, - dp.pitFallHpCost);  // Hurts
         }
         if (toLava) {
-            f.setHp(f.getHp() - dp.pitFallHpCost);  // Hurts
+            f.incrementAttribute(Figure.Attribute.Health, - dp.pitFallHpCost);  // Hurts
         }
 
         // Check if move action finished
-        if (f.getMovePoints() == 0 || inPit) f.setNActionsExecuted(f.getNActionsExecuted() + 1);
+        if (f.getAttribute(Figure.Attribute.MovePoints).getValue() == 0 || inPit) f.setNActionsExecuted(f.getNActionsExecuted() + 1);
         return true;
     }
 

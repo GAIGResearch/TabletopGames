@@ -8,6 +8,7 @@ import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
+import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import gui.views.ComponentView;
@@ -113,6 +114,18 @@ public class DescentGridBoardView extends ComponentView {
     @Override
     protected void paintComponent(Graphics g) {
         drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard) component, panX, panY, gameState.getGridReferences(), gameState.getTileReferences());
+        String dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
+
+        // Draw tokens
+        for (DToken dt: gameState.getTokens()) {
+            if (dt.getPosition() != null) {
+                String imgPath = dataPath + dt.getDescentTokenType().getImgPath(new Random(gameState.getGameParameters().getRandomSeed()));
+                Image img = ImageIO.GetInstance().getImage(imgPath);
+                g.drawImage(img, panX + dt.getPosition().getX() * itemSize, panY + dt.getPosition().getY() * itemSize, itemSize, itemSize, null);
+            } else {
+                // todo check if player owns, draw in player area
+            }
+        }
 
         // Draw heroes
         for (Figure f: gameState.getHeroes()) {
@@ -124,7 +137,6 @@ public class DescentGridBoardView extends ComponentView {
         }
         // Draw monsters
         for (List<Monster> monsterGroup: gameState.getMonsters()) {
-            String dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
             String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
 
             for (Monster m: monsterGroup) {
@@ -152,7 +164,7 @@ public class DescentGridBoardView extends ComponentView {
 
 
     public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
-                                                          Map<String, Set<Vector2D>> gridReferences,
+                                                          Map<String, HashMap<Vector2D,Vector2D>> gridReferences,
                                                           int[][] tileReferences) {
         int width = gridBoard.getWidth() * itemSize;
         int height = gridBoard.getHeight() * itemSize;
