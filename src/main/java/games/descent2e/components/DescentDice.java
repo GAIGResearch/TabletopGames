@@ -94,7 +94,7 @@ public class DescentDice extends Component {
 
     @Override
     public DescentDice copy() {
-        DescentDice  copy = new DescentDice();
+        DescentDice  copy = new DescentDice(this.componentID);
         copy.colour = this.colour;
         copy.shielding = this.shielding;
         copy.nSides = this.nSides;
