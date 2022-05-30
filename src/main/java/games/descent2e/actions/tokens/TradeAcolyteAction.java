@@ -4,10 +4,9 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
-import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.Hero;
-import games.descent2e.components.tokens.Acolyte;
+import games.descent2e.components.tokens.DToken;
 
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +31,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // TODO: trade with adjacent players
         DescentGameState dgs = (DescentGameState) state;
-        Acolyte acolyte = (Acolyte) dgs.getComponentById(tokenID);
+        DToken acolyte = (DToken) dgs.getComponentById(tokenID);
         Hero hero = dgs.getHeroes().get(acolyte.getOwnerId()-1);
         return null;
     }
@@ -78,7 +77,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
     @Override
     public boolean execute(DescentGameState gs) {
         if (receivingPlayerID != -1) {
-            Acolyte acolyte = (Acolyte) gs.getComponentById(tokenID);
+            DToken acolyte = (DToken) gs.getComponentById(tokenID);
             acolyte.setOwnerId(receivingPlayerID, gs);
         }
         return false;

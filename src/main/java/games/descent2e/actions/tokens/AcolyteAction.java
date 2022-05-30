@@ -3,9 +3,8 @@ package games.descent2e.actions.tokens;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
-import games.descent2e.actions.DescentAction;
 import games.descent2e.components.Hero;
-import games.descent2e.components.tokens.Acolyte;
+import games.descent2e.components.tokens.DToken;
 
 import static games.descent2e.actions.Triggers.END_TURN;
 
@@ -42,7 +41,7 @@ public class AcolyteAction extends TokenAction {
 
     @Override
     public boolean execute(DescentGameState gs) {
-        Acolyte acolyte = (Acolyte) gs.getComponentById(tokenID);
+        DToken acolyte = (DToken) gs.getComponentById(tokenID);
         Hero hero = gs.getHeroes().get(acolyte.getOwnerId()-1);
         return false;
     }
