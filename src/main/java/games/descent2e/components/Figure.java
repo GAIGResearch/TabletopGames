@@ -183,6 +183,7 @@ public class Figure extends Token {
             }
         }
         this.setAttribute(MovePoints, 0);
+        this.setAttribute(Fatigue, 0);
     }
 
     /**

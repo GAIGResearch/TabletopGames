@@ -31,7 +31,7 @@ public class Hero extends Figure {
     String[] defence;
 
     String heroicFeat;
-    boolean featAvailable;
+    boolean featAvailable, rested;
 
     String ability;
 
@@ -48,6 +48,13 @@ public class Hero extends Figure {
         equipSlotsAvailable.put("other", 2);
 
         tokenType = "Hero";
+    }
+
+    @Override
+    public void resetRound() {
+        super.resetRound();
+        if (rested) attributes.get(Attribute.Fatigue).setValue(0);
+        rested = false;
     }
 
     protected Hero(String name, int ID) {
@@ -126,6 +133,14 @@ public class Hero extends Figure {
         this.ability = ability;
     }
 
+    public boolean hasRested() {
+        return rested;
+    }
+
+    public void setRested(boolean rested) {
+        this.rested = rested;
+    }
+
     public boolean equip(Card c) {
         // Check if equipment
         Property cost = c.getProperty(costHash);
@@ -171,12 +186,12 @@ public class Hero extends Figure {
         if (!(o instanceof Hero)) return false;
         if (!super.equals(o)) return false;
         Hero hero = (Hero) o;
-        return featAvailable == hero.featAvailable && Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment) && Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) && Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) && Arrays.equals(defence, hero.defence) && Objects.equals(heroicFeat, hero.heroicFeat) && Objects.equals(ability, hero.ability) && Objects.equals(abilities, hero.abilities);
+        return featAvailable == hero.featAvailable && rested == hero.rested && Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment) && Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) && Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) && Arrays.equals(defence, hero.defence) && Objects.equals(heroicFeat, hero.heroicFeat) && Objects.equals(ability, hero.ability);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment, equipSlotsAvailable, heroicFeat, featAvailable, ability, abilities);
+        int result = Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment, equipSlotsAvailable, heroicFeat, featAvailable, rested, ability);
         result = 31 * result + Arrays.hashCode(defence);
         return result;
     }
@@ -197,7 +212,7 @@ public class Hero extends Figure {
         copy.heroicFeat = this.heroicFeat;
         copy.featAvailable = this.featAvailable;
         copy.ability = this.ability;
-
+        copy.rested = rested;
         super.copyComponentTo(copy);
         return copy;
     }
@@ -212,7 +227,6 @@ public class Hero extends Figure {
         this.featAvailable = true;
         this.heroicFeat = ((PropertyString)getProperty(heroicFeatHash)).value;
         this.ability = ((PropertyString)getProperty(abilityHash)).value;
-
     }
 
     /**

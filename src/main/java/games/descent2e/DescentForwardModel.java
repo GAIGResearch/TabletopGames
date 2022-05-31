@@ -8,6 +8,7 @@ import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
+import games.descent2e.actions.Rest;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Figure;
@@ -272,7 +273,13 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
-            // - Rest TODO
+
+            // - Rest
+            if (actingFigure instanceof Hero) {
+                // Only heroes can rest
+                actions.add(new Rest());
+            }
+
             // - Open/close a door TODO
             // - Revive hero TODO
 
