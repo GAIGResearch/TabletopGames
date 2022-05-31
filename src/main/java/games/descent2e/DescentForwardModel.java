@@ -107,7 +107,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             Vector2D location = playerStartingLocations.get(choice);
             figure.setPosition(location);
             PropertyInt prop = new PropertyInt("players", figure.getComponentID());
-//            dgs.masterBoard.getElement(location.getX(), location.getY()).setProperty(prop);  TODO turn back in
+            dgs.masterBoard.getElement(location.getX(), location.getY()).setProperty(prop);
             playerStartingLocations.remove(choice);
 
             // Inform game of this player's token
@@ -294,7 +294,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 for (DToken token: dgs.tokens) {
                     if (token.getDescentTokenType() == DescentToken.Search
                             && token.getPosition() != null
-                            && (neighbours.contains(token.getPosition())) || token.getPosition().equals(loc)) {
+                            && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
                         actions.addAll(token.getEffects());
                     }
                 }
