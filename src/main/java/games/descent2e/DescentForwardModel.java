@@ -8,7 +8,9 @@ import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
+import games.descent2e.actions.Rest;
 import games.descent2e.actions.tokens.TokenAction;
+import games.descent2e.components.DicePool;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -56,6 +58,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Overlord will also have a figure, but not on the board (to store xp and skill info)
         dgs.overlord = new Figure("Overlord");
         dgs.overlord.setTokenType("Overlord");
+        dgs.getTurnOrder().setStartingPlayer(1);
+
         // TODO: Shuffle overlord deck and give overlord nPlayers cards.
 
         // TODO: is this quest phase or campaign phase?
@@ -131,7 +135,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                     tileName = split[0];
                     String[] splitPos = split[1].split(";");
                     Vector2D locOnTile = new Vector2D(Integer.parseInt(splitPos[0]), Integer.parseInt(splitPos[1]));
-                    HashMap<Vector2D, Vector2D> map = dgs.gridReferences.get(tileName);
+                    Map<Vector2D, Vector2D> map = dgs.gridReferences.get(tileName);
                     for (Map.Entry<Vector2D, Vector2D> e: map.entrySet()) {
                         if (e.getValue().equals(locOnTile)) {
                             location = e.getKey();
@@ -170,7 +174,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // Set up dice!
         dgs.dice = _data.dice;
-        dgs.dicePool = new HashMap<>();
+        dgs.dicePool = new DicePool(Collections.emptyList());
 
         // Shuffle search cards deck
 
@@ -251,7 +255,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         // These three lines were almost refactored by James, but he left them
         // in to keep Raluca happy
         int monsterGroupIdx = ((DescentTurnOrder) dgs.getTurnOrder()).monsterGroupActingNext;
-        ArrayList<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
+        List<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
         ((DescentTurnOrder) dgs.getTurnOrder()).nextMonster(monsterGroup.size());
 
         if (!(dgs.getGamePhase() == DescentGameState.DescentPhase.ForceMove)) {
@@ -272,7 +276,13 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
-            // - Rest TODO
+
+            // - Rest
+            if (actingFigure instanceof Hero) {
+                // Only heroes can rest
+                actions.add(new Rest());
+            }
+
             // - Open/close a door TODO
             // - Revive hero TODO
 
@@ -550,7 +560,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
             dgs.tileReferences = trimTileRef;
             // And grid references
-            for (Map.Entry<String, HashMap<Vector2D, Vector2D>> e: dgs.gridReferences.entrySet()) {
+            for (Map.Entry<String, Map<Vector2D, Vector2D>> e: dgs.gridReferences.entrySet()) {
                 for (Vector2D v: e.getValue().keySet()) {
                     v.subtract(bounds.x, bounds.y);
                 }
@@ -591,9 +601,9 @@ public class DescentForwardModel extends AbstractForwardModel {
      */
     private void addTilesToBoard(BoardNode parentTile, BoardNode tileToAdd, int x, int y, BoardNode[][] board,
                                  BoardNode[][] tileGrid,
-                                 HashMap<Integer, GridBoard> tiles,
-                                 int[][] tileReferences,  HashMap<String, HashMap<Vector2D, Vector2D>> gridReferences,
-                                 HashMap<BoardNode, BoardNode> drawn,
+                                 Map<Integer, GridBoard> tiles,
+                                 int[][] tileReferences,  Map<String, Map<Vector2D, Vector2D>> gridReferences,
+                                 Map<BoardNode, BoardNode> drawn,
                                  Rectangle bounds,
                                  DescentGameState dgs,
                                  String sideWithOpening) {
@@ -979,9 +989,9 @@ public class DescentForwardModel extends AbstractForwardModel {
      */
     private void createMonsters(DescentGameState dgs, Quest quest, DescentGameData _data, Random rnd) {
         dgs.monsters = new ArrayList<>();
-        ArrayList<String[]> monsters = quest.getMonsters();
+        List<String[]> monsters = quest.getMonsters();
         for (String[] mDef: monsters) {
-            ArrayList<Monster> monsterGroup = new ArrayList<>();
+            List<Monster> monsterGroup = new ArrayList<>();
 
             String nameDef = mDef[0];
             String name = nameDef.split(":")[0];
@@ -1019,7 +1029,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             int act = quest.getAct();
-            HashMap<String, Token> monsterDef = _data.findMonster(name);
+            Map<String, Token> monsterDef = _data.findMonster(name);
             Token superDef = monsterDef.get("super");
             int[] monsterSetup = ((PropertyIntArray)superDef.getProperty(setupHash)).getValues();
 
@@ -1061,7 +1071,7 @@ public class DescentForwardModel extends AbstractForwardModel {
      * @param tileCoords - coordinate options for the monster
      * @param rnd - random generator
      */
-    private void placeMonster(DescentGameState dgs, Monster monster, ArrayList<Vector2D> tileCoords, Random rnd,
+    private void placeMonster(DescentGameState dgs, Monster monster, List<Vector2D> tileCoords, Random rnd,
                               int hpModifier, Token superDef) {
         // Finish setup of monster
         monster.setProperties(superDef.getProperties());

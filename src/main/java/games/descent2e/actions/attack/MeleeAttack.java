@@ -7,6 +7,8 @@ import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
+import games.descent2e.components.Item;
 
 import java.util.*;
 
@@ -69,8 +71,13 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
         phase = PRE_ATTACK_ROLL;
         interruptPlayer = attackingPlayer;
-        Component weaponCard = state.getComponentById(weaponCardId);
-        Figure figure = (Figure) state.getComponentById(attackingFigure);
+        Hero hero = state.getHeroes().get(attackingPlayer - 1);
+        Item weapon = hero.getWeapons(state).stream()
+                .filter(w -> w.getComponentID() == weaponCardId).findFirst()
+                .orElseThrow(() -> new AssertionError("Weapon not found : " + weaponCardId));
+        state.setDicePool(weapon.getDicePool());
+
+        // The one thing we do now is construct the dice pool to use
         movePhaseForward(state);
 
         // When executing a melee attack we need to:
@@ -95,7 +102,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
             interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
             if (phase.interrupt == null || interruptPlayer == attackingPlayer) {
                 // we have completed the loop
-                executePhase();
+                executePhase(state);
                 interruptPlayer = attackingPlayer;
             }
             if (playerHasInterruptOption(state)) {
@@ -125,13 +132,14 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         return state.playerHasAvailableInterrupt(interruptPlayer, phase.interrupt);
     }
 
-    private void executePhase() {
+    private void executePhase(DescentGameState state) {
         switch (phase) {
             case NOT_STARTED:
             case ALL_DONE:
                 throw new AssertionError("Should never be executed");
             case PRE_ATTACK_ROLL:
-                // TODO : Roll dice
+                // roll dice
+                state.getDicePool().roll(state.getRandom());
                 phase = POST_ATTACK_ROLL;
                 break;
             case POST_ATTACK_ROLL:
@@ -143,7 +151,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                 phase = PRE_DEFENCE_ROLL;
                 break;
             case PRE_DEFENCE_ROLL:
-                if (attackMissed()) // no damage done, so can skip the defence roll
+                if (attackMissed(state)) // no damage done, so can skip the defence roll
                     phase = ALL_DONE;
                 else
                     phase = POST_DEFENCE_ROLL;
@@ -152,16 +160,17 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                 phase = POST_DAMAGE;
                 break;
             case POST_DAMAGE:
-                // TODO: Implement the damage done
+                int damage = state.getDicePool().getDamage();
+                Figure defender = (Figure) state.getComponentById(defendingFigure);
+                int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
+                defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
                 phase = ALL_DONE;
                 break;
         }
     }
 
-    protected boolean attackMissed() {
-        // TODO: Interrogate the current dice pool on the game state
-        // if there are no damage icons, then we missed
-        return false;
+    protected boolean attackMissed(DescentGameState state) {
+        return state.getDicePool().hasRolled() && state.getDicePool().getDamage() == 0;
     }
 
     @Override

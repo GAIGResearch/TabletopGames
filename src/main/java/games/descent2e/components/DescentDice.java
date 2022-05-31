@@ -12,14 +12,14 @@ import java.io.IOException;
 import java.util.*;
 
 public class DescentDice extends Component {
-    private String colour;
+    private DiceType colour;
     private int damage;
     private int surge;
     private int range;
     private int shielding;
     private int nSides;
 
-    private HashMap<Integer, HashMap<String, Integer>> sides;
+    private Map<Integer, Map<String, Integer>> sides;
 
     public DescentDice(){
         super(Utils.ComponentType.DICE);
@@ -39,19 +39,17 @@ public class DescentDice extends Component {
         return 1;
     }
 
-    public static ArrayList<DescentDice> loadDice(String filename)
+    public static List<DescentDice> loadDice(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        ArrayList<DescentDice> dice = new ArrayList<>();
+        List<DescentDice> dice = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
             JSONArray data = (JSONArray) jsonParser.parse(reader);
             for(Object o : data) {
-
                 DescentDice newDice = new DescentDice();
                 newDice.loadDie((JSONObject) o);
-                String colour = newDice.colour;
                 dice.add(newDice);
             }
 
@@ -64,8 +62,9 @@ public class DescentDice extends Component {
     public void loadDie(JSONObject dice) {
         this.nSides = ((Long) ( (JSONArray) dice.get("count")).get(1)).intValue();
         for (int i = 1; i <= nSides; i++) {
-            this.colour = (String) ((JSONArray) dice.get("colour")).get(1);
-            HashMap<String, Integer> sideMap = new HashMap<>();
+            String diceDescriptor = (String) ((JSONArray) dice.get("colour")).get(1);
+            this.colour = DiceType.valueOf(diceDescriptor.toUpperCase(Locale.ROOT));
+            Map<String, Integer> sideMap = new HashMap<>();
             JSONArray diceArray = (JSONArray) ((JSONArray) dice.get(Integer.toString(i))).get(1);
             Long tempDamage = (Long) diceArray.get(2);
             Long tempRange = (Long) diceArray.get(0);
@@ -102,7 +101,7 @@ public class DescentDice extends Component {
         copy.surge = this.surge;
         copy.range = this.range;
         copy.sides = new HashMap<>();
-        for (Map.Entry<Integer, HashMap<String, Integer>> i: sides.entrySet()) {
+        for (Map.Entry<Integer, Map<String, Integer>> i: sides.entrySet()) {
             HashMap<String, Integer> m = new HashMap<>(i.getValue());
             copy.sides.put(i.getKey(), m);
         }
@@ -114,7 +113,7 @@ public class DescentDice extends Component {
         return shielding;
     }
 
-    public String getColour() {
+    public DiceType getColour() {
         return colour;
     }
 }

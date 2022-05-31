@@ -1,6 +1,8 @@
 package games.descent2e.components;
 
+import core.components.Card;
 import core.components.Counter;
+import core.components.Deck;
 import core.components.Token;
 import core.properties.PropertyInt;
 import games.descent2e.DescentTypes;
@@ -64,27 +66,35 @@ public class Figure extends Token {
     public Counter getAttribute(Attribute attribute) {
         return attributes.get(attribute);
     }
+
     public int getAttributeValue(Attribute a) {
         return attributes.get(a).getValue();
     }
+
     public int getAttributeMax(Attribute a) {
         return attributes.get(a).getMaximum();
     }
+
     public int getAttributeMin(Attribute a) {
         return attributes.get(a).getMinimum();
     }
+
     public void setAttribute(Attribute a, Counter c) {
         attributes.put(a, c);
     }
+
     public void setAttribute(Attribute a, int value) {
         attributes.get(a).setValue(value);
     }
+
     public void incrementAttribute(Attribute a, int increment) {
         attributes.get(a).increment(increment);
     }
+
     public void setAttributeToMax(Attribute a) {
         attributes.get(a).setToMax();
     }
+
     public void setAttributeToMin(Attribute a) {
         attributes.get(a).setToMin();
     }
@@ -150,7 +160,7 @@ public class Figure extends Token {
         super.copyComponentTo(copyTo);
         copyTo.tokenType = tokenType;
         copyTo.attributes = new HashMap<>();
-        for (Map.Entry<Attribute, Counter> e: attributes.entrySet()) {
+        for (Map.Entry<Attribute, Counter> e : attributes.entrySet()) {
             copyTo.attributes.put(e.getKey(), e.getValue().copy());
         }
         if (position != null) {
@@ -169,45 +179,47 @@ public class Figure extends Token {
 
     /**
      * Creates a Token objects from a JSON object.
+     *
      * @param figure - JSON to parse into Figure object.
      */
     protected void loadFigure(JSONObject figure) {
         this.componentName = (String) figure.get("id");
-        this.tokenType = (String) ( (JSONArray) figure.get("type")).get(1);
+        this.tokenType = (String) ((JSONArray) figure.get("type")).get(1);
         // TODO: custom load of figure properties
         parseComponent(this, figure);
 
-        for (Attribute a: Attribute.values()) {
-            PropertyInt prop = ((PropertyInt)getProperty(a.name()));
+        for (Attribute a : Attribute.values()) {
+            PropertyInt prop = ((PropertyInt) getProperty(a.name()));
             if (prop != null) {
                 int max = prop.value;
                 this.attributes.put(a, new Counter(max, 0, max, a.name()));
             }
         }
         this.setAttribute(MovePoints, 0);
+        this.setAttribute(Fatigue, 0);
     }
 
     /**
      * Loads all figures from a JSON file.
+     *
      * @param filename - path to file.
      * @return - List of Figure objects.
      */
-    public static List<Figure> loadFigures(String filename)
-    {
+    public static List<Figure> loadFigures(String filename) {
         JSONParser jsonParser = new JSONParser();
         ArrayList<Figure> figures = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
             JSONArray data = (JSONArray) jsonParser.parse(reader);
-            for(Object o : data) {
+            for (Object o : data) {
 
                 Figure newFigure = new Figure("");
                 newFigure.loadFigure((JSONObject) o);
                 figures.add(newFigure);
             }
 
-        }catch (IOException | ParseException e) {
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
 
