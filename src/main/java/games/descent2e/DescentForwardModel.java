@@ -323,14 +323,15 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         return actions;
     }
+
     private HashMap<BoardNode, Double> getAllAdjacentNodes(DescentGameState dgs, Figure figure){
 
         Vector2D figureLocation = figure.getPosition();
         BoardNode figureNode = dgs.masterBoard.getElement(figureLocation.getX(), figureLocation.getY());
-
+        String figureType = figure.getTokenType();
         // Get friendly figures based on token type (monster/hero)
         ArrayList<Vector2D> friendlyFigureLocations = new ArrayList<>();
-        if (figure.getTokenType().equals("Monster")) {
+        if (figureType.equals("Monster")) {
             for (ArrayList<Monster> monsterGroup : dgs.monsters) {
                 for (Monster m : monsterGroup) {
                     friendlyFigureLocations.add(m.getPosition());
@@ -366,11 +367,18 @@ public class DescentForwardModel extends AbstractForwardModel {
                 boolean isFriendly = false;
 
                 //Check if the neighbour node is friendly
-                for(Vector2D friendlyFigureLocation : friendlyFigureLocations){
+                /*for(Vector2D friendlyFigureLocation : friendlyFigureLocations){
                     if (friendlyFigureLocation.getX() == loc.getX() && friendlyFigureLocation.getY() == loc.getY()){
                         isFriendly = true;
                         break;
                     }
+                }*/
+
+
+                PropertyInt figureOnLocation = (PropertyInt)figureNode.getProperty(playersHash);
+                Figure neighbourFigure = (Figure)dgs.getComponentById(figureOnLocation.value);
+                if (figureType.equals(neighbourFigure.getTokenType()){
+                    isFriendly = true;
                 }
 
                 if (isFriendly){
@@ -439,14 +447,14 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         List<AbstractAction> actions = new ArrayList<>();
         for (BoardNode node : allAdjacentNodes.keySet()){
-            if (allAdjacentNodes.get(node) <= f.getRemainingMovePoints()) {
+            if (allAdjacentNodes.get(node) <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
                 Vector2D loc = ((PropertyVector2D) node.getProperty(coordinateHash)).values;
                 actions.add(new Move(loc.copy()));
             }
         }
         for(Vector2D pointOfInterest : allPointOfInterests) {
 
-            //if (distance(pointOfInterest, f.getPosition()) <= f.getRemainingPoints){
+            //if (distance(pointOfInterest, f.getPosition()) <= Figure.Attribute.MovePoints){
             actions.add(new Move(pointOfInterest.copy()));
             //}
         }

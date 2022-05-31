@@ -37,7 +37,6 @@ public class Figure extends Token {
 
     int nActionsExecuted;
 
-    int remainingMovePoints;
     Vector2D position;
     Pair<Integer,Integer> size;
 
@@ -89,8 +88,6 @@ public class Figure extends Token {
     public void setAttributeToMin(Attribute a) {
         attributes.get(a).setToMin();
     }
-    public int getRemainingMovePoints() { return remainingMovePoints; }
-    public void setRemainingMovePoints(int remainingMovePoints) { this.remainingMovePoints = remainingMovePoints; }
 
     public Vector2D getPosition() {
         return position;
