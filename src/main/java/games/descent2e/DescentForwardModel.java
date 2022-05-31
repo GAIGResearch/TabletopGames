@@ -28,6 +28,7 @@ import static utilities.Utils.getNeighbourhood;
 
 public class DescentForwardModel extends AbstractForwardModel {
 
+    public boolean flag = true;
     @Override
     protected void _setup(AbstractGameState firstState) {
         DescentGameState dgs = (DescentGameState) firstState;
@@ -304,9 +305,99 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         return actions;
     }
+    private HashMap<BoardNode, Double> getAllAdjacentNodes(DescentGameState dgs, Figure figure){
+
+        Vector2D figureLocation = figure.getLocation();
+        BoardNode figureNode = dgs.masterBoard.getElement(figureLocation.getX(), figureLocation.getY());
+
+        ArrayList<Vector2D> friendlyFigureLocations = new ArrayList<>();
+        for (ArrayList<Monster> monsterGroup : dgs.monsters){
+            for (Monster m : monsterGroup) {
+                friendlyFigureLocations.add(m.getLocation());
+            }
+        }
+        for (Hero h : dgs.heroes){
+            friendlyFigureLocations.add(h.getLocation());
+
+        }
+
+        //<Board Node, Cost to get there>
+        HashMap<BoardNode, Double> expandedBoardNodes = new HashMap<>();
+        HashMap<BoardNode, Double> nodesToBeExpanded = new HashMap<>();
+        HashMap<BoardNode, Double> allAdjacentNodes = new HashMap<>();
+
+        nodesToBeExpanded.put(figureNode, 0.0);
+
+        while (!nodesToBeExpanded.isEmpty()){
+            //Pick a node to expand, and remove it from the map
+            Map.Entry<BoardNode,Double> entry = nodesToBeExpanded.entrySet().iterator().next();
+            BoardNode expandingNode = entry.getKey();
+            Double expandingNodeCost = entry.getValue();
+            nodesToBeExpanded.remove(expandingNode);
+
+            HashMap<Integer, Double> neighbours =expandingNode.getNeighbours();
+            for (Integer neighbourID : neighbours.keySet()){
+                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourID);
+                Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+
+                double costToMoveToNeighbour = expandingNode.getNeighbourCost(neighbour);
+                double totalCost = expandingNodeCost + costToMoveToNeighbour;
+                boolean isFriendly = false;
+
+                //Check if the neighbour node is friendly
+                for(Vector2D friendlyFigureLocation : friendlyFigureLocations){
+                    if (friendlyFigureLocation.getX() == loc.getX() && friendlyFigureLocation.getY() == loc.getY()){
+                        isFriendly = true;
+                        break;
+                    }
+                }
+
+                //if the node is friendly and not expanded - add it to the expansion list
+                //if the node is friendly and expanded but the cost was higher - add it to the expansion list
+                //if the node is not friendly - add it to adjacentNodeList
+                if (isFriendly){
+                    if(!expandedBoardNodes.containsKey(neighbour)){
+                        nodesToBeExpanded.put(neighbour, totalCost);
+                    } else if (expandedBoardNodes.containsKey(neighbour) && expandedBoardNodes.get(neighbour) > totalCost){
+                        expandedBoardNodes.remove(neighbour);
+                        nodesToBeExpanded.put(neighbour, totalCost);
+                    }
+                } else {
+                    if (!allAdjacentNodes.containsKey(neighbour) || allAdjacentNodes.get(neighbour) > totalCost){
+                        allAdjacentNodes.put(neighbour, totalCost);
+                    }
+                }
+
+                expandedBoardNodes.put(neighbour, totalCost);
+            }
+
+        }
+
+
+        if (flag == true) {
+            System.out.println("My location: " + ((PropertyVector2D) figureNode.getProperty(coordinateHash)).values);
+            for (BoardNode node : allAdjacentNodes.keySet()){
+                System.out.println(((PropertyVector2D) node.getProperty(coordinateHash)).values + ": " + allAdjacentNodes.get(node));
+            }
+            flag = false;
+        }
+
+        return allAdjacentNodes;
+    }
 
     private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
+
+        Map<BoardNode, Double> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
+        //TODO: ADD points of interest nodes
         List<AbstractAction> actions = new ArrayList<>();
+
+        for (BoardNode node : allAdjacentNodes.keySet()){
+
+            if (allAdjacentNodes.get(node) <= f.getRemainingMovePoints()) {
+                Vector2D loc = ((PropertyVector2D) node.getProperty(coordinateHash)).values;
+                actions.add(new Move(loc.copy()));
+            }
+        }
 
         Vector2D currentLocation = f.getLocation();
         BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
