@@ -385,11 +385,13 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
 
 
-                //PropertyInt figureOnLocation = (PropertyInt)figureNode.getProperty(playersHash);
-                //Figure neighbourFigure = (Figure)dgs.getComponentById(figureOnLocation.value);
-                /*if (figureType.equals(neighbourFigure.getTokenType())){
-                    isFriendly = true;
-                }*/
+                PropertyInt figureOnLocation = (PropertyInt)neighbour.getProperty(playersHash);
+                if (figureOnLocation.value != -1) {
+                    Figure neighbourFigure = (Figure) dgs.getComponentById(figureOnLocation.value);
+                    if (figureType.equals(neighbourFigure.getTokenType())) {
+                        isFriendly = true;
+                    }
+                }
 
                 if (isFriendly){
                     //if the node is friendly and not expanded - add it to the expansion list
@@ -438,11 +440,12 @@ public class DescentForwardModel extends AbstractForwardModel {
                     pointsOfInterest.add(m.getPosition());
                 }
             }
+            /*
             for (DToken dToken : dgs.tokens){
                 if (dToken.getPosition() != null){
                     pointsOfInterest.add(dToken.getPosition());
                 }
-            }
+            }*/
         }
         /*
         for (Vector2D point : pointsOfInterest) {
