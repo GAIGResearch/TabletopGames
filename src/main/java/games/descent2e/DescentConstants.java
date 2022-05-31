@@ -70,6 +70,7 @@ public class DescentConstants {
     public final static int movementHash = Hash.GetInstance().hash("movement");
     public final static int fatigueHash = Hash.GetInstance().hash("fatigue");
     public final static int healthHash = Hash.GetInstance().hash("hp");
+    public final static int attackHash = Hash.GetInstance().hash("attack");
 
     public final static int mightHash = Hash.GetInstance().hash("might");
     public final static int knowledgeHash = Hash.GetInstance().hash("knowledge");

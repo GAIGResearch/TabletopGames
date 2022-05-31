@@ -9,6 +9,7 @@ import games.descent2e.actions.Triggers;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Item;
+import games.descent2e.components.Monster;
 
 import java.util.*;
 
@@ -63,6 +64,9 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         this.defendingFigure = defendingFigure;
         this.defendingPlayer = defendingPlayer;
     }
+    public MeleeAttack( int attackingFigure, int attackingPlayer, int defendingFigure, int defendingPlayer) {
+        this(-1, attackingFigure, attackingPlayer, defendingFigure, defendingPlayer);
+    }
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -71,12 +75,16 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
         phase = PRE_ATTACK_ROLL;
         interruptPlayer = attackingPlayer;
-        Hero hero = state.getHeroes().get(attackingPlayer - 1);
-        Item weapon = hero.getWeapons().stream()
-                .filter(w -> w.getComponentID() == weaponCardId).findFirst()
-                .orElseThrow(() -> new AssertionError("Weapon not found : " + weaponCardId));
-        state.setDicePool(weapon.getDicePool());
-
+        if (attackingPlayer == 0) {
+            Monster monster = (Monster) state.getComponentById(attackingFigure);
+            state.setDicePool(monster.getAttackDice());
+        } else {
+            Hero hero = state.getHeroes().get(attackingPlayer - 1);
+            Item weapon = hero.getWeapons().stream()
+                    .filter(w -> w.getComponentID() == weaponCardId).findFirst()
+                    .orElseThrow(() -> new AssertionError("Weapon not found : " + weaponCardId));
+            state.setDicePool(weapon.getDicePool());
+        }
         // The one thing we do now is construct the dice pool to use
         movePhaseForward(state);
 
