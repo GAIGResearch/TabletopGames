@@ -310,15 +310,18 @@ public class DescentForwardModel extends AbstractForwardModel {
         Vector2D figureLocation = figure.getLocation();
         BoardNode figureNode = dgs.masterBoard.getElement(figureLocation.getX(), figureLocation.getY());
 
+        // Get friendly figures based on token type (monster/hero)
         ArrayList<Vector2D> friendlyFigureLocations = new ArrayList<>();
-        for (ArrayList<Monster> monsterGroup : dgs.monsters){
-            for (Monster m : monsterGroup) {
-                friendlyFigureLocations.add(m.getLocation());
+        if (figure.getTokenType().equals("monster")) {
+            for (ArrayList<Monster> monsterGroup : dgs.monsters) {
+                for (Monster m : monsterGroup) {
+                    friendlyFigureLocations.add(m.getLocation());
+                }
             }
-        }
-        for (Hero h : dgs.heroes){
-            friendlyFigureLocations.add(h.getLocation());
-
+        } else {
+            for (Hero h : dgs.heroes) {
+                friendlyFigureLocations.add(h.getLocation());
+            }
         }
 
         //<Board Node, Cost to get there>
@@ -327,7 +330,6 @@ public class DescentForwardModel extends AbstractForwardModel {
         HashMap<BoardNode, Double> allAdjacentNodes = new HashMap<>();
 
         nodesToBeExpanded.put(figureNode, 0.0);
-
         while (!nodesToBeExpanded.isEmpty()){
             //Pick a node to expand, and remove it from the map
             Map.Entry<BoardNode,Double> entry = nodesToBeExpanded.entrySet().iterator().next();
@@ -335,6 +337,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             Double expandingNodeCost = entry.getValue();
             nodesToBeExpanded.remove(expandingNode);
 
+            // Go through all the neighbour nodes
             HashMap<Integer, Double> neighbours =expandingNode.getNeighbours();
             for (Integer neighbourID : neighbours.keySet()){
                 BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourID);
@@ -352,28 +355,27 @@ public class DescentForwardModel extends AbstractForwardModel {
                     }
                 }
 
-                //if the node is friendly and not expanded - add it to the expansion list
-                //if the node is friendly and expanded but the cost was higher - add it to the expansion list
-                //if the node is not friendly - add it to adjacentNodeList
                 if (isFriendly){
+                    //if the node is friendly and not expanded - add it to the expansion list
                     if(!expandedBoardNodes.containsKey(neighbour)){
                         nodesToBeExpanded.put(neighbour, totalCost);
+                    //if the node is friendly and expanded but the cost was higher - add it to the expansion list
                     } else if (expandedBoardNodes.containsKey(neighbour) && expandedBoardNodes.get(neighbour) > totalCost){
                         expandedBoardNodes.remove(neighbour);
                         nodesToBeExpanded.put(neighbour, totalCost);
                     }
                 } else {
+                    //if the node is not friendly - add it to adjacentNodeList
                     if (!allAdjacentNodes.containsKey(neighbour) || allAdjacentNodes.get(neighbour) > totalCost){
                         allAdjacentNodes.put(neighbour, totalCost);
                     }
                 }
-
                 expandedBoardNodes.put(neighbour, totalCost);
             }
 
         }
 
-
+        /*
         if (flag == true) {
             System.out.println("My location: " + ((PropertyVector2D) figureNode.getProperty(coordinateHash)).values);
             for (BoardNode node : allAdjacentNodes.keySet()){
@@ -381,6 +383,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
             flag = false;
         }
+        */
 
         return allAdjacentNodes;
     }
