@@ -54,6 +54,78 @@ public class Hero extends Figure {
         super(name, ID);
     }
 
+    public Deck<Card> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(Deck<Card> skills) {
+        this.skills = skills;
+    }
+
+    public Deck<Card> getHandEquipment() {
+        return handEquipment;
+    }
+
+    public void setHandEquipment(Deck<Card> handEquipment) {
+        this.handEquipment = handEquipment;
+    }
+
+    public Card getArmor() {
+        return armor;
+    }
+
+    public void setArmor(Card armor) {
+        this.armor = armor;
+    }
+
+    public Deck<Card> getOtherEquipment() {
+        return otherEquipment;
+    }
+
+    public void setOtherEquipment(Deck<Card> otherEquipment) {
+        this.otherEquipment = otherEquipment;
+    }
+
+    public HashMap<String, Integer> getEquipSlotsAvailable() {
+        return equipSlotsAvailable;
+    }
+
+    public void setEquipSlotsAvailable(HashMap<String, Integer> equipSlotsAvailable) {
+        this.equipSlotsAvailable = equipSlotsAvailable;
+    }
+
+    public String[] getDefence() {
+        return defence;
+    }
+
+    public void setDefence(String[] defence) {
+        this.defence = defence;
+    }
+
+    public String getHeroicFeat() {
+        return heroicFeat;
+    }
+
+    public void setHeroicFeat(String heroicFeat) {
+        this.heroicFeat = heroicFeat;
+    }
+
+    public boolean isFeatAvailable() {
+        return featAvailable;
+    }
+
+    public void setFeatAvailable(boolean featAvailable) {
+        this.featAvailable = featAvailable;
+    }
+
+    public String getAbility() {
+        return ability;
+    }
+
+    public void setAbility(String ability) {
+        this.ability = ability;
+    }
+
     public boolean equip(Card c) {
         // Check if equipment
         Property cost = c.getProperty(costHash);

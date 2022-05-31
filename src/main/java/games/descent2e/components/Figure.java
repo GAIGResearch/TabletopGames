@@ -16,7 +16,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static games.descent2e.DescentConstants.*;
 import static games.descent2e.components.Figure.Attribute.*;
 
 // TODO: figure out how to do ability/heroic-feat
@@ -36,7 +35,7 @@ public class Figure extends Token {
     HashMap<Attribute, Counter> attributes;
 
     int nActionsExecuted;
-    Vector2D location;
+    Vector2D position;
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
@@ -88,12 +87,12 @@ public class Figure extends Token {
         attributes.get(a).setToMin();
     }
 
-    public Vector2D getLocation() {
-        return location;
+    public Vector2D getPosition() {
+        return position;
     }
 
-    public void setLocation(Vector2D location) {
-        this.location = location;
+    public void setPosition(Vector2D position) {
+        this.position = position;
     }
 
     public int getNActionsExecuted() {
@@ -152,8 +151,8 @@ public class Figure extends Token {
         for (Map.Entry<Attribute, Counter> e: attributes.entrySet()) {
             copyTo.attributes.put(e.getKey(), e.getValue().copy());
         }
-        if (location != null) {
-            copyTo.location = location.copy();
+        if (position != null) {
+            copyTo.position = position.copy();
         }
         copyTo.nActionsExecuted = nActionsExecuted;
         copyTo.size = size.copy();

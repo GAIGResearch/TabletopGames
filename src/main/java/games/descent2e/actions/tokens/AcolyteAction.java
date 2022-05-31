@@ -1,7 +1,6 @@
 package games.descent2e.actions.tokens;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
@@ -32,6 +31,11 @@ public class AcolyteAction extends TokenAction {
     }
 
     @Override
+    public boolean equals(Object o) {
+        return super.equals(o) && o instanceof AcolyteAction;
+    }
+
+    @Override
     public String getString(AbstractGameState gameState) {
         return "Acolyte end turn effect";
     }
@@ -40,7 +44,7 @@ public class AcolyteAction extends TokenAction {
     public boolean execute(DescentGameState gs) {
         DToken acolyte = (DToken) gs.getComponentById(tokenID);
         Hero hero = gs.getHeroes().get(acolyte.getOwnerId()-1);
-        Vector2D loc = hero.getLocation();
+        Vector2D loc = hero.getPosition();
         GridBoard board = gs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
         for (DToken token: gs.getTokens()) {

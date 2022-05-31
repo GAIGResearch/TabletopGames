@@ -101,7 +101,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Place player in random starting location
             choice = rnd.nextInt(playerStartingLocations.size());
             Vector2D location = playerStartingLocations.get(choice);
-            figure.setLocation(location);
+            figure.setPosition(location);
             PropertyInt prop = new PropertyInt("players", figure.getComponentID());
 //            dgs.masterBoard.getElement(location.getX(), location.getY()).setProperty(prop);  TODO turn back in
             playerStartingLocations.remove(choice);
@@ -244,7 +244,6 @@ public class DescentForwardModel extends AbstractForwardModel {
         int currentPlayer = gameState.getCurrentPlayer();
         int nActions = ((DescentParameters) dgs.getGameParameters()).nActionsPerPlayer;
 
-
         // Init action list
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Figure actingFigure = dgs.getActingFigure();
@@ -272,14 +271,27 @@ public class DescentForwardModel extends AbstractForwardModel {
                 actions.addAll(moveActions(dgs, actingFigure));
             }
 
-            // TODO other actions
-            // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes]
-            // - Rest
-            // - Perform "action" ability/skill  // TODO: add these to list of figure's actions, have some mapping to functions
-            // - Open/close a door
-            // - Revive hero
+            // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
+            // - Rest TODO
+            // - Open/close a door TODO
+            // - Revive hero TODO
+
             // - Search
-            // - Stand up
+            if (actingFigure instanceof Hero) {
+                // Only heroes can search for adjacent Search tokens (or ones they're sitting on top of
+                Vector2D loc = actingFigure.getPosition();
+                GridBoard board = dgs.getMasterBoard();
+                List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+                for (DToken token: dgs.tokens) {
+                    if (token.getDescentTokenType() == DescentToken.Search
+                            && token.getPosition() != null
+                            && (neighbours.contains(token.getPosition())) || token.getPosition().equals(loc)) {
+                        actions.addAll(token.getEffects());
+                    }
+                }
+            }
+
+            // - Stand up TODO
 
             // - Special (specified by quest)
             if (actingFigure.getAbilities() != null) {
@@ -315,7 +327,7 @@ public class DescentForwardModel extends AbstractForwardModel {
     private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
         List<AbstractAction> actions = new ArrayList<>();
 
-        Vector2D currentLocation = f.getLocation();
+        Vector2D currentLocation = f.getPosition();
         BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
 
         // Check if figure can still move
@@ -983,7 +995,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                     }
                 }
                 if (canPlace) {
-                    monster.setLocation(option.copy());
+                    monster.setPosition(option.copy());
 
                     for (int i = 0; i < h; i++) {
                         for (int j = 0; j < w; j++) {

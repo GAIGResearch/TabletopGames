@@ -47,7 +47,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
         DescentGameState dgs = (DescentGameState) state;
         DToken acolyte = (DToken) dgs.getComponentById(tokenID);
         Hero hero = dgs.getHeroes().get(acolyte.getOwnerId()-1);
-        Vector2D loc = hero.getLocation();
+        Vector2D loc = hero.getPosition();
         GridBoard board = dgs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
         for (Vector2D n: neighbours) {
