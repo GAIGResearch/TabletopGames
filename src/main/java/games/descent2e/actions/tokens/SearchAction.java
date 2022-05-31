@@ -22,7 +22,7 @@ public class SearchAction extends TokenAction {
 
     @Override
     public SearchAction copy() {
-        return null;
+        return this;
     }
 
     @Override
