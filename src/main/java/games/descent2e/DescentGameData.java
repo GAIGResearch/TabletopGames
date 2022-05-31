@@ -3,6 +3,11 @@ package games.descent2e;
 import core.AbstractGameData;
 import core.components.*;
 import core.properties.PropertyString;
+import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.tokens.TokenAction;
+import games.descent2e.components.Figure;
+import games.descent2e.components.tokens.DToken;
+import games.descent2e.components.DescentDice;
 import games.descent2e.components.Hero;
 import games.descent2e.concepts.Quest;
 import org.json.simple.JSONArray;
@@ -14,6 +19,7 @@ import utilities.Vector2D;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static core.components.Component.parseComponent;
@@ -25,6 +31,7 @@ public class DescentGameData extends AbstractGameData {
     List<GraphBoard> boardConfigurations;
     List<Hero> heroes;
     List<Deck<Card>> decks;
+    List<DescentDice> dice;
     List<Quest> quests;
     List<Quest> sideQuests;
     HashMap<String, HashMap<String, Token>> monsters;
@@ -36,6 +43,7 @@ public class DescentGameData extends AbstractGameData {
 
         heroes = Hero.loadHeroes(dataPath + "heroes.json");
         monsters = loadMonsters(dataPath + "monsters.json");
+        dice = DescentDice.loadDice(dataPath + "/components/dice.json");
 
         quests = loadQuests(dataPath + "mainQuests.json");
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");
@@ -177,6 +185,44 @@ public class DescentGameData extends AbstractGameData {
                     q.setMonsters(qMonsters);
                 }
 
+                // Find tokens
+                ArrayList<DToken.DTokenDef> qTokens = new ArrayList<>();
+                JSONArray ts = (JSONArray) obj.get("tokens");
+                if (ts != null) {
+                    for (Object o1 : ts) {
+                        JSONArray tDef = (JSONArray) o1;
+                        DToken.DTokenDef def = new DToken.DTokenDef();
+                        def.setTokenType(DescentTypes.DescentToken.valueOf((String) tDef.get(0)));
+                        def.setAltName((String) tDef.get(1));
+                        def.setSetupHowMany((String) tDef.get(2));
+                        def.setLocations(jsonArrayToStringArray((JSONArray) tDef.get(3)));
+
+                        String[] rules = ((String) tDef.get(4)).split(";");
+                        ArrayList<TokenAction> effects = new ArrayList<>();
+                        HashMap<Figure.Attribute, Integer> attributeModifiers = new HashMap<>();
+                        for (String rule: rules) {
+                            if (rule.contains("AttributeModifier")) {
+                                // An attribute modifier
+                                String[] split = rule.split(":");
+                                attributeModifiers.put(Figure.Attribute.valueOf(split[1]), Integer.parseInt(split[2]));
+                            } else if (rule.contains("Effect")) {
+                                // An effect, needs a no-arg constructor
+                                try {
+                                    Class<?> clazz = Class.forName("games.descent2e.actions.tokens." + rule.split(":")[1]);
+                                    TokenAction effect = (TokenAction) clazz.getDeclaredConstructor().newInstance();
+                                    effects.add(effect);
+                                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                        def.setEffects(effects);
+                        def.setAttributeModifiers(attributeModifiers);
+                        qTokens.add(def);
+                    }
+                    q.setTokens(qTokens);
+                }
+
                 // Quest read complete
                 quests.add(q);
             }
@@ -186,6 +232,14 @@ public class DescentGameData extends AbstractGameData {
         }
 
         return quests;
+    }
+
+    private static String[] jsonArrayToStringArray(JSONArray ar) {
+        String[] ar2 = new String[ar.size()];
+        for (int i = 0; i < ar.size(); i++) {
+            ar2[i] = (String) ar.get(i);
+        }
+        return ar2;
     }
 
     private static HashMap<String, HashMap<String, Token>> loadMonsters(String dataPath) {

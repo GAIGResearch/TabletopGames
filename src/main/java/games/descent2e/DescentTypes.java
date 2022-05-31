@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 
 public class DescentTypes {
 
@@ -122,5 +123,24 @@ public class DescentTypes {
 //        Weaken,
 //        Doom,
 //        Terrify
+    }
+
+    public enum DescentToken {
+        Search ("search.png", 1),
+        Villager ("villager.png", 2),
+        WhiteObjective("whiteobjective.png", 1);
+        String imgPath; int nImgOptions;
+        DescentToken(String imgPath, int nImgOptions) {
+            this.imgPath = imgPath;
+            this.nImgOptions = nImgOptions;
+        }
+        public String getImgPath(Random rnd) {
+            String path = imgPath;
+            if (nImgOptions > 1) {
+                String[] split = imgPath.split("\\.");
+                path = split[0] + rnd.nextInt(nImgOptions) + "." + split[1];
+            }
+            return "tokens/" + path;
+        }
     }
 }

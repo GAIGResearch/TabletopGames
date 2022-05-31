@@ -1,8 +1,10 @@
 package games.descent2e.components;
 
+import core.components.Counter;
 import core.components.Token;
 import core.properties.PropertyInt;
 import games.descent2e.DescentTypes;
+import games.descent2e.actions.DescentAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -14,25 +16,38 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static games.descent2e.DescentConstants.*;
+import static games.descent2e.components.Figure.Attribute.*;
 
 // TODO: figure out how to do ability/heroic-feat
 public class Figure extends Token {
-    int xp;
-    int movePoints;
-    int hp;  // TODO: reset this every quest to max HP
+
+    public enum Attribute {
+        MovePoints,
+        Health,
+        XP,
+        Fatigue,
+        Might,
+        Willpower,
+        Knowledge,
+        Awareness
+    }
+
+    HashMap<Attribute, Counter> attributes;
 
     int nActionsExecuted;
-    Vector2D location;
+    Vector2D position;
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
+    ArrayList<DescentAction> abilities;  // TODO track exhausted etc.
 
     public Figure(String name) {
         super(name);
-        xp = 0;
         size = new Pair<>(1,1);
         conditions = new HashSet<>();
+        attributes = new HashMap<>();
+        attributes.put(XP, new Counter(0, 0, -1, "XP"));
+        abilities = new ArrayList<>();
     }
 
     protected Figure(String name, int ID) {
@@ -40,44 +55,44 @@ public class Figure extends Token {
     }
 
     public void resetRound() {
-        if (getProperty(movementHash) != null) {
-            this.movePoints = ((PropertyInt) getProperty(movementHash)).value;
-        } else {
-            this.movePoints = 0;
-        }
+        this.attributes.get(MovePoints).setToMax();
         this.nActionsExecuted = 0;
     }
 
-    public int getXP() {
-        return xp;
+    public Counter getAttribute(Attribute attribute) {
+        return attributes.get(attribute);
+    }
+    public int getAttributeValue(Attribute a) {
+        return attributes.get(a).getValue();
+    }
+    public int getAttributeMax(Attribute a) {
+        return attributes.get(a).getMaximum();
+    }
+    public int getAttributeMin(Attribute a) {
+        return attributes.get(a).getMinimum();
+    }
+    public void setAttribute(Attribute a, Counter c) {
+        attributes.put(a, c);
+    }
+    public void setAttribute(Attribute a, int value) {
+        attributes.get(a).setValue(value);
+    }
+    public void incrementAttribute(Attribute a, int increment) {
+        attributes.get(a).increment(increment);
+    }
+    public void setAttributeToMax(Attribute a) {
+        attributes.get(a).setToMax();
+    }
+    public void setAttributeToMin(Attribute a) {
+        attributes.get(a).setToMin();
     }
 
-    public void setXP(int xp) {
-        this.xp = xp;
+    public Vector2D getPosition() {
+        return position;
     }
 
-    public int getMovePoints() {
-        return movePoints;
-    }
-
-    public void setMovePoints(int movePoints) {
-        this.movePoints = movePoints;
-    }
-
-    public int getHp() {
-        return hp;
-    }
-
-    public void setHp(int hp) {
-        this.hp = hp;
-    }
-
-    public Vector2D getLocation() {
-        return location;
-    }
-
-    public void setLocation(Vector2D location) {
-        this.location = location;
+    public void setPosition(Vector2D position) {
+        this.position = position;
     }
 
     public int getNActionsExecuted() {
@@ -112,6 +127,16 @@ public class Figure extends Token {
         return conditions.contains(condition);
     }
 
+    public void addAbility(DescentAction ability) {
+        this.abilities.add(ability);
+    }
+    public void removeAbility(DescentAction ability) {
+        this.abilities.remove(ability);
+    }
+    public ArrayList<DescentAction> getAbilities() {
+        return abilities;
+    }
+
     @Override
     public Figure copy() {
         Figure copy = new Figure(componentName, componentID);
@@ -121,16 +146,23 @@ public class Figure extends Token {
 
     public void copyComponentTo(Figure copyTo) {
         super.copyComponentTo(copyTo);
-        copyTo.xp = xp;
         copyTo.tokenType = tokenType;
-        copyTo.movePoints = movePoints;
-        copyTo.hp = hp;
-        if (location != null) {
-            copyTo.location = location.copy();
+        copyTo.attributes = new HashMap<>();
+        for (Map.Entry<Attribute, Counter> e: attributes.entrySet()) {
+            copyTo.attributes.put(e.getKey(), e.getValue().copy());
+        }
+        if (position != null) {
+            copyTo.position = position.copy();
         }
         copyTo.nActionsExecuted = nActionsExecuted;
         copyTo.size = size.copy();
         copyTo.conditions = new HashSet<>(conditions);
+        copyTo.abilities = new ArrayList<>();
+        if (abilities != null) {
+            for (DescentAction ability : abilities) {
+                copyTo.abilities.add(ability.copy());
+            }
+        }
     }
 
     /**
@@ -142,8 +174,16 @@ public class Figure extends Token {
         this.tokenType = (String) ( (JSONArray) figure.get("type")).get(1);
         // TODO: custom load of figure properties
         parseComponent(this, figure);
-        this.movePoints = ((PropertyInt)getProperty(movementHash)).value;
-        this.hp = ((PropertyInt)getProperty(healthHash)).value;
+
+        for (Attribute a: Attribute.values()) {
+            PropertyInt prop = ((PropertyInt)getProperty(a.name()));
+            if (prop != null) {
+                int max = prop.value;
+                this.attributes.put(a, new Counter(max, 0, max, a.name()));
+            }
+        }
+        this.setAttribute(MovePoints, 0);
+        this.setAttribute(Fatigue, 0);
     }
 
     /**

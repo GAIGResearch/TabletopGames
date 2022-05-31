@@ -8,6 +8,7 @@ import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
+import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import gui.views.ComponentView;
@@ -113,10 +114,22 @@ public class DescentGridBoardView extends ComponentView {
     @Override
     protected void paintComponent(Graphics g) {
         drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard) component, panX, panY, gameState.getGridReferences(), gameState.getTileReferences());
+        String dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
+
+        // Draw tokens
+        for (DToken dt: gameState.getTokens()) {
+            if (dt.getPosition() != null) {
+                String imgPath = dataPath + dt.getDescentTokenType().getImgPath(new Random(gameState.getGameParameters().getRandomSeed()));
+                Image img = ImageIO.GetInstance().getImage(imgPath);
+                g.drawImage(img, panX + dt.getPosition().getX() * itemSize, panY + dt.getPosition().getY() * itemSize, itemSize, itemSize, null);
+            } else {
+                // todo check if player owns, draw in player area
+            }
+        }
 
         // Draw heroes
         for (Figure f: gameState.getHeroes()) {
-            Vector2D loc = f.getLocation();
+            Vector2D loc = f.getPosition();
             g.setColor(stringToColor(((PropertyColor)f.getProperty(colorHash)).valueStr));
             g.fillOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
             g.setColor(Color.black);
@@ -124,11 +137,10 @@ public class DescentGridBoardView extends ComponentView {
         }
         // Draw monsters
         for (ArrayList<Monster> monsterGroup: gameState.getMonsters()) {
-            String dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
             String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
 
             for (Monster m: monsterGroup) {
-                Vector2D loc = m.getLocation();
+                Vector2D loc = m.getPosition();
                 if (loc == null) continue;
                 int orientation = m.getOrientation();
 
@@ -152,7 +164,7 @@ public class DescentGridBoardView extends ComponentView {
 
 
     public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
-                                                          HashMap<String, HashSet<Vector2D>> gridReferences,
+                                                          HashMap<String, HashMap<Vector2D,Vector2D>> gridReferences,
                                                           int[][] tileReferences) {
         int width = gridBoard.getWidth() * itemSize;
         int height = gridBoard.getHeight() * itemSize;

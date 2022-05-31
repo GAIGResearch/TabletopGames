@@ -2,12 +2,17 @@ package games.descent2e;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.components.Component;
-import core.components.GridBoard;
-import core.components.Token;
+import core.actions.AbstractAction;
+import core.actions.DoNothing;
+import core.actions.AbstractAction;
+import core.actions.DoNothing;
+import core.components.*;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
+import games.descent2e.components.tokens.DToken;
+import games.descent2e.actions.Triggers;
+import games.descent2e.components.DescentDice;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
@@ -23,17 +28,24 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     DescentGameData data;
 
     // For reference only
-    HashMap<Integer, GridBoard> tiles;  // Mapping from board node ID in board configuration to tile configuration
-    int[][] tileReferences;  // int corresponds to component ID of tile at that location in master board
-    HashMap<String, HashSet<Vector2D>> gridReferences;  // Mapping from tile name to list of coordinates in master board for each cell
+
+    // Mapping from board node ID in board configuration to tile configuration
+    HashMap<Integer, GridBoard> tiles;
+    // int corresponds to component ID of tile at that location in master board
+    int[][] tileReferences;
+    // Mapping from tile name to list of coordinates in master board for each cell (and corresponding coordinates on original tile)
+    HashMap<String, HashMap<Vector2D, Vector2D>> gridReferences;
     boolean initData;
 
-
+    Deck<Card> searchCards; // TODO, placeholder
     GridBoard masterBoard;
+    List<DescentDice> dice;
+    Map<String, List<DescentDice>> dicePool;
     ArrayList<Hero> heroes;
     Figure overlord;
     ArrayList<ArrayList<Monster>> monsters;
     int overlordPlayer;
+    ArrayList<DToken> tokens;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -45,6 +57,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         super(gameParameters, new DescentTurnOrder(nPlayers), GameType.Descent2e);
         tiles = new HashMap<>();
         data = new DescentGameData();
+        dice = new ArrayList<>();
+        dicePool = new HashMap<>();
 
         heroes = new ArrayList<>();
         monsters = new ArrayList<>();
@@ -59,6 +73,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             components.addAll(data.tiles);
             components.addAll(data.heroes);
             components.addAll(data.boardConfigurations);
+            components.addAll(data.dice);
             for (HashMap<String, Token> m : data.monsters.values()) {
                 components.addAll(m.values());
             }
@@ -66,6 +81,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         }
         // Current state
         components.add(masterBoard);
+        if (tokens != null) {
+            components.addAll(tokens);
+        }
+        components.add(searchCards);
         // TODO
         return components;
     }
@@ -91,6 +110,16 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         copy.tileReferences = tileReferences.clone();  // TODO deep
         copy.gridReferences = new HashMap<>(gridReferences); // TODO deep
         copy.initData = initData;
+        copy.tokens = new ArrayList<>();
+        for (DToken t: tokens) {
+            copy.tokens.add(t.copy());
+        }
+        for (DescentDice d : dice) {
+            copy.dice.add(d.copy());
+        }
+        if (searchCards != null) {
+            copy.searchCards = searchCards.copy();
+        }
         // TODO
         return copy;
     }
@@ -119,25 +148,18 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected boolean _equals(Object o) {
+    public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DescentGameState)) return false;
         if (!super.equals(o)) return false;
         DescentGameState that = (DescentGameState) o;
-        return overlordPlayer == that.overlordPlayer &&
-                Objects.equals(tiles, that.tiles) &&
-                Arrays.equals(tileReferences, that.tileReferences) &&
-                Objects.equals(gridReferences, that.gridReferences) &&
-                Objects.equals(masterBoard, that.masterBoard) &&
-                Objects.equals(heroes, that.heroes) &&
-                Objects.equals(overlord, that.overlord) &&
-                Objects.equals(monsters, that.monsters);
+        return initData == that.initData && overlordPlayer == that.overlordPlayer && Objects.equals(data, that.data) && Objects.equals(tiles, that.tiles) && Arrays.equals(tileReferences, that.tileReferences) && Objects.equals(gridReferences, that.gridReferences) && Objects.equals(searchCards, that.searchCards) && Objects.equals(masterBoard, that.masterBoard) && Objects.equals(dice, that.dice) && Objects.equals(dicePool, that.dicePool) && Objects.equals(heroes, that.heroes) && Objects.equals(overlord, that.overlord) && Objects.equals(monsters, that.monsters) && Objects.equals(tokens, that.tokens);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), tiles, gridReferences, masterBoard, heroes, overlord, monsters, overlordPlayer);
-        result = 31 * result + Arrays.hashCode(tileReferences);
+        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards, masterBoard, dice, dicePool, heroes, overlord, monsters, overlordPlayer, tokens);
+        result = 31 * result + Arrays.deepHashCode(tileReferences);
         return result;
     }
 
@@ -153,16 +175,63 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return heroes;
     }
 
+    public List<DescentDice> getDice(){return dice;}
+
+    public Map<String, List<DescentDice>> getDicePool(){
+        return dicePool;
+    }
+
+    public void setDicePool(Map<String, List<DescentDice>> newPool){
+        dicePool = newPool;
+    }
+
     public ArrayList<ArrayList<Monster>> getMonsters() {
         return monsters;
+    }
+
+    public Deck<Card> getSearchCards() {
+        return searchCards;
+    }
+
+    public Figure getActingFigure() {
+        // Find current monster group + monster playing
+        int monsterGroupIdx = ((DescentTurnOrder) getTurnOrder()).monsterGroupActingNext;
+        ArrayList<Monster> monsterGroup = getMonsters().get(monsterGroupIdx);
+        int nextMonster = ((DescentTurnOrder) getTurnOrder()).monsterActingNext;
+
+        // Find currently acting figure (hero or monster)
+        Figure actingFigure;
+        if (getCurrentPlayer() != 0) {
+            // If hero player, get corresponding hero
+            actingFigure = getHeroes().get(getCurrentPlayer() - 1);
+        } else {
+            // Otherwise, monster is playing
+            actingFigure = monsterGroup.get(nextMonster);
+        }
+        return actingFigure;
+    }
+
+    public boolean playerHasAvailableInterrupt(int player, Triggers trigger) {
+        return false;
+    }
+    public List<AbstractAction> getInterruptActionsFor(int player, Triggers trigger) {
+        List<AbstractAction> retValue = new ArrayList<>();
+        // TODO: Run through the inventory or items/cards/abilities to see which have
+        // an action that can be used at this trigger
+        retValue.add(new DoNothing());
+        return retValue;
     }
 
     public int[][] getTileReferences() {
         return tileReferences;
     }
 
-    public HashMap<String, HashSet<Vector2D>> getGridReferences() {
+    public HashMap<String, HashMap<Vector2D, Vector2D>> getGridReferences() {
         return gridReferences;
+    }
+
+    public ArrayList<DToken> getTokens() {
+        return tokens;
     }
 
     @Override

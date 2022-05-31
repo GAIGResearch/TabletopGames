@@ -4,8 +4,9 @@ import core.CoreConstants;
 import core.components.Card;
 import core.components.Deck;
 import core.properties.Property;
-import core.properties.PropertyInt;
+import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import games.descent2e.actions.DescentAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,13 +20,20 @@ import static games.descent2e.DescentConstants.*;
 
 // TODO: figure out how to do ability/heroic-feat
 public class Hero extends Figure {
+
     Deck<Card> skills;
     Deck<Card> handEquipment;
     Card armor;
     Deck<Card> otherEquipment;
     HashMap<String, Integer> equipSlotsAvailable;
 
-    int fatigue;  // TODO: reset this every quest to max fatigue
+    // TODO: reset fatigue every quest to max fatigue
+    String[] defence;
+
+    String heroicFeat;
+    boolean featAvailable, rested;
+
+    String ability;
 
     public Hero(String name) {
         super(name);
@@ -42,8 +50,95 @@ public class Hero extends Figure {
         tokenType = "Hero";
     }
 
+    @Override
+    public void resetRound() {
+        super.resetRound();
+        if (rested) attributes.get(Attribute.Fatigue).setValue(0);
+        rested = false;
+    }
+
     protected Hero(String name, int ID) {
         super(name, ID);
+    }
+
+    public Deck<Card> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(Deck<Card> skills) {
+        this.skills = skills;
+    }
+
+    public Deck<Card> getHandEquipment() {
+        return handEquipment;
+    }
+
+    public void setHandEquipment(Deck<Card> handEquipment) {
+        this.handEquipment = handEquipment;
+    }
+
+    public Card getArmor() {
+        return armor;
+    }
+
+    public void setArmor(Card armor) {
+        this.armor = armor;
+    }
+
+    public Deck<Card> getOtherEquipment() {
+        return otherEquipment;
+    }
+
+    public void setOtherEquipment(Deck<Card> otherEquipment) {
+        this.otherEquipment = otherEquipment;
+    }
+
+    public HashMap<String, Integer> getEquipSlotsAvailable() {
+        return equipSlotsAvailable;
+    }
+
+    public void setEquipSlotsAvailable(HashMap<String, Integer> equipSlotsAvailable) {
+        this.equipSlotsAvailable = equipSlotsAvailable;
+    }
+
+    public String[] getDefence() {
+        return defence;
+    }
+
+    public void setDefence(String[] defence) {
+        this.defence = defence;
+    }
+
+    public String getHeroicFeat() {
+        return heroicFeat;
+    }
+
+    public void setHeroicFeat(String heroicFeat) {
+        this.heroicFeat = heroicFeat;
+    }
+
+    public boolean isFeatAvailable() {
+        return featAvailable;
+    }
+
+    public void setFeatAvailable(boolean featAvailable) {
+        this.featAvailable = featAvailable;
+    }
+
+    public String getAbility() {
+        return ability;
+    }
+
+    public void setAbility(String ability) {
+        this.ability = ability;
+    }
+
+    public boolean hasRested() {
+        return rested;
+    }
+
+    public void setRested(boolean rested) {
+        this.rested = rested;
     }
 
     public boolean equip(Card c) {
@@ -85,28 +180,39 @@ public class Hero extends Figure {
         }
     }
 
-    public int getFatigue() {
-        return fatigue;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Hero)) return false;
+        if (!super.equals(o)) return false;
+        Hero hero = (Hero) o;
+        return featAvailable == hero.featAvailable && rested == hero.rested && Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment) && Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment) && Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) && Arrays.equals(defence, hero.defence) && Objects.equals(heroicFeat, hero.heroicFeat) && Objects.equals(ability, hero.ability);
     }
 
-    public void setFatigue(int fatigue) {
-        this.fatigue = fatigue;
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment, equipSlotsAvailable, heroicFeat, featAvailable, rested, ability);
+        result = 31 * result + Arrays.hashCode(defence);
+        return result;
     }
 
     @Override
     public Hero copy() {
         Hero copy = new Hero(componentName, componentID);
         copy.equipSlotsAvailable = new HashMap<>();
-        for (Map.Entry<String, Integer> e: equipSlotsAvailable.entrySet()) {
-            copy.equipSlotsAvailable.put(e.getKey(), e.getValue());
-        }
+        copy.equipSlotsAvailable.putAll(equipSlotsAvailable);
         copy.skills = skills.copy();
         copy.handEquipment = handEquipment.copy();
         copy.otherEquipment = otherEquipment.copy();
         if (armor != null) {
             copy.armor = armor.copy();
         }
-        copy.fatigue = fatigue;
+        copy.defence = new String[this.defence.length];
+        System.arraycopy(this.defence, 0, copy.defence, 0, this.defence.length);
+        copy.heroicFeat = this.heroicFeat;
+        copy.featAvailable = this.featAvailable;
+        copy.ability = this.ability;
+        copy.rested = rested;
         super.copyComponentTo(copy);
         return copy;
     }
@@ -117,8 +223,10 @@ public class Hero extends Figure {
      */
     protected void loadHero(JSONObject figure) {
         super.loadFigure(figure);
-        // TODO: custom load of figure properties
-        this.fatigue = ((PropertyInt)getProperty(fatigueHash)).value;
+        this.defence = ((PropertyStringArray)getProperty(defenceHash)).getValues();
+        this.featAvailable = true;
+        this.heroicFeat = ((PropertyString)getProperty(heroicFeatHash)).value;
+        this.ability = ((PropertyString)getProperty(abilityHash)).value;
     }
 
     /**
