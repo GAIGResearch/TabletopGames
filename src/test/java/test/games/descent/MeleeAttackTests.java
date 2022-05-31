@@ -40,7 +40,7 @@ public class MeleeAttackTests {
         assertEquals(1, weapons.size());
 
         int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
-        MeleeAttack attack = new MeleeAttack(weapons.get(0).getComponentID(), actingFigure.getComponentID(), 1, victim.getComponentID(), 0);
+        MeleeAttack attack = new MeleeAttack(actingFigure.getComponentID(), victim.getComponentID());
         assertEquals(0, state.getDicePool().getSize());
         attack.execute(state);
         assertEquals(attack, state.currentActionInProgress());
@@ -60,7 +60,7 @@ public class MeleeAttackTests {
         Figure victim = state.getActingFigure();
 
         int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
-        MeleeAttack attack = new MeleeAttack(attacker.getComponentID(), 0, victim.getComponentID(), 0);
+        MeleeAttack attack = new MeleeAttack(attacker.getComponentID(), victim.getComponentID());
         assertEquals(0, state.getDicePool().getSize());
         attack.execute(state);
         assertEquals(2, state.getDicePool().getSize());
