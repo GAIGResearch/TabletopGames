@@ -33,7 +33,7 @@ public class RollDie extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         DescentGameState dgs = (DescentGameState) gs;
-        DicePool newPool = DicePool.constructDicePool(dgs, desiredDice);
+        DicePool newPool = DicePool.constructDicePool(desiredDice);
         newPool.roll(dgs.getRandom());
         dgs.setDicePool(newPool);
         return true;

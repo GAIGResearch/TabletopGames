@@ -72,7 +72,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         phase = PRE_ATTACK_ROLL;
         interruptPlayer = attackingPlayer;
         Hero hero = state.getHeroes().get(attackingPlayer - 1);
-        Item weapon = hero.getWeapons(state).stream()
+        Item weapon = hero.getWeapons().stream()
                 .filter(w -> w.getComponentID() == weaponCardId).findFirst()
                 .orElseThrow(() -> new AssertionError("Weapon not found : " + weaponCardId));
         state.setDicePool(weapon.getDicePool());

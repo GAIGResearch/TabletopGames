@@ -16,14 +16,13 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     boolean rolled = false;
     int[] rerolls;
 
-    public static DicePool constructDicePool(DescentGameState dgs, Map<DiceType, Integer> details) {
+    public static DicePool constructDicePool(Map<DiceType, Integer> details) {
         // Get / Set variables
-        List<DescentDice> gameDice = dgs.getDice();
         List<DescentDice> dice = new ArrayList<>();
 
         // Find right dice to act upon
         for (Map.Entry<DiceType, Integer> entry : details.entrySet()) {
-            DescentDice result = gameDice.stream()
+            DescentDice result = DescentDice.masterDice.stream()
                     .filter(a -> a.getColour() == entry.getKey())
                     .findFirst().orElseThrow(() -> new AssertionError("Die not found : " + entry.getKey()));
             int amount = entry.getValue();

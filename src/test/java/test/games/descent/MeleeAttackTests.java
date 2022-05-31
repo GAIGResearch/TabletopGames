@@ -38,7 +38,7 @@ public class MeleeAttackTests {
     public void attackRollsDicePool() {
         Figure actingFigure = state.getActingFigure();
         Figure victim = state.getMonsters().get(0).get(0);
-        List<Item> weapons = ((Hero)actingFigure).getWeapons(state);
+        List<Item> weapons = ((Hero)actingFigure).getWeapons();
         // TODO: check this works for a Hero
         // then generalise to monsters too
         assertEquals(1, weapons.size());

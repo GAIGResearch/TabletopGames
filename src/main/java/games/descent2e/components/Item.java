@@ -14,7 +14,7 @@ public class Item {
     protected AttackType attackType = AttackType.NONE;
     protected DicePool dicePool;
 
-    public Item(Card data, DescentGameState dgs) {
+    public Item(Card data) {
         referenceComponent = data.getComponentID();
         Property at = data.getProperty("attackType");
         if (at != null) {
@@ -28,7 +28,7 @@ public class Item {
                 else
                     attackDice.put(dt, 1);
             }
-            dicePool = DicePool.constructDicePool(dgs, attackDice);
+            dicePool = DicePool.constructDicePool(attackDice);
         }
 
     }
