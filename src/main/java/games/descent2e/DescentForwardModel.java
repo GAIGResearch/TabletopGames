@@ -342,7 +342,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Get friendly figures based on token type (monster/hero)
         ArrayList<Vector2D> friendlyFigureLocations = new ArrayList<>();
         if (figureType.equals("Monster")) {
-            for (ArrayList<Monster> monsterGroup : dgs.monsters) {
+            for (List<Monster> monsterGroup : dgs.monsters) {
                 for (Monster m : monsterGroup) {
                     friendlyFigureLocations.add(m.getPosition());
                 }
@@ -377,19 +377,19 @@ public class DescentForwardModel extends AbstractForwardModel {
                 boolean isFriendly = false;
 
                 //Check if the neighbour node is friendly
-                /*for(Vector2D friendlyFigureLocation : friendlyFigureLocations){
+                for(Vector2D friendlyFigureLocation : friendlyFigureLocations){
                     if (friendlyFigureLocation.getX() == loc.getX() && friendlyFigureLocation.getY() == loc.getY()){
                         isFriendly = true;
                         break;
                     }
-                }*/
-
-
-                PropertyInt figureOnLocation = (PropertyInt)figureNode.getProperty(playersHash);
-                Figure neighbourFigure = (Figure)dgs.getComponentById(figureOnLocation.value);
-                if (figureType.equals(neighbourFigure.getTokenType()){
-                    isFriendly = true;
                 }
+
+
+                //PropertyInt figureOnLocation = (PropertyInt)figureNode.getProperty(playersHash);
+                //Figure neighbourFigure = (Figure)dgs.getComponentById(figureOnLocation.value);
+                /*if (figureType.equals(neighbourFigure.getTokenType())){
+                    isFriendly = true;
+                }*/
 
                 if (isFriendly){
                     //if the node is friendly and not expanded - add it to the expansion list
@@ -433,7 +433,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
         //Assuming that if it's not monster it's a hero
         } else {
-            for (ArrayList<Monster> monsterGroup : dgs.monsters) {
+            for (List<Monster> monsterGroup : dgs.monsters) {
                 for (Monster m : monsterGroup) {
                     pointsOfInterest.add(m.getPosition());
                 }
