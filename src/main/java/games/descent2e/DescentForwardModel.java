@@ -29,7 +29,6 @@ import static utilities.Utils.getNeighbourhood;
 
 public class DescentForwardModel extends AbstractForwardModel {
 
-    public boolean flag = true;
     @Override
     protected void _setup(AbstractGameState firstState) {
         DescentGameState dgs = (DescentGameState) firstState;
