@@ -8,6 +8,7 @@ import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.tokens.TokenAction;
+import games.descent2e.components.DicePool;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
@@ -171,7 +172,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // Set up dice!
         dgs.dice = _data.dice;
-        dgs.dicePool = new HashMap<>();
+        dgs.dicePool = new DicePool(Collections.emptyList());
 
         // Shuffle search cards deck
 

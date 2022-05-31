@@ -17,7 +17,7 @@
          "fatigue": ["Integer", 0],
          "exhaust": ["Boolean", false],
          "attackType": ["String", "melee"],
-         "attackPower": ["Color[]", ["blue", "yellow"]],
+         "attackPower": ["String[]", ["blue", "yellow"]],
          "equipmentType": ["String[]", ["Hammer"]],
          "weaponSurges": ["String[]", ["Surge: Stun"]],
          "equipSlots": ["String[]", ["hand"]],

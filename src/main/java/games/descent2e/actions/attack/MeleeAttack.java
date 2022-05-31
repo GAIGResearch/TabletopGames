@@ -7,6 +7,8 @@ import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
+import games.descent2e.components.Item;
 
 import java.util.*;
 
@@ -69,8 +71,13 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
         phase = PRE_ATTACK_ROLL;
         interruptPlayer = attackingPlayer;
-        Component weaponCard = state.getComponentById(weaponCardId);
-        Figure figure = (Figure) state.getComponentById(attackingFigure);
+        Hero hero = state.getHeroes().get(attackingPlayer - 1);
+        Item weapon = hero.getWeapons(state).stream()
+                .filter(w -> w.getComponentID() == weaponCardId).findFirst()
+                .orElseThrow(() -> new AssertionError("Weapon not found : " + weaponCardId));
+        state.setDicePool(weapon.getDicePool());
+
+        // The one thing we do now is construct the dice pool to use
         movePhaseForward(state);
 
         // When executing a melee attack we need to:

@@ -8,6 +8,7 @@ import core.properties.Property;
 import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -99,10 +100,10 @@ public class Hero extends Figure {
         }
     }
 
-    public List<Item> getWeapons() {
+    public List<Item> getWeapons(DescentGameState dgs) {
         List<Item> retValue =  new ArrayList<>();
         for (int i = 0; i < handEquipment.getSize(); i++) {
-            Item c = new Item(handEquipment.get(i));
+            Item c = new Item(handEquipment.get(i), dgs);
             if (c.isAttack()) {
                 retValue.add(c);
             }

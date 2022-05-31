@@ -12,12 +12,9 @@ import core.components.Token;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
+import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.actions.Triggers;
-import games.descent2e.components.DescentDice;
-import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
-import games.descent2e.components.Monster;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -38,11 +35,12 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     // Mapping from tile name to list of coordinates in master board for each cell (and corresponding coordinates on original tile)
     Map<String, Map<Vector2D, Vector2D>> gridReferences;
     boolean initData;
+    Random rnd;
 
 
     GridBoard masterBoard;
     List<DescentDice> dice;
-    Map<String, List<DescentDice>> dicePool;
+    DicePool dicePool;
     List<Hero> heroes;
     Figure overlord;
     List<List<Monster>> monsters;
@@ -60,10 +58,11 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         tiles = new HashMap<>();
         data = new DescentGameData();
         dice = new ArrayList<>();
-        dicePool = new HashMap<>();
+        dicePool = new DicePool(Collections.emptyList());
 
         heroes = new ArrayList<>();
         monsters = new ArrayList<>();
+        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
@@ -115,11 +114,18 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         for (DToken t: tokens) {
             copy.tokens.add(t.copy());
         }
+        // TODO: Why copy Dice - aren't these immutable?
         for (DescentDice d : dice) {
             copy.dice.add(d.copy());
         }
+
+        copy.rnd = new Random(rnd.nextLong());
         // TODO
         return copy;
+    }
+
+    public Random getRandom() {
+        return rnd;
     }
 
     @Override
@@ -183,12 +189,12 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public List<DescentDice> getDice(){return dice;}
 
-    public Map<String, List<DescentDice>> getDicePool(){
+    public DicePool getDicePool(){
         return dicePool;
     }
 
-    public void setDicePool(Map<String, List<DescentDice>> newPool){
-        dicePool = newPool;
+    public void setDicePool(DicePool pool){
+        dicePool = pool;
     }
 
     public List<List<Monster>> getMonsters() {

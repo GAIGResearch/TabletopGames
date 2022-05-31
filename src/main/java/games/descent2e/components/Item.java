@@ -1,23 +1,44 @@
 package games.descent2e.components;
 
 import core.components.Card;
+import core.properties.Property;
+import core.properties.PropertyStringArray;
 import games.descent2e.DescentConstants.AttackType;
+import games.descent2e.DescentGameState;
+
+import java.util.*;
 
 public class Item {
 
     int referenceComponent;
-
     protected AttackType attackType = AttackType.NONE;
+    protected DicePool dicePool;
 
-    public Item(Card data) {
+    public Item(Card data, DescentGameState dgs) {
         referenceComponent = data.getComponentID();
-        String at = data.getProperty("attackType").toString();
-        if (!at.isEmpty())
-            attackType = AttackType.valueOf(at);
+        Property at = data.getProperty("attackType");
+        if (at != null) {
+            attackType = AttackType.valueOf(at.toString().toUpperCase(Locale.ROOT));
+            PropertyStringArray attPower = (PropertyStringArray) data.getProperty("attackPower");
+            Map<DiceType, Integer> attackDice = new HashMap<>();
+            for (String d : attPower.getValues()) {
+                DiceType dt = DiceType.valueOf(d.toUpperCase(Locale.ROOT));
+                if (attackDice.containsKey(dt))
+                    attackDice.put(dt, attackDice.get(dt) + 1);
+                else
+                    attackDice.put(dt, 1);
+            }
+            dicePool = DicePool.constructDicePool(dgs, attackDice);
+        }
+
     }
 
     public AttackType getAttackType() {
         return attackType;
+    }
+
+    public DicePool getDicePool() {
+        return dicePool.copy();
     }
 
     public boolean isMeleeAttack() {
@@ -34,5 +55,9 @@ public class Item {
 
     public boolean isAOE() {
         return attackType == AttackType.BLAST;
+    }
+
+    public int getComponentID() {
+        return referenceComponent;
     }
 }
