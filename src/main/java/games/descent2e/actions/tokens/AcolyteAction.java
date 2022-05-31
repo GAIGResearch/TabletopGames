@@ -1,48 +1,59 @@
 package games.descent2e.actions.tokens;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
+import core.components.GridBoard;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
+import utilities.Vector2D;
+
+import java.util.List;
 
 import static games.descent2e.actions.Triggers.END_TURN;
+import static utilities.Utils.getNeighbourhood;
 
-// TODO: If end turn adjacent to 1 or more wounded clergy, choose 1 adjacent wounded clergy to escort
+/**
+ * If the hero carrying the acolyte ends turn adjacent to 1 or more wounded clergy (villager tokens),
+ * choose 1 adjacent wounded clergy to escort
+ * TODO: effect does not cost action points and is automatically triggered at the end of the hero's turn
+ * TODO: player choice which one to get if multiple options (currently first token found)
+ */
 public class AcolyteAction extends TokenAction {
 
     public AcolyteAction() {
         super(-1, END_TURN);
     }
 
-    public AcolyteAction(int acolyteTokenID) {
-        super(acolyteTokenID, END_TURN);
+    @Override
+    public AcolyteAction copy() {
+        return this;
     }
 
     @Override
-    public AbstractAction copy() {
-        return null;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return 0;
+    public boolean equals(Object o) {
+        return super.equals(o) && o instanceof AcolyteAction;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return null;
+        return "Acolyte end turn effect";
     }
 
     @Override
     public boolean execute(DescentGameState gs) {
         DToken acolyte = (DToken) gs.getComponentById(tokenID);
         Hero hero = gs.getHeroes().get(acolyte.getOwnerId()-1);
+        Vector2D loc = hero.getPosition();
+        GridBoard board = gs.getMasterBoard();
+        List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+        for (DToken token: gs.getTokens()) {
+            if (token.getDescentTokenType() == DescentTypes.DescentToken.Villager && neighbours.contains(token.getPosition())) {
+                token.setOwnerId(hero.getOwnerId(), gs); // Take this one
+                token.setPosition(null);  // Take off the map
+                return true;
+            }
+        }
         return false;
     }
 }

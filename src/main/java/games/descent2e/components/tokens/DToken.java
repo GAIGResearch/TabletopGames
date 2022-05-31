@@ -81,6 +81,10 @@ public class DToken extends Token {
     @Override
     public DToken copy() {
         DToken copy = new DToken(tokenType, position != null? position.copy() : null, componentID);
+        for (TokenAction act: effects) {
+            copy.effects.add(act.copy());
+        }
+        copy.attributeModifiers = new HashMap<>(attributeModifiers);
         copyComponentTo(this);
         return copy;
     }
@@ -91,6 +95,10 @@ public class DToken extends Token {
 
     public Vector2D getPosition() {
         return position;
+    }
+
+    public void setPosition(Vector2D position) {
+        this.position = position;
     }
 
     @Override
