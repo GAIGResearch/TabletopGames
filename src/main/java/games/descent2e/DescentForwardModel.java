@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.*;
 import core.properties.*;
+import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.tokens.DToken;
@@ -152,17 +153,17 @@ public class DescentForwardModel extends AbstractForwardModel {
                     // A player should hold these tokens, not on the board, location is left null
                 }
                 DToken token = new DToken(def.getTokenType(), location);
+                token.setEffects(def.getEffects());
+                for (TokenAction ta: token.getEffects()) {
+                    ta.setTokenID(token.getComponentID());
+                }
+                token.setAttributeModifiers(def.getAttributeModifiers());
                 if (location == null) {
                     // Make a player owner of it TODO: players choose?
                     int idx = r.nextInt(dgs.getNPlayers()-1);
                     if (idx == dgs.overlordPlayer) idx++;
                     token.setOwnerId(idx, dgs);
                 }
-                token.setEffects(def.getEffects());
-                for (TokenAction ta: token.getEffects()) {
-                    ta.setTokenID(token.getComponentID());
-                }
-                token.setAttributeModifiers(def.getAttributeModifiers());
                 dgs.tokens.add(token);
             }
         }
@@ -279,7 +280,13 @@ public class DescentForwardModel extends AbstractForwardModel {
             // - Revive hero
             // - Search
             // - Stand up
-            // - Special (specified by quest) TODO: add these to list of figure's actions
+
+            // - Special (specified by quest)
+            if (actingFigure.getAbilities() != null) {
+                for (DescentAction act : actingFigure.getAbilities()) {
+                    actions.add(act); // TODO check if action can be executed right now
+                }
+            }
 
         } else {
             actions.addAll(moveActions(dgs, actingFigure));

@@ -4,6 +4,7 @@ import core.components.Counter;
 import core.components.Token;
 import core.properties.PropertyInt;
 import games.descent2e.DescentTypes;
+import games.descent2e.actions.DescentAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -39,14 +40,15 @@ public class Figure extends Token {
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
+    ArrayList<DescentAction> abilities;  // TODO track exhausted etc.
 
     public Figure(String name) {
         super(name);
-        Counter xp = new Counter(0, 0, -1, "XP");
         size = new Pair<>(1,1);
         conditions = new HashSet<>();
         attributes = new HashMap<>();
-        attributes.put(XP, xp);
+        attributes.put(XP, new Counter(0, 0, -1, "XP"));
+        abilities = new ArrayList<>();
     }
 
     protected Figure(String name, int ID) {
@@ -126,6 +128,16 @@ public class Figure extends Token {
         return conditions.contains(condition);
     }
 
+    public void addAbility(DescentAction ability) {
+        this.abilities.add(ability);
+    }
+    public void removeAbility(DescentAction ability) {
+        this.abilities.remove(ability);
+    }
+    public ArrayList<DescentAction> getAbilities() {
+        return abilities;
+    }
+
     @Override
     public Figure copy() {
         Figure copy = new Figure(componentName, componentID);
@@ -146,6 +158,12 @@ public class Figure extends Token {
         copyTo.nActionsExecuted = nActionsExecuted;
         copyTo.size = size.copy();
         copyTo.conditions = new HashSet<>(conditions);
+        copyTo.abilities = new ArrayList<>();
+        if (abilities != null) {
+            for (DescentAction ability : abilities) {
+                copyTo.abilities.add(ability.copy());
+            }
+        }
     }
 
     /**

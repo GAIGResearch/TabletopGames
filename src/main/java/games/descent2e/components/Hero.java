@@ -2,10 +2,8 @@ package games.descent2e.components;
 
 import core.CoreConstants;
 import core.components.Card;
-import core.components.Counter;
 import core.components.Deck;
 import core.properties.Property;
-import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
 import games.descent2e.actions.DescentAction;
@@ -37,9 +35,6 @@ public class Hero extends Figure {
 
     String ability;
 
-    ArrayList<DescentAction> abilities;
-
-
     public Hero(String name) {
         super(name);
 
@@ -53,7 +48,6 @@ public class Hero extends Figure {
         equipSlotsAvailable.put("other", 2);
 
         tokenType = "Hero";
-        abilities = new ArrayList<>();
     }
 
     protected Hero(String name, int ID) {
@@ -134,16 +128,6 @@ public class Hero extends Figure {
 
         super.copyComponentTo(copy);
         return copy;
-    }
-
-    public void addAbility(DescentAction ability) {
-        this.abilities.add(ability);
-    }
-    public void removeAbility(DescentAction ability) {
-        this.abilities.remove(ability);
-    }
-    public ArrayList<DescentAction> getAbilities() {
-        return abilities;
     }
 
     /**

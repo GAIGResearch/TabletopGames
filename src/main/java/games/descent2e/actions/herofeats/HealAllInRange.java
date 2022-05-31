@@ -19,7 +19,7 @@ public class HealAllInRange extends DescentAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public HealAllInRange copy() {
         return null;
     }
 

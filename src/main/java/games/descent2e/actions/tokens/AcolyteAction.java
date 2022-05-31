@@ -20,7 +20,7 @@ public class AcolyteAction extends TokenAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public AcolyteAction copy() {
         return null;
     }
 

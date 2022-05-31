@@ -13,7 +13,7 @@ public class SearchAction extends TokenAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public SearchAction copy() {
         return null;
     }
 
