@@ -377,15 +377,17 @@ public class DescentForwardModel extends AbstractForwardModel {
             if (neighbour == null) continue;
             Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
             int playerIdAtLoc = ((PropertyInt)neighbour.getProperty(playersHash)).value;
-            if (f instanceof Monster && playerIdAtLoc != 0) {
-                // Monster attacks a hero
-                // todo get params
-                System.out.println("monster is attacking");
+            if ( playerIdAtLoc != -1 && dgs.getComponentById(playerIdAtLoc) != null) {
+                if (f instanceof Monster && playerIdAtLoc != 0) {
+                    // Monster attacks a hero
+                    // todo get params
+                    System.out.println("monster is attacking");
 //                actions.add(new MeleeAttack());
-            } else if (f instanceof Hero && playerIdAtLoc == 0){
-                // Player attacks a monster
+                } else if (f instanceof Hero && playerIdAtLoc == 0) {
+                    // Player attacks a monster
 //                actions.add(new MeleeAttack());
-                System.out.println("Hero is attacking");
+                    System.out.println("Hero is attacking");
+                }
             }
         }
 
