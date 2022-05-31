@@ -85,6 +85,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             components.addAll(tokens);
         }
         components.add(searchCards);
+        components.addAll(heroes);
+        monsters.forEach(components::addAll);
         // TODO
         return components;
     }
