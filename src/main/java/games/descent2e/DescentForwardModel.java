@@ -9,12 +9,10 @@ import core.properties.*;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.Rest;
+import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.actions.tokens.TokenAction;
-import games.descent2e.components.DicePool;
+import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
-import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
-import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -376,17 +374,20 @@ public class DescentForwardModel extends AbstractForwardModel {
             BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
             if (neighbour == null) continue;
             Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
-            int playerIdAtLoc = ((PropertyInt)neighbour.getProperty(playersHash)).value;
-            if ( playerIdAtLoc != -1 && dgs.getComponentById(playerIdAtLoc) != null) {
-                if (f instanceof Monster && playerIdAtLoc != 0) {
+            int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
+            if ( neighbourID != -1 ) {
+                Figure other = (Figure)dgs.getComponentById(neighbourID);
+                // todo there is a getWeapon function
+                if (f instanceof Monster && other instanceof Hero) {
                     // Monster attacks a hero
                     // todo get params
                     System.out.println("monster is attacking");
 //                actions.add(new MeleeAttack());
-                } else if (f instanceof Hero && playerIdAtLoc == 0) {
+                } else if (f instanceof Hero && other instanceof Monster) {
                     // Player attacks a monster
-//                actions.add(new MeleeAttack());
-                    System.out.println("Hero is attacking");
+                    for (Item item: ((Hero) f).getWeapons(dgs)){
+                        actions.add(new MeleeAttack(item.getComponentID(), f.getComponentID(), f.getOwnerId(), other.getComponentID(), other.getOwnerId()));
+                    }
                 }
             }
         }

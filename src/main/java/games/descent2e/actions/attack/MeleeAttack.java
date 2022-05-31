@@ -57,6 +57,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     int interruptPlayer;
 
     public MeleeAttack(int weaponCardId, int attackingFigure, int attackingPlayer, int defendingFigure, int defendingPlayer) {
+        // todo this could be done with 3 arguments: weaponCard, AttackingFigure, DefendingFigure
         this.weaponCardId = weaponCardId;
         this.attackingFigure = attackingFigure;
         this.attackingPlayer = attackingPlayer;
