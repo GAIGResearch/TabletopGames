@@ -20,7 +20,7 @@ public class Pathfinder {
     private GridBoard graph;
 
     /**
-     * Cache of shortest path from node i  to the others
+     * Cache of shortest path from node i to the others
      */
     private TreeMap<Integer, TreeMap<Integer, Path>> shortestPaths;
 
