@@ -67,13 +67,16 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     @Override
     protected List<Component> _getAllComponents() {
         ArrayList<Component> components = new ArrayList<>();
-        components.addAll(data.decks);
-        components.addAll(data.tiles);
-        components.addAll(data.heroes);
-        components.addAll(data.boardConfigurations);
-        components.addAll(data.dice);
-        for (HashMap<String, Token> m : data.monsters.values()) {
-            components.addAll(m.values());
+        if (!initData) {
+            components.addAll(data.decks);
+            components.addAll(data.tiles);
+            components.addAll(data.heroes);
+            components.addAll(data.boardConfigurations);
+            components.addAll(data.dice);
+            for (HashMap<String, Token> m : data.monsters.values()) {
+                components.addAll(m.values());
+            }
+            initData = true;
         }
 
         // Current state
@@ -115,11 +118,6 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         for (DescentDice d : dice) {
             copy.dice.add(d.copy());
         }
-        if (searchCards != null) {
-            copy.searchCards = searchCards.copy();
-        }
-
-        copy.rnd = new Random(rnd.nextLong());
         // TODO
         return copy;
     }
