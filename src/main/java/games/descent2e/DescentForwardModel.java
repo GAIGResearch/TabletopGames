@@ -330,7 +330,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // Get friendly figures based on token type (monster/hero)
         ArrayList<Vector2D> friendlyFigureLocations = new ArrayList<>();
-        if (figure.getTokenType().equals("monster")) {
+        if (figure.getTokenType().equals("Monster")) {
             for (ArrayList<Monster> monsterGroup : dgs.monsters) {
                 for (Monster m : monsterGroup) {
                     friendlyFigureLocations.add(m.getPosition());
@@ -406,46 +406,49 @@ public class DescentForwardModel extends AbstractForwardModel {
         return allAdjacentNodes;
     }
 
+    private ArrayList<Vector2D> getAllPointOfInterests(DescentGameState dgs, Figure figure){
+
+        ArrayList<Vector2D> pointsOfInterest = new ArrayList<>();
+        if (figure.getTokenType().equals("Monster")) {
+            for (Hero h : dgs.heroes) {
+                pointsOfInterest.add(h.getPosition());
+            }
+        //Assuming that if it's not monster it's a hero
+        } else {
+            for (ArrayList<Monster> monsterGroup : dgs.monsters) {
+                for (Monster m : monsterGroup) {
+                    pointsOfInterest.add(m.getPosition());
+                }
+            }
+            for (DToken dToken : dgs.tokens){
+                if (dToken.getPosition() != null){
+                    pointsOfInterest.add(dToken.getPosition());
+                }
+            }
+        }
+        /*
+        for (Vector2D point : pointsOfInterest) {
+            System.out.println("Point:" + point.toString());
+        }*/
+        return pointsOfInterest;
+    }
     private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
 
         Map<BoardNode, Double> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
-        //TODO: ADD points of interest nodes
+        ArrayList<Vector2D> allPointOfInterests = getAllPointOfInterests(dgs, f);
+
         List<AbstractAction> actions = new ArrayList<>();
-
         for (BoardNode node : allAdjacentNodes.keySet()){
-
             if (allAdjacentNodes.get(node) <= f.getRemainingMovePoints()) {
                 Vector2D loc = ((PropertyVector2D) node.getProperty(coordinateHash)).values;
                 actions.add(new Move(loc.copy()));
             }
         }
+        for(Vector2D pointOfInterest : allPointOfInterests) {
 
-
-        Vector2D currentLocation = f.getPosition();
-        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
-
-        // Check if figure can still move
-        PropertyInt moveSpeed = (PropertyInt)f.getProperty(movementHash);
-        if (currentTile.getComponentName().equals("pit") || f.getAttribute(Figure.Attribute.MovePoints).getValue() > 0) {
-
-            // Find valid neighbours in master graph, can move there
-            for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
-                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
-                if (neighbour == null) continue;
-                Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
-                // TODO: size of figure moving, take into account large monster "expansion" rule, location saved on figure is always top-left corner
-
-                // Find terrain type
-                BoardNode tile = dgs.getMasterBoard().getElement(loc.getX(), loc.getY());
-                if ((currentTile.getComponentName().equals("pit") && !tile.getComponentName().equals("pit") // Moving from pit
-                        || !tile.getComponentName().equals("water")  // Normal move
-                        || f.getAttribute(Figure.Attribute.MovePoints).getValue() > ((DescentParameters)dgs.getGameParameters()).waterMoveCost) // Difficult terrain
-                        && ((PropertyInt)tile.getProperty(playersHash)).value == -1) {  // Empty space?
-                    // TODO: allow move in non-empty space if figure has move points left that allow it to finish the move action afterwards in an empty space
-                    // TODO: if moving to non-empty space, change game phase to ForceMove; otherwise, change game phase to main phase (if in force move).
-                    actions.add(new Move(loc.copy()));
-                }
-            }
+            //if (distance(pointOfInterest, f.getPosition()) <= f.getRemainingPoints){
+            actions.add(new Move(pointOfInterest.copy()));
+            //}
         }
         return actions;
     }
