@@ -129,7 +129,7 @@ public class DescentGridBoardView extends ComponentView {
 
         // Draw heroes
         for (Figure f: gameState.getHeroes()) {
-            Vector2D loc = f.getLocation();
+            Vector2D loc = f.getPosition();
             g.setColor(stringToColor(((PropertyColor)f.getProperty(colorHash)).valueStr));
             g.fillOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
             g.setColor(Color.black);
@@ -140,7 +140,7 @@ public class DescentGridBoardView extends ComponentView {
             String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
 
             for (Monster m: monsterGroup) {
-                Vector2D loc = m.getLocation();
+                Vector2D loc = m.getPosition();
                 if (loc == null) continue;
                 int orientation = m.getOrientation();
 

@@ -2,10 +2,8 @@ package games.descent2e.components;
 
 import core.CoreConstants;
 import core.components.Card;
-import core.components.Counter;
 import core.components.Deck;
 import core.properties.Property;
-import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
 import games.descent2e.actions.DescentAction;
@@ -37,9 +35,6 @@ public class Hero extends Figure {
 
     String ability;
 
-    ArrayList<DescentAction> abilities;
-
-
     public Hero(String name) {
         super(name);
 
@@ -53,11 +48,82 @@ public class Hero extends Figure {
         equipSlotsAvailable.put("other", 2);
 
         tokenType = "Hero";
-        abilities = new ArrayList<>();
     }
 
     protected Hero(String name, int ID) {
         super(name, ID);
+    }
+
+    public Deck<Card> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(Deck<Card> skills) {
+        this.skills = skills;
+    }
+
+    public Deck<Card> getHandEquipment() {
+        return handEquipment;
+    }
+
+    public void setHandEquipment(Deck<Card> handEquipment) {
+        this.handEquipment = handEquipment;
+    }
+
+    public Card getArmor() {
+        return armor;
+    }
+
+    public void setArmor(Card armor) {
+        this.armor = armor;
+    }
+
+    public Deck<Card> getOtherEquipment() {
+        return otherEquipment;
+    }
+
+    public void setOtherEquipment(Deck<Card> otherEquipment) {
+        this.otherEquipment = otherEquipment;
+    }
+
+    public HashMap<String, Integer> getEquipSlotsAvailable() {
+        return equipSlotsAvailable;
+    }
+
+    public void setEquipSlotsAvailable(HashMap<String, Integer> equipSlotsAvailable) {
+        this.equipSlotsAvailable = equipSlotsAvailable;
+    }
+
+    public String[] getDefence() {
+        return defence;
+    }
+
+    public void setDefence(String[] defence) {
+        this.defence = defence;
+    }
+
+    public String getHeroicFeat() {
+        return heroicFeat;
+    }
+
+    public void setHeroicFeat(String heroicFeat) {
+        this.heroicFeat = heroicFeat;
+    }
+
+    public boolean isFeatAvailable() {
+        return featAvailable;
+    }
+
+    public void setFeatAvailable(boolean featAvailable) {
+        this.featAvailable = featAvailable;
+    }
+
+    public String getAbility() {
+        return ability;
+    }
+
+    public void setAbility(String ability) {
+        this.ability = ability;
     }
 
     public boolean equip(Card c) {
@@ -134,16 +200,6 @@ public class Hero extends Figure {
 
         super.copyComponentTo(copy);
         return copy;
-    }
-
-    public void addAbility(DescentAction ability) {
-        this.abilities.add(ability);
-    }
-    public void removeAbility(DescentAction ability) {
-        this.abilities.remove(ability);
-    }
-    public ArrayList<DescentAction> getAbilities() {
-        return abilities;
     }
 
     /**

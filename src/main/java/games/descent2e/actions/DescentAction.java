@@ -23,4 +23,5 @@ public abstract class DescentAction extends AbstractAction {
         return execute((DescentGameState) gs);
     }
     public abstract boolean execute(DescentGameState gs);
+    public abstract DescentAction copy();
 }
