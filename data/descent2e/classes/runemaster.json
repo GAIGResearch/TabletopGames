@@ -17,7 +17,7 @@
          "fatigue": ["Integer", 0],
          "exhaust": ["Boolean", false],
          "attackType": ["String", "ranged"],
-         "attackPower": ["Color[]", ["blue", "yellow"]],
+         "attackPower": ["String[]", ["blue", "yellow"]],
          "weaponSurges": ["String[]", ["Surge: +1 Range", "Surge: Pierce 2"]],
          "equipmentType": ["String[]", ["Magic", "Rune"]],
          "equipSlots": ["String[]", ["hand", "hand"]],

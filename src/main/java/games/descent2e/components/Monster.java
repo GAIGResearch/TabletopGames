@@ -5,6 +5,7 @@ import core.properties.Property;
 import core.properties.PropertyInt;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static games.descent2e.DescentConstants.*;
 
@@ -12,7 +13,7 @@ public class Monster extends Figure {
 
     int orientation;  // medium monsters might be vertical (0) or horizontal (1)
 
-    public Monster(String name, HashMap<Integer, Property> props) {
+    public Monster(String name, Map<Integer, Property> props) {
         super(name);
         properties.clear();
         properties.putAll(props);
