@@ -6,6 +6,7 @@ import core.components.Deck;
 import core.components.Token;
 import core.properties.PropertyInt;
 import games.descent2e.DescentTypes;
+import games.descent2e.actions.DescentAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,7 +18,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-import static games.descent2e.DescentConstants.*;
 import static games.descent2e.components.Figure.Attribute.*;
 
 // TODO: figure out how to do ability/heroic-feat
@@ -37,18 +37,19 @@ public class Figure extends Token {
     HashMap<Attribute, Counter> attributes;
 
     int nActionsExecuted;
-    Vector2D location;
-    Pair<Integer, Integer> size;
+    Vector2D position;
+    Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
+    ArrayList<DescentAction> abilities;  // TODO track exhausted etc.
 
     public Figure(String name) {
         super(name);
-        Counter xp = new Counter(0, 0, -1, "XP");
-        size = new Pair<>(1, 1);
+        size = new Pair<>(1,1);
         conditions = new HashSet<>();
         attributes = new HashMap<>();
-        attributes.put(XP, xp);
+        attributes.put(XP, new Counter(0, 0, -1, "XP"));
+        abilities = new ArrayList<>();
     }
 
     protected Figure(String name, int ID) {
@@ -96,12 +97,12 @@ public class Figure extends Token {
         attributes.get(a).setToMin();
     }
 
-    public Vector2D getLocation() {
-        return location;
+    public Vector2D getPosition() {
+        return position;
     }
 
-    public void setLocation(Vector2D location) {
-        this.location = location;
+    public void setPosition(Vector2D position) {
+        this.position = position;
     }
 
     public int getNActionsExecuted() {
@@ -136,7 +137,15 @@ public class Figure extends Token {
         return conditions.contains(condition);
     }
 
-
+    public void addAbility(DescentAction ability) {
+        this.abilities.add(ability);
+    }
+    public void removeAbility(DescentAction ability) {
+        this.abilities.remove(ability);
+    }
+    public ArrayList<DescentAction> getAbilities() {
+        return abilities;
+    }
 
     @Override
     public Figure copy() {
@@ -152,12 +161,18 @@ public class Figure extends Token {
         for (Map.Entry<Attribute, Counter> e : attributes.entrySet()) {
             copyTo.attributes.put(e.getKey(), e.getValue().copy());
         }
-        if (location != null) {
-            copyTo.location = location.copy();
+        if (position != null) {
+            copyTo.position = position.copy();
         }
         copyTo.nActionsExecuted = nActionsExecuted;
         copyTo.size = size.copy();
         copyTo.conditions = new HashSet<>(conditions);
+        copyTo.abilities = new ArrayList<>();
+        if (abilities != null) {
+            for (DescentAction ability : abilities) {
+                copyTo.abilities.add(ability.copy());
+            }
+        }
     }
 
     /**
@@ -179,6 +194,7 @@ public class Figure extends Token {
             }
         }
         this.setAttribute(MovePoints, 0);
+        this.setAttribute(Fatigue, 0);
     }
 
     /**

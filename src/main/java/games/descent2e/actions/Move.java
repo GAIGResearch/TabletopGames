@@ -40,8 +40,8 @@ public class Move extends AbstractAction {
             f = dgs.getHeroes().get(currentPlayer-1);
         }
         // Update location
-        Vector2D oldLocation = f.getLocation().copy();
-        f.setLocation(location.copy());
+        Vector2D oldLocation = f.getPosition().copy();
+        f.setPosition(location.copy());
 
         // TODO: maybe change orientation if monster doesn't fit vertically
         int w = 1;

@@ -20,7 +20,7 @@ public abstract class TokenAction extends DescentAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof TokenAction)) return false;
         TokenAction that = (TokenAction) o;
         return tokenID == that.tokenID;
     }
@@ -29,4 +29,5 @@ public abstract class TokenAction extends DescentAction {
     public int hashCode() {
         return Objects.hash(tokenID);
     }
+    public abstract TokenAction copy();
 }
