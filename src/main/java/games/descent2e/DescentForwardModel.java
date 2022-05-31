@@ -276,6 +276,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
+            actions.addAll(attackActions(dgs, actingFigure));
 
             // - Rest
             if (actingFigure instanceof Hero) {
@@ -363,6 +364,31 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
         }
+        return actions;
+    }
+
+    private List<AbstractAction> attackActions(DescentGameState dgs, Figure f) {
+        List<AbstractAction> actions = new ArrayList<>();
+        Vector2D currentLocation = f.getPosition();
+        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+        // Find valid neighbours in master graph - used for melee attacks
+        for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
+            BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
+            if (neighbour == null) continue;
+            Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+            int playerIdAtLoc = ((PropertyInt)neighbour.getProperty(playersHash)).value;
+            if (f instanceof Monster && playerIdAtLoc != 0) {
+                // Monster attacks a hero
+                // todo get params
+                System.out.println("monster is attacking");
+//                actions.add(new MeleeAttack());
+            } else if (f instanceof Hero && playerIdAtLoc == 0){
+                // Player attacks a monster
+//                actions.add(new MeleeAttack());
+                System.out.println("Hero is attacking");
+            }
+        }
+
         return actions;
     }
 

@@ -94,7 +94,7 @@ public class Hero extends Figure {
         this.otherEquipment = otherEquipment;
     }
 
-    public HashMap<String, Integer> getEquipSlotsAvailable() {
+    public Map<String, Integer> getEquipSlotsAvailable() {
         return equipSlotsAvailable;
     }
 
