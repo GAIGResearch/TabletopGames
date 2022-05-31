@@ -35,7 +35,7 @@ public class MeleeAttackTests {
     }
 
     @Test
-    public void attackRollsDicePool() {
+    public void attackRollsDoesDamage() {
         Figure actingFigure = state.getActingFigure();
         Figure victim = state.getMonsters().get(0).get(0);
         List<Item> weapons = ((Hero)actingFigure).getWeapons();
