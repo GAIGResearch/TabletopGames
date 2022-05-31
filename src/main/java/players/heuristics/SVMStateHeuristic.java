@@ -67,6 +67,7 @@ public class SVMStateHeuristic implements IStateHeuristic {
             data[i + 1].index = i + 1;
             data[i + 1].value = phi[i];
         }
-        return svm.svm_predict(model, data);
+        double result = svm.svm_predict(model, data);
+        return result;
     }
 }
