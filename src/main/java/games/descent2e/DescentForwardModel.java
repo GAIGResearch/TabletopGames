@@ -295,7 +295,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 for (DToken token: dgs.tokens) {
                     if (token.getDescentTokenType() == DescentToken.Search
                             && token.getPosition() != null
-                            && (neighbours.contains(token.getPosition())) || token.getPosition().equals(loc)) {
+                            && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
                         actions.addAll(token.getEffects());
                     }
                 }
