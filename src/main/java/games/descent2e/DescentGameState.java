@@ -24,6 +24,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     public enum DescentPhase implements IGamePhase {
         ForceMove  // Used when a figure started a (possibly valid move action) and is currently overlapping a friendly figure
     }
+
     DescentGameData data;
 
     // For reference only
@@ -68,18 +69,15 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     @Override
     protected List<Component> _getAllComponents() {
         ArrayList<Component> components = new ArrayList<>();
-        if (!initData) {
-            // Data, only add once at the start to have ready for fm compute
-            components.addAll(data.decks);
-            components.addAll(data.tiles);
-            components.addAll(data.heroes);
-            components.addAll(data.boardConfigurations);
-            components.addAll(data.dice);
-            for (HashMap<String, Token> m : data.monsters.values()) {
-                components.addAll(m.values());
-            }
-            initData = true;
+        components.addAll(data.decks);
+        components.addAll(data.tiles);
+        components.addAll(data.heroes);
+        components.addAll(data.boardConfigurations);
+        components.addAll(data.dice);
+        for (HashMap<String, Token> m : data.monsters.values()) {
+            components.addAll(m.values());
         }
+
         // Current state
         components.add(masterBoard);
         if (tokens != null) {
@@ -96,13 +94,13 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         copy.masterBoard = masterBoard.copy();
         copy.overlord = overlord.copy();
         copy.heroes = new ArrayList<>();
-        for (Hero f: heroes) {
+        for (Hero f : heroes) {
             copy.heroes.add(f.copy());
         }
         copy.monsters = new ArrayList<>();
-        for (List<Monster> ma: monsters) {
+        for (List<Monster> ma : monsters) {
             List<Monster> maC = new ArrayList<>();
-            for (Monster m: ma) {
+            for (Monster m : ma) {
                 maC.add(m.copy());
             }
             copy.monsters.add(maC);
@@ -111,7 +109,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         copy.gridReferences = new HashMap<>(gridReferences); // TODO deep
         copy.initData = initData;
         copy.tokens = new ArrayList<>();
-        for (DToken t: tokens) {
+        for (DToken t : tokens) {
             copy.tokens.add(t.copy());
         }
         // TODO: Why copy Dice - aren't these immutable?
@@ -187,13 +185,15 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return heroes;
     }
 
-    public List<DescentDice> getDice(){return dice;}
+    public List<DescentDice> getDice() {
+        return dice;
+    }
 
-    public DicePool getDicePool(){
+    public DicePool getDicePool() {
         return dicePool;
     }
 
-    public void setDicePool(DicePool pool){
+    public void setDicePool(DicePool pool) {
         dicePool = pool;
     }
 
@@ -223,6 +223,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         // TODO: implement with look through Abilities/Items/Actions which fit
         return false;
     }
+
     public List<AbstractAction> getInterruptActionsFor(int player, Triggers trigger) {
         List<AbstractAction> retValue = new ArrayList<>();
         // TODO: Run through the inventory or items/cards/abilities to see which have

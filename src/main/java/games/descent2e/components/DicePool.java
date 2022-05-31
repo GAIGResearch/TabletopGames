@@ -45,8 +45,25 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     }
 
     public void roll(Random r) {
+        rolled = true;
         for (DescentDice d : dice)
             d.roll(r);
+    }
+
+    public int getNumber(DiceType type) {
+        return (int) dice.stream().filter(d -> d.getColour() == type).count();
+    }
+    public int getDamage() {
+        return dice.stream().mapToInt(DescentDice::getDamage).sum();
+    }
+    public int getSurge() {
+        return dice.stream().mapToInt(DescentDice::getSurge).sum();
+    }
+    public int getRange() {
+        return dice.stream().mapToInt(DescentDice::getRange).sum();
+    }
+    public boolean hasRolled() {
+        return rolled;
     }
 
 
