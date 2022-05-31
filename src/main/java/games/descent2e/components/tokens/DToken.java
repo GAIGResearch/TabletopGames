@@ -97,6 +97,10 @@ public class DToken extends Token {
         return position;
     }
 
+    public void setPosition(Vector2D position) {
+        this.position = position;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
