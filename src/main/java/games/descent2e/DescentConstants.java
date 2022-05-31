@@ -3,6 +3,7 @@ package games.descent2e;
 import utilities.Hash;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class DescentConstants {
 
@@ -12,7 +13,7 @@ public class DescentConstants {
 //            "Scout",
             "Healer"
     };
-    public final static HashMap<String, String[]> archetypeClassMap = new HashMap<String, String[]>() {{
+    public final static Map<String, String[]> archetypeClassMap = new HashMap<String, String[]>() {{
        put("Mage", new String[] {
 //                                "Necromancer",
                                 "Runemaster",
@@ -77,4 +78,8 @@ public class DescentConstants {
     public final static int heroicFeatHash = Hash.GetInstance().hash("heroicFeat");
     public final static int abilityHash = Hash.GetInstance().hash("ability");
     public final static int setupHash = Hash.GetInstance().hash("setup");
+
+    public enum AttackType {
+        NONE, MELEE, RANGED, BLAST;
+    }
 }

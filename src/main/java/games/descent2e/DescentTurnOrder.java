@@ -8,6 +8,7 @@ import games.descent2e.components.Monster;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
@@ -88,7 +89,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         for (Figure f: dgs.getHeroes()) {
             f.resetRound();
         }
-        for (ArrayList<Monster> mList: dgs.getMonsters()) {
+        for (List<Monster> mList: dgs.getMonsters()) {
             for (Monster m: mList) {
                 m.resetRound();
             }
@@ -96,6 +97,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         dgs.overlord.resetRound();
         monsterGroupActingNext = 0;
         monsterActingNext = 0;
+
     }
 
     @Override

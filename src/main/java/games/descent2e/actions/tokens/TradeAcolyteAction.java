@@ -46,18 +46,20 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
         List<AbstractAction> actions = new ArrayList<>();
         DescentGameState dgs = (DescentGameState) state;
         DToken acolyte = (DToken) dgs.getComponentById(tokenID);
-        Hero hero = dgs.getHeroes().get(acolyte.getOwnerId()-1);
-        Vector2D loc = hero.getPosition();
-        GridBoard board = dgs.getMasterBoard();
-        List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-        for (Vector2D n: neighbours) {
-            BoardNode bn = board.getElement(n.getX(), n.getY());
-            if (bn != null) {
-                PropertyInt figureAtNode = ((PropertyInt) bn.getProperty(playersHash));
-                if (figureAtNode != null && figureAtNode.value != -1) {
-                    Figure f = (Figure) dgs.getComponentById(figureAtNode.value);
-                    if (f instanceof Hero) {
-                        actions.add(new TradeAcolyteAction(tokenID, figureAtNode.value));
+        if (acolyte.getOwnerId() == state.getCurrentPlayer()) {
+            Hero hero = dgs.getHeroes().get(acolyte.getOwnerId() - 1);
+            Vector2D loc = hero.getPosition();
+            GridBoard board = dgs.getMasterBoard();
+            List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+            for (Vector2D n : neighbours) {
+                BoardNode bn = board.getElement(n.getX(), n.getY());
+                if (bn != null) {
+                    PropertyInt figureAtNode = ((PropertyInt) bn.getProperty(playersHash));
+                    if (figureAtNode != null && figureAtNode.value != -1) {
+                        Figure f = (Figure) dgs.getComponentById(figureAtNode.value);
+                        if (f instanceof Hero) {
+                            actions.add(new TradeAcolyteAction(tokenID, figureAtNode.value));
+                        }
                     }
                 }
             }

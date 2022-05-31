@@ -13,7 +13,7 @@ public abstract class Component {
 
     protected final int componentID;  // Unique ID of this component
     protected final ComponentType type;  // Type of this component
-    protected final HashMap<Integer, Property> properties;  // Maps between integer key for the property and the property object
+    protected final Map<Integer, Property> properties;  // Maps between integer key for the property and the property object
     protected int ownerId = -1;  // By default belongs to the game
     protected String componentName;  // Name of this component
 
@@ -105,7 +105,7 @@ public abstract class Component {
      * Get the full map of properties.
      * @return - mapping from property integer key to property objects.
      */
-    public HashMap<Integer, Property> getProperties() {
+    public Map<Integer, Property> getProperties() {
         return properties;
     }
 
@@ -132,7 +132,7 @@ public abstract class Component {
         properties.put(prop.getHashKey(), prop);
     }
 
-    public void setProperties(HashMap<Integer, Property> props) {
+    public void setProperties(Map<Integer, Property> props) {
         for (Property p: props.values()) {
             setProperty(p);
         }
