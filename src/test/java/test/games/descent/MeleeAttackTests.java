@@ -71,4 +71,9 @@ public class MeleeAttackTests {
         assertEquals(Math.max(startHP - damage, 0), victim.getAttribute(Figure.Attribute.Health).getValue());
     }
 
+    @Test
+    public void monsterRollsDefenceDieAfterAttack() {
+
+    }
+
 }
