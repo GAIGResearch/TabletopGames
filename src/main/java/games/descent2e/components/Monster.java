@@ -16,22 +16,18 @@ public class Monster extends Figure {
     DicePool attackDice;
     DicePool defenceDice;
 
-    public Monster(String name, Map<Integer, Property> props) {
-        super(name);
-        properties.clear();
-        properties.putAll(props);
+    public Monster() {
+        super("Monster");
+    }
 
-        int mp = ((PropertyInt)getProperty(movementHash)).value;
-        this.setAttribute(Attribute.MovePoints, new Counter(0, 0, mp, "Move points"));
-        int hp = ((PropertyInt)getProperty(healthHash)).value;
-        this.setAttribute(Attribute.Health, new Counter(hp, 0, hp, "Health"));
-
+    public void setProperties(Map<Integer, Property> props) {
+        for (Property p: props.values()) {
+            setProperty(p);
+        }
         String[] attack = ((PropertyStringArray) getProperty(attackHash)).getValues();
         attackDice = DicePool.constructDicePool(attack);
         String[] defence = ((PropertyStringArray) getProperty(defenceHash)).getValues();
         defenceDice = DicePool.constructDicePool(defence);
-        ownerId = 0; // All monsters belong to the overlord player
-        tokenType = "Monster";
     }
 
     protected Monster(String name, int ID) {
@@ -52,6 +48,19 @@ public class Monster extends Figure {
         copy.orientation = orientation;
         copy.attackDice = attackDice.copy();
         copy.defenceDice = defenceDice.copy();
+        super.copyComponentTo(copy);
+        return copy;
+    }
+
+    public Monster copyNewID() {
+        Monster copy = new Monster();
+        copy.orientation = orientation;
+        if (attackDice != null) {
+            copy.attackDice = attackDice.copy();
+        }
+        if (defenceDice != null) {
+            copy.defenceDice = defenceDice.copy();
+        }
         super.copyComponentTo(copy);
         return copy;
     }
