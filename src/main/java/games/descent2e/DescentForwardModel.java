@@ -296,6 +296,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                     if (token.getDescentTokenType() == DescentToken.Search
                             && token.getPosition() != null
                             && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
+
+
                         actions.addAll(token.getEffects());
                     }
                 }
@@ -334,35 +336,150 @@ public class DescentForwardModel extends AbstractForwardModel {
         return actions;
     }
 
-    private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
-        List<AbstractAction> actions = new ArrayList<>();
+    private HashMap<BoardNode, Double> getAllAdjacentNodes(DescentGameState dgs, Figure figure){
 
-        Vector2D currentLocation = f.getPosition();
-        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+        Vector2D figureLocation = figure.getPosition();
+        BoardNode figureNode = dgs.masterBoard.getElement(figureLocation.getX(), figureLocation.getY());
+        String figureType = figure.getTokenType();
+        // Get friendly figures based on token type (monster/hero)
+        ArrayList<Vector2D> friendlyFigureLocations = new ArrayList<>();
+        if (figureType.equals("Monster")) {
+            for (List<Monster> monsterGroup : dgs.monsters) {
+                for (Monster m : monsterGroup) {
+                    friendlyFigureLocations.add(m.getPosition());
+                }
+            }
+        } else {
+            for (Hero h : dgs.heroes) {
+                friendlyFigureLocations.add(h.getPosition());
+            }
+        }
 
-        // Check if figure can still move
-        PropertyInt moveSpeed = (PropertyInt)f.getProperty(movementHash);
-        if (currentTile.getComponentName().equals("pit") || f.getAttribute(Figure.Attribute.MovePoints).getValue() > 0) {
+        //<Board Node, Cost to get there>
+        HashMap<BoardNode, Double> expandedBoardNodes = new HashMap<>();
+        HashMap<BoardNode, Double> nodesToBeExpanded = new HashMap<>();
+        HashMap<BoardNode, Double> allAdjacentNodes = new HashMap<>();
 
-            // Find valid neighbours in master graph, can move there
-            for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
-                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
-                if (neighbour == null) continue;
+        nodesToBeExpanded.put(figureNode, 0.0);
+        while (!nodesToBeExpanded.isEmpty()){
+            //Pick a node to expand, and remove it from the map
+            Map.Entry<BoardNode,Double> entry = nodesToBeExpanded.entrySet().iterator().next();
+            BoardNode expandingNode = entry.getKey();
+            Double expandingNodeCost = entry.getValue();
+            nodesToBeExpanded.remove(expandingNode);
+
+            // Go through all the neighbour nodes
+            HashMap<Integer, Double> neighbours =expandingNode.getNeighbours();
+            for (Integer neighbourID : neighbours.keySet()){
+                BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourID);
                 Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
-                // TODO: size of figure moving, take into account large monster "expansion" rule, location saved on figure is always top-left corner
 
-                // Find terrain type
-                BoardNode tile = dgs.getMasterBoard().getElement(loc.getX(), loc.getY());
-                if ((currentTile.getComponentName().equals("pit") && !tile.getComponentName().equals("pit") // Moving from pit
-                        || !tile.getComponentName().equals("water")  // Normal move
-                        || f.getAttribute(Figure.Attribute.MovePoints).getValue() > ((DescentParameters)dgs.getGameParameters()).waterMoveCost) // Difficult terrain
-                        && ((PropertyInt)tile.getProperty(playersHash)).value == -1) {  // Empty space?
-                    // TODO: allow move in non-empty space if figure has move points left that allow it to finish the move action afterwards in an empty space
-                    // TODO: if moving to non-empty space, change game phase to ForceMove; otherwise, change game phase to main phase (if in force move).
-                    actions.add(new Move(loc.copy()));
+                double costToMoveToNeighbour = expandingNode.getNeighbourCost(neighbour);
+                double totalCost = expandingNodeCost + costToMoveToNeighbour;
+                boolean isFriendly = false;
+                boolean isEmpty = true;
+
+                //Check if the neighbour node is friendly
+//                for(Vector2D friendlyFigureLocation : friendlyFigureLocations){
+//                    if (friendlyFigureLocation.getX() == loc.getX() && friendlyFigureLocation.getY() == loc.getY()){
+//                        isFriendly = true;
+//                        break;
+//                    }
+//                }
+
+
+                PropertyInt figureOnLocation = (PropertyInt)neighbour.getProperty(playersHash);
+                if (figureOnLocation.value != -1) {
+                    isEmpty = false;
+                    Figure neighbourFigure = (Figure) dgs.getComponentById(figureOnLocation.value);
+                    if (figureType.equals(neighbourFigure.getTokenType())) {
+                        isFriendly = true;
+                    }
+                }
+
+                if (isFriendly){
+                    //if the node is friendly and not expanded - add it to the expansion list
+                    if(!expandedBoardNodes.containsKey(neighbour)){
+                        nodesToBeExpanded.put(neighbour, totalCost);
+                    //if the node is friendly and expanded but the cost was higher - add it to the expansion list
+                    } else if (expandedBoardNodes.containsKey(neighbour) && expandedBoardNodes.get(neighbour) > totalCost){
+                        expandedBoardNodes.remove(neighbour);
+                        nodesToBeExpanded.put(neighbour, totalCost);
+                    }
+                } else if (isEmpty) {
+                    //if the node is empty friendly - add it to adjacentNodeList
+                    if (!allAdjacentNodes.containsKey(neighbour) || allAdjacentNodes.get(neighbour) > totalCost){
+                        allAdjacentNodes.put(neighbour, totalCost);
+                    }
+                }
+                expandedBoardNodes.put(neighbour, totalCost);
+            }
+
+        }
+
+//
+//        if (flag == true && figureType.equals("Monster")) {
+//            System.out.println("My location: " + ((PropertyVector2D) figureNode.getProperty(coordinateHash)).values);
+//            for (BoardNode node : allAdjacentNodes.keySet()){
+//                System.out.println(((PropertyVector2D) node.getProperty(coordinateHash)).values + ": " + allAdjacentNodes.get(node));
+//            }
+//            flag = false;
+//        }
+
+
+        return allAdjacentNodes;
+    }
+
+    private ArrayList<Vector2D> getAllPointOfInterests(DescentGameState dgs, Figure figure){
+
+        ArrayList<Vector2D> pointsOfInterest = new ArrayList<>();
+        if (figure.getTokenType().equals("Monster")) {
+            for (Hero h : dgs.heroes) {
+                pointsOfInterest.add(h.getPosition());
+            }
+
+        } else if (figure.getTokenType().equals("Hero")) {
+            for (List<Monster> monsterGroup : dgs.monsters) {
+                for (Monster m : monsterGroup) {
+                    pointsOfInterest.add(m.getPosition());
+                }
+            }
+
+            for (DToken dToken : dgs.tokens){
+                if (dToken.getPosition() != null){
+                    pointsOfInterest.add(dToken.getPosition());
                 }
             }
         }
+
+//        for (Vector2D point : pointsOfInterest) {
+//            System.out.println("Point:" + point.toString());
+//        }
+        return pointsOfInterest;
+    }
+
+    private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
+
+        //TODO: This setAttribute should be called at the begining of turn, not here
+        f.setAttribute(Figure.Attribute.MovePoints, f.getAttributeMax(Figure.Attribute.MovePoints));
+
+        Map<BoardNode, Double> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
+        ArrayList<Vector2D> allPointOfInterests = getAllPointOfInterests(dgs, f);
+
+        List<AbstractAction> actions = new ArrayList<>();
+        for (BoardNode node : allAdjacentNodes.keySet()){
+            if (allAdjacentNodes.get(node) <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
+                Vector2D loc = ((PropertyVector2D) node.getProperty(coordinateHash)).values;
+                actions.add(new Move(loc.copy()));
+            }
+        }
+
+        for(Vector2D pointOfInterest : allPointOfInterests) {
+//            if (distance(pointOfInterest, f.getPosition()) <= Figure.Attribute.MovePoints){
+//            actions.add(new Move(pointOfInterest.copy()));
+//            }
+        }
+
         return actions;
     }
 
