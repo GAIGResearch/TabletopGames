@@ -36,7 +36,9 @@ public class Figure extends Token {
 
     HashMap<Attribute, Counter> attributes;
 
+
     int nActionsExecuted;
+
     Vector2D position;
     Pair<Integer,Integer> size;
 
