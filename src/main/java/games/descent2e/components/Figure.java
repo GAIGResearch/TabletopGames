@@ -59,7 +59,10 @@ public class Figure extends Token {
     }
 
     public void resetRound() {
-        this.attributes.get(MovePoints).setToMax();
+        if (this.attributes.containsKey(MovePoints)) {
+            // Overlord doesn't have move points
+            this.attributes.get(MovePoints).setToMax();
+        }
         this.nActionsExecuted = 0;
     }
 
