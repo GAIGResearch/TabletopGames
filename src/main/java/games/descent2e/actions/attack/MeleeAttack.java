@@ -74,7 +74,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
             Monster monster = (Monster) state.getComponentById(attackingFigure);
             state.setDicePool(monster.getAttackDice());
         } else {
-            Hero hero = state.getHeroes().get(attackingPlayer - 1);
+            Hero hero = (Hero) state.getComponentById(attackingFigure);
             Item weapon = hero.getWeapons().stream()
                     .findFirst().orElseThrow(() -> new AssertionError("Weapon not found : " + attackingFigure));
             state.setDicePool(weapon.getDicePool());
