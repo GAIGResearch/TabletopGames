@@ -6,12 +6,10 @@ import core.actions.AbstractAction;
 import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.*;
+import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.actions.tokens.TokenAction;
-import games.descent2e.components.DicePool;
+import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
-import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
-import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -284,6 +282,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
+            actions.addAll(attackActions(dgs, actingFigure));
 
             // - Rest
             if (actingFigure instanceof Hero) {
@@ -478,6 +477,31 @@ public class DescentForwardModel extends AbstractForwardModel {
 //            if (distance(pointOfInterest, f.getPosition()) <= Figure.Attribute.MovePoints){
 //            actions.add(new Move(pointOfInterest.copy()));
 //            }
+        }
+
+        return actions;
+    }
+
+    private List<AbstractAction> attackActions(DescentGameState dgs, Figure f) {
+        List<AbstractAction> actions = new ArrayList<>();
+        Vector2D currentLocation = f.getPosition();
+        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+        // Find valid neighbours in master graph - used for melee attacks
+        for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
+            BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
+            if (neighbour == null) continue;
+            Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+            int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
+            if ( neighbourID != -1 ) {
+                Figure other = (Figure)dgs.getComponentById(neighbourID);
+                if (f instanceof Monster && other instanceof Hero) {
+                    // Monster attacks a hero
+                    actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
+                } else if (f instanceof Hero && other instanceof Monster) {
+                    // Player attacks a monster
+                    actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
+                }
+            }
         }
 
         return actions;
