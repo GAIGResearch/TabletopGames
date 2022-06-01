@@ -38,7 +38,9 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     Deck<Card> searchCards; // TODO, placeholder
     GridBoard masterBoard;
-    DicePool dicePool;
+    DicePool attackDicePool;
+    DicePool defenceDicePool;
+    DicePool attributeDicePool;
     List<Hero> heroes;
     Figure overlord;
     List<List<Monster>> monsters;
@@ -55,7 +57,9 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         super(gameParameters, new DescentTurnOrder(nPlayers), GameType.Descent2e);
         tiles = new HashMap<>();
         data = new DescentGameData();
-        dicePool = new DicePool(Collections.emptyList());
+        attackDicePool = new DicePool(Collections.emptyList());
+        defenceDicePool = new DicePool(Collections.emptyList());
+        attributeDicePool = new DicePool(Collections.emptyList());
 
         heroes = new ArrayList<>();
         monsters = new ArrayList<>();
@@ -150,12 +154,23 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         if (!(o instanceof DescentGameState)) return false;
         if (!super.equals(o)) return false;
         DescentGameState that = (DescentGameState) o;
-        return initData == that.initData && overlordPlayer == that.overlordPlayer && Objects.equals(data, that.data) && Objects.equals(tiles, that.tiles) && Arrays.equals(tileReferences, that.tileReferences) && Objects.equals(gridReferences, that.gridReferences) && Objects.equals(searchCards, that.searchCards) && Objects.equals(masterBoard, that.masterBoard) && Objects.equals(dicePool, that.dicePool) && Objects.equals(heroes, that.heroes) && Objects.equals(overlord, that.overlord) && Objects.equals(monsters, that.monsters) && Objects.equals(tokens, that.tokens);
+        return initData == that.initData && overlordPlayer == that.overlordPlayer &&
+                Objects.equals(data, that.data) && Objects.equals(tiles, that.tiles) &&
+                Arrays.equals(tileReferences, that.tileReferences) &&
+                Objects.equals(gridReferences, that.gridReferences) &&
+                Objects.equals(searchCards, that.searchCards) &&
+                Objects.equals(masterBoard, that.masterBoard) &&
+                Objects.equals(attackDicePool, that.attackDicePool) &&
+                Objects.equals(defenceDicePool, that.defenceDicePool) &&
+                Objects.equals(attributeDicePool, that.attributeDicePool) &&
+                Objects.equals(heroes, that.heroes) && Objects.equals(overlord, that.overlord) &&
+                Objects.equals(monsters, that.monsters) && Objects.equals(tokens, that.tokens);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards, masterBoard, dicePool, heroes, overlord, monsters, overlordPlayer, tokens);
+        int result = Objects.hash(super.hashCode(), data, tiles, gridReferences, initData, searchCards,
+                masterBoard, attackDicePool, defenceDicePool, attributeDicePool, heroes, overlord, monsters, overlordPlayer, tokens);
         result = 31 * result + Arrays.deepHashCode(tileReferences);
         return result;
     }
@@ -172,13 +187,14 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return heroes;
     }
 
-    public DicePool getDicePool() {
-        return dicePool;
+    public DicePool getAttackDicePool() {
+        return attackDicePool;
     }
-
-    public void setDicePool(DicePool pool) {
-        dicePool = pool;
-    }
+    public DicePool getDefenceDicePool() {return defenceDicePool;}
+    public DicePool getAttributeDicePool() {return attributeDicePool;}
+    public void setAttackDicePool(DicePool pool) {attackDicePool = pool;}
+    public void setDefenceDicePool(DicePool pool) {defenceDicePool = pool;}
+    public void setAttributeDicePool(DicePool pool) {attributeDicePool = pool;}
 
     public List<List<Monster>> getMonsters() {
         return monsters;

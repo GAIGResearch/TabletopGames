@@ -173,7 +173,9 @@ public class DescentForwardModel extends AbstractForwardModel {
         }
 
         // Set up dice!
-        dgs.dicePool = new DicePool(Collections.emptyList());
+        dgs.attributeDicePool = new DicePool(Collections.emptyList());
+        dgs.attackDicePool = new DicePool(Collections.emptyList());
+        dgs.defenceDicePool = new DicePool(Collections.emptyList());
 
         // Shuffle search cards deck
 

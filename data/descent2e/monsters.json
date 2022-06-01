@@ -11,7 +11,7 @@
     "attackType": ["String", "ranged"],
     "act1": [
       {
-        "color": ["String", "white"],
+        "color": ["Color", "white"],
         "movement": ["Integer", 5],
         "hp": ["Integer", 2],
         "defence": ["String[]", ["grey"]],
@@ -19,7 +19,7 @@
         "passive": ["String[]", ["Scamper", "Cowardly", "Surge: +1 Range", "Surge: +1 Heart"]]
       },
       {
-        "color": ["String", "red"],
+        "color": ["Color", "red"],
         "movement": ["Integer", 5],
         "hp": ["Integer", 4],
         "defence": ["String[]", ["grey"]],
@@ -29,7 +29,7 @@
     ],
     "act2": [
       {
-        "color": ["String", "white"],
+        "color": ["Color", "white"],
         "movement": ["Integer", 5],
         "hp": ["Integer", 4],
         "defence": ["String[]", ["grey"]],
@@ -37,7 +37,7 @@
         "passive": ["String[]", ["Scamper", "Cowardly", "Surge: +2 Range", "Surge: +2 Heart"]]
       },
       {
-        "color": ["String", "red"],
+        "color": ["Color", "red"],
         "movement": ["Integer", 5],
         "hp": ["Integer", 6],
         "defence": ["String[]", ["grey"]],
@@ -57,7 +57,7 @@
     "attackType": ["String", "melee"],
     "act1": [
       {
-        "color": ["String", "white"],
+        "color": ["Color", "white"],
         "movement": ["Integer", 4],
         "hp": ["Integer", 4],
         "defence": ["String[]", ["grey"]],
@@ -66,7 +66,7 @@
         "action": ["String[]", ["Howl"]]
       },
       {
-        "color": ["String", "red"],
+        "color": ["Color", "red"],
         "movement": ["Integer", 4],
         "hp": ["Integer", 6],
         "defence": ["String[]", ["grey"]],
@@ -77,7 +77,7 @@
     ],
     "act2": [
       {
-        "color": ["String", "white"],
+        "color": ["Color", "white"],
         "movement": ["Integer", 4],
         "hp": ["Integer", 6],
         "defence": ["String[]", ["black"]],
@@ -86,7 +86,7 @@
         "action": ["String[]", ["Howl"]]
       },
       {
-        "color": ["String", "red"],
+        "color": ["Color", "red"],
         "movement": ["Integer", 4],
         "hp": ["Integer", 8],
         "defence": ["String[]", ["black"]],
