@@ -378,17 +378,12 @@ public class DescentForwardModel extends AbstractForwardModel {
             int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
             if ( neighbourID != -1 ) {
                 Figure other = (Figure)dgs.getComponentById(neighbourID);
-                // todo there is a getWeapon function
                 if (f instanceof Monster && other instanceof Hero) {
                     // Monster attacks a hero
-                    // todo get params
-                    System.out.println("monster is attacking");
-//                actions.add(new MeleeAttack());
+                    actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
                 } else if (f instanceof Hero && other instanceof Monster) {
                     // Player attacks a monster
-                    for (Item item: ((Hero) f).getWeapons(dgs)){
-                        actions.add(new MeleeAttack(item.getComponentID(), f.getComponentID(), f.getOwnerId(), other.getComponentID(), other.getOwnerId()));
-                    }
+                    actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
                 }
             }
         }
