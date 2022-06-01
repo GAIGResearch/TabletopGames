@@ -62,28 +62,31 @@ public class DescentForwardModel extends AbstractForwardModel {
         // TODO: is this quest phase or campaign phase?
 
         // TODO: Let players choose these, for now randomly assigned
-        // TODO: 2 player games, with 2 heroes for one, and the other the overlord.
         // 5. Player setup phase interrupts, after which setup continues:
-        // Player chooses hero & class
+        // Players choose heroes & class
 
-        ArrayList<Vector2D> playerStartingLocations = firstQuest.getStartingLocations().get(firstBoard);
-
+        ArrayList<Vector2D> heroStartingPositions = firstQuest.getStartingLocations().get(firstBoard);
         ArrayList<Integer> archetypes = new ArrayList<>();
         for (int i = 0; i < DescentConstants.archetypes.length; i++) {
             archetypes.add(i);
         }
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
         dgs.heroes = new ArrayList<>();
-        for (int i = 1; i < dgs.getNPlayers(); i++) {
+        for (int i = 1; i < Math.max(3, dgs.getNPlayers()); i++) {
             // Choose random archetype from those remaining
             int choice = archetypes.get(rnd.nextInt(archetypes.size()));
-//            archetypes.remove(Integer.valueOf(choice));
+//            archetypes.remove(Integer.valueOf(choice));  // TODO turn this back in once we have archetypes >= nHeroes, for now commented out to allow easy testing
             String archetype = DescentConstants.archetypes[choice];
 
             // Choose random hero from that archetype
             List<Hero> heroes = _data.findHeroes(archetype);
             Hero figure = heroes.get(rnd.nextInt(heroes.size()));
-            figure.setOwnerId(i);
+            if (dgs.getNPlayers() == 2) {
+                // In 2-player games, 1 player controls overlord, the other 2 heroes
+                figure.setOwnerId(1-dgs.overlordPlayer);
+            } else {
+                figure.setOwnerId(i);
+            }
 
             // Choose random class from that archetype
             choice = rnd.nextInt(DescentConstants.archetypeClassMap.get(archetype).length);
@@ -100,15 +103,19 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
 
-            // Place player in random starting location
-            choice = rnd.nextInt(playerStartingLocations.size());
-            Vector2D location = playerStartingLocations.get(choice);
-            figure.setPosition(location);
-            PropertyInt prop = new PropertyInt("players", figure.getComponentID());
-            dgs.masterBoard.getElement(location.getX(), location.getY()).setProperty(prop);
-            playerStartingLocations.remove(choice);
+            // Place hero on the board in random starting position out of those available
+            choice = rnd.nextInt(heroStartingPositions.size());
+            Vector2D position = heroStartingPositions.get(choice);
+            figure.setPosition(position);
 
-            // Inform game of this player's token
+            // Tell the board there's a hero there
+            PropertyInt prop = new PropertyInt("players", figure.getComponentID());
+            dgs.masterBoard.getElement(position.getX(), position.getY()).setProperty(prop);
+
+            // This starting position no longer an option (one hero per space)
+            heroStartingPositions.remove(choice);
+
+            // Inform game of this hero figure
             dgs.heroes.add(figure);
         }
 
