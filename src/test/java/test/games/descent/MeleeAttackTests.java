@@ -51,7 +51,6 @@ public class MeleeAttackTests {
         int damage = state.getDicePool().getDamage();
         assertTrue(attack.executionComplete(state));
         assertEquals(Math.max(startHP - damage, 0), victim.getAttribute(Figure.Attribute.Health).getValue());
-
     }
 
     @Test

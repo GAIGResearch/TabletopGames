@@ -30,7 +30,7 @@ public class Monster extends Figure {
         attackDice = DicePool.constructDicePool(attack);
         String[] defence = ((PropertyStringArray) getProperty(defenceHash)).getValues();
         defenceDice = DicePool.constructDicePool(defence);
-
+        ownerId = 0; // All monsters belong to the overlord player
         tokenType = "Monster";
     }
 
