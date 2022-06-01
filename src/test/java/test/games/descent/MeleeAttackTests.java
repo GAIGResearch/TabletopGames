@@ -40,7 +40,7 @@ public class MeleeAttackTests {
         assertEquals(1, weapons.size());
 
         int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
-        MeleeAttack attack = new MeleeAttack(actingFigure.getComponentID(), victim.getComponentID());
+        MeleeAttack attack = new MeleeAttackDamageOnly(actingFigure.getComponentID(), victim.getComponentID());
         assertEquals(0, state.getAttackDicePool().getSize());
         attack.execute(state);
         assertEquals(attack, state.currentActionInProgress());
@@ -59,7 +59,7 @@ public class MeleeAttackTests {
         Figure victim = state.getActingFigure();
 
         int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
-        MeleeAttack attack = new MeleeAttack(attacker.getComponentID(), victim.getComponentID());
+        MeleeAttack attack = new MeleeAttackDamageOnly(attacker.getComponentID(), victim.getComponentID());
         assertEquals(0, state.getAttackDicePool().getSize());
         attack.execute(state);
         assertEquals(2, state.getAttackDicePool().getSize());
@@ -73,7 +73,40 @@ public class MeleeAttackTests {
 
     @Test
     public void monsterRollsDefenceDieAfterAttack() {
+        Figure actingFigure = state.getActingFigure();
+        Figure victim = state.getMonsters().get(0).get(0);
+        int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
+        MeleeAttack attack = new MeleeAttack(actingFigure.getComponentID(), victim.getComponentID());
+        attack.execute(state);
+        assertEquals(1, state.getDefenceDicePool().getSize());
+        assertEquals(1, state.getDefenceDicePool().getNumber(DiceType.GREY));
+        assertEquals(0, state.getDefenceDicePool().getNumber(DiceType.BROWN));
+        assertTrue(state.getDefenceDicePool().hasRolled());
+        int damage = state.getAttackDicePool().getDamage();
+        int shields = state.getDefenceDicePool().getShields();
+        damage = Math.max(damage - shields, 0);
+        assertTrue(shields > 0);
+        assertTrue(attack.executionComplete(state));
+        assertEquals(Math.max(startHP - damage, 0), victim.getAttribute(Figure.Attribute.Health).getValue());
+    }
 
+    @Test
+    public void heroRollsDefenceDieAfterAttack() {
+        Figure actingFigure = state.getMonsters().get(0).get(0);
+        Figure victim = state.getActingFigure();
+        int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
+        MeleeAttack attack = new MeleeAttack(actingFigure.getComponentID(), victim.getComponentID());
+        attack.execute(state);
+        assertEquals(1, state.getDefenceDicePool().getSize());
+        assertEquals(1, state.getDefenceDicePool().getNumber(DiceType.GREY));
+        assertEquals(0, state.getDefenceDicePool().getNumber(DiceType.BROWN));
+        assertTrue(state.getDefenceDicePool().hasRolled());
+        int damage = state.getAttackDicePool().getDamage();
+        int shields = state.getDefenceDicePool().getShields();
+        damage = Math.max(damage - shields, 0);
+        assertTrue(shields > 0);
+        assertTrue(attack.executionComplete(state));
+        assertEquals(Math.max(startHP - damage, 0), victim.getAttribute(Figure.Attribute.Health).getValue());
     }
 
 }

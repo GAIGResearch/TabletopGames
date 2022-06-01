@@ -68,6 +68,7 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     public int getDamage() {
         return dice.stream().mapToInt(DescentDice::getDamage).sum();
     }
+    public int getShields() {return dice.stream().mapToInt(DescentDice::getShielding).sum();}
     public int getSurge() {
         return dice.stream().mapToInt(DescentDice::getSurge).sum();
     }
