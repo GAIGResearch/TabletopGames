@@ -7,6 +7,7 @@ import core.components.Token;
 import core.properties.PropertyInt;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.Move;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -186,26 +187,33 @@ public class Figure extends Token {
         }
     }
 
-    /**
-     * Creates a Token objects from a JSON object.
-     *
-     * @param figure - JSON to parse into Figure object.
-     */
-    protected void loadFigure(JSONObject figure) {
-        this.componentName = (String) figure.get("id");
-        this.tokenType = (String) ((JSONArray) figure.get("type")).get(1);
+    public void loadFigure(JSONObject figure, Set<String> ignoreKeys) {
+        if (!ignoreKeys.contains("id")) {
+            this.componentName = (String) figure.get("id");
+        }
+        if (!ignoreKeys.contains("type")) {
+            this.tokenType = (String) ((JSONArray) figure.get("type")).get(1);
+        }
         // TODO: custom load of figure properties
-        parseComponent(this, figure);
+        parseComponent(this, figure, ignoreKeys);
 
         for (Attribute a : Attribute.values()) {
             PropertyInt prop = ((PropertyInt) getProperty(a.name()));
             if (prop != null) {
                 int max = prop.value;
                 this.attributes.put(a, new Counter(max, 0, max, a.name()));
+                if (a == MovePoints || a == Fatigue) this.setAttribute(a, 0);
             }
         }
-        this.setAttribute(MovePoints, 0);
-        this.setAttribute(Fatigue, 0);
+    }
+
+    /**
+     * Creates a Token objects from a JSON object.
+     *
+     * @param figure - JSON to parse into Figure object.
+     */
+    public void loadFigure(JSONObject figure) {
+        loadFigure(figure, new HashSet<>());
     }
 
     /**

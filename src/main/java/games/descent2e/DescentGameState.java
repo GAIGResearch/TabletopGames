@@ -74,7 +74,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
             components.addAll(data.tiles);
             components.addAll(data.heroes);
             components.addAll(data.boardConfigurations);
-            for (HashMap<String, Token> m : data.monsters.values()) {
+            for (HashMap<String, Monster> m : data.monsters.values()) {
                 components.addAll(m.values());
             }
             initData = true;

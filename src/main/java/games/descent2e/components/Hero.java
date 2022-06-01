@@ -6,8 +6,6 @@ import core.components.Deck;
 import core.properties.Property;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
-import games.descent2e.DescentGameState;
-import games.descent2e.actions.DescentAction;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

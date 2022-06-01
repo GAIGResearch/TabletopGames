@@ -6,12 +6,10 @@ import core.actions.AbstractAction;
 import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.*;
+import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.actions.tokens.TokenAction;
-import games.descent2e.components.DicePool;
+import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
-import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
-import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
 import utilities.Pair;
 import utilities.Vector2D;
@@ -284,6 +282,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
+            actions.addAll(attackActions(dgs, actingFigure));
 
             // - Rest
             if (actingFigure instanceof Hero) {
@@ -478,6 +477,31 @@ public class DescentForwardModel extends AbstractForwardModel {
 //            if (distance(pointOfInterest, f.getPosition()) <= Figure.Attribute.MovePoints){
 //            actions.add(new Move(pointOfInterest.copy()));
 //            }
+        }
+
+        return actions;
+    }
+
+    private List<AbstractAction> attackActions(DescentGameState dgs, Figure f) {
+        List<AbstractAction> actions = new ArrayList<>();
+        Vector2D currentLocation = f.getPosition();
+        BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
+        // Find valid neighbours in master graph - used for melee attacks
+        for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
+            BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
+            if (neighbour == null) continue;
+            Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+            int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
+            if ( neighbourID != -1 ) {
+                Figure other = (Figure)dgs.getComponentById(neighbourID);
+                if (f instanceof Monster && other instanceof Hero) {
+                    // Monster attacks a hero
+                    actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
+                } else if (f instanceof Hero && other instanceof Monster) {
+                    // Player attacks a monster
+                    actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
+                }
+            }
         }
 
         return actions;
@@ -1009,45 +1033,46 @@ public class DescentForwardModel extends AbstractForwardModel {
             String name = nameDef.split(":")[0];
             String tile = mDef[1];
             Set<Vector2D> tileCoords = dgs.gridReferences.get(tile).keySet();
+            int act = quest.getAct();
+            Map<String, Monster> monsterDef = _data.findMonster(name);
+            Monster superDef = monsterDef.get("super");
+            int[] monsterSetup = ((PropertyIntArray)superDef.getProperty(setupHash)).getValues();
 
-            // Check property modifiers
-            int hpModifierMaster = 0;
-            int hpModifierMinion = 0;
+            // TODO: this could be adding/removing abilities too
+            // Check attribute modifiers
+            // Map from who (all/minion/master) -> list of modifiers in pairs (Atribute, howMuch)
+            HashMap<String, ArrayList<Pair<Figure.Attribute, Integer>>> attributeModifiers = new HashMap<>();
             if (mDef.length > 2) {
                 String mod = mDef[2];
                 String[] modifiers = mod.split(";");
                 for (String modifier: modifiers) {
                     String who = modifier.split(":")[0];
-                    String property = modifier.split(":")[1];
-                    String sign = modifier.split(":")[2];
-                    int amount = Integer.parseInt(modifier.split(":")[3]);
-                    if (sign.equals("-")) amount = -amount;
+                    String attribute = modifier.split(":")[1];
+                    String howMuch = modifier.split(":")[2];
+                    int amount = Integer.parseInt(howMuch);
 
-                    if (property.equals("HP")) {
-                        // HP modifier
-                        if (who.equals("all")) {
-                            hpModifierMaster += amount;
-                            hpModifierMinion += amount;
-                        } else if (who.equals("master")) {
-                            hpModifierMaster += amount;
-                        } else {
-                            hpModifierMinion += amount;
-                        }
-                    } else {
-                        // TODO: other properties modified
-                        // TODO: this could be adding/removing abilities too
+                    if (!attributeModifiers.containsKey(who)) {
+                        attributeModifiers.put(who, new ArrayList<>());
                     }
+                    attributeModifiers.get(who).add(new Pair<>(Figure.Attribute.valueOf(attribute), amount));
                 }
             }
 
-            int act = quest.getAct();
-            Map<String, Token> monsterDef = _data.findMonster(name);
-            Token superDef = monsterDef.get("super");
-            int[] monsterSetup = ((PropertyIntArray)superDef.getProperty(setupHash)).getValues();
-
             // Always 1 master
-            Monster master = new Monster(name + " master", monsterDef.get(act + "-master").getProperties());
-            placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, hpModifierMaster, superDef);
+            Monster master = monsterDef.get(act + "-master").copyNewID();
+            master.setProperties(monsterDef.get(act + "-master").getProperties());
+            master.setComponentName(name + " master");
+            if (attributeModifiers.containsKey("master")) {
+                for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("master")) {
+                    master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
+                }
+            }
+            if (attributeModifiers.containsKey("all")) {
+                for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("all")) {
+                    master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
+                }
+            }
+            placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, superDef);
             master.setOwnerId(dgs.overlordPlayer);
             monsterGroup.add(master);
 
@@ -1068,11 +1093,24 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // Place minions
             for (int i = 0; i < nMinions; i++) {
-                Monster minion = new Monster(name + " minion " + i, monsterDef.get(act + "-minion").getProperties());
-                placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, hpModifierMinion, superDef);
+                Monster minion = monsterDef.get(act + "-minion").copyNewID();
+                minion.setProperties(monsterDef.get(act + "-minion").getProperties());
+                minion.setComponentName(name + " minion");
+                placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, superDef);
                 minion.setOwnerId(dgs.overlordPlayer);
                 monsterGroup.add(minion);
+                if (attributeModifiers.containsKey("minion")) {
+                    for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("minion")) {
+                        master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
+                    }
+                }
+                if (attributeModifiers.containsKey("all")) {
+                    for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("all")) {
+                        master.getAttribute(modifier.a).setMaximum(master.getAttribute(modifier.a).getMaximum() + modifier.b);
+                    }
+                }
             }
+
 
             dgs.monsters.add(monsterGroup);
         }
@@ -1085,16 +1123,9 @@ public class DescentForwardModel extends AbstractForwardModel {
      * @param tileCoords - coordinate options for the monster
      * @param rnd - random generator
      */
-    private void placeMonster(DescentGameState dgs, Monster monster, List<Vector2D> tileCoords, Random rnd,
-                              int hpModifier, Token superDef) {
+    private void placeMonster(DescentGameState dgs, Monster monster, List<Vector2D> tileCoords, Random rnd, Token superDef) {
         // Finish setup of monster
         monster.setProperties(superDef.getProperties());
-        if (hpModifier > 0) {
-            int oldMasterHP = ((PropertyInt)monster.getProperty(healthHash)).value;
-            monster.setProperty(new PropertyInt("hp", oldMasterHP + hpModifier));
-        }
-        // Place monster
-        boolean placed = false;
 
         // TODO: maybe change orientation if monster doesn't fit vertically
         String size = ((PropertyString)monster.getProperty(sizeHash)).value;
