@@ -91,6 +91,31 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
     }
 
     @Override
+    public boolean canExecute(DescentGameState dgs) {
+        // Can only execute if player adjacent to another hero
+        DToken acolyte = (DToken) dgs.getComponentById(tokenID);
+        if (acolyte.getOwnerId() == dgs.getCurrentPlayer()) {
+            Hero hero = dgs.getHeroes().get(acolyte.getOwnerId() - 1);
+            Vector2D loc = hero.getPosition();
+            GridBoard board = dgs.getMasterBoard();
+            List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+            for (Vector2D n : neighbours) {
+                BoardNode bn = board.getElement(n.getX(), n.getY());
+                if (bn != null) {
+                    PropertyInt figureAtNode = ((PropertyInt) bn.getProperty(playersHash));
+                    if (figureAtNode != null && figureAtNode.value != -1) {
+                        Figure f = (Figure) dgs.getComponentById(figureAtNode.value);
+                        if (f instanceof Hero) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TradeAcolyteAction)) return false;

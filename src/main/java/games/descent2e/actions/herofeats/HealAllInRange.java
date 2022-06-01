@@ -24,6 +24,11 @@ public class HealAllInRange extends DescentAction {
     }
 
     @Override
+    public boolean canExecute(DescentGameState dgs) {
+        return false;
+    }
+
+    @Override
     public boolean equals(Object obj) {
         return false;
     }

@@ -2,22 +2,20 @@ package games.descent2e.actions;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
-import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
 
-public class Rest extends DescentAction{
-    public Rest() {
+public class EndTurn extends DescentAction{
+    public EndTurn() {
         super(Triggers.ACTION_POINT_SPEND);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Rest";
+        return "End turn";
     }
 
     @Override
     public boolean execute(DescentGameState gs) {
-        ((Hero)gs.getActingFigure()).setRested(true);
+        gs.getTurnOrder().endPlayerTurn(gs);
         return true;
     }
 
@@ -28,6 +26,6 @@ public class Rest extends DescentAction{
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return dgs.getHeroes().get(dgs.getCurrentPlayer()-1).getAttributeValue(Figure.Attribute.Fatigue) > 0;
+        return true;
     }
 }

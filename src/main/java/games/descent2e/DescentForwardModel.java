@@ -6,9 +6,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.*;
 import core.properties.*;
-import games.descent2e.actions.DescentAction;
-import games.descent2e.actions.Move;
-import games.descent2e.actions.Rest;
+import games.descent2e.actions.*;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.tokens.DToken;
@@ -186,12 +184,12 @@ public class DescentForwardModel extends AbstractForwardModel {
         action.execute(currentState);
         if (checkEndOfGame()) return;
 
-        int currentPlayer = currentState.getCurrentPlayer();
-        int nActionsPerPlayer = ((DescentParameters)currentState.getGameParameters()).nActionsPerPlayer;
-        if (currentPlayer == 0 && ((DescentGameState)currentState).overlord.getNActionsExecuted() == nActionsPerPlayer
-            || currentPlayer != 0 &&
-                ((DescentGameState)currentState).getHeroes().get(currentPlayer-1).getNActionsExecuted() == nActionsPerPlayer) {
-            currentState.getTurnOrder().endPlayerTurn(currentState);
+        DescentGameState dgs = (DescentGameState) currentState;
+        int currentPlayer = dgs.getCurrentPlayer();
+        int nActionsPerPlayer = ((DescentParameters)dgs.getGameParameters()).nActionsPerPlayer;
+        if (currentPlayer == dgs.overlordPlayer && dgs.overlord.getNActionsExecuted() == nActionsPerPlayer
+            || currentPlayer != dgs.overlordPlayer && dgs.getHeroes().get(currentPlayer-1).getNActionsExecuted() == nActionsPerPlayer) {
+            dgs.getTurnOrder().endPlayerTurn(dgs);
         }
 
         /*
@@ -261,8 +259,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         if (!(dgs.getGamePhase() == DescentGameState.DescentPhase.ForceMove)) {
             // Can do actions other than move
 
-            // Do nothing // TODO: remove this option, replace with EndAction action.
-            actions.add(new DoNothing());
+            // End turn
+            actions.add(new EndTurn());
 
             // Can we do a move action? Can't if already done max actions & not currently executing a move, or immobilized
             boolean canMove = !actingFigure.hasCondition(DescentCondition.Immobilize) &&
@@ -280,7 +278,10 @@ public class DescentForwardModel extends AbstractForwardModel {
             // - Rest
             if (actingFigure instanceof Hero) {
                 // Only heroes can rest
-                actions.add(new Rest());
+                Rest act = new Rest();
+                if (act.canExecute(dgs)) {
+                    actions.add(act);
+                }
             }
 
             // - Open/close a door TODO
@@ -306,7 +307,10 @@ public class DescentForwardModel extends AbstractForwardModel {
             // - Special (specified by quest)
             if (actingFigure.getAbilities() != null) {
                 for (DescentAction act : actingFigure.getAbilities()) {
-                    actions.add(act); // TODO check if action can be executed right now
+                    // Check if action can be executed right now
+                    if (act.canExecute(Triggers.ACTION_POINT_SPEND, dgs)) {
+                        actions.add(act);
+                    }
                 }
             }
 
