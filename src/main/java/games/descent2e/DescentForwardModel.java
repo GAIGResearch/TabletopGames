@@ -76,12 +76,12 @@ public class DescentForwardModel extends AbstractForwardModel {
         for (int i = 1; i < Math.max(3, dgs.getNPlayers()); i++) {
             // Choose random archetype from those remaining
             int choice = archetypes.get(rnd.nextInt(archetypes.size()));
-//            archetypes.remove(Integer.valueOf(choice));  // TODO turn this back in once we have archetypes >= nHeroes, for now commented out to allow easy testing
+//            archetypes.remove(Integer.valueOf(choice));  // TODO this should be commented in, but kept out for testing until it's guaranteed that archetypes >= nHeroes
             String archetype = DescentConstants.archetypes[choice];
 
             // Choose random hero from that archetype
             List<Hero> heroes = _data.findHeroes(archetype);
-            Hero figure = heroes.get(rnd.nextInt(heroes.size()));
+            Hero figure = (Hero) heroes.get(rnd.nextInt(heroes.size())).copyNewID();
 
             if (dgs.getNPlayers() == 2) {
                 // In 2-player games, 1 player controls overlord, the other 2 heroes

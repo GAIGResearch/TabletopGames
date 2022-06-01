@@ -159,6 +159,12 @@ public class Figure extends Token {
         return copy;
     }
 
+    public Figure copyNewID() {
+        Figure copy = new Figure(componentName);
+        copyComponentTo(copy);
+        return copy;
+    }
+
     public void copyComponentTo(Figure copyTo) {
         super.copyComponentTo(copyTo);
         copyTo.tokenType = tokenType;

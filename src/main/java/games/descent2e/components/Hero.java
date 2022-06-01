@@ -8,6 +8,7 @@ import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -211,6 +212,17 @@ public class Hero extends Figure {
     @Override
     public Hero copy() {
         Hero copy = new Hero(componentName, componentID);
+        return copyTo(copy);
+    }
+
+    @Override
+    public Hero copyNewID() {
+        Hero copy = new Hero(componentName);
+        return copyTo(copy);
+    }
+
+    @NotNull
+    private Hero copyTo(Hero copy) {
         copy.equipSlotsAvailable = new HashMap<>();
         copy.equipSlotsAvailable.putAll(equipSlotsAvailable);
         copy.skills = skills.copy();
