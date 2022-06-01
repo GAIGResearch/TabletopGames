@@ -121,9 +121,10 @@ public class MeleeAttackTests {
         // this gives a Chebyshev distance of 3, which should mena some attacks miss
 
         int missed = 0, outOfRange = 0, noDamage = 0;
-        for (int loop = 0; loop < 50; loop++) {
+        for (int loop = 0; loop < 100; loop++) {
             MeleeAttack attack = new RangedAttack(actingFigure.getComponentID(), victim.getComponentID());
             attack.execute(state);
+    //        System.out.println(state.getAttackDicePool().toString());
             assertTrue(state.getAttackDicePool().hasRolled());
             if (attack.attackMissed(state)) {
                 missed++;
@@ -137,8 +138,38 @@ public class MeleeAttackTests {
         System.out.printf("Missed: %d, Out of Range: %d, No Damage Done: %d%n", missed, outOfRange, noDamage);
         assertTrue(missed > 0);
         assertTrue(outOfRange > 0);
-        assertTrue(missed > outOfRange);
+        assertEquals(missed, outOfRange);
+        assertTrue(noDamage > 0);
     }
+
+
+    @Test
+    public void meleeAttackHits() {
+        Figure actingFigure = state.getActingFigure();
+        Figure victim = state.getMonsters().get(0).get(0);
+
+        int missed = 0, outOfRange = 0, noDamage = 0;
+        for (int loop = 0; loop < 100; loop++) {
+            MeleeAttack attack = new MeleeAttackDamageOnly(actingFigure.getComponentID(), victim.getComponentID());
+            attack.execute(state);
+            //        System.out.println(state.getAttackDicePool().toString());
+            assertTrue(state.getAttackDicePool().hasRolled());
+            if (attack.attackMissed(state)) {
+                missed++;
+            }
+            if (state.getAttackDicePool().getRange() < 0) {
+                outOfRange++;
+            }
+            if (state.getAttackDicePool().getDamage() == 0)
+                noDamage++;
+        }
+        System.out.printf("Missed: %d, Out of Range: %d, No Damage Done: %d%n", missed, outOfRange, noDamage);
+        assertTrue(missed > 0);
+        assertTrue(outOfRange > 0);
+        assertEquals(missed, outOfRange);
+        assertTrue(noDamage > 0);
+    }
+
 
 
 }

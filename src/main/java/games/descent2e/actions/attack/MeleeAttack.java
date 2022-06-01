@@ -158,7 +158,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                     phase = ALL_DONE;
                 else
                     defenceRoll(state);
-                    phase = POST_DEFENCE_ROLL;
+                phase = POST_DEFENCE_ROLL;
                 break;
             case POST_DEFENCE_ROLL:
                 damageRoll(state);
@@ -174,9 +174,11 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     protected void defenceRoll(DescentGameState state) {
         state.getDefenceDicePool().roll(state.getRandom());
     }
+
     protected void damageRoll(DescentGameState state) {
         state.getAttackDicePool().roll(state.getRandom());
     }
+
     protected void applyDamage(DescentGameState state) {
         int damage = state.getAttackDicePool().getDamage();
         int defence = state.getDefenceDicePool().getShields();
@@ -187,7 +189,8 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     }
 
     public boolean attackMissed(DescentGameState state) {
-        return state.getAttackDicePool().hasRolled() && state.getAttackDicePool().getDamage() == 0;
+        return state.getAttackDicePool().hasRolled() && (
+                state.getAttackDicePool().getRange() < 0 || state.getAttackDicePool().getDamage() == 0);
     }
 
     @Override

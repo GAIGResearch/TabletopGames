@@ -100,4 +100,9 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
         return CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
         // as yet no Dice are ever rolled secretly
     }
+
+    @Override
+    public String toString() {
+        return String.format("Range: %d, Damage: %d, Surge: %d, Shields: %d", getRange(), getDamage(), getSurge(), getShields());
+    }
 }
