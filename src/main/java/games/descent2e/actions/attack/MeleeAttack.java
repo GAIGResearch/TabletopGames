@@ -9,6 +9,7 @@ import games.descent2e.actions.Triggers;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.Item;
+import games.descent2e.components.Monster;
 
 import java.util.*;
 
@@ -48,35 +49,36 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         }
     }
 
-    final int weaponCardId;
     final int attackingFigure;
-    final int attackingPlayer;
+    int attackingPlayer;
     final int defendingFigure;
-    final int defendingPlayer;
+    int defendingPlayer;
     AttackPhase phase = NOT_STARTED;
     int interruptPlayer;
 
-    public MeleeAttack(int weaponCardId, int attackingFigure, int attackingPlayer, int defendingFigure, int defendingPlayer) {
-        this.weaponCardId = weaponCardId;
+    public MeleeAttack(int attackingFigure, int defendingFigure) {
         this.attackingFigure = attackingFigure;
-        this.attackingPlayer = attackingPlayer;
         this.defendingFigure = defendingFigure;
-        this.defendingPlayer = defendingPlayer;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         gs.setActionInProgress(this);
         DescentGameState state = (DescentGameState) gs;
+        attackingPlayer = state.getComponentById(attackingFigure).getOwnerId();
+        defendingPlayer = state.getComponentById(defendingFigure).getOwnerId();
 
         phase = PRE_ATTACK_ROLL;
         interruptPlayer = attackingPlayer;
-        Hero hero = state.getHeroes().get(attackingPlayer - 1);
-        Item weapon = hero.getWeapons(state).stream()
-                .filter(w -> w.getComponentID() == weaponCardId).findFirst()
-                .orElseThrow(() -> new AssertionError("Weapon not found : " + weaponCardId));
-        state.setDicePool(weapon.getDicePool());
-
+        if (attackingPlayer == 0) {
+            Monster monster = (Monster) state.getComponentById(attackingFigure);
+            state.setAttackDicePool(monster.getAttackDice());
+        } else {
+            Hero hero = (Hero) state.getComponentById(attackingFigure);
+            Item weapon = hero.getWeapons().stream()
+                    .findFirst().orElseThrow(() -> new AssertionError("Weapon not found : " + attackingFigure));
+            state.setAttackDicePool(weapon.getDicePool());
+        }
         // The one thing we do now is construct the dice pool to use
         movePhaseForward(state);
 
@@ -139,7 +141,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                 throw new AssertionError("Should never be executed");
             case PRE_ATTACK_ROLL:
                 // roll dice
-                state.getDicePool().roll(state.getRandom());
+                state.getAttackDicePool().roll(state.getRandom());
                 phase = POST_ATTACK_ROLL;
                 break;
             case POST_ATTACK_ROLL:
@@ -157,25 +159,35 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                     phase = POST_DEFENCE_ROLL;
                 break;
             case POST_DEFENCE_ROLL:
+                defenceRoll(state);
                 phase = POST_DAMAGE;
                 break;
             case POST_DAMAGE:
-                int damage = state.getDicePool().getDamage();
-                Figure defender = (Figure) state.getComponentById(defendingFigure);
-                int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
-                defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
+                damageRoll(state);
                 phase = ALL_DONE;
                 break;
         }
     }
 
+    protected void defenceRoll(DescentGameState state) {
+
+    }
+    protected void damageRoll(DescentGameState state) {
+        int damage = state.getAttackDicePool().getDamage();
+        Figure defender = (Figure) state.getComponentById(defendingFigure);
+        int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
+        defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
+    }
+
     protected boolean attackMissed(DescentGameState state) {
-        return state.getDicePool().hasRolled() && state.getDicePool().getDamage() == 0;
+        return state.getAttackDicePool().hasRolled() && state.getAttackDicePool().getDamage() == 0;
     }
 
     @Override
     public MeleeAttack copy() {
-        MeleeAttack retValue = new MeleeAttack(weaponCardId, attackingFigure, attackingPlayer, defendingFigure, defendingPlayer);
+        MeleeAttack retValue = new MeleeAttack(attackingFigure, defendingFigure);
+        retValue.attackingPlayer = attackingPlayer;
+        retValue.defendingPlayer = defendingPlayer;
         retValue.phase = phase;
         retValue.interruptPlayer = interruptPlayer;
         return retValue;
@@ -185,7 +197,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof MeleeAttack) {
             MeleeAttack other = (MeleeAttack) obj;
-            return other.weaponCardId == weaponCardId && other.attackingFigure == attackingFigure &&
+            return other.attackingFigure == attackingFigure &&
                     other.attackingPlayer == attackingPlayer && other.defendingFigure == defendingFigure &&
                     other.defendingPlayer == defendingPlayer && other.phase == phase && other.interruptPlayer == interruptPlayer;
         }
@@ -194,7 +206,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(weaponCardId, attackingFigure, attackingPlayer, defendingFigure, defendingPlayer, phase.ordinal(), interruptPlayer);
+        return Objects.hash(attackingFigure, attackingPlayer, defendingFigure, defendingPlayer, phase.ordinal(), interruptPlayer);
     }
 
     @Override
@@ -205,7 +217,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return String.format("Melee Attack (Wpn: %d by %d on %d", weaponCardId, attackingPlayer, attackingFigure);
+        return String.format("Melee Attack (Wpn: %d on %d", attackingPlayer, attackingFigure);
     }
 
     @Override

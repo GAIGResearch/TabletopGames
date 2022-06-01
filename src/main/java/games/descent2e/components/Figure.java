@@ -7,6 +7,7 @@ import core.components.Token;
 import core.properties.PropertyInt;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.Move;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -36,7 +37,9 @@ public class Figure extends Token {
 
     HashMap<Attribute, Counter> attributes;
 
+
     int nActionsExecuted;
+
     Vector2D position;
     Pair<Integer,Integer> size;
 
@@ -57,7 +60,10 @@ public class Figure extends Token {
     }
 
     public void resetRound() {
-        this.attributes.get(MovePoints).setToMax();
+        if (this.attributes.containsKey(MovePoints)) {
+            // Overlord doesn't have move points
+            this.attributes.get(MovePoints).setToMax();
+        }
         this.nActionsExecuted = 0;
     }
 
@@ -154,6 +160,12 @@ public class Figure extends Token {
         return copy;
     }
 
+    public Figure copyNewID() {
+        Figure copy = new Figure(componentName);
+        copyComponentTo(copy);
+        return copy;
+    }
+
     public void copyComponentTo(Figure copyTo) {
         super.copyComponentTo(copyTo);
         copyTo.tokenType = tokenType;
@@ -175,26 +187,33 @@ public class Figure extends Token {
         }
     }
 
-    /**
-     * Creates a Token objects from a JSON object.
-     *
-     * @param figure - JSON to parse into Figure object.
-     */
-    protected void loadFigure(JSONObject figure) {
-        this.componentName = (String) figure.get("id");
-        this.tokenType = (String) ((JSONArray) figure.get("type")).get(1);
+    public void loadFigure(JSONObject figure, Set<String> ignoreKeys) {
+        if (!ignoreKeys.contains("id")) {
+            this.componentName = (String) figure.get("id");
+        }
+        if (!ignoreKeys.contains("type")) {
+            this.tokenType = (String) ((JSONArray) figure.get("type")).get(1);
+        }
         // TODO: custom load of figure properties
-        parseComponent(this, figure);
+        parseComponent(this, figure, ignoreKeys);
 
         for (Attribute a : Attribute.values()) {
             PropertyInt prop = ((PropertyInt) getProperty(a.name()));
             if (prop != null) {
                 int max = prop.value;
                 this.attributes.put(a, new Counter(max, 0, max, a.name()));
+                if (a == MovePoints || a == Fatigue) this.setAttribute(a, 0);
             }
         }
-        this.setAttribute(MovePoints, 0);
-        this.setAttribute(Fatigue, 0);
+    }
+
+    /**
+     * Creates a Token objects from a JSON object.
+     *
+     * @param figure - JSON to parse into Figure object.
+     */
+    public void loadFigure(JSONObject figure) {
+        loadFigure(figure, new HashSet<>());
     }
 
     /**

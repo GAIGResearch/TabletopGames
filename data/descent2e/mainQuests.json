@@ -4,7 +4,7 @@
     "act": 1,
     "monsters": [
       ["Goblin Archer:group", "5A"],
-      ["Barghest:group", "4A", "all:HP:+:2"]
+      ["Barghest:group", "4A", "all:Health:+2"]
     ],
     "tokens": [
       ["Villager", "Wounded clergy", "nHeroes", ["8A"], ""],
@@ -12,8 +12,9 @@
       ["WhiteObjective", "Acolyte", "1", ["player"], "AttributeModifier:MovePoints:-1;Effect:AcolyteAction;Effect:TradeAcolyteAction"]
     ],
     "rules": [
-      ["reinforcements", "add <=2 goblin archer", "4A"],
-      ["overlord fatigue", "add 1 fatigue to overlord if 1 or more goblin archers on tile 9A"]
+      ["overlord fatigue", "START_TURN", "if(count(Goblin Archer,9A)>0) AttributeModifier:Fatigue:+1"],
+      ["overlord fatigue", "END_TURN", "if(count(Goblin Archer,9A)>0) AttributeModifier:Fatigue:+1"],
+      ["overlord reinforcements", "END_TURN", "SpawnMonster:Goblin Archer:2:4A"]
     ],
     "hero-win": ["monster:barghest", "count", 0],
     "overlord-win": ["property:fatigue", "count", 7],
