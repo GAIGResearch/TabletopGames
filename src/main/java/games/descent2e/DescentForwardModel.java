@@ -17,6 +17,7 @@ import games.descent2e.components.Hero;
 import games.descent2e.components.Monster;
 import games.descent2e.concepts.Quest;
 import utilities.Pair;
+import utilities.Utils;
 import utilities.Vector2D;
 
 import java.awt.*;
@@ -341,19 +342,20 @@ public class DescentForwardModel extends AbstractForwardModel {
         Vector2D figureLocation = figure.getPosition();
         BoardNode figureNode = dgs.masterBoard.getElement(figureLocation.getX(), figureLocation.getY());
         String figureType = figure.getTokenType();
+
         // Get friendly figures based on token type (monster/hero)
-        ArrayList<Vector2D> friendlyFigureLocations = new ArrayList<>();
-        if (figureType.equals("Monster")) {
-            for (List<Monster> monsterGroup : dgs.monsters) {
-                for (Monster m : monsterGroup) {
-                    friendlyFigureLocations.add(m.getPosition());
-                }
-            }
-        } else {
-            for (Hero h : dgs.heroes) {
-                friendlyFigureLocations.add(h.getPosition());
-            }
-        }
+//        ArrayList<Vector2D> friendlyFigureLocations = new ArrayList<>();
+//        if (figureType.equals("Monster")) {
+//            for (List<Monster> monsterGroup : dgs.monsters) {
+//                for (Monster m : monsterGroup) {
+//                    friendlyFigureLocations.add(m.getPosition());
+//                }
+//            }
+//        } else {
+//            for (Hero h : dgs.heroes) {
+//                friendlyFigureLocations.add(h.getPosition());
+//            }
+//        }
 
         //<Board Node, Cost to get there>
         HashMap<BoardNode, Double> expandedBoardNodes = new HashMap<>();
@@ -430,9 +432,10 @@ public class DescentForwardModel extends AbstractForwardModel {
         return allAdjacentNodes;
     }
 
-    private ArrayList<Vector2D> getAllPointOfInterests(DescentGameState dgs, Figure figure){
+    private Set<Vector2D> getAllPointOfInterests(DescentGameState dgs, Figure figure){
 
         ArrayList<Vector2D> pointsOfInterest = new ArrayList<>();
+        Set<Vector2D> movePointOfInterest = new HashSet<>();
         if (figure.getTokenType().equals("Monster")) {
             for (Hero h : dgs.heroes) {
                 pointsOfInterest.add(h.getPosition());
@@ -452,10 +455,24 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
         }
 
+        //For every point of interest find neighbours that are empty and add then as potential move spots
+        for (Vector2D point : pointsOfInterest){
+            BoardNode figureNode = dgs.masterBoard.getElement(point.getX(), point.getY());
+            Set<Integer> neighbourIDs = figureNode.getNeighbours().keySet();
+            for (Integer neighbourID : neighbourIDs){
+                BoardNode neighbourNode =  (BoardNode) dgs.getComponentById(neighbourID);
+                PropertyInt figureOnLocation = (PropertyInt) neighbourNode.getProperty(playersHash);
+                if (figureOnLocation.value == -1){
+                    Vector2D loc = ((PropertyVector2D) neighbourNode.getProperty(coordinateHash)).values;
+                    movePointOfInterest.add(loc);
+                }
+            }
+        }
+
 //        for (Vector2D point : pointsOfInterest) {
 //            System.out.println("Point:" + point.toString());
 //        }
-        return pointsOfInterest;
+        return movePointOfInterest;
     }
 
     private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
@@ -464,7 +481,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         f.setAttribute(Figure.Attribute.MovePoints, f.getAttributeMax(Figure.Attribute.MovePoints));
 
         Map<BoardNode, Double> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
-        ArrayList<Vector2D> allPointOfInterests = getAllPointOfInterests(dgs, f);
+        Set<Vector2D> allPointOfInterests = getAllPointOfInterests(dgs, f);
 
         List<AbstractAction> actions = new ArrayList<>();
         for (BoardNode node : allAdjacentNodes.keySet()){
@@ -476,7 +493,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         for(Vector2D pointOfInterest : allPointOfInterests) {
 //            if (distance(pointOfInterest, f.getPosition()) <= Figure.Attribute.MovePoints){
-//            actions.add(new Move(pointOfInterest.copy()));
+            actions.add(new Move(pointOfInterest.copy()));
 //            }
         }
 
