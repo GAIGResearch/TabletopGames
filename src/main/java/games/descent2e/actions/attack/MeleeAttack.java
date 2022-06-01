@@ -186,7 +186,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
     }
 
-    protected boolean attackMissed(DescentGameState state) {
+    public boolean attackMissed(DescentGameState state) {
         return state.getAttackDicePool().hasRolled() && state.getAttackDicePool().getDamage() == 0;
     }
 
