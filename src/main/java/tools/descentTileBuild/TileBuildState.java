@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.turnorders.AlternatingTurnOrder;
+import utilities.Pathfinder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.Objects;
 public class TileBuildState extends AbstractGameState {
 
     GridBoard tile;
+
+    Pathfinder pathfinder;
 
     /**
      * Constructor. Initialises some generic game state variables.

@@ -35,7 +35,6 @@ public class TileBuildGUI extends AbstractGUIManager {
     Vector2D cell;
 
     int width, height;
-    Pathfinder pathfinder;
 
     public TileBuildGUI(GamePanel parent, AbstractGameState gameState, ActionController ac) {
         super(parent, ac, (DescentTypes.TerrainType.getWalkableTerrains().size()+2)
@@ -43,7 +42,7 @@ public class TileBuildGUI extends AbstractGUIManager {
                 *((TileBuildParameters)gameState.getGameParameters()).maxGridSize);
 
         TileBuildState dgs = (TileBuildState) gameState;
-        pathfinder = new Pathfinder(dgs.tile);
+
 
         view = new TileBuildGridBoardView(dgs, dgs.tile);
         width = view.getPreferredSize().width;
@@ -162,7 +161,7 @@ public class TileBuildGUI extends AbstractGUIManager {
                 BoardNode node1 = dgs.tile.getElement(view.oldHighlight.getX(), view.oldHighlight.getY());
                 BoardNode node2 = dgs.tile.getElement(view.highlight.getX(), view.highlight.getY());
                 if (node1 != null && node2 != null) {
-                    Path p = pathfinder.getPath(dgs, node1.getComponentID(), node2.getComponentID());
+                    Path p = dgs.pathfinder.getPath(dgs, node1.getComponentID(), node2.getComponentID());
                     ArrayList<Vector2D> points = new ArrayList<>();
                     for (int i : p.points) {
                         points.add(((PropertyVector2D) (dgs.getComponentById(i)).getProperty(coordinateHash)).values);

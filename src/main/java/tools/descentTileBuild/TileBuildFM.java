@@ -7,11 +7,13 @@ import core.actions.SetGridValueAction;
 import core.components.BoardNode;
 import core.components.GridBoard;
 import core.properties.PropertyVector2D;
+import utilities.Pathfinder;
 import utilities.Vector2D;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import static core.CoreConstants.coordinateHash;
 import static games.descent2e.DescentTypes.*;
@@ -41,6 +43,7 @@ public class TileBuildFM extends AbstractForwardModel {
             }
         }
 
+        tbs.pathfinder = new Pathfinder(tbs.tile);
         buildNeighbours(tbs);
 
     }
@@ -70,9 +73,10 @@ public class TileBuildFM extends AbstractForwardModel {
                         BoardNode bnN = tbs.tile.getElement(nx, ny);
                         if (bnN != null)  // ... and not null.
                         {
-                            double cost = 1.0; //TODO: Cost needs be adjusted to tile type.
+                            String compName = bnN.getComponentName().substring(0,1).toUpperCase() + bnN.getComponentName().substring(1).toLowerCase();
+                            double cost = TerrainType.getMoveInCost(TerrainType.valueOf(compName));
                             node.addNeighbour(bnN, cost);
-                            System.out.println("Added neighbour: (" + i + "," + j + ") -> (" + nx + "," + ny + ")");
+                            //System.out.println("Added neighbour: (" + i + "," + j + ") -> (" + nx + "," + ny + ")");
                         }
                     }
                 }
@@ -87,8 +91,13 @@ public class TileBuildFM extends AbstractForwardModel {
         action.execute(currentState);
         currentState.addAllComponents();
 
-        // TODO: Shotgun approach, this regenerates ALL neighbours. Can be made more efficient if needed.
-        buildNeighbours((TileBuildState) currentState);
+        if(action instanceof SetGridValueAction)
+        {
+            // TODO: Shotgun approach, this regenerates ALL neighbours. Can be made more efficient if needed
+            ((TileBuildState)currentState).pathfinder.notifyNewNode();
+            buildNeighbours((TileBuildState) currentState);
+        }
+
     }
 
     @Override

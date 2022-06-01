@@ -65,6 +65,13 @@ public class DescentTypes {
         Pit,
         Block;
 
+        public static double getMoveInCost(TerrainType tt)
+        {
+            if(tt == Water) return 2.0; //TODO: These values should be read from the config file.
+            if(tt == Block) return Double.MAX_VALUE;
+            return 1.0;
+        }
+
         public static HashSet<TerrainType> getWalkableTerrains() {
             return new HashSet<TerrainType>() {{
                 add(Plain);

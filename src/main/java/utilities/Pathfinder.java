@@ -40,6 +40,11 @@ public class Pathfinder {
         shortestPaths = new TreeMap<>();
         nodeComparator = new NodeComparator();
 
+        initShortestPaths();
+    }
+
+    private void initShortestPaths()
+    {
         int w = graph.getWidth();
         int h = graph.getHeight();
         for(int i = 0; i < w; i++)
@@ -62,13 +67,17 @@ public class Pathfinder {
         HashMap<Integer, Double> nodeNeighbours = origin.getNeighbours();
         int originID = origin.getComponentID();
 
-        for(int nodeID : nodeNeighbours.keySet())
-        {
+        for(int nodeID : nodeNeighbours.keySet()) {
             assignCost(originID, nodeID, nodeNeighbours.get(nodeID));
         }
 
         //Default one, to itself
         assignCost(originID, originID, 0);
+    }
+
+    public void notifyNewNode()
+    {
+        initShortestPaths();
     }
 
     /**
@@ -83,7 +92,7 @@ public class Pathfinder {
         TreeMap<Integer, Path> originPaths = shortestPaths.get(originID);
         if(originPaths == null)
         {
-            originPaths = new TreeMap<Integer, Path>();
+            originPaths = new TreeMap<>();
 
             //There will be no destination, for sure, so lets assign it.
             Path newPath = new Path(originID, destID, cost);

@@ -69,14 +69,11 @@ public class Path
      */
     public Path(Path p)
     {
-        originID = p.destinationID;
-        destinationID = p.originID;
+        originID = p.originID;
+        destinationID = p.destinationID;
         cost = p.cost;
         points = new Vector<Integer>();
-        for(int i = p.points.size()-1; i >=0 ; --i)
-        {
-            points.add(p.points.get(i));
-        }
+        points.addAll(p.points);
     }
 
     public String toString()
