@@ -296,6 +296,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                     if (token.getDescentTokenType() == DescentToken.Search
                             && token.getPosition() != null
                             && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
+
+
                         actions.addAll(token.getEffects());
                     }
                 }
@@ -375,18 +377,20 @@ public class DescentForwardModel extends AbstractForwardModel {
                 double costToMoveToNeighbour = expandingNode.getNeighbourCost(neighbour);
                 double totalCost = expandingNodeCost + costToMoveToNeighbour;
                 boolean isFriendly = false;
+                boolean isEmpty = true;
 
                 //Check if the neighbour node is friendly
-                for(Vector2D friendlyFigureLocation : friendlyFigureLocations){
-                    if (friendlyFigureLocation.getX() == loc.getX() && friendlyFigureLocation.getY() == loc.getY()){
-                        isFriendly = true;
-                        break;
-                    }
-                }
+//                for(Vector2D friendlyFigureLocation : friendlyFigureLocations){
+//                    if (friendlyFigureLocation.getX() == loc.getX() && friendlyFigureLocation.getY() == loc.getY()){
+//                        isFriendly = true;
+//                        break;
+//                    }
+//                }
 
 
                 PropertyInt figureOnLocation = (PropertyInt)neighbour.getProperty(playersHash);
                 if (figureOnLocation.value != -1) {
+                    isEmpty = false;
                     Figure neighbourFigure = (Figure) dgs.getComponentById(figureOnLocation.value);
                     if (figureType.equals(neighbourFigure.getTokenType())) {
                         isFriendly = true;
@@ -402,8 +406,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                         expandedBoardNodes.remove(neighbour);
                         nodesToBeExpanded.put(neighbour, totalCost);
                     }
-                } else {
-                    //if the node is not friendly - add it to adjacentNodeList
+                } else if (isEmpty) {
+                    //if the node is empty friendly - add it to adjacentNodeList
                     if (!allAdjacentNodes.containsKey(neighbour) || allAdjacentNodes.get(neighbour) > totalCost){
                         allAdjacentNodes.put(neighbour, totalCost);
                     }
@@ -413,15 +417,15 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         }
 
-        /*
-        if (flag == true) {
-            System.out.println("My location: " + ((PropertyVector2D) figureNode.getProperty(coordinateHash)).values);
-            for (BoardNode node : allAdjacentNodes.keySet()){
-                System.out.println(((PropertyVector2D) node.getProperty(coordinateHash)).values + ": " + allAdjacentNodes.get(node));
-            }
-            flag = false;
-        }
-        */
+//
+//        if (flag == true && figureType.equals("Monster")) {
+//            System.out.println("My location: " + ((PropertyVector2D) figureNode.getProperty(coordinateHash)).values);
+//            for (BoardNode node : allAdjacentNodes.keySet()){
+//                System.out.println(((PropertyVector2D) node.getProperty(coordinateHash)).values + ": " + allAdjacentNodes.get(node));
+//            }
+//            flag = false;
+//        }
+
 
         return allAdjacentNodes;
     }
@@ -433,27 +437,31 @@ public class DescentForwardModel extends AbstractForwardModel {
             for (Hero h : dgs.heroes) {
                 pointsOfInterest.add(h.getPosition());
             }
-        //Assuming that if it's not monster it's a hero
-        } else {
+
+        } else if (figure.getTokenType().equals("Hero")) {
             for (List<Monster> monsterGroup : dgs.monsters) {
                 for (Monster m : monsterGroup) {
                     pointsOfInterest.add(m.getPosition());
                 }
             }
-            /*
+
             for (DToken dToken : dgs.tokens){
                 if (dToken.getPosition() != null){
                     pointsOfInterest.add(dToken.getPosition());
                 }
-            }*/
+            }
         }
-        /*
-        for (Vector2D point : pointsOfInterest) {
-            System.out.println("Point:" + point.toString());
-        }*/
+
+//        for (Vector2D point : pointsOfInterest) {
+//            System.out.println("Point:" + point.toString());
+//        }
         return pointsOfInterest;
     }
+
     private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
+
+        //TODO: This setAttribute should be called at the begining of turn, not here
+        f.setAttribute(Figure.Attribute.MovePoints, f.getAttributeMax(Figure.Attribute.MovePoints));
 
         Map<BoardNode, Double> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
         ArrayList<Vector2D> allPointOfInterests = getAllPointOfInterests(dgs, f);
@@ -465,12 +473,13 @@ public class DescentForwardModel extends AbstractForwardModel {
                 actions.add(new Move(loc.copy()));
             }
         }
-        for(Vector2D pointOfInterest : allPointOfInterests) {
 
-            //if (distance(pointOfInterest, f.getPosition()) <= Figure.Attribute.MovePoints){
-            actions.add(new Move(pointOfInterest.copy()));
-            //}
+        for(Vector2D pointOfInterest : allPointOfInterests) {
+//            if (distance(pointOfInterest, f.getPosition()) <= Figure.Attribute.MovePoints){
+//            actions.add(new Move(pointOfInterest.copy()));
+//            }
         }
+
         return actions;
     }
 
