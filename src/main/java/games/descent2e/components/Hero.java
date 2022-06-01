@@ -181,10 +181,10 @@ public class Hero extends Figure {
         }
     }
 
-    public List<Item> getWeapons(DescentGameState dgs) {
+    public List<Item> getWeapons() {
         List<Item> retValue =  new ArrayList<>();
         for (int i = 0; i < handEquipment.getSize(); i++) {
-            Item c = new Item(handEquipment.get(i), dgs);
+            Item c = new Item(handEquipment.get(i));
             if (c.isAttack()) {
                 retValue.add(c);
             }

@@ -56,6 +56,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Overlord will also have a figure, but not on the board (to store xp and skill info)
         dgs.overlord = new Figure("Overlord");
         dgs.overlord.setTokenType("Overlord");
+        // OVerlord is player 0, first hero is player 1
         dgs.getTurnOrder().setStartingPlayer(1);
 
         // TODO: Shuffle overlord deck and give overlord nPlayers cards.
@@ -84,6 +85,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Choose random hero from that archetype
             List<Hero> heroes = _data.findHeroes(archetype);
             Hero figure = heroes.get(rnd.nextInt(heroes.size()));
+            figure.setOwnerId(i);
 
             // Choose random class from that archetype
             choice = rnd.nextInt(DescentConstants.archetypeClassMap.get(archetype).length);
@@ -171,7 +173,6 @@ public class DescentForwardModel extends AbstractForwardModel {
         }
 
         // Set up dice!
-        dgs.dice = _data.dice;
         dgs.dicePool = new DicePool(Collections.emptyList());
 
         // Shuffle search cards deck

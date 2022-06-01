@@ -20,6 +20,7 @@ public class DescentDice extends Component {
     private int nSides;
 
     private Map<Integer, Map<String, Integer>> sides;
+    public static List<DescentDice> masterDice;
 
     public DescentDice(){
         super(Utils.ComponentType.DICE);
@@ -39,10 +40,10 @@ public class DescentDice extends Component {
         return 1;
     }
 
-    public static List<DescentDice> loadDice(String filename)
+    public static void loadDice(String filename)
     {
         JSONParser jsonParser = new JSONParser();
-        List<DescentDice> dice = new ArrayList<>();
+        masterDice = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
@@ -50,14 +51,14 @@ public class DescentDice extends Component {
             for(Object o : data) {
                 DescentDice newDice = new DescentDice();
                 newDice.loadDie((JSONObject) o);
-                dice.add(newDice);
+                masterDice.add(newDice);
             }
 
         }catch (IOException | ParseException e) {
             e.printStackTrace();
         }
 
-        return dice;
+        masterDice = Collections.unmodifiableList(masterDice);
     }
     public void loadDie(JSONObject dice) {
         this.nSides = ((Long) ( (JSONArray) dice.get("count")).get(1)).intValue();

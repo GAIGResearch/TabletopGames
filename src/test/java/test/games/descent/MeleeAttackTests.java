@@ -5,10 +5,7 @@ import games.descent2e.DescentForwardModel;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.actions.attack.MeleeAttack;
-import games.descent2e.components.DiceType;
-import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
-import games.descent2e.components.Item;
+import games.descent2e.components.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,19 +32,36 @@ public class MeleeAttackTests {
     }
 
     @Test
-    public void attackRollsDicePool() {
+    public void attackRollsDoesDamage() {
         Figure actingFigure = state.getActingFigure();
         Figure victim = state.getMonsters().get(0).get(0);
-        List<Item> weapons = ((Hero)actingFigure).getWeapons(state);
-        // TODO: check this works for a Hero
-        // then generalise to monsters too
+        List<Item> weapons = ((Hero)actingFigure).getWeapons();
+
         assertEquals(1, weapons.size());
 
         int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
-        MeleeAttack attack = new MeleeAttack(weapons.get(0).getComponentID(), actingFigure.getComponentID(), 1, victim.getComponentID(), 0);
+        MeleeAttack attack = new MeleeAttack(actingFigure.getComponentID(), victim.getComponentID());
         assertEquals(0, state.getDicePool().getSize());
         attack.execute(state);
         assertEquals(attack, state.currentActionInProgress());
+        assertEquals(2, state.getDicePool().getSize());
+        assertEquals(1, state.getDicePool().getNumber(DiceType.YELLOW));
+        assertEquals(1, state.getDicePool().getNumber(DiceType.BLUE));
+        assertTrue(state.getDicePool().hasRolled());
+        int damage = state.getDicePool().getDamage();
+        assertTrue(attack.executionComplete(state));
+        assertEquals(Math.max(startHP - damage, 0), victim.getAttribute(Figure.Attribute.Health).getValue());
+    }
+
+    @Test
+    public void monsterCanAttackHero() {
+        Monster attacker = state.getMonsters().get(0).get(1);
+        Figure victim = state.getActingFigure();
+
+        int startHP = victim.getAttribute(Figure.Attribute.Health).getValue();
+        MeleeAttack attack = new MeleeAttack(attacker.getComponentID(), victim.getComponentID());
+        assertEquals(0, state.getDicePool().getSize());
+        attack.execute(state);
         assertEquals(2, state.getDicePool().getSize());
         assertEquals(1, state.getDicePool().getNumber(DiceType.YELLOW));
         assertEquals(1, state.getDicePool().getNumber(DiceType.BLUE));

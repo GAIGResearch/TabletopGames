@@ -25,13 +25,11 @@ import java.util.*;
 import static core.components.Component.parseComponent;
 import static games.descent2e.DescentConstants.archetypeHash;
 
-
 public class DescentGameData extends AbstractGameData {
     List<GridBoard> tiles;
     List<GraphBoard> boardConfigurations;
     List<Hero> heroes;
     List<Deck<Card>> decks;
-    List<DescentDice> dice;
     List<Quest> quests;
     List<Quest> sideQuests;
     HashMap<String, HashMap<String, Token>> monsters;
@@ -43,7 +41,7 @@ public class DescentGameData extends AbstractGameData {
 
         heroes = Hero.loadHeroes(dataPath + "heroes.json");
         monsters = loadMonsters(dataPath + "monsters.json");
-        dice = DescentDice.loadDice(dataPath + "/components/dice.json");
+        DescentDice.loadDice(dataPath + "/components/dice.json");
 
         quests = loadQuests(dataPath + "mainQuests.json");
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");
