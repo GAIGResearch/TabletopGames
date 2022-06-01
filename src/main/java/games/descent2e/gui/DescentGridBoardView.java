@@ -8,6 +8,7 @@ import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
+import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
@@ -128,12 +129,19 @@ public class DescentGridBoardView extends ComponentView {
         }
 
         // Draw heroes
-        for (Figure f: gameState.getHeroes()) {
+        for (Hero f: gameState.getHeroes()) {
             Vector2D loc = f.getPosition();
-            g.setColor(stringToColor(((PropertyColor)f.getProperty(colorHash)).valueStr));
-            g.fillOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
-            g.setColor(Color.black);
-            g.drawOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
+            DescentTypes.Archetype archetype = DescentTypes.Archetype.valueOf(((PropertyString)f.getProperty("archetype")).value);
+
+            // Color
+//            g.setColor(archetype.getColor());
+//            g.fillOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
+//            g.setColor(Color.black);
+//            g.drawOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
+
+            // Or image
+            Image img = ImageIO.GetInstance().getImage(dataPath + "heroes/" + archetype.name().toLowerCase() + ".png");
+            g.drawImage(img, panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize, null);
         }
         // Draw monsters
         for (List<Monster> monsterGroup: gameState.getMonsters()) {

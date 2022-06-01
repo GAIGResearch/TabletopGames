@@ -107,12 +107,12 @@ public class DescentGameData extends AbstractGameData {
         return null;
     }
 
-    public List<Hero> findHeroes(String archetype) {
+    public List<Hero> findHeroes(DescentTypes.Archetype archetype) {
         List<Hero> heroes = new ArrayList<>();
         for (Hero f: this.heroes) {
             if (f.getTokenType().equalsIgnoreCase("hero")) {
                 String arch = ((PropertyString)f.getProperty(archetypeHash)).value;
-                if (arch != null && arch.equalsIgnoreCase(archetype)) {
+                if (arch != null && arch.equalsIgnoreCase(archetype.name())) {
                     heroes.add(f.copy());
                 }
             }
