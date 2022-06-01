@@ -223,7 +223,7 @@ public class DescentGridBoardView extends ComponentView {
             g.setStroke(new BasicStroke(5));
 
             //TODO: Remove after testing, added for movement debugging - Marko
-            g.drawString("X:" + x + " Y:" + y, xC + 5, yC + 15);
+//            g.drawString("X:" + x + " Y:" + y, xC + 5, yC + 15);
 
             // Find connectivity in the graph and draw borders to the cell where connection doesn't exist
             List<Vector2D> neighbourCells = getNeighbourhood(x, y, gridWidth, gridHeight, false);

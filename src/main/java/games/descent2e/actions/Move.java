@@ -6,42 +6,26 @@ import core.components.BoardNode;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
-import games.descent2e.DescentTurnOrder;
 import games.descent2e.components.Figure;
-import games.descent2e.components.Monster;
 import utilities.Vector2D;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class Move extends AbstractAction {
-    Vector2D location;
+    Vector2D position;
 
     public Move(Vector2D whereTo) {
-        this.location = whereTo;
+        this.position = whereTo;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DescentGameState dgs = (DescentGameState)gs;
         DescentParameters dp = (DescentParameters)gs.getGameParameters();
-        int currentPlayer = gs.getCurrentPlayer();
 
-        Figure f;
-        if (currentPlayer == 0) {
-            // Move monsters
-            int monsterGroupIdx = ((DescentTurnOrder)dgs.getTurnOrder()).getMonsterGroupActingNext();
-            List<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
-            f = monsterGroup.get(((DescentTurnOrder)dgs.getTurnOrder()).getMonsterActingNext());
-        }
-        else {
-            // Move corresponding hero player
-            f = dgs.getHeroes().get(currentPlayer-1);
-        }
+        Figure f = ((DescentGameState) gs).getActingFigure();
         // Update location
         Vector2D oldLocation = f.getPosition().copy();
-        f.setPosition(location.copy());
+        f.setPosition(position.copy());
 
         // TODO: maybe change orientation if monster doesn't fit vertically
         int w = 1;
@@ -58,7 +42,7 @@ public class Move extends AbstractAction {
         for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                 BoardNode currentTile = dgs.getMasterBoard().getElement(oldLocation.getX() + j, oldLocation.getY() + i);
-                BoardNode destinationTile = dgs.getMasterBoard().getElement(location.getX() + j, location.getY() + i);
+                BoardNode destinationTile = dgs.getMasterBoard().getElement(position.getX() + j, position.getY() + i);
 
                 PropertyInt prop1 = new PropertyInt("players", -1);
                 PropertyInt prop2 = new PropertyInt("players", f.getComponentID());
@@ -106,7 +90,7 @@ public class Move extends AbstractAction {
 
     @Override
     public AbstractAction copy() {
-        return new Move(location.copy());
+        return new Move(position.copy());
     }
 
     @Override

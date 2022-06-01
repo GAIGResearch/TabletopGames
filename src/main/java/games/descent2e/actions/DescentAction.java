@@ -25,6 +25,11 @@ public abstract class DescentAction extends AbstractAction {
     }
     public abstract boolean execute(DescentGameState gs);
     public abstract DescentAction copy();
+    public boolean canExecute(Triggers currentPoint, DescentGameState dgs) {
+        if (triggerPoints.contains(currentPoint)) return canExecute(dgs);
+        return false;
+    }
+    public abstract boolean canExecute(DescentGameState dgs);
 
     @Override
     public boolean equals(Object o) {
