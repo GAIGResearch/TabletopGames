@@ -85,6 +85,7 @@ public class TileBuildFM extends AbstractForwardModel {
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         action.execute(currentState);
+        currentState.addAllComponents();
 
         // TODO: Shotgun approach, this regenerates ALL neighbours. Can be made more efficient if needed.
         buildNeighbours((TileBuildState) currentState);
@@ -105,10 +106,13 @@ public class TileBuildFM extends AbstractForwardModel {
             //BoardNode bn = new BoardNode(-1, t);
             for (int i = 0; i < tbs.tile.getHeight(); i++) {
                 for (int j = 0; j < tbs.tile.getWidth(); j++) {
+                    BoardNode toAdd = new BoardNode(-1, t);
+                    toAdd.setProperty(new PropertyVector2D("coordinates", new Vector2D(j, i)));
+
                     if (t.equals("open")) {
                         int nInsideNeighbours = countInsideNeighboursOpenTile(j, i, tbs.tile.getWidth(), tbs.tile.getHeight(), tbs.tile).size();
                         if (nInsideNeighbours <= 1) {
-                            actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, new BoardNode(-1, t)));
+                            actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, toAdd));
                         }
                     } else {
                         if (!t.equals("null")) {
@@ -130,15 +134,15 @@ public class TileBuildFM extends AbstractForwardModel {
                                     int nInsideNeighbours = insideNeighbours.size();
                                     if (add) nInsideNeighbours += 1;
                                     if (nInsideNeighbours <= 1) {
-                                        actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, new BoardNode(-1, t)));
+                                        actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, toAdd));
                                     }
                                 }
                             }
                             if (!anyOpen) {
-                                actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, new BoardNode(-1, t)));
+                                actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, toAdd));
                             }
                         } else {
-                            actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, new BoardNode(-1, t)));
+                            actions.add(new SetGridValueAction(tbs.tile.getComponentID(), j, i, toAdd));
                         }
                     }
                 }

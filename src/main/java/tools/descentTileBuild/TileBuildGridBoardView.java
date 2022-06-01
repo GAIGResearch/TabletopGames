@@ -9,38 +9,57 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import static gui.AbstractGUIManager.defaultItemSize;
 
 public class TileBuildGridBoardView extends ComponentView {
 
     Vector2D highlight;
+    Vector2D oldHighlight;
+    TileBuildState gs;
+    ArrayList<Vector2D> path;
 
-    public TileBuildGridBoardView(GridBoard gridBoard) {
+    final static Stroke dashedStroke = new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
+            0, new float[]{9}, 0);
+    final static Stroke boldStroke = new BasicStroke(3);
+
+    public TileBuildGridBoardView(TileBuildState gs, GridBoard gridBoard) {
         super(gridBoard, (gridBoard.getWidth()+1) * defaultItemSize, (gridBoard.getHeight()+1) * defaultItemSize);
+        this.gs = gs;
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                GridBoard gridBoard = (GridBoard) component;
-                for (int i = 0; i < gridBoard.getHeight(); i++) {
-                    boolean found = false;
-                    for (int j = 0; j < gridBoard.getWidth(); j++) {
-                        Rectangle r = new Rectangle(j * defaultItemSize, i * defaultItemSize, defaultItemSize, defaultItemSize);
-                        if (r.contains(e.getPoint())) {
-                            highlight = new Vector2D(j, i);
-                            found = true;
-                            break;
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    GridBoard gridBoard = (GridBoard) component;
+                    for (int i = 0; i < gridBoard.getHeight(); i++) {
+                        boolean found = false;
+                        for (int j = 0; j < gridBoard.getWidth(); j++) {
+                            Rectangle r = new Rectangle(j * defaultItemSize, i * defaultItemSize, defaultItemSize, defaultItemSize);
+                            if (r.contains(e.getPoint())) {
+                                if (highlight != null) {
+                                    oldHighlight = highlight.copy();
+                                }
+                                highlight = new Vector2D(j, i);
+                                found = true;
+                                break;
+                            }
                         }
+                        if (found) break;
                     }
-                    if (found) break;
+                } else {
+                    oldHighlight = null;
+                    highlight = null;
                 }
+                path = null;
             }
         });
     }
 
     @Override
     protected void paintComponent(Graphics g) {
+        Stroke s = ((Graphics2D) g).getStroke();
         GridBoard gridBoard = (GridBoard) component;
 
         int width = gridBoard.getWidth() * defaultItemSize;
@@ -60,11 +79,33 @@ public class TileBuildGridBoardView extends ComponentView {
 
         if (highlight != null) {
             g.setColor(Color.cyan);
-            Stroke s = ((Graphics2D) g).getStroke();
-            ((Graphics2D) g).setStroke(new BasicStroke(3));
+            ((Graphics2D) g).setStroke(boldStroke);
             g.drawRect(highlight.getX() * defaultItemSize - 1, highlight.getY() * defaultItemSize - 1,
                     defaultItemSize + 2, defaultItemSize + 2);
             ((Graphics2D) g).setStroke(s);
+        }
+        if (oldHighlight != null) {
+            g.setColor(Color.gray);
+            ((Graphics2D) g).setStroke(dashedStroke);
+            g.drawRect(oldHighlight.getX() * defaultItemSize - 1, oldHighlight.getY() * defaultItemSize - 1,
+                    defaultItemSize + 2, defaultItemSize + 2);
+            ((Graphics2D) g).setStroke(s);
+        }
+
+        if (path != null) {
+            for (int i = 0; i < path.size(); i++) {
+                Vector2D point = path.get(i);
+                g.setColor(Color.yellow);
+                g.fillRect(point.getX() * defaultItemSize + defaultItemSize / 4, point.getY() * defaultItemSize + defaultItemSize / 4,
+                        defaultItemSize / 2, defaultItemSize / 2);
+                if (i < path.size() - 1) {
+                    Vector2D nextPoint = path.get(i + 1);
+                    ((Graphics2D) g).setStroke(boldStroke);
+                    g.drawLine(point.getX() * defaultItemSize + defaultItemSize / 2, point.getY() * defaultItemSize + defaultItemSize / 2,
+                            nextPoint.getX() * defaultItemSize + defaultItemSize / 2, nextPoint.getY() * defaultItemSize + defaultItemSize / 2);
+                    ((Graphics2D) g).setStroke(s);
+                }
+            }
         }
     }
 

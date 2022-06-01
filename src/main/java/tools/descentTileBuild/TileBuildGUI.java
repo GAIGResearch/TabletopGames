@@ -4,20 +4,28 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
+import core.components.BoardNode;
 import core.components.GridBoard;
+import core.properties.PropertyVector2D;
 import games.descent2e.DescentTypes;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Pair;
+import utilities.Path;
+import utilities.Pathfinder;
 import utilities.Vector2D;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
+
+import static core.CoreConstants.coordinateHash;
 
 public class TileBuildGUI extends AbstractGUIManager {
     TileBuildGridBoardView view;
@@ -27,7 +35,7 @@ public class TileBuildGUI extends AbstractGUIManager {
     Vector2D cell;
 
     int width, height;
-    private TileBuildState gameState;
+    Pathfinder pathfinder;
 
     public TileBuildGUI(GamePanel parent, AbstractGameState gameState, ActionController ac) {
         super(parent, ac, (DescentTypes.TerrainType.getWalkableTerrains().size()+2)
@@ -35,9 +43,9 @@ public class TileBuildGUI extends AbstractGUIManager {
                 *((TileBuildParameters)gameState.getGameParameters()).maxGridSize);
 
         TileBuildState dgs = (TileBuildState) gameState;
-        this.gameState = dgs;
+        pathfinder = new Pathfinder(dgs.tile);
 
-        view = new TileBuildGridBoardView(dgs.tile);
+        view = new TileBuildGridBoardView(dgs, dgs.tile);
         width = view.getPreferredSize().width;
         height = view.getPreferredSize().height;
 
@@ -147,6 +155,23 @@ public class TileBuildGUI extends AbstractGUIManager {
              }
              */
         });
+        JButton getPath = new JButton("Show shortest path");
+        getPath.addActionListener(e -> {
+            // Compute path from oldHighlight to highlight
+            if (view.oldHighlight != null && view.highlight != null) {
+                BoardNode node1 = dgs.tile.getElement(view.oldHighlight.getX(), view.oldHighlight.getY());
+                BoardNode node2 = dgs.tile.getElement(view.highlight.getX(), view.highlight.getY());
+                if (node1 != null && node2 != null) {
+                    Path p = pathfinder.getPath(dgs, node1.getComponentID(), node2.getComponentID());
+                    ArrayList<Vector2D> points = new ArrayList<>();
+                    for (int i : p.points) {
+                        points.add(((PropertyVector2D) (dgs.getComponentById(i)).getProperty(coordinateHash)).values);
+                    }
+                    view.path = points;
+                }
+            }
+        });
+
         JPanel adjustSize = new JPanel();
         adjustSize.add(new JLabel("Tile size (w x h): "));
         adjustSize.add(gridWidth);
@@ -160,7 +185,10 @@ public class TileBuildGUI extends AbstractGUIManager {
         actions.add(adjustSize);
         actions.add(nameField);
         actions.add(imgPathPan);
-        actions.add(getjson);
+        JPanel buttons = new JPanel();
+        buttons.add(getjson);
+        buttons.add(getPath);
+        actions.add(buttons);
 
         JScrollPane pane = new JScrollPane(jsonArea);
         pane.setPreferredSize(new Dimension(200, 200));
@@ -208,6 +236,8 @@ public class TileBuildGUI extends AbstractGUIManager {
                             ac.addAction(a);
 //                            terrainOptionsView.highlight = null;
                             view.highlight = null;
+                            view.oldHighlight = null;
+                            view.path = null;
                         }
                     }
                 }
@@ -225,7 +255,6 @@ public class TileBuildGUI extends AbstractGUIManager {
             if (player instanceof HumanGUIPlayer) {
                 updateActionButtons(player, gameState);
             }
-            this.gameState = (TileBuildState) gameState;
         }
         parent.repaint();
     }
