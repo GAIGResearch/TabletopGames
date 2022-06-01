@@ -24,6 +24,9 @@ import static games.descent2e.components.Figure.Attribute.*;
 // TODO: figure out how to do ability/heroic-feat
 public class Figure extends Token {
 
+    DicePool attackDice = DicePool.empty;
+    DicePool defenceDice = DicePool.empty;
+
     public enum Attribute {
         MovePoints,
         Health,
@@ -36,7 +39,6 @@ public class Figure extends Token {
     }
 
     HashMap<Attribute, Counter> attributes;
-
 
     int nActionsExecuted;
 
@@ -153,6 +155,10 @@ public class Figure extends Token {
         return abilities;
     }
 
+    public DicePool getAttackDice() { return attackDice;}
+
+    public DicePool getDefenceDice() {return defenceDice;}
+
     @Override
     public Figure copy() {
         Figure copy = new Figure(componentName, componentID);
@@ -185,6 +191,8 @@ public class Figure extends Token {
                 copyTo.abilities.add(ability.copy());
             }
         }
+        copyTo.attackDice = getAttackDice().copy();
+        copyTo.defenceDice = getDefenceDice().copy();
     }
 
     public void loadFigure(JSONObject figure, Set<String> ignoreKeys) {
@@ -242,4 +250,6 @@ public class Figure extends Token {
 
         return figures;
     }
+
+    // TODO: Add equals() and hashcode()
 }

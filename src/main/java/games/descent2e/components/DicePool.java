@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 public class DicePool extends Component implements IComponentContainer<DescentDice> {
 
+    public static DicePool empty = new DicePool(Collections.emptyList());
+
     List<DescentDice> dice;
     boolean rolled = false;
     int[] rerolls;

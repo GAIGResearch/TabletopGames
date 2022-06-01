@@ -67,20 +67,11 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
         phase = PRE_ATTACK_ROLL;
         interruptPlayer = attackingPlayer;
-        if (attackingPlayer == 0) {
-            Monster monster = (Monster) state.getComponentById(attackingFigure);
-            Hero hero = (Hero) state.getComponentById(defendingFigure);
-            state.setAttackDicePool(monster.getAttackDice());
-            state.setDefenceDicePool(hero.getDefence());
-        } else {
-            Monster monster = (Monster) state.getComponentById(defendingFigure);
-            Hero hero = (Hero) state.getComponentById(attackingFigure);
-            Item weapon = hero.getWeapons().stream()
-                    .findFirst().orElseThrow(() -> new AssertionError("Weapon not found : " + attackingFigure));
-            state.setAttackDicePool(weapon.getDicePool());
-            state.setDefenceDicePool(monster.getDefenceDice());
-        }
-        // The one thing we do now is construct the dice pool to use
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        Figure defender = (Figure) state.getComponentById(defendingFigure);
+        state.setAttackDicePool(attacker.getAttackDice());
+        state.setDefenceDicePool(defender.getDefenceDice());
+
         movePhaseForward(state);
 
         // When executing a melee attack we need to:
