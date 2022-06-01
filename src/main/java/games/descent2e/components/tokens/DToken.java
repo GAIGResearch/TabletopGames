@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
+// Important: ownerID is idx of hero in list of heroes in game state, NOT player IDX
 public class DToken extends Token {
     ArrayList<TokenAction> effects;
     HashMap<Figure.Attribute, Integer> attributeModifiers;
@@ -36,7 +37,7 @@ public class DToken extends Token {
 
     public void setOwnerId(int ownerId, DescentGameState dgs) {
         if (this.ownerId != -1) {
-            Hero hero = dgs.getHeroes().get(ownerId-1);
+            Hero hero = dgs.getHeroes().get(ownerId);
             // Revert attribute modifiers
             for (Figure.Attribute a: attributeModifiers.keySet()) {
                 int curMax = hero.getAttribute(a).getMaximum();
@@ -49,7 +50,7 @@ public class DToken extends Token {
         }
         super.setOwnerId(ownerId);
         if (this.ownerId != -1) {
-            Hero hero = dgs.getHeroes().get(ownerId-1);
+            Hero hero = dgs.getHeroes().get(ownerId);
             // Add attribute modifiers
             for (Figure.Attribute a: attributeModifiers.keySet()) {
                 int curMax = hero.getAttribute(a).getMaximum();

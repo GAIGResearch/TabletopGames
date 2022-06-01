@@ -25,19 +25,19 @@ import static utilities.Utils.getNeighbourhood;
  * 2-step action to give acolyte token to an adjacent player. Player currently carrying the token chooses between adjacent players
  */
 public class TradeAcolyteAction extends TokenAction implements IExtendedSequence {
-    int receivingPlayerID;
+    int receivingHeroComponentID;
 
     public TradeAcolyteAction() {
         super(-1, Triggers.ACTION_POINT_SPEND);
-        receivingPlayerID = -1;
+        receivingHeroComponentID = -1;
     }
     public TradeAcolyteAction(int acolyteComponentID) {
         super(acolyteComponentID, Triggers.ACTION_POINT_SPEND);
-        this.receivingPlayerID = -1;
+        this.receivingHeroComponentID = -1;
     }
-    public TradeAcolyteAction(int acolyteComponentID, int receivingPlayerID) {
+    public TradeAcolyteAction(int acolyteComponentID, int receivingHeroComponentID) {
         super(acolyteComponentID, Triggers.ACTION_POINT_SPEND);
-        this.receivingPlayerID = receivingPlayerID;
+        this.receivingHeroComponentID = receivingHeroComponentID;
     }
 
     @Override
@@ -46,8 +46,9 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
         List<AbstractAction> actions = new ArrayList<>();
         DescentGameState dgs = (DescentGameState) state;
         DToken acolyte = (DToken) dgs.getComponentById(tokenID);
-        if (acolyte.getOwnerId() == state.getCurrentPlayer()) {
-            Hero hero = dgs.getHeroes().get(acolyte.getOwnerId() - 1);
+        int heroIdx = acolyte.getOwnerId();
+        Hero hero = dgs.getHeroes().get(heroIdx);
+        if (hero.getOwnerId() == ((DescentGameState) state).getActingFigure().getOwnerId()) {
             Vector2D loc = hero.getPosition();
             GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
@@ -76,26 +77,27 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (action instanceof TradeAcolyteAction) {
-            this.receivingPlayerID = ((TradeAcolyteAction) action).receivingPlayerID;
-        } else this.receivingPlayerID = state.getComponentById(tokenID).getOwnerId();  // did nothing, ownership not changing
+            this.receivingHeroComponentID = ((TradeAcolyteAction) action).receivingHeroComponentID;
+        } else this.receivingHeroComponentID = state.getComponentById(tokenID).getOwnerId();  // did nothing, ownership not changing
     }
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return receivingPlayerID != -1;
+        return receivingHeroComponentID != -1;
     }
 
     @Override
     public TradeAcolyteAction copy() {
-        return new TradeAcolyteAction(tokenID, receivingPlayerID);
+        return new TradeAcolyteAction(tokenID, receivingHeroComponentID);
     }
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
         // Can only execute if player adjacent to another hero
         DToken acolyte = (DToken) dgs.getComponentById(tokenID);
-        if (acolyte.getOwnerId() == dgs.getCurrentPlayer()) {
-            Hero hero = dgs.getHeroes().get(acolyte.getOwnerId() - 1);
+        int heroIdx = acolyte.getOwnerId();
+        Hero hero = dgs.getHeroes().get(heroIdx);
+        if (hero.getOwnerId() == dgs.getActingFigure().getOwnerId()) {
             Vector2D loc = hero.getPosition();
             GridBoard board = dgs.getMasterBoard();
             List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
@@ -120,25 +122,25 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
         if (this == o) return true;
         if (!(o instanceof TradeAcolyteAction)) return false;
         TradeAcolyteAction that = (TradeAcolyteAction) o;
-        return receivingPlayerID == that.receivingPlayerID;
+        return receivingHeroComponentID == that.receivingHeroComponentID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), receivingPlayerID);
+        return Objects.hash(super.hashCode(), receivingHeroComponentID);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Give acolyte to " + receivingPlayerID;
+        return "Give acolyte to " + receivingHeroComponentID;
     }
 
     @Override
     public boolean execute(DescentGameState gs) {
-        if (receivingPlayerID != -1) {
+        if (receivingHeroComponentID != -1) {
             DToken acolyte = (DToken) gs.getComponentById(tokenID);
-            if (receivingPlayerID != acolyte.getOwnerId()) {
-                acolyte.setOwnerId(receivingPlayerID, gs);
+            if (receivingHeroComponentID != acolyte.getOwnerId()) {
+                acolyte.setOwnerId(receivingHeroComponentID, gs);
             }
         } else {
             gs.setActionInProgress(this);

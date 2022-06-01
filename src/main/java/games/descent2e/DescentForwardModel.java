@@ -3,7 +3,6 @@ package games.descent2e;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.*;
@@ -84,6 +83,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Choose random hero from that archetype
             List<Hero> heroes = _data.findHeroes(archetype);
             Hero figure = heroes.get(rnd.nextInt(heroes.size()));
+            figure.setOwnerId(i);
 
             // Choose random class from that archetype
             choice = rnd.nextInt(DescentConstants.archetypeClassMap.get(archetype).length);
@@ -161,7 +161,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
                 token.setAttributeModifiers(def.getAttributeModifiers());
                 if (location == null) {
-                    // Make a player owner of it TODO: players choose?
+                    // Make a hero owner of it TODO: players choose?
                     int idx = r.nextInt(dgs.getNPlayers()-1);
                     if (idx == dgs.overlordPlayer) idx++;
                     token.setOwnerId(idx, dgs);
@@ -185,10 +185,10 @@ public class DescentForwardModel extends AbstractForwardModel {
         if (checkEndOfGame()) return;
 
         DescentGameState dgs = (DescentGameState) currentState;
-        int currentPlayer = dgs.getCurrentPlayer();
+        Figure actingFigure = dgs.getActingFigure();
+        actingFigure.setNActionsExecuted(actingFigure.getNActionsExecuted()+1);
         int nActionsPerPlayer = ((DescentParameters)dgs.getGameParameters()).nActionsPerPlayer;
-        if (currentPlayer == dgs.overlordPlayer && dgs.overlord.getNActionsExecuted() == nActionsPerPlayer
-            || currentPlayer != dgs.overlordPlayer && dgs.getHeroes().get(currentPlayer-1).getNActionsExecuted() == nActionsPerPlayer) {
+        if (actingFigure.getNActionsExecuted() == nActionsPerPlayer) {
             dgs.getTurnOrder().endPlayerTurn(dgs);
         }
 
@@ -252,9 +252,9 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // These three lines were almost refactored by James, but he left them
         // in to keep Raluca happy
-        int monsterGroupIdx = ((DescentTurnOrder) dgs.getTurnOrder()).monsterGroupActingNext;
-        List<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
-        ((DescentTurnOrder) dgs.getTurnOrder()).nextMonster(monsterGroup.size());
+//        int monsterGroupIdx = ((DescentTurnOrder) dgs.getTurnOrder()).monsterGroupActingNext;
+//        List<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
+//        ((DescentTurnOrder) dgs.getTurnOrder()).nextMonster(monsterGroup.size());
 
         if (!(dgs.getGamePhase() == DescentGameState.DescentPhase.ForceMove)) {
             // Can do actions other than move
@@ -322,20 +322,6 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // TODO: stamina move, not an "action", but same rules for move apply
         // TODO: exhaust a card for an action/modifier/effect "free" action
-
-        if (actingFigure.getNActionsExecuted() == nActions || actions.size() == 1) {
-            if (currentPlayer == 0) {
-                // This monster is finished, move to next monster
-                // TODO: barghest minions never move, find out why
-                int nextMonster = ((DescentTurnOrder) dgs.getTurnOrder()).monsterActingNext;
-                if (nextMonster == monsterGroup.size() - 1) {
-                    // Overlord is finished with this monster group
-                    dgs.overlord.setNActionsExecuted(nActions);
-                }
-            } else {
-                actingFigure.setNActionsExecuted(actingFigure.getNActionsExecuted()+1);
-            }
-        }
 
         return actions;
     }
@@ -1052,6 +1038,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Always 1 master
             Monster master = new Monster(name + " master", monsterDef.get(act + "-master").getProperties());
             placeMonster(dgs, master, new ArrayList<>(tileCoords), rnd, hpModifierMaster, superDef);
+            master.setOwnerId(dgs.overlordPlayer);
             monsterGroup.add(master);
 
             // How many minions?
@@ -1073,6 +1060,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             for (int i = 0; i < nMinions; i++) {
                 Monster minion = new Monster(name + " minion " + i, monsterDef.get(act + "-minion").getProperties());
                 placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, hpModifierMinion, superDef);
+                minion.setOwnerId(dgs.overlordPlayer);
                 monsterGroup.add(minion);
             }
 

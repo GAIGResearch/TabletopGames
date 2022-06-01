@@ -1,13 +1,11 @@
 package games.descent2e.actions.tokens;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
 import core.components.GridBoard;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
-import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
@@ -35,7 +33,7 @@ public class SearchAction extends TokenAction {
     public boolean canExecute(DescentGameState gs) {
         // Can only execute if player adjacent to search token
         DToken acolyte = (DToken) gs.getComponentById(tokenID);
-        Hero hero = gs.getHeroes().get(acolyte.getOwnerId()-1);
+        Hero hero = gs.getHeroes().get(acolyte.getOwnerId());
         Vector2D loc = hero.getPosition();
         GridBoard board = gs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);

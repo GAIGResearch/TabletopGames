@@ -28,6 +28,7 @@ public class Rest extends DescentAction{
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return dgs.getHeroes().get(dgs.getCurrentPlayer()-1).getAttributeValue(Figure.Attribute.Fatigue) > 0;
+        Figure f = dgs.getActingFigure();
+        return f instanceof Hero && f.getAttributeValue(Figure.Attribute.Fatigue) > 0;
     }
 }

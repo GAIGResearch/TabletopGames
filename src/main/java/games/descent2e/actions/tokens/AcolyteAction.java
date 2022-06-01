@@ -35,7 +35,7 @@ public class AcolyteAction extends TokenAction {
     public boolean canExecute(DescentGameState gs) {
         // Can only execute if player adjacent to villager token
         DToken acolyte = (DToken) gs.getComponentById(tokenID);
-        Hero hero = gs.getHeroes().get(acolyte.getOwnerId()-1);
+        Hero hero = gs.getHeroes().get(acolyte.getOwnerId());
         Vector2D loc = hero.getPosition();
         GridBoard board = gs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
@@ -60,13 +60,14 @@ public class AcolyteAction extends TokenAction {
     @Override
     public boolean execute(DescentGameState gs) {
         DToken acolyte = (DToken) gs.getComponentById(tokenID);
-        Hero hero = gs.getHeroes().get(acolyte.getOwnerId()-1);
+        int heroIdx = acolyte.getOwnerId();
+        Hero hero = gs.getHeroes().get(heroIdx);
         Vector2D loc = hero.getPosition();
         GridBoard board = gs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
         for (DToken token: gs.getTokens()) {
             if (token.getDescentTokenType() == DescentTypes.DescentToken.Villager && neighbours.contains(token.getPosition())) {
-                token.setOwnerId(hero.getOwnerId(), gs); // Take this one
+                token.setOwnerId(heroIdx, gs); // Take this one
                 token.setPosition(null);  // Take off the map
                 return true;
             }
