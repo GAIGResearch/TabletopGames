@@ -35,6 +35,12 @@ public class DToken extends Token {
         attributeModifiers = new HashMap<>();
     }
 
+    @Override
+    public void setOwnerId(int ownerId) {
+        super.setOwnerId(ownerId);
+        int a = 0;
+    }
+
     public void setOwnerId(int ownerId, DescentGameState dgs) {
         if (this.ownerId != -1) {
             Hero hero = dgs.getHeroes().get(ownerId);
@@ -86,7 +92,7 @@ public class DToken extends Token {
             copy.effects.add(act.copy());
         }
         copy.attributeModifiers = new HashMap<>(attributeModifiers);
-        copyComponentTo(this);
+        copyComponentTo(copy);
         return copy;
     }
 
