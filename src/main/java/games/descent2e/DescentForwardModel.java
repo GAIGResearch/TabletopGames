@@ -66,7 +66,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         ArrayList<Vector2D> heroStartingPositions = firstQuest.getStartingLocations().get(firstBoard);
         ArrayList<Integer> archetypes = new ArrayList<>();
-        for (int i = 0; i < DescentConstants.archetypes.length; i++) {
+        for (int i = 0; i < Archetype.values().length; i++) {
             archetypes.add(i);
         }
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
@@ -75,11 +75,11 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Choose random archetype from those remaining
             int choice = archetypes.get(rnd.nextInt(archetypes.size()));
 //            archetypes.remove(Integer.valueOf(choice));  // TODO this should be commented in, but kept out for testing until it's guaranteed that archetypes >= nHeroes
-            String archetype = DescentConstants.archetypes[choice];
+            Archetype archetype = Archetype.values()[choice];
 
             // Choose random hero from that archetype
             List<Hero> heroes = _data.findHeroes(archetype);
-            Hero figure = (Hero) heroes.get(rnd.nextInt(heroes.size())).copyNewID();
+            Hero figure = heroes.get(rnd.nextInt(heroes.size())).copyNewID();
 
             if (dgs.getNPlayers() == 2) {
                 // In 2-player games, 1 player controls overlord, the other 2 heroes
@@ -89,14 +89,15 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
 
             // Choose random class from that archetype
-            choice = rnd.nextInt(DescentConstants.archetypeClassMap.get(archetype).length);
-            String heroClass = DescentConstants.archetypeClassMap.get(archetype)[choice];
+            HeroClass[] options = HeroClass.getClassesForArchetype(archetype);
+            choice = rnd.nextInt(options.length);
+            HeroClass heroClass = options[choice];
 
             // Inform figure of chosen class
-            figure.setProperty(new PropertyString("class", heroClass));
+            figure.setProperty(new PropertyString("class", heroClass.name()));
 
             // Assign starting skills and equipment from chosen class
-            Deck<Card> classDeck = _data.findDeck(heroClass);
+            Deck<Card> classDeck = _data.findDeck(heroClass.name());
             for (Card c: classDeck.getComponents()) {
                 if (((PropertyInt)c.getProperty(xpHash)).value <= figure.getAttribute(Figure.Attribute.XP).getValue()) {
                     figure.equip(c);

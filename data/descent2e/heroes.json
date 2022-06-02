@@ -2,7 +2,6 @@
   {
     "id": "Widow Tarha",
     "type": ["String", "Hero"],
-    "color": ["Color", "yellow"],
     "archetype": ["String", "Mage"],
     "MovePoints": ["Integer", 4],
     "Health": ["Integer", 10],
@@ -18,7 +17,6 @@
   {
     "id": "Avric Albright",
     "type": ["String", "Hero"],
-    "color": ["Color", "blue"],
     "archetype": ["String", "Healer"],
     "MovePoints": ["Integer", 4],
     "Health": ["Integer", 12],
