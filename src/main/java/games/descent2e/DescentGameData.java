@@ -40,9 +40,9 @@ public class DescentGameData extends AbstractGameData {
         tiles = GridBoard.loadBoards(dataPath + "tiles.json");
         boardConfigurations = GraphBoard.loadBoards(dataPath + "boards.json");
 
+        DescentDice.loadDice(dataPath + "/components/dice.json");
         heroes = Hero.loadHeroes(dataPath + "heroes.json");
         monsters = loadMonsters(dataPath + "monsters.json");
-        DescentDice.loadDice(dataPath + "/components/dice.json");
 
         quests = loadQuests(dataPath + "mainQuests.json");
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");

@@ -5,6 +5,7 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.Token;
 import core.properties.PropertyInt;
+import core.properties.PropertyStringArray;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Move;
@@ -19,10 +20,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+import static games.descent2e.DescentConstants.attackHash;
+import static games.descent2e.DescentConstants.defenceHash;
 import static games.descent2e.components.Figure.Attribute.*;
 
 // TODO: figure out how to do ability/heroic-feat
 public class Figure extends Token {
+
+    DicePool attackDice = DicePool.empty;
+    DicePool defenceDice = DicePool.empty;
 
     public enum Attribute {
         MovePoints,
@@ -36,7 +42,6 @@ public class Figure extends Token {
     }
 
     HashMap<Attribute, Counter> attributes;
-
 
     int nActionsExecuted;
 
@@ -153,6 +158,10 @@ public class Figure extends Token {
         return abilities;
     }
 
+    public DicePool getAttackDice() { return attackDice;}
+
+    public DicePool getDefenceDice() {return defenceDice;}
+
     @Override
     public Figure copy() {
         Figure copy = new Figure(componentName, componentID);
@@ -185,6 +194,8 @@ public class Figure extends Token {
                 copyTo.abilities.add(ability.copy());
             }
         }
+        copyTo.attackDice = getAttackDice().copy();
+        copyTo.defenceDice = getDefenceDice().copy();
     }
 
     public void loadFigure(JSONObject figure, Set<String> ignoreKeys) {
@@ -196,7 +207,14 @@ public class Figure extends Token {
         }
         // TODO: custom load of figure properties
         parseComponent(this, figure, ignoreKeys);
-
+        if (getProperty(attackHash) != null) {
+            String[] attack = ((PropertyStringArray) getProperty(attackHash)).getValues();
+            attackDice = DicePool.constructDicePool(attack);
+        }
+        if (getProperty(defenceHash) != null) {
+            String[] defence = ((PropertyStringArray) getProperty(defenceHash)).getValues();
+            defenceDice = DicePool.constructDicePool(defence);
+        }
         for (Attribute a : Attribute.values()) {
             PropertyInt prop = ((PropertyInt) getProperty(a.name()));
             if (prop != null) {
@@ -242,4 +260,6 @@ public class Figure extends Token {
 
         return figures;
     }
+
+    // TODO: Add equals() and hashcode()
 }
