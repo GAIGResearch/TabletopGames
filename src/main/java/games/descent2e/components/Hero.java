@@ -249,7 +249,8 @@ public class Hero extends Figure {
      */
     protected void loadHero(JSONObject figure) {
         super.loadFigure(figure);
-        String[] defenceDice = ((PropertyStringArray) getProperty(defenceHash)).getValues();
+        String[] defence = ((PropertyStringArray) getProperty(defenceHash)).getValues();
+        defenceDice = DicePool.constructDicePool(defence);
         this.featAvailable = true;
         this.heroicFeat = ((PropertyString) getProperty(heroicFeatHash)).value;
         this.ability = ((PropertyString) getProperty(abilityHash)).value;
