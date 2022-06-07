@@ -10,6 +10,9 @@ public class LinearStateHeuristic extends AbstractStateHeuristic {
     public LinearStateHeuristic(String featureVectorClassName, String coefficientsFile, String defaultHeuristicClass) {
         super(featureVectorClassName, coefficientsFile, defaultHeuristicClass);
     }
+    public LinearStateHeuristic(String featureVectorClassName, String coefficientsFile) {
+        super(featureVectorClassName, coefficientsFile, "");
+    }
     public LinearStateHeuristic(IStateFeatureVector featureVector, String coefficientsFile, IStateHeuristic defaultHeuristic) {
         super(featureVector, coefficientsFile, defaultHeuristic);
     }

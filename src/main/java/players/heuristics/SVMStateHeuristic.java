@@ -22,13 +22,20 @@ public class SVMStateHeuristic implements IStateHeuristic {
             e.printStackTrace();
             throw new AssertionError("Problem with Class : " + featureVectorClassName);
         }
-        try {
-            defaultHeuristic = (IStateHeuristic) Class.forName(defaultHeuristicClassName).getConstructor().newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError("Problem with Class : " + defaultHeuristicClassName);
+        if (defaultHeuristicClassName.equals("")) {
+            defaultHeuristic = new LeaderHeuristic();
+        } else {
+            try {
+                defaultHeuristic = (IStateHeuristic) Class.forName(defaultHeuristicClassName).getConstructor().newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new AssertionError("Problem with Class : " + defaultHeuristicClassName);
+            }
         }
         loadModel(svmModelLocation);
+    }
+    public SVMStateHeuristic(String featureVectorClassName, String svmModelLocation) {
+        this(featureVectorClassName, svmModelLocation, "");
     }
 
     public SVMStateHeuristic(IStateFeatureVector featureVector, String svmModelLocation, IStateHeuristic defaultHeuristic) {
