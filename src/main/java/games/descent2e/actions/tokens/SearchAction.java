@@ -59,9 +59,11 @@ public class SearchAction extends TokenAction {
     public boolean execute(DescentGameState gs) {
         Deck<Card> searchCards = gs.getSearchCards();
         if (searchCards != null) {
-            boolean added = ((Hero) gs.getActingFigure()).getOtherEquipment().add(searchCards.pick(new Random(gs.getGameParameters().getRandomSeed())));
+            Hero hero = (Hero) gs.getActingFigure();
+            boolean added = hero.getOtherEquipment().add(searchCards.pick(new Random(gs.getGameParameters().getRandomSeed())));
             if (added) {
                 ((DToken) gs.getComponentById(tokenID)).setPosition(null);  // Take off the map
+                hero.getNActionsExecuted().increment();
             }
             return added;
         }

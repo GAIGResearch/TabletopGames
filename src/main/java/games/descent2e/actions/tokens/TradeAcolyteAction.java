@@ -152,6 +152,7 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
             if (receivingHeroIdx != acolyte.getOwnerId()) {
                 acolyte.setOwnerId(receivingHeroIdx, gs);
             }
+            gs.getActingFigure().getNActionsExecuted().increment();
         } else {
             gs.setActionInProgress(this);
         }

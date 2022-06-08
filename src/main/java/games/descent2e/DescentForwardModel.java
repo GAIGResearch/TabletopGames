@@ -259,75 +259,58 @@ public class DescentForwardModel extends AbstractForwardModel {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Figure actingFigure = dgs.getActingFigure();
 
-        // These three lines were almost refactored by James, but he left them
-        // in to keep Raluca happy
-//        int monsterGroupIdx = ((DescentTurnOrder) dgs.getTurnOrder()).monsterGroupActingNext;
-//        List<Monster> monsterGroup = dgs.getMonsters().get(monsterGroupIdx);
-//        ((DescentTurnOrder) dgs.getTurnOrder()).nextMonster(monsterGroup.size());
+        // End turn
+        actions.add(new EndTurn());
 
-        if (!(dgs.getGamePhase() == DescentGameState.DescentPhase.ForceMove)) {
-            // Can do actions other than move
+        // Can we do a move action? Can't if already done max actions & not currently executing a move, or immobilized
+        GetMovementPoints movePoints = new GetMovementPoints();
+        if (movePoints.canExecute(dgs)) actions.add(movePoints);
+        if (actingFigure.getAttributeValue(Figure.Attribute.MovePoints) > 0) {
+            actions.addAll(moveActions(dgs, actingFigure));
+        }
 
-            // End turn
-            actions.add(new EndTurn());
+        // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
+        actions.addAll(attackActions(dgs, actingFigure));
 
-            // Can we do a move action? Can't if already done max actions & not currently executing a move, or immobilized
-            boolean canMove = !actingFigure.hasCondition(DescentCondition.Immobilize) &&
-                    (!actingFigure.getNActionsExecuted().isMaximum() || actingFigure.getAttribute(Figure.Attribute.MovePoints).getValue() > 0);
-            if (canMove) {
-                // Is this a new move action? It is if player can move, but all move points spent in first move action
-                if (actingFigure.getAttribute(Figure.Attribute.MovePoints).getValue() == 0) {
-                    // TODO: This is a second move action, reset move points for calculation + if agent actually chooses it
-                }
-                actions.addAll(moveActions(dgs, actingFigure));
+        // - Rest
+        if (actingFigure instanceof Hero) {
+            // Only heroes can rest
+            Rest act = new Rest();
+            if (act.canExecute(dgs)) {
+                actions.add(act);
             }
+        }
 
-            // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
-            actions.addAll(attackActions(dgs, actingFigure));
+        // - Open/close a door TODO
+        // - Revive hero TODO
 
-            // - Rest
-            if (actingFigure instanceof Hero) {
-                // Only heroes can rest
-                Rest act = new Rest();
-                if (act.canExecute(dgs)) {
+        // - Search
+        if (actingFigure instanceof Hero) {
+            // Only heroes can search for adjacent Search tokens (or ones they're sitting on top of
+            Vector2D loc = actingFigure.getPosition();
+            GridBoard board = dgs.getMasterBoard();
+            List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+            for (DToken token: dgs.tokens) {
+                if (token.getDescentTokenType() == DescentToken.Search
+                        && token.getPosition() != null
+                        && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
+                    for (DescentAction da: token.getEffects()) {
+                        actions.add(da.copy());
+                    }
+                }
+            }
+        }
+
+        // - Stand up TODO
+
+        // - Special (specified by quest)
+        if (actingFigure.getAbilities() != null) {
+            for (DescentAction act : actingFigure.getAbilities()) {
+                // Check if action can be executed right now
+                if (act.canExecute(Triggers.ACTION_POINT_SPEND, dgs)) {
                     actions.add(act);
                 }
             }
-
-            // - Open/close a door TODO
-            // - Revive hero TODO
-
-            // - Search
-            if (actingFigure instanceof Hero) {
-                // Only heroes can search for adjacent Search tokens (or ones they're sitting on top of
-                Vector2D loc = actingFigure.getPosition();
-                GridBoard board = dgs.getMasterBoard();
-                List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-                for (DToken token: dgs.tokens) {
-                    if (token.getDescentTokenType() == DescentToken.Search
-                            && token.getPosition() != null
-                            && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
-
-
-                        actions.addAll(token.getEffects());
-                    }
-                }
-            }
-
-            // - Stand up TODO
-
-            // - Special (specified by quest)
-            if (actingFigure.getAbilities() != null) {
-                for (DescentAction act : actingFigure.getAbilities()) {
-                    // Check if action can be executed right now
-                    if (act.canExecute(Triggers.ACTION_POINT_SPEND, dgs)) {
-                        actions.add(act);
-                    }
-                }
-            }
-
-        } else {
-            actions.addAll(moveActions(dgs, actingFigure));
         }
 
         // TODO: stamina move, not an "action", but same rules for move apply
@@ -337,6 +320,8 @@ public class DescentForwardModel extends AbstractForwardModel {
     }
 
     private HashMap<BoardNode, Double> getAllAdjacentNodes(DescentGameState dgs, Figure figure){
+
+        // TODO: get full path to the node that is to be traversed in the move action, give whole path to action
 
         Vector2D figureLocation = figure.getPosition();
         BoardNode figureNode = dgs.masterBoard.getElement(figureLocation.getX(), figureLocation.getY());

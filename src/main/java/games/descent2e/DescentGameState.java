@@ -225,6 +225,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return getActingFigure().getOwnerId();
     }
 
+    public int getOverlordPlayer() {
+        return overlordPlayer;
+    }
+
     public boolean playerHasAvailableInterrupt(int player, Triggers trigger) {
         // TODO: implement with look through Abilities/Items/Actions which fit
         return false;

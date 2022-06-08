@@ -2,21 +2,22 @@ package games.descent2e.actions;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
+import games.descent2e.components.Figure;
 
-public class EndTurn extends DescentAction{
-    public EndTurn() {
+public class GetMovementPoints extends DescentAction {
+    public GetMovementPoints() {
         super(Triggers.ACTION_POINT_SPEND);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "End turn";
+        return "Get movement points";
     }
 
     @Override
     public boolean execute(DescentGameState gs) {
-        gs.getActingFigure().getNActionsExecuted().setToMax();
-        gs.getTurnOrder().endPlayerTurn(gs);
+        gs.getActingFigure().setAttributeToMax(Figure.Attribute.MovePoints);
         return true;
     }
 
@@ -27,6 +28,7 @@ public class EndTurn extends DescentAction{
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return true;
+        Figure f = dgs.getActingFigure();
+        return !f.hasCondition(DescentTypes.DescentCondition.Immobilize) && !f.getNActionsExecuted().isMaximum();
     }
 }
