@@ -1,6 +1,7 @@
 package games.descent2e;
 
 import core.components.GridBoard;
+import games.descent2e.components.Figure;
 import games.descent2e.concepts.Quest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -11,8 +12,12 @@ import java.awt.*;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
+
+import static games.descent2e.components.Figure.Attribute.Health;
+import static games.descent2e.components.Figure.Attribute.MovePoints;
 
 public class DescentTypes {
 
@@ -52,19 +57,30 @@ public class DescentTypes {
         }
     }
 
+    // TODO: params for move costs and damage
     public enum TerrainType {
         // Tile margins
-        Edge,
-        Open,
-        Null,
+        Edge(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}}),
+        Open(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1);}}),
+        Null(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}}),
 
         // Inside tile
-        Plain,
-        Water,
-        Lava,
-        Hazard,
-        Pit,
-        Block;
+        Plain(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1);}}),
+        Water(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 2);}}),
+//        Sludge(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 2);}}),  // TODO: when a figure starts its turn or activation so that each space it occupies is a sludge space, its Speed is considered to be 1 and cannot be increased above 1 until the end of that turn or activation.
+        Lava(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 1);}}),
+        Hazard(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 1);}}),
+        Pit(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 2);}}),
+        Block(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}});
+
+        HashMap<Figure.Attribute, Integer> moveCosts;
+        TerrainType(HashMap<Figure.Attribute, Integer> moveCosts) {
+            this.moveCosts = moveCosts;
+        }
+
+        public HashMap<Figure.Attribute, Integer> getMoveCosts() {
+            return moveCosts;
+        }
 
         public static HashSet<TerrainType> getWalkableTerrains() {
             return new HashSet<TerrainType>() {{
