@@ -679,8 +679,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                         List<Vector2D> boardNs = getNeighbourhood(j, i, width, height, true);
                         for (Vector2D n2 : boardNs) {
                             if (tileGrid[n2.getY()][n2.getX()] != null && TerrainType.isWalkableTerrain(tileGrid[n2.getY()][n2.getX()].getComponentName())) {
-                                board[n2.getY()+y][n2.getX()+x].addNeighbour(board[i+y][j+x]);
-                                board[i+y][j+x].addNeighbour(board[n2.getY()+y][n2.getX()+x]);
+                                board[n2.getY()+y][n2.getX()+x].addNeighbourWithCost(board[i+y][j+x], TerrainType.getMovePointsCost(board[i+y][j+x].getComponentName()));
+                                board[i+y][j+x].addNeighbourWithCost(board[n2.getY()+y][n2.getX()+x], TerrainType.getMovePointsCost(board[n2.getY()+y][n2.getX()+x].getComponentName()));
                             }
                         }
                     }
@@ -780,8 +780,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                         for (int x1 = x-1; x1 <= x+1; x1++) {
                             if (j+x1 >= 0 && j+x1 < board[0].length) {
                                 if (board[i + y][j + x] != null && board[i + y - 1][j + x1] != null) {
-                                    board[i + y][j + x].addNeighbour(board[i + y - 1][j + x1]);
-                                    board[i + y - 1][j + x1].addNeighbour(board[i + y][j + x]);
+                                    board[i + y][j + x].addNeighbourWithCost(board[i + y - 1][j + x1], TerrainType.getMovePointsCost(board[i + y - 1][j + x1].getComponentName()));
+                                    board[i + y - 1][j + x1].addNeighbourWithCost(board[i + y][j + x], TerrainType.getMovePointsCost(board[i + y][j + x].getComponentName()));
                                 }
                             }
                         }
@@ -789,8 +789,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                         for (int x1 = x-1; x1 <= x+1; x1++) {
                             if (j+x1 >= 0 && j+x1 < board[0].length) {
                                 if (board[i + y - 1][j + x] != null && board[i + y][j + x1] != null) {
-                                    board[i + y - 1][j + x].addNeighbour(board[i + y][j + x1]);
-                                    board[i + y][j + x1].addNeighbour(board[i + y - 1][j + x]);
+                                    board[i + y - 1][j + x].addNeighbourWithCost(board[i + y][j + x1], TerrainType.getMovePointsCost(board[i + y][j + x1].getComponentName()));
+                                    board[i + y][j + x1].addNeighbourWithCost(board[i + y - 1][j + x], TerrainType.getMovePointsCost(board[i + y - 1][j + x].getComponentName()));
                                 }
                             }
                         }
@@ -807,8 +807,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                         for (int x1 = x-1; x1 <= x+1; x1++) {
                             if (j + x1 >= 0 && j + x1 < board[0].length) {
                                 if (board[i + y][j + x] != null && board[i + y + 1][j + x1] != null) {
-                                    board[i + y][j + x].addNeighbour(board[i + y + 1][j + x1]);
-                                    board[i + y + 1][j + x1].addNeighbour(board[i + y][j + x]);
+                                    board[i + y][j + x].addNeighbourWithCost(board[i + y + 1][j + x1], TerrainType.getMovePointsCost(board[i + y + 1][j + x1].getComponentName()));
+                                    board[i + y + 1][j + x1].addNeighbourWithCost(board[i + y][j + x], TerrainType.getMovePointsCost(board[i + y][j + x].getComponentName()));
                                 }
                             }
                         }
@@ -816,8 +816,8 @@ public class DescentForwardModel extends AbstractForwardModel {
                         for (int x1 = x-1; x1 <= x+1; x1++) {
                             if (j + x1 >= 0 && j + x1 < board[0].length) {
                                 if (board[i + y + 1][j + x] != null && board[i + y][j + x1] != null) {
-                                    board[i + y + 1][j + x].addNeighbour(board[i + y][j + x1]);
-                                    board[i + y][j + x1].addNeighbour(board[i + y + 1][j + x]);
+                                    board[i + y + 1][j + x].addNeighbourWithCost(board[i + y][j + x1], TerrainType.getMovePointsCost(board[i + y][j + x1].getComponentName()));
+                                    board[i + y][j + x1].addNeighbourWithCost(board[i + y + 1][j + x], TerrainType.getMovePointsCost(board[i + y + 1][j + x].getComponentName()));
                                 }
                             }
                         }
@@ -834,16 +834,16 @@ public class DescentForwardModel extends AbstractForwardModel {
                         for (int y1 = y-1; y1 <= y+1; y1++) {
                             if (i + y1 >= 0 && i + y1 < board.length
                                     && board[i + y][j + x] != null && board[i + y1][j + x + 1] != null) {
-                                board[i + y][j + x].addNeighbour(board[i + y1][j + x + 1]);
-                                board[i + y1][j + x + 1].addNeighbour(board[i + y][j + x]);
+                                board[i + y][j + x].addNeighbourWithCost(board[i + y1][j + x + 1], TerrainType.getMovePointsCost(board[i + y1][j + x + 1].getComponentName()));
+                                board[i + y1][j + x + 1].addNeighbourWithCost(board[i + y][j + x], TerrainType.getMovePointsCost(board[i + y][j + x].getComponentName()));
                             }
                         }
                         // And connections back from the node in front too
                         for (int y1 = y-1; y1 <= y+1; y1++) {
                             if (i + y1 >= 0 && i + y1 < board.length
                                     && board[i + y][j + x + 1] != null && board[i + y1][j + x] != null) {
-                                board[i + y][j + x + 1].addNeighbour(board[i + y1][j + x]);
-                                board[i + y1][j + x].addNeighbour(board[i + y][j + x + 1]);
+                                board[i + y][j + x + 1].addNeighbourWithCost(board[i + y1][j + x], TerrainType.getMovePointsCost(board[i + y1][j + x].getComponentName()));
+                                board[i + y1][j + x].addNeighbourWithCost(board[i + y][j + x + 1], TerrainType.getMovePointsCost(board[i + y][j + x + 1].getComponentName()));
                             }
                         }
                     }
@@ -859,16 +859,16 @@ public class DescentForwardModel extends AbstractForwardModel {
                         for (int y1 = y-1; y1 <= y+1; y1++) {
                             if (i + y1 >= 0 && i + y1 < board.length
                                     && board[i + y][j + x] != null && board[i + y1][j + x - 1] != null) {
-                                board[i + y][j + x].addNeighbour(board[i + y1][j + x - 1]);
-                                board[i + y1][j + x - 1].addNeighbour(board[i + y][j + x]);
+                                board[i + y][j + x].addNeighbourWithCost(board[i + y1][j + x - 1], TerrainType.getMovePointsCost(board[i + y1][j + x - 1].getComponentName()));
+                                board[i + y1][j + x - 1].addNeighbourWithCost(board[i + y][j + x], TerrainType.getMovePointsCost(board[i + y][j + x].getComponentName()));
                             }
                         }
                         // And connections back from the node in front too
                         for (int y1 = y-1; y1 <= y+1; y1++) {
                             if (i + y1 >= 0 && i + y1 < board.length
                                     && board[i + y][j + x - 1] != null && board[i + y1][j + x] != null) {
-                                board[i + y][j + x - 1].addNeighbour(board[i + y1][j + x]);
-                                board[i + y1][j + x].addNeighbour(board[i + y][j + x - 1]);
+                                board[i + y][j + x - 1].addNeighbourWithCost(board[i + y1][j + x], TerrainType.getMovePointsCost(board[i + y1][j + x].getComponentName()));
+                                board[i + y1][j + x].addNeighbourWithCost(board[i + y][j + x - 1], TerrainType.getMovePointsCost(board[i + y][j + x - 1].getComponentName()));
                             }
                         }
                     }

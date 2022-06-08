@@ -7,6 +7,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Utils;
 
 import java.awt.*;
 import java.io.FileReader;
@@ -80,6 +81,13 @@ public class DescentTypes {
 
         public HashMap<Figure.Attribute, Integer> getMoveCosts() {
             return moveCosts;
+        }
+        public static int getMovePointsCost(String terrain) {
+            TerrainType t = Utils.searchEnum(TerrainType.class, terrain);
+            if (t != null) {
+                return t.moveCosts.get(MovePoints);
+            }
+            return -1;
         }
 
         public static HashSet<TerrainType> getWalkableTerrains() {

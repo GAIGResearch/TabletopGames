@@ -6,7 +6,6 @@ import org.json.simple.JSONObject;
 import utilities.Utils;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class BoardNode extends Component {
 
@@ -38,8 +37,8 @@ public class BoardNode extends Component {
      * Adds a neighbour for this node.
      * @param neighbour - new neighbour of this node.
      */
-    public void addNeighbour(BoardNode neighbour) {
-        addNeighbour(neighbour, defaultCost);
+    public void addNeighbourWithCost(BoardNode neighbour) {
+        addNeighbourWithCost(neighbour, defaultCost);
     }
 
 
@@ -48,7 +47,7 @@ public class BoardNode extends Component {
      * @param neighbour - new neighbour of this node.
      * @param cost - cost to reach this neighbour from 'this'
      */
-    public void addNeighbour(BoardNode neighbour, double cost) {
+    public void addNeighbourWithCost(BoardNode neighbour, double cost) {
         if (neighbours.size() <= maxNeighbours || maxNeighbours == -1) {
             neighbours.put(neighbour.componentID, cost);
         }
@@ -74,8 +73,8 @@ public class BoardNode extends Component {
      * @param side - side of this node to be added in.
      * @return - true if added successfully, false otherwise. may fail if too many neighbours added already.
      */
-    public boolean addNeighbour(BoardNode neighbour, int side) {
-        return addNeighbour(neighbour, side, defaultCost);
+    public boolean addNeighbourOnSide(BoardNode neighbour, int side) {
+        return addNeighbourOnSideWithCost(neighbour, side, defaultCost);
     }
 
     /**
@@ -85,7 +84,7 @@ public class BoardNode extends Component {
      * @param cost - cost to reach this neighbour from 'this'
      * @return - true if added successfully, false otherwise. may fail if too many neighbours added already.
      */
-    public boolean addNeighbour(BoardNode neighbour, int side, double cost) {
+    public boolean addNeighbourOnSideWithCost(BoardNode neighbour, int side, double cost) {
         if (neighbours.size() <= maxNeighbours && side <= maxNeighbours || maxNeighbours == -1) {
             if (!(neighbours.containsKey(neighbour.componentID)) && !(neighbourSideMapping.containsKey(neighbour.componentID))) {
                 neighbours.put(neighbour.componentID, cost);
@@ -132,6 +131,11 @@ public class BoardNode extends Component {
     {
         if(neighbours.containsKey(neighbour.componentID))
             return neighbours.get(neighbour.componentID);
+        throw new RuntimeException("BoardNode.getNeighbourCost(): Accessing cost of a non-neighbour");
+    }
+    public double getNeighbourCost(int neighbourID) {
+        if(neighbours.containsKey(neighbourID))
+            return neighbours.get(neighbourID);
         throw new RuntimeException("BoardNode.getNeighbourCost(): Accessing cost of a non-neighbour");
     }
 

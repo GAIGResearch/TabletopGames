@@ -299,6 +299,7 @@ public class DescentGridBoardView extends ComponentView {
 
         // Draw underlying graph
         g.setColor(Color.green);
+        Stroke s = g.getStroke();
         for (int nnid : bn.getNeighbours().keySet()) {
             BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
             if (nn == null) continue;
@@ -306,9 +307,11 @@ public class DescentGridBoardView extends ComponentView {
             int xC2 = offsetX + location.getX() * itemSize;
             int yC2 = offsetY + location.getY() * itemSize;
 
+            g.setStroke(new BasicStroke((float) bn.getNeighbourCost(nnid)));
             g.drawLine(xC + itemSize/2, yC + itemSize/2, xC2 + itemSize/2, yC2 + itemSize/2);
         }
         g.setColor(Color.black);
+        g.setStroke(s);
     }
 
     @Override
