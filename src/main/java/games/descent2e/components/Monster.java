@@ -1,5 +1,7 @@
 package games.descent2e.components;
 
+import core.components.Counter;
+
 public class Monster extends Figure {
 
     /*
@@ -12,11 +14,11 @@ public class Monster extends Figure {
     int orientation=0;
 
     public Monster() {
-        super("Monster");
+        super("Monster", -1);
     }
 
-    protected Monster(String name, int ID) {
-        super(name, ID);
+    protected Monster(String name, Counter actions, int ID) {
+        super(name, actions, ID);
     }
 
     public int getOrientation() {
@@ -29,7 +31,7 @@ public class Monster extends Figure {
 
     @Override
     public Monster copy() {
-        Monster copy = new Monster(componentName, componentID);
+        Monster copy = new Monster(componentName, nActionsExecuted.copy(), componentID);
         copy.orientation = orientation;
         super.copyComponentTo(copy);
         return copy;

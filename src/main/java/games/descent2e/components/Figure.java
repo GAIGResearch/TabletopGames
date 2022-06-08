@@ -39,8 +39,7 @@ public class Figure extends Token {
     }
 
     HashMap<Attribute, Counter> attributes;
-
-    int nActionsExecuted;
+    Counter nActionsExecuted;
 
     Vector2D position;
     Pair<Integer,Integer> size;
@@ -48,17 +47,20 @@ public class Figure extends Token {
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
     ArrayList<DescentAction> abilities;  // TODO track exhausted etc.
 
-    public Figure(String name) {
+    public Figure(String name, int nActionsPossible) {
         super(name);
         size = new Pair<>(1,1);
         conditions = new HashSet<>();
         attributes = new HashMap<>();
         attributes.put(XP, new Counter(0, 0, -1, "XP"));
         abilities = new ArrayList<>();
+        // TODO: param, how many actions a figure can do
+        nActionsExecuted = new Counter(0, 0, nActionsPossible, "Actions executed");
     }
 
-    protected Figure(String name, int ID) {
+    protected Figure(String name, Counter actions, int ID) {
         super(name, ID);
+        this.nActionsExecuted = actions;
     }
 
     public void resetRound() {
@@ -66,7 +68,7 @@ public class Figure extends Token {
             // Overlord doesn't have move points
             this.attributes.get(MovePoints).setToMax();
         }
-        this.nActionsExecuted = 0;
+        this.nActionsExecuted.setToMin();
     }
 
     public Counter getAttribute(Attribute attribute) {
@@ -113,12 +115,8 @@ public class Figure extends Token {
         this.position = position;
     }
 
-    public int getNActionsExecuted() {
+    public Counter getNActionsExecuted() {
         return nActionsExecuted;
-    }
-
-    public void setNActionsExecuted(int nActionsExecuted) {
-        this.nActionsExecuted = nActionsExecuted;
     }
 
     public void setSize(int width, int height) {
@@ -161,14 +159,15 @@ public class Figure extends Token {
 
     @Override
     public Figure copy() {
-        Figure copy = new Figure(componentName, componentID);
+        Figure copy = new Figure(componentName, nActionsExecuted.copy(), componentID);
         copyComponentTo(copy);
         return copy;
     }
 
     public Figure copyNewID() {
-        Figure copy = new Figure(componentName);
+        Figure copy = new Figure(componentName, nActionsExecuted.getMaximum());
         copyComponentTo(copy);
+        copy.nActionsExecuted = nActionsExecuted.copy();
         return copy;
     }
 
@@ -231,32 +230,17 @@ public class Figure extends Token {
         loadFigure(figure, new HashSet<>());
     }
 
-    /**
-     * Loads all figures from a JSON file.
-     *
-     * @param filename - path to file.
-     * @return - List of Figure objects.
-     */
-    public static List<Figure> loadFigures(String filename) {
-        JSONParser jsonParser = new JSONParser();
-        ArrayList<Figure> figures = new ArrayList<>();
-
-        try (FileReader reader = new FileReader(filename)) {
-
-            JSONArray data = (JSONArray) jsonParser.parse(reader);
-            for (Object o : data) {
-
-                Figure newFigure = new Figure("");
-                newFigure.loadFigure((JSONObject) o);
-                figures.add(newFigure);
-            }
-
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
-
-        return figures;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Figure)) return false;
+        if (!super.equals(o)) return false;
+        Figure figure = (Figure) o;
+        return Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(abilities, figure.abilities);
     }
 
-    // TODO: Add equals() and hashcode()
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, abilities);
+    }
 }

@@ -30,6 +30,7 @@ public class DescentForwardModel extends AbstractForwardModel {
     protected void _setup(AbstractGameState firstState) {
         DescentGameState dgs = (DescentGameState) firstState;
         DescentParameters descentParameters = (DescentParameters) firstState.getGameParameters();
+        int nActionsPerFigure = descentParameters.nActionsPerFigure;
         dgs.data.load(descentParameters.getDataPath());
         dgs.initData = false;
         dgs.addAllComponents();
@@ -51,7 +52,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         // Overlord setup
         dgs.overlordPlayer = 0;  // First player is always the overlord
         // Overlord will also have a figure, but not on the board (to store xp and skill info)
-        dgs.overlord = new Figure("Overlord");
+        dgs.overlord = new Figure("Overlord", -1);
         dgs.overlord.setTokenType("Overlord");
         // OVerlord is player 0, first hero is player 1
         dgs.getTurnOrder().setStartingPlayer(1);
@@ -80,6 +81,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Choose random hero from that archetype
             List<Hero> heroes = _data.findHeroes(archetype);
             Hero figure = heroes.get(rnd.nextInt(heroes.size())).copyNewID();
+            figure.getNActionsExecuted().setMaximum(nActionsPerFigure);
 
             if (dgs.getNPlayers() == 2) {
                 // In 2-player games, 1 player controls overlord, the other 2 heroes
@@ -122,7 +124,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // Overlord chooses monster groups // TODO, for now randomly selected
         // Create and place monsters
-        createMonsters(dgs, firstQuest, _data, rnd);
+        createMonsters(dgs, firstQuest, _data, rnd, nActionsPerFigure);
 
         // Set up tokens
         Random r = new Random(dgs.getGameParameters().getRandomSeed());
@@ -195,9 +197,8 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         DescentGameState dgs = (DescentGameState) currentState;
         Figure actingFigure = dgs.getActingFigure();
-        actingFigure.setNActionsExecuted(actingFigure.getNActionsExecuted()+1);
-        int nActionsPerPlayer = ((DescentParameters)dgs.getGameParameters()).nActionsPerPlayer;
-        if (actingFigure.getNActionsExecuted() == nActionsPerPlayer) {
+//        actingFigure.getNActionsExecuted().increment();
+        if (actingFigure.getNActionsExecuted().isMaximum()) {
             dgs.getTurnOrder().endPlayerTurn(dgs);
         }
 
@@ -253,7 +254,6 @@ public class DescentForwardModel extends AbstractForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         DescentGameState dgs = (DescentGameState)gameState;
         int currentPlayer = gameState.getCurrentPlayer();
-        int nActions = ((DescentParameters) dgs.getGameParameters()).nActionsPerPlayer;
 
         // Init action list
         ArrayList<AbstractAction> actions = new ArrayList<>();
@@ -273,7 +273,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // Can we do a move action? Can't if already done max actions & not currently executing a move, or immobilized
             boolean canMove = !actingFigure.hasCondition(DescentCondition.Immobilize) &&
-                    (actingFigure.getNActionsExecuted() != nActions || actingFigure.getAttribute(Figure.Attribute.MovePoints).getValue() > 0);
+                    (!actingFigure.getNActionsExecuted().isMaximum() || actingFigure.getAttribute(Figure.Attribute.MovePoints).getValue() > 0);
             if (canMove) {
                 // Is this a new move action? It is if player can move, but all move points spent in first move action
                 if (actingFigure.getAttribute(Figure.Attribute.MovePoints).getValue() == 0) {
@@ -1021,7 +1021,7 @@ public class DescentForwardModel extends AbstractForwardModel {
      * @param _data - all game data
      * @param rnd - random generator
      */
-    private void createMonsters(DescentGameState dgs, Quest quest, DescentGameData _data, Random rnd) {
+    private void createMonsters(DescentGameState dgs, Quest quest, DescentGameData _data, Random rnd, int nActionsPerFigure) {
         dgs.monsters = new ArrayList<>();
         List<String[]> monsters = quest.getMonsters();
         for (String[] mDef: monsters) {
@@ -1058,6 +1058,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // Always 1 master
             Monster master = monsterDef.get(act + "-master").copyNewID();
+            master.getNActionsExecuted().setMaximum(nActionsPerFigure);
             master.setProperties(monsterDef.get(act + "-master").getProperties());
             master.setComponentName(name + " master");
             if (attributeModifiers.containsKey("master")) {
@@ -1096,6 +1097,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                 minion.setComponentName(name + " minion");
                 placeMonster(dgs, minion, new ArrayList<>(tileCoords), rnd, superDef);
                 minion.setOwnerId(dgs.overlordPlayer);
+                minion.getNActionsExecuted().setMaximum(nActionsPerFigure);
                 monsterGroup.add(minion);
                 if (attributeModifiers.containsKey("minion")) {
                     for (Pair<Figure.Attribute, Integer> modifier : attributeModifiers.get("minion")) {
@@ -1108,7 +1110,6 @@ public class DescentForwardModel extends AbstractForwardModel {
                     }
                 }
             }
-
 
             dgs.monsters.add(monsterGroup);
         }
