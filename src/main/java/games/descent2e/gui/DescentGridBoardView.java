@@ -46,7 +46,7 @@ public class DescentGridBoardView extends ComponentView {
     int itemSize;
 
     int panX, panY;
-    double scale = 1.;
+    double scale = 1;
     Set<Vector2D> highlights;
     int maxHighlights = 3;
 
@@ -54,6 +54,12 @@ public class DescentGridBoardView extends ComponentView {
         super(gridBoard, (gridBoard.getWidth()+1) * defaultItemSize, (gridBoard.getHeight()+1) * defaultItemSize);
         this.gameState = gameState;
         updateScale(scale);
+
+        // Focus on hero characters
+        Hero hero = gameState.getHeroes().get(0);
+        Vector2D pos = hero.getPosition();
+        panX = pos.getX() * itemSize / 2;
+        panY = -pos.getY() * itemSize / 2 - itemSize * 3;
 
         highlights = new HashSet<>();
         addMouseWheelListener(e -> {

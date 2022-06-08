@@ -20,8 +20,8 @@ import java.util.List;
 public class DescentGUI extends AbstractGUIManager {
     DescentGridBoardView view;
     int width, height;
-    int maxWidth = 800;
-    int maxHeight = 600;
+    int maxWidth = 1500;
+    int maxHeight = 750;
     JLabel actingFigureLabel;
 
     public DescentGUI(GamePanel panel, AbstractGameState gameState, ActionController ac) {
@@ -49,6 +49,7 @@ public class DescentGUI extends AbstractGUIManager {
         panel.add(view, BorderLayout.CENTER);
         panel.add(north, BorderLayout.NORTH);
         panel.add(actionPanel, BorderLayout.SOUTH);
+        panel.setPreferredSize(new Dimension(maxWidth, maxHeight));
     }
 
     private void onMouseEnter(ActionButton ab) {
