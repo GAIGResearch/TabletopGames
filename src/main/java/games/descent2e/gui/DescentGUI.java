@@ -2,16 +2,20 @@ package games.descent2e.gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTurnOrder;
+import games.descent2e.actions.Move;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Collection;
+import java.util.List;
 
 public class DescentGUI extends AbstractGUIManager {
     DescentGridBoardView view;
@@ -31,7 +35,8 @@ public class DescentGUI extends AbstractGUIManager {
         actingFigureLabel = new JLabel();
 
         JPanel infoPanel = createGameStateInfoPanel("Descent2e", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight);
+        JComponent actionPanel = createActionPanel(new Collection[]{view.highlights}, width, defaultActionPanelHeight,
+                this::onMouseEnter, this::onMouseExit);
 
         JPanel north = new JPanel();
         north.setLayout(new BoxLayout(north, BoxLayout.Y_AXIS));
@@ -44,6 +49,16 @@ public class DescentGUI extends AbstractGUIManager {
         panel.add(view, BorderLayout.CENTER);
         panel.add(north, BorderLayout.NORTH);
         panel.add(actionPanel, BorderLayout.SOUTH);
+    }
+
+    private void onMouseEnter(ActionButton ab) {
+        view.highlights.clear();
+        if (ab.getButtonAction() instanceof Move) {
+            view.highlights.addAll(((Move) ab.getButtonAction()).getPositionsTraveled());
+        }
+    }
+    private void onMouseExit(ActionButton ab) {
+        view.highlights.clear();
     }
 
     protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
@@ -83,6 +98,21 @@ public class DescentGUI extends AbstractGUIManager {
             actingFigureLabel.setText("Acting monster: " + dgs.getActingFigure().getComponentName());
         } else {
             actingFigureLabel.setText("Acting hero: " + dgs.getActingFigure().getComponentName() + "(" +dto.getHeroFigureActingNext() + ")");
+        }
+    }
+
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && !(actionButtons == null)) {
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+            for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
+                actionButtons[i].setVisible(true);
+                actionButtons[i].setButtonAction(actions.get(i), gameState);
+                actionButtons[i].setBackground(Color.white);
+            }
+            for (int i = actions.size(); i < actionButtons.length; i++) {
+                actionButtons[i].setVisible(false);
+                actionButtons[i].setButtonAction(null, "");
+            }
         }
     }
 

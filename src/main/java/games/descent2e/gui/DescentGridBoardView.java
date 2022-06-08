@@ -10,7 +10,6 @@ import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
-import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import gui.views.ComponentView;
 import utilities.ImageIO;
@@ -20,8 +19,6 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
@@ -50,7 +47,7 @@ public class DescentGridBoardView extends ComponentView {
 
     int panX, panY;
     double scale = 1.;
-    HashMap<String, Rectangle> highlights;
+    Set<Vector2D> highlights;
     int maxHighlights = 3;
 
     public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState) {
@@ -58,7 +55,7 @@ public class DescentGridBoardView extends ComponentView {
         this.gameState = gameState;
         updateScale(scale);
 
-        highlights = new HashMap<>();
+        highlights = new HashSet<>();
         addMouseWheelListener(e -> {
             double amount = 0.2 * Math.abs(e.getPreciseWheelRotation());
             if (e.getPreciseWheelRotation() > 0) {
@@ -169,6 +166,17 @@ public class DescentGridBoardView extends ComponentView {
                 BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
                 g.drawImage(imgToDraw, panX + loc.getX() * itemSize, panY + loc.getY() * itemSize,null);
             }
+        }
+
+        // Draw highlights
+        g.setColor(new Color(207, 75, 220));
+        for (Vector2D pos: highlights) {
+
+            int xC = panX + pos.getX() * itemSize;
+            int yC = panY + pos.getY() * itemSize;
+
+            // Paint cell background
+            g.fillRect(xC+itemSize/4, yC+itemSize/4, itemSize/2, itemSize/2);
         }
     }
 

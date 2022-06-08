@@ -12,29 +12,38 @@ import utilities.Pair;
 import utilities.Utils;
 import utilities.Vector2D;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class Move extends AbstractAction {
-    final Vector2D position;
+    final List<Vector2D> positionsTraveled;
     final int orientation;
 
-    public Move(Vector2D whereTo, int orientation) {
-        this.position = whereTo;
-        this.orientation = orientation;
-    }
-    public Move(Vector2D whereTo) {
-        this.position = whereTo;
+    public Move(List<Vector2D> whereTo) {
+        this.positionsTraveled = whereTo;
         this.orientation = 0;
+    }
+    public Move(List<Vector2D> whereTo, int finalOrientation) {
+        this.positionsTraveled = whereTo;
+        this.orientation = finalOrientation;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DescentGameState dgs = (DescentGameState) gs;
-
         Figure f = ((DescentGameState) gs).getActingFigure();
 
+        // Go through all positions traveled as part of this movement, applying all costs and penalties
+        for (Vector2D pos: positionsTraveled) {
+            moveTo(dgs, f, pos.copy());
+        }
+
+        return true;
+    }
+
+    private void moveTo(DescentGameState dgs, Figure f, Vector2D position) {
         // Update location and orientation
         Vector2D oldLocation = f.getPosition().copy();
         f.setPosition(position.copy());
@@ -91,20 +100,15 @@ public class Move extends AbstractAction {
                 f.incrementAttribute(e.getKey(), -e.getValue());
             }
         }
-        // Check if move action finished
-        if (f.getAttribute(Figure.Attribute.MovePoints).isMinimum()) f.getNActionsExecuted().increment();
-
-        // TODO Any figure that ends its turn in a lava/hazard space is immediately defeated.
-        //  Heroes that are defeated in this way place their hero token in the nearest empty space
-        //  (from where they were defeated) that does not contain lava/hazard. A large monster is immediately defeated
-        //  only if all spaces it occupies are lava spaces.
-
-        return true;
     }
 
     @Override
     public AbstractAction copy() {
-        return new Move(position.copy(), orientation);
+        List<Vector2D> posTraveledCopy = new ArrayList<>();
+        for (Vector2D pos: positionsTraveled) {
+            posTraveledCopy.add(pos.copy());
+        }
+        return new Move(posTraveledCopy, orientation);
     }
 
     @Override
@@ -112,16 +116,24 @@ public class Move extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof Move)) return false;
         Move move = (Move) o;
-        return orientation == move.orientation && Objects.equals(position, move.position);
+        return orientation == move.orientation && Objects.equals(positionsTraveled, move.positionsTraveled);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(position, orientation);
+        return Objects.hash(positionsTraveled, orientation);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Move to " + position.toString();
+        return "Move to " + positionsTraveled.toString();
+    }
+
+    public List<Vector2D> getPositionsTraveled() {
+        return positionsTraveled;
+    }
+
+    public int getOrientation() {
+        return orientation;
     }
 }

@@ -3,6 +3,7 @@ package gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import games.descent2e.actions.Move;
 import players.human.ActionController;
 import utilities.Utils;
 
@@ -98,18 +99,27 @@ public abstract class AbstractGUIManager {
      * @return - JComponent containing all action buttons.
      */
     protected JComponent createActionPanel(Collection[] highlights, int width, int height) {
-        return createActionPanel(highlights, width, height, true, null);
+        return createActionPanel(highlights, width, height, true, null, null, null);
     }
 
     protected JComponent createActionPanel(Collection[] highlights, int width, int height, Consumer<ActionButton> onActionSelected) {
-        return createActionPanel(highlights, width, height, true, onActionSelected);
+        return createActionPanel(highlights, width, height, true, onActionSelected, null, null);
+    }
+
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height,
+                                           Consumer<ActionButton> onMouseEnter,
+                                           Consumer<ActionButton> onMouseExit) {
+        return createActionPanel(highlights, width, height, true, null, onMouseEnter, onMouseExit);
     }
 
     protected JComponent createActionPanel (Collection[]highlights,int width, int height, boolean boxLayout){
-        return createActionPanel(highlights, width, height, boxLayout, null);
+        return createActionPanel(highlights, width, height, boxLayout, null, null, null);
     }
 
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout, Consumer<ActionButton> onActionSelected) {
+    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout,
+                                           Consumer<ActionButton> onActionSelected,
+                                           Consumer<ActionButton> onMouseEnter,
+                                           Consumer<ActionButton> onMouseExit) {
         JPanel actionPanel = new JPanel();
         if (boxLayout) {
             actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
@@ -117,7 +127,7 @@ public abstract class AbstractGUIManager {
 
         actionButtons = new ActionButton[maxActionSpace];
         for (int i = 0; i < maxActionSpace; i++) {
-            ActionButton ab = new ActionButton(ac, highlights, onActionSelected);
+            ActionButton ab = new ActionButton(ac, highlights, onActionSelected, onMouseEnter, onMouseExit);
             actionButtons[i] = ab;
             actionButtons[i].setVisible(false);
             actionPanel.add(actionButtons[i]);
@@ -244,10 +254,13 @@ public abstract class AbstractGUIManager {
         ActionButton[] actionButtons;
 
         public ActionButton(ActionController ac, Collection[] highlights) {
-            this(ac, highlights, null);
+            this(ac, highlights, null, null, null);
         }
 
-        public ActionButton(ActionController ac, Collection[] highlights, Consumer<ActionButton> onActionSelected) {
+        public ActionButton(ActionController ac, Collection[] highlights,
+                            Consumer<ActionButton> onActionSelected,
+                            Consumer<ActionButton> onMouseEnter,
+                            Consumer<ActionButton> onMouseExit) {
             addActionListener(e -> {
                 ac.addAction(action);
                 if (highlights != null) {
@@ -258,6 +271,14 @@ public abstract class AbstractGUIManager {
                 resetActionButtons();
                 if (onActionSelected!= null)
                     onActionSelected.accept(this);
+            });
+            addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    onMouseEnter.accept(ActionButton.this);
+                }
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    onMouseExit.accept(ActionButton.this);
+                }
             });
         }
 
@@ -270,6 +291,10 @@ public abstract class AbstractGUIManager {
         public void setButtonAction(AbstractAction action, String actionText) {
             this.action = action;
             setText(actionText);
+        }
+
+        public AbstractAction getButtonAction() {
+            return action;
         }
 
         public void informAllActionButtons(ActionButton[] actionButtons) {

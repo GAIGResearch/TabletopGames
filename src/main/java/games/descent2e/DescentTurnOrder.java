@@ -65,6 +65,13 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         DescentGameState dgs = (DescentGameState) gameState;
         int nFigures = dgs.getMonsters().stream().mapToInt(List::size).sum() + nPlayers-1;
 
+        // TODO Any figure that ends its turn in a lava/hazard space is immediately defeated.
+        //  Heroes that are defeated in this way place their hero token in the nearest empty space
+        //  (from where they were defeated) that does not contain lava/hazard. A large monster is immediately defeated
+        //  only if all spaces it occupies are lava spaces.
+
+        // TODO end-of-turn abilities
+
         turnCounter++;
         if (turnCounter >= nFigures) endRound(gameState);
         else {
