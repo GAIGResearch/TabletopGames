@@ -460,9 +460,6 @@ public class DescentForwardModel extends AbstractForwardModel {
 
     private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
 
-        //TODO: This setAttribute should be called at the begining of turn, not here
-        f.setAttribute(Figure.Attribute.MovePoints, f.getAttributeMax(Figure.Attribute.MovePoints));
-
         Map<BoardNode, Double> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
         ArrayList<Vector2D> allPointOfInterests = getAllPointOfInterests(dgs, f);
 

@@ -20,13 +20,15 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
 import static core.CoreConstants.*;
 import static gui.AbstractGUIManager.defaultItemSize;
-import static utilities.Utils.getNeighbourhood;
-import static utilities.Utils.stringToColor;
+import static utilities.Utils.*;
 
 public class DescentGridBoardView extends ComponentView {
 
@@ -152,10 +154,10 @@ public class DescentGridBoardView extends ComponentView {
                 if (loc == null) continue;
                 int orientation = m.getOrientation();
 
-                Pair<Integer, Integer> size = m.getSize();
-                if (orientation % 2 == 1) {
-                    size.swap();
-                }
+                // Get the size of the monster, and scale according to item size
+                Pair<Integer, Integer> size = m.getSize().copy();
+                size.a *= itemSize;
+                size.b *= itemSize;
 
                 String imagePath = dataPath;
                 if (((PropertyColor) m.getProperty(colorHash)).valueStr.equals("red")) {
@@ -163,13 +165,12 @@ public class DescentGridBoardView extends ComponentView {
                 } else {
                     imagePath += path;
                 }
-                Image img = ImageIO.GetInstance().getImage(imagePath);
-                g.drawImage(img, panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, size.a * itemSize, size.b * itemSize, null);
+                Image imgRaw = ImageIO.GetInstance().getImage(imagePath);
+                BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
+                g.drawImage(imgToDraw, panX + loc.getX() * itemSize, panY + loc.getY() * itemSize,null);
             }
         }
-
     }
-
 
     public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
                                                           Map<String, Map<Vector2D,Vector2D>> gridReferences,

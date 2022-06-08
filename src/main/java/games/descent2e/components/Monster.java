@@ -1,15 +1,15 @@
 package games.descent2e.components;
 
-import core.properties.Property;
-import core.properties.PropertyStringArray;
-
-import java.util.Map;
-
-import static games.descent2e.DescentConstants.*;
-
 public class Monster extends Figure {
 
-    int orientation;  // medium monsters might be vertical (0) or horizontal (1)
+    /*
+     Medium monsters might be rotated clockwise by:
+      0 degrees (orientation=0)
+      90 degrees (orientation=1): width <-> height
+      180 degrees (orientation=2)
+      270 degrees (orientation=3): width <-> height
+     */
+    int orientation=0;
 
     public Monster() {
         super("Monster");
