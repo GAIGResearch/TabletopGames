@@ -10,10 +10,9 @@ public enum Surge {
     PIERCE_2(1, (a, s) -> a.addPierce(2)),
     STUN(1, (a, s) -> a.setStunning(true)), // TODO: This doesn't yet have any actual effect
     RUNIC_KNOWLEDGE(1, (a, s) -> {
-        int health = s.getActingFigure().getAttribute(Figure.Attribute.Health).getValue();
         int fatigue = s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).getValue();
-        s.getActingFigure().setAttribute(Figure.Attribute.Health, health + 2);
         s.getActingFigure().setAttribute(Figure.Attribute.Fatigue, fatigue + 1);
+        a.addDamage(2);
     });
 
     private final BiConsumer<MeleeAttack, DescentGameState> lambda;
@@ -28,6 +27,7 @@ public enum Surge {
         if (surgesUsed > attack.surgesToSpend) {
             throw new AssertionError(String.format("%s: Requires %d surges and we only have %d to spend.", toString(), surgesUsed, attack.surgesToSpend));
         }
+        // TODO: Record which Surges have been used to avoid re-use!
         attack.surgesToSpend -= surgesUsed;
         lambda.accept(attack, state);
     }

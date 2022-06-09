@@ -19,6 +19,7 @@ public class RangedAttack extends MeleeAttack {
             return true; // due to no damage done
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
+        // TODO: Chebyshev distance is not actually right, as it does not allow diagonal moves
         double distance = Distance.chebyshev_distance(attacker.getPosition(), defender.getPosition());
         return (state.getAttackDicePool().getRange() + extraRange < distance);
     }

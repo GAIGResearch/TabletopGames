@@ -54,7 +54,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     AttackPhase phase = NOT_STARTED;
     int interruptPlayer;
     int surgesToSpend;
-    int extraRange, pierce;
+    int extraRange, pierce, extraDamage;
     boolean isStunning; // TODO: This doesn't actually stun the target (making them lose their next go) yet
 
     public MeleeAttack(int attackingFigure, int defendingFigure) {
@@ -201,6 +201,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         retValue.interruptPlayer = interruptPlayer;
         retValue.surgesToSpend = surgesToSpend;
         retValue.extraRange = extraRange;
+        retValue.extraDamage = extraDamage;
         retValue.pierce = pierce;
         retValue.isStunning = isStunning;
         return retValue;
@@ -211,7 +212,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         if (obj instanceof MeleeAttack) {
             MeleeAttack other = (MeleeAttack) obj;
             return other.attackingFigure == attackingFigure &&
-                    other.surgesToSpend == surgesToSpend &&
+                    other.surgesToSpend == surgesToSpend && other.extraDamage == extraRange &&
                     other.isStunning == isStunning && other.extraRange == extraRange && other.pierce == pierce &&
                     other.attackingPlayer == attackingPlayer && other.defendingFigure == defendingFigure &&
                     other.defendingPlayer == defendingPlayer && other.phase == phase && other.interruptPlayer == interruptPlayer;
@@ -222,7 +223,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash(attackingFigure, attackingPlayer, defendingFigure,
-                pierce, extraRange, isStunning,
+                pierce, extraRange, isStunning, extraDamage,
                 defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend);
     }
 
@@ -269,6 +270,9 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     }
     public void setStunning(boolean stun) {
         isStunning = stun;
+    }
+    public void addDamage(int damageBonus) {
+        extraDamage += damageBonus;
     }
 
 }
