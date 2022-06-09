@@ -10,12 +10,14 @@ import core.components.*;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
+import games.descent2e.actions.DescentAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.actions.Triggers;
 import utilities.Vector2D;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DescentGameState extends AbstractGameState implements IPrintable {
 
@@ -204,6 +206,13 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return searchCards;
     }
 
+    /*
+    This method is fine when we are circulating through each hero and monster in turn for taking their actions
+    It will not necessarily suffice when we have interrupt actions. Consider the situation in which one player has two
+    heroes, and one of the heroes has an ability that allows a monster move to be interrupted.
+    In this case the Action (interrupt Move ability) should encapsulate within it the Figure that is
+    executing the action (if this is at all relevant).
+     */
     public Figure getActingFigure() {
         // Find current monster group + monster playing
         int monsterGroupIdx = ((DescentTurnOrder) getTurnOrder()).monsterGroupActingNext;
@@ -225,17 +234,28 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return getActingFigure().getOwnerId();
     }
 
-    public boolean playerHasAvailableInterrupt(int player, Triggers trigger) {
-        // TODO: implement with look through Abilities/Items/Actions which fit
-        return false;
-    }
-
     public List<AbstractAction> getInterruptActionsFor(int player, Triggers trigger) {
-        List<AbstractAction> retValue = new ArrayList<>();
-        // TODO: Run through the inventory or items/cards/abilities to see which have
-        // an action that can be used at this trigger
-        retValue.add(new DoNothing());
-        return retValue;
+        List<AbstractAction> retValue;
+        if (player == overlordPlayer) {
+            // we run through monsters
+            retValue = monsters.stream().flatMap(List::stream)
+                    .flatMap(m -> m.getAbilities().stream())
+                    .collect(Collectors.toList());
+        } else {
+            // else we just look at heroes that belong to this player
+            retValue = heroes.stream().filter(h -> h.getOwnerId() == player)
+                    .flatMap(h -> h.getAbilities().stream())
+                    .collect(Collectors.toList());
+        }
+
+
+        if (retValue.isEmpty()) {
+            return retValue;
+        } else {
+            // always add a DoNothing option is we have any options at all
+            retValue.add(new DoNothing());
+            return retValue;
+        }
     }
 
     public int[][] getTileReferences() {

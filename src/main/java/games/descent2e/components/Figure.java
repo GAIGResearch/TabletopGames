@@ -49,7 +49,7 @@ public class Figure extends Token {
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
-    ArrayList<DescentAction> abilities;  // TODO track exhausted etc.
+    List<DescentAction> abilities;  // TODO track exhausted etc.
 
     public Figure(String name) {
         super(name);
@@ -154,7 +154,7 @@ public class Figure extends Token {
     public void removeAbility(DescentAction ability) {
         this.abilities.remove(ability);
     }
-    public ArrayList<DescentAction> getAbilities() {
+    public List<DescentAction> getAbilities() {
         return abilities;
     }
 

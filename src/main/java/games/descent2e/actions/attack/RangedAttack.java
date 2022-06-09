@@ -6,6 +6,7 @@ import utilities.Distance;
 
 /**
  *   This works in exactly the same way as a Melee Attack
+ *   Except that there is a different definition of 'missed' that takes into account the range rolled on the dice
  */
 public class RangedAttack extends MeleeAttack {
     public RangedAttack(int attackingFigure, int defendingFigure) {

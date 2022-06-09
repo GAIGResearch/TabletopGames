@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Component;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
+import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.*;
 
@@ -123,7 +124,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                 // always fine
         }
         // second we see if they can interrupt (i.e. have a relevant card/ability)
-        return state.playerHasAvailableInterrupt(interruptPlayer, phase.interrupt);
+        return !state.getInterruptActionsFor(interruptPlayer, phase.interrupt).isEmpty();
     }
 
     private void executePhase(DescentGameState state) {
@@ -147,9 +148,10 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
             case PRE_DEFENCE_ROLL:
                 if (attackMissed(state)) // no damage done, so can skip the defence roll
                     phase = ALL_DONE;
-                else
+                else {
                     defenceRoll(state);
-                phase = POST_DEFENCE_ROLL;
+                    phase = POST_DEFENCE_ROLL;
+                }
                 break;
             case POST_DEFENCE_ROLL:
                 damageRoll(state);
