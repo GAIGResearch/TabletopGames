@@ -248,7 +248,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                     .collect(Collectors.toList());
         }
         List<AbstractAction> retValue = descentActions.stream()
-                .filter(a -> a.canExecute(this))
+                .filter(a -> a.canExecute(trigger, this))
                 .map(a -> (AbstractAction) a).collect(Collectors.toList());
 
         if (retValue.isEmpty()) {
