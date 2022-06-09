@@ -27,7 +27,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         NOT_STARTED,
         PRE_ATTACK_ROLL(START_ATTACK, DEFENDER),
         POST_ATTACK_ROLL(ROLL_OWN_DICE, ATTACKER),
-        SURGE_DECISIONS,
+        SURGE_DECISIONS(SURGE_DECISION, ATTACKER),
         PRE_DEFENCE_ROLL,
         POST_DEFENCE_ROLL(ROLL_OWN_DICE, DEFENDER),
         POST_DAMAGE(ROLL_OWN_DICE, DEFENDER),
@@ -53,6 +53,9 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     int defendingPlayer;
     AttackPhase phase = NOT_STARTED;
     int interruptPlayer;
+    int surgesToSpend;
+    int extraRange, pierce;
+    boolean isStunning;
 
     public MeleeAttack(int attackingFigure, int defendingFigure) {
         this.attackingFigure = attackingFigure;
@@ -139,7 +142,9 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                 break;
             case POST_ATTACK_ROLL:
                 // Any rerolls are executed via interrupts
-                phase = SURGE_DECISIONS;
+                // once done we see how many surges we have to spend
+                surgesToSpend = state.getAttackDicePool().getSurge();
+                phase = surgesToSpend > 0 ? SURGE_DECISIONS : PRE_DEFENCE_ROLL;
                 break;
             case SURGE_DECISIONS:
                 // any surge decisions are executed via interrupts
@@ -193,6 +198,10 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         retValue.defendingPlayer = defendingPlayer;
         retValue.phase = phase;
         retValue.interruptPlayer = interruptPlayer;
+        retValue.surgesToSpend = surgesToSpend;
+        retValue.extraRange = extraRange;
+        retValue.pierce = pierce;
+        retValue.isStunning = isStunning;
         return retValue;
     }
 
@@ -201,6 +210,8 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         if (obj instanceof MeleeAttack) {
             MeleeAttack other = (MeleeAttack) obj;
             return other.attackingFigure == attackingFigure &&
+                    other.surgesToSpend == surgesToSpend &&
+                    other.isStunning == isStunning && other.extraRange == extraRange && other.pierce == pierce &&
                     other.attackingPlayer == attackingPlayer && other.defendingFigure == defendingFigure &&
                     other.defendingPlayer == defendingPlayer && other.phase == phase && other.interruptPlayer == interruptPlayer;
         }
@@ -209,7 +220,9 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
     @Override
     public int hashCode() {
-        return Objects.hash(attackingFigure, attackingPlayer, defendingFigure, defendingPlayer, phase.ordinal(), interruptPlayer);
+        return Objects.hash(attackingFigure, attackingPlayer, defendingFigure,
+                pierce, extraRange, isStunning,
+                defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend);
     }
 
     @Override
@@ -245,6 +258,16 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean executionComplete(AbstractGameState state) {
         return phase == ALL_DONE;
+    }
+
+    public void addRange(int rangeBonus) {
+        extraRange += rangeBonus;
+    }
+    public void addPierce(int pierceBonus) {
+        pierce += pierceBonus;
+    }
+    public void setStunning(boolean stun) {
+        isStunning = stun;
     }
 
 }

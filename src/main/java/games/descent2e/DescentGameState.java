@@ -247,6 +247,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                     .flatMap(h -> h.getAbilities().stream())
                     .collect(Collectors.toList());
         }
+        // Then filter to just the ones applicable to this Trigger point that are executable
         List<AbstractAction> retValue = descentActions.stream()
                 .filter(a -> a.canExecute(trigger, this))
                 .map(a -> (AbstractAction) a).collect(Collectors.toList());

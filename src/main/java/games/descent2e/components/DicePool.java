@@ -74,13 +74,10 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     public int getSurge() {
         return dice.stream().mapToInt(DescentDice::getSurge).sum();
     }
-    public int getRange() {
-        return dice.stream().mapToInt(DescentDice::getRange).sum();
-    }
+    public int getRange() {return dice.stream().mapToInt(DescentDice::getRange).sum();}
     public boolean hasRolled() {
         return rolled;
     }
-
 
     @Override
     public DicePool copy() {
