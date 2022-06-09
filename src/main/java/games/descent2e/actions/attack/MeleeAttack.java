@@ -55,7 +55,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     int interruptPlayer;
     int surgesToSpend;
     int extraRange, pierce;
-    boolean isStunning;
+    boolean isStunning; // TODO: This doesn't actually stun the target (making them lose their next go) yet
 
     public MeleeAttack(int attackingFigure, int defendingFigure) {
         this.attackingFigure = attackingFigure;
