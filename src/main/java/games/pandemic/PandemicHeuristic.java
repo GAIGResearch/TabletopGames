@@ -46,10 +46,9 @@ public class PandemicHeuristic extends TunableParameters implements IStateHeuris
     public double evaluateState(AbstractGameState gs, int playerId) {
         PandemicGameState pgs = (PandemicGameState) gs;
         PandemicParameters pp = (PandemicParameters) gs.getGameParameters();
-        Utils.GameResult gameStatus = gs.getGameStatus();
 
         if (!pgs.isNotTerminal()) {
-            return pgs.getGameStatus().value * 10;
+            return gs.getGameStatus().value * 10;
         }
 
         // Compute a score
@@ -70,9 +69,9 @@ public class PandemicHeuristic extends TunableParameters implements IStateHeuris
         double nCuresDiscovered = 0;
         double nDiseaseCubes = 0;
 
-        for (int i = 0; i < colors.length; i++) {
-            nDiseaseCubes += ((Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + colors[i]))).getValue();
-            if (((Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + colors[i]))).getValue() > 0)
+        for (String color : colors) {
+            nDiseaseCubes += ((Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + color))).getValue();
+            if (((Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + color))).getValue() > 0)
                 nCuresDiscovered += 1;
         }
 
