@@ -173,9 +173,9 @@ public class DescentTypes {
 
     public enum Archetype {
         Mage(Color.orange),
-        Healer(Color.blue);
-//        Scout(Color.green),
-//        Warrior(Color.red);
+        Healer(Color.blue),
+        Scout(Color.green),
+        Warrior(Color.red);
 
         Color color;
         Archetype(Color color) {
@@ -206,7 +206,7 @@ public class DescentTypes {
 //        Prophet (Archetype.Healer),
 //        SoulReaper (Archetype.Healer),
 //        Watchman (Archetype.Healer),
-//        Berserker (Archetype.Warrior),
+        Berserker (Archetype.Warrior),
 //        Knight (Archetype.Warrior),
 //        Avenger (Archetype.Warrior),
 //        Beastmaster (Archetype.Warrior),
@@ -215,7 +215,7 @@ public class DescentTypes {
 //        Raider (Archetype.Warrior),
 //        Skirmisher (Archetype.Warrior),
 //        Steelcaster (Archetype.Warrior),
-//        Thief (Archetype.Scout),
+        Thief (Archetype.Scout),
 //        Wildlander (Archetype.Scout),
 //        BountyHunter (Archetype.Scout),
 //        Monk (Archetype.Scout),
