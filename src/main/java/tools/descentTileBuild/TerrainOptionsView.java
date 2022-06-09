@@ -40,12 +40,14 @@ public class TerrainOptionsView extends JComponent {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                for (Map.Entry<String, Rectangle> t: terrainLocations.entrySet()) {
-                    if (t.getValue().contains(e.getPoint())) {
-                        highlight = new Pair<>(t.getKey(), t.getValue());
-                        break;
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    for (Map.Entry<String, Rectangle> t : terrainLocations.entrySet()) {
+                        if (t.getValue().contains(e.getPoint())) {
+                            highlight = new Pair<>(t.getKey(), t.getValue());
+                            break;
+                        }
                     }
-                }
+                } else highlight = null;
             }
         });
     }

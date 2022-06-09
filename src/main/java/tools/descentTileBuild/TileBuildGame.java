@@ -8,6 +8,8 @@ import gui.GUI;
 import gui.GamePanel;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
+import utilities.Path;
+import utilities.Pathfinder;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -17,10 +19,21 @@ public class TileBuildGame {
         TileBuildParameters tbp = new TileBuildParameters(0);
         ActionController ac = new ActionController();
 
+        TileBuildState tbs = new TileBuildState(tbp, 1);
         Game game = new Game(null, new ArrayList<AbstractPlayer>(){{
             add(new HumanGUIPlayer(ac));
 //            add(new RandomPlayer());
-        }}, new TileBuildFM(), new TileBuildState(tbp, 1));
+        }}, new TileBuildFM(), tbs);
+
+
+        //dgs.addAllComponents();
+        Pathfinder pf = new Pathfinder(tbs.tile);
+        int orig = tbs.tile.getElement(1,1).getComponentID();
+        int dest = tbs.tile.getElement(3,3).getComponentID();
+        Path p = pf.getPath(tbs, orig, dest);
+
+        //System.out.println(p.toString());
+        int a = 0;
 
 
         GUI frame = new GUI();
