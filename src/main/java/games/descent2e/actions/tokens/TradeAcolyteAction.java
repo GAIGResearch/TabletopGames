@@ -27,6 +27,7 @@ import static utilities.Utils.getNeighbourhood;
  */
 public class TradeAcolyteAction extends TokenAction implements IExtendedSequence {
     int receivingHeroIdx;
+    boolean complete;
 
     public TradeAcolyteAction() {
         super(-1, Triggers.ACTION_POINT_SPEND);
@@ -86,19 +87,17 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-        if (action instanceof TradeAcolyteAction) {
-            this.receivingHeroIdx = ((TradeAcolyteAction) action).receivingHeroIdx;
-        } else this.receivingHeroIdx = state.getComponentById(tokenID).getOwnerId();  // did nothing, ownership not changing
+        complete = true;
     }
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return receivingHeroIdx != -1;
+        return complete;
     }
 
     @Override
     public TradeAcolyteAction copy() {
-        return new TradeAcolyteAction(tokenID, receivingHeroIdx);
+        return new TradeAcolyteAction(tokenID);
     }
 
     @Override
@@ -131,18 +130,17 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TradeAcolyteAction)) return false;
-        TradeAcolyteAction that = (TradeAcolyteAction) o;
-        return receivingHeroIdx == that.receivingHeroIdx;
+        return super.equals(o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), receivingHeroIdx);
+        return Objects.hash(super.hashCode());
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Give acolyte to " + receivingHeroIdx;
+        return receivingHeroIdx != -1? "Give acolyte to " + receivingHeroIdx : "Trade acolyte";
     }
 
     @Override

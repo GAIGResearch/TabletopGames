@@ -35,7 +35,22 @@ public class Figure extends Token {
         Might,
         Willpower,
         Knowledge,
-        Awareness
+        Awareness;
+        public boolean isSecondary() {
+            switch (this) {
+                case MovePoints:
+                case Health:
+                case XP:
+                case Fatigue:
+                    return false;
+                case Might:
+                case Willpower:
+                case Knowledge:
+                case Awareness:
+                    return true;
+            }
+            return false;
+        }
     }
 
     HashMap<Attribute, Counter> attributes;
@@ -66,7 +81,7 @@ public class Figure extends Token {
     public void resetRound() {
         if (this.attributes.containsKey(MovePoints)) {
             // Overlord doesn't have move points
-            this.attributes.get(MovePoints).setToMax();
+            this.attributes.get(MovePoints).setToMin();
         }
         this.nActionsExecuted.setToMin();
     }

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.List;
 
 import static games.descent2e.components.Figure.Attribute.Health;
 import static games.descent2e.components.Figure.Attribute.MovePoints;
@@ -187,95 +188,59 @@ public class DescentTypes {
     }
 
     public enum HeroClass {
-        Necromancer,
-        Runemaster,
-        Battlemage,
-        Conjurer,
-        Elementalist,
-        Geomancer,
-        Hexer,
-        Lorekeeper,
-        Truthseer,
-        Disciple,
-        Spiritspeaker,
-        Apothecary,
-        Bard,
-        Crusader,
-        Heretic,
-        Prophet,
-        SoulReaper,
-        Watchman,
-        Berserker,
-        Knight,
-        Avenger,
-        Beastmaster,
-        Champion,
-        Marshal,
-        Raider,
-        Skirmisher,
-        Steelcaster,
-        Thief,
-        Wildlander,
-        BountyHunter,
-        Monk,
-        Ravager,
-        ShadowWalker,
-        Stalker,
-        TreasureHunter,
-        Trickster;
+        Runemaster (Archetype.Mage),
+//        Necromancer (Archetype.Mage),
+//        Battlemage (Archetype.Mage),
+//        Conjurer (Archetype.Mage),
+//        Elementalist (Archetype.Mage),
+//        Geomancer (Archetype.Mage),
+//        Hexer (Archetype.Mage),
+//        Lorekeeper (Archetype.Mage),
+//        Truthseer (Archetype.Mage),
+        Disciple (Archetype.Healer),
+//        Spiritspeaker (Archetype.Healer),
+//        Apothecary (Archetype.Healer),
+//        Bard (Archetype.Healer),
+//        Crusader (Archetype.Healer),
+//        Heretic (Archetype.Healer),
+//        Prophet (Archetype.Healer),
+//        SoulReaper (Archetype.Healer),
+//        Watchman (Archetype.Healer),
+//        Berserker (Archetype.Warrior),
+//        Knight (Archetype.Warrior),
+//        Avenger (Archetype.Warrior),
+//        Beastmaster (Archetype.Warrior),
+//        Champion (Archetype.Warrior),
+//        Marshal (Archetype.Warrior),
+//        Raider (Archetype.Warrior),
+//        Skirmisher (Archetype.Warrior),
+//        Steelcaster (Archetype.Warrior),
+//        Thief (Archetype.Scout),
+//        Wildlander (Archetype.Scout),
+//        BountyHunter (Archetype.Scout),
+//        Monk (Archetype.Scout),
+//        Ravager (Archetype.Scout),
+//        ShadowWalker (Archetype.Scout),
+//        Stalker (Archetype.Scout),
+//        TreasureHunter (Archetype.Scout),
+//        Trickster (Archetype.Scout)
+        ;
+
+        Archetype archetype;
+        HeroClass(Archetype archetype) {
+            this.archetype = archetype;
+        }
+
+        public Archetype getArchetype() {
+            return archetype;
+        }
 
         public static HeroClass[] getClassesForArchetype(Archetype archetype) {
-            switch(archetype) {
-                case Mage:
-                    return new HeroClass[] {
-                            Runemaster,
-//                            Necromancer,
-//                            Battlemage,
-//                            Conjurer,
-//                            Elementalist,
-//                            Geomancer,
-//                            Hexer,
-//                            Lorekeeper,
-//                            Truthseer
-                    };
-                case Healer:
-                    return new HeroClass[] {
-                            Disciple,
-//                           Spiritspeaker,
-//                           Apothecary,
-//                           Bard,
-//                           Crusader,
-//                           Heretic,
-//                           Prophet,
-//                           SoulReaper,
-//                           Watchman
-                    };
-//                case Scout:
-//                    return new HeroClass[]{
-////                           Thief,
-////                           Wildlander,
-////                           Bounty Hunter,
-////                           Monk,
-////                           Ravager,
-////                           Shadow Walker,
-////                           Stalker,
-////                           Treasure Hunter,
-////                           Trickster
-//                    };
-//                case Warrior:
-//                    return new HeroClass[]{
-////                           Berserker,
-////                           Knight,
-////                           Avenger,
-////                           Beastmaster,
-////                           Champion,
-////                           Marshal,
-////                           Raider,
-////                           Skirmisher,
-////                           Steelcaster
-//                    };
+            List<HeroClass> heroClassList = new ArrayList<>();
+            for (HeroClass heroClass: values()) {
+                if (heroClass.archetype == archetype) heroClassList.add(heroClass);
             }
-            return null;
+            return heroClassList.toArray(new HeroClass[0]);
         }
     }
 
