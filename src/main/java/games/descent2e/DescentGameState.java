@@ -250,6 +250,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return gridReferences;
     }
 
+    public Map<Integer, GridBoard> getTiles() {
+        return tiles;
+    }
+
     public List<DToken> getTokens() {
         return tokens;
     }

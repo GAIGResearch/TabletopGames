@@ -3,6 +3,7 @@ package games.descent2e.gui;
 import core.components.BoardNode;
 import core.components.GridBoard;
 import core.properties.PropertyColor;
+import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
@@ -48,18 +49,48 @@ public class DescentGridBoardView extends ComponentView {
     int panX, panY;
     double scale = 1;
     Set<Vector2D> highlights;
+    Color highlightColor = new Color(207, 75, 220);
     int maxHighlights = 3;
+
+    HashMap<Vector2D, List<Vector2D>> notConnectedMap;
+    HashMap<Vector2D, Pair<Image, Pair<Integer, Integer>>> tileImageTopLeftCorners;
+
+    String dataPath;
 
     public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState, int width, int height) {
         super(gridBoard, width, height);
         this.gameState = gameState;
+        this.dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
         updateScale(scale);
+        notConnectedMap = new HashMap<>();
 
         // Focus on hero characters
         Hero hero = gameState.getHeroes().get(0);
         Vector2D pos = hero.getPosition();
         panX = pos.getX() * descentItemSize / 2;
         panY = -pos.getY() * descentItemSize / 2 - descentItemSize * 3;
+
+        // Cache the top-left corners of rotated tile images for quick drawing
+        tileImageTopLeftCorners = new HashMap<>();
+        for (String tile: gameState.getGridReferences().keySet()) {
+            int minX = Integer.MAX_VALUE;
+            int minY = Integer.MAX_VALUE;
+            int maxX = 0;
+            int maxY = 0;
+            int compID = -1;
+            for (Vector2D space: gameState.getGridReferences().get(tile).keySet()) {
+                if (space.getX() < minX) minX = space.getX();
+                if (space.getY() < minY) minY = space.getY();
+                if (space.getX() > maxX) maxX = space.getX();
+                if (space.getY() > maxY) maxY = space.getY();
+                compID = gameState.getTileReferences()[space.getY()][space.getX()];
+            }
+            int orientation = ((PropertyInt)gameState.getTiles().get(compID).getProperty(orientationHash)).value;
+            Image img = ImageIO.GetInstance().getImage(dataPath + "tiles/" + tile.split("-")[0] + ".png");
+            Image img2 = rotateImage((BufferedImage) img, new Pair<>(img.getWidth(null), img.getHeight(null)), orientation);
+
+            tileImageTopLeftCorners.put(new Vector2D(minX, minY), new Pair<>(img2, new Pair<>(maxX-minX+1, maxY-minY+1)));
+        }
 
         highlights = new HashSet<>();
         addMouseWheelListener(e -> {
@@ -119,8 +150,20 @@ public class DescentGridBoardView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard) component, panX, panY, gameState.getGridReferences(), gameState.getTileReferences());
-        String dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
+        GridBoard gridBoard = (GridBoard) component;
+        int width = gridBoard.getWidth() * descentItemSize;
+        int height = gridBoard.getHeight() * descentItemSize;
+
+        // Draw background
+        g.setColor(Color.black);
+        g.fillRect(panX, panY, width, height);
+
+//        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard) component, panX, panY, gameState.getGridReferences(), gameState.getTileReferences());
+
+        for (Map.Entry<Vector2D, Pair<Image, Pair<Integer, Integer>>> e: tileImageTopLeftCorners.entrySet()) {
+            g.drawImage(e.getValue().a, panX + e.getKey().getX() * descentItemSize, panY + e.getKey().getY() * descentItemSize,
+                    e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize, null);
+        }
 
         // Draw tokens
         for (DToken dt: gameState.getTokens()) {
@@ -173,28 +216,22 @@ public class DescentGridBoardView extends ComponentView {
         }
 
         // Draw highlights
-        g.setColor(new Color(207, 75, 220));
         for (Vector2D pos: highlights) {
 
             int xC = panX + pos.getX() * descentItemSize;
             int yC = panY + pos.getY() * descentItemSize;
 
             // Paint cell background
+            g.setColor(highlightColor);
             g.fillRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
+            g.setColor(Color.black);
+            g.drawRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
         }
     }
 
     public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
                                                           Map<String, Map<Vector2D,Vector2D>> gridReferences,
                                                           int[][] tileReferences) {
-        int width = gridBoard.getWidth() * descentItemSize;
-        int height = gridBoard.getHeight() * descentItemSize;
-
-        // Draw background
-        g.setColor(Color.lightGray);
-        g.fillRect(x, y, width-1, height-1);
-        g.setColor(Color.black);
-
         // Draw cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
@@ -246,45 +283,53 @@ public class DescentGridBoardView extends ComponentView {
             //TODO: Remove after testing, added for movement debugging - Marko
 //            g.drawString("X:" + x + " Y:" + y, xC + 5, yC + 15);
 
-            // Find connectivity in the graph and draw borders to the cell where connection doesn't exist
-            List<Vector2D> neighbourCells = getNeighbourhood(x, y, gridWidth, gridHeight, false);
-            // Explore all neighbourhood of this cell
-            for (Vector2D n : neighbourCells) {
+            List<Vector2D> notConnectedList = notConnectedMap.get(new Vector2D(xC, yC));
+            if (notConnectedList == null) {
+                notConnectedList = new ArrayList<>();
+                // Find connectivity in the graph and draw borders to the cell where connection doesn't exist
+                List<Vector2D> neighbourCells = getNeighbourhood(x, y, gridWidth, gridHeight, false);
+                // Explore all neighbourhood of this cell
+                for (Vector2D n : neighbourCells) {
 
-                // Check if this node is a connected neighbour
-                boolean connected = false;
-                for (int nnid : bn.getNeighbours().keySet()) {
-                    BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
-                    if (nn == null) continue;
-                    Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
-                    if (location.equals(n)) {
-                        connected = true;
-                        break;
+                    // Check if this node is a connected neighbour
+                    boolean connected = false;
+                    for (int nnid : bn.getNeighbours().keySet()) {
+                        BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
+                        if (nn == null) continue;
+                        Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
+                        if (location.equals(n)) {
+                            connected = true;
+                            break;
+                        }
                     }
+                    if (!connected) notConnectedList.add(n);
                 }
-                if (!connected) {
-                    // Not a connection between these neighbours, drawing a thick black line on the edge to indicate this
-                    if (n.getX() - x == 0) {
-                        // Vertical neighbours, draw horizontal line
-                        if (n.getY() > y) {
-                            // Neighbour is below, separation line is y + cell size
-                            g.drawLine(xC, yC + descentItemSize, xC + descentItemSize, yC + descentItemSize);
-                        } else {
-                            // Neighbour is above, separation line is y
-                            g.drawLine(xC, yC, xC + descentItemSize, yC);
-                        }
-                    } else if (n.getY() - y == 0) {
-                        // Horizontal neighbours, draw vertical line
-                        if (n.getX() > x) {
-                            // Neighbour is to the right, separation line is x + cell size
-                            g.drawLine(xC + descentItemSize, yC, xC + descentItemSize, yC + descentItemSize);
-                        } else {
-                            // Neighbour is to the left, separation line is x
-                            g.drawLine(xC, yC, xC, yC + descentItemSize);
-                        }
+                // Caching the not connected neighbours for faster drawing of thick lines between these
+                notConnectedMap.put(new Vector2D(xC, yC), notConnectedList);
+            }
+            for (Vector2D n: notConnectedList) {
+                // Not a connection between these neighbours, drawing a thick black line on the edge to indicate this
+                if (n.getX() - x == 0) {
+                    // Vertical neighbours, draw horizontal line
+                    if (n.getY() > y) {
+                        // Neighbour is below, separation line is y + cell size
+                        g.drawLine(xC, yC + descentItemSize, xC + descentItemSize, yC + descentItemSize);
+                    } else {
+                        // Neighbour is above, separation line is y
+                        g.drawLine(xC, yC, xC + descentItemSize, yC);
+                    }
+                } else if (n.getY() - y == 0) {
+                    // Horizontal neighbours, draw vertical line
+                    if (n.getX() > x) {
+                        // Neighbour is to the right, separation line is x + cell size
+                        g.drawLine(xC + descentItemSize, yC, xC + descentItemSize, yC + descentItemSize);
+                    } else {
+                        // Neighbour is to the left, separation line is x
+                        g.drawLine(xC, yC, xC, yC + descentItemSize);
                     }
                 }
             }
+
         } else {
             // Bocked terrain can never be occupied, not connected to anything
             if (terrain.equals("block")) {

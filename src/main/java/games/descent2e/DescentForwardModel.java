@@ -515,6 +515,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // 2. Read all necessary tiles, which are all grid boards. Keep in a list.
         dgs.tiles = new HashMap<>();  // Maps from component ID to gridboard object
+        HashMap<Integer, GridBoard> tileConfigs = new HashMap<>();
         dgs.gridReferences = new HashMap<>();  // Maps from tile name to list of positions in the master grid board that its cells occupy
         for (BoardNode bn : config.getBoardNodes()) {
             String name = bn.getComponentName();
@@ -525,8 +526,10 @@ public class DescentForwardModel extends AbstractForwardModel {
             GridBoard tile = _data.findGridBoard(tileName).copyNewID();
             if (tile != null) {
                 tile = tile.copyNewID();
+                tile.setProperty(bn.getProperty(orientationHash));
                 tile.setComponentName(name);
-                dgs.tiles.put(bn.getComponentID(), tile);
+                dgs.tiles.put(tile.getComponentID(), tile);
+                tileConfigs.put(bn.getComponentID(), tile);
                 dgs.gridReferences.put(name, new HashMap<>());
             }
         }
@@ -537,7 +540,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         int height = 0;
         for (BoardNode bn : config.getBoardNodes()) {
             // Find width of this tile, according to orientation
-            GridBoard tile = dgs.tiles.get(bn.getComponentID());
+            GridBoard tile = tileConfigs.get(bn.getComponentID());
             if (tile != null) {
                 int orientation = ((PropertyInt) bn.getProperty(orientationHash)).value;
                 if (orientation % 2 == 0) {
@@ -566,7 +569,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         BoardNode firstTile = config.getBoardNodes().get(0);
         if (firstTile != null) {
             // Find grid board of first tile, rotate to correct orientation and add its tiles to the board
-            GridBoard tile = dgs.tiles.get(firstTile.getComponentID());
+            GridBoard tile = tileConfigs.get(firstTile.getComponentID());
             int orientation = ((PropertyInt) firstTile.getProperty(orientationHash)).value;
             BoardNode[][] rotated = tile.rotate(orientation);
             int startX = width / 2 - rotated[0].length / 2;
@@ -574,7 +577,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             // Bounds will keep track of where tiles actually exist in the master board, to trim to size later
             Rectangle bounds = new Rectangle(startX, startY, rotated[0].length, rotated.length);
             // Recursive call, will add all tiles in relation to their neighbours as per the board configuration
-            addTilesToBoard(null, firstTile, startX, startY, board, null, dgs.tiles, dgs.tileReferences, dgs.gridReferences, drawn, bounds, dgs, null);
+            addTilesToBoard(null, firstTile, startX, startY, board, null, tileConfigs, dgs.tileReferences, dgs.gridReferences, drawn, bounds, dgs, null);
 
             // Trim the resulting board and tile references to remove excess border of nulls according to 'bounds' rectangle
             BoardNode[][] trimBoard = new BoardNode[bounds.height][bounds.width];
