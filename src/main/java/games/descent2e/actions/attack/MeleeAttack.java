@@ -179,7 +179,8 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
     protected void applyDamage(DescentGameState state) {
         int damage = state.getAttackDicePool().getDamage();
-        int defence = state.getDefenceDicePool().getShields();
+        int defence = state.getDefenceDicePool().getShields() - pierce;
+        if (defence < 0) defence = 0;
         damage = Math.max(damage - defence, 0);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();

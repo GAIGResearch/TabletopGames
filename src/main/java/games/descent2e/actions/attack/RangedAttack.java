@@ -20,6 +20,6 @@ public class RangedAttack extends MeleeAttack {
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         double distance = Distance.chebyshev_distance(attacker.getPosition(), defender.getPosition());
-        return (state.getAttackDicePool().getRange() < distance);
+        return (state.getAttackDicePool().getRange() + extraRange < distance);
     }
 }
