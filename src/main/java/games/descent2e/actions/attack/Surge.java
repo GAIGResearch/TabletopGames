@@ -5,6 +5,7 @@ import games.descent2e.components.Figure;
 
 import java.util.function.BiConsumer;
 
+// These should be immutable - do not add internal state
 public enum Surge {
     RANGE_PLUS_1(1, (a, s) -> a.addRange(1)),
     PIERCE_2(1, (a, s) -> a.addPierce(2)),
