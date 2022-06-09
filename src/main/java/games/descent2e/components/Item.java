@@ -47,6 +47,8 @@ public class Item {
         return dicePool.copy();
     }
 
+    public List<Surge> getWeaponSurges() {return new ArrayList<>(weaponSurges);}
+
     public boolean isMeleeAttack() {
         return attackType == AttackType.MELEE;
     }

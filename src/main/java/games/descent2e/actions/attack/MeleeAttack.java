@@ -117,12 +117,15 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
             case ATTACKER:
                 if (interruptPlayer != attackingPlayer)
                     return false;
+                break;
             case DEFENDER:
                 if (interruptPlayer != defendingPlayer)
                     return false;
+                break;
             case OTHERS:
                 if (interruptPlayer == attackingPlayer)
                     return false;
+                break;
             case ALL:
                 // always fine
         }

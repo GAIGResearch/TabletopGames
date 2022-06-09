@@ -15,6 +15,7 @@ import org.json.simple.parser.ParseException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static games.descent2e.DescentConstants.*;
 
@@ -26,6 +27,7 @@ public class Hero extends Figure {
     Card armor;
     Deck<Card> otherEquipment;
     Map<String, Integer> equipSlotsAvailable;
+    List<Item> items;
 
     // TODO: reset fatigue every quest to max fatigue
 
@@ -40,6 +42,7 @@ public class Hero extends Figure {
         skills = new Deck<>("Skills", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         handEquipment = new Deck<>("Hands", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         otherEquipment = new Deck<>("OtherItems", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        items = new ArrayList<>();
 
         equipSlotsAvailable = new HashMap<>();
         equipSlotsAvailable.put("hand", 2);
@@ -150,6 +153,7 @@ public class Hero extends Figure {
             }
             if (canEquip) {
                 equipSlotsAvailable = equipSlots;
+                items.add(new Item(c));
                 switch (equip[0]) {
                     case "armor":
                         armor = c;
@@ -172,14 +176,7 @@ public class Hero extends Figure {
     }
 
     public List<Item> getWeapons() {
-        List<Item> retValue = new ArrayList<>();
-        for (int i = 0; i < handEquipment.getSize(); i++) {
-            Item c = new Item(handEquipment.get(i));
-            if (c.isAttack()) {
-                retValue.add(c);
-            }
-        }
-        return retValue;
+        return items.stream().filter(Item::isAttack).collect(Collectors.toList());
     }
 
     @Override
@@ -187,7 +184,7 @@ public class Hero extends Figure {
         Optional<Item> wpn = getWeapons().stream().findFirst();
         if (wpn.isPresent())
             return wpn.get().getDicePool();
-        return new DicePool(Collections.emptyList());
+        return DicePool.empty;
     }
 
     @Override
@@ -238,6 +235,7 @@ public class Hero extends Figure {
         copy.featAvailable = this.featAvailable;
         copy.ability = this.ability;
         copy.rested = rested;
+        copy.items = new ArrayList<>(items); // Currently immutable TODO: Review later
         super.copyComponentTo(copy);
         return copy;
     }

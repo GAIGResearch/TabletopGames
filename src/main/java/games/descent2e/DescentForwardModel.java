@@ -7,6 +7,7 @@ import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.*;
 import games.descent2e.actions.attack.MeleeAttack;
+import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
@@ -103,6 +104,9 @@ public class DescentForwardModel extends AbstractForwardModel {
                     figure.equip(c);
                 }
             }
+            // after equipping, set up abilities
+            figure.getWeapons().stream().flatMap(w -> w.getWeaponSurges().stream())
+                    .forEach(s -> figure.addAbility(new SurgeAttackAction(s)));
 
             // Place hero on the board in random starting position out of those available
             choice = rnd.nextInt(heroStartingPositions.size());

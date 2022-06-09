@@ -13,8 +13,7 @@ import utilities.Vector2D;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MeleeAttackTests {
 
@@ -170,6 +169,8 @@ public class MeleeAttackTests {
         assertTrue(noDamage > 0);
     }
 
-
+    public void stopAtSurgeDecsion() {
+        fail("Not yet implemented");
+    }
 
 }
