@@ -235,19 +235,21 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     }
 
     public List<AbstractAction> getInterruptActionsFor(int player, Triggers trigger) {
-        List<AbstractAction> retValue;
+        List<DescentAction> descentActions;
         if (player == overlordPlayer) {
             // we run through monsters
-            retValue = monsters.stream().flatMap(List::stream)
+            descentActions = monsters.stream().flatMap(List::stream)
                     .flatMap(m -> m.getAbilities().stream())
                     .collect(Collectors.toList());
         } else {
             // else we just look at heroes that belong to this player
-            retValue = heroes.stream().filter(h -> h.getOwnerId() == player)
+            descentActions = heroes.stream().filter(h -> h.getOwnerId() == player)
                     .flatMap(h -> h.getAbilities().stream())
                     .collect(Collectors.toList());
         }
-
+        List<AbstractAction> retValue = descentActions.stream()
+                .filter(a -> a.canExecute(this))
+                .map(a -> (AbstractAction) a).collect(Collectors.toList());
 
         if (retValue.isEmpty()) {
             return retValue;
