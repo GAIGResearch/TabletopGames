@@ -13,9 +13,7 @@ import utilities.Vector2D;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 
-import static core.CoreConstants.coordinateHash;
 import static games.descent2e.DescentTypes.*;
 import static utilities.Utils.getNeighbourhood;
 
@@ -74,8 +72,8 @@ public class TileBuildFM extends AbstractForwardModel {
                         if (bnN != null)  // ... and not null.
                         {
                             String compName = bnN.getComponentName().substring(0,1).toUpperCase() + bnN.getComponentName().substring(1).toLowerCase();
-                            double cost = TerrainType.getMoveInCost(TerrainType.valueOf(compName));
-                            node.addNeighbour(bnN, cost);
+                            double cost = TerrainType.getMovePointsCost(TerrainType.valueOf(compName));
+                            node.addNeighbourWithCost(bnN, cost);
                             //System.out.println("Added neighbour: (" + i + "," + j + ") -> (" + nx + "," + ny + ")");
                         }
                     }

@@ -91,11 +91,9 @@ public class DescentTypes {
             return -1;
         }
 
-        public static double getMoveInCost(TerrainType tt)
+        public static int getMovePointsCost(TerrainType tt)
         {
-            if(tt == Water) return 2.0; //TODO: These values should be read from the config file.
-            if(tt == Block) return Double.MAX_VALUE;
-            return 1.0;
+            return tt.moveCosts.get(MovePoints);
         }
 
         public static HashSet<TerrainType> getWalkableTerrains() {
