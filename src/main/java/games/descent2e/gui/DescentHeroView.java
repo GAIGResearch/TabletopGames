@@ -33,8 +33,8 @@ public class DescentHeroView extends ComponentView {
     HashMap<Figure.Attribute, Vector2D> valuesPositionMap;
 
     Image characterCard;
-    double characterCardScale;
-    Font descentFont, primaryAttributeF, secondaryAttributeF, titleFont;
+    static double characterCardScale;
+    static Font descentFont, primaryAttributeF, secondaryAttributeF, titleFont;
 
     public DescentHeroView(DescentGameState dgs, Hero hero, int heroIdx, int width, int height) {
         super(hero, width, height);
@@ -110,7 +110,7 @@ public class DescentHeroView extends ComponentView {
         /* Draw other data stored on the figure */
 
         // Draw attribute current values
-        g.setColor(Color.black);
+        g.setColor(Color.white);
         int n = 0;
         for (Figure.Attribute a: Figure.Attribute.values()) {
             if (!a.isSecondary()) {
@@ -121,7 +121,7 @@ public class DescentHeroView extends ComponentView {
         // Draw tokens player owns
         int i = 0;
         int j = 0;
-        int maxCols = 5;
+        int maxCols = 2;
         int gap = 5;
         for (DToken t: dgs.getTokens()) {
             if (t.getOwnerId() == heroIdx) {

@@ -55,20 +55,30 @@ public class DescentGridBoardView extends ComponentView {
     HashMap<Vector2D, List<Vector2D>> notConnectedMap;
     HashMap<Vector2D, Pair<Image, Pair<Integer, Integer>>> tileImageTopLeftCorners;
 
-    String dataPath;
+    static String dataPath;
+    int offset;
+    Dimension maxSize;
 
-    public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState, int width, int height) {
+    public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState, int offset, int width, int height) {
         super(gridBoard, width, height);
         this.gameState = gameState;
+        this.offset = offset;
+        this.maxSize = new Dimension(width+offset*2, height+offset*2);
         this.dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
-        updateScale(scale);
         notConnectedMap = new HashMap<>();
+        double w = gridBoard.getWidth() * defaultItemSize;
+        double h = gridBoard.getHeight() * defaultItemSize;
+        double minScale = 1.0;
+        if (width / w < minScale) minScale = width/w;
+        if (height / h < minScale) minScale = height/h;
+        scale = minScale;
+        updateScale(scale);
 
         // Focus on hero characters
-        Hero hero = gameState.getHeroes().get(0);
-        Vector2D pos = hero.getPosition();
-        panX = pos.getX() * descentItemSize / 2;
-        panY = -pos.getY() * descentItemSize / 2 - descentItemSize * 3;
+//        Hero hero = gameState.getHeroes().get(0);
+//        Vector2D pos = hero.getPosition();
+//        panX = pos.getX() * descentItemSize / 2;
+//        panY = -pos.getY() * descentItemSize / 2 - descentItemSize * 3;
 
         // Cache the top-left corners of rotated tile images for quick drawing
         tileImageTopLeftCorners = new HashMap<>();
@@ -150,18 +160,14 @@ public class DescentGridBoardView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        GridBoard gridBoard = (GridBoard) component;
-        int width = gridBoard.getWidth() * descentItemSize;
-        int height = gridBoard.getHeight() * descentItemSize;
-
         // Draw background
         g.setColor(Color.black);
-        g.fillRect(panX, panY, width, height);
+        g.fillRect(offset, offset, width, height);
 
-//        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard) component, panX, panY, gameState.getGridReferences(), gameState.getTileReferences());
+//        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard) component, offset+panX, offset+panY, gameState.getGridReferences(), gameState.getTileReferences());
 
         for (Map.Entry<Vector2D, Pair<Image, Pair<Integer, Integer>>> e: tileImageTopLeftCorners.entrySet()) {
-            g.drawImage(e.getValue().a, panX + e.getKey().getX() * descentItemSize, panY + e.getKey().getY() * descentItemSize,
+            g.drawImage(e.getValue().a, offset+panX + e.getKey().getX() * descentItemSize, offset+panY + e.getKey().getY() * descentItemSize,
                     e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize, null);
         }
 
@@ -170,7 +176,7 @@ public class DescentGridBoardView extends ComponentView {
             if (dt.getPosition() != null) {
                 String imgPath = dataPath + dt.getDescentTokenType().getImgPath(new Random(gameState.getGameParameters().getRandomSeed()));
                 Image img = ImageIO.GetInstance().getImage(imgPath);
-                g.drawImage(img, panX + dt.getPosition().getX() * descentItemSize, panY + dt.getPosition().getY() * descentItemSize, descentItemSize, descentItemSize, null);
+                g.drawImage(img, offset+panX + dt.getPosition().getX() * descentItemSize, offset+panY + dt.getPosition().getY() * descentItemSize, descentItemSize, descentItemSize, null);
             }
         }
 
@@ -181,13 +187,13 @@ public class DescentGridBoardView extends ComponentView {
 
             // Color
 //            g.setColor(archetype.getColor());
-//            g.fillOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
+//            g.fillOval(offset+panX + loc.getX() * itemSize, offset+panY + loc.getY() * itemSize, itemSize, itemSize);
 //            g.setColor(Color.black);
-//            g.drawOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
+//            g.drawOval(offset+panX + loc.getX() * itemSize, offset+panY + loc.getY() * itemSize, itemSize, itemSize);
 
             // Or image
             Image img = ImageIO.GetInstance().getImage(dataPath + "heroes/" + archetype.name().toLowerCase() + ".png");
-            g.drawImage(img, panX + loc.getX() * descentItemSize, panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize, null);
+            g.drawImage(img, offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize, null);
         }
         // Draw monsters
         for (List<Monster> monsterGroup: gameState.getMonsters()) {
@@ -211,15 +217,15 @@ public class DescentGridBoardView extends ComponentView {
                 }
                 Image imgRaw = ImageIO.GetInstance().getImage(imagePath);
                 BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
-                g.drawImage(imgToDraw, panX + loc.getX() * descentItemSize, panY + loc.getY() * descentItemSize,null);
+                g.drawImage(imgToDraw, offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize,null);
             }
         }
 
         // Draw highlights
         for (Vector2D pos: highlights) {
 
-            int xC = panX + pos.getX() * descentItemSize;
-            int yC = panY + pos.getY() * descentItemSize;
+            int xC = offset+panX + pos.getX() * descentItemSize;
+            int yC = offset+ panY + pos.getY() * descentItemSize;
 
             // Paint cell background
             g.setColor(highlightColor);
@@ -369,4 +375,8 @@ public class DescentGridBoardView extends ComponentView {
 //        super.scrollRectToVisible(rect);
     }
 
+    @Override
+    public Dimension getMaximumSize() {
+        return maxSize;
+    }
 }
