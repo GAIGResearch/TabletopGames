@@ -343,20 +343,6 @@ public class DescentForwardModel extends AbstractForwardModel {
         BoardNode figureNode = dgs.masterBoard.getElement(figureLocation.getX(), figureLocation.getY());
         String figureType = figure.getTokenType();
 
-        // Get friendly figures based on token type (monster/hero)
-//        ArrayList<Vector2D> friendlyFigureLocations = new ArrayList<>();
-//        if (figureType.equals("Monster")) {
-//            for (List<Monster> monsterGroup : dgs.monsters) {
-//                for (Monster m : monsterGroup) {
-//                    friendlyFigureLocations.add(m.getPosition());
-//                }
-//            }
-//        } else {
-//            for (Hero h : dgs.heroes) {
-//                friendlyFigureLocations.add(h.getPosition());
-//            }
-//        }
-
         //<Board Node, Cost to get there>
         HashMap<BoardNode, Double> expandedBoardNodes = new HashMap<>();
         HashMap<BoardNode, Double> nodesToBeExpanded = new HashMap<>();
@@ -380,14 +366,6 @@ public class DescentForwardModel extends AbstractForwardModel {
                 double totalCost = expandingNodeCost + costToMoveToNeighbour;
                 boolean isFriendly = false;
                 boolean isEmpty = true;
-
-                //Check if the neighbour node is friendly
-//                for(Vector2D friendlyFigureLocation : friendlyFigureLocations){
-//                    if (friendlyFigureLocation.getX() == loc.getX() && friendlyFigureLocation.getY() == loc.getY()){
-//                        isFriendly = true;
-//                        break;
-//                    }
-//                }
 
 
                 PropertyInt figureOnLocation = (PropertyInt)neighbour.getProperty(playersHash);
@@ -419,16 +397,45 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         }
 
-//
-//        if (flag == true && figureType.equals("Monster")) {
-//            System.out.println("My location: " + ((PropertyVector2D) figureNode.getProperty(coordinateHash)).values);
-//            for (BoardNode node : allAdjacentNodes.keySet()){
-//                System.out.println(((PropertyVector2D) node.getProperty(coordinateHash)).values + ": " + allAdjacentNodes.get(node));
-//            }
-//            flag = false;
-//        }
 
+        // If the monster is 1x2
+        if (figure.getSize().a > 1 || figure.getSize().b > 1){
 
+            // Go through all adjecent nodes
+            Iterator<Map.Entry<BoardNode, Double>> iter = allAdjacentNodes.entrySet().iterator();
+            while(iter.hasNext()) {
+
+                BoardNode node = iter.next().getKey();
+                boolean isAdjacentTileEmpty = false;
+                Vector2D nodeLoc = ((PropertyVector2D) node.getProperty(coordinateHash)).values;
+                HashMap<Integer, Double> allNeighbours = node.getNeighbours();
+
+                // Find the 4-way-neighbours
+                ArrayList<BoardNode> fourWayNeighbours = new ArrayList<>();
+                for (Integer nodeID : allNeighbours.keySet()){
+                    BoardNode neighbour = (BoardNode) dgs.getComponentById(nodeID);
+                    Vector2D adjacentLoc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
+                    int xDistance = adjacentLoc.getX() - nodeLoc.getX();
+                    int yDistance = adjacentLoc.getY() - nodeLoc.getY();
+                    if (xDistance == 0 || yDistance == 0){
+                        fourWayNeighbours.add(neighbour);
+                    }
+                }
+
+                // Check if any of the 4-way neighbours is empty space
+                for (BoardNode neighbour : fourWayNeighbours) {
+                    PropertyInt figureOnLocation = (PropertyInt) neighbour.getProperty(playersHash);
+                    if (figureOnLocation.value == -1 || figureOnLocation.value == figure.getComponentID()) {
+                        isAdjacentTileEmpty = true;
+                    }
+                }
+                // If there is no empty space, the location is not reachable
+                if (isAdjacentTileEmpty){
+                    iter.remove();
+                }
+            }
+
+        }
         return allAdjacentNodes;
     }
 
