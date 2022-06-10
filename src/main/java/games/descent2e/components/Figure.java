@@ -5,8 +5,10 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.Token;
 import core.properties.PropertyInt;
+import core.properties.PropertyStringArray;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.Move;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -18,10 +20,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+import static games.descent2e.DescentConstants.attackHash;
+import static games.descent2e.DescentConstants.defenceHash;
 import static games.descent2e.components.Figure.Attribute.*;
 
 // TODO: figure out how to do ability/heroic-feat
 public class Figure extends Token {
+
+    DicePool attackDice = DicePool.empty;
+    DicePool defenceDice = DicePool.empty;
 
     public enum Attribute {
         MovePoints,
@@ -35,7 +42,6 @@ public class Figure extends Token {
     }
 
     HashMap<Attribute, Counter> attributes;
-
 
     int nActionsExecuted;
 
@@ -152,9 +158,19 @@ public class Figure extends Token {
         return abilities;
     }
 
+    public DicePool getAttackDice() { return attackDice;}
+
+    public DicePool getDefenceDice() {return defenceDice;}
+
     @Override
     public Figure copy() {
         Figure copy = new Figure(componentName, componentID);
+        copyComponentTo(copy);
+        return copy;
+    }
+
+    public Figure copyNewID() {
+        Figure copy = new Figure(componentName);
         copyComponentTo(copy);
         return copy;
     }
@@ -178,6 +194,35 @@ public class Figure extends Token {
                 copyTo.abilities.add(ability.copy());
             }
         }
+        copyTo.attackDice = getAttackDice().copy();
+        copyTo.defenceDice = getDefenceDice().copy();
+    }
+
+    public void loadFigure(JSONObject figure, Set<String> ignoreKeys) {
+        if (!ignoreKeys.contains("id")) {
+            this.componentName = (String) figure.get("id");
+        }
+        if (!ignoreKeys.contains("type")) {
+            this.tokenType = (String) ((JSONArray) figure.get("type")).get(1);
+        }
+        // TODO: custom load of figure properties
+        parseComponent(this, figure, ignoreKeys);
+        if (getProperty(attackHash) != null) {
+            String[] attack = ((PropertyStringArray) getProperty(attackHash)).getValues();
+            attackDice = DicePool.constructDicePool(attack);
+        }
+        if (getProperty(defenceHash) != null) {
+            String[] defence = ((PropertyStringArray) getProperty(defenceHash)).getValues();
+            defenceDice = DicePool.constructDicePool(defence);
+        }
+        for (Attribute a : Attribute.values()) {
+            PropertyInt prop = ((PropertyInt) getProperty(a.name()));
+            if (prop != null) {
+                int max = prop.value;
+                this.attributes.put(a, new Counter(max, 0, max, a.name()));
+                if (a == MovePoints || a == Fatigue) this.setAttribute(a, 0);
+            }
+        }
     }
 
     /**
@@ -185,21 +230,8 @@ public class Figure extends Token {
      *
      * @param figure - JSON to parse into Figure object.
      */
-    protected void loadFigure(JSONObject figure) {
-        this.componentName = (String) figure.get("id");
-        this.tokenType = (String) ((JSONArray) figure.get("type")).get(1);
-        // TODO: custom load of figure properties
-        parseComponent(this, figure);
-
-        for (Attribute a : Attribute.values()) {
-            PropertyInt prop = ((PropertyInt) getProperty(a.name()));
-            if (prop != null) {
-                int max = prop.value;
-                this.attributes.put(a, new Counter(max, 0, max, a.name()));
-            }
-        }
-        this.setAttribute(MovePoints, 0);
-        this.setAttribute(Fatigue, 0);
+    public void loadFigure(JSONObject figure) {
+        loadFigure(figure, new HashSet<>());
     }
 
     /**
@@ -228,4 +260,6 @@ public class Figure extends Token {
 
         return figures;
     }
+
+    // TODO: Add equals() and hashcode()
 }

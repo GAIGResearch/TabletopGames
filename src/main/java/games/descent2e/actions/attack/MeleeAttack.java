@@ -6,10 +6,7 @@ import core.components.Component;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.Triggers;
-import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
-import games.descent2e.components.Item;
-import games.descent2e.components.Monster;
+import games.descent2e.components.*;
 
 import java.util.*;
 
@@ -70,16 +67,11 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
 
         phase = PRE_ATTACK_ROLL;
         interruptPlayer = attackingPlayer;
-        if (attackingPlayer == 0) {
-            Monster monster = (Monster) state.getComponentById(attackingFigure);
-            state.setAttackDicePool(monster.getAttackDice());
-        } else {
-            Hero hero = (Hero) state.getComponentById(attackingFigure);
-            Item weapon = hero.getWeapons().stream()
-                    .findFirst().orElseThrow(() -> new AssertionError("Weapon not found : " + attackingFigure));
-            state.setAttackDicePool(weapon.getDicePool());
-        }
-        // The one thing we do now is construct the dice pool to use
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        Figure defender = (Figure) state.getComponentById(defendingFigure);
+        state.setAttackDicePool(attacker.getAttackDice());
+        state.setDefenceDicePool(defender.getDefenceDice());
+
         movePhaseForward(state);
 
         // When executing a melee attack we need to:
@@ -156,31 +148,40 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                 if (attackMissed(state)) // no damage done, so can skip the defence roll
                     phase = ALL_DONE;
                 else
-                    phase = POST_DEFENCE_ROLL;
+                    defenceRoll(state);
+                phase = POST_DEFENCE_ROLL;
                 break;
             case POST_DEFENCE_ROLL:
-                defenceRoll(state);
+                damageRoll(state);
                 phase = POST_DAMAGE;
                 break;
             case POST_DAMAGE:
-                damageRoll(state);
+                applyDamage(state);
                 phase = ALL_DONE;
                 break;
         }
     }
 
     protected void defenceRoll(DescentGameState state) {
-
+        state.getDefenceDicePool().roll(state.getRandom());
     }
+
     protected void damageRoll(DescentGameState state) {
+        state.getAttackDicePool().roll(state.getRandom());
+    }
+
+    protected void applyDamage(DescentGameState state) {
         int damage = state.getAttackDicePool().getDamage();
+        int defence = state.getDefenceDicePool().getShields();
+        damage = Math.max(damage - defence, 0);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
         defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
     }
 
-    protected boolean attackMissed(DescentGameState state) {
-        return state.getAttackDicePool().hasRolled() && state.getAttackDicePool().getDamage() == 0;
+    public boolean attackMissed(DescentGameState state) {
+        return state.getAttackDicePool().hasRolled() && (
+                state.getAttackDicePool().getRange() < 0 || state.getAttackDicePool().getDamage() == 0);
     }
 
     @Override

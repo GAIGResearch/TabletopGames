@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 public class DicePool extends Component implements IComponentContainer<DescentDice> {
 
+    public static DicePool empty = new DicePool(Collections.emptyList());
+
     List<DescentDice> dice;
     boolean rolled = false;
     int[] rerolls;
@@ -68,6 +70,7 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     public int getDamage() {
         return dice.stream().mapToInt(DescentDice::getDamage).sum();
     }
+    public int getShields() {return dice.stream().mapToInt(DescentDice::getShielding).sum();}
     public int getSurge() {
         return dice.stream().mapToInt(DescentDice::getSurge).sum();
     }
@@ -98,5 +101,10 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     public CoreConstants.VisibilityMode getVisibilityMode() {
         return CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
         // as yet no Dice are ever rolled secretly
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Range: %d, Damage: %d, Surge: %d, Shields: %d", getRange(), getDamage(), getSurge(), getShields());
     }
 }

@@ -6,6 +6,7 @@ import core.properties.PropertyString;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Monster;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Hero;
@@ -32,16 +33,16 @@ public class DescentGameData extends AbstractGameData {
     List<Deck<Card>> decks;
     List<Quest> quests;
     List<Quest> sideQuests;
-    HashMap<String, HashMap<String, Token>> monsters;
+    HashMap<String, HashMap<String, Monster>> monsters;
 
     @Override
     public void load(String dataPath) {
         tiles = GridBoard.loadBoards(dataPath + "tiles.json");
         boardConfigurations = GraphBoard.loadBoards(dataPath + "boards.json");
 
+        DescentDice.loadDice(dataPath + "/components/dice.json");
         heroes = Hero.loadHeroes(dataPath + "heroes.json");
         monsters = loadMonsters(dataPath + "monsters.json");
-        DescentDice.loadDice(dataPath + "/components/dice.json");
 
         quests = loadQuests(dataPath + "mainQuests.json");
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");
@@ -106,12 +107,12 @@ public class DescentGameData extends AbstractGameData {
         return null;
     }
 
-    public List<Hero> findHeroes(String archetype) {
+    public List<Hero> findHeroes(DescentTypes.Archetype archetype) {
         List<Hero> heroes = new ArrayList<>();
         for (Hero f: this.heroes) {
             if (f.getTokenType().equalsIgnoreCase("hero")) {
                 String arch = ((PropertyString)f.getProperty(archetypeHash)).value;
-                if (arch != null && arch.equalsIgnoreCase(archetype)) {
+                if (arch != null && arch.equalsIgnoreCase(archetype.name())) {
                     heroes.add(f.copy());
                 }
             }
@@ -119,7 +120,7 @@ public class DescentGameData extends AbstractGameData {
         return heroes;
     }
 
-    public HashMap<String, Token> findMonster(String name) {
+    public HashMap<String, Monster> findMonster(String name) {
         return monsters.get(name);
     }
 
@@ -221,6 +222,8 @@ public class DescentGameData extends AbstractGameData {
                     q.setTokens(qTokens);
                 }
 
+                // Find special rules
+
                 // Quest read complete
                 quests.add(q);
             }
@@ -240,8 +243,8 @@ public class DescentGameData extends AbstractGameData {
         return ar2;
     }
 
-    private static HashMap<String, HashMap<String, Token>> loadMonsters(String dataPath) {
-        HashMap<String, HashMap<String, Token>> monsters = new HashMap<>();
+    private static HashMap<String, HashMap<String, Monster>> loadMonsters(String dataPath) {
+        HashMap<String, HashMap<String, Monster>> monsters = new HashMap<>();
 
         JSONParser jsonParser = new JSONParser();
         try (FileReader reader = new FileReader(dataPath)) {
@@ -251,24 +254,28 @@ public class DescentGameData extends AbstractGameData {
                 JSONObject obj = (JSONObject) o;
 
                 String key = (String) obj.get("id");
-                Token superT = new Token("");
-                HashSet ignoreKeys = new HashSet(){{
+                Monster superT = new Monster();
+                HashSet<String> ignoreKeys = new HashSet<String>(){{
                     add("act1");
                     add("act2");
                     add("id");
                 }};
-                parseComponent(superT, obj, ignoreKeys);
+                superT.loadFigure(obj, ignoreKeys);
 
-                HashMap<String, Token> monsterDef = new HashMap<>();
-                Token act1m = new Token("");
-                parseComponent(act1m, (JSONObject) ((JSONArray)obj.get("act1")).get(0));
-                Token act1M = new Token("");
-                parseComponent(act1M, (JSONObject) ((JSONArray)obj.get("act1")).get(1));
+                ignoreKeys.clear();
+                ignoreKeys.add("type");
+                ignoreKeys.add("id");
 
-                Token act2m = new Token("");
-                parseComponent(act2m, (JSONObject) ((JSONArray)obj.get("act2")).get(0));
-                Token act2M = new Token("");
-                parseComponent(act2M, (JSONObject) ((JSONArray)obj.get("act2")).get(1));
+                HashMap<String, Monster> monsterDef = new HashMap<>();
+                Monster act1m = new Monster();
+                act1m.loadFigure((JSONObject) ((JSONArray)obj.get("act1")).get(0), ignoreKeys);
+                Monster act1M = new Monster();
+                act1M.loadFigure((JSONObject) ((JSONArray)obj.get("act1")).get(1), ignoreKeys);
+
+                Monster act2m = new Monster();
+                act2m.loadFigure((JSONObject) ((JSONArray)obj.get("act2")).get(0), ignoreKeys);
+                Monster act2M = new Monster();
+                act2M.loadFigure((JSONObject) ((JSONArray)obj.get("act2")).get(1), ignoreKeys);
 
                 monsterDef.put("1-minion", act1m);
                 monsterDef.put("1-master", act1M);
