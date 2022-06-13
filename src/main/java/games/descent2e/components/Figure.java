@@ -157,7 +157,6 @@ public class Figure extends Token {
     public List<DescentAction> getAbilities() {
         return abilities;
     }
-
     public DicePool getAttackDice() { return attackDice;}
 
     public DicePool getDefenceDice() {return defenceDice;}

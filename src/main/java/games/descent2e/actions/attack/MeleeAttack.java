@@ -96,8 +96,8 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         // decision to be made
         boolean foundInterrupt = false;
         do {
-            // check next player
-            interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
+            // TODO: One player may have multiple interrupts
+            // Not least the attacking player when they spend multiple surges!
             if (phase.interrupt == null || interruptPlayer == attackingPlayer) {
                 // we have completed the loop
                 executePhase(state);
@@ -105,13 +105,17 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
             }
             if (playerHasInterruptOption(state)) {
                 foundInterrupt = true;
+             //   System.out.println("Interrupt for player " + interruptPlayer);
                 // we need to get a decision from this player
+            } else {
+                interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
             }
         } while (!foundInterrupt && phase != ALL_DONE);
     }
 
     private boolean playerHasInterruptOption(DescentGameState state) {
         if (phase.interrupt == null || phase.interrupters == null) return false;
+        if (phase == SURGE_DECISIONS && surgesToSpend == 0) return false;
         // first we see if the interruptPlayer is one who may interrupt
         switch (phase.interrupters) {
             case ATTACKER:
@@ -134,13 +138,14 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     }
 
     private void executePhase(DescentGameState state) {
+     //   System.out.println("Executing phase " + phase);
         switch (phase) {
             case NOT_STARTED:
             case ALL_DONE:
                 throw new AssertionError("Should never be executed");
             case PRE_ATTACK_ROLL:
                 // roll dice
-                state.getAttackDicePool().roll(state.getRandom());
+                damageRoll(state);
                 phase = POST_ATTACK_ROLL;
                 break;
             case POST_ATTACK_ROLL:
@@ -162,7 +167,6 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                 }
                 break;
             case POST_DEFENCE_ROLL:
-                damageRoll(state);
                 phase = POST_DAMAGE;
                 break;
             case POST_DAMAGE:

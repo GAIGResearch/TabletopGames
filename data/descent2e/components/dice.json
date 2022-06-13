@@ -1,5 +1,6 @@
 [
   {
+    "comment" : "Range, Surge, Damage, Shield : ordering of the values for each die face",
     "colour": ["String", "yellow"],
     "count": ["Integer", 6],
     "1": ["Integer[]",[1,1,0,0]],

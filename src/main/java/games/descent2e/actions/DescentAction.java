@@ -32,6 +32,10 @@ public abstract class DescentAction extends AbstractAction {
     }
     public abstract boolean canExecute(DescentGameState dgs);
 
+    public Set<Triggers> getTriggers() {
+        return triggerPoints;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -242,7 +242,9 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
                     .flatMap(m -> m.getAbilities().stream())
                     .collect(Collectors.toList());
         } else {
-            // else we just look at heroes that belong to this player
+            // else we just look at heroes that belong to the acting Figure
+            // TODO: Add in effects from cards in the player's hand
+            // We rely on canExecute() to filter out irrelevant ones
             descentActions = heroes.stream().filter(h -> h.getOwnerId() == player)
                     .flatMap(h -> h.getAbilities().stream())
                     .collect(Collectors.toList());

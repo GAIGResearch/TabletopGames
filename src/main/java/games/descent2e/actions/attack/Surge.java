@@ -3,6 +3,7 @@ package games.descent2e.actions.attack;
 import games.descent2e.DescentGameState;
 import games.descent2e.components.Figure;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 // These should be immutable - do not add internal state
@@ -32,4 +33,5 @@ public enum Surge {
         attack.surgesToSpend -= surgesUsed;
         lambda.accept(attack, state);
     }
+
 }

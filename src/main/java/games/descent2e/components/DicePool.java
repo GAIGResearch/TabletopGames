@@ -63,6 +63,9 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
         for (DescentDice d : dice)
             d.roll(r);
     }
+    public void setFace(int number, int face) {
+        dice.get(number).setFace(face);
+    }
 
     public int getNumber(DiceType type) {
         return (int) dice.stream().filter(d -> d.getColour() == type).count();

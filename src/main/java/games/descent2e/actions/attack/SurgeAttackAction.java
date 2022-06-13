@@ -5,18 +5,22 @@ import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 
+import java.util.Objects;
+
 public class SurgeAttackAction extends DescentAction {
 
     public final Surge surge;
+    public final int figureSource;
 
-    public SurgeAttackAction(Surge surge) {
+    public SurgeAttackAction(Surge surge, int figure) {
         super(Triggers.SURGE_DECISION);
         this.surge = surge;
+        this.figureSource = figure;
     }
 
     @Override
     public String toString() {
-        return surge.name();
+        return surge.name() + " : " + figureSource;
     }
     @Override
     public String getString(AbstractGameState gameState) {
@@ -37,6 +41,20 @@ public class SurgeAttackAction extends DescentAction {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
-        return true;
+        return dgs.getActingFigure().getComponentID() == figureSource;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof SurgeAttackAction) {
+            SurgeAttackAction o = (SurgeAttackAction) other;
+            return o.figureSource == figureSource && o.surge == surge;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(figureSource, surge.ordinal()) - 492209;
     }
 }
