@@ -21,4 +21,5 @@ public class DescentConstants {
     public enum AttackType {
         NONE, MELEE, RANGED, BLAST;
     }
+
 }

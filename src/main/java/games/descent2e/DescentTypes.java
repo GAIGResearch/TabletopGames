@@ -23,13 +23,6 @@ import static games.descent2e.components.Figure.Attribute.MovePoints;
 
 public class DescentTypes {
 
-    public final static HashSet<Character> direction = new HashSet<Character>() {{
-        add('N');
-        add('S');
-        add('W');
-        add('E');
-    }};
-
     public enum Campaign {
         HeirsOfBlood;
 

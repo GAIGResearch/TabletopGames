@@ -19,13 +19,13 @@ import java.util.Objects;
 
 public class Move extends AbstractAction {
     final List<Vector2D> positionsTraveled;
-    final int orientation;
+    final Monster.Direction orientation;
 
     public Move(List<Vector2D> whereTo) {
         this.positionsTraveled = whereTo;
-        this.orientation = 0;
+        this.orientation = Monster.Direction.DOWN;
     }
-    public Move(List<Vector2D> whereTo, int finalOrientation) {
+    public Move(List<Vector2D> whereTo, Monster.Direction finalOrientation) {
         this.positionsTraveled = whereTo;
         this.orientation = finalOrientation;
     }
@@ -36,6 +36,7 @@ public class Move extends AbstractAction {
         Figure f = ((DescentGameState) gs).getActingFigure();
 
         // Go through all positions traveled as part of this movement, applying all costs and penalties
+        // TODO big monsters don't need to be able to fully occupy all spaces travelled
         for (Vector2D pos: positionsTraveled) {
             moveTo(dgs, f, pos.copy());
         }
@@ -45,31 +46,30 @@ public class Move extends AbstractAction {
 
     private void moveTo(DescentGameState dgs, Figure f, Vector2D position) {
         // Update location and orientation
-        Vector2D oldLocation = f.getPosition().copy();
+        Vector2D oldTopLeftAnchor = f.getPosition().copy();
+        if (f instanceof Monster) {
+            oldTopLeftAnchor = ((Monster) f).applyAnchorModifier();
+        }
+        Monster.Direction oldOrientation = Monster.Direction.DOWN;
+
         f.setPosition(position.copy());
-        int oldOrientation = 0;
+        Vector2D topLeftAnchor = position.copy();
         if (f instanceof Monster) {
             oldOrientation = ((Monster) f).getOrientation();
             ((Monster) f).setOrientation(orientation);
+            topLeftAnchor = ((Monster) f).applyAnchorModifier();
         }
 
-        int w = 1, h = 1;
-        int oldW = 1, oldH = 1;
-        if (f.getSize() != null) {
-            Pair<Integer, Integer> size = f.getSize().copy();
-            Pair<Integer, Integer> sizeOld = f.getSize().copy();
-            if (orientation % 2 == 1) size.swap();
-            if (oldOrientation % 2 == 1) sizeOld.swap();
-            w = size.a;
-            h = size.b;
-            oldW = sizeOld.a;
-            oldH = sizeOld.b;
-        }
-        int minTerrainOrdinal = 100;
+        Pair<Integer, Integer> size = f.getSize().copy();
+        Pair<Integer, Integer> sizeOld = f.getSize().copy();
+        if (orientation.ordinal() % 2 == 1) size.swap();
+        if (oldOrientation.ordinal() % 2 == 1) sizeOld.swap();
+
+        int minTerrainOrdinal = DescentTypes.TerrainType.values().length;
         DescentTypes.TerrainType minTerrain = null;
-        for (int i = 0; i < h; i++) {
-            for (int j = 0; j < w; j++) {
-                BoardNode destinationTile = dgs.getMasterBoard().getElement(position.getX() + j, position.getY() + i);
+        for (int i = 0; i < size.b; i++) {
+            for (int j = 0; j < size.a; j++) {
+                BoardNode destinationTile = dgs.getMasterBoard().getElement(topLeftAnchor.getX() + j, topLeftAnchor.getY() + i);
                 PropertyInt placeFigureOnTile = new PropertyInt("players", f.getComponentID());
                 destinationTile.setProperty(placeFigureOnTile);
 
@@ -82,9 +82,9 @@ public class Move extends AbstractAction {
                 }
             }
         }
-        for (int i = 0; i < oldH; i++) {
-            for (int j = 0; j < oldW; j++) {
-                BoardNode currentTile = dgs.getMasterBoard().getElement(oldLocation.getX() + j, oldLocation.getY() + i);
+        for (int i = 0; i < sizeOld.b; i++) {
+            for (int j = 0; j < sizeOld.a; j++) {
+                BoardNode currentTile = dgs.getMasterBoard().getElement(oldTopLeftAnchor.getX() + j, oldTopLeftAnchor.getY() + i);
                 PropertyInt emptyTile = new PropertyInt("players", -1);
                 currentTile.setProperty(emptyTile);
                 if (currentTile.getComponentName().equalsIgnoreCase("pit")) {
@@ -126,14 +126,11 @@ public class Move extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Move to " + positionsTraveled.toString();
+        Figure f = ((DescentGameState) gameState).getActingFigure();
+        return "Move to " + positionsTraveled.toString() + (f.getSize().a > 1 || f.getSize().b > 1 ? " orientation:" + orientation : "");
     }
 
     public List<Vector2D> getPositionsTraveled() {
         return positionsTraveled;
-    }
-
-    public int getOrientation() {
-        return orientation;
     }
 }

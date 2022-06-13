@@ -200,9 +200,10 @@ public class DescentGridBoardView extends ComponentView {
             String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
 
             for (Monster m: monsterGroup) {
-                Vector2D loc = m.getPosition();
+//                Vector2D loc = m.getPosition();
+                Vector2D loc = m.applyAnchorModifier();
                 if (loc == null) continue;
-                int orientation = m.getOrientation();
+                int orientation = m.getOrientation().ordinal();
 
                 // Get the size of the monster, and scale according to item size
                 Pair<Integer, Integer> size = m.getSize().copy();

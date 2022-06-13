@@ -12,8 +12,6 @@ import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.concepts.Quest;
 import utilities.Pair;
-import utilities.Path;
-import utilities.Pathfinder;
 import utilities.Vector2D;
 
 import java.awt.*;
@@ -328,26 +326,10 @@ public class DescentForwardModel extends AbstractForwardModel {
         return actions;
     }
 
-    private HashMap<BoardNode, Pair<Double,List<Vector2D>>> getAllAdjacentNodes(DescentGameState dgs, Figure figure){
-
-        // TODO: get full path to the node that is to be traversed in the move action, give whole path to action
-
+    private HashMap<Vector2D, Pair<Double,List<Vector2D>>> getAllAdjacentNodes(DescentGameState dgs, Figure figure){
         Vector2D figureLocation = figure.getPosition();
         BoardNode figureNode = dgs.masterBoard.getElement(figureLocation.getX(), figureLocation.getY());
         String figureType = figure.getTokenType();
-        // Get friendly figures based on token type (monster/hero)
-        ArrayList<Vector2D> friendlyFigureLocations = new ArrayList<>();
-        if (figureType.equals("Monster")) {
-            for (List<Monster> monsterGroup : dgs.monsters) {
-                for (Monster m : monsterGroup) {
-                    friendlyFigureLocations.add(m.getPosition());
-                }
-            }
-        } else {
-            for (Hero h : dgs.heroes) {
-                friendlyFigureLocations.add(h.getPosition());
-            }
-        }
 
         //<Board Node, Cost to get there>
         HashMap<BoardNode, Pair<Double,List<Vector2D>>> expandedBoardNodes = new HashMap<>();
@@ -375,14 +357,6 @@ public class DescentForwardModel extends AbstractForwardModel {
                 totalPath.add(loc);
                 boolean isFriendly = false;
                 boolean isEmpty = true;
-
-                //Check if the neighbour node is friendly
-//                for(Vector2D friendlyFigureLocation : friendlyFigureLocations){
-//                    if (friendlyFigureLocation.getX() == loc.getX() && friendlyFigureLocation.getY() == loc.getY()){
-//                        isFriendly = true;
-//                        break;
-//                    }
-//                }
 
                 PropertyInt figureOnLocation = (PropertyInt)neighbour.getProperty(playersHash);
                 if (figureOnLocation.value != -1) {
@@ -412,21 +386,80 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
         }
 
-//        if (flag == true && figureType.equals("Monster")) {
-//            System.out.println("My location: " + ((PropertyVector2D) figureNode.getProperty(coordinateHash)).values);
-//            for (BoardNode node : allAdjacentNodes.keySet()){
-//                System.out.println(((PropertyVector2D) node.getProperty(coordinateHash)).values + ": " + allAdjacentNodes.get(node));
-//            }
-//            flag = false;
-//        }
+        //Return list of coordinates
+        HashMap<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentLocations = new HashMap<>();
+        for (BoardNode boardNode : allAdjacentNodes.keySet()){
+            Vector2D loc = ((PropertyVector2D) boardNode.getProperty(coordinateHash)).values;
+            allAdjacentLocations.put(loc, allAdjacentNodes.get(boardNode));
+        }
 
-
-        return allAdjacentNodes;
+        return allAdjacentLocations;
     }
 
-    private ArrayList<Vector2D> getAllPointOfInterests(DescentGameState dgs, Figure figure){
+    // Pair<final position, final orientation> -> pair<movement cost to get there, list of positions to travel through to get there>
+    private Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> getPossibleRotationsForMoveActions(Map<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentNodes, DescentGameState dgs, Figure figure){
+
+        Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> possibleRotations = new HashMap<>();
+
+        // Go through all adjacent nodes
+        Iterator<Map.Entry<Vector2D, Pair<Double,List<Vector2D>>>> iter = allAdjacentNodes.entrySet().iterator();
+
+        while (iter.hasNext()) {
+            Vector2D nodeLoc = iter.next().getKey();
+
+            if (figure.getSize().a > 1 || figure.getSize().b > 1) {
+                // Only monsters can have a size bigger than 1x1
+                Monster m = (Monster) figure;
+                Pair<Integer, Integer> monsterSize = m.getSize();
+
+                // Check all possible orientations with this position as the anchor if figure is bigger than 1x1
+                // If all spaces occupied are legal, then keep valid options
+                boolean isAnyDirectionPossible = false;
+                for (Monster.Direction d: Monster.Direction.values()) {
+                    Vector2D topLeftCorner = m.applyAnchorModifier(nodeLoc.copy(), d);
+                    Pair<Integer, Integer> mSize = monsterSize.copy();
+                    if (d.ordinal() % 2 == 1) mSize.swap();
+
+                    boolean legal = true;
+                    for (int j = 0; j < mSize.a; j++) {
+                        for (int i = 0; i < mSize.b; i++) {
+                            if (j == 0 && i == 0) continue;  // Already checked this
+                            BoardNode spaceOccupied = dgs.masterBoard.getElement(topLeftCorner.getX() + j, topLeftCorner.getY() + i);
+                            if (spaceOccupied != null) {
+                                PropertyInt figureOnLocation = (PropertyInt) spaceOccupied.getProperty(playersHash);
+                                if (!TerrainType.isWalkableTerrain(spaceOccupied.getComponentName()) || figureOnLocation.value != -1 && figureOnLocation.value != figure.getComponentID()) {
+                                    // TODO refactor to blocked node?
+                                    legal = false;
+                                    break;
+                                }
+                            } else {
+                                legal = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (legal) {
+                        possibleRotations.put(new Pair<>(nodeLoc, d), allAdjacentNodes.get(nodeLoc));
+                        isAnyDirectionPossible = true;
+                    }
+                }
+
+                // If there is no empty space, the location is not reachable
+                if (isAnyDirectionPossible) {
+                    iter.remove();
+                }
+            } else {
+                possibleRotations.put(new Pair<>(nodeLoc, Monster.Direction.DOWN), allAdjacentNodes.get(nodeLoc));
+            }
+        }
+
+        return possibleRotations;
+    }
+
+    private Map<Vector2D, Pair<Double,List<Vector2D>>> getAllPointOfInterests(DescentGameState dgs, Figure figure){
 
         ArrayList<Vector2D> pointsOfInterest = new ArrayList<>();
+        Map<Vector2D, Pair<Double,List<Vector2D>>> movePointOfInterest = new HashMap<>();
         if (figure.getTokenType().equals("Monster")) {
             for (Hero h : dgs.heroes) {
                 pointsOfInterest.add(h.getPosition());
@@ -446,28 +479,42 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
         }
 
-//        for (Vector2D point : pointsOfInterest) {
-//            System.out.println("Point:" + point.toString());
-//        }
-        return pointsOfInterest;
+        //For every point of interest find neighbours that are empty and add then as potential move spots
+        for (Vector2D point : pointsOfInterest){
+            BoardNode figureNode = dgs.masterBoard.getElement(point.getX(), point.getY());
+            Set<Integer> neighbourIDs = figureNode.getNeighbours().keySet();
+            for (Integer neighbourID : neighbourIDs){
+                BoardNode neighbourNode =  (BoardNode) dgs.getComponentById(neighbourID);
+                PropertyInt figureOnLocation = (PropertyInt) neighbourNode.getProperty(playersHash);
+                if (figureOnLocation.value == -1){
+                    Vector2D loc = ((PropertyVector2D) neighbourNode.getProperty(coordinateHash)).values;
+
+                    // TODO: use actual A* instead of 0
+                    //Double movementCost =  a_star_distance(figureNode, neighboutNode)
+                    Double movementCost = 1.0;
+                    List<Vector2D> path = new ArrayList<Vector2D>() {{add(loc);}};  // TODO full path
+                    movePointOfInterest.put(loc, new Pair<>(movementCost, path));
+                }
+            }
+        }
+
+        return movePointOfInterest;
     }
 
     private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
 
-        Map<BoardNode, Pair<Double,List<Vector2D>>> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
-        ArrayList<Vector2D> allPointOfInterests = getAllPointOfInterests(dgs, f);
+        Map<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
+        Map<Vector2D, Pair<Double,List<Vector2D>>> allPointOfInterests = getAllPointOfInterests(dgs, f);
 
+//        allAdjacentNodes.putAll(allPointOfInterests);
+
+        // get all potential rotations for the figure
+        Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> allPossibleRotations = getPossibleRotationsForMoveActions(allAdjacentNodes, dgs, f);
         List<AbstractAction> actions = new ArrayList<>();
-        for (BoardNode node : allAdjacentNodes.keySet()){
-            if (allAdjacentNodes.get(node).a <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
-                actions.add(new Move(allAdjacentNodes.get(node).b));
+        for (Pair<Vector2D, Monster.Direction> loc : allPossibleRotations.keySet()){
+            if (allPossibleRotations.get(loc).a <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
+                actions.add(new Move(allPossibleRotations.get(loc).b, loc.b));
             }
-        }
-
-        for(Vector2D pointOfInterest : allPointOfInterests) {
-//            if (distance(pointOfInterest, f.getPosition()) <= Figure.Attribute.MovePoints){
-//            actions.add(new Move(pointOfInterest.copy()));
-//            }
         }
 
         return actions;
@@ -1162,12 +1209,12 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
                 if (canPlace) {
                     monster.setPosition(option.copy());
+                    PropertyInt prop = new PropertyInt("players", monster.getComponentID());
+                    dgs.masterBoard.getElement(option.getX(), option.getY()).setProperty(prop);
 
-                    for (int i = 0; i < h; i++) {
-                        for (int j = 0; j < w; j++) {
-                            PropertyInt prop = new PropertyInt("players", monster.getComponentID());
-                            dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
-                        }
+                    // For 2x1 monsters
+                    if (w > 1 || h > 1){
+                        dgs.masterBoard.getElement(option.getX(), option.getY()).setProperty(prop);
                     }
                     break;
                 }
