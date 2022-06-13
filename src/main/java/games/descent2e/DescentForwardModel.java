@@ -11,11 +11,7 @@ import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.concepts.Quest;
-import utilities.Pair;
-import utilities.Utils;
-import utilities.Path;
-import utilities.Pathfinder;
-import utilities.Vector2D;
+import utilities.*;
 
 import java.awt.*;
 import java.util.*;
@@ -1235,5 +1231,46 @@ public class DescentForwardModel extends AbstractForwardModel {
                 }
             }
         }
+    }
+
+    private boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint){
+
+        boolean hasLineOfSight = true;
+        ArrayList<Vector2D> containedPoints = LineOfSight.bresenhamsLineAlgorithm(startPoint, endPoint);
+
+
+        // For each coordinate in the line, check:
+        // 1) Does the coordinate have it's board node
+        // 2) Is the board node empty (no character on location)
+        // 3) Is the board node connected to previously checked board node
+        // If any of these are false, then there is no LOS
+        for (int i = 1; i < containedPoints.size(); i++){
+
+            Vector2D previousPoint = containedPoints.get(i - 1);
+            Vector2D point = containedPoints.get(i);
+
+            // Check 1) Does the board node exist at this coordinate
+            BoardNode currentTile = dgs.masterBoard.getElement(point.getX(), point.getY());
+            if (currentTile == null){
+                hasLineOfSight = false;
+                break;
+            }
+
+            // Check 2) Is the board node empty
+            Integer owner = ((PropertyInt) currentTile.getProperty(playersHash)).value;
+            if (owner != -1 && i != containedPoints.size() - 1){
+                hasLineOfSight = false;
+                break;
+            }
+
+            // Check 3) Is the board node connected to previous board node
+            BoardNode previousTile = dgs.masterBoard.getElement(previousPoint.getX(), previousPoint.getY());
+            if (!previousTile.getNeighbours().keySet().contains(currentTile.getComponentID())){
+                hasLineOfSight = false;
+                break;
+            }
+        }
+
+        return hasLineOfSight;
     }
 }
