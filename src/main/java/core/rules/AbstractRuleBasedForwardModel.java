@@ -112,16 +112,21 @@ public abstract class AbstractRuleBasedForwardModel extends AbstractForwardModel
                 Node[] copies = new Node[children.length];
                 for (int j = 0; j < copies.length; j++) {
                     copies[j] = copyNodeGraph(visitedNodes, children[j].getNext());
+                    if (children[j].parent != null) copies[j].setParent(copy);
                 }
                 ((BranchingRuleNode) copy).setNext(copies);
             } else {
-                ((RuleNode) copy).setNext(copyNodeGraph(visitedNodes, node.getNext()));
+                Node child = copyNodeGraph(visitedNodes, node.getNext());
+                if (node.getNext().parent != null) child.setParent(copy);
+                ((RuleNode) copy).setNext(child);
             }
 
         } else if(node instanceof ConditionNode) {
-            ((ConditionNode) copy).setYesNo(
-                    copyNodeGraph(visitedNodes, ((ConditionNode) node).getYesNo()[0]),
-                    copyNodeGraph(visitedNodes, ((ConditionNode) node).getYesNo()[1]));
+            Node childYes = copyNodeGraph(visitedNodes, ((ConditionNode) node).getYesNo()[0]);
+            Node childNo = copyNodeGraph(visitedNodes, ((ConditionNode) node).getYesNo()[1]);
+            if (((ConditionNode) node).getYesNo()[0].parent != null) childYes.setParent(copy);
+            if (((ConditionNode) node).getYesNo()[1].parent != null) childNo.setParent(copy);
+            ((ConditionNode) copy).setYesNo(childYes, childNo);
         }
         return copy;
     }

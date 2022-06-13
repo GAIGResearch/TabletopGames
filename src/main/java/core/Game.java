@@ -16,6 +16,8 @@ import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
 import players.simple.RandomPlayer;
+import players.mcts.MCTSPlayer;
+import players.simple.OSLAPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.Utils;
@@ -26,10 +28,12 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static core.CoreConstants.GameEvents;
+import static games.GameType.*;
 import static utilities.Utils.componentToImage;
 
 public class Game {

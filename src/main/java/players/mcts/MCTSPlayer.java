@@ -5,7 +5,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
 import core.actions.AbstractAction;
-import core.interfaces.IActionHeuristic;
 import core.interfaces.IGameListener;
 import core.interfaces.IStateHeuristic;
 import games.dicemonastery.DiceMonasteryStateAttributes;
@@ -33,7 +32,7 @@ public class MCTSPlayer extends AbstractPlayer {
     protected SingleTreeNode root;
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStats;
     private AbstractPlayer opponentModel;
-    private IActionHeuristic advantageFunction;
+    private ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
 
     public MCTSPlayer() {
         this(System.currentTimeMillis());
@@ -54,7 +53,7 @@ public class MCTSPlayer extends AbstractPlayer {
         opponentModel = params.getOpponentModel();
         heuristic = params.getHeuristic();
         opponentHeuristic = params.getOpponentHeuristic();
-        advantageFunction = params.advantageFunction;
+        advantageFunction = params.getAdvantageFunction();
         setName(name);
     }
 
@@ -86,7 +85,7 @@ public class MCTSPlayer extends AbstractPlayer {
         }
         root.mctsSearch(getStatsLogger());
         if (params.gatherExpertIterationData) {
-            ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer(params.expertIterationFileStem, params.EIStateFeatureVector, params.EIActionFeatureVector);
+            ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer(params.expertIterationFileStem, Arrays.asList(DiceMonasteryStateAttributes.values()));
             eidg.recordData(root, getForwardModel());
             eidg.close();
         }
@@ -141,10 +140,6 @@ public class MCTSPlayer extends AbstractPlayer {
             opponentModel.setForwardModel(model);
     }
 
-    public void setStateHeuristic(IStateHeuristic heuristic) {
-        this.heuristic = heuristic;
-    }
-
     @Override
     public Map<AbstractAction, Map<String, Object>> getDecisionStats() {
         Map<AbstractAction, Map<String, Object>> retValue = new LinkedHashMap<>();
@@ -155,7 +150,7 @@ public class MCTSPlayer extends AbstractPlayer {
                 double visitProportion = visits / (double) root.getVisits();
                 double meanValue =  Arrays.stream(root.children.get(action)).filter(Objects::nonNull).mapToDouble(n -> n.getTotValue()[root.decisionPlayer]).sum()/ visits;
                 double heuristicValue = heuristic != null ? heuristic.evaluateState(root.state, root.decisionPlayer) : 0.0;
-                double advantageValue = advantageFunction != null ? advantageFunction.evaluateAction(action, root.state) : 0.0;
+                double advantageValue = advantageFunction != null ? advantageFunction.applyAsDouble(action, root.state) : 0.0;
 
                 Map<String, Object> actionValues = new HashMap<>();
                 actionValues.put("visits", visits);

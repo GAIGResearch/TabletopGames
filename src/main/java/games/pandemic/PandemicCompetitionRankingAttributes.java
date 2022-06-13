@@ -20,7 +20,7 @@ public enum PandemicCompetitionRankingAttributes implements IGameAttribute {
     // ~ reward finishing winning games quickly, but finishing losing games slowly (with neutral range allowance)
     GAME_TICKS((s) -> s.getGameState().getGameStatus()==WIN? s.getTick() : -s.getTick()),
     GAME_TICKS_RAW(Game::getTick),
-    N_DISEASE_CURED((s) -> countDisease(s, 1, false)),
+    N_DISEASE_CURED((s) -> countDisease(s, 1, false)+countDisease(s, 2, false)),
     N_OUTBREAKS((s) -> ((Counter) ((PandemicGameState)s.getGameState()).getComponent(PandemicConstants.outbreaksHash)).getValue()),
     N_CITY_DANGER(PandemicCompetitionRankingAttributes::countCityDanger),
     N_DISEASE_CUBES_LEFT((s)-> countDisease(s, 0, true)),

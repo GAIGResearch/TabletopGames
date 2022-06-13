@@ -22,10 +22,7 @@ import core.rules.rulenodes.ForceAllPlayerReaction;
 import games.pandemic.actions.AddResearchStation;
 import games.pandemic.actions.InfectCity;
 import games.pandemic.rules.conditions.*;
-import games.pandemic.rules.gameOver.GameOverDiseasesCured;
-import games.pandemic.rules.gameOver.GameOverDrawCards;
-import games.pandemic.rules.gameOver.GameOverInfection;
-import games.pandemic.rules.gameOver.GameOverOutbreak;
+import games.pandemic.rules.gameOver.*;
 import games.pandemic.rules.rules.*;
 import gui.GameFlowDiagram;
 import utilities.Hash;
@@ -54,6 +51,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         GameOverCondition infectLose = new GameOverInfection();
         GameOverCondition outbreakLose = new GameOverOutbreak(pp.loseMaxOutbreak);
         GameOverCondition drawCardsLose = new GameOverDrawCards();
+        GameOverCondition infectionCardsLose = new GameOverDrawInfectionCards();
         GameOverCondition win = new GameOverDiseasesCured();
 
         // Rules
@@ -81,6 +79,8 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         // Set up game over conditions in all rules
         playerAction.addGameOverCondition(win);  // Can win after playing an action, but not reactions
         drawCards.addGameOverCondition(drawCardsLose);
+        epidemic1.addGameOverCondition(infectionCardsLose);
+        infectCities.addGameOverCondition(infectionCardsLose);
         epidemic2.addGameOverCondition(infectLose);
         epidemic2.addGameOverCondition(outbreakLose);
         infectCities.addGameOverCondition(infectLose);
@@ -223,6 +223,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             playerDeck.add(c);
             pp.nEventCards++;
         }
+        playerDeck.shuffle(rnd);
 
         Deck<Card> playerRoles = _data.findDeck("Player Roles");
         Deck<Card> infectionDeck =  _data.findDeck("Infections");
@@ -281,7 +282,6 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
             // Set up player hands
             Deck<Card> playerHandDeck = (Deck<Card>) playerArea.getComponent(playerHandHash);
 
-            playerDeck.shuffle(rnd);
             for (int j = 0; j < nCardsPlayer; j++) {
                 new DrawCard(playerDeck.getComponentID(), playerHandDeck.getComponentID()).execute(state);
             }
@@ -302,14 +302,15 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         playerDeck.shuffle(rnd);
         int noCards = playerDeck.getSize();
         int noEpidemicCards = pp.nEpidemicCards;
-        int range = noCards / noEpidemicCards;
-        for (int i = 0; i < noEpidemicCards; i++) {
-            int index = i * range + i + rnd.nextInt(range);
+        if (noEpidemicCards > 0) {
+            int range = noCards / noEpidemicCards;
+            for (int i = 0; i < noEpidemicCards; i++) {
+                int index = i * range + i + rnd.nextInt(range);
 
-            Card card = new Card("Epidemic");
-            card.setProperty(new PropertyString("name", "epidemic"));
-            playerDeck.add(card, index);
-
+                Card card = new Card("Epidemic");
+                card.setProperty(new PropertyString("name", "epidemic"));
+                playerDeck.add(card, index);
+            }
         }
 
         // Research station in Atlanta

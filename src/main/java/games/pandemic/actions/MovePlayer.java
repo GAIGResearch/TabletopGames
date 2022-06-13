@@ -15,26 +15,38 @@ import static core.CoreConstants.playersHash;
 
 
 public class MovePlayer extends AbstractAction {
-    int playerIdx;
+    int playerToMove;
     String destination;
+    MoveType moveType;
 
-    public MovePlayer(int playerIdx, String city) {
-        this.playerIdx = playerIdx;
+    public enum MoveType {
+        Airlift,
+        OperationsExpert,
+        Dispatcher,
+        DriveFerry,
+        CharterFlight,
+        DirectFlight,
+        ShuttleFlight,
+    }
+
+    public MovePlayer(MoveType type, int playerIdx, String city) {
+        this.moveType = type;
+        this.playerToMove = playerIdx;
         this.destination = city;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         PandemicGameState pgs = (PandemicGameState) gs;
-        PropertyString prop = (PropertyString) pgs.getComponent(PandemicConstants.playerCardHash, playerIdx).getProperty(PandemicConstants.playerLocationHash);
-        removePlayer((PandemicGameState)gs, prop.value, playerIdx);
-        placePlayer((PandemicGameState)gs, destination, playerIdx);
+        PropertyString prop = (PropertyString) pgs.getComponent(PandemicConstants.playerCardHash, playerToMove).getProperty(PandemicConstants.playerLocationHash);
+        removePlayer((PandemicGameState)gs, prop.value, playerToMove);
+        placePlayer((PandemicGameState)gs, destination, playerToMove);
         return true;
     }
 
     @Override
     public AbstractAction copy() {
-        return new MovePlayer(playerIdx, destination);
+        return new MovePlayer(moveType, playerToMove, destination);
     }
 
 
@@ -68,23 +80,23 @@ public class MovePlayer extends AbstractAction {
         if(other instanceof MovePlayer)
         {
             MovePlayer otherAction = (MovePlayer) other;
-            return destination.equals(otherAction.destination) && playerIdx == otherAction.playerIdx;
+            return destination.equals(otherAction.destination) && playerToMove == otherAction.playerToMove;
 
         }else return false;
     }
 
     @Override
     public String toString() {
-        return "Move Player " + playerIdx + " to " + destination;
+        return moveType + ": p" + playerToMove + " to " + destination;
     }
 
-    public int getPlayerIdx() {
-        return playerIdx;
+    public int getPlayerToMove() {
+        return playerToMove;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerIdx, destination);
+        return Objects.hash(playerToMove, destination);
     }
 
     @Override
