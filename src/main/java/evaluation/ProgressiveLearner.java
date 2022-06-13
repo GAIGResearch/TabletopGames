@@ -29,7 +29,7 @@ public class ProgressiveLearner {
     List<AbstractPlayer> agents;
     ILearner learner;
     int nPlayers, matchups, iterations, iter, finalMatchups;
-    AbstractPlayer[] basePlayers;
+    AbstractPlayer basePlayer;
     AbstractPlayer[] agentsPerGeneration;
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
@@ -146,22 +146,20 @@ public class ProgressiveLearner {
         } while (iter < iterations);
 
         // Now we can run a tournament of everyone
-        if (basePlayers.length == 1) {
-            List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
-            // then add in the default agent that we started with
-            AbstractPlayer defaultAgent = PlayerFactory.createPlayer(player, this::injectAgentAttributes);
-            defaultAgent.setName("Default Agent");
-            finalAgents.add(defaultAgent);
-            RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers, 1, true, finalMatchups,
-                    System.currentTimeMillis(), params);
+        List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
+        finalAgents.add(basePlayer);
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers, 1, true, finalMatchups,
+                System.currentTimeMillis(), params);
 
-            tournament.listeners = new ArrayList<>();
-            IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
-            IGameListener gameTracker = IGameListener.createListener("utilities.GameResultListener", logger);
-            tournament.listeners.add(gameTracker);
-            tournament.runTournament();
-            gameTracker.allGamesFinished();
-        }
+        tournament.listeners = new ArrayList<>();
+        IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
+        IGameListener gameTracker = IGameListener.createListener("utilities.GameResultListener", logger);
+        tournament.listeners.add(gameTracker);
+        tournament.runTournament();
+      // gameTracker.allGamesFinished(); // This is done in tournament
+
+        // TODO : then find the winner, and record it
+
     }
 
     private void loadAgents() {
@@ -170,22 +168,22 @@ public class ProgressiveLearner {
         agents = new LinkedList<>();
         File playerLoc = new File(player);
         if (playerLoc.isDirectory()) {
-            agents.addAll(PlayerFactory.createPlayers(player, this::injectAgentAttributes));
-        } else {
-            if (iter == 0 || useOnlyLast)
-                agents.add(PlayerFactory.createPlayer(player, this::injectAgentAttributes));
-            else {
-                agents.add(basePlayers[0]);
-                agents.addAll(Arrays.asList(agentsPerGeneration).subList(0, iter));
-            }
+            throw new IllegalArgumentException("Not yet implemented for a directory of players");
         }
-        if (iter == 0) {
-            basePlayers = agents.toArray(new AbstractPlayer[0]);
+        if (iter == 0 || useOnlyLast) {
+            agents.add(PlayerFactory.createPlayer(player, this::injectAgentAttributes));
+            if (iter == 0) {
+                basePlayer = agents.get(0);
+                basePlayer.setName("Default Agent");
+            }
+        } else {
+            agents.add(basePlayer);
+            agents.addAll(Arrays.asList(agentsPerGeneration).subList(0, iter));
         }
     }
 
     private String injectAgentAttributes(String raw) {
-        String fileName = iter == 0 ? "" : learnedFilesByIteration[iter - 1];
+        String fileName = learnedFilesByIteration[iter] == null ? "" : learnedFilesByIteration[iter] ;
         return raw.replaceAll(Pattern.quote("*FILE*"), fileName)
                 .replaceAll(Pattern.quote("*PHI*"), phiClass)
                 .replaceAll(Pattern.quote("*HEURISTIC*"), heuristic)
@@ -214,9 +212,8 @@ public class ProgressiveLearner {
         learner.writeToFile(fileName);
 
         // if we only have one agent type, then we can create one agent as the result of this round
-        if (basePlayers.length == 1) {
-            agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, this::injectAgentAttributes);
-            agentsPerGeneration[iter].setName(String.format("Iteration %2d", iter));
-        }
+        agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, this::injectAgentAttributes);
+        agentsPerGeneration[iter].setName(String.format("Iteration %2d", iter + 1));
+
     }
 }

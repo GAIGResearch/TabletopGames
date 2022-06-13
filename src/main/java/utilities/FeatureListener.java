@@ -75,6 +75,8 @@ public abstract class FeatureListener implements IGameListener {
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
         // we record one state for each player after every action is taken
+        // TODO: This might be better to do at the end of each round, or turn?
+        // TODO: This reduce noise and increase signal (might)
         if (type == CoreConstants.GameEvents.ACTION_TAKEN) {
             for (int p = 0; p < state.getNPlayers(); p++) {
                 double[] phi = extractFeatureVector(action, state, p);
