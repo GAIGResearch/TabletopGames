@@ -96,19 +96,17 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         // decision to be made
         boolean foundInterrupt = false;
         do {
-            // TODO: One player may have multiple interrupts
-            // Not least the attacking player when they spend multiple surges!
-            if (phase.interrupt == null || interruptPlayer == attackingPlayer) {
-                // we have completed the loop
-                executePhase(state);
-                interruptPlayer = attackingPlayer;
-            }
             if (playerHasInterruptOption(state)) {
                 foundInterrupt = true;
              //   System.out.println("Interrupt for player " + interruptPlayer);
                 // we need to get a decision from this player
             } else {
                 interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
+                if (phase.interrupt == null || interruptPlayer == attackingPlayer) {
+                    // we have completed the loop, and start again with the attacking player
+                    executePhase(state);
+                    interruptPlayer = attackingPlayer;
+                }
             }
         } while (!foundInterrupt && phase != ALL_DONE);
     }
@@ -174,6 +172,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                 phase = ALL_DONE;
                 break;
         }
+        // and reset interrupts
     }
 
     protected void defenceRoll(DescentGameState state) {
