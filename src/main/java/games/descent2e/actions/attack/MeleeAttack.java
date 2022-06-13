@@ -2,6 +2,7 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.Component;
 import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
@@ -260,6 +261,8 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
+        if (action instanceof DoNothing && phase == SURGE_DECISIONS)
+            surgesToSpend = 0;
         movePhaseForward((DescentGameState) state);
     }
 

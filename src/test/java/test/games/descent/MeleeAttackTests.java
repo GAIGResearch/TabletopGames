@@ -216,7 +216,6 @@ public class MeleeAttackTests {
         return retValue;
     }
 
-
     @Test
     public void canChooseToDoNothingAtSurgeDecisions() {
         Figure victim = state.getMonsters().get(0).get(0);
