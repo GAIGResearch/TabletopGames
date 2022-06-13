@@ -29,11 +29,13 @@ public class ProgressiveLearner {
     List<AbstractPlayer> agents;
     ILearner learner;
     int nPlayers, matchups, iterations, iter, finalMatchups;
+    AbstractPlayer[] basePlayers;
     AbstractPlayer[] agentsPerGeneration;
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
     IStateFeatureVector phi;
     String phiClass, prefix;
+    boolean useOnlyLast;
 
     public ProgressiveLearner(String[] args) {
 
@@ -49,6 +51,7 @@ public class ProgressiveLearner {
         matchups = getArg(args, "matchups", 1);
         finalMatchups = getArg(args, "finalMatchups", 1000);
         iterations = getArg(args, "iterations", 100);
+        useOnlyLast = getArg(args, "useOnlyLast", false);
         agentsPerGeneration = new AbstractPlayer[iterations];
         dataFilesByIteration = new String[iterations];
         String learnerClass = getArg(args, "learner", "");
@@ -86,7 +89,7 @@ public class ProgressiveLearner {
                             "\tplayer=        The JSON file of the agent definition to be used. \n" +
                             "\t               This will need to use a heuristic that takes a file input.\n" +
                             "\t               This location(s) for this injection in the JSON file must be marked with '*FILE*'\n" +
-                            "\t               The content of the 'heuristic' argument will be injected to replace *HEURISTIC* in the file.\n"  +
+                            "\t               The content of the 'heuristic' argument will be injected to replace *HEURISTIC* in the file.\n" +
                             "\t               It can also optionally have the class to be used as FeatureVector marked with '*PHI*'\n" +
                             "\t               in which case the value specifies in the statePhi argument will be injected.\n" +
                             "\t               A default heuristic can be specified for the initial iteration with '*DEFAULT*'\n" +
@@ -143,7 +146,7 @@ public class ProgressiveLearner {
         } while (iter < iterations);
 
         // Now we can run a tournament of everyone
-        if (agents.size() == 1) {
+        if (basePlayers.length == 1) {
             List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
             // then add in the default agent that we started with
             AbstractPlayer defaultAgent = PlayerFactory.createPlayer(player, this::injectAgentAttributes);
@@ -169,7 +172,15 @@ public class ProgressiveLearner {
         if (playerLoc.isDirectory()) {
             agents.addAll(PlayerFactory.createPlayers(player, this::injectAgentAttributes));
         } else {
-            agents.add(PlayerFactory.createPlayer(player, this::injectAgentAttributes));
+            if (iter == 0 || useOnlyLast)
+                agents.add(PlayerFactory.createPlayer(player, this::injectAgentAttributes));
+            else {
+                agents.add(basePlayers[0]);
+                agents.addAll(Arrays.asList(agentsPerGeneration).subList(0, iter));
+            }
+        }
+        if (iter == 0) {
+            basePlayers = agents.toArray(new AbstractPlayer[0]);
         }
     }
 
@@ -203,7 +214,7 @@ public class ProgressiveLearner {
         learner.writeToFile(fileName);
 
         // if we only have one agent type, then we can create one agent as the result of this round
-        if (agents.size() == 1) {
+        if (basePlayers.length == 1) {
             agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, this::injectAgentAttributes);
             agentsPerGeneration[iter].setName(String.format("Iteration %2d", iter));
         }

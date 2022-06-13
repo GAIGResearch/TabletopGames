@@ -15,14 +15,14 @@ public class SimpleSVMLearner extends AbstractLearner {
     svm_parameter params = new svm_parameter();
 
     public SimpleSVMLearner() {
-        params.gamma = 10.0;
+        params.gamma = 5.0;
         params.kernel_type = svm_parameter.RBF;
         params.degree = 2;
-        params.svm_type = svm_parameter.NU_SVR;
+        params.svm_type = svm_parameter.EPSILON_SVR;
         params.nu = 0.60;
-        params.C = 0.3;
+        params.C = 1.0;
         params.eps = 0.01;
-        params.p = 0.1;
+        params.p = 0.003;
         params.shrinking = 1;
     }
     public SimpleSVMLearner(svm_parameter params) {
@@ -47,6 +47,7 @@ public class SimpleSVMLearner extends AbstractLearner {
 
         // SVM is at least available as a regressor
         // unlike the Weka Logistic implementation, here we do not do any messing about with a bias term
+        // which is just passed through (it is the first element in dataArray)
         svm_problem data = new svm_problem();
         data.l = dataArray.length;
         data.y = new double[dataArray.length];
@@ -83,7 +84,6 @@ public class SimpleSVMLearner extends AbstractLearner {
         }
 
         return new Pair<>(medianDiff / dataArray.length, squaredDiff / dataArray.length);
-
     }
 
 

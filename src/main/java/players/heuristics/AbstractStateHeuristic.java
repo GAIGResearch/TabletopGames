@@ -22,11 +22,15 @@ public abstract class AbstractStateHeuristic implements IStateHeuristic {
             e.printStackTrace();
             throw new AssertionError("Problem with Class : " + featureVectorClassName);
         }
-        try {
-            defaultHeuristic = (IStateHeuristic) Class.forName(defaultHeuristicClassName).getConstructor().newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError("Problem with Class : " + defaultHeuristicClassName);
+        if (defaultHeuristicClassName.equals("")) {
+            defaultHeuristic = new LeaderHeuristic();
+        } else {
+            try {
+                defaultHeuristic = (IStateHeuristic) Class.forName(defaultHeuristicClassName).getConstructor().newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new AssertionError("Problem with Class : " + defaultHeuristicClassName);
+            }
         }
         loadModel(coefficientsFile);
     }

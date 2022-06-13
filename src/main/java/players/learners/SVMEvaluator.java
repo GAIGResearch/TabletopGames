@@ -118,7 +118,7 @@ public class SVMEvaluator implements SolutionEvaluator {
             meanResult += result;
         }
         long endTime = System.currentTimeMillis();
-        System.out.printf("Training: %d, Evaluating: %d%n", trainTime - startTime, endTime - trainTime);
+        System.out.printf("Training: %d, Evaluating: %d, Result: %.2f%n", trainTime - startTime, endTime - trainTime, meanResult / gamesPerEval);
         nEvals++;
         return -meanResult / gamesPerEval;
     }

@@ -164,6 +164,8 @@ public class RoundRobinTournament extends AbstractTournament {
         }
         if (dataLogger != null)
             dataLogger.processDataAndFinish();
+        for (IGameListener listener : listeners)
+            listener.allGamesFinished();
     }
 
     /**
