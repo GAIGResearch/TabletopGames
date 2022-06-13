@@ -9,10 +9,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
-import games.descent2e.actions.attack.MeleeAttack;
-import games.descent2e.actions.attack.RangedAttack;
-import games.descent2e.actions.attack.Surge;
-import games.descent2e.actions.attack.SurgeAttackAction;
+import games.descent2e.actions.attack.*;
 import games.descent2e.components.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -201,7 +198,7 @@ public class MeleeAttackTests {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
         assertEquals(new SurgeAttackAction(Surge.STUN, actingFigure.getComponentID()), actions.get(0));
-        assertEquals(new DoNothing(), actions.get(1));
+        assertEquals(new EndSurgePhase(), actions.get(1));
 
         actions.get(0).execute(state);
         attack.registerActionTaken(state, actions.get(0));
@@ -232,10 +229,31 @@ public class MeleeAttackTests {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
         assertEquals(new SurgeAttackAction(Surge.STUN, actingFigure.getComponentID()), actions.get(0));
-        assertEquals(new DoNothing(), actions.get(1));
+        assertEquals(new EndSurgePhase(), actions.get(1));
 
         actions.get(1).execute(state);
         attack.registerActionTaken(state, actions.get(1));
+        assertTrue(attack.executionComplete(state));
+    }
+
+    @Test
+    public void cannotChooseTheSameSurgeTwice() {
+        Figure victim = state.getMonsters().get(0).get(0);
+        Figure actingFigure = state.getActingFigure();
+        DicePool attackDice = fixBlueAndYellowDice(5, 1);  // we now have 2 surges
+
+        MeleeAttack attack = new MeleeAttackOverride(
+                actingFigure.getComponentID(), victim.getComponentID(),
+                attackDice, null);
+        attack.execute(state);
+        assertFalse(attack.executionComplete(state));
+        assertEquals(attack, state.currentActionInProgress());
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(new SurgeAttackAction(Surge.STUN, actingFigure.getComponentID()), actions.get(0));
+
+        actions.get(0).execute(state);
+        attack.registerActionTaken(state, actions.get(0));
         assertTrue(attack.executionComplete(state));
     }
 

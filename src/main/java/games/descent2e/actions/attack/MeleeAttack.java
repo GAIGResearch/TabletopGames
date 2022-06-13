@@ -58,6 +58,8 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     int extraRange, pierce, extraDamage;
     boolean isStunning; // TODO: This doesn't actually stun the target (making them lose their next go) yet
 
+    Set<Surge> surgesUsed = new HashSet<>();
+
     public MeleeAttack(int attackingFigure, int defendingFigure) {
         this.attackingFigure = attackingFigure;
         this.defendingFigure = defendingFigure;
@@ -99,7 +101,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         do {
             if (playerHasInterruptOption(state)) {
                 foundInterrupt = true;
-             //   System.out.println("Interrupt for player " + interruptPlayer);
+                System.out.println("Interrupt for player " + interruptPlayer);
                 // we need to get a decision from this player
             } else {
                 interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
@@ -133,11 +135,11 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                 // always fine
         }
         // second we see if they can interrupt (i.e. have a relevant card/ability)
-        return !state.getInterruptActionsFor(interruptPlayer, phase.interrupt).isEmpty();
+        return !_computeAvailableActions(state).isEmpty();
     }
 
     private void executePhase(DescentGameState state) {
-     //   System.out.println("Executing phase " + phase);
+        System.out.println("Executing phase " + phase);
         switch (phase) {
             case NOT_STARTED:
             case ALL_DONE:
@@ -155,6 +157,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                 break;
             case SURGE_DECISIONS:
                 // any surge decisions are executed via interrupts
+                surgesUsed.clear();
                 phase = PRE_DEFENCE_ROLL;
                 break;
             case PRE_DEFENCE_ROLL:
@@ -209,6 +212,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         retValue.surgesToSpend = surgesToSpend;
         retValue.extraRange = extraRange;
         retValue.extraDamage = extraDamage;
+        retValue.surgesUsed = new HashSet<>(surgesUsed);
         retValue.pierce = pierce;
         retValue.isStunning = isStunning;
         return retValue;
@@ -222,6 +226,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
                     other.surgesToSpend == surgesToSpend && other.extraDamage == extraRange &&
                     other.isStunning == isStunning && other.extraRange == extraRange && other.pierce == pierce &&
                     other.attackingPlayer == attackingPlayer && other.defendingFigure == defendingFigure &&
+                    other.surgesUsed.equals(surgesUsed) &&
                     other.defendingPlayer == defendingPlayer && other.phase == phase && other.interruptPlayer == interruptPlayer;
         }
         return false;
@@ -230,7 +235,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     @Override
     public int hashCode() {
         return Objects.hash(attackingFigure, attackingPlayer, defendingFigure,
-                pierce, extraRange, isStunning, extraDamage,
+                pierce, extraRange, isStunning, extraDamage, surgesUsed,
                 defendingPlayer, phase.ordinal(), interruptPlayer, surgesToSpend);
     }
 
@@ -245,12 +250,31 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         return String.format("Melee Attack (Wpn: %d on %d", attackingPlayer, attackingFigure);
     }
 
+    public void registerSurge(Surge surge) {
+        if (surgesUsed.contains(surge))
+            throw new IllegalArgumentException(surge + " has already been used");
+        surgesUsed.add(surge);
+    }
+
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         if (phase.interrupt == null)
             throw new AssertionError("Should not be reachable");
         DescentGameState state = (DescentGameState) gs;
-        return state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
+        List<AbstractAction> retValue = state.getInterruptActionsFor(interruptPlayer, phase.interrupt);
+        // now we filter this for any that have been used
+        if (phase == SURGE_DECISIONS) {
+            retValue.removeIf(a -> {
+               if (a instanceof SurgeAttackAction) {
+                   SurgeAttackAction surge = (SurgeAttackAction)a;
+                   return surgesUsed.contains(surge.surge);
+               }
+               return false;
+            });
+            if (!retValue.isEmpty())
+                retValue.add(new EndSurgePhase());
+        }
+        return retValue;
     }
 
     @Override
@@ -261,8 +285,6 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // after the interrupt action has been taken, we can continue to see who interrupts next
-        if (action instanceof DoNothing && phase == SURGE_DECISIONS)
-            surgesToSpend = 0;
         movePhaseForward((DescentGameState) state);
     }
 

@@ -30,6 +30,7 @@ public class SurgeAttackAction extends DescentAction {
     @Override
     public boolean execute(DescentGameState gs) {
         MeleeAttack attack = (MeleeAttack) gs.currentActionInProgress();
+        attack.registerSurge(surge);
         surge.apply(attack, gs);
         return true;
     }

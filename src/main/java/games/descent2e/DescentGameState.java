@@ -253,14 +253,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         List<AbstractAction> retValue = descentActions.stream()
                 .filter(a -> a.canExecute(trigger, this))
                 .map(a -> (AbstractAction) a).collect(Collectors.toList());
-
-        if (retValue.isEmpty()) {
-            return retValue;
-        } else {
-            // always add a DoNothing option is we have any options at all
-            retValue.add(new DoNothing());
-            return retValue;
-        }
+        return retValue;
     }
 
     public int[][] getTileReferences() {
