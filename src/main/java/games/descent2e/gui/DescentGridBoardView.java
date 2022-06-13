@@ -234,6 +234,20 @@ public class DescentGridBoardView extends ComponentView {
             g.setColor(Color.black);
             g.drawRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
         }
+
+        // Debug print cell coordinates
+//        g.setColor(Color.white);
+//        Font f = g.getFont();
+//        g.setFont(new Font(f.getName(), Font.PLAIN, (int)(12*scale)));
+//        GridBoard gridBoard = (GridBoard) component;
+//        for (int i = 0; i < gridBoard.getHeight(); i++) {
+//            for (int j = 0; j < gridBoard.getWidth(); j++) {
+//                int xC = panX + j * descentItemSize;
+//                int yC = panY + i * descentItemSize;
+//                g.drawString("X:" + j + " Y:" + i, xC + defaultItemSize/5, yC + defaultItemSize);
+//            }
+//        }
+//        g.setFont(f);
     }
 
     public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
@@ -286,9 +300,6 @@ public class DescentGridBoardView extends ComponentView {
             g.setColor(Color.black);
             g.drawRect(xC, yC, descentItemSize, descentItemSize);
             g.setStroke(new BasicStroke(5));
-
-            //TODO: Remove after testing, added for movement debugging - Marko
-//            g.drawString("X:" + x + " Y:" + y, xC + 5, yC + 15);
 
             List<Vector2D> notConnectedList = notConnectedMap.get(new Vector2D(xC, yC));
             if (notConnectedList == null) {

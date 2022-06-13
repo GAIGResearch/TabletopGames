@@ -56,6 +56,9 @@ public class Figure extends Token {
     HashMap<Attribute, Counter> attributes;
     Counter nActionsExecuted;
 
+    // For big monsters, this is the anchor point. Their size and orientation can be used to find all spaces occupied by the figure
+    // Note: size remains constant and never changes. For finding spaces when orientation % 2 == 1 for medium monsters,
+    // size dimensions should be swapped (in a copy of the pair to leave this the same).
     Vector2D position;
     Pair<Integer,Integer> size;
 
@@ -69,7 +72,6 @@ public class Figure extends Token {
         attributes = new HashMap<>();
         attributes.put(XP, new Counter(0, 0, -1, "XP"));
         abilities = new ArrayList<>();
-        // TODO: param, how many actions a figure can do
         nActionsExecuted = new Counter(0, 0, nActionsPossible, "Actions executed");
     }
 

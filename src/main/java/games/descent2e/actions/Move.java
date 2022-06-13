@@ -38,13 +38,13 @@ public class Move extends AbstractAction {
         // Go through all positions traveled as part of this movement, applying all costs and penalties
         // TODO big monsters don't need to be able to fully occupy all spaces travelled
         for (Vector2D pos: positionsTraveled) {
-            moveTo(dgs, f, pos.copy());
+            moveTo(dgs, f, pos.copy(), orientation);
         }
 
         return true;
     }
 
-    private void moveTo(DescentGameState dgs, Figure f, Vector2D position) {
+    public static void moveTo(DescentGameState dgs, Figure f, Vector2D position, Monster.Direction orientation) {
         // Update location and orientation
         Vector2D oldTopLeftAnchor = f.getPosition().copy();
         if (f instanceof Monster) {

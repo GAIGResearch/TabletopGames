@@ -423,7 +423,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                     boolean legal = true;
                     for (int j = 0; j < mSize.a; j++) {
                         for (int i = 0; i < mSize.b; i++) {
-                            if (j == 0 && i == 0) continue;  // Already checked this
+//                            if (j == 0 && i == 0) continue;  // Already checked this
                             BoardNode spaceOccupied = dgs.masterBoard.getElement(topLeftCorner.getX() + j, topLeftCorner.getY() + i);
                             if (spaceOccupied != null) {
                                 PropertyInt figureOnLocation = (PropertyInt) spaceOccupied.getProperty(playersHash);
@@ -1210,11 +1210,10 @@ public class DescentForwardModel extends AbstractForwardModel {
                 if (canPlace) {
                     monster.setPosition(option.copy());
                     PropertyInt prop = new PropertyInt("players", monster.getComponentID());
-                    dgs.masterBoard.getElement(option.getX(), option.getY()).setProperty(prop);
-
-                    // For 2x1 monsters
-                    if (w > 1 || h > 1){
-                        dgs.masterBoard.getElement(option.getX(), option.getY()).setProperty(prop);
+                    for (int i = 0; i < h; i++) {
+                        for (int j = 0; j < w; j++) {
+                            dgs.masterBoard.getElement(option.getX() + j, option.getY() + i).setProperty(prop);
+                        }
                     }
                     break;
                 }
