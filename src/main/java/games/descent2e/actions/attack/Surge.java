@@ -8,6 +8,7 @@ import java.util.function.BiConsumer;
 
 // These should be immutable - do not add internal state
 public enum Surge {
+    // a = attack action, s = state (OBVIOUSLY!)
     RANGE_PLUS_1(1, (a, s) -> a.addRange(1)),
     PIERCE_2(1, (a, s) -> a.addPierce(2)),
     STUN(1, (a, s) -> a.setStunning(true)), // TODO: This doesn't yet have any actual effect
