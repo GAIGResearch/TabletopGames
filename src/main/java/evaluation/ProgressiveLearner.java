@@ -160,7 +160,7 @@ public class ProgressiveLearner {
             IGameListener gameTracker = IGameListener.createListener("utilities.GameResultListener", logger);
             tournament.listeners.add(gameTracker);
             tournament.runTournament();
-            gameTracker.allGamesFinished();
+     //       gameTracker.allGamesFinished();
         }
     }
 
