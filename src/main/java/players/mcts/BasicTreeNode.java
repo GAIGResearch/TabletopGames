@@ -238,7 +238,7 @@ class BasicTreeNode {
             }
         }
         // Evaluate final state and return normalised score
-        return rolloutState.getHeuristicScore(player.getPlayerID());
+        return player.params.getHeuristic().evaluateState(rolloutState, player.getPlayerID());
     }
 
     /**

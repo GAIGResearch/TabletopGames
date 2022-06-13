@@ -1,0 +1,57 @@
+[
+  {
+    "name": ["String", "developmentCards"],
+    "cards": [
+      {
+        "name": ["String", "Knight"],
+        "count": ["Integer", 14],
+        "description": ["String", ""]
+      },
+      {
+        "name": ["String", "Monopoly"],
+        "count": ["Integer", 2],
+        "description": ["String", ""]
+      },
+      {
+        "name": ["String", "Year of Plenty"],
+        "count": ["Integer", 2],
+        "description": ["String", ""]
+      },
+      {
+        "name": ["String", "Road Building"],
+        "count": ["Integer", 2],
+        "description": ["String", ""]
+      },
+      {
+        "name": ["String", "Victory Point"],
+        "count": ["Integer", 5],
+        "description": ["String", ""]
+      }
+    ]
+  },
+  {
+    "name": ["String", "resourceCards"],
+    "cards": [
+      {
+        "name": ["String", "Brick"],
+        "count": ["Integer", 19]
+      },
+      {
+        "name": ["String", "Lumber"],
+        "count": ["Integer", 19]
+      },
+      {
+        "name": ["String", "Ore"],
+        "count": ["Integer", 19]
+      },
+      {
+        "name": ["String", "Grain"],
+        "count": ["Integer", 19]
+      },
+      {
+        "name": ["String", "Wool"],
+        "count": ["Integer", 19]
+      }
+    ]
+  }
+]

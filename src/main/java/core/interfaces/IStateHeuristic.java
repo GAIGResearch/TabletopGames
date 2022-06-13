@@ -6,11 +6,11 @@ import core.AbstractGameState;
 public interface IStateHeuristic {
 
     /**
-     * Returns a score for the state that should be maximised by the player (the bigger, the better).
+     * Returns a score for the state that should be maximised by the player (the higher, the better).
      * Ideally bounded between [-1, 1].
-     * @param state - game state to evaluate and score.
-     * @param playerId
+     * @param gs - game state to evaluate and score.
+     * @param playerId - id of the player we're evaluating the game for.
      * @return - value of given state.
      */
-    double evaluateState(AbstractGameState state, int playerId);
+    double evaluateState(AbstractGameState gs, int playerId);
 }

@@ -86,7 +86,9 @@ public class MCTSPlayer extends AbstractPlayer {
         }
         root.mctsSearch(getStatsLogger());
         if (params.gatherExpertIterationData) {
-            ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer(params.expertIterationFileStem, params.EIStateFeatureVector, params.EIActionFeatureVector);
+            ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer(
+                    params.expertIterationFileStem,
+                    params.EIStateFeatureVector, params.EIActionFeatureVector);
             eidg.recordData(root, getForwardModel());
             eidg.close();
         }

@@ -16,8 +16,8 @@ import java.util.function.BiFunction;
 public enum ActionSimpleAttributes implements IGameAttribute {
 
     GAME_ID((s, a) -> s.getGameID()),
-    ROUND((s, a) -> (s.getTurnOrder()).getTurnCounter()),
-    TURN((s, a) -> (s.getTurnOrder()).getRoundCounter()),
+    ROUND((s, a) -> (s.getTurnOrder()).getRoundCounter()),
+    TURN((s, a) -> (s.getTurnOrder()).getTurnCounter()),
     PLAYER((s, a) -> s.getCurrentPlayer()),
     PLAYER_SCORE((s, a) -> s.getGameScore(s.getCurrentPlayer())),
     ACTION_TYPE((s, a) -> a == null ? "NONE" : a.getClass().getSimpleName()),
