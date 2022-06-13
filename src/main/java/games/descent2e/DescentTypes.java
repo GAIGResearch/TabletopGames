@@ -69,6 +69,18 @@ public class DescentTypes {
         Block(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}});
 
         HashMap<Figure.Attribute, Integer> moveCosts;
+        static HashSet<TerrainType> walkableTerrains = new HashSet<TerrainType>() {{
+            add(Plain);
+            add(Water);
+            add(Lava);
+            add(Hazard);
+//                add(Pit);
+        }};
+        static HashSet<TerrainType> marginTerrains = new HashSet<TerrainType>() {{
+            add(Edge);
+            add(Open);
+            add(Null);
+        }};
         TerrainType(HashMap<Figure.Attribute, Integer> moveCosts) {
             this.moveCosts = moveCosts;
         }
@@ -90,13 +102,7 @@ public class DescentTypes {
         }
 
         public static HashSet<TerrainType> getWalkableTerrains() {
-            return new HashSet<TerrainType>() {{
-                add(Plain);
-                add(Water);
-                add(Lava);
-                add(Hazard);
-//                add(Pit);
-            }};
+            return walkableTerrains;
         }
 
         public static HashSet<String> getWalkableStringTerrains() {
@@ -108,11 +114,7 @@ public class DescentTypes {
         }
 
         public static HashSet<TerrainType> getMarginTerrains() {
-            return new HashSet<TerrainType>() {{
-                add(Edge);
-                add(Open);
-                add(Null);
-            }};
+            return marginTerrains;
         }
 
         public static HashSet<String> getMarginStringTerrains() {
@@ -124,15 +126,15 @@ public class DescentTypes {
         }
 
         public static boolean isWalkableTerrain(String terrain) {
-            return terrain != null && (getWalkableStringTerrains().contains(terrain));
+            return terrain != null && walkableTerrains.contains(Utils.searchEnum(TerrainType.class, terrain));
         }
 
         public static boolean isInsideTerrain(String terrain) {
-            return terrain != null && (!getMarginStringTerrains().contains(terrain));
+            return terrain != null && !marginTerrains.contains(Utils.searchEnum(TerrainType.class, terrain));
         }
 
         public static boolean isMarginTerrain(String terrain) {
-            return terrain != null && getMarginStringTerrains().contains(terrain);
+            return terrain != null && marginTerrains.contains(Utils.searchEnum(TerrainType.class, terrain));
         }
     }
 

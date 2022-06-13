@@ -449,7 +449,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                     iter.remove();
                 }
             } else {
-                possibleRotations.put(new Pair<>(nodeLoc, Monster.Direction.DOWN), allAdjacentNodes.get(nodeLoc));
+                possibleRotations.put(new Pair<>(nodeLoc, Monster.Direction.getDefault()), allAdjacentNodes.get(nodeLoc));
             }
         }
 
