@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Random;
 
+import static games.descent2e.gui.DescentGUI.foregroundColor;
 import static gui.AbstractGUIManager.defaultItemSize;
 
 public class DescentHeroView extends ComponentView {
@@ -77,6 +78,8 @@ public class DescentHeroView extends ComponentView {
     protected void paintComponent(Graphics g) {
         /* draw blank character card and fill in information */
 
+        // TODO ugly version
+
         // Draw character card
         g.drawImage(characterCard, 0, 0, (int)(characterCardScale * characterCard.getWidth(null)), (int)(characterCardScale * characterCard.getHeight(null)), null);
 
@@ -88,7 +91,7 @@ public class DescentHeroView extends ComponentView {
         g.drawString(hero.getComponentName(), (int)(characterCardScale*20), (int)(characterCardScale*40));
 
         // Draw max attribute values
-        g.setColor(Color.white);
+        g.setColor(foregroundColor);
         for (Figure.Attribute a: maxValuesPositionMap.keySet()) {
             if (a.isSecondary()) g.setFont(secondaryAttributeF);
             else g.setFont(primaryAttributeF);
@@ -110,7 +113,7 @@ public class DescentHeroView extends ComponentView {
         /* Draw other data stored on the figure */
 
         // Draw attribute current values
-        g.setColor(Color.white);
+        g.setColor(foregroundColor);
         int n = 0;
         for (Figure.Attribute a: Figure.Attribute.values()) {
             if (!a.isSecondary()) {

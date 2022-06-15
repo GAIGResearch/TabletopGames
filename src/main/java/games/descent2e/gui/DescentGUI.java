@@ -32,12 +32,18 @@ public class DescentGUI extends AbstractGUIManager {
     DescentHeroView[] heroAreas;
     JPanel overlordArea;
 
+    static boolean prettyVersion = true;  // Turn off to not draw images
+    static Color foregroundColor = Color.black;
+
     public DescentGUI(GamePanel panel, AbstractGameState gameState, ActionController ac) {
         super(panel, ac, 100);  // TODO: calculate/approximate max action space
 
         DescentGameState dgs = (DescentGameState) gameState;
-        panel.setBackground(ImageIO.GetInstance().getImage(((DescentParameters)gameState.getGameParameters()).dataPath + "img/bg2.jpg"));
-        panel.setOpacity(1f);
+        if (prettyVersion) {
+            panel.setBackground(ImageIO.GetInstance().getImage(((DescentParameters) gameState.getGameParameters()).dataPath + "img/bg2.jpg"));
+            panel.setOpacity(1f);
+            foregroundColor = Color.white;
+        }
 
         int shadowSize = 10;
         view = new DescentGridBoardView(dgs.getMasterBoard(), dgs, shadowSize, maxWidth/2,maxHeight/2);
@@ -108,7 +114,7 @@ public class DescentGUI extends AbstractGUIManager {
         gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
         JLabel gt = new JLabel("<html><h1>Descent 2e</h1></html>");
         gt.setFont(titleFont);
-        gt.setForeground(Color.white);
+        gt.setForeground(foregroundColor);
         gameInfo.add(gt);
 
         updateGameStateInfo(gameState);
@@ -121,12 +127,12 @@ public class DescentGUI extends AbstractGUIManager {
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
         gameInfo.add(actingFigureLabel);
-        gameStatus.setForeground(Color.white);
-        gamePhase.setForeground(Color.white);
-        turnOwner.setForeground(Color.white);
-        turn.setForeground(Color.white);
-        currentPlayer.setForeground(Color.white);
-        actingFigureLabel.setForeground(Color.white);
+        gameStatus.setForeground(foregroundColor);
+        gamePhase.setForeground(foregroundColor);
+        turnOwner.setForeground(foregroundColor);
+        turn.setForeground(foregroundColor);
+        currentPlayer.setForeground(foregroundColor);
+        actingFigureLabel.setForeground(foregroundColor);
 
         gameInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
         gameInfo.setMaximumSize(new Dimension(width / 2 - 10, height));
@@ -141,10 +147,10 @@ public class DescentGUI extends AbstractGUIManager {
         historyWrapper.setOpaque(false);
         historyWrapper.setLayout(new BoxLayout(historyWrapper, BoxLayout.Y_AXIS));
         JLabel historyTitle = new JLabel("Action history:");
-        historyTitle.setForeground(Color.white);
+        historyTitle.setForeground(foregroundColor);
         historyWrapper.add(historyTitle);
         historyInfo.setPreferredSize(new Dimension(width / 2 - 10, height - 10));
-        historyInfo.setForeground(Color.white);
+        historyInfo.setForeground(foregroundColor);
         historyInfo.setOpaque(false);
         historyContainer = new JScrollPane(historyInfo);
         historyContainer.setOpaque(false);

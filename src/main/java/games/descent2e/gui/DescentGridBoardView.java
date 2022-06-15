@@ -25,15 +25,17 @@ import java.util.*;
 import java.util.List;
 
 import static core.CoreConstants.*;
+import static games.descent2e.gui.DescentGUI.foregroundColor;
+import static games.descent2e.gui.DescentGUI.prettyVersion;
 import static gui.AbstractGUIManager.defaultItemSize;
 import static utilities.Utils.*;
 
 public class DescentGridBoardView extends ComponentView {
 
     public static HashMap<String, Color> colorMap = new HashMap<String, Color>() {{
-        put("null", Color.gray);
-        put(null, Color.gray);
-        put("edge", Color.gray);
+        put("null", Color.black);
+        put(null, Color.black);
+        put("edge", Color.black);
         put("plain", Color.white);
         put("block", Color.red);
         put("lava", Color.orange);
@@ -47,7 +49,7 @@ public class DescentGridBoardView extends ComponentView {
     static int descentItemSize;
 
     int panX, panY;
-    double scale = 1;
+    double scale;
     Set<Vector2D> highlights;
     Color highlightColor = new Color(207, 75, 220);
     int maxHighlights = 3;
@@ -59,12 +61,16 @@ public class DescentGridBoardView extends ComponentView {
     int offset;
     Dimension maxSize;
 
+    boolean debugDrawCellCoordinates = false;
+    boolean debugDrawGridReferences = false;
+    boolean debugDrawTileReferences = false;
+
     public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState, int offset, int width, int height) {
         super(gridBoard, width, height);
         this.gameState = gameState;
         this.offset = offset;
         this.maxSize = new Dimension(width+offset*2, height+offset*2);
-        this.dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
+        dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
         notConnectedMap = new HashMap<>();
         double w = gridBoard.getWidth() * defaultItemSize;
         double h = gridBoard.getHeight() * defaultItemSize;
@@ -140,12 +146,7 @@ public class DescentGridBoardView extends ComponentView {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON3 || highlights.size() >= maxHighlights) {
                     highlights.clear();
-                    return;
                 }
-//                Point p = new Point(e.getX() - panX, e.getY() - panY);
-//                if (infectionDeckLocation.contains(p)) {
-//                    highlights.put("infectionDeck", infectionDeckLocation);
-//                }
             }
         });
     }
@@ -162,13 +163,16 @@ public class DescentGridBoardView extends ComponentView {
     protected void paintComponent(Graphics g) {
         // Draw background
         g.setColor(Color.black);
-        g.fillRect(offset, offset, width, height);
+        g.fillRect(offset, offset, width-offset*10, height);
 
-//        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard) component, offset+panX, offset+panY, gameState.getGridReferences(), gameState.getTileReferences());
-
-        for (Map.Entry<Vector2D, Pair<Image, Pair<Integer, Integer>>> e: tileImageTopLeftCorners.entrySet()) {
-            g.drawImage(e.getValue().a, offset+panX + e.getKey().getX() * descentItemSize, offset+panY + e.getKey().getY() * descentItemSize,
-                    e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize, null);
+        if (prettyVersion) {
+            // Draw map tile images
+            for (Map.Entry<Vector2D, Pair<Image, Pair<Integer, Integer>>> e: tileImageTopLeftCorners.entrySet()) {
+                g.drawImage(e.getValue().a, offset+panX + e.getKey().getX() * descentItemSize, offset+panY + e.getKey().getY() * descentItemSize,
+                        e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize, null);
+            }
+        } else {
+            drawGridBoardWithGraphConnectivity((Graphics2D) g, (GridBoard) component, offset + panX, offset + panY, gameState.getGridReferences(), gameState.getTileReferences());
         }
 
         // Draw tokens
@@ -177,6 +181,8 @@ public class DescentGridBoardView extends ComponentView {
                 String imgPath = dataPath + dt.getDescentTokenType().getImgPath(new Random(gameState.getGameParameters().getRandomSeed()));
                 Image img = ImageIO.GetInstance().getImage(imgPath);
                 g.drawImage(img, offset+panX + dt.getPosition().getX() * descentItemSize, offset+panY + dt.getPosition().getY() * descentItemSize, descentItemSize, descentItemSize, null);
+
+                // TODO ugly version
             }
         }
 
@@ -185,16 +191,19 @@ public class DescentGridBoardView extends ComponentView {
             Vector2D loc = f.getPosition();
             DescentTypes.Archetype archetype = DescentTypes.Archetype.valueOf(((PropertyString)f.getProperty("archetype")).value);
 
-            // Color
-//            g.setColor(archetype.getColor());
-//            g.fillOval(offset+panX + loc.getX() * itemSize, offset+panY + loc.getY() * itemSize, itemSize, itemSize);
-//            g.setColor(Color.black);
-//            g.drawOval(offset+panX + loc.getX() * itemSize, offset+panY + loc.getY() * itemSize, itemSize, itemSize);
-
-            // Or image
-            Image img = ImageIO.GetInstance().getImage(dataPath + "heroes/" + archetype.name().toLowerCase() + ".png");
-            g.drawImage(img, offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize, null);
+            if (prettyVersion) {
+                // Image
+                Image img = ImageIO.GetInstance().getImage(dataPath + "heroes/" + archetype.name().toLowerCase() + ".png");
+                g.drawImage(img, offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize, null);
+            } else {
+                // Color
+                g.setColor(archetype.getColor());
+                g.fillOval(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
+                g.setColor(Color.black);
+                g.drawOval(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
+            }
         }
+
         // Draw monsters
         for (List<Monster> monsterGroup: gameState.getMonsters()) {
             String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
@@ -210,6 +219,8 @@ public class DescentGridBoardView extends ComponentView {
                 size.a *= descentItemSize;
                 size.b *= descentItemSize;
 
+                // TODO ugly version
+
                 String imagePath = dataPath;
                 if (((PropertyColor) m.getProperty(colorHash)).valueStr.equals("red")) {
                     imagePath += path.replace(".png", "-master.png");
@@ -222,32 +233,33 @@ public class DescentGridBoardView extends ComponentView {
             }
         }
 
-        // Draw highlights
-        for (Vector2D pos: highlights) {
+        // TODO highlight acting figure
 
+        // Draw action space highlights
+        for (Vector2D pos: highlights) {
             int xC = offset+panX + pos.getX() * descentItemSize;
             int yC = offset+ panY + pos.getY() * descentItemSize;
-
-            // Paint cell background
             g.setColor(highlightColor);
             g.fillRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
             g.setColor(Color.black);
             g.drawRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
         }
 
-        // Debug print cell coordinates
-//        g.setColor(Color.white);
-//        Font f = g.getFont();
-//        g.setFont(new Font(f.getName(), Font.PLAIN, (int)(12*scale)));
-//        GridBoard gridBoard = (GridBoard) component;
-//        for (int i = 0; i < gridBoard.getHeight(); i++) {
-//            for (int j = 0; j < gridBoard.getWidth(); j++) {
-//                int xC = panX + j * descentItemSize;
-//                int yC = panY + i * descentItemSize;
-//                g.drawString("X:" + j + " Y:" + i, xC + defaultItemSize/5, yC + defaultItemSize);
-//            }
-//        }
-//        g.setFont(f);
+        // Debug draw cell coordinates
+        if (debugDrawCellCoordinates) {
+            g.setColor(foregroundColor);
+            Font f = g.getFont();
+            g.setFont(new Font(f.getName(), Font.PLAIN, (int)(12*scale)));
+            GridBoard gridBoard = (GridBoard) component;
+            for (int i = 0; i < gridBoard.getHeight(); i++) {
+                for (int j = 0; j < gridBoard.getWidth(); j++) {
+                    int xC = panX + j * descentItemSize;
+                    int yC = panY + i * descentItemSize;
+                    g.drawString("X:" + j + " Y:" + i, xC + defaultItemSize/5, yC + defaultItemSize);
+                }
+            }
+            g.setFont(f);
+        }
     }
 
     public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
@@ -266,20 +278,25 @@ public class DescentGridBoardView extends ComponentView {
             }
         }
 
+        g.setColor(foregroundColor);
+
         // Draw grid references
-        g.setColor(Color.black);
-//        for (String tile: gridReferences.keySet()) {
-//            for (Vector2D t: gridReferences.get(tile)) {
-//                g.drawString(tile, x+t.getX()*defaultItemSize + 10, y+t.getY()*defaultItemSize + 10);
-//            }
-//        }
+        if (debugDrawGridReferences) {
+            for (String tile: gridReferences.keySet()) {
+                for (Vector2D t: gridReferences.get(tile).keySet()) {
+                    g.drawString(tile, x+t.getX()*defaultItemSize + 10, y+t.getY()*defaultItemSize + 10);
+                }
+            }
+        }
 
         // Draw tile references
-//        for (int i = 0; i < gridBoard.getHeight(); i++) {
-//            for (int j = 0; j < gridBoard.getWidth(); j++) {
-//                g.drawString(""+tileReferences[i][j], x+j*defaultItemSize + 10, y+i*defaultItemSize + 10);
-//            }
-//        }
+        if (debugDrawTileReferences) {
+            for (int i = 0; i < gridBoard.getHeight(); i++) {
+                for (int j = 0; j < gridBoard.getWidth(); j++) {
+                    g.drawString(""+tileReferences[i][j], x+j*defaultItemSize + 10, y+i*defaultItemSize + 10);
+                }
+            }
+        }
     }
 
 
