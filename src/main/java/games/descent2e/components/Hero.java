@@ -2,6 +2,7 @@ package games.descent2e.components;
 
 import core.CoreConstants;
 import core.components.Card;
+import core.components.Counter;
 import core.components.Deck;
 import core.properties.Property;
 import core.properties.PropertyString;
@@ -34,8 +35,8 @@ public class Hero extends Figure {
 
     String ability;
 
-    public Hero(String name) {
-        super(name);
+    public Hero(String name, int nActionsPossible) {
+        super(name, nActionsPossible);
 
         skills = new Deck<>("Skills", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         handEquipment = new Deck<>("Hands", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
@@ -56,8 +57,8 @@ public class Hero extends Figure {
         rested = false;
     }
 
-    protected Hero(String name, int ID) {
-        super(name, ID);
+    protected Hero(String name, Counter actions, int ID) {
+        super(name, actions, ID);
     }
 
     public Deck<Card> getSkills() {
@@ -214,13 +215,13 @@ public class Hero extends Figure {
 
     @Override
     public Hero copy() {
-        Hero copy = new Hero(componentName, componentID);
+        Hero copy = new Hero(componentName, nActionsExecuted.copy(), componentID);
         return copyTo(copy);
     }
 
     @Override
     public Hero copyNewID() {
-        Hero copy = new Hero(componentName);
+        Hero copy = new Hero(componentName, -1);
         return copyTo(copy);
     }
 
@@ -271,7 +272,7 @@ public class Hero extends Figure {
             JSONArray data = (JSONArray) jsonParser.parse(reader);
             for (Object o : data) {
 
-                Hero newFigure = new Hero("");
+                Hero newFigure = new Hero("", -1);
                 newFigure.loadHero((JSONObject) o);
                 figures.add(newFigure);
             }

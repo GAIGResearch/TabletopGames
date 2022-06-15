@@ -1,14 +1,11 @@
 package games.descent2e.components;
 
-import core.components.Card;
 import core.components.Counter;
-import core.components.Deck;
 import core.components.Token;
 import core.properties.PropertyInt;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
-import games.descent2e.actions.Move;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -38,38 +35,57 @@ public class Figure extends Token {
         Might,
         Willpower,
         Knowledge,
-        Awareness
+        Awareness;
+        public boolean isSecondary() {
+            switch (this) {
+                case MovePoints:
+                case Health:
+                case XP:
+                case Fatigue:
+                    return false;
+                case Might:
+                case Willpower:
+                case Knowledge:
+                case Awareness:
+                    return true;
+            }
+            return false;
+        }
     }
 
     HashMap<Attribute, Counter> attributes;
+    Counter nActionsExecuted;
 
-    int nActionsExecuted;
-
+    // For big monsters, this is the anchor point. Their size and orientation can be used to find all spaces occupied by the figure
+    // Note: size remains constant and never changes. For finding spaces when orientation % 2 == 1 for medium monsters,
+    // size dimensions should be swapped (in a copy of the pair to leave this the same).
     Vector2D position;
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
     ArrayList<DescentAction> abilities;  // TODO track exhausted etc.
 
-    public Figure(String name) {
+    public Figure(String name, int nActionsPossible) {
         super(name);
         size = new Pair<>(1,1);
         conditions = new HashSet<>();
         attributes = new HashMap<>();
         attributes.put(XP, new Counter(0, 0, -1, "XP"));
         abilities = new ArrayList<>();
+        nActionsExecuted = new Counter(0, 0, nActionsPossible, "Actions executed");
     }
 
-    protected Figure(String name, int ID) {
+    protected Figure(String name, Counter actions, int ID) {
         super(name, ID);
+        this.nActionsExecuted = actions;
     }
 
     public void resetRound() {
         if (this.attributes.containsKey(MovePoints)) {
             // Overlord doesn't have move points
-            this.attributes.get(MovePoints).setToMax();
+            this.attributes.get(MovePoints).setToMin();
         }
-        this.nActionsExecuted = 0;
+        this.nActionsExecuted.setToMin();
     }
 
     public Counter getAttribute(Attribute attribute) {
@@ -116,12 +132,8 @@ public class Figure extends Token {
         this.position = position;
     }
 
-    public int getNActionsExecuted() {
+    public Counter getNActionsExecuted() {
         return nActionsExecuted;
-    }
-
-    public void setNActionsExecuted(int nActionsExecuted) {
-        this.nActionsExecuted = nActionsExecuted;
     }
 
     public void setSize(int width, int height) {
@@ -164,14 +176,15 @@ public class Figure extends Token {
 
     @Override
     public Figure copy() {
-        Figure copy = new Figure(componentName, componentID);
+        Figure copy = new Figure(componentName, nActionsExecuted.copy(), componentID);
         copyComponentTo(copy);
         return copy;
     }
 
     public Figure copyNewID() {
-        Figure copy = new Figure(componentName);
+        Figure copy = new Figure(componentName, nActionsExecuted.getMaximum());
         copyComponentTo(copy);
+        copy.nActionsExecuted = nActionsExecuted.copy();
         return copy;
     }
 
@@ -234,32 +247,17 @@ public class Figure extends Token {
         loadFigure(figure, new HashSet<>());
     }
 
-    /**
-     * Loads all figures from a JSON file.
-     *
-     * @param filename - path to file.
-     * @return - List of Figure objects.
-     */
-    public static List<Figure> loadFigures(String filename) {
-        JSONParser jsonParser = new JSONParser();
-        ArrayList<Figure> figures = new ArrayList<>();
-
-        try (FileReader reader = new FileReader(filename)) {
-
-            JSONArray data = (JSONArray) jsonParser.parse(reader);
-            for (Object o : data) {
-
-                Figure newFigure = new Figure("");
-                newFigure.loadFigure((JSONObject) o);
-                figures.add(newFigure);
-            }
-
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
-        }
-
-        return figures;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Figure)) return false;
+        if (!super.equals(o)) return false;
+        Figure figure = (Figure) o;
+        return Objects.equals(attackDice, figure.attackDice) && Objects.equals(defenceDice, figure.defenceDice) && Objects.equals(attributes, figure.attributes) && Objects.equals(nActionsExecuted, figure.nActionsExecuted) && Objects.equals(position, figure.position) && Objects.equals(size, figure.size) && Objects.equals(conditions, figure.conditions) && Objects.equals(abilities, figure.abilities);
     }
 
-    // TODO: Add equals() and hashcode()
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), attackDice, defenceDice, attributes, nActionsExecuted, position, size, conditions, abilities);
+    }
 }

@@ -3,6 +3,7 @@ package games.descent2e.gui;
 import core.components.BoardNode;
 import core.components.GridBoard;
 import core.properties.PropertyColor;
+import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
@@ -10,7 +11,6 @@ import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
-import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 import gui.views.ComponentView;
 import utilities.ImageIO;
@@ -20,20 +20,22 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
 import static core.CoreConstants.*;
+import static games.descent2e.gui.DescentGUI.foregroundColor;
+import static games.descent2e.gui.DescentGUI.prettyVersion;
 import static gui.AbstractGUIManager.defaultItemSize;
-import static utilities.Utils.getNeighbourhood;
-import static utilities.Utils.stringToColor;
+import static utilities.Utils.*;
 
 public class DescentGridBoardView extends ComponentView {
 
     public static HashMap<String, Color> colorMap = new HashMap<String, Color>() {{
-        put("null", Color.gray);
-        put(null, Color.gray);
-        put("edge", Color.gray);
+        put("null", Color.black);
+        put(null, Color.black);
+        put("edge", Color.black);
         put("plain", Color.white);
         put("block", Color.red);
         put("lava", Color.orange);
@@ -44,19 +46,69 @@ public class DescentGridBoardView extends ComponentView {
     }};
 
     private DescentGameState gameState;
-    int itemSize;
+    static int descentItemSize;
 
     int panX, panY;
-    double scale = 1.;
-    HashMap<String, Rectangle> highlights;
+    double scale;
+    Set<Vector2D> highlights;
+    Color highlightColor = new Color(207, 75, 220);
     int maxHighlights = 3;
 
-    public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState) {
-        super(gridBoard, (gridBoard.getWidth()+1) * defaultItemSize, (gridBoard.getHeight()+1) * defaultItemSize);
+    HashMap<Vector2D, List<Vector2D>> notConnectedMap;
+    HashMap<Vector2D, Pair<Image, Pair<Integer, Integer>>> tileImageTopLeftCorners;
+
+    static String dataPath;
+    int offset;
+    Dimension maxSize;
+
+    boolean debugDrawCellCoordinates = false;
+    boolean debugDrawGridReferences = false;
+    boolean debugDrawTileReferences = false;
+
+    public DescentGridBoardView(GridBoard gridBoard, DescentGameState gameState, int offset, int width, int height) {
+        super(gridBoard, width, height);
         this.gameState = gameState;
+        this.offset = offset;
+        this.maxSize = new Dimension(width+offset*2, height+offset*2);
+        dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
+        notConnectedMap = new HashMap<>();
+        double w = gridBoard.getWidth() * defaultItemSize;
+        double h = gridBoard.getHeight() * defaultItemSize;
+        double minScale = 1.0;
+        if (width / w < minScale) minScale = width/w;
+        if (height / h < minScale) minScale = height/h;
+        scale = minScale;
         updateScale(scale);
 
-        highlights = new HashMap<>();
+        // Focus on hero characters
+//        Hero hero = gameState.getHeroes().get(0);
+//        Vector2D pos = hero.getPosition();
+//        panX = pos.getX() * descentItemSize / 2;
+//        panY = -pos.getY() * descentItemSize / 2 - descentItemSize * 3;
+
+        // Cache the top-left corners of rotated tile images for quick drawing
+        tileImageTopLeftCorners = new HashMap<>();
+        for (String tile: gameState.getGridReferences().keySet()) {
+            int minX = Integer.MAX_VALUE;
+            int minY = Integer.MAX_VALUE;
+            int maxX = 0;
+            int maxY = 0;
+            int compID = -1;
+            for (Vector2D space: gameState.getGridReferences().get(tile).keySet()) {
+                if (space.getX() < minX) minX = space.getX();
+                if (space.getY() < minY) minY = space.getY();
+                if (space.getX() > maxX) maxX = space.getX();
+                if (space.getY() > maxY) maxY = space.getY();
+                compID = gameState.getTileReferences()[space.getY()][space.getX()];
+            }
+            int orientation = ((PropertyInt)gameState.getTiles().get(compID).getProperty(orientationHash)).value;
+            Image img = ImageIO.GetInstance().getImage(dataPath + "tiles/" + tile.split("-")[0] + ".png");
+            Image img2 = rotateImage((BufferedImage) img, new Pair<>(img.getWidth(null), img.getHeight(null)), orientation);
+
+            tileImageTopLeftCorners.put(new Vector2D(minX, minY), new Pair<>(img2, new Pair<>(maxX-minX+1, maxY-minY+1)));
+        }
+
+        highlights = new HashSet<>();
         addMouseWheelListener(e -> {
             double amount = 0.2 * Math.abs(e.getPreciseWheelRotation());
             if (e.getPreciseWheelRotation() > 0) {
@@ -94,18 +146,13 @@ public class DescentGridBoardView extends ComponentView {
             public void mouseClicked(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON3 || highlights.size() >= maxHighlights) {
                     highlights.clear();
-                    return;
                 }
-//                Point p = new Point(e.getX() - panX, e.getY() - panY);
-//                if (infectionDeckLocation.contains(p)) {
-//                    highlights.put("infectionDeck", infectionDeckLocation);
-//                }
             }
         });
     }
     private void updateScale(double scale) {
         this.scale = scale;
-        itemSize = (int)(scale * defaultItemSize);
+        descentItemSize = (int)(scale * defaultItemSize);
     }
 
     public void updateGameState(DescentGameState gameState) {
@@ -114,17 +161,28 @@ public class DescentGridBoardView extends ComponentView {
 
     @Override
     protected void paintComponent(Graphics g) {
-        drawGridBoardWithGraphConnectivity((Graphics2D)g, (GridBoard) component, panX, panY, gameState.getGridReferences(), gameState.getTileReferences());
-        String dataPath = ((DescentParameters) gameState.getGameParameters()).dataPath + "img/";
+        // Draw background
+        g.setColor(Color.black);
+        g.fillRect(offset, offset, width-offset*10, height);
+
+        if (prettyVersion) {
+            // Draw map tile images
+            for (Map.Entry<Vector2D, Pair<Image, Pair<Integer, Integer>>> e: tileImageTopLeftCorners.entrySet()) {
+                g.drawImage(e.getValue().a, offset+panX + e.getKey().getX() * descentItemSize, offset+panY + e.getKey().getY() * descentItemSize,
+                        e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize, null);
+            }
+        } else {
+            drawGridBoardWithGraphConnectivity((Graphics2D) g, (GridBoard) component, offset + panX, offset + panY, gameState.getGridReferences(), gameState.getTileReferences());
+        }
 
         // Draw tokens
         for (DToken dt: gameState.getTokens()) {
             if (dt.getPosition() != null) {
                 String imgPath = dataPath + dt.getDescentTokenType().getImgPath(new Random(gameState.getGameParameters().getRandomSeed()));
                 Image img = ImageIO.GetInstance().getImage(imgPath);
-                g.drawImage(img, panX + dt.getPosition().getX() * itemSize, panY + dt.getPosition().getY() * itemSize, itemSize, itemSize, null);
-            } else {
-                // todo check if player owns, draw in player area
+                g.drawImage(img, offset+panX + dt.getPosition().getX() * descentItemSize, offset+panY + dt.getPosition().getY() * descentItemSize, descentItemSize, descentItemSize, null);
+
+                // TODO ugly version
             }
         }
 
@@ -133,29 +191,35 @@ public class DescentGridBoardView extends ComponentView {
             Vector2D loc = f.getPosition();
             DescentTypes.Archetype archetype = DescentTypes.Archetype.valueOf(((PropertyString)f.getProperty("archetype")).value);
 
-            // Color
-//            g.setColor(archetype.getColor());
-//            g.fillOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
-//            g.setColor(Color.black);
-//            g.drawOval(panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize);
-
-            // Or image
-            Image img = ImageIO.GetInstance().getImage(dataPath + "heroes/" + archetype.name().toLowerCase() + ".png");
-            g.drawImage(img, panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, itemSize, itemSize, null);
+            if (prettyVersion) {
+                // Image
+                Image img = ImageIO.GetInstance().getImage(dataPath + "heroes/" + archetype.name().toLowerCase() + ".png");
+                g.drawImage(img, offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize, null);
+            } else {
+                // Color
+                g.setColor(archetype.getColor());
+                g.fillOval(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
+                g.setColor(Color.black);
+                g.drawOval(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
+            }
         }
+
         // Draw monsters
         for (List<Monster> monsterGroup: gameState.getMonsters()) {
             String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
 
             for (Monster m: monsterGroup) {
-                Vector2D loc = m.getPosition();
+//                Vector2D loc = m.getPosition();
+                Vector2D loc = m.applyAnchorModifier();
                 if (loc == null) continue;
-                int orientation = m.getOrientation();
+                int orientation = m.getOrientation().ordinal();
 
-                Pair<Integer, Integer> size = m.getSize();
-                if (orientation % 2 == 1) {
-                    size.swap();
-                }
+                // Get the size of the monster, and scale according to item size
+                Pair<Integer, Integer> size = m.getSize().copy();
+                size.a *= descentItemSize;
+                size.b *= descentItemSize;
+
+                // TODO ugly version
 
                 String imagePath = dataPath;
                 if (((PropertyColor) m.getProperty(colorHash)).valueStr.equals("red")) {
@@ -163,25 +227,44 @@ public class DescentGridBoardView extends ComponentView {
                 } else {
                     imagePath += path;
                 }
-                Image img = ImageIO.GetInstance().getImage(imagePath);
-                g.drawImage(img, panX + loc.getX() * itemSize, panY + loc.getY() * itemSize, size.a * itemSize, size.b * itemSize, null);
+                Image imgRaw = ImageIO.GetInstance().getImage(imagePath);
+                BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
+                g.drawImage(imgToDraw, offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize,null);
             }
         }
 
-    }
+        // TODO highlight acting figure
 
+        // Draw action space highlights
+        for (Vector2D pos: highlights) {
+            int xC = offset+panX + pos.getX() * descentItemSize;
+            int yC = offset+ panY + pos.getY() * descentItemSize;
+            g.setColor(highlightColor);
+            g.fillRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
+            g.setColor(Color.black);
+            g.drawRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
+        }
+
+        // Debug draw cell coordinates
+        if (debugDrawCellCoordinates) {
+            g.setColor(foregroundColor);
+            Font f = g.getFont();
+            g.setFont(new Font(f.getName(), Font.PLAIN, (int)(12*scale)));
+            GridBoard gridBoard = (GridBoard) component;
+            for (int i = 0; i < gridBoard.getHeight(); i++) {
+                for (int j = 0; j < gridBoard.getWidth(); j++) {
+                    int xC = panX + j * descentItemSize;
+                    int yC = panY + i * descentItemSize;
+                    g.drawString("X:" + j + " Y:" + i, xC + defaultItemSize/5, yC + defaultItemSize);
+                }
+            }
+            g.setFont(f);
+        }
+    }
 
     public void drawGridBoardWithGraphConnectivity(Graphics2D g, GridBoard gridBoard, int x, int y,
                                                           Map<String, Map<Vector2D,Vector2D>> gridReferences,
                                                           int[][] tileReferences) {
-        int width = gridBoard.getWidth() * itemSize;
-        int height = gridBoard.getHeight() * itemSize;
-
-        // Draw background
-        g.setColor(Color.lightGray);
-        g.fillRect(x, y, width-1, height-1);
-        g.setColor(Color.black);
-
         // Draw cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
@@ -195,89 +278,99 @@ public class DescentGridBoardView extends ComponentView {
             }
         }
 
+        g.setColor(foregroundColor);
+
         // Draw grid references
-        g.setColor(Color.black);
-//        for (String tile: gridReferences.keySet()) {
-//            for (Vector2D t: gridReferences.get(tile)) {
-//                g.drawString(tile, x+t.getX()*defaultItemSize + 10, y+t.getY()*defaultItemSize + 10);
-//            }
-//        }
+        if (debugDrawGridReferences) {
+            for (String tile: gridReferences.keySet()) {
+                for (Vector2D t: gridReferences.get(tile).keySet()) {
+                    g.drawString(tile, x+t.getX()*defaultItemSize + 10, y+t.getY()*defaultItemSize + 10);
+                }
+            }
+        }
 
         // Draw tile references
-//        for (int i = 0; i < gridBoard.getHeight(); i++) {
-//            for (int j = 0; j < gridBoard.getWidth(); j++) {
-//                g.drawString(""+tileReferences[i][j], x+j*defaultItemSize + 10, y+i*defaultItemSize + 10);
-//            }
-//        }
+        if (debugDrawTileReferences) {
+            for (int i = 0; i < gridBoard.getHeight(); i++) {
+                for (int j = 0; j < gridBoard.getWidth(); j++) {
+                    g.drawString(""+tileReferences[i][j], x+j*defaultItemSize + 10, y+i*defaultItemSize + 10);
+                }
+            }
+        }
     }
 
 
     private void drawCell(Graphics2D g, BoardNode bn, int x, int y, int gridWidth, int gridHeight, int offsetX, int offsetY) {
         if (bn == null) return;
 
-        int xC = offsetX + x * itemSize;
-        int yC = offsetY + y * itemSize;
+        int xC = offsetX + x * descentItemSize;
+        int yC = offsetY + y * descentItemSize;
 
         // Paint cell background
         g.setColor(colorMap.get(bn.getComponentName()));
-        g.fillRect(xC, yC, itemSize, itemSize);
+        g.fillRect(xC, yC, descentItemSize, descentItemSize);
 
         String terrain = bn.getComponentName();
         Stroke s = g.getStroke();
 
         if (DescentTypes.TerrainType.isWalkableTerrain(terrain)) {
             g.setColor(Color.black);
-            g.drawRect(xC, yC, itemSize, itemSize);
+            g.drawRect(xC, yC, descentItemSize, descentItemSize);
             g.setStroke(new BasicStroke(5));
 
-            //TODO: Remove after testing, added for movement debugging - Marko
-//            g.drawString("X:" + x + " Y:" + y, xC + 5, yC + 15);
+            List<Vector2D> notConnectedList = notConnectedMap.get(new Vector2D(xC, yC));
+            if (notConnectedList == null) {
+                notConnectedList = new ArrayList<>();
+                // Find connectivity in the graph and draw borders to the cell where connection doesn't exist
+                List<Vector2D> neighbourCells = getNeighbourhood(x, y, gridWidth, gridHeight, false);
+                // Explore all neighbourhood of this cell
+                for (Vector2D n : neighbourCells) {
 
-            // Find connectivity in the graph and draw borders to the cell where connection doesn't exist
-            List<Vector2D> neighbourCells = getNeighbourhood(x, y, gridWidth, gridHeight, false);
-            // Explore all neighbourhood of this cell
-            for (Vector2D n : neighbourCells) {
-
-                // Check if this node is a connected neighbour
-                boolean connected = false;
-                for (int nnid : bn.getNeighbours().keySet()) {
-                    BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
-                    if (nn == null) continue;
-                    Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
-                    if (location.equals(n)) {
-                        connected = true;
-                        break;
+                    // Check if this node is a connected neighbour
+                    boolean connected = false;
+                    for (int nnid : bn.getNeighbours().keySet()) {
+                        BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
+                        if (nn == null) continue;
+                        Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
+                        if (location.equals(n)) {
+                            connected = true;
+                            break;
+                        }
                     }
+                    if (!connected) notConnectedList.add(n);
                 }
-                if (!connected) {
-                    // Not a connection between these neighbours, drawing a thick black line on the edge to indicate this
-                    if (n.getX() - x == 0) {
-                        // Vertical neighbours, draw horizontal line
-                        if (n.getY() > y) {
-                            // Neighbour is below, separation line is y + cell size
-                            g.drawLine(xC, yC + itemSize, xC + itemSize, yC + itemSize);
-                        } else {
-                            // Neighbour is above, separation line is y
-                            g.drawLine(xC, yC, xC + itemSize, yC);
-                        }
-                    } else if (n.getY() - y == 0) {
-                        // Horizontal neighbours, draw vertical line
-                        if (n.getX() > x) {
-                            // Neighbour is to the right, separation line is x + cell size
-                            g.drawLine(xC + itemSize, yC, xC + itemSize, yC + itemSize);
-                        } else {
-                            // Neighbour is to the left, separation line is x
-                            g.drawLine(xC, yC, xC, yC + itemSize);
-                        }
+                // Caching the not connected neighbours for faster drawing of thick lines between these
+                notConnectedMap.put(new Vector2D(xC, yC), notConnectedList);
+            }
+            for (Vector2D n: notConnectedList) {
+                // Not a connection between these neighbours, drawing a thick black line on the edge to indicate this
+                if (n.getX() - x == 0) {
+                    // Vertical neighbours, draw horizontal line
+                    if (n.getY() > y) {
+                        // Neighbour is below, separation line is y + cell size
+                        g.drawLine(xC, yC + descentItemSize, xC + descentItemSize, yC + descentItemSize);
+                    } else {
+                        // Neighbour is above, separation line is y
+                        g.drawLine(xC, yC, xC + descentItemSize, yC);
+                    }
+                } else if (n.getY() - y == 0) {
+                    // Horizontal neighbours, draw vertical line
+                    if (n.getX() > x) {
+                        // Neighbour is to the right, separation line is x + cell size
+                        g.drawLine(xC + descentItemSize, yC, xC + descentItemSize, yC + descentItemSize);
+                    } else {
+                        // Neighbour is to the left, separation line is x
+                        g.drawLine(xC, yC, xC, yC + descentItemSize);
                     }
                 }
             }
+
         } else {
             // Bocked terrain can never be occupied, not connected to anything
             if (terrain.equals("block")) {
                 g.setStroke(new BasicStroke(5));
                 g.setColor(Color.black);
-                g.drawRect(xC, yC, itemSize, itemSize);
+                g.drawRect(xC, yC, descentItemSize, descentItemSize);
             }
         }
         g.setStroke(s);
@@ -285,21 +378,24 @@ public class DescentGridBoardView extends ComponentView {
 
     private void drawNeighbourConnections(Graphics2D g, BoardNode bn, int x, int y, int offsetX, int offsetY) {
         if (bn == null) return;
-        int xC = offsetX + x * itemSize;
-        int yC = offsetY + y * itemSize;
+        int xC = offsetX + x * descentItemSize;
+        int yC = offsetY + y * descentItemSize;
 
         // Draw underlying graph
         g.setColor(Color.green);
+        Stroke s = g.getStroke();
         for (int nnid : bn.getNeighbours().keySet()) {
             BoardNode nn = (BoardNode) gameState.getComponentById(nnid);
             if (nn == null) continue;
             Vector2D location = ((PropertyVector2D) nn.getProperty(coordinateHash)).values;
-            int xC2 = offsetX + location.getX() * itemSize;
-            int yC2 = offsetY + location.getY() * itemSize;
+            int xC2 = offsetX + location.getX() * descentItemSize;
+            int yC2 = offsetY + location.getY() * descentItemSize;
 
-            g.drawLine(xC + itemSize/2, yC + itemSize/2, xC2 + itemSize/2, yC2 + itemSize/2);
+            g.setStroke(new BasicStroke((float) bn.getNeighbourCost(nnid)));
+            g.drawLine(xC + descentItemSize /2, yC + descentItemSize /2, xC2 + descentItemSize /2, yC2 + descentItemSize /2);
         }
         g.setColor(Color.black);
+        g.setStroke(s);
     }
 
     @Override
@@ -308,4 +404,8 @@ public class DescentGridBoardView extends ComponentView {
 //        super.scrollRectToVisible(rect);
     }
 
+    @Override
+    public Dimension getMaximumSize() {
+        return maxSize;
+    }
 }

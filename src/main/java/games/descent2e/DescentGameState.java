@@ -225,6 +225,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return getActingFigure().getOwnerId();
     }
 
+    public int getOverlordPlayer() {
+        return overlordPlayer;
+    }
+
     public boolean playerHasAvailableInterrupt(int player, Triggers trigger) {
         // TODO: implement with look through Abilities/Items/Actions which fit
         return false;
@@ -244,6 +248,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public Map<String, Map<Vector2D, Vector2D>> getGridReferences() {
         return gridReferences;
+    }
+
+    public Map<Integer, GridBoard> getTiles() {
+        return tiles;
     }
 
     public List<DToken> getTokens() {

@@ -6,6 +6,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -400,6 +402,50 @@ public abstract class Utils {
         GameResult(double value) {
             this.value = value;
         }
+    }
+
+
+    /**
+     * Rotates and scales an image clockwise by 90 degrees. Orientation says how many times the image should be rotated:
+     * 0 = 0 degrees
+     * 1 = 90 degrees
+     * 2 = 180 degrees
+     * 3 = 270 degrees
+     * @param image - image to rotate
+     * @param scaledWidthHeight - desired width and height of image after scaling
+     * @param orientation - as described above
+     * @return - new image, rotated and scaled (* does not modify original image)
+     */
+    public static BufferedImage rotateImage(BufferedImage image, Pair<Integer, Integer> scaledWidthHeight, int orientation) {
+        final double rads = Math.toRadians(90*orientation);
+        final double sin = Math.abs(Math.sin(rads));
+        final double cos = Math.abs(Math.cos(rads));
+        final int w = (int) Math.floor(scaledWidthHeight.a * cos + scaledWidthHeight.b * sin);
+        final int h = (int) Math.floor(scaledWidthHeight.b * cos + scaledWidthHeight.a * sin);
+        AffineTransform at;
+        if (orientation % 2 == 0) {
+            at = AffineTransform.getRotateInstance(rads, scaledWidthHeight.a/2., scaledWidthHeight.b/2.);
+            at.scale(scaledWidthHeight.a * 1.0 / image.getWidth(), scaledWidthHeight.b * 1.0 / image.getHeight());
+        } else {
+            at = AffineTransform.getTranslateInstance((scaledWidthHeight.b-scaledWidthHeight.a)/2., (scaledWidthHeight.a-scaledWidthHeight.b)/2.);
+            at.rotate(rads, scaledWidthHeight.a/2., scaledWidthHeight.b/2.);
+            at.scale(scaledWidthHeight.a * 1.0 / image.getWidth(), scaledWidthHeight.b * 1.0 / image.getHeight());
+        }
+        final AffineTransformOp rotateOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC);
+        BufferedImage rotatedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        return rotateOp.filter(image, rotatedImage);
+    }
+
+    /**
+     * Case-insensitive search for enum element given string.
+     */
+    public static <T extends Enum<?>> T searchEnum(Class<T> enumeration, String search) {
+        for (T each : enumeration.getEnumConstants()) {
+            if (each.name().compareToIgnoreCase(search) == 0) {
+                return each;
+            }
+        }
+        return null;
     }
 
 }

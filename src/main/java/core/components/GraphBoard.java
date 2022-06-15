@@ -158,8 +158,8 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
     }
 
     public void addConnection(BoardNode bn1, BoardNode bn2) {
-        bn1.addNeighbour(bn2);
-        bn2.addNeighbour(bn1);
+        bn1.addNeighbourWithCost(bn2);
+        bn2.addNeighbourWithCost(bn1);
         if (!boardNodes.contains(bn1)) {
             boardNodes.add(bn1);
         }
@@ -232,8 +232,8 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
                 for (String str : psa.getValues()) {
                     BoardNode neigh = this.getNodeByProperty(_hash_vertices_, new PropertyString(str));
                     if (neigh != null) {
-                        bn.addNeighbour(neigh);
-                        neigh.addNeighbour(bn);
+                        bn.addNeighbourWithCost(neigh);
+                        neigh.addNeighbourWithCost(bn);
                     }
                 }
             }

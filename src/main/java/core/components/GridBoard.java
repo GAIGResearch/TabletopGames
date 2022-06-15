@@ -430,8 +430,8 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
         }
         for (Pair<Vector2D, Vector2D> p : neighbours) {
             if (bnMapping.get(p.a) != null && bnMapping.get(p.b) != null) {
-                bnMapping.get(p.a).addNeighbour(bnMapping.get(p.b));
-                bnMapping.get(p.b).addNeighbour(bnMapping.get(p.a));
+                bnMapping.get(p.a).addNeighbourWithCost(bnMapping.get(p.b));
+                bnMapping.get(p.b).addNeighbourWithCost(bnMapping.get(p.a));
             }
         }
     }

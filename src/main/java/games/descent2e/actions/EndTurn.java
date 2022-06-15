@@ -15,6 +15,7 @@ public class EndTurn extends DescentAction{
 
     @Override
     public boolean execute(DescentGameState gs) {
+        gs.getActingFigure().getNActionsExecuted().setToMax();
         gs.getTurnOrder().endPlayerTurn(gs);
         return true;
     }
