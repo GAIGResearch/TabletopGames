@@ -3,6 +3,7 @@ package games.descent2e.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.BoardNode;
+import core.properties.PropertyBoolean;
 import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
@@ -39,12 +40,12 @@ public class Move extends AbstractAction {
         remove(dgs, f);
 
         // Go through all positions traveled as part of this movement, except for final one, applying all costs and penalties
-        for (int i = 0; i < positionsTraveled.size()-1; i++) {
-            moveThrough(dgs, f, positionsTraveled.get(i));
+        for (int i = 0; i < positionsTraveled.size(); i++) {
+            // Place only at final position with new orientation
+            boolean place = i == positionsTraveled.size()-1;
+            moveThrough(dgs, f, positionsTraveled.get(i), place, orientation);
         }
 
-        // Place at final position with new orientation
-        place(dgs, f, positionsTraveled.get(positionsTraveled.size()-1), orientation);
 
         return true;
     }
@@ -59,13 +60,33 @@ public class Move extends AbstractAction {
      * @param f - figure to apply penalties to
      * @param position - tile to go through
      */
-    private static void moveThrough(DescentGameState dgs, Figure f, Vector2D position) {
+    private static void moveThrough(DescentGameState dgs, Figure f, Vector2D position, boolean place, Monster.Direction orientation) {
         BoardNode destinationTile = dgs.getMasterBoard().getElement(position.getX(), position.getY());
         DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, destinationTile.getComponentName());
         if (terrain != null) {
             for (Map.Entry<Figure.Attribute, Integer> e : terrain.getMoveCosts().entrySet()) {
                 f.incrementAttribute(e.getKey(), -e.getValue());
             }
+        }
+
+        if (place) {
+            // TODO: the following code needs to be complemented by 3 things before commented back in:
+            // - Move action calculations in FM allow big monsters to move as if 1x1, unless that completes their movement action
+            //     -> BUT new position needs to allow figure to eventually reach a fully legal position (through future move actions) within its current movement points
+            // - If position is temporary only AND if there are no legal positions to fully expand in current position, then force player to take another move action and block all other options
+            // - If position is temporary only and another action is chosen, fully expand the figure and place properly on the board first, before doing the other action
+
+            // Don't fully place large monsters, unless they're out of movement points or they touched a pit space
+//            if (f instanceof Monster && (f.getSize().a > 1 || f.getSize().b > 1) &&
+//                    f.getAttributeValue(Figure.Attribute.MovePoints) > 0 && terrain != DescentTypes.TerrainType.Pit) {
+//                // Still got movement points, only place in this space temporarily
+//                f.setPosition(position);
+//                PropertyInt placeFigureOnTile = new PropertyInt("players", f.getComponentID());
+//                destinationTile.setProperty(placeFigureOnTile);
+//                PropertyBoolean tempPlacement = new PropertyBoolean("tempPlacement", true);
+//                destinationTile.setProperty(tempPlacement);
+//            }
+            place(dgs, f, position, orientation);
         }
     }
 
@@ -76,22 +97,35 @@ public class Move extends AbstractAction {
      */
     private static void remove(DescentGameState dgs, Figure f) {
         Vector2D oldTopLeftAnchor = f.getPosition().copy();
-        if (f instanceof Monster) {
-            oldTopLeftAnchor = ((Monster) f).applyAnchorModifier();
-        }
-        Monster.Direction oldOrientation = Monster.Direction.DOWN;
-        if (f instanceof Monster) {
-            oldOrientation = ((Monster) f).getOrientation();
-        }
-        Pair<Integer, Integer> sizeOld = f.getSize().copy();
-        if (oldOrientation.ordinal() % 2 == 1) sizeOld.swap();
-        for (int i = 0; i < sizeOld.b; i++) {
-            for (int j = 0; j < sizeOld.a; j++) {
-                BoardNode currentTile = dgs.getMasterBoard().getElement(oldTopLeftAnchor.getX() + j, oldTopLeftAnchor.getY() + i);
-                PropertyInt emptyTile = new PropertyInt("players", -1);
-                currentTile.setProperty(emptyTile);
-                if (currentTile.getComponentName().equalsIgnoreCase("pit")) {
-                    f.setAttributeToMin(Figure.Attribute.MovePoints);
+        PropertyInt emptySpace = new PropertyInt("players", -1);
+
+        BoardNode baseSpace = dgs.getMasterBoard().getElement(oldTopLeftAnchor.getX(), oldTopLeftAnchor.getY());
+        PropertyBoolean temporary = (PropertyBoolean) baseSpace.getProperty("tempPlacement");
+        if (temporary != null && temporary.value) {
+            // Only remove figure from this tile
+            baseSpace.setProperty(emptySpace);
+            if (baseSpace.getComponentName().equalsIgnoreCase("pit")) {
+                f.setAttributeToMin(Figure.Attribute.MovePoints);
+            }
+            temporary.value = false;
+        } else {
+            // Full remove figure of all spaces (including adjacent) that it occupies
+            if (f instanceof Monster) {
+                oldTopLeftAnchor = ((Monster) f).applyAnchorModifier();
+            }
+            Monster.Direction oldOrientation = Monster.Direction.DOWN;
+            if (f instanceof Monster) {
+                oldOrientation = ((Monster) f).getOrientation();
+            }
+            Pair<Integer, Integer> sizeOld = f.getSize().copy();
+            if (oldOrientation.ordinal() % 2 == 1) sizeOld.swap();
+            for (int i = 0; i < sizeOld.b; i++) {
+                for (int j = 0; j < sizeOld.a; j++) {
+                    BoardNode currentTile = dgs.getMasterBoard().getElement(oldTopLeftAnchor.getX() + j, oldTopLeftAnchor.getY() + i);
+                    currentTile.setProperty(emptySpace);
+                    if (currentTile.getComponentName().equalsIgnoreCase("pit")) {
+                        f.setAttributeToMin(Figure.Attribute.MovePoints);
+                    }
                 }
             }
         }

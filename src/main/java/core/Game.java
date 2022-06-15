@@ -147,10 +147,7 @@ public class Game {
                 frame.setContentPane(gamePanel);
 
                 AbstractGUIManager gui = gameToPlay.createGUIManager(gamePanel, game, ac);
-
                 frame.setFrameProperties();
-                frame.validate();
-                frame.pack();
 
                 // Video recording setup
                 if (game.recordingVideo) {
@@ -917,16 +914,13 @@ public class Game {
 
         MCTSParams params1 = new MCTSParams();
 
-        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
         players.add(new HumanGUIPlayer(ac));
+        players.add(new RandomPlayer());
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 //        players.add(new HumanConsolePlayer());

@@ -3,7 +3,6 @@ package games.descent2e.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.properties.PropertyString;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTurnOrder;
@@ -18,19 +17,17 @@ import utilities.ImageIO;
 import utilities.Utils;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static games.descent2e.gui.DescentHeroView.descentFont;
 import static games.descent2e.gui.DescentHeroView.titleFont;
 
 public class DescentGUI extends AbstractGUIManager {
     DescentGridBoardView view;
-    int maxWidth = 1500;
-    int maxHeight = 750;
+    final int maxWidth = 1500;
+    final int maxHeight = 750;
     JLabel actingFigureLabel;
     DescentHeroView[] heroAreas;
     JPanel overlordArea;
@@ -43,7 +40,7 @@ public class DescentGUI extends AbstractGUIManager {
         panel.setOpacity(1f);
 
         int shadowSize = 10;
-        view = new DescentGridBoardView(dgs.getMasterBoard(), dgs, shadowSize, maxWidth/3,maxHeight/2);
+        view = new DescentGridBoardView(dgs.getMasterBoard(), dgs, shadowSize, maxWidth/2,maxHeight/2);
         DropShadowBorder shadow = new DropShadowBorder(Color.black, shadowSize, 0.9f, 12, true, true, true, true);
         view.setBorder(shadow);
         actingFigureLabel = new JLabel();
@@ -132,6 +129,7 @@ public class DescentGUI extends AbstractGUIManager {
         actingFigureLabel.setForeground(Color.white);
 
         gameInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
+        gameInfo.setMaximumSize(new Dimension(width / 2 - 10, height));
 
         JPanel wrapper = new JPanel();
         wrapper.setOpaque(false);
@@ -198,10 +196,18 @@ public class DescentGUI extends AbstractGUIManager {
                                            Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {
-        JPanel actionPanel = new JPanel();
+        JPanel actionPanel = new JPanel() {
+            @Override
+            public Dimension getMaximumSize() {
+                return new Dimension(width, super.getMaximumSize().height);
+            }
+
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(width, super.getPreferredSize().height);
+            }
+        };
         actionPanel.setOpaque(false);
-        actionPanel.setPreferredSize(new Dimension(width, Integer.MAX_VALUE));
-        actionPanel.setMaximumSize(new Dimension(width, Integer.MAX_VALUE));
 
         actionButtons = new ActionButton[maxActionSpace];
         for (int i = 0; i < maxActionSpace; i++) {

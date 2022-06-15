@@ -192,15 +192,15 @@ public class DescentForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
-        if (checkEndOfGame()) return;
-
         DescentGameState dgs = (DescentGameState) currentState;
         Figure actingFigure = dgs.getActingFigure();
 
+        action.execute(currentState);
+        if (checkEndOfGame()) return;
+
         // TODO: may still be able to play cards/skills/free effects
         // Turn ends for figure if they executed the number of actions available and have no more movement points available
-        if (actingFigure.getNActionsExecuted().isMaximum() && actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum()) {
+        if (!(action instanceof EndTurn) && actingFigure.getNActionsExecuted().isMaximum() && actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum()) {
             dgs.getTurnOrder().endPlayerTurn(dgs);
         }
 
