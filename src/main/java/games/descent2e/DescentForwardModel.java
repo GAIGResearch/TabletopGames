@@ -351,12 +351,12 @@ public class DescentForwardModel extends AbstractForwardModel {
                 BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourID);
                 Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
 
-                double costToMoveToNeighbour = expandingNode.getNeighbourCost(neighbour);  // TODO put costs in node graph
+                double costToMoveToNeighbour = expandingNode.getNeighbourCost(neighbour);
                 double totalCost = expandingNodeCost + costToMoveToNeighbour;
                 List<Vector2D> totalPath = new ArrayList<>(expandingNodePath);
                 totalPath.add(loc);
                 boolean isFriendly = false;
-                boolean isEmpty = true;
+                boolean isEmpty = TerrainType.isWalkableTerrain(neighbour.getComponentName());
 
                 PropertyInt figureOnLocation = (PropertyInt)neighbour.getProperty(playersHash);
                 if (figureOnLocation.value != -1) {
@@ -377,7 +377,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                         nodesToBeExpanded.put(neighbour, new Pair<>(totalCost, totalPath));
                     }
                 } else if (isEmpty) {
-                    //if the node is empty friendly - add it to adjacentNodeList
+                    //if the node is empty - add it to adjacentNodeList
                     if (!allAdjacentNodes.containsKey(neighbour) || allAdjacentNodes.get(neighbour).a > totalCost){
                         allAdjacentNodes.put(neighbour, new Pair<>(totalCost, totalPath));
                     }
@@ -402,10 +402,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> possibleRotations = new HashMap<>();
 
         // Go through all adjacent nodes
-        Iterator<Map.Entry<Vector2D, Pair<Double,List<Vector2D>>>> iter = allAdjacentNodes.entrySet().iterator();
-
-        while (iter.hasNext()) {
-            Vector2D nodeLoc = iter.next().getKey();
+        for (Map.Entry<Vector2D, Pair<Double,List<Vector2D>>> e : allAdjacentNodes.entrySet()) {
+            Vector2D nodeLoc = e.getKey();
 
             if (figure.getSize().a > 1 || figure.getSize().b > 1) {
                 // Only monsters can have a size bigger than 1x1
@@ -414,7 +412,6 @@ public class DescentForwardModel extends AbstractForwardModel {
 
                 // Check all possible orientations with this position as the anchor if figure is bigger than 1x1
                 // If all spaces occupied are legal, then keep valid options
-                boolean isAnyDirectionPossible = false;
                 for (Monster.Direction d: Monster.Direction.values()) {
                     Vector2D topLeftCorner = m.applyAnchorModifier(nodeLoc.copy(), d);
                     Pair<Integer, Integer> mSize = monsterSize.copy();
@@ -423,12 +420,11 @@ public class DescentForwardModel extends AbstractForwardModel {
                     boolean legal = true;
                     for (int j = 0; j < mSize.a; j++) {
                         for (int i = 0; i < mSize.b; i++) {
-//                            if (j == 0 && i == 0) continue;  // Already checked this
                             BoardNode spaceOccupied = dgs.masterBoard.getElement(topLeftCorner.getX() + j, topLeftCorner.getY() + i);
                             if (spaceOccupied != null) {
                                 PropertyInt figureOnLocation = (PropertyInt) spaceOccupied.getProperty(playersHash);
-                                if (!TerrainType.isWalkableTerrain(spaceOccupied.getComponentName()) || figureOnLocation.value != -1 && figureOnLocation.value != figure.getComponentID()) {
-                                    // TODO refactor to blocked node?
+                                if (!TerrainType.isWalkableTerrain(spaceOccupied.getComponentName()) ||
+                                        figureOnLocation.value != -1 && figureOnLocation.value != figure.getComponentID()) {
                                     legal = false;
                                     break;
                                 }
@@ -439,17 +435,11 @@ public class DescentForwardModel extends AbstractForwardModel {
                         }
                     }
                     if (legal) {
-                        possibleRotations.put(new Pair<>(nodeLoc, d), allAdjacentNodes.get(nodeLoc));
-                        isAnyDirectionPossible = true;
+                        possibleRotations.put(new Pair<>(nodeLoc, d), e.getValue());
                     }
                 }
-
-                // If there is no empty space, the location is not reachable
-                if (isAnyDirectionPossible) {
-                    iter.remove();
-                }
             } else {
-                possibleRotations.put(new Pair<>(nodeLoc, Monster.Direction.getDefault()), allAdjacentNodes.get(nodeLoc));
+                possibleRotations.put(new Pair<>(nodeLoc, Monster.Direction.getDefault()), e.getValue());
             }
         }
 

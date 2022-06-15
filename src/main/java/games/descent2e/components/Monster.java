@@ -48,7 +48,7 @@ public class Monster extends Figure {
     // Use external values to find top-left corner of monster, given its size
     public Vector2D applyAnchorModifier(Vector2D pos, Direction d) {
         Pair<Integer,Integer> mSize = size.copy();
-        if (orientation.ordinal() % 2 == 1) mSize.swap();
+        if (d.ordinal() % 2 == 1) mSize.swap();
         pos.add((mSize.a-1) * d.anchorModifier.getX(), (mSize.b-1) * d.anchorModifier.getY());
         return pos;
     }
