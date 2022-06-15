@@ -5,16 +5,17 @@ import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 
 import java.util.HashSet;
+import java.util.Objects;
 
 public abstract class DescentAction extends AbstractAction {
 
-    HashSet<InterruptPoints> triggerPoints;
+    final HashSet<Triggers> triggerPoints;
 
-    public DescentAction(InterruptPoints triggerPoint) {
+    public DescentAction(Triggers triggerPoint) {
         this.triggerPoints = new HashSet<>();
         this.triggerPoints.add(triggerPoint);
     }
-    public DescentAction(HashSet<InterruptPoints> triggerPoints) {
+    public DescentAction(HashSet<Triggers> triggerPoints) {
         this.triggerPoints = triggerPoints;
     }
 
@@ -23,5 +24,23 @@ public abstract class DescentAction extends AbstractAction {
         return execute((DescentGameState) gs);
     }
     public abstract boolean execute(DescentGameState gs);
+    public abstract DescentAction copy();
+    public boolean canExecute(Triggers currentPoint, DescentGameState dgs) {
+        if (triggerPoints.contains(currentPoint)) return canExecute(dgs);
+        return false;
+    }
+    public abstract boolean canExecute(DescentGameState dgs);
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DescentAction)) return false;
+        DescentAction that = (DescentAction) o;
+        return Objects.equals(triggerPoints, that.triggerPoints);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(triggerPoints);
+    }
 }

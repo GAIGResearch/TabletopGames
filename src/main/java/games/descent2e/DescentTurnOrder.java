@@ -6,18 +6,18 @@ import core.turnorders.TurnOrder;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
+// Order is all heroes (controlled by their owner ID player), then all monsters by monster group (controlled by overlord)
 public class DescentTurnOrder extends ReactiveTurnOrder {
     int monsterGroupActingNext;
     int monsterActingNext;
-    int heroPlayerActingNext;
+    int heroFigureActingNext;
 
-    // TODO: order is player, overlord(monster group 1), player, overlord (monster group 2) ...
     public DescentTurnOrder(int nPlayers) {
         super(nPlayers);
     }
@@ -27,32 +27,46 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         super._reset();
         monsterGroupActingNext = 0;
         monsterActingNext = 0;
-        heroPlayerActingNext = 0;
+        heroFigureActingNext = 0;
     }
 
     public int getMonsterGroupActingNext() {
         return monsterGroupActingNext;
     }
 
-    public int getHeroPlayerActingNext() {
-        return heroPlayerActingNext;
+    public int getHeroFigureActingNext() {
+        return heroFigureActingNext;
     }
 
     public int getMonsterActingNext() {
         return monsterActingNext;
     }
 
-    public void nextMonster(int groupSize) {
-        monsterActingNext = (groupSize+monsterActingNext+1)%groupSize;
+    public void nextMonster(DescentGameState dgs) {
+        int groupSize = dgs.getMonsters().get(monsterGroupActingNext).size();
+        int next = (groupSize+monsterActingNext+1)%groupSize;
+        if (next == 0 && monsterActingNext == groupSize-1) {
+            // Next monster group
+            nextMonsterGroup(dgs);
+            monsterActingNext = 0;
+        } else {
+            monsterActingNext = next;
+        }
+    }
+    public void nextMonsterGroup(DescentGameState dgs) {
+        int nMonsters = dgs.getMonsters().size();
+        monsterGroupActingNext = (nMonsters+monsterGroupActingNext+1)%nMonsters;
     }
 
+    // Here this really means "end figure turn"
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
         DescentGameState dgs = (DescentGameState) gameState;
+        int nFigures = dgs.getMonsters().stream().mapToInt(List::size).sum() + nPlayers-1;
 
         turnCounter++;
-        if (turnCounter >= (nPlayers + dgs.getMonsters().size())) endRound(gameState);
+        if (turnCounter >= nFigures) endRound(gameState);
         else {
             turnOwner = nextPlayer(gameState);
             int n = 0;
@@ -69,13 +83,18 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
     @Override
     public int nextPlayer(AbstractGameState gameState) {
-        int nMonsters = ((DescentGameState)gameState).getMonsters().size();
-        if (turnOwner == 0) {
-            monsterGroupActingNext = (nMonsters+monsterGroupActingNext+1)%nMonsters;
-            return 1+heroPlayerActingNext;
+        if (turnOwner == ((DescentGameState)gameState).overlordPlayer) {
+            // Move to next monster, or next monster group
+            nextMonster((DescentGameState) gameState);
+            // Always return overlord, player turn init on end round when all monsters are finished
+            return ((DescentGameState)gameState).overlordPlayer;
         } else {
-            heroPlayerActingNext = (nPlayers-1+heroPlayerActingNext+1)%(nPlayers-1);
-            return 0;
+            // Return next hero, or overlord if we cycled back
+            int nHeroes = ((DescentGameState)gameState).heroes.size();
+            heroFigureActingNext = (nHeroes + heroFigureActingNext +1)%nHeroes;
+            if (heroFigureActingNext == 0)
+                return ((DescentGameState)gameState).overlordPlayer;
+            else return ((DescentGameState)gameState).heroes.get(heroFigureActingNext).getOwnerId();
         }
     }
 
@@ -88,7 +107,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         for (Figure f: dgs.getHeroes()) {
             f.resetRound();
         }
-        for (ArrayList<Monster> mList: dgs.getMonsters()) {
+        for (List<Monster> mList: dgs.getMonsters()) {
             for (Monster m: mList) {
                 m.resetRound();
             }
@@ -96,6 +115,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         dgs.overlord.resetRound();
         monsterGroupActingNext = 0;
         monsterActingNext = 0;
+        heroFigureActingNext = 0;
     }
 
     @Override
@@ -104,7 +124,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         pto.reactivePlayers = new LinkedList<>(reactivePlayers);
         pto.monsterActingNext = monsterActingNext;
         pto.monsterGroupActingNext = monsterGroupActingNext;
-        pto.heroPlayerActingNext = heroPlayerActingNext;
+        pto.heroFigureActingNext = heroFigureActingNext;
         return pto;
     }
 }

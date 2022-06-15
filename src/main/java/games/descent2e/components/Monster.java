@@ -1,25 +1,20 @@
 package games.descent2e.components;
 
 import core.properties.Property;
-import core.properties.PropertyInt;
+import core.properties.PropertyStringArray;
+import utilities.Vector2D;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import static games.descent2e.DescentConstants.*;
 
 public class Monster extends Figure {
 
     int orientation;  // medium monsters might be vertical (0) or horizontal (1)
+    private Vector2D adjacentLocation;
 
-    public Monster(String name, HashMap<Integer, Property> props) {
-        super(name);
-        properties.clear();
-        properties.putAll(props);
-
-        this.movePoints = ((PropertyInt)getProperty(movementHash)).value;
-        this.hp = ((PropertyInt)getProperty(healthHash)).value;
-
-        tokenType = "Monster";
+    public Monster() {
+        super("Monster");
     }
 
     protected Monster(String name, int ID) {
@@ -38,7 +33,35 @@ public class Monster extends Figure {
     public Monster copy() {
         Monster copy = new Monster(componentName, componentID);
         copy.orientation = orientation;
+
+        if (adjacentLocation != null) {
+            copy.adjacentLocation = adjacentLocation.copy();
+        } else {
+            copy.adjacentLocation = null;
+        }
         super.copyComponentTo(copy);
         return copy;
+    }
+
+    public Monster copyNewID() {
+        Monster copy = new Monster();
+        copy.orientation = orientation;
+
+        if (adjacentLocation != null){
+            copy.adjacentLocation = adjacentLocation.copy();
+        } else {
+            copy.adjacentLocation = null;
+        }
+
+        super.copyComponentTo(copy);
+        return copy;
+    }
+
+    public Vector2D getAdjacentLocation() {
+        return adjacentLocation;
+    }
+
+    public void setAdjacentLocation(Vector2D adjacentLocation) {
+        this.adjacentLocation = adjacentLocation;
     }
 }

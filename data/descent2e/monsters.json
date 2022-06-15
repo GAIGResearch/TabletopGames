@@ -12,36 +12,36 @@
     "act1": [
       {
         "color": ["Color", "white"],
-        "movement": ["Integer", 5],
-        "hp": ["Integer", 2],
-        "defence": ["Color[]", ["gray"]],
-        "attack": ["Color[]", ["blue", "yellow"]],
+        "MovePoints": ["Integer", 5],
+        "Health": ["Integer", 2],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow"]],
         "passive": ["String[]", ["Scamper", "Cowardly", "Surge: +1 Range", "Surge: +1 Heart"]]
       },
       {
         "color": ["Color", "red"],
-        "movement": ["Integer", 5],
-        "hp": ["Integer", 4],
-        "defence": ["Color[]", ["gray"]],
-        "attack": ["Color[]", ["blue", "yellow"]],
+        "MovePoints": ["Integer", 5],
+        "Health": ["Integer", 4],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow"]],
         "passive": ["String[]", ["Scamper", "Surge: +2 Range", "Surge: +2 Heart"]]
       }
     ],
     "act2": [
       {
         "color": ["Color", "white"],
-        "movement": ["Integer", 5],
-        "hp": ["Integer", 4],
-        "defence": ["Color[]", ["gray"]],
-        "attack": ["Color[]", ["blue", "yellow"]],
+        "MovePoints": ["Integer", 5],
+        "Health": ["Integer", 4],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow"]],
         "passive": ["String[]", ["Scamper", "Cowardly", "Surge: +2 Range", "Surge: +2 Heart"]]
       },
       {
         "color": ["Color", "red"],
-        "movement": ["Integer", 5],
-        "hp": ["Integer", 6],
-        "defence": ["Color[]", ["gray"]],
-        "attack": ["Color[]", ["blue", "yellow", "yellow"]],
+        "MovePoints": ["Integer", 5],
+        "Health": ["Integer", 6],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow", "yellow"]],
         "passive": ["String[]", ["Scamper", "Surge: +3 Range", "Surge: +2 Heart"]]
       }
     ]
@@ -58,19 +58,19 @@
     "act1": [
       {
         "color": ["Color", "white"],
-        "movement": ["Integer", 4],
-        "hp": ["Integer", 4],
-        "defence": ["Color[]", ["gray"]],
-        "attack": ["Color[]", ["blue", "red"]],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 4],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "red"]],
         "passive": ["String[]", ["Surge: +1 Heart"]],
         "action": ["String[]", ["Howl"]]
       },
       {
         "color": ["Color", "red"],
-        "movement": ["Integer", 4],
-        "hp": ["Integer", 6],
-        "defence": ["Color[]", ["gray"]],
-        "attack": ["Color[]", ["blue", "yellow"]],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 6],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow"]],
         "passive": ["String[]", ["NightStalker", "Surge: +2 Heart"]],
         "action": ["String[]", ["Howl"]]
       }
@@ -78,19 +78,19 @@
     "act2": [
       {
         "color": ["Color", "white"],
-        "movement": ["Integer", 4],
-        "hp": ["Integer", 6],
-        "defence": ["Color[]", ["black"]],
-        "attack": ["Color[]", ["blue", "red"]],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 6],
+        "defence": ["String[]", ["black"]],
+        "attack": ["String[]", ["blue", "red"]],
         "passive": ["String[]", ["Surge: +2 Heart"]],
         "action": ["String[]", ["Howl"]]
       },
       {
         "color": ["Color", "red"],
-        "movement": ["Integer", 4],
-        "hp": ["Integer", 8],
-        "defence": ["Color[]", ["black"]],
-        "attack": ["Color[]", ["blue", "red", "yellow"]],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 8],
+        "defence": ["String[]", ["black"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
         "passive": ["String[]", ["NightStalker", "Surge: +2 Heart"]],
         "action": ["String[]", ["Howl"]]
       }

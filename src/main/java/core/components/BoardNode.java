@@ -123,6 +123,11 @@ public class BoardNode extends Component {
         return neighbours;
     }
 
+    public void clearNeighbours() {
+        neighbours.clear();
+        neighbourSideMapping.clear();
+    }
+
     /**
      * Returns the cost of a neighbour to this node. Throws exception if the neighbour is not.
      * @param neighbour neighbour to return the cost of traveling to that neighbour

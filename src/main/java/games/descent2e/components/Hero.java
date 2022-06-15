@@ -2,13 +2,11 @@ package games.descent2e.components;
 
 import core.CoreConstants;
 import core.components.Card;
-import core.components.Counter;
 import core.components.Deck;
 import core.properties.Property;
-import core.properties.PropertyInt;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
-import games.descent2e.actions.DescentAction;
+import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -22,25 +20,17 @@ import static games.descent2e.DescentConstants.*;
 
 // TODO: figure out how to do ability/heroic-feat
 public class Hero extends Figure {
+
     Deck<Card> skills;
     Deck<Card> handEquipment;
     Card armor;
     Deck<Card> otherEquipment;
-    HashMap<String, Integer> equipSlotsAvailable;
+    Map<String, Integer> equipSlotsAvailable;
 
-    Counter speed;
-    Counter health;
-    // TODO: reset this every quest to max fatigue
-    Counter fatigue;
-    String[] defence;
-
-    Counter might;
-    Counter knowledge;
-    Counter willpower;
-    Counter awareness;
+    // TODO: reset fatigue every quest to max fatigue
 
     String heroicFeat;
-    boolean featAvailable;
+    boolean featAvailable, rested;
 
     String ability;
 
@@ -62,8 +52,87 @@ public class Hero extends Figure {
         abilities = new ArrayList<>();
     }
 
+    @Override
+    public void resetRound() {
+        super.resetRound();
+        if (rested) attributes.get(Attribute.Fatigue).setValue(0);
+        rested = false;
+    }
+
     protected Hero(String name, int ID) {
         super(name, ID);
+    }
+
+    public Deck<Card> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(Deck<Card> skills) {
+        this.skills = skills;
+    }
+
+    public Deck<Card> getHandEquipment() {
+        return handEquipment;
+    }
+
+    public void setHandEquipment(Deck<Card> handEquipment) {
+        this.handEquipment = handEquipment;
+    }
+
+    public Card getArmor() {
+        return armor;
+    }
+
+    public void setArmor(Card armor) {
+        this.armor = armor;
+    }
+
+    public Deck<Card> getOtherEquipment() {
+        return otherEquipment;
+    }
+
+    public void setOtherEquipment(Deck<Card> otherEquipment) {
+        this.otherEquipment = otherEquipment;
+    }
+
+    public Map<String, Integer> getEquipSlotsAvailable() {
+        return equipSlotsAvailable;
+    }
+
+    public void setEquipSlotsAvailable(HashMap<String, Integer> equipSlotsAvailable) {
+        this.equipSlotsAvailable = equipSlotsAvailable;
+    }
+
+    public String getHeroicFeat() {
+        return heroicFeat;
+    }
+
+    public void setHeroicFeat(String heroicFeat) {
+        this.heroicFeat = heroicFeat;
+    }
+
+    public boolean isFeatAvailable() {
+        return featAvailable;
+    }
+
+    public void setFeatAvailable(boolean featAvailable) {
+        this.featAvailable = featAvailable;
+    }
+
+    public String getAbility() {
+        return ability;
+    }
+
+    public void setAbility(String ability) {
+        this.ability = ability;
+    }
+
+    public boolean hasRested() {
+        return rested;
+    }
+
+    public void setRested(boolean rested) {
+        this.rested = rested;
     }
 
     public boolean equip(Card c) {
@@ -71,15 +140,15 @@ public class Hero extends Figure {
         Property cost = c.getProperty(costHash);
         if (cost != null) {
             // Equipment! Check if it's legal to equip
-            String[] equip = ((PropertyStringArray)c.getProperty(equipSlotHash)).getValues();
+            String[] equip = ((PropertyStringArray) c.getProperty(equipSlotHash)).getValues();
             boolean canEquip = true;
-            HashMap<String, Integer> equipSlots = new HashMap<>(equipSlotsAvailable);
-            for (String e: equip) {
+            Map<String, Integer> equipSlots = new HashMap<>(equipSlotsAvailable);
+            for (String e : equip) {
                 if (equipSlots.get(e) < 1) {
                     canEquip = false;
                     break;
                 } else {
-                    equipSlots.put(e, equipSlots.get(e)-1);
+                    equipSlots.put(e, equipSlots.get(e) - 1);
                 }
             }
             if (canEquip) {
@@ -105,34 +174,73 @@ public class Hero extends Figure {
         }
     }
 
+    public List<Item> getWeapons() {
+        List<Item> retValue = new ArrayList<>();
+        for (int i = 0; i < handEquipment.getSize(); i++) {
+            Item c = new Item(handEquipment.get(i));
+            if (c.isAttack()) {
+                retValue.add(c);
+            }
+        }
+        return retValue;
+    }
+
+    @Override
+    public DicePool getAttackDice() {
+        Optional<Item> wpn = getWeapons().stream().findFirst();
+        if (wpn.isPresent())
+            return wpn.get().getDicePool();
+        return new DicePool(Collections.emptyList());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Hero)) return false;
+        if (!super.equals(o)) return false;
+        Hero hero = (Hero) o;
+        return featAvailable == hero.featAvailable && rested == hero.rested &&
+                Objects.equals(skills, hero.skills) && Objects.equals(handEquipment, hero.handEquipment)
+                && Objects.equals(armor, hero.armor) && Objects.equals(otherEquipment, hero.otherEquipment)
+                && Objects.equals(equipSlotsAvailable, hero.equipSlotsAvailable) &&
+                Objects.equals(heroicFeat, hero.heroicFeat) &&
+                Objects.equals(ability, hero.ability);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), skills, handEquipment, armor, otherEquipment,
+                equipSlotsAvailable, heroicFeat, featAvailable, rested, ability);
+        result = 31 * result;
+        return result;
+    }
+
     @Override
     public Hero copy() {
         Hero copy = new Hero(componentName, componentID);
+        return copyTo(copy);
+    }
+
+    @Override
+    public Hero copyNewID() {
+        Hero copy = new Hero(componentName);
+        return copyTo(copy);
+    }
+
+    @NotNull
+    private Hero copyTo(Hero copy) {
         copy.equipSlotsAvailable = new HashMap<>();
-        for (Map.Entry<String, Integer> e: equipSlotsAvailable.entrySet()) {
-            copy.equipSlotsAvailable.put(e.getKey(), e.getValue());
-        }
+        copy.equipSlotsAvailable.putAll(equipSlotsAvailable);
         copy.skills = skills.copy();
         copy.handEquipment = handEquipment.copy();
         copy.otherEquipment = otherEquipment.copy();
         if (armor != null) {
             copy.armor = armor.copy();
         }
-        copy.speed = speed.copy();
-        copy.health = health.copy();
-        copy.fatigue = fatigue.copy();
-        copy.defence = new String[this.defence.length];
-        for (int i =0 ; i < this.defence.length; i++){
-            copy.defence[i] = this.defence[i];
-        }
-        copy.might = this.might.copy();
-        copy.knowledge = this.knowledge.copy();
-        copy.willpower = this.willpower.copy();
-        copy.awareness = this.awareness.copy();
         copy.heroicFeat = this.heroicFeat;
         copy.featAvailable = this.featAvailable;
         copy.ability = this.ability;
-
+        copy.rested = rested;
         super.copyComponentTo(copy);
         return copy;
     }
@@ -153,57 +261,39 @@ public class Hero extends Figure {
 
     /**
      * Creates a Token objects from a JSON object.
+     *
      * @param figure - JSON to parse into Figure object.
      */
     protected void loadHero(JSONObject figure) {
         super.loadFigure(figure);
-        // custom load of figure properties
-        int movement = ((PropertyInt)getProperty(movementHash)).value;
-        int fatigue = ((PropertyInt)getProperty(fatigueHash)).value;
-        int health = ((PropertyInt)getProperty(healthHash)).value;
-        int might = ((PropertyInt)getProperty(mightHash)).value;
-        int knowledge = ((PropertyInt)getProperty(knowledgeHash)).value;
-        int willpower = ((PropertyInt)getProperty(willpowerHash)).value;
-        int awareness = ((PropertyInt)getProperty(awarenessHash)).value;
-
-        // Setup counters
-        this.speed = new Counter(movement, 0, movement, "movementCounter");
-        this.fatigue = new Counter(fatigue, 0, fatigue, "fatigueCounter");
-        this.health = new Counter(health, 0, health, "healthCounter");
-        this.defence = ((PropertyStringArray)getProperty(defenceHash)).getValues();
-
-        this.might = new Counter(might, 0, might, "mightCounter");
-        this.knowledge = new Counter(knowledge, 0, knowledge, "knowledgeCounter");
-        this.willpower = new Counter(willpower, 0, willpower, "willpowerCounter");
-        this.awareness = new Counter(awareness, 0, awareness, "awarenessCounter");
-
+        String[] defence = ((PropertyStringArray) getProperty(defenceHash)).getValues();
+        defenceDice = DicePool.constructDicePool(defence);
         this.featAvailable = true;
-        this.heroicFeat = ((PropertyString)getProperty(heroicFeatHash)).value;
-        this.ability = ((PropertyString)getProperty(abilityHash)).value;
-
+        this.heroicFeat = ((PropertyString) getProperty(heroicFeatHash)).value;
+        this.ability = ((PropertyString) getProperty(abilityHash)).value;
     }
 
     /**
      * Loads all figures from a JSON file.
+     *
      * @param filename - path to file.
      * @return - List of Figure objects.
      */
-    public static List<Hero> loadHeroes(String filename)
-    {
+    public static List<Hero> loadHeroes(String filename) {
         JSONParser jsonParser = new JSONParser();
         ArrayList<Hero> figures = new ArrayList<>();
 
         try (FileReader reader = new FileReader(filename)) {
 
             JSONArray data = (JSONArray) jsonParser.parse(reader);
-            for(Object o : data) {
+            for (Object o : data) {
 
                 Hero newFigure = new Hero("");
                 newFigure.loadHero((JSONObject) o);
                 figures.add(newFigure);
             }
 
-        }catch (IOException | ParseException e) {
+        } catch (IOException | ParseException e) {
             e.printStackTrace();
         }
 

@@ -123,6 +123,14 @@ public class Counter extends Component {
         this.value = i;
     }
 
+    public void setToMax() {
+        this.value = maximum;
+    }
+
+    public void setToMin() {
+        this.value = minimum;
+    }
+
     /**
      * Loads all counter from a JSON file.
      * @param filename - path to file.
