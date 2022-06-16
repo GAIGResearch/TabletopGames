@@ -13,10 +13,9 @@ public class Quest {
     private String name;
     private ArrayList<String[]> monsters;  // name, tile, bonus effects for each monster type
     private ArrayList<DToken.DTokenDef> tokens;  // token, meaning, how many, where
+    private ArrayList<GameOverCondition> gameOverConditions;  // How does the game end?
 //    private ArrayList<DescentRule> rules;  // define these in code
-//    private ArrayList<DescentWinCondition> heroWins;
 //    private int heroWinsMinSatisfied;
-//    private ArrayList<DescentWinCondition> overlordWins;
 //    private int overlordWinsMinSatisfied;
 //    private ArrayList<DescentReward> overlordRewards;
 //    private ArrayList<DescentReward> heroReward;
@@ -29,65 +28,56 @@ public class Quest {
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
-
     public ArrayList<String> getBoards() {
         return boards;
     }
-
     public void setBoards(ArrayList<String> boards) {
         this.boards = boards;
     }
-
     public ArrayList<Quest> getNextMainQuests() {
         return nextMainQuests;
     }
-
     public void setNextMainQuests(ArrayList<Quest> nextMainQuests) {
         this.nextMainQuests = nextMainQuests;
     }
-
     public ArrayList<Quest> getNextSideQuests() {
         return nextSideQuests;
     }
-
     public void setNextSideQuests(ArrayList<Quest> nextSideQuests) {
         this.nextSideQuests = nextSideQuests;
     }
-
     public void setStartingLocations(HashMap<String, ArrayList<Vector2D>> startingLocations) {
         this.startingLocations = startingLocations;
     }
-
     public HashMap<String, ArrayList<Vector2D>> getStartingLocations() {
         return startingLocations;
     }
-
     public void setMonsters(ArrayList<String[]> monsters) {
         this.monsters = monsters;
     }
-
     public ArrayList<String[]> getMonsters() {
         return monsters;
     }
-
     public void setAct(int act) {
         this.act = act;
     }
-
     public int getAct() {
         return act;
     }
-
     public void setTokens(ArrayList<DToken.DTokenDef> tokens) {
         this.tokens = tokens;
     }
-
     public ArrayList<DToken.DTokenDef> getTokens() {
         return tokens;
+    }
+    public void setGameOverConditions(ArrayList<GameOverCondition> gameOverConditions) {
+        this.gameOverConditions = gameOverConditions;
+    }
+    public ArrayList<GameOverCondition> getGameOverConditions() {
+        return gameOverConditions;
     }
 
     public Quest copy() {
@@ -104,6 +94,7 @@ public class Quest {
         }
         q.act = act;
         q.tokens = new ArrayList<>(tokens);  // todo deep?
+        q.gameOverConditions = new ArrayList<>(gameOverConditions);
         return q; // TODO
     }
 }

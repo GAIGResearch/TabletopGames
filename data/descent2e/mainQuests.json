@@ -16,10 +16,38 @@
       ["overlord fatigue", "END_TURN", "if(count(Goblin Archer,9A)>0) AttributeModifier:Fatigue:+1"],
       ["overlord reinforcements", "END_TURN", "SpawnMonster:Goblin Archer:2:4A"]
     ],
-    "hero-win": ["monster:barghest", "count", 0],
-    "overlord-win": ["property:fatigue", "count", 7],
+    "game-over": [
+      {
+        "id": "CountGameOver",
+        "type": "NFiguresAlive",
+        "figureNameContains": "Hero",
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "LOSE",
+        "result-overlord": "WIN"
+      },
+      {
+        "id": "CountGameOver",
+        "type": "NFiguresAlive",
+        "figureNameContains": "Barghest",
+        "target": 0,
+        "comparison-type": "Equal",
+        "result-heroes": "WIN",
+        "result-overlord": "LOSE"
+      },
+      {
+        "id": "CountGameOver",
+        "type": "Attribute",
+        "attribute": "Fatigue",
+        "figureNameContains": "Overlord",
+        "target": 6,
+        "comparison-type": "More",
+        "result-heroes": "LOSE",
+        "result-overlord": "WIN"
+      }
+    ],
     "all-reward": ["1XP"],
-    "overlord-reward": ["1XP", "heroes discard all but 1 Villager"],
+    "overlord-reward-if-win": ["1XP", "heroes discard all but 1 Villager"],
     "hero-reward": ["25G x Villager"],
     "boards": [
       "board1"

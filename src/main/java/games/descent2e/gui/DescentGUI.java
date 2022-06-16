@@ -28,7 +28,7 @@ public class DescentGUI extends AbstractGUIManager {
     DescentGridBoardView view;
     final int maxWidth = 1500;
     final int maxHeight = 750;
-    JLabel actingFigureLabel;
+    JLabel actingFigureLabel, currentQuestLabel;
     DescentHeroView[] heroAreas;
     JPanel overlordArea;
 
@@ -50,6 +50,7 @@ public class DescentGUI extends AbstractGUIManager {
         DropShadowBorder shadow = new DropShadowBorder(Color.black, shadowSize, 0.9f, 12, true, true, true, true);
         view.setBorder(shadow);
         actingFigureLabel = new JLabel();
+        currentQuestLabel = new JLabel();
 
         JPanel eastWrapper = new JPanel();
         eastWrapper.setOpaque(false);
@@ -119,6 +120,7 @@ public class DescentGUI extends AbstractGUIManager {
 
         updateGameStateInfo(gameState);
 
+        gameInfo.add(currentQuestLabel);
         gameInfo.add(gameStatus);
 //        gameInfo.add(playerStatus);
 //        gameInfo.add(playerScores);
@@ -133,6 +135,7 @@ public class DescentGUI extends AbstractGUIManager {
         turn.setForeground(foregroundColor);
         currentPlayer.setForeground(foregroundColor);
         actingFigureLabel.setForeground(foregroundColor);
+        currentQuestLabel.setForeground(foregroundColor);
 
         gameInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
         gameInfo.setMaximumSize(new Dimension(width / 2 - 10, height));
@@ -170,6 +173,7 @@ public class DescentGUI extends AbstractGUIManager {
         } else {
             actingFigureLabel.setText("Acting hero: " + dgs.getActingFigure().getComponentName() + "(" +dto.getHeroFigureActingNext() + ")");
         }
+        currentQuestLabel.setText("Quest: " + dgs.getCurrentQuest().getName());
     }
 
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {

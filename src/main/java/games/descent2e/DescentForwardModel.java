@@ -10,8 +10,10 @@ import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
+import games.descent2e.concepts.GameOverCondition;
 import games.descent2e.concepts.Quest;
 import utilities.Pair;
+import utilities.Utils;
 import utilities.Vector2D;
 
 import java.awt.*;
@@ -44,6 +46,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         // TODO: Separate shop items (+shuffle), monster and lieutenent cards into 2 acts.
 
         Quest firstQuest = campaign.getQuests()[0];
+        dgs.currentQuest = firstQuest;
         String firstBoard = firstQuest.getBoards().get(0);
 
         // Set up first board of first quest
@@ -53,6 +56,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         dgs.overlordPlayer = 0;  // First player is always the overlord
         // Overlord will also have a figure, but not on the board (to store xp and skill info)
         dgs.overlord = new Figure("Overlord", -1);
+        // TODO: read the following from quest setup
+        dgs.overlord.setAttribute(Figure.Attribute.Fatigue, new Counter(0, 0, 7, "Overlord Fatigue"));
         dgs.overlord.setTokenType("Overlord");
         // OVerlord is player 0, first hero is player 1
         dgs.getTurnOrder().setStartingPlayer(1);
@@ -82,6 +87,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             List<Hero> heroes = _data.findHeroes(archetype);
             Hero figure = heroes.get(rnd.nextInt(heroes.size())).copyNewID();
             figure.getNActionsExecuted().setMaximum(nActionsPerFigure);
+            figure.setComponentName("Hero: " + figure.getComponentName());  // For reference in rules
 
             if (dgs.getNPlayers() == 2) {
                 // In 2-player games, 1 player controls overlord, the other 2 heroes
@@ -196,7 +202,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         Figure actingFigure = dgs.getActingFigure();
 
         action.execute(currentState);
-        if (checkEndOfGame()) return;
+        if (checkEndOfGame(dgs)) return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
 
         // TODO: may still be able to play cards/skills/free effects
         // Turn ends for figure if they executed the number of actions available and have no more movement points available
@@ -540,8 +546,10 @@ public class DescentForwardModel extends AbstractForwardModel {
         return new DescentForwardModel();
     }
 
-    private boolean checkEndOfGame() {
-        // TODO
+    private boolean checkEndOfGame(DescentGameState dgs) {
+        for (GameOverCondition condition: dgs.currentQuest.getGameOverConditions()) {
+            if (condition.test(dgs) == Utils.GameResult.GAME_END) return true;
+        }
         return false;
     }
 

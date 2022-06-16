@@ -4,8 +4,6 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
@@ -13,6 +11,7 @@ import games.GameType;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.actions.Triggers;
+import games.descent2e.concepts.Quest;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -34,6 +33,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     // Mapping from tile name to list of coordinates in master board for each cell (and corresponding coordinates on original tile)
     Map<String, Map<Vector2D, Vector2D>> gridReferences;
     boolean initData;
+
+    // Important
     Random rnd;
 
     Deck<Card> searchCards; // TODO, placeholder
@@ -46,6 +47,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     List<List<Monster>> monsters;
     int overlordPlayer;
     ArrayList<DToken> tokens;
+    Quest currentQuest;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -88,6 +90,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         components.add(searchCards);
         components.addAll(heroes);
         monsters.forEach(components::addAll);
+        components.add(overlord);
         // TODO
         return components;
     }
@@ -117,6 +120,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         for (DToken t : tokens) {
             copy.tokens.add(t.copy());
         }
+        copy.currentQuest = currentQuest;  // TODO does this need to be deep? it (should be) read-only after data parsing
         // TODO
         return copy;
     }
@@ -256,6 +260,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
     public List<DToken> getTokens() {
         return tokens;
+    }
+
+    public Quest getCurrentQuest() {
+        return currentQuest;
     }
 
     @Override

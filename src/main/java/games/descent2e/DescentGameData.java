@@ -10,6 +10,7 @@ import games.descent2e.components.Monster;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Hero;
+import games.descent2e.concepts.GameOverCondition;
 import games.descent2e.concepts.Quest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -223,6 +224,26 @@ public class DescentGameData extends AbstractGameData {
                 }
 
                 // Find special rules
+
+                // Find game over conditions
+                JSONArray gos = (JSONArray) obj.get("game-over");
+                ArrayList<GameOverCondition> conditions = new ArrayList<>();
+                if (ts != null) {
+                    for (Object o1 : gos) {
+                        JSONObject def = (JSONObject) o1;
+                        String conditionClass = (String) def.get("id");
+                        try {
+                            // Create instance of class based on name
+                            Class<?> clazz = Class.forName("games.descent2e.concepts." + conditionClass);
+                            GameOverCondition condition = (GameOverCondition) clazz.getDeclaredConstructor().newInstance();
+                            condition.parse(def);  // Fill in details
+                            conditions.add(condition);  // Add to list
+                        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                q.setGameOverConditions(conditions);
 
                 // Quest read complete
                 quests.add(q);
