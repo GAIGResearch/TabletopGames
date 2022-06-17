@@ -1,6 +1,7 @@
 package utilities;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
@@ -15,8 +16,8 @@ public class StateFeatureListener extends FeatureListener {
 
     IStateFeatureVector phiFn;
 
-    public StateFeatureListener(IStatisticLogger logger, IStateFeatureVector phi) {
-        super(logger);
+    public StateFeatureListener(IStatisticLogger logger, IStateFeatureVector phi, CoreConstants.GameEvents frequency, boolean currentPlayerOnly) {
+        super(logger, frequency, currentPlayerOnly);
         this.phiFn = phi;
     }
 

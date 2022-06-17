@@ -2,6 +2,7 @@ package evaluation;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.ParameterFactory;
 import core.interfaces.IGameListener;
 import core.interfaces.ILearner;
@@ -34,6 +35,8 @@ public class ProgressiveLearner {
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
     IStateFeatureVector phi;
+    CoreConstants.GameEvents frequency;
+    boolean currentPlayerOnly;
     String phiClass, prefix;
     boolean useOnlyLast;
 
@@ -77,6 +80,8 @@ public class ProgressiveLearner {
         prefix = getArg(args, "fileName", String.format("%tF-%s", System.currentTimeMillis(), phi.getClass().getSimpleName()));
         defaultHeuristic = getArg(args, "defaultHeuristic", "players.heuristics.NullHeuristic");
         heuristic = getArg(args, "heuristic", "players.heuristics.LinearStateHeuristic");
+        currentPlayerOnly = getArg(args, "stateCPO", false);
+        frequency = CoreConstants.GameEvents.valueOf(getArg(args, "stateFreq", "ACTION_TAKEN"));
     }
 
     public static void main(String[] args) {
@@ -106,6 +111,9 @@ public class ProgressiveLearner {
                             "\tmatchups=      Defaults to 1. The number of games to play before the learning process is called.\n" +
                             "\tstatePhi=      The full class name of an IStateFeatureVector implementation that defines the inputs \n" +
                             "\t               to the heuristic used in the player files.\n" +
+                            "\tstateFreq=     How frequently to record a value to regress against (ROUND_OVER, TURN_OVER, ACTION_CHOSEN, ACTION_TAKEN)\n" +
+                            "\t               Defaults to ACTION_TAKEN.\n" +
+                            "\tstateCPO=      Whether to only record states for the current player (defaults to all players)\n" +
                             "\theuristic=     A class name for a heuristic to inject into the Agent JSON defintition (see 'player')\n" +
                             "\t               Defaults to players.heuristics.LinearStateHeuristic\n" +
                             "\tdefaultHeuristic=Defaults to a null heuristic (random play). This is only used in the first iteration\n" +
@@ -157,14 +165,9 @@ public class ProgressiveLearner {
         tournament.listeners.add(gameTracker);
         tournament.runTournament();
       // gameTracker.allGamesFinished(); // This is done in tournament
-
-        // TODO : then find the winner, and record it
-
     }
 
     private void loadAgents() {
-        // For the moment we always use the previous agent - so this is brittle self-play - to be changed later
-
         agents = new LinkedList<>();
         File playerLoc = new File(player);
         if (playerLoc.isDirectory()) {
@@ -198,7 +201,7 @@ public class ProgressiveLearner {
 
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
-        StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi);
+        StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi, frequency, currentPlayerOnly);
         tournament.listeners = Collections.singletonList(dataTracker);
         tournament.runTournament();
     }

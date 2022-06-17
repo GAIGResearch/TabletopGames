@@ -5,6 +5,7 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameListener;
+import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
 
 import java.util.*;
@@ -18,11 +19,16 @@ import java.util.stream.IntStream;
  */
 public abstract class FeatureListener implements IGameListener {
 
+
     List<StateFeatureListener.LocalDataWrapper> currentData = new ArrayList<>();
     IStatisticLogger logger;
+    CoreConstants.GameEvents frequency;
+    boolean currentPlayerOnly = false;
 
-    protected FeatureListener(IStatisticLogger logger) {
+    protected FeatureListener(IStatisticLogger logger, CoreConstants.GameEvents frequency, boolean currentPlayerOnly) {
         this.logger = logger;
+        this.currentPlayerOnly = currentPlayerOnly;
+        this.frequency = frequency;
     }
 
     @Override
@@ -75,12 +81,16 @@ public abstract class FeatureListener implements IGameListener {
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
         // we record one state for each player after every action is taken
-        // TODO: This might be better to do at the end of each round, or turn?
-        // TODO: This reduce noise and increase signal (might)
-        if (type == CoreConstants.GameEvents.ACTION_TAKEN) {
-            for (int p = 0; p < state.getNPlayers(); p++) {
+        if (type == frequency) {
+            if (currentPlayerOnly) {
+                int p = state.getCurrentPlayer();
                 double[] phi = extractFeatureVector(action, state, p);
                 currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state));
+            } else {
+                for (int p = 0; p < state.getNPlayers(); p++) {
+                    double[] phi = extractFeatureVector(action, state, p);
+                    currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state));
+                }
             }
         }
     }
