@@ -7,6 +7,7 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
+import games.descent2e.components.cards.SearchCard;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Hero;
@@ -31,6 +32,7 @@ public class DescentGameData extends AbstractGameData {
     List<GraphBoard> boardConfigurations;
     List<Hero> heroes;
     List<Deck<Card>> decks;
+    Deck<Card> searchCards;
     List<Quest> quests;
     List<Quest> sideQuests;
     HashMap<String, HashMap<String, Monster>> monsters;
@@ -46,6 +48,8 @@ public class DescentGameData extends AbstractGameData {
 
         quests = loadQuests(dataPath + "mainQuests.json");
 //        sideQuests = loadQuests(dataPath + "sideQuests.json");
+
+        searchCards = SearchCard.loadCards(dataPath + "searchCards.json");
 
         decks = new ArrayList<>();
         // Read all class decks

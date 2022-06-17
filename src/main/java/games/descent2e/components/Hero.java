@@ -2,10 +2,12 @@ package games.descent2e.components;
 
 import core.CoreConstants;
 import core.components.Card;
+import core.components.Counter;
 import core.components.Deck;
 import core.properties.Property;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import games.descent2e.actions.DescentAction;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -243,10 +245,6 @@ public class Hero extends Figure {
         copy.rested = rested;
         super.copyComponentTo(copy);
         return copy;
-    }
-
-    public Counter getSpeed() {
-        return speed;
     }
 
     public void addAbility(DescentAction ability) {

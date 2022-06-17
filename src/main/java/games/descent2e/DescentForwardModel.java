@@ -183,6 +183,8 @@ public class DescentForwardModel extends AbstractForwardModel {
         dgs.defenceDicePool = new DicePool(Collections.emptyList());
 
         // Shuffle search cards deck
+        dgs.searchCards = _data.searchCards;
+        dgs.searchCards.shuffle(r);
 
         // Ready to start playing!
     }
@@ -323,6 +325,11 @@ public class DescentForwardModel extends AbstractForwardModel {
                         actions.add(act);
                     }
                 }
+            }
+
+            // Search Cards
+            if (actingFigure instanceof Hero) {
+                fo
             }
 
         } else {
