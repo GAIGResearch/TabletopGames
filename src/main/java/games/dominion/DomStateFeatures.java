@@ -73,7 +73,7 @@ public class DomStateFeatures extends AbstractStateFeature {
             retValue[baseFeatureCount + index * 3 + 2] = state.cardsOfType(card, -1, DominionConstants.DeckType.SUPPLY) / 10.0;
         }
         List<CardType> hand = state.getDeck(HAND, playerId).stream().map(DominionCard::cardType).collect(Collectors.toList());
-        Deck<DominionCard> deck = state.getDeck(DRAW, playerId);
+        Deck<DominionCard> deck = state.getDeck(DRAW, playerId).copy();
         deck.add(state.getDeck(DISCARD, playerId));
         Map<CardType, Long> allCards = deck.stream().collect(groupingBy(DominionCard::cardType, counting()));
         for (CardType card : allCards.keySet()) {

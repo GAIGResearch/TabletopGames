@@ -88,7 +88,7 @@ public class TestCoreGameLoop {
     }
 
     @Test
-    public void endOfRoundCleanUpAsExpected() {
+    public void endOfTurnCleanUpAsExpected() {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.setGamePhase(DominionGamePhase.Buy);
         state.addCard(CardType.COPPER, 0, DeckType.TABLE);
@@ -101,6 +101,38 @@ public class TestCoreGameLoop {
         assertEquals(1, state.getDeck(DeckType.TABLE, 1).getSize());
         assertEquals(6, state.getDeck(DeckType.DISCARD, 0).getSize());
         assertEquals(DominionGamePhase.Play, state.getGamePhase());
+    }
+
+    @Test
+    public void endOfRoundCleanUpAsExpected() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        for (int p = 0; p < 4; p++) {
+            state.setGamePhase(DominionGamePhase.Buy);
+            BuyCard newBuy = new BuyCard(CardType.MOAT, p);
+            fm.next(state, newBuy);
+        }
+        for (int p=0; p < 4; p++) {
+            assertEquals(5, state.getDeck(DeckType.HAND, p).getSize());
+            assertEquals(0, state.getDeck(DeckType.DRAW, p).getSize());
+            assertEquals(0, state.getDeck(DeckType.TABLE, p).getSize());
+            assertEquals(6, state.getDeck(DeckType.DISCARD, p).getSize());
+            assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        }
+    }
+
+    @Test
+    public void reshuffleOfDiscardIntoDeck() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        for (int i = 0; i < 4; i++)
+            state.endOfTurn(i);
+        assertEquals(0, state.getCurrentPlayer());
+        state.setGamePhase(DominionGamePhase.Buy);
+        BuyCard newBuy = new BuyCard(CardType.MOAT, 0);
+        fm.next(state, newBuy);
+        assertEquals(5, state.getDeck(DeckType.HAND, 0).getSize());
+        assertEquals(6, state.getDeck(DeckType.DRAW, 0).getSize());
+        assertEquals(0, state.getDeck(DeckType.TABLE, 0).getSize());
+        assertEquals(0, state.getDeck(DeckType.DISCARD, 0).getSize());
     }
 
     @Test
