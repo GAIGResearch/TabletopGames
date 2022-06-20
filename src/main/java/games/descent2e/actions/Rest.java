@@ -17,7 +17,9 @@ public class Rest extends DescentAction{
 
     @Override
     public boolean execute(DescentGameState gs) {
-        ((Hero)gs.getActingFigure()).setRested(true);
+        Hero hero = (Hero)gs.getActingFigure();
+        hero.setRested(true);
+        hero.getNActionsExecuted().increment();
         return true;
     }
 
