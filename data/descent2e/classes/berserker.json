@@ -19,7 +19,7 @@
         "attackType": ["String", "melee"],
         "attackPower": ["String[]", ["blue", "red"]],
         "equipmentType": ["String[]", ["Axe"]],
-        "weaponSurges": ["String[]", ["Surge: +1 damage", "Surge: +1 damage"]],
+        "weaponSurges": ["String[]", ["DAMAGE_PLUS_1", "DAMAGE_PLUS_1"]],
         "equipSlots": ["String[]", ["hand", "hand"]],
         "cost": ["Integer", 25],
         "action": ["String", "Attack"]

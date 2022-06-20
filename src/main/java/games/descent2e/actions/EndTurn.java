@@ -2,6 +2,7 @@ package games.descent2e.actions;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.components.Figure;
 
 public class EndTurn extends DescentAction{
     public EndTurn() {
