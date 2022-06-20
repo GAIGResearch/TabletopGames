@@ -10,6 +10,7 @@ import java.util.function.BiConsumer;
 public enum Surge {
     // a = attack action, s = state (OBVIOUSLY!)
     RANGE_PLUS_1(1, (a, s) -> a.addRange(1)),
+    DAMAGE_PLUS_1(1, (a, s) -> a.addDamage(1)),
     PIERCE_2(1, (a, s) -> a.addPierce(2)),
     STUN(1, (a, s) -> a.setStunning(true)), // TODO: This doesn't yet have any actual effect
     RUNIC_KNOWLEDGE(1, (a, s) -> {

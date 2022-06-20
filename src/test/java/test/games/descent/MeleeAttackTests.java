@@ -26,9 +26,14 @@ public class MeleeAttackTests {
 
     @Before
     public void setup() {
-        state = new DescentGameState(new DescentParameters(234), 2);
-        fm.setup(state);
-        assertEquals("Avric Albright", state.getHeroes().get(0).getComponentName());
+        int seed = 234;
+        do {
+            seed += 1001;
+            state = new DescentGameState(new DescentParameters(seed), 2);
+            fm.setup(state);
+     //       System.out.println("Class: "  + state.getHeroes().get(0).getProperty("class"));
+        } while (state.getHeroes().get(0).getAbilities().stream()
+                .noneMatch(a -> a instanceof SurgeAttackAction && ((SurgeAttackAction)a).surge == Surge.STUN));
     }
 
     @Test
@@ -174,11 +179,10 @@ public class MeleeAttackTests {
     }
 
     @Test
-    public void avricHasSurgeAbility() {
-        assertEquals("Avric Albright", state.getHeroes().get(0).getComponentName());
-        Hero avric = state.getHeroes().get(0);
-        assertEquals(1, avric.getAbilities().size());
-        for (Triggers da : avric.getAbilities().get(0).getTriggers())
+    public void hasSurgeAbility() {
+        Hero hero = state.getHeroes().get(0);
+        assertEquals(1, hero.getAbilities().size());
+        for (Triggers da : hero.getAbilities().get(0).getTriggers())
             assertEquals(Triggers.SURGE_DECISION, da);
     }
 

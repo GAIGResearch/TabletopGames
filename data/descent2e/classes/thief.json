@@ -19,7 +19,7 @@
         "attackType": ["String", "ranged"],
         "attackPower": ["String[]", ["blue", "yellow"]],
         "equipmentType": ["String[]", ["Blade"]],
-        "weaponSurges": ["String[]", ["Surge: +1 Range"]],
+        "weaponSurges": ["String[]", ["RANGE_PLUS_1"]],
         "equipSlots": ["String[]", ["hand"]],
         "cost": ["Integer", 25],
         "action": ["String", "Attack. When Attacking an adjacent monster, gain +1 damage."]

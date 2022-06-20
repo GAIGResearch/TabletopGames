@@ -101,7 +101,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         do {
             if (playerHasInterruptOption(state)) {
                 foundInterrupt = true;
-                System.out.println("Interrupt for player " + interruptPlayer);
+         //       System.out.println("Interrupt for player " + interruptPlayer);
                 // we need to get a decision from this player
             } else {
                 interruptPlayer = (interruptPlayer + 1) % state.getNPlayers();
@@ -139,7 +139,7 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     }
 
     private void executePhase(DescentGameState state) {
-        System.out.println("Executing phase " + phase);
+      //  System.out.println("Executing phase " + phase);
         switch (phase) {
             case NOT_STARTED:
             case ALL_DONE:
