@@ -3,6 +3,7 @@ package players.heuristics;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
+import utilities.Utils;
 
 
 public class LogisticStateWinHeuristic extends LogisticStateHeuristic {
@@ -19,8 +20,10 @@ public class LogisticStateWinHeuristic extends LogisticStateHeuristic {
 
     @Override
     public double evaluateState(AbstractGameState state, int playerId) {
-        if (state.isNotTerminalForPlayer(playerId))
-            return super.evaluateState(state, playerId);
+        if (state.isNotTerminalForPlayer(playerId)) {
+            double retValue = super.evaluateState(state, playerId);
+            return Utils.range(retValue, 0.0, 1.0);
+        }
 
         switch (state.getPlayerResults()[playerId]) {
             case WIN:
