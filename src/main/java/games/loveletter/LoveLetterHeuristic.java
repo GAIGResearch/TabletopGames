@@ -108,7 +108,7 @@ public class LoveLetterHeuristic extends TunableParameters implements IStateHeur
         if (cardTypes.contains(Prince)) retValue += FACTOR_PRINCE;
         if (cardTypes.contains(Princess)) retValue += FACTOR_PRINCESS;
 
-        return retValue;
+        return Utils.range(retValue, -1.0, 1.0);
     }
 
     /**

@@ -24,8 +24,8 @@ public class ActionFeatureListener extends FeatureListener {
 
     IActionFeatureVector psiFn;
 
-    public ActionFeatureListener(IStatisticLogger logger, IActionFeatureVector psi) {
-        super(logger);
+    public ActionFeatureListener(IStatisticLogger logger, IActionFeatureVector psi, CoreConstants.GameEvents frequency, boolean currentPlayerOnly) {
+        super(logger, frequency, currentPlayerOnly);
         this.psiFn = psi;
     }
 

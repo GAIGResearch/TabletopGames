@@ -117,7 +117,7 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
         if (totalCards != 0.0)
             retValue += totalCards * state.getTotalCards(playerId) / 40.0;
 
-        return retValue;
+        return Utils.range(retValue, -1.0, 1.0);
     }
 
 

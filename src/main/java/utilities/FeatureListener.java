@@ -5,6 +5,7 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameListener;
+import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
 
 import java.util.*;
@@ -18,16 +19,23 @@ import java.util.stream.IntStream;
  */
 public abstract class FeatureListener implements IGameListener {
 
+
     List<StateFeatureListener.LocalDataWrapper> currentData = new ArrayList<>();
     IStatisticLogger logger;
+    CoreConstants.GameEvents frequency;
+    boolean currentPlayerOnly = false;
 
-    protected FeatureListener(IStatisticLogger logger) {
+    protected FeatureListener(IStatisticLogger logger, CoreConstants.GameEvents frequency, boolean currentPlayerOnly) {
         this.logger = logger;
+        this.currentPlayerOnly = currentPlayerOnly;
+        this.frequency = frequency;
     }
 
     @Override
     public void onGameEvent(CoreConstants.GameEvents type, Game game) {
         if (type == CoreConstants.GameEvents.GAME_OVER) {
+            // first we record a final state for each player
+            onEvent(frequency, game.getGameState(), null);
             // now we can update the result
             int totP = game.getGameState().getNPlayers();
             double[] finalScores = IntStream.range(0, totP).mapToDouble(game.getGameState()::getGameScore).toArray();
@@ -75,10 +83,16 @@ public abstract class FeatureListener implements IGameListener {
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
         // we record one state for each player after every action is taken
-        if (type == CoreConstants.GameEvents.ACTION_TAKEN) {
-            for (int p = 0; p < state.getNPlayers(); p++) {
+        if (type == frequency) {
+            if (currentPlayerOnly && state.isNotTerminal()) {
+                int p = state.getCurrentPlayer();
                 double[] phi = extractFeatureVector(action, state, p);
                 currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state));
+            } else {
+                for (int p = 0; p < state.getNPlayers(); p++) {
+                    double[] phi = extractFeatureVector(action, state, p);
+                    currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state));
+                }
             }
         }
     }

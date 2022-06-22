@@ -28,7 +28,7 @@ public abstract class AbstractLearner implements ILearner {
     Target targetType;
 
     public enum Target {
-        WIN(3, false), ORDINAL(2, false), SCORE(1, false),
+        WIN(3, false), ORDINAL(2, false), SCORE(1, false), SCORE_DELTA(1, false),
         WIN_MEAN(3, true), ORD_MEAN(2, true);
         public final int indexOffset;
         public final boolean discountToMean;
@@ -47,8 +47,14 @@ public abstract class AbstractLearner implements ILearner {
         this.gamma = gamma;
         this.targetType = target;
     }
-    public void setGamma(double newGamma) {gamma = newGamma;}
-    public void setTarget(Target newTarget) {targetType = newTarget;}
+
+    public void setGamma(double newGamma) {
+        gamma = newGamma;
+    }
+
+    public void setTarget(Target newTarget) {
+        targetType = newTarget;
+    }
 
     protected void loadData(String... files) {
         List<double[]> data = new ArrayList<>();
@@ -98,7 +104,10 @@ public abstract class AbstractLearner implements ILearner {
                 expectedAverage = 1.0 / allData[header.length - 5];
             if (targetType == Target.ORD_MEAN)
                 expectedAverage = (1.0 + allData[header.length - 5]) / 2.0;
-            target[i][0] = (allData[header.length - targetType.indexOffset] - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
+            if (targetType == Target.SCORE_DELTA)
+                target[i][0] = (allData[header.length - targetType.indexOffset] - allData[4]) * Math.pow(gamma, turns);
+            else
+                target[i][0] = (allData[header.length - targetType.indexOffset] - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
             currentScore[i][0] = allData[4];
             double[] regressionData = new double[header.length - 9];
             regressionData[0] = 1.0; // the bias term
