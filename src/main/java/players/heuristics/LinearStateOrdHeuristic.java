@@ -22,7 +22,7 @@ public class LinearStateOrdHeuristic extends LinearStateHeuristic {
     public double evaluateState(AbstractGameState state, int playerId) {
         if (state.isNotTerminalForPlayer(playerId)) {
             double retValue = super.evaluateState(state, playerId);
-            return Utils.range(retValue, 0.0, 1.0);
+            return Utils.range(retValue, -state.getNPlayers(), -1.0);
         }
 
         return -state.getOrdinalPosition(playerId);
