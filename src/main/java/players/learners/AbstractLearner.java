@@ -108,6 +108,8 @@ public abstract class AbstractLearner implements ILearner {
                 target[i][0] = (allData[header.length - targetType.indexOffset] - allData[4]) * Math.pow(gamma, turns);
             else
                 target[i][0] = (allData[header.length - targetType.indexOffset] - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
+            if (targetType == Target.ORDINAL || targetType == Target.ORD_MEAN)
+                target[i][0] = -target[i][0];  // if we are targeting the Ordinal position, then high is bad!
             currentScore[i][0] = allData[4];
             double[] regressionData = new double[header.length - 9];
             regressionData[0] = 1.0; // the bias term
