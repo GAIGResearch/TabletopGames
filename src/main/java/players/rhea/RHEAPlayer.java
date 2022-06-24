@@ -28,7 +28,7 @@ import static games.GameType.Pandemic;
 public class RHEAPlayer extends AbstractPlayer {
     RHEAParams params;
 
-    private ArrayList<RHEAIndividual> population;
+    private List<RHEAIndividual> population;
     private final Random randomGenerator;
     IStateHeuristic heuristic;
 
@@ -222,7 +222,7 @@ public class RHEAPlayer extends AbstractPlayer {
         //selection
         population.sort(Comparator.naturalOrder());
         //copy elites
-        ArrayList<RHEAIndividual> newPopulation = new ArrayList<RHEAIndividual>();
+        List<RHEAIndividual> newPopulation = new ArrayList<>();
         int statesUpdated = 0;
         for (int i = 0, max = Math.min(params.eliteCount, population.size()); i < max; ++i) {
             newPopulation.add(new RHEAIndividual(population.get(i))); // todo: possibly cheating, needs to update copy calls?

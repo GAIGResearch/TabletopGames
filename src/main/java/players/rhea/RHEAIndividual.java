@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-public class RHEAIndividual implements Comparable {
+public class RHEAIndividual implements Comparable<RHEAIndividual> {
 
     AbstractAction[] actions;         // Actions in individual. Intended max length of individual = actions.length
     AbstractGameState[] gameStates;   // Game states in individual.
@@ -41,6 +41,7 @@ public class RHEAIndividual implements Comparable {
         gameStates = new AbstractGameState[I.gameStates.length];
         length = I.length;
         discountFactor = I.discountFactor;
+        heuristic = I.heuristic;
 
         for (int i = 0; i < length; i++){
             actions[i] = I.actions[i].copy();
@@ -117,28 +118,6 @@ public class RHEAIndividual implements Comparable {
     }
 
     /**
-     * Evaluates the individuals score
-     * @param playerID ID of player, used in state evaluation
-     * @return number of calls to the fm.next() function
-     */
-    private double evaluate(int playerID)
-    {
-        double delta = 0;
-        double previousScore = 0;
-        for (int i = 0; i < length; i++) {
-            double score;
-            if (this.heuristic != null){
-                score = heuristic.evaluateState(gameStates[i+1], playerID);
-            } else {
-                score = gameStates[i+1].getGameScore(playerID);
-            }
-            delta += Math.pow(discountFactor, i) * (score - previousScore);
-            previousScore = score;
-        }
-        return delta;
-    }
-
-    /**
      * Performs a rollout with random actions from startIndex to endIndex in the individual, from root game state gs.
      * Starts by repairing the full individual, then mutates it, and finally evaluates it.
      * Evaluates the final state reached and returns the number of calls to the FM.next() function.
@@ -196,7 +175,7 @@ public class RHEAIndividual implements Comparable {
                     if (this.heuristic != null){
                         score = heuristic.evaluateState(gameStates[i+1], playerID);
                     } else {
-                        score = gameStates[i+1].getHeuristicScore(playerID);
+                        score = gameStates[i+1].getGameScore(playerID);
                     }
                     delta += Math.pow(discountFactor, i) * (score - previousScore);
                     previousScore = score;
@@ -216,15 +195,14 @@ public class RHEAIndividual implements Comparable {
     }
 
     @Override
-    public int compareTo(Object o) {
+    public int compareTo(RHEAIndividual b) {
         RHEAIndividual a = this;
-        RHEAIndividual b = (RHEAIndividual)o;
         return Double.compare(b.value, a.value);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Individual)) return false;
+        if (!(o instanceof RHEAIndividual)) return false;
 
         RHEAIndividual a = this;
         RHEAIndividual b = (RHEAIndividual)o;
