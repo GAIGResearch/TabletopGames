@@ -25,10 +25,8 @@ import static core.Game.runOne;
 import static games.GameType.LoveLetter;
 import static games.GameType.Pandemic;
 
-public class RHEAPlayer extends AbstractPlayer
-{
+public class RHEAPlayer extends AbstractPlayer {
     RHEAParams params;
-    private RHEAIndividual bestIndividual;
 
     private ArrayList<RHEAIndividual> population;
     private final Random randomGenerator;
@@ -73,7 +71,6 @@ public class RHEAPlayer extends AbstractPlayer
     public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         timer.setMaxTimeMillis(params.budget);
-        long t = timer.remainingTimeMillis();
         avgTimeTaken = 0;
         acumTimeTaken = 0;
         numIters = 0;
@@ -81,19 +78,16 @@ public class RHEAPlayer extends AbstractPlayer
         copyCalls = 0;
 
         // Initialise individuals
-        population = new ArrayList<RHEAIndividual>();
-        for(int i = 0; i < params.populationSize; ++i)
-        {
+        population = new ArrayList<>();
+        for (int i = 0; i < params.populationSize; ++i) {
             population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic));
             fmCalls += population.get(i).length;
         }
 
         // Run evolution
         boolean keepIterating = true;
-        int iterations = 0;
         while (keepIterating) {
             runIteration(stateObs);
-
             // Check budget depending on budget type
             if (params.budgetType == PlayerConstants.BUDGET_TIME) {
                 long remaining = timer.remainingTimeMillis();
@@ -120,10 +114,8 @@ public class RHEAPlayer extends AbstractPlayer
         return new RHEAPlayer(newParams);
     }
 
-    private RHEAIndividual crossover(RHEAIndividual p1, RHEAIndividual p2)
-    {
-        switch (params.crossoverType)
-        {
+    private RHEAIndividual crossover(RHEAIndividual p1, RHEAIndividual p2) {
+        switch (params.crossoverType) {
             case UNIFORM:
                 return uniformCrossover(p1, p2);
             case ONE_POINT:
@@ -135,15 +127,12 @@ public class RHEAPlayer extends AbstractPlayer
         }
     }
 
-    private RHEAIndividual uniformCrossover(RHEAIndividual p1, RHEAIndividual p2)
-    {
+    private RHEAIndividual uniformCrossover(RHEAIndividual p1, RHEAIndividual p2) {
         RHEAIndividual child = new RHEAIndividual(p1);
         copyCalls += child.length;
-        int min = (p1.length > p2.length ? p2.length : p1.length);
-        for(int i = 0; i < min; ++i)
-        {
-            if(randomGenerator.nextFloat() >= 0.5f)
-            {
+        int min = Math.min(p1.length, p2.length);
+        for (int i = 0; i < min; ++i) {
+            if (randomGenerator.nextFloat() >= 0.5f) {
                 child.actions[i] = p2.actions[i];
                 child.gameStates[i] = p2.gameStates[i].copy();
             }
@@ -158,20 +147,17 @@ public class RHEAPlayer extends AbstractPlayer
         int tailLength = Math.min(p1.length, p2.length) / 2;
 
         for (int i = 0; i < tailLength; ++i) {
-
             child.actions[child.length - 1 - i] = p2.actions[p2.length - 1 - i];
             child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i].copy();
         }
         return child;
     }
 
-    private RHEAIndividual twoPointCrossover(RHEAIndividual p1, RHEAIndividual p2)
-    {
+    private RHEAIndividual twoPointCrossover(RHEAIndividual p1, RHEAIndividual p2) {
         RHEAIndividual child = new RHEAIndividual(p1);
         copyCalls += child.length;
         int tailLength = Math.min(p1.length, p2.length) / 3;
-        for(int i = 0; i < tailLength; ++i)
-        {
+        for (int i = 0; i < tailLength; ++i) {
             child.actions[i] = p2.actions[i];
             child.gameStates[i] = p2.gameStates[i].copy();
             child.actions[child.length - 1 - i] = p2.actions[p2.length - 1 - i];
@@ -180,12 +166,10 @@ public class RHEAPlayer extends AbstractPlayer
         return child;
     }
 
-    RHEAIndividual[] selectParents()
-    {
+    RHEAIndividual[] selectParents() {
         RHEAIndividual[] parents = new RHEAIndividual[2];
 
-        switch (params.selectionType)
-        {
+        switch (params.selectionType) {
             case TOURNAMENT:
                 parents[0] = tournamentSelection();
                 parents[1] = tournamentSelection();
@@ -201,37 +185,36 @@ public class RHEAPlayer extends AbstractPlayer
         return parents;
     }
 
-    RHEAIndividual tournamentSelection()
-    {
-        int rand = randomGenerator.nextInt(population.size() - params.tournamentSize);
-        RHEAIndividual best = population.get(rand);
-        for(int i = rand + 1; i < rand + params.tournamentSize; ++i)
-        {
-            RHEAIndividual current = population.get(i);
-            if(current.value > best.value)
+    RHEAIndividual tournamentSelection() {
+        RHEAIndividual best = null;
+        for (int i = 0; i < params.tournamentSize; ++i) {
+            int rand = randomGenerator.nextInt(population.size());
+
+            RHEAIndividual current = population.get(rand);
+            if (best == null || current.value > best.value)
                 best = current;
         }
         return best;
     }
 
-    RHEAIndividual rankSelection()
-    {
+    RHEAIndividual rankSelection() {
         population.sort(Comparator.naturalOrder());
         int rankSum = 0;
-        for(int i = 0; i < population.size(); ++i)
+        for (int i = 0; i < population.size(); ++i)
             rankSum += i + 1;
         int ran = randomGenerator.nextInt(rankSum);
         int p = 0;
-        for(int i = 0; i < population.size(); ++i)
-        {
+        for (int i = 0; i < population.size(); ++i) {
             p += population.size() - (i);
-            if(p >= ran)
+            if (p >= ran)
                 return population.get(i);
         }
         throw new RuntimeException("Random Generator generated an invalid goal, goal: " + ran + " p: " + p);
     }
+
     /**
      * Run evolutionary process for one generation
+     *
      * @param stateObs - current game state
      */
     private void runIteration(AbstractGameState stateObs) {
@@ -241,13 +224,11 @@ public class RHEAPlayer extends AbstractPlayer
         //copy elites
         ArrayList<RHEAIndividual> newPopulation = new ArrayList<RHEAIndividual>();
         int statesUpdated = 0;
-        for(int i = 0; i < params.eliteCount; ++i)
-        {
+        for (int i = 0, max = Math.min(params.eliteCount, population.size()); i < max; ++i) {
             newPopulation.add(new RHEAIndividual(population.get(i))); // todo: possibly cheating, needs to update copy calls?
         }
         //crossover
-        for(int i = 0; i < params.childCount; ++i)
-        {
+        for (int i = 0; i < params.childCount; ++i) {
             RHEAIndividual[] parents = selectParents();
             RHEAIndividual child = crossover(parents[0], parents[1]);
             //statesUpdated += child.mutate(getForwardModel(), getPlayerID());
@@ -257,8 +238,7 @@ public class RHEAPlayer extends AbstractPlayer
 
         ElapsedCpuTimer test = new ElapsedCpuTimer();
         // mutation
-        for(int i = 0; i < population.size(); ++i)
-        {
+        for (int i = 0; i < population.size(); ++i) {
             statesUpdated += population.get(i).mutate(getForwardModel(), getPlayerID());
         }
 
@@ -266,8 +246,7 @@ public class RHEAPlayer extends AbstractPlayer
         population.sort(Comparator.naturalOrder());
 
         //best ones get moved to the new population
-        for(int i = 0; i < params.populationSize - params.eliteCount; ++i)
-        {
+        for (int i = 0; i < params.populationSize - params.eliteCount; ++i) {
             newPopulation.add(population.get(i));
         }
 
@@ -282,8 +261,7 @@ public class RHEAPlayer extends AbstractPlayer
         avgTimeTaken = acumTimeTaken / numIters;
     }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
         ActionController ac = null; //null;
         /* 2. Game seed */
@@ -297,7 +275,7 @@ public class RHEAPlayer extends AbstractPlayer
 
     private static void RoundRobin() {
         String[] args;
-        
+
         args = new String[6];
         args[0] = "game=LoveLetter";
         args[1] = "nPlayers=4";
@@ -345,8 +323,7 @@ public class RHEAPlayer extends AbstractPlayer
 
     }
 
-    private static void Visual(String[] args)
-    {
+    private static void Visual(String[] args) {
         gui.Frontend.main(args);
     }
 }
