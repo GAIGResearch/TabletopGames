@@ -7,13 +7,9 @@ import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import evaluation.ParameterSearch;
 import evaluation.RoundRobinTournament;
-import org.jetbrains.annotations.NotNull;
 import players.PlayerConstants;
 import players.human.ActionController;
 import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCPlayer;
-import players.simple.OSLAPlayer;
-import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
 
 import java.util.ArrayList;
@@ -22,16 +18,13 @@ import java.util.List;
 import java.util.Random;
 
 import static core.Game.runOne;
-import static games.GameType.LoveLetter;
 import static games.GameType.Pandemic;
 
 public class RHEAPlayer extends AbstractPlayer {
-    RHEAParams params;
-
-    private List<RHEAIndividual> population;
     private final Random randomGenerator;
+    RHEAParams params;
     IStateHeuristic heuristic;
-
+    private List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
     private double avgTimeTaken = 0, acumTimeTaken = 0;
     private int numIters = 0;
@@ -78,16 +71,23 @@ public class RHEAPlayer extends AbstractPlayer {
         copyCalls = 0;
 
         // Initialise individuals
-        population = new ArrayList<>();
-        for (int i = 0; i < params.populationSize; ++i) {
-            population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic));
-            fmCalls += population.get(i).length;
+        if (params.shiftLeft && !population.isEmpty()) {
+            for (RHEAIndividual genome : population) {
+                System.arraycopy(genome.actions, 1, genome.actions, 0, genome.length - 1);
+                // we shift all actions along, and then rollout with repair
+                fmCalls += genome.rollout(stateObs, getForwardModel(), 0, genome.length, getPlayerID(), true);
+            }
+        } else {
+            population = new ArrayList<>();
+            for (int i = 0; i < params.populationSize; ++i) {
+                population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic));
+                fmCalls += population.get(i).length;
+            }
         }
 
         // Run evolution
         boolean keepIterating = true;
         while (keepIterating) {
-            runIteration(stateObs);
             // Check budget depending on budget type
             if (params.budgetType == PlayerConstants.BUDGET_TIME) {
                 long remaining = timer.remainingTimeMillis();
@@ -101,6 +101,10 @@ public class RHEAPlayer extends AbstractPlayer {
             } else if (params.budgetType == PlayerConstants.BUDGET_ITERATIONS) {
                 keepIterating = numIters < params.budget;
             }
+
+            population.sort(Comparator.naturalOrder());
+            if (keepIterating) // this is after the above check in case the initialisation of the population uses up our time!
+                runIteration(stateObs);
         }
 
         // Return first action of best individual
@@ -139,7 +143,6 @@ public class RHEAPlayer extends AbstractPlayer {
         }
         return child;
     }
-
 
     private RHEAIndividual onePointCrossover(RHEAIndividual p1, RHEAIndividual p2) {
         RHEAIndividual child = new RHEAIndividual(p1);
@@ -219,8 +222,6 @@ public class RHEAPlayer extends AbstractPlayer {
      */
     private void runIteration(AbstractGameState stateObs) {
         ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
-        //selection
-        population.sort(Comparator.naturalOrder());
         //copy elites
         List<RHEAIndividual> newPopulation = new ArrayList<>();
         int statesUpdated = 0;
@@ -236,7 +237,6 @@ public class RHEAPlayer extends AbstractPlayer {
             population.add(child);
         }
 
-        ElapsedCpuTimer test = new ElapsedCpuTimer();
         // mutation
         for (int i = 0; i < population.size(); ++i) {
             statesUpdated += population.get(i).mutate(getForwardModel(), getPlayerID());
@@ -259,71 +259,5 @@ public class RHEAPlayer extends AbstractPlayer {
         numIters++;
         acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
         avgTimeTaken = acumTimeTaken / numIters;
-    }
-
-    public static void main(String[] args) {
-        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = null; //null;
-        /* 2. Game seed */
-        //
-        //
-        Optimize();
-        //RunFast();
-        //RoundRobin();
-        //Visual(args);
-    }
-
-    private static void RoundRobin() {
-        String[] args;
-
-        args = new String[6];
-        args[0] = "game=LoveLetter";
-        args[1] = "nPlayers=4";
-        args[2] = "players=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json";
-        args[3] = "gamesPerMatchup=100";
-        args[4] = "selfPlay=false";
-        args[5] = "mode=exhaustive";
-        RoundRobinTournament.main(args);
-    }
-
-    private static void Optimize() {
-        String[] args;
-        long seed = System.currentTimeMillis(); //0
-        args = new String[6];
-        args[0] = "C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\optimization\\rheaoptimization.json";
-        args[1] = "100";
-        args[2] = "LoveLetter";
-        args[3] = "nPlayers=4";
-        args[4] = "opponent=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json\\osla.json";
-        //args[4] = "opponent=coop";
-
-        args[5] = "repeat=10";
-        ParameterSearch.main(args);
-    }
-
-    private static void RunFast() {
-        ArrayList<AbstractPlayer> players = new ArrayList<>();
-        players.add(new MCTSPlayer());
-        players.add(new MCTSPlayer());
-        players.add(new MCTSPlayer());
-        players.add(new MCTSPlayer());
-        /* 4. Run! */
-        int rheaWonGames = 0;
-        int mctsWonGames = 0;
-        int rmhcWonGames = 0;
-        int oslaWonGames = 0;
-        for (int i = 0; i < 1000; i++) {
-            System.out.println(i);
-            Game game = runOne(Pandemic, null, players, 0, false, null, null, 0);
-        }
-        System.out.println("RHEA won: " + rheaWonGames);
-        System.out.println("MCTS won: " + mctsWonGames);
-        System.out.println("RMHC won: " + rmhcWonGames);
-        System.out.println("OSLA won: " + oslaWonGames);
-
-    }
-
-    private static void Visual(String[] args) {
-        gui.Frontend.main(args);
     }
 }

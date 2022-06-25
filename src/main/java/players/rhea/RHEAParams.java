@@ -1,6 +1,5 @@
 package players.rhea;
 
-import core.AbstractParameters;
 import players.PlayerParameters;
 
 import java.util.Arrays;
@@ -16,6 +15,8 @@ public class RHEAParams extends PlayerParameters
     RHEAEnums.SelectionType selectionType = RHEAEnums.SelectionType.TOURNAMENT;
     public int tournamentSize = 4;
     RHEAEnums.CrossoverType crossoverType = RHEAEnums.CrossoverType.UNIFORM;
+    public boolean shiftLeft;
+
     public RHEAParams() {
         this(System.currentTimeMillis());
     }
@@ -30,6 +31,7 @@ public class RHEAParams extends PlayerParameters
         addTunableParameter("selectionType", RHEAEnums.SelectionType.TOURNAMENT, Arrays.asList(RHEAEnums.SelectionType.values()));
         addTunableParameter("tournamentSize", 4, Arrays.asList(1, 2, 3, 4, 5, 6));
         addTunableParameter("crossoverType", RHEAEnums.CrossoverType.UNIFORM, Arrays.asList(RHEAEnums.CrossoverType.values()));
+        addTunableParameter("shiftLeft", false, Arrays.asList(false, true));
     }
 
     @Override
@@ -43,11 +45,22 @@ public class RHEAParams extends PlayerParameters
         selectionType = (RHEAEnums.SelectionType) getParameterValue("selectionType");
         tournamentSize = (int) getParameterValue("tournamentSize");
         crossoverType = (RHEAEnums.CrossoverType) getParameterValue("crossoverType");
+        shiftLeft = (boolean) getParameterValue("shiftLeft");
     }
 
     @Override
-    protected AbstractParameters _copy() {
-        return new RHEAParams(System.currentTimeMillis());
+    protected RHEAParams _copy() {
+         RHEAParams retValue = new RHEAParams(System.currentTimeMillis());
+         retValue.horizon = horizon;
+         retValue.discountFactor = discountFactor;
+         retValue.populationSize = populationSize;
+         retValue.shiftLeft = shiftLeft;
+         retValue.eliteCount = eliteCount;
+         retValue.childCount = childCount;
+         retValue.selectionType = selectionType;
+         retValue.tournamentSize = tournamentSize;
+         retValue.crossoverType = crossoverType;
+         return retValue;
     }
 
 
