@@ -113,6 +113,8 @@ public class RHEAPlayer extends AbstractPlayer {
 
     private RHEAIndividual crossover(RHEAIndividual p1, RHEAIndividual p2) {
         switch (params.crossoverType) {
+            case NONE: // we just take the first parent
+                return new RHEAIndividual(p1);
             case UNIFORM:
                 return uniformCrossover(p1, p2);
             case ONE_POINT:
