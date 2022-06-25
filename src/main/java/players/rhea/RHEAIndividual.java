@@ -4,6 +4,7 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
+import org.graalvm.compiler.core.common.type.ArithmeticOpTable;
 
 import java.util.List;
 import java.util.Random;
@@ -27,7 +28,8 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
         this.heuristic = heuristic;
 
         // Rollout with random actions and assign fitness value
-        rollout(gs, fm, 0, L, playerID, true);  // TODO: cheating, init should also count FM calls
+        gameStates[0] = gs.copy();
+        rollout(fm, 0, playerID, true);  // TODO: cheating, init should also count FM calls
     }
 
     // Copy constructor
@@ -57,20 +59,19 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
      * @return number of calls to the FM.next() function, as the difference between length after rollout and start
      * index of rollout
      */
-    public int mutate(AbstractForwardModel fm, int playerID) {
-        if (length > 0) {
+    public int mutate(AbstractForwardModel fm, int playerID, int mutationCount) {
             // Find index from which to mutate individual, random in range of currently valid length
-            int startIndex = 0;
-            if (length > 1) {
-                startIndex = gen.nextInt(length - 1);
+            int startIndex = actions.length;
+            for (int mutation = 0; mutation < mutationCount; mutation++) {
+                int position = gen.nextInt(actions.length);
+                List<AbstractAction> available = fm.computeAvailableActions(gameStates[position]);
+                actions[position] = available.get(gen.nextInt(available.size()));
+                if (position < startIndex)
+                    startIndex = position;  // start the rollout from the first mutation
             }
-            // Last index is maximum intended individual length
-            int endIndex = actions.length;
 
             // Perform rollout and return number of FM calls taken.
-            return rollout(gameStates[startIndex], fm, startIndex, endIndex, playerID, true);
-        }
-        return 0;
+            return rollout(fm, startIndex, playerID, true);
     }
 
     /**
@@ -78,19 +79,17 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
      * Starts by repairing the full individual, then mutates it, and finally evaluates it.
      * Evaluates the final state reached and returns the number of calls to the FM.next() function.
      *
-     * @param gs         - root game state from which to start rollout
      * @param fm         - forward model
      * @param startIndex - index in individual from which to start rollout
-     * @param endIndex   - index in individual where to end rollout
      * @param playerID   - ID of player, used in state evaluation
      * @return - number of calls to the FM.next() function
      */
-    public int rollout(AbstractGameState gs, AbstractForwardModel fm, int startIndex, int endIndex, int playerID, boolean repair) {
+    public int rollout(AbstractForwardModel fm, int startIndex, int playerID, boolean repair) {
         length = 0;
         double delta = 0;
         double previousScore = 0;
         int fmCalls = 0;
-        gameStates[startIndex] = gs.copy();
+        AbstractGameState gs = gameStates[startIndex].copy();
 
         for (int i = 0; i < startIndex; i++) {
             double score;
@@ -103,7 +102,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
             previousScore = score;
         }
 
-        for (int i = startIndex; i < endIndex; i++) {
+        for (int i = startIndex; i < actions.length; i++) {
             // Rolls from chosen index to the end, randomly changing actions and game states
             // Length of individual is updated depending on if it reaches a terminal game state
             if (gs.isNotTerminal()) {

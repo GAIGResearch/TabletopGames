@@ -63,7 +63,8 @@ public class RHEAPlayer extends AbstractPlayer {
             for (RHEAIndividual genome : population) {
                 System.arraycopy(genome.actions, 1, genome.actions, 0, genome.length - 1);
                 // we shift all actions along, and then rollout with repair
-                fmCalls += genome.rollout(stateObs, getForwardModel(), 0, genome.length, getPlayerID(), true);
+                genome.gameStates[0] = stateObs.copy();
+                fmCalls += genome.rollout(getForwardModel(), 0, getPlayerID(), true);
             }
         } else {
             population = new ArrayList<>();
@@ -212,7 +213,6 @@ public class RHEAPlayer extends AbstractPlayer {
 
     /**
      * Run evolutionary process for one generation
-     *
      */
     private void runIteration() {
         ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
@@ -220,7 +220,7 @@ public class RHEAPlayer extends AbstractPlayer {
         List<RHEAIndividual> newPopulation = new ArrayList<>();
         int statesUpdated = 0;
         for (int i = 0, max = Math.min(params.eliteCount, population.size()); i < max; ++i) {
-            newPopulation.add(new RHEAIndividual(population.get(i))); // todo: possibly cheating, needs to update copy calls?
+            newPopulation.add(new RHEAIndividual(population.get(i)));
         }
         //crossover
         for (int i = 0; i < params.childCount; ++i) {
@@ -231,10 +231,10 @@ public class RHEAPlayer extends AbstractPlayer {
             population.add(child);
         }
 
-        // TODO: Currently we mutate a single future action. Add parameter for multiple mutations.
-        // mutation
+        // TODO: Currently we mutate a single future action.
+        // mutation also rolls forward from the point of mutation, with random actions at every future point - so this also updates value
         for (int i = 0; i < population.size(); ++i) {
-            statesUpdated += population.get(i).mutate(getForwardModel(), getPlayerID());
+            statesUpdated += population.get(i).mutate(getForwardModel(), getPlayerID(), params.mutationCount);
         }
 
         //sort

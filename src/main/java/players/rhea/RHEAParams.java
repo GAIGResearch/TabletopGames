@@ -12,6 +12,7 @@ public class RHEAParams extends PlayerParameters
     public int populationSize = 10;
     public int eliteCount = 2;
     public int childCount = 10;
+    public int mutationCount = 1;
     RHEAEnums.SelectionType selectionType = RHEAEnums.SelectionType.TOURNAMENT;
     public int tournamentSize = 4;
     RHEAEnums.CrossoverType crossoverType = RHEAEnums.CrossoverType.UNIFORM;
@@ -32,6 +33,7 @@ public class RHEAParams extends PlayerParameters
         addTunableParameter("tournamentSize", 4, Arrays.asList(1, 2, 3, 4, 5, 6));
         addTunableParameter("crossoverType", RHEAEnums.CrossoverType.UNIFORM, Arrays.asList(RHEAEnums.CrossoverType.values()));
         addTunableParameter("shiftLeft", false, Arrays.asList(false, true));
+        addTunableParameter("mutationCount", 1, Arrays.asList(1, 3, 10));
     }
 
     @Override
@@ -46,6 +48,7 @@ public class RHEAParams extends PlayerParameters
         tournamentSize = (int) getParameterValue("tournamentSize");
         crossoverType = (RHEAEnums.CrossoverType) getParameterValue("crossoverType");
         shiftLeft = (boolean) getParameterValue("shiftLeft");
+        mutationCount = (int) getParameterValue("mutationCount");
     }
 
     @Override
@@ -60,6 +63,7 @@ public class RHEAParams extends PlayerParameters
          retValue.selectionType = selectionType;
          retValue.tournamentSize = tournamentSize;
          retValue.crossoverType = crossoverType;
+         retValue.mutationCount = mutationCount;
          return retValue;
     }
 
