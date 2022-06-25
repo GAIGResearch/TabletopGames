@@ -4,13 +4,14 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
-import org.graalvm.compiler.core.common.type.ArithmeticOpTable;
 
 import java.util.List;
 import java.util.Random;
 
 public class RHEAIndividual implements Comparable<RHEAIndividual> {
 
+    protected int repairCount;
+    protected int nonRepairCount;
     AbstractAction[] actions;         // Actions in individual. Intended max length of individual = actions.length
     AbstractGameState[] gameStates;   // Game states in individual.
     double value;                     // Fitness of individual, to be maximised.
@@ -60,18 +61,24 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
      * index of rollout
      */
     public int mutate(AbstractForwardModel fm, int playerID, int mutationCount) {
-            // Find index from which to mutate individual, random in range of currently valid length
-            int startIndex = actions.length;
-            for (int mutation = 0; mutation < mutationCount; mutation++) {
-                int position = gen.nextInt(actions.length);
+        // Find index from which to mutate individual, random in range of currently valid length
+        int startIndex = actions.length;
+        for (int mutation = 0; mutation < mutationCount; mutation++) {
+            int position = gen.nextInt(length); // we only consider actions up to the end of the game (which will therefore increase mutation rate towards game end)
+            if (gameStates[position] != null) {
                 List<AbstractAction> available = fm.computeAvailableActions(gameStates[position]);
                 actions[position] = available.get(gen.nextInt(available.size()));
                 if (position < startIndex)
                     startIndex = position;  // start the rollout from the first mutation
             }
+        }
 
-            // Perform rollout and return number of FM calls taken.
+        // Perform rollout and return number of FM calls taken.
+        if (gameStates[startIndex] == null) {
+            return 0;
+        } else {
             return rollout(fm, startIndex, playerID, true);
+        }
     }
 
     /**
@@ -110,13 +117,16 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                 AbstractAction action;
                 AbstractGameState gsCopy = gs.copy();
                 List<AbstractAction> currentActions = fm.computeAvailableActions(gsCopy);
-                boolean illegalAction = actions[i] == null || !currentActions.contains(actions[i]);
-                if (illegalAction) {
+                boolean illegalAction = !currentActions.contains(actions[i]);
+                if (illegalAction || actions[i] == null) {
                     action = currentActions.get(gen.nextInt(currentActions.size()));
-                    if (repair) // if we are repairing then we override an illegal action with a random legitimate one
+                    if (repair || actions[i] == null) // if we are repairing then we override an illegal action with a random legitimate one
                         actions[i] = action;
+                    if (repair && !(actions[i] == null))
+                        repairCount++;
                 } else {
                     action = actions[i];
+                    nonRepairCount++;
                 }
                 // TODO: Add a closed loop option to not copy the state (expensively) if the action is valid, but jump to the next state stored
                 fm.next(gsCopy, action.copy());

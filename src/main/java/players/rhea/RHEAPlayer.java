@@ -19,6 +19,7 @@ public class RHEAPlayer extends AbstractPlayer {
     private int numIters = 0;
     private int fmCalls = 0;
     private int copyCalls = 0;
+    private int repairCount, nonRepairCount;
 
     public RHEAPlayer() {
         this(System.currentTimeMillis());
@@ -57,11 +58,13 @@ public class RHEAPlayer extends AbstractPlayer {
         numIters = 0;
         fmCalls = 0;
         copyCalls = 0;
+        repairCount = 0;
+        nonRepairCount = 0;
 
         // Initialise individuals
         if (params.shiftLeft && !population.isEmpty()) {
             for (RHEAIndividual genome : population) {
-                System.arraycopy(genome.actions, 1, genome.actions, 0, genome.length - 1);
+                System.arraycopy(genome.actions, 1, genome.actions, 0, genome.actions.length - 1);
                 // we shift all actions along, and then rollout with repair
                 genome.gameStates[0] = stateObs.copy();
                 fmCalls += genome.rollout(getForwardModel(), 0, getPlayerID(), true);
@@ -231,12 +234,14 @@ public class RHEAPlayer extends AbstractPlayer {
             population.add(child);
         }
 
-        // TODO: Currently we mutate a single future action.
-        // mutation also rolls forward from the point of mutation, with random actions at every future point - so this also updates value
         for (int i = 0; i < population.size(); ++i) {
             statesUpdated += population.get(i).mutate(getForwardModel(), getPlayerID(), params.mutationCount);
         }
 
+        for (RHEAIndividual individual : population) {
+            repairCount += individual.repairCount;
+            nonRepairCount += individual.nonRepairCount;
+        }
         //sort
         population.sort(Comparator.naturalOrder());
 
@@ -269,6 +274,8 @@ public class RHEAPlayer extends AbstractPlayer {
         stats.put("hiReward", population.get(0).value);
         stats.put("loReward", population.get(population.size() - 1).value);
         stats.put("medianReward", population.get(population.size() / 2 - 1).value);
+        stats.put("repairProportion", repairCount == 0 ? 0.0 : repairCount / (double) (repairCount + nonRepairCount));
+        stats.put("repairsPerIteration", repairCount == 0 ? 0.0 : repairCount / (double) numIters);
         statsLogger.record(stats);
     }
 }
