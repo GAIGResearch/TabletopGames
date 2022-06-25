@@ -15,7 +15,7 @@ public class RHEAPlayer extends AbstractPlayer {
     IStateHeuristic heuristic;
     private List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
-    private double timePerIteration = 0, avgTimeTaken = 0, acumTimeTaken = 0;
+    private double timePerIteration = 0, timeTaken = 0, acumTimeTaken = 0, initTime = 0;
     private int numIters = 0;
     private int fmCalls = 0;
     private int copyCalls = 0;
@@ -53,7 +53,6 @@ public class RHEAPlayer extends AbstractPlayer {
     public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         timer.setMaxTimeMillis(params.budget);
-        avgTimeTaken = 0;
         acumTimeTaken = 0;
         numIters = 0;
         fmCalls = 0;
@@ -74,13 +73,14 @@ public class RHEAPlayer extends AbstractPlayer {
             }
         }
 
+        initTime = timer.elapsedMillis();
         // Run evolution
         boolean keepIterating = true;
         while (keepIterating) {
             // Check budget depending on budget type
             if (params.budgetType == PlayerConstants.BUDGET_TIME) {
                 long remaining = timer.remainingTimeMillis();
-                keepIterating = remaining > avgTimeTaken && remaining > params.breakMS;
+                keepIterating = remaining > timeTaken && remaining > params.breakMS;
             } else if (params.budgetType == PlayerConstants.BUDGET_FM_CALLS) {
                 keepIterating = fmCalls < params.budget;
             } else if (params.budgetType == PlayerConstants.BUDGET_COPY_CALLS) {
@@ -93,11 +93,11 @@ public class RHEAPlayer extends AbstractPlayer {
 
             population.sort(Comparator.naturalOrder());
             if (keepIterating) // this is after the above check in case the initialisation of the population uses up our time!
-                runIteration(stateObs);
+                runIteration();
         }
 
-        avgTimeTaken = timer.elapsedMillis() / (double) numIters;
-        timePerIteration = acumTimeTaken / numIters;
+        timeTaken = timer.elapsedMillis();
+        timePerIteration = acumTimeTaken / numIters;  // exludes initialisation
         if (statsLogger != null)
             logStatistics(stateObs);
         // Return first action of best individual
@@ -133,7 +133,7 @@ public class RHEAPlayer extends AbstractPlayer {
         for (int i = 0; i < min; ++i) {
             if (randomGenerator.nextFloat() >= 0.5f) {
                 child.actions[i] = p2.actions[i];
-                child.gameStates[i] = p2.gameStates[i].copy();
+                child.gameStates[i] = p2.gameStates[i]; //.copy();
             }
         }
         return child;
@@ -146,7 +146,7 @@ public class RHEAPlayer extends AbstractPlayer {
 
         for (int i = 0; i < tailLength; ++i) {
             child.actions[child.length - 1 - i] = p2.actions[p2.length - 1 - i];
-            child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i].copy();
+            child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i]; //.copy();
         }
         return child;
     }
@@ -157,9 +157,9 @@ public class RHEAPlayer extends AbstractPlayer {
         int tailLength = Math.min(p1.length, p2.length) / 3;
         for (int i = 0; i < tailLength; ++i) {
             child.actions[i] = p2.actions[i];
-            child.gameStates[i] = p2.gameStates[i].copy();
+            child.gameStates[i] = p2.gameStates[i]; //.copy();
             child.actions[child.length - 1 - i] = p2.actions[p2.length - 1 - i];
-            child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i].copy();
+            child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i]; //.copy();
         }
         return child;
     }
@@ -213,9 +213,8 @@ public class RHEAPlayer extends AbstractPlayer {
     /**
      * Run evolutionary process for one generation
      *
-     * @param stateObs - current game state
      */
-    private void runIteration(AbstractGameState stateObs) {
+    private void runIteration() {
         ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
         //copy elites
         List<RHEAIndividual> newPopulation = new ArrayList<>();
@@ -264,8 +263,9 @@ public class RHEAPlayer extends AbstractPlayer {
         stats.put("iterations", numIters);
         stats.put("fmCalls", fmCalls);
         stats.put("copyCalls", copyCalls);
-        stats.put("time", avgTimeTaken);
+        stats.put("time", timeTaken);
         stats.put("timePerIteration", timePerIteration);
+        stats.put("initTime", initTime);
         stats.put("hiReward", population.get(0).value);
         stats.put("loReward", population.get(population.size() - 1).value);
         stats.put("medianReward", population.get(population.size() / 2 - 1).value);

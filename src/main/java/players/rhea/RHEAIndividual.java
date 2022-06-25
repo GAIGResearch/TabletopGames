@@ -39,8 +39,8 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
         heuristic = I.heuristic;
 
         for (int i = 0; i < length; i++) {
-            actions[i] = I.actions[i].copy();
-            gameStates[i] = I.gameStates[i].copy();
+            actions[i] = I.actions[i]; //.copy();
+            gameStates[i] = I.gameStates[i]; //.copy(); // Should not need to copy game states, as we always copy before we use!
         }
 
         value = I.value;
