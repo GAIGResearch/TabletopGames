@@ -2,23 +2,12 @@ package players.rhea;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
-import evaluation.ParameterSearch;
-import evaluation.RoundRobinTournament;
 import players.PlayerConstants;
-import players.human.ActionController;
-import players.mcts.MCTSPlayer;
 import utilities.ElapsedCpuTimer;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
-
-import static core.Game.runOne;
-import static games.GameType.Pandemic;
+import java.util.*;
 
 public class RHEAPlayer extends AbstractPlayer {
     private final Random randomGenerator;
@@ -26,7 +15,7 @@ public class RHEAPlayer extends AbstractPlayer {
     IStateHeuristic heuristic;
     private List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
-    private double avgTimeTaken = 0, acumTimeTaken = 0;
+    private double timePerIteration = 0, avgTimeTaken = 0, acumTimeTaken = 0;
     private int numIters = 0;
     private int fmCalls = 0;
     private int copyCalls = 0;
@@ -107,6 +96,10 @@ public class RHEAPlayer extends AbstractPlayer {
                 runIteration(stateObs);
         }
 
+        avgTimeTaken = timer.elapsedMillis() / (double) numIters;
+        timePerIteration = acumTimeTaken / numIters;
+        if (statsLogger != null)
+            logStatistics(stateObs);
         // Return first action of best individual
         return population.get(0).actions[0];
     }
@@ -237,6 +230,7 @@ public class RHEAPlayer extends AbstractPlayer {
             population.add(child);
         }
 
+        // TODO: Currently we mutate a single future action. Add parameter for multiple mutations.
         // mutation
         for (int i = 0; i < population.size(); ++i) {
             statesUpdated += population.get(i).mutate(getForwardModel(), getPlayerID());
@@ -258,6 +252,21 @@ public class RHEAPlayer extends AbstractPlayer {
         // Update budgets
         numIters++;
         acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
-        avgTimeTaken = acumTimeTaken / numIters;
+    }
+
+    protected void logStatistics(AbstractGameState state) {
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("round", state.getTurnOrder());
+        stats.put("turn", state.getTurnOrder().getTurnCounter());
+        stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
+        stats.put("iterations", numIters);
+        stats.put("fmCalls", fmCalls);
+        stats.put("copyCalls", copyCalls);
+        stats.put("time", avgTimeTaken);
+        stats.put("timePerIteration", timePerIteration);
+        stats.put("hiReward", population.get(0).value);
+        stats.put("loReward", population.get(population.size() - 1).value);
+        stats.put("medianReward", population.get(population.size() / 2 - 1).value);
+        statsLogger.record(stats);
     }
 }

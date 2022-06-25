@@ -125,7 +125,8 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
 
                 // If it's my turn, store this in the individual
                 while (gsCopy.isNotTerminal() && !(gsCopy.getCurrentPlayer() == playerID)) {
-                    // now we fast forward through any opponent moves
+                    // now we fast forward through any opponent moves with a random OM
+                    // TODO: Add in other opponent model options
                     List<AbstractAction> moves = fm.computeAvailableActions(gsCopy);
                     fm.next(gsCopy, moves.get(gen.nextInt(moves.size())));
                 }
