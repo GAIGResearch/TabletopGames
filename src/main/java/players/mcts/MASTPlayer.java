@@ -29,7 +29,7 @@ public class MASTPlayer extends AbstractPlayer {
         double[] pdf = new double[possibleActions.size()];
         for (int i = 0; i < possibleActions.size(); i++) {
             AbstractAction a = possibleActions.get(i);
-            double actionValue = 0.0;
+            double actionValue = 10.0; // arbitrary and non-zero
             int p = gameState.getCurrentPlayer();
             if (MASTStatistics.get(p).containsKey(a)) {
                 Pair<Integer, Double> stats = MASTStatistics.get(p).get(a);
