@@ -133,6 +133,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                     nonRepairCount++;
                 }
                 // TODO: Add a closed loop option to not copy the state (expensively) if the action is valid, but jump to the next state stored
+                // TODO: When implemented, this will also need to take account of shiftLeft
                 fm.next(gsCopy, action.copy());
                 fmCalls++;
 

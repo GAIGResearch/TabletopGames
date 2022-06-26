@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class RHEAPlayer extends AbstractPlayer {
-    private static AbstractPlayer randomPlayer = new RandomPlayer();
+    private static final AbstractPlayer randomPlayer = new RandomPlayer();
     private final Random randomGenerator;
     RHEAParams params;
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
