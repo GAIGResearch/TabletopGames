@@ -78,6 +78,7 @@ public class RHEAParams extends PlayerParameters
          retValue.tournamentSize = tournamentSize;
          retValue.crossoverType = crossoverType;
          retValue.mutationCount = mutationCount;
+         retValue.heuristic = heuristic;
          return retValue;
     }
 

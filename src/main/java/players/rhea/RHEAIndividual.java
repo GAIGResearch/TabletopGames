@@ -4,6 +4,7 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
+import utilities.Pair;
 
 import java.util.List;
 import java.util.Random;
@@ -60,7 +61,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
      * @return number of calls to the FM.next() function, as the difference between length after rollout and start
      * index of rollout
      */
-    public int mutate(AbstractForwardModel fm, int playerID, int mutationCount) {
+    public Pair<Integer, Integer> mutate(AbstractForwardModel fm, int playerID, int mutationCount) {
         // Find index from which to mutate individual, random in range of currently valid length
         int startIndex = actions.length;
         for (int mutation = 0; mutation < mutationCount; mutation++) {
@@ -75,7 +76,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
 
         // Perform rollout and return number of FM calls taken.
         if (gameStates[startIndex] == null) {
-            return 0;
+            return new Pair<>(0, 0);
         } else {
             return rollout(fm, startIndex, playerID, true);
         }
@@ -91,11 +92,11 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
      * @param playerID   - ID of player, used in state evaluation
      * @return - number of calls to the FM.next() function
      */
-    public int rollout(AbstractForwardModel fm, int startIndex, int playerID, boolean repair) {
+    public Pair<Integer, Integer> rollout(AbstractForwardModel fm, int startIndex, int playerID, boolean repair) {
         length = 0;
         double delta = 0;
         double previousScore = 0;
-        int fmCalls = 0;
+        int fmCalls = 0, copyCalls = 0;
         AbstractGameState gs = gameStates[startIndex].copy();
 
         for (int i = 0; i < startIndex; i++) {
@@ -112,6 +113,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                 // is the action valid
                 AbstractAction action;
                 AbstractGameState gsCopy = gs.copy();
+                copyCalls++;
                 List<AbstractAction> currentActions = fm.computeAvailableActions(gsCopy);
                 boolean illegalAction = !currentActions.contains(actions[i]);
                 if (illegalAction || actions[i] == null) {
@@ -134,6 +136,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                     // TODO: Add in other opponent model options
                     List<AbstractAction> moves = fm.computeAvailableActions(gsCopy);
                     fm.next(gsCopy, moves.get(gen.nextInt(moves.size())));
+                    fmCalls++;
                 }
                 gameStates[i + 1] = gsCopy;
                 // Individual length increased
@@ -153,7 +156,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
         }
 //        this.value = gs.getScore(playerID);
         this.value = delta;
-        return fmCalls;
+        return new Pair<>(fmCalls, copyCalls);
     }
 
     @Override

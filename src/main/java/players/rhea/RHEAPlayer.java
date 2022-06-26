@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import players.PlayerConstants;
 import utilities.ElapsedCpuTimer;
+import utilities.Pair;
 
 import java.util.*;
 
@@ -51,7 +52,9 @@ public class RHEAPlayer extends AbstractPlayer {
                 System.arraycopy(genome.actions, 1, genome.actions, 0, genome.actions.length - 1);
                 // we shift all actions along, and then rollout with repair
                 genome.gameStates[0] = stateObs.copy();
-                fmCalls += genome.rollout(getForwardModel(), 0, getPlayerID(), true);
+                 Pair<Integer, Integer> calls =  genome.rollout(getForwardModel(), 0, getPlayerID(), true);
+                 fmCalls += calls.a;
+                 copyCalls += calls.b;
             }
         } else {
             population = new ArrayList<>();
@@ -59,6 +62,7 @@ public class RHEAPlayer extends AbstractPlayer {
                 if (!budgetLeft(timer)) break;
                 population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, params.heuristic));
                 fmCalls += population.get(i).length;
+                copyCalls += population.get(i).length;
             }
         }
 
@@ -205,7 +209,6 @@ public class RHEAPlayer extends AbstractPlayer {
     private void runIteration() {
         //copy elites
         List<RHEAIndividual> newPopulation = new ArrayList<>();
-        int statesUpdated = 0;
         for (int i = 0, max = Math.min(params.eliteCount, population.size()); i < max; ++i) {
             newPopulation.add(new RHEAIndividual(population.get(i)));
         }
@@ -218,8 +221,10 @@ public class RHEAPlayer extends AbstractPlayer {
             population.add(child);
         }
 
-        for (int i = 0; i < population.size(); ++i) {
-            statesUpdated += population.get(i).mutate(getForwardModel(), getPlayerID(), params.mutationCount);
+        for (RHEAIndividual rheaIndividual : population) {
+            Pair<Integer, Integer> calls = rheaIndividual.mutate(getForwardModel(), getPlayerID(), params.mutationCount);
+            fmCalls += calls.a;
+            copyCalls += calls.b;
         }
 
         for (RHEAIndividual individual : population) {
@@ -237,8 +242,6 @@ public class RHEAPlayer extends AbstractPlayer {
         population = newPopulation;
 
         population.sort(Comparator.naturalOrder());
-        fmCalls += statesUpdated;
-        copyCalls += statesUpdated; // as mutate() copyies once each time it applies the forward model
         // Update budgets
         numIters++;
     }
