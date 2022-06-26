@@ -1,5 +1,9 @@
 package players.rhea;
 
+import core.AbstractGameState;
+import core.interfaces.IStateHeuristic;
+import evaluation.TunableParameters;
+import org.json.simple.JSONObject;
 import players.PlayerParameters;
 
 import java.util.Arrays;
@@ -17,6 +21,8 @@ public class RHEAParams extends PlayerParameters
     public int tournamentSize = 4;
     RHEAEnums.CrossoverType crossoverType = RHEAEnums.CrossoverType.UNIFORM;
     public boolean shiftLeft;
+    protected IStateHeuristic heuristic = AbstractGameState::getGameScore;
+
 
     public RHEAParams() {
         this(System.currentTimeMillis());
@@ -34,6 +40,7 @@ public class RHEAParams extends PlayerParameters
         addTunableParameter("crossoverType", RHEAEnums.CrossoverType.UNIFORM, Arrays.asList(RHEAEnums.CrossoverType.values()));
         addTunableParameter("shiftLeft", false, Arrays.asList(false, true));
         addTunableParameter("mutationCount", 1, Arrays.asList(1, 3, 10));
+        addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getGameScore);
     }
 
     @Override
@@ -49,6 +56,13 @@ public class RHEAParams extends PlayerParameters
         crossoverType = (RHEAEnums.CrossoverType) getParameterValue("crossoverType");
         shiftLeft = (boolean) getParameterValue("shiftLeft");
         mutationCount = (int) getParameterValue("mutationCount");
+        heuristic = (IStateHeuristic) getParameterValue("heuristic");
+        if (heuristic instanceof TunableParameters) {
+            TunableParameters tunableHeuristic = (TunableParameters) heuristic;
+            for (String name : tunableHeuristic.getParameterNames()) {
+                tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
+            }
+        }
     }
 
     @Override
@@ -72,4 +86,30 @@ public class RHEAParams extends PlayerParameters
     public RHEAPlayer instantiate() {
         return new RHEAPlayer(this);
     }
+
+
+    /**
+     * Any nested tunable parameter space is highly likely to be an IStateHeuristic
+     * If it is, then we set this as the heuristic after the parent code in TunableParameters
+     * has done the work to merge the search spaces together.
+     *
+     * @param json The raw JSON
+     * @return The instantiated object
+     */
+    @Override
+    public Object registerChild(String nameSpace, JSONObject json) {
+        Object child = super.registerChild(nameSpace, json);
+        if ("heuristic".equals(nameSpace)) {
+            heuristic = (IStateHeuristic) child;
+            setParameterValue("heuristic", child);
+        } else {
+            throw new AssertionError("Unknown nameSpace : " + nameSpace);
+        }
+        return child;
+    }
+
+    public IStateHeuristic getHeuristic() {
+        return heuristic;
+    }
+
 }

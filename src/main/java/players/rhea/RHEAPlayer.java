@@ -12,7 +12,6 @@ import java.util.*;
 public class RHEAPlayer extends AbstractPlayer {
     private final Random randomGenerator;
     RHEAParams params;
-    IStateHeuristic heuristic;
     private List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
     private double timePerIteration = 0, timeTaken = 0,  initTime = 0;
@@ -33,21 +32,6 @@ public class RHEAPlayer extends AbstractPlayer {
 
     public RHEAPlayer(long seed) {
         this(new RHEAParams(seed));
-    }
-
-    public RHEAPlayer(IStateHeuristic heuristic) {
-        this(System.currentTimeMillis());
-        this.heuristic = heuristic;
-    }
-
-    public RHEAPlayer(RHEAParams params, IStateHeuristic heuristic) {
-        this(params);
-        this.heuristic = heuristic;
-    }
-
-    public RHEAPlayer(long seed, IStateHeuristic heuristic) {
-        this(new RHEAParams(seed));
-        this.heuristic = heuristic;
     }
 
     @Override
@@ -73,7 +57,7 @@ public class RHEAPlayer extends AbstractPlayer {
             population = new ArrayList<>();
             for (int i = 0; i < params.populationSize; ++i) {
                 if (!budgetLeft(timer)) break;
-                population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic));
+                population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, params.heuristic));
                 fmCalls += population.get(i).length;
             }
         }
