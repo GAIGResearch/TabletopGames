@@ -22,6 +22,7 @@ public class RHEAParams extends PlayerParameters
     RHEAEnums.CrossoverType crossoverType = RHEAEnums.CrossoverType.UNIFORM;
     public boolean shiftLeft;
     protected IStateHeuristic heuristic = AbstractGameState::getGameScore;
+    public boolean useMAST;
 
 
     public RHEAParams() {
@@ -41,6 +42,7 @@ public class RHEAParams extends PlayerParameters
         addTunableParameter("shiftLeft", false, Arrays.asList(false, true));
         addTunableParameter("mutationCount", 1, Arrays.asList(1, 3, 10));
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getGameScore);
+        addTunableParameter("useMAST", false, Arrays.asList(false, true));
     }
 
     @Override
@@ -56,6 +58,7 @@ public class RHEAParams extends PlayerParameters
         crossoverType = (RHEAEnums.CrossoverType) getParameterValue("crossoverType");
         shiftLeft = (boolean) getParameterValue("shiftLeft");
         mutationCount = (int) getParameterValue("mutationCount");
+        useMAST = (boolean) getParameterValue("useMAST");
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         if (heuristic instanceof TunableParameters) {
             TunableParameters tunableHeuristic = (TunableParameters) heuristic;
@@ -79,6 +82,7 @@ public class RHEAParams extends PlayerParameters
          retValue.crossoverType = crossoverType;
          retValue.mutationCount = mutationCount;
          retValue.heuristic = heuristic;
+         retValue.useMAST = useMAST;
          return retValue;
     }
 

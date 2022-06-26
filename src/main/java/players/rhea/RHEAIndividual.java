@@ -2,6 +2,7 @@ package players.rhea;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import utilities.Pair;
@@ -19,19 +20,23 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
     int length;                       // Actual length of individual, <= actions.length
     double discountFactor;            // Discount factor for calculating rewards
     IStateHeuristic heuristic;
+    AbstractPlayer rolloutPolicy;
     private Random gen;               // Random generator
 
-    RHEAIndividual(int L, double discountFactor, AbstractForwardModel fm, AbstractGameState gs, int playerID, Random gen, IStateHeuristic heuristic) {
+    RHEAIndividual(int L, double discountFactor, AbstractForwardModel fm, AbstractGameState gs,
+                   int playerID, Random gen, IStateHeuristic heuristic,
+                   AbstractPlayer rolloutPolicy) {
         // Initialize
         this.gen = gen;
         this.discountFactor = discountFactor;
         actions = new AbstractAction[L];
         gameStates = new AbstractGameState[L + 1];
         this.heuristic = heuristic;
+        this.rolloutPolicy = rolloutPolicy;
 
         // Rollout with random actions and assign fitness value
         gameStates[0] = gs.copy();
-        rollout(fm, 0, playerID, true);  // TODO: cheating, init should also count FM calls
+        rollout(fm, 0, playerID, true);
     }
 
     // Copy constructor
@@ -41,6 +46,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
         length = I.length;
         discountFactor = I.discountFactor;
         heuristic = I.heuristic;
+        rolloutPolicy = I.rolloutPolicy.copy();
 
         for (int i = 0; i < length; i++) {
             actions[i] = I.actions[i]; //.copy();
@@ -117,10 +123,10 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                 List<AbstractAction> currentActions = fm.computeAvailableActions(gsCopy);
                 boolean illegalAction = !currentActions.contains(actions[i]);
                 if (illegalAction || actions[i] == null) {
-                    action = currentActions.get(gen.nextInt(currentActions.size()));
+                    action = rolloutPolicy.getAction(gsCopy, currentActions);
                     if (repair || actions[i] == null) // if we are repairing then we override an illegal action with a random legitimate one
                         actions[i] = action;
-                    if (repair && !(actions[i] == null))
+                    if (repair && illegalAction)
                         repairCount++;
                 } else {
                     action = actions[i];
@@ -133,7 +139,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                 // If it's my turn, store this in the individual
                 while (gsCopy.isNotTerminal() && !(gsCopy.getCurrentPlayer() == playerID)) {
                     // now we fast forward through any opponent moves with a random OM
-                    // TODO: Add in other opponent model options
+                    // TODO: Add in other opponent model options, and record other player moves for MAST
                     List<AbstractAction> moves = fm.computeAvailableActions(gsCopy);
                     fm.next(gsCopy, moves.get(gen.nextInt(moves.size())));
                     fmCalls++;

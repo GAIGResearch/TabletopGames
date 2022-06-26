@@ -3,23 +3,29 @@ package players.rhea;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
 import players.PlayerConstants;
+import players.mcts.MASTPlayer;
+import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
 import utilities.Pair;
+import utilities.Utils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RHEAPlayer extends AbstractPlayer {
     private final Random randomGenerator;
     RHEAParams params;
+    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     private List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
-    private double timePerIteration = 0, timeTaken = 0,  initTime = 0;
+    private double timePerIteration = 0, timeTaken = 0, initTime = 0;
     private int numIters = 0;
     private int fmCalls = 0;
     private int copyCalls = 0;
     private int repairCount, nonRepairCount;
+    private MASTPlayer mastPlayer;
+    private static AbstractPlayer randomPlayer = new RandomPlayer();
 
     public RHEAPlayer() {
         this(System.currentTimeMillis());
@@ -36,6 +42,14 @@ public class RHEAPlayer extends AbstractPlayer {
     }
 
     @Override
+    public void initializePlayer(AbstractGameState state) {
+        MASTStatistics = new ArrayList<>();
+        for (int i = 0; i < state.getNPlayers(); i++)
+            MASTStatistics.add(new HashMap<>());
+        population = new ArrayList<>();
+    }
+
+    @Override
     public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         timer.setMaxTimeMillis(params.budget);
@@ -45,6 +59,19 @@ public class RHEAPlayer extends AbstractPlayer {
         repairCount = 0;
         nonRepairCount = 0;
 
+        if (params.useMAST) {
+            if (MASTStatistics == null) {
+                MASTStatistics = new ArrayList<>();
+                for (int i = 0; i < stateObs.getNPlayers(); i++)
+                    MASTStatistics.add(new HashMap<>());
+            } else {
+                MASTStatistics = MASTStatistics.stream()
+                        .map(m -> Utils.decay(m, params.discountFactor))
+                        .collect(Collectors.toList());
+            }
+            mastPlayer = new MASTPlayer(new Random(params.getRandomSeed()));
+            mastPlayer.setStats(MASTStatistics);
+        }
         // Initialise individuals
         if (params.shiftLeft && !population.isEmpty()) {
             for (RHEAIndividual genome : population) {
@@ -52,15 +79,16 @@ public class RHEAPlayer extends AbstractPlayer {
                 System.arraycopy(genome.actions, 1, genome.actions, 0, genome.actions.length - 1);
                 // we shift all actions along, and then rollout with repair
                 genome.gameStates[0] = stateObs.copy();
-                 Pair<Integer, Integer> calls =  genome.rollout(getForwardModel(), 0, getPlayerID(), true);
-                 fmCalls += calls.a;
-                 copyCalls += calls.b;
+                Pair<Integer, Integer> calls = genome.rollout(getForwardModel(), 0, getPlayerID(), true);
+                fmCalls += calls.a;
+                copyCalls += calls.b;
             }
         } else {
             population = new ArrayList<>();
             for (int i = 0; i < params.populationSize; ++i) {
                 if (!budgetLeft(timer)) break;
-                population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, params.heuristic));
+                population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs,
+                        getPlayerID(), randomGenerator, params.heuristic, params.useMAST ? mastPlayer : randomPlayer));
                 fmCalls += population.get(i).length;
                 copyCalls += population.get(i).length;
             }
@@ -216,21 +244,18 @@ public class RHEAPlayer extends AbstractPlayer {
         for (int i = 0; i < params.childCount; ++i) {
             RHEAIndividual[] parents = selectParents();
             RHEAIndividual child = crossover(parents[0], parents[1]);
-            //statesUpdated += child.mutate(getForwardModel(), getPlayerID());
-            //fmCalls += child.rollout(child.gameStates[0], getForwardModel(), 0, child.actions.length, getPlayerID());
             population.add(child);
         }
 
-        for (RHEAIndividual rheaIndividual : population) {
-            Pair<Integer, Integer> calls = rheaIndividual.mutate(getForwardModel(), getPlayerID(), params.mutationCount);
+        for (RHEAIndividual individual : population) {
+            Pair<Integer, Integer> calls = individual.mutate(getForwardModel(), getPlayerID(), params.mutationCount);
             fmCalls += calls.a;
             copyCalls += calls.b;
-        }
-
-        for (RHEAIndividual individual : population) {
             repairCount += individual.repairCount;
             nonRepairCount += individual.nonRepairCount;
+            MASTBackup(individual.actions, individual.value, getPlayerID());
         }
+
         //sort
         population.sort(Comparator.naturalOrder());
 
@@ -244,6 +269,16 @@ public class RHEAPlayer extends AbstractPlayer {
         population.sort(Comparator.naturalOrder());
         // Update budgets
         numIters++;
+    }
+
+
+    protected void MASTBackup(AbstractAction[] rolloutActions, double delta, int player) {
+        for (int i = 0; i < rolloutActions.length; i++) {
+            Pair<Integer, Double> stats = MASTStatistics.get(player).getOrDefault(rolloutActions[i], new Pair<>(0, 0.0));
+            stats.a++;  // visits
+            stats.b += delta;   // value
+            MASTStatistics.get(player).put(rolloutActions[i].copy(), stats);
+        }
     }
 
     protected void logStatistics(AbstractGameState state) {
