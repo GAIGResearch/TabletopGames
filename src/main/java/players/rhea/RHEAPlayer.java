@@ -15,7 +15,7 @@ public class RHEAPlayer extends AbstractPlayer {
     IStateHeuristic heuristic;
     private List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
-    private double timePerIteration = 0, timeTaken = 0, acumTimeTaken = 0, initTime = 0;
+    private double timePerIteration = 0, timeTaken = 0,  initTime = 0;
     private int numIters = 0;
     private int fmCalls = 0;
     private int copyCalls = 0;
@@ -54,7 +54,6 @@ public class RHEAPlayer extends AbstractPlayer {
     public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         timer.setMaxTimeMillis(params.budget);
-        acumTimeTaken = 0;
         numIters = 0;
         fmCalls = 0;
         copyCalls = 0;
@@ -64,6 +63,7 @@ public class RHEAPlayer extends AbstractPlayer {
         // Initialise individuals
         if (params.shiftLeft && !population.isEmpty()) {
             for (RHEAIndividual genome : population) {
+                if (!budgetLeft(timer)) break;
                 System.arraycopy(genome.actions, 1, genome.actions, 0, genome.actions.length - 1);
                 // we shift all actions along, and then rollout with repair
                 genome.gameStates[0] = stateObs.copy();
@@ -72,40 +72,41 @@ public class RHEAPlayer extends AbstractPlayer {
         } else {
             population = new ArrayList<>();
             for (int i = 0; i < params.populationSize; ++i) {
+                if (!budgetLeft(timer)) break;
                 population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic));
                 fmCalls += population.get(i).length;
             }
         }
 
+        population.sort(Comparator.naturalOrder());
         initTime = timer.elapsedMillis();
         // Run evolution
-        boolean keepIterating = true;
-        while (keepIterating) {
-            // Check budget depending on budget type
-            if (params.budgetType == PlayerConstants.BUDGET_TIME) {
-                long remaining = timer.remainingTimeMillis();
-                keepIterating = remaining > timeTaken && remaining > params.breakMS;
-            } else if (params.budgetType == PlayerConstants.BUDGET_FM_CALLS) {
-                keepIterating = fmCalls < params.budget;
-            } else if (params.budgetType == PlayerConstants.BUDGET_COPY_CALLS) {
-                keepIterating = copyCalls < params.budget && numIters < params.budget;
-            } else if (params.budgetType == PlayerConstants.BUDGET_FMANDCOPY_CALLS) {
-                keepIterating = (fmCalls + copyCalls) < params.budget;
-            } else if (params.budgetType == PlayerConstants.BUDGET_ITERATIONS) {
-                keepIterating = numIters < params.budget;
-            }
-
-            population.sort(Comparator.naturalOrder());
-            if (keepIterating) // this is after the above check in case the initialisation of the population uses up our time!
-                runIteration();
+        while (budgetLeft(timer)) {
+            runIteration();
         }
 
         timeTaken = timer.elapsedMillis();
-        timePerIteration = acumTimeTaken / numIters;  // exludes initialisation
+        timePerIteration = numIters == 0 ? 0.0 : (timeTaken - initTime) / numIters;
         if (statsLogger != null)
             logStatistics(stateObs);
         // Return first action of best individual
         return population.get(0).actions[0];
+    }
+
+    private boolean budgetLeft(ElapsedCpuTimer timer) {
+        if (params.budgetType == PlayerConstants.BUDGET_TIME) {
+            long remaining = timer.remainingTimeMillis();
+            return remaining > params.breakMS;
+        } else if (params.budgetType == PlayerConstants.BUDGET_FM_CALLS) {
+            return fmCalls < params.budget;
+        } else if (params.budgetType == PlayerConstants.BUDGET_COPY_CALLS) {
+            return copyCalls < params.budget && numIters < params.budget;
+        } else if (params.budgetType == PlayerConstants.BUDGET_FMANDCOPY_CALLS) {
+            return (fmCalls + copyCalls) < params.budget;
+        } else if (params.budgetType == PlayerConstants.BUDGET_ITERATIONS) {
+            return numIters < params.budget;
+        }
+        throw new AssertionError("This should be unreachable : " + params.budgetType);
     }
 
     @Override
@@ -218,7 +219,6 @@ public class RHEAPlayer extends AbstractPlayer {
      * Run evolutionary process for one generation
      */
     private void runIteration() {
-        ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
         //copy elites
         List<RHEAIndividual> newPopulation = new ArrayList<>();
         int statesUpdated = 0;
@@ -246,7 +246,7 @@ public class RHEAPlayer extends AbstractPlayer {
         population.sort(Comparator.naturalOrder());
 
         //best ones get moved to the new population
-        for (int i = 0; i < params.populationSize - params.eliteCount; ++i) {
+        for (int i = 0; i < Math.min(population.size(), params.populationSize - params.eliteCount); ++i) {
             newPopulation.add(population.get(i));
         }
 
@@ -257,7 +257,6 @@ public class RHEAPlayer extends AbstractPlayer {
         copyCalls += statesUpdated; // as mutate() copyies once each time it applies the forward model
         // Update budgets
         numIters++;
-        acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
     }
 
     protected void logStatistics(AbstractGameState state) {
