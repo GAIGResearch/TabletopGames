@@ -1,5 +1,6 @@
 package utilities;
 
+import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -9,7 +10,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.*;
 
@@ -301,14 +301,27 @@ public abstract class Utils {
     public static <T> T loadClassFromJSON(JSONObject json) {
         try {
             String cl = (String) json.getOrDefault("class", "");
+            if (cl.isEmpty()) {
+                // look for an enum
+                String en = (String) json.getOrDefault("enum", "");
+                String val = (String) json.getOrDefault("value", "");
+                if (en.isEmpty() || val.isEmpty())
+                    throw new AssertionError("No class or enum/value tags found in " + json);
+                Class<? extends Enum> enumClass = (Class<? extends Enum>) Class.forName(en);
+                return (T) Enum.valueOf(enumClass, val);
+            }
             Class<T> outputClass = (Class<T>) Class.forName(cl);
             JSONArray argArray = (JSONArray) json.getOrDefault("args", new JSONArray());
             Class<?>[] argClasses = new Class[argArray.size()];
             Object[] args = new Object[argArray.size()];
             for (int i = 0; i < argClasses.length; i++) {
                 Object arg = argArray.get(i);
-                args[i] = arg;
-                if (arg instanceof Long) {
+                if (arg instanceof JSONObject) {
+                    // we have recursion
+                    // we need to instantiate this, and then stick it in
+                    arg = loadClassFromJSON((JSONObject) arg);
+                    argClasses[i] = arg.getClass();
+                } else if (arg instanceof Long) {
                     argClasses[i] = int.class;
                     args[i] = ((Long) arg).intValue();
                 } else if (arg instanceof Double) {
@@ -320,18 +333,20 @@ public abstract class Utils {
                 } else {
                     throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
                 }
+                args[i] = arg;
             }
             Class<?> clazz = Class.forName(cl);
-            Constructor<?> constructor = clazz.getConstructor(argClasses);
-            return outputClass.cast(constructor.newInstance(args));
+            Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
+            Object retValue = constructor.newInstance(args);
+            return outputClass.cast(retValue);
         } catch (ClassNotFoundException e) {
-            throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            throw new AssertionError("No matching constructor for class found using " + json.toJSONString());
+            throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
             throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
         }
     }
 
