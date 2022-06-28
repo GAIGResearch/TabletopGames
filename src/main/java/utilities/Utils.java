@@ -331,7 +331,7 @@ public abstract class Utils {
             throw new AssertionError("No matching constructor for class found using " + json.toJSONString());
         } catch (ReflectiveOperationException e) {
             e.printStackTrace();
-            throw new AssertionError("Error constructing class using " + json.toJSONString());
+            throw new AssertionError("Error constructing class using " + json.toJSONString() + " : " + e.getMessage());
         }
     }
 

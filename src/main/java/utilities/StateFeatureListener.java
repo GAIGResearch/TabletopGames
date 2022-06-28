@@ -6,6 +6,8 @@ import core.actions.AbstractAction;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * This provides a generic way of recording training data from games. After each move is made, it will record a feature
  * vector of the current state (for each player?) and the current score.
@@ -15,6 +17,15 @@ import core.interfaces.IStatisticLogger;
 public class StateFeatureListener extends FeatureListener {
 
     IStateFeatureVector phiFn;
+
+    // utility constructor
+    public StateFeatureListener(String loggerString, String phiString, String frequencyString, boolean currentPlayerOnly)
+            throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+            this((IStatisticLogger) Class.forName(loggerString).getConstructor().newInstance(),
+                    (IStateFeatureVector) Class.forName(phiString).getConstructor().newInstance(),
+                    CoreConstants.GameEvents.valueOf(frequencyString),
+                    currentPlayerOnly);
+    }
 
     public StateFeatureListener(IStatisticLogger logger, IStateFeatureVector phi, CoreConstants.GameEvents frequency, boolean currentPlayerOnly) {
         super(logger, frequency, currentPlayerOnly);

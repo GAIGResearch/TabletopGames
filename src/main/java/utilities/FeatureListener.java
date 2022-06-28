@@ -80,6 +80,9 @@ public abstract class FeatureListener implements IGameListener {
 
     public abstract double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
+    public void setLogger(IStatisticLogger newLogger) {
+        this.logger = newLogger;
+    }
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
         // we record one state for each player after every action is taken
