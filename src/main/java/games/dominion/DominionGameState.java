@@ -2,6 +2,7 @@ package games.dominion;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -16,6 +17,7 @@ import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static java.util.Comparator.comparingInt;
@@ -184,8 +186,10 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public int availableSpend(int playerID) {
-        if (playerID != turnOrder.getTurnOwner())
-            throw new AssertionError("Not yet supported");
+        if (playerID != turnOrder.getTurnOwner()) {
+            System.out.println(printState());
+            throw new AssertionError(String.format("Not yet supported : Player %d trying to spend in turn of player %d", playerID, getCurrentPlayer()));
+        }
         int totalTreasureInHand = playerHands[playerID].sumInt(DominionCard::treasureValue);
         return totalTreasureInHand - spentSoFar + additionalSpendAvailable;
     }
@@ -451,5 +455,26 @@ public class DominionGameState extends AbstractGameState {
         result = result + 31 * Arrays.hashCode(playerResults) + 743 * Arrays.hashCode(playerHands) + 353 * Arrays.hashCode(playerDiscards) +
                 11 * Arrays.hashCode(playerTableaux) + 41 * Arrays.hashCode(playerDrawPiles) + Arrays.hashCode(defenceStatus);
         return result;
+    }
+
+    public String printState() {
+        StringBuilder retValue = new StringBuilder();
+        retValue.append(String.format("Turn: %d, Current Player: %d%n", turnOrder.getRoundCounter(), getCurrentPlayer()));
+        for (Map.Entry<CardType, Integer> s : cardsIncludedInGame.entrySet()) {
+            retValue.append(String.format("\t%2d %s%n", s.getValue(), s.getKey()));
+        }
+        for (int p = 0; p < getCurrentPlayer(); p++) {
+            retValue.append(String.format("Player: %d, Score: %2.0f, Hand: %d, Deck: %d, Discard: %d%n",
+                    p, getGameScore(p), playerHands[p].getSize(), playerDrawPiles[p].getSize(), playerDiscards[p].getSize()));
+            retValue.append("Tableau:\n\t");
+            retValue.append(getDeck(DeckType.TABLE, p).stream().map(Card::toString).collect(Collectors.joining()));
+            retValue.append("\nHand:\n\t");
+            retValue.append(getDeck(DeckType.HAND, p).stream().map(Card::toString).collect(Collectors.joining()));
+        }
+        retValue.append("\n\nHistory:\n\t");
+        int historyLength = getHistoryAsText().size();
+        retValue.append(getHistoryAsText().subList(historyLength - 10, historyLength).stream().map(Objects::toString).collect(Collectors.joining("\n\t")));
+        retValue.append("\n");
+        return retValue.toString();
     }
 }

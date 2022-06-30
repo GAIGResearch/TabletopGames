@@ -2,9 +2,9 @@ package games.dominion.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import games.dominion.DominionConstants.*;
+import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionGameState;
-import games.dominion.DominionGameState.*;
+import games.dominion.DominionGameState.DominionGamePhase;
 import games.dominion.cards.CardType;
 
 import java.util.Objects;
@@ -22,13 +22,20 @@ public abstract class DominionAction extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
-        if (state.getCurrentPlayer() != player)
-            throw new AssertionError("Attempting to play an action out of turn");
-        if (state.actionsLeft() < 1)
-            throw new AssertionError("Insufficient actions to play action card " + this.toString());
-        if (state.getGamePhase() != DominionGamePhase.Play)
-            throw new AssertionError("Should not be able to play Action Cards unless it is the Play Phase");
+        if (state.getCurrentPlayer() != player) {
+            System.out.println(((DominionGameState) gs).printState());
+            throw new AssertionError("Attempting to play an action out of turn : " + this);
+        }
+        if (state.actionsLeft() < 1) {
+            System.out.println(((DominionGameState) gs).printState());
+            throw new AssertionError("Insufficient actions to play action card " + this);
+        }
+        if (state.getGamePhase() != DominionGamePhase.Play) {
+            System.out.println(((DominionGameState) gs).printState());
+            throw new AssertionError("Should not be able to play Action Cards unless it is the Play Phase : " + this);
+        }
         if (!state.moveCard(type, player, DeckType.HAND, player, DeckType.TABLE)) {
+            System.out.println(((DominionGameState) gs).printState());
             throw new AssertionError(String.format("Moving %s card from HAND to TABLE failed for player %d", type, player));
         }
         state.changeActions(-1);  // use up one action from playing this card
@@ -38,7 +45,7 @@ public abstract class DominionAction extends AbstractAction {
 
     /**
      * Any standard functionality parameterised directly on the CardType. This effectively means:
-     *  - Plus Actions/Draws/Buys/Money
+     * - Plus Actions/Draws/Buys/Money
      */
     void executeCoreCardTypeFunctionality(DominionGameState state) {
         state.changeActions(type.plusActions);
