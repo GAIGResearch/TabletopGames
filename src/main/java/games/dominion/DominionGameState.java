@@ -7,6 +7,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
+import core.interfaces.IPrintable;
 import core.turnorders.StandardTurnOrder;
 import games.GameType;
 import games.dominion.DominionConstants.DeckType;
@@ -23,38 +24,27 @@ import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
-public class DominionGameState extends AbstractGameState {
-
-    public enum DominionGamePhase implements IGamePhase {
-        Play,
-        Buy
-    }
+public class DominionGameState extends AbstractGameState implements IPrintable {
 
     Random rnd;
     int playerCount;
     DominionParameters params;
-
     // Counts of cards on the table should be fine
     Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
-
     // Then Decks for each player - Hand, Discard and Draw
     PartialObservableDeck<DominionCard>[] playerHands;
     PartialObservableDeck<DominionCard>[] playerDrawPiles;
     Deck<DominionCard>[] playerDiscards;
     Deck<DominionCard>[] playerTableaux;
-
     // Trash pile and other global decks
     Deck<DominionCard> trashPile;
-
     boolean[] defenceStatus;
-
     int buysLeftForCurrentPlayer = 1;
     int actionsLeftForCurrentPlayer = 1;
     int spentSoFar = 0;
     int additionalSpendAvailable = 0;
-
-
     List<IDelayedAction> delayedActions = new ArrayList<>();
+
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -187,7 +177,7 @@ public class DominionGameState extends AbstractGameState {
 
     public int availableSpend(int playerID) {
         if (playerID != turnOrder.getTurnOwner()) {
-            System.out.println(printState());
+            System.out.println(this);
             throw new AssertionError(String.format("Not yet supported : Player %d trying to spend in turn of player %d", playerID, getCurrentPlayer()));
         }
         int totalTreasureInHand = playerHands[playerID].sumInt(DominionCard::treasureValue);
@@ -457,15 +447,18 @@ public class DominionGameState extends AbstractGameState {
         return result;
     }
 
-    public String printState() {
+    @Override
+    public String toString() {
         StringBuilder retValue = new StringBuilder();
-        retValue.append(String.format("Turn: %d, Current Player: %d%n", turnOrder.getRoundCounter(), getCurrentPlayer()));
+        retValue.append(String.format("Turn: %d, Current Player: %d, Phase: %s%n", turnOrder.getRoundCounter(), getCurrentPlayer(), gamePhase));
         for (Map.Entry<CardType, Integer> s : cardsIncludedInGame.entrySet()) {
             retValue.append(String.format("\t%2d %s%n", s.getValue(), s.getKey()));
         }
-        for (int p = 0; p < getCurrentPlayer(); p++) {
-            retValue.append(String.format("Player: %d, Score: %2.0f, Hand: %d, Deck: %d, Discard: %d%n",
-                    p, getGameScore(p), playerHands[p].getSize(), playerDrawPiles[p].getSize(), playerDiscards[p].getSize()));
+        for (int p = 0; p < getNPlayers(); p++) {
+            retValue.append(String.format("Player: %d, Score: %2.0f, Hand: %d, Deck: %d, Discard: %d, Actions: %d, Buys: %d%n",
+                    p, getGameScore(p), playerHands[p].getSize(), playerDrawPiles[p].getSize(), playerDiscards[p].getSize(),
+                    p == getCurrentPlayer() ? actionsLeftForCurrentPlayer : 0,
+                    p == getCurrentPlayer() ? buysLeftForCurrentPlayer : 0));
             retValue.append("Tableau:\n\t");
             retValue.append(getDeck(DeckType.TABLE, p).stream().map(Card::toString).collect(Collectors.joining()));
             retValue.append("\nHand:\n\t");
@@ -476,5 +469,10 @@ public class DominionGameState extends AbstractGameState {
         retValue.append(getHistoryAsText().subList(historyLength - 10, historyLength).stream().map(Objects::toString).collect(Collectors.joining("\n\t")));
         retValue.append("\n");
         return retValue.toString();
+    }
+
+    public enum DominionGamePhase implements IGamePhase {
+        Play,
+        Buy
     }
 }

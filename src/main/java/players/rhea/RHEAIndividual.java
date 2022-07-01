@@ -142,6 +142,9 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                     // now we fast forward through any opponent moves with a random OM
                     // TODO: Add in other opponent model options, and record other player moves for MAST
                     List<AbstractAction> moves = fm.computeAvailableActions(gsCopy);
+                    if (moves.isEmpty()) {
+                        throw new AssertionError("No moves found in state " + gsCopy);
+                    }
                     fm.next(gsCopy, moves.get(gen.nextInt(moves.size())));
                     fmCalls++;
                 }

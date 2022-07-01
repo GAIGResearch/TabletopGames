@@ -143,7 +143,7 @@ public class DominionForwardModel extends AbstractForwardModel {
                     availableActions.add(new EndPhase());
                     return availableActions;
                 }
-                return Arrays.asList(new EndPhase());
+                return Collections.singletonList(new EndPhase());
             case "Buy":
                 // we return every available card for purchase within our price range
                 int budget = state.availableSpend(playerID);

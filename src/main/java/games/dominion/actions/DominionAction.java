@@ -23,19 +23,19 @@ public abstract class DominionAction extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
         if (state.getCurrentPlayer() != player) {
-            System.out.println(((DominionGameState) gs).printState());
+            System.out.println(gs);
             throw new AssertionError("Attempting to play an action out of turn : " + this);
         }
         if (state.actionsLeft() < 1) {
-            System.out.println(((DominionGameState) gs).printState());
+            System.out.println(gs);
             throw new AssertionError("Insufficient actions to play action card " + this);
         }
         if (state.getGamePhase() != DominionGamePhase.Play) {
-            System.out.println(((DominionGameState) gs).printState());
+            System.out.println(gs);
             throw new AssertionError("Should not be able to play Action Cards unless it is the Play Phase : " + this);
         }
         if (!state.moveCard(type, player, DeckType.HAND, player, DeckType.TABLE)) {
-            System.out.println(((DominionGameState) gs).printState());
+            System.out.println(gs);
             throw new AssertionError(String.format("Moving %s card from HAND to TABLE failed for player %d", type, player));
         }
         state.changeActions(-1);  // use up one action from playing this card
