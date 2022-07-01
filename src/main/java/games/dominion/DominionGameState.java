@@ -76,8 +76,10 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
     }
 
     public void endOfTurn(int playerID) {
-        if (playerID != getCurrentPlayer())
-            throw new AssertionError("Not yet supported");
+        if (playerID != getCurrentPlayer()) {
+            System.out.println(this);
+            throw new AssertionError("Cannot end turn if it is not your turn currently");
+        }
         // 1) put hand and cards played into discard
         // 2) draw 5 new cards
         // 3) shuffle and move discard if we run out
@@ -460,13 +462,17 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                     p == getCurrentPlayer() ? actionsLeftForCurrentPlayer : 0,
                     p == getCurrentPlayer() ? buysLeftForCurrentPlayer : 0));
             retValue.append("Tableau:\n\t");
-            retValue.append(getDeck(DeckType.TABLE, p).stream().map(Card::toString).collect(Collectors.joining()));
+            retValue.append(getDeck(DeckType.TABLE, p).stream().map(Card::toString).collect(Collectors.joining(", ")));
             retValue.append("\nHand:\n\t");
-            retValue.append(getDeck(DeckType.HAND, p).stream().map(Card::toString).collect(Collectors.joining()));
+            retValue.append(getDeck(DeckType.HAND, p).stream().map(Card::toString).collect(Collectors.joining(", ")));
+            retValue.append("\n");
         }
         retValue.append("\n\nHistory:\n\t");
         int historyLength = getHistoryAsText().size();
         retValue.append(getHistoryAsText().subList(historyLength - 10, historyLength).stream().map(Objects::toString).collect(Collectors.joining("\n\t")));
+        retValue.append("\n").append("Available Actions: \n");
+        DominionForwardModel fm = new DominionForwardModel();
+        retValue.append(fm._computeAvailableActions(this).stream().map(Objects::toString).collect(Collectors.joining(", ")));
         retValue.append("\n");
         return retValue.toString();
     }
