@@ -469,7 +469,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
         }
         retValue.append("\n\nHistory:\n\t");
         int historyLength = getHistoryAsText().size();
-        retValue.append(getHistoryAsText().subList(historyLength - 10, historyLength).stream().map(Objects::toString).collect(Collectors.joining("\n\t")));
+        retValue.append(getHistoryAsText().subList(Math.max(0, historyLength - 10), historyLength).stream().map(Objects::toString).collect(Collectors.joining("\n\t")));
         retValue.append("\n").append("Available Actions: \n");
         DominionForwardModel fm = new DominionForwardModel();
         retValue.append(fm._computeAvailableActions(this).stream().map(Objects::toString).collect(Collectors.joining(", ")));
