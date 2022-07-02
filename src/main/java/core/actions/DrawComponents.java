@@ -96,6 +96,7 @@ public class DrawComponents<T extends Component> extends AbstractAction {
         return deckFrom == that.deckFrom &&
                 deckTo == that.deckTo &&
                 nComponents == that.nComponents &&
+                Arrays.equals(componentIds, that.componentIds) &&
                 idxs.equals(that.idxs);
     }
 

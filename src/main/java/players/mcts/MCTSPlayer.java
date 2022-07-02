@@ -81,7 +81,7 @@ public class MCTSPlayer extends AbstractPlayer {
                     .collect(Collectors.toList());
 
         if (rolloutStrategy instanceof MASTPlayer) {
-            ((MASTPlayer) rolloutStrategy).setRoot(root);
+            ((MASTPlayer) rolloutStrategy).setStats(root.MASTStatistics);
             ((MASTPlayer) rolloutStrategy).temperature = params.MASTBoltzmann;
         }
         root.mctsSearch(getStatsLogger());

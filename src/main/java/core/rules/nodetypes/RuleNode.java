@@ -76,7 +76,7 @@ public abstract class RuleNode extends Node {
                 Utils.GameResult result = goc.test(gs);
                 if (result != GAME_ONGOING) {
                     gs.setGameStatus(result);
-                    childNext = null;
+//                    childNext = null;
                 }
             }
         }
