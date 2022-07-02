@@ -14,7 +14,7 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
     double TWO_BOXES = 0.0;
     double ORDINAL = 0.0;
 
-    DBStateFeatures featureDefinition = new DBStateFeatures();
+    DBStateFeaturesReduced featureDefinition = new DBStateFeaturesReduced();
     String[] names = featureDefinition.names();
 
     public DotsAndBoxesHeuristic() {
