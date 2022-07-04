@@ -329,7 +329,6 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // Search Cards
             if (actingFigure instanceof Hero) {
-                fo
             }
 
         } else {

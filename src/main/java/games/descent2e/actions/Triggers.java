@@ -17,5 +17,6 @@ public enum Triggers {
     ROLL_OTHER_DICE,
     END_TURN,
     FORCED,
-    ANYTIME
+    ANYTIME,
+    ROLL_DEFENCE_DICE
 }
