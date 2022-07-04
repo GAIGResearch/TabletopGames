@@ -12,6 +12,7 @@ import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.concepts.Quest;
+import utilities.LineOfSight;
 import utilities.Pair;
 import utilities.Vector2D;
 

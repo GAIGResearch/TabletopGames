@@ -243,15 +243,15 @@ public class Hero extends Figure {
         return copy;
     }
 
-    public void addAbility(DescentAction ability) {
-        this.abilities.add(ability);
-    }
-    public void removeAbility(DescentAction ability) {
-        this.abilities.remove(ability);
-    }
-    public ArrayList<DescentAction> getAbilities() {
-        return abilities;
-    }
+//    public void addAbility(DescentAction ability) {
+//        this.abilities.add(ability);
+//    }
+//    public void removeAbility(DescentAction ability) {
+//        this.abilities.remove(ability);
+//    }
+//    public ArrayList<DescentAction> getAbilities() {
+//        return abilities;
+//    }
 
     /**
      * Creates a Token objects from a JSON object.

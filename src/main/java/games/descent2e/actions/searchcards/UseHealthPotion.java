@@ -104,7 +104,5 @@ public class UseHealthPotion extends DescentAction implements IExtendedSequence 
         Deck<Card> heroEquipment = ((Hero) dgs.getActingFigure()).getOtherEquipment();
         return heroEquipment.stream()
                 .anyMatch(a -> a.getComponentName().equals("Health Potion"));
-
-
     }
 }
