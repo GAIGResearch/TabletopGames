@@ -63,6 +63,9 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
         for (DescentDice d : dice)
             d.roll(r);
     }
+    public void setFace(int number, int face) {
+        dice.get(number).setFace(face);
+    }
 
     public int getNumber(DiceType type) {
         return (int) dice.stream().filter(d -> d.getColour() == type).count();
@@ -74,13 +77,10 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     public int getSurge() {
         return dice.stream().mapToInt(DescentDice::getSurge).sum();
     }
-    public int getRange() {
-        return dice.stream().mapToInt(DescentDice::getRange).sum();
-    }
+    public int getRange() {return dice.stream().mapToInt(DescentDice::getRange).sum();}
     public boolean hasRolled() {
         return rolled;
     }
-
 
     @Override
     public DicePool copy() {

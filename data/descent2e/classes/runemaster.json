@@ -9,7 +9,8 @@
         "XP": ["Integer", 0],
         "fatigue": ["Integer", 0],
         "exhaust": ["Boolean", false],
-        "passive": ["String", "While you have a Magic or Rune weapon equipped, each of your attacks gains:\nSurge: Suffer 1 Fatigue to gain +2 Heart."]
+        "passive": ["String", "While you have a Magic or Rune weapon equipped, each of your attacks gains:\nSurge: Suffer 1 Fatigue to gain +2 Heart."],
+        "weaponSurges": ["String[]", ["RUNIC_KNOWLEDGE"]]
       },
        {
          "name": ["String","Arcane Bolt"],
@@ -18,7 +19,7 @@
          "exhaust": ["Boolean", false],
          "attackType": ["String", "ranged"],
          "attackPower": ["String[]", ["blue", "yellow"]],
-         "weaponSurges": ["String[]", ["Surge: +1 Range", "Surge: Pierce 2"]],
+         "weaponSurges": ["String[]", ["RANGE_PLUS_1", "PIERCE_2"]],
          "equipmentType": ["String[]", ["Magic", "Rune"]],
          "equipSlots": ["String[]", ["hand", "hand"]],
          "cost": ["Integer", 25],

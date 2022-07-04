@@ -5,16 +5,21 @@ import java.awt.*;
 
 public class GamePanel extends JComponent {
     Image background;
+    float opacity = 0.3f;
 
     public void setBackground(Image background) {
         this.background = background;
+    }
+
+    public void setOpacity(float opacity) {
+        this.opacity = opacity;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         if (background != null) {
             Graphics2D g2d = (Graphics2D) g.create();
-            g2d.setComposite(AlphaComposite.SrcOver.derive(0.3f));
+            g2d.setComposite(AlphaComposite.SrcOver.derive(opacity));
 
             Rectangle r = this.getBounds();
             int h = r.height;

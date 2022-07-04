@@ -19,7 +19,7 @@
          "attackType": ["String", "melee"],
          "attackPower": ["String[]", ["blue", "yellow"]],
          "equipmentType": ["String[]", ["Hammer"]],
-         "weaponSurges": ["String[]", ["Surge: Stun"]],
+         "weaponSurges": ["String[]", ["STUN"]],
          "equipSlots": ["String[]", ["hand"]],
          "cost": ["Integer", 25],
          "action": ["String", "Attack"]

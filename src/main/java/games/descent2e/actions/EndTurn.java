@@ -2,6 +2,7 @@ package games.descent2e.actions;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.components.Figure;
 
 public class EndTurn extends DescentAction{
     public EndTurn() {
@@ -15,6 +16,7 @@ public class EndTurn extends DescentAction{
 
     @Override
     public boolean execute(DescentGameState gs) {
+        gs.getActingFigure().getNActionsExecuted().setToMax();
         gs.getTurnOrder().endPlayerTurn(gs);
         return true;
     }

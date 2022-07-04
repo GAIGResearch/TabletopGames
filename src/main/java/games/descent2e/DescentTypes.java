@@ -1,27 +1,27 @@
 package games.descent2e;
 
 import core.components.GridBoard;
+import games.descent2e.components.Figure;
 import games.descent2e.concepts.Quest;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import utilities.Utils;
 
 import java.awt.*;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.List;
+
+import static games.descent2e.components.Figure.Attribute.Health;
+import static games.descent2e.components.Figure.Attribute.MovePoints;
 
 public class DescentTypes {
-
-    public final static HashSet<Character> direction = new HashSet<Character>() {{
-        add('N');
-        add('S');
-        add('W');
-        add('E');
-    }};
 
     public enum Campaign {
         HeirsOfBlood;
@@ -52,35 +52,57 @@ public class DescentTypes {
         }
     }
 
+    // TODO: params for move costs and damage
     public enum TerrainType {
         // Tile margins
-        Edge,
-        Open,
-        Null,
+        Edge(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}}),
+        Open(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1);}}),
+        Null(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}}),
 
         // Inside tile
-        Plain,
-        Water,
-        Lava,
-        Hazard,
-        Pit,
-        Block;
+        Plain(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1);}}),
+        Water(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 2);}}),
+//        Sludge(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 2);}}),  // TODO: when a figure starts its turn or activation so that each space it occupies is a sludge space, its Speed is considered to be 1 and cannot be increased above 1 until the end of that turn or activation.
+        Lava(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 1);}}),
+        Hazard(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 1);}}),
+        Pit(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1); put(Health, 2);}}),
+        Block(new HashMap<Figure.Attribute, Integer>() {{put(MovePoints, 1000);}});
 
-        public static double getMoveInCost(TerrainType tt)
+        HashMap<Figure.Attribute, Integer> moveCosts;
+        static HashSet<TerrainType> walkableTerrains = new HashSet<TerrainType>() {{
+            add(Plain);
+            add(Water);
+            add(Lava);
+            add(Hazard);
+//                add(Pit);
+        }};
+        static HashSet<TerrainType> marginTerrains = new HashSet<TerrainType>() {{
+            add(Edge);
+            add(Open);
+            add(Null);
+        }};
+        TerrainType(HashMap<Figure.Attribute, Integer> moveCosts) {
+            this.moveCosts = moveCosts;
+        }
+
+        public HashMap<Figure.Attribute, Integer> getMoveCosts() {
+            return moveCosts;
+        }
+        public static int getMovePointsCost(String terrain) {
+            TerrainType t = Utils.searchEnum(TerrainType.class, terrain);
+            if (t != null) {
+                return t.moveCosts.get(MovePoints);
+            }
+            return -1;
+        }
+
+        public static int getMovePointsCost(TerrainType tt)
         {
-            if(tt == Water) return 2.0; //TODO: These values should be read from the config file.
-            if(tt == Block) return Double.MAX_VALUE;
-            return 1.0;
+            return tt.moveCosts.get(MovePoints);
         }
 
         public static HashSet<TerrainType> getWalkableTerrains() {
-            return new HashSet<TerrainType>() {{
-                add(Plain);
-                add(Water);
-                add(Lava);
-                add(Hazard);
-//                add(Pit);
-            }};
+            return walkableTerrains;
         }
 
         public static HashSet<String> getWalkableStringTerrains() {
@@ -92,11 +114,7 @@ public class DescentTypes {
         }
 
         public static HashSet<TerrainType> getMarginTerrains() {
-            return new HashSet<TerrainType>() {{
-                add(Edge);
-                add(Open);
-                add(Null);
-            }};
+            return marginTerrains;
         }
 
         public static HashSet<String> getMarginStringTerrains() {
@@ -108,15 +126,15 @@ public class DescentTypes {
         }
 
         public static boolean isWalkableTerrain(String terrain) {
-            return terrain != null && (getWalkableStringTerrains().contains(terrain));
+            return terrain != null && walkableTerrains.contains(Utils.searchEnum(TerrainType.class, terrain));
         }
 
         public static boolean isInsideTerrain(String terrain) {
-            return terrain != null && (!getMarginStringTerrains().contains(terrain));
+            return terrain != null && !marginTerrains.contains(Utils.searchEnum(TerrainType.class, terrain));
         }
 
         public static boolean isMarginTerrain(String terrain) {
-            return terrain != null && getMarginStringTerrains().contains(terrain);
+            return terrain != null && marginTerrains.contains(Utils.searchEnum(TerrainType.class, terrain));
         }
     }
 
@@ -155,9 +173,9 @@ public class DescentTypes {
 
     public enum Archetype {
         Mage(Color.orange),
-        Healer(Color.blue);
-//        Scout(Color.green),
-//        Warrior(Color.red);
+        Healer(Color.blue),
+        Scout(Color.green),
+        Warrior(Color.red);
 
         Color color;
         Archetype(Color color) {
@@ -170,95 +188,59 @@ public class DescentTypes {
     }
 
     public enum HeroClass {
-        Necromancer,
-        Runemaster,
-        Battlemage,
-        Conjurer,
-        Elementalist,
-        Geomancer,
-        Hexer,
-        Lorekeeper,
-        Truthseer,
-        Disciple,
-        Spiritspeaker,
-        Apothecary,
-        Bard,
-        Crusader,
-        Heretic,
-        Prophet,
-        SoulReaper,
-        Watchman,
-        Berserker,
-        Knight,
-        Avenger,
-        Beastmaster,
-        Champion,
-        Marshal,
-        Raider,
-        Skirmisher,
-        Steelcaster,
-        Thief,
-        Wildlander,
-        BountyHunter,
-        Monk,
-        Ravager,
-        ShadowWalker,
-        Stalker,
-        TreasureHunter,
-        Trickster;
+        Runemaster (Archetype.Mage),
+//        Necromancer (Archetype.Mage),
+//        Battlemage (Archetype.Mage),
+//        Conjurer (Archetype.Mage),
+//        Elementalist (Archetype.Mage),
+//        Geomancer (Archetype.Mage),
+//        Hexer (Archetype.Mage),
+//        Lorekeeper (Archetype.Mage),
+//        Truthseer (Archetype.Mage),
+        Disciple (Archetype.Healer),
+//        Spiritspeaker (Archetype.Healer),
+//        Apothecary (Archetype.Healer),
+//        Bard (Archetype.Healer),
+//        Crusader (Archetype.Healer),
+//        Heretic (Archetype.Healer),
+//        Prophet (Archetype.Healer),
+//        SoulReaper (Archetype.Healer),
+//        Watchman (Archetype.Healer),
+        Berserker (Archetype.Warrior),
+//        Knight (Archetype.Warrior),
+//        Avenger (Archetype.Warrior),
+//        Beastmaster (Archetype.Warrior),
+//        Champion (Archetype.Warrior),
+//        Marshal (Archetype.Warrior),
+//        Raider (Archetype.Warrior),
+//        Skirmisher (Archetype.Warrior),
+//        Steelcaster (Archetype.Warrior),
+        Thief (Archetype.Scout),
+//        Wildlander (Archetype.Scout),
+//        BountyHunter (Archetype.Scout),
+//        Monk (Archetype.Scout),
+//        Ravager (Archetype.Scout),
+//        ShadowWalker (Archetype.Scout),
+//        Stalker (Archetype.Scout),
+//        TreasureHunter (Archetype.Scout),
+//        Trickster (Archetype.Scout)
+        ;
+
+        Archetype archetype;
+        HeroClass(Archetype archetype) {
+            this.archetype = archetype;
+        }
+
+        public Archetype getArchetype() {
+            return archetype;
+        }
 
         public static HeroClass[] getClassesForArchetype(Archetype archetype) {
-            switch(archetype) {
-                case Mage:
-                    return new HeroClass[] {
-                            Runemaster,
-//                            Necromancer,
-//                            Battlemage,
-//                            Conjurer,
-//                            Elementalist,
-//                            Geomancer,
-//                            Hexer,
-//                            Lorekeeper,
-//                            Truthseer
-                    };
-                case Healer:
-                    return new HeroClass[] {
-                            Disciple,
-//                           Spiritspeaker,
-//                           Apothecary,
-//                           Bard,
-//                           Crusader,
-//                           Heretic,
-//                           Prophet,
-//                           SoulReaper,
-//                           Watchman
-                    };
-//                case Scout:
-//                    return new HeroClass[]{
-////                           Thief,
-////                           Wildlander,
-////                           Bounty Hunter,
-////                           Monk,
-////                           Ravager,
-////                           Shadow Walker,
-////                           Stalker,
-////                           Treasure Hunter,
-////                           Trickster
-//                    };
-//                case Warrior:
-//                    return new HeroClass[]{
-////                           Berserker,
-////                           Knight,
-////                           Avenger,
-////                           Beastmaster,
-////                           Champion,
-////                           Marshal,
-////                           Raider,
-////                           Skirmisher,
-////                           Steelcaster
-//                    };
+            List<HeroClass> heroClassList = new ArrayList<>();
+            for (HeroClass heroClass: values()) {
+                if (heroClass.archetype == archetype) heroClassList.add(heroClass);
             }
-            return null;
+            return heroClassList.toArray(new HeroClass[0]);
         }
     }
 

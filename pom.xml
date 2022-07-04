@@ -51,6 +51,13 @@
             <artifactId>humble-video-all</artifactId>
             <version>0.3.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.swinglabs/swingx -->
+        <dependency>
+            <groupId>org.swinglabs</groupId>
+            <artifactId>swingx</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+
     </dependencies>
 
 

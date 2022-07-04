@@ -2,7 +2,6 @@
   {
     "id": "11A",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid":
       [
@@ -17,7 +16,6 @@
   {
     "id": "11B",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid" :
       [
@@ -47,7 +45,6 @@
   {
     "id": "10B",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid" :
     [
@@ -62,7 +59,6 @@
   {
     "id": "20A",
     "size": [5, 10],
-    "img": "",
     "class": "String",
     "grid" :
       [
@@ -81,7 +77,6 @@
   {
     "id" : "20B",
     "size": [5, 10],
-    "img": "",
     "class": "String",
     "grid":
       [
@@ -100,7 +95,6 @@
   {
     "id": "13A1",
     "size": [6, 3],
-    "img": "",
     "class": "String",
     "grid":
       [
@@ -112,7 +106,6 @@
   {
     "id": "13A2",
     "size": [8, 7],
-    "img": "",
     "class": "String",
     "grid":
     [
@@ -139,7 +132,6 @@
   {
     "id": "28B",
     "size": [6, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "open", "open", "null", "null", "null"],
@@ -151,7 +143,6 @@
   {
     "id": "27A",
     "size": [4, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null"],
@@ -165,7 +156,6 @@
   {
     "id": "27B",
     "size": [4, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null"],
@@ -179,7 +169,6 @@
   {
     "id": "26A",
     "size": [6, 5],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -192,7 +181,6 @@
   {
     "id": "26B",
     "size": [6, 5],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -205,7 +193,6 @@
   {
     "id": "25A",
     "size": [4, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "open", "open", "null"],
@@ -221,7 +208,6 @@
   {
     "id": "25B",
     "size": [4, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "open", "open", "null"],
@@ -237,7 +223,6 @@
   {
     "id": "24A",
     "size": [8, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -249,7 +234,6 @@
   {
     "id": "24B",
     "size": [8, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -261,7 +245,6 @@
   {
     "id": "23A",
     "size": [8, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -273,7 +256,6 @@
   {
     "id": "23B",
     "size": [8, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -285,7 +267,6 @@
   {
     "id": "22A",
     "size": [8, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -297,7 +278,6 @@
   {
     "id": "22B",
     "size": [8, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -309,7 +289,6 @@
   {
     "id": "21A",
     "size": [8, 5],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -322,7 +301,6 @@
   {
     "id": "21B",
     "size": [8, 5],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -335,7 +313,6 @@
   {
     "id": "19A",
     "size": [5, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null"],
@@ -351,7 +328,6 @@
   {
     "id": "19B",
     "size": [5, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "open", "open", "null", "null"],
@@ -367,7 +343,6 @@
   {
     "id": "30A",
     "size": [6, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -379,7 +354,6 @@
   {
     "id": "30B",
     "size": [6, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -391,7 +365,6 @@
   {
     "id": "29A",
     "size": [6, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -403,7 +376,6 @@
   {
     "id": "29B",
     "size": [6, 4],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -415,7 +387,6 @@
   {
     "id": "18A",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null"],
@@ -429,7 +400,6 @@
   {
     "id": "17A",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null"],
@@ -443,7 +413,6 @@
   {
     "id": "18B",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "open", "open", "null", "null", "null"],
@@ -457,7 +426,6 @@
   {
     "id": "17B",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "open", "open", "null", "null", "null"],
@@ -471,7 +439,6 @@
   {
     "id": "16A",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -485,7 +452,6 @@
   {
     "id": "16B",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -499,7 +465,6 @@
   {
     "id": "15A",
     "size": [7, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null"],
@@ -513,7 +478,6 @@
   {
     "id": "15B",
     "size": [7, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null", "null"],
@@ -527,7 +491,6 @@
   {
     "id": "14A",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -541,7 +504,6 @@
   {
     "id": "14B",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null"],
@@ -555,7 +517,6 @@
   {
     "id": "13B",
     "size": [8, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null", "null"],
@@ -571,7 +532,6 @@
   {
     "id": "12A",
     "size": [7, 7],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null"],
@@ -586,7 +546,6 @@
   {
     "id": "12B",
     "size": [7, 7],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null"],
@@ -601,7 +560,6 @@
   {
     "id": "9A",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -615,7 +573,6 @@
   {
     "id": "9B",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -629,7 +586,6 @@
   {
     "id": "8A",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -643,7 +599,6 @@
   {
     "id": "8B",
     "size": [6, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -657,7 +612,6 @@
   {
     "id": "7A",
     "size": [8, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "open", "open", "null", "null"],
@@ -671,7 +625,6 @@
   {
     "id": "7B",
     "size": [8, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null", "null", "null"],
@@ -685,7 +638,6 @@
   {
     "id": "5A",
     "size": [8, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -699,7 +651,6 @@
   {
     "id": "5B",
     "size": [8, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -713,7 +664,6 @@
   {
     "id": "3A",
     "size": [8, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -727,7 +677,6 @@
   {
     "id": "3B",
     "size": [8, 6],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "null", "null", "null", "null"],
@@ -741,7 +690,6 @@
   {
     "id": "6B",
     "size": [6, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -757,7 +705,6 @@
   {
     "id": "6A",
     "size": [6, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "open", "open", "null", "null"],
@@ -773,7 +720,6 @@
   {
     "id": "4A",
     "size": [8, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null", "null"],
@@ -789,7 +735,6 @@
   {
     "id": "4B",
     "size": [8, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null", "null"],
@@ -805,7 +750,6 @@
   {
     "id": "2A",
     "size": [8, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null", "null"],
@@ -821,7 +765,6 @@
   {
     "id": "2B",
     "size": [8, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "open", "open", "null", "null", "null"],
@@ -837,7 +780,6 @@
   {
     "id": "1B",
     "size": [10, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "open", "open", "null", "null", "null", "null"],
@@ -853,7 +795,6 @@
   {
     "id": "1A",
     "size": [10, 8],
-    "img": "",
     "class": "String",
     "grid": [
       ["null", "null", "null", "null", "open", "open", "null", "null", "null", "null"],
@@ -867,9 +808,8 @@
     ]
   },
   {
-    "id" : "endcap",
+    "id" : "endcap1A",
     "size": [4, 3],
-    "img": "",
     "class": "String",
     "grid":
     [
@@ -879,9 +819,8 @@
     ]
   },
   {
-    "id" : "extender",
+    "id" : "extender1A",
     "size": [4, 3],
-    "img": "",
     "class": "String",
     "grid":
     [
@@ -891,9 +830,8 @@
     ]
   },
   {
-    "id" : "transition",
+    "id" : "transition1A",
     "size": [4, 4],
-    "img": "",
     "class": "String",
     "grid":
     [
@@ -904,9 +842,8 @@
     ]
   },
   {
-    "id" : "entrance",
+    "id" : "entrance1A",
     "size": [4, 4],
-    "img": "",
     "class": "String",
     "grid":
     [
@@ -917,9 +854,8 @@
     ]
   },
   {
-    "id" : "exit",
+    "id" : "exit1A",
     "size": [4, 4],
-    "img": "",
     "class": "String",
     "grid":
     [

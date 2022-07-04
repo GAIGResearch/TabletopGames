@@ -48,14 +48,21 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         if (next == 0 && monsterActingNext == groupSize-1) {
             // Next monster group
             nextMonsterGroup(dgs);
-            monsterActingNext = 0;
         } else {
             monsterActingNext = next;
         }
     }
     public void nextMonsterGroup(DescentGameState dgs) {
         int nMonsters = dgs.getMonsters().size();
-        monsterGroupActingNext = (nMonsters+monsterGroupActingNext+1)%nMonsters;
+        int next = (nMonsters+monsterGroupActingNext+1)%nMonsters;
+        monsterActingNext = 0;
+        if (next == 0 && monsterGroupActingNext == nMonsters-1) {
+            monsterGroupActingNext = 0;
+            heroFigureActingNext = 0;
+            turnOwner = dgs.heroes.get(heroFigureActingNext).getOwnerId();
+        } else {
+            monsterGroupActingNext = next;
+        }
     }
 
     // Here this really means "end figure turn"
@@ -63,7 +70,14 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
         DescentGameState dgs = (DescentGameState) gameState;
-        int nFigures = dgs.getMonsters().stream().mapToInt(List::size).sum() + nPlayers-1;
+        int nFigures = dgs.getMonsters().stream().mapToInt(List::size).sum() + dgs.getHeroes().size();
+
+        // TODO Any figure that ends its turn in a lava/hazard space is immediately defeated.
+        //  Heroes that are defeated in this way place their hero token in the nearest empty space
+        //  (from where they were defeated) that does not contain lava/hazard. A large monster is immediately defeated
+        //  only if all spaces it occupies are lava spaces.
+
+        // TODO end-of-turn abilities
 
         turnCounter++;
         if (turnCounter >= nFigures) endRound(gameState);
@@ -91,10 +105,13 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
         } else {
             // Return next hero, or overlord if we cycled back
             int nHeroes = ((DescentGameState)gameState).heroes.size();
-            heroFigureActingNext = (nHeroes + heroFigureActingNext +1)%nHeroes;
-            if (heroFigureActingNext == 0)
+            int next = (nHeroes + heroFigureActingNext +1)%nHeroes;
+            if (next == 0 && heroFigureActingNext == nHeroes-1)
                 return ((DescentGameState)gameState).overlordPlayer;
-            else return ((DescentGameState)gameState).heroes.get(heroFigureActingNext).getOwnerId();
+            else {
+                heroFigureActingNext = next;
+                return ((DescentGameState)gameState).heroes.get(next).getOwnerId();
+            }
         }
     }
 

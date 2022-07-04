@@ -13,6 +13,7 @@ public enum Triggers {
     FATIGUE_INTO_SPACE,
     START_ATTACK,
     END_ATTACK,
+    SURGE_DECISION,
     ROLL_OWN_DICE,
     ROLL_OTHER_DICE,
     END_TURN,

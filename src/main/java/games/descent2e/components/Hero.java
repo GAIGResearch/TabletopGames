@@ -17,6 +17,7 @@ import org.json.simple.parser.ParseException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static games.descent2e.DescentConstants.*;
 
@@ -28,6 +29,7 @@ public class Hero extends Figure {
     Card armor;
     Deck<Card> otherEquipment;
     Map<String, Integer> equipSlotsAvailable;
+    List<Item> items;
 
     // TODO: reset fatigue every quest to max fatigue
 
@@ -36,14 +38,13 @@ public class Hero extends Figure {
 
     String ability;
 
-    ArrayList<DescentAction> abilities;
-
-    public Hero(String name) {
-        super(name);
+    public Hero(String name, int nActionsPossible) {
+        super(name, nActionsPossible);
 
         skills = new Deck<>("Skills", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         handEquipment = new Deck<>("Hands", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         otherEquipment = new Deck<>("OtherItems", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        items = new ArrayList<>();
 
         equipSlotsAvailable = new HashMap<>();
         equipSlotsAvailable.put("hand", 2);
@@ -61,8 +62,8 @@ public class Hero extends Figure {
         rested = false;
     }
 
-    protected Hero(String name, int ID) {
-        super(name, ID);
+    protected Hero(String name, Counter actions, int ID) {
+        super(name, actions, ID);
     }
 
     public Deck<Card> getSkills() {
@@ -155,6 +156,7 @@ public class Hero extends Figure {
             }
             if (canEquip) {
                 equipSlotsAvailable = equipSlots;
+                items.add(new Item(c));
                 switch (equip[0]) {
                     case "armor":
                         armor = c;
@@ -177,14 +179,7 @@ public class Hero extends Figure {
     }
 
     public List<Item> getWeapons() {
-        List<Item> retValue = new ArrayList<>();
-        for (int i = 0; i < handEquipment.getSize(); i++) {
-            Item c = new Item(handEquipment.get(i));
-            if (c.isAttack()) {
-                retValue.add(c);
-            }
-        }
-        return retValue;
+        return items.stream().filter(Item::isAttack).collect(Collectors.toList());
     }
 
     @Override
@@ -192,7 +187,7 @@ public class Hero extends Figure {
         Optional<Item> wpn = getWeapons().stream().findFirst();
         if (wpn.isPresent())
             return wpn.get().getDicePool();
-        return new DicePool(Collections.emptyList());
+        return DicePool.empty;
     }
 
     @Override
@@ -219,13 +214,13 @@ public class Hero extends Figure {
 
     @Override
     public Hero copy() {
-        Hero copy = new Hero(componentName, componentID);
+        Hero copy = new Hero(componentName, nActionsExecuted.copy(), componentID);
         return copyTo(copy);
     }
 
     @Override
     public Hero copyNewID() {
-        Hero copy = new Hero(componentName);
+        Hero copy = new Hero(componentName, -1);
         return copyTo(copy);
     }
 
@@ -243,6 +238,7 @@ public class Hero extends Figure {
         copy.featAvailable = this.featAvailable;
         copy.ability = this.ability;
         copy.rested = rested;
+        copy.items = new ArrayList<>(items); // Currently immutable TODO: Review later
         super.copyComponentTo(copy);
         return copy;
     }
@@ -286,7 +282,7 @@ public class Hero extends Figure {
             JSONArray data = (JSONArray) jsonParser.parse(reader);
             for (Object o : data) {
 
-                Hero newFigure = new Hero("");
+                Hero newFigure = new Hero("", -1);
                 newFigure.loadHero((JSONObject) o);
                 figures.add(newFigure);
             }

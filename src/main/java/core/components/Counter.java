@@ -49,6 +49,12 @@ public class Counter extends Component {
         if (this.value > this.maximum) {
             this.value = this.maximum;
         }
+        if (this.value < this.minimum) {
+            this.value = this.minimum;
+        }
+    }
+    public void increment() {
+        increment(1);
     }
 
     /**
@@ -57,9 +63,15 @@ public class Counter extends Component {
      */
     public void decrement(int value) {
         this.value -= value;
+        if (this.value > this.maximum) {
+            this.value = this.maximum;
+        }
         if (this.value < this.minimum) {
             this.value = this.minimum;
         }
+    }
+    public void decrement() {
+        decrement(1);
     }
 
     /**
