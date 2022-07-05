@@ -11,6 +11,7 @@ public class RHEAEnums
 
     enum CrossoverType
     {
+        NONE,
         UNIFORM,
         ONE_POINT,
         TWO_POINT

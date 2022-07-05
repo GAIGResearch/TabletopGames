@@ -2,43 +2,30 @@ package players.rhea;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
-import evaluation.ParameterSearch;
-import evaluation.RoundRobinTournament;
-import org.jetbrains.annotations.NotNull;
 import players.PlayerConstants;
-import players.human.ActionController;
-import players.mcts.MCTSPlayer;
-import players.rmhc.RMHCPlayer;
-import players.simple.OSLAPlayer;
+import players.mcts.MASTPlayer;
 import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
+import utilities.Pair;
+import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import static core.Game.runOne;
-import static games.GameType.LoveLetter;
-import static games.GameType.Pandemic;
-
-public class RHEAPlayer extends AbstractPlayer
-{
-    RHEAParams params;
-    private RHEAIndividual bestIndividual;
-
-    private ArrayList<RHEAIndividual> population;
+public class RHEAPlayer extends AbstractPlayer {
+    private static final AbstractPlayer randomPlayer = new RandomPlayer();
     private final Random randomGenerator;
-    IStateHeuristic heuristic;
-
+    RHEAParams params;
+    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
+    private List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
-    private double avgTimeTaken = 0, acumTimeTaken = 0;
+    private double timePerIteration = 0, timeTaken = 0, initTime = 0;
     private int numIters = 0;
     private int fmCalls = 0;
     private int copyCalls = 0;
+    private int repairCount, nonRepairCount;
+    private MASTPlayer mastPlayer;
 
     public RHEAPlayer() {
         this(System.currentTimeMillis());
@@ -54,63 +41,92 @@ public class RHEAPlayer extends AbstractPlayer
         this(new RHEAParams(seed));
     }
 
-    public RHEAPlayer(IStateHeuristic heuristic) {
-        this(System.currentTimeMillis());
-        this.heuristic = heuristic;
-    }
-
-    public RHEAPlayer(RHEAParams params, IStateHeuristic heuristic) {
-        this(params);
-        this.heuristic = heuristic;
-    }
-
-    public RHEAPlayer(long seed, IStateHeuristic heuristic) {
-        this(new RHEAParams(seed));
-        this.heuristic = heuristic;
+    @Override
+    public void initializePlayer(AbstractGameState state) {
+        MASTStatistics = new ArrayList<>();
+        for (int i = 0; i < state.getNPlayers(); i++)
+            MASTStatistics.add(new HashMap<>());
+        population = new ArrayList<>();
     }
 
     @Override
     public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         timer.setMaxTimeMillis(params.budget);
-        long t = timer.remainingTimeMillis();
-        avgTimeTaken = 0;
-        acumTimeTaken = 0;
         numIters = 0;
         fmCalls = 0;
         copyCalls = 0;
+        repairCount = 0;
+        nonRepairCount = 0;
 
-        // Initialise individuals
-        population = new ArrayList<RHEAIndividual>();
-        for(int i = 0; i < params.populationSize; ++i)
-        {
-            population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs, getPlayerID(), randomGenerator, heuristic));
-            fmCalls += population.get(i).length;
+        if (params.useMAST) {
+            if (MASTStatistics == null) {
+                MASTStatistics = new ArrayList<>();
+                for (int i = 0; i < stateObs.getNPlayers(); i++)
+                    MASTStatistics.add(new HashMap<>());
+            } else {
+                MASTStatistics = MASTStatistics.stream()
+                        .map(m -> Utils.decay(m, params.discountFactor))
+                        .collect(Collectors.toList());
+            }
+            mastPlayer = new MASTPlayer(new Random(params.getRandomSeed()));
+            mastPlayer.setStats(MASTStatistics);
         }
-
-        // Run evolution
-        boolean keepIterating = true;
-        int iterations = 0;
-        while (keepIterating) {
-            runIteration(stateObs);
-
-            // Check budget depending on budget type
-            if (params.budgetType == PlayerConstants.BUDGET_TIME) {
-                long remaining = timer.remainingTimeMillis();
-                keepIterating = remaining > avgTimeTaken && remaining > params.breakMS;
-            } else if (params.budgetType == PlayerConstants.BUDGET_FM_CALLS) {
-                keepIterating = fmCalls < params.budget;
-            } else if (params.budgetType == PlayerConstants.BUDGET_COPY_CALLS) {
-                keepIterating = copyCalls < params.budget && numIters < params.budget;
-            } else if (params.budgetType == PlayerConstants.BUDGET_FMANDCOPY_CALLS) {
-                keepIterating = (fmCalls + copyCalls) < params.budget;
-            } else if (params.budgetType == PlayerConstants.BUDGET_ITERATIONS) {
-                keepIterating = numIters < params.budget;
+        // Initialise individuals
+        if (params.shiftLeft && !population.isEmpty()) {
+            population.forEach(i -> i.value = Double.NEGATIVE_INFINITY);  // so that any we don't have time to shift are ignored when picking an action
+            for (RHEAIndividual genome : population) {
+                if (!budgetLeft(timer)) break;
+                System.arraycopy(genome.actions, 1, genome.actions, 0, genome.actions.length - 1);
+                // we shift all actions along, and then rollout with repair
+                genome.gameStates[0] = stateObs.copy();
+                Pair<Integer, Integer> calls = genome.rollout(getForwardModel(), 0, getPlayerID(), true);
+                fmCalls += calls.a;
+                copyCalls += calls.b;
+            }
+        } else {
+            population = new ArrayList<>();
+            for (int i = 0; i < params.populationSize; ++i) {
+                if (!budgetLeft(timer)) break;
+                population.add(new RHEAIndividual(params.horizon, params.discountFactor, getForwardModel(), stateObs,
+                        getPlayerID(), randomGenerator, params.heuristic, params.useMAST ? mastPlayer : randomPlayer));
+                fmCalls += population.get(i).length;
+                copyCalls += population.get(i).length;
             }
         }
 
+        population.sort(Comparator.naturalOrder());
+        initTime = timer.elapsedMillis();
+        // Run evolution
+        while (budgetLeft(timer)) {
+            runIteration();
+        }
+
+        timeTaken = timer.elapsedMillis();
+        timePerIteration = numIters == 0 ? 0.0 : (timeTaken - initTime) / numIters;
+        if (statsLogger != null)
+            logStatistics(stateObs);
         // Return first action of best individual
-        return population.get(0).actions[0];
+        AbstractAction retValue = population.get(0).actions[0];
+        if (!actions.contains(retValue))
+            throw new AssertionError("Action chosen is not legitimate " + numIters + ", " + params.shiftLeft);
+        return retValue;
+    }
+
+    private boolean budgetLeft(ElapsedCpuTimer timer) {
+        if (params.budgetType == PlayerConstants.BUDGET_TIME) {
+            long remaining = timer.remainingTimeMillis();
+            return remaining > params.breakMS;
+        } else if (params.budgetType == PlayerConstants.BUDGET_FM_CALLS) {
+            return fmCalls < params.budget;
+        } else if (params.budgetType == PlayerConstants.BUDGET_COPY_CALLS) {
+            return copyCalls < params.budget && numIters < params.budget;
+        } else if (params.budgetType == PlayerConstants.BUDGET_FMANDCOPY_CALLS) {
+            return (fmCalls + copyCalls) < params.budget;
+        } else if (params.budgetType == PlayerConstants.BUDGET_ITERATIONS) {
+            return numIters < params.budget;
+        }
+        throw new AssertionError("This should be unreachable : " + params.budgetType);
     }
 
     @Override
@@ -120,10 +136,10 @@ public class RHEAPlayer extends AbstractPlayer
         return new RHEAPlayer(newParams);
     }
 
-    private RHEAIndividual crossover(RHEAIndividual p1, RHEAIndividual p2)
-    {
-        switch (params.crossoverType)
-        {
+    private RHEAIndividual crossover(RHEAIndividual p1, RHEAIndividual p2) {
+        switch (params.crossoverType) {
+            case NONE: // we just take the first parent
+                return new RHEAIndividual(p1);
             case UNIFORM:
                 return uniformCrossover(p1, p2);
             case ONE_POINT:
@@ -135,22 +151,18 @@ public class RHEAPlayer extends AbstractPlayer
         }
     }
 
-    private RHEAIndividual uniformCrossover(RHEAIndividual p1, RHEAIndividual p2)
-    {
+    private RHEAIndividual uniformCrossover(RHEAIndividual p1, RHEAIndividual p2) {
         RHEAIndividual child = new RHEAIndividual(p1);
         copyCalls += child.length;
-        int min = (p1.length > p2.length ? p2.length : p1.length);
-        for(int i = 0; i < min; ++i)
-        {
-            if(randomGenerator.nextFloat() >= 0.5f)
-            {
+        int min = Math.min(p1.length, p2.length);
+        for (int i = 0; i < min; ++i) {
+            if (randomGenerator.nextFloat() >= 0.5f) {
                 child.actions[i] = p2.actions[i];
-                child.gameStates[i] = p2.gameStates[i].copy();
+                child.gameStates[i] = p2.gameStates[i]; //.copy();
             }
         }
         return child;
     }
-
 
     private RHEAIndividual onePointCrossover(RHEAIndividual p1, RHEAIndividual p2) {
         RHEAIndividual child = new RHEAIndividual(p1);
@@ -158,34 +170,29 @@ public class RHEAPlayer extends AbstractPlayer
         int tailLength = Math.min(p1.length, p2.length) / 2;
 
         for (int i = 0; i < tailLength; ++i) {
-
             child.actions[child.length - 1 - i] = p2.actions[p2.length - 1 - i];
-            child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i].copy();
+            child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i]; //.copy();
         }
         return child;
     }
 
-    private RHEAIndividual twoPointCrossover(RHEAIndividual p1, RHEAIndividual p2)
-    {
+    private RHEAIndividual twoPointCrossover(RHEAIndividual p1, RHEAIndividual p2) {
         RHEAIndividual child = new RHEAIndividual(p1);
         copyCalls += child.length;
         int tailLength = Math.min(p1.length, p2.length) / 3;
-        for(int i = 0; i < tailLength; ++i)
-        {
+        for (int i = 0; i < tailLength; ++i) {
             child.actions[i] = p2.actions[i];
-            child.gameStates[i] = p2.gameStates[i].copy();
+            child.gameStates[i] = p2.gameStates[i]; //.copy();
             child.actions[child.length - 1 - i] = p2.actions[p2.length - 1 - i];
-            child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i].copy();
+            child.gameStates[child.length - 1 - i] = p2.gameStates[p2.length - 1 - i]; //.copy();
         }
         return child;
     }
 
-    RHEAIndividual[] selectParents()
-    {
+    RHEAIndividual[] selectParents() {
         RHEAIndividual[] parents = new RHEAIndividual[2];
 
-        switch (params.selectionType)
-        {
+        switch (params.selectionType) {
             case TOURNAMENT:
                 parents[0] = tournamentSelection();
                 parents[1] = tournamentSelection();
@@ -201,152 +208,103 @@ public class RHEAPlayer extends AbstractPlayer
         return parents;
     }
 
-    RHEAIndividual tournamentSelection()
-    {
-        int rand = randomGenerator.nextInt(population.size() - params.tournamentSize);
-        RHEAIndividual best = population.get(rand);
-        for(int i = rand + 1; i < rand + params.tournamentSize; ++i)
-        {
-            RHEAIndividual current = population.get(i);
-            if(current.value > best.value)
+    RHEAIndividual tournamentSelection() {
+        RHEAIndividual best = null;
+        for (int i = 0; i < params.tournamentSize; ++i) {
+            int rand = randomGenerator.nextInt(population.size());
+
+            RHEAIndividual current = population.get(rand);
+            if (best == null || current.value > best.value)
                 best = current;
         }
         return best;
     }
 
-    RHEAIndividual rankSelection()
-    {
+    RHEAIndividual rankSelection() {
         population.sort(Comparator.naturalOrder());
         int rankSum = 0;
-        for(int i = 0; i < population.size(); ++i)
+        for (int i = 0; i < population.size(); ++i)
             rankSum += i + 1;
         int ran = randomGenerator.nextInt(rankSum);
         int p = 0;
-        for(int i = 0; i < population.size(); ++i)
-        {
+        for (int i = 0; i < population.size(); ++i) {
             p += population.size() - (i);
-            if(p >= ran)
+            if (p >= ran)
                 return population.get(i);
         }
         throw new RuntimeException("Random Generator generated an invalid goal, goal: " + ran + " p: " + p);
     }
+
     /**
      * Run evolutionary process for one generation
-     * @param stateObs - current game state
      */
-    private void runIteration(AbstractGameState stateObs) {
-        ElapsedCpuTimer elapsedTimerIteration = new ElapsedCpuTimer();
-        //selection
-        population.sort(Comparator.naturalOrder());
+    private void runIteration() {
         //copy elites
-        ArrayList<RHEAIndividual> newPopulation = new ArrayList<RHEAIndividual>();
-        int statesUpdated = 0;
-        for(int i = 0; i < params.eliteCount; ++i)
-        {
-            newPopulation.add(new RHEAIndividual(population.get(i))); // todo: possibly cheating, needs to update copy calls?
+        List<RHEAIndividual> newPopulation = new ArrayList<>();
+        for (int i = 0, max = Math.min(params.eliteCount, population.size()); i < max; ++i) {
+            newPopulation.add(new RHEAIndividual(population.get(i)));
         }
         //crossover
-        for(int i = 0; i < params.childCount; ++i)
-        {
+        for (int i = 0; i < params.childCount; ++i) {
             RHEAIndividual[] parents = selectParents();
             RHEAIndividual child = crossover(parents[0], parents[1]);
-            //statesUpdated += child.mutate(getForwardModel(), getPlayerID());
-            //fmCalls += child.rollout(child.gameStates[0], getForwardModel(), 0, child.actions.length, getPlayerID());
             population.add(child);
         }
 
-        ElapsedCpuTimer test = new ElapsedCpuTimer();
-        // mutation
-        for(int i = 0; i < population.size(); ++i)
-        {
-            statesUpdated += population.get(i).mutate(getForwardModel(), getPlayerID());
+        for (RHEAIndividual individual : population) {
+            Pair<Integer, Integer> calls = individual.mutate(getForwardModel(), getPlayerID(), params.mutationCount);
+            fmCalls += calls.a;
+            copyCalls += calls.b;
+            repairCount += individual.repairCount;
+            nonRepairCount += individual.nonRepairCount;
+            if (params.useMAST)
+                MASTBackup(individual.actions, individual.value, getPlayerID());
         }
 
         //sort
         population.sort(Comparator.naturalOrder());
 
         //best ones get moved to the new population
-        for(int i = 0; i < params.populationSize - params.eliteCount; ++i)
-        {
+        for (int i = 0; i < Math.min(population.size(), params.populationSize - params.eliteCount); ++i) {
             newPopulation.add(population.get(i));
         }
 
         population = newPopulation;
 
         population.sort(Comparator.naturalOrder());
-        fmCalls += statesUpdated;
-        copyCalls += statesUpdated; // as mutate() copyies once each time it applies the forward model
         // Update budgets
         numIters++;
-        acumTimeTaken += (elapsedTimerIteration.elapsedMillis());
-        avgTimeTaken = acumTimeTaken / numIters;
     }
 
-    public static void main(String[] args)
-    {
-        /* 1. Action controller for GUI interactions. If set to null, running without visuals. */
-        ActionController ac = null; //null;
-        /* 2. Game seed */
-        //
-        //
-        Optimize();
-        //RunFast();
-        //RoundRobin();
-        //Visual(args);
-    }
 
-    private static void RoundRobin() {
-        String[] args;
-        
-        args = new String[6];
-        args[0] = "game=LoveLetter";
-        args[1] = "nPlayers=4";
-        args[2] = "players=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json";
-        args[3] = "gamesPerMatchup=100";
-        args[4] = "selfPlay=false";
-        args[5] = "mode=exhaustive";
-        RoundRobinTournament.main(args);
-    }
-
-    private static void Optimize() {
-        String[] args;
-        long seed = System.currentTimeMillis(); //0
-        args = new String[6];
-        args[0] = "C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\optimization\\rheaoptimization.json";
-        args[1] = "100";
-        args[2] = "LoveLetter";
-        args[3] = "nPlayers=4";
-        args[4] = "opponent=C:\\Users\\Me\\Documents\\GitHub\\TabletopGames2\\json\\osla.json";
-        //args[4] = "opponent=coop";
-
-        args[5] = "repeat=10";
-        ParameterSearch.main(args);
-    }
-
-    private static void RunFast() {
-        ArrayList<AbstractPlayer> players = new ArrayList<>();
-        players.add(new MCTSPlayer());
-        players.add(new MCTSPlayer());
-        players.add(new MCTSPlayer());
-        players.add(new MCTSPlayer());
-        /* 4. Run! */
-        int rheaWonGames = 0;
-        int mctsWonGames = 0;
-        int rmhcWonGames = 0;
-        int oslaWonGames = 0;
-        for (int i = 0; i < 1000; i++) {
-            System.out.println(i);
-            Game game = runOne(Pandemic, null, players, 0, false, null, null, 0);
+    protected void MASTBackup(AbstractAction[] rolloutActions, double delta, int player) {
+        for (int i = 0; i < rolloutActions.length; i++) {
+            AbstractAction action = rolloutActions[i];
+            if (action == null)
+                break;
+            Pair<Integer, Double> stats = MASTStatistics.get(player).getOrDefault(action, new Pair<>(0, 0.0));
+            stats.a++;  // visits
+            stats.b += delta;   // value
+            MASTStatistics.get(player).put(action.copy(), stats);
         }
-        System.out.println("RHEA won: " + rheaWonGames);
-        System.out.println("MCTS won: " + mctsWonGames);
-        System.out.println("RMHC won: " + rmhcWonGames);
-        System.out.println("OSLA won: " + oslaWonGames);
-
     }
 
-    private static void Visual(String[] args)
-    {
-        gui.Frontend.main(args);
+    protected void logStatistics(AbstractGameState state) {
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("round", state.getTurnOrder());
+        stats.put("turn", state.getTurnOrder().getTurnCounter());
+        stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
+        stats.put("iterations", numIters);
+        stats.put("fmCalls", fmCalls);
+        stats.put("copyCalls", copyCalls);
+        stats.put("time", timeTaken);
+        stats.put("timePerIteration", timePerIteration);
+        stats.put("initTime", initTime);
+        stats.put("hiReward", population.get(0).value);
+        stats.put("loReward", population.get(population.size() - 1).value);
+        stats.put("medianReward", population.size() == 1 ? population.get(0).value : population.get(population.size() / 2 - 1).value);
+        stats.put("repairProportion", repairCount == 0 ? 0.0 : repairCount / (double) (repairCount + nonRepairCount));
+        stats.put("repairsPerIteration", repairCount == 0 ? 0.0 : repairCount / (double) numIters);
+        statsLogger.record(stats);
     }
 }

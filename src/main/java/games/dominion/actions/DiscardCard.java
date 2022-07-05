@@ -2,6 +2,7 @@ package games.dominion.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Card;
 import games.dominion.DominionConstants;
 import games.dominion.DominionGame;
 import games.dominion.DominionGameState;
@@ -10,6 +11,7 @@ import games.dominion.cards.DominionCard;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static games.dominion.DominionConstants.*;
 
@@ -33,7 +35,8 @@ public class DiscardCard extends AbstractAction {
             DominionCard card = cardToDiscard.get();
             state.moveCard(card, player, DeckType.HAND, player, DeckType.DISCARD);
         } else {
-            throw new AssertionError("Cannot discard card that is not in hand : " + type);
+            System.out.println(ags);
+            throw new AssertionError("Cannot discard card that is not in hand : " + this);
         }
         return true;
     }

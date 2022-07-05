@@ -2,10 +2,12 @@ package games.dominion;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
+import core.interfaces.IPrintable;
 import core.turnorders.StandardTurnOrder;
 import games.GameType;
 import games.dominion.DominionConstants.DeckType;
@@ -16,43 +18,33 @@ import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
-public class DominionGameState extends AbstractGameState {
-
-    public enum DominionGamePhase implements IGamePhase {
-        Play,
-        Buy
-    }
+public class DominionGameState extends AbstractGameState implements IPrintable {
 
     Random rnd;
     int playerCount;
     DominionParameters params;
-
     // Counts of cards on the table should be fine
     Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
-
     // Then Decks for each player - Hand, Discard and Draw
     PartialObservableDeck<DominionCard>[] playerHands;
     PartialObservableDeck<DominionCard>[] playerDrawPiles;
     Deck<DominionCard>[] playerDiscards;
     Deck<DominionCard>[] playerTableaux;
-
     // Trash pile and other global decks
     Deck<DominionCard> trashPile;
-
     boolean[] defenceStatus;
-
     int buysLeftForCurrentPlayer = 1;
     int actionsLeftForCurrentPlayer = 1;
     int spentSoFar = 0;
     int additionalSpendAvailable = 0;
-
-
     List<IDelayedAction> delayedActions = new ArrayList<>();
+
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -84,8 +76,10 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public void endOfTurn(int playerID) {
-        if (playerID != getCurrentPlayer())
-            throw new AssertionError("Not yet supported");
+        if (playerID != getCurrentPlayer()) {
+            System.out.println(this);
+            throw new AssertionError("Cannot end turn if it is not your turn currently");
+        }
         // 1) put hand and cards played into discard
         // 2) draw 5 new cards
         // 3) shuffle and move discard if we run out
@@ -184,8 +178,10 @@ public class DominionGameState extends AbstractGameState {
     }
 
     public int availableSpend(int playerID) {
-        if (playerID != turnOrder.getTurnOwner())
-            throw new AssertionError("Not yet supported");
+        if (playerID != turnOrder.getTurnOwner()) {
+            System.out.println(this);
+            throw new AssertionError(String.format("Not yet supported : Player %d trying to spend in turn of player %d", playerID, getCurrentPlayer()));
+        }
         int totalTreasureInHand = playerHands[playerID].sumInt(DominionCard::treasureValue);
         return totalTreasureInHand - spentSoFar + additionalSpendAvailable;
     }
@@ -451,5 +447,38 @@ public class DominionGameState extends AbstractGameState {
         result = result + 31 * Arrays.hashCode(playerResults) + 743 * Arrays.hashCode(playerHands) + 353 * Arrays.hashCode(playerDiscards) +
                 11 * Arrays.hashCode(playerTableaux) + 41 * Arrays.hashCode(playerDrawPiles) + Arrays.hashCode(defenceStatus);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder retValue = new StringBuilder();
+        retValue.append(String.format("Turn: %d, Current Player: %d, Phase: %s%n", turnOrder.getRoundCounter(), getCurrentPlayer(), gamePhase));
+        for (Map.Entry<CardType, Integer> s : cardsIncludedInGame.entrySet()) {
+            retValue.append(String.format("\t%2d %s%n", s.getValue(), s.getKey()));
+        }
+        for (int p = 0; p < getNPlayers(); p++) {
+            retValue.append(String.format("Player: %d, Score: %2.0f, Hand: %d, Deck: %d, Discard: %d, Actions: %d, Buys: %d%n",
+                    p, getGameScore(p), playerHands[p].getSize(), playerDrawPiles[p].getSize(), playerDiscards[p].getSize(),
+                    p == getCurrentPlayer() ? actionsLeftForCurrentPlayer : 0,
+                    p == getCurrentPlayer() ? buysLeftForCurrentPlayer : 0));
+            retValue.append("Tableau:\n\t");
+            retValue.append(getDeck(DeckType.TABLE, p).stream().map(Card::toString).collect(Collectors.joining(", ")));
+            retValue.append("\nHand:\n\t");
+            retValue.append(getDeck(DeckType.HAND, p).stream().map(Card::toString).collect(Collectors.joining(", ")));
+            retValue.append("\n");
+        }
+        retValue.append("\n\nHistory:\n\t");
+        int historyLength = getHistoryAsText().size();
+        retValue.append(getHistoryAsText().subList(Math.max(0, historyLength - 10), historyLength).stream().map(Objects::toString).collect(Collectors.joining("\n\t")));
+        retValue.append("\n").append("Available Actions: \n");
+        DominionForwardModel fm = new DominionForwardModel();
+        retValue.append(fm._computeAvailableActions(this).stream().map(Objects::toString).collect(Collectors.joining(", ")));
+        retValue.append("\n");
+        return retValue.toString();
+    }
+
+    public enum DominionGamePhase implements IGamePhase {
+        Play,
+        Buy
     }
 }
