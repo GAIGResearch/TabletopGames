@@ -74,6 +74,7 @@ public class RHEAPlayer extends AbstractPlayer {
         }
         // Initialise individuals
         if (params.shiftLeft && !population.isEmpty()) {
+            population.forEach(i -> i.value = Double.NEGATIVE_INFINITY);  // so that any we don't have time to shift are ignored when picking an action
             for (RHEAIndividual genome : population) {
                 if (!budgetLeft(timer)) break;
                 System.arraycopy(genome.actions, 1, genome.actions, 0, genome.actions.length - 1);
@@ -106,7 +107,10 @@ public class RHEAPlayer extends AbstractPlayer {
         if (statsLogger != null)
             logStatistics(stateObs);
         // Return first action of best individual
-        return population.get(0).actions[0];
+        AbstractAction retValue = population.get(0).actions[0];
+        if (!actions.contains(retValue))
+            throw new AssertionError("Action chosen is not legitimate " + numIters + ", " + params.shiftLeft);
+        return retValue;
     }
 
     private boolean budgetLeft(ElapsedCpuTimer timer) {
