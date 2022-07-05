@@ -30,7 +30,6 @@ public class RoundRobinTournament extends AbstractTournament {
     int[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
-    private int gameCounter;
     public boolean verbose = true;
 
     /**
@@ -87,7 +86,7 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               Defaults to utilities.GameResultListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
-                            "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file (FileStatsLogger only).\n" +
+                            "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file.\n" +
                             "\t               Defaults to RoundRobinReport.txt\n" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
                             "\t               use a different log file.\n");
@@ -98,7 +97,7 @@ public class RoundRobinTournament extends AbstractTournament {
         int nPlayersPerGame = getArg(args, "nPlayers", 2);
         boolean selfPlay = getArg(args, "selfPlay", false);
         String mode = getArg(args, "mode", "exhaustive");
-        int matchups = getArg(args, "matchups", 1000);
+        int matchups = getArg(args, "matchups", 1);
         String playerDirectory = getArg(args, "players", "");
         String gameParams = getArg(args, "gameParams", "");
 
@@ -201,7 +200,6 @@ public class RoundRobinTournament extends AbstractTournament {
         // Run the game N = gamesPerMatchUp times with these players
         long currentSeed = games.get(gameIdx).getGameState().getGameParameters().getRandomSeed();
         for (int i = 0; i < this.gamesPerMatchUp; i++) {
-            gameCounter++;
             games.get(gameIdx).reset(matchUpPlayers, currentSeed + i + 1);
 
             games.get(gameIdx).run();  // Always running tournaments without visuals
