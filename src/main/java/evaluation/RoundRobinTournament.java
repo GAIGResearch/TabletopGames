@@ -73,7 +73,6 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\tplayers=       The directory containing agent JSON files for the competing Players\n" +
                             "\t               If not specified, this defaults to very basic OSLA, RND, RHEA and MCTS players.\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
-                            "\tgamesPerMatchup  Defaults to 1. The number of games to play for each combination.\n" +
                             "\tselfPlay=      If true, then multiple copies of the same agent can be in one game.\n" +
                             "\t               Defaults to false\n" +
                             "\tmode=          exhaustive|random - defaults to exhaustive.\n" +
@@ -82,7 +81,8 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               for a large number of players, and random will have a random matchup \n" +
                             "\t               in each game, while ensuring no duplicates, and that all players get the\n" +
                             "\t               the same number of games in total.\n" +
-                            "\tmatchups=      The total number of matchups to run if mode=random\n" +
+                            "\tmatchups=      The total number of matchups to run if mode=random...\n" +
+                            "\t               ...or the number of matchups to run per combination of players if mode=exhaustive\n"+
                             "\tlistener=      (Optional) The full class name of an IGameListener implementation. \n" +
                             "\t               Defaults to utilities.GameResultListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
@@ -96,10 +96,9 @@ public class RoundRobinTournament extends AbstractTournament {
         /* 1. Settings for the tournament */
         GameType gameToPlay = GameType.valueOf(getArg(args, "game", "Uno"));
         int nPlayersPerGame = getArg(args, "nPlayers", 2);
-        int nGamesPerMatchUp = getArg(args, "gamesPerMatchup", 1);
         boolean selfPlay = getArg(args, "selfPlay", false);
         String mode = getArg(args, "mode", "exhaustive");
-        int totalMatchups = getArg(args, "matchups", 1000);
+        int matchups = getArg(args, "matchups", 1000);
         String playerDirectory = getArg(args, "players", "");
         String gameParams = getArg(args, "gameParams", "");
 
@@ -127,8 +126,8 @@ public class RoundRobinTournament extends AbstractTournament {
 
         // Run!
         RoundRobinTournament tournament = mode.equals("exhaustive") ?
-                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay, params) :
-                new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay, totalMatchups,
+                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, params) :
+                new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, selfPlay, matchups,
                         System.currentTimeMillis(), params);
 
         tournament.listeners = new ArrayList<>();
