@@ -51,8 +51,22 @@
             <artifactId>humble-video-all</artifactId>
             <version>0.3.0</version>
         </dependency>
+        <dependency>
+            <groupId>nz.ac.waikato.cms.weka</groupId>
+            <artifactId>weka-stable</artifactId>
+            <version>3.8.6</version>
+        </dependency>
+        <dependency>
+            <groupId>tw.edu.ntu.csie</groupId>
+            <artifactId>libsvm</artifactId>
+            <version>3.25</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.1</version>
+        </dependency>
     </dependencies>
-
 
     <build>
         <plugins>
@@ -152,6 +166,24 @@
                                 </manifest>
                             </archive>
                             <finalName>Tournament</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>ProgressiveLearner</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>evaluation.ProgressiveLearner</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>ProgressiveLearner</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>

@@ -4,6 +4,7 @@ import core.AbstractParameters;
 import core.interfaces.ITunableParameters;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import utilities.Utils;
 
 import java.io.FileReader;
 import java.lang.reflect.Constructor;
@@ -70,9 +71,9 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             if (debug)
                 System.out.println("\tLoading " + pName);
             if (isParamArray(pName, rawData)) {
-                Object pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
+                List<?> pValue = getParamList(pName, rawData, params.getDefaultParameterValue(pName));
                 params.addTunableParameter(pName, params.getDefaultParameterValue(pName),
-                        new ArrayList<>(((List<?>) pValue)));
+                        new ArrayList<>(pValue));
             } else {
                 Object pValue = getParam(pName, rawData, params.getDefaultParameterValue(pName), params);
                 if (pValue != null)
@@ -107,24 +108,13 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             return (T) data;
         if (finalData instanceof JSONObject) {
             JSONObject subJson = (JSONObject) finalData;
-            String className = (String) subJson.get("class");
-            if (className == null)
-                throw new AssertionError("No class name specified for " + name);
-            try {
-                Class<?> clazz = Class.forName(className);
-                Constructor<?> constructor = clazz.getConstructor();
-                T retValue = (T) constructor.newInstance();
-                if (retValue instanceof TunableParameters) {
-                    TunableParameters subParams = (TunableParameters) retValue;
-                    TunableParameters.loadFromJSON(subParams, subJson);
-                    params.registerChild(name, subJson);
-                }
-                return retValue;
-            } catch (Exception e) {
-                System.out.println("Error loading heuristic class " + className + " : " + e.getMessage());
-                e.printStackTrace();
-                throw new AssertionError("Error loading Class");
+            T retValue = Utils.loadClassFromJSON(subJson);
+            if (retValue instanceof TunableParameters) {
+                TunableParameters subParams = (TunableParameters) retValue;
+                TunableParameters.loadFromJSON(subParams, subJson);
+                params.registerChild(name, subJson);
             }
+            return retValue;
         }
         if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {
             Optional<?> matchingValue = Arrays.stream(defaultValue.getClass().getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
@@ -391,8 +381,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             int periodIndex = nameSpace.lastIndexOf(".");
             if (periodIndex > -1)
                 nameSpace = nameSpace.substring(periodIndex + 1);
-            Class<?> clazz = Class.forName((String) json.get("class"));
-            Object child = clazz.getConstructor().newInstance();
+            Object child = Utils.loadClassFromJSON(json);
             if (child instanceof TunableParameters) {
                 TunableParameters tunableChild = (TunableParameters) child;
                 TunableParameters.loadFromJSON(tunableChild, json);

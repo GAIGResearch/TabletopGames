@@ -51,6 +51,7 @@ public class LearnedValue extends AbstractPlayer implements IGameListener, ITree
             defaultValue = Double.parseDouble(stuff[6]);
         if (stuff.length > 7) {
             try {
+                // TODO : Convert to Utils.loadFromFile()
                 Class<?> bucketClass = Class.forName(stuff[7]);
                 bucketingFunction = (Function<AbstractGameState, String>) bucketClass.getConstructor().newInstance();
             } catch (Exception e) {

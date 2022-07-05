@@ -4,18 +4,16 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import core.interfaces.IStateHeuristic;
-import core.interfaces.ITunableParameters;
+import core.interfaces.*;
 import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;
+import utilities.Utils;
 
-import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.function.ToDoubleBiFunction;
-import java.util.regex.Pattern;
 
 import static players.mcts.MCTSEnums.Information.Open_Loop;
 import static players.mcts.MCTSEnums.MASTType.Rollout;
@@ -51,8 +49,11 @@ public class MCTSParams extends PlayerParameters {
     public double exploreEpsilon = 0.1;
     public boolean gatherExpertIterationData = false;
     public String expertIterationFileStem = "ExpertIterationData";
-    public String advantageFunctionString = "";
-    public ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction;
+    public String expertIterationStateFeatures = "";
+    public IStateFeatureVector EIStateFeatureVector;
+    public String expertIterationActionFeatures = "";
+    public IActionFeatureVector EIActionFeatureVector;
+    public IActionHeuristic advantageFunction;
     public int biasVisits = 0;
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
     public double progressiveWideningExponent = 0.0;
@@ -92,6 +93,8 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("MASTGamma", 0.5, Arrays.asList(0.0, 0.5, 0.9, 1.0));
         addTunableParameter("expertIteration", false);
         addTunableParameter("expIterFile", "");
+        addTunableParameter("expertIterationStateFeatures", "");
+        addTunableParameter("expertIterationActionFeatures", "");
         addTunableParameter("advantageFunction", "");
         addTunableParameter("biasVisits", 0, Arrays.asList(0, 1, 3, 10, 30, 100));
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
@@ -99,6 +102,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("normaliseRewards", true);
         addTunableParameter("nodesStoreScoreDelta", false);
         addTunableParameter("maintainMasterState", false);
+        addTunableParameter("advantageFunction", IActionHeuristic.nullReturn);
     }
 
     @Override
@@ -124,8 +128,21 @@ public class MCTSParams extends PlayerParameters {
         oppModelClass = (String) getParameterValue("oppModelClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
         expertIterationFileStem = (String) getParameterValue("expIterFile");
-        advantageFunctionString = (String) getParameterValue("advantageFunction");
-        advantageFunction = getAdvantageFunction();
+        expertIterationStateFeatures = (String) getParameterValue("expertIterationStateFeatures");
+        if (!expertIterationStateFeatures.equals(""))
+            try {
+                EIStateFeatureVector = (IStateFeatureVector) Class.forName(expertIterationStateFeatures).getConstructor().newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        expertIterationActionFeatures = (String) getParameterValue("expertIterationActionFeatures");
+        if (!expertIterationActionFeatures.equals(""))
+            try {
+                EIActionFeatureVector = (IActionFeatureVector) Class.forName(expertIterationActionFeatures).getConstructor().newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         biasVisits = (int) getParameterValue("biasVisits");
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
         progressiveWideningExponent = (double) getParameterValue("progressiveWideningExponent");
@@ -143,6 +160,7 @@ public class MCTSParams extends PlayerParameters {
                 tunableHeuristic.setParameterValue(name, this.getParameterValue("heuristic." + name));
             }
         }
+        // TODO: opponentHeuristic is not currently used
         opponentHeuristic = (IStateHeuristic) getParameterValue("opponentHeuristic");
         if (opponentHeuristic instanceof TunableParameters) {
             TunableParameters tunableHeuristic = (TunableParameters) opponentHeuristic;
@@ -220,45 +238,12 @@ public class MCTSParams extends PlayerParameters {
                 return new MASTPlayer(new Random(getRandomSeed()));
             case CLASS:
                 // we have a bespoke Class to instantiate
-                String[] classAndParams = details.split(Pattern.quote("|"));
-                if (classAndParams.length > 2)
-                    throw new IllegalArgumentException("Only a single string parameter is currently supported");
-                try {
-                    Class<?> rollout = Class.forName(classAndParams[0]);
-                    if (classAndParams.length == 1)
-                        return (AbstractPlayer) rollout.getConstructor().newInstance();
-                    return (AbstractPlayer) rollout.getConstructor(String.class).newInstance(classAndParams[1]);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                throw new AssertionError("Error while instantiating policy from CLASS " + details);
+                return Utils.loadClassFromString(details);
             case PARAMS:
                 throw new AssertionError("PolicyParameters have not been set");
             default:
                 throw new AssertionError("Unknown strategy type : " + type);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    public ToDoubleBiFunction<AbstractAction, AbstractGameState> getAdvantageFunction() {
-        if (advantageFunctionString.isEmpty() || advantageFunctionString.equalsIgnoreCase("none"))
-            return null;
-        String[] classAndParams = advantageFunctionString.split(Pattern.quote("|"));
-        if (classAndParams.length > 2)
-            throw new IllegalArgumentException("Only a single string parameter is currently supported");
-        try {
-            Class<?> rollout = Class.forName(classAndParams[0]);
-            if (classAndParams.length == 1)
-                return (ToDoubleBiFunction<AbstractAction, AbstractGameState>) rollout.getConstructor().newInstance();
-            Constructor<ToDoubleBiFunction<AbstractAction, AbstractGameState>> con = (Constructor<ToDoubleBiFunction<AbstractAction, AbstractGameState>>) rollout.getConstructor(String.class);
-            return con.newInstance(classAndParams[1]);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        throw new AssertionError("Not reachable");
     }
 
     public IStateHeuristic getHeuristic() {

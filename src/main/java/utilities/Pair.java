@@ -17,8 +17,8 @@ public class Pair<T,V> {
         b = (V) c;
     }
 
-    public Pair<V, V> copy() {
-        return new Pair(a, b);
+    public Pair<T, V> copy() {
+        return new Pair<>(a, b);
     }
 
     @Override

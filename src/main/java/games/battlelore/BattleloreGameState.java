@@ -6,7 +6,6 @@ import core.components.Component;
 import core.components.GridBoard;
 import core.interfaces.IGamePhase;
 import core.turnorders.StandardTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;

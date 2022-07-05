@@ -7,18 +7,15 @@ import core.components.GridBoard;
 import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
-import core.interfaces.IVectorObservation;
 import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
-import utilities.Utils;
-import utilities.VectorObservation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Token>, IVectorObservation {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
 
     GridBoard<Token> gridBoard;
 
@@ -38,11 +35,6 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
         TicTacToeGameState s = new TicTacToeGameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
         return s;
-    }
-
-    @Override
-    public VectorObservation getVectorObservation() {
-        return new VectorObservation<>(gridBoard.flattenGrid());
     }
 
     @Override

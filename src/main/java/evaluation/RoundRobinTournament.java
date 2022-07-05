@@ -26,13 +26,13 @@ public class RoundRobinTournament extends AbstractTournament {
     private static boolean debug = false;
     public final boolean selfPlay;
     private final int gamesPerMatchUp;
-    protected List<String> listenerClasses;
-    protected List<String> listenerFiles;
+    protected List<IGameListener> listeners;
     int[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
     private int gameCounter;
     private FileStatsLogger dataLogger;
+    public boolean verbose = true;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -43,7 +43,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param gamesPerMatchUp - number of games for each combination of players.
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
-    public RoundRobinTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
+    public RoundRobinTournament(List<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                                 int gamesPerMatchUp, boolean selfPlay, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, gameParams);
         if (!selfPlay && playersPerGame > this.agents.size()) {
@@ -88,11 +88,9 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\tlistener=      (Optional) The full class name of an IGameListener implementation. \n" +
                             "\t               Defaults to utilities.GameResultListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
-                            "\t               from the same set of games." +
-                            "\tlogger=        (Optional) The full class name of an IStatisticsLogger implementation.\n" +
-                            "\t               Defaults to FileStatsLogger. \n" +
+                            "\t               from the same set of games.\n" +
                             "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file (FileStatsLogger only).\n" +
-                            "\t               Defaults to RoundRobinReport.txt" +
+                            "\t               Defaults to RoundRobinReport.txt\n" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
                             "\t               use a different log file.\n");
             return;
@@ -135,8 +133,13 @@ public class RoundRobinTournament extends AbstractTournament {
                 new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay, params) :
                 new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, nGamesPerMatchUp, selfPlay, totalMatchups,
                         System.currentTimeMillis(), params);
-        tournament.listenerFiles = listenerFiles;
-        tournament.listenerClasses = listenerClasses;
+
+        tournament.listeners = new ArrayList<>();
+        for (int l = 0; l < listenerClasses.size(); l++) {
+            IStatisticLogger logger = new FileStatsLogger(listenerFiles.get(l));
+            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), logger);
+            tournament.listeners.add(gameTracker);
+        }
         tournament.dataLogger = logFile.equals("") ? null : new FileStatsLogger(logFile, "\t", true);
         tournament.runTournament();
     }
@@ -147,18 +150,22 @@ public class RoundRobinTournament extends AbstractTournament {
     @Override
     public void runTournament() {
         for (int g = 0; g < games.size(); g++) {
-            System.out.println("Playing " + games.get(g).getGameType().name());
+            if (verbose)
+                System.out.println("Playing " + games.get(g).getGameType().name());
 
             LinkedList<Integer> matchUp = new LinkedList<>();
             createAndRunMatchUp(matchUp, g);
 
-            for (int i = 0; i < this.agents.size(); i++) {
-                System.out.printf("%s got %d points %n", agents.get(i), pointsPerPlayer[i]);
-                System.out.printf("%s won %.1f%% of the games %n", agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun));
-            }
+            if (verbose)
+                for (int i = 0; i < this.agents.size(); i++) {
+                    System.out.printf("%s got %d points %n", agents.get(i), pointsPerPlayer[i]);
+                    System.out.printf("%s won %.1f%% of the games %n", agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun));
+                }
         }
         if (dataLogger != null)
             dataLogger.processDataAndFinish();
+        for (IGameListener listener : listeners)
+            listener.allGamesFinished();
     }
 
     /**
@@ -194,14 +201,8 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int agentID : agentIDs)
             matchUpPlayers.add(this.agents.get(agentID));
 
-        List<IGameListener> gameTrackers = new ArrayList<>();
-        for (int l = 0; l < listenerClasses.size(); l++) {
-            String logFile = listenerFiles.size() == 1 ? listenerFiles.get(0) : listenerFiles.get(l);
-            IStatisticLogger logger = new FileStatsLogger(logFile);
-            String listenerClass = listenerClasses.size() == 1 ? listenerClasses.get(0) : listenerClasses.get(l);
-            IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
-            games.get(gameIdx).addListener(gameTracker);
-            gameTrackers.add(gameTracker);
+        for (IGameListener listener : listeners) {
+            games.get(gameIdx).addListener(listener);
         }
 
         // Run the game N = gamesPerMatchUp times with these players
@@ -234,9 +235,6 @@ public class RoundRobinTournament extends AbstractTournament {
             }
         }
         games.get(gameIdx).clearListeners();
-        for (IGameListener gameTracker : gameTrackers) {
-            gameTracker.allGamesFinished();
-        }
         matchUpsRun++;
     }
 }
