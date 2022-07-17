@@ -114,7 +114,7 @@ public class ProgressiveLearner {
                             "\tstateFreq=     How frequently to record a value to regress against (ROUND_OVER, TURN_OVER, ACTION_CHOSEN, ACTION_TAKEN)\n" +
                             "\t               Defaults to ACTION_TAKEN.\n" +
                             "\tstateCPO=      Whether to only record states for the current player (defaults to all players)\n" +
-                            "\theuristic=     A class name for a heuristic to inject into the Agent JSON defintition (see 'player')\n" +
+                            "\theuristic=     A class name for a heuristic to inject into the Agent JSON definition (see 'player')\n" +
                             "\t               Defaults to players.heuristics.LinearStateHeuristic\n" +
                             "\tdefaultHeuristic=Defaults to a null heuristic (random play). This is only used in the first iteration\n" +
                             "\t               when we have no data.  \n" +
