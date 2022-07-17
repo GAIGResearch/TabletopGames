@@ -89,7 +89,11 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file.\n" +
                             "\t               Defaults to RoundRobinReport.txt\n" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
-                            "\t               use a different log file.\n");
+                            "\t               use a different log file.\n" +
+                            "\tstatsLog=      The file to use for logging agent-specific statistics (e.g. MCTS iterations/depth)\n" +
+                            "\t               A single line will be generated as the average for each agent, implicitly assuming they are" +
+                            "\t               all of the same type. If not supplied, then no logging will take place."
+            );
             return;
         }
         /* 1. Settings for the tournament */
@@ -100,7 +104,7 @@ public class RoundRobinTournament extends AbstractTournament {
         int matchups = getArg(args, "matchups", 1);
         String playerDirectory = getArg(args, "players", "");
         String gameParams = getArg(args, "gameParams", "");
-
+        String statsLogPrefix = getArg(args, "statsLog", "");
 
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameResultListener").split("\\|")));
         List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
@@ -112,6 +116,13 @@ public class RoundRobinTournament extends AbstractTournament {
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         if (!playerDirectory.equals("")) {
             agents.addAll(PlayerFactory.createPlayers(playerDirectory));
+            if (!statsLogPrefix.equals("")) {
+                for (AbstractPlayer agent : agents) {
+                    IStatisticLogger logger = IStatisticLogger.createLogger("utilities.SummaryLogger", statsLogPrefix);
+                    logger.record("Name", agent.toString());
+                    agent.setStatsLogger(logger);
+                }
+            }
         } else {
             /* 2. Set up players */
             agents.add(new MCTSPlayer());
@@ -136,6 +147,12 @@ public class RoundRobinTournament extends AbstractTournament {
             tournament.listeners.add(gameTracker);
         }
         tournament.runTournament();
+        if (!statsLogPrefix.equals("")) {
+            for (AbstractPlayer agent : agents) {
+                System.out.println("Statistics for agent " + agent);
+                agent.getStatsLogger().processDataAndFinish();
+            }
+        }
     }
 
     /**
