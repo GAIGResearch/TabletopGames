@@ -148,7 +148,9 @@ public class RoundRobinTournament extends AbstractTournament {
         }
         tournament.runTournament();
         if (!statsLogPrefix.equals("")) {
-            for (AbstractPlayer agent : agents) {
+                for (int i = 0; i < agents.size(); i++) {
+                AbstractPlayer agent = agents.get(i);
+                agent.getStatsLogger().record("WinRate", tournament.pointsPerPlayer[i] / (double)(tournament.matchUpsRun * tournament.gamesPerMatchUp));
                 System.out.println("Statistics for agent " + agent);
                 agent.getStatsLogger().processDataAndFinish();
             }

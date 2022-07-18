@@ -242,13 +242,13 @@ public class SVMEvaluator implements SolutionEvaluator {
             landscapeModel.reset();
             Pair<Double, Double> r = ParameterSearch.runNTBEA(evaluator, null, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
-            ParameterSearch.printDetailsOfRun(retValue, searchSpace, logfile);
+            ParameterSearch.printDetailsOfRun(retValue, searchSpace, logfile, false, null);
             if (retValue.a.a > bestResult.a.a)
                 bestResult = retValue;
 
         }
         System.out.println("\nFinal Recommendation: ");
         // we don't log the final run to file to avoid duplication
-        ParameterSearch.printDetailsOfRun(bestResult, searchSpace, "");
+        ParameterSearch.printDetailsOfRun(bestResult, searchSpace, "", false, null);
     }
 }
