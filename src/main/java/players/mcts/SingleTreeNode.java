@@ -22,6 +22,8 @@ import static players.PlayerConstants.*;
 import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
+import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
+import static players.mcts.MCTSEnums.RolloutTermination.START_TURN;
 import static players.mcts.MCTSEnums.Strategies.MAST;
 import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
@@ -67,6 +69,7 @@ public class SingleTreeNode {
     private double[] totSquares;
     // Number of visits
     private int nVisits;
+    private int rolloutActionsTaken;
 
     protected SingleTreeNode() {
 
@@ -200,6 +203,7 @@ public class SingleTreeNode {
 
         // Tracking number of iterations for iteration budget
         int numIters = 0;
+        rolloutActionsTaken = 0;
         boolean stop = false;
         while (!stop) {
             switch (params.information) {
@@ -263,8 +267,10 @@ public class SingleTreeNode {
         SingleTreeNode selected = treePolicy(treeActions);
         // Monte carlo rollout: return value of MC rollout from the newly added node
         List<Pair<Integer, AbstractAction>> rolloutActions = new ArrayList<>();
-        double[] delta = selected.rollOut(rolloutActions, startingValues, decisionPlayer);
+        int lastActorInTree = treeActions.isEmpty() ? decisionPlayer : treeActions.get(treeActions.size() - 1).a;
+        double[] delta = selected.rollOut(rolloutActions, startingValues, decisionPlayer, lastActorInTree);
         // Back up the value of the rollout through the tree
+        rolloutActionsTaken += rolloutActions.size();
         selected.backUp(delta);
         updateMASTStatistics(treeActions, rolloutActions, delta);
     }
@@ -315,6 +321,7 @@ public class SingleTreeNode {
         stats.put("normalisedBestValue", Utils.normalise(this.actionTotValue(bestAction, decisionPlayer) / this.actionVisits(bestAction), lowReward, highReward));
         stats.put("lowReward", this.lowReward);
         stats.put("highReward", this.highReward);
+        stats.put("rolloutActions", this.rolloutActionsTaken / numIters);
         statsLogger.record(stats);
     }
 
@@ -755,12 +762,15 @@ public class SingleTreeNode {
      *
      * @return - value of rollout.
      */
-    protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int decisionPlayer) {
+    protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int decisionPlayer, int lastActor) {
         int rolloutDepth = 0; // counting from end of tree
+
+        int roundAtStartOfRollout = openLoopState.getTurnOrder().getRoundCounter();
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
-        if (params.rolloutLength > 0) {
+        if (params.rolloutLength > 0 || params.rolloutTermination != DEFAULT) {
+            // even if rollout length is zero, we may rollout a few actions to reach the end of our turn, or the start of our next turn
             if (params.information == Closed_Loop) {
                 // the thinking here is that in openLoop we copy the state right at the root, and then use the forward
                 // model at each action. Hence the current state on the node is the one we have been using up to now.
@@ -769,12 +779,13 @@ public class SingleTreeNode {
                 root.copyCount++;
             }
 
-            while (!finishRollout(rolloutState, rolloutDepth)) {
+            while (!finishRollout(rolloutState, rolloutDepth, decisionPlayer, lastActor, roundAtStartOfRollout)) {
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState);
                 if (availableActions.isEmpty())
                     break;
                 AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
-                rolloutActions.add(new Pair<>(rolloutState.getCurrentPlayer(), next));
+                lastActor = rolloutState.getCurrentPlayer();
+                rolloutActions.add(new Pair<>(lastActor, next));
                 int startingFMCalls = root.fmCallsCount;
                 advance(rolloutState, next);
                 // rollout moves can be tracked by total forward model calls
@@ -798,12 +809,23 @@ public class SingleTreeNode {
      * @param depth       - current depth
      * @return - true if rollout finished, false otherwise
      */
-    private boolean finishRollout(AbstractGameState rollerState, int depth) {
-        if (depth >= params.rolloutLength)
+    private boolean finishRollout(AbstractGameState rollerState, int depth, int decisionPlayer, int lastActor, int roundAtStartOfRollout) {
+        if (!rollerState.isNotTerminal())
             return true;
-
-        // End of game
-        return !rollerState.isNotTerminal();
+        int currentActor = rollerState.getCurrentPlayer();
+        if (depth >= params.rolloutLength) {
+            switch (params.rolloutTermination) {
+                case DEFAULT:
+                    return true;
+                case END_TURN:
+                    return lastActor == decisionPlayer && currentActor != decisionPlayer;
+                case START_TURN:
+                    return lastActor != decisionPlayer && currentActor == decisionPlayer;
+                case END_ROUND:
+                    return rollerState.getTurnOrder().getRoundCounter() != roundAtStartOfRollout;
+            }
+        }
+        return false;
     }
 
     /**

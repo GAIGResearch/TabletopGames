@@ -19,6 +19,7 @@ import static players.mcts.MCTSEnums.Information.Open_Loop;
 import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
+import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
 import static players.mcts.MCTSEnums.Strategies.PARAMS;
 import static players.mcts.MCTSEnums.Strategies.RANDOM;
@@ -60,6 +61,7 @@ public class MCTSParams extends PlayerParameters {
     public boolean normaliseRewards = true;
     public boolean nodesStoreScoreDelta = true;
     public boolean maintainMasterState = false;
+    public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
     private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     private IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
 
@@ -79,6 +81,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("rolloutClass", "");
         addTunableParameter("oppModelClass", "");
         addTunableParameter("rolloutPolicyParams", ITunableParameters.class);
+        addTunableParameter("rolloutTermination", DEFAULT, Arrays.asList(MCTSEnums.RolloutTermination.values()));
         addTunableParameter("opponentModelParams", ITunableParameters.class);
         addTunableParameter("opponentModel", new RandomPlayer());
         addTunableParameter("information", Open_Loop, Arrays.asList(MCTSEnums.Information.values()));
@@ -114,6 +117,7 @@ public class MCTSParams extends PlayerParameters {
         maxTreeDepth = (int) getParameterValue("maxTreeDepth");
         epsilon = (double) getParameterValue("epsilon");
         rolloutType = (MCTSEnums.Strategies) getParameterValue("rolloutType");
+        rolloutTermination = (MCTSEnums.RolloutTermination) getParameterValue("rolloutTermination");
         oppModelType = (MCTSEnums.Strategies) getParameterValue("oppModelType");
         information = (MCTSEnums.Information) getParameterValue("information");
         selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
@@ -209,8 +213,47 @@ public class MCTSParams extends PlayerParameters {
     }
 
     @Override
-    protected AbstractParameters _copy() {
-        return new MCTSParams(System.currentTimeMillis());
+    protected MCTSParams _copy() {
+        MCTSParams retValue = new MCTSParams(System.currentTimeMillis());
+        retValue.K = K;
+        retValue.rolloutLength = rolloutLength;
+        retValue.maxTreeDepth = maxTreeDepth;
+        retValue.epsilon = epsilon;
+        retValue.information = information;
+        retValue.MAST = MAST;
+        retValue.useMAST = useMAST;
+        retValue.MASTGamma = MASTGamma;
+        retValue.MASTBoltzmann = MASTBoltzmann;
+        retValue.expansionPolicy = expansionPolicy;
+        retValue.selectionPolicy = selectionPolicy;
+        retValue.treePolicy = treePolicy;
+        retValue.opponentTreePolicy = opponentTreePolicy;
+        retValue.rolloutType = rolloutType;
+        retValue.oppModelType = oppModelType;
+        retValue.rolloutClass = rolloutClass;
+        retValue.oppModelClass = oppModelClass;
+        retValue.rolloutPolicy = rolloutPolicy == null ? null : rolloutPolicy.copy();
+        retValue.rolloutPolicyParams = rolloutPolicyParams;
+        retValue.opponentModel = opponentModel == null ? null : opponentModel.copy();
+        retValue.opponentModelParams = opponentModelParams;
+        retValue.exploreEpsilon = exploreEpsilon;
+        retValue.gatherExpertIterationData = gatherExpertIterationData;
+        retValue.expertIterationFileStem = expertIterationFileStem;
+        retValue.expertIterationStateFeatures = expertIterationStateFeatures;
+        retValue.EIStateFeatureVector = EIStateFeatureVector;
+        retValue.expertIterationActionFeatures = expertIterationActionFeatures;
+        retValue.EIActionFeatureVector = EIActionFeatureVector;
+        retValue.advantageFunction = advantageFunction;
+        retValue.biasVisits = biasVisits;
+        retValue.progressiveWideningConstant = progressiveWideningConstant;
+        retValue.progressiveWideningExponent = progressiveWideningExponent;
+        retValue.normaliseRewards = normaliseRewards;
+        retValue.nodesStoreScoreDelta = nodesStoreScoreDelta;
+        retValue.maintainMasterState = maintainMasterState;
+        retValue.rolloutTermination = rolloutTermination;
+        retValue.heuristic = heuristic;
+        retValue.opponentHeuristic = opponentHeuristic;
+        return retValue;
     }
 
 
