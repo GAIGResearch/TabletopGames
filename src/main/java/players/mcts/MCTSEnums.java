@@ -27,7 +27,9 @@ public class MCTSEnums {
     }
 
     public enum OpponentTreePolicy {
-        SelfOnly(true), Paranoid(false), MaxN(false), MultiTree(true), MultiTreeParanoid(true);
+        SelfOnly(true), Paranoid(false), MaxN(false),
+        MultiTree(true), MultiTreeParanoid(true),
+        OMA(false), OMA_All(false);
 
         boolean selfOnlyTree;
         OpponentTreePolicy(boolean selfOnlyTree) {

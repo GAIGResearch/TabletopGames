@@ -20,8 +20,7 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
 import static players.mcts.MCTSEnums.Information.Closed_Loop;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.RolloutTermination.START_TURN;
 import static players.mcts.MCTSEnums.Strategies.MAST;
@@ -627,6 +626,14 @@ public class SingleTreeNode {
             int actionVisits = actionVisits(action);
             double childValue = hvVal / (actionVisits + params.epsilon);
 
+            // consider OMA term
+            if (this instanceof OMATreeNode && ((OMATreeNode) this).OMAParent.isPresent()) {
+                OMATreeNode oma = ((OMATreeNode) this).OMAParent.get();
+                double omaValue =
+                double beta = Math.sqrt(params.OMAVisits / (double) (params.OMAVisits + 3 * actionVisits));
+                childValue = (1.0 - beta) * childValue + beta * oma.OMAValue;
+            }
+
             // consider any progressive bias term
             if (params.biasVisits > 0) {
                 double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
@@ -676,9 +683,8 @@ public class SingleTreeNode {
 
             // Apply small noise to break ties randomly
             uctValue = noise(uctValue, params.epsilon, rnd.nextDouble());
-            if (Double.isNaN(uctValue)) {
-                boolean stop = true;
-            }
+            if (Double.isNaN(uctValue))
+                throw new AssertionError("Numeric error calculating uctValue");
 
             // Assign value
             if (uctValue > bestValue) {
