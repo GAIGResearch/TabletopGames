@@ -21,7 +21,6 @@ public class OMATreeNode extends SingleTreeNode {
 
     class OMAStats {
         double OMATotValue;
-        double OMATotSquares;
         int OMAVisits;
     }
 
@@ -33,8 +32,7 @@ public class OMATreeNode extends SingleTreeNode {
     // when making a decision at *this* node, we use the statistics held on the OMAParent node
     // We also do not need to store Arrays (one element per player) of values and successor nodes, as
     // these are always going to be for the same player as this node
-    private final Map<AbstractAction, Integer> OMAValidVisits = new HashMap<>();
-    Map<AbstractAction, OMAStats> OMAChildren = new HashMap<>();
+    final Map<AbstractAction, OMAStats> OMAChildren = new HashMap<>();
 
     /**
      * Back up the value of the child through all parents. Increase number of visits and total value.
@@ -57,7 +55,7 @@ public class OMATreeNode extends SingleTreeNode {
             // we jump for players out of scope
             if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.OMA_All || n.decisionPlayer == root.decisionPlayer) {
                 if (actionTaken != null && OMAParent.isPresent()) {
-                    OMAParent.get().OMABackup(n, result, actionTaken);
+                    OMAParent.get().OMABackup(result, actionTaken);
                 }
             }
             actionTaken = n.actionToReach;
@@ -65,24 +63,12 @@ public class OMATreeNode extends SingleTreeNode {
         }
     }
 
-    private void OMABackup(SingleTreeNode decisionNode, double[] result, AbstractAction actionTaken) {
-
+    private void OMABackup(double[] result, AbstractAction actionTaken) {
         if (!OMAChildren.containsKey(actionTaken))
             OMAChildren.put(actionTaken, new OMAStats());
         OMAStats stats = OMAChildren.get(actionTaken);
         stats.OMAVisits++;
-        // Here we look at actionsFromOpenLoopState to see which ones were valid
-        // when we passed through, and keep track of valid visits
-        // This is now also valid for Closed Loop, as these are amalgamated across different states
-        // Crucially we need to look at the actions from the actual decision node (not the parent)
-        for (AbstractAction action : decisionNode.actionsFromOpenLoopState) {
-            if (!OMAValidVisits.containsKey(action))
-                OMAValidVisits.put(action, 1);
-            else
-                OMAValidVisits.put(action, OMAValidVisits.get(action) + 1);
-        }
         stats.OMATotValue += result[decisionPlayer];
-        stats.OMATotSquares += result[decisionPlayer] * result[decisionPlayer];
     }
 
     @Override
@@ -103,6 +89,4 @@ public class OMATreeNode extends SingleTreeNode {
         }
         return retValue;
     }
-
-
 }

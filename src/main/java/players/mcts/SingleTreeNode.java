@@ -633,8 +633,16 @@ public class SingleTreeNode {
             double childValue = hvVal / (actionVisits + params.epsilon);
 
             // consider OMA term
-            if (this instanceof OMATreeNode && ((OMATreeNode) this).OMAParent.isPresent()) {
-                // TODO:
+            if (this instanceof OMATreeNode) {
+                OMATreeNode oma = ((OMATreeNode) this).OMAParent.orElse(null);
+                if (oma != null) {
+                    double beta = Math.sqrt(params.omaVisits / (double) (params.omaVisits + 3 * actionVisits));
+                    OMATreeNode.OMAStats stats = oma.OMAChildren.get(action);
+                    if (stats != null) {
+                        double omaValue = stats.OMATotValue / stats.OMAVisits;
+                        childValue = (1.0 - beta) * childValue + beta * omaValue;
+                    }
+                }
             }
 
             // consider any progressive bias term

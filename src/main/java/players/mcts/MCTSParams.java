@@ -56,6 +56,7 @@ public class MCTSParams extends PlayerParameters {
     public IActionFeatureVector EIActionFeatureVector;
     public IActionHeuristic advantageFunction;
     public int biasVisits = 0;
+    public int omaVisits = 0;
     public double progressiveWideningConstant = 0.0; //  Zero indicates switched off (well, less than 1.0)
     public double progressiveWideningExponent = 0.0;
     public boolean normaliseRewards = true;
@@ -106,6 +107,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("nodesStoreScoreDelta", false);
         addTunableParameter("maintainMasterState", false);
         addTunableParameter("advantageFunction", IActionHeuristic.nullReturn);
+        addTunableParameter("omaVisits", 0);
     }
 
     @Override
@@ -148,6 +150,7 @@ public class MCTSParams extends PlayerParameters {
             }
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         biasVisits = (int) getParameterValue("biasVisits");
+        omaVisits = (int) getParameterValue("omaVisits");
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
         progressiveWideningExponent = (double) getParameterValue("progressiveWideningExponent");
         normaliseRewards = (boolean) getParameterValue("normaliseRewards");
@@ -245,6 +248,7 @@ public class MCTSParams extends PlayerParameters {
         retValue.EIActionFeatureVector = EIActionFeatureVector;
         retValue.advantageFunction = advantageFunction;
         retValue.biasVisits = biasVisits;
+        retValue.omaVisits = omaVisits;
         retValue.progressiveWideningConstant = progressiveWideningConstant;
         retValue.progressiveWideningExponent = progressiveWideningExponent;
         retValue.normaliseRewards = normaliseRewards;
