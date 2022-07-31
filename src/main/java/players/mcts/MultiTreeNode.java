@@ -179,7 +179,7 @@ public class MultiTreeNode extends SingleTreeNode {
         }
         for (SingleTreeNode singleTreeNode : currentLocation) {
             if (singleTreeNode != null)
-                singleTreeNode.backUp(finalValues);
+                singleTreeNode.backUp(finalValues, actionsInRollout);
         }
         root.updateMASTStatistics(actionsInTree, actionsInRollout, finalValues);
     }

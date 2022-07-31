@@ -28,10 +28,13 @@ import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
 
 public class SingleTreeNode {
-    private final Map<AbstractAction, Integer> nValidVisits = new HashMap<>();
+
     // State in this node (closed loop)
-    protected AbstractAction actionToReach;
     protected AbstractGameState state;
+    // State in this node (open loop - this is updated by onward trajectory....be very careful about using)
+    protected AbstractGameState openLoopState;
+    List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
+    Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
     // Parameters guiding the search
     protected MCTSParams params;
     protected AbstractForwardModel forwardModel;
@@ -42,12 +45,23 @@ public class SingleTreeNode {
     // Number of FM calls and State copies up until this node
     protected int fmCallsCount;
     protected int copyCount;
-    protected AbstractGameState openLoopState;
     protected int paranoidPlayer = -1;
     // Depth of this node
     int depth;
     // the id of the player who makes the decision at this node
     int decisionPlayer;
+    private final Map<AbstractAction, Integer> nValidVisits = new HashMap<>();
+    // Action taken to reach this node
+    // In vanilla MCTS this will likely be an action taken by some other player (not the decisionPlayer at this node)
+    protected AbstractAction actionToReach;
+    // The total value of all trajectories through this node (one element per player)
+    private double[] totValue;
+    private double[] totSquares;
+    // Number of visits to this node
+    private int nVisits;
+    private int rolloutActionsTaken;
+    double highReward = Double.NEGATIVE_INFINITY;
+    double lowReward = Double.POSITIVE_INFINITY;
     // Root node of tree
     SingleTreeNode root;
     // Parent of this node
@@ -57,18 +71,10 @@ public class SingleTreeNode {
     // only ever have one position in the array populated: and similarly if we are using a SelfOnly tree).
     Map<AbstractAction, SingleTreeNode[]> children = new HashMap<>();
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
-    double highReward = Double.NEGATIVE_INFINITY;
-    double lowReward = Double.POSITIVE_INFINITY;
-    List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
-    Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
     ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
     ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
     // Total value of this node
-    private double[] totValue;
-    private double[] totSquares;
-    // Number of visits
-    private int nVisits;
-    private int rolloutActionsTaken;
+
 
     protected SingleTreeNode() {
 
@@ -270,7 +276,7 @@ public class SingleTreeNode {
         double[] delta = selected.rollOut(rolloutActions, startingValues, decisionPlayer, lastActorInTree);
         // Back up the value of the rollout through the tree
         rolloutActionsTaken += rolloutActions.size();
-        selected.backUp(delta);
+        selected.backUp(delta, rolloutActions);
         updateMASTStatistics(treeActions, rolloutActions, delta);
     }
 
@@ -628,10 +634,7 @@ public class SingleTreeNode {
 
             // consider OMA term
             if (this instanceof OMATreeNode && ((OMATreeNode) this).OMAParent.isPresent()) {
-                OMATreeNode oma = ((OMATreeNode) this).OMAParent.get();
-                double omaValue =
-                double beta = Math.sqrt(params.OMAVisits / (double) (params.OMAVisits + 3 * actionVisits));
-                childValue = (1.0 - beta) * childValue + beta * oma.OMAValue;
+                // TODO:
             }
 
             // consider any progressive bias term
@@ -839,7 +842,7 @@ public class SingleTreeNode {
      *
      * @param result - value of rollout to backup
      */
-    protected void backUp(double[] result) {
+    protected void backUp(double[] result, List<Pair<Integer, AbstractAction>> rolloutActions) {
         SingleTreeNode n = this;
         double[] squaredResults = new double[result.length];
         for (int i = 0; i < result.length; i++)
