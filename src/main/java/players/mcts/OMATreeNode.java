@@ -19,9 +19,9 @@ import static players.mcts.MCTSEnums.Information.Closed_Loop;
  */
 public class OMATreeNode extends SingleTreeNode {
 
-    class OMAStats {
-        double OMATotValue;
-        int OMAVisits;
+    public class OMAStats {
+        public double OMATotValue;
+        public int OMAVisits;
     }
 
 
@@ -49,17 +49,17 @@ public class OMATreeNode extends SingleTreeNode {
         // - This will be actionToReach on the next node in the trajectory
         // - or null for the very last node (the one expanded)...for the moment we do not treat the first
         // rollout action as the 'action taken'
-        SingleTreeNode n = this;
+        OMATreeNode n = this;
         AbstractAction actionTaken = null;
         while (n != null) {
             // we jump for players out of scope
             if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.OMA_All || n.decisionPlayer == root.decisionPlayer) {
-                if (actionTaken != null && OMAParent.isPresent()) {
-                    OMAParent.get().OMABackup(result, actionTaken);
+                if (actionTaken != null && n.OMAParent.isPresent()) {
+                    n.OMAParent.get().OMABackup(result, actionTaken);
                 }
             }
             actionTaken = n.actionToReach;
-            n = n.parent;
+            n = (OMATreeNode) n.parent;
         }
     }
 
@@ -78,15 +78,28 @@ public class OMATreeNode extends SingleTreeNode {
         // we follow the links up the tree to find the closest one at which we last acted
 
         // We only track OMAParents for all players if using OMA_All; otherwise just for the root decision player
-        if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.OMA_All || root.decisionPlayer == decisionPlayer) {
+        if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.OMA_All || root.decisionPlayer == retValue.decisionPlayer) {
             SingleTreeNode oneUp = retValue.parent;
             while (oneUp != null && !retValue.OMAParent.isPresent()) {
-                if (oneUp.decisionPlayer == this.decisionPlayer) {
+                if (oneUp.decisionPlayer == retValue.decisionPlayer) {
                     // found it..we're done
                     retValue.OMAParent = Optional.of((OMATreeNode) oneUp);
                 }
+                oneUp = oneUp.parent;
             }
         }
         return retValue;
+    }
+
+    public Optional<OMATreeNode> getOMAParent() {
+        return OMAParent;
+    }
+
+    public OMAStats getOMAStats(AbstractAction action) {
+        return OMAChildren.get(action);
+    }
+
+    public Set<AbstractAction> getOMAChildrenActions() {
+        return OMAChildren.keySet();
     }
 }

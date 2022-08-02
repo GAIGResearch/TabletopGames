@@ -82,7 +82,8 @@ public class SingleTreeNode {
 
     // Called in tree expansion
     public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
-        SingleTreeNode retValue = new SingleTreeNode();
+        SingleTreeNode retValue = (player.params.opponentTreePolicy == OMA || player.params.opponentTreePolicy == OMA_All)
+                ? new OMATreeNode() : new SingleTreeNode();
         retValue.decisionPlayer = state.getCurrentPlayer();
         retValue.params = player.params;
         retValue.forwardModel = player.getForwardModel();
@@ -113,7 +114,7 @@ public class SingleTreeNode {
     }
 
     public static SingleTreeNode createChildNode(SingleTreeNode parent, AbstractAction actionToReach, AbstractGameState state) {
-        SingleTreeNode retValue = new SingleTreeNode();
+        SingleTreeNode retValue = (parent instanceof OMATreeNode) ? new OMATreeNode() : new SingleTreeNode();
         retValue.instantiate(parent, actionToReach, state);
         return retValue;
     }
@@ -883,6 +884,8 @@ public class SingleTreeNode {
                     break;
                 case Paranoid:
                 case MultiTreeParanoid:
+                case OMA_All:
+                case OMA:
                     int paranoid = root.paranoidPlayer == -1 ? root.decisionPlayer : root.paranoidPlayer;
                     for (int j = 0; j < result.length; j++) {
                         if (j == paranoid) {

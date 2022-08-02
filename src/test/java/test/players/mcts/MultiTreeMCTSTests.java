@@ -29,8 +29,6 @@ import java.util.function.Predicate;
 import static org.junit.Assert.assertEquals;
 
 public class MultiTreeMCTSTests {
-
-
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;
 
