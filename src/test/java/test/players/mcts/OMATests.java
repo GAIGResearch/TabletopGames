@@ -14,10 +14,7 @@ import players.mcts.*;
 import players.simple.RandomPlayer;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.summingInt;
-import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
 public class OMATests {
@@ -39,7 +36,7 @@ public class OMATests {
         params.maxTreeDepth = 20;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
-        params.budget = 200;
+        params.budget = 2000;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
         params.K = 1.0;
     }
@@ -104,11 +101,28 @@ public class OMATests {
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
                 .getAction(state, fm.computeAvailableActions(state));
 
+
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node -> {
             OMATreeNode n = (OMATreeNode) node;
-            Set<AbstractAction> children = n.getOMAChildrenActions();
-            Token expected = node.getActor() == 0 ? x : o;
-            return children.stream().allMatch(c -> ((SetGridValueAction<Token>) c).getValue().equals(expected));
+            if (n.getOMAParent().isPresent()) {
+                Set<AbstractAction> parentActions = n.getOMAParent().get().getChildren().keySet();
+                return parentActions.containsAll(n.getOMAParentActions());
+            } else
+                return true;
+        });
+        assertEquals(0, problemNodes.size());
+
+
+        problemNodes = mctsPlayer.getRoot(0).checkTree(node -> {
+            OMATreeNode n = (OMATreeNode) node;
+            if (n.getOMAParent().isPresent()) {
+                OMATreeNode OMAParent = n.getOMAParent().get();
+                Set<AbstractAction> parentActions = OMAParent.getChildren().keySet();
+                Token expected = node.getActor() == 0 ? x : o;
+                return parentActions.stream().flatMap(a -> OMAParent.getOMAChildrenActions(a).stream())
+                        .filter(Objects::nonNull)
+                        .allMatch(c -> ((SetGridValueAction<Token>) c).getValue().equals(expected));
+            } else return true;
         });
         assertEquals(0, problemNodes.size());
         // this checks that all actions are for the same player as the node player
@@ -148,28 +162,41 @@ public class OMATests {
 
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node -> {
                     OMATreeNode n = (OMATreeNode) node;
-                    if (n.getOMAChildrenActions().isEmpty())
-                        return true;
-                    for (AbstractAction action : n.getChildren().keySet()) {
-                        List<SingleTreeNode> grandchildren = n.getChildren().get(action)[1].checkTree(n2 -> n2.getDepth() == n.getDepth() + 2);
-                        // We now need to get weighted value of grandchildren stats
-                        double totalValue = grandchildren.stream().mapToDouble(gc -> gc.getTotValue()[0]).sum();
-                        int totVisits = grandchildren.stream().mapToInt(SingleTreeNode::getVisits).sum();
-                        OMATreeNode.OMAStats stats = n.getOMAStats(action);
-                        System.out.printf("%s GC: %.2f/%d, OMA: %.2f/%d%n", action, totalValue, totVisits, stats.OMATotValue, stats.OMAVisits);
-                        if (Math.abs(totVisits - stats.OMAVisits) > 1) return false;
-                        if (Math.abs(totalValue - stats.OMATotValue) > 0.01) return false;
+                    int player = n.getActor();
+                    for (AbstractAction parentAction : n.getChildren().keySet()) {
+                        if (n.getChildren().get(parentAction) != null) {
+                            SingleTreeNode child = n.getChildren().get(parentAction)[ 1 - player]; // the node whose children we are interested in for OMA
+                            for (AbstractAction childAction : n.getOMAChildrenActions(parentAction)) {
+                                // 'grandchildren' are then the nodes reached by childAction, which contain the stats that OMA should summarise
+                                List<SingleTreeNode> grandchildren = child
+                                        .checkTree(n2 -> !(n2.getDepth() == child.getDepth() + 2 && n2.getActionToReach().equals(childAction)));
+                                // We now need to get weighted value of grandchildren stats
+                                double totalValue = grandchildren.stream().mapToDouble(gc -> gc.getTotValue()[player]).sum();
+                                int totVisits = grandchildren.stream().mapToInt(SingleTreeNode::getVisits).sum();
+                                OMATreeNode.OMAStats stats = n.getOMAStats(parentAction, childAction);
+                                System.out.printf("%s GC: %.2f/%d, OMA: %.2f/%d%n", childAction, totalValue, totVisits,
+                                        stats.OMATotValue, stats.OMAVisits);
+                                if (Math.abs(totVisits - stats.OMAVisits) > 0) return false;
+                                if (Math.abs(totalValue - stats.OMATotValue) > 0.01) return false;
+                            }
+                        }
                     }
                     return true;
                 }
-            );
+        );
         assertEquals(0, problemNodes.size());
-
     }
 
     @Test
     public void omaStatisticsCorrectOMA_All() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OMA_All;
+        omaStatisticsCorrectOMA();
 
+        List<SingleTreeNode> playerTwoNodes = mctsPlayer.getRoot(0).checkTree(node -> {
+                    OMATreeNode n = (OMATreeNode) node;
+                    return !(n.getOMAParent().isPresent() && n.getActor() == 1 && !n.getOMAParent().get().getOMAParentActions().isEmpty());
+                }
+        );
+        assertTrue(playerTwoNodes.size() > 5);
     }
-
 }

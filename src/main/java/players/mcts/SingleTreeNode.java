@@ -277,7 +277,7 @@ public class SingleTreeNode {
         double[] delta = selected.rollOut(rolloutActions, startingValues, decisionPlayer, lastActorInTree);
         // Back up the value of the rollout through the tree
         rolloutActionsTaken += rolloutActions.size();
-        selected.backUp(delta, rolloutActions);
+        selected.backUp(delta);
         updateMASTStatistics(treeActions, rolloutActions, delta);
     }
 
@@ -634,11 +634,20 @@ public class SingleTreeNode {
             double childValue = hvVal / (actionVisits + params.epsilon);
 
             // consider OMA term
-            if (this instanceof OMATreeNode) {
+            if (params.opponentTreePolicy == OMA_All || params.opponentTreePolicy == OMA) {
                 OMATreeNode oma = ((OMATreeNode) this).OMAParent.orElse(null);
                 if (oma != null) {
                     double beta = Math.sqrt(params.omaVisits / (double) (params.omaVisits + 3 * actionVisits));
-                    OMATreeNode.OMAStats stats = oma.OMAChildren.get(action);
+                    // we need to find the action taken from the OMAParent
+                    SingleTreeNode iteratingNode = this;
+                    AbstractAction lastActionTaken;
+                    do {
+                        lastActionTaken = iteratingNode.actionToReach;
+                        iteratingNode = iteratingNode.parent;
+                        if (iteratingNode == null)
+                            throw new AssertionError("Should always find OMA node before root");
+                    } while (iteratingNode != oma);
+                    OMATreeNode.OMAStats stats = oma.OMAChildren.get(lastActionTaken).get(action);
                     if (stats != null) {
                         double omaValue = stats.OMATotValue / stats.OMAVisits;
                         childValue = (1.0 - beta) * childValue + beta * omaValue;
@@ -851,7 +860,7 @@ public class SingleTreeNode {
      *
      * @param result - value of rollout to backup
      */
-    protected void backUp(double[] result, List<Pair<Integer, AbstractAction>> rolloutActions) {
+    protected void backUp(double[] result) {
         SingleTreeNode n = this;
         double[] squaredResults = new double[result.length];
         for (int i = 0; i < result.length; i++)
@@ -884,8 +893,6 @@ public class SingleTreeNode {
                     break;
                 case Paranoid:
                 case MultiTreeParanoid:
-                case OMA_All:
-                case OMA:
                     int paranoid = root.paranoidPlayer == -1 ? root.decisionPlayer : root.paranoidPlayer;
                     for (int j = 0; j < result.length; j++) {
                         if (j == paranoid) {
@@ -899,6 +906,8 @@ public class SingleTreeNode {
                     break;
                 case MaxN:
                 case MultiTree:
+                case OMA_All:
+                case OMA:
                     for (int j = 0; j < result.length; j++) {
                         n.totValue[j] += result[j];
                         n.totSquares[j] += squaredResults[j];
@@ -985,6 +994,10 @@ public class SingleTreeNode {
 
     public Map<AbstractAction, SingleTreeNode[]> getChildren() {
         return children;
+    }
+
+    public AbstractAction getActionToReach() {
+        return actionToReach;
     }
 
     public int getActor() {

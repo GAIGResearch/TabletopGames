@@ -30,9 +30,13 @@ public class OMATreeNode extends SingleTreeNode {
 
     // we then have a separate copy of all the standard statistics maintained for SingleTreeNode
     // when making a decision at *this* node, we use the statistics held on the OMAParent node
-    // We also do not need to store Arrays (one element per player) of values and successor nodes, as
-    // these are always going to be for the same player as this node
-    final Map<AbstractAction, OMAStats> OMAChildren = new HashMap<>();
+    // We do not need to store arrays of statistics (one element per player), as we only ever
+    // consider OMA stats from the perspective of the acting player.
+    // However, we need to store one set of stats for each action we take from the OMAParent node,
+    // as it is the 'grandchildren' of this action that are amalgamated to give the OMA stats.
+    // The first Action key is the action from the OMAParent node. The second Action key is the action at the
+    // grandchildren.
+    final Map<AbstractAction, Map<AbstractAction, OMAStats>> OMAChildren = new HashMap<>();
 
     /**
      * Back up the value of the child through all parents. Increase number of visits and total value.
@@ -40,33 +44,57 @@ public class OMATreeNode extends SingleTreeNode {
      * @param result - value of rollout to backup
      */
     @Override
-    protected void backUp(double[] result, List<Pair<Integer, AbstractAction>> rolloutActions) {
-        super.backUp(result, rolloutActions); // first we do the usual stuff
+    protected void backUp(double[] result) {
+        super.backUp(result); // first we do the usual stuff
         // and now we add on the OMA statistics
-        // These are update on the node from which an action was taken (the OMAParent)
+        // These are updated on the node from which an action was taken (the OMAParent)
         // and not the node that is reached by taking an action.
         // We first need to find the action that was taken from this node.
         // - This will be actionToReach on the next node in the trajectory
         // - or null for the very last node (the one expanded)...for the moment we do not treat the first
         // rollout action as the 'action taken'
-        OMATreeNode n = this;
-        AbstractAction actionTaken = null;
-        while (n != null) {
-            // we jump for players out of scope
-            if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.OMA_All || n.decisionPlayer == root.decisionPlayer) {
-                if (actionTaken != null && n.OMAParent.isPresent()) {
-                    n.OMAParent.get().OMABackup(result, actionTaken);
+
+        for (int player = 0; player < result.length; player++) {
+            if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.OMA && player != root.decisionPlayer)
+                continue;  // for OMA we only consider the root player
+            // We loop over each player separately to avoid confusion with interleaving actions
+            // it might be more efficient to do this in a single pass...but at the cost of greater algorithmic complexity and bugginess
+            OMATreeNode iteratingNode = this;
+            AbstractAction actionTakenFromChild = null;
+            // we also need the action taken from the OMAParent to get here. To find this we need to back-track up
+            // the nodes and find the actionToReach on the immediate child of OMAPArent
+
+            // the aim is to find the first node on the backwards trajectory that has an OMAParent
+            while (iteratingNode != null) {
+                if (iteratingNode.decisionPlayer == player && iteratingNode.OMAParent.isPresent()) {
+                    // Now find the action taken FROM the parent
+                    if (actionTakenFromChild != null) {
+                        OMATreeNode OMAParent = iteratingNode.OMAParent.get();
+                        OMATreeNode parentSearch = iteratingNode;
+                        AbstractAction actionTakenFromParent;
+                        do { // we now head up to the OMAParent, recording the action taken from it
+                            actionTakenFromParent = parentSearch.actionToReach; // this is the action just before we find the OMAParent present
+                            parentSearch = (OMATreeNode) parentSearch.parent;
+                            if (parentSearch == null)
+                                throw new AssertionError("We should be guaranteed to find OMAParent before reaching root");
+                        } while (parentSearch != OMAParent);
+                        OMAParent.OMABackup(result, actionTakenFromParent, actionTakenFromChild);
+                    }
+                    // we now continue from iterating node for BP further up the tree
                 }
+                actionTakenFromChild = iteratingNode.actionToReach;
+                iteratingNode = (OMATreeNode) iteratingNode.parent;
             }
-            actionTaken = n.actionToReach;
-            n = (OMATreeNode) n.parent;
         }
     }
 
-    private void OMABackup(double[] result, AbstractAction actionTaken) {
-        if (!OMAChildren.containsKey(actionTaken))
-            OMAChildren.put(actionTaken, new OMAStats());
-        OMAStats stats = OMAChildren.get(actionTaken);
+    private void OMABackup(double[] result, AbstractAction actionTakenFromParent, AbstractAction actionTakenToReachChild) {
+        if (!OMAChildren.containsKey(actionTakenFromParent))
+            OMAChildren.put(actionTakenFromParent, new HashMap<>());
+        Map<AbstractAction, OMAStats> possibleActions = OMAChildren.get(actionTakenFromParent);
+        if (!possibleActions.containsKey(actionTakenToReachChild))
+            possibleActions.put(actionTakenToReachChild, new OMAStats());
+        OMAStats stats = possibleActions.get(actionTakenToReachChild);
         stats.OMAVisits++;
         stats.OMATotValue += result[decisionPlayer];
     }
@@ -95,11 +123,15 @@ public class OMATreeNode extends SingleTreeNode {
         return OMAParent;
     }
 
-    public OMAStats getOMAStats(AbstractAction action) {
-        return OMAChildren.get(action);
+    public OMAStats getOMAStats(AbstractAction action1, AbstractAction action2) {
+        return OMAChildren.get(action1).get(action2);
     }
 
-    public Set<AbstractAction> getOMAChildrenActions() {
+    public Set<AbstractAction> getOMAChildrenActions(AbstractAction action) {
+        return OMAChildren.getOrDefault(action, new HashMap<>()).keySet();
+    }
+
+    public Set<AbstractAction> getOMAParentActions() {
         return OMAChildren.keySet();
     }
 }
