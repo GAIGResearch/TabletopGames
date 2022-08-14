@@ -22,7 +22,6 @@ import static players.PlayerConstants.*;
 import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
-import static players.mcts.MCTSEnums.RolloutTermination.START_TURN;
 import static players.mcts.MCTSEnums.Strategies.MAST;
 import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
@@ -1009,14 +1008,28 @@ public class SingleTreeNode {
     }
 
     /**
-     * This returns a list of all nodes in the tree that do not match the specificd Predicate
+     * This returns a list of all nodes in the tree that do not match the specified Predicate
      *
      * @param allMatch
      * @return
      */
-    public List<SingleTreeNode> checkTree(Predicate<SingleTreeNode> allMatch) {
-        List<SingleTreeNode> allNodes = allNodesInTree();
-        return allNodes.stream().filter(n -> !allMatch.test(n)).collect(toList());
+    public List<SingleTreeNode> nonMatchingNodes(Predicate<SingleTreeNode> allMatch) {
+        return filterTree( n -> !allMatch.test(n));
+    }
+    /**
+     * This returns a list of all nodes in the tree that match the specified Predicate
+     *
+     * @param allMatch
+     * @return
+     */
+    public List<SingleTreeNode> filterTree(Predicate<SingleTreeNode> allMatch) {
+        return allNodesInTree().stream().filter(allMatch).collect(toList());
+    }
+
+    public SingleTreeNode matchingParent(Predicate<SingleTreeNode> match) {
+        if (parent == null || match.test(parent))
+            return parent;
+        return parent.matchingParent(match);
     }
 
     public SingleTreeNode getParent() {

@@ -1,11 +1,13 @@
 package test.players.mcts;
 
+import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import core.AbstractForwardModel;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.Token;
+import games.loveletter.*;
 import games.tictactoe.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +17,7 @@ import players.simple.RandomPlayer;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
 public class OMATests {
@@ -24,7 +27,8 @@ public class OMATests {
     Token x = TicTacToeConstants.playerMapping.get(0);
     Token o = TicTacToeConstants.playerMapping.get(1);
 
-    AbstractForwardModel fm = new TicTacToeForwardModel();
+    AbstractForwardModel ticTacToeForwardModel = new TicTacToeForwardModel();
+    AbstractForwardModel loveLetterForwardModel = new LoveLetterForwardModel();
 
     @Before
     public void setup() {
@@ -36,7 +40,7 @@ public class OMATests {
         params.maxTreeDepth = 20;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
-        params.budget = 2000;
+        params.budget = 5000;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
         params.K = 1.0;
     }
@@ -52,13 +56,24 @@ public class OMATests {
         return new TicTacToeGame(players, gameParams);
     }
 
+    public Game createLoveLetter(MCTSParams params) {
+        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer.setDebug(true);
+        List<AbstractPlayer> players = new ArrayList<>();
+        players.add(mctsPlayer);
+        players.add(new RandomPlayer(new Random(3023)));
+        players.add(new RandomPlayer(new Random(-36572)));
+        return new LoveLetterGame(players, new LoveLetterParameters(68274));
+    }
+
+
     @Test
-    public void omaNodesUsed() {
+    public void omaNodesUsedTicTacToe() {
         Game game = createTicTacToe(params, 3);
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                .getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
 
         TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
         System.out.println(stats);
@@ -66,7 +81,7 @@ public class OMATests {
         assertEquals(params.budget, mctsPlayer.getRoot(0).getVisits());
         assertEquals(9, mctsPlayer.getRoot(0).getChildren().size());
 
-        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node -> node instanceof OMATreeNode);
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node instanceof OMATreeNode);
         assertEquals(0, problemNodes.size());
 
         // and check that we have non-zero values (so that OMA does normal back-prop)
@@ -75,15 +90,15 @@ public class OMATests {
     }
 
     @Test
-    public void omaParentsPopulatedOMA_All() {
+    public void omaParentsPopulatedOMA_AllTicTacToe() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OMA_All;
         Game game = createTicTacToe(params, 3);
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                .getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
 
-        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node -> {
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> {
             OMATreeNode n = (OMATreeNode) node;
             return (n.getDepth() <= 1 && !n.getOMAParent().isPresent()) || (n.getDepth() > 1 && n.getOMAParent().isPresent());
         });
@@ -93,16 +108,16 @@ public class OMATests {
     }
 
     @Test
-    public void omaChildrenTieUpWithExpectedActions() {
+    public void omaChildrenTieUpWithExpectedActionsTicTacToe() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OMA_All;
         Game game = createTicTacToe(params, 3);
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                .getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
 
 
-        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node -> {
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> {
             OMATreeNode n = (OMATreeNode) node;
             if (n.getOMAParent().isPresent()) {
                 Set<AbstractAction> parentActions = n.getOMAParent().get().getChildren().keySet();
@@ -113,7 +128,7 @@ public class OMATests {
         assertEquals(0, problemNodes.size());
 
 
-        problemNodes = mctsPlayer.getRoot(0).checkTree(node -> {
+        problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> {
             OMATreeNode n = (OMATreeNode) node;
             if (n.getOMAParent().isPresent()) {
                 OMATreeNode OMAParent = n.getOMAParent().get();
@@ -129,17 +144,17 @@ public class OMATests {
     }
 
     @Test
-    public void omaParentsPopulatedOMA() {
+    public void omaParentsPopulatedOMATicTacToe() {
         Game game = createTicTacToe(params, 3);
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                .getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
 
-        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node -> node instanceof OMATreeNode);
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node instanceof OMATreeNode);
         assertEquals(0, problemNodes.size());
 
-        problemNodes = mctsPlayer.getRoot(0).checkTree(node -> {
+        problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> {
             OMATreeNode n = (OMATreeNode) node;
             if (n.getActor() == 1)
                 return !n.getOMAParent().isPresent();
@@ -151,52 +166,120 @@ public class OMATests {
     }
 
     @Test
-    public void omaStatisticsCorrectOMA() {
+    public void omaParentsPopulatedOMALoveLetter() {
+        Game game = createLoveLetter(params);
+        LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
+
+        AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
+                .getAction(state, loveLetterForwardModel.computeAvailableActions(state));
+
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node instanceof OMATreeNode);
+        assertEquals(0, problemNodes.size());
+
+        List<SingleTreeNode> depthFourNodesWithOMAParents = mctsPlayer.getRoot(0).nonMatchingNodes(
+                n -> {
+                    OMATreeNode node = (OMATreeNode) n;
+                    return !(node.getDepth() == 4 && node.getOMAParent().isPresent());
+                }
+        );
+
+        problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> {
+            OMATreeNode n = (OMATreeNode) node;
+            if (n.getActor() == 1 || n.getActor() == 2)
+                return !n.getOMAParent().isPresent();
+            if (n.getDepth() == 0)
+                return !n.getOMAParent().isPresent();
+            return n.getOMAParent().isPresent();
+        });
+        assertEquals(0, problemNodes.size());
+    }
+
+
+    @Test
+    public void omaStatisticsCorrectOMATicTacToe() {
         // Then, for each OMA Parent node, we look at all its grandchildren, and check that
         // their statistics are correctly merged to give the node parent statistics
         Game game = createTicTacToe(params, 3);
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                .getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
 
-        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node -> {
-                    OMATreeNode n = (OMATreeNode) node;
-                    int player = n.getActor();
-                    for (AbstractAction parentAction : n.getChildren().keySet()) {
-                        if (n.getChildren().get(parentAction) != null) {
-                            SingleTreeNode child = n.getChildren().get(parentAction)[ 1 - player]; // the node whose children we are interested in for OMA
-                            for (AbstractAction childAction : n.getOMAChildrenActions(parentAction)) {
-                                // 'grandchildren' are then the nodes reached by childAction, which contain the stats that OMA should summarise
-                                List<SingleTreeNode> grandchildren = child
-                                        .checkTree(n2 -> !(n2.getDepth() == child.getDepth() + 2 && n2.getActionToReach().equals(childAction)));
-                                // We now need to get weighted value of grandchildren stats
-                                double totalValue = grandchildren.stream().mapToDouble(gc -> gc.getTotValue()[player]).sum();
-                                int totVisits = grandchildren.stream().mapToInt(SingleTreeNode::getVisits).sum();
-                                OMATreeNode.OMAStats stats = n.getOMAStats(parentAction, childAction);
-                                System.out.printf("%s GC: %.2f/%d, OMA: %.2f/%d%n", childAction, totalValue, totVisits,
-                                        stats.OMATotValue, stats.OMAVisits);
-                                if (Math.abs(totVisits - stats.OMAVisits) > 0) return false;
-                                if (Math.abs(totalValue - stats.OMATotValue) > 0.01) return false;
-                            }
-                        }
+
+        List<SingleTreeNode> problemNodes = checkOMAStats();
+        assertEquals(0, problemNodes.size());
+    }
+
+    private List<SingleTreeNode> checkOMAStats() {
+        return mctsPlayer.getRoot(0).nonMatchingNodes(node -> {
+            OMATreeNode n = (OMATreeNode) node;
+            int player = n.getActor();
+            for (AbstractAction parentAction : n.getChildren().keySet()) {
+                if (n.getChildren().get(parentAction) != null) {
+                    for (AbstractAction childAction : n.getOMAChildrenActions(parentAction)) {
+                        // 'grandchildren' are then the nodes reached by childAction, which contain the stats that OMA should summarise
+                        List<SingleTreeNode> grandchildren = Arrays.stream(n.getChildren().get(parentAction))
+                                .filter(Objects::nonNull)
+                                .flatMap(child -> child.filterTree(
+                                                // we require this to have the correct childAction to reach, and its grandparent
+                                                // measured purely in terms of the acting player needs to be n
+                                                n2 -> n2.getActionToReach().equals(childAction) &&
+                                                        n2.matchingParent(y -> y.getActor() == player).matchingParent(z -> z.getActor() == player) == n)
+                                        .stream())
+                                .collect(toList());
+                        // We now need to get weighted value of grandchildren stats
+                        double totalValue = grandchildren.stream().mapToDouble(gc -> gc.getTotValue()[player]).sum();
+                        int totVisits = grandchildren.stream().mapToInt(SingleTreeNode::getVisits).sum();
+                        OMATreeNode.OMAStats stats = n.getOMAStats(parentAction, childAction);
+                        System.out.printf("%s GC: %.2f/%d, OMA: %.2f/%d%n", childAction, totalValue, totVisits,
+                                stats.OMATotValue, stats.OMAVisits);
+                        if (Math.abs(totVisits - stats.OMAVisits) > 0) return false;
+                        if (Math.abs(totalValue - stats.OMATotValue) > 0.01) return false;
                     }
-                    return true;
                 }
-        );
+            }
+            return true;
+        });
+    }
+
+    @Test
+    public void omaStatisticsCorrectOMALoveLetter() {
+        // Then, for each OMA Parent node, we look at all its grandchildren, and check that
+        // their statistics are correctly merged to give the node parent statistics
+        Game game = createLoveLetter(params);
+        LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
+
+        AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
+                .getAction(state, loveLetterForwardModel.computeAvailableActions(state));
+
+        List<SingleTreeNode> problemNodes = checkOMAStats();
         assertEquals(0, problemNodes.size());
     }
 
     @Test
-    public void omaStatisticsCorrectOMA_All() {
+    public void omaStatisticsCorrectOMA_AllTicTacToe() {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OMA_All;
-        omaStatisticsCorrectOMA();
+        omaStatisticsCorrectOMATicTacToe();
 
-        List<SingleTreeNode> playerTwoNodes = mctsPlayer.getRoot(0).checkTree(node -> {
+        List<SingleTreeNode> playerTwoNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> {
                     OMATreeNode n = (OMATreeNode) node;
                     return !(n.getOMAParent().isPresent() && n.getActor() == 1 && !n.getOMAParent().get().getOMAParentActions().isEmpty());
                 }
         );
         assertTrue(playerTwoNodes.size() > 5);
+    }
+
+
+    @Test
+    public void omaStatisticsCorrectOMA_AllLoveLetter() {
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OMA_All;
+        omaStatisticsCorrectOMALoveLetter();
+
+        List<SingleTreeNode> playerTwoNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> {
+                    OMATreeNode n = (OMATreeNode) node;
+                    return !(n.getOMAParent().isPresent() && (n.getActor() == 1  || n.getActor() == 2) && !n.getOMAParent().get().getOMAParentActions().isEmpty());
+                }
+        );
+        assertTrue(playerTwoNodes.size() > 100);
     }
 }

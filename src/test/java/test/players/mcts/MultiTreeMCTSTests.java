@@ -109,11 +109,11 @@ public class MultiTreeMCTSTests {
         assertEquals(200, root.getVisits());
 
         // the invariant then to check is that for each node in the tree, the number of visits is equal to the number of child visits + 1
-        List<SingleTreeNode> problemNodes = root.checkTree(childrenVisitsAddUp);
+        List<SingleTreeNode> problemNodes = root.nonMatchingNodes(childrenVisitsAddUp);
         assertEquals(0, problemNodes.size());
 
         // TicTacToe is easy as we strictly alternate turns
-        problemNodes = root.checkTree(node -> node.getChildren().isEmpty() || node.getActor() == node.getDepth() % 2);
+        problemNodes = root.nonMatchingNodes(node -> node.getChildren().isEmpty() || node.getActor() == node.getDepth() % 2);
         assertEquals(0, problemNodes.size());
     }
 
@@ -140,19 +140,19 @@ public class MultiTreeMCTSTests {
         assertEquals(200, mctsPlayer.getRoot(1).getVisits());
 
         // Now each tree should only have nodes for its player
-        List<SingleTreeNode> problemNodes = root.checkTree(node -> node.getActor() == 0);
+        List<SingleTreeNode> problemNodes = root.nonMatchingNodes(node -> node.getActor() == 0);
         assertEquals(0, problemNodes.size());
-        problemNodes = mctsPlayer.getRoot(1).checkTree(node -> node.getActor() == 1);
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node -> node.getActor() == 1);
         assertEquals(0, problemNodes.size());
 
         // And each node should lead to the same player's next decision
-        problemNodes = root.checkTree(node -> node.getChildren().values().stream().allMatch(arr -> {
+        problemNodes = root.nonMatchingNodes(node -> node.getChildren().values().stream().allMatch(arr -> {
                     if (arr == null) return true;
                     return arr[1] == null;
                 }
         ));
         assertEquals(0, problemNodes.size());
-        problemNodes = mctsPlayer.getRoot(1).checkTree(node -> node.getChildren().values().stream().allMatch(arr -> {
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node -> node.getChildren().values().stream().allMatch(arr -> {
                     if (arr == null) return true;
                     return arr[0] == null;
                 }
@@ -185,25 +185,25 @@ public class MultiTreeMCTSTests {
         assertEquals(16, mctsPlayer.getRoot(1).getChildren().size());
 
         // the invariant then to check is that for each node in the tree, the number of visits is equal to the number of child visits + 1
-        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(childrenVisitsAddUp);
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(childrenVisitsAddUp);
         assertEquals(0, problemNodes.size());
-        problemNodes = mctsPlayer.getRoot(1).checkTree(childrenVisitsAddUp);
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(childrenVisitsAddUp);
         assertEquals(0, problemNodes.size());
 
         // Now each tree should only have nodes for its player
-        problemNodes = mctsPlayer.getRoot(0).checkTree(node -> node.getActor() == 0);
+        problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node.getActor() == 0);
         assertEquals(0, problemNodes.size());
-        problemNodes = mctsPlayer.getRoot(1).checkTree(node -> node.getActor() == 1);
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node -> node.getActor() == 1);
         assertEquals(0, problemNodes.size());
 
         // And each node should lead to the same player's next decision
-        problemNodes = mctsPlayer.getRoot(0).checkTree(node -> node.getChildren().values().stream().allMatch(arr -> {
+        problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node.getChildren().values().stream().allMatch(arr -> {
                     if (arr == null) return true;
                     return arr[1] == null;
                 }
         ));
         assertEquals(0, problemNodes.size());
-        problemNodes = mctsPlayer.getRoot(1).checkTree(node -> node.getChildren().values().stream().allMatch(arr -> {
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node -> node.getChildren().values().stream().allMatch(arr -> {
                     if (arr == null) return true;
                     return arr[0] == null;
                 }
@@ -235,38 +235,38 @@ public class MultiTreeMCTSTests {
         // the invariant then to check is that for each node in the tree, the number of visits is equal to the number of child visits + 1
         // we allow some nodes to break this with 2000 iterations - due to simulation over conditions while still descending tree. The point is it should be small
         // or rollout finishing before we get back?
-        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(childrenVisitsAddUp);
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(childrenVisitsAddUp);
         System.out.println("Problem nodes for player 0 : " + problemNodes.size());
         assertEquals(0, problemNodes.size(), 20);
-        problemNodes = mctsPlayer.getRoot(1).checkTree(childrenVisitsAddUp);
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(childrenVisitsAddUp);
         System.out.println("Problem nodes for player 1 : " + problemNodes.size());
         assertEquals(0, problemNodes.size(), 40);
-        problemNodes = mctsPlayer.getRoot(2).checkTree(childrenVisitsAddUp);
+        problemNodes = mctsPlayer.getRoot(2).nonMatchingNodes(childrenVisitsAddUp);
         System.out.println("Problem nodes for player 2 : " + problemNodes.size());
         assertEquals(0, problemNodes.size(), 80);
 
         // Now each tree should only have nodes for its player
-        problemNodes = mctsPlayer.getRoot(0).checkTree(node -> node.getActor() == 0 || node.getVisits() == 1);
+        problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node.getActor() == 0 || node.getVisits() == 1);
         if (!problemNodes.isEmpty())
             System.out.println(problemNodes.get(0));
         assertEquals(0, problemNodes.size());
-        problemNodes = mctsPlayer.getRoot(1).checkTree(node -> node.getActor() == 1 || node.getVisits() == 1);
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node -> node.getActor() == 1 || node.getVisits() == 1);
         if (!problemNodes.isEmpty())
             System.out.println(problemNodes.get(0));
         assertEquals(0, problemNodes.size());
-        problemNodes = mctsPlayer.getRoot(2).checkTree(node -> node.getActor() == 2 || node.getVisits() == 1);
+        problemNodes = mctsPlayer.getRoot(2).nonMatchingNodes(node -> node.getActor() == 2 || node.getVisits() == 1);
         if (!problemNodes.isEmpty())
             System.out.println(problemNodes.get(0));
         assertEquals(0, problemNodes.size());
 
         // And each node should lead to the same player's next decision
-        problemNodes = mctsPlayer.getRoot(0).checkTree(node -> node.getChildren().values().stream().allMatch(arr -> {
+        problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node.getChildren().values().stream().allMatch(arr -> {
                     if (arr == null) return true;
                     return arr[1] == null && arr[2] == null;
                 }
         ));
         assertEquals(0, problemNodes.size());
-        problemNodes = mctsPlayer.getRoot(1).checkTree(node -> node.getChildren().values().stream().allMatch(arr -> {
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node -> node.getChildren().values().stream().allMatch(arr -> {
                     if (arr == null) return true;
                     return arr[0] == null && arr[2] == null;
                 }
@@ -292,15 +292,15 @@ public class MultiTreeMCTSTests {
 
 
         // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea
-        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node ->
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node ->
                 node.getVisits() <= 10 ||
                         node.getTotValue()[1] > node.getTotValue()[0] && node.getTotValue()[1] > node.getTotValue()[2]);
         assertEquals(0, problemNodes.size(), 0);
-        problemNodes = mctsPlayer.getRoot(1).checkTree(node ->
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node ->
                 node.getVisits() <= 10 ||
                         node.getTotValue()[1] > node.getTotValue()[0] && node.getTotValue()[1] > node.getTotValue()[2]);
         assertEquals(0, problemNodes.size(), 0);
-        problemNodes = mctsPlayer.getRoot(2).checkTree(node ->
+        problemNodes = mctsPlayer.getRoot(2).nonMatchingNodes(node ->
                 node.getVisits() <= 10 ||
                         node.getTotValue()[1] > node.getTotValue()[0] && node.getTotValue()[1] > node.getTotValue()[2]);
         assertEquals(0, problemNodes.size(), 0);
@@ -324,13 +324,13 @@ public class MultiTreeMCTSTests {
 
 
         // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea
-        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).checkTree(node ->
+        List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node ->
                         node.getTotValue()[0] == -node.getTotValue()[1] && node.getTotValue()[0] == -node.getTotValue()[2]);
         assertEquals(0, problemNodes.size(), 0);
-        problemNodes = mctsPlayer.getRoot(1).checkTree(node ->
+        problemNodes = mctsPlayer.getRoot(1).nonMatchingNodes(node ->
                 node.getTotValue()[0] == -node.getTotValue()[1] && node.getTotValue()[0] == -node.getTotValue()[2]);
         assertEquals(0, problemNodes.size(), 0);
-        problemNodes = mctsPlayer.getRoot(2).checkTree(node ->
+        problemNodes = mctsPlayer.getRoot(2).nonMatchingNodes(node ->
                 node.getTotValue()[0] == -node.getTotValue()[1] && node.getTotValue()[0] == -node.getTotValue()[2]);
         assertEquals(0, problemNodes.size(), 0);
 

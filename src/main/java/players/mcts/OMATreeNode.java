@@ -62,7 +62,7 @@ public class OMATreeNode extends SingleTreeNode {
             OMATreeNode iteratingNode = this;
             AbstractAction actionTakenFromChild = null;
             // we also need the action taken from the OMAParent to get here. To find this we need to back-track up
-            // the nodes and find the actionToReach on the immediate child of OMAPArent
+            // the nodes and find the actionToReach on the immediate child of OMAParent
 
             // the aim is to find the first node on the backwards trajectory that has an OMAParent
             while (iteratingNode != null) {
@@ -100,23 +100,20 @@ public class OMATreeNode extends SingleTreeNode {
     }
 
     @Override
-    protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
-        OMATreeNode retValue = (OMATreeNode) super.expandNode(actionCopy, nextState);
-        // Now we need to link this up to its OMAParent (if such exists)
-        // we follow the links up the tree to find the closest one at which we last acted
-
+    protected void instantiate(SingleTreeNode parent, AbstractAction actionToReach, AbstractGameState state) {
+        super.instantiate(parent, actionToReach, state);
         // We only track OMAParents for all players if using OMA_All; otherwise just for the root decision player
-        if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.OMA_All || root.decisionPlayer == retValue.decisionPlayer) {
-            SingleTreeNode oneUp = retValue.parent;
-            while (oneUp != null && !retValue.OMAParent.isPresent()) {
-                if (oneUp.decisionPlayer == retValue.decisionPlayer) {
+        if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.OMA_All || root.decisionPlayer == decisionPlayer) {
+            SingleTreeNode oneUp = this.parent;
+            while (oneUp != null) {
+                if (oneUp.decisionPlayer == decisionPlayer) {
                     // found it..we're done
-                    retValue.OMAParent = Optional.of((OMATreeNode) oneUp);
+                    this.OMAParent = Optional.of((OMATreeNode) oneUp);
+                    break;
                 }
                 oneUp = oneUp.parent;
             }
         }
-        return retValue;
     }
 
     public Optional<OMATreeNode> getOMAParent() {
