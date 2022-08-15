@@ -326,11 +326,10 @@ public class ParameterSearch {
                         .map(p -> String.format("\t%s:\t%s\n", searchSpace.name(p.a), valueToString(p.a, p.b.intValue(), searchSpace)))
                         .collect(joining(" ")));
 
-        if (verbose && statsLogger != null) {
+        if (verbose && statsLogger != null && logFile.isEmpty()) {
             System.out.println("Agent Statistics: ");
             System.out.println(statsLogger);
         }
-
 
         if (!logFile.isEmpty()) {
             try {
