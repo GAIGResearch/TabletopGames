@@ -23,7 +23,7 @@ public class MCTSEnums {
     }
 
     public enum RolloutTermination {
-        DEFAULT, END_TURN, START_TURN, END_ROUND
+        DEFAULT, END_TURN, START_TURN, END_ROUND;
     }
 
     public enum OpponentTreePolicy {
