@@ -57,8 +57,8 @@ public class SingleTreeNode {
     private double[] totValue;
     private double[] totSquares;
     // Number of visits to this node
-    private int nVisits;
-    private int rolloutActionsTaken;
+    protected int nVisits;
+    protected int rolloutActionsTaken;
     double highReward = Double.NEGATIVE_INFINITY;
     double lowReward = Double.POSITIVE_INFINITY;
     // Root node of tree
@@ -334,7 +334,7 @@ public class SingleTreeNode {
      * Uses plain java loop instead of streams for performance
      * (this is called often enough it can make a measurable difference)
      */
-    private int actionVisits(AbstractAction action) {
+    protected int actionVisits(AbstractAction action) {
         int retValue = 0;
         SingleTreeNode[] nodes = children.get(action);
         if (nodes != null) {
@@ -356,7 +356,7 @@ public class SingleTreeNode {
      * Uses plain java loop instead of streams for performance
      * (this is called often enough it can make a measurable difference)
      */
-    private double actionTotValue(AbstractAction action, int playerId) {
+    protected double actionTotValue(AbstractAction action, int playerId) {
         double retValue = 0.0;
         SingleTreeNode[] nodes = children.get(action);
         if (nodes != null) {

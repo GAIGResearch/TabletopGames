@@ -81,7 +81,7 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               in each game, while ensuring no duplicates, and that all players get the\n" +
                             "\t               the same number of games in total.\n" +
                             "\tmatchups=      The total number of matchups to run if mode=random...\n" +
-                            "\t               ...or the number of matchups to run per combination of players if mode=exhaustive\n"+
+                            "\t               ...or the number of matchups to run per combination of players if mode=exhaustive\n" +
                             "\tlistener=      (Optional) The full class name of an IGameListener implementation. \n" +
                             "\t               Defaults to utilities.GameResultListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
@@ -118,7 +118,7 @@ public class RoundRobinTournament extends AbstractTournament {
             agents.addAll(PlayerFactory.createPlayers(playerDirectory));
             if (!statsLogPrefix.equals("")) {
                 for (AbstractPlayer agent : agents) {
-                    IStatisticLogger logger = IStatisticLogger.createLogger("utilities.SummaryLogger", statsLogPrefix);
+                    IStatisticLogger logger = IStatisticLogger.createLogger("utilities.SummaryLogger", statsLogPrefix + "_" + agent.toString() + ".txt");
                     logger.record("Name", agent.toString());
                     agent.setStatsLogger(logger);
                 }
@@ -148,9 +148,9 @@ public class RoundRobinTournament extends AbstractTournament {
         }
         tournament.runTournament();
         if (!statsLogPrefix.equals("")) {
-                for (int i = 0; i < agents.size(); i++) {
+            for (int i = 0; i < agents.size(); i++) {
                 AbstractPlayer agent = agents.get(i);
-                agent.getStatsLogger().record("WinRate", tournament.pointsPerPlayer[i] / (double)(tournament.matchUpsRun * tournament.gamesPerMatchUp));
+                agent.getStatsLogger().record("WinRate", tournament.pointsPerPlayer[i] / (double) (tournament.matchUpsRun * tournament.gamesPerMatchUp));
                 System.out.println("Statistics for agent " + agent);
                 agent.getStatsLogger().processDataAndFinish();
             }

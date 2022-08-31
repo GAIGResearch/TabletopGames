@@ -232,7 +232,7 @@ public class ParameterSearch {
         Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
             landscapeModel.reset();
-            evaluator.statsLogger = IStatisticLogger.createLogger("utilities.SummaryLogger", "Agent_" + logfile);
+            evaluator.statsLogger = IStatisticLogger.createLogger("utilities.SummaryLogger", "Agent_" + String.format("%2d", repeats+1) + "_" + logfile);
             Pair<Double, Double> r = runNTBEA(evaluator, null, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
             printDetailsOfRun(retValue, searchSpace, logfile, verbose, evaluator.statsLogger);

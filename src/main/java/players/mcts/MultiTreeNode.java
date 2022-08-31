@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import utilities.Pair;
+import utilities.Utils;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -181,6 +182,7 @@ public class MultiTreeNode extends SingleTreeNode {
             if (singleTreeNode != null)
                 singleTreeNode.backUp(finalValues);
         }
+        rolloutActionsTaken += actionsInRollout.size();
         root.updateMASTStatistics(actionsInTree, actionsInRollout, finalValues);
     }
 
@@ -223,6 +225,7 @@ public class MultiTreeNode extends SingleTreeNode {
         stats.put("turn", state.getTurnOrder().getTurnCounter());
         stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
         stats.put("iterations", numIters);
+        stats.put("rolloutActions", rolloutActionsTaken / numIters);
         stats.put("time", timeTaken);
         int validRoots = (int) Arrays.stream(roots).filter(Objects::nonNull).count();
         for (SingleTreeNode node : roots) {
@@ -250,6 +253,12 @@ public class MultiTreeNode extends SingleTreeNode {
             stats.merge("maxVisitProportion" + suffix, (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters * multiplier, addFn);
             double[] visitProportions = Arrays.stream(node.actionVisits()).asDoubleStream().map(d -> d / node.getVisits()).toArray();
             stats.merge("visitEntropy" + suffix, entropyOf(visitProportions) * multiplier, addFn);
+            AbstractAction bestAction = node.bestAction();
+            stats.put("bestAction" + suffix, bestAction);
+            stats.put("bestValue" + suffix, node.actionTotValue(bestAction, node.decisionPlayer) / node.actionVisits(bestAction));
+            stats.put("normalisedBestValue" + suffix, Utils.normalise(node.actionTotValue(bestAction, node.decisionPlayer) / node.actionVisits(bestAction), node.lowReward, node.highReward));
+            stats.put("lowReward" + suffix, node.lowReward);
+            stats.put("highReward" + suffix, node.highReward);
         }
         statsLogger.record(stats);
     }
