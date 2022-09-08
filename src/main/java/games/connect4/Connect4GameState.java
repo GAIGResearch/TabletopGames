@@ -9,8 +9,10 @@ import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
+import utilities.Pair;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,9 +20,11 @@ import java.util.Objects;
 public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
 
     GridBoard<Token> gridBoard;
+    LinkedList<Pair<Integer, Integer>> winnerCells;
 
     public Connect4GameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Connect4);
+        winnerCells = new LinkedList<>();
     }
 
     @Override
@@ -34,6 +38,11 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     protected AbstractGameState _copy(int playerId) {
         Connect4GameState s = new Connect4GameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
+
+        s.winnerCells.clear();
+        for (Pair<Integer, Integer> wC : this.winnerCells)
+            s.winnerCells.add(wC.copy());
+
         return s;
     }
 
@@ -82,5 +91,13 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     @Override
     public void printToConsole() {
         System.out.println(gridBoard.toString());
+    }
+
+    public void registerWinningCells(LinkedList<Pair<Integer, Integer>> winnerCells) {
+        this.winnerCells = winnerCells;
+    }
+
+    public LinkedList<Pair<Integer, Integer>> getWinningCells() {
+        return winnerCells;
     }
 }

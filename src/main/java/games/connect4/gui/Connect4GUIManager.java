@@ -63,9 +63,10 @@ public class Connect4GUIManager extends AbstractGUIManager {
                 Rectangle r = highlight.get(0);
                 for (AbstractAction abstractAction : actions) {
                     SetGridValueAction<Token> action = (SetGridValueAction<Token>) abstractAction;
-                    if (action.getX() == r.x/defaultItemSize && action.getY() == r.y/defaultItemSize) {
+                    if (action.getX() == r.x/defaultItemSize) { // && action.getY() == r.y/defaultItemSize) {
                         actionButtons[0].setVisible(true);
-                        actionButtons[0].setButtonAction(action, "Play " + Connect4Constants.playerMapping.get(player.getPlayerID()));
+                        actionButtons[0].setButtonAction(action, "Play " + Connect4Constants.playerMapping.get(player.getPlayerID())
+                          + " in column " + (action.getX() + 1));
                         break;
                     }
                 }
@@ -80,6 +81,7 @@ public class Connect4GUIManager extends AbstractGUIManager {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             view.updateComponent(((Connect4GameState)gameState).getGridBoard());
+            view.setWinningCells(((Connect4GameState)gameState).getWinningCells());
         }
     }
 }

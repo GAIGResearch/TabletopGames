@@ -1,12 +1,16 @@
 package games.connect4.gui;
 import core.components.GridBoard;
 import core.components.Token;
+import games.connect4.Connect4Constants;
+import games.connect4.Connect4GameState;
 import gui.views.ComponentView;
+import utilities.Pair;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import static gui.GUI.defaultItemSize;
 
@@ -14,11 +18,13 @@ public class Connect4BoardView extends ComponentView {
 
     Rectangle[] rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;
+    LinkedList<Pair<Integer, Integer>> winningCells;
 
     public Connect4BoardView(GridBoard<Token> gridBoard) {
         super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
-        rects = new Rectangle[gridBoard.getWidth() * gridBoard.getHeight()];
+        rects = new Rectangle[gridBoard.getWidth()];
         highlight = new ArrayList<>();
+        winningCells = new LinkedList<Pair<Integer, Integer>>();
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -53,50 +59,87 @@ public class Connect4BoardView extends ComponentView {
             g.drawRect(r.x, r.y, r.width, r.height);
             ((Graphics2D) g).setStroke(s);
         }
+
+        if(winningCells.size() > 0)
+            drawWinningCells((Graphics2D) g);
     }
 
     public void drawGridBoard(Graphics2D g, GridBoard<Token> gridBoard, int x, int y) {
         int width = gridBoard.getWidth() * defaultItemSize;
-        int height = gridBoard.getHeight() * defaultItemSize;
+        int height = (gridBoard.getHeight()+1) * defaultItemSize;
 
-        // Draw background
+        //Draw cells background
         g.setColor(Color.lightGray);
         g.fillRect(x, y, width-1, height-1);
         g.setColor(Color.black);
 
-        // Draw cells
+        // Draw column indicators
+        for (int j = 0; j < gridBoard.getWidth(); j++) {
+            int xC = x + j * defaultItemSize;
+            int yC = y;
+            drawCell(g, null, xC, yC);
+
+            // Save rect where cell is drawn
+            if (rects[j] == null) {
+                rects[j] = new Rectangle(xC, yC, defaultItemSize, defaultItemSize);
+            }
+        }
+
+
+        // Draw main cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
                 int xC = x + j * defaultItemSize;
-                int yC = y + i * defaultItemSize;
+                int yC = y + (i+1) * defaultItemSize;
                 drawCell(g, gridBoard.getElement(j, i), xC, yC);
 
-                // Save rect where cell is drawn
-                int idx = i * gridBoard.getWidth() + j;
-                if (rects[idx] == null) {
-                    rects[idx] = new Rectangle(xC, yC, defaultItemSize, defaultItemSize);
-                }
             }
         }
     }
 
     private void drawCell(Graphics2D g, Token element, int x, int y) {
-        // Paint cell background
-        g.setColor(Color.lightGray);
-        g.fillRect(x, y, defaultItemSize, defaultItemSize);
-        g.setColor(Color.black);
-        g.drawRect(x, y, defaultItemSize, defaultItemSize);
+
 
         // Paint element in cell
         if (element != null) {
+
+            // Paint cell background
+            g.setColor(Color.lightGray);
+            g.fillRect(x, y, defaultItemSize, defaultItemSize);
+            g.setColor(Color.black);
+            g.drawRect(x, y, defaultItemSize, defaultItemSize);
+
             Font f = g.getFont();
             g.setFont(new Font(f.getName(), Font.BOLD, defaultItemSize * 3 / 2));
-            g.drawString(element.toString(), x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
+            if(!element.toString().equals(Connect4Constants.emptyCell))
+                g.drawString(element.toString(), x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
             g.setFont(f);
+        }else
+        {
+            // Paint cell background
+            g.setColor(Color.pink);
+            g.fillRect(x, y, defaultItemSize, defaultItemSize);
+            g.setColor(Color.black);
+            g.drawRect(x, y, defaultItemSize, defaultItemSize);
+
+            // Paint column indicator
+            g.drawString("[Col: " + ((x/defaultItemSize)+1) + "]", x + defaultItemSize / 16, y + defaultItemSize - defaultItemSize / 16);
         }
+
     }
 
     public ArrayList<Rectangle> getHighlight() {
         return highlight;
+    }
+
+    public void drawWinningCells(Graphics2D g) {
+        g.setColor(Color.cyan);
+        for (Pair<Integer, Integer> wC : winningCells)
+            g.drawRect(wC.a * defaultItemSize, (wC.b+1) * defaultItemSize, defaultItemSize, defaultItemSize);
+        g.setColor(Color.black);
+    }
+
+    public void setWinningCells(LinkedList<Pair<Integer, Integer>> winningCells) {
+        this.winningCells = winningCells;
     }
 }

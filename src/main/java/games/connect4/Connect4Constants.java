@@ -8,4 +8,5 @@ public class Connect4Constants {
         add(new Token("o"));
     }};
     public static final String emptyCell = ".";
+    public static final int winCount = 4;
 }
