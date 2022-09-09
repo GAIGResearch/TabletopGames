@@ -77,6 +77,7 @@ public class Connect4ForwardModel extends AbstractForwardModel {
      */
     private boolean checkGameEnd(Connect4GameState gameState) {
         GridBoard<Token> gridBoard = gameState.getGridBoard();
+        Connect4GameParameters c4gp = (Connect4GameParameters) gameState.getGameParameters();
         boolean gap = false;
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();;
 
@@ -101,7 +102,7 @@ public class Connect4ForwardModel extends AbstractForwardModel {
                     {
                         count++;
                         winning.add(new Pair<>(x, y));
-                        if (count == Connect4Constants.winCount) {
+                        if (count == c4gp.winCount) {
                             registerWinner(gameState, c, winning);
                             return true;
                         }
@@ -131,7 +132,7 @@ public class Connect4ForwardModel extends AbstractForwardModel {
                     {
                         count++;
                         winning.add(new Pair<>(x, y));
-                        if (count == Connect4Constants.winCount) {
+                        if (count == c4gp.winCount) {
                             registerWinner(gameState, c, winning);
                             return true;
                         }
@@ -175,6 +176,7 @@ public class Connect4ForwardModel extends AbstractForwardModel {
     private boolean checkMainDiagonals(Connect4GameState gameState, int xStart, int yStart)
     {
         GridBoard<Token> gridBoard = gameState.getGridBoard();
+        Connect4GameParameters c4gp = (Connect4GameParameters) gameState.getGameParameters();
         int count = 0;
         String lastToken = null;
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();
@@ -194,7 +196,7 @@ public class Connect4ForwardModel extends AbstractForwardModel {
             } else {
                 count++;
                 winning.add(new Pair<>(x, y));
-                if (count == Connect4Constants.winCount) {
+                if (count == c4gp.winCount) {
                     registerWinner(gameState, c, winning);
                     return true;
                 }
@@ -207,6 +209,7 @@ public class Connect4ForwardModel extends AbstractForwardModel {
     private boolean checkInvDiagonals(Connect4GameState gameState, int xStart, int yStart)
     {
         GridBoard<Token> gridBoard = gameState.getGridBoard();
+        Connect4GameParameters c4gp = (Connect4GameParameters) gameState.getGameParameters();
         int count = 0;
         String lastToken = null;
         LinkedList<Pair<Integer, Integer>> winning = new LinkedList<>();
@@ -226,7 +229,7 @@ public class Connect4ForwardModel extends AbstractForwardModel {
             } else {
                 count++;
                 winning.add(new Pair<>(x, y));
-                if (count == Connect4Constants.winCount) {
+                if (count == c4gp.winCount) {
                     registerWinner(gameState, c, winning);
                     return true;
                 }

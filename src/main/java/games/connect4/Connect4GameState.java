@@ -93,7 +93,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
         System.out.println(gridBoard.toString());
     }
 
-    public void registerWinningCells(LinkedList<Pair<Integer, Integer>> winnerCells) {
+    void registerWinningCells(LinkedList<Pair<Integer, Integer>> winnerCells) {
         this.winnerCells = winnerCells;
     }
 

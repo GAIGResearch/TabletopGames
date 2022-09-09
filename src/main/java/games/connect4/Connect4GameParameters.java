@@ -9,6 +9,7 @@ public class Connect4GameParameters extends TunableParameters {
 
 
     public int gridSize = 8;
+    public int winCount = 4;
 
     public Connect4GameParameters() {
         this(System.currentTimeMillis());
@@ -17,17 +18,20 @@ public class Connect4GameParameters extends TunableParameters {
     public Connect4GameParameters(long seed) {
         super(seed);
         addTunableParameter("gridSize", 8, Arrays.asList(6, 8, 10, 12));
+        addTunableParameter("winCount", 4, Arrays.asList(3, 4, 5, 6));
     }
 
     @Override
     public void _reset() {
         gridSize = (int) getParameterValue("gridSize");
+        winCount = (int) getParameterValue("winCount");
     }
 
     @Override
     protected AbstractParameters _copy() {
         Connect4GameParameters gp = new Connect4GameParameters(System.currentTimeMillis());
         gp.gridSize = gridSize;
+        gp.winCount = winCount;
         return gp;
     }
 
@@ -37,12 +41,12 @@ public class Connect4GameParameters extends TunableParameters {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Connect4GameParameters that = (Connect4GameParameters) o;
-        return gridSize == that.gridSize;
+        return gridSize == that.gridSize && winCount == that.winCount;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), gridSize);
+        return Objects.hash(super.hashCode(), gridSize, winCount);
     }
 
     @Override
