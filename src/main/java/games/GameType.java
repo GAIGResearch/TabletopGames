@@ -14,6 +14,9 @@ import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.gui.ColtExpressGUIManager;
+import games.connect4.Connect4ForwardModel;
+import games.connect4.Connect4GameState;
+import games.connect4.gui.Connect4GUIManager;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.dominion.gui.DominionGUIManager;
@@ -87,6 +90,14 @@ public enum GameType {
                 add(VariablePlayerPowers);
             }}),
     TicTacToe(2, 2,
+            new ArrayList<Category>() {{
+                add(Simple);
+                add(Abstract);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(PatternBuilding);
+            }}),
+    Connect4(2, 2,
             new ArrayList<Category>() {{
                 add(Simple);
                 add(Abstract);
@@ -301,6 +312,8 @@ public enum GameType {
                 return Pandemic;
             case "tictactoe":
                 return TicTacToe;
+            case "connect4":
+                return Connect4;
             case "explodingkittens":
                 return ExplodingKittens;
             case "loveletter":
@@ -372,6 +385,10 @@ public enum GameType {
             case TicTacToe:
                 forwardModel = new TicTacToeForwardModel();
                 gameState = new TicTacToeGameState(params, nPlayers);
+                break;
+            case Connect4:
+                forwardModel = new Connect4ForwardModel();
+                gameState = new Connect4GameState(params, nPlayers);
                 break;
             case ExplodingKittens:
                 forwardModel = new ExplodingKittensForwardModel();
@@ -488,6 +505,9 @@ public enum GameType {
                 break;
             case TicTacToe:
                 gui = new TicTacToeGUIManager(parent, game, ac);
+                break;
+            case Connect4:
+                gui = new Connect4GUIManager(parent, game, ac);
                 break;
             case DotsAndBoxes:
                 if (game != null) {
