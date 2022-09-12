@@ -13,13 +13,15 @@ import games.terraformingmars.components.Award;
 import games.terraformingmars.components.Milestone;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
+import games.terraformingmars.rules.Discount;
 import games.terraformingmars.rules.effects.Effect;
+import games.terraformingmars.rules.requirements.Requirement;
 import games.terraformingmars.rules.requirements.TagOnCardRequirement;
+import utilities.SimpleSerializer;
 import utilities.Utils;
 import utilities.Vector2D;
 
 import java.io.FileWriter;
-import java.lang.reflect.Type;
 import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.*;
@@ -102,13 +104,24 @@ public class TMForwardModel extends AbstractForwardModel {
 
 //        TMCard cccc = null;
 //        try {
-//            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//            GsonBuilder gsonBuilder = new GsonBuilder()
+//                    .registerTypeAdapter(Requirement.class, new SimpleSerializer<Requirement>())
+//                    .registerTypeAdapter(Effect.class, new SimpleSerializer<Effect>())
+//                    .registerTypeAdapter(Discount.class, new Discount())
+//                    .registerTypeAdapter(TMAction.class, new SimpleSerializer<TMAction>())
+//                    ;
 //
-//            FileWriter fw = new FileWriter("data/terraformingmars/projectCards/jsonCards.json");
+////            GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Requirement.class, new RequirementJSONSerializer());
+//            Gson gson = gsonBuilder.setPrettyPrinting().create();
+//
+//            FileWriter fw = new FileWriter("data/terraformingmars/projectCards/jsonCardsT.json");
 //            fw.write("[");
 //            for (TMCard c: gs.projectCards.getComponents()) {
 //                cccc = c;
-//                fw.write(gson.toJson(c.copySerializable()) + ",");
+//                TMCard cCopy = c.copySerializable();
+//                String jsonString = gson.toJson(cCopy);
+//                fw.write(jsonString + ",");
+//                System.out.println(jsonString);
 //                fw.flush();
 //            }
 //            fw.write("]");

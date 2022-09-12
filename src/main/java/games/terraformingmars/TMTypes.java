@@ -285,7 +285,8 @@ public class TMTypes {
             return "data/terraformingmars/corporationCards/" + this.name().toLowerCase() + ".json";
         }
         public String getProjectCardsPath() {
-            return "data/terraformingmars/projectCards/" + this.name().toLowerCase() + ".json";
+            return "data/terraformingmars/projectCards/jsonCardsT.json";
+//            return "data/terraformingmars/projectCards/" + this.name().toLowerCase() + ".json";
         }
         public String getOtherCardsPath() {
             return "data/terraformingmars/otherCards/" + this.name().toLowerCase() + ".json";
@@ -386,7 +387,8 @@ public class TMTypes {
                     if (deck.getComponentName().equalsIgnoreCase("corporations")) {
                         card = TMCard.loadCorporation((JSONObject)o);
                     } else {
-                        card = TMCard.loadCardHTML((JSONObject) o);
+//                        card = TMCard.loadCardHTML((JSONObject) o);
+                        card = TMCard.loadCardJSON((JSONObject) o);
                     }
                     deck.add(card);
                 }
