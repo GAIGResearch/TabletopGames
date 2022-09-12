@@ -99,7 +99,7 @@ public class TMForwardModel extends AbstractForwardModel {
             }
             e.loadBoard(gs.board, gs.extraTiles, gs.bonuses, gs.milestones, gs.awards, gs.globalParameters);
         }
-
+//
 //        TMCard cccc = null;
 //        try {
 //            Gson gson = new GsonBuilder().setPrettyPrinting().create();

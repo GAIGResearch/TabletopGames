@@ -495,7 +495,7 @@ public class Game {
         return this.getPlayers().get(activePlayer) instanceof HumanGUIPlayer;
     }
 
-    public final void oneAction() {
+    public final AbstractAction oneAction() {
 
         // we pause before each action is taken if running with a delay (e.g. for video recording with random players)
         if (turnPause > 0)
@@ -590,6 +590,7 @@ public class Game {
         AbstractAction finalAction1 = action;
         listeners.forEach(l -> l.onEvent(GameEvents.ACTION_TAKEN, gameState.copy(), finalAction1.copy()));
         if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
+        return action;
     }
 
     /**
