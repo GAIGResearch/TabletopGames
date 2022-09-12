@@ -4,7 +4,9 @@ import evaluation.TunableParameters;
 import games.GameType;
 import games.battlelore.BattleloreGameParameters;
 import games.blackjack.BlackjackParameters;
+import games.catan.CatanParameters;
 import games.coltexpress.ColtExpressParameters;
+import games.connect4.Connect4GameParameters;
 import games.diamant.DiamantParameters;
 import games.dicemonastery.DiceMonasteryParams;
 import games.dominion.DominionParameters;
@@ -28,6 +30,8 @@ public class ParameterFactory {
                 return new PandemicParameters("data/pandemic/", seed);
             case TicTacToe:
                 return new TicTacToeGameParameters(seed);
+            case Connect4:
+                return new Connect4GameParameters(seed);
             case ExplodingKittens:
                 return new ExplodingKittensParameters(seed);
             case LoveLetter:
@@ -58,6 +62,8 @@ public class ParameterFactory {
                 return new DiceMonasteryParams(seed);
             case SushiGo:
                 return new SGParameters(seed);
+            case Catan:
+                return new CatanParameters(seed);
             case Stratego:
                 return new StrategoParams(seed);
             case TerraformingMars:

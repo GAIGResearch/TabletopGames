@@ -98,4 +98,14 @@ public class DBGameState extends AbstractGameState {
         result = 31 * result + Arrays.hashCode(nCellsPerPlayer);
         return result;
     }
+
+    public int countCompleteEdges(DBCell c) {
+        int retValue = 0;
+        for (DBEdge e: cellToEdgesMap.get(c)) {
+            if (edgeToOwnerMap.containsKey(e)) {
+                retValue++;
+            }
+        }
+        return retValue;
+    }
 }

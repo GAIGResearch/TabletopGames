@@ -42,7 +42,7 @@ public class PandemicGame extends Game {
         int offset = 0;
         for (int i = 0; i < nRepetitions; i++) {
             Long s = seed;
-            if (s == null) s = System.currentTimeMillis();
+            if (s == -1) s = System.currentTimeMillis();
             s += offset;
             game = runOne(GameType.Pandemic, parameterConfigFile, players, s, randomizeParameters, listeners, ac, 0);
             if (game != null) {
@@ -66,10 +66,9 @@ public class PandemicGame extends Game {
         return game;
     }
 
-    public static void runWithStats(String config, int nPlayers) {
+    public static void runWithStats(String config, int nPlayers, int nRepetition) {
         String logFile = "results.csv";
         ActionController ac =  null; // new ActionController();
-        int nRepetition = 10;
 
         // logging setup
         FileStatsLogger logger = new FileStatsLogger(logFile);
@@ -85,7 +84,7 @@ public class PandemicGame extends Game {
         }
 
         PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
-        runCompetition(config, players, params.getRandomSeed(), false, listeners, nRepetition, ac);
+        runCompetition(config, players, -1, false, listeners, nRepetition, ac);
         logger.processDataAndFinish();
     }
 
@@ -188,9 +187,9 @@ public class PandemicGame extends Game {
          * Settings: configuration file, ac (visuals on if initialised, off if null), number of players,
          * number of repetitions per player, list of players to test.
          */
-        String config = "data/pandemic/train/param-config-v1.json";
+        String config = "data/pandemic/train/param-config-v2.json";
 //        String config = "data/pandemic/param-config-easy.json";
-        int nPlayers = 2;
+        int nPlayers = 4;
         PlayerType[] playersToTest = new PlayerType[] {
                 PlayerType.Random, PlayerType.MCTS, PlayerType.OSLA
         };
@@ -198,6 +197,6 @@ public class PandemicGame extends Game {
 
         // Run
         runCompetition(config, nPlayers, playersToTest, nRepetitions);
-//        runWithStats(config, nPlayers);
+//        runWithStats(config, nPlayers, nRepetitions);
     }
 }

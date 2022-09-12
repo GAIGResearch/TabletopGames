@@ -16,7 +16,6 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.GameResult.GAME_ONGOING;
-import static utilities.Utils.GameResult.WIN;
 
 
 /**
@@ -402,7 +401,7 @@ public abstract class AbstractGameState {
      * Retrieves a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
      * This should generally be in the range [-1, +1], with +1 being a certain win, and -1 being a certain loss
-     * The default implementation calls the same-specific heuristic
+     * The default implementation calls the game-specific heuristic
      * @param playerId - player observing the state.
      * @return - double, score of current state.
      */

@@ -78,14 +78,14 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
             }
 
             // Check if this was an event action or a reaction. These actions are always played with the event card.
-            Card eventCard = action.getCard(gs);
-            if (eventCard == null && !(action instanceof RearrangeDeckOfCards) ||  // No card played, and not Forecast - step 2 action played
-                    eventCard != null && eventCard.getProperty(countryHash) != null  // Card played, but not event
-                    || pto.reactionsFinished()) {  // Reactions have finished
-                // Notify turn step only if an event card was not played, or if this was a reaction.
-                // Event cards are free.
-                pto.endPlayerTurnStep();
-            }
+//            Card eventCard = action.getCard(gs);
+//            if (eventCard == null && !(action instanceof RearrangeDeckOfCards) ||  // No card played, and not Forecast - step 2 action played
+//                    eventCard != null && eventCard.getProperty(countryHash) != null  // Card played, but not event
+//                    || pto.reactionsFinished()) {  // Reactions have finished
+//                // Notify turn step only if an event card was not played, or if this was a reaction.
+//                // Event cards are free.
+//            }
+            pto.endPlayerTurnStep();
             return true;
         }
         return false;

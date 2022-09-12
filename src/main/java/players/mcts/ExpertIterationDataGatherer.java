@@ -2,53 +2,69 @@ package players.mcts;
 
 import core.AbstractForwardModel;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
+import core.interfaces.IActionFeatureVector;
+import core.interfaces.IStateFeatureVector;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
 public class ExpertIterationDataGatherer {
 
-    File logFileV, logFileQ;
-    List<IGameAttribute> features;
-    FileWriter writerV, writerQ;
     public int visitThreshold = 50;
+    File logFileV, logFileQ;
+    //   List<IGameAttribute> features;
+    IStateFeatureVector stateFeatures;
+    IActionFeatureVector actionFeatures;
+    FileWriter writerV, writerQ;
 
-    public ExpertIterationDataGatherer(String fileStem, List<IGameAttribute> features) {
+    /**
+     * Two sets of features are provided.
+     *
+     * @param fileStem
+     * @param stateFeatures  - the features that will be record to value a state (V)
+     * @param actionFeatures - the additional features used for Q
+     */
+    public ExpertIterationDataGatherer(String fileStem, IStateFeatureVector stateFeatures, IActionFeatureVector actionFeatures) {
+        if (stateFeatures == null)
+            throw new IllegalArgumentException("stateFeatures must be specified - actionFeatures are optional");
         this.logFileV = new File(fileStem + "_V.txt");
-        this.logFileQ = new File(fileStem + "_Q.txt");
-        this.features = features;
+        if (actionFeatures != null)
+            this.logFileQ = new File(fileStem + "_Q.txt");
+        this.stateFeatures = stateFeatures;
+        this.actionFeatures = actionFeatures;
         try {
             // if file does not already exist, add a header row
             if (!logFileV.exists()) {
                 writerV = new FileWriter(logFileV, false);
                 StringBuilder header = new StringBuilder();
                 header.append("Value\tDepth\tVisits");
-                for (IGameAttribute feature : features) {
-                    header.append("\t").append(feature.name());
-                }
+                for (String feature : stateFeatures.names())
+                    header.append("\t").append(feature);
                 header.append(System.lineSeparator());
                 writerV.write(header.toString());
             } else {
                 writerV = new FileWriter(logFileV, true);
             }
 
-            if (!logFileQ.exists()) {
-                writerQ = new FileWriter(logFileQ, false);
-                StringBuilder header = new StringBuilder();
-                header.append("Action\tActionHash\tValue\tAdvantage\tVisits\tN");
-                for (IGameAttribute feature : features) {
-                    header.append("\t").append(feature.name());
+            if (actionFeatures != null)
+                if (!logFileQ.exists()) {
+                    writerQ = new FileWriter(logFileQ, false);
+                    StringBuilder header = new StringBuilder();
+                    header.append("Action\tActionHash\tValue\tAdvantage\tVisits\tN");
+                    for (String feature : stateFeatures.names())
+                        header.append("\t").append(feature);
+                    for (String feature : actionFeatures.names())
+                        header.append("\t").append(feature);
+                    header.append(System.lineSeparator());
+                    writerQ.write(header.toString());
+                } else {
+                    writerQ = new FileWriter(logFileQ, true);
                 }
-                header.append(System.lineSeparator());
-                writerQ.write(header.toString());
-            } else {
-                writerQ = new FileWriter(logFileQ, true);
-            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -64,36 +80,38 @@ public class ExpertIterationDataGatherer {
         try {
             while (!nodeQueue.isEmpty()) {
                 SingleTreeNode node = nodeQueue.poll();
-                // process this nodes
+                // process this node
                 // we record its depth, value, visits, and the full feature list
                 StringBuilder output = new StringBuilder();
                 StringBuilder coreData = new StringBuilder();
                 int player = node.getActor();
                 double stateValue = node.getTotValue()[player] / node.getVisits();
-                List<AbstractAction> actionsFromState = forwardModel.computeAvailableActions(node.getState());
+                List<AbstractAction> actionsFromState = forwardModel.computeAvailableActions(node.state);
                 output.append(String.format("%.3g\t%d\t%d", stateValue, node.depth, node.getVisits()));
-//                if (actionsFromState.stream().anyMatch(a -> a instanceof KillMonk)) {
-//                    if ((boolean) DiceMonasteryStateAttributes.AUTUMN.get(node.getState(), player))
-//                        throw new AssertionError("???");
-//                }
-                for (IGameAttribute feature : features) {
-                    coreData.append("\t").append(feature.get(node.getState(), player));
-                }
+                double[] stateVector = stateFeatures.featureVector(node.state, player);
+                String stateVectorAsString = Arrays.stream(stateVector).mapToObj(d -> String.format("%.4g", d)).collect(Collectors.joining("\t"));
+                coreData.append("\t").append(stateVectorAsString);
+
                 output.append(coreData).append(System.lineSeparator());
                 writerV.write(output.toString());
 
                 // then write action data : the core feature data is the same, but we write one row per action, and the value we reach for that action
-                for (AbstractAction action : actionsFromState) {
-                    output = new StringBuilder();
-                    if (node.children.get(action) == null || node.children.get(action)[player] == null)
-                        continue;
-                    SingleTreeNode childNode = node.children.get(action)[player];
-                    double actionValue = childNode.getTotValue()[player] / childNode.getVisits();
-                    output.append(String.format("%s\t%d\t%.3g\t%.3g\t%d\t%d", action.toString(), action.hashCode(),
-                            actionValue, actionValue - stateValue, childNode.getVisits(), node.getVisits()));
-                    output.append(coreData).append(System.lineSeparator());
-                    writerQ.write(output.toString());
-                }
+                // plus any additional features that are action-specific
+                if (actionFeatures != null)
+                    for (AbstractAction action : actionsFromState) {
+                        output = new StringBuilder();
+                        if (node.children.get(action) == null || node.children.get(action)[player] == null)
+                            continue;
+                        SingleTreeNode childNode = node.children.get(action)[player];
+                        double actionValue = childNode.getTotValue()[player] / childNode.getVisits();
+                        output.append(String.format("%s\t%d\t%.3g\t%.3g\t%d\t%d", action.toString(), action.hashCode(),
+                                actionValue, actionValue - stateValue, childNode.getVisits(), node.getVisits()));
+                        output.append("\t").append(coreData); // the state features
+                        double[] actionVector = actionFeatures.featureVector(action, node.state, player);
+                        String actionVectorAsString = Arrays.stream(actionVector).mapToObj(d -> String.format("%.4g", d)).collect(Collectors.joining("\t"));
+                        coreData.append("\t").append(actionVectorAsString).append(System.lineSeparator());
+                        writerQ.write(output.toString());
+                    }
 
 
                 // add children of current node to queue

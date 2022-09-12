@@ -88,11 +88,11 @@ public class Pilgrimage extends Component {
         state.addVP(vpPerStep[progress], player);
         if (progress == vpPerStep.length - 1) {
             DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) state.getTurnOrder();
-            dmto.logEvent(String.format("Monk reaches %s and gains %s", destination, finalReward), state);
+            dmto.logEvent(() -> String.format("Monk reaches %s and gains %s", destination, finalReward), state);
 
             state.addResource(player, finalReward, 1);
 
-            dmto.logEvent(String.format("Monk returns from %s and is promoted", destination), state);
+            dmto.logEvent(() -> String.format("Monk returns from %s and is promoted", destination), state);
             Monk pilgrim = state.getMonkById(pilgrimId);
             state.moveMonk(pilgrimId, PILGRIMAGE, DORMITORY);
             pilgrim.promote(state);

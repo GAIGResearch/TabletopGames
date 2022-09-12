@@ -108,8 +108,8 @@ public class GameEvaluator implements SolutionEvaluator {
      */
     @Override
     public double evaluate(int[] settings) {
-/*        System.out.println(String.format("Starting evaluation %d of %s at %tT", nEvals,
-                Arrays.toString(settings), System.currentTimeMillis()));*/
+    //    System.out.printf("Starting evaluation %d of %s at %tT%n", nEvals,
+     //           Arrays.toString(settings), System.currentTimeMillis());
         Object configuredThing = searchSpace.getAgent(settings);
         boolean tuningPlayer = configuredThing instanceof AbstractPlayer;
         boolean tuningGame = configuredThing instanceof Game;

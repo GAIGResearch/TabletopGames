@@ -172,7 +172,7 @@ public class SingleTreeNode {
             } else {
                 if (params.advantageFunction != null)
                     advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
-                            .collect(toMap(a -> a, a -> params.advantageFunction.applyAsDouble(a, actionState)));
+                            .collect(toMap(a -> a, a -> params.advantageFunction.evaluateAction(a, actionState)));
             }
             for (AbstractAction action : actionsFromOpenLoopState) {
                 if (!children.containsKey(action)) {

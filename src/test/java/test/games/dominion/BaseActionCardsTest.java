@@ -422,6 +422,40 @@ public class BaseActionCardsTest {
     }
 
     @Test
+    public void remodelPossibleWithNoBuyableCards() {
+        DominionGameState state = (DominionGameState) game.getGameState();
+        state.addCard(CardType.REMODEL, 0, DeckType.HAND);
+        state.addCard(CardType.ESTATE, 0, DeckType.HAND);
+        // now remove all cost 2 cards
+        while (state.cardsToBuy().contains(CardType.ESTATE))
+            state.removeCardFromTable(CardType.ESTATE);
+        while (state.cardsToBuy().contains(CardType.COPPER))
+            state.removeCardFromTable(CardType.COPPER);
+        while (state.cardsToBuy().contains(CardType.MOAT))
+            state.removeCardFromTable(CardType.MOAT);
+        while (state.cardsToBuy().contains(CardType.CELLAR))
+            state.removeCardFromTable(CardType.CELLAR);
+        Remodel remodel = new Remodel(0);
+        fm.next(state, remodel);
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
+        assertTrue(actions.stream().allMatch(a -> a instanceof TrashCard));
+        assertEquals(2, actions.size()); // COPPER, ESTATE
+
+        fm.next(state, new TrashCard(CardType.COPPER, 0));
+        actions = fm.computeAvailableActions(state);
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(1, actions.size());
+        assertEquals(new DoNothing(), actions.get(0));
+        assertTrue(state.isActionInProgress());
+        fm.next(state, new DoNothing());
+        assertFalse(state.isActionInProgress());
+        assertEquals(DominionGamePhase.Buy, state.getGamePhase());
+    }
+
+    @Test
     public void merchantWithNoSilverInHand() {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.addCard(CardType.MERCHANT, 0, DeckType.HAND);

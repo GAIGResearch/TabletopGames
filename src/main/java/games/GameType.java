@@ -7,9 +7,16 @@ import games.battlelore.gui.BattleloreGUI;
 import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.gui.BlackjackGUIManager;
+import games.catan.CatanForwardModel;
+import games.catan.CatanGameState;
+import games.catan.CatanParameters;
+import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.gui.ColtExpressGUIManager;
+import games.connect4.Connect4ForwardModel;
+import games.connect4.Connect4GameState;
+import games.connect4.gui.Connect4GUIManager;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.dominion.gui.DominionGUIManager;
@@ -83,6 +90,14 @@ public enum GameType {
                 add(VariablePlayerPowers);
             }}),
     TicTacToe(2, 2,
+            new ArrayList<Category>() {{
+                add(Simple);
+                add(Abstract);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(PatternBuilding);
+            }}),
+    Connect4(2, 2,
             new ArrayList<Category>() {{
                 add(Simple);
                 add(Abstract);
@@ -259,25 +274,35 @@ public enum GameType {
                 add(PushYourLuck);
                 add(SimultaneousActionSelection);
             }}),
-    Stratego(2, 2,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(Bluffing);
-                add(Deduction);
-                add(Abstract);
-            }},
+    Catan(3, 4,
+                    new ArrayList<Category>() {{
+        add(Strategy);
+        add(Cards);
+    }},
             new ArrayList<Mechanic>() {{
                 add(Memory);
                 add(GridMovement);
+                add(ModularBoard);
             }}),
     TerraformingMars (1, 5,
             new ArrayList<Category>() {{ add(Economic); add(Environmental); add(Manufacturing); add(TerritoryBuilding);
                 add(Cards); add(Strategy); add(Exploration); }},
             new ArrayList<Mechanic>() {{ add(Drafting); add(EndGameBonus); add(HandManagement); add(HexagonGrid);
                 add(Income); add(SetCollection); add(TakeThat); add(TilePlacement); add(ProgressiveTurnOrder);
-                add(VariablePlayerPowers); add(EngineBuilding); add(TableauBuilding);}})
+                add(VariablePlayerPowers); add(EngineBuilding); add(TableauBuilding);}}),
+        Stratego(2, 2,
+        new ArrayList<Category>() {{
+        add(Strategy);
+        add(Bluffing);
+        add(Deduction);
+        add(Abstract);
+        }},
+        new ArrayList<Mechanic>() {{
+        add(Memory);
+        add(GridMovement);
+        }});
 
-    ;
+
 
     /**
      * Converts a given string to the enum type corresponding to the game.
@@ -292,6 +317,8 @@ public enum GameType {
                 return Pandemic;
             case "tictactoe":
                 return TicTacToe;
+            case "connect4":
+                return Connect4;
             case "explodingkittens":
                 return ExplodingKittens;
             case "loveletter":
@@ -316,6 +343,8 @@ public enum GameType {
                 return DominionSizeDistortion;
             case "dominionimprovements":
                 return DominionImprovements;
+            case "catan":
+                return Catan;
             case "battlelore":
                 return Battlelore;
             case "dicemonastery":
@@ -361,6 +390,10 @@ public enum GameType {
             case TicTacToe:
                 forwardModel = new TicTacToeForwardModel();
                 gameState = new TicTacToeGameState(params, nPlayers);
+                break;
+            case Connect4:
+                forwardModel = new Connect4ForwardModel();
+                gameState = new Connect4GameState(params, nPlayers);
                 break;
             case ExplodingKittens:
                 forwardModel = new ExplodingKittensForwardModel();
@@ -411,6 +444,9 @@ public enum GameType {
             case TerraformingMars:
                 forwardModel = new TMForwardModel();
                 gameState = new TMGameState(params, nPlayers);
+            case Catan:
+                forwardModel = new CatanForwardModel();
+                gameState = new CatanGameState(params, nPlayers);
                 break;
             case Battlelore:
                 forwardModel = new BattleloreForwardModel();
@@ -478,6 +514,9 @@ public enum GameType {
             case TicTacToe:
                 gui = new TicTacToeGUIManager(parent, game, ac);
                 break;
+            case Connect4:
+                gui = new Connect4GUIManager(parent, game, ac);
+                break;
             case DotsAndBoxes:
                 if (game != null) {
                     gui = new DBGUIManager(parent, game.getGameState(), ac);
@@ -489,6 +528,9 @@ public enum GameType {
             case DominionImprovements:
             case DominionSizeDistortion:
                 gui = new DominionGUIManager(parent, game, ac, human);
+                break;
+            case Catan:
+                gui = new CatanGUI(parent, game, ac);
                 break;
             // TODO: Diamant GUI
             case TerraformingMars:

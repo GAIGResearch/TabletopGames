@@ -5,18 +5,23 @@ import core.CoreConstants;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IStateHeuristic;
+import core.properties.PropertyString;
 import evaluation.TunableParameters;
 import utilities.Hash;
 import utilities.Utils;
 
+import static games.pandemic.PandemicConstants.*;
+import static utilities.Utils.indexOf;
+
 public class PandemicHeuristic extends TunableParameters implements IStateHeuristic {
 
-    double FACTOR_CURES = 0.3;
+    double FACTOR_CURES = 1.0;
     double FACTOR_CUBES = 0.2;
     double FACTOR_CARDS_IN_PILE = 0.15;
-    double FACTOR_CARDS_IN_HAND = 0.15;
-    double FACTOR_OUTBREAKS = -0.2;
-    double FACTOR_RS = 0.2;
+    double FACTOR_CARDS_IN_HAND = 0.25;
+    double FACTOR_OUTBREAKS = -0.5;
+    double FACTOR_RS = 0.35;
+    double FACTOR_AT_RS = 0.6;
 
     public PandemicHeuristic() {
         addTunableParameter("FACTOR_CURES", 0.3);
@@ -41,10 +46,10 @@ public class PandemicHeuristic extends TunableParameters implements IStateHeuris
     public double evaluateState(AbstractGameState gs, int playerId) {
         PandemicGameState pgs = (PandemicGameState) gs;
         PandemicParameters pp = (PandemicParameters) gs.getGameParameters();
-        Utils.GameResult gameStatus = gs.getGameStatus();
 
-        if (!pgs.isNotTerminal())
-            return pgs.getPlayerResults()[playerId].value;
+        if (!pgs.isNotTerminal()) {
+            return gs.getGameStatus().value * 10;
+        }
 
         // Compute a score
         Counter outbreaks = (Counter) pgs.getComponent(PandemicConstants.outbreaksHash);
@@ -53,21 +58,30 @@ public class PandemicHeuristic extends TunableParameters implements IStateHeuris
         int nCardsInPile = ((Deck) pgs.getComponent(PandemicConstants.playerDeckHash)).getSize() / nTotalCardsPlayerDeck;
         int nCardsInHand = ((Deck) pgs.getComponentActingPlayer(CoreConstants.playerHandHash)).getSize() / (pp.maxCardsPerPlayer + 2);
         int nResearchStations = ((Counter) pgs.getComponent(PandemicConstants.researchStationHash)).getValue() / pp.nResearchStations;
+
+        int playerAtResStation = 0;
+        for (String resStationLocation: pgs.researchStationLocations){
+            if (((PropertyString) pgs.getComponentActingPlayer(playerCardHash).getProperty(playerLocationHash)).value.equals(resStationLocation)){
+                playerAtResStation = 1;
+            }
+
+        }
         double nCuresDiscovered = 0;
         double nDiseaseCubes = 0;
 
-        for (int i = 0; i < PandemicConstants.colors.length; i++) {
-            nDiseaseCubes += ((Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + PandemicConstants.colors[i]))).getValue();
-            if (((Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + PandemicConstants.colors[i]))).getValue() > 0)
+        for (String color : colors) {
+            nDiseaseCubes += ((Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + color))).getValue();
+            if (((Counter) pgs.getComponent(Hash.GetInstance().hash("Disease Cube " + color))).getValue() > 0)
                 nCuresDiscovered += 1;
         }
 
-        return (nCuresDiscovered / PandemicConstants.colors.length) * FACTOR_CURES
+        return (nCuresDiscovered / colors.length) * FACTOR_CURES
                 + nCardsInHand * FACTOR_CARDS_IN_HAND
                 + (nDiseaseCubes / pp.nInitialDiseaseCubes) * FACTOR_CUBES
                 + nCardsInPile * FACTOR_CARDS_IN_PILE
                 + nOutbreaks * FACTOR_OUTBREAKS
                 + nResearchStations * FACTOR_RS
+                + playerAtResStation * FACTOR_AT_RS
                 ;
     }
 

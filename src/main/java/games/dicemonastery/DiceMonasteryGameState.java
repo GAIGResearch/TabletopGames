@@ -216,7 +216,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
         if (nextRetirementReward < RETIREMENT_REWARDS.length) {
             vp = RETIREMENT_REWARDS[nextRetirementReward];
         }
-        dmto.logEvent("Monk retired for " + vp + " VP", this);
+        int finalVp = vp;
+        dmto.logEvent(() -> "Monk retired for " + finalVp + " VP", this);
         addVP(vp, monk.getOwnerId());
         nextRetirementReward++;
     }
@@ -356,7 +357,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
         for (int player = 0; player < getNPlayers(); player++) {
             if (monksIn(null, player).isEmpty()) {
                 // Hire a free novice!
-                ((DiceMonasteryTurnOrder) turnOrder).logEvent(String.format("Player %d gets new Novice due to lack of monks", player), this);
+                int finalPlayer = player;
+                ((DiceMonasteryTurnOrder) turnOrder).logEvent(() -> String.format("Player %d gets new Novice due to lack of monks", finalPlayer), this);
                 createMonk(1, player);
             }
         }
@@ -487,7 +489,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
             }
             if (requiredFood > 0) {
                 // monks starve
-                dmto.logEvent(String.format("Player %d fails to feed %d of %d monks", player, requiredFood, monks.size()), this);
+                int finalRequiredFood = requiredFood;
+                int finalPlayer = player;
+                dmto.logEvent(() -> String.format("Player %d fails to feed %d of %d monks", finalPlayer, finalRequiredFood, monks.size()), this);
                 addVP(-requiredFood, player);
                 // we also need to down-pip monks; let's assume we start at the lower value ones...excluding 1
                 // TODO: Make this a player decision

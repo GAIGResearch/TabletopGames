@@ -78,7 +78,7 @@ public class ITPSearchSpace extends AgentSearchSpace<Object> {
                     Object data = json.get(baseKey);
                     String key = "".equals(nameSpace) ? (String) baseKey : nameSpace + "." + baseKey;
                     if (data instanceof JSONObject) {
-                        // in this case we have nesting, and need to recurse to get all of the relevant parameters
+                        // in this case we have nesting, and need to recurse to get all the relevant parameters
                         // we use key as the nameSpace
                         try {
                             JSONObject subJSON = (JSONObject) data;

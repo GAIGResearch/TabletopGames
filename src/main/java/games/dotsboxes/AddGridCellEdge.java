@@ -23,12 +23,7 @@ public class AddGridCellEdge extends AbstractAction {
 
         HashSet<DBCell> cells = dbgs.edgeToCellMap.get(edge);
         for (DBCell c : cells) {
-            int nEdgesComplete = 0;
-            for (DBEdge e: dbgs.cellToEdgesMap.get(c)) {
-                if (dbgs.edgeToOwnerMap.containsKey(e)) {
-                    nEdgesComplete++;
-                }
-            }
+            int nEdgesComplete = dbgs.countCompleteEdges(c);
             if (nEdgesComplete == 4) {  // A cell has 4 sides
                 // All edges complete, this box complete
                 dbgs.cellToOwnerMap.put(c, gs.getCurrentPlayer());

@@ -16,8 +16,8 @@ public class SummaryLogger implements IStatisticLogger {
 
     File logFile;
     public boolean printToConsole = true;
-    Map<String, TAGStatSummary> allData = new HashMap<>();
-    Map<String, String> otherData = new HashMap<>();
+    Map<String, TAGStatSummary> allData = new LinkedHashMap<>();
+    Map<String, String> otherData = new LinkedHashMap<>();
 
     public SummaryLogger() {
     }
@@ -103,6 +103,11 @@ public class SummaryLogger implements IStatisticLogger {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void processDataAndNotFinish() {
+        // do nothing until we have full finished
     }
 
 

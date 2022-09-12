@@ -456,7 +456,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements ScreenHigh
         }
         for (AbstractAction action : actions) {
             if (action instanceof MovePlayer) {
-                int pIdx = ((MovePlayer) action).getPlayerIdx();
+                int pIdx = ((MovePlayer) action).getPlayerToMove();
                 Card c = action.getCard(gameState);
                 if (action instanceof MovePlayerWithCard && isCardHighlighted(c, pIdx)) {
                     if (c.getProperty(effectHash) == null || bnHighlights.contains(((MovePlayer) action).getDestination()) &&
