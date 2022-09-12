@@ -444,6 +444,7 @@ public enum GameType {
             case TerraformingMars:
                 forwardModel = new TMForwardModel();
                 gameState = new TMGameState(params, nPlayers);
+                break;
             case Catan:
                 forwardModel = new CatanForwardModel();
                 gameState = new CatanGameState(params, nPlayers);
