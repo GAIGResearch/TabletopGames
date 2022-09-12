@@ -304,10 +304,18 @@ public class TMGUI extends AbstractGUIManager {
 //        tabs.setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
 
         parent.setLayout(new BorderLayout());
-        parent.add(tabs, BorderLayout.CENTER);
-        parent.add(menuBar, BorderLayout.NORTH);
+
+        JPanel scrolling = new JPanel();
+        scrolling.setLayout(new BorderLayout());
+
+        scrolling.add(tabs, BorderLayout.CENTER);
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        parent.setPreferredSize(new Dimension((int)(screenSize.width*0.95), (int)(screenSize.height*0.95)));
+
+        JScrollPane pane = new JScrollPane(scrolling);
+        pane.setPreferredSize(new Dimension((int)(screenSize.width*0.95), (int)(screenSize.height*0.9)));
+        parent.add(menuBar, BorderLayout.NORTH);
+        parent.add(pane);
+
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
