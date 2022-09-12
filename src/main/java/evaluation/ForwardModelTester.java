@@ -66,6 +66,10 @@ public class ForwardModelTester {
                 hashCodes.add(game.getGameState().hashCode());
                 hashNames.add(game.getGameState().toString());
                 if (stateCopy.hashCode() != game.getGameState().hashCode()) {
+                    String error = String.format("Problem on state copy - orig/copy hashcodes are %d/%d",
+                             game.getGameState().hashCode(), stateCopy.hashCode());
+                    System.out.println(error);
+                    System.out.printf("\tOrig: %s%n\tCopy: %s%n", game.getGameState().toString(), stateCopy.toString());
                     throw new AssertionError("Copy of game state should have same hashcode as original");
                 }
                 allFine = checkHistory();
