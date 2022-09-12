@@ -317,7 +317,8 @@ public class TMGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), generation, board, extraTiles, globalParameters, bonuses, projectCards, corpCards, discardCards, milestones, awards, nMilestonesClaimed, nAwardsFunded);
+        int result = Objects.hash(super.hashCode(), generation, board, extraTiles, globalParameters, bonuses,
+                projectCards, corpCards, discardCards, milestones, awards, nMilestonesClaimed, nAwardsFunded);
         result = 31 * result + Arrays.hashCode(playerExtraActions);
         result = 31 * result + Arrays.hashCode(playerResourceMap);
         result = 31 * result + Arrays.hashCode(playerDiscountEffects);
@@ -341,7 +342,7 @@ public class TMGameState extends AbstractGameState {
         StringBuilder sb = new StringBuilder();
         int result = Objects.hash(gameParameters);
         sb.append(result).append("|");
-        result = Objects.hash(turnOrder) ;
+        result = Objects.hash(turnOrder);
         sb.append(result).append("|");
         result = Objects.hash(getAllComponents());
         sb.append(result).append("|");
@@ -355,7 +356,7 @@ public class TMGameState extends AbstractGameState {
         sb.append(result).append("|");
         result = Objects.hash(board);
         sb.append(result).append("|");
-        result=Objects.hash(extraTiles);
+        result = Objects.hash(extraTiles);
         sb.append(result).append("|");
         result = Objects.hash(globalParameters);
         sb.append(result).append("|");
@@ -380,24 +381,24 @@ public class TMGameState extends AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerResources);
         result = 31 * result + Arrays.hashCode(playerResourceIncreaseGen);
         sb.append(result).append("|9|");
-        result = 31 * result + Arrays.hashCode(playerProduction);
+        result = Arrays.hashCode(playerProduction);
         sb.append(result).append("|10|");
-        result = 31 * result + Arrays.hashCode(playerCardsPlayedTags);
+        result = Arrays.hashCode(playerCardsPlayedTags);
         sb.append(result).append("|10|");
-        result = 31 * result + Arrays.hashCode(playerCardsPlayedTypes);
+        result = Arrays.hashCode(playerCardsPlayedTypes);
         sb.append(result).append("|12|");
-        result = 31 * result + Arrays.hashCode(playerTilesPlaced);
+        result = Arrays.hashCode(playerTilesPlaced);
         sb.append(result).append("|13|");
-        result = 31 * result + Arrays.hashCode(playerCardPoints);
+        result = Arrays.hashCode(playerCardPoints);
         sb.append(result).append("|14|");
-        result = 31 * result + Arrays.hashCode(playerHands);
+        result = Arrays.hashCode(playerHands);
         sb.append(result).append("|15|");
-        result = 31 * result + Arrays.hashCode(playerComplicatedPointCards);
+        result = Arrays.hashCode(playerComplicatedPointCards);
         sb.append(result).append("|16|");
-        result = 31 * result + Arrays.hashCode(playerCardChoice);
+        result = Arrays.hashCode(playerCardChoice);
         sb.append(result).append("|17|");
-        result = 31 * result + Arrays.hashCode(playerCorporations);
-        sb.append(result).append("|18|");
+        result = Arrays.hashCode(playerCorporations);
+        sb.append(result);
         return sb.toString();
     }
 
