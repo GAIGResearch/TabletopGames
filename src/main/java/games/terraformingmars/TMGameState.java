@@ -113,7 +113,7 @@ public class TMGameState extends AbstractGameState {
 
         // General public info
         copy.generation = generation;
-        copy.board = new GridBoard<>(board.getWidth(), board.getHeight());  // Deep copy of board
+        copy.board = board.emptyCopy();  // Deep copy of board
         for (int i = 0; i < board.getHeight(); i++) {
             for (int j = 0; j < board.getWidth(); j++) {
                 if (board.getElement(j, i) != null) {
@@ -285,25 +285,39 @@ public class TMGameState extends AbstractGameState {
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TMGameState)) return false;
-        if (!super.equals(o)) return false;
         TMGameState that = (TMGameState) o;
-        return generation == that.generation && Objects.equals(board, that.board) &&
-                Objects.equals(extraTiles, that.extraTiles) && Objects.equals(globalParameters, that.globalParameters)
-                && Objects.equals(bonuses, that.bonuses) && Objects.equals(projectCards, that.projectCards)
-                && Objects.equals(corpCards, that.corpCards) && Objects.equals(discardCards, that.discardCards)
+        return generation == that.generation
+                && Objects.equals(board, that.board)
+                && Objects.equals(extraTiles, that.extraTiles)
+                && Objects.equals(globalParameters, that.globalParameters)
+                && Objects.equals(bonuses, that.bonuses)
+                && Objects.equals(projectCards, that.projectCards)
+                && Objects.equals(corpCards, that.corpCards)
+                && Objects.equals(discardCards, that.discardCards)
                 && Arrays.equals(playerExtraActions, that.playerExtraActions)
                 && Arrays.equals(playerResourceMap, that.playerResourceMap)
                 && Arrays.equals(playerDiscountEffects, that.playerDiscountEffects)
                 && Arrays.equals(playerPersistingEffects, that.playerPersistingEffects)
                 && Arrays.equals(playerResources, that.playerResources)
                 && Arrays.equals(playerResourceIncreaseGen, that.playerResourceIncreaseGen)
-                && Arrays.equals(playerProduction, that.playerProduction) && Arrays.equals(playerCardsPlayedTags, that.playerCardsPlayedTags) && Arrays.equals(playerCardsPlayedTypes, that.playerCardsPlayedTypes) && Arrays.equals(playerTilesPlaced, that.playerTilesPlaced) && Arrays.equals(playerCardPoints, that.playerCardPoints) && Arrays.equals(playerHands, that.playerHands) && Arrays.equals(playerComplicatedPointCards, that.playerComplicatedPointCards) && Arrays.equals(playerCardChoice, that.playerCardChoice) && Arrays.equals(playerCorporations, that.playerCorporations) && Objects.equals(milestones, that.milestones) && Objects.equals(awards, that.awards) && Objects.equals(nMilestonesClaimed, that.nMilestonesClaimed) && Objects.equals(nAwardsFunded, that.nAwardsFunded);
+                && Arrays.equals(playerProduction, that.playerProduction)
+                && Arrays.equals(playerCardsPlayedTags, that.playerCardsPlayedTags)
+                && Arrays.equals(playerCardsPlayedTypes, that.playerCardsPlayedTypes)
+                && Arrays.equals(playerTilesPlaced, that.playerTilesPlaced)
+                && Arrays.equals(playerCardPoints, that.playerCardPoints)
+                && Arrays.equals(playerHands, that.playerHands)
+                && Arrays.equals(playerComplicatedPointCards, that.playerComplicatedPointCards)
+                && Arrays.equals(playerCardChoice, that.playerCardChoice)
+                && Arrays.equals(playerCorporations, that.playerCorporations)
+                && Objects.equals(milestones, that.milestones)
+                && Objects.equals(awards, that.awards)
+                && Objects.equals(nMilestonesClaimed, that.nMilestonesClaimed)
+                && Objects.equals(nAwardsFunded, that.nAwardsFunded);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), generation, board, extraTiles, globalParameters, bonuses,
-                projectCards, corpCards, discardCards, milestones, awards, nMilestonesClaimed, nAwardsFunded);
+        int result = Objects.hash(super.hashCode(), generation, board, extraTiles, globalParameters, bonuses, projectCards, corpCards, discardCards, milestones, awards, nMilestonesClaimed, nAwardsFunded);
         result = 31 * result + Arrays.hashCode(playerExtraActions);
         result = 31 * result + Arrays.hashCode(playerResourceMap);
         result = 31 * result + Arrays.hashCode(playerDiscountEffects);

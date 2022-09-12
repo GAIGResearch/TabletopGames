@@ -33,6 +33,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
+import static javax.swing.JOptionPane.OK_CANCEL_OPTION;
+
 public class TMGUI extends AbstractGUIManager {
 
     TMBoardView view;
@@ -60,6 +63,8 @@ public class TMGUI extends AbstractGUIManager {
     boolean firstUpdate = true;
     boolean updateButtons = false;
     HashMap<TMTypes.ActionType, JMenu> actionMenus;
+
+    TMGameState gameState;
 
     public TMGUI(GamePanel parent, Game game, ActionController ac) {
         super(parent, ac, 500);
@@ -504,21 +509,38 @@ public class TMGUI extends AbstractGUIManager {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
 
+            TMGameState gs = ((TMGameState) gameState);
+
+            if (gameState.getGameStatus() == Utils.GameResult.GAME_END) {
+                int win = -1;
+                String displayText = "<html><table><tr><td>Player</td><td>TR</td><td>Milestones</td><td>Awards</td><td>Board</td><td>Cards</td><td>Total</td></tr>";
+                for (int i = 0; i < gameState.getNPlayers(); i++) {
+                    if (gameState.getPlayerResults()[i] == Utils.GameResult.WIN) win = i;
+
+                    int tr = gs.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue();
+                    int milestones = gs.countPointsMilestones(i);
+                    int awards = gs.countPointsAwards(i);
+                    int board = gs.countPointsBoard(i);
+                    int cards = gs.countPointsCards(i);
+                    int total = tr + milestones + awards + board + cards;
+
+                    displayText += "<tr><td>" + i + "</td><td>" + tr + "</td><td>" + milestones +"</td><td>" + awards
+                            + "</td><td>" + board + "</td><td>" + cards + "</td><td>" + total + "</td></tr>";
+                }
+                displayText += "</table><hr>Winner(s): " + win + "</html>";
+                JOptionPane.showConfirmDialog(parent, displayText, "Terraforming Mars: Game Over", OK_CANCEL_OPTION, INFORMATION_MESSAGE);
+            }
+
             if (player instanceof HumanGUIPlayer) {
-                createActionMenu(player, (TMGameState) gameState);
-                updateActionButtons(player, gameState);
-//                if (actionTaken) {
-//                    createActionMenu(player, (TMGameState) gameState);
-//                }
-//                if (actionTaken || stateChange) {
-//                    updateActionButtons(player, gameState);
-//                    stateChange = false;
-//                }
+                // TODO fix equals / copy
+                if (!gameState.equals(this.gameState)) {
+                    createActionMenu(player, (TMGameState) gameState);
+                    this.gameState = (TMGameState) gameState.copy();
+                }
             } else {
                 resetActionButtons();
             }
 
-            TMGameState gs = ((TMGameState) gameState);
             currentPlayerIdx = gs.getCurrentPlayer();
             focusPlayerButton.setText("Current player: " + currentPlayerIdx);
             if (focusCurrentPlayer) {
@@ -542,7 +564,7 @@ public class TMGUI extends AbstractGUIManager {
             playerCardsPlayed.update(gs.getPlayerComplicatedPointCards()[focusPlayer].copy(), false);
 
             TMCard corp = gs.getPlayerCorporations()[focusPlayer];
-            playerCorporation.update(gs, corp, -1);
+            playerCorporation.update(gs, corp, -1);  // TODO do it once
 
         }
         parent.repaint();

@@ -59,7 +59,6 @@ public abstract class AbstractGUIManager {
      *
      * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
-     * @param actionTaken - true if an action was taken and game state updated, false otherwise
      */
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
     }
