@@ -90,7 +90,6 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof VirusGameState)) return false;
-        if (!super.equals(o)) return false;
         VirusGameState that = (VirusGameState) o;
         return Objects.equals(playerBodies, that.playerBodies) &&
                 Objects.equals(playerDecks, that.playerDecks) &&

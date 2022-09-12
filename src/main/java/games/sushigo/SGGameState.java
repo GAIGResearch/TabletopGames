@@ -285,7 +285,6 @@ public class SGGameState extends AbstractGameState {
 
         if (this == o) return true;
         if (!(o instanceof SGGameState)) return false;
-        if (!super.equals(o)) return false;
         SGGameState that = (SGGameState) o;
         return Objects.equals(playerHands, that.playerHands) &&
                 Objects.equals(playerFields, that.playerFields) &&
