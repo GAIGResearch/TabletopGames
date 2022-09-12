@@ -64,7 +64,6 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TicTacToeGameState)) return false;
-        if (!super.equals(o)) return false;
         TicTacToeGameState that = (TicTacToeGameState) o;
         return Objects.equals(gridBoard, that.gridBoard);
     }

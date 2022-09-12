@@ -380,7 +380,7 @@ public abstract class Utils {
             return Utils.loadClassFromJSON(rawData);
 
         } catch (FileNotFoundException e) {
-            throw new AssertionError("File not found to load IGameHeuristic : " + filename);
+            throw new AssertionError("File not found to load : " + filename);
         } catch (IOException e) {
             throw new AssertionError("Problem reading file " + filename + " : " + e);
         } catch (ParseException e) {
