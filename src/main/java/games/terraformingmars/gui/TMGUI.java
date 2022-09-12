@@ -507,7 +507,7 @@ public class TMGUI extends AbstractGUIManager {
         if (gameState != null) {
 
             if (player instanceof HumanGUIPlayer) {
-                // TODO only do this if the action space changed
+                // TODO fix equals / copy
                 if (!gameState.equals(this.gameState)) {
                     createActionMenu(player, (TMGameState) gameState);
                 }
