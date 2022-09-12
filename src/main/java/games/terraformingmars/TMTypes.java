@@ -285,8 +285,7 @@ public class TMTypes {
             return "data/terraformingmars/corporationCards/" + this.name().toLowerCase() + ".json";
         }
         public String getProjectCardsPath() {
-            return "data/terraformingmars/projectCards/jsonCardsT.json";
-//            return "data/terraformingmars/projectCards/" + this.name().toLowerCase() + ".json";
+            return "data/terraformingmars/projectCards/" + this.name().toLowerCase() + ".json";
         }
         public String getOtherCardsPath() {
             return "data/terraformingmars/otherCards/" + this.name().toLowerCase() + ".json";
