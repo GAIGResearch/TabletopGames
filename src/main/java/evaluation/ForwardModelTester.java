@@ -27,8 +27,10 @@ public class ForwardModelTester {
      */
 
     List<Integer> hashCodes = new ArrayList<>();
+    List<String> hashNames = new ArrayList<>();
     List<AbstractGameState> stateHistory = new ArrayList<>();
     List<AbstractAction> actionHistory = new ArrayList<>();
+    int decision = 0;
 
     public static void main(String... args) {
         new ForwardModelTester(args);
@@ -51,34 +53,42 @@ public class ForwardModelTester {
             hashCodes = new ArrayList<>();
             stateHistory = new ArrayList<>();
             actionHistory = new ArrayList<>();
+            hashNames = new ArrayList<>();
             seed = rnd.nextInt();
-            System.out.printf("Running Game %d of %s with seed %d at %tc", loop, gameToRun, seed, System.currentTimeMillis());
+            System.out.printf("Running Game %d of %s with seed %d at %tc%n", loop, gameToRun, seed, System.currentTimeMillis());
             game.reset(allPlayers, seed);
 
-            int decision = 0;
+            decision = 0;
+            boolean allFine = true;
             do {
                 AbstractGameState stateCopy = game.getGameState().copy();
                 stateHistory.add(stateCopy);
                 hashCodes.add(game.getGameState().hashCode());
+                hashNames.add(game.getGameState().toString());
                 if (stateCopy.hashCode() != game.getGameState().hashCode()) {
                     throw new AssertionError("Copy of game state should have same hashcode as original");
                 }
-                checkHistory();
+                allFine = checkHistory();
                 AbstractAction action = game.oneAction();
                 actionHistory.add(action);
+                decision++;
 
-            } while (game.getGameState().isNotTerminal());
+            } while (allFine && game.getGameState().isNotTerminal());
         }
     }
 
-    private void checkHistory() {
+    private boolean checkHistory() {
         // Here we run through the history of game state to make sure that their hashcodes are unchanged
         for (int i = 0; i < stateHistory.size(); i++) {
             if (stateHistory.get(i).hashCode() != hashCodes.get(i)) {
-                String error = String.format("Mismatch on action %d (%s) - old/new hashcodes are %d/%d", i,
-                        actionHistory.get(i), hashCodes.get(i), stateHistory.get(i).hashCode());
-                throw new AssertionError(error);
+                String error = String.format("Mismatch on action %d after decision %d (%s) - old/new hashcodes are %d/%d",
+                        i, decision, actionHistory.get(decision-1), hashCodes.get(i), stateHistory.get(i).hashCode());
+                // throw new AssertionError(error + "\n");
+                System.out.println(error);
+                System.out.printf("\tOld: %s%n\tNew: %s%n", hashNames.get(i), stateHistory.get(i).toString());
+                return false;
             }
         }
+        return true;
     }
 }

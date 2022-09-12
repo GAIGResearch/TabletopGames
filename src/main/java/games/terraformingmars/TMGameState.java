@@ -72,7 +72,7 @@ public class TMGameState extends AbstractGameState {
      * @param gameParameters - game parameters.
      */
     public TMGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new TMTurnOrder(nPlayers, ((TMGameParameters)gameParameters).nActionsPerPlayer), GameType.TerraformingMars);
+        super(gameParameters, new TMTurnOrder(nPlayers, ((TMGameParameters) gameParameters).nActionsPerPlayer), GameType.TerraformingMars);
     }
 
     @Override
@@ -124,23 +124,23 @@ public class TMGameState extends AbstractGameState {
             }
         }
         copy.extraTiles = new HashSet<>();
-        for (TMMapTile mt: extraTiles) {
+        for (TMMapTile mt : extraTiles) {
             copy.extraTiles.add(mt.copy());
         }
         copy.globalParameters = new HashMap<>();
-        for (TMTypes.GlobalParameter p: globalParameters.keySet()) {
+        for (TMTypes.GlobalParameter p : globalParameters.keySet()) {
             copy.globalParameters.put(p, globalParameters.get(p).copy());
         }
         copy.bonuses = new HashSet<>();
-        for (Bonus b: bonuses) {
+        for (Bonus b : bonuses) {
             copy.bonuses.add(b.copy());
         }
         copy.milestones = new HashSet<>();
-        for (Milestone m: milestones) {
+        for (Milestone m : milestones) {
             copy.milestones.add(m.copy());
         }
         copy.awards = new HashSet<>();
-        for (Award a: awards) {
+        for (Award a : awards) {
             copy.awards.add(a.copy());
         }
         copy.nMilestonesClaimed = nMilestonesClaimed.copy();
@@ -183,32 +183,32 @@ public class TMGameState extends AbstractGameState {
             if (playerCorporations[i] != null) {
                 copy.playerCorporations[i] = playerCorporations[i].copy();
             }
-            for (TMAction a: playerExtraActions[i]) {
+            for (TMAction a : playerExtraActions[i]) {
                 copy.playerExtraActions[i].add(a.copy());
             }
-            for (ResourceMapping rm: playerResourceMap[i]) {
+            for (ResourceMapping rm : playerResourceMap[i]) {
                 copy.playerResourceMap[i].add(rm.copy());
             }
-            for (Requirement r: playerDiscountEffects[i].keySet()) {
+            for (Requirement r : playerDiscountEffects[i].keySet()) {
                 copy.playerDiscountEffects[i].put(r.copy(), playerDiscountEffects[i].get(r));
             }
-            for (Effect e: playerPersistingEffects[i]) {
+            for (Effect e : playerPersistingEffects[i]) {
                 copy.playerPersistingEffects[i].add(e.copy());
             }
-            for (TMTypes.Resource r: playerResources[i].keySet()) {
+            for (TMTypes.Resource r : playerResources[i].keySet()) {
                 copy.playerResources[i].put(r, playerResources[i].get(r).copy());
                 copy.playerResourceIncreaseGen[i].put(r, playerResourceIncreaseGen[i].get(r));
             }
-            for (TMTypes.Resource r: playerProduction[i].keySet()) {
+            for (TMTypes.Resource r : playerProduction[i].keySet()) {
                 copy.playerProduction[i].put(r, playerProduction[i].get(r).copy());
             }
-            for (TMTypes.Tag t: playerCardsPlayedTags[i].keySet()) {
+            for (TMTypes.Tag t : playerCardsPlayedTags[i].keySet()) {
                 copy.playerCardsPlayedTags[i].put(t, playerCardsPlayedTags[i].get(t).copy());
             }
-            for (TMTypes.CardType t: playerCardsPlayedTypes[i].keySet()) {
+            for (TMTypes.CardType t : playerCardsPlayedTypes[i].keySet()) {
                 copy.playerCardsPlayedTypes[i].put(t, playerCardsPlayedTypes[i].get(t).copy());
             }
-            for (TMTypes.Tile t: playerTilesPlaced[i].keySet()) {
+            for (TMTypes.Tile t : playerTilesPlaced[i].keySet()) {
                 copy.playerTilesPlaced[i].put(t, playerTilesPlaced[i].get(t).copy());
             }
         }
@@ -334,6 +334,71 @@ public class TMGameState extends AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerCardChoice);
         result = 31 * result + Arrays.hashCode(playerCorporations);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        int result = Objects.hash(gameParameters);
+        sb.append(result).append("|");
+        result = Objects.hash(turnOrder) ;
+        sb.append(result).append("|");
+        result = Objects.hash(getAllComponents());
+        sb.append(result).append("|");
+        result = Objects.hash(gameStatus);
+        sb.append(result).append("|");
+        result = Objects.hash(gamePhase);
+        sb.append(result).append("|");
+        result = Arrays.hashCode(playerResults);
+        sb.append(result).append("|*|");
+        result = Objects.hash(generation);
+        sb.append(result).append("|");
+        result = Objects.hash(board);
+        sb.append(result).append("|");
+        result=Objects.hash(extraTiles);
+        sb.append(result).append("|");
+        result = Objects.hash(globalParameters);
+        sb.append(result).append("|");
+        result = Objects.hash(bonuses);
+        sb.append(result).append("|2|");
+        result = Objects.hash(projectCards);
+        sb.append(result).append("|3|");
+        result = Objects.hash(corpCards);
+        sb.append(result).append("|4|");
+        result = Objects.hash(discardCards);
+        sb.append(result).append("|5|");
+        result = Objects.hash(milestones);
+        sb.append(result).append("|6|");
+        result = Objects.hash(awards);
+        sb.append(result).append("|7|");
+        result = Objects.hash(nMilestonesClaimed, nAwardsFunded);
+        sb.append(result).append("|8|");
+        result = Arrays.hashCode(playerExtraActions);
+        result = 31 * result + Arrays.hashCode(playerResourceMap);
+        result = 31 * result + Arrays.hashCode(playerDiscountEffects);
+        result = 31 * result + Arrays.hashCode(playerPersistingEffects);
+        result = 31 * result + Arrays.hashCode(playerResources);
+        result = 31 * result + Arrays.hashCode(playerResourceIncreaseGen);
+        sb.append(result).append("|9|");
+        result = 31 * result + Arrays.hashCode(playerProduction);
+        sb.append(result).append("|10|");
+        result = 31 * result + Arrays.hashCode(playerCardsPlayedTags);
+        sb.append(result).append("|10|");
+        result = 31 * result + Arrays.hashCode(playerCardsPlayedTypes);
+        sb.append(result).append("|12|");
+        result = 31 * result + Arrays.hashCode(playerTilesPlaced);
+        sb.append(result).append("|13|");
+        result = 31 * result + Arrays.hashCode(playerCardPoints);
+        sb.append(result).append("|14|");
+        result = 31 * result + Arrays.hashCode(playerHands);
+        sb.append(result).append("|15|");
+        result = 31 * result + Arrays.hashCode(playerComplicatedPointCards);
+        sb.append(result).append("|16|");
+        result = 31 * result + Arrays.hashCode(playerCardChoice);
+        sb.append(result).append("|17|");
+        result = 31 * result + Arrays.hashCode(playerCorporations);
+        sb.append(result).append("|18|");
+        return sb.toString();
     }
 
     /*
@@ -463,7 +528,7 @@ public class TMGameState extends AbstractGameState {
         // Apply tag discount effects
         int discount = 0;
         if (player == -1) player = getCurrentPlayer();
-        for (Map.Entry<Requirement,Integer> e: playerDiscountEffects[player].entrySet()) {
+        for (Map.Entry<Requirement, Integer> e : playerDiscountEffects[player].entrySet()) {
             if (e.getKey() instanceof ActionTypeRequirement) {
                 if (e.getKey().testCondition(action)) {
                     discount += e.getValue();
@@ -477,11 +542,11 @@ public class TMGameState extends AbstractGameState {
         // Apply tag discount effects
         int discount = 0;
         if (player == -1) player = getCurrentPlayer();
-        for (TMTypes.Tag t: card.tags) {
-            for (Map.Entry<Requirement,Integer> e: playerDiscountEffects[player].entrySet()) {
+        for (TMTypes.Tag t : card.tags) {
+            for (Map.Entry<Requirement, Integer> e : playerDiscountEffects[player].entrySet()) {
                 if (e.getKey() instanceof TagsPlayedRequirement) {
                     boolean found = false;
-                    for (TMTypes.Tag tt: ((TagsPlayedRequirement) e.getKey()).tags) {
+                    for (TMTypes.Tag tt : ((TagsPlayedRequirement) e.getKey()).tags) {
                         if (tt == t) {
                             found = true;
                             break;
@@ -549,13 +614,14 @@ public class TMGameState extends AbstractGameState {
         }
 
         int sum = playerResourceSum(player, card, from, to, true);
-        return card != null? isCardFree(card, sum, -1) : sum >= amount;
+        return card != null ? isCardFree(card, sum, -1) : sum >= amount;
     }
 
     public int playerResourceSum(int player, TMCard card, HashSet<TMTypes.Resource> from, TMTypes.Resource to, boolean itself) {
         if (from == null || from.size() > 0) {
             int sum = 0;
-            if (itself || from != null && from.contains(to)) sum = playerResources[player].get(to).getValue();  // All resources can be exchanged for themselves at rate 1.0
+            if (itself || from != null && from.contains(to))
+                sum = playerResources[player].get(to).getValue();  // All resources can be exchanged for themselves at rate 1.0
 
             // Add resources that this player can use as the "to" resource for this action
             for (ResourceMapping resMap : playerResourceMap[player]) {
@@ -573,9 +639,10 @@ public class TMGameState extends AbstractGameState {
 
     /**
      * Check if player can transform one resource into another, when buying a card
+     *
      * @param card - card to buy; can be null, and resource mappings that require card tags will be skipped
      * @param from - resource to transform from; can be null, then all resources in the player's mapping will be checked
-     * @param to - resource to transform to
+     * @param to   - resource to transform to
      * @return all resources that can be transformed into given res
      */
     public HashSet<TMTypes.Resource> canPlayerTransform(int player, TMCard card, TMTypes.Resource from, TMTypes.Resource to) {
@@ -596,7 +663,7 @@ public class TMGameState extends AbstractGameState {
 
     public double getResourceMapRate(TMTypes.Resource from, TMTypes.Resource to) {
         double rate = 1.;
-        for (ResourceMapping rm: playerResourceMap[getCurrentPlayer()]) {
+        for (ResourceMapping rm : playerResourceMap[getCurrentPlayer()]) {
             if (rm.from == from && rm.to == to) {
                 rate = rm.rate;
                 break;
@@ -607,7 +674,7 @@ public class TMGameState extends AbstractGameState {
 
     public void addDiscountEffects(HashMap<Requirement, Integer> effects) {
         int player = getCurrentPlayer();
-        for (Requirement r: effects.keySet()) {
+        for (Requirement r : effects.keySet()) {
             if (playerDiscountEffects[player].containsKey(r)) {
                 playerDiscountEffects[player].put(r, playerDiscountEffects[player].get(r) + effects.get(r));
             } else {
@@ -648,7 +715,7 @@ public class TMGameState extends AbstractGameState {
     }
 
     public boolean hasPlacedTile(int player) {
-        for (TMTypes.Tile t: playerTilesPlaced[player].keySet()) {
+        for (TMTypes.Tile t : playerTilesPlaced[player].keySet()) {
             if (t.canBeOwned() && playerTilesPlaced[player].get(t).getValue() > 0) return true;
         }
         return false;
@@ -687,7 +754,7 @@ public class TMGameState extends AbstractGameState {
     public int countPointsMilestones(int player) {
         TMGameParameters params = (TMGameParameters) gameParameters;
         int points = 0;
-        for (Milestone m: milestones) {
+        for (Milestone m : milestones) {
             if (m.isClaimed() && m.claimed == player) {
                 points += params.nPointsMilestone;
             }
@@ -698,7 +765,7 @@ public class TMGameState extends AbstractGameState {
     public int countPointsAwards(int player) {
         TMGameParameters params = (TMGameParameters) gameParameters;
         int points = 0;
-        for (Award a: awards) {
+        for (Award a : awards) {
             Pair<HashSet<Integer>, HashSet<Integer>> winners = awardWinner(a);
             if (winners != null) {
                 if (winners.a.contains(player)) points += params.nPointsAwardFirst;
@@ -739,7 +806,8 @@ public class TMGameState extends AbstractGameState {
                     secondBestPlayer.add(i);
                 }
             }
-            if (getNPlayers() <= 2 || bestPlayer.size() > 1) secondBestPlayer.clear();  // No second-best awarded unless there are 3 or more players, and only 1 got first place
+            if (getNPlayers() <= 2 || bestPlayer.size() > 1)
+                secondBestPlayer.clear();  // No second-best awarded unless there are 3 or more players, and only 1 got first place
             return new Pair<>(bestPlayer, secondBestPlayer);
         }
         return null;
@@ -768,7 +836,7 @@ public class TMGameState extends AbstractGameState {
         // Normal points
         points += playerCardPoints[player].getValue();
         // Complicated points
-        for (TMCard card: playerComplicatedPointCards[player].getComponents()) {
+        for (TMCard card : playerComplicatedPointCards[player].getComponents()) {
             if (card == null) {
                 continue;
             }
@@ -788,7 +856,7 @@ public class TMGameState extends AbstractGameState {
                         // only adjacent tiles count
                         TMMapTile mt = (TMMapTile) getComponentById(card.mapTileIDTilePlaced);
                         List<Vector2D> neighbours = PlaceTile.getNeighbours(new Vector2D(mt.getX(), mt.getY()));
-                        for (Vector2D n: neighbours) {
+                        for (Vector2D n : neighbours) {
                             TMMapTile e = board.getElement(n.getX(), n.getY());
                             if (e != null && e.getTilePlaced() == card.pointsTile) {
                                 points += card.nPoints;

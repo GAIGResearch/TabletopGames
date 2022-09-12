@@ -8,8 +8,8 @@ import java.util.Objects;
 
 public class Bonus {
     public final int threshold;
-    public TMTypes.GlobalParameter param;
-    public TMAction effect;
+    public final TMTypes.GlobalParameter param;
+    public final TMAction effect;
 
     public int claimed = -1;  // Can only execute once
 
@@ -35,7 +35,7 @@ public class Bonus {
     }
 
     public Bonus copy() {
-        Bonus b = new Bonus(param, threshold, effect);
+        Bonus b = new Bonus(param, threshold, effect.copy());
         b.claimed = claimed;
         return b;
     }
