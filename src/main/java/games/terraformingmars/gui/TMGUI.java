@@ -61,6 +61,8 @@ public class TMGUI extends AbstractGUIManager {
     boolean updateButtons = false;
     HashMap<TMTypes.ActionType, JMenu> actionMenus;
 
+    TMGameState gameState;
+
     public TMGUI(GamePanel parent, Game game, ActionController ac) {
         super(parent, ac, 500);
         if (game == null) return;
@@ -505,20 +507,16 @@ public class TMGUI extends AbstractGUIManager {
         if (gameState != null) {
 
             if (player instanceof HumanGUIPlayer) {
-                createActionMenu(player, (TMGameState) gameState);
-                updateActionButtons(player, gameState);
-//                if (actionTaken) {
-//                    createActionMenu(player, (TMGameState) gameState);
-//                }
-//                if (actionTaken || stateChange) {
-//                    updateActionButtons(player, gameState);
-//                    stateChange = false;
-//                }
+                // TODO only do this if the action space changed
+                if (!gameState.equals(this.gameState)) {
+                    createActionMenu(player, (TMGameState) gameState);
+                }
             } else {
                 resetActionButtons();
             }
 
             TMGameState gs = ((TMGameState) gameState);
+            this.gameState = (TMGameState) gs.copy();
             currentPlayerIdx = gs.getCurrentPlayer();
             focusPlayerButton.setText("Current player: " + currentPlayerIdx);
             if (focusCurrentPlayer) {
@@ -542,7 +540,7 @@ public class TMGUI extends AbstractGUIManager {
             playerCardsPlayed.update(gs.getPlayerComplicatedPointCards()[focusPlayer].copy(), false);
 
             TMCard corp = gs.getPlayerCorporations()[focusPlayer];
-            playerCorporation.update(gs, corp, -1);
+            playerCorporation.update(gs, corp, -1);  // TODO do it once
 
         }
         parent.repaint();
