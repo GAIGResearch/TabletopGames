@@ -10,7 +10,6 @@ import gui.ScreenHighlight;
 import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 
 public class BattleloreGUI extends AbstractGUIManager {
     BattleloreBoardView view;

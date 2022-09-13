@@ -9,7 +9,6 @@ import games.uno.UnoGameState;
 import gui.ScreenHighlight;
 import gui.GamePanel;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import javax.swing.border.Border;

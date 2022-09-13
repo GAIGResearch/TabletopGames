@@ -104,6 +104,7 @@ public class Utils {
     }
     public static void drawStringCentered(Graphics2D g, String text, Rectangle rectToCenterIn, Color color, int size, boolean split) {
         Font f = g.getFont();
+        g.setColor(color);
 
         if (size != -1) {
             g.setFont(new Font(f.getName(), f.getStyle(), size));
@@ -135,12 +136,11 @@ public class Utils {
                 wraps = wrapped.split("\n");
                 h = metrics.getHeight() * wraps.length;
             }
-            int i = 0;
             int y = rectToCenterIn.y;
             for (String s : wraps) {
-                drawShadowStringCentered(g, wraps[i], new Rectangle(rectToCenterIn.x, y, rectToCenterIn.width, metrics.getHeight()));
+//                drawShadowStringCentered(g, s, new Rectangle(rectToCenterIn.x, y, rectToCenterIn.width, metrics.getHeight()));
+                g.drawString(s, rectToCenterIn.x, y);
                 y += metrics.getHeight();
-                i++;
             }
 
             g.setFont(f);
@@ -157,7 +157,6 @@ public class Utils {
         int xText = (int)(rectToCenterIn.getX() + (rectToCenterIn.getWidth() - metrics.stringWidth(text)) / 2);
         int yText = (int)(rectToCenterIn.getY() + ((rectToCenterIn.getHeight() - metrics.getHeight()) / 2) + metrics.getAscent());
 
-        g.setColor(color);
         g.drawString(text, xText, yText);
 
         g.setFont(f);

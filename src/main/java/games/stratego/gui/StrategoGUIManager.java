@@ -4,10 +4,8 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
-import games.stratego.StrategoConstants;
 import games.stratego.StrategoGameState;
 import games.stratego.actions.Move;
-import games.stratego.actions.NormalMove;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.ScreenHighlight;
@@ -18,9 +16,7 @@ import utilities.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public class StrategoGUIManager extends AbstractGUIManager implements ScreenHighlight{
 

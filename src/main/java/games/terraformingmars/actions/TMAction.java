@@ -305,7 +305,7 @@ public class TMAction extends AbstractAction {
                 if (a != null) {
                     if (a instanceof PlaceTile) {
                         a.setCardID(cardID);
-                    } else if (card != null && a instanceof AddResourceOnCard && !((AddResourceOnCard) a).chooseAny) {
+                    } else if (card != null && a instanceof AddResourceOnCard && (!((AddResourceOnCard) a).chooseAny || a.cardID == -1)) {
                         // if add resource on card (not other), set resource on this card
                         card.resourceOnCard = ((AddResourceOnCard) a).resource;
                     }

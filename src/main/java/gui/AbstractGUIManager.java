@@ -211,8 +211,9 @@ public abstract class AbstractGUIManager {
      * Updates the GUI, public method called from the Game class. Updates game state info panels, resets action buttons
      * and then calls the _update() method to allow subclasses to update their inner state.
      *
-     * @param player    - current player acting.
-     * @param gameState - current game state to be used in updating visuals.
+     * @param player      - current player acting.
+     * @param gameState   - current game state to be used in updating visuals.
+     * @param showActions - if false, action buttons not shown
      */
     public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions){
         updateGameStateInfo(gameState);

@@ -8,6 +8,7 @@ import games.GameType;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.*;
+import games.terraformingmars.rules.Discount;
 import games.terraformingmars.rules.effects.Bonus;
 import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.requirements.ActionTypeRequirement;
@@ -673,13 +674,15 @@ public class TMGameState extends AbstractGameState {
         return rate;
     }
 
-    public void addDiscountEffects(HashMap<Requirement, Integer> effects) {
+    public void addDiscountEffects(LinkedList<Discount> discounts) {
         int player = getCurrentPlayer();
-        for (Requirement r : effects.keySet()) {
+        for(Discount d : discounts){
+            Requirement r = d.a;
+            int amount = d.b;
             if (playerDiscountEffects[player].containsKey(r)) {
-                playerDiscountEffects[player].put(r, playerDiscountEffects[player].get(r) + effects.get(r));
+                playerDiscountEffects[player].put(r, playerDiscountEffects[player].get(r) + amount);
             } else {
-                playerDiscountEffects[player].put(r, effects.get(r));
+                playerDiscountEffects[player].put(r, amount);
             }
         }
     }

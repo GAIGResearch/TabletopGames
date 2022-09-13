@@ -6,10 +6,12 @@ import core.components.Card;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
+import games.terraformingmars.rules.Discount;
 import games.terraformingmars.rules.effects.*;
 import games.terraformingmars.rules.requirements.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import utilities.SimpleDeserializer;
 import utilities.Utils;
 
 import java.util.*;
@@ -24,7 +26,7 @@ public class TMCard extends Card {
     public HashSet<Requirement<TMGameState>> requirements;
     public TMTypes.Tag[] tags;
 
-    public HashMap<Requirement, Integer> discountEffects;
+    public LinkedList<Discount> discountEffects;
     public HashSet<TMGameState.ResourceMapping> resourceMappings;
 
     public Effect[] persistingEffects;
@@ -53,7 +55,7 @@ public class TMCard extends Card {
         actions = new TMAction[0];
         immediateEffects = new TMAction[0];
         persistingEffects = new Effect[0];
-        discountEffects = new HashMap<>();
+        discountEffects = new LinkedList<>();
         resourceMappings = new HashSet<>();
         requirements = new HashSet<>();
     }
@@ -159,29 +161,32 @@ public class TMCard extends Card {
                     // A discount for CounterRequirement
                     for (Object o2: (JSONArray)effect.get("counter")) {
                         r = new CounterRequirement((String)o2, -1, true);
-                        if (card.discountEffects.containsKey(r)) {
-                            card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                        if (card.discountEffects.contains(r)) {
+                            int disc = card.discountEffects.get(card.discountEffects.indexOf(r)).b;
+                            card.discountEffects.add(new Discount(r, disc + amount));
                         } else {
-                            card.discountEffects.put(r, amount);
+                            card.discountEffects.add(new Discount(r, amount));
                         }
                     }
                 } else if (effect.get("tag") != null) {
                     // A discount for tag requirements
                     TMTypes.Tag t = TMTypes.Tag.valueOf((String) effect.get("tag"));
                     r = new TagsPlayedRequirement(new TMTypes.Tag[]{t}, new int[1]);
-                    if (card.discountEffects.containsKey(r)) {
-                        card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                    if (card.discountEffects.contains(r)) {
+                        int disc = card.discountEffects.get(card.discountEffects.indexOf(r)).b;
+                        card.discountEffects.add(new Discount(r, disc + amount));
                     } else {
-                        card.discountEffects.put(r, amount);
+                        card.discountEffects.add(new Discount(r, amount));
                     }
                 } else if (effect.get("standardproject") != null) {
                     // A discount for buying standard projects
                     TMTypes.StandardProject sp = TMTypes.StandardProject.valueOf((String) effect.get("standardproject"));
                     r = new ActionTypeRequirement(TMTypes.ActionType.StandardProject, sp);
-                    if (card.discountEffects.containsKey(r)) {
-                        card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                    if (card.discountEffects.contains(r)) {
+                        int disc = card.discountEffects.get(card.discountEffects.indexOf(r)).b;
+                        card.discountEffects.add(new Discount(r, disc + amount));
                     } else {
-                        card.discountEffects.put(r, amount);
+                        card.discountEffects.add(new Discount(r, amount));
                     }
                 }
             } else if (type.equalsIgnoreCase("resourcemapping")) {
@@ -199,6 +204,26 @@ public class TMCard extends Card {
         card.immediateEffects = immediateEffects.toArray(new TMAction[0]);
         card.actions = actions.toArray(new TMAction[0]);
         card.persistingEffects = persistingEffects.toArray(new Effect[0]);
+
+        return card;
+    }
+
+    public static TMCard loadCardJSON(JSONObject cardDef)
+    {
+        TMCard card = null;
+        try{
+            GsonBuilder gsonBuilder = new GsonBuilder()
+                    .registerTypeAdapter(Requirement.class, new SimpleDeserializer<Requirement>())
+                    .registerTypeAdapter(Effect.class, new SimpleDeserializer<Effect>())
+                    .registerTypeAdapter(Discount.class, new Discount())
+                    .registerTypeAdapter(TMAction.class, new SimpleDeserializer<TMAction>())
+                    ;
+            Gson gson = gsonBuilder.setPrettyPrinting().create();
+            card = gson.fromJson(cardDef.toJSONString(), TMCard.class);
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
 
         return card;
     }
@@ -350,10 +375,11 @@ public class TMCard extends Card {
                                         int amount = Integer.parseInt(split2[1]);
                                         HashSet<Requirement> reqs = parseDiscount(split2);
                                         for (Requirement r: reqs) {
-                                            if (card.discountEffects.containsKey(r)) {
-                                                card.discountEffects.put(r, card.discountEffects.get(r) + amount);
+                                            if (card.discountEffects.contains(r)) {
+                                                int disc = card.discountEffects.get(card.discountEffects.indexOf(r)).b;
+                                                card.discountEffects.add(new Discount(r, disc + amount));
                                             } else {
-                                                card.discountEffects.put(r, amount);
+                                                card.discountEffects.add(new Discount(r, amount));
                                             }
                                         }
                                     } else if (s.contains("resourcemapping")) {
@@ -546,9 +572,9 @@ public class TMCard extends Card {
         }
         copy.tags = tags.clone();
         if (discountEffects != null) {
-            copy.discountEffects = new HashMap<>();
-            for (Requirement r: discountEffects.keySet()) {
-                copy.discountEffects.put(r.copy(), discountEffects.get(r));
+            copy.discountEffects = new LinkedList<>();
+            for (Discount discountEffect : discountEffects) {
+                copy.discountEffects.add(new Discount(discountEffect.a.copy(), discountEffect.b));
             }
         }
         if (resourceMappings != null) {
@@ -610,9 +636,9 @@ public class TMCard extends Card {
             copy.tags = tags.clone();
         } else copy.tags = null;
         if (discountEffects != null && discountEffects.size() > 0) {
-            copy.discountEffects = new HashMap<>();
-            for (Requirement r: discountEffects.keySet()) {
-                copy.discountEffects.put(r.copySerializable(), discountEffects.get(r));
+            copy.discountEffects = new LinkedList<>();
+            for (Discount discount :discountEffects) {
+                copy.discountEffects.add(new Discount(discount.a.copySerializable(), discount.b));
             }
         } else copy.discountEffects = null;
         if (resourceMappings != null && resourceMappings.size() > 0) {

@@ -9,7 +9,6 @@ import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensGameState;
 import gui.ScreenHighlight;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import javax.swing.border.Border;

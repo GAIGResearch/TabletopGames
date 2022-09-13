@@ -7,7 +7,6 @@ import core.Game;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 
 import javax.swing.*;
@@ -15,7 +14,6 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Collection;
 
 public class BlackjackGUIManager extends AbstractGUIManager {
     final static int playerWidth = 300;

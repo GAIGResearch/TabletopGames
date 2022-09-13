@@ -1,0 +1,7290 @@
+[
+  {
+    "@class": "filterDiv automated buildingTag jovianTag standard reqs",
+    "@data-oxygen": "5",
+    "annotation": "(Oxygen must be 5% or less.)",
+    "div": [
+      {
+        "#text": "Colonizer Training Camp",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-jovian "
+      },
+      {
+        "#text": "#001",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big "
+          },
+          {
+            "#text": "max 5 Oxygen",
+            "@class": "requirements requirements-max "
+          },
+          {
+            "#text": "Oxygen must be 5-max",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard ",
+    "annotation": "(Increase your Energy production 1 step. Increase temperature 1 step.)",
+    "div": [
+      {
+        "#text": "Deep Well Heating",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-power "
+      },
+      {
+        "#text": "#003",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "energyprod-"
+            }
+          },
+          {
+            "@class": "tile temperature-tile ",
+            "@style": "margin-left:20px "
+          },
+          {
+            "#text": "inc-Energyprod-1 * inc-Temperature-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated standard reqs noneTag",
+    "@data-Ocean": "3",
+    "annotation": "(Requires 3 ocean tiles. Decrease your MC production 1 step and any heat production 1 step. Increase your Plant production 2 steps.)",
+    "div": [
+      {
+        "#text": "Cloud Seeding",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "#text": "#004",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "3 OceanTiles",
+            "@class": "requirements "
+          },
+          {
+            "@class": "production-boxprod-box-size2a ",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "#text": "1",
+                "@class": "moneyprod-"
+              },
+              {
+                "@class": "heatprod-red-outline "
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "plantprod-"
+              },
+              {
+                "@class": "plantprod-"
+              }
+            ]
+          },
+          {
+            "#text": "Requires 3 oceanTiles* dec-MegaCreditprod-1 * dec-heatprod-1-any * inc-Plantprod-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active scienceTag standard reqs",
+    "@data-oxygen": "6",
+    "annotation": "(Action: Spend 1 MC to reveal the top card of the draw deck. If that card has a Microbe tag, add a Science resource here. 3 VPs if you have one or more Science resources here.)",
+    "div": [
+      {
+        "#text": "Search for Life",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "3",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-science "
+      },
+      {
+        "#text": "#005",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "3/",
+            "@class": "points points-big",
+            "div": {
+              "@class": "resource science"
+            }
+          },
+          {
+            "#text": "max 6 Oxygen",
+            "@class": "requirements requirements-max "
+          },
+          {
+            "#text": "*  :",
+            "@class": " ",
+            "div": [
+              {
+                "@class": "red-arrow "
+              },
+              {
+                "@class": "resource science"
+              }
+            ],
+            "span": [
+              {
+                "#text": "1",
+                "@class": " money resource "
+              },
+              {
+                "@class": "resource-tag tag-microbe"
+              }
+            ]
+          },
+          {
+            "#text": "Action: dec-MegaCredit-1 and add-1-Science---Microbe * 3 VP if 1 Science ",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag standard ",
+    "annotation": "(Action: Spend 1 Energy to gain 1 MC for each City tile ON MARS.)",
+    "div": [
+      {
+        "#text": "Martian Rails",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#007",
+        "@class": "number"
+      },
+      {
+        "#text": "/",
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile city-tile-small",
+            "@style": "filter:brightness0.8 drop-shadow1px 0px 1px #c33 drop-shadow-1px 0px 1px #c33 drop-shadow0px 1px 1px #c33 drop-shadow0px -1px 1px #c33"
+          },
+          {
+            "#text": "Action: dec-Energy-1 and inc-MegaCredit-1-tile+City-true-any ",
+            "@class": "description "
+          }
+        ],
+        "span": [
+          {
+            "@class": "energy resource "
+          },
+          {
+            "#text": "1",
+            "@class": " money resource "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated cityTag buildingTag standard reqs",
+    "@data-Ocean": "4",
+    "annotation": "(Requires 4 ocean tiles. Place this tile. Decrease your Energy production 2 steps and increase your MC production 5 steps.",
+    "div": [
+      {
+        "#text": "Capital",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "26",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#008",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points ",
+            "span": {
+              "@class": "resource ocean-resource "
+            }
+          },
+          {
+            "#text": "4 OceanTiles",
+            "@class": "requirements "
+          },
+          {
+            "@class": "production-boxprod-box-size2a ",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "5",
+                "@class": "moneyprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile",
+            "@style": "margin-top: -10px;\r\n                width: 60px;\r\n                height: 69px;\r\n                background-size: 60px 69px;\r\n                filter:none;\r\n                "
+          },
+          {
+            "#text": "Requires 4 oceanTiles* placetile/Capital/ground/true * dec-Energyprod-2 * inc-MegaCreditprod-5 * 1 VP per 1 Ocean Adjacent ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag standard ",
+    "annotation": "(Raise temperature 1 step and gain 2 titanium. Remove up to 3 Plants from any player.)",
+    "div": [
+      {
+        "#text": "Asteroid",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "14",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#009",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "tile temperature-tile "
+          },
+          {
+            "@class": " titanium resource "
+          },
+          {
+            "@class": " titanium resource "
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "resource plant red-outline "
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "#text": "inc-temperature-1  * inc-titanium-2* dec-Plant-3-any",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag standard ",
+    "annotation": "(Raise temperature 1 step and place an ocean tile. Remove up to 3 Plants from any player.)",
+    "div": [
+      {
+        "#text": "Comet",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "21",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#010",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "tile temperature-tile "
+          },
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "#text": "inc-temperature-1  *placetile/ocean/ocean/true * dec-Plant-3-any",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag standard ",
+    "annotation": "(Raise temperature 2 steps and gain 4 titanium. Remove up to 4 Plants from any player.)",
+    "div": [
+      {
+        "#text": "Big Asteroid",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "27",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#011",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "tile temperature-tile "
+          },
+          {
+            "@class": "tile temperature-tile "
+          },
+          {
+            "@class": "titanium resource "
+          },
+          {
+            "@class": "titanium resource "
+          },
+          {
+            "@class": "titanium resource "
+          },
+          {
+            "@class": "titanium resource "
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "#text": "inc-temperature-2  * inc-titanium-4* dec-Plant-4-any",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active spaceTag jovianTag standard ",
+    "annotation": "(Action: Pay 12 MC to place an ocean tile. TITANIUM MAY BE USED as if playing a Space card. 1 VP for each Jovian tag you have.)",
+    "div": [
+      {
+        "#text": "Water Import from Europa",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "25",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-jovian "
+      },
+      {
+        "#text": "#012",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points points-big",
+            "span": {
+              "@class": "tag-jovian resource-tag"
+            }
+          },
+          {
+            "#text": "12",
+            "@class": " money resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "ocean-tile tile "
+          },
+          {
+            "#text": "Action: dec-MegaCredit-12 and placetile/ocean/ocean/true * TITANIUM MAY BE USED as if playing a Space card * 1 VP per 1 Jovian tag ",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ],
+        "span": {
+          "@class": "resource titanium"
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag standard ",
+    "annotation": "(Action: Decrease your Energy production 1 step to increase your terraform rating 1 step.)",
+    "div": [
+      {
+        "#text": "Equatorial Magnetizer",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#015",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size1a ",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              }
+            ]
+          },
+          {
+            "@class": "rating tile "
+          },
+          {
+            "#text": "Action: dec-Energyprod-1 and inc-TR-1 ",
+            "@class": "description "
+          }
+        ],
+        "span": {
+          "@class": "red-arrow ",
+          "@style": "margin-left:5px; "
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated cityTag buildingTag standard reqs",
+    "@data-oxygen": "7",
+    "annotation": "(Oxygen must be 7% or less. Gain 3 plants. Place a City tile. Decrease your Energy production 1 step and increase your MC production 3 steps.)",
+    "div": [
+      {
+        "#text": "Domed Crater",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "24",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#016",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big "
+          },
+          {
+            "#text": "max 7 Oxygen",
+            "@class": "requirements requirements-max "
+          },
+          {
+            "@class": "production-boxprod-box-size1a ",
+            "@style": "margin-bottom:5px;",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "3",
+                "@class": "moneyprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile ",
+            "@style": "margin-left:20px;margin-bottom:5px;"
+          },
+          {
+            "@class": "plant resource "
+          },
+          {
+            "@class": "plant resource "
+          },
+          {
+            "@class": "plant resource "
+          },
+          {
+            "#text": "Oxygen must be 7-max* inc-Plant-3* placetile/city/ground/true * dec-Energyprod-1 * inc-MegaCreditprod-3 ",
+            "@class": "description ",
+            "@style": "margin-top:-7px;font-size:11px;text-align: left",
+            "br": [
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated cityTag buildingTag standard ",
+    "annotation": "(Decrease your Energy production 1 step and increase your MC production 3 steps. Place a City ON THE RESERVED AREA, disregarding normal placement restrictions.)",
+    "div": [
+      {
+        "#text": "Noctis City",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "18",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#017",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size1a ",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "3",
+                "@class": "moneyprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile ",
+            "@style": "margin-left:20px "
+          },
+          {
+            "#text": "dec-Energyprod-1  * inc-MegaCreditprod-3 * placetile/City/Noctis/true ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag jovianTag standard reqs",
+    "@data-oxygen": "2",
+    "annotation": "(Requires 2% oxygen. Increase your heat production 2 steps and your Plant production 2 steps.)",
+    "div": [
+      {
+        "#text": "Methane from Titan",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "28",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-jovian "
+      },
+      {
+        "#text": "#018",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big "
+          },
+          {
+            "#text": "2 Oxygen",
+            "@class": "requirements "
+          },
+          {
+            "@class": "production-boxprod-box-size2 ",
+            "div": [
+              {
+                "@class": "production heat "
+              },
+              {
+                "@class": "production heat "
+              },
+              {
+                "@class": "production plant "
+              },
+              {
+                "@class": "production plant "
+              }
+            ]
+          },
+          {
+            "#text": "Requires 2% oxygen* inc-heatprod-2  * inc-Plantprod-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event earthTag spaceTag eventTag standard ",
+    "annotation": "(Gain 3 Plants, or add 3 Microbes or 2 Animals to ANOTHER card. Place an ocean tile.)",
+    "div": [
+      {
+        "#text": "Imported Hydrogen",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "16",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "tag tag3 tag-earth "
+      },
+      {
+        "#text": "#019",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "resource plant "
+          },
+          {
+            "@class": "resource microbe "
+          },
+          {
+            "@class": "resource animal "
+          },
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "#text": "inc-Plant-3 or add-3-Microbe-another or add-2-Animal-another * placetile/ocean/ocean/true ",
+            "@class": "description "
+          }
+        ],
+        "span": [
+          "3",
+          "3",
+          "2"
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active cityTag buildingTag scienceTag standard ",
+    "annotation": "(Effect: When you play a card, you pay 1 MC less for it.)",
+    "div": [
+      {
+        "#text": "Research Outpost",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "18",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "@class": "tag tag3 tag-science "
+      },
+      {
+        "#text": "#020",
+        "@class": "number"
+      },
+      {
+        "#text": ":",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "Effect: discount-1",
+            "@class": "description "
+          },
+          {
+            "@class": "tile city-tile "
+          },
+          {
+            "#text": "placetile/city/ground/true/None",
+            "@class": "description "
+          }
+        ],
+        "span": {
+          "#text": "-1",
+          "@class": "money resource "
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag cityTag standard ",
+    "annotation": "(Increase your titanium production 1 step and place a City tile ON THE RESERVED AREA.)",
+    "div": [
+      {
+        "#text": "Phobos Space Haven",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "25",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#021",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "3",
+            "@class": "points points-big "
+          },
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "titaniumprod-"
+            }
+          },
+          {
+            "@class": "tile city-tile ",
+            "@style": "margin-left:20px "
+          },
+          {
+            "#text": "inc-titaniumprod-1  * placetile/city/Phobos/false ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated standard noneTag",
+    "annotation": "(Place an ocean tile. Decrease your MC production 2 steps and increase your heat production 3 steps.)",
+    "div": [
+      {
+        "#text": "Black Polar Dust",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "15",
+        "@class": "price"
+      },
+      {
+        "#text": "#022",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size3a ",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "#text": "2",
+                "@class": "moneyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "heatprod-"
+              },
+              {
+                "@class": "heatprod-"
+              },
+              {
+                "@class": "heatprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "#text": "placetile/ocean/ocean/true * dec-MegaCreditprod-2  * inc-heatprod-3 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active plantTag standard reqs",
+    "@data-temperature": "-12",
+    "annotation": "(Effect: When anyone places an ocean tile, gain 2 Plants.)",
+    "div": [
+      {
+        "#text": "Arctic Algae",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant "
+      },
+      {
+        "#text": "#023",
+        "@class": "number"
+      },
+      {
+        "#text": ":",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "max -12 Temperature",
+            "@class": "requirements requirements-max "
+          },
+          {
+            "@class": "tile ocean-tile red-outline "
+          },
+          {
+            "@class": "resource plant "
+          },
+          {
+            "@class": "resource plant "
+          },
+          {
+            "#text": "Effect: placetile(Ocean,onMars,any) / inc-Plant-2",
+            "@class": "description "
+          },
+          {
+            "@class": "resource plant "
+          },
+          {
+            "#text": "Requires -12 C or colder to play* inc-Plant-1",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active animalTag standard reqs",
+    "@data-oxygen": "11",
+    "annotation": "(Action: Remove 1 Animal from any card and add it to this card.)",
+    "div": [
+      {
+        "#text": "Predators",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "14",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal "
+      },
+      {
+        "#text": "#024",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points ",
+            "div": {
+              "@class": "animal resource "
+            }
+          },
+          {
+            "#text": "11 Oxygen",
+            "@class": "requirements"
+          },
+          {
+            "@class": "resource animal red-outline "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "animal resource "
+          },
+          {
+            "#text": "Action: rem-1-Animal and add-1-Animal ",
+            "@class": "description "
+          },
+          {
+            "#text": "Requires 11% oxygen* 1 VP per 1 Animal ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv plantTag buildingTag automated standard reqs",
+    "@data-temperature": "-12",
+    "annotation": "(Requires -12 C or warmer. Add 1 Animal TO ANY ANIMAL CARD. Gain 3 Plants. Increase your MC production 2 steps.)",
+    "div": [
+      {
+        "#text": "Eos Chasma National Park",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "16",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-plant "
+      },
+      {
+        "#text": "#026",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big "
+          },
+          {
+            "#text": "-12 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "resource animal "
+          },
+          {
+            "@class": "resource plant ",
+            "@style": "margin-left:15px "
+          },
+          {
+            "@class": "resource plant "
+          },
+          {
+            "@class": "resource plant "
+          },
+          {
+            "@class": "production-boxprod-box ",
+            "div": {
+              "#text": "2",
+              "@class": "moneyprod-"
+            }
+          },
+          {
+            "#text": "Requires -12 C or warmer* add-1-Animal-another-Animal * inc-Plant-3* inc-MegaCreditprod-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated cityTag buildingTag standard reqs",
+    "@data-oxygen": "9",
+    "annotation": "(Oxygen must be 9% or less. Place a City tile. Decrease your Energy production 1 step and increase your MC production 3 steps.)",
+    "div": [
+      {
+        "#text": "Cupola City",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "16",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#029",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "max 9 Oxygen",
+            "@class": "requirements requirements-max "
+          },
+          {
+            "@class": "production-boxprod-box-size1a ",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "3",
+                "@class": "moneyprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile ",
+            "@style": "margin-left:20px "
+          },
+          {
+            "#text": "Oxygen must be 9-max* placetile/city/ground/true * dec-Energyprod-1  * inc-MegaCreditprod-3 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated earthTag powerTag standard ",
+    "annotation": "(Decrease your MC production 2 steps and increase your heat production and Energy production 2 steps each.)",
+    "div": [
+      {
+        "#text": "Lunar Beam",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-power "
+      },
+      {
+        "@class": "tag tag2 tag-earth "
+      },
+      {
+        "#text": "#030",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size2a ",
+            "br": [
+              "",
+              ""
+            ],
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "#text": "2",
+                "@class": "moneyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "heatprod-"
+              },
+              {
+                "@class": "heatprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "energyprod-"
+              }
+            ]
+          },
+          {
+            "#text": "2 MegaCreditprod",
+            "@class": "requirements "
+          },
+          {
+            "#text": "dec-MegaCreditprod-2  * inc-heatprod-2 * inc-Energyprod-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active spaceTag standard",
+    "annotation": "(Effect: When you play a Space Event, you gain 3 MC and 3 heat.)",
+    "div": [
+      {
+        "#text": "Optimal Aerobraking",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "#text": "#031",
+        "@class": "number"
+      },
+      {
+        "#text": ":",
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "resource-tag tag-space "
+          },
+          {
+            "@class": "resource-tag tag-event "
+          },
+          {
+            "#text": "3",
+            "@class": "resource money "
+          },
+          {
+            "@class": "resource heat ",
+            "@style": "margin-right: 0px;"
+          },
+          {
+            "@class": "resource heat ",
+            "@style": "margin-right: 0px;"
+          },
+          {
+            "@class": "resource heat"
+          },
+          {
+            "#text": "Effect: playcard(tag-Space,Event) / inc-MegaCredit-3 and inc-heat-3",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv cityTag buildingTag standard automated ",
+    "annotation": "(Place a City tile. Decrease your Energy production 2 steps and increase your steel production 2 steps.)",
+    "div": [
+      {
+        "#text": "Underground city",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "18",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#032",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size2a ",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "steelprod-"
+              },
+              {
+                "@class": "steelprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile ",
+            "@style": "margin-left:20px "
+          },
+          {
+            "#text": "placetile/city/ground/true * dec-Energyprod-2  * inc-steelprod-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv standard active scienceTag microbeTag ",
+    "annotation": "(Action: Add 1 Microbe to this card, or remove 2 Microbes from this card to raise oxygen level 1 step.)",
+    "div": [
+      {
+        "#text": "Regolith Eaters",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe "
+      },
+      {
+        "@class": "tag tag2 tag-science "
+      },
+      {
+        "#text": "#033",
+        "@class": "number"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile oxygen-tile "
+          },
+          {
+            "#text": "Action: add-1-Microbe * Action: rem-2-Microbe and inc-oxygen-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv standard active scienceTag microbeTag reqs",
+    "@data-oxygen": "4",
+    "annotation": "(Action: Add 1 Microbe to this card, or remove 2 Microbes to raise temperature 1 step. Requires 4% oxygen.)",
+    "div": [
+      {
+        "#text": "GHG Producing Bacteria",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe "
+      },
+      {
+        "@class": "tag tag2 tag-science "
+      },
+      {
+        "#text": "#034",
+        "@class": "number"
+      },
+      {
+        "#text": "OR",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "4 Oxygen",
+            "@class": "requirements "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile temperature-tile "
+          },
+          {
+            "#text": "Action: add-1-Microbe * Action: rem-2-Microbe and inc-Temperature-1",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv standard active microbeTag reqs",
+    "@data-oxygen": "4",
+    "annotation": "(Action: Remove 1 Microbe from any card to add 1 to this card. Requires 4% oxygen. 1 VP per 2 Microbes on this card.)",
+    "div": [
+      {
+        "#text": "Ants",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe "
+      },
+      {
+        "#text": "#035",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1/2",
+            "@class": "points ",
+            "div": {
+              "@class": "resource microbe "
+            }
+          },
+          {
+            "#text": "4 Oxygen",
+            "@class": "requirements "
+          },
+          {
+            "@class": "microbe resource red-outline "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "#text": "Action: rem-1-Microbe-any and add-1-Microbe * 1 VP per 2 Microbe ",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag standard ",
+    "annotation": "(Raise your terraform rating 2 steps.)",
+    "div": [
+      {
+        "#text": "Release of Inert Gases",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "14",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#036",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile rating "
+          },
+          {
+            "@class": "tile rating "
+          },
+          {
+            "#text": "inc-TR-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag standard ",
+    "annotation": "(Raise your terraforming rating 2 steps and temperature 1 step. Increase your Plant production 1 step, or 4 steps if you have 3 Plant tags.)",
+    "div": [
+      {
+        "#text": "Nitrogen-Rich Asteroid",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "31",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#037",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "production plant",
+                "@style": "margin-left:37px"
+              },
+              {
+                "@class": "tag-plant resource-tag"
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "#text": "inc-TR-2  * inc-temperature-1 * inc-Plantprod-1 , but inc-Plantprod-4  if you have 3 Plant tags",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag standard",
+    "annotation": "(Effect: When any City tile is placed, gain 2 MC.)",
+    "div": [
+      {
+        "#text": "Rover Construction",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#038",
+        "@class": "number"
+      },
+      {
+        "#text": ":",
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "tile city-tile",
+            "@style": "filter:brightness0.8 drop-shadow1px 0px 1px #c33 drop-shadow-1px 0px 1px #c33 drop-shadow0px 1px 1px #c33 drop-shadow0px -1px 1px #c33"
+          },
+          {
+            "#text": "2",
+            "@class": "money resource"
+          },
+          {
+            "#text": "Effect: placetile(City,,any) / inc-MegaCredit-2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag standard",
+    "annotation": "(Raise temperature 3 steps and gain 4 steel. Remove up to 8 Plants from any player.)",
+    "div": [
+      {
+        "#text": "Deimos Down",
+        "@class": "title background-color-event"
+      },
+      {
+        "#text": "31",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event"
+      },
+      {
+        "@class": "tag tag2 tag-space"
+      },
+      {
+        "#text": "#039",
+        "@class": "number"
+      },
+      {
+        "#text": "8",
+        "@class": "content",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "@class": " steel resource"
+          },
+          {
+            "@class": " steel resource"
+          },
+          {
+            "@class": " steel resource"
+          },
+          {
+            "@class": " steel resource"
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "resource plant red-outline"
+          },
+          {
+            "#text": "inc-temperature-3  * inc-steel-4* dec-Plant-8-any",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag jovianTag standard",
+    "annotation": "(Increase your titanium production 2 steps.)",
+    "div": [
+      {
+        "#text": "Asteroid Mining",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "30",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-jovian"
+      },
+      {
+        "#text": "#040",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "production titanium"
+              },
+              {
+                "@class": "production titanium"
+              }
+            ]
+          },
+          {
+            "#text": "inc-titaniumprod-2 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag standard",
+    "annotation": "(Decrease your Plant production 1 step and increase your MC production 4 steps.)",
+    "div": [
+      {
+        "#text": "Food Factory",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#041",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "4",
+                "@class": "moneyprod"
+              }
+            ]
+          },
+          {
+            "#text": "dec-Plantprod-1  * inc-MegaCreditprod-4 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated microbeTag standard reqs",
+    "@data-temperature": "-18",
+    "annotation": "(It must be -18 C or colder. Increase your Plant production 1 step.)",
+    "div": [
+      {
+        "#text": "Archaebacteria",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "6",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "#text": "#042",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "max -18 Temperature",
+            "@class": "requirements requirements-max"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "plantprod"
+            }
+          },
+          {
+            "#text": "Requires -18 C or colder* inc-Plantprod-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag standard",
+    "annotation": "(Decrease your Energy production 1 step and increase your heat production 3 steps.)",
+    "div": [
+      {
+        "#text": "Carbonate Processing",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "6",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#043",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size3a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "heatprod"
+              },
+              {
+                "@class": "heatprod"
+              },
+              {
+                "@class": "heatprod"
+              }
+            ]
+          },
+          {
+            "#text": "dec-Energyprod-1  * inc-heatprod-3 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag scienceTag standard reqs",
+    "@data-oxygen": "4",
+    "annotation": "(Oxygen must be 4% or less. Place this tile NEXT TO NO OTHER TILE. Increase your MC production 1 step.)",
+    "div": [
+      {
+        "#text": "Natural Preserve",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-science"
+      },
+      {
+        "#text": "#044",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "max 4 Oxygen",
+            "@class": "requirements requirements-max"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "1",
+              "@class": "moneyprod"
+            }
+          },
+          {
+            "#text": "\u2642",
+            "@class": "tile special-tile",
+            "@style": "font-size: 24px;margin-left:20px;"
+          },
+          {
+            "#text": "Oxygen must be 4-max* placetile/Park/ground/true/None * inc-MegaCreditprod-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard",
+    "annotation": "(Decrease your MC production 2 steps and increase your Energy production 3 steps.)",
+    "div": [
+      {
+        "#text": "Nuclear Power",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "#text": "#045",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size3a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "#text": "2",
+                "@class": "moneyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              }
+            ]
+          },
+          {
+            "#text": "dec-MegaCreditprod-2  * inc-Energyprod-3 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-Ocean": "5",
+    "annotation": "(Requires 5 ocean tiles. Gain 1 Plant and increase your Plant production 2 steps.)",
+    "div": [
+      {
+        "#text": "Algae",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#047",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "5 OceanTiles",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "@class": "plant resource",
+            "@style": "margin-left:20px"
+          },
+          {
+            "#text": "Requires 5 oceanTiles* inc-Plant-1 * inc-Plantprod-2 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "#comment": "",
+    "@class": "filterDiv automated plantTag standard",
+    "annotation": "(Increase your Plant production 1 step.)",
+    "div": [
+      {
+        "#text": "Adapted Lichen",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#048",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "plantprod"
+            }
+          },
+          {
+            "#text": "inc-Plantprod-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active animalTag standard reqs",
+    "@data-temperature": "2",
+    "annotation": "(Action: Add 1 Animal to this card.)",
+    "div": [
+      {
+        "#text": "Fish",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal"
+      },
+      {
+        "#text": "#052",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points",
+            "div": {
+              "@class": "animal resource"
+            }
+          },
+          {
+            "#text": "+2 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "animal resource"
+          },
+          {
+            "#text": "Action: add-1-Animal ",
+            "@class": "description"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "@style": "margin-top:-10px;",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "plantprod-red-outline"
+              }
+            ]
+          },
+          {
+            "#text": "Requires +2 C or warmer* dec-Plantprod-1-any * 1 VP per 1 Animal ",
+            "@class": "description",
+            "@style": "text-align:left;margin-top:-5px;",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ],
+        "span": {
+          "@class": "red-arrow"
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated standard reqs noneTag",
+    "@data-temperature": "0",
+    "annotation": "(Requires 0 C or warmer. Place 2 ocean tiles.)",
+    "div": [
+      {
+        "#text": "Lake Marineris",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "18",
+        "@class": "price"
+      },
+      {
+        "#text": "#053",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "0 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile ocean-tile"
+          },
+          {
+            "@class": "tile ocean-tile"
+          },
+          {
+            "#text": "Requires 0 C or warmer* placetile/ocean/ocean/true * placetile/ocean/ocean/true ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active animalTag standard reqs",
+    "@data-oxygen": "6",
+    "annotation": "(Action: Add 1 Animal to this card.)",
+    "div": [
+      {
+        "#text": "Small Animals",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "6",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal"
+      },
+      {
+        "#text": "#054",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1/2",
+            "@class": "points",
+            "div": {
+              "@class": "animal resource"
+            }
+          },
+          {
+            "#text": "6 Oxygen",
+            "@class": "requirements"
+          },
+          {
+            "@class": "animal resource"
+          },
+          {
+            "#text": "Action: add-1-Animal ",
+            "@class": "description",
+            "@style": "margin-bottom:5px;"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "plantprod-red-outline"
+              }
+            ]
+          },
+          {
+            "#text": " inc-Plantprod-1 * 1 VP per 2 Animal ",
+            "@class": "description",
+            "@style": "text-align:left;",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ],
+        "span": {
+          "@class": "red-arrow"
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-Ocean": "6",
+    "annotation": "(Requires 6 ocean tiles. Increase your MC production 2 steps and your Plant production 3 steps. Gain 2 Plants.)",
+    "div": [
+      {
+        "#text": "Kelp Farming",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "17",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#055",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "6 OceanTiles",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size3",
+            "br": "",
+            "div": [
+              {
+                "#text": "2",
+                "@class": "moneyprod"
+              },
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "@class": "plant resource",
+            "@style": "margin-left:20px"
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "#text": "Requires 6 oceanTiles* inc-MegaCreditprod-2  * inc-Plantprod-3 * inc-Plant-2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag jovianTag powerTag standard reqs",
+    "@data-jovian": "1",
+    "annotation": "(Requires a Jovian tag. Increase your heat production and Energy production 3 steps each.)",
+    "div": [
+      {
+        "#text": "Beam from a Thorium Asteroid",
+        "@class": "title background-color-automated",
+        "@style": "font-size:14px"
+      },
+      {
+        "#text": "32",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-power"
+      },
+      {
+        "@class": "tag tag2 tag-space"
+      },
+      {
+        "@class": "tag tag3 tag-jovian"
+      },
+      {
+        "#text": "#058",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Jovian tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size3",
+            "br": "",
+            "div": [
+              {
+                "@class": "production heat"
+              },
+              {
+                "@class": "production heat"
+              },
+              {
+                "@class": "production heat"
+              },
+              {
+                "@class": "production energy"
+              },
+              {
+                "@class": "production energy"
+              },
+              {
+                "@class": "production energy"
+              }
+            ]
+          },
+          {
+            "#text": "Requires a Jovian tag* inc-heatprod-3 * inc-Energyprod-3  ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-temperature": "4",
+    "annotation": "(Requires +4 C or warmer. Place a greenery tile ON AN AREA RESERVED FOR OCEAN and raise oxygen 1 step. Disregard normal placement restrictions for this.)",
+    "div": [
+      {
+        "#text": "Mangrove",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#059",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "+4 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile greenery-tile"
+          },
+          {
+            "#text": "Requires +4 C or warmer* placetile/greenery/ocean/true ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-temperature": "-4",
+    "annotation": "(Requires -4 C or warmer. Increase your Plant production 3 steps. Gain 1 Plant.)",
+    "div": [
+      {
+        "#text": "Trees",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#060",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "-4 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "@class": "plant resource",
+            "@style": "margin-left:20px"
+          },
+          {
+            "#text": "Requires -4 C or warmer* inc-Plantprod-3 * inc-Plant-1",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag standard ",
+    "annotation": "(Raise oxygen 1 step. Remove 2 plants from any player. Gain 2 steel.)",
+    "div": [
+      {
+        "#text": "Mining Expedition",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#063",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "tile oxygen-tile"
+          },
+          {
+            "@class": "resource steel"
+          },
+          {
+            "@class": "resource steel"
+          },
+          {
+            "@class": "resource plant red-outline"
+          },
+          {
+            "@class": "resource plant red-outline"
+          },
+          {
+            "#text": "inc-oxygen-1 * dec-Plant-2-any* inc-steel-2",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag standard",
+    "annotation": "(Place this tile on an area with a steel or titanium placement bonus. Increase that production 1 step.)",
+    "div": [
+      {
+        "#text": "Mining Rights",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#067",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "*",
+          "*"
+        ],
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "#text": "\u2692",
+            "@class": "tile special-tile"
+          },
+          {
+            "#text": "OR",
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "steelprod"
+              },
+              {
+                "@class": "titaniumprod"
+              }
+            ]
+          },
+          {
+            "#text": "placetile/Mine/Steel-Titanium/true ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active animalTag standard reqs",
+    "@data-oxygen": "13",
+    "annotation": "(Action: Add an animal to this card.)",
+    "div": [
+      {
+        "#text": "Birds",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal "
+      },
+      {
+        "#text": "#072",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points ",
+            "div": {
+              "@class": "animal resource "
+            }
+          },
+          {
+            "#text": "13 Oxygen",
+            "@class": "requirements",
+            "@style": "margin-bottom:5px;"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "animal resource "
+          },
+          {
+            "#text": "Action: add-1-Animal ",
+            "@class": "description ",
+            "@style": "margin-top:-5px;margin-bottom:5px;"
+          },
+          {
+            "@class": "production-boxprod-box-size2a",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "plantprod-red-outline"
+              },
+              {
+                "@class": "plantprod-red-outline"
+              }
+            ]
+          },
+          {
+            "#text": "Requires 13% oxygen* dec-Plantprod-2* 1 VP per 1 Animal ",
+            "@class": "description",
+            "@style": "margin-top:-5px;"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag standard ",
+    "annotation": "(Gain 2 plants. Raise oxygen level 1 step and place an ocean tile.)",
+    "div": [
+      {
+        "#text": "Towing a Comet",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "23",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#075",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "tile oxygen-tile "
+          },
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "#text": "inc-Plant-2* inc-oxygen-1 * placetile/ocean/ocean/true ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active powerTag spaceTag standard ",
+    "annotation": "(Action: Spend 7 MC to increase your energy production 1 step.)",
+    "div": [
+      {
+        "#text": "Space Mirrors",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "3",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-power "
+      },
+      {
+        "#text": "#076",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "7",
+            "@class": "resource money"
+          },
+          {
+            "@class": "red-arrow"
+          },
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "energyprod-"
+            }
+          },
+          {
+            "#text": "Action: dec-MegaCredit-7 and inc-energyprod-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated scienceTag powerTag spaceTag standard ",
+    "annotation": "(Increase your energy production 1 step and gain 2 titanium.)",
+    "div": [
+      {
+        "#text": "Solar Wind Power",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-power "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "tag tag3 tag-science "
+      },
+      {
+        "#text": "#077",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "energyprod-"
+            }
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "@class": "resource titanium"
+          },
+          {
+            "#text": "inc-energyprod-1  * inc-titanium-2",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag standard ",
+    "annotation": "(Place 2 ocean tiles.)",
+    "div": [
+      {
+        "#text": "Ice Asteroid",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "23",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#078",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "#text": "placetile/ocean/ocean/true * placetile/ocean/ocean/true ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag standard ",
+    "annotation": "(Raise temperature 2 steps and place 2 ocean tiles. Remove up to 6 plants from any player.)",
+    "div": [
+      {
+        "#text": "Giant Ice Asteroid",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "36",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#080",
+        "@class": "number"
+      },
+      {
+        "#text": "6",
+        "@class": "content ",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "tile temperature-tile "
+          },
+          {
+            "@class": "tile temperature-tile "
+          },
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "@class": "plant resource red-outline "
+          },
+          {
+            "#text": "inc-temperature-2  * placetile/ocean/ocean/true * placetile/ocean/ocean/true * dec-Plant-6-any",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag jovianTag cityTag standard ",
+    "annotation": "(Place a city tile ON THE RESERVED AREA. 1 VP per Jovian tag you have.)",
+    "div": [
+      {
+        "#text": "Ganymede Colony",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "20",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-city"
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "tag tag3 tag-jovian "
+      },
+      {
+        "#text": "#081",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points points-big ",
+            "span": {
+              "@class": "resource-tag tag-jovian"
+            }
+          },
+          {
+            "@class": "tile city-tile"
+          },
+          {
+            "#text": "placetile/city/Ganymede/false * 1 VP per 1 Jovian tag ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag powerTag standard ",
+    "annotation": "(Increase your energy production 3 steps.)",
+    "div": [
+      {
+        "#text": "Giant Space Mirror",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "17",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "@class": "tag tag2 tag-power "
+      },
+      {
+        "#text": "#083",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "production energy"
+              },
+              {
+                "@class": "production energy"
+              },
+              {
+                "@class": "production energy"
+              }
+            ]
+          },
+          {
+            "#text": "inc-energyprod-3 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-temperature": "-16",
+    "annotation": "(Requires -16 C or warmer. Increase your plant production 1 step. Gain 3 plants.)",
+    "div": [
+      {
+        "#text": "Grass",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#087",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "-16 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "plantprod"
+            }
+          },
+          {
+            "@class": "plant resource",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "#text": "Requires -16 C or warmer* inc-plantprod-1 * inc-Plant-3",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-temperature": "-14",
+    "annotation": "(Requires -14 C or warmer. Increase your plant production 1 step. Gain 1 plant.)",
+    "div": [
+      {
+        "#text": "Heather",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "6",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#088",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "-14 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "plantprod"
+            }
+          },
+          {
+            "@class": "plant resource",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "#text": "Requires -14 C or warmer* inc-plantprod-1 * inc-Plant-1",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard",
+    "annotation": "(Decrease your MC production 1 step and increase your Energy production 2 steps.)",
+    "div": [
+      {
+        "#text": "Peroxide Power",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "#text": "#089",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size2a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "#text": "1",
+                "@class": "moneyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              }
+            ]
+          },
+          {
+            "#text": "dec-MegaCreditprod-1  * inc-Energyprod-2 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-temperature": "-10",
+    "annotation": "(Requires -10 C or warmer. Increase your plant production 2 steps. Gain 2 plants.)",
+    "div": [
+      {
+        "#text": "Bushes",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#093",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "-10 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "@class": "plant resource",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "#text": "Requires -10 C or warmer* inc-plantprod-2 * inc-Plant-2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv plantTag buildingTag automated standard ",
+    "annotation": "(Gain 1 plant for each city tile in play.)",
+    "div": [
+      {
+        "#text": "Greenhouses",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "6",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-plant "
+      },
+      {
+        "#text": "#096",
+        "@class": "number"
+      },
+      {
+        "#text": "/",
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "tile city-tile red-outline"
+          },
+          {
+            "#text": "inc-plant-1-tile+City-false-any",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated earthTag standard",
+    "annotation": "(Place this tile and raise temperature 2 steps.)",
+    "div": [
+      {
+        "#text": "Nuclear Zone",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-earth"
+      },
+      {
+        "#text": "#097",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "#text": "-2",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "\u2622",
+            "@class": "tile special-tile"
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "@class": "tile temperature-tile"
+          },
+          {
+            "#text": "placetile/NuclearExplosion/ground/true * inc-temperature-2 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard",
+    "annotation": "(Decrease your MC production 1 step and increase your Energy production 1 step.)",
+    "div": [
+      {
+        "#text": "Fueled Generators",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "1",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "#text": "#100",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size1a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "#text": "1",
+                "@class": "moneyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              }
+            ]
+          },
+          {
+            "#text": "dec-MegaCreditprod-1  * inc-Energyprod-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag standard ",
+    "annotation": "(Action: Spend 4 energy to gain 1 steel and raise oxygen 1 step.)",
+    "div": [
+      {
+        "#text": "Ironworks",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#101",
+        "@class": "number"
+      },
+      {
+        "#text": "4",
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "steel resource "
+          },
+          {
+            "@class": "tile oxygen-tile"
+          },
+          {
+            "#text": "Action: dec-Energy-4 and inc-steel-1 and inc-oxygen-1 ",
+            "@class": "description "
+          }
+        ],
+        "span": {
+          "@class": "energy resource "
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated powerTag standard",
+    "annotation": "(Increase your Energy production step for each Power tag you have, including this.)",
+    "div": [
+      {
+        "#text": "Power Grid",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "18",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-power"
+      },
+      {
+        "#text": "#102",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "/",
+            "@class": "production-boxprod-box-size2a",
+            "div": [
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "resource-tagprod-tag tag-power"
+              }
+            ]
+          },
+          {
+            "#text": "inc-Energyprod-1-tag+Power",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag standard ",
+    "annotation": "(Action: Spend 4 energy to gain 2 steel and increase oxygen 1 step.)",
+    "div": [
+      {
+        "#text": "Steelworks",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "15",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#103",
+        "@class": "number"
+      },
+      {
+        "#text": "4",
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "steel resource "
+          },
+          {
+            "@class": "resource steel"
+          },
+          {
+            "@class": "tile oxygen-tile",
+            "@style": "margin-left:0px;"
+          },
+          {
+            "#text": "Action: dec-Energy-4 and inc-steel-2 and inc-oxygen-1 ",
+            "@class": "description "
+          }
+        ],
+        "span": {
+          "@class": "energy resource "
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag standard ",
+    "annotation": "(Action: Spend 4 energy to gain 1 titanium and increase oxygen 1 step.)",
+    "div": [
+      {
+        "#text": "Ore Processor",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#104",
+        "@class": "number"
+      },
+      {
+        "#text": "4",
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "titanium resource "
+          },
+          {
+            "@class": "tile oxygen-tile"
+          },
+          {
+            "#text": "Action: dec-Energy-4 and inc-titanium-1 and inc-oxygen-1 ",
+            "@class": "description "
+          }
+        ],
+        "span": {
+          "@class": "energy resource "
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated cityTag buildingTag standard reqs",
+    "@data-oxygen": "12",
+    "annotation": "(Requires 12% oxygen. Gain 2 plants. Place a City tile. Decrease your Energy production 1 step and increase your MC production 4 steps.)",
+    "div": [
+      {
+        "#text": "Open City",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "23",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#108",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big "
+          },
+          {
+            "#text": "12 Oxygen",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size1a ",
+            "@style": "margin-bottom:5px;",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "4",
+                "@class": "moneyprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile ",
+            "@style": "margin-left:20px;margin-bottom:5px; "
+          },
+          {
+            "@class": "plant resource "
+          },
+          {
+            "@class": "plant resource "
+          },
+          {
+            "#text": "Requires 12% oxygen* inc-Plant-2* placetile/City/ground/true * dec-Energyprod-1 * inc-MegaCreditprod-4 ",
+            "@class": "description ",
+            "@style": "margin-top:-10px;font-size:11px;text-align: left",
+            "br": [
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard ",
+    "annotation": "(Increase your energy production 1 step.)",
+    "div": [
+      {
+        "#text": "Solar Power",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-power "
+      },
+      {
+        "#text": "#113",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "energyprod-"
+            }
+          },
+          {
+            "#text": "inc-energyprod-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated scienceTag standard reqs",
+    "@data-oxygen": "7",
+    "annotation": "(Requires 7% oxygen.)",
+    "div": [
+      {
+        "#text": "Breathing Filters",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-science "
+      },
+      {
+        "#text": "#114",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big "
+          },
+          {
+            "#text": "7 Oxygen",
+            "@class": "requirements"
+          },
+          {
+            "#text": "Requires 7% oxygen",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated scienceTag standard",
+    "annotation": "(Increase your plant production 1 step or your energy production 2 steps.)",
+    "div": [
+      {
+        "#text": "Artificial Photosynthesis",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-science "
+      },
+      {
+        "#text": "#115",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "OR",
+            "@class": "production-boxprod-box-size4",
+            "div": [
+              {
+                "@class": "production plant"
+              },
+              {
+                "@class": "production energy"
+              },
+              {
+                "@class": "production energy"
+              }
+            ]
+          },
+          {
+            "#text": "inc-plantprod-1  or inc-energyprod-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag standard reqs",
+    "@data-temperature": "-6",
+    "annotation": "(Requires -6 C or warmer. Place 1 ocean tile ON AN AREA NOT RESERVED FOR OCEAN.)",
+    "div": [
+      {
+        "#text": "Artificial Lake",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "15",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#116",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "-6 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile ocean-tile"
+          },
+          {
+            "#text": "Requires -6 C or warmer* placetile/ocean/ground/true",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard ",
+    "annotation": "(Increase your energy production 2 step.)",
+    "div": [
+      {
+        "#text": "Geothermal Power",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-power "
+      },
+      {
+        "#text": "#117",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "energyprod-"
+              }
+            ]
+          },
+          {
+            "#text": "inc-energyprod-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-temperature": "4",
+    "annotation": "(Requires +4 C or warmer. Increase your MC production 2 steps and your plant production 2 steps. Gain 2 Plants.)",
+    "div": [
+      {
+        "#text": "Farming",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "16",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#118",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "+4 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "br": "",
+            "div": [
+              {
+                "#text": "2",
+                "@class": "moneyprod"
+              },
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "@class": "plant resource",
+            "@style": "margin-left:20px"
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "#text": "Requires +4 C or warmer* inc-MegaCreditprod-2  * inc-plantprod-2 * inc-Plant-2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated  standard noneTag reqs",
+    "@data-Ocean": "3",
+    "annotation": "(Requires 3 or less ocean tiles.)",
+    "div": [
+      {
+        "#text": "Dust Seals",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "2",
+        "@class": "price"
+      },
+      {
+        "#text": "#119",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big "
+          },
+          {
+            "#text": "max 3 OceanTiles",
+            "@class": "requirements requirements-max "
+          },
+          {
+            "#text": "Requires 3 or less oceanTiles",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated cityTag buildingTag standard ",
+    "annotation": "(Decrease your energy production 1 step and increase your MC production 2 steps. Place a city tile ADJACENT TO AT LEAST 2 OTHER CITY TILES.)",
+    "div": [
+      {
+        "#text": "Urbanized Area",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#120",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size1a ",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "2",
+                "@class": "moneyprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile ",
+            "@style": "margin-left:20px "
+          },
+          {
+            "#text": "dec-energyprod-1  * inc-MegaCreditprod-2 * placetile/City/Ground/true/City-City ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-Ocean": "3",
+    "annotation": "(Requires 3 oean tiles and that you lose 1 plant. Increase your plant production 1 step.)",
+    "div": [
+      {
+        "#text": "Moss",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#122",
+        "@class": "number"
+      },
+      {
+        "#text": "-",
+        "@class": "content",
+        "div": [
+          {
+            "#text": "3 OceanTiles",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "plantprod"
+            }
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "#text": "Requires 3 ocean tiles* dec-Plant-1* inc-plantprod-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag standard",
+    "annotation": "(Decrease your Energy production 1 step and increase your heat production 4 steps.)",
+    "div": [
+      {
+        "#text": "GHG Factories",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#126",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "4",
+            "@class": "production-boxprod-box-size1a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "@style": "margin-left: -8px;",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "heatprod"
+              }
+            ]
+          },
+          {
+            "#text": "dec-Energyprod-1  * inc-heatprod-4 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag standard ",
+    "annotation": "(Place 1 ocean tile.)",
+    "div": [
+      {
+        "#text": "Subterranean Reservoir",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#127",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "#text": "placetile/ocean/ocean/true",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active plantTag animalTag standard reqs",
+    "annotation": "(Effect: When you play an animal or plant tag (including these), add an animal to this card.)",
+    "div": [
+      {
+        "#text": "Ecological Zone",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "@class": "tag tag2 tag-animal"
+      },
+      {
+        "#text": "#128",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "/",
+          ":"
+        ],
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1/2",
+            "@class": "points",
+            "div": {
+              "@class": "resource animal"
+            }
+          },
+          {
+            "#text": "Greenery tile",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tag-animal resource-tag"
+          },
+          {
+            "@class": "tag-plant resource-tag"
+          },
+          {
+            "@class": "animal resource"
+          },
+          {
+            "#text": "Effect: playcard(tag-Animal,Plant) / add-1-Animal ",
+            "@class": "description"
+          },
+          {
+            "#text": "\ud83d\udc3e\ufe0e",
+            "@class": "tile special-tile",
+            "@style": "margin-left:143px;font-size: 22px;"
+          },
+          {
+            "#text": "Requires that you have a greenery tile* placetile/Nature/Ground/true/Greenery *  add-2-Animal * 1 VP per 2 Animal ",
+            "@class": "description",
+            "@style": "text-align:left;margin-top:-55px;"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated standard reqs noneTag",
+    "@data-oxygen": "5",
+    "annotation": "(Requires 5% oxygen. Increase your MC production 1 step for each City tile ON MARS.)",
+    "div": [
+      {
+        "#text": "Zeppelins",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "#text": "#129",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "5 Oxygen",
+            "@class": "requirements "
+          },
+          {
+            "#text": "/",
+            "@class": "production-boxprod-box-size2a ",
+            "br": "",
+            "div": [
+              {
+                "#text": "1",
+                "@class": "moneyprod-"
+              },
+              {
+                "@class": "tile city-tile-small red-outline ",
+                "@style": "margin-bottom:0px;"
+              }
+            ]
+          },
+          {
+            "#text": "Requires 5% oxygen* inc-MegaCreditprod-1-tile+City-true-any ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated standard microbeTag reqs",
+    "@data-oxygen": "4",
+    "annotation": "(Requires 4% oxygen. Increase your Plant production 1 step for every 2 Microbe tags you have, including this.)",
+    "div": [
+      {
+        "#text": "Worms",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "#text": "#130",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "4 Oxygen",
+            "@class": "requirements "
+          },
+          {
+            "#text": "/ 2",
+            "@class": "production-boxprod-box-size3 ",
+            "br": "",
+            "div": [
+              {
+                "@class": "plantprod-"
+              },
+              {
+                "@class": "resource-tagprod-tag tag-microbe "
+              }
+            ]
+          },
+          {
+            "#text": "Requires 4% oxygen* inc-Plantprod-0.5-tag+Microbe",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active microbeTag standard reqs",
+    "@data-oxygen": "3",
+    "annotation": "(Effect: When you play an Animal, Plant, or Microbe tag, including this, add a Microbe to this card.)",
+    "div": [
+      {
+        "#text": "Decomposers",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "#text": "#131",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "/",
+          "/",
+          ":"
+        ],
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1/3",
+            "@class": "points",
+            "div": {
+              "@class": "resource microbe"
+            }
+          },
+          {
+            "#text": "3 Oxygen",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tag-animal resource-tag"
+          },
+          {
+            "@class": "tag-plant resource-tag"
+          },
+          {
+            "@class": "tag-microbe resource-tag"
+          },
+          {
+            "@class": "microbe resource"
+          },
+          {
+            "#text": "Effect: playcard(tag-Animal,Plant,Microbe) / add-3-Microbe *  add-3-Microbe  ",
+            "@class": "description"
+          },
+          {
+            "#text": "Requires 3% oxygen* 1 VP per 3 Microbe ",
+            "@class": "description",
+            "@style": "margin-top:10px;"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag scienceTag standard reqs",
+    "annotation": "(Requires 2 Power tags. Increase your Energy production 3 steps.)",
+    "div": [
+      {
+        "#text": "Fusion Power",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "14",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "@class": "tag tag3 tag-science"
+      },
+      {
+        "#text": "#132",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "Power Power tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              }
+            ]
+          },
+          {
+            "#text": "Requires 2 Power tags* inc-Energyprod-3 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv standard active microbeTag reqs",
+    "@data-temperature": "-14",
+    "annotation": "(Action: Add a microbe to ANOTHER card. Requires -14 C or warmer.)",
+    "div": [
+      {
+        "#text": "Symbiotic Fungus",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe "
+      },
+      {
+        "#text": "#133",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "-14 Temperature",
+            "@class": "requirements "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "#text": "Action: add-1-Microbe-another * Requires -14 C or warmer",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv standard active microbeTag reqs ",
+    "@data-temperature": "-10",
+    "annotation": "(Action: Gain 1 plant or add 2 microbes to ANOTHER card. It must be -10 C or colder.)",
+    "div": [
+      {
+        "#text": "Extreme-Cold Fungus",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe "
+      },
+      {
+        "#text": "#134",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "OR",
+          "*"
+        ],
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "max -10 Temperature",
+            "@class": "requirements requirements-max"
+          },
+          {
+            "@class": "red-arrow ",
+            "@style": "margin-left:-9px"
+          },
+          {
+            "@class": "plant resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "#text": "Action: inc-plant-1 or add-2-Microbe-another . Requires -10 C or colder",
+            "@class": "description ",
+            "br": [
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag animalTag microbeTag standard reqs",
+    "annotation": "(Requires a Plant tag, a Microbe tag, and an Animal tag.)",
+    "div": [
+      {
+        "#text": "Advanced Ecosystems",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal"
+      },
+      {
+        "@class": "tag tag2 tag-microbe"
+      },
+      {
+        "@class": "tag tag3 tag-plant"
+      },
+      {
+        "#text": "#135",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "3",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Plant Microbe Animal tags",
+            "@class": "requirements"
+          },
+          {
+            "#text": "Requires a Plant tag, a Microbe tag, and an Animal tag",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard reqs",
+    "@data-Ocean": "4",
+    "annotation": "(Requires 4 ocean tiles. Increase your Energy production 2 steps.)",
+    "div": [
+      {
+        "#text": "Great Dam",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "#text": "#136",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "4 OceanTiles",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              }
+            ]
+          },
+          {
+            "#text": "Requires 4 oceanTiles. inc-Energyprod-2 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv  buildingTag standard automated ",
+    "annotation": "(Decrease your Energy production 2 steps. Increase your steel production 2 steps and your titanium production 1 step. Raise oxygen 2 steps.)",
+    "div": [
+      {
+        "#text": "Strip Mine",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "25",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#138",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size3a ",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "energyprod-"
+              },
+              {
+                "@class": "production-prefix ",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "steelprod-"
+              },
+              {
+                "@class": "steelprod-"
+              },
+              {
+                "@class": "titaniumprod-"
+              }
+            ]
+          },
+          {
+            "@class": "tile oxygen-tile "
+          },
+          {
+            "@class": "tile oxygen-tile "
+          },
+          {
+            "#text": "dec-Energyprod-2 * inc-steelprod-2  * inc-titaniumprod-1 * inc-oxygen-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated powerTag standard reqs",
+    "@data-Ocean": "3",
+    "annotation": "(Requires 3 ocean tiles. Increase your energy production 1 step.)",
+    "div": [
+      {
+        "#text": "Wave Power",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-power"
+      },
+      {
+        "#text": "#139",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "3 OceanTiles",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "energyprod"
+            }
+          },
+          {
+            "#text": "Requires 3 oceanTiles* inc-energyprod-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag standard ",
+    "annotation": "(Raise temperature 2 steps and place this tile ON EITHER THARSIS THOLUS, ASCRAEUS MONS, PAVONIS MONS OR ARSIA MONS.)",
+    "div": [
+      {
+        "#text": "Lava Flows",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "18",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#140",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "tile temperature-tile "
+          },
+          {
+            "@class": "tile temperature-tile "
+          },
+          {
+            "#text": "\ud83c\udf0b",
+            "@class": "tile special-tile",
+            "@style": "font-size: 18px;"
+          },
+          {
+            "#text": "inc-temperature-2  * placetile/Volcano/Volcanic/true ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard",
+    "annotation": "(Increase your Energy production 1 step.)",
+    "div": [
+      {
+        "#text": "Power Plant",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "#text": "#141",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "energyprod"
+            }
+          },
+          {
+            "#text": "inc-Energyprod-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag standard",
+    "annotation": "(Increase your heat production 4 steps. Place this tile ON AN AREA RESERVED FOR OCEAN.)",
+    "div": [
+      {
+        "#text": "Mohole Area",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "20",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#142",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "#text": "4",
+            "@class": "production-boxprod-box-size1a",
+            "div": {
+              "@class": "heatprod"
+            }
+          },
+          {
+            "#text": "\u2668",
+            "@class": "tile special-tile"
+          },
+          {
+            "#text": "inc-heatprod-4 * placetile/Moonhole/ocean/true",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event earthTag spaceTag eventTag standard ",
+    "annotation": "(Place an ocean tile and draw 2 cards. Gain 5 Plants or add 4 Animals to ANOTHER card.)",
+    "div": [
+      {
+        "#text": "Large Convoy",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "36",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "tag tag3 tag-earth "
+      },
+      {
+        "#text": "#143",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "5",
+          "OR 4",
+          "*"
+        ],
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "@class": "resource card "
+          },
+          {
+            "@class": "resource card"
+          },
+          {
+            "@class": "resource plant "
+          },
+          {
+            "@class": "resource animal "
+          },
+          {
+            "#text": "placetile/ocean/ocean/true * inc-Card-2* inc-Plant-5 or add-4-Animal-another ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard reqs",
+    "@data-science": "2",
+    "annotation": "(Requires 2 Science tags. Increase your Energy production 3 steps.)",
+    "div": [
+      {
+        "#text": "Tectonic Stress Power",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "18",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "#text": "#145",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Science Science tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              }
+            ]
+          },
+          {
+            "#text": "Requires 2 Science tags* inc-Energyprod-3 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-Ocean": "3",
+    "annotation": "(Requires 3 ocean tiles and that you lose 2 plants. Increase your plant production 2 steps.)",
+    "div": [
+      {
+        "#text": "Nitrophilic Moss",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#146",
+        "@class": "number"
+      },
+      {
+        "#text": "-",
+        "@class": "content",
+        "div": [
+          {
+            "#text": "3 OceanTiles",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "#text": "Requires 3 oceanTiles * dec-Plant-2* inc-plantprod-2 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active animalTag standard reqs",
+    "@data-oxygen": "8",
+    "annotation": "(Effect: When you place a greenery tile, add an Animal to this card.)",
+    "div": [
+      {
+        "#text": "Herbivores",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal "
+      },
+      {
+        "#text": "#147",
+        "@class": "number"
+      },
+      {
+        "#text": ":",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1/2",
+            "@class": "points ",
+            "div": {
+              "@class": "animal resource "
+            }
+          },
+          {
+            "#text": "8 Oxygen",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile greenery-tile",
+            "@style": "margin-top:-3px;"
+          },
+          {
+            "@class": "animal resource "
+          },
+          {
+            "#text": "Effect: placetile(Greenery,onMars,any) / add-1-Animal ",
+            "@class": "description ",
+            "@style": "margin-top:-8px;"
+          },
+          {
+            "@class": "animal resource ",
+            "@style": "margin-left:105px;"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "@style": "margin-top:2px;",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "plantprod-red-outline"
+              }
+            ]
+          },
+          {
+            "#text": "Requires 8% oxygen* add-1-Animal * dec-Plantprod-1-any* 1 VP per 2 Animal ",
+            "@class": "description",
+            "@style": "position:absolute;text-align:left;margin-top:-25px;",
+            "br": [
+              "",
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated standard microbeTag reqs",
+    "@data-oxygen": "6",
+    "annotation": "(Requires 6% oxygen. Increase your Plant production 1 step for each plant tag you have.)",
+    "div": [
+      {
+        "#text": "Insects",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "#text": "#148",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "6 Oxygen",
+            "@class": "requirements "
+          },
+          {
+            "#text": "/",
+            "@class": "production-boxprod-box-size2a ",
+            "br": "",
+            "div": [
+              {
+                "@class": "plantprod-"
+              },
+              {
+                "@class": "resource-tagprod-tag tag-plant "
+              }
+            ]
+          },
+          {
+            "#text": "Requires 6% oxygen* inc-Plantprod-1-tag+Plant ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated standard noneTag",
+    "annotation": "(Decrease your heat production any number of steps and increase your MC production the same number of steps.)",
+    "div": [
+      {
+        "#text": "Insulation",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "2",
+        "@class": "price"
+      },
+      {
+        "#text": "#152",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": [
+              "-X",
+              "+"
+            ],
+            "@class": "production-boxprod-box-size3 ",
+            "div": [
+              {
+                "@class": "heatprod-"
+              },
+              {
+                "#text": "X",
+                "@class": "moneyprod-"
+              }
+            ]
+          },
+          {
+            "#text": "dec-Heatprod-X-MegaCreditprod",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active scienceTag standard",
+    "annotation": "(Effect: Your global requirements are +2 or -2 steps, your choice in each case.)",
+    "div": [
+      {
+        "#text": "Adaptation Technology",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-science"
+      },
+      {
+        "#text": "#153",
+        "@class": "number"
+      },
+      {
+        "#text": ": +/- 2",
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "Temperature / Oxygen / OceanTiles",
+            "@class": "tile globals-box"
+          },
+          {
+            "#text": "Effect: discount-2-global",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated standard microbeTag scienceTag reqs",
+    "@data-temperature": "-14",
+    "annotation": "(It must be -14 C or colder. Increase your Plant production 2 steps.)",
+    "div": [
+      {
+        "#text": "Designed Microorganisms",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "16",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe"
+      },
+      {
+        "@class": "tag tag2 tag-science"
+      },
+      {
+        "#text": "#155",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "max -14 Temperature",
+            "@class": "requirements requirements-max"
+          },
+          {
+            "@class": "production-boxprod-box-size2 ",
+            "div": [
+              {
+                "@class": "plantprod-"
+              },
+              {
+                "@class": "plantprod-"
+              }
+            ]
+          },
+          {
+            "#text": "Requires -14 C or colder* inc-Plantprod-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv standard active microbeTag ",
+    "annotation": "(Action: Add 1 Microbe to this card, or remove 3 Microbes to increase your TR 1 step.",
+    "div": [
+      {
+        "#text": "Nitrite Reducing Bacteria",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "11",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-microbe "
+      },
+      {
+        "#text": "#157",
+        "@class": "number"
+      },
+      {
+        "#text": "OR 3",
+        "@class": "content ",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile rating "
+          },
+          {
+            "#text": "Action: add-1-Microbe * Action: rem-3-Microbe and inc-TR-1 ",
+            "@class": "description "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "@class": "microbe resource "
+          },
+          {
+            "#text": "add-3-Microbe ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag microbeTag standard",
+    "annotation": "(Increase your Energy production and your steel production 1 step each.)",
+    "div": [
+      {
+        "#text": "Industrial Microbes",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-microbe"
+      },
+      {
+        "#text": "#158",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "production-box",
+            "div": [
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "steelprod"
+              }
+            ]
+          },
+          {
+            "#text": "inc-Energyprod-1 * inc-steelprod-1",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-temperature": "-24",
+    "annotation": "(Requires -24 C or warmer. Increase your Plant production 1 step.)",
+    "div": [
+      {
+        "#text": "Lichen",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#159",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "-24 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "plantprod"
+            }
+          },
+          {
+            "#text": "Requires -24 C or warmer* inc-Plantprod-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag standard ",
+    "annotation": "(Place 1 ocean tile and draw 1 card.)",
+    "div": [
+      {
+        "#text": "Convoy From Europa",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "15",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#161",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "@class": "resource card ",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "#text": "placetile/ocean/ocean/true * inc-card-1",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event earthTag spaceTag eventTag standard ",
+    "annotation": "(Increase your heat production 1 step and gain 3 heat.)",
+    "div": [
+      {
+        "#text": "Imported GHG",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "tag tag3 tag-earth "
+      },
+      {
+        "#text": "#162",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "heatprod"
+            }
+          },
+          {
+            "@class": "heat resource",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "heat resource"
+          },
+          {
+            "@class": "heat resource"
+          },
+          {
+            "#text": "inc-heatprod-1  * inc-heat-3",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event earthTag spaceTag eventTag standard ",
+    "annotation": "(Raise your TR 1 step and gain 4 Plants. Add 3 Microbes to ANOTHER card and 2 Animals to ANOTHER card.)",
+    "div": [
+      {
+        "#text": "Imported Nitrogen",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "23",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "tag tag3 tag-earth "
+      },
+      {
+        "#text": "#163",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "4",
+          "3",
+          "* 2",
+          "*"
+        ],
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "rating tile"
+          },
+          {
+            "@class": "plant resource"
+          },
+          {
+            "@class": "microbe resource"
+          },
+          {
+            "@class": "animal resource"
+          },
+          {
+            "#text": "inc-TR-1 * inc-Plant-4* add-3-Microbe-another * add-2-Animal-another ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated standard noneTag",
+    "annotation": "(Increase your heat production 1 step.)",
+    "div": [
+      {
+        "#text": "Micro-Mills",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "3",
+        "@class": "price"
+      },
+      {
+        "#text": "#164",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "@class": "production-box",
+            "div": {
+              "@class": "heatprod"
+            }
+          },
+          {
+            "#text": "inc-heatprod-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag standard",
+    "annotation": "(Decrease your Energy production 4 steps and increase your Plant production 2 steps. Raise your TR 3 steps.)",
+    "div": [
+      {
+        "#text": "Magnetic Field Generators",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "20",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#165",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "#text": "4",
+            "@class": "production-boxprod-box-size2a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "dec-Energyprod-4  * inc-Plantprod-2 * inc-TR-3 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active spaceTag standard reqs",
+    "@data-oxygen": "5",
+    "annotation": "(Effect: When you play a Space card, you pay 2 MC less for it.)",
+    "div": [
+      {
+        "#text": "Shuttles",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space "
+      },
+      {
+        "#text": "#166",
+        "@class": "number"
+      },
+      {
+        "#text": ":",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "5 Oxygen",
+            "@class": "requirements"
+          },
+          {
+            "@class": "resource-tag tag-space"
+          },
+          {
+            "#text": "-2",
+            "@class": "money resource "
+          },
+          {
+            "#text": "Effect: discount-2-Space",
+            "@class": "description "
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "@style": "margin-top:10px;margin-right:130px;",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "2",
+                "@class": "moneyprod"
+              }
+            ]
+          },
+          {
+            "#text": "Requires 5% oxygen* dec-Energyprod-1  * inc-MegaCreditprod-2 ",
+            "@class": "description ",
+            "@style": "position:absolute;margin-top:-90px;text-align:left;margin-left:86px;"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event earthTag spaceTag eventTag standard ",
+    "annotation": "(Increase your heat production 2 steps.)",
+    "div": [
+      {
+        "#text": "Import of Advanced GHG",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "@class": "tag tag3 tag-earth "
+      },
+      {
+        "#text": "#167",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size2",
+            "div": [
+              {
+                "@class": "heatprod"
+              },
+              {
+                "@class": "heatprod"
+              }
+            ]
+          },
+          {
+            "#text": "inc-heatprod-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard reqs",
+    "@data-oxygen": "7",
+    "annotation": "(Requires 7% oxygen. Increase your Energy production 1 step.)",
+    "div": [
+      {
+        "#text": "Windmills",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "6",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-power "
+      },
+      {
+        "#text": "#168",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "7 Oxygen",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box ",
+            "div": {
+              "@class": "energyprod-"
+            }
+          },
+          {
+            "#text": "Requires 7% oxygen* inc-Energyprod-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-temperature": "-6",
+    "annotation": "(Requires -6 C or warmer. Increase your Plant production 1 step and your MC production 2 steps. Gain 1 Plant.)",
+    "div": [
+      {
+        "#text": "Tundra Farming",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "16",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#169",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "2",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "-6 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size2",
+            "br": "",
+            "div": [
+              {
+                "@class": "plantprod"
+              },
+              {
+                "#text": "2",
+                "@class": "moneyprod"
+              }
+            ]
+          },
+          {
+            "@class": "plant resource",
+            "@style": "margin-left:20px"
+          },
+          {
+            "#text": "Requires -6 C or warmer* inc-Plantprod-1  * inc-MegaCreditprod-2 * inc-Plant-1",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event spaceTag eventTag standard ",
+    "annotation": "(Add 2 Microbes to ANOTHER card. Increase your heat production 3 steps and your Plant productions 1 step.)",
+    "div": [
+      {
+        "#text": "Aerobraked Ammonia Asteroid",
+        "@class": "title background-color-event ",
+        "@style": "font-size:14px"
+      },
+      {
+        "#text": "26",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "@class": "tag tag2 tag-space "
+      },
+      {
+        "#text": "#170",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size3",
+            "div": [
+              {
+                "@class": "heatprod"
+              },
+              {
+                "@class": "heatprod"
+              },
+              {
+                "@class": "heatprod"
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "@class": "microbe resource"
+          },
+          {
+            "@class": "microbe resource"
+          },
+          {
+            "#text": "add-2-Microbe-another * inc-heatprod-3  * inc-Plantprod-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag standard",
+    "annotation": "(Decrease your Energy production 2 steps and increase your Plant production 1 step. Raise your TR 1 step.)",
+    "div": [
+      {
+        "#text": "Magnetic Field Dome",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#171",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size2a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "plantprod"
+              }
+            ]
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "dec-Energyprod-2 * inc-Plantprod-1* inc-TR-1",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active earthTag animalTag standard",
+    "annotation": "(Effect: When any City tile is placed, add an Animal to this card.)",
+    "div": [
+      {
+        "#text": "Pets",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal"
+      },
+      {
+        "@class": "tag tag2 tag-earth"
+      },
+      {
+        "#text": "#172",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          ":",
+          "ANIMALS MAY NOT BE REMOVED FROM THIS CARD"
+        ],
+        "@class": "content",
+        "@style": "font-weight: normal;",
+        "br": [
+          "",
+          ""
+        ],
+        "div": [
+          {
+            "#text": "1/2",
+            "@class": "points",
+            "div": {
+              "@class": "animal resource"
+            }
+          },
+          {
+            "@class": "tile city-tile-small red-outline"
+          },
+          {
+            "@class": "animal resource"
+          },
+          {
+            "#text": "Effect: placetile(City,,any) / add-1-Animal ",
+            "@class": "description"
+          },
+          {
+            "@class": "animal resource"
+          },
+          {
+            "#text": "add-1-animal* 1 VP per 2 Animal * Animal stays on this card",
+            "@class": "description",
+            "@style": "text-align:left;margin-top:10px;",
+            "br": ""
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv plantTag buildingTag automated standard ",
+    "annotation": "(Increase your MC production 2 steps. Place on a greenery tile ON AN AREA RESERVED FOR OCEAN, disregarding normal placement restrictions, and increase oxygen 1 step.)",
+    "div": [
+      {
+        "#text": "Protected Valley",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "23",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-plant "
+      },
+      {
+        "#text": "#174",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "production-boxprod-box ",
+            "div": {
+              "#text": "2",
+              "@class": "moneyprod-"
+            }
+          },
+          {
+            "@class": "tile greenery-tile",
+            "@style": "margin-left:30px;"
+          },
+          {
+            "#text": "inc-MegaCreditprod-2 * placetile/greenery/ocean/true * inc-oxygen-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag plantTag standard reqs",
+    "@data-temperature": "-20",
+    "annotation": "(Requires -20 C or warmer. Increase your MC production 1 step and gain 2 Plants.)",
+    "div": [
+      {
+        "#text": "Noctis Farming",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "10",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag2 tag-plant"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#176",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "-20 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "1",
+              "@class": "moneyprod"
+            }
+          },
+          {
+            "@class": "resource plant",
+            "@style": "margin-left:20px;"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "#text": "Requires -20 C or warmer* inc-MegaCreditprod-1  * inc-Plant-2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag standard reqs",
+    "@data-Ocean": "2",
+    "annotation": "(Action: Spend 3 Energy to raise oxygen 1 step. Requires 2 ocean tiles.)",
+    "div": [
+      {
+        "#text": "Water Splitting Plant",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "12",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#177",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "2 OceanTiles",
+            "@class": "requirements"
+          },
+          {
+            "@class": "energy resource "
+          },
+          {
+            "@class": "energy resource "
+          },
+          {
+            "@class": "energy resource "
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "tile oxygen-tile"
+          },
+          {
+            "#text": "Action: dec-Energy-3 and inc-Oxygen-1",
+            "@class": "description ",
+            "br": [
+              "",
+              "",
+              "",
+              ""
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard ",
+    "annotation": "(Decrease any heat production 2 steps and increase your Energy production 1 step.)",
+    "div": [
+      {
+        "#text": "Heat Trappers",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "6",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-power "
+      },
+      {
+        "#text": "#178",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "-1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "production-boxprod-box-size2a",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "heatprod-red-outline "
+              },
+              {
+                "@class": "heatprod-red-outline "
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "energyprod-"
+              }
+            ]
+          },
+          {
+            "#text": "dec-heatprod-2-any * inc-Energyprod-1",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag standard",
+    "annotation": "(Decrease your Energy production 1 step and increase your Plant production 1 step.)",
+    "div": [
+      {
+        "#text": "Soil Factory",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "9",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#179",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1",
+            "@class": "points points-big "
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod- "
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "plantprod-"
+              }
+            ]
+          },
+          {
+            "#text": "dec-Energyprod-1  * inc-Plantprod-1 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag standard reqs",
+    "@data-temperature": "2",
+    "annotation": "(Requires +2 C or warmer. Place 1 ocean tile.)",
+    "div": [
+      {
+        "#text": "Ice Cap Melting",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "5",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#181",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "+2 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "#text": "Requires +2 C or warmer* placetile/ocean/ocean/true ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag powerTag standard reqs",
+    "@data-oxygen": "6",
+    "annotation": "(Requires 6% oxygen. Decrease any Plant production 1 step and increase your Energy production 2 steps.)",
+    "div": [
+      {
+        "#text": "Biomass Combustors",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "@class": "tag tag2 tag-power"
+      },
+      {
+        "#text": "#183",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "-1",
+            "@class": "points points-big"
+          },
+          {
+            "#text": "6 Oxygen",
+            "@class": "requirements"
+          },
+          {
+            "@class": "production-boxprod-box-size2a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "plantprod-red-outline"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              },
+              {
+                "@class": "energyprod"
+              }
+            ]
+          },
+          {
+            "#text": "Requires 6% oxygen* dec-Plantprod-1-any * inc-Energyprod-2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active animalTag standard reqs",
+    "@data-oxygen": "9",
+    "annotation": "(Action: Add 1 Animal to this card.)",
+    "div": [
+      {
+        "#text": "Livestock",
+        "@class": "title background-color-active"
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-animal"
+      },
+      {
+        "#text": "#184",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "1/",
+            "@class": "points",
+            "div": {
+              "@class": "animal resource"
+            }
+          },
+          {
+            "#text": "9 Oxygen*",
+            "@class": "requirements"
+          },
+          {
+            "@class": "animal resource"
+          },
+          {
+            "#text": "Action: add-1-animal ",
+            "@class": "description",
+            "@style": "margin-bottom:5px;"
+          },
+          {
+            "@class": "production-boxprod-box-size1a",
+            "@style": "margin-top:10px;margin-right:150px;",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "plantprod"
+              },
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "plus"
+                }
+              },
+              {
+                "#text": "2",
+                "@class": "moneyprod"
+              }
+            ]
+          },
+          {
+            "#text": "Requires 9% oxygen* dec-Plantprod-1  * inc-MegaCreditprod-2 * 1 VP per 1 Animal ",
+            "@class": "description",
+            "@style": "position:absolute;margin-top:-85px;text-align:left;margin-left:80px;font-size:10px;"
+          }
+        ],
+        "span": {
+          "@class": "red-arrow"
+        }
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag standard ",
+    "annotation": "(Action: Spend 8 MC to place 1 ocean tile. STEEL MAY BE USED as if you were playing a Building card.)",
+    "div": [
+      {
+        "#text": "Aquifer Pumping",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "18",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#187",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "",
+          ""
+        ],
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "8",
+            "@class": " money resource "
+          },
+          {
+            "@class": "resource steel"
+          },
+          {
+            "@class": "red-arrow "
+          },
+          {
+            "@class": "ocean-tile tile "
+          },
+          {
+            "#text": "Action: dec-MegaCredit-8 and placetile/ocean/ocean/true * STEEL MAY BE USED as if you were playing a Building card",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag standard ",
+    "annotation": "(Place an ocean tile. IF THERE ARE TILES ADJACENT TO THIS OCEAN TILE, YOU MAY REMOVE 4 MC FROM THE OWNER OF ONE OF THOSE TILES.)",
+    "div": [
+      {
+        "#text": "Flooding",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "7",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#188",
+        "@class": "number"
+      },
+      {
+        "#text": "*",
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "-1",
+            "@class": "points points-big"
+          },
+          {
+            "@class": "tile ocean-tile ",
+            "@style": "margin-right:20px"
+          },
+          {
+            "@class": "minus"
+          },
+          {
+            "#text": "4",
+            "@class": "resource money red-outline"
+          },
+          {
+            "#text": "placetile/ocean/ocean/true/any-4-MegaCredit",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated powerTag standard",
+    "annotation": "(Increase your Energy production 1 step for each City tile in play.)",
+    "div": [
+      {
+        "#text": "Energy Saving",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "15",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-power"
+      },
+      {
+        "#text": "#189",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "/",
+            "@class": "production-boxprod-box-size2a",
+            "div": [
+              {
+                "@class": "energyprod",
+                "@style": "vertical-align: middle;"
+              },
+              {
+                "@class": "tile city-tile-small red-outline",
+                "@style": "margin-bottom:3px;"
+              }
+            ]
+          },
+          {
+            "#text": "inc-Energyprod-1-tile+City-false-any ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag standard ",
+    "annotation": "(Spend 5 heat to gain either 4 Plants, or to add 2 Animals to ANOTHER card.)",
+    "div": [
+      {
+        "#text": "Local Heat Trapping",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "1",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#190",
+        "@class": "number"
+      },
+      {
+        "#text": [
+          "-5",
+          "+ \u00a0\u00a04",
+          "OR 2",
+          "*"
+        ],
+        "@class": "content ",
+        "div": [
+          {
+            "@class": "resource heat",
+            "@style": "margin-right:10px;"
+          },
+          {
+            "@class": "resource plant"
+          },
+          {
+            "@class": "resource animal"
+          },
+          {
+            "#text": "dec-Heat-5 and inc-Plant-4 or dec-Heat-5 and add-2-Animal-another ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event eventTag standard reqs ",
+    "@data-temperature": "-8",
+    "annotation": "(Requires -8 C or warmer. Place 1 ocean tile.)",
+    "div": [
+      {
+        "#text": "Permafrost Extraction",
+        "@class": "title background-color-event "
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event "
+      },
+      {
+        "#text": "#191",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "-8 Temperature",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile ocean-tile "
+          },
+          {
+            "#text": "Requires -8 C or warmer* placetile/ocean/ocean/true ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated plantTag standard reqs",
+    "@data-science": "2",
+    "annotation": "(Requires 2 Science tags. Place a greenery tile and raise oxygen 1 step.)",
+    "div": [
+      {
+        "#text": "Plantation",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "15",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-plant"
+      },
+      {
+        "#text": "#193",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "div": [
+          {
+            "#text": "Science Science tags",
+            "@class": "requirements"
+          },
+          {
+            "@class": "tile greenery-tile"
+          },
+          {
+            "#text": "Requires 2 Science tags* placetile/greenery/ground/true  * inc-oxygen-1 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag earthTag standard ",
+    "annotation": "(Increase your MC production 5 steps. 1 VP for every 3rd City in play.)",
+    "div": [
+      {
+        "#text": "Immigration Shuttles",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "31",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "@class": "tag tag2 tag-earth"
+      },
+      {
+        "#text": "#198",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "1/3",
+            "@class": "points big",
+            "@style": "font-size:24px",
+            "div": {
+              "@class": "tile city-tile-small red-outline"
+            }
+          },
+          {
+            "@class": "production-box ",
+            "div": {
+              "#text": "5",
+              "@class": "moneyprod"
+            }
+          },
+          {
+            "#text": "inc-MegaCreditprod-5 * 1 VP per 3 City ",
+            "@class": "description",
+            "@style": "margin-top:-5px"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active cityTag buildingTag  standard ",
+    "annotation": "(Effect: When a City tile is placed, including this, increase your MC production 1 step.)",
+    "div": [
+      {
+        "#text": "Immigrant City",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "13",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "@class": "tag tag2 tag-city "
+      },
+      {
+        "#text": "#200",
+        "@class": "number"
+      },
+      {
+        "#text": ":",
+        "@class": "content ",
+        "br": "",
+        "div": [
+          {
+            "@class": "tile city-tile red-outline"
+          },
+          {
+            "@class": "production-box",
+            "div": {
+              "#text": "1",
+              "@class": "production money"
+            }
+          },
+          {
+            "#text": "Effect: placetile(City,,any) / inc-MegaCreditprod-1 * inc-MegaCreditprod-1 ",
+            "@class": "description "
+          },
+          {
+            "@class": "production-boxprod-box-size2a",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "production energy"
+              },
+              {
+                "#text": "-2",
+                "@class": "production money"
+              }
+            ]
+          },
+          {
+            "@class": "tile city-tile "
+          },
+          {
+            "#text": "dec-Energyprod-1  * dec-MegaCreditprod-2 * placetile/city/ground/true ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv active buildingTag standard ",
+    "annotation": "(Action: Spend 10MC to increase your heat production 2 steps.)",
+    "div": [
+      {
+        "#text": "Underground Detonations",
+        "@class": "title background-color-active "
+      },
+      {
+        "#text": "6",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building "
+      },
+      {
+        "#text": "#202",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "10",
+            "@class": "money resource "
+          },
+          {
+            "@class": "red-arrow ",
+            "@style": "margin-left:5px; "
+          },
+          {
+            "@class": "production-boxprod-box-size2 ",
+            "div": [
+              {
+                "@class": "heatprod-"
+              },
+              {
+                "@class": "heatprod-"
+              }
+            ]
+          },
+          {
+            "#text": "Action: dec-MegaCredit-10 and inc-heatprod-2 ",
+            "@class": "description "
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated spaceTag standard ",
+    "annotation": "(Increase your heat production 7 steps.)",
+    "div": [
+      {
+        "#text": "Soletta",
+        "@class": "title background-color-automated "
+      },
+      {
+        "#text": "35",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-space"
+      },
+      {
+        "#text": "#203",
+        "@class": "number"
+      },
+      {
+        "@class": "content ",
+        "div": [
+          {
+            "#text": "7",
+            "@class": "production-boxprod-box-size1a",
+            "div": {
+              "@class": "heatprod"
+            }
+          },
+          {
+            "#text": "inc-heatprod-7 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv automated buildingTag standard",
+    "annotation": "(Decrease your Energy production 1 step. Raise your TR 2 steps.)",
+    "div": [
+      {
+        "#text": "Rad-Chem Factory",
+        "@class": "title background-color-automated"
+      },
+      {
+        "#text": "8",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-building"
+      },
+      {
+        "#text": "#205",
+        "@class": "number"
+      },
+      {
+        "@class": "content",
+        "br": "",
+        "div": [
+          {
+            "@class": "production-boxprod-box-size1a",
+            "br": "",
+            "div": [
+              {
+                "@class": "production-prefix",
+                "div": {
+                  "@class": "minus"
+                }
+              },
+              {
+                "@class": "energyprod"
+              }
+            ]
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "@class": "tile rating"
+          },
+          {
+            "#text": "dec-Energyprod-1 * inc-TR-2 ",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "@class": "filterDiv event scienceTag eventTag standard ",
+    "annotation": "(The next card you play this generation is +2 or -2 steps in global requirements, your choice.)",
+    "div": [
+      {
+        "#text": "Special Design",
+        "@class": "title background-color-event"
+      },
+      {
+        "#text": "4",
+        "@class": "price"
+      },
+      {
+        "@class": "tag tag1 tag-event"
+      },
+      {
+        "@class": "tag tag2 tag-science"
+      },
+      {
+        "#text": "#206",
+        "@class": "number"
+      },
+      {
+        "#text": ": +/- 2",
+        "@class": "content",
+        "div": [
+          {
+            "#text": "Temperature / Oxygen / OceanTiles",
+            "@class": "tile globals-box"
+          },
+          {
+            "#text": "The next card you play this generation is global parameter discount 2",
+            "@class": "description"
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -11,7 +11,6 @@ import games.coltexpress.components.Compartment;
 import gui.ScreenHighlight;
 import gui.GamePanel;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 
 import javax.swing.*;

@@ -386,7 +386,8 @@ public class TMTypes {
                     if (deck.getComponentName().equalsIgnoreCase("corporations")) {
                         card = TMCard.loadCorporation((JSONObject)o);
                     } else {
-                        card = TMCard.loadCardHTML((JSONObject) o);
+//                        card = TMCard.loadCardHTML((JSONObject) o);
+                        card = TMCard.loadCardJSON((JSONObject) o);
                     }
                     deck.add(card);
                 }

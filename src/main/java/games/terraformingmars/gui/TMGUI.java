@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameState;
+import games.terraformingmars.TMTurnOrder;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.PayForAction;
 import games.terraformingmars.actions.PlaceTile;
@@ -15,7 +16,6 @@ import games.terraformingmars.rules.requirements.Requirement;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.ScreenHighlight;
-import gui.TiledImage;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -25,7 +25,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +63,8 @@ public class TMGUI extends AbstractGUIManager {
     boolean updateButtons = false;
     HashMap<TMTypes.ActionType, JMenu> actionMenus;
 
-    TMGameState gameState;
+    TMAction lastAction;
+    TMTurnOrder turnOrder;
 
     public TMGUI(GamePanel parent, Game game, ActionController ac) {
         super(parent, ac, 500);
@@ -532,10 +532,12 @@ public class TMGUI extends AbstractGUIManager {
             }
 
             if (player instanceof HumanGUIPlayer) {
-                // TODO fix equals / copy
-                if (!gameState.equals(this.gameState)) {
+                TMAction action = (TMAction) gameState.getHistory().get(gameState.getHistory().size()-1);
+                TMTurnOrder turnOrder = (TMTurnOrder) gameState.getTurnOrder();
+                if (!action.equals(lastAction) || !turnOrder.equals(this.turnOrder)) {
                     createActionMenu(player, (TMGameState) gameState);
-                    this.gameState = (TMGameState) gameState.copy();
+                    this.lastAction = action.copy();
+                    this.turnOrder = (TMTurnOrder) turnOrder.copy();
                 }
             } else {
                 resetActionButtons();
