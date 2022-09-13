@@ -16,7 +16,9 @@ import static games.loveletter.cards.LoveLetterCard.CardType.*;
  */
 public class LLStateFeaturesReduced implements IStateFeatureVector {
 
-    String[] names = new String[]{"CARDS", "AFFECTION", "COUNTESS", "BARON", "GUARD", "HANDMAID", "KING", "PRIEST", "PRINCE", "PRINCESS", "HIDDEN", "ADVANTAGE"};
+    String[] names = new String[]{"CARDS", "AFFECTION", "COUNTESS", "BARON",
+            "GUARD", "HANDMAID", "KING", "PRIEST", "PRINCE", "PRINCESS", "HIDDEN",
+            "ADVANTAGE"};
 
     @Override
     public double[] featureVector(AbstractGameState gs, int playerId) {
