@@ -2,12 +2,16 @@ package games.catan.components;
 
 import games.catan.CatanParameters;
 
+import java.util.Objects;
+
+import static games.catan.CatanParameters.HarborTypes.*;
+
 public class Settlement implements Copiable {
     private int type; // settlement = 1, city = 2
     private int owner;
     private static int counter = 0;
     private int id;
-    private CatanParameters.HarborTypes harbour = null;
+    private CatanParameters.HarborTypes harbour = NONE;
 
     public Settlement(int owner){
         this.owner = owner;
@@ -64,14 +68,15 @@ public class Settlement implements Copiable {
         if (this == obj) return true;
         if (obj instanceof Settlement){
             Settlement otherAction = (Settlement)obj;
-            return id == otherAction.id;
+            return id == otherAction.id && type == otherAction.type && harbour == otherAction.harbour &&
+                    owner == otherAction.owner;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return id;
+        return Objects.hash(id, owner, harbour, type);
     }
 
     @Override
