@@ -4,6 +4,7 @@ import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.rules.Discount;
 import games.terraformingmars.rules.effects.Effect;
 import games.terraformingmars.rules.effects.PayForActionEffect;
 import games.terraformingmars.rules.effects.PlaceTileEffect;
@@ -244,8 +245,9 @@ public class TMCardView extends JComponent {
         }
         // Draw discounts
         int yD = yA + spacing;
-        for (Requirement r: card.discountEffects.keySet()) {
-            int amount = card.discountEffects.get(r);
+        for(Discount d : card.discountEffects){
+            Requirement r = d.a;
+            int amount = d.b;
             if (r instanceof TagsPlayedRequirement || r instanceof TagOnCardRequirement) {
                 int nTags = 0;
                 TMTypes.Tag[] tags = null;
@@ -474,8 +476,9 @@ public class TMCardView extends JComponent {
         }
         // Draw discounts
         int yD = yA + spacing;
-        for (Requirement r: card.discountEffects.keySet()) {
-            int amount = card.discountEffects.get(r);
+        for(Discount d : card.discountEffects){
+            Requirement r = d.a;
+            int amount = d.b;
             if (r instanceof TagsPlayedRequirement || r instanceof TagOnCardRequirement) {
                 int nTags;
                 TMTypes.Tag[] tags;
