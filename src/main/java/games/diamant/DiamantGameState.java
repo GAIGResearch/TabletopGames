@@ -282,13 +282,13 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         double[] retVal = new double[names.length];
         retVal[0] = getTreasureChests().get(getCurrentPlayer()).getValue();
         retVal[1] = nGemsOnPath;
-        retVal[3] = playerInCave.size();
-        retVal[4] = nCave;
-        retVal[5] = nHazardExplosionsOnPath;
-        retVal[6] = nHazardPoissonGasOnPath;
-        retVal[7] = nHazardRockfallsOnPath;
-        retVal[8] = nHazardScorpionsOnPath;
-        retVal[9] = nHazardSnakesOnPath;
+        retVal[2] = playerInCave.size();
+        retVal[3] = nCave;
+        retVal[4] = nHazardExplosionsOnPath;
+        retVal[5] = nHazardPoissonGasOnPath;
+        retVal[6] = nHazardRockfallsOnPath;
+        retVal[7] = nHazardScorpionsOnPath;
+        retVal[8] = nHazardSnakesOnPath;
         return retVal;
     }
 }
