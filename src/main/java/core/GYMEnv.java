@@ -47,7 +47,7 @@ public class GYMEnv {
 
     }
 
-    public void reset(){
+    public AbstractGameState reset(){
         // Reset game instance, passing the players for this game
         this.game.reset(players);
         this.turnPause = 0;
@@ -56,6 +56,7 @@ public class GYMEnv {
         this.gameState = game.getGameState();
         this.forwardModel = game.getForwardModel();
         this.availableActions = forwardModel.computeAvailableActions(gameState);
+        return this.gameState;
     }
 
     public int getPlayerID(){

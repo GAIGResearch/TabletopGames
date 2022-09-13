@@ -22,11 +22,13 @@ from players.human import ActionController
 from players.simple import RandomPlayer
 from players.mcts import MCTSPlayer
 from players.python import PythonAgent
+from games.tictactoe import TicTacToeStateVector
 from utilities import Utils
 # gameType = "pandemic"
 
 class TAG():
     def __init__(self):
+        # self.vectoriser = TicTacToeStateVector()
         null = jpype.java.lang.String @ None
         null_list = jpype.java.util.List @ None
         gameType = Utils.getArg([""], "game", "TicTacToe");
@@ -40,14 +42,19 @@ class TAG():
         self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed))
 
     def reset(self):
+        vectoriser = TicTacToeStateVector
         gs = self.env.reset()
-        return gs
+        obs = vectoriser.featureVector(gs, 0)
+        print(f"reset obs = {obs}")
+        return obs
 
     def getActions(self):
         return self.env.getActions()
 
     def step(self, action):
         gs = self.env.step(action)
+        features = gs.featureVector(gs, 0)
+        print(features)
         reward = self.env.getReward()
         done = self.env.isDone()
         return gs, reward, done, ""
