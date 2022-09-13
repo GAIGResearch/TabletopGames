@@ -101,7 +101,7 @@ public class TMForwardModel extends AbstractForwardModel {
             }
             e.loadBoard(gs.board, gs.extraTiles, gs.bonuses, gs.milestones, gs.awards, gs.globalParameters);
         }
-//
+
 //        TMCard cccc = null;
 //        try {
 //            GsonBuilder gsonBuilder = new GsonBuilder()
@@ -114,7 +114,7 @@ public class TMForwardModel extends AbstractForwardModel {
 ////            GsonBuilder gsonBuilder = new GsonBuilder().registerTypeAdapter(Requirement.class, new RequirementJSONSerializer());
 //            Gson gson = gsonBuilder.setPrettyPrinting().create();
 //
-//            FileWriter fw = new FileWriter("data/terraformingmars/projectCards/jsonCardsT.json");
+//            FileWriter fw = new FileWriter("data/terraformingmars/projectCards/jsonCardsCORP.json");
 //            fw.write("[");
 //            for (TMCard c: gs.projectCards.getComponents()) {
 //                cccc = c;
