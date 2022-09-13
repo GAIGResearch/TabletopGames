@@ -16,7 +16,6 @@ import utilities.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class Connect4GUIManager extends AbstractGUIManager {

@@ -12,7 +12,6 @@ import games.poker.components.MoneyPot;
 import gui.GamePanel;
 import gui.ScreenHighlight;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 import utilities.Pair;
 import utilities.Utils;
@@ -23,7 +22,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 

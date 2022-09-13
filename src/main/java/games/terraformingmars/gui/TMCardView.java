@@ -228,7 +228,7 @@ public class TMCardView extends JComponent {
         }
         // Draw resources on card
         int yRC = ribbonRect.y + ribbonRect.height + spacing;
-        if (card.resourceOnCard != null && card.nResourcesOnCard > 0) {
+        if (card.resourceOnCard != null) {
             int xRC = width/2 - size*3/2;
             drawImage(g, ImageIO.GetInstance().getImage(card.resourceOnCard.getImagePath()), xRC, yRC, size, size);
             drawShadowStringCentered(g, " : ", new Rectangle(xRC + size, yRC, size, size));
@@ -720,6 +720,8 @@ public class TMCardView extends JComponent {
 
     private void drawAddResourceAction(Graphics2D g, AddResourceOnCard a, int x, int y, int size) {
         // x is the middle
+        int originalX = x;
+        int originalY = y;
 
         String amount = "" + a.amount;
         TMTypes.Resource res = a.resource;
@@ -727,6 +729,8 @@ public class TMCardView extends JComponent {
         boolean another = a.getCardID() == -1;
         TMTypes.Tag tagRequired = a.tagRequirement;
         int minResRequired = a.minResRequirement;
+        TMTypes.Tag tagTopCardDraw = a.tagTopCardDrawDeck;
+        TMTypes.Tag lastTagTopCardDraw = a.lastTopCardDrawDeckTag;
 
         // Calculate width of display
         FontMetrics fm = g.getFontMetrics();
@@ -789,6 +793,23 @@ public class TMCardView extends JComponent {
                 }
 
                 drawShadowStringCentered(g, ")", new Rectangle(x, y, fm.stringWidth(")"), size));
+            }
+        }
+        if (tagTopCardDraw != null) {
+            y += size*2;
+            x = 8;
+            String text = "if top draw pile card has tag: ";
+            size = 10;
+            drawStringCentered(g, text, new Rectangle(x, y, width - x*2, size*2), Color.white, size, true);
+            x = width - 8 - size;
+            drawImage(g, ImageIO.GetInstance().getImage(tagTopCardDraw.getImagePath()), x, y, size, size);
+            if (lastTagTopCardDraw != null) {
+                x = 8;
+                y += size*2;
+                text = "last drawn tag: ";
+                drawStringCentered(g, text, new Rectangle(x, y, width - x*2, size*2), Color.white, size, true);
+                x = width - 8 - size;
+                drawImage(g, ImageIO.GetInstance().getImage(lastTagTopCardDraw.getImagePath()), x, y, size, size);
             }
         }
     }

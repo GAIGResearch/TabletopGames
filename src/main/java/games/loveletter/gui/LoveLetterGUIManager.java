@@ -14,7 +14,6 @@ import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.ScreenHighlight;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 import utilities.Utils;
 
@@ -25,10 +24,8 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 public class LoveLetterGUIManager extends AbstractGUIManager {
     // Settings for display areas
