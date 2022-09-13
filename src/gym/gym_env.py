@@ -1,4 +1,5 @@
 import random
+import time
 import jpype
 from jpype import *
 import jpype.imports
@@ -27,24 +28,23 @@ from utilities import Utils
 # gameType = "pandemic"
 
 class TAG():
-    def __init__(self, seed=42, game="TicTacToe"):
+    def __init__(self, seed=42, game="Diamant"):
         null = jpype.java.lang.String @ None
         null_list = jpype.java.util.List @ None
         gameType = Utils.getArg([""], "game", game)
         players = jpype.java.util.ArrayList()
         players.add(PythonAgent())
-        players.add(RandomPlayer())
+        players.add(PythonAgent())
         # players.add(PythonAgent())
         self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed))
+        self.gs = None
 
     def getObs(self):
         return self.env.getFeatures()
 
     def reset(self):
         gs = self.env.reset()
-        # obs = TicTacToeStateVector.featureVector(gs, 0)
-        obs = self.env.getFeatures()
-        print(f"reset obs = {obs}")
+        obs = gs.getFeatureVector()
         return obs
 
     def getActions(self):
@@ -52,26 +52,33 @@ class TAG():
 
     def step(self, action):
         gs = self.env.step(action)
-        # features = gs.featureVector(gs, 0)
-        obs = self.env.getFeatures()
-        print(f"step {obs}")
+        obs = gs.getFeatureVector()
         reward = self.env.getReward()
         done = self.env.isDone()
-        return gs, reward, done, ""
+        return obs, reward, done, ""
 
     def close(self):
         jpype.shutdownJVM()
 
 if __name__ == "__main__":
+    EPISODES = 100
     env = TAG()
     done = False
+
+    start_time = time.time()
     steps = 0
-    gs = env.reset()
-    while not done:
-        steps +=1
-        rnd_action = random.randint(0, len(env.getActions())-1)
-        print(f"player {env.env.getPlayerID()} choose action {rnd_action}")
-        gs, reward, done, info = env.step(rnd_action)
-        if done:
-            print(f"Game over {reward} in {steps} steps")
+    for e in range(EPISODES):
+        obs = env.reset()
+        done = False
+        while not done:
+            steps +=1
+            rnd_action = random.randint(0, len(env.getActions())-1)
+            # print(f"player {env.env.getPlayerID()} choose action {rnd_action}")
+            obs, reward, done, info = env.step(rnd_action)
+            if done:
+                print(f"Game over rewards {reward} in {steps} steps results =  {env.env.getPlayerResults()[0]}")
+                break
+
+    print(f"{EPISODES} episodes done in {time.time() - start_time} with total steps = {steps}")
+    env.close()
 
