@@ -5,7 +5,6 @@ import core.AbstractPlayer;
 import core.Game;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
-import games.catan.CatanParameters;
 import games.catan.CatanTile;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
@@ -15,7 +14,6 @@ import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Collection;
 
 public class CatanGUI extends AbstractGUIManager {
     CatanGameState gs;

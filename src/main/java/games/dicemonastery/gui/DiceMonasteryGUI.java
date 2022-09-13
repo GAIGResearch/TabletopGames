@@ -8,7 +8,6 @@ import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.ScreenHighlight;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -16,7 +15,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.IntStream;
 

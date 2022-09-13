@@ -23,7 +23,7 @@ public class TicTacToeGame extends Game {
         agents.add(new OSLAPlayer());
         agents.add(new RandomPlayer());
 
-        TicTacToeGameParameters params = new TicTacToeGameParameters(System.currentTimeMillis());
+        TicTacToeGameParameters params = new TicTacToeGameParameters();
         Game game = new TicTacToeGame(agents, params);
         game.run();
     }

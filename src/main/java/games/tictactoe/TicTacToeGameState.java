@@ -72,6 +72,17 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     public int hashCode() {
         return Objects.hash(super.hashCode(), gridBoard);
     }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Objects.hash(gameParameters)).append("|");
+        sb.append(Objects.hash(turnOrder)).append("|");
+        sb.append(Objects.hash(getAllComponents())).append("|");
+        sb.append(Objects.hash(gameStatus)).append("|");
+        sb.append(Objects.hash(gamePhase)).append("|*|");
+        sb.append(Objects.hash(gridBoard));
+        return sb.toString();
+    }
 
     @Override
     public GridBoard<Token> getGridBoard() {

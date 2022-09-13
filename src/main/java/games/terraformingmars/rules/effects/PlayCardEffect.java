@@ -25,7 +25,7 @@ public class PlayCardEffect extends Effect {
                 /* Effect based on card played, e.g. add resource to that card */
                 effectAction.setCardID(action.getPlayCardID());
             }
-            this.effectAction.execute(gs);
+            this.effectAction.execute(gs);  // TODO execute multiple times
         }
     }
 

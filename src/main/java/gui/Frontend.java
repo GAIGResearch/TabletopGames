@@ -12,10 +12,8 @@ import players.human.ActionController;
 
 import javax.swing.Timer;
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.io.File;
 import java.util.List;
 import java.util.*;
 

@@ -12,14 +12,12 @@ import gui.ScreenHighlight;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class TicTacToeGUIManager extends AbstractGUIManager {
 

@@ -254,13 +254,36 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, communityCards, moneyPots, bet);
+        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase, playerDecks, drawDeck, communityCards, moneyPots, bet);
         result = 31 * result + Arrays.hashCode(playerMoney);
         result = 31 * result + Arrays.hashCode(playerBet);
         result = 31 * result + Arrays.hashCode(playerNeedsToCall);
         result = 31 * result + Arrays.hashCode(playerFold);
         result = 31 * result + Arrays.hashCode(playerActStreet);
+        result = 31 * result + Arrays.hashCode(playerResults);
+
         return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Objects.hash(gameParameters)).append("|");
+        sb.append(Objects.hash(turnOrder)).append("|");
+        sb.append(Objects.hash(gameStatus)).append("|");
+        sb.append(Objects.hash(gamePhase)).append("|*|");
+        sb.append(Objects.hash(playerDecks)).append("|");
+        sb.append(Objects.hash(drawDeck)).append("|");
+        sb.append(Objects.hash(communityCards)).append("|");
+        sb.append(Objects.hash(moneyPots)).append("|");
+        sb.append(Objects.hash(bet)).append("|*|");
+        sb.append(Arrays.hashCode(playerMoney)).append("|");
+        sb.append(Arrays.hashCode(playerBet)).append("|");
+        sb.append(Arrays.hashCode(playerNeedsToCall)).append("|");
+        sb.append(Arrays.hashCode(playerFold)).append("|");
+        sb.append(Arrays.hashCode(playerMoney)).append("|");
+        sb.append(Arrays.hashCode(playerResults)).append("|");
+        return sb.toString();
     }
 
     enum PokerHand {

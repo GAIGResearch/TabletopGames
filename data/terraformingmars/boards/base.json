@@ -25,15 +25,15 @@
       "range": [-30, -28, -26, -24, -22, -20, -18, -16, -14, -12, -10, -8, -6, -4, -2, 0, 2, 4, 6, 8],
       "bonus": [
         {
-          "threshold": 4,
+          "threshold": 3,
           "effect": "inc-Heatprod-1"
         },
         {
-          "threshold": 6,
+          "threshold": 5,
           "effect": "inc-Heatprod-1"
         },
         {
-          "threshold": 16,
+          "threshold": 15,
           "effect": "placetile/ocean/ocean/true"
         }
       ]

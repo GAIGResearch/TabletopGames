@@ -257,7 +257,7 @@ public class TMForwardModel extends AbstractForwardModel {
                     }
                     // TODO: remove, used for testing specific cards
 //                    for (TMCard c: gs.projectCards.getComponents()) {
-//                        if (c.getComponentName().equals("Symbiotic Fungus")) {
+//                        if (c.getComponentName().equalsIgnoreCase("search for life")) {
 //                            gs.playerCardChoice[i].add(c);
 //                        }
 //                    }

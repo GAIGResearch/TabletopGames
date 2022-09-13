@@ -18,6 +18,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
     public int minResRequirement;
 
     public TMTypes.Tag tagTopCardDrawDeck;  // tag top card of the draw deck must have for this to be played; top card discarded either way
+    public TMTypes.Tag lastTopCardDrawDeckTag;  // tag of the last drawn card from the top of the deck
 
     public AddResourceOnCard(int player, int cardID, TMTypes.Resource resource, int amount, boolean free) {
         super(player, free);
@@ -25,9 +26,9 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         this.amount = amount;
         this.setCardID(cardID);
 
-        if (amount < 0) {
-            this.setActionCost(resource, Math.abs(amount), -1);
-        }
+//        if (amount < 0) {
+//            this.setActionCost(resource, Math.abs(amount), -1);
+//        }
     }
 
     @Override
@@ -39,6 +40,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
                 TMCard topCard = gs.drawCard();
                 if (topCard != null) {
                     for (TMTypes.Tag t : topCard.tags) {
+                        lastTopCardDrawDeckTag = t;  // todo show all?
                         if (t == tagTopCardDrawDeck) {
                             canExecute = true;
                             break;
@@ -113,13 +115,15 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         if (action instanceof AddResourceOnCard) {
             setCardID(((AddResourceOnCard) action).getCardID());
         } else {
-            setCardID(-2);  // No cards to add resource to
+            setCardID(-2);
         }
     }
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return getCardID() != -1;
+        boolean complete = getCardID() != -1;
+        setCardID(-1);
+        return complete;
     }
 
     @Override
@@ -129,6 +133,7 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         copy.tagRequirement = tagRequirement;
         copy.minResRequirement = minResRequirement;
         copy.tagTopCardDrawDeck = tagTopCardDrawDeck;
+        copy.lastTopCardDrawDeckTag = lastTopCardDrawDeckTag;
         return copy;
     }
 
@@ -157,12 +162,12 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
             TMCard card = (TMCard) gameState.getComponentById(getCardID());
             return "Add " + amount + " " + resource + " on card " + card.getComponentName();
         }
-        return "Add " + amount + " " + resource + " on card";
+        return "Add " + amount + " " + resource + " on " + (chooseAny? "any " : "another ") + "card";
     }
 
     @Override
     public String toString() {
-        return "Add " + amount + " " + resource + " on card";
+        return "Add " + amount + " " + resource + " on " + (chooseAny? "any " : getCardID()==-1? "another " : "") + "card";
     }
 
 }

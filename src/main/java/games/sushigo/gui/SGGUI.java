@@ -9,7 +9,6 @@ import games.sushigo.SGParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import javax.swing.border.Border;
