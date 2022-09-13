@@ -2,12 +2,17 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.components.Token;
 import games.GameType;
+import games.tictactoe.TicTacToeConstants;
+import games.tictactoe.TicTacToeGameState;
+import games.tictactoe.TicTacToeStateVector;
 import players.human.HumanGUIPlayer;
 import players.python.PythonAgent;
 import utilities.Utils;
 
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -75,6 +80,22 @@ public class GYMEnv {
         return availableActions;
     }
 
+    public double[] getFeatures(){
+        String playerChar = TicTacToeConstants.playerMapping.get(gameState.getCurrentPlayer()).getTokenType();
+        TicTacToeGameState gs = (TicTacToeGameState) gameState;
+        return Arrays.stream(gs.getGridBoard().flattenGrid()).mapToDouble(c -> {
+            String pos = ((Token) c).getTokenType();
+            if (pos.equals(playerChar)) {
+                return 1.0;
+            } else if (pos.equals(TicTacToeConstants.emptyCell)) {
+                return 0.0;
+            } else { // opponent's piece
+                return -1.0;
+            }
+        }).toArray();
+//        return new TicTacToeStateVector().featureVector(gameState, gameState.getCurrentPlayer());
+    }
+
     public AbstractGameState step(int a){
         // execute action and loop until a PythonAgent is required to make a decision
         // todo check for game over
@@ -139,6 +160,7 @@ public class GYMEnv {
             tick++;
 
             lastPlayer = activePlayer;
+            currentPlayer = players.get(gameState.getCurrentPlayer());
 
         }
         AbstractGameState observation = gameState.copy(activePlayer);

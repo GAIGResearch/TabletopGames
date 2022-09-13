@@ -16,7 +16,7 @@ java.lang.System.out.println("Hello World!!")
 # TicTacToeGame.main([""])
 import java
 from core import GYMEnv
-from core import Game
+from core import Game, AbstractGameState
 from games import GameType
 from players.human import ActionController
 from players.simple import RandomPlayer
@@ -27,24 +27,23 @@ from utilities import Utils
 # gameType = "pandemic"
 
 class TAG():
-    def __init__(self):
-        # self.vectoriser = TicTacToeStateVector()
+    def __init__(self, seed=42, game="TicTacToe"):
         null = jpype.java.lang.String @ None
         null_list = jpype.java.util.List @ None
-        gameType = Utils.getArg([""], "game", "TicTacToe");
-        ac = ActionController()
-        turnPause = 0
-        seed = 42
+        gameType = Utils.getArg([""], "game", game)
         players = jpype.java.util.ArrayList()
         players.add(PythonAgent())
         players.add(RandomPlayer())
         # players.add(PythonAgent())
         self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed))
 
+    def getObs(self):
+        return self.env.getFeatures()
+
     def reset(self):
-        vectoriser = TicTacToeStateVector
         gs = self.env.reset()
-        obs = vectoriser.featureVector(gs, 0)
+        # obs = TicTacToeStateVector.featureVector(gs, 0)
+        obs = self.env.getFeatures()
         print(f"reset obs = {obs}")
         return obs
 
@@ -53,8 +52,9 @@ class TAG():
 
     def step(self, action):
         gs = self.env.step(action)
-        features = gs.featureVector(gs, 0)
-        print(features)
+        # features = gs.featureVector(gs, 0)
+        obs = self.env.getFeatures()
+        print(f"step {obs}")
         reward = self.env.getReward()
         done = self.env.isDone()
         return gs, reward, done, ""
