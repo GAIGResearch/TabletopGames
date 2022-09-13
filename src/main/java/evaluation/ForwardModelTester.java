@@ -12,7 +12,7 @@ import java.util.*;
 public class ForwardModelTester {
 
     /**
-     * The idea here is to rnu a game from start to finish - optionally using some agent to make
+     * The idea here is to run a game from start to finish - optionally using some agent to make
      * decisions.
      * At each point in the game we:
      * i) copy the game state once for each action, and check it is equal to the original (plus same hashcode)
