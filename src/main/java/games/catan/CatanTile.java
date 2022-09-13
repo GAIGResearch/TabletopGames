@@ -285,7 +285,14 @@ public class CatanTile {
     public int hashCode() {
         int result = Objects.hash(x, y, tileType, number, hasHarbor, robber);
         result = result * 31 + Arrays.hashCode(roads);
-        result = result * 31 + Arrays.hashCode(settlements);
+        // The direct settlements hashcode does not include the possible state changes
+        // because it is used as the key in the Graph of board nodes (not the ideal design choice)
+        // which means that its hashcode is restricted to just the id (so that the key value does not change)
+        int settlementHashCode = 0;
+        for (Settlement settlement : settlements) {
+            settlementHashCode = settlementHashCode + 3 * settlement.extendedHashCode();
+        }
+        result = result * 31 + settlementHashCode;
         result = result * 31 + Arrays.hashCode(harbors);
         return result;
     }

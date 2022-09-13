@@ -76,7 +76,11 @@ public class Settlement implements Copiable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, owner, harbour, type);
+        return id;
+    }
+
+    public int extendedHashCode() {
+        return Objects.hash(id, type, harbour, owner);
     }
 
     @Override
