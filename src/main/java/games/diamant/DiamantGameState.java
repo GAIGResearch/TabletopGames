@@ -275,4 +275,20 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     public List<Counter>     getTreasureChests() { return treasureChests; }
     public Deck<DiamantCard> getPath()           { return path;           }
     public ActionsPlayed     getActionsPlayed()  { return actionsPlayed;  }
+
+    public double[] getFeatureVector() {
+        String[] names = new String[]{"BANKED POINTS", "CAVE POINTS", "NPLAYERS", "CAVES LEFT"
+                , "TRAP1", "TRAP2", "TRAP3", "TRAP4", "TRAP5"};
+        double[] retVal = new double[names.length];
+        retVal[0] = getTreasureChests().get(getCurrentPlayer()).getValue();
+        retVal[1] = nGemsOnPath;
+        retVal[3] = playerInCave.size();
+        retVal[4] = nCave;
+        retVal[5] = nHazardExplosionsOnPath;
+        retVal[6] = nHazardPoissonGasOnPath;
+        retVal[7] = nHazardRockfallsOnPath;
+        retVal[8] = nHazardScorpionsOnPath;
+        retVal[9] = nHazardSnakesOnPath;
+        return retVal;
+    }
 }

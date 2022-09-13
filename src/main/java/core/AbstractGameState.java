@@ -138,6 +138,7 @@ public abstract class AbstractGameState {
         addAllComponents(); // otherwise the list of allComponents is only ever updated when we copy the state!
         return allComponents;
     }
+    public double[] getFeatureVector() {return null;} //Gets a feature vector for games that have it, otherwise returns null
 
     /**
      * While getAllComponents() returns an Area containing every component, this method
