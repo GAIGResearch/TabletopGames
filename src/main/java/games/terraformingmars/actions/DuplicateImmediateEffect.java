@@ -119,4 +119,14 @@ public class DuplicateImmediateEffect extends TMAction implements IExtendedSeque
     public int hashCode() {
         return Objects.hash(super.hashCode(), tagRequirement, actionClassName, production);
     }
+
+    @Override
+    public String toString() {
+        return "Duplicate card";
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+    }
 }

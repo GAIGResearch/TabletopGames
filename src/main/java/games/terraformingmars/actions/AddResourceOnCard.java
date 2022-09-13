@@ -25,9 +25,9 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
         this.amount = amount;
         this.setCardID(cardID);
 
-        if (amount < 0) {
-            this.setActionCost(resource, Math.abs(amount), -1);
-        }
+//        if (amount < 0) {
+//            this.setActionCost(resource, Math.abs(amount), -1);
+//        }
     }
 
     @Override

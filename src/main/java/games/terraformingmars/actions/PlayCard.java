@@ -43,7 +43,10 @@ public class PlayCard extends TMAction {
             for (TMTypes.Tag t : card.tags) {
                 gs.getPlayerCardsPlayedTags()[player].get(t).increment(1);
             }
+        } else {
+            gs.getPlayerCardsPlayedTags()[player].get(TMTypes.Tag.Event).increment(1);
         }
+
         gs.getPlayerCardsPlayedTypes()[player].get(card.cardType).increment(1);
         if (card.shouldSaveCard()) {
             gs.getPlayerComplicatedPointCards()[player].add(card);

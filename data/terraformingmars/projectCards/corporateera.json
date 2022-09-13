@@ -2735,7 +2735,7 @@
   },
   {
     "@class": "filterDiv active corporate noneTag",
-    "annotation": "OPPONENTS MAY NOT REMOVE YOUR",
+    "annotation": "Opponents may not remove your plants, animals, microbes.",
     "div": [
       {
         "#text": "Protected Habitats",
@@ -2753,7 +2753,7 @@
         "@class": "number"
       },
       {
-        "#text": "OPPONENTS MAY NOT REMOVE YOUR",
+        "#text": "Opponents may not remove your plants, animals, microbes.",
         "@class": "content",
         "@style": "font-weight: normal;",
         "br": "",

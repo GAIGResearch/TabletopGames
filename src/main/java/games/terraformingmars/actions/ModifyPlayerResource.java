@@ -37,7 +37,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.production = production;
         this.targetPlayer = player;
         this.player = player;
-        if (change < 0) {
+        if (change < 0 && production) {
             this.requirements.add(new ResourceRequirement(resource, Math.abs(change), production, player, -1));
         }
     }
@@ -72,7 +72,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.onMars = onMars;
         this.counterResource = counterResource;
         this.counterResourceProduction = counterResourceProduction;
-        if (change < 0) {
+        if (change < 0 && production) {
             this.requirements.add(new ResourceRequirement(resource, Math.abs((int)change), production, targetPlayer, -1));
         }
     }
@@ -85,7 +85,7 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         this.production = production;
         this.targetPlayer = targetPlayer;
         this.player = player;
-        if (change < 0) {
+        if (change < 0 && production) {
             this.requirements.add(new ResourceRequirement(resource, Math.abs((int)change), production, targetPlayer, -1));
         }
     }
@@ -235,9 +235,12 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
+        TMGameState gs = (TMGameState)state;
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
         if (targetPlayer == -2) {
+            Counter c = gs.getPlayerResources()[player].get(resource);
+            double max = -1*Math.min(Math.abs(change),(c.getMinimum() < 0? c.getValue() + Math.abs(c.getMinimum()) : c.getValue()));
             // Choose a player
             if (targetPlayerOptions != null) {
                 for (int i: targetPlayerOptions) {
@@ -245,33 +248,36 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
                         actions.add(new TMAction(player));  // Pass
                         continue;
                     }
-                    ModifyPlayerResource a = new ModifyPlayerResource(player, i, change, resource, production, tagToCount, tileToCount,
-                            any, opponents, onMars, counterResource, counterResourceProduction, true);
-                    a.complete = true;
-                    if (a.canBePlayed((TMGameState) state)) {
-                        actions.add(a);
+                    if (!production && change < 0) {
+                        for (double k = max; k < 0; k++) {
+                            createActions((TMGameState) state, actions, i, k);
+                        }
+                    } else {
+                        createActions((TMGameState) state, actions, i, change);
                     }
                 }
             } else {
                 for (int i = 0; i < state.getNPlayers(); i++) {
-                    ModifyPlayerResource a = new ModifyPlayerResource(player, i, change, resource, production, tagToCount, tileToCount,
-                            any, opponents, onMars, counterResource, counterResourceProduction, true);
-                    a.complete = true;
-                    if (a.canBePlayed((TMGameState) state)) {
-                        actions.add(a);
+                    if (!production && change < 0) {
+                        for (double k = max; k < 0; k++) {
+                            createActions((TMGameState) state, actions, i, k);
+                        }
+                    } else {
+                        createActions((TMGameState) state, actions, i, change);
                     }
                 }
                 if (state.getNPlayers() == 1) {
-                    // Can do this to neutral opponent (no effect) in solo play
-                    ModifyPlayerResource a = new ModifyPlayerResource(player, -3, change, resource, production, tagToCount, tileToCount,
-                            any, opponents, onMars, counterResource, counterResourceProduction, true);
-                    a.complete = true;
-                    actions.add(a);
+                    if (!production && change < 0) {
+                        for (double k = max; k < 0; k++) {
+                            createActions((TMGameState) state, actions, -3, k);
+                        }
+                    } else {
+                        createActions((TMGameState) state, actions, -3, change);
+                    }
                 }
             }
         } else if (counterResource != null) {
             // Choose amount
-            TMGameState gs = (TMGameState)state;
             Counter c;
             if (production) {
                 c = gs.getPlayerProduction()[player].get(resource);
@@ -292,6 +298,15 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
         }
 
         return actions;
+    }
+
+    private void createActions(TMGameState state, ArrayList<AbstractAction> actions, int i, double k) {
+        ModifyPlayerResource a = new ModifyPlayerResource(player, i, k, resource, production, tagToCount, tileToCount,
+                any, opponents, onMars, counterResource, counterResourceProduction, true);
+        a.complete = true;
+        if (a.canBePlayed(state)) {
+            actions.add(a);
+        }
     }
 
     @Override

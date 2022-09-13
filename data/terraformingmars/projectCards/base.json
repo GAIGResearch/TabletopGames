@@ -4524,7 +4524,7 @@
             "@class": "microbe resource"
           },
           {
-            "#text": "Effect: playcard(tag-Animal,Plant,Microbe) / add-3-Microbe *  add-3-Microbe  ",
+            "#text": "Effect: playcard(tag-Animal,Plant,Microbe) / add-1-Microbe *  add-1-Microbe  ",
             "@class": "description"
           },
           {
