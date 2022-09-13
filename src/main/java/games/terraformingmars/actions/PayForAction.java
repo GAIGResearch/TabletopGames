@@ -77,6 +77,14 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         TMGameState gs = (TMGameState) state;
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+
+        if (stage >= resourcesToPayWith.length) {
+            // Shouldn't happen
+            actions.add(action);
+            return actions;
+        }
+
         TMTypes.Resource res = resourcesToPayWith[stage];
         // Find minimum that must be spent of this resource so that the card is still payable with remaining resources
         HashSet<TMTypes.Resource> resourcesRemaining = new HashSet<>(Arrays.asList(resourcesToPayWith).subList(stage + 1, resourcesToPayWith.length));
@@ -89,14 +97,13 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         int max = Math.min(gs.getPlayerResources()[player].get(res).getValue(), (int)(Math.ceil((getCost() - costPaid)/rate)));
 
         // Can pay between min and max of this resource
-        ArrayList<AbstractAction> actions = new ArrayList<>();
         for (int i = min; i <= max; i++) {
             actions.add(new ModifyPlayerResource(player, -i, res, false));
         }
+
         if (actions.size() == 0) {
-            int a = 0;  // TODO: bad, this shouldn't happen
+            // Shouldn't happen
             actions.add(action);
-//            actions.add(new TMAction(player));
         }
         return actions;
     }
@@ -109,8 +116,10 @@ public class PayForAction extends TMAction implements IExtendedSequence {
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (! (action instanceof ModifyPlayerResource)) {
-            stage = resourcesToPayWith.length;  // TODO: bad, this shouldn't happen
+            // Shouldn't happen
+            stage = resourcesToPayWith.length;
             this.action.player = player;
+            this.action.requirements.remove(costRequirement);
             this.action.execute(state);
             return;
         }
@@ -121,20 +130,10 @@ public class PayForAction extends TMAction implements IExtendedSequence {
         if (costPaid >= getCost()) {
             // Action paid for, execute
             this.action.player = player;
+            this.action.requirements.remove(costRequirement);
             this.action.execute(state);
             stage = resourcesToPayWith.length;
         }
-//        else if (stage == resourcesToPayWith.length-1) {
-//            List<AbstractAction> actions = _computeAvailableActions(gs);
-//            if (actions.size() == 1) {
-//                // If only 1 option left, just do it
-//                TMAction a = (TMAction) actions.get(0);
-//                a.execute(gs);
-//                this.action.player = player;
-//                this.action.execute(state);
-//                stage = resourcesToPayWith.length;
-//            }
-//        }
     }
 
     @Override
