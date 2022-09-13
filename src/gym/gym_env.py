@@ -16,15 +16,28 @@ java.lang.System.out.println("Hello World!!")
 # from games.tictactoe import TicTacToeGame
 # TicTacToeGame.main([""])
 import java
-from core import GYMEnv
-from core import Game, AbstractGameState
-from games import GameType
-from players.human import ActionController
-from players.simple import RandomPlayer
-from players.mcts import MCTSPlayer
-from players.python import PythonAgent
-from games.tictactoe import TicTacToeStateVector
-from utilities import Utils
+
+# Import Calls
+GYMEnv = jpype.JClass("core.GYMEnv")
+Game = jpype.JClass("core.Game")
+AbstractGameState = jpype.JClass("core.AbstractGameState")
+GameType = jpype.JClass("games.GameType")
+ActionController = jpype.JClass("players.human.ActionController")
+RandomPlayer = jpype.JClass("players.simple.RandomPlayer")
+MCTSPlayer = jpype.JClass("players.mcts.MCTSPlayer")
+PythonAgent = jpype.JClass("players.python.PythonAgent")
+TicTacToeStateVector = jpype.JClass("games.tictactoe.TicTacToeStateVector")
+Utils = jpype.JClass("utilities.Utils")
+
+# from core import GYMEnv
+# from core import Game, AbstractGameState
+# from games import GameType
+# from players.human import ActionController
+# from players.simple import RandomPlayer
+# from players.mcts import MCTSPlayer
+# from players.python import PythonAgent
+# from games.tictactoe import TicTacToeStateVector
+# from utilities import Utils
 # gameType = "pandemic"
 
 class TAG():
