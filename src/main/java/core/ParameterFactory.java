@@ -24,9 +24,19 @@ import games.virus.VirusGameParameters;
 public class ParameterFactory {
 
     static public AbstractParameters getDefaultParams(GameType game, long seed) {
+
+        String dataPath;
+        //sets default data path depending on if using python interface
+        if (System.getProperty("user.dir").contains("gym")) {
+            dataPath = "../../data/";
+        }
+        else {
+            dataPath = "data/";
+        }
+
         switch (game) {
             case Pandemic:
-                return new PandemicParameters("data/pandemic/", seed);
+                return new PandemicParameters(dataPath+"pandemic", seed);
             case TicTacToe:
                 return new TicTacToeGameParameters(seed);
             case Connect4:
@@ -56,7 +66,7 @@ public class ParameterFactory {
             case Blackjack:
                 return new BlackjackParameters(seed);
             case Battlelore:
-                return new BattleloreGameParameters("data/battlelore/", seed);
+                return new BattleloreGameParameters(dataPath+"battlelore", seed);
             case DiceMonastery:
                 return new DiceMonasteryParams(seed);
             case SushiGo:

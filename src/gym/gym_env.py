@@ -41,7 +41,7 @@ Utils = jpype.JClass("utilities.Utils")
 # gameType = "pandemic"
 
 class TAG():
-    def __init__(self, seed=42, game="Diamant"):
+    def __init__(self, seed=42, game="Pandemic"):
         null = jpype.java.lang.String @ None
         null_list = jpype.java.util.List @ None
         gameType = Utils.getArg([""], "game", game)
