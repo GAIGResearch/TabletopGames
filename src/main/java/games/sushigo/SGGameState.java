@@ -303,7 +303,9 @@ public class SGGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        int retValue = Objects.hash(cardAmount, playerHands, playerFields, drawPile, discardPile, deckRotations);
+        int retValue = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase);
+        retValue = 31 * retValue + Arrays.hashCode(playerResults);
+        retValue = 31 * retValue + Objects.hash(cardAmount, playerHands, playerFields, drawPile, discardPile, deckRotations);
         retValue = retValue * 31 + Arrays.hashCode(playerScore);
         retValue = retValue * 31 + Arrays.hashCode(playerScoreToAdd);
         retValue = retValue * 31 + Arrays.hashCode(playerExtraCardPicks);

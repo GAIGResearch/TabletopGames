@@ -35,6 +35,7 @@ public class DominionParameters extends TunableParameters {
         addTunableParameter("COPPER_SUPPLY", 32, Arrays.asList(10,20,32,40,50));
         addTunableParameter("SILVER_SUPPLY", 40, Arrays.asList(10,20,30,40,50));
         addTunableParameter("GOLD_SUPPLY", 30, Arrays.asList(10,20,30,40,50));
+        _reset();
     }
 
     @Override

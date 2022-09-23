@@ -41,6 +41,7 @@ public class PokerGameParameters extends TunableParameters {
         addTunableParameter("smallBlind", 5, Arrays.asList(1, 5, 10, 15, 20));
         addTunableParameter("bigBlind", 10, Arrays.asList(2, 10, 20, 30, 40));
         addTunableParameter("bet", 5, Arrays.asList(1, 5, 10, 15, 20));
+        _reset();
     }
 
     @Override

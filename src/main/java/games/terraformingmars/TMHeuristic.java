@@ -84,6 +84,7 @@ public class TMHeuristic extends TunableParameters implements IStateHeuristic {
         addTunableParameter("PlantProdWeight", 0.5);
         addTunableParameter("EnergyProdWeight", 0.5);
         addTunableParameter("HeatProdWeight", 0.5);
+        _reset();
     }
     @Override
     public void _reset() {

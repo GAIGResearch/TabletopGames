@@ -19,6 +19,7 @@ public class Connect4GameParameters extends TunableParameters {
         super(seed);
         addTunableParameter("gridSize", 8, Arrays.asList(6, 8, 10, 12));
         addTunableParameter("winCount", 4, Arrays.asList(3, 4, 5, 6));
+        _reset();
     }
 
     @Override

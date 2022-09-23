@@ -58,6 +58,7 @@ public class UnoGameParameters extends TunableParameters {
         addTunableParameter("nWildDrawPoints", 50, Arrays.asList(20,30,50,80,100));
         addTunableParameter("nWinPoints", 500, Arrays.asList(50,100,250,500));
         addTunableParameter("scoringMethod", UnoScoring.INCREMENTAL, Arrays.asList(UnoScoring.values()));
+        _reset();
     }
 
     @Override

@@ -27,6 +27,7 @@ public class DiceMonasteryParams extends TunableParameters {
         addTunableParameter("prepareVellumCost", 2);
         addTunableParameter("hireNoviceCost", 3);
         addTunableParameter("waxPerCandle", 1);
+        _reset();
     }
 
     public String dataPath = "data/dicemonastery/";

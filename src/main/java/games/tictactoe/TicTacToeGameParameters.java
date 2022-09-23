@@ -16,6 +16,7 @@ public class TicTacToeGameParameters extends TunableParameters {
     public TicTacToeGameParameters(long seed) {
         super(seed);
         addTunableParameter("gridSize", 3, Arrays.asList(3, 4, 5, 6));
+        _reset();
     }
 
     @Override
