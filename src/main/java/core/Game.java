@@ -23,12 +23,11 @@ import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -915,11 +914,10 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
 
-        MCTSParams params1 = new MCTSParams();
-
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
+//        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
@@ -938,8 +936,8 @@ public class Game {
 //        games.remove(LoveLetter);
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, null, false, false, null);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, null, false, false, null);
+//        runMany(games, players, 100L, 100, false, false, null, turnPause);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
     }
 
 }
