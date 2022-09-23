@@ -929,7 +929,7 @@ public class Game {
 //        players.add(new HumanConsolePlayer());
 
         /* 4. Game parameter configuration. Set to null to ignore and use default parameters */
-        String gameParams = "data/pandemic/param-config.json"; //null;
+        String gameParams = null;
 
         /* 5. Run! */
         runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
