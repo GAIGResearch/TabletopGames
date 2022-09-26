@@ -34,6 +34,7 @@ public class CatanGUI extends AbstractGUIManager {
 
     public CatanGUI(GamePanel parent, Game game, ActionController ac) {
         super(parent, ac, 25);
+        if (game == null) return;
 
         parent.setPreferredSize(new Dimension(1000, 600));
         this.gs = (CatanGameState) game.getGameState();
