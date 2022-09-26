@@ -20,9 +20,10 @@ public class LinearStateWinHeuristic extends LinearStateHeuristic {
 
     @Override
     public double evaluateState(AbstractGameState state, int playerId) {
+        minValue = 0.0;
+        maxValue = 1.0;
         if (state.isNotTerminalForPlayer(playerId)) {
-            double retValue = super.evaluateState(state, playerId);
-            return Utils.range(retValue, 0.0, 1.0);
+            return super.evaluateState(state, playerId);
         }
 
         switch (state.getPlayerResults()[playerId]) {
