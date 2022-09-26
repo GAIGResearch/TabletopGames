@@ -26,6 +26,10 @@ public class CantStopParameters extends AbstractParameters {
     public final int ELEVEN_MAX = 4;
     public final int TWELVE_MAX = 2;
 
+    public final int DICE_NUMBER = 4; // If you change this, then you'll need to also update code in ForwardModel._computeAvailableActions()
+    public final int DICE_SIDES = 6;
+    public final int COLUMNS_TO_WIN = 3;
+
     public CantStopParameters(long seed) {
         super(seed);
     }
