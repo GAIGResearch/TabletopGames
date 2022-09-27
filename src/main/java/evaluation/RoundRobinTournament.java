@@ -155,11 +155,15 @@ public class RoundRobinTournament extends AbstractTournament {
 
             LinkedList<Integer> matchUp = new LinkedList<>();
             createAndRunMatchUp(matchUp, g);
+            int gamesPerPlayer = gameCounter * playersPerGame.get(g) / agents.size();
 
             if (verbose)
                 for (int i = 0; i < this.agents.size(); i++) {
                     System.out.printf("%s got %d points %n", agents.get(i), pointsPerPlayer[i]);
-                    System.out.printf("%s won %.1f%% of the games %n", agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun));
+                    System.out.printf("%s won %.1f%% of the %d games of the tournament. %n",
+                            agents.get(i), 100.0 * pointsPerPlayer[i] / (gamesPerMatchUp * matchUpsRun), gameCounter);
+                    System.out.printf("%s won %.1f%% of the games it played during the tournament. %n",
+                            agents.get(i), 100.0 * pointsPerPlayer[i] / gamesPerPlayer);
                 }
         }
         if (dataLogger != null)
