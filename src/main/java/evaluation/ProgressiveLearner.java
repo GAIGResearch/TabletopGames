@@ -114,7 +114,7 @@ public class ProgressiveLearner {
                             "\tstateFreq=     How frequently to record a value to regress against (ROUND_OVER, TURN_OVER, ACTION_CHOSEN, ACTION_TAKEN)\n" +
                             "\t               Defaults to ACTION_TAKEN.\n" +
                             "\tstateCPO=      Whether to only record states for the current player (defaults to all players)\n" +
-                            "\theuristic=     A class name for a heuristic to inject into the Agent JSON defintition (see 'player')\n" +
+                            "\theuristic=     A class name for a heuristic to inject into the Agent JSON definition (see 'player')\n" +
                             "\t               Defaults to players.heuristics.LinearStateHeuristic\n" +
                             "\tdefaultHeuristic=Defaults to a null heuristic (random play). This is only used in the first iteration\n" +
                             "\t               when we have no data.  \n" +
@@ -156,7 +156,7 @@ public class ProgressiveLearner {
         // Now we can run a tournament of everyone
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers, 1, true, finalMatchups,
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
                 System.currentTimeMillis(), params);
 
         tournament.listeners = new ArrayList<>();
@@ -195,7 +195,7 @@ public class ProgressiveLearner {
 
     private void runGamesWithAgents() {
         // Run!
-        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers, 1, true, matchups,
+        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
                 System.currentTimeMillis(), params);
         tournament.verbose = false;
 

@@ -20,17 +20,20 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.*;
 import static players.PlayerConstants.*;
 import static players.mcts.MCTSEnums.Information.Closed_Loop;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.SelfOnly;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
+import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.Strategies.MAST;
 import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
 
 public class SingleTreeNode {
-    private final Map<AbstractAction, Integer> nValidVisits = new HashMap<>();
+
     // State in this node (closed loop)
-    protected AbstractAction actionToReach;
     protected AbstractGameState state;
+    // State in this node (open loop - this is updated by onward trajectory....be very careful about using)
+    protected AbstractGameState openLoopState;
+    List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
+    Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
     // Parameters guiding the search
     protected MCTSParams params;
     protected AbstractForwardModel forwardModel;
@@ -41,12 +44,23 @@ public class SingleTreeNode {
     // Number of FM calls and State copies up until this node
     protected int fmCallsCount;
     protected int copyCount;
-    protected AbstractGameState openLoopState;
     protected int paranoidPlayer = -1;
     // Depth of this node
     int depth;
     // the id of the player who makes the decision at this node
     int decisionPlayer;
+    private final Map<AbstractAction, Integer> nValidVisits = new HashMap<>();
+    // Action taken to reach this node
+    // In vanilla MCTS this will likely be an action taken by some other player (not the decisionPlayer at this node)
+    protected AbstractAction actionToReach;
+    // The total value of all trajectories through this node (one element per player)
+    private double[] totValue;
+    private double[] totSquares;
+    // Number of visits to this node
+    protected int nVisits;
+    protected int rolloutActionsTaken;
+    double highReward = Double.NEGATIVE_INFINITY;
+    double lowReward = Double.POSITIVE_INFINITY;
     // Root node of tree
     SingleTreeNode root;
     // Parent of this node
@@ -56,17 +70,10 @@ public class SingleTreeNode {
     // only ever have one position in the array populated: and similarly if we are using a SelfOnly tree).
     Map<AbstractAction, SingleTreeNode[]> children = new HashMap<>();
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
-    double highReward = Double.NEGATIVE_INFINITY;
-    double lowReward = Double.POSITIVE_INFINITY;
-    List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
-    Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
     ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
     ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
     // Total value of this node
-    private double[] totValue;
-    private double[] totSquares;
-    // Number of visits
-    private int nVisits;
+
 
     protected SingleTreeNode() {
 
@@ -74,7 +81,8 @@ public class SingleTreeNode {
 
     // Called in tree expansion
     public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
-        SingleTreeNode retValue = new SingleTreeNode();
+        SingleTreeNode retValue = (player.params.opponentTreePolicy == OMA || player.params.opponentTreePolicy == OMA_All)
+                ? new OMATreeNode() : new SingleTreeNode();
         retValue.decisionPlayer = state.getCurrentPlayer();
         retValue.params = player.params;
         retValue.forwardModel = player.getForwardModel();
@@ -105,7 +113,7 @@ public class SingleTreeNode {
     }
 
     public static SingleTreeNode createChildNode(SingleTreeNode parent, AbstractAction actionToReach, AbstractGameState state) {
-        SingleTreeNode retValue = new SingleTreeNode();
+        SingleTreeNode retValue = (parent instanceof OMATreeNode) ? new OMATreeNode() : new SingleTreeNode();
         retValue.instantiate(parent, actionToReach, state);
         return retValue;
     }
@@ -200,6 +208,7 @@ public class SingleTreeNode {
 
         // Tracking number of iterations for iteration budget
         int numIters = 0;
+        rolloutActionsTaken = 0;
         boolean stop = false;
         while (!stop) {
             switch (params.information) {
@@ -263,8 +272,10 @@ public class SingleTreeNode {
         SingleTreeNode selected = treePolicy(treeActions);
         // Monte carlo rollout: return value of MC rollout from the newly added node
         List<Pair<Integer, AbstractAction>> rolloutActions = new ArrayList<>();
-        double[] delta = selected.rollOut(rolloutActions, startingValues, decisionPlayer);
+        int lastActorInTree = treeActions.isEmpty() ? decisionPlayer : treeActions.get(treeActions.size() - 1).a;
+        double[] delta = selected.rollOut(rolloutActions, startingValues, decisionPlayer, lastActorInTree);
         // Back up the value of the rollout through the tree
+        rolloutActionsTaken += rolloutActions.size();
         selected.backUp(delta);
         updateMASTStatistics(treeActions, rolloutActions, delta);
     }
@@ -315,6 +326,7 @@ public class SingleTreeNode {
         stats.put("normalisedBestValue", Utils.normalise(this.actionTotValue(bestAction, decisionPlayer) / this.actionVisits(bestAction), lowReward, highReward));
         stats.put("lowReward", this.lowReward);
         stats.put("highReward", this.highReward);
+        stats.put("rolloutActions", this.rolloutActionsTaken / numIters);
         statsLogger.record(stats);
     }
 
@@ -322,7 +334,7 @@ public class SingleTreeNode {
      * Uses plain java loop instead of streams for performance
      * (this is called often enough it can make a measurable difference)
      */
-    private int actionVisits(AbstractAction action) {
+    protected int actionVisits(AbstractAction action) {
         int retValue = 0;
         SingleTreeNode[] nodes = children.get(action);
         if (nodes != null) {
@@ -344,7 +356,7 @@ public class SingleTreeNode {
      * Uses plain java loop instead of streams for performance
      * (this is called often enough it can make a measurable difference)
      */
-    private double actionTotValue(AbstractAction action, int playerId) {
+    protected double actionTotValue(AbstractAction action, int playerId) {
         double retValue = 0.0;
         SingleTreeNode[] nodes = children.get(action);
         if (nodes != null) {
@@ -620,6 +632,28 @@ public class SingleTreeNode {
             int actionVisits = actionVisits(action);
             double childValue = hvVal / (actionVisits + params.epsilon);
 
+            // consider OMA term
+            if (params.opponentTreePolicy == OMA_All || params.opponentTreePolicy == OMA) {
+                OMATreeNode oma = ((OMATreeNode) this).OMAParent.orElse(null);
+                if (oma != null) {
+                    double beta = Math.sqrt(params.omaVisits / (double) (params.omaVisits + 3 * actionVisits));
+                    // we need to find the action taken from the OMAParent
+                    SingleTreeNode iteratingNode = this;
+                    AbstractAction lastActionTaken;
+                    do {
+                        lastActionTaken = iteratingNode.actionToReach;
+                        iteratingNode = iteratingNode.parent;
+                        if (iteratingNode == null)
+                            throw new AssertionError("Should always find OMA node before root");
+                    } while (iteratingNode != oma);
+                    OMATreeNode.OMAStats stats = oma.OMAChildren.get(lastActionTaken).get(action);
+                    if (stats != null) {
+                        double omaValue = stats.OMATotValue / stats.OMAVisits;
+                        childValue = (1.0 - beta) * childValue + beta * omaValue;
+                    }
+                }
+            }
+
             // consider any progressive bias term
             if (params.biasVisits > 0) {
                 double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
@@ -669,9 +703,8 @@ public class SingleTreeNode {
 
             // Apply small noise to break ties randomly
             uctValue = noise(uctValue, params.epsilon, rnd.nextDouble());
-            if (Double.isNaN(uctValue)) {
-                boolean stop = true;
-            }
+            if (Double.isNaN(uctValue))
+                throw new AssertionError("Numeric error calculating uctValue");
 
             // Assign value
             if (uctValue > bestValue) {
@@ -755,12 +788,15 @@ public class SingleTreeNode {
      *
      * @return - value of rollout.
      */
-    protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int decisionPlayer) {
+    protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int decisionPlayer, int lastActor) {
         int rolloutDepth = 0; // counting from end of tree
+
+        int roundAtStartOfRollout = openLoopState.getTurnOrder().getRoundCounter();
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
-        if (params.rolloutLength > 0) {
+        if (params.rolloutLength > 0 || params.rolloutTermination != DEFAULT) {
+            // even if rollout length is zero, we may rollout a few actions to reach the end of our turn, or the start of our next turn
             if (params.information == Closed_Loop) {
                 // the thinking here is that in openLoop we copy the state right at the root, and then use the forward
                 // model at each action. Hence the current state on the node is the one we have been using up to now.
@@ -769,12 +805,13 @@ public class SingleTreeNode {
                 root.copyCount++;
             }
 
-            while (!finishRollout(rolloutState, rolloutDepth)) {
+            while (!finishRollout(rolloutState, rolloutDepth, decisionPlayer, lastActor, roundAtStartOfRollout)) {
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState);
                 if (availableActions.isEmpty())
                     break;
                 AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
-                rolloutActions.add(new Pair<>(rolloutState.getCurrentPlayer(), next));
+                lastActor = rolloutState.getCurrentPlayer();
+                rolloutActions.add(new Pair<>(lastActor, next));
                 int startingFMCalls = root.fmCallsCount;
                 advance(rolloutState, next);
                 // rollout moves can be tracked by total forward model calls
@@ -798,12 +835,23 @@ public class SingleTreeNode {
      * @param depth       - current depth
      * @return - true if rollout finished, false otherwise
      */
-    private boolean finishRollout(AbstractGameState rollerState, int depth) {
-        if (depth >= params.rolloutLength)
+    private boolean finishRollout(AbstractGameState rollerState, int depth, int decisionPlayer, int lastActor, int roundAtStartOfRollout) {
+        if (!rollerState.isNotTerminal())
             return true;
-
-        // End of game
-        return !rollerState.isNotTerminal();
+        int currentActor = rollerState.getCurrentPlayer();
+        if (depth >= params.rolloutLength) {
+            switch (params.rolloutTermination) {
+                case DEFAULT:
+                    return true;
+                case END_TURN:
+                    return lastActor == decisionPlayer && currentActor != decisionPlayer;
+                case START_TURN:
+                    return lastActor != decisionPlayer && currentActor == decisionPlayer;
+                case END_ROUND:
+                    return rollerState.getTurnOrder().getRoundCounter() != roundAtStartOfRollout;
+            }
+        }
+        return false;
     }
 
     /**
@@ -857,6 +905,8 @@ public class SingleTreeNode {
                     break;
                 case MaxN:
                 case MultiTree:
+                case OMA_All:
+                case OMA:
                     for (int j = 0; j < result.length; j++) {
                         n.totValue[j] += result[j];
                         n.totSquares[j] += squaredResults[j];
@@ -945,6 +995,10 @@ public class SingleTreeNode {
         return children;
     }
 
+    public AbstractAction getActionToReach() {
+        return actionToReach;
+    }
+
     public int getActor() {
         return decisionPlayer;
     }
@@ -954,14 +1008,28 @@ public class SingleTreeNode {
     }
 
     /**
-     * This returns a list of all nodes in the tree that do not match the specificd Predicate
+     * This returns a list of all nodes in the tree that do not match the specified Predicate
      *
      * @param allMatch
      * @return
      */
-    public List<SingleTreeNode> checkTree(Predicate<SingleTreeNode> allMatch) {
-        List<SingleTreeNode> allNodes = allNodesInTree();
-        return allNodes.stream().filter(n -> !allMatch.test(n)).collect(toList());
+    public List<SingleTreeNode> nonMatchingNodes(Predicate<SingleTreeNode> allMatch) {
+        return filterTree( n -> !allMatch.test(n));
+    }
+    /**
+     * This returns a list of all nodes in the tree that match the specified Predicate
+     *
+     * @param allMatch
+     * @return
+     */
+    public List<SingleTreeNode> filterTree(Predicate<SingleTreeNode> allMatch) {
+        return allNodesInTree().stream().filter(allMatch).collect(toList());
+    }
+
+    public SingleTreeNode matchingParent(Predicate<SingleTreeNode> match) {
+        if (parent == null || match.test(parent))
+            return parent;
+        return parent.matchingParent(match);
     }
 
     public SingleTreeNode getParent() {
