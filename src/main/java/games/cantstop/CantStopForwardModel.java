@@ -20,7 +20,8 @@ public class CantStopForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         // everything is reset in CantStopGameState._reset();
-        // nothing extra is required here
+        // nothing extra is required here - except to set the Phase
+        firstState.setGamePhase(CantStopGamePhase.Decision);
     }
 
     @Override

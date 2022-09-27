@@ -2,6 +2,7 @@ package games.cantstop.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.cantstop.CantStopGamePhase;
 import games.cantstop.CantStopGameState;
 
 public class AllocateDice extends AbstractAction {
@@ -24,6 +25,7 @@ public class AllocateDice extends AbstractAction {
             throw new AssertionError("At least one of the two moves needs to be valid for " + this);
         state.moveMarker(numberSplit[0]);
         state.moveMarker(numberSplit[1]);
+        state.setGamePhase(CantStopGamePhase.Decision);
         return true;
     }
 

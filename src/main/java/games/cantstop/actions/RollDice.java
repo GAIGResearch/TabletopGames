@@ -2,6 +2,7 @@ package games.cantstop.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.cantstop.CantStopGamePhase;
 import games.cantstop.CantStopGameState;
 
 public class RollDice extends AbstractAction {
@@ -9,6 +10,7 @@ public class RollDice extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CantStopGameState state = (CantStopGameState) gs;
         state.rollDice();
+        state.setGamePhase(CantStopGamePhase.Allocation);
         return true;
     }
 

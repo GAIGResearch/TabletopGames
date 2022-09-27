@@ -4,13 +4,15 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Dice;
+import core.interfaces.IPrintable;
+import core.turnorders.StandardTurnOrder;
 import games.GameType;
 
 import java.util.*;
 
 import static java.util.stream.Collectors.*;
 
-public class CantStopGameState extends AbstractGameState {
+public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     // The core game state is made up of the 11 tracks (2 through 12), with the positions of each player,
     // and the temporary markers if in the middle of someone's turn
@@ -26,11 +28,13 @@ public class CantStopGameState extends AbstractGameState {
         super(copyFrom.gameParameters, GameType.CantStop);
         // TurnOrder will be copied later
         completedColumns = copyFrom.completedColumns.clone();
-        for (int[] playerMarkers : playerMarkerPositions) {
+        playerMarkerPositions = new ArrayList<>();
+        for (int[] playerMarkers : copyFrom.playerMarkerPositions) {
             playerMarkerPositions.add(playerMarkers.clone());
         }
+        temporaryMarkerPositions = new HashMap<>();
         temporaryMarkerPositions.putAll(copyFrom.temporaryMarkerPositions);
-        dice = dice.stream().map(Dice::copy).collect(toList());
+        dice = copyFrom.dice.stream().map(Dice::copy).collect(toList());
         if (rnd == null) {
             rnd = new Random(System.currentTimeMillis());
         } else {
@@ -54,7 +58,7 @@ public class CantStopGameState extends AbstractGameState {
     }
 
     public CantStopGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new CantStopTurnOrder(nPlayers), GameType.CantStop);
+        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.CantStop);
     }
 
     @Override
@@ -91,11 +95,11 @@ public class CantStopGameState extends AbstractGameState {
     @Override
     protected void _reset() {
         CantStopParameters params = (CantStopParameters) getGameParameters();
-        completedColumns = new boolean[12];
+        completedColumns = new boolean[13];
         playerMarkerPositions = new ArrayList<>();
         temporaryMarkerPositions = new HashMap<>();
         for (int p = 0; p < getNPlayers(); p++) {
-            playerMarkerPositions.add(new int[12]);
+            playerMarkerPositions.add(new int[13]);
         }
         dice = new ArrayList<>();
         for (int i = 0; i < params.DICE_NUMBER; i++) {
@@ -106,6 +110,7 @@ public class CantStopGameState extends AbstractGameState {
         } else {
             rnd = new Random(rnd.nextLong());
         }
+        gamePhase = CantStopGamePhase.Decision;
     }
 
     @Override
@@ -129,5 +134,32 @@ public class CantStopGameState extends AbstractGameState {
         hash = hash * 31 + Arrays.hashCode(completedColumns);
         // rnd is deliberately excluded
         return hash;
+    }
+
+    @Override
+    public void printToConsole() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("--------------------------------------------------\n");
+        sb.append("Scores: \n");
+        sb.append(String.format("Player %d to move. Phase %s%n%n", getCurrentPlayer(), getGamePhase()));
+        sb.append("Number\t");
+        for (int p = 0; p < getNPlayers(); p++)
+            sb.append("P").append(p).append("\t");
+        sb.append("\n");
+        for (int n = 2; n <= 12; n++) {
+            sb.append(String.format("%2d :\t", n));
+            if (trackComplete(n))
+                sb.append(" COMPLETED");
+            else
+                for (int p = 0; p < getNPlayers(); p++) {
+                    if (p == getCurrentPlayer() && temporaryMarkerPositions.containsKey(n))
+                        sb.append(String.format("%2d/%2d\t", playerMarkerPositions.get(p)[n], temporaryMarkerPositions.get(n)));
+                    else
+                        sb.append(String.format("%2d\t", playerMarkerPositions.get(p)[n]));
+                }
+            sb.append("\n");
+        }
+        sb.append("--------------------------------------------------\n");
+        System.out.println(sb);
     }
 }

@@ -468,6 +468,7 @@ public enum GameType {
             case CantStop:
                 forwardModel = new CantStopForwardModel();
                 gameState = new CantStopGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
