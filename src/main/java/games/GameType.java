@@ -377,9 +377,8 @@ public enum GameType {
      */
     public Game createGameInstance(int nPlayers, long seed, AbstractParameters params) {
         if (nPlayers < minPlayers || nPlayers > maxPlayers) {
-            System.out.println("Unsupported number of players: " + nPlayers
+            throw new IllegalArgumentException("Unsupported number of players: " + nPlayers
                     + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
-            return null;
         }
 
         if (params == null) {

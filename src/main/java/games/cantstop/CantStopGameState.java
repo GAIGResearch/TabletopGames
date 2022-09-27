@@ -57,6 +57,27 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
         }
     }
 
+    public void setDice(int[] numbers) {
+        if (numbers.length != ((CantStopParameters) getGameParameters()).DICE_NUMBER)
+            throw new IllegalArgumentException("Invalid number of dice results");
+        for (int i = 0; i < numbers.length; i++) {
+            dice.get(i).setValue(numbers[i]);
+        }
+    }
+
+    public int getMarkerPosition(int number, int player) {
+        return playerMarkerPositions.get(player)[number];
+    }
+
+    public int getTemporaryMarkerPosition(int number)  {
+        // we default to the current permanent position
+        return temporaryMarkerPositions.getOrDefault(number, playerMarkerPositions.get(getCurrentPlayer())[number]);
+    }
+
+    public List<Integer> getMarkersMoved() {
+        return new ArrayList<>(temporaryMarkerPositions.keySet());
+    }
+
     public CantStopGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new StandardTurnOrder(nPlayers), GameType.CantStop);
     }

@@ -26,34 +26,37 @@ public class CantStopForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
+        action.execute(currentState);
         if (action instanceof Pass) {
+            Pass pass = (Pass) action;
             CantStopGameState state = (CantStopGameState) currentState;
             // this is the trigger to move on to the next player
-            if (((Pass) action).bust) {
-                // first we remove all the temporary progress...
-                state.temporaryMarkerPositions = new HashMap<>(); // easy!
-            } else {
-                /// ... or we make the temporary progress permanent
-                CantStopParameters params = (CantStopParameters) state.getGameParameters();
+            if (!pass.bust)
+                makeTemporaryMarkersPermanent(state);
 
-                int playerId = state.getCurrentPlayer();
-                for (Integer trackNumber : state.temporaryMarkerPositions.keySet()) {
-                    int maxValue = params.maxValue(trackNumber);
-                    int newValue = Math.min(maxValue, state.temporaryMarkerPositions.get(trackNumber));
-                    state.playerMarkerPositions.get(playerId)[trackNumber] = newValue;
-                    if (newValue == maxValue) {
-                        state.completedColumns[trackNumber] = true;
-                        // and then check game end condition
-                        if (state.getGameScore(playerId) >= params.COLUMNS_TO_WIN) {
-                            for (int p = 0; p < state.getNPlayers(); p++)
-                                state.setPlayerResult(p == playerId ? Utils.GameResult.WIN : Utils.GameResult.LOSE, playerId);
-                        }
-                    }
-                }
-            }
-            // then we pass to the next player
+            // then we clear temp markers and pass to the next player
+            state.temporaryMarkerPositions = new HashMap<>();
             if (state.isNotTerminal())
                 state.getTurnOrder().endPlayerTurn(state);
+        }
+    }
+
+    public void makeTemporaryMarkersPermanent(CantStopGameState state) {
+        CantStopParameters params = (CantStopParameters) state.getGameParameters();
+
+        int playerId = state.getCurrentPlayer();
+        for (Integer trackNumber : state.temporaryMarkerPositions.keySet()) {
+            int maxValue = params.maxValue(trackNumber);
+            int newValue = Math.min(maxValue, state.temporaryMarkerPositions.get(trackNumber));
+            state.playerMarkerPositions.get(playerId)[trackNumber] = newValue;
+            if (newValue == maxValue) {
+                state.completedColumns[trackNumber] = true;
+                // and then check game end condition
+                if (state.getGameScore(playerId) >= params.COLUMNS_TO_WIN) {
+                    for (int p = 0; p < state.getNPlayers(); p++)
+                        state.setPlayerResult(p == playerId ? Utils.GameResult.WIN : Utils.GameResult.LOSE, playerId);
+                }
+            }
         }
     }
 
@@ -81,6 +84,7 @@ public class CantStopForwardModel extends AbstractForwardModel {
                     // in this case we have gone bust - not really a decision, but lets the player know
                     retValue.add(bust);
                 }
+                break;
             default:
                 throw new AssertionError("Unknown phase " + phase);
         }

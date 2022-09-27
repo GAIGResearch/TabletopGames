@@ -29,6 +29,7 @@ public class CantStopParameters extends AbstractParameters {
     public final int DICE_NUMBER = 4; // If you change this, then you'll need to also update code in ForwardModel._computeAvailableActions()
     public final int DICE_SIDES = 6;
     public final int COLUMNS_TO_WIN = 3;
+    public final int MARKERS = 3; // number of temporary markers
 
     public CantStopParameters(long seed) {
         super(seed);
