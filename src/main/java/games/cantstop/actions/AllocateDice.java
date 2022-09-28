@@ -87,6 +87,12 @@ public class AllocateDice extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Use pairs of dice : " + Arrays.toString(numberSplit);
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        return "Use dice : " + Arrays.toString(numberSplit);
+
     }
 }

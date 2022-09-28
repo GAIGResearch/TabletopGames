@@ -24,16 +24,21 @@ public class Pass extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Pass;
+        return obj instanceof Pass && ((Pass) obj).bust == bust;
     }
 
     @Override
     public int hashCode() {
-        return 3927;
+        return 3927 + (bust ? 392 : 0);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Pass";
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        return "Pass" + (bust ? " (bust)" : "");
     }
 }

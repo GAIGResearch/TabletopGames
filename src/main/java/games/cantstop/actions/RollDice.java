@@ -31,6 +31,11 @@ public class RollDice extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
+        return toString();
+    }
+
+    @Override
+    public String toString() {
         return "Roll Dice";
     }
 }
