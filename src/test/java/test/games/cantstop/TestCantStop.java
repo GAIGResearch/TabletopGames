@@ -8,6 +8,7 @@ import games.cantstop.*;
 import games.cantstop.actions.*;
 import org.junit.*;
 import players.simple.RandomPlayer;
+import utilities.Utils;
 
 import java.util.*;
 
@@ -276,6 +277,7 @@ public class TestCantStop {
     @Test
     public void checkGameTerminates() {
         CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        assertEquals(0, state.getCurrentPlayer());
         state.moveMarker(2);
         state.moveMarker(2);
         state.moveMarker(3);
@@ -287,7 +289,36 @@ public class TestCantStop {
         state.moveMarker(12);
         state.moveMarker(12);
         fm.makeTemporaryMarkersPermanentAndClear(state);
+        assertEquals(0, state.getCurrentPlayer());
         assertFalse(state.isNotTerminal());
+        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[0]);
+        assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[1]);
+        assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[2]);
+        assertEquals(Utils.GameResult.GAME_END, state.getGameStatus());
     }
+
+    @Test
+    public void testFourIdenticalDice() {
+        CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        fm.next(state, new RollDice());
+        state.setDice(new int[]{1, 1, 1, 1});
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(1, actions.size());
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(2, 2)));
+    }
+
+    @Test
+    public void testBustChangesPhase() {
+        CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        fm.next(state, new RollDice());
+        do {
+            fm.next(state, fm.computeAvailableActions(state).get(0));
+            fm.next(state, new RollDice());
+            // we keep rolling dice until we go bust
+        } while (!fm.computeAvailableActions(state).get(0).equals(new Pass(true)));
+        fm.next(state, new Pass(true));
+        assertEquals(CantStopGamePhase.Decision, state.getGamePhase());
+    }
+
 
 }

@@ -38,8 +38,10 @@ public class CantStopForwardModel extends AbstractForwardModel {
                 state.temporaryMarkerPositions = new HashMap<>();
             // then we clear temp markers and pass to the next player
 
-            if (state.isNotTerminal())
+            if (state.isNotTerminal()) {
                 state.getTurnOrder().endPlayerTurn(state);
+                state.setGamePhase(CantStopGamePhase.Decision);
+            }
         }
     }
 
@@ -57,7 +59,7 @@ public class CantStopForwardModel extends AbstractForwardModel {
                 if (state.getGameScore(playerId) >= params.COLUMNS_TO_WIN) {
                     state.setGameStatus(Utils.GameResult.GAME_END);
                     for (int p = 0; p < state.getNPlayers(); p++)
-                        state.setPlayerResult(p == playerId ? Utils.GameResult.WIN : Utils.GameResult.LOSE, playerId);
+                        state.setPlayerResult(p == playerId ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
                 }
             }
         }

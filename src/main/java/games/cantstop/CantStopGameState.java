@@ -64,6 +64,9 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
             dice.get(i).setValue(numbers[i]);
         }
     }
+    public int[] getDice() {
+        return dice.stream().mapToInt(Dice::getValue).toArray();
+    }
 
     public int getMarkerPosition(int number, int player) {
         return playerMarkerPositions.get(player)[number];

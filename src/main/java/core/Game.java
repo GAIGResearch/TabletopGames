@@ -465,6 +465,9 @@ public class Game {
 
                     if (debug) System.out.printf("Invoking oneAction from Game for player %d%n", activePlayer);
                     oneAction();
+                    if (tick > 1000) {
+                        throw new AssertionError("???");
+                    }
 
                 } else {
                     if (firstEnd) {
