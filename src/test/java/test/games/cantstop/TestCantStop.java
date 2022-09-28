@@ -11,7 +11,6 @@ import players.simple.RandomPlayer;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.*;
 import static org.junit.Assert.*;
 
 public class TestCantStop {
@@ -104,7 +103,7 @@ public class TestCantStop {
                 state.moveMarker(n);
             } while (state.getTemporaryMarkerPosition(n) < params.maxValue(n));
         }
-        fm.makeTemporaryMarkersPermanent(state);
+        fm.makeTemporaryMarkersPermanentAndClear(state);
         assertEquals(1, fm.computeAvailableActions(state).size());
         assertEquals(new Pass(true), fm.computeAvailableActions(state).get(0));
     }
@@ -123,7 +122,7 @@ public class TestCantStop {
                 state.moveMarker(n);
             } while (state.getTemporaryMarkerPosition(n) < params.maxValue(n));
         }
-        fm.makeTemporaryMarkersPermanent(state);
+        fm.makeTemporaryMarkersPermanentAndClear(state);
 
         // and put the other two at the top - so they cannot be increased any more
         for (int n : new int[]{7, 8}) {
@@ -217,6 +216,78 @@ public class TestCantStop {
         assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(6)));
         assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(8)));
         assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(7, 7)));
+    }
+
+    @Test
+    public void testMarkerMovesInAdditionToStartingPlace() {
+        CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        fm.next(state, new RollDice());
+        fm.next(state, new AllocateDice(7, 7));
+        fm.next(state, new Pass(false));
+        assertEquals(2, state.getMarkerPosition(7, 0));
+        // we now continue until we get back to P0
+        fm.next(state, new Pass(false));
+        fm.next(state, new Pass(false));
+        fm.next(state, new RollDice());
+        assertEquals(0, state.getCurrentPlayer());
+        fm.next(state, new AllocateDice(7, 7));
+        assertEquals(4, state.getTemporaryMarkerPosition(7));
+        assertEquals(2, state.getMarkerPosition(7, 0));
+        fm.next(state, new Pass(false));
+        assertEquals(4, state.getMarkerPosition(7, 0));
+    }
+
+    @Test
+    public void testPermanentPositionDoesNotInterfere() {
+        CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        fm.next(state, new RollDice());
+        state.setDice(new int[]{2, 5, 5, 3}); // 5+10, 7+8
+        state.moveMarker(5);
+        state.moveMarker(5);
+        state.moveMarker(7);
+        state.moveMarker(7);
+        fm.makeTemporaryMarkersPermanentAndClear(state);
+        state.moveMarker(7);
+        state.moveMarker(9);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(3, actions.size());
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(7, 8)));
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(10)));
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(5)));
+    }
+
+    @Test
+    public void testTwoDiceWithNoAvailableMarker() {
+        // we have markers set on 3 and 8
+        // dice of 2, 2, 5, 3
+        // should not have the available actions of 4+8, 7+5
+        CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        fm.next(state, new RollDice());
+        state.setDice(new int[]{2, 2, 5, 3});
+
+        state.moveMarker(3);
+        state.moveMarker(8);
+        state.moveMarker(2);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(1, actions.size());
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(8)));
+    }
+
+    @Test
+    public void checkGameTerminates() {
+        CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        state.moveMarker(2);
+        state.moveMarker(2);
+        state.moveMarker(3);
+        state.moveMarker(3);
+        state.moveMarker(3);
+        state.moveMarker(3);
+        fm.makeTemporaryMarkersPermanentAndClear(state);
+        assertTrue(state.isNotTerminal());
+        state.moveMarker(12);
+        state.moveMarker(12);
+        fm.makeTemporaryMarkersPermanentAndClear(state);
+        assertFalse(state.isNotTerminal());
     }
 
 }

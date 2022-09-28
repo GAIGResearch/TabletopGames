@@ -33,32 +33,35 @@ public class CantStopForwardModel extends AbstractForwardModel {
             CantStopGameState state = (CantStopGameState) currentState;
             // this is the trigger to move on to the next player
             if (!pass.bust)
-                makeTemporaryMarkersPermanent(state);
-
+                makeTemporaryMarkersPermanentAndClear(state);
+            else
+                state.temporaryMarkerPositions = new HashMap<>();
             // then we clear temp markers and pass to the next player
-            state.temporaryMarkerPositions = new HashMap<>();
+
             if (state.isNotTerminal())
                 state.getTurnOrder().endPlayerTurn(state);
         }
     }
 
-    public void makeTemporaryMarkersPermanent(CantStopGameState state) {
+    public void makeTemporaryMarkersPermanentAndClear(CantStopGameState state) {
         CantStopParameters params = (CantStopParameters) state.getGameParameters();
 
         int playerId = state.getCurrentPlayer();
         for (Integer trackNumber : state.temporaryMarkerPositions.keySet()) {
             int maxValue = params.maxValue(trackNumber);
-            int newValue = Math.min(maxValue, state.temporaryMarkerPositions.get(trackNumber));
+            int newValue = state.temporaryMarkerPositions.get(trackNumber);
             state.playerMarkerPositions.get(playerId)[trackNumber] = newValue;
             if (newValue == maxValue) {
                 state.completedColumns[trackNumber] = true;
                 // and then check game end condition
                 if (state.getGameScore(playerId) >= params.COLUMNS_TO_WIN) {
+                    state.setGameStatus(Utils.GameResult.GAME_END);
                     for (int p = 0; p < state.getNPlayers(); p++)
                         state.setPlayerResult(p == playerId ? Utils.GameResult.WIN : Utils.GameResult.LOSE, playerId);
                 }
             }
         }
+        state.temporaryMarkerPositions = new HashMap<>();
     }
 
     @Override
@@ -84,7 +87,7 @@ public class CantStopForwardModel extends AbstractForwardModel {
                 retValue.addAll(legalSplit.getOrDefault(true, Collections.emptyList())); // legal actions go in directly
                 // then we splitup the legal actions, as we can use just one of the numbers
                 List<AllocateDice> legalSingleNumbers = legalSplit.getOrDefault(false, Collections.emptyList()).stream()
-                        .flatMapToInt(a ->  Arrays.stream(a.getValues()))
+                        .flatMapToInt(a -> Arrays.stream(a.getValues()))
                         .mapToObj(AllocateDice::new)
                         .distinct()
                         .filter(a -> a.isLegal(state))

@@ -52,7 +52,7 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     public void moveMarker(int n) {
         if (!trackComplete(n)) {
-            int currentPosition = temporaryMarkerPositions.getOrDefault(n, 0);
+            int currentPosition = temporaryMarkerPositions.getOrDefault(n, playerMarkerPositions.get(getCurrentPlayer())[n]);
             temporaryMarkerPositions.put(n, currentPosition + 1);
         }
     }
@@ -70,8 +70,7 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
     }
 
     public int getTemporaryMarkerPosition(int number)  {
-        // we default to the current permanent position
-        return temporaryMarkerPositions.getOrDefault(number, playerMarkerPositions.get(getCurrentPlayer())[number]);
+        return temporaryMarkerPositions.getOrDefault(number, 0);
     }
 
     public List<Integer> getMarkersMoved() {
@@ -160,24 +159,33 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
     @Override
     public void printToConsole() {
         StringBuilder sb = new StringBuilder();
+        CantStopParameters params = (CantStopParameters) gameParameters;
         sb.append("--------------------------------------------------\n");
-        sb.append("Scores: \n");
+        sb.append("Scores:\t");
+        for (int p = 0; p < getNPlayers(); p++)
+            sb.append(getGameScore(p)).append("\t");
+        sb.append("\n");
         sb.append(String.format("Player %d to move. Phase %s%n%n", getCurrentPlayer(), getGamePhase()));
+        sb.append("Dice Values: ")
+                .append(dice.stream().map(d -> String.valueOf(d.getValue())).collect(joining(", ")))
+                .append("\n");
         sb.append("Number\t");
         for (int p = 0; p < getNPlayers(); p++)
-            sb.append("P").append(p).append("\t");
-        sb.append("\n");
+            sb.append("P").append(p).append("\t\t");
+        sb.append("Max\n");
         for (int n = 2; n <= 12; n++) {
             sb.append(String.format("%2d :\t", n));
             if (trackComplete(n))
                 sb.append(" COMPLETED");
-            else
+            else {
                 for (int p = 0; p < getNPlayers(); p++) {
                     if (p == getCurrentPlayer() && temporaryMarkerPositions.containsKey(n))
-                        sb.append(String.format("%2d/%2d\t", playerMarkerPositions.get(p)[n], temporaryMarkerPositions.get(n)));
+                        sb.append(String.format("%2d/%d\t\t", playerMarkerPositions.get(p)[n], temporaryMarkerPositions.get(n)));
                     else
-                        sb.append(String.format("%2d\t", playerMarkerPositions.get(p)[n]));
+                        sb.append(String.format("%2d\t\t", playerMarkerPositions.get(p)[n]));
                 }
+                sb.append(params.maxValue(n));
+            }
             sb.append("\n");
         }
         sb.append("--------------------------------------------------\n");
