@@ -9,6 +9,7 @@ import utilities.Utils;
 
 import java.util.*;
 
+import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 
 public class CantStopForwardModel extends AbstractForwardModel {
@@ -79,7 +80,16 @@ public class CantStopForwardModel extends AbstractForwardModel {
                 temp.add(new AllocateDice(values.get(0) + values.get(1), values.get(2) + values.get(3)));
                 temp.add(new AllocateDice(values.get(0) + values.get(2), values.get(1) + values.get(3)));
                 temp.add(new AllocateDice(values.get(0) + values.get(3), values.get(1) + values.get(2)));
-                retValue.addAll(temp.stream().filter(ad -> ad.isLegal(state)).collect(toList()));
+                Map<Boolean, List<AllocateDice>> legalSplit = temp.stream().distinct().collect(partitioningBy(ad -> ad.isLegal(state)));
+                retValue.addAll(legalSplit.getOrDefault(true, Collections.emptyList())); // legal actions go in directly
+                // then we splitup the legal actions, as we can use just one of the numbers
+                List<AllocateDice> legalSingleNumbers = legalSplit.getOrDefault(false, Collections.emptyList()).stream()
+                        .flatMapToInt(a ->  Arrays.stream(a.getValues()))
+                        .mapToObj(AllocateDice::new)
+                        .distinct()
+                        .filter(a -> a.isLegal(state))
+                        .collect(toList());
+                retValue.addAll(legalSingleNumbers);
                 if (retValue.isEmpty()) {
                     // in this case we have gone bust - not really a decision, but lets the player know
                     retValue.add(bust);

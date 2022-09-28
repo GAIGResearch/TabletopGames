@@ -183,8 +183,40 @@ public class TestCantStop {
 
         assertEquals(4, fm.computeAvailableActions(state).size()); // all options are possible (2, 3, 7, 8)
         fm.next(state, new AllocateDice(7));
-        // Ooops - in this case we have to choose!!!
+        assertEquals(1, state.getTemporaryMarkerPosition(7));
+    }
 
+    @Test
+    public void testDoubleIsValidIfOnlyOneSpaceToMove() {
+        // Rules slightly unclear on this one. We interpret the rule that a runner must be moved by one of the dice
+        // to enable a 4+4 pairing to be chosen, and then to just use one 4.
+        CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        fm.next(state, new RollDice());
+        state.setDice(new int[]{3, 1, 3, 1});  // gives 4+4, 2+6
+
+        // then move two of the markers so that only one is available
+        for (int i = 0; i < 5; i++)
+            state.moveMarker(4);  // one off the top
+
+        assertEquals(2, fm.computeAvailableActions(state).size()); // 4, 2+6
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(2, 6)));
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(4)));
+    }
+
+    @Test
+    public void testDoubleIsValidIfOneFreeMarker() {
+        CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        fm.next(state, new RollDice());
+        state.setDice(new int[]{3, 4, 3, 4});  // gives 6+8 or 7+7
+
+        // then move two of the markers so that only one is available
+        state.moveMarker(4);
+        state.moveMarker(5);
+
+        assertEquals(3, fm.computeAvailableActions(state).size()); // 7+7, 6, 8
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(6)));
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(8)));
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(7, 7)));
     }
 
 }
