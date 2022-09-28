@@ -22,12 +22,11 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param agents          - players for the tournament.
      * @param gameToPlay      - game to play in this tournament.
      * @param playersPerGame  - number of players per game.
-     * @param gamesPerMatchUp - number of games for each combination of players.
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RandomRRTournament(List<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                              int gamesPerMatchUp, boolean selfPlay, int totalMatchUps, long seed, AbstractParameters gameParams) {
-        super(agents, gameToPlay, playersPerGame, gamesPerMatchUp, selfPlay, gameParams);
+                              boolean selfPlay, int totalMatchUps, long seed, AbstractParameters gameParams) {
+        super(agents, gameToPlay, playersPerGame, 1, selfPlay, gameParams);
         this.totalMatchups = totalMatchUps;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
     }
