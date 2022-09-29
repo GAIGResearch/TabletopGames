@@ -9,6 +9,7 @@ import games.blackjack.BlackjackGameState;
 import games.blackjack.gui.BlackjackGUIManager;
 import games.cantstop.CantStopForwardModel;
 import games.cantstop.CantStopGameState;
+import games.cantstop.gui.CantStopGUIManager;
 import games.catan.CatanForwardModel;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
@@ -552,6 +553,9 @@ public enum GameType {
                 break;
             case Stratego:
                 gui = new StrategoGUIManager(parent, game, ac);
+                break;
+            case CantStop:
+                gui = new CantStopGUIManager(parent, game, ac);
                 break;
         }
 
