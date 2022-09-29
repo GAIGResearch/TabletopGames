@@ -17,7 +17,7 @@ public class CantStopBoardView extends JComponent {
     int spaceInterval = 10;
     int margin = 20;
     int labelHeight = 30;
-    int boardWidth = 600;
+    int boardWidth = 500;
     int boardHeight = 600;
     int discOffset;
     Color[] playerColours = new Color[]{Color.GREEN, Color.RED, Color.BLUE, Color.YELLOW};
@@ -25,6 +25,7 @@ public class CantStopBoardView extends JComponent {
     int[][] markerPositions;
     int[] tempPositions;
     int[] completedColumns;
+    int[] dice;
     int currentPlayer;
 
     public CantStopBoardView(CantStopGameState state) {
@@ -36,12 +37,14 @@ public class CantStopBoardView extends JComponent {
         completedColumns = new int[13];
         Arrays.fill(completedColumns, -1);
         discOffset = 25 / (state.getNPlayers() + 1);
+        dice = new int[params.DICE_NUMBER];
     }
 
     public synchronized void update(CantStopGameState state) {
         // here we update the details that paintComponent() will actually draw
         // we synchronize to ensure that we do not try to draw the board (in paintComponent)
         // while we are updating this data
+        dice = state.getDice();
         currentPlayer = state.getCurrentPlayer();
         markerPositions = new int[state.getNPlayers()][13];
         completedColumns = new int[13];
@@ -68,6 +71,7 @@ public class CantStopBoardView extends JComponent {
         Graphics2D g = (Graphics2D) graphics;
         g.setStroke(new BasicStroke(5));
         g.setFont(new Font("Arial", Font.BOLD, 24));
+        g.drawString("Dice Values : " + Arrays.toString(dice), margin, margin);
         for (int n = 2; n <= 12; n++) {
             g.setColor(Color.BLACK);
             int labelX = margin + n * spaceWidth + n * spaceInterval;

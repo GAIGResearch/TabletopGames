@@ -14,10 +14,10 @@ public class CantStopGUIManager extends AbstractGUIManager {
 
     CantStopBoardView view;
     static int cantStopWidth = 800;
-    static int cantStopHeight = 800;
+    static int cantStopHeight = 600;
 
     public CantStopGUIManager(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 4);
+        super(parent, ac, 6);
         CantStopGameState state = (CantStopGameState) game.getGameState();
         view = new CantStopBoardView(state);
 
