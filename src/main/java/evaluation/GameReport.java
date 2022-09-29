@@ -50,11 +50,13 @@ public class GameReport {
                             "\t               Different player counts can be specified for each game in pipe-delimited format.\n" +
                             "\t               If 'all' is specified, then every possible playerCount for the game will be analysed.\n" +
                             "\tnGames=        The number of games to run for each game type. Defaults to 1000.\n" +
-                            "\tlistener=      The full class name of an IGameListener implementation. \n" +
+                            "\tlistener=      The full class name of an IGameListener implementation. Or the location\n" +
+                            "\t               of a json file from which a listener can be instantiated.\n" +
                             "\t               Defaults to utilities.GameStatisticsListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
+                            "\t               This is ignored if a json file is provided for the listener.\n" +
                             "\t               Defaults to utilities.SummaryLogger. \n" +
                             "\tlogFile=       Will be used as the IStatisticsLogger log file (FileStatsLogger only)\n" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +

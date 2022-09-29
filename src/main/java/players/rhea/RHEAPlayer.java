@@ -291,7 +291,7 @@ public class RHEAPlayer extends AbstractPlayer {
 
     protected void logStatistics(AbstractGameState state) {
         Map<String, Object> stats = new LinkedHashMap<>();
-        stats.put("round", state.getTurnOrder());
+        stats.put("round", state.getTurnOrder().getRoundCounter());
         stats.put("turn", state.getTurnOrder().getTurnCounter());
         stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
         stats.put("iterations", numIters);
