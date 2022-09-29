@@ -10,6 +10,8 @@ import games.terraformingmars.rules.requirements.PlayableActionRequirement;
 
 public class PlayCard extends TMAction {
 
+    public PlayCard() { super(); } // This is needed for JSON Deserializer
+
     public PlayCard(int player, TMCard card, boolean free) {
         super(TMTypes.ActionType.PlayCard, player, free);
         this.setActionCost(TMTypes.Resource.MegaCredit, card.cost, card.getComponentID());

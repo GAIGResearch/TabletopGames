@@ -11,6 +11,8 @@ import java.util.Arrays;
 public class CompoundAction extends TMAction{
     public TMAction[] actions;
 
+    public CompoundAction() { super(); }  // This is needed for JSON Deserializer
+
     public CompoundAction(int player, TMAction[] actions) {
         super(player, true);
         this.actions = actions;

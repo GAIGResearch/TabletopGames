@@ -11,7 +11,9 @@ import games.terraformingmars.rules.requirements.ClaimableAwardMilestoneRequirem
 import java.util.Objects;
 
 public class ClaimAwardMilestone extends TMAction {
-    final int toClaimID;
+    int toClaimID;
+
+    public ClaimAwardMilestone() { super(); } // This is needed for JSON Deserializer
 
     public ClaimAwardMilestone(int player, Award toClaim, int cost) {
         super((toClaim instanceof Milestone? TMTypes.ActionType.ClaimMilestone : TMTypes.ActionType.FundAward), player, false);

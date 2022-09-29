@@ -13,6 +13,8 @@ public class TMModifyCounter extends TMAction {
     public int counterID;
     public double change;
 
+    public TMModifyCounter() { super(); } // This is needed for JSON Deserializer
+
     public TMModifyCounter(int counterID, double change, boolean free) {
         super(-1, free);
         this.counterID = counterID;

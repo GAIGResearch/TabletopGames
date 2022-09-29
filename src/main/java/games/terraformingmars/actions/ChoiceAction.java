@@ -17,6 +17,8 @@ public class ChoiceAction extends TMAction implements IExtendedSequence {
     public TMAction[] actions;
     boolean finished;
 
+    public ChoiceAction() { super(); } // This is needed for JSON Deserializer
+
     public ChoiceAction(int player, TMAction[] actions) {
         super(player, true);
         this.actions = actions;

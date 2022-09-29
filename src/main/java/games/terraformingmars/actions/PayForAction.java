@@ -13,11 +13,13 @@ import java.util.*;
 
 // Wrapper class for actions that need to be paid with resources before execution
 public class PayForAction extends TMAction implements IExtendedSequence {
-    public final TMAction action;
+    public TMAction action;
 
     int costPaid;
     int stage;
     TMTypes.Resource[] resourcesToPayWith;
+
+    public PayForAction() { super(); } // This is needed for JSON Deserializer
 
     public PayForAction(int player, TMAction action) {
         super(action.actionType, player, true);

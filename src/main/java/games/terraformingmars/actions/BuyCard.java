@@ -9,6 +9,8 @@ import games.terraformingmars.components.TMCard;
 
 public class BuyCard extends TMAction {
 
+    public BuyCard() { super(); } // This is needed for JSON Deserializer
+
     public BuyCard(int player, int cardID, int cost) {
         super(player, true);
         this.setActionCost(TMTypes.Resource.MegaCredit, cost, -1);

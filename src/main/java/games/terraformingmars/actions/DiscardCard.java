@@ -16,6 +16,8 @@ import java.util.Objects;
 public class DiscardCard extends TMAction implements IExtendedSequence {
     boolean cardChoice;
 
+    public DiscardCard() { super(); } // This is needed for JSON Deserializer
+
     public DiscardCard(int player, int cardID, boolean cardChoice) {
         super(player, true);
         setCardID(cardID);

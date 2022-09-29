@@ -10,11 +10,13 @@ import games.terraformingmars.components.TMMapTile;
 import java.util.*;
 
 public class ReserveTile extends TMAction implements IExtendedSequence {
-    public final int mapTileID;
+    public int mapTileID;
     public TMTypes.MapTileType mapType;
 
     boolean placed;
     boolean impossible;
+
+    public ReserveTile() { super(); } // This is needed for JSON Deserializer
 
     public ReserveTile(int player, int mapTileID, boolean free) {
         super(player, free);

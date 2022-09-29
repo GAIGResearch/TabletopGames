@@ -16,8 +16,10 @@ public class TopCardDecision extends TMAction implements IExtendedSequence {
     int nCardsKept;
 
     public int nCardsLook;
-    public final int nCardsKeep;
-    public final boolean buy;
+    public int nCardsKeep;
+    public boolean buy;
+
+    public TopCardDecision() { super(); } // This is needed for JSON Deserializer
 
     public TopCardDecision(int nCardsLook, int nCardsKeep, boolean buy) {
         super(-1, true);

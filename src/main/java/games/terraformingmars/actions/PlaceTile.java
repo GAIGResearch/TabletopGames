@@ -40,6 +40,8 @@ public class PlaceTile extends TMAction implements IExtendedSequence {
     boolean placed;
     boolean impossible;
 
+    public PlaceTile() { super(); } // This is needed for JSON Deserializer
+
     public PlaceTile(int player, int mapTileID, TMTypes.Tile tile,
                      boolean respectingAdjacency, boolean onMars, String tileName, TMTypes.MapTileType mapType,
                      HashSet<Integer> legalPositions,

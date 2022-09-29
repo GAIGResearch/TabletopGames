@@ -12,9 +12,14 @@ import java.util.List;
 import java.util.Objects;
 
 public class DuplicateImmediateEffect extends TMAction implements IExtendedSequence {
-    final public TMTypes.Tag tagRequirement;  // tag card chosen must have
-    final public String actionClassName;  // what type of effect can be duplicated
-    final public boolean production;  // If modify player resource, must it be production?
+    public TMTypes.Tag tagRequirement;  // tag card chosen must have
+    public String actionClassName;  // what type of effect can be duplicated
+    public boolean production;  // If modify player resource, must it be production?
+
+    public DuplicateImmediateEffect() // This is needed for JSON Deserializer
+    {
+        super();
+    }
 
     public DuplicateImmediateEffect(TMTypes.Tag tagRequirement, String actionClassName, boolean production) {
         super(-1, true);

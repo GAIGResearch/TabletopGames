@@ -30,6 +30,8 @@ public class ModifyPlayerResource extends TMModifyCounter implements IExtendedSe
 
     transient public boolean complete;
 
+    public ModifyPlayerResource() { super(); } // This is needed for JSON Deserializer
+
     public ModifyPlayerResource(int player, int change, TMTypes.Resource resource, boolean production) {
         // Used for other free effects
         super(-1, change, true);

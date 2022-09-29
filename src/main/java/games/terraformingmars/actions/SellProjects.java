@@ -18,6 +18,8 @@ public class SellProjects extends TMAction implements IExtendedSequence {
     HashSet<Integer> cardIDsSold;
     boolean complete;
 
+    public SellProjects() { super(); } // This is needed for JSON Deserializer
+
     public SellProjects(int player) {
         super(player, false);
         actionType = TMTypes.ActionType.StandardProject;

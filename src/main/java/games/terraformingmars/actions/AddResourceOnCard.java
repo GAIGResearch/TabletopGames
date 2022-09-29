@@ -10,8 +10,8 @@ import games.terraformingmars.components.TMCard;
 import java.util.*;
 
 public class AddResourceOnCard extends TMAction implements IExtendedSequence {
-    public final TMTypes.Resource resource;
-    public final int amount;  // Can be negative for removing resources
+    public TMTypes.Resource resource;
+    public int amount;  // Can be negative for removing resources
 
     public boolean chooseAny;  // if true, can choose cards that take resources from any player, otherwise own ones
     public TMTypes.Tag tagRequirement;  // tag target card must have
@@ -19,6 +19,12 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
 
     public TMTypes.Tag tagTopCardDrawDeck;  // tag top card of the draw deck must have for this to be played; top card discarded either way
     public TMTypes.Tag lastTopCardDrawDeckTag;  // tag of the last drawn card from the top of the deck
+
+
+    public AddResourceOnCard()   // This is needed for JSON Deserializer
+    {
+        super();
+    }
 
     public AddResourceOnCard(int player, int cardID, TMTypes.Resource resource, int amount, boolean free) {
         super(player, free);
@@ -160,6 +166,10 @@ public class AddResourceOnCard extends TMAction implements IExtendedSequence {
     public String getString(AbstractGameState gameState) {
         if (getCardID() != -1) {
             TMCard card = (TMCard) gameState.getComponentById(getCardID());
+            if(card == null)
+            {
+                int a = 0;
+            }
             return "Add " + amount + " " + resource + " on card " + card.getComponentName();
         }
         return "Add " + amount + " " + resource + " on " + (chooseAny? "any " : "another ") + "card";

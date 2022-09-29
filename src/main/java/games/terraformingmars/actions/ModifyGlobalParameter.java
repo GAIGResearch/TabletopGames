@@ -14,6 +14,8 @@ import java.util.Objects;
 public class ModifyGlobalParameter extends TMModifyCounter {
     public TMTypes.GlobalParameter param;
 
+    public ModifyGlobalParameter() { super(); } // This is needed for JSON Deserializer
+
     public ModifyGlobalParameter(TMTypes.GlobalParameter param, double change, boolean free) {
         super(-1, change, free);
         this.param = param;

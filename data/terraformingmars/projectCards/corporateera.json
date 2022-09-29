@@ -37,6 +37,7 @@
         "freeActionPoint": false,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "actionType": "ActiveAction",
         "cost": 0
       }
@@ -104,6 +105,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -139,6 +141,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -202,6 +205,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -239,18 +243,7 @@
               "freeActionPoint": false,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "MegaCredit",
-                    "amount": 2,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -1
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -296,18 +289,7 @@
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "MegaCredit",
-                        "amount": 2,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -361,6 +343,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -396,6 +379,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -430,6 +414,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -478,6 +463,7 @@
         "freeActionPoint": false,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "actionType": "ActiveAction",
         "cost": 0
       }
@@ -509,6 +495,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -550,6 +537,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -609,30 +597,8 @@
                         "freeActionPoint": true,
                         "player": -1,
                         "pass": false,
-                        "costRequirement": {
-                          "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                          "data": {
-                            "resource": "Science",
-                            "amount": 1,
-                            "production": false,
-                            "cardID": -1,
-                            "player": -1
-                          }
-                        },
-                        "requirements": [
-                          {
-                            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                            "data": {
-                              "resource": "Science",
-                              "amount": 1,
-                              "production": false,
-                              "cardID": -1,
-                              "player": -1
-                            }
-                          }
-                        ],
-                        "cost": 1,
-                        "costResource": "Science"
+                        "requirements": [],
+                        "cost": 0
                       }
                     },
                     {
@@ -672,30 +638,8 @@
                             "freeActionPoint": true,
                             "player": -1,
                             "pass": false,
-                            "costRequirement": {
-                              "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                              "data": {
-                                "resource": "Science",
-                                "amount": 1,
-                                "production": false,
-                                "cardID": -1,
-                                "player": -1
-                              }
-                            },
-                            "requirements": [
-                              {
-                                "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                                "data": {
-                                  "resource": "Science",
-                                  "amount": 1,
-                                  "production": false,
-                                  "cardID": -1,
-                                  "player": -1
-                                }
-                              }
-                            ],
-                            "cost": 1,
-                            "costResource": "Science"
+                            "requirements": [],
+                            "cost": 0
                           }
                         }
                       }
@@ -751,30 +695,8 @@
                             "freeActionPoint": true,
                             "player": -1,
                             "pass": false,
-                            "costRequirement": {
-                              "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                              "data": {
-                                "resource": "Science",
-                                "amount": 1,
-                                "production": false,
-                                "cardID": -1,
-                                "player": -1
-                              }
-                            },
-                            "requirements": [
-                              {
-                                "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                                "data": {
-                                  "resource": "Science",
-                                  "amount": 1,
-                                  "production": false,
-                                  "cardID": -1,
-                                  "player": -1
-                                }
-                              }
-                            ],
-                            "cost": 1,
-                            "costResource": "Science"
+                            "requirements": [],
+                            "cost": 0
                           }
                         },
                         {
@@ -814,30 +736,8 @@
                                 "freeActionPoint": true,
                                 "player": -1,
                                 "pass": false,
-                                "costRequirement": {
-                                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                                  "data": {
-                                    "resource": "Science",
-                                    "amount": 1,
-                                    "production": false,
-                                    "cardID": -1,
-                                    "player": -1
-                                  }
-                                },
-                                "requirements": [
-                                  {
-                                    "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                                    "data": {
-                                      "resource": "Science",
-                                      "amount": 1,
-                                      "production": false,
-                                      "cardID": -1,
-                                      "player": -1
-                                    }
-                                  }
-                                ],
-                                "cost": 1,
-                                "costResource": "Science"
+                                "requirements": [],
+                                "cost": 0
                               }
                             }
                           }
@@ -909,6 +809,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -974,6 +875,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     },
@@ -1002,6 +904,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -1065,6 +968,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     },
@@ -1083,6 +987,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -1117,6 +1022,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -1204,6 +1110,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -1243,6 +1150,7 @@
             "freeActionPoint": true,
             "player": -1,
             "pass": false,
+            "requirements": [],
             "cost": 0
           }
         }
@@ -1290,18 +1198,7 @@
               "freeActionPoint": false,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Heat",
-                    "amount": 8,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -1
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -1335,7 +1232,7 @@
               "action": {
                 "name": "games.terraformingmars.actions.ModifyPlayerResource",
                 "data": {
-                  "resource": "Heat",
+                  "resource": "TR",
                   "production": false,
                   "targetPlayer": -1,
                   "counterResourceProduction": false,
@@ -1343,22 +1240,11 @@
                   "opponents": false,
                   "onMars": false,
                   "counterID": -1,
-                  "change": -8.0,
+                  "change": 1.0,
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Heat",
-                        "amount": 8,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -1370,7 +1256,7 @@
               "action": {
                 "name": "games.terraformingmars.actions.ModifyPlayerResource",
                 "data": {
-                  "resource": "TR",
+                  "resource": "Heat",
                   "production": false,
                   "targetPlayer": -1,
                   "counterResourceProduction": false,
@@ -1378,7 +1264,7 @@
                   "opponents": false,
                   "onMars": false,
                   "counterID": -1,
-                  "change": 1.0,
+                  "change": -8.0,
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
@@ -1454,6 +1340,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -1536,6 +1423,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -1570,6 +1458,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -1660,6 +1549,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -1701,18 +1591,7 @@
                     "freeActionPoint": true,
                     "player": -1,
                     "pass": false,
-                    "requirements": [
-                      {
-                        "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                        "data": {
-                          "resource": "Steel",
-                          "amount": 2,
-                          "production": false,
-                          "cardID": -1,
-                          "player": -2
-                        }
-                      }
-                    ],
+                    "requirements": [],
                     "cost": 0
                   }
                 },
@@ -1782,18 +1661,7 @@
                         "freeActionPoint": true,
                         "player": -1,
                         "pass": false,
-                        "requirements": [
-                          {
-                            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                            "data": {
-                              "resource": "Steel",
-                              "amount": 2,
-                              "production": false,
-                              "cardID": -1,
-                              "player": -2
-                            }
-                          }
-                        ],
+                        "requirements": [],
                         "cost": 0
                       }
                     }
@@ -1822,18 +1690,7 @@
                     "freeActionPoint": true,
                     "player": -1,
                     "pass": false,
-                    "requirements": [
-                      {
-                        "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                        "data": {
-                          "resource": "MegaCredit",
-                          "amount": 3,
-                          "production": false,
-                          "cardID": -1,
-                          "player": -2
-                        }
-                      }
-                    ],
+                    "requirements": [],
                     "cost": 0
                   }
                 },
@@ -1903,18 +1760,7 @@
                         "freeActionPoint": true,
                         "player": -1,
                         "pass": false,
-                        "requirements": [
-                          {
-                            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                            "data": {
-                              "resource": "MegaCredit",
-                              "amount": 3,
-                              "production": false,
-                              "cardID": -1,
-                              "player": -2
-                            }
-                          }
-                        ],
+                        "requirements": [],
                         "cost": 0
                       }
                     }
@@ -1940,132 +1786,6 @@
                     {
                       "name": "games.terraformingmars.actions.ModifyPlayerResource",
                       "data": {
-                        "resource": "MegaCredit",
-                        "production": false,
-                        "targetPlayer": -2,
-                        "counterResourceProduction": false,
-                        "any": false,
-                        "opponents": false,
-                        "onMars": false,
-                        "counterID": -1,
-                        "change": -3.0,
-                        "freeActionPoint": true,
-                        "player": -1,
-                        "pass": false,
-                        "requirements": [
-                          {
-                            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                            "data": {
-                              "resource": "MegaCredit",
-                              "amount": 3,
-                              "production": false,
-                              "cardID": -1,
-                              "player": -2
-                            }
-                          }
-                        ],
-                        "cost": 0
-                      }
-                    },
-                    {
-                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
-                      "data": {
-                        "resource": "MegaCredit",
-                        "production": false,
-                        "targetPlayer": -1,
-                        "counterResourceProduction": false,
-                        "any": false,
-                        "opponents": false,
-                        "onMars": false,
-                        "counterID": -1,
-                        "change": 3.0,
-                        "freeActionPoint": true,
-                        "player": -1,
-                        "pass": false,
-                        "requirements": [],
-                        "cost": 0
-                      }
-                    }
-                  ],
-                  "freeActionPoint": true,
-                  "player": -1,
-                  "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
-                      "data": {
-                        "action": {
-                          "name": "games.terraformingmars.actions.ModifyPlayerResource",
-                          "data": {
-                            "resource": "MegaCredit",
-                            "production": false,
-                            "targetPlayer": -1,
-                            "counterResourceProduction": false,
-                            "any": false,
-                            "opponents": false,
-                            "onMars": false,
-                            "counterID": -1,
-                            "change": 3.0,
-                            "freeActionPoint": true,
-                            "player": -1,
-                            "pass": false,
-                            "requirements": [],
-                            "cost": 0
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
-                      "data": {
-                        "action": {
-                          "name": "games.terraformingmars.actions.ModifyPlayerResource",
-                          "data": {
-                            "resource": "MegaCredit",
-                            "production": false,
-                            "targetPlayer": -2,
-                            "counterResourceProduction": false,
-                            "any": false,
-                            "opponents": false,
-                            "onMars": false,
-                            "counterID": -1,
-                            "change": -3.0,
-                            "freeActionPoint": true,
-                            "player": -1,
-                            "pass": false,
-                            "requirements": [
-                              {
-                                "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                                "data": {
-                                  "resource": "MegaCredit",
-                                  "amount": 3,
-                                  "production": false,
-                                  "cardID": -1,
-                                  "player": -2
-                                }
-                              }
-                            ],
-                            "cost": 0
-                          }
-                        }
-                      }
-                    }
-                  ],
-                  "cost": 0
-                }
-              }
-            }
-          },
-          {
-            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
-            "data": {
-              "action": {
-                "name": "games.terraformingmars.actions.CompoundAction",
-                "data": {
-                  "actions": [
-                    {
-                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
-                      "data": {
                         "resource": "Steel",
                         "production": false,
                         "targetPlayer": -2,
@@ -2078,18 +1798,7 @@
                         "freeActionPoint": true,
                         "player": -1,
                         "pass": false,
-                        "requirements": [
-                          {
-                            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                            "data": {
-                              "resource": "Steel",
-                              "amount": 2,
-                              "production": false,
-                              "cardID": -1,
-                              "player": -2
-                            }
-                          }
-                        ],
+                        "requirements": [],
                         "cost": 0
                       }
                     },
@@ -2159,18 +1868,111 @@
                             "freeActionPoint": true,
                             "player": -1,
                             "pass": false,
-                            "requirements": [
-                              {
-                                "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                                "data": {
-                                  "resource": "Steel",
-                                  "amount": 2,
-                                  "production": false,
-                                  "cardID": -1,
-                                  "player": -2
-                                }
-                              }
-                            ],
+                            "requirements": [],
+                            "cost": 0
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.CompoundAction",
+                "data": {
+                  "actions": [
+                    {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "MegaCredit",
+                        "production": false,
+                        "targetPlayer": -2,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": -3.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    },
+                    {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "MegaCredit",
+                        "production": false,
+                        "targetPlayer": -1,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": 3.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    }
+                  ],
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [
+                    {
+                      "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                      "data": {
+                        "action": {
+                          "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                          "data": {
+                            "resource": "MegaCredit",
+                            "production": false,
+                            "targetPlayer": -1,
+                            "counterResourceProduction": false,
+                            "any": false,
+                            "opponents": false,
+                            "onMars": false,
+                            "counterID": -1,
+                            "change": 3.0,
+                            "freeActionPoint": true,
+                            "player": -1,
+                            "pass": false,
+                            "requirements": [],
+                            "cost": 0
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                      "data": {
+                        "action": {
+                          "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                          "data": {
+                            "resource": "MegaCredit",
+                            "production": false,
+                            "targetPlayer": -2,
+                            "counterResourceProduction": false,
+                            "any": false,
+                            "opponents": false,
+                            "onMars": false,
+                            "counterID": -1,
+                            "change": -3.0,
+                            "freeActionPoint": true,
+                            "player": -1,
+                            "pass": false,
+                            "requirements": [],
                             "cost": 0
                           }
                         }
@@ -2220,18 +2022,7 @@
               "freeActionPoint": false,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "MegaCredit",
-                    "amount": 7,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -1
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -2301,18 +2092,7 @@
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "MegaCredit",
-                        "amount": 7,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -2350,6 +2130,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -2387,18 +2168,7 @@
               "freeActionPoint": true,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Titanium",
-                    "amount": 3,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -2
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -2417,18 +2187,7 @@
               "freeActionPoint": true,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Steel",
-                    "amount": 4,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -2
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -2447,18 +2206,7 @@
               "freeActionPoint": true,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "MegaCredit",
-                    "amount": 7,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -2
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           }
@@ -2468,41 +2216,6 @@
         "player": -1,
         "pass": false,
         "requirements": [
-          {
-            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
-            "data": {
-              "action": {
-                "name": "games.terraformingmars.actions.ModifyPlayerResource",
-                "data": {
-                  "resource": "Titanium",
-                  "production": false,
-                  "targetPlayer": -2,
-                  "counterResourceProduction": false,
-                  "any": false,
-                  "opponents": false,
-                  "onMars": false,
-                  "counterID": -1,
-                  "change": -3.0,
-                  "freeActionPoint": true,
-                  "player": -1,
-                  "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Titanium",
-                        "amount": 3,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -2
-                      }
-                    }
-                  ],
-                  "cost": 0
-                }
-              }
-            }
-          },
           {
             "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
             "data": {
@@ -2521,18 +2234,7 @@
                   "freeActionPoint": true,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "MegaCredit",
-                        "amount": 7,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -2
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -2556,18 +2258,31 @@
                   "freeActionPoint": true,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Steel",
-                        "amount": 4,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -2
-                      }
-                    }
-                  ],
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Titanium",
+                  "production": false,
+                  "targetPlayer": -2,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -3.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -2608,6 +2323,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -2638,6 +2354,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -2667,6 +2384,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "actionType": "ActiveAction",
         "cost": 0
       }
@@ -2740,6 +2458,7 @@
             "freeActionPoint": true,
             "player": -1,
             "pass": false,
+            "requirements": [],
             "cost": 0
           }
         }
@@ -2775,6 +2494,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -2808,6 +2528,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -2868,6 +2589,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -2931,6 +2653,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -2969,18 +2692,7 @@
               "freeActionPoint": false,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Energy",
-                    "amount": 6,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -1
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -3007,6 +2719,25 @@
             "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
             "data": {
               "action": {
+                "name": "games.terraformingmars.actions.AddResourceOnCard",
+                "data": {
+                  "resource": "Science",
+                  "amount": 1,
+                  "chooseAny": false,
+                  "minResRequirement": 0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
                 "name": "games.terraformingmars.actions.ModifyPlayerResource",
                 "data": {
                   "resource": "Energy",
@@ -3018,36 +2749,6 @@
                   "onMars": false,
                   "counterID": -1,
                   "change": -6.0,
-                  "freeActionPoint": false,
-                  "player": -1,
-                  "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Energy",
-                        "amount": 6,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
-                  "cost": 0
-                }
-              }
-            }
-          },
-          {
-            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
-            "data": {
-              "action": {
-                "name": "games.terraformingmars.actions.AddResourceOnCard",
-                "data": {
-                  "resource": "Science",
-                  "amount": 1,
-                  "chooseAny": false,
-                  "minResRequirement": 0,
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
@@ -3122,6 +2823,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -3156,6 +2858,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     },
@@ -3174,6 +2877,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -3222,6 +2926,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -3256,6 +2961,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -3283,6 +2989,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -3346,6 +3053,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     },
@@ -3366,6 +3074,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -3414,6 +3123,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -3475,6 +3185,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -3549,11 +3260,17 @@
                 "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
                 "data": {
                   "action": {
-                    "name": "games.terraformingmars.actions.AddResourceOnCard",
+                    "name": "games.terraformingmars.actions.ModifyPlayerResource",
                     "data": {
-                      "amount": 1,
-                      "chooseAny": false,
-                      "minResRequirement": 0,
+                      "resource": "Plant",
+                      "production": false,
+                      "targetPlayer": -1,
+                      "counterResourceProduction": false,
+                      "any": false,
+                      "opponents": false,
+                      "onMars": false,
+                      "counterID": -1,
+                      "change": 1.0,
                       "freeActionPoint": true,
                       "player": -1,
                       "pass": false,
@@ -3567,17 +3284,11 @@
                 "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
                 "data": {
                   "action": {
-                    "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                    "name": "games.terraformingmars.actions.AddResourceOnCard",
                     "data": {
-                      "resource": "Plant",
-                      "production": false,
-                      "targetPlayer": -1,
-                      "counterResourceProduction": false,
-                      "any": false,
-                      "opponents": false,
-                      "onMars": false,
-                      "counterID": -1,
-                      "change": 1.0,
+                      "amount": 1,
+                      "chooseAny": false,
+                      "minResRequirement": 0,
                       "freeActionPoint": true,
                       "player": -1,
                       "pass": false,
@@ -3610,6 +3321,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -3655,18 +3367,7 @@
                   "freeActionPoint": true,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Card",
-                        "amount": 1,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               },
@@ -3712,18 +3413,7 @@
                       "freeActionPoint": true,
                       "player": -1,
                       "pass": false,
-                      "requirements": [
-                        {
-                          "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                          "data": {
-                            "resource": "Card",
-                            "amount": 1,
-                            "production": false,
-                            "cardID": -1,
-                            "player": -1
-                          }
-                        }
-                      ],
+                      "requirements": [],
                       "cost": 0
                     }
                   }
@@ -3780,18 +3470,7 @@
               "freeActionPoint": true,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Card",
-                    "amount": 1,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -1
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -3837,18 +3516,7 @@
                   "freeActionPoint": true,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Card",
-                        "amount": 1,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -3898,12 +3566,12 @@
   ],
   "resourceMappings": [
     {
-      "from": "Titanium",
+      "from": "Steel",
       "to": "MegaCredit",
       "rate": 1.0
     },
     {
-      "from": "Steel",
+      "from": "Titanium",
       "to": "MegaCredit",
       "rate": 1.0
     }
@@ -3974,18 +3642,7 @@
               "freeActionPoint": false,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Plant",
-                    "amount": 1,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -1
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -4019,7 +3676,7 @@
               "action": {
                 "name": "games.terraformingmars.actions.ModifyPlayerResource",
                 "data": {
-                  "resource": "Plant",
+                  "resource": "MegaCredit",
                   "production": false,
                   "targetPlayer": -1,
                   "counterResourceProduction": false,
@@ -4027,22 +3684,11 @@
                   "opponents": false,
                   "onMars": false,
                   "counterID": -1,
-                  "change": -1.0,
+                  "change": 7.0,
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Plant",
-                        "amount": 1,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -4054,7 +3700,7 @@
               "action": {
                 "name": "games.terraformingmars.actions.ModifyPlayerResource",
                 "data": {
-                  "resource": "MegaCredit",
+                  "resource": "Plant",
                   "production": false,
                   "targetPlayer": -1,
                   "counterResourceProduction": false,
@@ -4062,7 +3708,7 @@
                   "opponents": false,
                   "onMars": false,
                   "counterID": -1,
-                  "change": 7.0,
+                  "change": -1.0,
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
@@ -4096,18 +3742,7 @@
               "freeActionPoint": false,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Steel",
-                    "amount": 1,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -1
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -4153,18 +3788,7 @@
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Steel",
-                        "amount": 1,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -4261,6 +3885,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -4337,6 +3962,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -4380,6 +4006,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -4413,6 +4040,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -4484,6 +4112,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -4518,6 +4147,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -4551,6 +4181,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -4586,6 +4217,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -4624,18 +4256,7 @@
               "freeActionPoint": true,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Animal",
-                    "amount": 2,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -2
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -4654,18 +4275,7 @@
               "freeActionPoint": true,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Plant",
-                    "amount": 5,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -2
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           }
@@ -4675,41 +4285,6 @@
         "player": -1,
         "pass": false,
         "requirements": [
-          {
-            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
-            "data": {
-              "action": {
-                "name": "games.terraformingmars.actions.ModifyPlayerResource",
-                "data": {
-                  "resource": "Plant",
-                  "production": false,
-                  "targetPlayer": -2,
-                  "counterResourceProduction": false,
-                  "any": false,
-                  "opponents": false,
-                  "onMars": false,
-                  "counterID": -1,
-                  "change": -5.0,
-                  "freeActionPoint": true,
-                  "player": -1,
-                  "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Plant",
-                        "amount": 5,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -2
-                      }
-                    }
-                  ],
-                  "cost": 0
-                }
-              }
-            }
-          },
           {
             "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
             "data": {
@@ -4728,18 +4303,31 @@
                   "freeActionPoint": true,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Animal",
-                        "amount": 2,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -2
-                      }
-                    }
-                  ],
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Plant",
+                  "production": false,
+                  "targetPlayer": -2,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -5.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -4774,6 +4362,7 @@
         "freeActionPoint": false,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "actionType": "ActiveAction",
         "cost": 0
       }
@@ -4824,6 +4413,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     },
@@ -4842,6 +4432,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -4879,18 +4470,7 @@
               "freeActionPoint": false,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Titanium",
-                    "amount": 1,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -1
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -4931,18 +4511,7 @@
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Titanium",
-                        "amount": 1,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -5063,18 +4632,7 @@
               "freeActionPoint": false,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Energy",
-                    "amount": 1,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -1
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -5120,18 +4678,7 @@
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Energy",
-                        "amount": 1,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -5201,18 +4748,7 @@
               "freeActionPoint": false,
               "player": -1,
               "pass": false,
-              "requirements": [
-                {
-                  "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                  "data": {
-                    "resource": "Steel",
-                    "amount": 1,
-                    "production": false,
-                    "cardID": -1,
-                    "player": -1
-                  }
-                }
-              ],
+              "requirements": [],
               "cost": 0
             }
           },
@@ -5246,7 +4782,7 @@
               "action": {
                 "name": "games.terraformingmars.actions.ModifyPlayerResource",
                 "data": {
-                  "resource": "MegaCredit",
+                  "resource": "Steel",
                   "production": false,
                   "targetPlayer": -1,
                   "counterResourceProduction": false,
@@ -5254,7 +4790,7 @@
                   "opponents": false,
                   "onMars": false,
                   "counterID": -1,
-                  "change": 5.0,
+                  "change": -1.0,
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
@@ -5270,7 +4806,7 @@
               "action": {
                 "name": "games.terraformingmars.actions.ModifyPlayerResource",
                 "data": {
-                  "resource": "Steel",
+                  "resource": "MegaCredit",
                   "production": false,
                   "targetPlayer": -1,
                   "counterResourceProduction": false,
@@ -5278,22 +4814,11 @@
                   "opponents": false,
                   "onMars": false,
                   "counterID": -1,
-                  "change": -1.0,
+                  "change": 5.0,
                   "freeActionPoint": false,
                   "player": -1,
                   "pass": false,
-                  "requirements": [
-                    {
-                      "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
-                      "data": {
-                        "resource": "Steel",
-                        "amount": 1,
-                        "production": false,
-                        "cardID": -1,
-                        "player": -1
-                      }
-                    }
-                  ],
+                  "requirements": [],
                   "cost": 0
                 }
               }
@@ -5321,6 +4846,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -5350,6 +4876,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }
@@ -5424,6 +4951,7 @@
         "freeActionPoint": true,
         "player": -1,
         "pass": false,
+        "requirements": [],
         "cost": 0
       }
     }

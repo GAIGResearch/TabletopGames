@@ -35,6 +35,8 @@ public class TMAction extends AbstractAction {
     transient private int playCardID = -1;  // Card used to play this action (factors into the cost of the action)
     transient private int cardID = -1;  // Card related to the action (does not factor into the cost)
 
+    public TMAction()  {  } // This is needed for JSON Deserializer
+
     public TMAction(TMTypes.ActionType actionType, int player, boolean free) {
         this.player = player;
         this.freeActionPoint = free;
@@ -226,7 +228,7 @@ public class TMAction extends AbstractAction {
         if (costRequirement != null) {
             action.costRequirement = costRequirement.copy();
         }
-        if (requirements != null && requirements.size() > 0) {
+        if (requirements != null){ // && requirements.size() > 0) {
             action.requirements = new HashSet<>();
             for (Requirement r : requirements) {
                 action.requirements.add(r.copy());
