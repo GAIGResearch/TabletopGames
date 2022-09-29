@@ -544,7 +544,7 @@ public class Frontend extends GUI {
         AbstractGameState gameState = gameRunning.getGameState().copy();
         int currentPlayer = gameState.getCurrentPlayer();
         AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
-        if (gui != null && gameState.isNotTerminal()) {
+        if (gui != null) {
             gui.update(player, gameState, gameRunning.isHumanToMove() || showAll);
             if (!gameRunning.isHumanToMove() && paused && showAll) {
                 // in this case we allow a human to override an AI decision
