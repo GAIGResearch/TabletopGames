@@ -220,6 +220,36 @@ public class TestCantStop {
     }
 
     @Test
+    public void testDoubleIsNotValidIfOnlyOneStepLeftFromTempMarker() {
+        CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        fm.next(state, new RollDice());
+        state.setDice(new int[]{3, 4, 3, 4});  // gives 6+8 or 7+7
+
+        // then move two of the markers so that only one is available
+        for (int i = 0; i < 11; i++)
+            state.moveMarker(7);
+
+        assertEquals(2, fm.computeAvailableActions(state).size()); // 7, 6+8
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(6, 8)));
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(7)));
+    }
+    @Test
+    public void testDoubleIsNotValidIfOnlyOneStepLeftFromPermMarker() {
+        CantStopGameState state = (CantStopGameState) cantStop.getGameState();
+        fm.next(state, new RollDice());
+        state.setDice(new int[]{3, 4, 3, 4});  // gives 6+8 or 7+7
+
+        // then move two of the markers so that only one is available
+        for (int i = 0; i < 11; i++)
+            state.moveMarker(7);
+        fm.makeTemporaryMarkersPermanentAndClear(state);
+
+        assertEquals(2, fm.computeAvailableActions(state).size()); // 7, 6+8
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(6, 8)));
+        assertTrue(fm.computeAvailableActions(state).contains(new AllocateDice(7)));
+    }
+
+    @Test
     public void testMarkerMovesInAdditionToStartingPlace() {
         CantStopGameState state = (CantStopGameState) cantStop.getGameState();
         fm.next(state, new RollDice());
