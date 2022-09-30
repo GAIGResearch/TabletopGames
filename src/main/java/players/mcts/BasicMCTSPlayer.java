@@ -3,6 +3,7 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import core.interfaces.IStateHeuristic;
 
 import java.util.List;
 import java.util.Random;
@@ -63,6 +64,11 @@ public class BasicMCTSPlayer extends AbstractPlayer {
         // Return best action
         return root.bestAction();
     }
+
+    public void setStateHeuristic(IStateHeuristic heuristic) {
+        this.params.heuristic = heuristic;
+    }
+
 
     @Override
     public String toString() {

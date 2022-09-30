@@ -63,8 +63,8 @@ public class MCTSParams extends PlayerParameters {
     public boolean nodesStoreScoreDelta = true;
     public boolean maintainMasterState = false;
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
-    private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
-    private IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
+    public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
+    public IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
