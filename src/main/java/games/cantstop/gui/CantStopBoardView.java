@@ -11,14 +11,14 @@ public class CantStopBoardView extends JComponent {
 
     // We need one large panel for the board
     CantStopParameters params;
-    int spaceHeight = 40;
-    int spaceWidth = 40;
-    int discDiam = 25;
+    int spaceHeight = 35;
+    int spaceWidth = 35;
+    int discDiam = 20;
     int spaceInterval = 10;
     int margin = 20;
     int labelHeight = 30;
     int boardWidth = 500;
-    int boardHeight = 600;
+    int boardHeight = 500;
     int discOffset;
     Color[] playerColours = new Color[]{Color.GREEN, Color.RED, Color.BLUE, Color.YELLOW};
 

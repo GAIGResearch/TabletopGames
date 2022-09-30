@@ -13,8 +13,8 @@ import java.util.*;
 public class CantStopGUIManager extends AbstractGUIManager {
 
     CantStopBoardView view;
-    static int cantStopWidth = 800;
-    static int cantStopHeight = 600;
+    static int cantStopWidth = 600;
+    static int cantStopHeight = 500;
 
     public CantStopGUIManager(GamePanel parent, Game game, ActionController ac) {
         super(parent, ac, 6);

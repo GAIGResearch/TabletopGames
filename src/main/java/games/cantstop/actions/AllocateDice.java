@@ -24,7 +24,8 @@ public class AllocateDice extends AbstractAction {
         // in this case what will happen in the forward model is that we'll reduce this just 7.
         Map<Integer, Long> numberCounts = Arrays.stream(numberSplit).boxed().collect(groupingBy(n -> n, counting()));
         for (int n : numberSplit) {
-            boolean canMoveOnTrack = !state.trackComplete(n) && (state.getTemporaryMarkerPosition(n) + numberCounts.get(n) - 1) < params.maxValue(n);
+            int markerPosition = Math.max(state.getTemporaryMarkerPosition(n), state.getMarkerPosition(n, state.getCurrentPlayer()));
+            boolean canMoveOnTrack = !state.trackComplete(n) && (markerPosition + numberCounts.get(n) - 1) < params.maxValue(n);
             retValue = canMoveOnTrack && retValue;
         }
         // then each number must either have a marker already, or a spare marker is available
