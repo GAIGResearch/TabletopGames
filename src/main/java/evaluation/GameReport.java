@@ -7,6 +7,7 @@ import core.ParameterFactory;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
+import games.terraformingmars.stats.TMStatsVisualiser;
 import players.PlayerFactory;
 import players.simple.RandomPlayer;
 import utilities.FileStatsLogger;
@@ -181,6 +182,9 @@ public class GameReport {
         }
         if (statsLogger != null)
             statsLogger.processDataAndFinish();
+
+        // Visualise
+        new TMStatsVisualiser(gameTrackers);
     }
 }
 

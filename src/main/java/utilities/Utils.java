@@ -9,6 +9,7 @@ import org.json.simple.parser.ParseException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.*;
@@ -332,6 +333,28 @@ public abstract class Utils {
                     argClasses[i] = boolean.class;
                 } else if (arg instanceof String) {
                     argClasses[i] = String.class;
+                } else if (arg instanceof JSONArray) {
+                    Object first = ((JSONArray) arg).get(0);
+                    if (first instanceof JSONObject) {
+                        // we have recursion
+                        // we need to instantiate this, and then stick it in
+                        first = loadClassFromJSON((JSONObject) first);
+                        T[] arr = (T[]) Array.newInstance(first.getClass(),((JSONArray) arg).size());
+                        argClasses[i] = arr.getClass();
+                        for (int j = 0; j < ((JSONArray) arg).size(); j++) {
+                            arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
+                        }
+                        arg = arr;
+                    } else if (first instanceof Long) {
+                        argClasses[i] = int[].class;
+                        args[i] = ((Long) first).intValue();
+                    } else if (first instanceof Double) {
+                        argClasses[i] = double[].class;
+                    } else if (first instanceof Boolean) {
+                        argClasses[i] = boolean[].class;
+                    } else if (first instanceof String) {
+                        argClasses[i] = String[].class;
+                    }
                 } else {
                     throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
                 }
