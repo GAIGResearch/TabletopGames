@@ -206,7 +206,6 @@ public class TMStatsVisualiser extends JFrame {
             }
         });
         pane.setPreferredSize(new Dimension(maxWidth + 20, maxHeight + 20));
-        barPlot3.setScrollPane(pane);
         getContentPane().add(pane, c);
 
         // Frame properties
