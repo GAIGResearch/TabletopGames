@@ -184,7 +184,15 @@ public class GameReport {
             statsLogger.processDataAndFinish();
 
         // Visualise
-        new TMStatsVisualiser(gameTrackers);
+        TMStatsVisualiser vis = new TMStatsVisualiser(gameTrackers);
+        while(true) {
+            vis.repaint();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
 

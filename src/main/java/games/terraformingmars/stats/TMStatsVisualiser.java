@@ -186,6 +186,7 @@ public class TMStatsVisualiser extends JFrame {
         c.gridy++;
         BarPlot barPlot3 = new BarPlot(winRate, "Win Rate", "Card");
         barPlot3.setxTicks(xTicks);
+        barPlot3.setOrderData(true);
         barPlot3.setDrawYvalue(false);
         getContentPane().add(barPlot3, c);
 
@@ -200,4 +201,5 @@ public class TMStatsVisualiser extends JFrame {
 //        setExtendedState(JFrame.MAXIMIZED_BOTH);
         repaint();
     }
+
 }

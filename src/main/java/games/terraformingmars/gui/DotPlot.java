@@ -13,7 +13,7 @@ public class DotPlot extends JComponent {
     final Dimension size;
     final static int padding = 2;
     final static int maxWidth = 300, maxHeight = 20, dotRadius = maxHeight/2;
-    final static Color dotColor = new Color(64, 230, 248, 81);
+    final static Color dotColor = new Color(22, 230, 250, 40);
 
     public DotPlot(double[] data, int minY, int maxY) {
         this.data = data;
