@@ -198,6 +198,7 @@ public class TMStatsVisualiser extends JFrame {
         pane.getViewport().setOpaque(false);
         pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
         pane.getHorizontalScrollBar().setOpaque(false);
+        pane.getHorizontalScrollBar().setUnitIncrement(16);
         pane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
             @Override
             protected void configureScrollBarColors() {

@@ -154,8 +154,6 @@ public class BarPlot extends JComponent {
             if (useXTickImages) {
                 g2.drawImage(dataAll.get(i).xTickImage, rect.x + (int)(barWidth / 2) - fontSize / 2, maxHeight + padding * 3, fontSize, fontSize, null);
             }
-
-            // TODO: scroll if plot too big to fit in window
         }
 
         // Draw outline
@@ -178,7 +176,7 @@ public class BarPlot extends JComponent {
 
             g2.setColor(fontColor);
             g2.drawString(str, rect.x+padding, rect.y + hoverOverHeight/2);
-            System.out.println(str);
+//            System.out.println(str);
         }
     }
 
