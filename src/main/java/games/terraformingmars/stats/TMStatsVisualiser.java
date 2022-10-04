@@ -4,10 +4,7 @@ import core.interfaces.IGameListener;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
-import games.terraformingmars.gui.BarPlot;
-import games.terraformingmars.gui.DotPlot;
-import games.terraformingmars.gui.TMBoardHeatMap;
-import games.terraformingmars.gui.TMBoardView;
+import games.terraformingmars.gui.*;
 import gui.TiledImage;
 import utilities.ImageIO;
 import utilities.SummaryLogger;
@@ -225,6 +222,28 @@ public class TMStatsVisualiser extends JFrame {
         });
         pane.setPreferredSize(new Dimension(maxWidth + 20, maxHeight + 20));
         getContentPane().add(pane, c);
+        c.gridheight = 1;
+
+        // Points distribution
+        c.gridx = 2;
+        c.gridy = 0;
+        stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.MAP_COVERAGE.name());
+        getContentPane().add(new JLabel("Points distribution:"), c);
+
+        c.gridy = 1;
+        c.gridheight = 9;
+        double[] data = new double[] {
+            playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.N_POINTS_TR.name()).mean(),
+            playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.N_POINTS_MILESTONES.name()).mean(),
+            playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.N_POINTS_AWARDS.name()).mean(),
+            playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.N_POINTS_CARDS.name()).mean(),
+            playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.N_POINTS_BOARD.name()).mean(),
+        };
+        String[] dataLabels = new String[] {
+                "TR", "Milestones", "Awards", "Cards", "Board"
+        };
+        PiePlot pp = new PiePlot(data, dataLabels);
+        getContentPane().add(pp, c);
         c.gridheight = 1;
 
         // Frame properties
