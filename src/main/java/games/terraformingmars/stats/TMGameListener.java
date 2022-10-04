@@ -14,6 +14,7 @@ import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.Award;
 import games.terraformingmars.components.Milestone;
 import games.terraformingmars.components.TMCard;
+import games.terraformingmars.components.TMMapTile;
 import utilities.Pair;
 
 import java.util.*;
@@ -147,6 +148,23 @@ public class TMGameListener implements IGameListener {
                 }
             }
             return tilesPlaced*1.0 / nTiles;
+        }),
+        MAP_TILES((s,a) -> {
+            String ss = "";
+            for (int i = 0; i < s.getBoard().getHeight(); i++) {
+                for (int j = 0; j < s.getBoard().getWidth(); j++) {
+                    if (s.getBoard().getElement(j, i) != null) {
+                        if (s.getBoard().getElement(j, i).getTilePlaced() != null) {
+                            ss += "(" + j + "-" + i + "),";
+                        }
+                    }
+                }
+            }
+            for (TMMapTile map: s.getExtraTiles()) {
+                ss += map.getComponentName() + ",";
+            }
+            ss += "]";
+            return ss.replace(",]","");
         });
 //        RESOURCE_PROD((s,a) -> {
 //            String ss = "[";

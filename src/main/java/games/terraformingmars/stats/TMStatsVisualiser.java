@@ -1,10 +1,13 @@
 package games.terraformingmars.stats;
 
 import core.interfaces.IGameListener;
-import core.interfaces.IStatisticLogger;
+import games.terraformingmars.TMForwardModel;
+import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.gui.BarPlot;
 import games.terraformingmars.gui.DotPlot;
+import games.terraformingmars.gui.TMBoardHeatMap;
+import games.terraformingmars.gui.TMBoardView;
 import gui.TiledImage;
 import utilities.ImageIO;
 import utilities.SummaryLogger;
@@ -71,36 +74,36 @@ public class TMStatsVisualiser extends JFrame {
         // Generation average
         TAGStatSummary stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.GENERATION.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Generation:", stats.mean(), stats.sd())), c);
-        c.gridy++;
+        c.gridy = 1;
         getContentPane().add(new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30), c);
 
         // Global parameters
-        c.gridy++;
+        c.gridy = 2;
         getContentPane().add(Box.createRigidArea(new Dimension(0, 20)), c);
-        c.gridy++;
+        c.gridy = 3;
         getContentPane().add(new JLabel("Generation global parameter was completed:"), c);
-        c.gridy++;
+        c.gridy = 4;
         stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.GP_OCEAN_COMPLETE_GEN.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Ocean:", stats.mean(), stats.sd())), c);
-        c.gridy++;
+        c.gridy = 5;
         getContentPane().add(new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30), c);
-        c.gridy++;
+        c.gridy = 6;
         stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.GP_OXYGEN_COMPLETE_GEN.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Oxygen:", stats.mean(), stats.sd())), c);
-        c.gridy++;
+        c.gridy = 7;
         getContentPane().add(new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30), c);
-        c.gridy++;
+        c.gridy = 8;
         stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.GP_TEMPERATURE_COMPLETE_GEN.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Temperature:", stats.mean(), stats.sd())), c);
-        c.gridy++;
+        c.gridy = 9;
         getContentPane().add(new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30), c);
 
         // Resource averages
-        c.gridy++;
+        c.gridy = 10;
         getContentPane().add(Box.createRigidArea(new Dimension(0, 20)), c);
-        c.gridy++;
+        c.gridy = 11;
         getContentPane().add(new JLabel("Resources at the end:"), c);
-        c.gridy++;
+        c.gridy = 12;
         double[] resources = new double[] {
                 playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.MEGACREDIT.name()).mean(),
                 playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.STEEL.name()).mean(),
@@ -120,10 +123,13 @@ public class TMStatsVisualiser extends JFrame {
         BarPlot barPlot1 = new BarPlot(resources, "Amount", "Resource");
         barPlot1.setxTicks(new String[]{"MC", "Steel", "Titanium", "Plant", "Energy", "Heat"});
         barPlot1.setxTickImages(xTickImages);
+        c.gridheight = 7;
         getContentPane().add(barPlot1, c);
-        c.gridy++;
+        c.gridheight = 1;
+        c.gridy = 19;
         getContentPane().add(new JLabel("Resource production at the end:"), c);
-        c.gridy++;
+        c.gridy = 20;
+        c.gridheight = 7;
         resources = new double[] {
                 playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.MEGACREDIT_PROD.name()).mean(),
                 playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.STEEL_PROD.name()).mean(),
@@ -136,45 +142,55 @@ public class TMStatsVisualiser extends JFrame {
         barPlot2.setxTicks(new String[]{"MC", "Steel", "Titanium", "Plant", "Energy", "Heat"});
         barPlot2.setxTickImages(xTickImages);
         getContentPane().add(barPlot2, c);
+        c.gridheight = 1;
 
         // Map coverage
-        c.gridx++;
+        c.gridx = 1;
         c.gridy = 0;
         stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.MAP_COVERAGE.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g%% +/- %6.2g", "Map coverage:", stats.mean()*100, stats.sd()*100)), c);
-        // TODO heatmap
-        c.gridy++;
+
+        // Heatmap (percentage of times the tile was placed out of all games played)
+        c.gridy = 1;
+        c.gridheight = 9;
+        TMGameState gs = new TMGameState(new TMGameParameters(0), 2);
+        TMForwardModel fm = new TMForwardModel();
+        fm.setup(gs);
+        TAGStringStatSummary stats2 = gameLogger.summaryStringData().get(TMGameListener.TMGameAttributes.MAP_TILES.name());
+        TMBoardHeatMap view = new TMBoardHeatMap(gs, stats2, stats.n());
+        getContentPane().add(view, c);
+        c.gridheight = 1;
 
         // Score gap
-        c.gridy++;
+        c.gridy = 10;
         getContentPane().add(Box.createRigidArea(new Dimension(0, 20)), c);
-        c.gridy++;
+        c.gridy = 11;
         stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.POINT_DIFF.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Score gap:", stats.mean(), stats.sd())), c);
 
         // Card stats
-        c.gridy++;
+        c.gridy = 12;
         getContentPane().add(Box.createRigidArea(new Dimension(0, 20)), c);
-        c.gridy++;
+        c.gridy = 13;
         stats = playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.CARDS.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Cards left in hand:", stats.mean(), stats.sd())), c);
-        c.gridy++;
+        c.gridy = 14;
         stats = playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.N_CARDS_PLAYED.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Cards played:", stats.mean(), stats.sd())), c);
-        c.gridy++;
+        c.gridy = 15;
         stats = playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.N_CARDS_PLAYED_AUTOMATED.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Cards played (automated):", stats.mean(), stats.sd())), c);
-        c.gridy++;
+        c.gridy = 16;
         stats = playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.N_CARDS_PLAYED_ACTIVE.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Cards played (active):", stats.mean(), stats.sd())), c);
-        c.gridy++;
+        c.gridy = 17;
         stats = playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.N_CARDS_PLAYED_EVENT.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Cards played (event):", stats.mean(), stats.sd())), c);
 
         // Detailed card win rate plot
-        c.gridy++;
+        c.gridy = 18;
         getContentPane().add(Box.createRigidArea(new Dimension(0, 20)), c);
-        c.gridy++;
+        c.gridy = 19;
         getContentPane().add(new JLabel("Cards win rate:"), c);
         TAGStringStatSummary summary = playerAggregateLogger.summaryStringData().get(TMPlayerListener.TMPlayerAttributes.CARDS_PLAYED_WIN.name());
         TAGStringStatSummary summary2 = playerAggregateLogger.summaryStringData().get(TMPlayerListener.TMPlayerAttributes.CARDS_PLAYED.name());
@@ -187,7 +203,8 @@ public class TMStatsVisualiser extends JFrame {
             xTicks[i] = card;
             i++;
         }
-        c.gridy++;
+        c.gridy = 20;
+        c.gridheight = 7;
         BarPlot barPlot3 = new BarPlot(winRate, "Win Rate", "Card");
         barPlot3.setxTicks(xTicks);
         barPlot3.setOrderData(true);
@@ -208,6 +225,7 @@ public class TMStatsVisualiser extends JFrame {
         });
         pane.setPreferredSize(new Dimension(maxWidth + 20, maxHeight + 20));
         getContentPane().add(pane, c);
+        c.gridheight = 1;
 
         // Frame properties
         setSize(new Dimension(1200, 800));
