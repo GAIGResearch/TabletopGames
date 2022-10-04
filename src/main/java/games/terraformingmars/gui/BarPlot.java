@@ -26,7 +26,7 @@ public class BarPlot extends JComponent {
 
     final Dimension size;
     final static int padding = 1;
-    final static int maxWidth = 300, maxHeight = 150;
+    public final static int maxWidth = 300, maxHeight = 150;
     final static Color barColor = new Color(174, 241, 124, 190);
     final static int hoverOverWidth = 100, hoverOverHeight = 20;
     final static Color hoverOverColor = new Color(0,0,0,150);
@@ -49,10 +49,10 @@ public class BarPlot extends JComponent {
             if (data[i] < minY) minY = data[i];
             dataAll.add(new Data(data[i], xTicks[i], xTickImages[i]));
         }
-        barWidth = Math.max(maxWidth / data.length,5);
+        barWidth = Math.max(maxWidth / data.length, 10);
         if (maxY * unitHeight > maxHeight || stretchY) unitHeight = maxHeight / maxY;
 
-        size = new Dimension(maxWidth + fontSize + padding*2, maxHeight + fontSize*2 + padding*5);
+        size = new Dimension((int)(barWidth * data.length) + fontSize + padding*2, maxHeight + fontSize*2 + padding*5);
         bars = new HashMap<>();
 
         addMouseListener(new MouseAdapter() {
@@ -68,7 +68,8 @@ public class BarPlot extends JComponent {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     // Left click, highlight cell
                     for (Rectangle r: bars.keySet()) {
-                        if (r != null && r.contains(e.getPoint())) {
+                        if (r == null) continue;
+                        if (r.contains(e.getPoint())) {
                             highlight = r;
                             break;
                         }
@@ -159,7 +160,7 @@ public class BarPlot extends JComponent {
 
         // Draw outline
         g2.setColor(fontColor);
-        g2.drawRect(fontSize, 0, maxWidth, maxHeight + padding*2);
+        g2.drawRect(fontSize, 0, (int)(barWidth * data.length), maxHeight + padding*2);
 
         // Click on data bar to show tick x label and data value text bigger (to see card win rate info)
         if (highlight != null) {
@@ -168,14 +169,16 @@ public class BarPlot extends JComponent {
             int textWidth = fm.stringWidth(str) + padding*2;
 
             g2.setColor(hoverOverColor);
-            Rectangle rect = new Rectangle(highlight.x, highlight.y, Math.max(hoverOverWidth,textWidth), hoverOverHeight);
-            if (rect.x+rect.width > maxWidth) rect.x = maxWidth-rect.width;
+            Rectangle adjusted = highlight;
+
+            Rectangle rect = new Rectangle(adjusted.x, adjusted.y, Math.max(hoverOverWidth,textWidth), hoverOverHeight);
+            if (rect.x+rect.width > size.width) rect.x = size.width-rect.width;
             if (rect.y+rect.height > maxHeight) rect.y = maxHeight - rect.height;
             g2.fillRect(rect.x, rect.y, rect.width, rect.height);
 
             g2.setColor(fontColor);
             g2.drawString(str, rect.x+padding, rect.y + hoverOverHeight/2);
-//            System.out.println(str);
+            System.out.println(str);
         }
     }
 

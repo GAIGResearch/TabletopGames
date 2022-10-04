@@ -12,12 +12,16 @@ import utilities.TAGStatSummary;
 import utilities.TAGStringStatSummary;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+
+import static games.terraformingmars.gui.BarPlot.maxHeight;
+import static games.terraformingmars.gui.BarPlot.maxWidth;
 
 public class TMStatsVisualiser extends JFrame {
     SummaryLogger[] playerLoggers;
@@ -188,7 +192,22 @@ public class TMStatsVisualiser extends JFrame {
         barPlot3.setxTicks(xTicks);
         barPlot3.setOrderData(true);
         barPlot3.setDrawYvalue(false);
-        getContentPane().add(barPlot3, c);
+        JScrollPane pane = new JScrollPane(barPlot3);
+        pane.setOpaque(false);
+        pane.setBorder(null);
+        pane.getViewport().setOpaque(false);
+        pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        pane.getHorizontalScrollBar().setOpaque(false);
+        pane.getHorizontalScrollBar().setUI(new BasicScrollBarUI() {
+            @Override
+            protected void configureScrollBarColors() {
+                this.thumbColor = Color.white;
+                this.trackColor = Color.black;
+            }
+        });
+        pane.setPreferredSize(new Dimension(maxWidth + 20, maxHeight + 20));
+        barPlot3.setScrollPane(pane);
+        getContentPane().add(pane, c);
 
         // Frame properties
         setSize(new Dimension(1200, 800));
