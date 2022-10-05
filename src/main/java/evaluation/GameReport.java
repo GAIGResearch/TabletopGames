@@ -31,6 +31,7 @@ public class GameReport {
      * @param args
      */
     public static void main(String[] args) {
+        long timeStart = System.currentTimeMillis();
         List<String> argsList = Arrays.asList(args);
         if (argsList.contains("--help") || argsList.contains("-h") || argsList.size() == 0) {
             System.out.println(
@@ -183,16 +184,21 @@ public class GameReport {
         if (statsLogger != null)
             statsLogger.processDataAndFinish();
 
+        long elapsed = System.currentTimeMillis() - timeStart;
+        double elapsedSec = elapsed / 1000.0;
+        double elapsedMin = elapsedSec / 60.0;
+        System.out.println("Time elapsed: " + elapsed + " milliseconds, " + elapsedSec + " seconds, " + elapsedMin + " min.");
+
         // Visualise
-        TMStatsVisualiser vis = new TMStatsVisualiser(gameTrackers);
-        while(true) {
-            vis.repaint();
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+//        TMStatsVisualiser vis = new TMStatsVisualiser(gameTrackers);
+//        while(true) {
+//            vis.repaint();
+//            try {
+//                Thread.sleep(100);
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
     }
 }
 
