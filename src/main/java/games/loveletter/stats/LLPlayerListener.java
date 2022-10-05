@@ -90,7 +90,6 @@ public class LLPlayerListener implements IGameListener {
                 losingCards = ("Princess");
                 winningCards  = ("Princess (opp)");
 
-                //current player wins (played by 1-current OR check id from history)
             }else if(drawPileEmpty)
             {
                 if(action instanceof GuardAction) {
@@ -124,7 +123,6 @@ public class LLPlayerListener implements IGameListener {
                 }
             }else if(action instanceof BaronAction)
             {
-                int opponentID = ((BaronAction) action).getOpponentID();
                 if(playAndWin)
                 {
                     winningCards  = ("Baron");
@@ -136,7 +134,6 @@ public class LLPlayerListener implements IGameListener {
                 }
 
             }else if(action instanceof GuardAction) {
-                int opponentID = ((GuardAction) action).getOpponentID();
                 winningCards  = ("Guard");
                 losingCards  = ("Guard (opp)");
             }else if(action instanceof PrinceAction)
@@ -149,7 +146,6 @@ public class LLPlayerListener implements IGameListener {
                     winningCards = "Prince (opp)";
                 }
             }else{
-                //System.out.println("248: " + (llgs.getHistoryAsText().get(llgs.getHistoryAsText().size()-1)));
                 winningCards  = (llgs.getHistoryAsText().get(llgs.getHistoryAsText().size()-1));
             }
         }
@@ -219,51 +215,7 @@ public class LLPlayerListener implements IGameListener {
                 ss.append("]");
             }
             return ss.toString().replace(",]", "");
-        }),
-
-//        WINNER_ON_EMPTY_DRAW_DECK ((s, p) -> {
-//            StringBuilder ss = new StringBuilder();
-//            if(s.getPlayerResults()[p] == Utils.GameResult.WIN && s.getDrawPile().getSize() == 0) {
-//                Deck<LoveLetterCard> inHand = s.getPlayerHandCards().get(p);
-//
-//                ss.append(inHand.get(0).cardType);
-//            }
-//            return ss.toString().replace(",]", "");
-//        }),
-//
-//        LOSER_ON_EMPTY_DRAW_DECK ((s, p) -> {
-//            StringBuilder ss = new StringBuilder();
-//            if(s.getPlayerResults()[p] == Utils.GameResult.LOSE && s.getDrawPile().getSize() == 0) {
-//                Deck<LoveLetterCard> inHand = s.getPlayerHandCards().get(p);
-//                if(inHand.getSize() > 0)
-//                {
-//                    ss.append(inHand.get(0).cardType);
-//                }
-//            }
-//            return ss.toString().replace(",]", "");
-//        }),
-//
-//        WINNER_HAND((s, p) -> {
-//            StringBuilder ss = new StringBuilder();
-//            if(s.getPlayerResults()[p] == Utils.GameResult.WIN) {
-//
-//                Deck<LoveLetterCard> played = s.getPlayerDiscardCards().get(p);
-//                if(played.getSize() == 0)
-//                {
-//                    int a = 0;
-//                }
-//
-////                LoveLetterCard cardPlayed = played.get(played.getSize()-1);
-////
-////                LoveLetterCard cardInHand = s.getPlayerHandCards().get(p).get(0);
-////
-////                ss.append(cardInHand.cardType).append("-").append(cardPlayed.cardType).append(",");
-//                ss.append("]");
-//            }
-//            return ss.toString().replace(",]", "");
-//        }),
-
-        ;
+        });
 
         private final BiFunction<LoveLetterGameState, Integer, Object> lambda_sp;
 
