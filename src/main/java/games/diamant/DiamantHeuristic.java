@@ -6,6 +6,7 @@ import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import utilities.Utils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,14 +56,13 @@ public class DiamantHeuristic extends TunableParameters implements IStateHeurist
             return 1;
 
         DiamantGameState dgs = (DiamantGameState) gs;
-        List<Integer> gemsInOrder = dgs.getTreasureChests().stream()
-                .mapToInt(Counter::getValue)
+        List<Integer> gemsInOrder = Arrays.stream(dgs.treasureChests)
                 .sorted().boxed().collect(Collectors.toList());
 
         int max_ngens = gemsInOrder.get(dgs.getNPlayers()-1);
         int min_ngens = gemsInOrder.get(0);
 
-        int player_gems = dgs.treasureChests.get(playerId).getValue();
+        int player_gems = dgs.treasureChests[playerId];
         double highestExpectedScore = 139.0 / gs.getNPlayers() * 2.0;
         // 1.0 if a player has every single gem in a 2-player game; 67% of gems in a 3-player; 50% in a 4-player....
         double score = FACTOR_SCORE * player_gems / highestExpectedScore;
@@ -73,7 +73,7 @@ public class DiamantHeuristic extends TunableParameters implements IStateHeurist
 
         score += FACTOR_AHEAD * (player_gems - min_ngens) / highestExpectedScore;
 
-        if (dgs.playerInCave.get(playerId)) score += FACTOR_IN_CAVE;  // are we in the cave...for luck-pushing strategies
+        if (dgs.playerInCave[playerId]) score += FACTOR_IN_CAVE;  // are we in the cave...for luck-pushing strategies
 
         return score;
     }
