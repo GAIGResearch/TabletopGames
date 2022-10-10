@@ -118,6 +118,7 @@ class BasicTreeNode {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
                 cur = cur.expand();
+                return cur;
             } else {
                 // Move to next child given by UCT function
                 AbstractAction actionChosen = cur.ucb();
