@@ -106,9 +106,11 @@ public class SGGUI extends AbstractGUIManager {
                 JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
 
                 // Add all views to frame
+                parent.setLayout(new BorderLayout());
                 parent.add(mainGameArea, BorderLayout.CENTER);
                 parent.add(infoPanel, BorderLayout.NORTH);
                 parent.add(actionPanel, BorderLayout.SOUTH);
+                parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + 20));
             }
 
         }
