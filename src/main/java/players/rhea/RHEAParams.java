@@ -17,11 +17,11 @@ public class RHEAParams extends PlayerParameters
     public int eliteCount = 2;
     public int childCount = 10;
     public int mutationCount = 1;
-    RHEAEnums.SelectionType selectionType = RHEAEnums.SelectionType.TOURNAMENT;
+    public RHEAEnums.SelectionType selectionType = RHEAEnums.SelectionType.TOURNAMENT;
     public int tournamentSize = 4;
-    RHEAEnums.CrossoverType crossoverType = RHEAEnums.CrossoverType.UNIFORM;
+    public RHEAEnums.CrossoverType crossoverType = RHEAEnums.CrossoverType.UNIFORM;
     public boolean shiftLeft;
-    protected IStateHeuristic heuristic = AbstractGameState::getGameScore;
+    public IStateHeuristic heuristic = AbstractGameState::getGameScore;
     public boolean useMAST;
 
 
