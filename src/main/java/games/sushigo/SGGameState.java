@@ -161,8 +161,16 @@ public class SGGameState extends AbstractGameState {
         return playerFields;
     }
 
+    public Deck<SGCard> getPlayerField(int playerId) {
+        return playerFields.get(playerId);
+    }
+
     public List<Deck<SGCard>> getPlayerDecks() {
         return playerHands;
+    }
+
+    public Deck<SGCard> getPlayerDeck(int playerId) {
+        return playerHands.get(playerId);
     }
 
     @Override
