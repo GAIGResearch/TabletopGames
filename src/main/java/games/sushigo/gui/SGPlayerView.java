@@ -41,22 +41,18 @@ public class SGPlayerView extends JComponent {
 
     @Override
     protected void paintComponent(Graphics g) {
-        Rectangle r = new Rectangle(5, 100, 60, 85);
-        playerHandView.drawDeck((Graphics2D) g);
-        //playerCardView.drawDeck((Graphics2D) g);
-
-        //playerCardView.drawComponent((Graphics2D) g, new Rectangle(5, 100, 60, 85), new SGCard(SGCard.SGCardType.Maki_2, 0), true);
-
-        for (int i = 0; i < gs.getPlayerFields().get(playerId).getSize(); i++){
-            playerCardView.drawComponent((Graphics2D) g, r, gs.getPlayerFields().get(playerId).get(i), true);
-
-            r.x += offset;
+        if (gs != null) {
+            Rectangle r = new Rectangle(5, 100, 60, 85);
+            playerHandView.drawDeck((Graphics2D) g);
+            //playerCardView.drawDeck((Graphics2D) g);
+            //playerCardView.drawComponent((Graphics2D) g, new Rectangle(5, 100, 60, 85), new SGCard(SGCard.SGCardType.Maki_2, 0), true);
+            for (int i = 0; i < gs.getPlayerFields().get(playerId).getSize(); i++) {
+                playerCardView.drawComponent((Graphics2D) g, r, gs.getPlayerFields().get(playerId).get(i), true);
+                r.x += offset;
+            }
+            g.setColor(Color.black);
+            g.drawString(nPoints + " points", border + playerAreaWidth / 2 - 20, border + SGCardHeight + 10);
         }
-
-
-
-        g.setColor(Color.black);
-        g.drawString(nPoints + " points", border+playerAreaWidth/2 - 20, border + SGCardHeight+10);
     }
 
     @Override
