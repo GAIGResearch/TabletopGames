@@ -49,6 +49,8 @@ public class SingleTreeNode {
     int depth;
     // the id of the player who makes the decision at this node
     int decisionPlayer;
+    int round, turn, turnOwner;
+    boolean terminalNode;
     private final Map<AbstractAction, Integer> nValidVisits = new HashMap<>();
     // Action taken to reach this node
     // In vanilla MCTS this will likely be an action taken by some other player (not the decisionPlayer at this node)
@@ -127,6 +129,10 @@ public class SingleTreeNode {
         this.opponentModels = root.opponentModels;
         this.forwardModel = root.forwardModel;
         this.rnd = root.rnd;
+        this.round = state.getTurnOrder().getRoundCounter();
+        this.turn = state.getTurnOrder().getTurnCounter();
+        this.turnOwner = state.getTurnOrder().getTurnOwner();
+        this.terminalNode = !state.isNotTerminal();
 
         decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
         this.actionToReach = actionToReach;
@@ -302,9 +308,10 @@ public class SingleTreeNode {
     protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
         Map<String, Object> stats = new LinkedHashMap<>();
         TreeStatistics treeStats = new TreeStatistics(root);
-        stats.put("round", state.getTurnOrder().getRoundCounter());
-        stats.put("turn", state.getTurnOrder().getTurnCounter());
-        stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
+        stats.put("round", round);
+        stats.put("turn", turn);
+        stats.put("turnOwner", turnOwner);
+        stats.put("actingPlayer", decisionPlayer);
         double[] visitProportions = Arrays.stream(actionVisits()).asDoubleStream().map(d -> d / nVisits).toArray();
         stats.put("visitEntropy", entropyOf(visitProportions));
         stats.put("iterations", numIters);
@@ -873,6 +880,11 @@ public class SingleTreeNode {
                 n.root.highReward = stats.getMax();
         }
         while (n != null) {
+            if (params.discardStateAfterEachIteration) {
+                n.openLoopState = null; // releases for Garbage Collection
+                if (n.depth> 0 && !params.maintainMasterState)
+                    n.state = null;
+            }
             n.nVisits++;
             // Here we look at actionsFromOpenLoopState to see which ones were valid
             // when we passed through, and keep track of valid visits
@@ -1014,8 +1026,9 @@ public class SingleTreeNode {
      * @return
      */
     public List<SingleTreeNode> nonMatchingNodes(Predicate<SingleTreeNode> allMatch) {
-        return filterTree( n -> !allMatch.test(n));
+        return filterTree(n -> !allMatch.test(n));
     }
+
     /**
      * This returns a list of all nodes in the tree that match the specified Predicate
      *

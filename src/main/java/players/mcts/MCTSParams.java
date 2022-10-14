@@ -62,6 +62,7 @@ public class MCTSParams extends PlayerParameters {
     public boolean normaliseRewards = true;
     public boolean nodesStoreScoreDelta = true;
     public boolean maintainMasterState = false;
+    public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
     public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
     public IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
