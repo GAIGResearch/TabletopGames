@@ -118,6 +118,7 @@ class BasicTreeNode {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
                 cur = cur.expand();
+                return cur;
             } else {
                 // Move to next child given by UCT function
                 AbstractAction actionChosen = cur.ucb();
@@ -228,7 +229,7 @@ class BasicTreeNode {
         int rolloutDepth = 0; // counting from end of tree
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
-        AbstractGameState rolloutState = state;
+        AbstractGameState rolloutState = state.copy();
         if (player.params.rolloutLength > 0) {
             while (!finishRollout(rolloutState, rolloutDepth)) {
                 List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(rolloutState);
