@@ -134,6 +134,9 @@ public class MCTSParams extends PlayerParameters {
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
+        if (gatherExpertIterationData) {
+            maintainMasterState = true; // this is required!
+        }
         expertIterationFileStem = (String) getParameterValue("expIterFile");
         expertIterationStateFeatures = (String) getParameterValue("expertIterationStateFeatures");
         if (!expertIterationStateFeatures.equals(""))
