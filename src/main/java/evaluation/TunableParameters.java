@@ -121,7 +121,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             if (matchingValue.isPresent()) {
                 return (T) matchingValue.get();
             }
-            throw new AssertionError("No Enum match found for " + name + " in " + Arrays.toString(defaultValue.getClass().getEnumConstants()));
+            throw new AssertionError("No Enum match found for " + name + " [" + data + "] in " + Arrays.toString(defaultValue.getClass().getEnumConstants()));
         }
         return defaultValue;
     }

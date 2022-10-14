@@ -3,6 +3,8 @@ package games.dotsboxes;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
+import core.components.GridBoard;
+import core.components.Token;
 import core.interfaces.IStateHeuristic;
 import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
