@@ -220,7 +220,10 @@ public abstract class Utils {
     public static <T> T getArg(String[] args, String name, T defaultValue) {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
         if (raw.isPresent()) {
-            String rawString = raw.get().split("=")[1];
+            String[] temp = raw.get().split("=");
+            if (temp.length < 2)
+                throw new IllegalArgumentException("No value provided for argument " + temp[0]);
+            String rawString = temp[1];
             if (defaultValue instanceof Enum) {
                 T[] constants = (T[]) defaultValue.getClass().getEnumConstants();
                 for (T o : constants) {
