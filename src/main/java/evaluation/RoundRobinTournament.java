@@ -112,7 +112,6 @@ public class RoundRobinTournament extends AbstractTournament {
         if (listenerClasses.size() > 1 && listenerFiles.size() > 1 && listenerClasses.size() != listenerFiles.size())
             throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
 
-
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         if (!playerDirectory.equals("")) {
             agents.addAll(PlayerFactory.createPlayers(playerDirectory));
