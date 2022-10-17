@@ -107,6 +107,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("normaliseRewards", true);
         addTunableParameter("nodesStoreScoreDelta", false);
         addTunableParameter("maintainMasterState", false);
+        addTunableParameter("discardStateAfterEachIteration", true);
         addTunableParameter("advantageFunction", IActionHeuristic.nullReturn);
         addTunableParameter("omaVisits", 0);
     }
@@ -160,6 +161,7 @@ public class MCTSParams extends PlayerParameters {
         normaliseRewards = (boolean) getParameterValue("normaliseRewards");
         nodesStoreScoreDelta = (boolean) getParameterValue("nodesStoreScoreDelta");
         maintainMasterState = (boolean) getParameterValue("maintainMasterState");
+        discardStateAfterEachIteration = (boolean) getParameterValue("discardStateAfterEachIteration");
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST
                 || (biasVisits > 0 && advantageFunction == null)) {
             useMAST = true;
@@ -261,6 +263,7 @@ public class MCTSParams extends PlayerParameters {
         retValue.rolloutTermination = rolloutTermination;
         retValue.heuristic = heuristic;
         retValue.opponentHeuristic = opponentHeuristic;
+        retValue.discardStateAfterEachIteration = discardStateAfterEachIteration;
         return retValue;
     }
 
