@@ -89,10 +89,10 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file.\n" +
                             "\t               Defaults to RoundRobinReport.txt\n" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
-                            "\t                    use a different log file.\n" +
+                            "\t               use a different log file.\n" +
                             "\tstatsLog=      The file to use for logging agent-specific statistics (e.g. MCTS iterations/depth)\n" +
-                            "\t               A single line will be generated as the average for each agent, implicitly assuming they are" +
-                            "\t               all of the same type. If not supplied, then no logging will take place."
+                            "\t               A single line will be generated as the average for each agent, implicitly assuming they are\n" +
+                            "\t               all of the same type. If not supplied, then no logging will take place.\n"
             );
             return;
         }
@@ -111,7 +111,6 @@ public class RoundRobinTournament extends AbstractTournament {
 
         if (listenerClasses.size() > 1 && listenerFiles.size() > 1 && listenerClasses.size() != listenerFiles.size())
             throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
-
 
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         if (!playerDirectory.equals("")) {

@@ -15,7 +15,9 @@ public class MCTSEnums {
     }
 
     public enum SelectionPolicy {
-        ROBUST, SIMPLE
+        ROBUST, SIMPLE, TREE
+        // ROBUST uses the most visited, SIMPLE the highest scoring
+        // TREE uses the node tree policy (for EXP3 or Regret Matching)
     }
 
     public enum TreePolicy {
