@@ -85,6 +85,7 @@ public class Individual implements Comparable {
         length = 0;
         int fmCalls = 0;
         double delta = 0;
+        double previousScore = 0;
 
         for (int i = 0; i < startIndex; i++) {
             double score;
@@ -95,8 +96,8 @@ public class Individual implements Comparable {
             }
             if (Double.isNaN(score))
                 throw new AssertionError("Illegal heuristic value - should be a number");
-
-            delta += Math.pow(discountFactor, i) * score;
+            delta += Math.pow(discountFactor, i) * (score - previousScore);
+            previousScore = score;
         }
 
         for (int i = startIndex; i < actions.length; i++){
@@ -133,7 +134,8 @@ public class Individual implements Comparable {
                     }
                     if (Double.isNaN(score))
                         throw new AssertionError("Illegal heuristic value - should be a number");
-                    delta += Math.pow(discountFactor, i) * score;
+                    delta += Math.pow(discountFactor, i) * (score - previousScore);
+                    previousScore = score;
                 } else {
                     i--;
                 }
