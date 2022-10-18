@@ -239,7 +239,10 @@ class BasicTreeNode {
             }
         }
         // Evaluate final state and return normalised score
-        return player.params.getHeuristic().evaluateState(rolloutState, player.getPlayerID());
+        double value = player.params.getHeuristic().evaluateState(rolloutState, player.getPlayerID());
+        if (Double.isNaN(value))
+            throw new AssertionError("Illegal heuristic value - should be a number");
+        return value;
     }
 
     /**
