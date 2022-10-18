@@ -13,7 +13,6 @@ import games.diamant.components.ActionsPlayed;
 import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -25,15 +24,21 @@ public class DiamantForwardModel extends AbstractForwardModel {
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;
         Random r = new Random(dgs.getGameParameters().getRandomSeed());
-        int players = firstState.getNPlayers();
 
-        dgs.hands = new int[players];
-        dgs.treasureChests = new int[players];
-        Arrays.fill(dgs.playerInCave, true);
+        dgs.hands = new ArrayList<>();
+        dgs.treasureChests = new ArrayList<>();
 
-        dgs.mainDeck = new Deck<>("MainDeck", HIDDEN_TO_ALL);
-        dgs.discardDeck = new Deck<>("DiscardDeck", VISIBLE_TO_ALL);
-        dgs.path = new Deck<>("Path", VISIBLE_TO_ALL);
+        for (int i = 0; i < dgs.getNPlayers(); i++) {
+            String counter_hand_name = "CounterHand" + i;
+            String counter_chest_name = "CounterChest" + i;
+            dgs.hands.add(new Counter(0, 0, 1000, counter_hand_name));
+            dgs.treasureChests.add(new Counter(0, 0, 1000, counter_chest_name));
+            dgs.playerInCave.add(true);
+        }
+
+        dgs.mainDeck = new Deck("MainDeck", HIDDEN_TO_ALL);
+        dgs.discardDeck = new Deck("DiscardDeck", VISIBLE_TO_ALL);
+        dgs.path = new Deck("Path", VISIBLE_TO_ALL);
         dgs.actionsPlayed = new ActionsPlayed();
 
         createCards(dgs);
@@ -131,10 +136,10 @@ public class DiamantForwardModel extends AbstractForwardModel {
 
         for (int p = 0; p < dgs.getNPlayers(); p++) {
             if (dgs.actionsPlayed.get(p) instanceof ExitFromCave) {
-                dgs.hands[p] += gems_to_players;                             // increment hand gems
-                dgs.treasureChests[p] += dgs.hands[p];   // hand gems to chest
-                dgs.hands[p] = 0;                                 // hand gems <- 0
-                dgs.playerInCave[p] = false;                                      // Set to not in Cave
+                dgs.hands.get(p).increment(gems_to_players);                             // increment hand gems
+                dgs.treasureChests.get(p).increment(dgs.hands.get(p).getValue());   // hand gems to chest
+                dgs.hands.get(p).setValue(0);                                 // hand gems <- 0
+                dgs.playerInCave.set(p, false);                                       // Set to not in Cave
             }
         }
     }
@@ -168,7 +173,8 @@ public class DiamantForwardModel extends AbstractForwardModel {
             dgs.nHazardSnakesOnPath = 0;
 
             // All the player will participate in next cave
-            Arrays.fill(dgs.playerInCave, true);
+            for (int p = 0; p < dgs.getNPlayers(); p++)
+                dgs.playerInCave.set(p, true);
 
             drawAndPlayCard(dgs);
         }
@@ -184,7 +190,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
         List<Integer> bestPlayers = new ArrayList<>();
 
         for (int p = 0; p < dgs.getNPlayers(); p++) {
-            int nGems = dgs.treasureChests[p];
+            int nGems = dgs.treasureChests.get(p).getValue();
             if (nGems > maxGems) {
                 bestPlayers.clear();
                 bestPlayers.add(p);
@@ -223,7 +229,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
         // If the player is still in the cave
-        if (dgs.playerInCave[gameState.getCurrentPlayer()]) {
+        if (dgs.playerInCave.get(gameState.getCurrentPlayer())) {
             actions.add(new ContinueInCave());
             actions.add(new ExitFromCave());
         } else
@@ -251,8 +257,8 @@ public class DiamantForwardModel extends AbstractForwardModel {
             int gems_to_path = card.getNumberOfGems() % dgs.getNPlayersInCave();
 
             for (int p = 0; p < dgs.getNPlayers(); p++)
-                if (dgs.playerInCave[p])
-                    dgs.hands[p] += gems_to_players;
+                if (dgs.playerInCave.get(p))
+                    dgs.hands.get(p).increment(gems_to_players);
 
             dgs.nGemsOnPath += gems_to_path;
         } else if (card.getCardType() == DiamantCard.DiamantCardType.Hazard) {
@@ -271,8 +277,8 @@ public class DiamantForwardModel extends AbstractForwardModel {
                     dgs.nHazardExplosionsOnPath == dp.nHazardsToDead) {
                 // All active players loose all gems on hand.
                 for (int p = 0; p < dgs.getNPlayers(); p++) {
-                    if (dgs.playerInCave[p]) {
-                        dgs.hands[p] = 0;
+                    if (dgs.playerInCave.get(p)) {
+                        dgs.hands.get(p).setValue(0);
                         dgs.recordOfPlayerActions.add(new DiamantGameState.PlayerTurnRecord(p, dgs.nCave, -1));
                     }
                 }
