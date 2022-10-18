@@ -98,7 +98,7 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (!isNotTerminal()) {
+        if (isNotTerminal()) {
             return getGameScore(playerId) / ((CantStopParameters) gameParameters).COLUMNS_TO_WIN;
         } else
             return getPlayerResults()[playerId].value;
