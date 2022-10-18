@@ -93,6 +93,8 @@ public class Individual implements Comparable {
             } else {
                 score = gameStates[i+1].getHeuristicScore(playerID);
             }
+            if (Double.isNaN(score))
+                throw new AssertionError("Illegal heuristic value - should be a number");
 
             delta += Math.pow(discountFactor, i) * score;
         }
@@ -129,6 +131,8 @@ public class Individual implements Comparable {
                     } else {
                         score = gameStates[i+1].getHeuristicScore(playerID);
                     }
+                    if (Double.isNaN(score))
+                        throw new AssertionError("Illegal heuristic value - should be a number");
                     delta += Math.pow(discountFactor, i) * score;
                 } else {
                     i--;
