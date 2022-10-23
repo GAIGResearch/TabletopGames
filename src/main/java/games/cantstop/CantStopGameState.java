@@ -64,6 +64,7 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
             dice.get(i).setValue(numbers[i]);
         }
     }
+
     public int[] getDice() {
         return dice.stream().mapToInt(Dice::getValue).toArray();
     }
@@ -72,7 +73,7 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
         return playerMarkerPositions.get(player)[number];
     }
 
-    public int getTemporaryMarkerPosition(int number)  {
+    public int getTemporaryMarkerPosition(int number) {
         return temporaryMarkerPositions.getOrDefault(number, 0);
     }
 
@@ -97,7 +98,10 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return getGameScore(playerId);
+        if (isNotTerminal()) {
+            return getGameScore(playerId) / ((CantStopParameters) gameParameters).COLUMNS_TO_WIN;
+        } else
+            return getPlayerResults()[playerId].value;
         // have not bothered to implement one.
     }
 

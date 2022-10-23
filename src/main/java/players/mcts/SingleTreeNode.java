@@ -832,6 +832,8 @@ public class SingleTreeNode {
 
         for (int i = 0; i < retValue.length; i++) {
             retValue[i] = heuristic.evaluateState(rolloutState, i) - startingValues[i];
+            if (Double.isNaN(retValue[i]))
+                throw new AssertionError("Illegal heuristic value - should be a number");
         }
         return retValue;
     }
