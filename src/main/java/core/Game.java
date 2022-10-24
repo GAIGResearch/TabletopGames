@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
+import core.interfaces.IStateHeuristic;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
 import gui.AbstractGUIManager;
@@ -12,10 +13,13 @@ import gui.GamePanel;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
+import players.heuristics.SushiGoHeuristic;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
+import players.mcts.BasicMCTSPlayer;
 import players.mcts.MCTSParams;
+import players.rhea.RHEAPlayer;
 import players.simple.RandomPlayer;
 import players.mcts.MCTSPlayer;
 import players.simple.OSLAPlayer;
@@ -904,10 +908,10 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Pandemic");
+        String gameType = Utils.getArg(args, "game", "SushiGo");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int playerCount = Utils.getArg(args, "nPlayers", 2);
-        int turnPause = Utils.getArg(args, "turnPause", 0);
+        int turnPause = Utils.getArg(args, "turnPause", 1000);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
 
         ActionController ac = new ActionController(); //null;
@@ -915,8 +919,11 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
 
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+        players.add(new BasicMCTSPlayer());
+
+        MCTSParams params = new MCTSParams();
+        params.heuristic = new SushiGoHeuristic();
+        players.add(new BasicMCTSPlayer(params));
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
