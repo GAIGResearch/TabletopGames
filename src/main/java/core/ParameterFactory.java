@@ -4,6 +4,7 @@ import evaluation.TunableParameters;
 import games.GameType;
 import games.battlelore.BattleloreGameParameters;
 import games.blackjack.BlackjackParameters;
+import games.cantstop.CantStopParameters;
 import games.catan.CatanParameters;
 import games.coltexpress.ColtExpressParameters;
 import games.connect4.Connect4GameParameters;
@@ -68,6 +69,8 @@ public class ParameterFactory {
                 return new StrategoParams(seed);
             case TerraformingMars:
                 return new TMGameParameters(seed);
+            case CantStop:
+                return new CantStopParameters(seed);
         }
         throw new AssertionError("No default Parameters specified for Game " + game);
 

@@ -22,18 +22,18 @@ import static players.PlayerConstants.*;
 import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
+import static players.mcts.MCTSEnums.SelectionPolicy.*;
 import static players.mcts.MCTSEnums.Strategies.MAST;
 import static utilities.Utils.entropyOf;
 import static utilities.Utils.noise;
 
 public class SingleTreeNode {
 
+    private final Map<AbstractAction, Integer> nValidVisits = new HashMap<>();
     // State in this node (closed loop)
     protected AbstractGameState state;
     // State in this node (open loop - this is updated by onward trajectory....be very careful about using)
     protected AbstractGameState openLoopState;
-    List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
-    Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
     // Parameters guiding the search
     protected MCTSParams params;
     protected AbstractForwardModel forwardModel;
@@ -45,20 +45,20 @@ public class SingleTreeNode {
     protected int fmCallsCount;
     protected int copyCount;
     protected int paranoidPlayer = -1;
+    // Action taken to reach this node
+    // In vanilla MCTS this will likely be an action taken by some other player (not the decisionPlayer at this node)
+    protected AbstractAction actionToReach;
+    // Number of visits to this node
+    protected int nVisits;
+    protected int rolloutActionsTaken;
+    List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
+    Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
     // Depth of this node
     int depth;
     // the id of the player who makes the decision at this node
     int decisionPlayer;
-    private final Map<AbstractAction, Integer> nValidVisits = new HashMap<>();
-    // Action taken to reach this node
-    // In vanilla MCTS this will likely be an action taken by some other player (not the decisionPlayer at this node)
-    protected AbstractAction actionToReach;
-    // The total value of all trajectories through this node (one element per player)
-    private double[] totValue;
-    private double[] totSquares;
-    // Number of visits to this node
-    protected int nVisits;
-    protected int rolloutActionsTaken;
+    int round, turn, turnOwner;
+    boolean terminalNode;
     double highReward = Double.NEGATIVE_INFINITY;
     double lowReward = Double.POSITIVE_INFINITY;
     // Root node of tree
@@ -72,6 +72,9 @@ public class SingleTreeNode {
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
     ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
+    // The total value of all trajectories through this node (one element per player)
+    private double[] totValue;
+    private double[] totSquares;
     // Total value of this node
 
 
@@ -127,6 +130,10 @@ public class SingleTreeNode {
         this.opponentModels = root.opponentModels;
         this.forwardModel = root.forwardModel;
         this.rnd = root.rnd;
+        this.round = state.getTurnOrder().getRoundCounter();
+        this.turn = state.getTurnOrder().getTurnCounter();
+        this.turnOwner = state.getTurnOrder().getTurnOwner();
+        this.terminalNode = !state.isNotTerminal();
 
         decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
         this.actionToReach = actionToReach;
@@ -302,9 +309,10 @@ public class SingleTreeNode {
     protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
         Map<String, Object> stats = new LinkedHashMap<>();
         TreeStatistics treeStats = new TreeStatistics(root);
-        stats.put("round", state.getTurnOrder().getRoundCounter());
-        stats.put("turn", state.getTurnOrder().getTurnCounter());
-        stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
+        stats.put("round", round);
+        stats.put("turn", turn);
+        stats.put("turnOwner", turnOwner);
+        stats.put("actingPlayer", decisionPlayer);
         double[] visitProportions = Arrays.stream(actionVisits()).asDoubleStream().map(d -> d / nVisits).toArray();
         stats.put("visitEntropy", entropyOf(visitProportions));
         stats.put("iterations", numIters);
@@ -422,7 +430,7 @@ public class SingleTreeNode {
                 return cur.expandNode(chosen, nextState);
             } else {
                 // Move to next child given by UCT function
-                AbstractAction chosen = cur.treePolicyAction();
+                AbstractAction chosen = cur.treePolicyAction(true);
                 if (params.information != Closed_Loop) {
                     // We do not need to copy the state, as we advance this as we descend the tree.
                     // In open loop we never re-use the state...the only purpose of storing it on the Node is
@@ -549,9 +557,9 @@ public class SingleTreeNode {
      *
      * @return - child node according to the tree policy
      */
-    protected AbstractAction treePolicyAction() {
+    protected AbstractAction treePolicyAction(boolean explore) {
 
-        if (params.opponentTreePolicy == SelfOnly && openLoopState.getCurrentPlayer() != decisionPlayer)
+        if (params.opponentTreePolicy == SelfOnly && openLoopState != null && openLoopState.getCurrentPlayer() != decisionPlayer)
             throw new AssertionError("An error has occurred. SelfOnly should only call uct when we are moving.");
 
         List<AbstractAction> availableActions = actionsToConsider(actionsFromOpenLoopState, 0);
@@ -571,7 +579,7 @@ public class SingleTreeNode {
                 case EXP3:
                 case RegretMatching:
                     // These construct a distribution over possible actions and then sample from it
-                    actionChosen = sampleFromDistribution(availableActions);
+                    actionChosen = sampleFromDistribution(availableActions, explore ? params.exploreEpsilon : 0.0);
                     break;
                 default:
                     throw new AssertionError("Unknown treepolicy: " + params.treePolicy);
@@ -749,7 +757,7 @@ public class SingleTreeNode {
         return Math.max(0.0, regret);
     }
 
-    private AbstractAction sampleFromDistribution(List<AbstractAction> availableActions) {
+    private AbstractAction sampleFromDistribution(List<AbstractAction> availableActions, double explore) {
         // first we get a value for each of them
         Function<AbstractAction, Double> valueFn;
         switch (params.treePolicy) {
@@ -768,9 +776,9 @@ public class SingleTreeNode {
         // then we normalise to a pdf
         actionToValueMap = Utils.normaliseMap(actionToValueMap);
         // we then add on the exploration bonus
-        double exploreBonus = params.exploreEpsilon / actionToValueMap.size();
+        double exploreBonus = explore / actionToValueMap.size();
         Map<AbstractAction, Double> probabilityOfSelection = actionToValueMap.entrySet().stream().collect(
-                toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - params.exploreEpsilon) + exploreBonus));
+                toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - explore) + exploreBonus));
 
         // then we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
         double cdfSample = rnd.nextDouble();
@@ -824,6 +832,8 @@ public class SingleTreeNode {
 
         for (int i = 0; i < retValue.length; i++) {
             retValue[i] = heuristic.evaluateState(rolloutState, i) - startingValues[i];
+            if (Double.isNaN(retValue[i]))
+                throw new AssertionError("Illegal heuristic value - should be a number");
         }
         return retValue;
     }
@@ -873,6 +883,11 @@ public class SingleTreeNode {
                 n.root.highReward = stats.getMax();
         }
         while (n != null) {
+            if (params.discardStateAfterEachIteration) {
+                n.openLoopState = null; // releases for Garbage Collection
+                if (n.depth > 0 && !params.maintainMasterState)
+                    n.state = null;
+            }
             n.nVisits++;
             // Here we look at actionsFromOpenLoopState to see which ones were valid
             // when we passed through, and keep track of valid visits
@@ -943,25 +958,28 @@ public class SingleTreeNode {
         MCTSEnums.SelectionPolicy policy = params.selectionPolicy;
         // check to see if all nodes have the same number of visits
         // if they do, then we use average score instead
-        if (params.selectionPolicy == MCTSEnums.SelectionPolicy.ROBUST &&
+        if (params.selectionPolicy == ROBUST &&
                 Arrays.stream(actionVisits()).boxed().collect(toSet()).size() == 1) {
-            policy = MCTSEnums.SelectionPolicy.SIMPLE;
+            policy = SIMPLE;
         }
 
+        if (params.selectionPolicy == TREE) {
+            bestAction = treePolicyAction(false);
+        } else {
+            for (AbstractAction action : children.keySet()) {
+                if (children.get(action) != null) {
+                    double childValue = actionVisits(action); // if ROBUST
+                    if (policy == SIMPLE)
+                        childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.epsilon);
 
-        for (AbstractAction action : children.keySet()) {
-            if (children.get(action) != null) {
-                double childValue = actionVisits(action); // if ROBUST
-                if (policy == MCTSEnums.SelectionPolicy.SIMPLE)
-                    childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.epsilon);
+                    // Apply small noise to break ties randomly
+                    childValue = noise(childValue, params.epsilon, rnd.nextDouble());
 
-                // Apply small noise to break ties randomly
-                childValue = noise(childValue, params.epsilon, rnd.nextDouble());
-
-                // Save best value (highest visit count)
-                if (childValue > bestValue) {
-                    bestValue = childValue;
-                    bestAction = action;
+                    // Save best value (highest visit count)
+                    if (childValue > bestValue) {
+                        bestValue = childValue;
+                        bestAction = action;
+                    }
                 }
             }
         }
@@ -1014,8 +1032,9 @@ public class SingleTreeNode {
      * @return
      */
     public List<SingleTreeNode> nonMatchingNodes(Predicate<SingleTreeNode> allMatch) {
-        return filterTree( n -> !allMatch.test(n));
+        return filterTree(n -> !allMatch.test(n));
     }
+
     /**
      * This returns a list of all nodes in the tree that match the specified Predicate
      *

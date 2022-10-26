@@ -7,6 +7,9 @@ import games.battlelore.gui.BattleloreGUI;
 import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.gui.BlackjackGUIManager;
+import games.cantstop.CantStopForwardModel;
+import games.cantstop.CantStopGameState;
+import games.cantstop.gui.CantStopGUIManager;
 import games.catan.CatanForwardModel;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
@@ -275,10 +278,10 @@ public enum GameType {
                 add(SimultaneousActionSelection);
             }}),
     Catan(3, 4,
-                    new ArrayList<Category>() {{
-        add(Strategy);
-        add(Cards);
-    }},
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Cards);
+            }},
             new ArrayList<Mechanic>() {{
                 add(Memory);
                 add(GridMovement);
@@ -290,19 +293,26 @@ public enum GameType {
             new ArrayList<Mechanic>() {{ add(Drafting); add(EndGameBonus); add(HandManagement); add(HexagonGrid);
                 add(Income); add(SetCollection); add(TakeThat); add(TilePlacement); add(ProgressiveTurnOrder);
                 add(VariablePlayerPowers); add(EngineBuilding); add(TableauBuilding);}}),
-        Stratego(2, 2,
-        new ArrayList<Category>() {{
-        add(Strategy);
-        add(Bluffing);
-        add(Deduction);
-        add(Abstract);
-        }},
-        new ArrayList<Mechanic>() {{
-        add(Memory);
-        add(GridMovement);
-        }});
-
-
+    Stratego(2, 2,
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Bluffing);
+                add(Deduction);
+                add(Abstract);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(Memory);
+                add(GridMovement);
+            }}),
+    CantStop(2, 4,
+            new ArrayList<Category>() {{
+                add(Dice);
+                add(Abstract);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(PushYourLuck);
+            }}
+    );
 
     /**
      * Converts a given string to the enum type corresponding to the game.
@@ -353,6 +363,8 @@ public enum GameType {
                 return SushiGo;
             case "stratego":
                 return Stratego;
+            case "cantstop":
+                return CantStop;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -369,9 +381,8 @@ public enum GameType {
      */
     public Game createGameInstance(int nPlayers, long seed, AbstractParameters params) {
         if (nPlayers < minPlayers || nPlayers > maxPlayers) {
-            System.out.println("Unsupported number of players: " + nPlayers
+            throw new IllegalArgumentException("Unsupported number of players: " + nPlayers
                     + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
-            return null;
         }
 
         if (params == null) {
@@ -461,6 +472,10 @@ public enum GameType {
                 forwardModel = new StrategoForwardModel();
                 gameState = new StrategoGameState(params, nPlayers);
                 break;
+            case CantStop:
+                forwardModel = new CantStopForwardModel();
+                gameState = new CantStopGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -549,6 +564,9 @@ public enum GameType {
             case Stratego:
                 gui = new StrategoGUIManager(parent, game, ac);
                 break;
+            case CantStop:
+                gui = new CantStopGUIManager(parent, game, ac);
+                break;
         }
 
         return gui;
@@ -569,6 +587,7 @@ public enum GameType {
         Animals,
         Cards,
         ComicBook,
+        Dice,
         Humour,
         Medical,
         Deduction,

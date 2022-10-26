@@ -3,13 +3,13 @@ package players.rhea;
 public class RHEAEnums
 {
 
-    enum SelectionType
+    public enum SelectionType
     {
         RANK,
         TOURNAMENT
     }
 
-    enum CrossoverType
+    public enum CrossoverType
     {
         NONE,
         UNIFORM,

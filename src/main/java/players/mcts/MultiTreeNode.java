@@ -152,7 +152,7 @@ public class MultiTreeNode extends SingleTreeNode {
                     advance(currentState, chosen);
                     // we will create the new node once we get back to a point when it is this player's action again
                 } else {
-                    chosen = currentNode.treePolicyAction();
+                    chosen = currentNode.treePolicyAction(true);
                     lastAction[currentActor] = chosen;
                     if (debug)
                         System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);

@@ -62,9 +62,10 @@ public class MCTSParams extends PlayerParameters {
     public boolean normaliseRewards = true;
     public boolean nodesStoreScoreDelta = true;
     public boolean maintainMasterState = false;
+    public boolean discardStateAfterEachIteration = true;  // default will remove reference to OpenLoopState in backup(). Saves memory!
     public MCTSEnums.RolloutTermination rolloutTermination = DEFAULT;
-    private IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
-    private IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
+    public IStateHeuristic heuristic = AbstractGameState::getHeuristicScore;
+    public IStateHeuristic opponentHeuristic = AbstractGameState::getHeuristicScore;
 
     public MCTSParams() {
         this(System.currentTimeMillis());
@@ -106,6 +107,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("normaliseRewards", true);
         addTunableParameter("nodesStoreScoreDelta", false);
         addTunableParameter("maintainMasterState", false);
+        addTunableParameter("discardStateAfterEachIteration", true);
         addTunableParameter("advantageFunction", IActionHeuristic.nullReturn);
         addTunableParameter("omaVisits", 0);
     }
@@ -133,6 +135,9 @@ public class MCTSParams extends PlayerParameters {
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
+        if (gatherExpertIterationData) {
+            maintainMasterState = true; // this is required!
+        }
         expertIterationFileStem = (String) getParameterValue("expIterFile");
         expertIterationStateFeatures = (String) getParameterValue("expertIterationStateFeatures");
         if (!expertIterationStateFeatures.equals(""))
@@ -156,6 +161,7 @@ public class MCTSParams extends PlayerParameters {
         normaliseRewards = (boolean) getParameterValue("normaliseRewards");
         nodesStoreScoreDelta = (boolean) getParameterValue("nodesStoreScoreDelta");
         maintainMasterState = (boolean) getParameterValue("maintainMasterState");
+        discardStateAfterEachIteration = (boolean) getParameterValue("discardStateAfterEachIteration");
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST
                 || (biasVisits > 0 && advantageFunction == null)) {
             useMAST = true;
@@ -257,6 +263,7 @@ public class MCTSParams extends PlayerParameters {
         retValue.rolloutTermination = rolloutTermination;
         retValue.heuristic = heuristic;
         retValue.opponentHeuristic = opponentHeuristic;
+        retValue.discardStateAfterEachIteration = discardStateAfterEachIteration;
         return retValue;
     }
 

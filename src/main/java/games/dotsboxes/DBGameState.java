@@ -3,6 +3,8 @@ package games.dotsboxes;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
+import core.components.GridBoard;
+import core.components.Token;
 import core.interfaces.IStateHeuristic;
 import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
@@ -11,7 +13,7 @@ import java.util.*;
 
 public class DBGameState extends AbstractGameState {
 
-    IStateHeuristic heuristic = new DotsAndBoxesHeuristic();
+    IStateHeuristic heuristic;
 
     // List of all edges possible
     HashSet<DBEdge> edges;
@@ -53,11 +55,15 @@ public class DBGameState extends AbstractGameState {
         dbgs.nCellsPerPlayer = nCellsPerPlayer.clone();
         dbgs.cellToOwnerMap = (HashMap<DBCell, Integer>) cellToOwnerMap.clone();
         dbgs.edgeToOwnerMap = (HashMap<DBEdge, Integer>) edgeToOwnerMap.clone();
+        dbgs.heuristic = heuristic;
         return dbgs;
     }
 
     @Override
     protected double _getHeuristicScore(int playerId) {
+        if (heuristic == null) { // lazy initialization
+            heuristic = new DotsAndBoxesHeuristic();
+        }
         return heuristic.evaluateState(this, playerId);
     }
 

@@ -13,6 +13,7 @@ import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.ActionController;
+import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
 import players.simple.RandomPlayer;
@@ -539,7 +540,7 @@ public class Game {
         // Either ask player which action to use or, in case no actions are available, report the updated observation
         AbstractAction action = null;
         if (observedActions.size() > 0) {
-            if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
+            if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer || currentPlayer instanceof HumanConsolePlayer) || observedActions.get(0) instanceof DoNothing)) {
                 // Can only do 1 action, so do it.
                 action = observedActions.get(0);
                 currentPlayer.registerUpdatedObservation(observation);

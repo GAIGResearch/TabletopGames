@@ -115,4 +115,10 @@ public class PlayCardAction extends AbstractAction {
     public String getString(AbstractGameState gameState) {
         return "Play " + cardType;
     }
+
+
+    @Override
+    public String toString() {
+        return "Play " + cardType;
+    }
 }

@@ -15,6 +15,7 @@ import utilities.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -22,7 +23,7 @@ import static utilities.Utils.getArg;
 
 public class GameReport {
 
-    public static boolean debug = false;
+    public static boolean debug = true;
 
     /**
      * The idea here is that we get statistics from the the decisions of a particular agent in
@@ -170,8 +171,9 @@ public class GameReport {
                     game.run();
                     if (debug) {
                         System.out.printf("Game %4d finished at %tT%n", i, System.currentTimeMillis());
-                        System.out.printf("\tResult: %20s%n", game.getPlayers().stream().map(Objects::toString).collect(Collectors.joining(" | ")));
+                        System.out.printf("\tAgent: %20s%n", game.getPlayers().stream().map(Objects::toString).collect(Collectors.joining(" | ")));
                         System.out.printf("\tResult: %20s%n", Arrays.stream(game.getGameState().getPlayerResults()).map(Objects::toString).collect(Collectors.joining(" | ")));
+                        System.out.printf("\tScore: %20s%n", IntStream.range(0, game.getPlayers().size()).mapToObj(p -> String.valueOf(game.getGameState().getGameScore(p))).collect(Collectors.joining(" | ")));
                     }
                 }
             }

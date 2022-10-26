@@ -28,7 +28,7 @@ public class Individual implements Comparable {
         this.heuristic = heuristic;
 
         // Rollout with random actions and assign fitness value
-        rollout(gs, fm, 0, L, playerID);  // TODO: cheating, init should also count FM calls
+        rollout(gs, fm, 0, playerID);
     }
 
     // Copy constructor
@@ -45,6 +45,7 @@ public class Individual implements Comparable {
 
         value = I.value;
         gen = I.gen;
+        heuristic = I.heuristic;
     }
 
     /**
@@ -61,14 +62,12 @@ public class Individual implements Comparable {
             // Find index from which to mutate individual, random in range of currently valid length
             int startIndex = 0;
             if (length > 1) {
-                gen.nextInt(length - 1);
+                startIndex = gen.nextInt(length - 1);
             }
-            // Last index is maximum intended individual length
-            int endIndex = actions.length;
-            // Game state to start from
+
             AbstractGameState gs = gameStates[startIndex];
             // Perform rollout and return number of FM calls taken
-            return rollout(gs, fm, startIndex, endIndex, playerID);
+            return rollout(gs, fm, startIndex, playerID);
         }
         return 0;
     }
@@ -79,14 +78,15 @@ public class Individual implements Comparable {
      * @param gs - root game state from which to start rollout
      * @param fm - forward model
      * @param startIndex - index in individual from which to start rollout
-     * @param endIndex - index in individual where to end rollout
      * @param playerID - ID of player, used in state evaluation
      * @return - number of calls to the FM.next() function
      */
-    private int rollout(AbstractGameState gs, AbstractForwardModel fm, int startIndex, int endIndex, int playerID) {
+    private int rollout(AbstractGameState gs, AbstractForwardModel fm, int startIndex, int playerID) {
         length = 0;
         int fmCalls = 0;
         double delta = 0;
+        double previousScore = 0;
+
         for (int i = 0; i < startIndex; i++) {
             double score;
             if (this.heuristic != null){
@@ -94,10 +94,13 @@ public class Individual implements Comparable {
             } else {
                 score = gameStates[i+1].getHeuristicScore(playerID);
             }
-
-            delta += Math.pow(discountFactor, i) * score;
+            if (Double.isNaN(score))
+                throw new AssertionError("Illegal heuristic value - should be a number");
+            delta += Math.pow(discountFactor, i) * (score - previousScore);
+            previousScore = score;
         }
-        for (int i = startIndex; i < endIndex; i++){
+
+        for (int i = startIndex; i < actions.length; i++){
             // Rolls from chosen index to the end, randomly changing actions and game states
             // Length of individual is updated depending on if it reaches a terminal game state
             if (gs.isNotTerminal()) {
@@ -129,7 +132,10 @@ public class Individual implements Comparable {
                     } else {
                         score = gameStates[i+1].getHeuristicScore(playerID);
                     }
-                    delta += Math.pow(discountFactor, i) * score;
+                    if (Double.isNaN(score))
+                        throw new AssertionError("Illegal heuristic value - should be a number");
+                    delta += Math.pow(discountFactor, i) * (score - previousScore);
+                    previousScore = score;
                 } else {
                     i--;
                 }
@@ -139,7 +145,7 @@ public class Individual implements Comparable {
                 break;
             }
         }
-//        this.value = gs.getScore(playerID);
+
         this.value = delta;
         return fmCalls;
     }

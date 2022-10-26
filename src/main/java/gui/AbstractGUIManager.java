@@ -60,8 +60,7 @@ public abstract class AbstractGUIManager {
      * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
-    }
+    protected abstract void _update(AbstractPlayer player, AbstractGameState gameState);
 
     /**
      * Updates which action buttons should be visible to the players, and which should not.
