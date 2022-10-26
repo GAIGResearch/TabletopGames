@@ -175,6 +175,20 @@ public class GameReport {
                     }
                 }
             }
+
+            // Visualise data for this game, if visualiser available
+            StatsVisualiser vis = StatsVisualiser.getVisualiserForGame(gameType, gameTrackers);
+            if (vis != null) {
+                while (true) {
+                    vis.repaint();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        break;
+//                        throw new RuntimeException(e);
+                    }
+                }
+            }
         }
 
         // Once all games are complete, let the gameTracker know
@@ -184,21 +198,12 @@ public class GameReport {
         if (statsLogger != null)
             statsLogger.processDataAndFinish();
 
+        // How much time elapsed?
         long elapsed = System.currentTimeMillis() - timeStart;
         double elapsedSec = elapsed / 1000.0;
         double elapsedMin = elapsedSec / 60.0;
         System.out.println("Time elapsed: " + elapsed + " milliseconds, " + elapsedSec + " seconds, " + elapsedMin + " min.");
 
-        // Visualise
-//        TMStatsVisualiser vis = new TMStatsVisualiser(gameTrackers);
-//        while(true) {
-//            vis.repaint();
-//            try {
-//                Thread.sleep(100);
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
     }
 }
 

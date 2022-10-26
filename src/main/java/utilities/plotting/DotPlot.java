@@ -1,9 +1,7 @@
-package games.terraformingmars.gui;
+package utilities.plotting;
 
 import javax.swing.*;
 import java.awt.*;
-
-import static games.terraformingmars.stats.TMStatsVisualiser.*;
 
 public class DotPlot extends JComponent {
     double[] data;
@@ -11,9 +9,10 @@ public class DotPlot extends JComponent {
     int xTickWidth;
 
     final Dimension size;
-    final static int padding = 2;
-    final static int maxWidth = 300, maxHeight = 20, dotRadius = maxHeight/2;
-    final static Color dotColor = new Color(22, 230, 250, 40);
+    int padding = 2;
+    int maxWidth = 300, maxHeight = 20, dotRadius = maxHeight/2;
+    Color dotColor = new Color(22, 230, 250, 40);
+    Color outlineColor = Color.white;
 
     public DotPlot(double[] data, int minY, int maxY) {
         this.data = data;
@@ -47,9 +46,33 @@ public class DotPlot extends JComponent {
         }
 
         // Draw outline
-        g2.setColor(fontColor);
+        g2.setColor(outlineColor);
         g2.drawRect(0, 0, maxWidth + padding*2, maxHeight);
 
+    }
+
+    public void setPadding(int padding) {
+        this.padding = padding;
+    }
+
+    public void setMaxWidth(int maxWidth) {
+        this.maxWidth = maxWidth;
+    }
+
+    public void setMaxHeight(int maxHeight) {
+        this.maxHeight = maxHeight;
+    }
+
+    public void setDotRadius(int dotRadius) {
+        this.dotRadius = dotRadius;
+    }
+
+    public void setDotColor(Color dotColor) {
+        this.dotColor = dotColor;
+    }
+
+    public void setOutlineColor(Color outlineColor) {
+        this.outlineColor = outlineColor;
     }
 
     @Override

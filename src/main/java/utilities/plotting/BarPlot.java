@@ -1,4 +1,4 @@
-package games.terraformingmars.gui;
+package utilities.plotting;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -8,8 +8,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.List;
-
-import static games.terraformingmars.stats.TMStatsVisualiser.*;
 
 public class BarPlot extends JComponent {
     double[] data;
@@ -25,19 +23,25 @@ public class BarPlot extends JComponent {
     boolean stretchY = true, orderData, reverseOrder = true;
 
     final Dimension size;
-    final static int padding = 1;
-    public final static int maxWidth = 300, maxHeight = 150;
-    final static Color barColor = new Color(174, 241, 124, 190);
-    final static int hoverOverWidth = 100, hoverOverHeight = 20;
-    final static Color hoverOverColor = new Color(0,0,0,150);
+    int padding = 1;
+    int maxWidth = 300, maxHeight = 150;
+    Color barColor = new Color(174, 241, 124, 190);
+    int hoverOverWidth = 100, hoverOverHeight = 20;
+    Color hoverOverColor = new Color(0,0,0,150);
+    int fontSize;
+    Font font;
+    Color fontColor;
 
     HashMap<Rectangle, Integer> bars; // map from location on screen to idx in data array
     Rectangle highlight;
 
-    public BarPlot(double[] data, String yLabel, String xLabel) {
+    public BarPlot(double[] data, String yLabel, String xLabel, int fontSize, Font font, Color fontColor) {
         this.data = data;
         this.yLabel = yLabel;
         this.xLabel = xLabel;
+        this.fontSize = fontSize;
+        this.font = font;
+        this.fontColor = fontColor;
         dataAll = new ArrayList<>();
         xTicks = new String[data.length];
         xTickImages = new Image[data.length];
@@ -109,11 +113,53 @@ public class BarPlot extends JComponent {
         this.orderData = orderData;
     }
 
+    public void setUnitHeight(double unitHeight) {
+        this.unitHeight = unitHeight;
+    }
+
+    public void setStretchY(boolean stretchY) {
+        this.stretchY = stretchY;
+    }
+
+    public void setReverseOrder(boolean reverseOrder) {
+        this.reverseOrder = reverseOrder;
+    }
+
+    public void setPadding(int padding) {
+        this.padding = padding;
+    }
+
+    public void setBarColor(Color barColor) {
+        this.barColor = barColor;
+    }
+
+    public void setHoverOverWidth(int hoverOverWidth) {
+        this.hoverOverWidth = hoverOverWidth;
+    }
+
+    public void setHoverOverHeight(int hoverOverHeight) {
+        this.hoverOverHeight = hoverOverHeight;
+    }
+
+    public void setHoverOverColor(Color hoverOverColor) {
+        this.hoverOverColor = hoverOverColor;
+    }
+
+    public void setMaxHeight(int maxHeight) {
+        this.maxHeight = maxHeight;
+    }
+
+    public void setMaxWidth(int maxWidth) {
+        this.maxWidth = maxWidth;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        g2.setFont(defaultFontSmall);
+        if (font != null) {
+            g2.setFont(font);
+        }
         FontMetrics fm = g2.getFontMetrics();
 
         // Order data if required (card win rates should be ordered)

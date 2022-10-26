@@ -1,15 +1,8 @@
-package games.terraformingmars.gui;
+package utilities.plotting;
 
-import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 
 import static games.terraformingmars.stats.TMStatsVisualiser.*;
 
@@ -20,7 +13,7 @@ public class PiePlot extends JComponent {
 
     final Dimension size;
     final static int padding = 1;
-    public final static int maxWidth = 200, maxHeight = 200;
+    int maxWidth = 200, maxHeight = 200;
     final static Color[] sliceColors = new Color[] {
             new Color(124, 241, 179, 190),
             new Color(124, 227, 241, 190),
@@ -40,6 +33,14 @@ public class PiePlot extends JComponent {
         }
 
         size = new Dimension(maxWidth, maxHeight);
+    }
+
+    public void setMaxWidth(int maxWidth) {
+        this.maxWidth = maxWidth;
+    }
+
+    public void setMaxHeight(int maxHeight) {
+        this.maxHeight = maxHeight;
     }
 
     @Override

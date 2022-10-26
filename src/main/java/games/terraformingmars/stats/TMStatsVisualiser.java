@@ -1,6 +1,7 @@
 package games.terraformingmars.stats;
 
 import core.interfaces.IGameListener;
+import evaluation.StatsVisualiser;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
@@ -10,6 +11,9 @@ import utilities.ImageIO;
 import utilities.SummaryLogger;
 import utilities.TAGStatSummary;
 import utilities.TAGStringStatSummary;
+import utilities.plotting.BarPlot;
+import utilities.plotting.DotPlot;
+import utilities.plotting.PiePlot;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -20,10 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static games.terraformingmars.gui.BarPlot.maxHeight;
-import static games.terraformingmars.gui.BarPlot.maxWidth;
-
-public class TMStatsVisualiser extends JFrame {
+public class TMStatsVisualiser extends StatsVisualiser {
     SummaryLogger[] playerLoggers;
     SummaryLogger playerAggregateLogger;
     SummaryLogger gameLogger;
@@ -31,12 +32,7 @@ public class TMStatsVisualiser extends JFrame {
     public static int fontSize = 16;
     public static Font defaultFont = new Font("Prototype", Font.BOLD, fontSize);
     public static Font defaultFontSmall = new Font("Prototype", Font.BOLD, fontSize-5);
-    public static Font defaultFontLarge = new Font("Prototype", Font.BOLD, fontSize+5);
     public static Color fontColor = Color.white;
-    static Color bgColor = Color.black;
-    static Color grayColor = Color.gray;
-    static Color lightGrayColor = Color.lightGray;
-    static Color darkGrayColor = Color.darkGray;
 
     public TMStatsVisualiser(List<IGameListener> listeners) {
         for (IGameListener list: listeners) {
@@ -72,7 +68,9 @@ public class TMStatsVisualiser extends JFrame {
         TAGStatSummary stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.GENERATION.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Generation:", stats.mean(), stats.sd())), c);
         c.gridy = 1;
-        getContentPane().add(new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30), c);
+        DotPlot dotPlot1 = new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30);
+        setDefaultDotPlotProperties(dotPlot1);
+        getContentPane().add(dotPlot1, c);
 
         // Global parameters
         c.gridy = 2;
@@ -83,17 +81,23 @@ public class TMStatsVisualiser extends JFrame {
         stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.GP_OCEAN_COMPLETE_GEN.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Ocean:", stats.mean(), stats.sd())), c);
         c.gridy = 5;
-        getContentPane().add(new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30), c);
+        DotPlot dotPlot2 = new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30);
+        setDefaultDotPlotProperties(dotPlot2);
+        getContentPane().add(dotPlot2, c);
         c.gridy = 6;
         stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.GP_OXYGEN_COMPLETE_GEN.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Oxygen:", stats.mean(), stats.sd())), c);
         c.gridy = 7;
-        getContentPane().add(new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30), c);
+        DotPlot dotPlot3 = new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30);
+        setDefaultDotPlotProperties(dotPlot3);
+        getContentPane().add(dotPlot3, c);
         c.gridy = 8;
         stats = gameLogger.summary().get(TMGameListener.TMGameAttributes.GP_TEMPERATURE_COMPLETE_GEN.name());
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", "Temperature:", stats.mean(), stats.sd())), c);
         c.gridy = 9;
-        getContentPane().add(new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30), c);
+        DotPlot dotPlot4 = new DotPlot(stats.getElements().toArray(new Double[0]), 0, 30);
+        setDefaultDotPlotProperties(dotPlot4);
+        getContentPane().add(dotPlot4, c);
 
         // Resource averages
         c.gridy = 10;
@@ -117,9 +121,10 @@ public class TMStatsVisualiser extends JFrame {
                 ImageIO.GetInstance().getImage("data/terraformingmars/images/resources/power.png"),
                 ImageIO.GetInstance().getImage("data/terraformingmars/images/resources/heat.png"),
         };
-        BarPlot barPlot1 = new BarPlot(resources, "Amount", "Resource");
+        BarPlot barPlot1 = new BarPlot(resources, "Amount", "Resource", fontSize, defaultFontSmall, fontColor);
         barPlot1.setxTicks(new String[]{"MC", "Steel", "Titanium", "Plant", "Energy", "Heat"});
         barPlot1.setxTickImages(xTickImages);
+        setDefaultBarPlotProperties(barPlot1);
         c.gridheight = 7;
         getContentPane().add(barPlot1, c);
         c.gridheight = 1;
@@ -135,9 +140,10 @@ public class TMStatsVisualiser extends JFrame {
                 playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.ENERGY_PROD.name()).mean(),
                 playerAggregateLogger.summary().get(TMPlayerListener.TMPlayerAttributes.HEAT_PROD.name()).mean(),
         };
-        BarPlot barPlot2 = new BarPlot(resources, "Amount", "Resource");
+        BarPlot barPlot2 = new BarPlot(resources, "Amount", "Resource", fontSize, defaultFontSmall, fontColor);
         barPlot2.setxTicks(new String[]{"MC", "Steel", "Titanium", "Plant", "Energy", "Heat"});
         barPlot2.setxTickImages(xTickImages);
+        setDefaultBarPlotProperties(barPlot2);
         getContentPane().add(barPlot2, c);
         c.gridheight = 1;
 
@@ -202,8 +208,9 @@ public class TMStatsVisualiser extends JFrame {
         }
         c.gridy = 20;
         c.gridheight = 7;
-        BarPlot barPlot3 = new BarPlot(winRate, "Win Rate", "Card");
+        BarPlot barPlot3 = new BarPlot(winRate, "Win Rate", "Card", fontSize, defaultFontSmall, fontColor);
         barPlot3.setxTicks(xTicks);
+        setDefaultBarPlotProperties(barPlot3);
         barPlot3.setOrderData(true);
         barPlot3.setDrawYvalue(false);
         JScrollPane pane = new JScrollPane(barPlot3);
@@ -220,7 +227,7 @@ public class TMStatsVisualiser extends JFrame {
                 this.trackColor = Color.black;
             }
         });
-        pane.setPreferredSize(new Dimension(maxWidth + 20, maxHeight + 20));
+        pane.setPreferredSize(new Dimension(320, 170));
         getContentPane().add(pane, c);
         c.gridheight = 1;
 
@@ -243,19 +250,38 @@ public class TMStatsVisualiser extends JFrame {
                 "TR", "Milestones", "Awards", "Cards", "Board"
         };
         PiePlot pp = new PiePlot(data, dataLabels);
+        setDefaultPiePlotProperties(pp);
         getContentPane().add(pp, c);
         c.gridheight = 1;
 
-        // Frame properties
-        setSize(new Dimension(1200, 800));
-        setPreferredSize(new Dimension(1200, 800));
-        setMinimumSize(new Dimension(1200, 800));
-        revalidate();
-        pack();
-        this.setVisible(true);
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-//        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        repaint();
+        super.setFrameProperties(new Dimension(1200, 800));
+    }
+
+    private void setDefaultBarPlotProperties(BarPlot barPlot) {
+        barPlot.setUnitHeight(20);
+        barPlot.setPadding(1);
+        barPlot.setMaxWidth(300);
+        barPlot.setMaxHeight(150);
+        barPlot.setHoverOverWidth(100);
+        barPlot.setHoverOverHeight(20);
+        barPlot.setBarColor(new Color(174, 241, 124, 190));
+        barPlot.setHoverOverColor(new Color(0,0,0,150));
+        barPlot.setStretchY(true);
+        barPlot.setReverseOrder(true);
+        barPlot.setOrderData(false);
+    }
+
+    private void setDefaultDotPlotProperties(DotPlot dotPlot) {
+        dotPlot.setDotColor(new Color(22, 230, 250, 40));
+        dotPlot.setOutlineColor(fontColor);
+        dotPlot.setMaxWidth(300);
+        dotPlot.setMaxHeight(20);
+        dotPlot.setPadding(2);
+    }
+
+    private void setDefaultPiePlotProperties(PiePlot piePlot) {
+        piePlot.setMaxWidth(200);
+        piePlot.setMaxHeight(200);
     }
 
 }
