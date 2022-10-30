@@ -89,7 +89,7 @@ public class SimpleSVMLearner extends AbstractLearner {
 
 
     @Override
-    public boolean writeToFile(String file) {
+    public void writeToFile(String file) {
         try {
             svm.svm_save_model(file, model);
         } catch (IOException e) {
@@ -97,7 +97,6 @@ public class SimpleSVMLearner extends AbstractLearner {
             throw new AssertionError("Error writing SVM model");
         }
 
-        return true;
     }
 
     @Override

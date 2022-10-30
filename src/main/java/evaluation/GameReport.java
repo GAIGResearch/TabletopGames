@@ -8,21 +8,18 @@ import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
 import players.PlayerFactory;
-import players.simple.RandomPlayer;
-import utilities.FileStatsLogger;
 import utilities.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.getArg;
 
 public class GameReport {
 
-    public static boolean debug = true;
+    public static boolean debug = false;
 
     /**
      * The idea here is that we get statistics from the the decisions of a particular agent in
@@ -119,7 +116,7 @@ public class GameReport {
             gameTrackers.add(gameTracker);
         }
 
-        IStatisticLogger statsLogger = IStatisticLogger.createLogger(loggerClass, statsLog);
+            IStatisticLogger statsLogger = "".equals(statsLog) ? null : IStatisticLogger.createLogger(loggerClass, statsLog);
 
         // Then iterate over the Game Types
         for (int gameIndex = 0; gameIndex < games.size(); gameIndex++) {

@@ -4,7 +4,7 @@ public interface ILearner {
 
     void learnFrom(String... files);
 
-    boolean writeToFile(String file);
+    void writeToFile(String file);
 
     String name();
 
