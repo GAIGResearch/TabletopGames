@@ -16,6 +16,7 @@ public class DBParameters extends TunableParameters {
         super(seed);
         addTunableParameter("gridWidth", 7, Arrays.asList(5, 7, 11, 15, 19));
         addTunableParameter("gridHeight", 5, Arrays.asList(5, 7, 11, 15, 19));
+        _reset();
     }
 
     @Override

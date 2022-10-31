@@ -4,7 +4,7 @@ import java.util.*;
 
 /* Implementation of a generic Graph using generic edges */
 public class Graph<N extends Copiable, E extends Copiable> {
-    private Map<N, List<Edge<N, E>>> map;
+    private final Map<N, List<Edge<N, E>>> map;
 
     public Graph(){
         map = new HashMap<>();
@@ -75,7 +75,7 @@ public class Graph<N extends Copiable, E extends Copiable> {
         Graph<N, E> copy = new Graph<>();
         for (Map.Entry<N, List<Edge<N, E>>> entry : map.entrySet()) {
             List<Edge<N, E>> edgeList = new ArrayList<>();
-            for (Edge edge: entry.getValue()){
+            for (Edge<N, E> edge: entry.getValue()){
                 edgeList.add(edge.copy());
             }
             copy.map.put((N) entry.getKey().copy(), edgeList);
@@ -83,5 +83,33 @@ public class Graph<N extends Copiable, E extends Copiable> {
         return copy;
     }
 
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Graph) {
+            Graph<N, E> o = (Graph<N, E>) other;
+            if (o.map.size() == ((Graph<?, ?>) other).map.size()) {
+                for (N key : map.keySet()) {
+                    List<Edge<N, E>> edges = map.get(key);
+                    List<Edge<N, E>> otherEdges = o.map.get(key);
+                    if (edges != null && otherEdges != null && edges.size() == otherEdges.size()) {
+                        if (!edges.equals(otherEdges)) return false;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 0;
+        for (Map.Entry<N, List<Edge<N, E>>> entry : map.entrySet()) {
+            result = result * 31 + entry.hashCode();
+        }
+        return result;
+    }
 }
 

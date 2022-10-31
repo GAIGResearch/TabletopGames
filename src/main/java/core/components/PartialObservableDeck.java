@@ -16,7 +16,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
     protected boolean[] deckVisibility;
 
     // Visibility of each component in the deck, order corresponds to order of elements in the deck;
-    protected ArrayList<boolean[]> elementVisibility = new ArrayList<>();
+    protected List<boolean[]> elementVisibility = new ArrayList<>();
 
     public boolean getVisibilityForPlayer(int elementIdx, int playerID) {
         return elementVisibility.get(elementIdx)[playerID];
@@ -37,6 +37,10 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     public PartialObservableDeck(String id, int nPlayers) {
         this(id, -1, new boolean[nPlayers]);
+    }
+
+    public PartialObservableDeck(String id, int ownerID, VisibilityMode visibilityMode) {
+        super(id, ownerID, visibilityMode);
     }
 
     public PartialObservableDeck(String id, int ownerID, int nPlayers) {
@@ -255,7 +259,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
 
     @Override
     public void shuffle(Random rnd) {
-        Pair<ArrayList<T>, ArrayList<boolean[]>> shuffled = shuffleLists(components, elementVisibility, rnd);
+        Pair<List<T>, List<boolean[]>> shuffled = shuffleLists(components, elementVisibility, rnd);
         components = shuffled.a;
         elementVisibility = shuffled.b;
     }
@@ -268,9 +272,9 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
      * @param rnd   - random number generator to be used in shuffling.
      * @return - both lists shuffled, keeping the mapping from component to visibility at the same index.
      */
-    private Pair<ArrayList<T>, ArrayList<boolean[]>> shuffleLists(ArrayList<T> comps, ArrayList<boolean[]> vis, Random rnd) {
-        ArrayList<T> tmp_components = new ArrayList<>();
-        ArrayList<boolean[]> tmp_visibility = new ArrayList<>();
+    private Pair<List<T>, List<boolean[]>> shuffleLists(List<T> comps, List<boolean[]> vis, Random rnd) {
+        List<T> tmp_components = new ArrayList<>();
+        List<boolean[]> tmp_visibility = new ArrayList<>();
 
         List<Integer> indexList = new ArrayList<>();
         for (int i = 0; i < comps.size(); i++)
@@ -303,7 +307,7 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
                 visibility.add(b);
             }
         }
-        Pair<ArrayList<T>, ArrayList<boolean[]>> shuffled = shuffleLists(visibleComponents, visibility, rnd);
+        Pair<List<T>, List<boolean[]>> shuffled = shuffleLists(visibleComponents, visibility, rnd);
 
         int n = 0;
         for (int i = 0; i < components.size(); i++) {

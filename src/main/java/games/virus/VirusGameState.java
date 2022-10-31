@@ -11,10 +11,7 @@ import games.virus.cards.*;
 import games.virus.components.VirusBody;
 import games.virus.components.VirusOrgan;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 
 public class VirusGameState extends AbstractGameState implements IPrintable {
@@ -90,7 +87,6 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof VirusGameState)) return false;
-        if (!super.equals(o)) return false;
         VirusGameState that = (VirusGameState) o;
         return Objects.equals(playerBodies, that.playerBodies) &&
                 Objects.equals(playerDecks, that.playerDecks) &&
@@ -100,7 +96,9 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), playerBodies, playerDecks, drawDeck, discardDeck);
+        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase);
+        result = 31 * result + Arrays.hashCode(playerResults);
+        return result * 31 + Objects.hash(playerBodies, playerDecks, drawDeck, discardDeck);
     }
 
     public Deck<VirusCard> getDiscardDeck() {
@@ -119,6 +117,19 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
         return playerBodies;
     }
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(gameParameters.hashCode()).append("|");
+        sb.append(turnOrder.hashCode()).append("|");
+        sb.append(gameStatus.hashCode()).append("|");
+        sb.append(gamePhase.hashCode()).append("|");
+        sb.append(Arrays.hashCode(playerResults)).append("|*|");
+        sb.append(playerBodies.hashCode()).append("|");
+        sb.append(playerDecks.hashCode()).append("|");
+        sb.append(drawDeck.hashCode()).append("|");
+        sb.append(discardDeck.hashCode()).append("|");
+        return sb.toString();
+    }
     @Override
     public void printToConsole() {
         int nPlayers = getNPlayers();

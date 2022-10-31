@@ -132,7 +132,14 @@ public abstract class AbstractGameState {
         return gamePhase;
     }
     public final Component getComponentById(int id) {
-        return allComponents.getComponent(id);
+        Component c = allComponents.getComponent(id);
+        if (c == null) {
+            try {
+                addAllComponents();
+                c = allComponents.getComponent(id);
+            } catch (Exception ignored) {}  // Can crash from concurrent modifications if running with GUI TODO: this is an ugly fix
+        }
+        return c;
     }
     public final Area getAllComponents() {
         addAllComponents(); // otherwise the list of allComponents is only ever updated when we copy the state!
@@ -187,6 +194,7 @@ public abstract class AbstractGameState {
             // If there is any information only available in History that could legitimately be used, then this should
             // be incorporated in the game-specific data in GameState where the correct hiding protocols can be enforced.
         }
+        // TODO: uncomment
         s.actionsInProgress = new Stack<>();
         actionsInProgress.forEach(
                 a -> s.actionsInProgress.push(a.copy())
@@ -209,7 +217,6 @@ public abstract class AbstractGameState {
     }
 
     public boolean isActionInProgress() {
-        checkActionsInProgress();
         return !actionsInProgress.empty();
     }
 

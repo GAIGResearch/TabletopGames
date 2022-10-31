@@ -102,16 +102,8 @@ public class Unit extends Component {
     @Override
     public Component copy() {
         Unit newUnit = new Unit(componentID, type, id, name, moveRange, strength, health, faction, shortName, isMelee);
-        newUnit.id = id;
-        newUnit.name = name;
-        newUnit.shortName = shortName;
-        newUnit.faction = faction;
-        newUnit.moveRange = moveRange;
-        newUnit.strength = strength;
-        newUnit.health = health;
         newUnit.canMove = canMove;
         newUnit.canAttack = canAttack;
-        newUnit.isMelee = isMelee;
         return newUnit;
     }
 
@@ -207,6 +199,6 @@ public class Unit extends Component {
 
     @Override
     public final int hashCode() {
-        return componentID;
+        return Objects.hash(componentID, id, name, shortName, faction, moveRange, strength, health, canMove, canAttack, isMelee);
     }
 }

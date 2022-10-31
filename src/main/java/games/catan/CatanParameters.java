@@ -102,6 +102,7 @@ public class CatanParameters extends AbstractParameters {
     }
 
     public enum HarborTypes {
+        NONE,
         BRICK,
         LUMBER,
         ORE,

@@ -293,7 +293,6 @@ public class SGGameState extends AbstractGameState {
 
         if (this == o) return true;
         if (!(o instanceof SGGameState)) return false;
-        if (!super.equals(o)) return false;
         SGGameState that = (SGGameState) o;
         return Objects.equals(playerHands, that.playerHands) &&
                 Objects.equals(playerFields, that.playerFields) &&
@@ -308,5 +307,46 @@ public class SGGameState extends AbstractGameState {
                 Arrays.equals(playerScoreToAdd, that.playerScoreToAdd) &&
                 Arrays.equals(playerChopsticksActivated, that.playerChopsticksActivated) &&
                 Arrays.equals(playerExtraTurns, that.playerExtraTurns);
+    }
+
+    @Override
+    public int hashCode() {
+        int retValue = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase);
+        retValue = 31 * retValue + Arrays.hashCode(playerResults);
+        retValue = 31 * retValue + Objects.hash(cardAmount, playerHands, playerFields, drawPile, discardPile, deckRotations);
+        retValue = retValue * 31 + Arrays.hashCode(playerScore);
+        retValue = retValue * 31 + Arrays.hashCode(playerScoreToAdd);
+        retValue = retValue * 31 + Arrays.hashCode(playerExtraCardPicks);
+        retValue = retValue * 31 + Arrays.hashCode(playerTempuraAmount);
+        retValue = retValue * 31 + Arrays.hashCode(playerSashimiAmount);
+        retValue = retValue * 31 + Arrays.hashCode(playerDumplingAmount);
+        retValue = retValue * 31 + Arrays.hashCode(playerWasabiAvailable);
+        retValue = retValue * 31 + Arrays.hashCode(playerChopSticksAmount);
+        retValue = retValue * 31 + Arrays.hashCode(playerChopsticksActivated);
+        retValue = retValue * 31 + Arrays.hashCode(playerExtraTurns);
+        return retValue;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(cardAmount).append("|");
+        sb.append(playerHands.hashCode()).append("|");
+        sb.append(playerFields.hashCode()).append("|");
+        sb.append(drawPile.hashCode()).append("|");
+        sb.append(discardPile.hashCode()).append("|");
+        sb.append(deckRotations).append("|*|");
+        sb.append(Arrays.hashCode(playerScore)).append("|");
+        sb.append(Arrays.hashCode(playerScoreToAdd)).append("|");
+        sb.append(Arrays.hashCode(playerExtraCardPicks)).append("|");
+        sb.append(Arrays.hashCode(playerTempuraAmount)).append("|");
+        sb.append(Arrays.hashCode(playerSashimiAmount)).append("|");
+        sb.append(Arrays.hashCode(playerDumplingAmount)).append("|");
+        sb.append(Arrays.hashCode(playerWasabiAvailable)).append("|");
+        sb.append(Arrays.hashCode(playerChopSticksAmount)).append("|");
+        sb.append(Arrays.hashCode(playerChopsticksActivated)).append("|");
+        sb.append(Arrays.hashCode(playerExtraTurns)).append("|");
+
+        return sb.toString();
     }
 }

@@ -30,6 +30,7 @@ public class PandemicHeuristic extends TunableParameters implements IStateHeuris
         addTunableParameter("FACTOR_CARDS_IN_HAND", 0.15);
         addTunableParameter("FACTOR_OUTBREAKS", -0.2);
         addTunableParameter("FACTOR_RS", 0.2);
+        _reset();
     }
 
     @Override

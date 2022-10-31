@@ -1,6 +1,7 @@
 package core;
 
 import core.interfaces.ITunableParameters;
+
 import java.util.*;
 
 public abstract class AbstractParameters {
@@ -50,11 +51,14 @@ public abstract class AbstractParameters {
         this.randomSeed = randomSeed;
     }
 
-    public void setThinkingTimeMins(long thinkingTimeMins){ this.thinkingTimeMins = thinkingTimeMins; }
+    public void setThinkingTimeMins(long thinkingTimeMins) {
+        this.thinkingTimeMins = thinkingTimeMins;
+    }
 
 
     /**
      * Retrieve total thinking time for the game, in minutes
+     *
      * @return - thinking time.
      */
     public long getThinkingTimeMins() {
@@ -63,6 +67,7 @@ public abstract class AbstractParameters {
 
     /**
      * Retrieve the number of seconds added to a player's timer after an action is taken
+     *
      * @return - action increment
      */
     public long getIncrementActionS() {
@@ -71,6 +76,7 @@ public abstract class AbstractParameters {
 
     /**
      * Retrieve the number of seconds added to a player's timer after a turn is finished
+     *
      * @return - turn increment
      */
     public long getIncrementTurnS() {
@@ -79,6 +85,7 @@ public abstract class AbstractParameters {
 
     /**
      * Retrieve the number of seconds added to a player's timer after a round is finished
+     *
      * @return - round increment
      */
     public long getIncrementRoundS() {
@@ -87,6 +94,7 @@ public abstract class AbstractParameters {
 
     /**
      * Retrieve the number of seconds added to a player's timer after a game-specific defined milestone
+     *
      * @return - milestone increment
      */
     public long getIncrementMilestoneS() {
@@ -140,16 +148,16 @@ public abstract class AbstractParameters {
         if (this == o) return true;
         if (!(o instanceof AbstractParameters)) return false;
         AbstractParameters that = (AbstractParameters) o;
-        return randomSeed == that.randomSeed &&
-                thinkingTimeMins == that.thinkingTimeMins &&
+        return thinkingTimeMins == that.thinkingTimeMins &&
                 incrementActionS == that.incrementActionS &&
                 incrementTurnS == that.incrementTurnS &&
                 incrementRoundS == that.incrementRoundS &&
                 incrementMilestoneS == that.incrementMilestoneS;
+        // equals and hashcode deliberatley excludes the random seed
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(randomSeed, thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS);
+        return Objects.hash(thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS);
     }
 }

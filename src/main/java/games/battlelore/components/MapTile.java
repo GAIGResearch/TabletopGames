@@ -3,6 +3,7 @@ package games.battlelore.components;
 import core.components.Component;
 import utilities.Utils;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MapTile extends Component {
 
@@ -128,7 +129,7 @@ public class MapTile extends Component {
 
     @Override
     public MapTile copy() {
-        ArrayList<Unit> clonedUnits = new ArrayList<Unit>();
+        ArrayList<Unit> clonedUnits = new ArrayList<>();
         for (Unit i : units) {
             clonedUnits.add((Unit)i.copy());
         }
@@ -148,6 +149,11 @@ public class MapTile extends Component {
                 && locationY == mapTile.locationY
                 && units == mapTile.units
                 && type == mapTile.type
-                && componentID == componentID;
+                && componentID == mapTile.componentID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ownerId, locationX, locationY, units, type, componentID);
     }
 }

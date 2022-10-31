@@ -16,22 +16,22 @@ public class MoneyPot extends Counter {
         limit = -1;
     }
 
-    private MoneyPot(int value, int minimum, int maximum, String name, HashMap<Integer, Integer> playerContribution,
+    private MoneyPot(int valueIdx, int minimum, int maximum, String name, HashMap<Integer, Integer> playerContribution,
                      int limit, int ID) {
-        super(value, minimum, maximum, name, ID);
+        super(null, valueIdx, minimum, maximum, name, ID);
         this.playerContribution = new HashMap<>(playerContribution);
         this.limit = limit;
     }
 
     public MoneyPot copy() {
-        MoneyPot copy = new MoneyPot(value, minimum, maximum, componentName, playerContribution,
+        MoneyPot copy = new MoneyPot(valueIdx, minimum, maximum, componentName, playerContribution,
                 limit, componentID);
         copyComponentTo(copy);
         return copy;
     }
 
     public void increment(int value, int player) {
-        this.value += value;
+        this.valueIdx += value;
 
         int contribution = value;
         if (playerContribution.containsKey(player)) {

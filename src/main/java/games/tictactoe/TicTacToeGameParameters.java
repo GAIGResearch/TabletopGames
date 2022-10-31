@@ -10,12 +10,13 @@ public class TicTacToeGameParameters extends TunableParameters {
     public int gridSize = 3;
 
     public TicTacToeGameParameters() {
-        this(System.currentTimeMillis());
+        this(0);
     }
 
     public TicTacToeGameParameters(long seed) {
         super(seed);
         addTunableParameter("gridSize", 3, Arrays.asList(3, 4, 5, 6));
+        _reset();
     }
 
     @Override
@@ -25,7 +26,7 @@ public class TicTacToeGameParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        TicTacToeGameParameters gp = new TicTacToeGameParameters(System.currentTimeMillis());
+        TicTacToeGameParameters gp = new TicTacToeGameParameters(getRandomSeed());
         gp.gridSize = gridSize;
         return gp;
     }

@@ -9,6 +9,7 @@ import org.json.simple.parser.ParseException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.*;
@@ -39,6 +40,8 @@ public abstract class Utils {
                 return Color.ORANGE;
             case "light green":
                 return Color.GREEN;
+            case "purple":
+                return new Color(143, 77, 175);
             default:
                 return null;
         }
@@ -333,6 +336,28 @@ public abstract class Utils {
                     argClasses[i] = boolean.class;
                 } else if (arg instanceof String) {
                     argClasses[i] = String.class;
+                } else if (arg instanceof JSONArray) {
+                    Object first = ((JSONArray) arg).get(0);
+                    if (first instanceof JSONObject) {
+                        // we have recursion
+                        // we need to instantiate this, and then stick it in
+                        first = loadClassFromJSON((JSONObject) first);
+                        T[] arr = (T[]) Array.newInstance(first.getClass(),((JSONArray) arg).size());
+                        argClasses[i] = arr.getClass();
+                        for (int j = 0; j < ((JSONArray) arg).size(); j++) {
+                            arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
+                        }
+                        arg = arr;
+                    } else if (first instanceof Long) {
+                        argClasses[i] = int[].class;
+                        args[i] = ((Long) first).intValue();
+                    } else if (first instanceof Double) {
+                        argClasses[i] = double[].class;
+                    } else if (first instanceof Boolean) {
+                        argClasses[i] = boolean[].class;
+                    } else if (first instanceof String) {
+                        argClasses[i] = String[].class;
+                    }
                 } else {
                     throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
                 }
@@ -351,6 +376,15 @@ public abstract class Utils {
             e.printStackTrace();
             throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
         }
+    }
+
+    public static <T extends Enum<?>> T searchEnum(Class<T> enumeration, String search) {
+        for (T each : enumeration.getEnumConstants()) {
+            if (each.name().compareToIgnoreCase(search) == 0) {
+                return each;
+            }
+        }
+        return null;
     }
 
     /**
@@ -372,7 +406,7 @@ public abstract class Utils {
             return Utils.loadClassFromJSON(rawData);
 
         } catch (FileNotFoundException e) {
-            throw new AssertionError("File not found to load IGameHeuristic : " + filename);
+            throw new AssertionError("File not found to load : " + filename);
         } catch (IOException e) {
             throw new AssertionError("Problem reading file " + filename + " : " + e);
         } catch (ParseException e) {
