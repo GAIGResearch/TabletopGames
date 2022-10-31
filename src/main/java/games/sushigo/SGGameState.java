@@ -130,7 +130,7 @@ public class SGGameState extends AbstractGameState {
         return copy;
     }
 
-    private boolean hasSeenHand(int playerId, int opponentId) {
+    public boolean hasSeenHand(int playerId, int opponentId) {
         int opponentSpacesToLeft = opponentId - playerId;
         if (opponentSpacesToLeft < 0)
             opponentSpacesToLeft = getNPlayers() + opponentSpacesToLeft;
