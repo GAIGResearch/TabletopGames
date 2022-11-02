@@ -4,12 +4,11 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
-import games.stratego.StrategoConstants;
 import games.stratego.StrategoGameState;
 import games.stratego.actions.Move;
-import games.stratego.actions.NormalMove;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Utils;
@@ -17,11 +16,9 @@ import utilities.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-public class StrategoGUIManager extends AbstractGUIManager {
+public class StrategoGUIManager extends AbstractGUIManager implements ScreenHighlight{
 
     StrategoBoardView view;
 
@@ -43,7 +40,7 @@ public class StrategoGUIManager extends AbstractGUIManager {
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Stratego", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[]{view.getHighlight()},
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{this},
                 width, defaultActionPanelHeight);
 
         parent.setLayout(new BorderLayout());
@@ -104,5 +101,10 @@ public class StrategoGUIManager extends AbstractGUIManager {
         if (gameState != null) {
             view.updateComponent(((StrategoGameState)gameState).getGridBoard());
         }
+    }
+
+    @Override
+    public void clearHighlights() {
+        view.getHighlight().clear();
     }
 }

@@ -30,6 +30,7 @@ public class RMHCPlayer extends AbstractPlayer {
     public RMHCPlayer(RMHCParams params) {
         randomGenerator = new Random(params.getRandomSeed());
         this.params = params;
+        heuristic = params.gameHeuristic;
         setName("RMHC");
     }
 

@@ -21,6 +21,9 @@ public abstract class ConditionNode extends Node {
      */
     protected ConditionNode(ConditionNode node) {
         super(node);
+        childYes = node.childYes;
+        childNo = node.childNo;
+        passed = node.passed;
     }
 
     public ConditionNode() {

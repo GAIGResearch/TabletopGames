@@ -4,6 +4,7 @@ import core.components.BoardNode;
 import core.components.Component;
 import utilities.Utils;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MapTile extends BoardNode {
 
@@ -129,7 +130,7 @@ public class MapTile extends BoardNode {
 
     @Override
     public MapTile copy() {
-        ArrayList<Unit> clonedUnits = new ArrayList<Unit>();
+        ArrayList<Unit> clonedUnits = new ArrayList<>();
         for (Unit i : units) {
             clonedUnits.add((Unit)i.copy());
         }
@@ -149,6 +150,11 @@ public class MapTile extends BoardNode {
                 && locationY == mapTile.locationY
                 && units == mapTile.units
                 && type == mapTile.type
-                && componentID == componentID;
+                && componentID == mapTile.componentID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ownerId, locationX, locationY, units, type, componentID);
     }
 }

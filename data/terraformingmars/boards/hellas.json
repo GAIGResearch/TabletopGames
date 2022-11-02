@@ -1,0 +1,13 @@
+{
+  "board": [["0", "0", "Ocean:Plant:Plant", "Ground:Plant:Plant", "Ground:Plant:Plant", "Ground:Plant:Steel", "Ground:Plant", "0", "0"],
+            ["0", "Ocean:Plant:Plant", "Ground:Plant:Plant", "Ground:Plant", "Ground:Plant:Steel", "Ground:Plant", "Ground:Plant", "0", "0"],
+            ["0", "Ocean:Plant", "Ground:Plant", "Ground:Steel", "Ground:Steel", "Ground", "Ground:Plant:Plant", "Ground:Plant:Card", "0"],
+            ["Ocean:Plant", "Ground:Plant", "Ground:Steel", "Ground:Steel:Steel", "Ground:Steel", "Ocean:Plant", "Ocean:Plant", "Ground:Plant", "0"],
+            ["Ground:Card", "Ground", "Ground", "Ground:Steel:Steel", "Ground", "Ocean:Card", "Ocean:Heat:Heat:Heat", "Ocean", "Ground:Plant"],
+            ["Ground:Titanium", "Ground", "Ground:Steel", "Ground", "Ground", "Ocean", "Ocean:Steel", "Ground", "0"],
+            ["0", "Ocean:Titanium:Titanium", "Ground", "Ground", "Ground:Card", "Ground", "Ground", "Ground:Titanium", "0"],
+            ["0", "Ground:Steel", "Ground:Card", "Ground:Heat:Heat", "Ground:Heat:Heat", "Ground:Titanium", "Ground:Titanium", "0", "0"],
+            ["0", "0", "Ground", "Ground:Heat:Heat", "Ground:Ocean:MegaCredit/-6", "Ground:Heat:Heat", "Ground", "0", "0"]],
+  "milestones": ["diversifier:tag:8", "tactician:req:5", "polar-explorer:bottom-2:3", "energizer:Energyprod:6", "rim-settler:Jovian:3"],
+  "awards": ["cultivator:Greenery", "magnate:automated", "space-baron:space", "excentric:resource", "contractor:building"]
+}

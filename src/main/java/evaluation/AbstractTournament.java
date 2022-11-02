@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract class AbstractTournament {
     // List of players taking part in the tournament
-    protected LinkedList<AbstractPlayer> agents;
+    protected List<AbstractPlayer> agents;
     // Games to play
     protected List<Game> games;
     // Number of players in the games, index matches the games list
@@ -23,7 +23,7 @@ public abstract class AbstractTournament {
      * @param gameToPlay - game to play in this tournament.
      * @param nPlayerPerGame - number of players per game.
      */
-    public AbstractTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame, AbstractParameters gameParams){
+    public AbstractTournament(List<AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame, AbstractParameters gameParams){
         this.agents = agents;
         this.games = new ArrayList<>();
         this.playersPerGame = new ArrayList<>();

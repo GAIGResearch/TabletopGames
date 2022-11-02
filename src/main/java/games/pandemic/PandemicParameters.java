@@ -76,6 +76,7 @@ public class PandemicParameters extends TunableParameters {
         addTunableParameter("player1Role", "Any", PandemicConstants.PlayerRole.getRoleListIncludeAny());
         addTunableParameter("player2Role", "Any", PandemicConstants.PlayerRole.getRoleListIncludeAny());
         addTunableParameter("player3Role", "Any", PandemicConstants.PlayerRole.getRoleListIncludeAny());
+        _reset();
     }
 
     public PandemicParameters(PandemicParameters pandemicParameters) {

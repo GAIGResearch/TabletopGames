@@ -48,8 +48,8 @@ public class ExplodingKittensHeuristic extends TunableParameters implements ISta
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
-        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState)gs;
+        Utils.GameResult playerResult = ekgs.getPlayerResults()[playerId];
 
         if (playerResult == Utils.GameResult.LOSE)
             return -1;

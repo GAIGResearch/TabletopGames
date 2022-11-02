@@ -10,6 +10,7 @@ import core.properties.PropertyVector2D;
 import games.descent2e.DescentTypes;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Pair;
@@ -195,10 +196,7 @@ public class TileBuildGUI extends AbstractGUIManager {
 
         // Display terrain type, depending on selection of terrain + coordinates in grid, only some actions are available
         terrainOptionsView = new TerrainOptionsView();
-        JComponent actionPanel = createActionPanel(new Collection[]{new ArrayList<Object>() {{
-            add(terrainOptionsView.highlight);
-            add(view.highlight);
-        }}}, width, defaultActionPanelHeight);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{terrainOptionsView, view}, width, defaultActionPanelHeight);
 
         JPanel east = new JPanel();
         east.add(actions);

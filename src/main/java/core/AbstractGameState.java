@@ -16,7 +16,6 @@ import java.util.*;
 
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.GameResult.GAME_ONGOING;
-import static utilities.Utils.GameResult.WIN;
 
 
 /**
@@ -135,7 +134,14 @@ public abstract class AbstractGameState {
         return gamePhase;
     }
     public final Component getComponentById(int id) {
-        return allComponents.getComponent(id);
+        Component c = allComponents.getComponent(id);
+        if (c == null) {
+            try {
+                addAllComponents();
+                c = allComponents.getComponent(id);
+            } catch (Exception ignored) {}  // Can crash from concurrent modifications if running with GUI TODO: this is an ugly fix
+        }
+        return c;
     }
     public final Area getAllComponents() {
         addAllComponents(); // otherwise the list of allComponents is only ever updated when we copy the state!
@@ -190,6 +196,7 @@ public abstract class AbstractGameState {
             // If there is any information only available in History that could legitimately be used, then this should
             // be incorporated in the game-specific data in GameState where the correct hiding protocols can be enforced.
         }
+        // TODO: uncomment
         s.actionsInProgress = new Stack<>();
         actionsInProgress.forEach(
                 a -> s.actionsInProgress.push(a.copy())
@@ -212,7 +219,6 @@ public abstract class AbstractGameState {
     }
 
     public boolean isActionInProgress() {
-        checkActionsInProgress();
         return !actionsInProgress.empty();
     }
 
@@ -397,7 +403,7 @@ public abstract class AbstractGameState {
      * Retrieves a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
      * This should generally be in the range [-1, +1], with +1 being a certain win, and -1 being a certain loss
-     * The default implementation calls the same-specific heuristic
+     * The default implementation calls the game-specific heuristic
      * @param playerId - player observing the state.
      * @return - double, score of current state.
      */

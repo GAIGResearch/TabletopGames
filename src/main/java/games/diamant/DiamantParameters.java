@@ -18,6 +18,7 @@ public class DiamantParameters extends TunableParameters {
         addTunableParameter("nCaves", 5, Arrays.asList(3,5,7,10));
         addTunableParameter("nHazardCardsPerType", 3, Arrays.asList(1,3,4,7,10));
         addTunableParameter("nHazardsToDead", 2, Arrays.asList(1,2,3,4,5));
+        _reset();
     }
 
     @Override

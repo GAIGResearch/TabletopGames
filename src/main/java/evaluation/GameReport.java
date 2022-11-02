@@ -7,6 +7,7 @@ import core.ParameterFactory;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
+import games.terraformingmars.stats.TMStatsVisualiser;
 import players.PlayerFactory;
 import players.simple.RandomPlayer;
 import utilities.FileStatsLogger;
@@ -14,6 +15,7 @@ import utilities.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -21,7 +23,7 @@ import static utilities.Utils.getArg;
 
 public class GameReport {
 
-    public static boolean debug = false;
+    public static boolean debug = true;
 
     /**
      * The idea here is that we get statistics from the the decisions of a particular agent in
@@ -30,6 +32,7 @@ public class GameReport {
      * @param args
      */
     public static void main(String[] args) {
+        long timeStart = System.currentTimeMillis();
         List<String> argsList = Arrays.asList(args);
         if (argsList.contains("--help") || argsList.contains("-h") || argsList.size() == 0) {
             System.out.println(
@@ -50,11 +53,13 @@ public class GameReport {
                             "\t               Different player counts can be specified for each game in pipe-delimited format.\n" +
                             "\t               If 'all' is specified, then every possible playerCount for the game will be analysed.\n" +
                             "\tnGames=        The number of games to run for each game type. Defaults to 1000.\n" +
-                            "\tlistener=      The full class name of an IGameListener implementation. \n" +
+                            "\tlistener=      The full class name of an IGameListener implementation. Or the location\n" +
+                            "\t               of a json file from which a listener can be instantiated.\n" +
                             "\t               Defaults to utilities.GameStatisticsListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
+                            "\t               This is ignored if a json file is provided for the listener.\n" +
                             "\t               Defaults to utilities.SummaryLogger. \n" +
                             "\tlogFile=       Will be used as the IStatisticsLogger log file (FileStatsLogger only)\n" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
@@ -166,8 +171,23 @@ public class GameReport {
                     game.run();
                     if (debug) {
                         System.out.printf("Game %4d finished at %tT%n", i, System.currentTimeMillis());
-                        System.out.printf("\tResult: %20s%n", game.getPlayers().stream().map(Objects::toString).collect(Collectors.joining(" | ")));
+                        System.out.printf("\tAgent: %20s%n", game.getPlayers().stream().map(Objects::toString).collect(Collectors.joining(" | ")));
                         System.out.printf("\tResult: %20s%n", Arrays.stream(game.getGameState().getPlayerResults()).map(Objects::toString).collect(Collectors.joining(" | ")));
+                        System.out.printf("\tScore: %20s%n", IntStream.range(0, game.getPlayers().size()).mapToObj(p -> String.valueOf(game.getGameState().getGameScore(p))).collect(Collectors.joining(" | ")));
+                    }
+                }
+            }
+
+            // Visualise data for this game, if visualiser available
+            StatsVisualiser vis = StatsVisualiser.getVisualiserForGame(gameType, gameTrackers);
+            if (vis != null) {
+                while (true) {
+                    vis.repaint();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        break;
+//                        throw new RuntimeException(e);
                     }
                 }
             }
@@ -179,6 +199,13 @@ public class GameReport {
         }
         if (statsLogger != null)
             statsLogger.processDataAndFinish();
+
+        // How much time elapsed?
+        long elapsed = System.currentTimeMillis() - timeStart;
+        double elapsedSec = elapsed / 1000.0;
+        double elapsedMin = elapsedSec / 60.0;
+        System.out.println("Time elapsed: " + elapsed + " milliseconds, " + elapsedSec + " seconds, " + elapsedMin + " min.");
+
     }
 }
 

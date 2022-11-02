@@ -10,17 +10,16 @@ import games.loveletter.cards.LoveLetterCard;
 /**
  * At the beginning of each round the player draws a card and loses its protection status.
  */
-public class DrawCard extends core.actions.DrawCard implements IPrintable {
-
-    public DrawCard(int deckFrom, int deckTo, int fromIndex) {
-        super(deckFrom, deckTo, fromIndex);
-    }
+public class DrawCard extends AbstractAction implements IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
         // Player is no longer protected
-        ((LoveLetterGameState)gs).setProtection(gs.getCurrentPlayer(), false);
-        return super.execute(gs);
+        LoveLetterGameState state = (LoveLetterGameState) gs;
+        state.setProtection(gs.getCurrentPlayer(), false);
+        LoveLetterCard cardDrawn = state.getDrawPile().draw();
+        state.getPlayerHandCards().get(state.getCurrentPlayer()).add(cardDrawn);
+        return true;
     }
 
     @Override
@@ -35,11 +34,22 @@ public class DrawCard extends core.actions.DrawCard implements IPrintable {
 
     @Override
     public void printToConsole(AbstractGameState gameState) {
-        System.out.println(toString());
+        System.out.println(this);
     }
 
     @Override
     public AbstractAction copy() {
-        return new DrawCard(deckFrom, deckTo, fromIndex);
+        return this; // immutable
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof DrawCard;
+    }
+
+    @Override
+    public int hashCode() {
+        return 433904;
+    }
+
 }

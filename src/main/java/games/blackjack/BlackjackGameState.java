@@ -112,6 +112,7 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
                 }
             }
         }
+        copy.dealerPlayer = dealerPlayer;
         return copy;
     }
 
@@ -167,7 +168,9 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), playerDecks, drawDeck, dealerPlayer);
+        int result = Objects.hash(gameParameters, turnOrder, playerDecks, gameStatus, gamePhase, drawDeck, dealerPlayer);
+        result = 31 * result + Arrays.hashCode(playerResults);
+        return result;
     }
 
     @Override

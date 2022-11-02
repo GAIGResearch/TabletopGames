@@ -1,0 +1,14 @@
+{
+  "class" : "players.rhea.RHEAParams",
+  "horizon": [1, 3, 5, 10, 20, 30],
+  "discountFactor": [0.5, 0.8, 0.9, 0.95, 0.99, 0.999, 1.0],
+  "populationSize": [6, 8, 10, 12, 14, 16, 18, 20],
+  "childCount": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+  "crossoverType": ["UNIFORM", "ONE_POINT", "TWO_POINT"],
+  "eliteCount": [1, 2, 3, 4, 5, 6],
+  "selectionType" : ["RANK", "TOURNAMENT"],
+  "tournamentSize" : [1, 2, 3, 4, 5],
+  "budgetType" : "BUDGET_TIME",
+  "budget" : 40,
+  "breakMS" : 0
+}

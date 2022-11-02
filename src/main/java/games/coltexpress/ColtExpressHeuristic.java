@@ -41,7 +41,6 @@ public class ColtExpressHeuristic extends TunableParameters implements IStateHeu
     public double evaluateState(AbstractGameState gs, int playerId) {
         ColtExpressGameState cegs = (ColtExpressGameState) gs;
         ColtExpressParameters cep = (ColtExpressParameters) gs.getGameParameters();
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
 
         if (!cegs.isNotTerminal())
             return cegs.getPlayerResults()[playerId].value;

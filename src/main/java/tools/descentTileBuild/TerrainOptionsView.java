@@ -2,6 +2,7 @@ package tools.descentTileBuild;
 
 import games.descent2e.DescentTypes;
 import games.descent2e.gui.DescentGridBoardView;
+import gui.ScreenHighlight;
 import utilities.Pair;
 
 import javax.swing.*;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 import static gui.AbstractGUIManager.defaultItemSize;
 
-public class TerrainOptionsView extends JComponent {
+public class TerrainOptionsView extends JComponent implements ScreenHighlight {
 
     static int inARow = 2;
     static HashSet<String> terrains;
@@ -84,5 +85,10 @@ public class TerrainOptionsView extends JComponent {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(inARow * defaultItemSize, (terrains.size()/inARow+1) * defaultItemSize);
+    }
+
+    @Override
+    public void clearHighlights() {
+        highlight = null;
     }
 }

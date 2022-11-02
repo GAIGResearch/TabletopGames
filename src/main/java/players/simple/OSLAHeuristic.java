@@ -16,6 +16,7 @@ public class OSLAHeuristic extends TunableParameters {
 
     public OSLAHeuristic() {
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
+        _reset();
     }
 
     @Override

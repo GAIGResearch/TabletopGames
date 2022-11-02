@@ -118,6 +118,7 @@ class BasicTreeNode {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
                 cur = cur.expand();
+                return cur;
             } else {
                 // Move to next child given by UCT function
                 AbstractAction actionChosen = cur.ucb();
@@ -186,6 +187,8 @@ class BasicTreeNode {
             BasicTreeNode child = children.get(action);
             if (child == null)
                 throw new AssertionError("Should not be here");
+            else if (bestAction == null)
+                bestAction = action;
 
             // Find child value
             double hvVal = child.totValue;
@@ -228,7 +231,7 @@ class BasicTreeNode {
         int rolloutDepth = 0; // counting from end of tree
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
-        AbstractGameState rolloutState = state;
+        AbstractGameState rolloutState = state.copy();
         if (player.params.rolloutLength > 0) {
             while (!finishRollout(rolloutState, rolloutDepth)) {
                 List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(rolloutState);
@@ -238,7 +241,10 @@ class BasicTreeNode {
             }
         }
         // Evaluate final state and return normalised score
-        return rolloutState.getHeuristicScore(player.getPlayerID());
+        double value = player.params.getHeuristic().evaluateState(rolloutState, player.getPlayerID());
+        if (Double.isNaN(value))
+            throw new AssertionError("Illegal heuristic value - should be a number");
+        return value;
     }
 
     /**

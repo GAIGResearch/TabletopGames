@@ -12,6 +12,7 @@ import games.descent2e.DescentTypes;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Monster;
+import gui.ScreenHighlight;
 import gui.views.ComponentView;
 import utilities.ImageIO;
 import utilities.Pair;
@@ -30,7 +31,7 @@ import static games.descent2e.gui.DescentGUI.prettyVersion;
 import static gui.AbstractGUIManager.defaultItemSize;
 import static utilities.Utils.*;
 
-public class DescentGridBoardView extends ComponentView {
+public class DescentGridBoardView extends ComponentView implements ScreenHighlight {
 
     public static HashMap<String, Color> colorMap = new HashMap<String, Color>() {{
         put("null", Color.black);
@@ -407,5 +408,10 @@ public class DescentGridBoardView extends ComponentView {
     @Override
     public Dimension getMaximumSize() {
         return maxSize;
+    }
+
+    @Override
+    public void clearHighlights() {
+        highlights.clear();
     }
 }

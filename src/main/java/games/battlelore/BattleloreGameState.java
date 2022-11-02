@@ -188,16 +188,16 @@ public class BattleloreGameState extends AbstractGameState {
     @Override
     protected AbstractGameState _copy(int playerId) {
         BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), getNPlayers());
-        GridBoard clonedBoard = new GridBoard(gameBoard.getWidth(), gameBoard.getHeight());
+        state.gameBoard = new GridBoard(gameBoard.getWidth(), gameBoard.getHeight());
 
         for (int x = 0; x < gameBoard.getWidth(); x++) {
             for(int y = 0; y < gameBoard.getHeight(); y++) {
-                clonedBoard.setElement(x, y, gameBoard.getElement(x,y).copy());
+                state.gameBoard.setElement(x, y, gameBoard.getElement(x,y).copy());
             }
         }
-
-        state.gameBoard = clonedBoard;
         state.unitTypes = unitTypes; // immutable
+        System.arraycopy(playerScores, 0, state.playerScores, 0, playerScores.length);
+
         return state;
     }
 
@@ -241,5 +241,29 @@ public class BattleloreGameState extends AbstractGameState {
 
         BattleloreGameState other = (BattleloreGameState) o;
         return Objects.equals(gameBoard, other.gameBoard);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase);
+        result = 31 * result + Arrays.hashCode(playerResults);
+        result = 31 * result + Objects.hash(unitTypes);
+        result = 31 * result * Arrays.hashCode(playerScores);
+        result = 31 * result * gameBoard.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(gameParameters.hashCode()).append("|");
+        sb.append(turnOrder.hashCode()).append("|");
+        sb.append(gameStatus.hashCode()).append("|");
+        sb.append(gamePhase.hashCode()).append("|");
+        sb.append(Arrays.hashCode(playerResults)).append("|*|");
+        sb.append(unitTypes.hashCode()).append("|");
+        sb.append(gameBoard.hashCode()).append("|");
+        sb.append(Arrays.hashCode(playerScores)).append("|");
+        return sb.toString();
     }
 }

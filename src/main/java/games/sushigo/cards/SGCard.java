@@ -19,7 +19,7 @@ public class SGCard extends Card {
         Pudding
     }
 
-    public SGCardType type;
+    public final SGCardType type;
 
     public SGCard(SGCardType type)
     {
@@ -29,7 +29,7 @@ public class SGCard extends Card {
 
     @Override
     public Card copy() {
-        return new SGCard(type);
+        return this; // immutable
     }
 
     @Override

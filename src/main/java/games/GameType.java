@@ -7,6 +7,9 @@ import games.battlelore.gui.BattleloreGUI;
 import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.gui.BlackjackGUIManager;
+import games.cantstop.CantStopForwardModel;
+import games.cantstop.CantStopGameState;
+import games.cantstop.gui.CantStopGUIManager;
 import games.catan.CatanForwardModel;
 import games.catan.CatanGameState;
 import games.catan.gui.CatanGUI;
@@ -17,6 +20,9 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.gui.DescentGUI;
 import games.coltexpress.gui.ColtExpressGUIManager;
+import games.connect4.Connect4ForwardModel;
+import games.connect4.Connect4GameState;
+import games.connect4.gui.Connect4GUIManager;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
 import games.dominion.gui.DominionGUIManager;
@@ -30,7 +36,10 @@ import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
-import games.pandemic.gui.*;
+import games.pandemic.gui.PandemicGUIManager;
+import games.terraformingmars.TMForwardModel;
+import games.terraformingmars.TMGameState;
+import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
 import games.poker.gui.*;
 import games.dicemonastery.gui.*;
@@ -87,6 +96,14 @@ public enum GameType {
                 add(VariablePlayerPowers);
             }}),
     TicTacToe(2, 2,
+            new ArrayList<Category>() {{
+                add(Simple);
+                add(Abstract);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(PatternBuilding);
+            }}),
+    Connect4(2, 2,
             new ArrayList<Category>() {{
                 add(Simple);
                 add(Abstract);
@@ -264,13 +281,14 @@ public enum GameType {
                 add(SimultaneousActionSelection);
             }}),
     Catan(3, 4,
-                    new ArrayList<Category>() {{
-        add(Strategy);
-        add(Cards);
-    }},
+            new ArrayList<Category>() {{
+                add(Strategy);
+                add(Cards);
+            }},
             new ArrayList<Mechanic>() {{
         add(ModularBoard);
-
+                add(Memory);
+                add(GridMovement);
     }}),
         Stratego(2, 2,
         new ArrayList<Category>() {{
@@ -287,11 +305,26 @@ public enum GameType {
         add(Fantasy); add(Fighting); add(Miniatures); }},
             new ArrayList<Mechanic>() {{ add(ActionPoints); add(DiceRolling); add(GridMovement); add(HandManagement);
                 add(LineOfSight); add(ModularBoard); add(MovementPoints); add(MultipleMaps); add(Campaign); add(Cooperative);
-                add(VariablePlayerPowers); add(GameMaster); }});
+                add(VariablePlayerPowers); add(GameMaster); }}),
 
 //    Carcassonne (2, 5,
 //            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
 //            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
+    TerraformingMars (1, 5,
+            new ArrayList<Category>() {{ add(Economic); add(Environmental); add(Manufacturing); add(TerritoryBuilding);
+                add(Cards); add(Strategy); add(Exploration); }},
+            new ArrayList<Mechanic>() {{ add(Drafting); add(EndGameBonus); add(HandManagement); add(HexagonGrid);
+                add(Income); add(SetCollection); add(TakeThat); add(TilePlacement); add(ProgressiveTurnOrder);
+                add(VariablePlayerPowers); add(EngineBuilding); add(TableauBuilding);}}),
+    CantStop(2, 4,
+            new ArrayList<Category>() {{
+                add(Dice);
+                add(Abstract);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(PushYourLuck);
+            }}
+    );
 
     /**
      * Converts a given string to the enum type corresponding to the game.
@@ -306,6 +339,8 @@ public enum GameType {
                 return Pandemic;
             case "tictactoe":
                 return TicTacToe;
+            case "connect4":
+                return Connect4;
             case "explodingkittens":
                 return ExplodingKittens;
             case "loveletter":
@@ -342,6 +377,8 @@ public enum GameType {
                 return SushiGo;
             case "stratego":
                 return Stratego;
+            case "cantstop":
+                return CantStop;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -358,9 +395,8 @@ public enum GameType {
      */
     public Game createGameInstance(int nPlayers, long seed, AbstractParameters params) {
         if (nPlayers < minPlayers || nPlayers > maxPlayers) {
-            System.out.println("Unsupported number of players: " + nPlayers
+            throw new IllegalArgumentException("Unsupported number of players: " + nPlayers
                     + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
-            return null;
         }
 
         if (params == null) {
@@ -379,6 +415,10 @@ public enum GameType {
             case TicTacToe:
                 forwardModel = new TicTacToeForwardModel();
                 gameState = new TicTacToeGameState(params, nPlayers);
+                break;
+            case Connect4:
+                forwardModel = new Connect4ForwardModel();
+                gameState = new Connect4GameState(params, nPlayers);
                 break;
             case ExplodingKittens:
                 forwardModel = new ExplodingKittensForwardModel();
@@ -431,6 +471,10 @@ public enum GameType {
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
                 break;
+            case TerraformingMars:
+                forwardModel = new TMForwardModel();
+                gameState = new TMGameState(params, nPlayers);
+                break;
             case Catan:
                 forwardModel = new CatanForwardModel();
                 gameState = new CatanGameState(params, nPlayers);
@@ -446,6 +490,10 @@ public enum GameType {
             case Stratego:
                 forwardModel = new StrategoForwardModel();
                 gameState = new StrategoGameState(params, nPlayers);
+                break;
+            case CantStop:
+                forwardModel = new CantStopForwardModel();
+                gameState = new CantStopGameState(params, nPlayers);
                 break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
@@ -506,6 +554,9 @@ public enum GameType {
             case TicTacToe:
                 gui = new TicTacToeGUIManager(parent, game, ac);
                 break;
+            case Connect4:
+                gui = new Connect4GUIManager(parent, game, ac);
+                break;
             case DotsAndBoxes:
                 if (game != null) {
                     gui = new DBGUIManager(parent, game.getGameState(), ac);
@@ -522,6 +573,9 @@ public enum GameType {
                 gui = new CatanGUI(parent, game, ac);
                 break;
             // TODO: Diamant GUI
+            case TerraformingMars:
+                gui = new TMGUI(parent, game, ac);
+                break;
             case Battlelore:
                 gui = new BattleloreGUI(parent, game, ac);
                 break;
@@ -533,6 +587,9 @@ public enum GameType {
                 break;
             case Stratego:
                 gui = new StrategoGUIManager(parent, game, ac);
+                break;
+            case CantStop:
+                gui = new CantStopGUIManager(parent, game, ac);
                 break;
         }
 
@@ -554,6 +611,7 @@ public enum GameType {
         Animals,
         Cards,
         ComicBook,
+        Dice,
         Humour,
         Medical,
         Deduction,
@@ -571,6 +629,9 @@ public enum GameType {
         Fantasy,
         Miniatures,
         Bluffing,
+        Economic,
+        Environmental,
+        Manufacturing,
         Wargame;
 
         /**
@@ -638,6 +699,12 @@ public enum GameType {
         Campaign,
         Enclosure,
         DeckManagement,
+        Drafting,
+        EndGameBonus,
+        HexagonGrid,
+        Income,
+        ProgressiveTurnOrder,
+        TableauBuilding,
         BattleCardDriven,
         CommandCards,
         MoveThroughDeck;

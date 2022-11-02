@@ -7,17 +7,15 @@ import core.components.GridBoard;
 import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
-import core.interfaces.IVectorObservation;
 import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
-import utilities.VectorObservation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState, IVectorObservation {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState {
 
     GridBoard gridBoard;
 
@@ -37,11 +35,6 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
         TicTacToeGameState s = new TicTacToeGameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
         return s;
-    }
-
-    @Override
-    public VectorObservation getVectorObservation() {
-        return new VectorObservation<>(gridBoard.flattenGrid());
     }
 
     @Override
@@ -71,7 +64,6 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TicTacToeGameState)) return false;
-        if (!super.equals(o)) return false;
         TicTacToeGameState that = (TicTacToeGameState) o;
         return Objects.equals(gridBoard, that.gridBoard);
     }
@@ -79,6 +71,17 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), gridBoard);
+    }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(Objects.hash(gameParameters)).append("|");
+        sb.append(Objects.hash(turnOrder)).append("|");
+        sb.append(Objects.hash(getAllComponents())).append("|");
+        sb.append(Objects.hash(gameStatus)).append("|");
+        sb.append(Objects.hash(gamePhase)).append("|*|");
+        sb.append(Objects.hash(gridBoard));
+        return sb.toString();
     }
 
     @Override

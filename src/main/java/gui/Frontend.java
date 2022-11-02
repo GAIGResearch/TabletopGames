@@ -12,10 +12,8 @@ import players.human.ActionController;
 
 import javax.swing.Timer;
 import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.io.File;
 import java.util.List;
 import java.util.*;
 
@@ -544,7 +542,7 @@ public class Frontend extends GUI {
         AbstractGameState gameState = gameRunning.getGameState().copy();
         int currentPlayer = gameState.getCurrentPlayer();
         AbstractPlayer player = gameRunning.getPlayers().get(currentPlayer);
-        if (gui != null && gameState.isNotTerminal()) {
+        if (gui != null) {
             gui.update(player, gameState, gameRunning.isHumanToMove() || showAll);
             if (!gameRunning.isHumanToMove() && paused && showAll) {
                 // in this case we allow a human to override an AI decision

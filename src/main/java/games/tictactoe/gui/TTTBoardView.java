@@ -3,6 +3,7 @@ package games.tictactoe.gui;
 import core.components.BoardNode;
 import core.components.GridBoard;
 import core.components.Token;
+import gui.ScreenHighlight;
 import gui.views.ComponentView;
 
 import java.awt.*;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 
 import static gui.GUI.defaultItemSize;
 
-public class TTTBoardView extends ComponentView {
+public class TTTBoardView extends ComponentView implements ScreenHighlight {
 
     Rectangle[] rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;
@@ -100,5 +101,10 @@ public class TTTBoardView extends ComponentView {
 
     public ArrayList<Rectangle> getHighlight() {
         return highlight;
+    }
+
+    @Override
+    public void clearHighlights() {
+        highlight.clear();
     }
 }
