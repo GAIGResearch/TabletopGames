@@ -1,0 +1,13 @@
+{
+  "class" : "games.terraformingmars.stats.TMPlayerListener",
+  "args" : [
+    [
+      { "class" : "utilities.SummaryLogger" },
+      { "class" : "utilities.SummaryLogger" },
+      { "class" : "utilities.SummaryLogger" },
+      { "class" : "utilities.SummaryLogger" },
+      { "class" : "utilities.SummaryLogger" }
+    ],
+    { "class" : "utilities.SummaryLogger" }
+  ]
+}

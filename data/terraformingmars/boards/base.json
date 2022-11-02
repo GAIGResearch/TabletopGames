@@ -1,0 +1,48 @@
+{
+  "board": [["0", "0", "Ground:Steel:Steel", "Ocean:Steel:Steel", "Ground", "Ocean:Card", "Ocean", "0", "0"],
+            ["0", "Ground", "Volcanic:Steel", "Ground", "Ground", "Ground", "Ocean:Card:Card", "0", "0"],
+            ["0", "Volcanic:Card", "Ground", "Ground", "Ground", "Ground", "Ground", "Ground:Steel", "0"],
+            ["Volcanic:Plant:Titanium", "Ground:Plant", "Ground:Plant", "Ground:Plant", "Ground:Plant:Plant", "Ground:Plant", "Ground:Plant", "Ocean:Plant:Plant", "0"],
+            ["Volcanic:Plant:Plant", "Ground:Plant:Plant", "Noctis:Plant:Plant", "Ocean:Plant:Plant", "Ocean:Plant:Plant", "Ocean:Plant:Plant", "Ground:Plant:Plant", "Ground:Plant:Plant", "Ground:Plant:Plant"],
+            ["Ground:Plant", "Ground:Plant:Plant", "Ground:Plant", "Ground:Plant", "Ground:Plant", "Ocean:Plant", "Ocean:Plant", "Ocean:Plant", "0"],
+            ["0", "Ground", "Ground", "Ground", "Ground", "Ground", "Ground:Plant", "Ground", "0"],
+            ["0", "Ground:Steel:Steel", "Ground", "Ground:Card", "Ground:Card", "Ground", "Ground:Titanium", "0", "0"],
+            ["0", "0", "Ground:Steel", "Ground:Steel:Steel", "Ground", "Ground", "Ocean:Titanium:Titanium", "0", "0"]],
+  "extra": ["Phobos", "Ganymede"],
+  "globalParameters": [
+    {
+      "name": "Oxygen",
+      "range": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+      "bonus": [
+        {
+          "threshold": 8,
+          "effect": "inc-temperature-1"
+        }
+      ]
+    },
+    {
+      "name": "Temperature",
+      "range": [-30, -28, -26, -24, -22, -20, -18, -16, -14, -12, -10, -8, -6, -4, -2, 0, 2, 4, 6, 8],
+      "bonus": [
+        {
+          "threshold": 3,
+          "effect": "inc-Heatprod-1"
+        },
+        {
+          "threshold": 5,
+          "effect": "inc-Heatprod-1"
+        },
+        {
+          "threshold": 15,
+          "effect": "placetile/ocean/ocean/true"
+        }
+      ]
+    },
+    {
+      "name": "OceanTiles",
+      "range": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    }
+  ],
+  "milestones": ["terraformer:tr:35", "mayor:city:3", "gardner:greenery:3", "builder:building:8", "planner:card:16"],
+  "awards": ["landlord:city", "banker:megacreditprod", "scientist:science", "thermalist:heat", "miner:steel-titanium"]
+}

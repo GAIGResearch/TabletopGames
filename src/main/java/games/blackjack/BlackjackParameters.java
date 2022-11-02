@@ -34,7 +34,7 @@ public class BlackjackParameters extends TunableParameters {
         addTunableParameter("winScore", 21, Arrays.asList(15, 21, 30, 50));
         addTunableParameter("dealerStand", 17, Arrays.asList(5, 7, 10, 13, 15, 17, 20));
         addTunableParameter("nDealerCardsHidden", 1, Arrays.asList(0,1,2,3,4,5));
-
+        _reset();
     }
 
     @Override

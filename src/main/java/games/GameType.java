@@ -33,15 +33,15 @@ import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
-import games.pandemic.gui.*;
+import games.pandemic.gui.PandemicGUIManager;
+import games.terraformingmars.TMForwardModel;
+import games.terraformingmars.TMGameState;
+import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
-import games.blackjack.*;
-import games.blackjack.gui.*;
 import games.poker.gui.*;
 import games.dicemonastery.gui.*;
 import games.stratego.StrategoForwardModel;
 import games.stratego.StrategoGameState;
-import games.stratego.StrategoParams;
 import games.stratego.gui.StrategoGUIManager;
 import games.sushigo.SGForwardModel;
 import games.sushigo.SGGameState;
@@ -283,9 +283,16 @@ public enum GameType {
                 add(Cards);
             }},
             new ArrayList<Mechanic>() {{
+                add(Memory);
+                add(GridMovement);
                 add(ModularBoard);
-
             }}),
+    TerraformingMars (1, 5,
+            new ArrayList<Category>() {{ add(Economic); add(Environmental); add(Manufacturing); add(TerritoryBuilding);
+                add(Cards); add(Strategy); add(Exploration); }},
+            new ArrayList<Mechanic>() {{ add(Drafting); add(EndGameBonus); add(HandManagement); add(HexagonGrid);
+                add(Income); add(SetCollection); add(TakeThat); add(TilePlacement); add(ProgressiveTurnOrder);
+                add(VariablePlayerPowers); add(EngineBuilding); add(TableauBuilding);}}),
     Stratego(2, 2,
             new ArrayList<Category>() {{
                 add(Strategy);
@@ -306,10 +313,6 @@ public enum GameType {
                 add(PushYourLuck);
             }}
     );
-
-//    Carcassonne (2, 5,
-//            new ArrayList<Category>() {{ add(Strategy); add(CityBuilding); add(Medieval); add(TerritoryBuilding); }},
-//            new ArrayList<Mechanic>() {{ add(Influence); add(MapAddition); add(TilePlacement); }}),
 
     /**
      * Converts a given string to the enum type corresponding to the game.
@@ -449,6 +452,10 @@ public enum GameType {
                 forwardModel = new DominionForwardModel();
                 gameState = new DominionGameState(params, nPlayers);
                 break;
+            case TerraformingMars:
+                forwardModel = new TMForwardModel();
+                gameState = new TMGameState(params, nPlayers);
+                break;
             case Catan:
                 forwardModel = new CatanForwardModel();
                 gameState = new CatanGameState(params, nPlayers);
@@ -542,6 +549,9 @@ public enum GameType {
                 gui = new CatanGUI(parent, game, ac);
                 break;
             // TODO: Diamant GUI
+            case TerraformingMars:
+                gui = new TMGUI(parent, game, ac);
+                break;
             case Battlelore:
                 gui = new BattleloreGUI(parent, game, ac);
                 break;
@@ -595,6 +605,9 @@ public enum GameType {
         Fantasy,
         Miniatures,
         Bluffing,
+        Economic,
+        Environmental,
+        Manufacturing,
         Wargame;
 
         /**
@@ -662,6 +675,12 @@ public enum GameType {
         Campaign,
         Enclosure,
         DeckManagement,
+        Drafting,
+        EndGameBonus,
+        HexagonGrid,
+        Income,
+        ProgressiveTurnOrder,
+        TableauBuilding,
         BattleCardDriven,
         CommandCards,
         MoveThroughDeck;

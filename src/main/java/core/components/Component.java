@@ -10,10 +10,10 @@ import java.util.*;
 public abstract class Component {
     private static int ID = 0;  // All components receive a unique and final ID from this always increasing counter
 
-    protected final int componentID;  // Unique ID of this component
+    protected transient final int componentID;  // Unique ID of this component
     protected final ComponentType type;  // Type of this component
-    protected final HashMap<Integer, Property> properties;  // Maps between integer key for the property and the property object
-    protected int ownerId = -1;  // By default belongs to the game
+    protected HashMap<Integer, Property> properties;  // Maps between integer key for the property and the property object
+    protected transient int ownerId = -1;  // By default belongs to the game
     protected String componentName;  // Name of this component
 
     public Component(ComponentType type, String name) {

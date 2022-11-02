@@ -31,6 +31,7 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
         addTunableParameter("playerSettlements", 0.15);
         addTunableParameter("playerPorts", 0.1);
         addTunableParameter("opponentsScore", -1.0);
+        _reset();
     }
 
     @Override

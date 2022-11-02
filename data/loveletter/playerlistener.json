@@ -1,0 +1,13 @@
+{
+  "class" : "games.loveletter.stats.LLPlayerListener",
+  "args" : [
+    [
+      { "class" : "utilities.SummaryLogger" },
+      { "class" : "utilities.SummaryLogger" },
+      { "class" : "utilities.SummaryLogger" },
+      { "class" : "utilities.SummaryLogger" },
+      { "class" : "utilities.SummaryLogger" }
+    ],
+    { "class" : "utilities.SummaryLogger" }
+  ]
+}

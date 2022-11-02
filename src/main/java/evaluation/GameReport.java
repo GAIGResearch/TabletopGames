@@ -7,6 +7,7 @@ import core.ParameterFactory;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
+import games.terraformingmars.stats.TMStatsVisualiser;
 import players.PlayerFactory;
 import players.simple.RandomPlayer;
 import utilities.FileStatsLogger;
@@ -31,6 +32,7 @@ public class GameReport {
      * @param args
      */
     public static void main(String[] args) {
+        long timeStart = System.currentTimeMillis();
         List<String> argsList = Arrays.asList(args);
         if (argsList.contains("--help") || argsList.contains("-h") || argsList.size() == 0) {
             System.out.println(
@@ -175,6 +177,20 @@ public class GameReport {
                     }
                 }
             }
+
+            // Visualise data for this game, if visualiser available
+            StatsVisualiser vis = StatsVisualiser.getVisualiserForGame(gameType, gameTrackers);
+            if (vis != null) {
+                while (true) {
+                    vis.repaint();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        break;
+//                        throw new RuntimeException(e);
+                    }
+                }
+            }
         }
 
         // Once all games are complete, let the gameTracker know
@@ -183,6 +199,13 @@ public class GameReport {
         }
         if (statsLogger != null)
             statsLogger.processDataAndFinish();
+
+        // How much time elapsed?
+        long elapsed = System.currentTimeMillis() - timeStart;
+        double elapsedSec = elapsed / 1000.0;
+        double elapsedMin = elapsedSec / 60.0;
+        System.out.println("Time elapsed: " + elapsed + " milliseconds, " + elapsedSec + " seconds, " + elapsedMin + " min.");
+
     }
 }
 

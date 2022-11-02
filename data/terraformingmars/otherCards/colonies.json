@@ -1,0 +1,1118 @@
+[
+    {
+      "@id": "#EUROPA",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n      background-image:url('images/colonies-planets/europa.png');\r\n      background-size: 220px 220px;\r\n      background-position: bottom 65px right -5px;\r\n      box-shadow: inset 0 0 4px 4px rgb(188,149,120), 0 0 2px 1px black;\r\n      ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, rgb(188,149,120), black);",
+            "#text": "EUROPA"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "1"
+            },
+            {
+              "@style": "margin-bottom:10px;margin-top:8px;margin-left:10px;",
+              "span": {
+                "@class": "colony-background-color",
+                "@style": "margin-left: -8px;",
+                "#text": "Trade Income: Gain the indicated production"
+              }
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": {
+                    "@class": "tile ocean-tile",
+                    "@style": "margin-top: 3px;"
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "tile ocean-tile",
+                    "@style": "margin-top: 3px;"
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "tile ocean-tile",
+                    "@style": "margin-top: 3px;"
+                  }
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "@style": "transform: scale(0.8);",
+                    "div": {
+                      "@class": "production money",
+                      "#text": "1"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "@style": "transform: scale(0.8);",
+                    "div": {
+                      "@class": "production money",
+                      "#text": "1"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "@style": "transform: scale(0.8);",
+                    "div": {
+                      "@class": "production energy"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "@style": "transform: scale(0.8);",
+                    "div": {
+                      "@class": "production energy"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "@style": "transform: scale(0.8);",
+                    "div": {
+                      "@class": "production plant"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "@style": "transform: scale(0.8);",
+                    "div": {
+                      "@class": "production plant"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "@style": "transform: scale(0.8);",
+                    "div": {
+                      "@class": "production plant"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "span": {
+            "@class": "colony-background-color",
+            "#text": "Colony Bonus"
+          },
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#TRITON",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n    background-image:url('images/colonies-planets/triton.jpg');\r\n    background-size: 150px 150px;\r\n    background-position: bottom 90px right 35px;\r\n    box-shadow: inset 0 0 4px 4px #c2e0f6, 0 0 2px 1px black;\r\n    ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, #c2e0f6, black);",
+            "#text": "TRITON"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "div": [
+            {
+              "@class": "resource titanium"
+            },
+            {
+              "@class": "resource titanium",
+              "@style": "margin-left:20px;"
+            },
+            {
+              "@class": "white-x"
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": [
+                    {
+                      "@class": "resource titanium resource-stacked ",
+                      "@style": "margin-bottom:0px;margin-top:1px;"
+                    },
+                    {
+                      "@class": "resource titanium resource-stacked ",
+                      "@style": "margin-top:-10px;margin-left:20px"
+                    },
+                    {
+                      "@class": "resource titanium resource-stacked ",
+                      "@style": "margin-top: -73px;margin-left: -13px;"
+                    }
+                  ]
+                },
+                {
+                  "div": [
+                    {
+                      "@class": "resource titanium resource-stacked ",
+                      "@style": "margin-bottom:0px;margin-top:1px;"
+                    },
+                    {
+                      "@class": "resource titanium resource-stacked ",
+                      "@style": "margin-top:-10px;margin-left:20px"
+                    },
+                    {
+                      "@class": "resource titanium resource-stacked ",
+                      "@style": "margin-top: -73px;margin-left: -13px;"
+                    }
+                  ]
+                },
+                {
+                  "div": [
+                    {
+                      "@class": "resource titanium resource-stacked ",
+                      "@style": "margin-bottom:0px;margin-top:1px;"
+                    },
+                    {
+                      "@class": "resource titanium resource-stacked ",
+                      "@style": "margin-top:-10px;margin-left:20px"
+                    },
+                    {
+                      "@class": "resource titanium resource-stacked ",
+                      "@style": "margin-top: -73px;margin-left: -13px;"
+                    }
+                  ]
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                "0",
+                "1",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5"
+              ]
+            }
+          ],
+          "span": [
+            {
+              "@class": "colony-background-color",
+              "#text": "Colony Bonus"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Trade Income"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#CALLISTO",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n        background-image:url('images/colonies-planets/callisto.png');\r\n        background-size: 300px 300px;\r\n        background-position: bottom -11px right -55px;\r\n        box-shadow: inset 0 0 4px 4px rgb(158,79,150), 0 0 2px 1px black;\r\n        ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, rgb(158,79,150), transparent);",
+            "#text": "CALLISTO"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "div": [
+            {
+              "@class": "resource energy"
+            },
+            {
+              "@class": "resource energy"
+            },
+            {
+              "@class": "resource energy"
+            },
+            {
+              "@class": "resource energy",
+              "@style": "margin-left:20px;"
+            },
+            {
+              "@class": "white-x"
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production energy"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production energy"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production energy"
+                    }
+                  }
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                "0",
+                "2",
+                "3",
+                "5",
+                "7",
+                "10",
+                "13"
+              ]
+            }
+          ],
+          "span": [
+            {
+              "@class": "colony-background-color",
+              "#text": "Colony Bonus"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Trade Income"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#CERES",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n        background-image:url('images/colonies-planets/ceres.jpg');\r\n        background-size: 100px 100px;\r\n        background-position: bottom 150px right 60px;\r\n        box-shadow: inset 0 0 4px 4px rgb(124,157,200), 0 0 2px 1px black;\r\n        ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, rgb(124,157,200), black);",
+            "#text": "CERES"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "div": [
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel"
+            },
+            {
+              "@class": "resource steel",
+              "@style": "margin-left:20px;"
+            },
+            {
+              "@class": "white-x"
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production steel"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production steel"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production steel"
+                    }
+                  }
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "6",
+                "8",
+                "10"
+              ]
+            }
+          ],
+          "span": [
+            {
+              "@class": "colony-background-color",
+              "#text": "Colony Bonus"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Trade Income"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#ENCELADUS",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n        background-image:url('images/colonies-planets/enceladus.png');\r\n        background-size: 150px 150px;\r\n        background-position: bottom 120px right -15px;\r\n        box-shadow: inset 0 0 4px 4px rgb(163,201,152), 0 0 2px 1px black;\r\n        ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, rgb(163,201,152), black);",
+            "#text": "ENCELADUS"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "div": [
+            {
+              "@class": "resource microbe"
+            },
+            {
+              "@class": "resource microbe",
+              "@style": "margin-left:20px;"
+            },
+            {
+              "@class": "white-x"
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": [
+                    {
+                      "@class": "resource microbe resource-stacked ",
+                      "@style": "margin-bottom:0px;margin-top:1px;"
+                    },
+                    {
+                      "@class": "resource microbe resource-stacked ",
+                      "@style": "margin-top:-10px;margin-left:20px"
+                    },
+                    {
+                      "@class": "resource microbe resource-stacked ",
+                      "@style": "margin-top: -73px;margin-left: -13px;"
+                    }
+                  ]
+                },
+                {
+                  "div": [
+                    {
+                      "@class": "resource microbe resource-stacked ",
+                      "@style": "margin-bottom:0px;margin-top:1px;"
+                    },
+                    {
+                      "@class": "resource microbe resource-stacked ",
+                      "@style": "margin-top:-10px;margin-left:20px"
+                    },
+                    {
+                      "@class": "resource microbe resource-stacked ",
+                      "@style": "margin-top: -73px;margin-left: -13px;"
+                    }
+                  ]
+                },
+                {
+                  "div": [
+                    {
+                      "@class": "resource microbe resource-stacked ",
+                      "@style": "margin-bottom:0px;margin-top:1px;"
+                    },
+                    {
+                      "@class": "resource microbe resource-stacked ",
+                      "@style": "margin-top:-10px;margin-left:20px"
+                    },
+                    {
+                      "@class": "resource microbe resource-stacked ",
+                      "@style": "margin-top: -73px;margin-left: -13px;"
+                    }
+                  ]
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "4",
+                "5"
+              ]
+            }
+          ],
+          "span": [
+            {
+              "@class": "colony-background-color",
+              "#text": "Colony Bonus"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Trade Income"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#TITAN",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n        background-image:url('images/colonies-planets/titan.jpg');\r\n        background-size: 250px 250px;\r\n        background-position: bottom 30px right -8px;\r\n        box-shadow: inset 0 0 4px 4px rgb(255,204,100), 0 0 2px 1px black;\r\n        ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, rgb(255,204,100), black);",
+            "#text": "TITAN"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "div": [
+            {
+              "@class": "resource floater"
+            },
+            {
+              "@class": "resource floater",
+              "@style": "margin-left:20px;"
+            },
+            {
+              "@class": "white-x"
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": [
+                    {
+                      "@class": "resource floater resource-stacked ",
+                      "@style": "margin-bottom:0px;margin-top:1px;"
+                    },
+                    {
+                      "@class": "resource floater resource-stacked ",
+                      "@style": "margin-top:-10px;margin-left:20px"
+                    },
+                    {
+                      "@class": "resource floater resource-stacked ",
+                      "@style": "margin-top: -73px;margin-left: -13px;"
+                    }
+                  ]
+                },
+                {
+                  "div": [
+                    {
+                      "@class": "resource floater resource-stacked ",
+                      "@style": "margin-bottom:0px;margin-top:1px;"
+                    },
+                    {
+                      "@class": "resource floater resource-stacked ",
+                      "@style": "margin-top:-10px;margin-left:20px"
+                    },
+                    {
+                      "@class": "resource floater resource-stacked ",
+                      "@style": "margin-top: -73px;margin-left: -13px;"
+                    }
+                  ]
+                },
+                {
+                  "div": [
+                    {
+                      "@class": "resource floater resource-stacked ",
+                      "@style": "margin-bottom:0px;margin-top:1px;"
+                    },
+                    {
+                      "@class": "resource floater resource-stacked ",
+                      "@style": "margin-top:-10px;margin-left:20px"
+                    },
+                    {
+                      "@class": "resource floater resource-stacked ",
+                      "@style": "margin-top: -73px;margin-left: -13px;"
+                    }
+                  ]
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                "0",
+                "1",
+                "1",
+                "2",
+                "3",
+                "3",
+                "4"
+              ]
+            }
+          ],
+          "span": [
+            {
+              "@class": "colony-background-color",
+              "#text": "Colony Bonus"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Trade Income"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#MIRANDA",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n        background-image:url('images/colonies-planets/miranda.jpg');\r\n        background-size: 100px 100px;\r\n        background-position: bottom 145px right 55px;\r\n        box-shadow: inset 0 0 4px 4px rgb(115,216,255), 0 0 2px 1px black;\r\n        ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, rgb(115,216,255), black);",
+            "#text": "MIRANDA"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "@style": "margin-top:-10px;",
+          "div": [
+            {
+              "@class": "resource card",
+              "@style": "box-shadow: 0 0 2px #ccc;"
+            },
+            {
+              "@class": "resource animal",
+              "@style": "margin-left:20px;margin-top:-10px;"
+            },
+            {
+              "@class": "white-x"
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": {
+                    "@class": "resource animal",
+                    "@style": "margin-top:11px;"
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "resource animal",
+                    "@style": "margin-top:11px;"
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "resource animal",
+                    "@style": "margin-top:11px;"
+                  }
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                "0",
+                "1",
+                "1",
+                "2",
+                "2",
+                "3",
+                "3"
+              ]
+            }
+          ],
+          "span": [
+            {
+              "@class": "colony-background-color",
+              "#text": "Colony Bonus"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Trade Income"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#GANYMEDE",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n        background-image:url('images/colonies-planets/ganymede.jpg');\r\n        background-position: bottom 5px right 10px;\r\n        box-shadow: inset 0 0 4px 4px rgb(150,150,150), 0 0 2px 1px black;\r\n        ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, rgb(150,150,150), rgba(0,0,0,0));",
+            "#text": "GANYMEDE"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "div": [
+            {
+              "@class": "resource plant"
+            },
+            {
+              "@class": "resource plant",
+              "@style": "margin-left:20px;"
+            },
+            {
+              "@class": "white-x"
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production plant"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production plant"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production plant"
+                    }
+                  }
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6"
+              ]
+            }
+          ],
+          "span": [
+            {
+              "@class": "colony-background-color",
+              "#text": "Colony Bonus"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Trade Income"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#LUNA",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n        background-image:url('images/colonies-planets/luna.jpg');\r\n        background-position: bottom -5px right 0px;\r\n        box-shadow: inset 0 0 4px 4px rgb(106,185,244), 0 0 2px 1px black;\r\n        ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, rgb(106,185,244), black);",
+            "#text": "LUNA"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "div": [
+            {
+              "@class": "resource money",
+              "#text": "2"
+            },
+            {
+              "@class": "resource money",
+              "@style": "margin-left:20px;"
+            },
+            {
+              "@class": "white-x"
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production money",
+                      "#text": "2"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production money",
+                      "#text": "2"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production money",
+                      "#text": "2"
+                    }
+                  }
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                "1",
+                "2",
+                "4",
+                "7",
+                "10",
+                "13",
+                "17"
+              ]
+            }
+          ],
+          "span": [
+            {
+              "@class": "colony-background-color",
+              "#text": "Colony Bonus"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Trade Income"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#IO",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n    background-image:url('images/colonies-planets/io.jpg');\r\n    background-size: 200px 200px;\r\n    background-position: bottom 60px right -20px;\r\n    box-shadow: inset 0 0 4px 4px #eee, 0 0 2px 1px black;\r\n    ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, #eee, black);",
+            "#text": "IO"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "div": [
+            {
+              "@class": "resource heat"
+            },
+            {
+              "@class": "resource heat"
+            },
+            {
+              "@class": "resource heat",
+              "@style": "margin-left:20px;"
+            },
+            {
+              "@class": "white-x"
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production heat"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production heat"
+                    }
+                  }
+                },
+                {
+                  "div": {
+                    "@class": "production-box",
+                    "div": {
+                      "@class": "production heat"
+                    }
+                  }
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                "2",
+                "3",
+                "4",
+                "6",
+                "8",
+                "10",
+                "13"
+              ]
+            }
+          ],
+          "span": [
+            {
+              "@class": "colony-background-color",
+              "#text": "Colony Bonus"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Trade Income"
+            }
+          ],
+          "br": ""
+        }
+      ]
+    },
+    {
+      "@id": "#PLUTO",
+      "@onclick": "getClickedCard();",
+      "@class": "filterDiv colony-card colonies",
+      "@style": "\r\n  background-image:url('images/colonies-planets/pluto.jpg');\r\n  background-size: 150px 150px;\r\n  background-position: bottom 117px right 7px;\r\n  box-shadow: inset 0 0 4px 4px #c2e0f6, 0 0 2px 1px black;\r\n  ",
+      "div": [
+        {
+          "@class": "colony-card-title-div",
+          "span": {
+            "@class": "colony-card-title-span",
+            "@style": "  background: linear-gradient(to right, #c2e0f6, black);",
+            "#text": "PLUTO"
+          }
+        },
+        {
+          "@class": "colony-content",
+          "@style": "margin-top:-10px;",
+          "span": [
+            {
+              "@class": "white-char",
+              "@style": "margin-left:5px;",
+              "#text": "+"
+            },
+            {
+              "@class": "white-char",
+              "#text": "-"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Colony Bonus"
+            },
+            {
+              "@class": "colony-background-color",
+              "#text": "Trade Income"
+            }
+          ],
+          "div": [
+            {
+              "@class": "resource card",
+              "@style": "box-shadow: 0 0 2px #ccc"
+            },
+            {
+              "@class": "resource card",
+              "@style": "box-shadow: 0 0 2px #ccc"
+            },
+            {
+              "@class": "resource card",
+              "@style": "box-shadow: 0 0 2px #ccc;margin-top: -4px; margin-left: 40px;"
+            },
+            {
+              "@class": "white-x"
+            },
+            {
+              "@class": "colony-grid-container",
+              "div": [
+                {
+                  "div": [
+                    {
+                      "@class": "resource card",
+                      "@style": "margin-top: 9px;box-shadow: 0 0 2px #ccc;"
+                    },
+                    {
+                      "@class": "resource card",
+                      "@style": "margin-left: -48px;margin-top: -2px;box-shadow: 0 0 2px #ccc"
+                    }
+                  ]
+                },
+                {
+                  "div": [
+                    {
+                      "@class": "resource card",
+                      "@style": "margin-top: 9px;box-shadow: 0 0 2px #ccc;"
+                    },
+                    {
+                      "@class": "resource card",
+                      "@style": "margin-left: -48px;margin-top: -2px;box-shadow: 0 0 2px #ccc"
+                    }
+                  ]
+                },
+                {
+                  "div": [
+                    {
+                      "@class": "resource card",
+                      "@style": "margin-top: 9px;box-shadow: 0 0 2px #ccc;"
+                    },
+                    {
+                      "@class": "resource card",
+                      "@style": "margin-left: -48px;margin-top: -2px;box-shadow: 0 0 2px #ccc;"
+                    }
+                  ]
+                },
+                "",
+                "",
+                "",
+                ""
+              ]
+            },
+            {
+              "@class": "colony-grid-container2",
+              "div": [
+                "0",
+                "1",
+                "2",
+                "2",
+                "3",
+                "3",
+                "4"
+              ]
+            }
+          ],
+          "br": ""
+        }
+      ]
+    }
+  ]
