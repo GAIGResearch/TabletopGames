@@ -6,10 +6,10 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.battlelore.BattleloreGameState;
+import gui.ScreenHighlight;
 import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 
 public class BattleloreGUI extends AbstractGUIManager {
     BattleloreBoardView view;
@@ -30,7 +30,7 @@ public class BattleloreGUI extends AbstractGUIManager {
 
 
         JPanel infoPanel = createGameStateInfoPanel("Battlelore", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false);
 
         parent.setLayout(new BorderLayout());
         parent.add(view, BorderLayout.CENTER);

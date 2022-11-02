@@ -13,8 +13,6 @@ import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
-import java.util.HashMap;
 
 public class PrototypeGUIManager extends AbstractGUIManager {
     JComponent view;
@@ -42,7 +40,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
         if (game != null && gameState != null) {
             infoPanel = createGameStateInfoPanel(game.name(), gameState, width, defaultInfoPanelHeight);
         }
-        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, true);
 
         JPanel deckView = new JPanel();
         componentViews = new ComponentView[maxComponentsInDeck];

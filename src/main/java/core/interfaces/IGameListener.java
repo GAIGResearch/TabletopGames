@@ -5,7 +5,9 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import utilities.GameStatisticsListener;
+import utilities.Utils;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 
 public interface IGameListener {
@@ -49,20 +51,26 @@ public interface IGameListener {
 
 
     static IGameListener createListener(String listenerClass, IStatisticLogger logger) {
+        // first we check to see if listenerClass is a file or not
         IGameListener listener = new GameStatisticsListener(logger);
-        if (!listenerClass.equals("")) {
-            try {
-                Class<?> clazz = Class.forName(listenerClass);
-
-                Constructor<?> constructor;
+        File listenerDetails = new File(listenerClass);
+        if (listenerDetails.exists()) {
+            // in this case we construct from file
+            listener = Utils.loadClassFromFile(listenerClass);
+        } else {
+            if (!listenerClass.equals("")) {
                 try {
-                    constructor = clazz.getConstructor(IStatisticLogger.class);
-                    listener = (IGameListener) constructor.newInstance(logger);
-                } catch (NoSuchMethodException e) {
-                    return createListener(listenerClass);
+                    Class<?> clazz = Class.forName(listenerClass);
+                    Constructor<?> constructor;
+                    try {
+                        constructor = clazz.getConstructor(IStatisticLogger.class);
+                        listener = (IGameListener) constructor.newInstance(logger);
+                    } catch (NoSuchMethodException e) {
+                        return createListener(listenerClass);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }
         return listener;

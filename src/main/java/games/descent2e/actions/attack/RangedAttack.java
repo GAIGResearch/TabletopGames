@@ -6,6 +6,7 @@ import utilities.Distance;
 
 /**
  *   This works in exactly the same way as a Melee Attack
+ *   Except that there is a different definition of 'missed' that takes into account the range rolled on the dice
  */
 public class RangedAttack extends MeleeAttack {
     public RangedAttack(int attackingFigure, int defendingFigure) {
@@ -18,7 +19,8 @@ public class RangedAttack extends MeleeAttack {
             return true; // due to no damage done
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
+        // TODO: Chebyshev distance is not actually right, as it does not allow diagonal moves
         double distance = Distance.chebyshev_distance(attacker.getPosition(), defender.getPosition());
-        return (state.getAttackDicePool().getRange() < distance);
+        return (state.getAttackDicePool().getRange() + extraRange < distance);
     }
 }

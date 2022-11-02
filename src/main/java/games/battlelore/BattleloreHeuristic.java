@@ -28,7 +28,6 @@ public class BattleloreHeuristic extends TunableParameters implements IStateHeur
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         BattleloreGameState gameState = (BattleloreGameState) gs;
-        BattleloreGameParameters gameParams = (BattleloreGameParameters) gameState.getGameParameters();
         Utils.GameResult playerResult = gameState.getPlayerResults()[playerId];
 
         int playerUnitPower = 0;

@@ -4,18 +4,16 @@ import gui.AbstractGUIManager;
 import gui.GamePanel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.actions.AbstractAction;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;
 
-import core.actions.AbstractAction;
 import utilities.ImageIO;
 import utilities.Utils;
 
 import java.util.List;
-import java.util.Map;
 
 public class DBGUIManager extends AbstractGUIManager {
     DBGridBoardView view;

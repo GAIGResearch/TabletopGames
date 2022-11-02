@@ -10,6 +10,7 @@ import games.descent2e.actions.Move;
 import games.descent2e.components.Hero;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.ScreenHighlight;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -68,8 +69,7 @@ public class DescentGUI extends AbstractGUIManager {
         eastWrapper.add(east);
 
         JPanel infoPanel = createGameStateInfoPanel("Descent2e", gameState, maxWidth/2, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[]{view.highlights}, maxWidth/2, defaultActionPanelHeight,
-                this::onMouseEnter, this::onMouseExit);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view}, maxWidth/2, defaultActionPanelHeight, false, false, null, this::onMouseEnter, this::onMouseExit);
 
         JPanel south = new JPanel();
         south.setOpaque(false);
@@ -100,7 +100,7 @@ public class DescentGUI extends AbstractGUIManager {
     }
 
     private void onMouseEnter(ActionButton ab) {
-        view.highlights.clear();
+        view.clearHighlights();
         if (ab.getButtonAction() instanceof Move) {
             view.highlights.addAll(((Move) ab.getButtonAction()).getPositionsTraveled());
         }
@@ -202,7 +202,8 @@ public class DescentGUI extends AbstractGUIManager {
         parent.repaint();
     }
 
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout,
+    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, boolean boxLayout,
+                                           boolean opaque,
                                            Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {

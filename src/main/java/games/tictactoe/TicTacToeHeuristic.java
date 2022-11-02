@@ -2,6 +2,7 @@ package games.tictactoe;
 import core.AbstractGameState;
 import core.components.BoardNode;
 import core.components.Token;
+import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import utilities.Pair;

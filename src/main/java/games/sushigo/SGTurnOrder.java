@@ -2,7 +2,6 @@ package games.sushigo;
 
 import core.AbstractGameState;
 import core.turnorders.StandardTurnOrder;
-import core.turnorders.TurnOrder;
 import games.sushigo.cards.SGCard;
 import utilities.Utils;
 

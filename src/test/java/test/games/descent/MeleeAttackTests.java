@@ -1,11 +1,15 @@
 package test.games.descent;
 
 import core.Game;
+import core.actions.AbstractAction;
+import core.actions.DoNothing;
+import games.descent2e.DescentConstants;
 import games.descent2e.DescentForwardModel;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
-import games.descent2e.actions.attack.MeleeAttack;
-import games.descent2e.actions.attack.RangedAttack;
+import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.Triggers;
+import games.descent2e.actions.attack.*;
 import games.descent2e.components.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,8 +17,7 @@ import utilities.Vector2D;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MeleeAttackTests {
 
@@ -23,9 +26,14 @@ public class MeleeAttackTests {
 
     @Before
     public void setup() {
-        state = new DescentGameState(new DescentParameters(234), 2);
-        fm.setup(state);
-        assertEquals("Avric Albright", state.getHeroes().get(0).getComponentName());
+        int seed = 234;
+        do {
+            seed += 1001;
+            state = new DescentGameState(new DescentParameters(seed), 2);
+            fm.setup(state);
+     //       System.out.println("Class: "  + state.getHeroes().get(0).getProperty("class"));
+        } while (state.getHeroes().get(0).getAbilities().stream()
+                .noneMatch(a -> a instanceof SurgeAttackAction && ((SurgeAttackAction)a).surge == Surge.STUN));
     }
 
     @Test
@@ -170,6 +178,87 @@ public class MeleeAttackTests {
         assertTrue(noDamage > 0);
     }
 
+    @Test
+    public void hasSurgeAbility() {
+        Hero hero = state.getHeroes().get(0);
+        assertEquals(1, hero.getAbilities().size());
+        for (Triggers da : hero.getAbilities().get(0).getTriggers())
+            assertEquals(Triggers.SURGE_DECISION, da);
+    }
 
+    @Test
+    public void stopAtSurgeDecision() {
+        Figure victim = state.getMonsters().get(0).get(0);
+        Figure actingFigure = state.getActingFigure();
+        DicePool attackDice = fixBlueAndYellowDice(2, 1);
+
+        MeleeAttack attack = new MeleeAttackOverride(
+                actingFigure.getComponentID(), victim.getComponentID(),
+                attackDice, null);
+        attack.execute(state);
+        assertFalse(attack.executionComplete(state));
+        assertEquals(attack, state.currentActionInProgress());
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(2, actions.size());
+        assertEquals(new SurgeAttackAction(Surge.STUN, actingFigure.getComponentID()), actions.get(0));
+        assertEquals(new EndSurgePhase(), actions.get(1));
+
+        actions.get(0).execute(state);
+        attack.registerActionTaken(state, actions.get(0));
+        assertTrue(attack.executionComplete(state));
+    }
+
+    private DicePool fixBlueAndYellowDice(int blueFace, int yellowFace) {
+        DicePool retValue = DicePool.constructDicePool("BLUE", "YELLOW");
+        retValue.roll(state.getRandom());
+        retValue.setFace(0, blueFace);
+        retValue.setFace(1, yellowFace);
+        return retValue;
+    }
+
+    @Test
+    public void canChooseToDoNothingAtSurgeDecisions() {
+        Figure victim = state.getMonsters().get(0).get(0);
+        Figure actingFigure = state.getActingFigure();
+        DicePool attackDice = fixBlueAndYellowDice(2, 1);
+
+        MeleeAttack attack = new MeleeAttackOverride(
+                actingFigure.getComponentID(), victim.getComponentID(),
+                attackDice, null);
+        attack.execute(state);
+        assertFalse(attack.executionComplete(state));
+        assertEquals(attack, state.currentActionInProgress());
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(2, actions.size());
+        assertEquals(new SurgeAttackAction(Surge.STUN, actingFigure.getComponentID()), actions.get(0));
+        assertEquals(new EndSurgePhase(), actions.get(1));
+
+        actions.get(1).execute(state);
+        attack.registerActionTaken(state, actions.get(1));
+        assertTrue(attack.executionComplete(state));
+    }
+
+    @Test
+    public void cannotChooseTheSameSurgeTwice() {
+        Figure victim = state.getMonsters().get(0).get(0);
+        Figure actingFigure = state.getActingFigure();
+        DicePool attackDice = fixBlueAndYellowDice(5, 1);  // we now have 2 surges
+
+        MeleeAttack attack = new MeleeAttackOverride(
+                actingFigure.getComponentID(), victim.getComponentID(),
+                attackDice, null);
+        attack.execute(state);
+        assertFalse(attack.executionComplete(state));
+        assertEquals(attack, state.currentActionInProgress());
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(new SurgeAttackAction(Surge.STUN, actingFigure.getComponentID()), actions.get(0));
+
+        actions.get(0).execute(state);
+        attack.registerActionTaken(state, actions.get(0));
+        assertTrue(attack.executionComplete(state));
+    }
 
 }

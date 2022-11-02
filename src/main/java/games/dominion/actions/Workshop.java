@@ -68,7 +68,7 @@ public class Workshop extends DominionAction implements IExtendedSequence {
             Workshop other = (Workshop) obj;
             return executed == other.executed && player == other.player;
         }
-        return true;
+        return false;
     }
 
     @Override

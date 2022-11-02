@@ -33,11 +33,14 @@ public class DescentDice extends Component {
 
     public int roll(Random r){
         int roll = r.nextInt(this.nSides) + 1;
-        this.damage = sides.get(roll).get("damage");
-        this.surge = sides.get(roll).get("surge");
-        this.range = sides.get(roll).get("range");
-        this.shielding = sides.get(roll).get("shielding");
+        setFace(roll);
         return 1;
+    }
+    public void setFace(int face) {
+        this.damage = sides.get(face).get("damage");
+        this.surge = sides.get(face).get("surge");
+        this.range = sides.get(face).get("range");
+        this.shielding = sides.get(face).get("shielding");
     }
 
     public static void loadDice(String filename)

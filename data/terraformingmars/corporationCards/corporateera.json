@@ -1,0 +1,30 @@
+[
+  {
+    "id": 11,
+    "name": "TERACTOR",
+    "annotation": "(Effect: When playing an Earth card, you pay 3 MC less for it. You start with 60 MC.)",
+    "tags": ["earth"],
+    "effect": [
+      {
+        "type": "discount",
+        "tag": "Earth",
+        "amount": 3
+      }
+    ],
+    "start":  ["60 megacredit"]
+  },
+  {
+    "id": 12,
+    "name": "SATURN SYSTEMS",
+    "annotation": "(Effect: Each time any Jovian tag is put into play, including this, increase your MC production 1 step. You start with 1 titanium production and 42 MC.)",
+    "tags": ["jovian"],
+    "effect": [
+      {
+        "type": "effect",
+        "if": "playcard(tag-Jovian-any)",
+        "then": "inc-megacreditprod-1"
+      }
+    ],
+    "start":  ["1 titaniumprod, 42 megacredit, 1 megacreditprod"]
+  }
+]

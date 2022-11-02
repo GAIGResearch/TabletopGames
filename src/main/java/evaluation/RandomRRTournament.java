@@ -22,12 +22,11 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param agents          - players for the tournament.
      * @param gameToPlay      - game to play in this tournament.
      * @param playersPerGame  - number of players per game.
-     * @param gamesPerMatchUp - number of games for each combination of players.
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
-    public RandomRRTournament(LinkedList<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                              int gamesPerMatchUp, boolean selfPlay, int totalMatchUps, long seed, AbstractParameters gameParams) {
-        super(agents, gameToPlay, playersPerGame, gamesPerMatchUp, selfPlay, gameParams);
+    public RandomRRTournament(List<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
+                              boolean selfPlay, int totalMatchUps, long seed, AbstractParameters gameParams) {
+        super(agents, gameToPlay, playersPerGame, 1, selfPlay, gameParams);
         this.totalMatchups = totalMatchUps;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
     }
@@ -64,7 +63,15 @@ public class RandomRRTournament extends RoundRobinTournament {
         Random rnd;
 
         public PermutationCycler(int maxNumberExclusive, long seed, int nPlayers) {
-            currentPermutation = IntStream.range(0, maxNumberExclusive).toArray();
+            if (maxNumberExclusive >= nPlayers)
+                currentPermutation = IntStream.range(0, maxNumberExclusive).toArray();
+            else {
+                // in this case we ensure the agents we do have are all equally represented - self-play will occur
+                currentPermutation = IntStream.range(0, maxNumberExclusive * nPlayers).toArray();
+                for (int i = maxNumberExclusive; i < currentPermutation.length; i++) {
+                    currentPermutation[i] = i % maxNumberExclusive;
+                }
+            }
             currentPosition = -1;
             rnd = new Random(seed);
             this.nPlayers = nPlayers;

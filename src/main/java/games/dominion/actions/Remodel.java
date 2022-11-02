@@ -2,22 +2,24 @@ package games.dominion.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.dominion.DominionConstants;
 import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 public class Remodel extends DominionAction implements IExtendedSequence {
 
+    public int BONUS_OVER_TRASHED_VALUE = 2;
     CardType cardTrashed;
     CardType cardGained;
-
-    public int BONUS_OVER_TRASHED_VALUE = 2;
 
     public Remodel(int playerId) {
         super(CardType.REMODEL, playerId);
@@ -37,21 +39,25 @@ public class Remodel extends DominionAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         DominionGameState state = (DominionGameState) gs;
         // We get a list of all cards in Hand. We must trash one of them (unless we have none, in which case we DoNothing)
+        List<AbstractAction> retValue = new ArrayList<>();
         if (cardTrashed == null) {
             // Phase 1 - trash a card in hand
             List<DominionCard> cardsInHand = state.getDeck(DominionConstants.DeckType.HAND, player).stream().collect(toList());
-            return cardsInHand.stream()
+            retValue = cardsInHand.stream()
                     .map(card -> new TrashCard(card.cardType(), player))
                     .distinct()
                     .collect(toList());
         } else {
             //Phase 2 - gain a card costing up to 2 more
             int budget = cardTrashed.cost + BONUS_OVER_TRASHED_VALUE;
-            return state.cardsToBuy().stream()
+            retValue = state.cardsToBuy().stream()
                     .filter(ct -> ct.cost <= budget)
                     .map(ct -> new GainCard(ct, player))
                     .collect(toList());
         }
+        if (retValue.isEmpty())
+            retValue.add(new DoNothing());  // either because we have nothing in hand, or because there is nothing to buy
+        return retValue;
     }
 
     @Override
@@ -71,6 +77,14 @@ public class Remodel extends DominionAction implements IExtendedSequence {
             if (bc.buyingPlayer == player)
                 cardGained = bc.cardType;
         }
+        if (action instanceof DoNothing) {
+            if (cardTrashed == null) {
+                cardTrashed = CardType.COPPER;
+                cardGained = CardType.COPPER;
+            }
+            if (cardGained == null)
+                cardGained = CardType.COPPER;
+        }
     }
 
     @Override
@@ -89,7 +103,7 @@ public class Remodel extends DominionAction implements IExtendedSequence {
         Remodel retValue = new Remodel(player);
         retValue.cardGained = cardGained;
         retValue.cardTrashed = cardTrashed;
-        return  retValue;
+        return retValue;
     }
 
     @Override

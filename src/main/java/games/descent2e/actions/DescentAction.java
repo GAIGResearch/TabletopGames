@@ -6,16 +6,17 @@ import games.descent2e.DescentGameState;
 
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public abstract class DescentAction extends AbstractAction {
 
-    final HashSet<Triggers> triggerPoints;
+    final Set<Triggers> triggerPoints;
 
     public DescentAction(Triggers triggerPoint) {
         this.triggerPoints = new HashSet<>();
         this.triggerPoints.add(triggerPoint);
     }
-    public DescentAction(HashSet<Triggers> triggerPoints) {
+    public DescentAction(Set<Triggers> triggerPoints) {
         this.triggerPoints = triggerPoints;
     }
 
@@ -30,6 +31,10 @@ public abstract class DescentAction extends AbstractAction {
         return false;
     }
     public abstract boolean canExecute(DescentGameState dgs);
+
+    public Set<Triggers> getTriggers() {
+        return triggerPoints;
+    }
 
     @Override
     public boolean equals(Object o) {

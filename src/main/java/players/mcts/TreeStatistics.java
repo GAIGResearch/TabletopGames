@@ -23,8 +23,8 @@ public class TreeStatistics {
         Queue<SingleTreeNode> nodeQueue = new ArrayDeque<>();
         if (root instanceof MultiTreeNode) {
             throw new AssertionError("Not expected");
-   //         for (SingleTreeNode node : ((MultiTreeNode) root).roots)
-   //             if (node != null) nodeQueue.add(node);
+            //         for (SingleTreeNode node : ((MultiTreeNode) root).roots)
+            //             if (node != null) nodeQueue.add(node);
         } else {
             nodeQueue.add(root);
         }
@@ -36,7 +36,7 @@ public class TreeStatistics {
             SingleTreeNode node = nodeQueue.poll();
             if (node.depth < maxDepth) {
                 nodesAtDepth[node.depth]++;
-                if (!node.getState().isNotTerminal())
+                if (node.terminalNode)
                     gameTerminalNodesAtDepth[node.depth]++;
                 totalActions += node.children.size();
                 if (node.children.size() > maxActions)

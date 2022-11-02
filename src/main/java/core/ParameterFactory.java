@@ -4,9 +4,11 @@ import evaluation.TunableParameters;
 import games.GameType;
 import games.battlelore.BattleloreGameParameters;
 import games.blackjack.BlackjackParameters;
+import games.cantstop.CantStopParameters;
 import games.catan.CatanParameters;
 import games.coltexpress.ColtExpressParameters;
 import games.descent2e.DescentParameters;
+import games.connect4.Connect4GameParameters;
 import games.diamant.DiamantParameters;
 import games.dicemonastery.DiceMonasteryParams;
 import games.dominion.DominionParameters;
@@ -17,6 +19,7 @@ import games.pandemic.PandemicParameters;
 import games.poker.PokerGameParameters;
 import games.stratego.StrategoParams;
 import games.sushigo.SGParameters;
+import games.terraformingmars.TMGameParameters;
 import games.tictactoe.TicTacToeGameParameters;
 import games.uno.UnoGameParameters;
 import games.virus.VirusGameParameters;
@@ -29,6 +32,8 @@ public class ParameterFactory {
                 return new PandemicParameters("data/pandemic/", seed);
             case TicTacToe:
                 return new TicTacToeGameParameters(seed);
+            case Connect4:
+                return new Connect4GameParameters(seed);
             case ExplodingKittens:
                 return new ExplodingKittensParameters(seed);
             case LoveLetter:
@@ -65,6 +70,10 @@ public class ParameterFactory {
                 return new StrategoParams(seed);
             case Descent2e:
                 return new DescentParameters(seed);
+            case TerraformingMars:
+                return new TMGameParameters(seed);
+            case CantStop:
+                return new CantStopParameters(seed);
         }
         throw new AssertionError("No default Parameters specified for Game " + game);
 

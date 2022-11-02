@@ -10,11 +10,8 @@ import utilities.Utils;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
@@ -64,8 +61,7 @@ public abstract class AbstractGUIManager {
      * @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
      */
-    protected void _update(AbstractPlayer player, AbstractGameState gameState) {
-    }
+    protected abstract void _update(AbstractPlayer player, AbstractGameState gameState);
 
     /**
      * Updates which action buttons should be visible to the players, and which should not.
@@ -94,32 +90,29 @@ public abstract class AbstractGUIManager {
      *
      * @param highlights - when button is clicked, any GUI highlights are cleared. This array contains all lists of
      *                   highlights maintained by the GUI. Can be null if not used.
-     * @param width      - width of this panel.
-     * @param height     - height of this panel.
+     * @param width - width of this panel.
+     * @param height - height of this panel.
+     * @param opaque - true by default. if false, all panels created are not opaque (transparent).
      * @return - JComponent containing all action buttons.
      */
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height) {
-        return createActionPanel(highlights, width, height, true, null, null, null);
+    protected JComponent createActionPanelOpaque(ScreenHighlight[] highlights, int width, int height, boolean opaque) {
+        return createActionPanel(highlights, width, height, true, opaque, null, null, null);
     }
 
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, Consumer<ActionButton> onActionSelected) {
-        return createActionPanel(highlights, width, height, true, onActionSelected, null, null);
+    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height) {
+        return createActionPanel(highlights, width, height, true, true, null, null, null);
     }
 
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height,
-                                           Consumer<ActionButton> onMouseEnter,
-                                           Consumer<ActionButton> onMouseExit) {
-        return createActionPanel(highlights, width, height, true, null, onMouseEnter, onMouseExit);
+    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, Consumer<ActionButton> onActionSelected) {
+        return createActionPanel(highlights, width, height, true, true, onActionSelected, null, null);
     }
 
-    protected JComponent createActionPanel (Collection[]highlights,int width, int height, boolean boxLayout){
-        return createActionPanel(highlights, width, height, boxLayout, null, null, null);
+    protected JComponent createActionPanel (ScreenHighlight[]highlights,int width, int height, boolean boxLayout){
+        return createActionPanel(highlights, width, height, boxLayout, true, null, null, null);
     }
-
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout,
-                                           Consumer<ActionButton> onActionSelected,
-                                           Consumer<ActionButton> onMouseEnter,
-                                           Consumer<ActionButton> onMouseExit) {
+    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, boolean boxLayout, boolean opaque, Consumer<ActionButton> onActionSelected,
+                Consumer<ActionButton> onMouseEnter,
+                Consumer<ActionButton> onMouseExit) {
         JPanel actionPanel = new JPanel();
         if (boxLayout) {
             actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
@@ -141,6 +134,11 @@ public abstract class AbstractGUIManager {
         if (boxLayout) {
             pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         }
+
+        actionPanel.setOpaque(opaque);
+        pane.setOpaque(opaque);
+        pane.getViewport().setOpaque(opaque);
+
         return pane;
     }
 
@@ -172,11 +170,15 @@ public abstract class AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        historyInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
-        historyContainer = new JScrollPane(historyInfo);
-        historyContainer.setPreferredSize(new Dimension(width / 2 - 25, height));
+        createActionHistoryPanel(width/2 - 10, height);
         wrapper.add(historyContainer);
         return wrapper;
+    }
+
+    protected void createActionHistoryPanel(int width, int height) {
+        historyInfo.setPreferredSize(new Dimension(width, height));
+        historyContainer = new JScrollPane(historyInfo);
+        historyContainer.setPreferredSize(new Dimension(width - 15, height));
     }
 
     /**
@@ -211,10 +213,11 @@ public abstract class AbstractGUIManager {
      * Updates the GUI, public method called from the Game class. Updates game state info panels, resets action buttons
      * and then calls the _update() method to allow subclasses to update their inner state.
      *
-     * @param player    - current player acting.
-     * @param gameState - current game state to be used in updating visuals.
+     * @param player      - current player acting.
+     * @param gameState   - current game state to be used in updating visuals.
+     * @param showActions - if false, action buttons not shown
      */
-    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions) {
+    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions){
         updateGameStateInfo(gameState);
         _update(player, gameState);
         if (showActions)
@@ -253,19 +256,19 @@ public abstract class AbstractGUIManager {
         AbstractAction action;
         ActionButton[] actionButtons;
 
-        public ActionButton(ActionController ac, Collection[] highlights) {
+        public ActionButton(ActionController ac, ScreenHighlight[] highlights) {
             this(ac, highlights, null, null, null);
         }
 
-        public ActionButton(ActionController ac, Collection[] highlights,
+        public ActionButton(ActionController ac, ScreenHighlight[] highlights,
                             Consumer<ActionButton> onActionSelected,
                             Consumer<ActionButton> onMouseEnter,
                             Consumer<ActionButton> onMouseExit) {
             addActionListener(e -> {
                 ac.addAction(action);
                 if (highlights != null) {
-                    for (Collection c : highlights) {
-                        c.clear();
+                    for (ScreenHighlight c : highlights) {
+                        c.clearHighlights();
                     }
                 }
                 resetActionButtons();

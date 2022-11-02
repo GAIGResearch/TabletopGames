@@ -15,7 +15,6 @@ import utilities.Utils;
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode;
-import static utilities.Utils.GameResult.*;
 
 public class ExplodingKittensGameState extends AbstractGameState implements IPrintable {
 

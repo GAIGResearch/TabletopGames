@@ -7,20 +7,21 @@ import utilities.Pair;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class MASTPlayer extends AbstractPlayer {
 
     Random rnd;
-    SingleTreeNode root;
+    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics;
     double temperature = 0.1;
 
     public MASTPlayer(Random rnd) {
         this.rnd = rnd;
     }
 
-    public void setRoot(SingleTreeNode root) {
-        this.root = root;
+    public void setStats(List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics) {
+        this.MASTStatistics = MASTStatistics;
     }
 
     @Override
@@ -28,10 +29,10 @@ public class MASTPlayer extends AbstractPlayer {
         double[] pdf = new double[possibleActions.size()];
         for (int i = 0; i < possibleActions.size(); i++) {
             AbstractAction a = possibleActions.get(i);
-            double actionValue = 0.0;
+            double actionValue = 10.0; // arbitrary and non-zero
             int p = gameState.getCurrentPlayer();
-            if (root.MASTStatistics.get(p).containsKey(a)) {
-                Pair<Integer, Double> stats = root.MASTStatistics.get(p).get(a);
+            if (MASTStatistics.get(p).containsKey(a)) {
+                Pair<Integer, Double> stats = MASTStatistics.get(p).get(a);
                 actionValue = stats.a > 0 ? stats.b / stats.a : 0.0;
             }
             pdf[i] = actionValue;
@@ -57,6 +58,8 @@ public class MASTPlayer extends AbstractPlayer {
 
     @Override
     public MASTPlayer copy() {
-        return new MASTPlayer(new Random(rnd.nextInt()));
+        MASTPlayer retValue = new MASTPlayer(new Random(rnd.nextInt()));
+        retValue.setStats(MASTStatistics);
+        return retValue;
     }
 }

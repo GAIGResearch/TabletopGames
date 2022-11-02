@@ -6,9 +6,11 @@ import core.AbstractPlayer;
 import core.ParameterFactory;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
+import core.interfaces.IStatisticLogger;
 import core.interfaces.ITunableParameters;
 import evodef.EvoAlg;
 import evodef.SearchSpace;
+import evodef.SolutionEvaluator;
 import games.GameType;
 import ntbea.MultiNTupleBanditEA;
 import ntbea.NTupleBanditEA;
@@ -69,7 +71,7 @@ public class ParameterSearch {
                         "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation \n" +
                         "\tverbose        Will log the results marginalised to each dimension, and the Top 10 best tuples for each run \n" +
                         "\tseed=          Random seed for Game use (not used by NTBEA itself). Defaults to System.currentTimeMillis()\n" +
-                        "\tlogFile=       Output file with results of each run for easier statistical analysis"
+                        "\tlogFile=       Output file with results of each run for easier statistical analysis\n"
         );
 
         if (argsList.size() < 3)
@@ -181,7 +183,7 @@ public class ParameterSearch {
         if (tuningGame) {
             if (new File(evalMethod).exists()) {
                 // load from file
-                gameHeuristic = Utils.loadFromFile(evalMethod);
+                gameHeuristic = Utils.loadClassFromFile(evalMethod);
             } else {
                 if (evalMethod.contains(".json"))
                     throw new AssertionError("File not found : " + evalMethod);
@@ -230,21 +232,17 @@ public class ParameterSearch {
         Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
             landscapeModel.reset();
+            evaluator.statsLogger = IStatisticLogger.createLogger("utilities.SummaryLogger", "Agent_" + String.format("%2d", repeats+1) + "_" + logfile);
             Pair<Double, Double> r = runNTBEA(evaluator, null, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
-            printDetailsOfRun(retValue, searchSpace, logfile);
-            if (verbose) {
-                System.out.println("MCTS Statistics: ");
-                System.out.println(evaluator.statsLogger.toString());
-            }
-            evaluator.statsLogger = new SummaryLogger();
+            printDetailsOfRun(retValue, searchSpace, logfile, verbose, evaluator.statsLogger);
             if (retValue.a.a > bestResult.a.a)
                 bestResult = retValue;
 
         }
         System.out.println("\nFinal Recommendation: ");
         // we don't log the final run to file to avoid duplication
-        printDetailsOfRun(bestResult, searchSpace, "");
+        printDetailsOfRun(bestResult, searchSpace, "", false, null);
     }
 
     public static void runMultiNTBEA(NTupleSystem landscapeModel, String[] args) {
@@ -296,7 +294,7 @@ public class ParameterSearch {
             landscapeModel.reset();
             Pair<Double, Double> r = runNTBEA(null, evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
-            printDetailsOfRun(retValue, searchSpace, logfile);
+            printDetailsOfRun(retValue, searchSpace, logfile, verbose, null);
             printDiversityResults(landscapeModel, kExplore);
 
             if (retValue.a.a > bestResult.a.a)
@@ -305,7 +303,7 @@ public class ParameterSearch {
         }
         System.out.println("\nFinal Recommendation: ");
         // we don't log the final run to file to avoid duplication
-        printDetailsOfRun(bestResult, searchSpace, "");
+        printDetailsOfRun(bestResult, searchSpace, "", false, null);
     }
 
 
@@ -320,13 +318,18 @@ public class ParameterSearch {
      *                    a more accurate estimate of their utility).
      * @param searchSpace The relevant searchSpace
      */
-    private static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace, String logFile) {
+    public static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace, String logFile, boolean verbose, IStatisticLogger statsLogger) {
         System.out.printf("Recommended settings have score %.3g +/- %.3g:\t%s\n %s%n",
                 data.a.a, data.a.b,
                 Arrays.stream(data.b).mapToObj(it -> String.format("%.0f", it)).collect(joining(", ")),
                 IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
                         .map(p -> String.format("\t%s:\t%s\n", searchSpace.name(p.a), valueToString(p.a, p.b.intValue(), searchSpace)))
                         .collect(joining(" ")));
+
+        if (verbose && statsLogger != null && logFile.isEmpty()) {
+            System.out.println("Agent Statistics: ");
+            System.out.println(statsLogger);
+        }
 
         if (!logFile.isEmpty()) {
             try {
@@ -348,6 +351,16 @@ public class ParameterSearch {
                 writer.write(firstPart + values + "\n");
                 writer.flush();
                 writer.close();
+
+                if (statsLogger != null) {
+                    statsLogger.record("estimated value", data.a.a);
+                    for (int index = 0; index < data.b.length; index++) {
+                        String key = searchSpace.name(index);
+                        String value = valueToString(index, (int) data.b[index], searchSpace);
+                        statsLogger.record(key, value);
+                    }
+                    statsLogger.processDataAndFinish();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println(e.getMessage() + " : Error accessing file " + logFile);
@@ -473,7 +486,7 @@ public class ParameterSearch {
      *                        really matter.
      * @return This returns Pair<Mean, Std Error on Mean> as calculated from the evaluation games
      */
-    public static Pair<Double, Double> runNTBEA(GameEvaluator evaluator,
+    public static Pair<Double, Double> runNTBEA(SolutionEvaluator evaluator,
                                                 GameMultiPlayerEvaluator multiPlayerEvaluator,
                                                 EvoAlg searchFramework,
                                                 int totalRuns, int reportEvery,
@@ -532,8 +545,8 @@ public class ParameterSearch {
             }
         }
         // now run the evaluation games on the final recommendation
-        if (evaluator != null && evalGames > 0) {
-            evaluator.reportStatistics = true;
+        if (evaluator instanceof GameEvaluator && evalGames > 0) {
+            ((GameEvaluator) evaluator).reportStatistics = true;
             double[] results = IntStream.range(0, evalGames)
                     .mapToDouble(answer -> {
                         int[] settings = Arrays.stream(landscapeModel.getBestOfSampled())
@@ -546,7 +559,7 @@ public class ParameterSearch {
             double stdErr = Math.sqrt(Arrays.stream(results)
                     .map(d -> Math.pow(d - avg, 2.0)).sum()) / (evalGames - 1.0);
 
-            evaluator.reportStatistics = false;
+            ((GameEvaluator) evaluator).reportStatistics = false;
             return new Pair<>(avg, stdErr);
         } else {
             return new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled()), 0.0);

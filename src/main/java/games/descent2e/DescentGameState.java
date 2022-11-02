@@ -8,6 +8,7 @@ import core.components.*;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
+import games.descent2e.actions.DescentAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.actions.Triggers;
@@ -15,6 +16,7 @@ import games.descent2e.concepts.Quest;
 import utilities.Vector2D;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DescentGameState extends AbstractGameState implements IPrintable {
 
@@ -208,6 +210,13 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return searchCards;
     }
 
+    /*
+    This method is fine when we are circulating through each hero and monster in turn for taking their actions
+    It will not necessarily suffice when we have interrupt actions. Consider the situation in which one player has two
+    heroes, and one of the heroes has an ability that allows a monster move to be interrupted.
+    In this case the Action (interrupt Move ability) should encapsulate within it the Figure that is
+    executing the action (if this is at all relevant).
+     */
     public Figure getActingFigure() {
         // Find current monster group + monster playing
         int monsterGroupIdx = ((DescentTurnOrder) getTurnOrder()).monsterGroupActingNext;
@@ -233,16 +242,25 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return overlordPlayer;
     }
 
-    public boolean playerHasAvailableInterrupt(int player, Triggers trigger) {
-        // TODO: implement with look through Abilities/Items/Actions which fit
-        return false;
-    }
-
     public List<AbstractAction> getInterruptActionsFor(int player, Triggers trigger) {
-        List<AbstractAction> retValue = new ArrayList<>();
-        // TODO: Run through the inventory or items/cards/abilities to see which have
-        // an action that can be used at this trigger
-        retValue.add(new DoNothing());
+        List<DescentAction> descentActions;
+        if (player == overlordPlayer) {
+            // we run through monsters
+            descentActions = monsters.stream().flatMap(List::stream)
+                    .flatMap(m -> m.getAbilities().stream())
+                    .collect(Collectors.toList());
+        } else {
+            // else we just look at heroes that belong to the acting Figure
+            // TODO: Add in effects from cards in the player's hand
+            // We rely on canExecute() to filter out irrelevant ones
+            descentActions = heroes.stream().filter(h -> h.getOwnerId() == player)
+                    .flatMap(h -> h.getAbilities().stream())
+                    .collect(Collectors.toList());
+        }
+        // Then filter to just the ones applicable to this Trigger point that are executable
+        List<AbstractAction> retValue = descentActions.stream()
+                .filter(a -> a.canExecute(trigger, this))
+                .map(a -> (AbstractAction) a).collect(Collectors.toList());
         return retValue;
     }
 
