@@ -52,27 +52,27 @@
         "result-overlord": "WIN"
       }
     ],
-    "common-reward": {
+    "common-rewards": [{
       "rewardType": "Attribute",
       "attribute": "XP",
       "value": 1.0
-    },
-    "overlord-reward-if-win": [{
+    }],
+    "overlord-rewards": [{
       "rewardType": "Attribute",
       "attribute": "XP",
       "value": 1.0,
       "mustWinToReceive": true
     }],
-    "hero-reward": [{
+    "hero-rewards": [{
       "rewardType": "Token",
       "token": "Villager",
       "value": 1.0,
       "mustLoseToReceive": true,
-      "apply": "set"
+      "apply": "Set"
     }, {
       "rewardType": "Attribute",
       "attribute": "Gold",
-      "value": 25,
+      "value": 25.0,
       "multiplier": {
         "type": "Token",
         "token": "Villager"

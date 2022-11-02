@@ -10,6 +10,7 @@ import games.descent2e.components.Monster;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Hero;
+import games.descent2e.concepts.DescentReward;
 import games.descent2e.concepts.GameOverCondition;
 import games.descent2e.concepts.Quest;
 import org.json.simple.JSONArray;
@@ -228,7 +229,7 @@ public class DescentGameData extends AbstractGameData {
                 // Find game over conditions
                 JSONArray gos = (JSONArray) obj.get("game-over");
                 ArrayList<GameOverCondition> conditions = new ArrayList<>();
-                if (ts != null) {
+                if (gos != null) {
                     for (Object o1 : gos) {
                         JSONObject def = (JSONObject) o1;
                         String conditionClass = (String) def.get("id");
@@ -245,10 +246,31 @@ public class DescentGameData extends AbstractGameData {
                 }
                 q.setGameOverConditions(conditions);
 
-                // Find rewards TODO
-                q.setCommonRewards();
-                q.setHeroRewards();
-                q.setOverlordRewards();
+                // Find rewards
+                JSONArray crs = (JSONArray) obj.get("common-rewards");
+                ArrayList<DescentReward> commonRewards = new ArrayList<>();
+                if (crs != null) {
+                    for (Object o1 : crs) {
+                        commonRewards.add(DescentReward.parse((JSONObject) o1));
+                    }
+                }
+                q.setCommonRewards(commonRewards);
+                JSONArray hrs = (JSONArray) obj.get("hero-rewards");
+                ArrayList<DescentReward> heroRewards = new ArrayList<>();
+                if (hrs != null) {
+                    for (Object o1 : hrs) {
+                        commonRewards.add(DescentReward.parse((JSONObject) o1));
+                    }
+                }
+                q.setHeroRewards(heroRewards);
+                JSONArray ors = (JSONArray) obj.get("overlord-rewards");
+                ArrayList<DescentReward> overlordRewards = new ArrayList<>();
+                if (ors != null) {
+                    for (Object o1 : ors) {
+                        commonRewards.add(DescentReward.parse((JSONObject) o1));
+                    }
+                }
+                q.setOverlordRewards(overlordRewards);
 
                 // Quest read complete
                 quests.add(q);
