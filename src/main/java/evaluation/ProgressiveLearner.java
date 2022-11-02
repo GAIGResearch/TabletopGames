@@ -96,7 +96,7 @@ public class ProgressiveLearner {
                             "\t               This location(s) for this injection in the JSON file must be marked with '*FILE*'\n" +
                             "\t               The content of the 'heuristic' argument will be injected to replace *HEURISTIC* in the file.\n" +
                             "\t               It can also optionally have the class to be used as FeatureVector marked with '*PHI*'\n" +
-                            "\t               in which case the value specifies in the statePhi argument will be injected.\n" +
+                            "\t               in which case the value specified in the statePhi argument will be injected.\n" +
                             "\t               A default heuristic can be specified for the initial iteration with '*DEFAULT*'\n" +
                             "\t               in which case the defaultHeuristic argument will be used.\n" +
                             "\tfileName=      The prefix to use on the files generate on each learning iteration.\n" +
@@ -119,7 +119,7 @@ public class ProgressiveLearner {
                             "\tdefaultHeuristic=Defaults to a null heuristic (random play). This is only used in the first iteration\n" +
                             "\t               when we have no data.  \n" +
                             "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n" +
-                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000."
+                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000.\n"
             );
             return;
         }
