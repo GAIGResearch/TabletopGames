@@ -31,6 +31,7 @@ public class Figure extends Token {
         MovePoints,
         Health,
         XP,
+        Gold,
         Fatigue,
         Might,
         Willpower,
@@ -71,6 +72,7 @@ public class Figure extends Token {
         conditions = new HashSet<>();
         attributes = new HashMap<>();
         attributes.put(XP, new Counter(0, 0, -1, "XP"));
+        attributes.put(Gold, new Counter(0, 0, -1, "Gold"));
         abilities = new ArrayList<>();
         nActionsExecuted = new Counter(0, 0, nActionsPossible, "Actions executed");
     }

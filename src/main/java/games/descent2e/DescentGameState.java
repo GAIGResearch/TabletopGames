@@ -242,6 +242,10 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         return overlordPlayer;
     }
 
+    public Figure getOverlord() {
+        return overlord;
+    }
+
     public List<AbstractAction> getInterruptActionsFor(int player, Triggers trigger) {
         List<DescentAction> descentActions;
         if (player == overlordPlayer) {

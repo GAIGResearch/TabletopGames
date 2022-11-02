@@ -245,6 +245,11 @@ public class DescentGameData extends AbstractGameData {
                 }
                 q.setGameOverConditions(conditions);
 
+                // Find rewards TODO
+                q.setCommonRewards();
+                q.setHeroRewards();
+                q.setOverlordRewards();
+
                 // Quest read complete
                 quests.add(q);
             }

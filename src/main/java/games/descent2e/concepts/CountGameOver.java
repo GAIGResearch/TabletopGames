@@ -1,58 +1,28 @@
 package games.descent2e.concepts;
 
-import core.components.Component;
 import games.descent2e.DescentGameState;
-import games.descent2e.components.Figure;
 import org.json.simple.JSONObject;
 import utilities.Utils;
 
-import java.util.ArrayList;
-
 public class CountGameOver extends GameOverCondition {
     // IMPORTANT: All values are effectively final and should not be changed after parsing initialisation
-    CountType countType;
+    CountGameFeature countFeature;
     ComparisonType comparisonType;
     int target;
-    String figureNameContains;
     Utils.GameResult resultOverlord, resultHeroes;
 
     @Override
     public Utils.GameResult test(DescentGameState gs) {
-        int count = count(gs);
+        int count = countFeature.count(gs);
         if (comparisonType.compare(count, target)) {
             return endGame(gs);
         }
         return Utils.GameResult.GAME_ONGOING;
     }
 
-    private int count(DescentGameState gs) {
-        ArrayList<Figure> figures = new ArrayList<>();
-        for (Component c: gs.getAllComponents().getComponents()) {
-            if (c instanceof Figure && c.getComponentName().contains(figureNameContains)) {
-                figures.add((Figure) c);
-            }
-        }
-        if (countType == CountType.Attribute) {
-            int sum = 0;
-            for (Figure f: figures) {
-                sum += f.getAttributeValue(countType.attribute);
-            }
-            return sum;
-        } else if (countType == CountType.NFiguresAlive) {
-            int count = 0;
-            for (Figure f : figures) {
-                if (!f.getAttribute(Figure.Attribute.Health).isMinimum()) count++;
-            }
-            return count;
-        }
-        return -1;
-    }
-
     @Override
     public void parse(JSONObject jsonObject) {
-        countType = CountType.valueOf((String) jsonObject.get("type"));
-        if (countType == CountType.Attribute) countType.attribute = Figure.Attribute.valueOf((String) jsonObject.get("attribute"));
-        figureNameContains = (String) jsonObject.get("figureNameContains");
+        countFeature = CountGameFeature.parse((JSONObject) jsonObject.get("count"));
         target = (int)(long)jsonObject.get("target");
         comparisonType = ComparisonType.valueOf((String) jsonObject.get("comparison-type"));
         resultHeroes = Utils.GameResult.valueOf((String) jsonObject.get("result-heroes"));
@@ -61,14 +31,14 @@ public class CountGameOver extends GameOverCondition {
 
     @Override
     public String toString() {
-        return "Count " + countType.toString() + " " + figureNameContains + " " + comparisonType.toString() + target
+        return "Count " + countFeature.toString() + " " + comparisonType.toString() + target
                 + "? " + "Heroes: " + resultHeroes + "; Overlord: " + resultOverlord;
     }
 
     @Override
     public String getString(DescentGameState gs) {
-        int count = count(gs);
-        return "Count " + countType.toString() + " " + figureNameContains + ": " + count + comparisonType.toString() + target
+        int count = countFeature.count(gs);
+        return "Count " + countFeature.toString() + ": " + count + comparisonType.toString() + target
                 + "? " + "Heroes: " + resultHeroes + "; Overlord: " + resultOverlord;
     }
 
@@ -79,24 +49,6 @@ public class CountGameOver extends GameOverCondition {
             else gs.setPlayerResult(resultHeroes, i);
         }
         return Utils.GameResult.GAME_END;
-    }
-
-
-    enum CountType {
-        NFiguresAlive,  // how many of the figures are alive
-        Attribute;  // sum of values of specific attribute
-        Figure.Attribute attribute;
-
-        @Override
-        public String toString() {
-            switch(this) {
-                case NFiguresAlive:
-                    return "N";
-                case Attribute:
-                    return attribute.name();
-            }
-            return null;
-        }
     }
 
     enum ComparisonType {

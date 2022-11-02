@@ -19,8 +19,10 @@
     "game-over": [
       {
         "id": "CountGameOver",
-        "type": "NFiguresAlive",
-        "figureNameContains": "Hero",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Hero"
+        },
         "target": 0,
         "comparison-type": "Equal",
         "result-heroes": "LOSE",
@@ -28,8 +30,10 @@
       },
       {
         "id": "CountGameOver",
-        "type": "NFiguresAlive",
-        "figureNameContains": "Barghest",
+        "count": {
+          "type": "NFiguresAlive",
+          "figureNameContains": "Barghest"
+        },
         "target": 0,
         "comparison-type": "Equal",
         "result-heroes": "WIN",
@@ -37,18 +41,43 @@
       },
       {
         "id": "CountGameOver",
-        "type": "Attribute",
-        "attribute": "Fatigue",
-        "figureNameContains": "Overlord",
+        "count": {
+          "type": "Attribute",
+          "attribute": "Fatigue",
+          "figureNameContains": "Overlord"
+        },
         "target": 6,
         "comparison-type": "More",
         "result-heroes": "LOSE",
         "result-overlord": "WIN"
       }
     ],
-    "all-reward": ["1XP"],
-    "overlord-reward-if-win": ["1XP", "heroes discard all but 1 Villager"],
-    "hero-reward": ["25G x Villager"],
+    "common-reward": {
+      "rewardType": "Attribute",
+      "attribute": "XP",
+      "value": 1.0
+    },
+    "overlord-reward-if-win": [{
+      "rewardType": "Attribute",
+      "attribute": "XP",
+      "value": 1.0,
+      "mustWinToReceive": true
+    }],
+    "hero-reward": [{
+      "rewardType": "Token",
+      "token": "Villager",
+      "value": 1.0,
+      "mustLoseToReceive": true,
+      "apply": "set"
+    }, {
+      "rewardType": "Attribute",
+      "attribute": "Gold",
+      "value": 25,
+      "multiplier": {
+        "type": "Token",
+        "token": "Villager"
+      }
+    }],
     "boards": [
       "board1"
     ],

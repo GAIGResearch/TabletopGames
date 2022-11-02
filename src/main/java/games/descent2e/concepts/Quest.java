@@ -17,8 +17,9 @@ public class Quest {
 //    private ArrayList<DescentRule> rules;  // define these in code
 //    private int heroWinsMinSatisfied;
 //    private int overlordWinsMinSatisfied;
-//    private ArrayList<DescentReward> overlordRewards;
-//    private ArrayList<DescentReward> heroReward;
+    private ArrayList<DescentReward> overlordRewards;
+    private ArrayList<DescentReward> heroRewards;
+    private ArrayList<DescentReward> commonRewards;
     private ArrayList<String> boards;
     private HashMap<String, ArrayList<Vector2D>> startingLocations;
     private ArrayList<Quest> nextMainQuests;
@@ -78,6 +79,30 @@ public class Quest {
     }
     public ArrayList<GameOverCondition> getGameOverConditions() {
         return gameOverConditions;
+    }
+
+    public ArrayList<DescentReward> getCommonRewards() {
+        return commonRewards;
+    }
+
+    public ArrayList<DescentReward> getHeroRewards() {
+        return heroRewards;
+    }
+
+    public ArrayList<DescentReward> getOverlordRewards() {
+        return overlordRewards;
+    }
+
+    public void setCommonRewards(ArrayList<DescentReward> commonRewards) {
+        this.commonRewards = commonRewards;
+    }
+
+    public void setOverlordRewards(ArrayList<DescentReward> overlordRewards) {
+        this.overlordRewards = overlordRewards;
+    }
+
+    public void setHeroRewards(ArrayList<DescentReward> heroRewards) {
+        this.heroRewards = heroRewards;
     }
 
     public Quest copy() {

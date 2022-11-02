@@ -11,6 +11,7 @@ import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
+import games.descent2e.concepts.DescentReward;
 import games.descent2e.concepts.GameOverCondition;
 import games.descent2e.concepts.Quest;
 import utilities.Pair;
@@ -551,8 +552,24 @@ public class DescentForwardModel extends AbstractForwardModel {
     }
 
     private boolean checkEndOfGame(DescentGameState dgs) {
+        // TODO end of campaign / other phases
         for (GameOverCondition condition: dgs.currentQuest.getGameOverConditions()) {
-            if (condition.test(dgs) == Utils.GameResult.GAME_END) return true;
+            if (condition.test(dgs) == Utils.GameResult.GAME_END) {
+                // Quest is over, give rewards
+                List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();
+                List<DescentReward> heroRewards = dgs.currentQuest.getCommonRewards();
+                List<DescentReward> overlordRewards = dgs.currentQuest.getCommonRewards();
+                for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    for (DescentReward dr: commonRewards) dr.applyReward(dgs, i);
+                    if (i == dgs.overlordPlayer) {
+                        for (DescentReward dr: overlordRewards) dr.applyReward(dgs, i);
+                    } else {
+                        for (DescentReward dr: heroRewards) dr.applyReward(dgs, i);
+                    }
+                }
+                // Quest is over, return true
+                return true;
+            }
         }
         return false;
     }
