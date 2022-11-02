@@ -2,7 +2,6 @@ package players.mcts;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import games.sushigo.SushiGoHeuristic;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
@@ -204,7 +203,7 @@ class BasicPBTreeNode {
              * a = argmax(Q(s,a) + c(root(ln.N(s)/N(s,a)) + h(s,a)/1+N(s,a)
              */
             //double progressiveBias = child.rollOut() / (1 + child.nVisits);
-            double heuristicScore = new SushiGoHeuristic().evaluateState(state, state.getCurrentPlayer());
+            double heuristicScore = player.params.heuristic.evaluateState(state, state.getCurrentPlayer());
             double progressiveBiasTerm = heuristicScore / (1 + child.nVisits + player.params.epsilon);
             // Find 'UCB' value
             // If 'we' are taking a turn we use classic UCB

@@ -136,17 +136,9 @@ public class RoundRobinTournament extends AbstractTournament {
             /* 2. Set up players */
             MCTSParams params1 = new MCTSParams();
             params1.heuristic = new SushiGoHeuristic();
-<<<<<<< Updated upstream
-            agents.add(new BasicMCTSPlayer(params1));
-=======
             agents.add(new BasicPBMCTSPlayer(params1));
 
-//            agents.add(new RHEAPlayer());
->>>>>>> Stashed changes
-
-            MCTSParams params2 = new MCTSParams();
-            params2.heuristic = new SushiGoHeuristic_2();
-            agents.add(new BasicMCTSPlayer(params2));
+            agents.add(new BasicMCTSPlayer());
 
 //            agents.add(new MCTSPlayer());
 //            agents.add(new BasicMCTSPlayer());
