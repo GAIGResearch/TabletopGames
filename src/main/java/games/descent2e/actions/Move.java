@@ -61,14 +61,6 @@ public class Move extends AbstractAction {
      * @param position - tile to go through
      */
     private static void moveThrough(DescentGameState dgs, Figure f, Vector2D position, boolean place, Monster.Direction orientation) {
-        BoardNode destinationTile = dgs.getMasterBoard().getElement(position.getX(), position.getY());
-        DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, destinationTile.getComponentName());
-        if (terrain != null) {
-            for (Map.Entry<Figure.Attribute, Integer> e : terrain.getMoveCosts().entrySet()) {
-                f.incrementAttribute(e.getKey(), -e.getValue());
-            }
-        }
-
         if (place) {
             // TODO: the following code needs to be complemented by 3 things before commented back in:
             // - Move action calculations in FM allow big monsters to move as if 1x1, unless that completes their movement action
@@ -87,6 +79,14 @@ public class Move extends AbstractAction {
 //                destinationTile.setProperty(tempPlacement);
 //            }
             place(dgs, f, position, orientation);
+        } else {
+            BoardNode destinationTile = dgs.getMasterBoard().getElement(position.getX(), position.getY());
+            DescentTypes.TerrainType terrain = Utils.searchEnum(DescentTypes.TerrainType.class, destinationTile.getComponentName());
+            if (terrain != null) {
+                for (Map.Entry<Figure.Attribute, Integer> e : terrain.getMoveCosts().entrySet()) {
+                    f.incrementAttribute(e.getKey(), -e.getValue());
+                }
+            }
         }
     }
 
