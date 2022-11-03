@@ -42,7 +42,7 @@ public class ApacheLogisticLearner extends AbstractLearner {
             e.printStackTrace();
         }
         // for 4 players
-        df = spark.sql("select " + String.join(", ", regressors) + ", (1 - (Ordinal13 - 1) / 3) as Ordinal From data");
+        df = spark.sql(String.format("select %s, (1 - (Ordinal13 - 1) / 3) as Ordinal From data", String.join(", ", regressors)));
 
         df.show(10);
 
@@ -75,10 +75,11 @@ public class ApacheLogisticLearner extends AbstractLearner {
         public void learnFrom (String...files){
             loadData(files);
             // first add the target to the data array so that we can convert to an apache dataset (we just add on the target)
-            double[][] apacheDataArray = new double[dataArray.length][dataArray[0].length + 1];
+            double[][] apacheDataArray = new double[dataArray.length][dataArray[0].length];
             for (int i = 0; i < dataArray.length; i++) {
-                System.arraycopy(dataArray[i], 0, apacheDataArray[i], 0, descriptions.length + 1);
-                apacheDataArray[i][descriptions.length + 1] = target[i][0]; // add target to end
+                // we skip the BIAS at the front here, as we add that in separately
+                System.arraycopy(dataArray[i], 1, apacheDataArray[i], 0, descriptions.length);
+                apacheDataArray[i][descriptions.length] = target[i][0]; // add target to end
             }
             // convert the raw data into Rows
             List<Row> rowList = Arrays.stream(apacheDataArray)
@@ -86,10 +87,9 @@ public class ApacheLogisticLearner extends AbstractLearner {
                     .map(RowFactory::create)
                     .collect(toList());
             // use the header to get the names, and all of them are double by design
-            String[] apacheHeader = new String[descriptions.length + 2];
-            apacheHeader[0] = "BIAS";
-            System.arraycopy(descriptions, 0, apacheHeader, 1, descriptions.length);
-            apacheHeader[descriptions.length + 1] = "target";
+            String[] apacheHeader = new String[descriptions.length + 1];
+            System.arraycopy(descriptions, 0, apacheHeader, 0, descriptions.length);
+            apacheHeader[descriptions.length] = "target";
             // set up the column names
             StructType schema = new StructType(Arrays.stream(apacheHeader)
                     .map(name -> new StructField(name, DataTypes.DoubleType, true, Metadata.empty()))
@@ -103,7 +103,7 @@ public class ApacheLogisticLearner extends AbstractLearner {
                 apacheData.show(10);
 
             RFormula formula = new RFormula()
-                    .setFormula("target ~ BIAS + " + String.join(" + ", descriptions))
+                    .setFormula("target ~ " + String.join(" + ", descriptions))
                     .setFeaturesCol("features")
                     .setLabelCol("target");
 
@@ -113,11 +113,11 @@ public class ApacheLogisticLearner extends AbstractLearner {
                 training.show(10);
 
             GeneralizedLinearRegression lr = new GeneralizedLinearRegression()
+                    .setFitIntercept(true)
                     .setMaxIter(10)
                     .setFamily("Binomial")
                     .setLink("Logit")
                     .setRegParam(0.1)
-                    //       .setElasticNetParam(0.8)
                     .setLabelCol("target")
                     .setFeaturesCol("features");
 
@@ -126,12 +126,15 @@ public class ApacheLogisticLearner extends AbstractLearner {
             if (debug)
                 System.out.println(lrModel.coefficients());
 
-            coefficients = lrModel.coefficients().toArray();
+            coefficients = new double[descriptions.length + 1];
+            coefficients[0] = lrModel.intercept();
+            double[] coeffs = lrModel.coefficients().toArray();
+            System.arraycopy(coeffs, 0, coefficients, 1, coeffs.length);
 
         }
 
         @Override
-        public void writeToFile (String file){
+        public void writeToFile (String file) {
             try (FileWriter writer = new FileWriter(file, false)) {
                 writer.write("BIAS\t" + String.join("\t", descriptions) + "\n");
                 writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.3g", d)).collect(joining("\t")));
@@ -142,7 +145,7 @@ public class ApacheLogisticLearner extends AbstractLearner {
         }
 
         @Override
-        public String name () {
+        public String name() {
             return "ApacheLogistic";
         }
     }
