@@ -1,12 +1,18 @@
 package games.descent2e.gui;
 
+import core.components.Card;
+import core.components.Deck;
+import core.properties.Property;
+import core.properties.PropertyBoolean;
 import core.properties.PropertyString;
+import core.properties.PropertyStringArray;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
+import games.descent2e.components.Item;
 import games.descent2e.components.tokens.DToken;
 import gui.views.ComponentView;
 import utilities.ImageIO;
@@ -16,7 +22,9 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 import static games.descent2e.gui.DescentGUI.foregroundColor;
@@ -68,27 +76,30 @@ public class DescentHeroView extends ComponentView {
 
             titleFont = Font.createFont(Font.TRUETYPE_FONT, new File(((DescentParameters)dgs.getGameParameters()).dataPath + "fonts/Windlass.ttf"));
             ge.registerFont(titleFont);
-            titleFont = new Font(titleFont.getName(), Font.PLAIN, (int)(characterCardScale *20));
+            titleFont = new Font("Arial", Font.BOLD, (int)(characterCardScale *18));
         } catch (IOException | FontFormatException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics g1) {
         /* draw blank character card and fill in information */
+        Graphics2D g = (Graphics2D) g1;
 
         // TODO ugly version
 
         // Draw character card
-        g.drawImage(characterCard, 0, 0, (int)(characterCardScale * characterCard.getWidth(null)), (int)(characterCardScale * characterCard.getHeight(null)), null);
+        int heroCardWidth = (int)(characterCardScale * characterCard.getWidth(null));
+        int heroCardHeight = (int)(characterCardScale * characterCard.getHeight(null));
+        g.drawImage(characterCard, 0, 0, heroCardWidth, heroCardHeight, null);
 
         Font f = g.getFont();
 
         // Draw name
         g.setColor(Color.black);
         g.setFont(titleFont);
-        g.drawString(hero.getComponentName(), (int)(characterCardScale*20), (int)(characterCardScale*40));
+        g.drawString(hero.getComponentName().split(":")[1].trim(), (int)(characterCardScale*20), (int)(characterCardScale*40));
 
         // Draw max attribute values
         g.setColor(foregroundColor);
@@ -141,5 +152,81 @@ public class DescentHeroView extends ComponentView {
 
         /* Draw abilities, equipment, other cards */
         // TODO
+
+        int cardHeight = (int)(heroCardHeight * 0.6);
+        int cardWidth = (int)(heroCardWidth * 0.5);
+        int x = 0;
+        int y = heroCardHeight + 5;
+        Deck<Card> weapons = hero.getHandEquipment();
+        for (Card card: weapons.getComponents()) {
+            drawCard(g, card, x, y, cardWidth, cardHeight);
+            x += cardWidth + 2;
+            if (x + cardWidth >= width) {
+                x = 0;
+                y += cardHeight + 2;
+            }
+        }
+    }
+
+    public void drawCard(Graphics2D g, Card card, int x, int y, int width, int height) {
+        g.setColor(Color.darkGray);
+        g.fillRoundRect(x, y, width, height, 5, 5);
+        g.setColor(Color.white);
+
+        FontMetrics fm = g.getFontMetrics();
+        int h = fm.getHeight();
+        String name = card.getProperty("name").toString();
+        y += h;
+        g.drawString(name, x + width/2 - fm.stringWidth(name)/2, y);
+
+        y += h;
+        Property XP = card.getProperty("XP");
+        Property fatigue = card.getProperty("fatigue");
+        String text = "XP: " + XP.toString() + "; Fatigue: " + fatigue.toString();
+        g.drawString(text, x + width/2 - fm.stringWidth(text)/2, y);
+
+        Property equipmentType = card.getProperty("equipmentType");
+        if (equipmentType != null) {
+            y += h;
+            text = "Type: " + equipmentType;
+            g.drawString(text, x + width / 2 - fm.stringWidth(text) / 2, y);
+        }
+        Property equipSlots = card.getProperty("equipSlots");
+        if (equipmentType != null) {
+            y += h;
+            String[] slots = ((PropertyStringArray)equipSlots).getValues();
+            text = Arrays.toString(slots);
+            g.drawString(text, x + width / 2 - fm.stringWidth(text) / 2, y);
+        }
+        Property cost = card.getProperty("cost");
+        if (equipmentType != null) {
+            int w = fm.stringWidth(text);
+            text = " " + cost + "G";
+            g.drawString(text, x + w/2 + width / 2, y);
+        }
+
+        Property exhaust = card.getProperty("exhaust");
+        if (exhaust != null) {
+            boolean ex = ((PropertyBoolean)card.getProperty("exhaust")).value;
+            if (ex) {
+                y += h;
+                text = "Exhausts on use";
+                g.drawString(text, x + width / 2 - fm.stringWidth(text) / 2, y);
+            }
+        }
+
+        Property attackType = card.getProperty("attackType");
+        if (attackType != null) {
+            y += h;
+            text = "Attack: " + attackType;
+            g.drawString(text, x + width / 2 - fm.stringWidth(text) / 2, y);
+        }
+
+        /*
+        "attackPower": ["String[]", ["blue", "red"]],
+        "weaponSurges": ["String[]", ["DAMAGE_PLUS_1", "DAMAGE_PLUS_1"]],
+        "action": ["String", "Attack"]
+        "passive": ["String", "You gain +4 Health. Whenever you stand up or are revived by another hero, you recover 2 additional Heart."]
+         */
     }
 }
