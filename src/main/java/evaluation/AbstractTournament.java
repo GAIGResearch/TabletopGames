@@ -15,6 +15,8 @@ public abstract class AbstractTournament {
     protected List<Game> games;
     // Number of players in the games, index matches the games list
     protected List<Integer> playersPerGame;
+    // Filename to write the results of the tournament
+    protected String resultsFileName;
 
     /**
      * Constructor, initialises the tournament given a list of players, a game to play and the number of players
@@ -48,6 +50,7 @@ public abstract class AbstractTournament {
         this.agents = agents;
         this.games = new ArrayList<>();
         this.playersPerGame = new ArrayList<>();
+        this.resultsFileName = null;
 
         for (Pair<GameType, Integer> gameToPlay: gamesToPlay) {
             Game g = gameToPlay.a.createGameInstance(gameToPlay.b);
@@ -57,6 +60,11 @@ public abstract class AbstractTournament {
                 this.playersPerGame.add(gameToPlay.b);
             }
         }
+    }
+
+    public void setOutputFileName(String fileName)
+    {
+        this.resultsFileName = fileName;
     }
 
     /**
