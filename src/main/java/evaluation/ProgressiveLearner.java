@@ -196,7 +196,7 @@ public class ProgressiveLearner {
     private void runGamesWithAgents() {
         // Run!
         RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
-                finalMatchups, System.currentTimeMillis(), params);
+                matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
 
         String fileName = String.format("%s_%d.data", prefix, iter);
