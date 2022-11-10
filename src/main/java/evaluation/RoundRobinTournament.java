@@ -33,6 +33,7 @@ public class RoundRobinTournament extends AbstractTournament {
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
     public boolean verbose = true;
+    protected boolean drawScores = false;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -44,7 +45,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RoundRobinTournament(List<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, boolean selfPlay, AbstractParameters gameParams) {
+                                int gamesPerMatchUp, boolean selfPlay, boolean drawScores, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, gameParams);
         if (!selfPlay && playersPerGame > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
@@ -57,6 +58,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
         this.gamesPerMatchUp = gamesPerMatchUp;
         this.selfPlay = selfPlay;
+        this.drawScores = drawScores;
         this.pointsPerPlayer = new int[agents.size()];
     }
 
@@ -75,6 +77,9 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               If not specified, this defaults to very basic OSLA, RND, RHEA and MCTS players.\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tselfPlay=      If true, then multiple copies of the same agent can be in one game.\n" +
+                            "\t               Defaults to false\n" +
+                            "\tdrawScores=    If true, each draw is worth 1/N points, where N is the number of players that tied.\n" +
+                            "\t               If false, draws are worth the same as a loss (0 points).\n" +
                             "\t               Defaults to false\n" +
                             "\tmode=          exhaustive|random - defaults to exhaustive.\n" +
                             "\t               exhaustive will iterate exhaustively through every possible matchup: \n" +
@@ -106,6 +111,7 @@ public class RoundRobinTournament extends AbstractTournament {
         GameType gameToPlay = GameType.valueOf(getArg(args, "game", "SushiGo"));
         int nPlayersPerGame = getArg(args, "nPlayers", 4);
         boolean selfPlay = getArg(args, "selfPlay", false);
+        boolean drawScores = getArg(args, "drawScores", false);
         String mode = getArg(args, "mode", "random");
         int matchups = getArg(args, "matchups", 1);
         String playerDirectory = getArg(args, "players", "");
@@ -143,8 +149,8 @@ public class RoundRobinTournament extends AbstractTournament {
 
         // Run!
         RoundRobinTournament tournament = mode.equals("exhaustive") ?
-                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, params) :
-                new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, selfPlay, matchups, reportPeriod,
+                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, drawScores, params) :
+                new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, selfPlay, drawScores, matchups, reportPeriod,
                         System.currentTimeMillis(), params);
 
         if(resultsFile.length() > 0)
@@ -242,12 +248,24 @@ public class RoundRobinTournament extends AbstractTournament {
             games.get(gameIdx).run();  // Always running tournaments without visuals
             GameResult[] results = games.get(gameIdx).getGameState().getPlayerResults();
 
+            int numDraws = 0;
             for (int j = 0; j < matchUpPlayers.size(); j++)
-                pointsPerPlayer[agentIDs.get(j)] += results[j] == GameResult.WIN ? 1 : 0;
+            {
+                if(results[j] == GameResult.WIN)  pointsPerPlayer[agentIDs.get(j)] += 1;
+                if(results[j] == GameResult.DRAW) numDraws++;
+            }
+
+            if(drawScores && numDraws>0)
+            {
+                double pointsPerDraw = 1.0 / numDraws;
+                for (int j = 0; j < matchUpPlayers.size(); j++)
+                    if(results[j] == GameResult.DRAW) pointsPerPlayer[agentIDs.get(j)] += pointsPerDraw;
+            }
 
             if(verbose)
             {
                 StringBuffer sb = new StringBuffer();
+                sb.append("[");
                 for (int j = 0; j < matchUpPlayers.size(); j++)
                     sb.append(results[j]).append(",");
                 sb.setCharAt(sb.length()-1, ']');

@@ -156,7 +156,7 @@ public class ProgressiveLearner {
         // Now we can run a tournament of everyone
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, false, finalMatchups,
                 finalMatchups, System.currentTimeMillis(), params);
 
         tournament.listeners = new ArrayList<>();
@@ -195,7 +195,7 @@ public class ProgressiveLearner {
 
     private void runGamesWithAgents() {
         // Run!
-        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
+        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, false, matchups,
                 matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
 
