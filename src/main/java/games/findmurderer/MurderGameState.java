@@ -75,7 +75,7 @@ public class MurderGameState extends AbstractGameState {
         gs.personToPositionMap = new HashMap<>(personToPositionMap);
 
         // Copy the killer
-        if (playerId == -1) {
+        if (playerId == -1 || playerId == PlayerMapping.Killer.playerIdx) {
             // Full observability, copy the killer directly
             gs.killer = killer.copy();
         } else {
