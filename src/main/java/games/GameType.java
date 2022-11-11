@@ -12,7 +12,6 @@ import games.cantstop.CantStopGameState;
 import games.cantstop.gui.CantStopGUIManager;
 import games.catan.CatanForwardModel;
 import games.catan.CatanGameState;
-import games.catan.CatanParameters;
 import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
@@ -29,6 +28,9 @@ import games.dotsboxes.DBGameState;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
+import games.findmurderer.MurderForwardModel;
+import games.findmurderer.gui.MurderGUI;
+import games.findmurderer.MurderGameState;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.PandemicForwardModel;
@@ -311,8 +313,9 @@ public enum GameType {
             }},
             new ArrayList<Mechanic>() {{
                 add(PushYourLuck);
-            }}
-    );
+            }}),
+    FindMurderer(1,2, new ArrayList<>(), new ArrayList<>())
+    ;
 
     /**
      * Converts a given string to the enum type corresponding to the game.
@@ -476,6 +479,10 @@ public enum GameType {
                 forwardModel = new CantStopForwardModel();
                 gameState = new CantStopGameState(params, nPlayers);
                 break;
+            case FindMurderer:
+                forwardModel = new MurderForwardModel();
+                gameState = new MurderGameState(params, nPlayers);
+                break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
         }
@@ -566,6 +573,9 @@ public enum GameType {
                 break;
             case CantStop:
                 gui = new CantStopGUIManager(parent, game, ac);
+                break;
+            case FindMurderer:
+                gui = new MurderGUI(parent, game, ac);
                 break;
         }
 

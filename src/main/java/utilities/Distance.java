@@ -31,6 +31,14 @@ public class Distance {
 
         return Math.pow(dist, 1.0/p);
     }
+    public static double minkowski_distance(Vector2D a, Vector2D b, double p) {
+        double dist = 0.0;
+        double d = Math.abs(a.getX() - b.getX());
+        dist += Math.pow(d, p);
+        d = Math.abs(a.getY() - b.getY());
+        dist += Math.pow(d, p);
+        return Math.pow(dist, 1.0/p);
+    }
 
     /**
      * Java port by Raluca D. Gaina 2020, from https://github.com/mavillan/py-hausdorff
@@ -59,6 +67,9 @@ public class Distance {
             ret += Math.abs(x[i]-y[i]);
         }
         return ret;
+    }
+    public static double manhattan_distance(Vector2D a, Vector2D b) {
+        return Math.abs(a.getX()-b.getX()) + Math.abs(a.getY()-b.getY());
     }
 
     /**
@@ -89,6 +100,9 @@ public class Distance {
         }
         return Math.sqrt(ret);
     }
+    public static double euclidian_distance(Vector2D a, Vector2D b) {
+        return Math.sqrt(Math.pow((a.getX() - b.getX()), 2) + Math.pow((a.getY() - b.getY()), 2));
+    }
 
     /**
      * Java port by Raluca D. Gaina 2020, from https://github.com/mavillan/py-hausdorff
@@ -108,6 +122,14 @@ public class Distance {
             if (d > ret) {
                 ret = d;
             }
+        }
+        return ret;
+    }
+    public static double chebyshev_distance(Vector2D a, Vector2D b) {
+        double ret = Math.abs(a.getX() - b.getX());
+        double d = Math.abs(a.getY() - b.getY());
+        if (d > ret) {
+            ret = d;
         }
         return ret;
     }
@@ -134,6 +156,18 @@ public class Distance {
         }
         return 1.0 - xy_dot/(Math.sqrt(x_norm) * Math.sqrt(y_norm));
     }
+    public static double cosine_distance(Vector2D a, Vector2D b) {
+        double xy_dot = 0.0;
+        double x_norm = 0.0;
+        double y_norm = 0.0;
+        xy_dot += a.getX() * b.getX();
+        x_norm += a.getX() * a.getX();
+        y_norm += b.getX() * b.getX();
+        xy_dot += a.getY() * b.getY();
+        x_norm += a.getY() * a.getY();
+        y_norm += b.getY() * b.getY();
+        return 1.0 - xy_dot/(Math.sqrt(x_norm) * Math.sqrt(y_norm));
+    }
 
     /**
      * Java port by Raluca D. Gaina 2020, from https://github.com/mavillan/py-hausdorff
@@ -158,5 +192,19 @@ public class Distance {
         double a = (Math.pow(Math.sin(dlat/2.0), 2.0) + Math.cos(lat_x) *
                 Math.cos(lat_y) * Math.pow(Math.sin(dlon/2.0), 2.0));
         return R * 2 * Math.asin(Math.sqrt(a));
+    }
+
+    public static double haversine_distance(Vector2D a, Vector2D b) {
+        double R = 6378.0;
+        double radians = Math.PI / 180.0;
+        double lat_x = radians * a.getX();
+        double lon_x = radians * a.getY();
+        double lat_y = radians * b.getX();
+        double lon_y = radians * b.getY();
+        double dlon = lon_y - lon_x;
+        double dlat = lat_y - lat_x;
+        double aa = (Math.pow(Math.sin(dlat/2.0), 2.0) + Math.cos(lat_x) *
+                Math.cos(lat_y) * Math.pow(Math.sin(dlon/2.0), 2.0));
+        return R * 2 * Math.asin(Math.sqrt(aa));
     }
 }

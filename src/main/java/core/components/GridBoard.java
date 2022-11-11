@@ -408,6 +408,10 @@ public class GridBoard<T extends Component> extends Component implements ICompon
         return Arrays.stream(flattenGrid()).map( component -> (T) component).collect(Collectors.toList());
     }
 
+    public List<T> getNonNullComponents() {
+        return Arrays.stream(flattenGrid()).filter(Objects::nonNull).map( component -> (T) component).collect(Collectors.toList());
+    }
+
     @Override
     public CoreConstants.VisibilityMode getVisibilityMode() {
         return CoreConstants.VisibilityMode.VISIBLE_TO_ALL;

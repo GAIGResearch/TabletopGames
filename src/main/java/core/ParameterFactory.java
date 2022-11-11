@@ -13,6 +13,7 @@ import games.dicemonastery.DiceMonasteryParams;
 import games.dominion.DominionParameters;
 import games.dotsboxes.DBParameters;
 import games.explodingkittens.ExplodingKittensParameters;
+import games.findmurderer.MurderParameters;
 import games.loveletter.LoveLetterParameters;
 import games.pandemic.PandemicParameters;
 import games.poker.PokerGameParameters;
@@ -71,6 +72,8 @@ public class ParameterFactory {
                 return new TMGameParameters(seed);
             case CantStop:
                 return new CantStopParameters(seed);
+            case FindMurderer:
+                return new MurderParameters(seed);
         }
         throw new AssertionError("No default Parameters specified for Game " + game);
 
