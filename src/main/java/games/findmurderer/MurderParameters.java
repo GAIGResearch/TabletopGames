@@ -5,10 +5,11 @@ import core.AbstractParameters;
 import java.util.Objects;
 
 public class MurderParameters extends AbstractParameters {
-    int gridWidth = 10;  // Width of grid world
-    int gridHeight = 10;  // Height of grid world
-    double percPeopleOnGrid = 0.5;  // Percentage of the world that is filled randomly with people
-    double percCivilianDeadWinKiller = 0.5;  // Percentage of the people in the world that have to be dead in order for the killer to win
+    public int gridWidth = 10;  // Width of grid world
+    public int gridHeight = 10;  // Height of grid world
+    public double percPeopleOnGrid = 0.5;  // Percentage of the world that is filled randomly with people
+    public double percCivilianDeadWinKiller = 0.8;  // Percentage of the people in the world that have to be dead in order for the killer to win
+    public int killerMaxRange = 6;  // Killer can only kill people as far as this away from them, and loses when no more people are left in range
 
     public MurderParameters(long seed) {
         super(seed);

@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.findmurderer.MurderGameState;
+import games.findmurderer.MurderParameters;
 import games.findmurderer.actions.Kill;
 import games.findmurderer.components.Person;
 import utilities.Distance;
@@ -28,6 +29,7 @@ public class DistanceKillerPlayer extends AbstractPlayer {
     long randomSeed;
     Random r;
     HashMap<Integer, Double> distanceToKiller;  // maps component ID of person -> distance to killer
+    double maxDistance;
 
     public DistanceKillerPlayer() {
         randomSeed = System.currentTimeMillis();
@@ -48,6 +50,11 @@ public class DistanceKillerPlayer extends AbstractPlayer {
             Vector2D pos = mgs.getPersonToPositionMap().get(p.getComponentID());
             distanceToKiller.put(p.getComponentID(), distanceFunction.apply(killerPosition, pos));
         }
+
+        maxDistance = Math.max(distanceFunction.apply(killerPosition, new Vector2D(0,0)),
+                distanceFunction.apply(killerPosition, new Vector2D(0, mgs.getGrid().getHeight())));
+        maxDistance = Math.max(maxDistance, distanceFunction.apply(killerPosition, new Vector2D(mgs.getGrid().getWidth(), 0)));
+        maxDistance = Math.max(maxDistance, distanceFunction.apply(killerPosition, new Vector2D(mgs.getGrid().getWidth(), mgs.getGrid().getHeight())));
     }
 
     @Override
@@ -67,8 +74,9 @@ public class DistanceKillerPlayer extends AbstractPlayer {
             for (AbstractAction aa: possibleActions) {
                 if (aa instanceof Kill) {
                     Kill a = (Kill)aa;
+                    double distance = distanceToKiller.get(a.target);
+                    probSum += maxDistance / distance;
                     targetToActionMap.put(a.target, a);
-                    probSum += distanceToKiller.get(a.target);
                     possibleTargets.add(a.target);
                 }
             }
@@ -76,7 +84,7 @@ public class DistanceKillerPlayer extends AbstractPlayer {
             // Calculate probabilities to kill each target based on their distance to the killer
             double[] probabilities = new double[possibleTargets.size()];
             for (int i = 0; i < probabilities.length; i++) {
-                probabilities[i] = distanceToKiller.get(possibleTargets.get(i))/probSum;
+                probabilities[i] = (maxDistance/distanceToKiller.get(possibleTargets.get(i)))/probSum;
             }
 
             // Choose random target based on probabilities

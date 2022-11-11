@@ -7,6 +7,7 @@ import core.actions.DoNothing;
 import core.components.GridBoard;
 import games.findmurderer.actions.Kill;
 import games.findmurderer.components.Person;
+import utilities.Distance;
 import utilities.Utils;
 import utilities.Vector2D;
 
@@ -75,29 +76,45 @@ public class MurderForwardModel extends AbstractForwardModel {
 
         // If not ended, it's the next player's turn
         currentState.getTurnOrder().endPlayerTurn(currentState);
+
+        List<AbstractAction> availableActionsNext = computeAvailableActions(currentState);
+        if (availableActionsNext.size() == 1) {
+            // Only pass actions available next, that player lost
+            int player = currentState.getCurrentPlayer();
+            mgs.setGameStatus(Utils.GameResult.GAME_END);
+            mgs.setPlayerResult(Utils.GameResult.LOSE, player);
+            mgs.setPlayerResult(Utils.GameResult.WIN, 1-player); // Assumes 2-player only
+        }
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         // Create action list for current player
         MurderGameState mgs = (MurderGameState) gameState;
+        MurderParameters mp = (MurderParameters) gameState.getGameParameters();
         int currentPlayer = gameState.getCurrentPlayer();
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
+        for (Person p: mgs.grid.getNonNullComponents()) {
+            // Can only kill alive people
+            if (p.status != Person.Status.Alive) continue;
+
+            // Killer extra conditions for kill viability
+            if (currentPlayer == MurderGameState.PlayerMapping.Killer.playerIdx) {
+                // Killer can't suicide
+                if (p.personType == Person.PersonType.Killer) continue;
+
+                // Killer can only kill within some range defined in parameters
+                double distance = Distance.euclidian_distance(mgs.personToPositionMap.get(mgs.killer.getComponentID()), mgs.personToPositionMap.get(p.getComponentID()));
+                if (distance > mp.killerMaxRange) continue;
+            }
+
+            // Add one kill action for each person we can kill
+            actions.add(new Kill(p.getComponentID()));
+        }
+
         // Can always pass
         actions.add(new DoNothing());
-
-        for (Person p: mgs.grid.getNonNullComponents()) {
-            if (p.status == Person.Status.Alive) {
-                // Can only kill alive people
-                if (p.personType == Person.PersonType.Killer && currentPlayer == MurderGameState.PlayerMapping.Killer.playerIdx) {
-                    // Killer can't suicide
-                    continue;
-                }
-                // Add one kill action for each person alive
-                actions.add(new Kill(p.getComponentID()));
-            }
-        }
 
         return actions;
     }
