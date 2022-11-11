@@ -59,25 +59,27 @@ public class MurderGUI extends AbstractGUIManager {
             ArrayList<Rectangle> highlight = view.getHighlight();
             HashMap<Rectangle, Integer> rectToComponentIDMap = view.getRectToComponentIDMap();
 
-            int start = actions.size();
+            resetActionButtons();
+
+            int idx = 0;
             if (highlight.size() > 0) {
                 Rectangle r = highlight.get(0);
                 for (AbstractAction abstractAction : actions) {
                     if (abstractAction instanceof Kill) {
                         int target = ((Kill)abstractAction).target;
                         if (rectToComponentIDMap.containsKey(r) && target == rectToComponentIDMap.get(r)) {
-                            actionButtons[0].setVisible(true);
-                            actionButtons[0].setButtonAction(abstractAction, gameState);
+                            actionButtons[idx].setVisible(true);
+                            actionButtons[idx++].setButtonAction(abstractAction, "Kill " + target);
                             break;
                         }
-                    } else {
-                        actionButtons[0].setVisible(true);
-                        actionButtons[0].setButtonAction(abstractAction, gameState);
                     }
                 }
-            } else {
-                actionButtons[0].setVisible(false);
-                actionButtons[0].setButtonAction(null, "");
+            }
+            for (AbstractAction abstractAction : actions) {
+                if (!(abstractAction instanceof Kill)) {
+                    actionButtons[idx].setVisible(true);
+                    actionButtons[idx++].setButtonAction(abstractAction, gameState);
+                }
             }
         }
     }
