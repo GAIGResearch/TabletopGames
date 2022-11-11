@@ -76,9 +76,6 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tselfPlay=      If true, then multiple copies of the same agent can be in one game.\n" +
                             "\t               Defaults to false\n" +
-                            "\tdrawScores=    If true, each draw is worth 1/N points, where N is the number of players that tied.\n" +
-                            "\t               If false, draws are worth the same as a loss (0 points).\n" +
-                            "\t               Defaults to false\n" +
                             "\tmode=          exhaustive|random - defaults to exhaustive.\n" +
                             "\t               exhaustive will iterate exhaustively through every possible matchup: \n" +
                             "\t               every possible player in every possible position. This can be excessive\n" +
