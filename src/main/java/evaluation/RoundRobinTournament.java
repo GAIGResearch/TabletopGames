@@ -106,7 +106,6 @@ public class RoundRobinTournament extends AbstractTournament {
         GameType gameToPlay = GameType.valueOf(getArg(args, "game", "SushiGo"));
         int nPlayersPerGame = getArg(args, "nPlayers", 4);
         boolean selfPlay = getArg(args, "selfPlay", false);
-        boolean drawScores = getArg(args, "drawScores", false);
         String mode = getArg(args, "mode", "random");
         int matchups = getArg(args, "matchups", 1);
         String playerDirectory = getArg(args, "players", "");
