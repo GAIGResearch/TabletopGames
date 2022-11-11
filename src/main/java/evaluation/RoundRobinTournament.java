@@ -29,7 +29,7 @@ public class RoundRobinTournament extends AbstractTournament {
     public final boolean selfPlay;
     private final int gamesPerMatchUp;
     protected List<IGameListener> listeners;
-    int[] pointsPerPlayer;
+    double[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
     public boolean verbose = true;
@@ -57,7 +57,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
         this.gamesPerMatchUp = gamesPerMatchUp;
         this.selfPlay = selfPlay;
-        this.pointsPerPlayer = new int[agents.size()];
+        this.pointsPerPlayer = new double[agents.size()];
     }
 
     /**
@@ -242,12 +242,24 @@ public class RoundRobinTournament extends AbstractTournament {
             games.get(gameIdx).run();  // Always running tournaments without visuals
             GameResult[] results = games.get(gameIdx).getGameState().getPlayerResults();
 
+            int numDraws = 0;
             for (int j = 0; j < matchUpPlayers.size(); j++)
-                pointsPerPlayer[agentIDs.get(j)] += results[j] == GameResult.WIN ? 1 : 0;
+            {
+                if(results[j] == GameResult.WIN)  pointsPerPlayer[agentIDs.get(j)] += 1;
+                if(results[j] == GameResult.DRAW) numDraws++;
+            }
+
+            if(numDraws>0)
+            {
+                double pointsPerDraw = 1.0 / numDraws;
+                for (int j = 0; j < matchUpPlayers.size(); j++)
+                    if(results[j] == GameResult.DRAW) pointsPerPlayer[agentIDs.get(j)] += pointsPerDraw;
+            }
 
             if(verbose)
             {
                 StringBuffer sb = new StringBuffer();
+                sb.append("[");
                 for (int j = 0; j < matchUpPlayers.size(); j++)
                     sb.append(results[j]).append(",");
                 sb.setCharAt(sb.length()-1, ']');
@@ -266,7 +278,7 @@ public class RoundRobinTournament extends AbstractTournament {
         int gamesPerPlayer = gameCounter * playersPerGame.get(game_index) / agents.size();
         boolean toFile = resultsFileName != null;
         ArrayList<String> dataDump = new ArrayList<>();
-        HashMap<String, Integer> ranked = new HashMap();
+        HashMap<String, Double> ranked = new HashMap<>();
 
         // To console
         if (verbose)  System.out.printf("============= %s - %d games played ============= \n", games.get(game_index).getGameType().name(), gameCounter);
@@ -274,7 +286,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
             ranked.put(agents.get(i).toString(), pointsPerPlayer[i]);
 
-            String str = String.format("%s got %d points. ", agents.get(i), pointsPerPlayer[i]);
+            String str = String.format("%s got %.2f points. ", agents.get(i), pointsPerPlayer[i]);
             if(toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
 
@@ -294,15 +306,15 @@ public class RoundRobinTournament extends AbstractTournament {
         if (verbose)  System.out.print(str);
 
         // Sort by points.
-        Map<String, Integer> valueDescSortMap = ranked.entrySet().stream()
-                .sorted(Map.Entry.<String, Integer> comparingByValue().reversed())
+        Map<String, Double> valueDescSortMap = ranked.entrySet().stream()
+                .sorted(Map.Entry.<String, Double> comparingByValue().reversed())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
                         LinkedHashMap::new));
 
         // for(String name : ranked.keySet())
         for(String name : valueDescSortMap.keySet())
         {
-            str = String.format("%s: %d\n", name, valueDescSortMap.get(name));
+            str = String.format("%s: %.2f\n", name, valueDescSortMap.get(name));
             if(toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
         }
