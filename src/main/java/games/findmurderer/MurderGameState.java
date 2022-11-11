@@ -83,11 +83,15 @@ public class MurderGameState extends AbstractGameState {
             // We'll assign it as a random person out of those alive
             ArrayList<Person> alive = new ArrayList<>();
             for (Person p: gs.grid.getNonNullComponents()) {
-                if (p.status == Person.Status.Alive) alive.add(p);
+                if (p.status == Person.Status.Alive) {
+                    alive.add(p);
+                    p.setPersonType(Person.PersonType.Civilian);
+                }
             }
             Random r = new Random(getGameParameters().getRandomSeed());
             int idx = r.nextInt(alive.size());
             gs.killer = alive.get(idx);
+            gs.killer.setPersonType(Person.PersonType.Killer);
         }
 
         // Return the copy
