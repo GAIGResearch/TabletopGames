@@ -33,7 +33,6 @@ public class RoundRobinTournament extends AbstractTournament {
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
     public boolean verbose = true;
-    protected boolean drawScores = false;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -45,7 +44,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RoundRobinTournament(List<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, boolean selfPlay, boolean drawScores, AbstractParameters gameParams) {
+                                int gamesPerMatchUp, boolean selfPlay, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, gameParams);
         if (!selfPlay && playersPerGame > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
@@ -58,7 +57,6 @@ public class RoundRobinTournament extends AbstractTournament {
 
         this.gamesPerMatchUp = gamesPerMatchUp;
         this.selfPlay = selfPlay;
-        this.drawScores = drawScores;
         this.pointsPerPlayer = new double[agents.size()];
     }
 
@@ -149,8 +147,8 @@ public class RoundRobinTournament extends AbstractTournament {
 
         // Run!
         RoundRobinTournament tournament = mode.equals("exhaustive") ?
-                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, drawScores, params) :
-                new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, selfPlay, drawScores, matchups, reportPeriod,
+                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, params) :
+                new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, selfPlay, matchups, reportPeriod,
                         System.currentTimeMillis(), params);
 
         if(resultsFile.length() > 0)
@@ -255,7 +253,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 if(results[j] == GameResult.DRAW) numDraws++;
             }
 
-            if(drawScores && numDraws>0)
+            if(numDraws>0)
             {
                 double pointsPerDraw = 1.0 / numDraws;
                 for (int j = 0; j < matchUpPlayers.size(); j++)
