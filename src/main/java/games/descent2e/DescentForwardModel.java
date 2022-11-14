@@ -110,7 +110,7 @@ public class DescentForwardModel extends AbstractForwardModel {
             Deck<Card> classDeck = _data.findDeck(heroClass.name());
             for (Card c: classDeck.getComponents()) {
                 if (((PropertyInt)c.getProperty(xpHash)).value <= figure.getAttribute(Figure.Attribute.XP).getValue()) {
-                    figure.equip(c);
+                    figure.equip(new DescentCard(c));
                 }
             }
             // after equipping, set up abilities

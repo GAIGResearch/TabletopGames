@@ -12,19 +12,17 @@ import games.descent2e.DescentTypes;
 import games.descent2e.components.DescentDice;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
-import games.descent2e.components.Item;
+import games.descent2e.components.DescentCard;
 import games.descent2e.components.tokens.DToken;
 import gui.views.ComponentView;
-import utilities.ImageIO;
-import utilities.Utils;
-import utilities.Vector2D;
+import utilities.*;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
 import static games.descent2e.gui.DescentGUI.foregroundColor;
@@ -45,6 +43,8 @@ public class DescentHeroView extends ComponentView {
     static double characterCardScale;
     static Font descentFont, primaryAttributeF, secondaryAttributeF, titleFont;
 
+    HashMap<Rectangle, DescentCard> rectToCardMap;
+
     public DescentHeroView(DescentGameState dgs, Hero hero, int heroIdx, int width, int height) {
         super(hero, width, height);
         this.dgs = dgs;
@@ -52,6 +52,8 @@ public class DescentHeroView extends ComponentView {
         this.heroIdx = heroIdx;
         this.heroClass = Utils.searchEnum(DescentTypes.HeroClass.class, ((PropertyString) hero.getProperty("class")).value);
         this.imgPath = ((DescentParameters)dgs.getGameParameters()).dataPath + "/img/";
+
+        rectToCardMap = new HashMap<>();
 
         maxValuesPositionMap = new HashMap<Figure.Attribute, Vector2D>() {{
             put(Figure.Attribute.MovePoints, new Vector2D(290, 122));
@@ -117,8 +119,17 @@ public class DescentHeroView extends ComponentView {
             g.drawImage(toDraw, (int)(characterCardScale*285), (int)(characterCardScale*353), defaultItemSize/3, defaultItemSize/3,null);
         }
 
-        // TODO draw character ability on card
-        // TODO draw character heroic feat on card (indicate if executed)
+        // Character ability // TODO: symbolic version?
+        GUIUtils.drawStringCentered(g, hero.getAbility(), new Rectangle((int)(characterCardScale*380), (int)(characterCardScale*70), (int)(characterCardScale*220), (int)(characterCardScale*190)), Color.black, 12, true);
+
+        // Draw character heroic feat on card (indicate if executed)  // TODO symbolic?
+        GUIUtils.drawStringCentered(g, hero.getHeroicFeat(), new Rectangle((int)(characterCardScale*380), (int)(characterCardScale*290), (int)(characterCardScale*220),
+                (int)(characterCardScale*190)), hero.isFeatAvailable() ? Color.black : Color.lightGray, 12, true);
+        if (!hero.isFeatAvailable()) {
+            GUIUtils.drawStringCentered(g, "Executed", new Rectangle((int)(characterCardScale*380), (int)(characterCardScale*380), (int)(characterCardScale*220),
+                    (int)(characterCardScale*190)), Color.black, 16, true);
+        }
+
         // TODO character image?
 
         /* Draw other data stored on the figure */
@@ -131,6 +142,9 @@ public class DescentHeroView extends ComponentView {
                 g.drawString(a.name() + " : " + hero.getAttributeValue(a), 5 + width/2, 15 + 15 * (n++));
             }
         }
+
+        // Draw conditions
+        g.drawString("Conditions: " + hero.getConditions().toString(), 5 + width/2, 15 + 15 * n);
 
         // Draw tokens player owns
         int i = 0;
@@ -150,32 +164,47 @@ public class DescentHeroView extends ComponentView {
             }
         }
 
-        /* Draw abilities, equipment, other cards */
-        // TODO
+        /* Draw cards: skills, equipment, others */
+        int cardHeight = (int)(heroCardHeight * 0.8);
+        int cardWidth = (int)(heroCardWidth * 0.6);
+        Pair<Integer, Integer> xy = new Pair<>(0, heroCardHeight + 5);
+        xy = drawDeckOfCards(g, hero.getHandEquipment(), xy.a, xy.b, cardWidth, cardHeight);
+        Card armor = hero.getArmor();
+        if (armor != null) {
+            drawCard(g, hero.getArmor(), xy.a, xy.b, cardWidth, cardHeight);
+            rectToCardMap.put(new Rectangle(xy.a, xy.b, cardWidth, cardHeight), hero.getArmor());
+            xy.a += cardWidth + 2;
+            if (xy.a + cardWidth >= width) {
+                xy.a = 0;
+                xy.b += cardHeight + 2;
+            }
+        }
+        xy = drawDeckOfCards(g, hero.getOtherEquipment(), xy.a, xy.b, cardWidth, cardHeight);
+        xy = drawDeckOfCards(g, hero.getSkills(), xy.a, xy.b, cardWidth, cardHeight);
+    }
 
-        int cardHeight = (int)(heroCardHeight * 0.6);
-        int cardWidth = (int)(heroCardWidth * 0.5);
-        int x = 0;
-        int y = heroCardHeight + 5;
-        Deck<Card> weapons = hero.getHandEquipment();
-        for (Card card: weapons.getComponents()) {
+    private Pair<Integer, Integer> drawDeckOfCards(Graphics2D g, Deck<DescentCard> deck, int x, int y, int cardWidth, int cardHeight) {
+        for (DescentCard card: deck.getComponents()) {
             drawCard(g, card, x, y, cardWidth, cardHeight);
+            rectToCardMap.put(new Rectangle(x, y, cardWidth, cardHeight), card);
             x += cardWidth + 2;
             if (x + cardWidth >= width) {
                 x = 0;
                 y += cardHeight + 2;
             }
         }
+        return new Pair<>(x, y);
     }
 
-    public void drawCard(Graphics2D g, Card card, int x, int y, int width, int height) {
+    public void drawCard(Graphics2D g, DescentCard card, int x, int y, int width, int height) {
         g.setColor(Color.darkGray);
         g.fillRoundRect(x, y, width, height, 5, 5);
         g.setColor(Color.white);
 
         FontMetrics fm = g.getFontMetrics();
         int h = fm.getHeight();
-        String name = card.getProperty("name").toString();
+        Property nameProp = card.getProperty("name");
+        String name = nameProp.toString();
         y += h;
         g.drawString(name, x + width/2 - fm.stringWidth(name)/2, y);
 
@@ -222,11 +251,57 @@ public class DescentHeroView extends ComponentView {
             g.drawString(text, x + width / 2 - fm.stringWidth(text) / 2, y);
         }
 
-        /*
-        "attackPower": ["String[]", ["blue", "red"]],
-        "weaponSurges": ["String[]", ["DAMAGE_PLUS_1", "DAMAGE_PLUS_1"]],
-        "action": ["String", "Attack"]
-        "passive": ["String", "You gain +4 Health. Whenever you stand up or are revived by another hero, you recover 2 additional Heart."]
-         */
+        Property attackPower = card.getProperty("attackPower");
+        if (attackPower != null) {
+            y += h;
+            int idx = 0;
+            int pad = 2;
+            int startX = x + width/2 - hero.getAttackDice().getComponents().size() * (h+pad) / 2;
+            String[] colors = ((PropertyStringArray)attackPower).getValues();
+            for (String col: colors) {
+                Image toDraw = ImageIO.GetInstance().getImage(imgPath + "dice/" + col + ".png");
+                g.drawImage(toDraw, startX + idx*(h+pad), y-h*2/3, h, h,null);
+                idx++;
+            }
+        }
+
+        Property weaponSurges = card.getProperty("weaponSurges");
+        if (weaponSurges != null) {
+            int pad = 5;
+            y += pad;
+            String[] surges = ((PropertyStringArray)weaponSurges).getValues();
+            for (String surge: surges) {
+                y += h;
+                Image toDraw = ImageIO.GetInstance().getImage(imgPath + "tokens/Surge.png");
+                int startX = x + width/2 - (h + pad + fm.stringWidth(surge)) / 2;
+                g.drawImage(toDraw, startX, y-h*2/3, h, h,null);
+                g.drawString(surge, startX + h + pad, y);
+            }
+        }
+
+        // Action and passive text are put as tooltips to not crowd view, below.
+
+    }
+
+    @Override
+    public String getToolTipText(MouseEvent event) {
+        Point p = new Point(event.getX(), event.getY());
+        for (Rectangle r: rectToCardMap.keySet()) {
+            if (r.contains(p)) {
+                String toolTip = "";
+
+                Property action = rectToCardMap.get(r).getProperty("action");
+                if (action != null) {
+                    toolTip += "Action: " + action;
+                }
+                Property passive = rectToCardMap.get(r).getProperty("passive");
+                if (passive != null) {
+                    toolTip += "Passive: " + passive;
+                }
+
+                return toolTip;
+            }
+        }
+        return super.getToolTipText(event);
     }
 }

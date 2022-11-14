@@ -1,13 +1,9 @@
 package test.games.descent;
 
-import core.Game;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
-import games.descent2e.DescentConstants;
 import games.descent2e.DescentForwardModel;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
-import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
 import games.descent2e.actions.attack.*;
 import games.descent2e.components.*;
@@ -45,7 +41,7 @@ public class MeleeAttackTests {
     public void attackRollsDoesDamage() {
         Figure actingFigure = state.getActingFigure();
         Figure victim = state.getMonsters().get(0).get(0);
-        List<Item> weapons = ((Hero)actingFigure).getWeapons();
+        List<DescentCard> weapons = ((Hero)actingFigure).getWeapons();
 
         assertEquals(1, weapons.size());
 

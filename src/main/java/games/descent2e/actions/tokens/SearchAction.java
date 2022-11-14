@@ -8,6 +8,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.Hero;
+import games.descent2e.components.DescentCard;
 import games.descent2e.components.tokens.DToken;
 import utilities.Vector2D;
 
@@ -60,7 +61,7 @@ public class SearchAction extends TokenAction {
         Deck<Card> searchCards = gs.getSearchCards();
         if (searchCards != null) {
             Hero hero = (Hero) gs.getActingFigure();
-            boolean added = hero.getOtherEquipment().add(searchCards.pick(new Random(gs.getGameParameters().getRandomSeed())));
+            boolean added = hero.getOtherEquipment().add(new DescentCard(searchCards.pick(new Random(gs.getGameParameters().getRandomSeed()))));
             if (added) {
                 ((DToken) gs.getComponentById(tokenID)).setPosition(null);  // Take off the map
                 hero.getNActionsExecuted().increment();

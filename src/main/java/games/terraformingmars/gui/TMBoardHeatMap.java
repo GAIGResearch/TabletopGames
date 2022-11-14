@@ -9,7 +9,7 @@ import utilities.ImageIO;
 import utilities.TAGStringStatSummary;
 
 import java.awt.*;
-import static games.terraformingmars.gui.Utils.*;
+import static utilities.GUIUtils.*;
 
 public class TMBoardHeatMap extends ComponentView {
 

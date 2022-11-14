@@ -37,6 +37,8 @@ import static javax.swing.JOptionPane.OK_CANCEL_OPTION;
 
 public class TMGUI extends AbstractGUIManager {
 
+    public final static Color[] playerColors = new Color[]{new Color(203, 161, 26), Color.red, Color.pink, Color.green, Color.cyan};
+
     TMBoardView view;
     TMPlayerView playerView;
     TMDeckDisplay playerHand, playerCardChoice;

@@ -10,12 +10,12 @@ import utilities.ImageIO;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
+import static games.terraformingmars.gui.TMGUI.playerColors;
 import static gui.AbstractGUIManager.*;
 import static games.terraformingmars.gui.TMGUI.focusPlayer;
-import static games.terraformingmars.gui.Utils.*;
+import static utilities.GUIUtils.*;
 
 public class TMPlayerView extends ComponentView {
 

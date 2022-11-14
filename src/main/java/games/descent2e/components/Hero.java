@@ -1,7 +1,6 @@
 package games.descent2e.components;
 
 import core.CoreConstants;
-import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
 import core.properties.Property;
@@ -23,12 +22,11 @@ import static games.descent2e.DescentConstants.*;
 // TODO: figure out how to do ability/heroic-feat
 public class Hero extends Figure {
 
-    Deck<Card> skills;
-    Deck<Card> handEquipment;
-    Card armor;
-    Deck<Card> otherEquipment;
+    Deck<DescentCard> skills;
+    Deck<DescentCard> handEquipment;
+    DescentCard armor;
+    Deck<DescentCard> otherEquipment;
     Map<String, Integer> equipSlotsAvailable;
-    List<Item> items;
 
     // TODO: reset fatigue every quest to max fatigue
 
@@ -43,7 +41,6 @@ public class Hero extends Figure {
         skills = new Deck<>("Skills", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         handEquipment = new Deck<>("Hands", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         otherEquipment = new Deck<>("OtherItems", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
-        items = new ArrayList<>();
 
         equipSlotsAvailable = new HashMap<>();
         equipSlotsAvailable.put("hand", 2);
@@ -64,35 +61,35 @@ public class Hero extends Figure {
         super(name, actions, ID);
     }
 
-    public Deck<Card> getSkills() {
+    public Deck<DescentCard> getSkills() {
         return skills;
     }
 
-    public void setSkills(Deck<Card> skills) {
+    public void setSkills(Deck<DescentCard> skills) {
         this.skills = skills;
     }
 
-    public Deck<Card> getHandEquipment() {
+    public Deck<DescentCard> getHandEquipment() {
         return handEquipment;
     }
 
-    public void setHandEquipment(Deck<Card> handEquipment) {
+    public void setHandEquipment(Deck<DescentCard> handEquipment) {
         this.handEquipment = handEquipment;
     }
 
-    public Card getArmor() {
+    public DescentCard getArmor() {
         return armor;
     }
 
-    public void setArmor(Card armor) {
+    public void setArmor(DescentCard armor) {
         this.armor = armor;
     }
 
-    public Deck<Card> getOtherEquipment() {
+    public Deck<DescentCard> getOtherEquipment() {
         return otherEquipment;
     }
 
-    public void setOtherEquipment(Deck<Card> otherEquipment) {
+    public void setOtherEquipment(Deck<DescentCard> otherEquipment) {
         this.otherEquipment = otherEquipment;
     }
 
@@ -136,7 +133,7 @@ public class Hero extends Figure {
         this.rested = rested;
     }
 
-    public boolean equip(Card c) {
+    public boolean equip(DescentCard c) {
         // Check if equipment
         Property cost = c.getProperty(costHash);
         if (cost != null) {
@@ -154,7 +151,6 @@ public class Hero extends Figure {
             }
             if (canEquip) {
                 equipSlotsAvailable = equipSlots;
-                items.add(new Item(c));
                 switch (equip[0]) {
                     case "armor":
                         armor = c;
@@ -176,13 +172,13 @@ public class Hero extends Figure {
         }
     }
 
-    public List<Item> getWeapons() {
-        return items.stream().filter(Item::isAttack).collect(Collectors.toList());
+    public List<DescentCard> getWeapons() {
+        return handEquipment.stream().filter(DescentCard::isAttack).collect(Collectors.toList());
     }
 
     @Override
     public DicePool getAttackDice() {
-        Optional<Item> wpn = getWeapons().stream().findFirst();
+        Optional<DescentCard> wpn = getWeapons().stream().findFirst();
         if (wpn.isPresent())
             return wpn.get().getDicePool();
         return DicePool.empty;
@@ -236,7 +232,6 @@ public class Hero extends Figure {
         copy.featAvailable = this.featAvailable;
         copy.ability = this.ability;
         copy.rested = rested;
-        copy.items = new ArrayList<>(items); // Currently immutable TODO: Review later
         super.copyComponentTo(copy);
         return copy;
     }

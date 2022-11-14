@@ -20,9 +20,10 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static games.terraformingmars.gui.TMGUI.playerColors;
 import static gui.AbstractGUIManager.defaultItemSize;
 import static games.terraformingmars.gui.TMCardView.drawResource;
-import static games.terraformingmars.gui.Utils.*;
+import static utilities.GUIUtils.*;
 
 public class TMBoardView extends ComponentView implements ScreenHighlight {
 

@@ -30,9 +30,9 @@ public class Figure extends Token {
     public enum Attribute {
         MovePoints,
         Health,
+        Fatigue,
         XP,
         Gold,
-        Fatigue,
         Might,
         Willpower,
         Knowledge,

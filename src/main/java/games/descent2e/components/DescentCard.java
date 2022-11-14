@@ -4,25 +4,24 @@ import core.components.Card;
 import core.properties.Property;
 import core.properties.PropertyStringArray;
 import games.descent2e.DescentConstants.AttackType;
-import games.descent2e.DescentGameState;
 import games.descent2e.actions.attack.Surge;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Item {
-
+public class DescentCard extends Card {
     // Currently this is immutable, with no internal state
-    // Items are not stored as such, but are a useful wrapper around the Component
+    // Items are not stored as such, but are a useful wrapper around the Card
     // to give programmatic access to key properties
 
-    final int referenceComponent;
     protected AttackType attackType = AttackType.NONE;
     protected DicePool dicePool = DicePool.empty;
     protected List<Surge> weaponSurges = new ArrayList<>();
 
-    public Item(Card data) {
-        referenceComponent = data.getComponentID();
+    public DescentCard(Card data) {
+        super(data.getComponentName());
+
+        this.setProperties(data.getProperties());
         Property at = data.getProperty("attackType");
         if (at != null) {
             attackType = AttackType.valueOf(at.toString().toUpperCase(Locale.ROOT));
@@ -65,7 +64,8 @@ public class Item {
         return attackType == AttackType.BLAST;
     }
 
-    public int getComponentID() {
-        return referenceComponent;
+    @Override
+    public DescentCard copy() {
+        return this;
     }
 }
