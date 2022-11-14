@@ -24,18 +24,19 @@ import static utilities.Utils.getNeighbourhood;
 public class UseHealthPotion extends DescentAction implements IExtendedSequence {
     int toHealID;
 
-    public UseHealthPotion(Triggers triggerPoint) {
-        super(triggerPoint);
-    }
-
     public UseHealthPotion(int toHealID) {
         super(Triggers.ACTION_POINT_SPEND);
+        this.toHealID = toHealID;
     }
-
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Use health potion on" + toHealID;
+        return "Use health potion on " + gameState.getComponentById(toHealID).getComponentName();
+    }
+
+    @Override
+    public String toString() {
+        return "Use health potion";
     }
 
     @Override

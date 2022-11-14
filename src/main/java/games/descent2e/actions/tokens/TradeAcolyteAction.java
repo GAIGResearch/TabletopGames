@@ -102,6 +102,8 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
+        if (dgs.getActingFigure().getNActionsExecuted().isMaximum()) return false;
+
         // Can only execute if player adjacent to another hero
         DToken acolyte = (DToken) dgs.getComponentById(tokenID);
         int heroIdx = acolyte.getOwnerId();

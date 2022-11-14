@@ -5,8 +5,10 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Component;
 import core.interfaces.IExtendedSequence;
+import core.properties.PropertyInt;
 import games.descent2e.DescentGameState;
 import games.descent2e.actions.DescentAction;
+import games.descent2e.actions.Move;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.*;
 
@@ -16,7 +18,7 @@ import static games.descent2e.actions.Triggers.*;
 import static games.descent2e.actions.attack.MeleeAttack.AttackPhase.*;
 import static games.descent2e.actions.attack.MeleeAttack.Interrupters.*;
 
-public class MeleeAttack extends AbstractAction implements IExtendedSequence {
+public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     enum Interrupters {
         ATTACKER, DEFENDER, OTHERS, ALL
@@ -61,12 +63,13 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
     Set<Surge> surgesUsed = new HashSet<>();
 
     public MeleeAttack(int attackingFigure, int defendingFigure) {
+        super(ACTION_POINT_SPEND);
         this.attackingFigure = attackingFigure;
         this.defendingFigure = defendingFigure;
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean execute(DescentGameState gs) {
         gs.setActionInProgress(this);
         DescentGameState state = (DescentGameState) gs;
         attackingPlayer = state.getComponentById(attackingFigure).getOwnerId();
@@ -194,7 +197,31 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         damage = Math.max(damage - defence, 0);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
-        defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
+        if (startingHealth - damage <= 0) {
+            // Death
+            if (defender instanceof Hero) {
+                ((Hero)defender).setDefeated(true);
+                // Remove from map
+                Move.remove(state, defender);
+                // Overlord may draw a card TODO
+            } else {
+                // A monster
+                Monster m = (Monster)defender;
+
+                // Remove from board
+                Move.remove(state, m);
+
+                // Remove from state lists
+                for (List<Monster> monsterGroup: state.getMonsters()) {
+                    monsterGroup.remove(m);
+                }
+            }
+        } else {
+            defender.setAttribute(Figure.Attribute.Health, Math.max(startingHealth - damage, 0));
+        }
+
+        Figure attacker = (Figure) state.getComponentById(attackingFigure);
+        attacker.getNActionsExecuted().increment();
     }
 
     public boolean attackMissed(DescentGameState state) {
@@ -216,6 +243,11 @@ public class MeleeAttack extends AbstractAction implements IExtendedSequence {
         retValue.pierce = pierce;
         retValue.isStunning = isStunning;
         return retValue;
+    }
+
+    @Override
+    public boolean canExecute(DescentGameState dgs) {
+        return true;  // TODO
     }
 
     @Override

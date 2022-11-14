@@ -95,7 +95,7 @@ public class Move extends AbstractAction {
      * @param dgs - game state
      * @param f - figure to remove
      */
-    private static void remove(DescentGameState dgs, Figure f) {
+    public static void remove(DescentGameState dgs, Figure f) {
         Vector2D oldTopLeftAnchor = f.getPosition().copy();
         PropertyInt emptySpace = new PropertyInt("players", -1);
 

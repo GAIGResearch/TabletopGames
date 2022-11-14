@@ -13,17 +13,23 @@ public class UseWardingTalisman extends DescentAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return null;
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        return "Use Warding Talisman";
     }
 
     @Override
     public boolean execute(DescentGameState gs) {
+        // TODO:  add 2 (N) Shield to his defence pool when being a target of an attack.
         return false;
     }
 
     @Override
     public DescentAction copy() {
-        return null;
+        return this;
     }
 
     @Override

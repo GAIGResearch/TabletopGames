@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class DicePool extends Component implements IComponentContainer<DescentDice> {
 
     public static DicePool empty = new DicePool(Collections.emptyList());
+    public static DicePool revive;
 
     List<DescentDice> dice;
     boolean rolled = false;

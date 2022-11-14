@@ -31,6 +31,6 @@ public class Rest extends DescentAction{
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
-        return f instanceof Hero && f.getAttributeValue(Figure.Attribute.Fatigue) > 0;
+        return f instanceof Hero && f.getAttributeValue(Figure.Attribute.Fatigue) > 0 && !f.getNActionsExecuted().isMaximum();
     }
 }

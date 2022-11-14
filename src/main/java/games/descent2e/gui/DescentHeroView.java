@@ -41,7 +41,7 @@ public class DescentHeroView extends ComponentView {
 
     Image characterCard;
     static double characterCardScale;
-    static Font descentFont, primaryAttributeF, secondaryAttributeF, titleFont;
+    static Font descentFont, primaryAttributeF, secondaryAttributeF, labelFont, titleFont;
 
     HashMap<Rectangle, DescentCard> rectToCardMap;
 
@@ -75,6 +75,7 @@ public class DescentHeroView extends ComponentView {
 
             primaryAttributeF = new Font(descentFont.getName(), Font.BOLD, (int)(characterCardScale *45));
             secondaryAttributeF = new Font(descentFont.getName(), Font.BOLD, (int)(characterCardScale *30));
+            labelFont = new Font("Arial", Font.BOLD, 10);
 
             titleFont = Font.createFont(Font.TRUETYPE_FONT, new File(((DescentParameters)dgs.getGameParameters()).dataPath + "fonts/Windlass.ttf"));
             ge.registerFont(titleFont);
@@ -174,7 +175,7 @@ public class DescentHeroView extends ComponentView {
             drawCard(g, hero.getArmor(), xy.a, xy.b, cardWidth, cardHeight);
             rectToCardMap.put(new Rectangle(xy.a, xy.b, cardWidth, cardHeight), hero.getArmor());
             xy.a += cardWidth + 2;
-            if (xy.a + cardWidth >= width) {
+            if (xy.a + cardWidth + 5 >= width) {
                 xy.a = 0;
                 xy.b += cardHeight + 2;
             }
@@ -188,7 +189,7 @@ public class DescentHeroView extends ComponentView {
             drawCard(g, card, x, y, cardWidth, cardHeight);
             rectToCardMap.put(new Rectangle(x, y, cardWidth, cardHeight), card);
             x += cardWidth + 2;
-            if (x + cardWidth >= width) {
+            if (x + cardWidth + 5 >= width) {
                 x = 0;
                 y += cardHeight + 2;
             }
@@ -208,11 +209,15 @@ public class DescentHeroView extends ComponentView {
         y += h;
         g.drawString(name, x + width/2 - fm.stringWidth(name)/2, y);
 
-        y += h;
+        String text = "";
+
         Property XP = card.getProperty("XP");
         Property fatigue = card.getProperty("fatigue");
-        String text = "XP: " + XP.toString() + "; Fatigue: " + fatigue.toString();
-        g.drawString(text, x + width/2 - fm.stringWidth(text)/2, y);
+        if (XP != null && fatigue != null) {  // TODO: could a card have only XP, or only fatigue? probably
+            y += h;
+            text = "XP: " + XP + "; Fatigue: " + fatigue;
+            g.drawString(text, x + width / 2 - fm.stringWidth(text) / 2, y);
+        }
 
         Property equipmentType = card.getProperty("equipmentType");
         if (equipmentType != null) {
@@ -272,7 +277,7 @@ public class DescentHeroView extends ComponentView {
             String[] surges = ((PropertyStringArray)weaponSurges).getValues();
             for (String surge: surges) {
                 y += h;
-                Image toDraw = ImageIO.GetInstance().getImage(imgPath + "tokens/Surge.png");
+                Image toDraw = ImageIO.GetInstance().getImage(imgPath + "tokens/Surge_L.png");
                 int startX = x + width/2 - (h + pad + fm.stringWidth(surge)) / 2;
                 g.drawImage(toDraw, startX, y-h*2/3, h, h,null);
                 g.drawString(surge, startX + h + pad, y);

@@ -40,7 +40,12 @@ public class UseCurseDoll extends DescentAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toCureID != 1 && conditionToCure != null? "Curing" + conditionToCure + "from" + toCureID : "Use Curse Doll";
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        return toCureID != 1 && conditionToCure != null? "Curing " + conditionToCure + " from " + toCureID : "Use Curse Doll";
     }
 
     @Override
@@ -110,6 +115,8 @@ public class UseCurseDoll extends DescentAction implements IExtendedSequence {
                     .filter(a -> a.getComponentName().equals("Curse Doll"))
                     .findAny().orElseThrow(() -> new AssertionError("Card not found: Curse Doll"));
             heroEquipment.remove(card);
+
+            hero.getNActionsExecuted().increment();
         }
         else {
             gs.setActionInProgress(this);
@@ -124,6 +131,8 @@ public class UseCurseDoll extends DescentAction implements IExtendedSequence {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
+        if (dgs.getActingFigure().getNActionsExecuted().isMaximum()) return false;
+
         Deck<DescentCard> heroEquipment = ((Hero) dgs.getActingFigure()).getOtherEquipment();
         return heroEquipment.stream()
                 .anyMatch(a -> a.getComponentName().equals("Curse Doll"));

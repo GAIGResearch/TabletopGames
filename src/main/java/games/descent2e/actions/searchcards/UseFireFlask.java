@@ -12,29 +12,27 @@ import games.descent2e.components.Hero;
 
 
 public class UseFireFlask extends DescentAction {
-    int heroID;
-    int enemyID;
+    final int enemyID;
 
-
-    public UseFireFlask() {
+    public UseFireFlask(int enemyID) {
         super(Triggers.ACTION_POINT_SPEND);
-    }
-
-    public UseFireFlask(int heroID, int enemyID) {
-        super(Triggers.ACTION_POINT_SPEND);
-        this.heroID = heroID;
         this.enemyID = enemyID;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return null;
+        return "Use fire flask on " + gameState.getComponentById(enemyID).getComponentName();
+    }
+
+    @Override
+    public String toString() {
+        return "Use fire flask";
     }
 
     @Override
     public boolean execute(DescentGameState gs) {
         gs.setAttackDicePool(DicePool.constructDicePool("BlUE", "YELLOW"));
-        RangedAttack attack = new RangedAttack(heroID, enemyID);
+        RangedAttack attack = new RangedAttack(gs.getActingFigure().getComponentID(), enemyID);
         attack.execute(gs);
         //TODO Blast Surge
         return true;
@@ -47,6 +45,8 @@ public class UseFireFlask extends DescentAction {
 
     @Override
     public boolean canExecute(DescentGameState dgs) {
+        if (dgs.getActingFigure().getNActionsExecuted().isMaximum()) return false;
+
         Deck<DescentCard> heroEquipment = ((Hero) dgs.getActingFigure()).getOtherEquipment();
         return heroEquipment.stream()
                 .anyMatch(a -> a.getComponentName().equals("Fire Flask"));

@@ -18,12 +18,14 @@ import utilities.ImageIO;
 import utilities.Utils;
 
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static games.descent2e.gui.DescentHeroView.titleFont;
+import static games.descent2e.gui.DescentHeroView.*;
 
 public class DescentGUI extends AbstractGUIManager {
     DescentGridBoardView view;
@@ -32,6 +34,7 @@ public class DescentGUI extends AbstractGUIManager {
     JLabel actingFigureLabel, currentQuestLabel;
     DescentHeroView[] heroAreas;
     JPanel overlordArea;
+    DicePoolView dpvAttack, dpvDef, dpvAtt;
 
     static boolean prettyVersion = true;  // Turn off to not draw images
     static Color foregroundColor = Color.black;
@@ -161,6 +164,24 @@ public class DescentGUI extends AbstractGUIManager {
         historyContainer.setMaximumSize(new Dimension(width / 2 - 25, height - 25));
         historyWrapper.add(historyContainer);
         wrapper.add(historyWrapper);
+
+        DescentGameState dgs = (DescentGameState) gameState;
+        dpvAttack = new DicePoolView(dgs.getAttackDicePool(), dgs);
+        TitledBorder title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Attack dice",
+                TitledBorder.CENTER, TitledBorder.TOP, labelFont, Color.white);
+        dpvAttack.setBorder(title);
+        wrapper.add(dpvAttack);
+        dpvDef = new DicePoolView(dgs.getDefenceDicePool(), dgs);
+        title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Defence dice",
+                TitledBorder.CENTER, TitledBorder.TOP, labelFont, Color.white);
+        dpvDef.setBorder(title);
+        wrapper.add(dpvDef);
+        dpvAtt = new DicePoolView(dgs.getAttributeDicePool(), dgs);
+        title = BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Attribute dice",
+                TitledBorder.CENTER, TitledBorder.TOP, labelFont, Color.white);
+        dpvAtt.setBorder(title);
+        wrapper.add(dpvAtt);
+
         return wrapper;
     }
 
@@ -169,9 +190,9 @@ public class DescentGUI extends AbstractGUIManager {
         DescentTurnOrder dto = (DescentTurnOrder)gameState.getTurnOrder();
         DescentGameState dgs = (DescentGameState)gameState;
         if (dgs.getCurrentPlayer() == dgs.getOverlordPlayer()) {
-            actingFigureLabel.setText("Acting monster: " + dgs.getActingFigure().getComponentName());
+            actingFigureLabel.setText("Acting: " + dgs.getActingFigure().getComponentName());
         } else {
-            actingFigureLabel.setText("Acting hero: " + dgs.getActingFigure().getComponentName() + "(" +dto.getHeroFigureActingNext() + ")");
+            actingFigureLabel.setText("Acting: " + dgs.getActingFigure().getComponentName() + "(" +dto.getHeroFigureActingNext() + ")");
         }
         currentQuestLabel.setText("Quest: " + dgs.getCurrentQuest().getName());
     }
@@ -197,7 +218,11 @@ public class DescentGUI extends AbstractGUIManager {
             if (player instanceof HumanGUIPlayer) {
                 updateActionButtons(player, gameState);
             }
-            view.updateGameState((DescentGameState) gameState);
+            DescentGameState dgs = (DescentGameState) gameState;
+            view.updateGameState(dgs);
+            dpvAttack.update(dgs.getAttackDicePool());
+            dpvDef.update(dgs.getDefenceDicePool());
+            dpvAtt.update(dgs.getAttributeDicePool());
         }
         parent.repaint();
     }

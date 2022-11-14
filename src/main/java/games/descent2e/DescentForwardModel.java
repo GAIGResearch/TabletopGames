@@ -27,6 +27,7 @@ import games.descent2e.DescentTypes.*;
 
 import static core.CoreConstants.*;
 import static games.descent2e.DescentConstants.*;
+import static games.descent2e.components.DicePool.constructDicePool;
 import static utilities.Utils.getNeighbourhood;
 
 public class DescentForwardModel extends AbstractForwardModel {
@@ -40,6 +41,9 @@ public class DescentForwardModel extends AbstractForwardModel {
         dgs.initData = false;
         dgs.addAllComponents();
         DescentGameData _data = dgs.getData();
+
+        // Set up revive dice pool: 2 red dice
+        DicePool.revive = constructDicePool(descentParameters.reviveDice);
 
         // TODO: epic play options (pg 19)
 

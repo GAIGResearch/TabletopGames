@@ -24,25 +24,26 @@ import static utilities.Utils.getNeighbourhood;
 public class UseStaminaPotion extends DescentAction implements IExtendedSequence {
     int toRestoreID;
 
-    public UseStaminaPotion(Triggers triggerPoint) {
-        super(triggerPoint);
-    }
-
     public UseStaminaPotion(int toRestoreID) {
-        super(Triggers.ACTION_POINT_SPEND);
+        super(Triggers.ANYTIME);
+        this.toRestoreID = toRestoreID;
     }
-
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Use stamina potion on" + toRestoreID;
+        return "Use stamina potion on " + gameState.getComponentById(toRestoreID).getComponentName();
+    }
+
+    @Override
+    public String toString() {
+        return "Use stamina potion";
     }
 
     @Override
     public boolean execute(DescentGameState gs) {
         // Heal hero
         Hero hero = (Hero) gs.getComponentById(toRestoreID);
-        hero.setAttributeToMax(Figure.Attribute.Fatigue);
+        hero.setAttributeToMin(Figure.Attribute.Fatigue);
         return true;
     }
 

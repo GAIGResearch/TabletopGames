@@ -33,6 +33,8 @@ public class SearchAction extends TokenAction {
 
     @Override
     public boolean canExecute(DescentGameState gs) {
+        if (gs.getActingFigure().getNActionsExecuted().isMaximum()) return false;
+
         // Can only execute if player adjacent to search token
         DToken acolyte = (DToken) gs.getComponentById(tokenID);
         Hero hero = gs.getHeroes().get(acolyte.getOwnerId());

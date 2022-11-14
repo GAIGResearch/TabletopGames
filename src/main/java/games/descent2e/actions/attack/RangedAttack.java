@@ -1,5 +1,6 @@
 package games.descent2e.actions.attack;
 
+import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.components.Figure;
 import utilities.Distance;
@@ -22,5 +23,21 @@ public class RangedAttack extends MeleeAttack {
         // TODO: Chebyshev distance is not actually right, as it does not allow diagonal moves
         double distance = Distance.chebyshev_distance(attacker.getPosition(), defender.getPosition());
         return (state.getAttackDicePool().getRange() + extraRange < distance);
+    }
+
+    @Override
+    public String getString(AbstractGameState gameState) {
+        return toString();
+        // TODO: Extend this to pull in details of card and figures involved
+    }
+
+    @Override
+    public boolean canExecute(DescentGameState dgs) {
+        return super.canExecute(dgs); // TODO
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Ranged Attack (Wpn: %d on %d", attackingPlayer, attackingFigure);
     }
 }

@@ -6,6 +6,7 @@ import core.components.Deck;
 import core.properties.Property;
 import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
+import games.descent2e.actions.Move;
 import org.jetbrains.annotations.NotNull;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -31,7 +32,7 @@ public class Hero extends Figure {
     // TODO: reset fatigue every quest to max fatigue
 
     String heroicFeat;
-    boolean featAvailable, rested;
+    boolean featAvailable, rested, defeated;
 
     String ability;
 
@@ -131,6 +132,23 @@ public class Hero extends Figure {
 
     public void setRested(boolean rested) {
         this.rested = rested;
+    }
+
+    public void setDefeated(boolean defeated) {
+        this.defeated = defeated;
+
+        if (defeated) {
+            // Loses all health
+            setAttribute(Figure.Attribute.Health, 0);
+            // Max fatigue
+            setAttributeToMax(Figure.Attribute.Fatigue);
+            // Discard conditions
+            getConditions().clear();
+        }
+    }
+
+    public boolean isDefeated() {
+        return defeated;
     }
 
     public boolean equip(DescentCard c) {
