@@ -53,7 +53,12 @@ public class SearchAction extends TokenAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return null;
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        return "Search";
     }
 
     @Override
