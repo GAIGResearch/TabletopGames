@@ -9,6 +9,7 @@ import games.descent2e.DescentTypes;
 import games.descent2e.actions.Triggers;
 import games.descent2e.components.Hero;
 import games.descent2e.components.DescentCard;
+import games.descent2e.components.cards.SearchCard;
 import games.descent2e.components.tokens.DToken;
 import utilities.Vector2D;
 
@@ -65,13 +66,18 @@ public class SearchAction extends TokenAction {
     public boolean execute(DescentGameState gs) {
         Deck<Card> searchCards = gs.getSearchCards();
         if (searchCards != null) {
-            Hero hero = (Hero) gs.getActingFigure();
-            boolean added = hero.getOtherEquipment().add(new DescentCard(searchCards.pick(new Random(gs.getGameParameters().getRandomSeed()))));
-            if (added) {
-                ((DToken) gs.getComponentById(tokenID)).setPosition(null);  // Take off the map
-                hero.getNActionsExecuted().increment();
+            SearchCard card = (SearchCard) searchCards.draw();
+            if (card.getComponentName().equals("Treasure Chest")) {
+                // TODO - when shop cards are added
+                return true;
             }
-            return added;
+            else if (!card.getComponentName().equals("Nothing")) {
+                boolean added = ((Hero) gs.getActingFigure()).getOtherEquipment().add(new DescentCard(card));
+                if (added) {
+                    ((DToken) gs.getComponentById(tokenID)).setPosition(null);  // Take off the map
+                }
+                return added;
+            }
         }
         return false;
     }
