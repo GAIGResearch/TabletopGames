@@ -921,7 +921,10 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
 
-        players.add(new RandomPlayer());
+//        players.add(new MCTSPlayer());
+//        players.add(new MCTSPlayer());
+
+        players.add(new HumanGUIPlayer(ac));
         players.add(new DistanceKillerPlayer());  // Killer policy for Find the Murderer game, 2nd player
 
 //        players.add(new MCTSPlayer());
@@ -929,7 +932,6 @@ public class Game {
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
-//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 //        players.add(new HumanConsolePlayer());
@@ -945,7 +947,7 @@ public class Game {
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
 //        runMany(games, players, 100L, 100, false, false, null, turnPause);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
+//        runMany(new ArrayList<GameType>() {{add(GameType.FindMurderer);}}, players, 100L, 100, false, false, null, turnPause);
     }
 
 }

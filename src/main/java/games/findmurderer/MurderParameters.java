@@ -1,18 +1,56 @@
 package games.findmurderer;
 
 import core.AbstractParameters;
+import core.AbstractPlayer;
+import players.simple.RandomPlayer;
 
 import java.util.Objects;
+import java.util.Random;
 
 public class MurderParameters extends AbstractParameters {
+    public enum Direction {
+        Left(-1,0),
+        Right(1,0),
+        Up(0, -1),
+        Down(0,1);
+        public final int xDiff;
+        public final int yDiff;
+        Direction(int x, int y) {
+            this.xDiff = x;
+            this.yDiff = y;
+        }
+        public int getxDiff() {
+            return xDiff;
+        }
+        public int getyDiff() {
+            return yDiff;
+        }
+        public boolean equals(int x, int y) {
+            return x == xDiff && y == yDiff;
+        }
+
+        public static Direction getDirection(int x, int y) {
+            for (Direction d: values()) {
+                if (d.equals(x, y)) return d;
+            }
+            return null;
+        }
+    }
+
     public int gridWidth = 10;  // Width of grid world
     public int gridHeight = 10;  // Height of grid world
     public double percPeopleOnGrid = 0.5;  // Percentage of the world that is filled randomly with people
     public double percCivilianDeadWinKiller = 0.8;  // Percentage of the people in the world that have to be dead in order for the killer to win
-    public int killerMaxRange = 6;  // Killer can only kill people as far as this away from them, and loses when no more people are left in range
+    public int killerMaxRange = 1;  // Killer can only kill people as far as this away from them, and loses when no more people are left in range
+    public int maxTicks = 100;  // Maximum number of ticks
+    public int detectiveVisionRange = 5;  // Detective will see this many cells around their current focus
+
+    // How do civilians behave? Random default.
+    public AbstractPlayer civilianPolicy;
 
     public MurderParameters(long seed) {
         super(seed);
+        civilianPolicy = new RandomPlayer(new Random(getRandomSeed()));
     }
 
     @Override
@@ -22,6 +60,7 @@ public class MurderParameters extends AbstractParameters {
         mp.gridWidth = gridWidth;
         mp.percCivilianDeadWinKiller = percCivilianDeadWinKiller;
         mp.percPeopleOnGrid = percPeopleOnGrid;
+        mp.maxTicks = maxTicks;
         return mp;
     }
 

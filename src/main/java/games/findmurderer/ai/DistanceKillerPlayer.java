@@ -37,10 +37,7 @@ public class DistanceKillerPlayer extends AbstractPlayer {
     }
 
     @Override
-    public void initializePlayer(AbstractGameState gameState) {
-        // Assumes constant grid with no movement, precomputes distances to killer for each person in the grid
-        // If grid not static, then this will have to be done for every decision
-
+    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         MurderGameState mgs = (MurderGameState) gameState;
         List<Person> people = mgs.getGrid().getNonNullComponents();
 
@@ -55,12 +52,8 @@ public class DistanceKillerPlayer extends AbstractPlayer {
                 distanceFunction.apply(killerPosition, new Vector2D(0, mgs.getGrid().getHeight())));
         maxDistance = Math.max(maxDistance, distanceFunction.apply(killerPosition, new Vector2D(mgs.getGrid().getWidth(), 0)));
         maxDistance = Math.max(maxDistance, distanceFunction.apply(killerPosition, new Vector2D(mgs.getGrid().getWidth(), mgs.getGrid().getHeight())));
-    }
 
-    @Override
-    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
-
-        if (possibleActions.contains(passAction) && r.nextDouble() < passProbability) {
+        if (possibleActions.contains(passAction) && r.nextDouble() < passProbability || possibleActions.size() == 1 && possibleActions.get(0) instanceof DoNothing) {
             // If a pass probability is set, then pass action will be returned with that probability
             return passAction;
         }
@@ -80,6 +73,8 @@ public class DistanceKillerPlayer extends AbstractPlayer {
                     possibleTargets.add(a.target);
                 }
             }
+
+            if (possibleTargets.size() == 0) return passAction;
 
             // Calculate probabilities to kill each target based on their distance to the killer
             double[] probabilities = new double[possibleTargets.size()];

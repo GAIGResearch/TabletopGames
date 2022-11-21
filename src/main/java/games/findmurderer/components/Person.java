@@ -3,7 +3,7 @@ package games.findmurderer.components;
 import core.components.Token;
 import games.findmurderer.MurderGameState;
 
-import java.util.Objects;
+import java.util.*;
 
 public class Person extends Token {
 
@@ -26,11 +26,17 @@ public class Person extends Token {
     public Status status; // The status of the person, alive or dead
     public MurderGameState.PlayerMapping killer;  // The player who killed this person (null if person is alive)
 
+    public TreeMap<Integer, HashSet<Integer>> interactionHistory;  // Mapping from round number to list of other people they were adjacent to in that round
+
     public Person() {
         super("");
-        // By default people are alive and civilians
+
+        // By default, people are alive and civilians
         this.personType = PersonType.Civilian;
         this.status = Status.Alive;
+
+        // Initialise hashmap
+        interactionHistory = new TreeMap<>();
     }
 
     // Setters:
@@ -39,6 +45,10 @@ public class Person extends Token {
     }
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public void addInteractions(int round, HashSet<Integer> adjacent) {
+        this.interactionHistory.put(round, adjacent);
     }
 
     // Copy constructor
@@ -53,6 +63,11 @@ public class Person extends Token {
         p.status = status;
         p.personType = personType;
         p.killer = killer;
+        p.interactionHistory = new TreeMap<>();
+        for (int r: interactionHistory.keySet()) {
+            p.interactionHistory.put(r, new HashSet<>(interactionHistory.get(r)));
+        }
+        copyComponentTo(this);
         return p;
     }
 

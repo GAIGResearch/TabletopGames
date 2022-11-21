@@ -2,9 +2,12 @@ package games.findmurderer.gui;
 
 import core.components.GridBoard;
 import games.findmurderer.MurderGameState;
+import games.findmurderer.MurderParameters;
 import games.findmurderer.components.Person;
 import gui.ScreenHighlight;
 import gui.views.ComponentView;
+import utilities.Distance;
+import utilities.Vector2D;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -16,6 +19,7 @@ import static gui.GUI.defaultItemSize;
 
 public class MurderBoardView extends ComponentView implements ScreenHighlight {
 
+    boolean fullObservability = false;
     boolean highlightKiller = false;
 
     HashMap<Person.Status, Color> statusColorMap = new HashMap<Person.Status, Color>() {{
@@ -28,20 +32,23 @@ public class MurderBoardView extends ComponentView implements ScreenHighlight {
 
     Rectangle[] rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;
-    HashMap<Rectangle, Integer> rectToComponentIDMap;
+    HashMap<Rectangle, Vector2D> rectToGridPosMap;
     int itemSize = defaultItemSize;
     int maxHeight = 500;
 
-    public MurderBoardView(GridBoard<Person> gridBoard) {
-        super(gridBoard, gridBoard.getWidth() * defaultItemSize, gridBoard.getHeight() * defaultItemSize);
-        rects = new Rectangle[gridBoard.getWidth() * gridBoard.getHeight()];
-        highlight = new ArrayList<>();
-        rectToComponentIDMap = new HashMap<>();
+    MurderGameState mgs;
 
-        if (gridBoard.getHeight()*itemSize > maxHeight) {
-            itemSize = Math.max(1,maxHeight/gridBoard.getHeight());
-            this.height = itemSize * gridBoard.getHeight();
-            this.width = itemSize * gridBoard.getWidth();
+    public MurderBoardView(MurderGameState mgs) {
+        super(mgs.getGrid(), mgs.getGrid().getWidth() * defaultItemSize, mgs.getGrid().getHeight() * defaultItemSize);
+        rects = new Rectangle[mgs.getGrid().getWidth() * mgs.getGrid().getHeight()];
+        highlight = new ArrayList<>();
+        rectToGridPosMap = new HashMap<>();
+        this.mgs = mgs;
+
+        if (mgs.getGrid().getHeight()*itemSize > maxHeight) {
+            itemSize = Math.max(1,maxHeight/mgs.getGrid().getHeight());
+            this.height = itemSize * mgs.getGrid().getHeight();
+            this.width = itemSize * mgs.getGrid().getWidth();
         }
         killerStroke = new BasicStroke((int)(6 * itemSize*1.0/defaultItemSize));
 
@@ -92,60 +99,70 @@ public class MurderBoardView extends ComponentView implements ScreenHighlight {
         // Draw cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
+                boolean seenByDetective = Distance.euclidian_distance(new Vector2D(j, i), mgs.getDetectiveFocus()) <= ((MurderParameters)mgs.getGameParameters()).detectiveVisionRange;
+
                 int xC = x + j * itemSize;
                 int yC = y + i * itemSize;
                 Person p = gridBoard.getElement(j, i);
-                drawCell(g, p, xC, yC);
+                drawCell(g, p, xC, yC, seenByDetective);
 
                 // Save rect where cell is drawn
                 int idx = i * gridBoard.getWidth() + j;
                 if (rects[idx] == null) {
                     rects[idx] = new Rectangle(xC, yC, itemSize, itemSize);
-                    if (p != null) {
-                        rectToComponentIDMap.put(rects[idx], p.getComponentID());
-                    }
+                    rectToGridPosMap.put(rects[idx], new Vector2D(j, i));
                 }
             }
         }
     }
 
-    private void drawCell(Graphics2D g, Person element, int x, int y) {
-        // Paint cell background
-        g.setColor(Color.white);
-        g.fillRect(x, y, itemSize, itemSize);
-        g.setColor(Color.black);
-        g.drawRect(x, y, itemSize, itemSize);
+    private void drawCell(Graphics2D g, Person element, int x, int y, boolean seenByDetective) {
 
-        int pad = (int)(5 * itemSize*1.0/defaultItemSize);
-
-        // Paint element in cell
-        if (element != null) {
-            Font f = g.getFont();
-            Stroke s = g.getStroke();
-
-            g.setColor(statusColorMap.get(element.status));
-            g.fillOval(x+pad, y+pad, itemSize-pad*2, itemSize-pad*2);
-
-            if (element.killer == MurderGameState.PlayerMapping.Detective) {
-                g.setColor(detectiveKillHighlight);
-                g.setFont(new Font(f.getName(), Font.BOLD, itemSize));
-                int w = g.getFontMetrics().stringWidth("X");
-                g.drawString("X", x + itemSize / 2 - w / 2, y + itemSize / 2 + itemSize/3);
-            }
-
+        if (fullObservability || seenByDetective) {
+            // Paint cell background
+            g.setColor(Color.white);
+            g.fillRect(x, y, itemSize, itemSize);
             g.setColor(Color.black);
-            g.setFont(new Font(f.getName(), Font.BOLD, (int)(12 * itemSize*1.0/defaultItemSize)));
-            String name = ""+element.getComponentID();  // element.toString()
-            int w = g.getFontMetrics().stringWidth(name);
-            g.drawString(name, x + itemSize/2 - w/2, y + itemSize/2 + (int)(6 * itemSize*1.0/defaultItemSize));
-            g.setFont(f);
+            g.drawRect(x, y, itemSize, itemSize);
 
-            if (highlightKiller && element.personType == Person.PersonType.Killer) {
-                g.setColor(killerOutline);
-                g.setStroke(killerStroke);
-                g.drawOval(x + pad, y + pad, itemSize - pad * 2, itemSize - pad * 2);
-                g.setStroke(s);
+            int pad = (int) (5 * itemSize * 1.0 / defaultItemSize);
+
+            // Paint element in cell
+            if (element != null) {
+                Font f = g.getFont();
+                Stroke s = g.getStroke();
+
+                g.setColor(statusColorMap.get(element.status));
+                g.fillOval(x + pad, y + pad, itemSize - pad * 2, itemSize - pad * 2);
+
+                if (element.killer == MurderGameState.PlayerMapping.Detective) {
+                    g.setColor(detectiveKillHighlight);
+                    g.setFont(new Font(f.getName(), Font.BOLD, itemSize));
+                    int w = g.getFontMetrics().stringWidth("X");
+                    g.drawString("X", x + itemSize / 2 - w / 2, y + itemSize / 2 + itemSize / 3);
+                }
+
+                g.setColor(Color.black);
+                g.setFont(new Font(f.getName(), Font.BOLD, (int) (12 * itemSize * 1.0 / defaultItemSize)));
+                String name = "" + element.getComponentID();  // element.toString()
+                int w = g.getFontMetrics().stringWidth(name);
+                g.drawString(name, x + itemSize / 2 - w / 2, y + itemSize / 2 + (int) (6 * itemSize * 1.0 / defaultItemSize));
+                g.setFont(f);
+
+                if (highlightKiller && element.personType == Person.PersonType.Killer) {
+                    g.setColor(killerOutline);
+                    g.setStroke(killerStroke);
+                    g.drawOval(x + pad, y + pad, itemSize - pad * 2, itemSize - pad * 2);
+                    g.setStroke(s);
+                }
             }
+        } else {
+
+            // Paint cell background
+            g.setColor(Color.gray);
+            g.fillRect(x, y, itemSize, itemSize);
+            g.setColor(Color.black);
+            g.drawRect(x, y, itemSize, itemSize);
         }
     }
 
@@ -153,12 +170,16 @@ public class MurderBoardView extends ComponentView implements ScreenHighlight {
         return highlight;
     }
 
-    public HashMap<Rectangle, Integer> getRectToComponentIDMap() {
-        return rectToComponentIDMap;
+    public HashMap<Rectangle, Vector2D> getRectToGridPosMap() {
+        return rectToGridPosMap;
     }
 
     @Override
     public void clearHighlights() {
         highlight.clear();
+    }
+
+    public void update(MurderGameState mgs) {
+        this.mgs = mgs;
     }
 }

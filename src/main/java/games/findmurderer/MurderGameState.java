@@ -35,6 +35,13 @@ public class MurderGameState extends AbstractGameState {
     HashMap<Integer, Vector2D> personToPositionMap;
     Person killer;
 
+    // What does the detective know about the interactions in the map?
+    // Mapping from person ID to the round up until they know about the person. Initially 0.
+    // TODO: show in GUI
+    HashMap<Integer, Integer> detectiveInformation;
+    // Where is the detective looking currently - coordinates of cell, with radius of vision around it according to parameters.
+    Vector2D detectiveFocus;
+
     /**
      * Constructor, using alternating turn order: each player gets to execute 1 action.
      * @param gameParameters - parameters for the game
@@ -67,7 +74,21 @@ public class MurderGameState extends AbstractGameState {
         for (int i = 0; i < grid.getHeight(); i++) {
             for (int j = 0; j < grid.getWidth(); j++) {
                 if (grid.getElement(j, i) != null) {
-                    gs.grid.setElement(j, i, grid.getElement(j, i).copy());
+                    Person copy = grid.getElement(j, i).copy();
+                    if (playerId != -1) {
+                        // Partial observability
+                        if (playerId == PlayerMapping.Detective.playerIdx) {
+                            // Detective has partial information about the people's interaction history
+                            int lastKnownRound = 0;
+                            if (detectiveInformation.containsKey(copy.getComponentID()))
+                                lastKnownRound = detectiveInformation.get(copy.getComponentID());
+                            copy.interactionHistory.tailMap(lastKnownRound).clear();
+                        } else {
+                            // Killer doesn't know what detective knows
+                            copy.interactionHistory = new TreeMap<>();
+                        }
+                    }
+                    gs.grid.setElement(j, i, copy);
                 }
             }
         }
@@ -94,8 +115,28 @@ public class MurderGameState extends AbstractGameState {
             gs.killer.setPersonType(Person.PersonType.Killer);
         }
 
+        if (playerId == -1 || playerId == PlayerMapping.Detective.playerIdx) {
+            // Detective knows where they're looking
+            gs.detectiveFocus = detectiveFocus.copy();
+        } else {
+            // Killer doesn't? TODO maybe they do know if they're being observed
+            gs.detectiveFocus = new Vector2D();
+        }
+
         // Return the copy
         return gs;
+    }
+
+    public HashMap<Integer, Integer> getDetectiveInformation() {
+        return detectiveInformation;
+    }
+
+    public Vector2D getDetectiveFocus() {
+        return detectiveFocus;
+    }
+
+    public void setDetectiveFocus(Vector2D detectiveFocus) {
+        this.detectiveFocus = detectiveFocus;
     }
 
     @Override

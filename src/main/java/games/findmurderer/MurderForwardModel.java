@@ -6,6 +6,9 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.GridBoard;
 import games.findmurderer.actions.Kill;
+import games.findmurderer.actions.LookAt;
+import games.findmurderer.actions.Move;
+import games.findmurderer.actions.Query;
 import games.findmurderer.components.Person;
 import utilities.Distance;
 import utilities.Utils;
@@ -22,11 +25,16 @@ public class MurderForwardModel extends AbstractForwardModel {
         // Cast variables to correct types and create random number generator with correct random seed
         MurderGameState mgs = (MurderGameState) firstState;
         MurderParameters mp = (MurderParameters) firstState.getGameParameters();
+        mp.civilianPolicy.setForwardModel(this);
         Random r = new Random(mp.getRandomSeed());
 
         // Create grid
         mgs.grid = new GridBoard<>(mp.gridWidth, mp.gridHeight);
         mgs.personToPositionMap = new HashMap<>();
+
+        // Initialize detective information
+        mgs.detectiveInformation = new HashMap<>();
+        mgs.detectiveFocus = new Vector2D();
 
         // Add people to random locations in the grid: respect percentage of grid that should be covered by people
         int placed = 0;
@@ -54,6 +62,7 @@ public class MurderForwardModel extends AbstractForwardModel {
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         // Apply action
         action.execute(currentState);
+
         // Check end of game
         MurderGameState mgs = (MurderGameState) currentState;
         MurderParameters mp = (MurderParameters) currentState.getGameParameters();
@@ -72,19 +81,51 @@ public class MurderForwardModel extends AbstractForwardModel {
                 mgs.setPlayerResult(Utils.GameResult.WIN, MurderGameState.PlayerMapping.Killer.playerIdx);
                 return;
             }
+            // Game also ends on max. ticks
+            if (mgs.getTurnOrder().getRoundCounter() >= mp.maxTicks) {
+                // Detective wins
+                mgs.setGameStatus(Utils.GameResult.GAME_END);
+                mgs.setPlayerResult(Utils.GameResult.WIN, MurderGameState.PlayerMapping.Detective.playerIdx);
+                mgs.setPlayerResult(Utils.GameResult.LOSE, MurderGameState.PlayerMapping.Killer.playerIdx);
+                return;
+            }
         }
 
-        // If not ended, it's the next player's turn
+        // If not ended ...
+
+        // Move civilians that are alive in the grid
+        for (int i = 0; i < mgs.getGrid().getHeight(); i++) {
+            for (int j = 0; j < mgs.getGrid().getWidth(); j++) {
+                Person p = mgs.getGrid().getElement(j, i);
+                if (p != null && p.personType != Person.PersonType.Killer && p.status == Person.Status.Alive) {
+                    List<AbstractAction> moves = calculateMoves(mgs, p, j, i);
+                    // Can also stay where they are, ensure that all can at least do this.
+                    moves.add(new Move(p.getComponentID(), new Vector2D(j, i), new Vector2D(j, i)));
+                    // Get chosen move and apply it in state
+                    mp.civilianPolicy.getAction(mgs, moves).execute(mgs);  // TODO: potentially partial observations
+                }
+            }
+        }
+
+        // It's the next player's turn
         currentState.getTurnOrder().endPlayerTurn(currentState);
+    }
 
-        List<AbstractAction> availableActionsNext = computeAvailableActions(currentState);
-        if (availableActionsNext.size() == 1) {
-            // Only pass actions available next, that player lost
-            int player = currentState.getCurrentPlayer();
-            mgs.setGameStatus(Utils.GameResult.GAME_END);
-            mgs.setPlayerResult(Utils.GameResult.LOSE, player);
-            mgs.setPlayerResult(Utils.GameResult.WIN, 1-player); // Assumes 2-player only
+    private List<AbstractAction> calculateMoves(MurderGameState mgs, Person p, int currentX, int currentY) {
+        List<AbstractAction> moves = new ArrayList<>();  // TODO potential more complex behaviours rather than just move
+        int w = mgs.grid.getWidth();
+        int h = mgs.grid.getHeight();
+        for (MurderParameters.Direction d: MurderParameters.Direction.values()) {
+            Vector2D targetPos = new Vector2D(currentX + d.xDiff, currentY + d.yDiff);
+            // Cannot go off the grid
+            if (targetPos.getX() >= 0 && targetPos.getX() < w
+                    && targetPos.getY() >= 0 && targetPos.getY() < h
+                    // Cannot overlap other people, only 1 per cell
+                    && mgs.getGrid().getElement(targetPos.getX(), targetPos.getY()) == null) {
+                moves.add(new Move(p.getComponentID(), new Vector2D(currentX, currentY), targetPos));
+            }
         }
+        return moves;
     }
 
     @Override
@@ -94,9 +135,10 @@ public class MurderForwardModel extends AbstractForwardModel {
         MurderParameters mp = (MurderParameters) gameState.getGameParameters();
         int currentPlayer = gameState.getCurrentPlayer();
         ArrayList<AbstractAction> actions = new ArrayList<>();
+        Vector2D killerPosition = mgs.personToPositionMap.get(mgs.killer.getComponentID());
 
         for (Person p: mgs.grid.getNonNullComponents()) {
-            // Can only kill alive people
+            // Can only interact with alive people
             if (p.status != Person.Status.Alive) continue;
 
             // Killer extra conditions for kill viability
@@ -105,12 +147,35 @@ public class MurderForwardModel extends AbstractForwardModel {
                 if (p.personType == Person.PersonType.Killer) continue;
 
                 // Killer can only kill within some range defined in parameters
-                double distance = Distance.euclidian_distance(mgs.personToPositionMap.get(mgs.killer.getComponentID()), mgs.personToPositionMap.get(p.getComponentID()));
+                double distance = Distance.euclidian_distance(killerPosition, mgs.personToPositionMap.get(p.getComponentID()));
                 if (distance > mp.killerMaxRange) continue;
             }
 
-            // Add one kill action for each person we can kill
+            // Detective can only interact with people in vision range
+            if (currentPlayer == MurderGameState.PlayerMapping.Detective.playerIdx) {
+                double distance = Distance.euclidian_distance(mgs.detectiveFocus, mgs.personToPositionMap.get(p.getComponentID()));
+                if (distance > mp.detectiveVisionRange) continue;
+
+                // Detective can query this person to update their information of interactions
+                actions.add(new Query(p.getComponentID()));
+            }
+
+            // Both killer and detective can kill this person
             actions.add(new Kill(p.getComponentID()));
+        }
+
+        if (currentPlayer == MurderGameState.PlayerMapping.Detective.playerIdx) {
+            // Detective can change focus on grid
+            for (int i = 0; i < mgs.grid.getHeight(); i++) {
+                for (int j = 0; j < mgs.grid.getWidth(); j++) {
+                    actions.add(new LookAt(new Vector2D(j, i)));
+                }
+            }
+        }
+
+        if (currentPlayer == MurderGameState.PlayerMapping.Killer.playerIdx) {
+            // Killer can move
+            actions.addAll(calculateMoves(mgs, mgs.killer, killerPosition.getX(), killerPosition.getY()));
         }
 
         // Can always pass
