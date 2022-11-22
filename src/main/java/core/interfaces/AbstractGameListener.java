@@ -10,7 +10,10 @@ import utilities.Utils;
 import java.io.File;
 import java.lang.reflect.Constructor;
 
-public interface IGameListener {
+public abstract class AbstractGameListener {
+
+    //Default logger for the listener.
+    protected IStatisticLogger logger;
 
     /**
      * This is used to register Game Start and Game Over events
@@ -21,7 +24,7 @@ public interface IGameListener {
      * @param type Either ABOUT_TO_START or GAME_OVER
      * @param game The Game
      */
-    void onGameEvent(CoreConstants.GameEvents type, Game game);
+    public abstract void onGameEvent(CoreConstants.GameEvents type, Game game);
 
     /**
      * Registers all other event types.
@@ -36,7 +39,7 @@ public interface IGameListener {
      * @param action The Action that have just been Chosen (if relevant; else null)
      */
     // for all other event types
-    void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action);
+    public abstract void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action);
 
     /**
      * This is called when all processing is finished, for example after running a sequence of games
@@ -44,15 +47,17 @@ public interface IGameListener {
      *
      * This is useful for Listeners that are just interested in aggregate data across many runs
      */
-    default void allGamesFinished() {
-        // default is to do nothing
-
+    public void allGamesFinished() {
+        if(logger != null)
+            logger.processDataAndFinish();
     }
 
+    public IStatisticLogger getLogger() {return logger;}
 
-    static IGameListener createListener(String listenerClass, IStatisticLogger logger) {
+
+    public static AbstractGameListener createListener(String listenerClass, IStatisticLogger logger) {
         // first we check to see if listenerClass is a file or not
-        IGameListener listener = new GameStatisticsListener(logger);
+        AbstractGameListener listener = new GameStatisticsListener(logger);
         File listenerDetails = new File(listenerClass);
         if (listenerDetails.exists()) {
             // in this case we construct from file
@@ -64,7 +69,7 @@ public interface IGameListener {
                     Constructor<?> constructor;
                     try {
                         constructor = clazz.getConstructor(IStatisticLogger.class);
-                        listener = (IGameListener) constructor.newInstance(logger);
+                        listener = (AbstractGameListener) constructor.newInstance(logger);
                     } catch (NoSuchMethodException e) {
                         return createListener(listenerClass);
                     }
@@ -76,13 +81,13 @@ public interface IGameListener {
         return listener;
     }
 
-    static IGameListener createListener(String listenerClass) {
-        IGameListener listener = new GameStatisticsListener();
+    static AbstractGameListener createListener(String listenerClass) {
+        AbstractGameListener listener = new GameStatisticsListener();
         try {
             Class<?> clazz = Class.forName(listenerClass);
             Constructor<?> constructor;
             constructor = clazz.getConstructor();
-            listener = (IGameListener) constructor.newInstance();
+            listener = (AbstractGameListener) constructor.newInstance();
 
         } catch (Exception e) {
             e.printStackTrace();

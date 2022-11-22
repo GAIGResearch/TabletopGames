@@ -4,13 +4,11 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
-import core.interfaces.IGameListener;
-import games.dicemonastery.DiceMonasteryGameState;
+import core.interfaces.AbstractGameListener;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static utilities.Utils.GameResult.GAME_END;
@@ -28,7 +26,7 @@ public abstract class TurnOrder {
     protected int turnCounter;  // Number of turns in this round
     protected int roundCounter;  // 1 round = (1 turn) x nPlayers(alive)
 
-    protected List<IGameListener> listeners = new ArrayList<>();
+    protected List<AbstractGameListener> listeners = new ArrayList<>();
 
     public TurnOrder(int nPlayers, int nMaxRounds) {
         reset();
@@ -241,7 +239,7 @@ public abstract class TurnOrder {
         return Objects.hash(nPlayers, turnOwner, turnCounter, roundCounter, firstPlayer, nMaxRounds);
     }
 
-    public void addListener(IGameListener listener) {
+    public void addListener(AbstractGameListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
     }

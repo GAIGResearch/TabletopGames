@@ -5,17 +5,16 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IComponentContainer;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
 
 import java.util.*;
 
 import static core.CoreConstants.GameEvents.*;
 
-public class GameResultListener implements IGameListener {
+public class GameResultListener extends AbstractGameListener {
 
     Map<String, Object> collectedData = new LinkedHashMap<>();
-    IStatisticLogger logger;
 
     public GameResultListener(IStatisticLogger logger) {
         this.logger = logger;
@@ -55,11 +54,6 @@ public class GameResultListener implements IGameListener {
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
         // do nothing
-    }
-
-    @Override
-    public void allGamesFinished() {
-        logger.processDataAndFinish();
     }
 
     /**

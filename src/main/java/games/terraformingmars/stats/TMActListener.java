@@ -5,7 +5,7 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameAttribute;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.actions.PayForAction;
@@ -16,9 +16,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class TMActListener implements IGameListener {
+public class TMActListener extends AbstractGameListener {
 
-    IStatisticLogger logger;
     public TMActListener(IStatisticLogger logger) {
         this.logger = logger;
     }
@@ -34,11 +33,6 @@ public class TMActListener implements IGameListener {
                     .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, action)));
             logger.record(data);
         }
-    }
-
-    @Override
-    public void allGamesFinished() {
-        logger.processDataAndFinish();
     }
 
     public enum TMActAttributes implements IGameAttribute {

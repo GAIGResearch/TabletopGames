@@ -4,13 +4,10 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.ParameterFactory;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
-import games.terraformingmars.stats.TMStatsVisualiser;
 import players.PlayerFactory;
-import players.simple.RandomPlayer;
-import utilities.FileStatsLogger;
 import utilities.Pair;
 
 import java.util.*;
@@ -75,7 +72,7 @@ public class GameReport {
         String opponentDescriptor = getArg(args, "opponent", "random");
         String gameParams = getArg(args, "gameParam", "");
         String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
-        String statsLog = getArg(args, "statsLog", "");
+        String statsLog = getArg(args, "statsLog", "SummaryLogger.txt");
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameStatisticsListener").split("\\|")));
         List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
 
@@ -112,12 +109,12 @@ public class GameReport {
         if (nPlayers.size() > 1 && nPlayers.size() != games.size())
             throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list");
 
-        List<IGameListener> gameTrackers = new ArrayList<>();
+        List<AbstractGameListener> gameTrackers = new ArrayList<>();
         for (int i = 0; i < listenerClasses.size(); i++) {
             String logFile = logFiles.size() == 1 ? logFiles.get(0) : logFiles.get(i);
             String listenerClass = listenerClasses.size() == 1 ? listenerClasses.get(0) : listenerClasses.get(i);
             IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
-            IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
+            AbstractGameListener gameTracker = AbstractGameListener.createListener(listenerClass, logger);
             gameTrackers.add(gameTracker);
         }
 
@@ -145,7 +142,7 @@ public class GameReport {
                 Game game = params == null ?
                         gameType.createGameInstance(playerCount) :
                         gameType.createGameInstance(playerCount, params);
-                for (IGameListener gameTracker : gameTrackers)
+                for (AbstractGameListener gameTracker : gameTrackers)
                     game.addListener(gameTracker);
 
                 if (playerDescriptor.isEmpty() && opponentDescriptor.isEmpty()) {
@@ -194,7 +191,7 @@ public class GameReport {
         }
 
         // Once all games are complete, let the gameTracker know
-        for (IGameListener gameTracker : gameTrackers) {
+        for (AbstractGameListener gameTracker : gameTrackers) {
             gameTracker.allGamesFinished();
         }
         if (statsLogger != null)

@@ -2,7 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
@@ -15,10 +15,7 @@ import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSParams;
 import players.simple.RandomPlayer;
-import players.mcts.MCTSPlayer;
-import players.simple.OSLAPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.Utils;
@@ -32,9 +29,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static core.CoreConstants.*;
 import static core.CoreConstants.GameEvents;
-import static games.GameType.*;
 import static utilities.Utils.componentToImage;
 
 public class Game {
@@ -47,7 +42,7 @@ public class Game {
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
-    protected List<IGameListener> listeners = new ArrayList<>();
+    protected List<AbstractGameListener> listeners = new ArrayList<>();
     /* Game Statistics */
     private int lastPlayer; // used to track actions per 'turn'
     private JFrame frame;
@@ -120,7 +115,7 @@ public class Game {
      * @return - game instance created for the run
      */
     public static Game runOne(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                              boolean randomizeParameters, List<IGameListener> listeners, ActionController ac, int turnPause) {
+                              boolean randomizeParameters, List<AbstractGameListener> listeners, ActionController ac, int turnPause) {
         // Creating game instance (null if not implemented)
         Game game;
         if (parameterConfigFile != null) {
@@ -197,7 +192,7 @@ public class Game {
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
                                int nRepetitions, boolean randomizeParameters,
-                               boolean detailedStatistics, List<IGameListener> listeners, int turnPause) {
+                               boolean detailedStatistics, List<AbstractGameListener> listeners, int turnPause) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -275,7 +270,7 @@ public class Game {
      * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, int nRepetitions,
-                               long[] seeds, ActionController ac, boolean randomizeParameters, List<IGameListener> listeners, int turnPause) {
+                               long[] seeds, ActionController ac, boolean randomizeParameters, List<AbstractGameListener> listeners, int turnPause) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -734,7 +729,7 @@ public class Game {
         return gameType;
     }
 
-    public void addListener(IGameListener listener) {
+    public void addListener(AbstractGameListener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
             gameState.turnOrder.addListener(listener);

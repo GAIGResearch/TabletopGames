@@ -5,7 +5,7 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameAttribute;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
 
 import java.util.Arrays;
@@ -15,15 +15,9 @@ import java.util.stream.Collectors;
 import static core.CoreConstants.GameEvents.ACTION_CHOSEN;
 import static core.CoreConstants.GameEvents.GAME_EVENT;
 
-public class ActionListener implements IGameListener {
+public class ActionListener extends AbstractGameListener {
 
-    IStatisticLogger logger;
     IGameAttribute[] attributesToRecord;
-
-    @Override
-    public void allGamesFinished() {
-        logger.processDataAndFinish();
-    }
 
     public ActionListener(IStatisticLogger logger) {
         this(logger, ActionSimpleAttributes.values());

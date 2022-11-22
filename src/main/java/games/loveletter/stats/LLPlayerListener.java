@@ -5,7 +5,7 @@ import core.Game;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IGameAttribute;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.BaronAction;
@@ -19,17 +19,16 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class LLPlayerListener implements IGameListener {
+public class LLPlayerListener extends AbstractGameListener {
 
-    IStatisticLogger[] logger;
-    IStatisticLogger aggregate;
+    IStatisticLogger[] loggerArray;
 
     String winningCards;
     String losingCards;
 
-    public LLPlayerListener(IStatisticLogger[] logger, IStatisticLogger aggregate) {
-        this.logger = logger;
-        this.aggregate = aggregate;
+    public LLPlayerListener(IStatisticLogger[] loggerArray, IStatisticLogger aggregate) {
+        this.loggerArray = loggerArray;
+        this.logger = aggregate;
         winningCards = null;
         losingCards = null;
     }
@@ -48,8 +47,8 @@ public class LLPlayerListener implements IGameListener {
                 String losses = processCards(losingCards, playerID);
                 data.put("LOSE_REASON", losses);
 
-                logger[i].record(data);
-                aggregate.record(data);
+                loggerArray[i].record(data);
+                logger.record(data);
             }
 
             winningCards = null;
@@ -172,10 +171,10 @@ public class LLPlayerListener implements IGameListener {
 
     @Override
     public void allGamesFinished() {
-        for (IStatisticLogger log : logger) {
+        for (IStatisticLogger log : loggerArray) {
             log.processDataAndFinish();
         }
-        aggregate.processDataAndFinish();
+        super.allGamesFinished();
     }
 
 

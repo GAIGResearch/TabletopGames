@@ -7,7 +7,7 @@ import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
 import utilities.Hash;
 
@@ -17,8 +17,8 @@ import java.util.Map;
 import static games.pandemic.PandemicConstants.infectionHash;
 import static games.pandemic.PandemicConstants.playerDeckHash;
 
-public class PandemicListener implements IGameListener {
-    IStatisticLogger logger;
+public class PandemicListener extends AbstractGameListener {
+
     public PandemicListener(IStatisticLogger logger) {
         this.logger = logger;
     }
@@ -58,10 +58,6 @@ public class PandemicListener implements IGameListener {
         // nothing
     }
 
-    @Override
-    public void allGamesFinished() {
-        logger.processDataAndFinish();
-    }
 }
 
 

@@ -2,18 +2,9 @@ package utilities;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
-import core.interfaces.IGameListener;
-import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
-
-import java.util.*;
-import java.util.stream.IntStream;
-
-import static utilities.StateFeatureListener.*;
-
 /**
  * This provides a generic way of recording training data from games. After each move is made, it will record a feature
  * vector of the current state (for each player?) and the current score.

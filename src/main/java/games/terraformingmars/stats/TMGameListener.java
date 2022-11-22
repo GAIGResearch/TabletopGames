@@ -5,15 +5,11 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameAttribute;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
-import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.TMAction;
-import games.terraformingmars.components.Award;
-import games.terraformingmars.components.Milestone;
-import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
 import utilities.Pair;
 
@@ -21,9 +17,8 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class TMGameListener implements IGameListener {
+public class TMGameListener extends AbstractGameListener {
 
-    IStatisticLogger logger;
     public TMGameListener(IStatisticLogger logger) {
         this.logger = logger;
     }
@@ -33,7 +28,12 @@ public class TMGameListener implements IGameListener {
         if (type == CoreConstants.GameEvents.GAME_OVER) {
             AbstractGameState state = game.getGameState();
             Map<String, Object> data = Arrays.stream(TMGameAttributes.values())
-                    .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, null)));
+                    .collect(Collectors.toMap(IGameAttribute::name, attr -> {
+                        if(true)
+                            return attr.get(state, null);
+                        else
+                            return null;
+                    }));
             logger.record(data);
         }
     }
@@ -42,10 +42,6 @@ public class TMGameListener implements IGameListener {
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
     }
 
-    @Override
-    public void allGamesFinished() {
-        logger.processDataAndFinish();
-    }
 
     public enum TMGameAttributes implements IGameAttribute {
 //        GAME_ID((s, a) -> s.getGameID()),

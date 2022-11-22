@@ -1,6 +1,6 @@
 package evaluation;
 
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import games.GameType;
 import games.terraformingmars.stats.TMStatsVisualiser;
 
@@ -23,7 +23,7 @@ public abstract class StatsVisualiser extends JFrame {
         repaint();
     }
 
-    static StatsVisualiser getVisualiserForGame(GameType gameType, List<IGameListener> listeners) {
+    static StatsVisualiser getVisualiserForGame(GameType gameType, List<AbstractGameListener> listeners) {
         switch (gameType) {
             case TerraformingMars: return new TMStatsVisualiser(listeners);
             default: return null;

@@ -5,7 +5,7 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameAttribute;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -19,14 +19,13 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class TMPlayerListener implements IGameListener {
+public class TMPlayerListener extends AbstractGameListener {
 
-    IStatisticLogger[] logger;
-    IStatisticLogger aggregate;
+    IStatisticLogger[] loggerArray;
 
-    public TMPlayerListener(IStatisticLogger[] logger, IStatisticLogger aggregate) {
-        this.logger = logger;
-        this.aggregate = aggregate;
+    public TMPlayerListener(IStatisticLogger[] loggerArray, IStatisticLogger aggregate) {
+        this.loggerArray = loggerArray;
+        this.logger = aggregate;
     }
 
     @Override
@@ -37,8 +36,8 @@ public class TMPlayerListener implements IGameListener {
                 final int player = i;
                 Map<String, Object> data = Arrays.stream(TMPlayerAttributes.values())
                         .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, player)));
-                logger[i].record(data);
-                aggregate.record(data);
+                loggerArray[i].record(data);
+                logger.record(data);
             }
         }
     }
@@ -49,10 +48,10 @@ public class TMPlayerListener implements IGameListener {
 
     @Override
     public void allGamesFinished() {
-        for (IStatisticLogger log : logger) {
+        for (IStatisticLogger log : loggerArray) {
             log.processDataAndFinish();
         }
-        aggregate.processDataAndFinish();
+        super.allGamesFinished();
     }
 
 

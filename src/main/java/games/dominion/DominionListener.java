@@ -5,16 +5,15 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameAttribute;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class DominionListener implements IGameListener {
+public class DominionListener extends AbstractGameListener {
 
-    IStatisticLogger logger;
     public DominionListener(IStatisticLogger logger) {
         this.logger = logger;
     }
@@ -32,10 +31,5 @@ public class DominionListener implements IGameListener {
     @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
         // nothing
-    }
-
-    @Override
-    public void allGamesFinished() {
-        logger.processDataAndFinish();
     }
 }

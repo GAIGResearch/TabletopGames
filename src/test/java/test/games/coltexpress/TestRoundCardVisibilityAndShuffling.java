@@ -5,7 +5,7 @@ import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGame;
 import games.coltexpress.ColtExpressGameState;
@@ -42,7 +42,7 @@ public class TestRoundCardVisibilityAndShuffling {
         game.run();
     }
 
-    static class TestRoundEndListener implements IGameListener {
+    static class TestRoundEndListener extends AbstractGameListener {
         @Override
         public void onGameEvent(CoreConstants.GameEvents type, Game game) {
 

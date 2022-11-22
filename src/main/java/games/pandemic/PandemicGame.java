@@ -1,24 +1,16 @@
 package games.pandemic;
 
 import core.*;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import games.GameType;
-import games.pandemic.gui.PandemicGUIManager;
-import org.apache.commons.math3.stat.descriptive.summary.Sum;
 import players.PlayerType;
 import players.human.ActionController;
 import players.mcts.MCTSPlayer;
-import players.simple.OSLAPlayer;
-import players.simple.RandomPlayer;
 import utilities.FileStatsLogger;
 import utilities.SummaryLogger;
 import utilities.TAGStatSummary;
-import utilities.Utils;
 
 import java.util.*;
-
-import static games.pandemic.PandemicCompetitionRankingAttributes.GAME_WIN;
-
 public class PandemicGame extends Game {
 
     public PandemicGame(List<AbstractPlayer> agents, PandemicParameters params) {
@@ -30,7 +22,7 @@ public class PandemicGame extends Game {
     }
 
     public static Game runCompetition(String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                          boolean randomizeParameters, List<IGameListener> listeners, int nRepetitions, ActionController ac){
+                                      boolean randomizeParameters, List<AbstractGameListener> listeners, int nRepetitions, ActionController ac){
         boolean detailedStatistics = true;
         boolean printStatSummary = false;
 
@@ -73,7 +65,7 @@ public class PandemicGame extends Game {
         // logging setup
         FileStatsLogger logger = new FileStatsLogger(logFile);
         PandemicListener pl = new PandemicListener(logger);
-        ArrayList<IGameListener> listeners = new ArrayList<>();
+        ArrayList<AbstractGameListener> listeners = new ArrayList<>();
         listeners.add((pl));
 
         List<AbstractPlayer> players = new ArrayList<>();
@@ -153,7 +145,7 @@ public class PandemicGame extends Game {
             // logging setup
             sumLogs[p] = new SummaryLogger();
             PandemicCompetitionListener pl = new PandemicCompetitionListener(sumLogs[p]);
-            ArrayList<IGameListener> listeners = new ArrayList<>();
+            ArrayList<AbstractGameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 
             PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());

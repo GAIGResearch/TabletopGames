@@ -4,7 +4,7 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.CoreConstants;
 import core.ParameterFactory;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
@@ -161,7 +161,7 @@ public class ProgressiveLearner {
 
         tournament.listeners = new ArrayList<>();
         IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
-        IGameListener gameTracker = IGameListener.createListener("utilities.GameResultListener", logger);
+        AbstractGameListener gameTracker = AbstractGameListener.createListener("utilities.GameResultListener", logger);
         tournament.listeners.add(gameTracker);
         tournament.runTournament();
       // gameTracker.allGamesFinished(); // This is done in tournament

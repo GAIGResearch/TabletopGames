@@ -5,9 +5,8 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameAttribute;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
-import games.dominion.DominionGameAttributes;
 import games.sushigo.SGGameAttributes;
 
 import java.util.Arrays;
@@ -15,8 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-public class SGListener implements IGameListener {
-    IStatisticLogger logger;
+public class SGListener extends AbstractGameListener {
 
     public SGListener(IStatisticLogger logger){
         this.logger = logger;
@@ -37,8 +35,4 @@ public class SGListener implements IGameListener {
 
     }
 
-    @Override
-    public void allGamesFinished() {
-        logger.processDataAndFinish();
-    }
 }
