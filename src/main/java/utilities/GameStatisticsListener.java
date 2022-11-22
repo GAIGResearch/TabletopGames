@@ -6,7 +6,7 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IComponentContainer;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
 
 import java.util.*;
@@ -14,14 +14,14 @@ import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameEvents.*;
 
-public class GameStatisticsListener implements IGameListener {
+public class GameStatisticsListener extends AbstractGameListener {
 
     List<Double> scores = new ArrayList<>();
     List<Double> visibilityOnTurn = new ArrayList<>();
     List<Integer> components = new ArrayList<>();
+    List<Integer> decisionPoints = new ArrayList<>();
     Map<String, Object> collectedData = new LinkedHashMap<>();
     AbstractForwardModel fm;
-    IStatisticLogger logger;
 
     public GameStatisticsListener(IStatisticLogger logger) {
         this.logger = logger;
@@ -40,7 +40,12 @@ public class GameStatisticsListener implements IGameListener {
                 throw new AssertionError("We have not yet received an ABOUT_TO_START event to initialise the required ForwardModel");
             }
             List<AbstractAction> allActions = fm.computeAvailableActions(state);
-            if (allActions.size() < 2) return;
+            if (allActions.size() < 2)
+            {
+                decisionPoints.add(0);
+                return;
+            }
+            decisionPoints.add(1);
 
             scores.add(state.getGameScore(player));
             Pair<Integer, int[]> allComp = countComponents(state);
@@ -116,14 +121,13 @@ public class GameStatisticsListener implements IGameListener {
             collectedData.put("HiddenInfoMin", visibility.min());
             collectedData.put("HiddenInfoVarCoeff", Math.abs(visibility.sd() / visibility.mean()));
 
+            TAGStatSummary movesWithDecision = decisionPoints.stream().collect(new TAGSummariser());
+            collectedData.put("DecisionPointsMean", movesWithDecision.mean());
+
+
             logger.record(collectedData);
             collectedData = new HashMap<>();
         }
-    }
-
-    @Override
-    public void allGamesFinished() {
-        logger.processDataAndFinish();
     }
 
     /**
