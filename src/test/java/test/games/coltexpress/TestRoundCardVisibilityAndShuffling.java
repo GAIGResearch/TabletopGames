@@ -5,7 +5,9 @@ import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.AbstractGameListener;
+import evaluation.GameListener;
+import core.interfaces.IGameMetric;
+import core.interfaces.IStatisticLogger;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGame;
 import games.coltexpress.ColtExpressGameState;
@@ -13,6 +15,7 @@ import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.cards.RoundCard;
 import org.junit.Test;
 import players.simple.RandomPlayer;
+import utilities.Pair;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,11 +41,15 @@ public class TestRoundCardVisibilityAndShuffling {
         // check shuffling. The work is done in TestRoundEndListener()
 
         // This checks the counts of
-        game.addListener(new TestRoundEndListener());
+        game.addListener(new TestRoundEndListener(null, null));
         game.run();
     }
 
-    static class TestRoundEndListener extends AbstractGameListener {
+    static class TestRoundEndListener extends GameListener {
+
+        public TestRoundEndListener(IStatisticLogger logger, Pair<String, IGameMetric>[] metrics) {
+            super(logger, metrics);
+        }
         @Override
         public void onGameEvent(CoreConstants.GameEvents type, Game game) {
 

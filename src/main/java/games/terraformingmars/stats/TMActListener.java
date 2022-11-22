@@ -4,8 +4,8 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
-import core.interfaces.AbstractGameListener;
+import core.interfaces.IGameMetric;
+import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.actions.PayForAction;
@@ -16,10 +16,10 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class TMActListener extends AbstractGameListener {
+public class TMActListener extends GameListener {
 
     public TMActListener(IStatisticLogger logger) {
-        this.logger = logger;
+        super(logger, null);
     }
 
     @Override
@@ -30,12 +30,12 @@ public class TMActListener extends AbstractGameListener {
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
         if (type == CoreConstants.GameEvents.ACTION_CHOSEN) {
             Map<String, Object> data = Arrays.stream(TMActAttributes.values())
-                    .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, action)));
+                    .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(state, action)));
             logger.record(data);
         }
     }
 
-    public enum TMActAttributes implements IGameAttribute {
+    public enum TMActAttributes implements IGameMetric {
         GAME_ID((s, a) -> s.getGameID()),
         GENERATION((s, a) -> s.getGeneration()),
         PLAYER((s, a) -> s.getCurrentPlayer()),
@@ -53,5 +53,9 @@ public class TMActListener extends AbstractGameListener {
             return lambda.apply((TMGameState) state, (TMAction) action);
         }
 
+        @Override
+        public Type getType() {
+            return Type.STATE_ACTION;
+        }
     }
 }

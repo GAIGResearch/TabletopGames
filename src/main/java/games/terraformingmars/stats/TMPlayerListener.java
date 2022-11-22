@@ -4,8 +4,8 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
-import core.interfaces.AbstractGameListener;
+import core.interfaces.IGameMetric;
+import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -19,13 +19,13 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class TMPlayerListener extends AbstractGameListener {
+public class TMPlayerListener extends GameListener {
 
     IStatisticLogger[] loggerArray;
 
     public TMPlayerListener(IStatisticLogger[] loggerArray, IStatisticLogger aggregate) {
+        super(aggregate, null);
         this.loggerArray = loggerArray;
-        this.logger = aggregate;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class TMPlayerListener extends AbstractGameListener {
             for (int i = 0; i < state.getNPlayers(); i++) {
                 final int player = i;
                 Map<String, Object> data = Arrays.stream(TMPlayerAttributes.values())
-                        .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, player)));
+                        .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(state, player)));
                 loggerArray[i].record(data);
                 logger.record(data);
             }
@@ -55,7 +55,7 @@ public class TMPlayerListener extends AbstractGameListener {
     }
 
 
-    public enum TMPlayerAttributes implements IGameAttribute {
+    public enum TMPlayerAttributes implements IGameMetric {
         //    GAME_ID((s, p) -> s.getGameID()),
 //    GENERATION((s, p) -> s.getGeneration()),
         RESULT((s, p) -> s.getPlayerResults()[p].value),
@@ -255,6 +255,10 @@ public class TMPlayerListener extends AbstractGameListener {
             return lambda_sp.apply((TMGameState) state, player);
         }
 
+        @Override
+        public Type getType() {
+            return Type.STATE_PLAYER;
+        }
     }
 
 }

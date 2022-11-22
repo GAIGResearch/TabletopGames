@@ -2,12 +2,12 @@ package games.dicemonastery;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
+import core.interfaces.IGameMetric;
 import games.dicemonastery.actions.*;
 
 import java.util.function.BiFunction;
 
-public enum DiceMonasteryActionAttributes implements IGameAttribute {
+public enum DiceMonasteryActionAttributes implements IGameMetric {
 
     GAME_ID((s, a) -> s.getGameID()),
     SEASON((s, a) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getSeason()),
@@ -62,4 +62,8 @@ public enum DiceMonasteryActionAttributes implements IGameAttribute {
         return lambda.apply((DiceMonasteryGameState) state, action);
     }
 
+    @Override
+    public Type getType() {
+        return Type.STATE_ACTION;
+    }
 }

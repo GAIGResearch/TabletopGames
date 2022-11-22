@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.AbstractGameListener;
+import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
 
 import java.util.*;
@@ -16,14 +16,14 @@ import java.util.stream.IntStream;
  * When a game is finished, and we know the final result, the records for the game can be updated with this (i.e.
  * win/loss, score, ordinal position), and all the records written to file.
  */
-public abstract class FeatureListener extends AbstractGameListener {
+public abstract class FeatureListener extends GameListener {
 
     List<StateFeatureListener.LocalDataWrapper> currentData = new ArrayList<>();
     CoreConstants.GameEvents frequency;
     boolean currentPlayerOnly = false;
 
     protected FeatureListener(IStatisticLogger logger, CoreConstants.GameEvents frequency, boolean currentPlayerOnly) {
-        this.logger = logger;
+        super(logger, null);
         this.currentPlayerOnly = currentPlayerOnly;
         this.frequency = frequency;
     }

@@ -6,7 +6,7 @@ import core.AbstractPlayer;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
-import core.interfaces.AbstractGameListener;
+import evaluation.GameListener;
 import core.interfaces.IStateHeuristic;
 import utilities.Pair;
 import utilities.Utils;
@@ -118,10 +118,10 @@ public class MCTSPlayer extends AbstractPlayer {
     public void finalizePlayer(AbstractGameState state) {
         rolloutStrategy.onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
         opponentModel.onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
-        if (heuristic instanceof AbstractGameListener)
-            ((AbstractGameListener) heuristic).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
-        if (advantageFunction instanceof AbstractGameListener)
-            ((AbstractGameListener) advantageFunction).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
+        if (heuristic instanceof GameListener)
+            ((GameListener) heuristic).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
+        if (advantageFunction instanceof GameListener)
+            ((GameListener) advantageFunction).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
 
     }
 

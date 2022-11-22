@@ -1,54 +1,18 @@
 package games.loveletter.stats;
-import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
-import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
-import core.interfaces.AbstractGameListener;
+import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
-import games.loveletter.LoveLetterGameState;
-import games.loveletter.actions.DrawCard;
+public class LLGameListener extends GameListener {
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-public class LLGameListener extends AbstractGameListener {
 
-    public LLGameListener(IStatisticLogger logger) { this.logger = logger;}
+    public LLGameListener(IStatisticLogger logger) {
+        super(logger, null);
+    }
 
     @Override
     public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        if (type == CoreConstants.GameEvents.GAME_OVER) {
-            AbstractGameState state = game.getGameState();
-            Map<String, Object> data = Arrays.stream(LLGameAttributes.values())
-                    .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, null)));
-            logger.record(data);
-        }
+        super.onGameEvent(type, game);
     }
 
-    @Override
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-    }
-
-    public enum LLGameAttributes implements IGameAttribute {
-        DISCARDED_CARDS((s, a) -> {
-            int nCards = 0;
-            for(int i = 0; i < s.getNPlayers(); i++) {
-                nCards += s.getPlayerDiscardCards().get(i).getSize();
-            }
-            return nCards;
-        });
-
-        private final BiFunction<LoveLetterGameState, DrawCard, Object> lambda_sa;
-
-        LLGameAttributes(BiFunction<LoveLetterGameState, DrawCard, Object> lambda) {
-            this.lambda_sa = lambda;
-        }
-
-        @Override
-        public Object get(AbstractGameState state, AbstractAction action) {
-            return lambda_sa.apply((LoveLetterGameState) state, (DrawCard) action);
-        }
-    }
 }

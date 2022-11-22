@@ -4,25 +4,25 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
-import core.interfaces.AbstractGameListener;
+import core.interfaces.IGameMetric;
+import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class PandemicCompetitionListener extends AbstractGameListener {
+public class PandemicCompetitionListener extends GameListener {
 
     public PandemicCompetitionListener(IStatisticLogger logger) {
-        this.logger = logger;
+        super(logger, null);
     }
 
     @Override
     public void onGameEvent(CoreConstants.GameEvents type, Game game) {
         if (type == CoreConstants.GameEvents.GAME_OVER) {
             Map<String, Object> data = Arrays.stream(PandemicCompetitionRankingAttributes.values())
-                    .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(game)));
+                    .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(game)));
             logger.record(data);
         }
     }

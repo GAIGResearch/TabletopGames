@@ -4,8 +4,8 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.components.Deck;
-import core.interfaces.IGameAttribute;
-import core.interfaces.AbstractGameListener;
+import core.interfaces.IGameMetric;
+import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.BaronAction;
@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class LLPlayerListener extends AbstractGameListener {
+public class LLPlayerListener extends GameListener {
 
     IStatisticLogger[] loggerArray;
 
@@ -27,8 +27,8 @@ public class LLPlayerListener extends AbstractGameListener {
     String losingCards;
 
     public LLPlayerListener(IStatisticLogger[] loggerArray, IStatisticLogger aggregate) {
+        super(aggregate, null);
         this.loggerArray = loggerArray;
-        this.logger = aggregate;
         winningCards = null;
         losingCards = null;
     }
@@ -39,7 +39,7 @@ public class LLPlayerListener extends AbstractGameListener {
             for (int i = 0; i < state.getNPlayers(); i++) {
                 final int playerID = i;
                 Map<String, Object> data = Arrays.stream(LLPlayerListener.LLPlayerAttributes.values())
-                        .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, playerID)));
+                        .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(state, playerID)));
 
                 String wins = processCards(winningCards, playerID);
                 data.put("WINS_REASON", wins);
@@ -178,7 +178,7 @@ public class LLPlayerListener extends AbstractGameListener {
     }
 
 
-    public enum LLPlayerAttributes implements IGameAttribute {
+    public enum LLPlayerAttributes implements IGameMetric {
         RESULT((s, p) -> s.getPlayerResults()[p].value),
 
         ACTIONS_PLAYED((s, p) -> {
@@ -226,6 +226,10 @@ public class LLPlayerListener extends AbstractGameListener {
             return lambda_sp.apply((LoveLetterGameState) state, player);
         }
 
+        @Override
+        public Type getType() {
+            return Type.STATE_PLAYER;
+        }
     }
 
 

@@ -341,13 +341,27 @@ public abstract class Utils {
                     if (first instanceof JSONObject) {
                         // we have recursion
                         // we need to instantiate this, and then stick it in
-                        first = loadClassFromJSON((JSONObject) first);
-                        T[] arr = (T[]) Array.newInstance(first.getClass(),((JSONArray) arg).size());
-                        argClasses[i] = arr.getClass();
-                        for (int j = 0; j < ((JSONArray) arg).size(); j++) {
-                            arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
+
+                        Object info = ((JSONObject) first).get("info");
+
+                        if(info!=null) // Enhanced json objects with an info tag
+                        {
+                            Pair<String, T>[] arr = (Pair<String, T>[]) Array.newInstance(Pair.class,((JSONArray) arg).size());
+                            argClasses[i] = arr.getClass();
+                            for (int j = 0; j < ((JSONArray) arg).size(); j++) {
+                                JSONObject obj = (JSONObject) ((JSONArray) arg).get(j);
+                                arr[j] = new Pair<>((String) obj.get("info"), loadClassFromJSON(obj));
+                            }
+                            arg = arr;
+                        }else {
+                            first = loadClassFromJSON((JSONObject) first);
+                            T[] arr = (T[]) Array.newInstance(first.getClass(), ((JSONArray) arg).size());
+                            argClasses[i] = arr.getClass();
+                            for (int j = 0; j < ((JSONArray) arg).size(); j++) {
+                                arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
+                            }
+                            arg = arr;
                         }
-                        arg = arr;
                     } else if (first instanceof Long) {
                         argClasses[i] = int[].class;
                         args[i] = ((Long) first).intValue();
@@ -376,6 +390,16 @@ public abstract class Utils {
             e.printStackTrace();
             throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
         }
+    }
+
+
+    public static Object searchEnum(Object[] enumConstants, String search) {
+        for (Object obj : enumConstants) {
+            if (obj.toString().compareToIgnoreCase(search) == 0) {
+                return obj;
+            }
+        }
+        return null;
     }
 
     public static <T extends Enum<?>> T searchEnum(Class<T> enumeration, String search) {

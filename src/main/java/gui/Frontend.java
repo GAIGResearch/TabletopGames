@@ -2,7 +2,7 @@ package gui;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.interfaces.AbstractGameListener;
+import evaluation.GameListener;
 import evaluation.TunableParameters;
 import games.GameType;
 import gui.models.AITableModel;
@@ -486,7 +486,7 @@ public class Frontend extends GUI {
 
     private void listenForDecisions() {
         // add a listener to detect every time an action has been taken
-        gameRunning.addListener(new AbstractGameListener() {
+        gameRunning.addListener(new GameListener(null, null) {
             @Override
             public void onGameEvent(CoreConstants.GameEvents type, Game game) {
                 // Do nothing

@@ -4,7 +4,15 @@ import core.AbstractGameState;
 import core.Game;
 import core.actions.AbstractAction;
 
-public interface IGameAttribute {
+public interface IGameMetric {
+
+    //Types of Metrics;
+    enum Type
+    {
+        STATE_ACTION,
+        STATE_PLAYER,
+        GAME
+    }
 
     /**
      * A simple interface to gather data on game-specific attributes
@@ -27,8 +35,17 @@ public interface IGameAttribute {
         return 0;
     }
 
+    /**
+     * Metric for game
+     * @param game The game.
+     * @return
+     */
     default Object get(Game game) { return 0; }
 
+    // Returns the type of this metric.
+    Type getType();
+
+    // Returns the name of the metric
     String name();
 
 }

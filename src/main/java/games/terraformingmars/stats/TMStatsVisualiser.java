@@ -1,6 +1,6 @@
 package games.terraformingmars.stats;
 
-import core.interfaces.AbstractGameListener;
+import evaluation.GameListener;
 import evaluation.StatsVisualiser;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameParameters;
@@ -34,8 +34,8 @@ public class TMStatsVisualiser extends StatsVisualiser {
     public static Font defaultFontSmall = new Font("Prototype", Font.BOLD, fontSize-5);
     public static Color fontColor = Color.white;
 
-    public TMStatsVisualiser(List<AbstractGameListener> listeners) {
-        for (AbstractGameListener list: listeners) {
+    public TMStatsVisualiser(List<GameListener> listeners) {
+        for (GameListener list: listeners) {
             if (list instanceof TMGameListener) {
                 this.gameLogger = (SummaryLogger) list.getLogger();
             } else if (list instanceof TMPlayerListener) {

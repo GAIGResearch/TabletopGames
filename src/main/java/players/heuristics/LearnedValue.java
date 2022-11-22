@@ -2,7 +2,6 @@ package players.heuristics;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.interfaces.AbstractGameListener;
 import players.mcts.ITreeProcessor;
 import players.mcts.SingleTreeNode;
 import utilities.Pair;

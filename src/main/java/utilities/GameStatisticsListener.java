@@ -6,7 +6,7 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IComponentContainer;
-import core.interfaces.AbstractGameListener;
+import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
 
 import java.util.*;
@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameEvents.*;
 
-public class GameStatisticsListener extends AbstractGameListener {
+public class GameStatisticsListener extends GameListener {
 
     List<Double> scores = new ArrayList<>();
     List<Double> visibilityOnTurn = new ArrayList<>();
@@ -24,10 +24,10 @@ public class GameStatisticsListener extends AbstractGameListener {
     AbstractForwardModel fm;
 
     public GameStatisticsListener(IStatisticLogger logger) {
-        this.logger = logger;
+        super(logger, null);
     }
     public GameStatisticsListener() {
-        this.logger = null;
+        super(null, null);
     }
 
     @Override

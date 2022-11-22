@@ -3,7 +3,6 @@ package evaluation;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.ParameterFactory;
-import core.interfaces.AbstractGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
 import players.PlayerFactory;
@@ -26,7 +25,7 @@ public class RoundRobinTournament extends AbstractTournament {
     private static boolean debug = false;
     public final boolean selfPlay;
     private final int gamesPerMatchUp;
-    protected List<AbstractGameListener> listeners;
+    protected List<GameListener> listeners;
     double[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
@@ -151,7 +150,7 @@ public class RoundRobinTournament extends AbstractTournament {
         tournament.listeners = new ArrayList<>();
         for (int l = 0; l < listenerClasses.size(); l++) {
             IStatisticLogger logger = new FileStatsLogger(listenerFiles.get(l));
-            AbstractGameListener gameTracker = AbstractGameListener.createListener(listenerClasses.get(l), logger);
+            GameListener gameTracker = GameListener.createListener(listenerClasses.get(l), logger);
             tournament.listeners.add(gameTracker);
         }
         tournament.runTournament();
@@ -179,7 +178,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
             reportResults(g);
         }
-        for (AbstractGameListener listener : listeners)
+        for (GameListener listener : listeners)
             listener.allGamesFinished();
     }
 
@@ -228,7 +227,7 @@ public class RoundRobinTournament extends AbstractTournament {
         }
 
 
-        for (AbstractGameListener listener : listeners) {
+        for (GameListener listener : listeners) {
             games.get(gameIdx).addListener(listener);
         }
 

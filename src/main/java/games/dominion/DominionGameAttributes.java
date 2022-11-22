@@ -2,12 +2,12 @@ package games.dominion;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
+import core.interfaces.IGameMetric;
 import games.dominion.cards.CardType;
 
 import java.util.function.*;
 
-public enum DominionGameAttributes implements IGameAttribute {
+public enum DominionGameAttributes implements IGameMetric {
     GAME_ID((s, a) -> s.getGameID()),
     GAME_ROUND((s, a) -> s.getTurnOrder().getRoundCounter()),
     PLAYER((s, a) -> s.getCurrentPlayer()),
@@ -31,4 +31,8 @@ public enum DominionGameAttributes implements IGameAttribute {
         return lambda.apply((DominionGameState) state, action);
     }
 
+    @Override
+    public Type getType() {
+        return Type.STATE_ACTION;
+    }
 }

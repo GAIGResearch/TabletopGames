@@ -5,23 +5,23 @@ import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IComponentContainer;
-import core.interfaces.AbstractGameListener;
+import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
 
 import java.util.*;
 
 import static core.CoreConstants.GameEvents.*;
 
-public class GameResultListener extends AbstractGameListener {
+public class GameResultListener extends GameListener {
 
     Map<String, Object> collectedData = new LinkedHashMap<>();
 
     public GameResultListener(IStatisticLogger logger) {
-        this.logger = logger;
+        super(logger, null);
     }
 
     public GameResultListener() {
-        this.logger = null;
+        super(null, null);
     }
 
     @Override

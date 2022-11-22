@@ -3,7 +3,7 @@ package games.pandemic;
 import core.Game;
 import core.components.BoardNode;
 import core.components.Counter;
-import core.interfaces.IGameAttribute;
+import core.interfaces.IGameMetric;
 import core.properties.PropertyIntArray;
 import utilities.Hash;
 
@@ -13,7 +13,7 @@ import static games.pandemic.PandemicConstants.colors;
 import static games.pandemic.PandemicConstants.infectionHash;
 import static utilities.Utils.GameResult.WIN;
 
-public enum PandemicCompetitionRankingAttributes implements IGameAttribute {
+public enum PandemicCompetitionRankingAttributes implements IGameMetric {
     GAME_WIN((s) -> Math.max(0,s.getGameState().getGameStatus().value)),
     // Exception: game ticks lower are better if win rate > winNeutralRange[1],
     //              and higher are better if win rate < winNeutralRange[0] (otherwise considered equal)
@@ -67,5 +67,9 @@ public enum PandemicCompetitionRankingAttributes implements IGameAttribute {
             }
         }
         return count;
+    }
+    @Override
+    public Type getType() {
+        return Type.GAME;
     }
 }

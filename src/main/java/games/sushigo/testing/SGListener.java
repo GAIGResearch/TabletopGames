@@ -4,8 +4,8 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
-import core.interfaces.AbstractGameListener;
+import core.interfaces.IGameMetric;
+import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
 import games.sushigo.SGGameAttributes;
 
@@ -14,10 +14,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 
-public class SGListener extends AbstractGameListener {
+public class SGListener extends GameListener {
 
     public SGListener(IStatisticLogger logger){
-        this.logger = logger;
+        super(logger, null);
     }
 
     @Override
@@ -25,7 +25,7 @@ public class SGListener extends AbstractGameListener {
         if (type == CoreConstants.GameEvents.GAME_OVER){
             AbstractGameState state = game.getGameState();
             Map<String, Object> data = Arrays.stream(SGGameAttributes.values())
-                    .collect(Collectors.toMap(IGameAttribute::name, attr -> attr.get(state, null)));
+                    .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(state, null)));
             logger.record(data);
         }
     }

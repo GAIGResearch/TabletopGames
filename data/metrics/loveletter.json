@@ -1,0 +1,20 @@
+{
+  "class": "evaluation.GameListener",
+  "args": [
+    {
+      "class" : "utilities.SummaryLogger"
+    },
+    [
+      {
+        "info": "Cards discarded by players",
+        "enum": "games.loveletter.stats.LLGameAttributes",
+        "value": "DISCARDED_CARDS"
+      },
+      {
+        "info": "Number of ticks played",
+        "enum": "utilities.GameMetric",
+        "value": "TICKS"
+      }
+    ]
+  ]
+}

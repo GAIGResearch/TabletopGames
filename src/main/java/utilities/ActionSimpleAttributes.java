@@ -2,7 +2,7 @@ package utilities;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
+import core.interfaces.IGameMetric;
 
 import java.util.function.BiFunction;
 
@@ -13,7 +13,7 @@ import java.util.function.BiFunction;
  * When working on a specific game it is advisable to use this as a starting point, and
  * add in relevant game-specific items of data
  */
-public enum ActionSimpleAttributes implements IGameAttribute {
+public enum ActionSimpleAttributes implements IGameMetric {
 
     GAME_ID((s, a) -> s.getGameID()),
     ROUND((s, a) -> (s.getTurnOrder()).getRoundCounter()),
@@ -35,4 +35,8 @@ public enum ActionSimpleAttributes implements IGameAttribute {
         return lambda.apply(state, action);
     }
 
+    @Override
+    public Type getType() {
+        return Type.STATE_ACTION;
+    }
 }
