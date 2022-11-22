@@ -2,7 +2,7 @@ package players.heuristics;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.interfaces.IGameListener;
+import core.interfaces.AbstractGameListener;
 import players.mcts.ITreeProcessor;
 import players.mcts.SingleTreeNode;
 import utilities.Pair;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-public class LearnedValue extends AbstractPlayer implements IGameListener, ITreeProcessor {
+public class LearnedValue extends AbstractPlayer implements ITreeProcessor {
 
     String filename, suffix;
     int count = 0;
@@ -211,7 +211,6 @@ public class LearnedValue extends AbstractPlayer implements IGameListener, ITree
         }
     }
 
-    @Override
     public void onGameEvent(CoreConstants.GameEvents type, Game game) {
         if (type == CoreConstants.GameEvents.GAME_OVER) {
             // we record the current state
@@ -220,7 +219,6 @@ public class LearnedValue extends AbstractPlayer implements IGameListener, ITree
         }
     }
 
-    @Override
     public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
         onGameEvent(type, null);
     }

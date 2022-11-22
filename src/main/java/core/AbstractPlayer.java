@@ -97,6 +97,8 @@ public abstract class AbstractPlayer {
         this.statsLogger = logger;
     }
 
+    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {  }
+
     public abstract AbstractPlayer copy();
 
     // override this to provide information on the last decision taken
