@@ -10,7 +10,6 @@ import games.findmurderer.actions.LookAt;
 import games.findmurderer.actions.Move;
 import games.findmurderer.actions.Query;
 import games.findmurderer.components.Person;
-import utilities.Distance;
 import utilities.Utils;
 import utilities.Vector2D;
 
@@ -34,7 +33,7 @@ public class MurderForwardModel extends AbstractForwardModel {
 
         // Initialize detective information
         mgs.detectiveInformation = new HashMap<>();
-        mgs.detectiveFocus = new Vector2D();
+        mgs.detectiveFocus = new Vector2D(mp.gridWidth/2, mp.gridHeight/2);  // Focus starts in the center
 
         // Add people to random locations in the grid: respect percentage of grid that should be covered by people
         int placed = 0;
@@ -93,16 +92,18 @@ public class MurderForwardModel extends AbstractForwardModel {
 
         // If not ended ...
 
-        // Move civilians that are alive in the grid
-        for (int i = 0; i < mgs.getGrid().getHeight(); i++) {
-            for (int j = 0; j < mgs.getGrid().getWidth(); j++) {
-                Person p = mgs.getGrid().getElement(j, i);
-                if (p != null && p.personType != Person.PersonType.Killer && p.status == Person.Status.Alive) {
-                    List<AbstractAction> moves = calculateMoves(mgs, p, j, i);
-                    // Can also stay where they are, ensure that all can at least do this.
-                    moves.add(new Move(p.getComponentID(), new Vector2D(j, i), new Vector2D(j, i)));
-                    // Get chosen move and apply it in state
-                    mp.civilianPolicy.getAction(mgs, moves).execute(mgs);  // TODO: potentially partial observations
+        // Move civilians that are alive in the grid, after the detective moves
+        if (currentState.getCurrentPlayer() == MurderGameState.PlayerMapping.Detective.playerIdx) {
+            for (int i = 0; i < mgs.getGrid().getHeight(); i++) {
+                for (int j = 0; j < mgs.getGrid().getWidth(); j++) {
+                    Person p = mgs.getGrid().getElement(j, i);
+                    if (p != null && p.personType != Person.PersonType.Killer && p.status == Person.Status.Alive) {
+                        List<AbstractAction> moves = calculateMoves(mgs, p, j, i);
+                        // Can also stay where they are, ensure that all can at least do this.
+                        moves.add(new Move(p.getComponentID(), new Vector2D(j, i), new Vector2D(j, i)));
+                        // Get chosen move and apply it in state
+                        mp.civilianPolicy.getAction(mgs, moves).execute(mgs);  // TODO: potentially partial observations
+                    }
                 }
             }
         }
@@ -112,7 +113,7 @@ public class MurderForwardModel extends AbstractForwardModel {
     }
 
     private List<AbstractAction> calculateMoves(MurderGameState mgs, Person p, int currentX, int currentY) {
-        List<AbstractAction> moves = new ArrayList<>();  // TODO potential more complex behaviours rather than just move
+        List<AbstractAction> moves = new ArrayList<>();
         int w = mgs.grid.getWidth();
         int h = mgs.grid.getHeight();
         for (MurderParameters.Direction d: MurderParameters.Direction.values()) {
@@ -147,13 +148,13 @@ public class MurderForwardModel extends AbstractForwardModel {
                 if (p.personType == Person.PersonType.Killer) continue;
 
                 // Killer can only kill within some range defined in parameters
-                double distance = Distance.euclidian_distance(killerPosition, mgs.personToPositionMap.get(p.getComponentID()));
+                double distance = mp.distanceFunction.apply(killerPosition, mgs.personToPositionMap.get(p.getComponentID()));
                 if (distance > mp.killerMaxRange) continue;
             }
 
             // Detective can only interact with people in vision range
             if (currentPlayer == MurderGameState.PlayerMapping.Detective.playerIdx) {
-                double distance = Distance.euclidian_distance(mgs.detectiveFocus, mgs.personToPositionMap.get(p.getComponentID()));
+                double distance = mp.distanceFunction.apply(mgs.detectiveFocus, mgs.personToPositionMap.get(p.getComponentID()));
                 if (distance > mp.detectiveVisionRange) continue;
 
                 // Detective can query this person to update their information of interactions

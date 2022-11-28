@@ -15,8 +15,8 @@ public class MurderGameState extends AbstractGameState {
 
     // Player mapping sets who is player 0 and who is player 1 (detective or killer)
     public enum PlayerMapping{
-        Detective(0),
-        Killer(1);
+        Detective(1),
+        Killer(0);
         final int playerIdx;
         PlayerMapping(int playerIdx) {
             this.playerIdx = playerIdx;
@@ -115,13 +115,16 @@ public class MurderGameState extends AbstractGameState {
             gs.killer.setPersonType(Person.PersonType.Killer);
         }
 
-        if (playerId == -1 || playerId == PlayerMapping.Detective.playerIdx) {
-            // Detective knows where they're looking
-            gs.detectiveFocus = detectiveFocus.copy();
-        } else {
-            // Killer doesn't? TODO maybe they do know if they're being observed
-            gs.detectiveFocus = new Vector2D();
-        }
+//        if (playerId == -1 || playerId == PlayerMapping.Detective.playerIdx) {
+//            // Detective knows where they're looking
+//            gs.detectiveFocus = detectiveFocus.copy();
+//        } else {
+//            // Killer doesn't?
+//            gs.detectiveFocus = new Vector2D();
+//        }
+
+        // Everyone knows where the detective is looking
+        gs.detectiveFocus = detectiveFocus.copy();
 
         // Return the copy
         return gs;

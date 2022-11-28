@@ -5,7 +5,6 @@ import core.actions.AbstractAction;
 import games.findmurderer.MurderGameState;
 import games.findmurderer.MurderParameters;
 import games.findmurderer.components.Person;
-import utilities.Distance;
 import utilities.Vector2D;
 
 import java.util.HashSet;
@@ -27,6 +26,7 @@ public class Move extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         MurderGameState mgs = (MurderGameState) gs;
+        MurderParameters mp = (MurderParameters)mgs.getGameParameters();
         Person p = mgs.getGrid().getElement(fromPos.getX(), fromPos.getY());
         mgs.getGrid().setElement(fromPos.getX(), fromPos.getY(), null);
         mgs.getGrid().setElement(toPos.getX(), toPos.getY(), p);
@@ -51,10 +51,12 @@ public class Move extends AbstractAction {
         }
 
         // If this person is in the detective's vision range, update detective information too in game state
-        if (Distance.manhattan_distance(toPos, mgs.getDetectiveFocus()) <= ((MurderParameters)mgs.getGameParameters()).detectiveVisionRange) {
+        if (mp.distanceFunction.apply(toPos, mgs.getDetectiveFocus()) <= mp.detectiveVisionRange) {
             // TODO: inaccurate, this reveals too much information (e.g. if someone comes into vision range that the detective knows nothing about, all interaction history so far will be revealed but the detective shouldn't know that)
 //            mgs.getDetectiveInformation().put(whoID, round);
         }
+
+        mgs.getPersonToPositionMap().put(p.getComponentID(), toPos);
 
         return true;
     }
@@ -84,11 +86,12 @@ public class Move extends AbstractAction {
 
     @Override
     public String toString() {
-        MurderParameters.Direction d = MurderParameters.Direction.getDirection(toPos.getX() - fromPos.getX(), toPos.getY() - fromPos.getY());
-        if (d != null) {
-            return "Move " + whoID + " " + d.name().toLowerCase();
-        } else {
-            return "Move " + whoID + " to " + toPos;
-        }
+//        MurderParameters.Direction d = MurderParameters.Direction.getDirection(toPos.getX() - fromPos.getX(), toPos.getY() - fromPos.getY());
+//        if (d != null) {
+//            return "Move " + whoID + " " + d.name().toLowerCase();
+//        } else {
+//            return "Move " + whoID + " to " + toPos;
+//        }
+        return "Move";
     }
 }

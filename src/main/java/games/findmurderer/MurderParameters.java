@@ -3,16 +3,23 @@ package games.findmurderer;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import players.simple.RandomPlayer;
+import utilities.Distance;
+import utilities.Vector2D;
 
 import java.util.Objects;
 import java.util.Random;
+import java.util.function.BiFunction;
 
 public class MurderParameters extends AbstractParameters {
     public enum Direction {
         Left(-1,0),
         Right(1,0),
         Up(0, -1),
-        Down(0,1);
+        Down(0,1),
+        UpLeft(-1,-1),
+        UpRight(1,-1),
+        DownRight(1,1),
+        DownLeft(-1,1);
         public final int xDiff;
         public final int yDiff;
         Direction(int x, int y) {
@@ -44,6 +51,7 @@ public class MurderParameters extends AbstractParameters {
     public int killerMaxRange = 1;  // Killer can only kill people as far as this away from them, and loses when no more people are left in range
     public int maxTicks = 100;  // Maximum number of ticks
     public int detectiveVisionRange = 5;  // Detective will see this many cells around their current focus
+    public BiFunction<Vector2D, Vector2D, Double> distanceFunction = Distance::manhattan_distance;  // What distance function to use
 
     // How do civilians behave? Random default.
     public AbstractPlayer civilianPolicy;
@@ -61,6 +69,7 @@ public class MurderParameters extends AbstractParameters {
         mp.percCivilianDeadWinKiller = percCivilianDeadWinKiller;
         mp.percPeopleOnGrid = percPeopleOnGrid;
         mp.maxTicks = maxTicks;
+        mp.distanceFunction = distanceFunction;
         return mp;
     }
 

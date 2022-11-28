@@ -924,8 +924,8 @@ public class Game {
 //        players.add(new MCTSPlayer());
 //        players.add(new MCTSPlayer());
 
-        players.add(new HumanGUIPlayer(ac));
         players.add(new DistanceKillerPlayer());  // Killer policy for Find the Murderer game, 2nd player
+        players.add(new HumanGUIPlayer(ac));
 
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();

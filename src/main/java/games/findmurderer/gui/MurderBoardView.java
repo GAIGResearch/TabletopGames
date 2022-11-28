@@ -6,7 +6,6 @@ import games.findmurderer.MurderParameters;
 import games.findmurderer.components.Person;
 import gui.ScreenHighlight;
 import gui.views.ComponentView;
-import utilities.Distance;
 import utilities.Vector2D;
 
 import java.awt.*;
@@ -89,6 +88,8 @@ public class MurderBoardView extends ComponentView implements ScreenHighlight {
     }
 
     public void drawGridBoard(Graphics2D g, GridBoard<Person> gridBoard, int x, int y) {
+        MurderParameters mp = (MurderParameters) mgs.getGameParameters();
+
         int width = gridBoard.getWidth() * itemSize;
         int height = gridBoard.getHeight() * itemSize;
 
@@ -99,7 +100,7 @@ public class MurderBoardView extends ComponentView implements ScreenHighlight {
         // Draw cells
         for (int i = 0; i < gridBoard.getHeight(); i++) {
             for (int j = 0; j < gridBoard.getWidth(); j++) {
-                boolean seenByDetective = Distance.euclidian_distance(new Vector2D(j, i), mgs.getDetectiveFocus()) <= ((MurderParameters)mgs.getGameParameters()).detectiveVisionRange;
+                boolean seenByDetective = mp.distanceFunction.apply(new Vector2D(j, i), mgs.getDetectiveFocus()) <= ((MurderParameters)mgs.getGameParameters()).detectiveVisionRange;
 
                 int xC = x + j * itemSize;
                 int yC = y + i * itemSize;
