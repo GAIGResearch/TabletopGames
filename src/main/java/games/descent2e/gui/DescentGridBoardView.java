@@ -9,6 +9,7 @@ import core.properties.PropertyVector2D;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
 import games.descent2e.DescentTypes;
+import games.descent2e.components.Figure;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.components.Monster;
@@ -253,6 +254,13 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
                 Image imgRaw = ImageIO.GetInstance().getImage(imagePath);
                 BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
                 g.drawImage(imgToDraw, offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize,null);
+
+                int health = m.getAttributeValue(Figure.Attribute.Health);
+                int maxHealth = m.getAttributeMax(Figure.Attribute.Health);
+                g.setColor(Color.red);
+                g.fillRect(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, (int)(descentItemSize * health*1.0/maxHealth), 5);
+                g.setColor(Color.black);
+                g.drawRect(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, (int)(descentItemSize * health*1.0/maxHealth), 5);
             }
         }
 
