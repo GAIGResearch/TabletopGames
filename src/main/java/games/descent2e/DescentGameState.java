@@ -39,7 +39,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     // Important
     Random rnd;
 
-    Deck<Card> searchCards; // TODO, placeholder
+    Deck<Card> searchCards;
     GridBoard masterBoard;
     DicePool attackDicePool;
     DicePool defenceDicePool;
@@ -122,6 +122,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         for (DToken t : tokens) {
             copy.tokens.add(t.copy());
         }
+        copy.searchCards = searchCards.copy();
         copy.currentQuest = currentQuest;  // TODO does this need to be deep? it (should be) read-only after data parsing
         // TODO
         return copy;

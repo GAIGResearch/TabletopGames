@@ -18,6 +18,7 @@ import utilities.ImageIO;
 import utilities.Pair;
 import utilities.Vector2D;
 
+import javax.swing.text.Highlighter;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -51,12 +52,15 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
 
     int panX, panY;
     double scale;
-    Set<Vector2D> highlights;
-    Color highlightColor = new Color(207, 75, 220);
+    Set<Vector2D> actionHighlights;
+    Color highlightColor = Color.green; //new Color(207, 75, 220);
+    Stroke highlightStroke = new BasicStroke(3);
     int maxHighlights = 3;
 
     HashMap<Vector2D, List<Vector2D>> notConnectedMap;
     HashMap<Vector2D, Pair<Image, Pair<Integer, Integer>>> tileImageTopLeftCorners;
+
+    Vector2D cellHighlight;
 
     static String dataPath;
     int offset;
@@ -109,7 +113,7 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
             tileImageTopLeftCorners.put(new Vector2D(minX, minY), new Pair<>(img2, new Pair<>(maxX-minX+1, maxY-minY+1)));
         }
 
-        highlights = new HashSet<>();
+        actionHighlights = new HashSet<>();
         addMouseWheelListener(e -> {
             double amount = 0.2 * Math.abs(e.getPreciseWheelRotation());
             if (e.getPreciseWheelRotation() > 0) {
@@ -118,7 +122,8 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
             } else {
                 updateScale(scale + amount);
             }
-            highlights.clear();
+            actionHighlights.clear();
+            cellHighlight = null;
         });
         addMouseListener(new MouseAdapter() {
             Point start;
@@ -128,6 +133,7 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
                 if (e.getButton() == MouseEvent.BUTTON2) {
                     // Middle (wheel) click, pan around
                     start = e.getPoint();
+                    cellHighlight = null;
                 }
             }
 
@@ -139,14 +145,19 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
                     panX += (int)(scale * (end.x - start.x));
                     panY += (int)(scale * (end.y - start.y));
                     start = null;
-                    highlights.clear();
+                    actionHighlights.clear();
+                    cellHighlight = null;
                 }
             }
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON3 || highlights.size() >= maxHighlights) {
-                    highlights.clear();
+                if (e.getButton() == MouseEvent.BUTTON3 || actionHighlights.size() >= maxHighlights) {
+                    actionHighlights.clear();
+                    cellHighlight = null;
+                }
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    cellHighlight = new Vector2D((e.getX()-offset-panX) / descentItemSize, (e.getY()-offset-panY)/descentItemSize);
                 }
             }
         });
@@ -161,8 +172,9 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics gg) {
         // Draw background
+        Graphics2D g = (Graphics2D) gg;
         g.setColor(Color.black);
         g.fillRect(offset, offset, width-offset*10, height);
 
@@ -173,7 +185,7 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
                         e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize, null);
             }
         } else {
-            drawGridBoardWithGraphConnectivity((Graphics2D) g, (GridBoard) component, offset + panX, offset + panY, gameState.getGridReferences(), gameState.getTileReferences());
+            drawGridBoardWithGraphConnectivity(g, (GridBoard) component, offset + panX, offset + panY, gameState.getGridReferences(), gameState.getTileReferences());
         }
 
         // Draw tokens
@@ -186,22 +198,32 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
                 // TODO ugly version
             }
         }
+        Stroke s = g.getStroke();
 
         // Draw heroes
         for (Hero f: gameState.getHeroes()) {
             Vector2D loc = f.getPosition();
             DescentTypes.Archetype archetype = DescentTypes.Archetype.valueOf(((PropertyString)f.getProperty("archetype")).value);
 
+            // Color
+            g.setColor(archetype.getColor());
+            g.fillOval(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
+
+            if (gameState.getActingFigure().equals(f)) {
+                g.setStroke(highlightStroke);
+                g.setColor(highlightColor);
+            } else {
+                g.setColor(Color.black);
+            }
+            g.drawOval(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
+            g.setStroke(s);
+
             if (prettyVersion) {
                 // Image
+                int imgSize = descentItemSize*2/3;
                 Image img = ImageIO.GetInstance().getImage(dataPath + "heroes/" + archetype.name().toLowerCase() + ".png");
-                g.drawImage(img, offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize, null);
-            } else {
-                // Color
-                g.setColor(archetype.getColor());
-                g.fillOval(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
-                g.setColor(Color.black);
-                g.drawOval(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
+                g.drawImage(img, offset + panX + loc.getX() * descentItemSize + descentItemSize / 2 - imgSize / 2,
+                        offset + panY + loc.getY() * descentItemSize + descentItemSize / 2 - imgSize / 2, imgSize, imgSize, null);
             }
         }
 
@@ -234,16 +256,22 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
             }
         }
 
-        // TODO highlight acting figure
-
         // Draw action space highlights
-        for (Vector2D pos: highlights) {
+        for (Vector2D pos: actionHighlights) {
             int xC = offset+panX + pos.getX() * descentItemSize;
             int yC = offset+ panY + pos.getY() * descentItemSize;
             g.setColor(highlightColor);
             g.fillRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
             g.setColor(Color.black);
             g.drawRect(xC+ descentItemSize /4, yC+ descentItemSize /4, descentItemSize /2, descentItemSize /2);
+        }
+
+        // Draw selected cell highlight
+        if (cellHighlight != null) {
+            int xC = offset + panX + cellHighlight.getX() * descentItemSize;
+            int yC = offset + panY + cellHighlight.getY() * descentItemSize;
+            g.setColor(highlightColor);
+            g.drawRect(xC, yC, descentItemSize, descentItemSize);
         }
 
         // Debug draw cell coordinates
@@ -412,6 +440,11 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
 
     @Override
     public void clearHighlights() {
-        highlights.clear();
+        actionHighlights.clear();
+        cellHighlight = null;
+    }
+
+    public Vector2D getCellHighlight() {
+        return cellHighlight;
     }
 }

@@ -172,12 +172,12 @@ public class DescentTypes {
 
 
     public enum Archetype {
-        Mage(Color.orange),
-        Healer(Color.blue),
-        Scout(Color.green),
-        Warrior(Color.red);
+        Mage(new Color(246, 191, 73)),
+        Healer(new Color(58, 134, 183)),
+        Scout(new Color(78, 168, 22, 255)),
+        Warrior(new Color(220, 76, 76));
 
-        Color color;
+        final Color color;
         Archetype(Color color) {
             this.color = color;
         }

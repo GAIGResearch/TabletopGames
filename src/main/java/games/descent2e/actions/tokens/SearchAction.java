@@ -14,7 +14,6 @@ import games.descent2e.components.tokens.DToken;
 import utilities.Vector2D;
 
 import java.util.List;
-import java.util.Random;
 
 import static utilities.Utils.getNeighbourhood;
 
@@ -28,7 +27,9 @@ public class SearchAction extends TokenAction {
 
     @Override
     public SearchAction copy() {
-        return this;
+        SearchAction sa = new SearchAction();
+        sa.tokenID = tokenID;
+        return sa;
     }
 
     @Override
@@ -36,8 +37,7 @@ public class SearchAction extends TokenAction {
         if (gs.getActingFigure().getNActionsExecuted().isMaximum()) return false;
 
         // Can only execute if player adjacent to search token
-        DToken acolyte = (DToken) gs.getComponentById(tokenID);
-        Hero hero = gs.getHeroes().get(acolyte.getOwnerId());
+        Hero hero = (Hero) gs.getActingFigure();
         Vector2D loc = hero.getPosition();
         GridBoard board = gs.getMasterBoard();
         List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
@@ -67,19 +67,23 @@ public class SearchAction extends TokenAction {
     @Override
     public boolean execute(DescentGameState gs) {
         Deck<Card> searchCards = gs.getSearchCards();
+        DToken searchToken = (DToken) gs.getComponentById(tokenID);
         if (searchCards != null) {
             SearchCard card = (SearchCard) searchCards.draw();
             if (card.getComponentName().equals("Treasure Chest")) {
                 // TODO - when shop cards are added
+                searchToken.setPosition(null);  // Take off the map
                 return true;
             }
             else if (!card.getComponentName().equals("Nothing")) {
                 boolean added = ((Hero) gs.getActingFigure()).getOtherEquipment().add(new DescentCard(card));
                 if (added) {
-                    ((DToken) gs.getComponentById(tokenID)).setPosition(null);  // Take off the map
+                    searchToken.setPosition(null);  // Take off the map
                 }
                 return added;
             }
+            searchToken.setPosition(null);  // Take off the map
+            return true;
         }
         return false;
     }

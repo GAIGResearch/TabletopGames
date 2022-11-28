@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.components.GridBoard;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
-import games.descent2e.actions.Triggers;
 import games.descent2e.components.Hero;
 import games.descent2e.components.tokens.DToken;
 import utilities.Vector2D;
@@ -28,7 +27,9 @@ public class AcolyteAction extends TokenAction {
 
     @Override
     public AcolyteAction copy() {
-        return this;
+        AcolyteAction sa = new AcolyteAction();
+        sa.tokenID = tokenID;
+        return sa;
     }
 
     @Override

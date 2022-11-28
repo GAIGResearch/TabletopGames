@@ -97,7 +97,9 @@ public class TradeAcolyteAction extends TokenAction implements IExtendedSequence
 
     @Override
     public TradeAcolyteAction copy() {
-        return new TradeAcolyteAction(tokenID);
+        TradeAcolyteAction taa = new TradeAcolyteAction(tokenID);
+        taa.receivingHeroIdx = receivingHeroIdx;
+        return taa;
     }
 
     @Override

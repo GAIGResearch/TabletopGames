@@ -16,12 +16,12 @@ import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 import utilities.Utils;
+import utilities.Vector2D;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -103,13 +103,13 @@ public class DescentGUI extends AbstractGUIManager {
     }
 
     private void onMouseEnter(ActionButton ab) {
-        view.clearHighlights();
+        view.actionHighlights.clear();
         if (ab.getButtonAction() instanceof Move) {
-            view.highlights.addAll(((Move) ab.getButtonAction()).getPositionsTraveled());
+            view.actionHighlights.addAll(((Move) ab.getButtonAction()).getPositionsTraveled());
         }
     }
     private void onMouseExit(ActionButton ab) {
-        view.highlights.clear();
+        view.actionHighlights.clear();
     }
 
     protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
@@ -201,6 +201,19 @@ public class DescentGUI extends AbstractGUIManager {
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && !(actionButtons == null)) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
+                AbstractAction action = actions.get(i);
+                if (action instanceof Move) {
+                    // Filter Move actions depending on cell highlighted
+                    if (view.cellHighlight != null ) {
+                        List<Vector2D> moves = ((Move) action).getPositionsTraveled();
+                        Vector2D dest = moves.get(moves.size()-1);
+                        if (!dest.equals(view.cellHighlight)) {
+                            actionButtons[i].setVisible(false);
+                            actionButtons[i].setButtonAction(null, "");
+                            continue;
+                        }
+                    }
+                }
                 actionButtons[i].setVisible(true);
                 actionButtons[i].setButtonAction(actions.get(i), gameState);
                 actionButtons[i].setBackground(Color.white);

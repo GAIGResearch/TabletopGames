@@ -181,7 +181,7 @@ public class DescentForwardModel extends AbstractForwardModel {
                     // A player should hold these tokens, not on the board, location is left null
                 }
                 DToken token = new DToken(def.getTokenType(), location);
-                token.setEffects(def.getEffects());
+                token.setEffects(def.getEffectsCopy());
                 for (TokenAction ta: token.getEffects()) {
                     ta.setTokenID(token.getComponentID());
                 }

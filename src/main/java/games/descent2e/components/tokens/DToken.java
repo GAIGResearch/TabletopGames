@@ -38,7 +38,6 @@ public class DToken extends Token {
     @Override
     public void setOwnerId(int ownerId) {
         super.setOwnerId(ownerId);
-        int a = 0;
     }
 
     public void setOwnerId(int ownerId, DescentGameState dgs) {
@@ -160,6 +159,12 @@ public class DToken extends Token {
 
         public ArrayList<TokenAction> getEffects() {
             return effects;
+        }
+
+        public ArrayList<TokenAction> getEffectsCopy() {
+            ArrayList<TokenAction> actions = new ArrayList<>();
+            for (TokenAction ta: effects) actions.add(ta.copy());
+            return actions;
         }
 
         public HashMap<Figure.Attribute, Integer> getAttributeModifiers() {
