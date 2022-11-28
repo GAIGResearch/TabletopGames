@@ -69,9 +69,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
 
     @Override
-    public boolean execute(DescentGameState gs) {
-        gs.setActionInProgress(this);
-        DescentGameState state = (DescentGameState) gs;
+    public boolean execute(DescentGameState state) {
+        state.setActionInProgress(this);
         attackingPlayer = state.getComponentById(attackingFigure).getOwnerId();
         defendingPlayer = state.getComponentById(defendingFigure).getOwnerId();
 
@@ -279,7 +278,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return String.format("Melee Attack (Wpn: %d on %d", attackingPlayer, attackingFigure);
+        return String.format("Melee Attack by %d on %d", attackingFigure, defendingFigure);
     }
 
     public void registerSurge(Surge surge) {
