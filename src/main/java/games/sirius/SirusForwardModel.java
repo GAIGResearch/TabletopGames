@@ -6,6 +6,7 @@ import core.actions.*;
 import java.util.List;
 
 public class SirusForwardModel extends AbstractForwardModel {
+
     @Override
     protected void _setup(AbstractGameState firstState) {
         SiriusGameState state = (SiriusGameState) firstState;
@@ -19,6 +20,7 @@ public class SirusForwardModel extends AbstractForwardModel {
         for (int i = 0; i < params.ammonia; i++) {
             state.ammoniaDeck.add(new SiriusCard("Hyper Ammonia", 3));
         }
+        state.ammoniaDeck.shuffle(state.rnd);
         state.moons.add(new Moon("Sirius", MoonType.TRADING));
         state.moons.add(new Moon("Mining_1", MoonType.MINING));
         state.moons.add(new Moon("Mining_2", MoonType.MINING));

@@ -10,10 +10,12 @@ import java.util.*;
 public class SiriusGameState extends AbstractGameState {
     public SiriusGameState(AbstractParameters gameParameters, GameType gameType) {
         super(gameParameters, gameType);
+        rnd = new Random(gameParameters.getRandomSeed());
     }
 
     Deck<Card> ammoniaDeck;
     List<Moon> moons;
+    Random rnd;
 
     @Override
     protected List<Component> _getAllComponents() {
