@@ -4,13 +4,14 @@ import core.actions.AbstractAction;
 import games.*;
 import games.sirius.*;
 import core.*;
-import games.sirius.actions.MoveToMoon;
-import org.junit.Before;
-import org.junit.Test;
+import games.sirius.actions.*;
+import org.junit.*;
 import players.simple.RandomPlayer;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
 public class TestMoves {
@@ -97,5 +98,32 @@ public class TestMoves {
             assertEquals(i == 2 ? plannedMoves[i] : -1, copy2.getMoveSelected()[i]);
         }
 
+    }
+
+    @Test
+    public void testTakeCardActionsInDrawPhase() {
+        state.setGamePhase(SiriusConstants.SiriusPhase.Draw);
+        state.movePlayerTo(0, 1);
+        List<Integer> distinctCardValues = state.getMoon(1).getDeck().stream().mapToInt(c -> c.value).distinct().boxed().collect(toList());
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(distinctCardValues.size(), actions.size());
+        assertTrue(distinctCardValues.stream().map(TakeCard::new).allMatch(actions::contains));
+
+        state.getMoon(1).addCard(new SiriusCard("TestAmmonia", 4));
+        List<AbstractAction> extendedActions = fm.computeAvailableActions(state);
+        assertEquals(distinctCardValues.size() + 1, extendedActions.size());
+    }
+
+    @Test
+    public void testTakeCardFunctionsAsExpected() {
+        TakeCard action = new TakeCard(1);
+        state.getMoon(1).addCard(new SiriusCard("ammonia", 1));
+        assertEquals(3,state.getMoon(1).getDeckSize());
+        assertEquals(0,state.getPlayerHand(0).getSize());
+        state.movePlayerTo(0, 1);
+        fm.next(state, action);
+        assertEquals(2,state.getMoon(1).getDeckSize());
+        assertEquals(1,state.getPlayerHand(0).getSize());
+        assertEquals(1, state.getPlayerHand(0).draw().value);
     }
 }

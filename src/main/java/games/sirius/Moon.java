@@ -3,13 +3,12 @@ package games.sirius;
 
 import core.CoreConstants;
 import core.components.*;
+import games.sirius.SiriusConstants.MoonType;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.function.Predicate;
 
-enum MoonType {
-    MINING, TRADING
-}
 
 public class Moon extends Component {
 
@@ -34,7 +33,15 @@ public class Moon extends Component {
     public SiriusCard drawCard() {
         return deck.draw();
     }
+    public Optional<SiriusCard> drawCard( Predicate<SiriusCard> predicate) {
+        Optional<SiriusCard> retValue = deck.stream().filter(predicate).findFirst();
+        retValue.ifPresent(c -> deck.remove(c));
+        return retValue;
+    }
 
+    public MoonType getMoonType() {return moonType;}
+    public int getDeckSize() {return deck.getSize();}
+    public Deck<SiriusCard> getDeck() {return deck.copy();}
     public void addCard(SiriusCard card) {
         deck.add(card);
     }

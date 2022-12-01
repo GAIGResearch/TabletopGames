@@ -4,12 +4,14 @@ import core.*;
 import core.actions.*;
 import games.sirius.SiriusConstants.SiriusPhase;
 import games.sirius.actions.MoveToMoon;
+import games.sirius.actions.TakeCard;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static games.sirius.SiriusConstants.MoonType.*;
 import static games.sirius.SiriusConstants.SiriusPhase.Move;
 import static java.util.stream.Collectors.toList;
 
@@ -29,9 +31,16 @@ public class SiriusForwardModel extends AbstractForwardModel {
             state.ammoniaDeck.add(new SiriusCard("Hyper Ammonia", 3));
         }
         state.ammoniaDeck.shuffle(state.rnd);
-        state.moons.add(new Moon("Sirius", MoonType.TRADING, state.rnd));
-        state.moons.add(new Moon("Mining_1", MoonType.MINING, state.rnd));
-        state.moons.add(new Moon("Mining_2", MoonType.MINING, state.rnd));
+        state.moons.add(new Moon("Sirius", TRADING, state.rnd));
+        state.moons.add(new Moon("Mining_1", MINING, state.rnd));
+        state.moons.add(new Moon("Mining_2", MINING, state.rnd));
+        for (Moon moon : state.getAllMoons()) {
+            if (moon.getMoonType() == MINING) {
+                for (int i = 0; i < params.cardsPerEmptyMoon; i++) {
+                    moon.addCard((SiriusCard) state.ammoniaDeck.draw());
+                }
+            }
+        }
 
         state.playerLocations = new int[state.getNPlayers()];
         state.moveSelected = new int[state.getNPlayers()];
@@ -57,13 +66,14 @@ public class SiriusForwardModel extends AbstractForwardModel {
         SiriusPhase phase = (SiriusPhase) state.getGamePhase();
         List<AbstractAction> retValue = new ArrayList<>();
         int player = state.getCurrentPlayer();
+        int currentLocation = state.getLocationIndex(player);
         switch (phase) {
             case Move:
-                int currentLocation = state.getLocationIndex(player);
                 retValue = IntStream.range(0, state.moons.size()).filter(i -> i != currentLocation).mapToObj(MoveToMoon::new).collect(toList());
                 break;
             case Draw:
-                // TODO:
+                retValue = state.getMoon(currentLocation).deck.stream().map(c -> new TakeCard(c.value)).distinct().collect(toList());
+                break;
         }
         return retValue;
     }

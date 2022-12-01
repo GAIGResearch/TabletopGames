@@ -7,6 +7,8 @@ import games.sirius.SiriusConstants.SiriusPhase;
 
 import java.util.Arrays;
 
+import static games.sirius.SiriusConstants.MoonType.MINING;
+
 public class SiriusTurnOrder extends TurnOrder {
 
     int[] nextPlayer;
@@ -61,7 +63,9 @@ public class SiriusTurnOrder extends TurnOrder {
                 break;
         }
         turnCounter++;
+        int oldTurnOwner = turnOwner;
         turnOwner = nextPlayer(state);
+        nextPlayer[oldTurnOwner] = -1;
     }
 
     protected boolean allActionsComplete() {
@@ -71,8 +75,7 @@ public class SiriusTurnOrder extends TurnOrder {
     protected void applyMovesAndSetTurnOrder(SiriusGameState state) {
         state.applyChosenMoves();
         // TODO: Replace placeholder that takes actions in simple order
-        Arrays.setAll(nextPlayer, i -> i == nextPlayer.length - 1 ? -1 : i + 1);
-        turnOwner = 0;
+        Arrays.setAll(nextPlayer, i -> i == nextPlayer.length - 1 ? 0 : i + 1);
     }
 
     // for unit-testing
@@ -83,9 +86,19 @@ public class SiriusTurnOrder extends TurnOrder {
     @Override
     public void endRound(AbstractGameState gs) {
         SiriusGameState state = (SiriusGameState) gs;
+        SiriusParameters params = (SiriusParameters) state.getGameParameters();
         state.getPlayerTimer()[getCurrentPlayer(state)].incrementRound();
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
 
+        // add cards
+        for (Moon moon : state.getAllMoons()) {
+            if (moon.getMoonType() == MINING) {
+                int drawLimit = moon.getDeckSize() == 0 ? params.cardsPerEmptyMoon : params.cardsPerNonEmptyMoon;
+                for (int i = 0; i < drawLimit; i++) {
+                    moon.addCard((SiriusCard) state.ammoniaDeck.draw());
+                }
+            }
+        }
         roundCounter++;
     }
 

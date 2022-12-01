@@ -95,6 +95,15 @@ public class SiriusGameState extends AbstractGameState {
     public Moon getMoon(int index) {
         return moons.get(index);
     }
+    public List<Moon> getAllMoons() {
+        return moons;
+    }
+    public void addCardToHand(int player, SiriusCard card) {
+        playerAreas.get(player).deck.add(card);
+    }
+    public Deck<SiriusCard> getPlayerHand(int player) {
+        return playerAreas.get(player).deck;
+    }
 
     @Override
     protected boolean _equals(Object o) {

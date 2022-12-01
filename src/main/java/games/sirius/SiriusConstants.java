@@ -7,4 +7,9 @@ public class SiriusConstants {
     public enum SiriusPhase implements IGamePhase {
         Move, Draw
     }
+
+    public enum MoonType {
+        MINING, TRADING
+    }
+
 }
