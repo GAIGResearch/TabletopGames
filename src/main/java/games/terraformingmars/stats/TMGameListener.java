@@ -7,6 +7,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
 import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.TMAction;
@@ -24,13 +25,12 @@ public class TMGameListener extends GameListener {
     }
 
     @Override
-    public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        if (type == CoreConstants.GameEvents.GAME_OVER) {
-            AbstractGameState state = game.getGameState();
+    public void onEvent(Event event) {
+        if (event.type == Event.GameEvent.GAME_OVER) {
             Map<String, Object> data = Arrays.stream(TMGameAttributes.values())
                     .collect(Collectors.toMap(IGameMetric::name, attr -> {
-                        if(true)
-                            return attr.get(state, null);
+                        if (true)
+                            return attr.get(this, event);
                         else
                             return null;
                     }));
@@ -38,29 +38,28 @@ public class TMGameListener extends GameListener {
         }
     }
 
-    @Override
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-    }
-
 
     public enum TMGameAttributes implements IGameMetric {
-//        GAME_ID((s, a) -> s.getGameID()),
-        GENERATION((s, a) -> s.getGeneration()),
-//        N_PLAYERS((s, a) -> s.getNPlayers()),
-        RESULT((s, a) -> Arrays.toString(s.getPlayerResults())),
-        GP_OCEAN_COMPLETE_GEN((s, a) -> {
-            ArrayList<Pair<Integer, Integer>> increases = s.getGlobalParameters().get(TMTypes.GlobalParameter.OceanTiles).getIncreases();
+//        GAME_ID((l, e) -> s.getGameID()),
+        GENERATION((l, e) -> ((TMGameState)e.state).getGeneration()),
+//        N_PLAYERS((l, e) -> s.getNPlayers()),
+        RESULT((l, e) -> Arrays.toString(((TMGameState)e.state).getPlayerResults())),
+        GP_OCEAN_COMPLETE_GEN((l, e) -> {
+            TMGameState tmgs = (TMGameState)e.state;
+            ArrayList<Pair<Integer, Integer>> increases = tmgs.getGlobalParameters().get(TMTypes.GlobalParameter.OceanTiles).getIncreases();
             return increases.get(increases.size()-1).a;}),
-        GP_TEMPERATURE_COMPLETE_GEN((s, a) -> {
-            ArrayList<Pair<Integer, Integer>> increases = s.getGlobalParameters().get(TMTypes.GlobalParameter.Temperature).getIncreases();
+        GP_TEMPERATURE_COMPLETE_GEN((l, e) -> {
+            TMGameState tmgs = (TMGameState)e.state;
+            ArrayList<Pair<Integer, Integer>> increases = tmgs.getGlobalParameters().get(TMTypes.GlobalParameter.Temperature).getIncreases();
             return increases.get(increases.size()-1).a;}),
-        GP_OXYGEN_COMPLETE_GEN((s, a) -> {
-            ArrayList<Pair<Integer, Integer>> increases = s.getGlobalParameters().get(TMTypes.GlobalParameter.Oxygen).getIncreases();
+        GP_OXYGEN_COMPLETE_GEN((l, e) -> {
+            TMGameState tmgs = (TMGameState)e.state;
+            ArrayList<Pair<Integer, Integer>> increases = tmgs.getGlobalParameters().get(TMTypes.GlobalParameter.Oxygen).getIncreases();
             return increases.get(increases.size()-1).a;}),
-//        GP_OCEAN((s, a) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.OceanTiles).getIncreasesString()),  // Pairs are (generation,player)
-//        GP_TEMPERATURE((s, a) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.Temperature).getIncreasesString()),
-//        GP_OXYGEN((s, a) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.Oxygen).getIncreasesString()),
-//        CORP_CARDS((s,a) -> {
+//        GP_OCEAN((l, e) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.OceanTiles).getIncreasesString()),  // Pairs are (generation,player)
+//        GP_TEMPERATURE((l, e) -> s.getGlobalParameters().get(TMTypes.GlobalParameter.Temperature).getIncreasesString()),
+//        GP_OXYGEN((l, e) -> e.state.getGlobalParameters().get(TMTypes.GlobalParameter.Oxygen).getIncreasesString()),
+//        CORP_CARDS((l, e) -> {
 //            String ss = "[";
 //            for(TMCard c: s.getPlayerCorporations()) {
 //                ss += c.getComponentName() + ",";
@@ -68,34 +67,37 @@ public class TMGameListener extends GameListener {
 //            ss += "]";
 //            return ss.replace(",]", "]");
 //        }),
-        N_CARDS_PLAYED((s,a) -> {
+        N_CARDS_PLAYED((l, e) -> {
             int nCards = 0;
-            for(int i = 0; i < s.getNPlayers(); i++) {
-                nCards += s.getPlayedCards()[i].getSize();
+            TMGameState tmgs = (TMGameState)e.state;
+            for(int i = 0; i < tmgs.getNPlayers(); i++) {
+                nCards += tmgs.getPlayedCards()[i].getSize();
             }
             return nCards;
         }),
-        AVG_N_POINTS((s,a) -> {
+        AVG_N_POINTS((l, e) -> {
             int c = 0;
-            for(int i = 0; i < s.getNPlayers(); i++) {
-                c += s.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue();
-                c += s.countPointsMilestones(i);
-                c += s.countPointsAwards(i);
-                c += s.countPointsBoard(i);
-                c += s.countPointsCards(i);
+            TMGameState tmgs = (TMGameState)e.state;
+            for(int i = 0; i < tmgs.getNPlayers(); i++) {
+                c += tmgs.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue();
+                c += tmgs.countPointsMilestones(i);
+                c += tmgs.countPointsAwards(i);
+                c += tmgs.countPointsBoard(i);
+                c += tmgs.countPointsCards(i);
             }
-            return c / s.getNPlayers();
+            return c / tmgs.getNPlayers();
         }),
-        POINT_DIFF((s,a) -> {
+        POINT_DIFF((l, e) -> {
             int c = 0;
-            for(int i = 0; i < s.getNPlayers()-1; i++) {
-                int s1 = s.countPoints(i);
-                int s2 = s.countPoints(i+1);
+            TMGameState tmgs = (TMGameState)e.state;
+            for(int i = 0; i < tmgs.getNPlayers()-1; i++) {
+                int s1 = tmgs.countPoints(i);
+                int s2 = tmgs.countPoints(i+1);
                 c += Math.abs(s1-s2);
             }
-            return c / (s.getNPlayers()-1);
+            return c / (tmgs.getNPlayers()-1);
         }),
-//        MILESTONES((s,a) -> {
+//        MILESTONES((l, e) -> {
 //            String ss = "[";
 //            for(Milestone m: s.getMilestones()) {
 //                if (m.isClaimed()) ss += m.getComponentName() + "-" + m.claimed + ",";
@@ -103,7 +105,7 @@ public class TMGameListener extends GameListener {
 //            ss += "]";
 //            return ss.replace(",]", "]");
 //        }),
-//        EXPANSIONS((s,a) -> {
+//        EXPANSIONS((l, e) -> {
 //            String ss = "[";
 //            for(TMTypes.Expansion e: ((TMGameParameters)s.getGameParameters()).getExpansions()) {
 //                ss += e.name() + ",";
@@ -111,14 +113,14 @@ public class TMGameListener extends GameListener {
 //            ss += "]";
 //            return ss.replace(",]", "]");
 //        }),
-//        MAP((s,a) -> {
+//        MAP((l, e) -> {
 //            String ss = "Tharsis";
 //            HashSet<TMTypes.Expansion> exps = ((TMGameParameters)s.getGameParameters()).getExpansions();
 //            if (exps.contains(TMTypes.Expansion.Hellas)) ss = "Hellas";
 //            else if (exps.contains(TMTypes.Expansion.Elysium)) ss = "Elysium";
 //            return ss;
 //        }),
-//        AWARDS((s,a) -> {
+//        AWARDS((l, e) -> {
 //            String ss = "[";
 //            for(Award aa: s.getAwards()) {
 //                if (aa.isClaimed()) {
@@ -130,14 +132,15 @@ public class TMGameListener extends GameListener {
 //            ss += "]";
 //            return ss.replace(",]", "]");
 //        }),
-        MAP_COVERAGE((s,a) -> {
+        MAP_COVERAGE((l, e) -> {
             int tilesPlaced = 0;
             int nTiles = 0;
-            for (int i = 0; i < s.getBoard().getHeight(); i++) {
-                for (int j = 0; j < s.getBoard().getWidth(); j++) {
-                    if (s.getBoard().getElement(j, i) != null) {
+            TMGameState tmgs = (TMGameState)e.state;
+            for (int i = 0; i < tmgs.getBoard().getHeight(); i++) {
+                for (int j = 0; j < tmgs.getBoard().getWidth(); j++) {
+                    if (tmgs.getBoard().getElement(j, i) != null) {
                         nTiles ++;
-                        if (s.getBoard().getElement(j, i).getTilePlaced() != null) {
+                        if (tmgs.getBoard().getElement(j, i).getTilePlaced() != null) {
                             tilesPlaced++;
                         }
                     }
@@ -145,24 +148,25 @@ public class TMGameListener extends GameListener {
             }
             return tilesPlaced*1.0 / nTiles;
         }),
-        MAP_TILES((s,a) -> {
+        MAP_TILES((l, e) -> {
             String ss = "";
-            for (int i = 0; i < s.getBoard().getHeight(); i++) {
-                for (int j = 0; j < s.getBoard().getWidth(); j++) {
-                    if (s.getBoard().getElement(j, i) != null) {
-                        if (s.getBoard().getElement(j, i).getTilePlaced() != null) {
+            TMGameState tmgs = (TMGameState)e.state;
+            for (int i = 0; i < tmgs.getBoard().getHeight(); i++) {
+                for (int j = 0; j < tmgs.getBoard().getWidth(); j++) {
+                    if (tmgs.getBoard().getElement(j, i) != null) {
+                        if (tmgs.getBoard().getElement(j, i).getTilePlaced() != null) {
                             ss += "(" + j + "-" + i + "),";
                         }
                     }
                 }
             }
-            for (TMMapTile map: s.getExtraTiles()) {
+            for (TMMapTile map: tmgs.getExtraTiles()) {
                 ss += map.getComponentName() + ",";
             }
             ss += "]";
             return ss.replace(",]","");
         });
-//        RESOURCE_PROD((s,a) -> {
+//        RESOURCE_PROD((l, e) -> {
 //            String ss = "[";
 //            for (int i = 0; i < s.getNPlayers(); i++) {
 //                ss += "{";
@@ -176,21 +180,17 @@ public class TMGameListener extends GameListener {
 //            return ss.replace(",]", "]");
 //        });
 
-        private final BiFunction<TMGameState, TMAction, Object> lambda_sa;
+        private final BiFunction<TMGameListener, Event, Object> lambda_sa;
 
-        TMGameAttributes(BiFunction<TMGameState, TMAction, Object> lambda) {
+        TMGameAttributes(BiFunction<TMGameListener, Event, Object> lambda) {
             this.lambda_sa = lambda;
         }
 
         @Override
-        public Object get(AbstractGameState state, AbstractAction action) {
-            return lambda_sa.apply((TMGameState) state, (TMAction) action);
+        public Object get(GameListener listener, Event event) {
+            return lambda_sa.apply((TMGameListener)listener, event);
         }
 
-        @Override
-        public Type getType() {
-            return Type.STATE_ACTION;
-        }
     }
 
 }

@@ -3,29 +3,26 @@ package games.sushigo;
 import core.interfaces.IGameMetric;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import evaluation.GameListener;
+import evaluation.metrics.Event;
 
 import java.util.function.*;
 
 public enum SGGameAttributes implements IGameMetric {
-    GAME_ID((SGGameState s, AbstractAction a) -> s.getGameID()),
-    PLAYER((SGGameState s, AbstractAction a) -> s.getCurrentPlayer());
+    GAME_ID((l, e) -> e.state.getGameID()),
+    PLAYER((l, e) -> e.state.getCurrentPlayer());
     //WINNING_PLAYER((SGGameState s, AbstractAction a) -> s.getWinningPlayer());
 
+    private final BiFunction<GameListener, Event,  Object> lambda;
 
-    private final BiFunction<SGGameState, AbstractAction, Object> lambda;
-
-    SGGameAttributes(BiFunction<SGGameState, AbstractAction, Object> lambda){
+    SGGameAttributes(BiFunction<GameListener, Event, Object> lambda){
         this.lambda = lambda;
     }
 
     @Override
-    public Object get(AbstractGameState state, AbstractAction action) {
-        return lambda.apply((SGGameState) state, action);
+    public Object get(GameListener listener, Event event) {
+        return lambda.apply(listener, event);
     }
 
-    @Override
-    public Type getType() {
-        return Type.STATE_ACTION;
-    }
 }
 

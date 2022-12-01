@@ -7,6 +7,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
 import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.TMAction;
@@ -23,22 +24,20 @@ public class TMProgressListener extends GameListener {
     }
 
     @Override
-    public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-    }
-
-    @Override
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-        if (type == CoreConstants.GameEvents.ROUND_OVER) {
+    public void onEvent(Event event) {
+        if (event.type == Event.GameEvent.ROUND_OVER) {
             Map<String, Object> data = Arrays.stream(TMProgressAttributes.values())
-                    .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(state, action)));
+                    .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(this, event)));
             logger.record(data);
         }
     }
 
     public enum TMProgressAttributes implements IGameMetric {
-        GAME_ID((s, a) -> s.getGameID()),
-        GENERATION((s, a) -> s.getGeneration()),
-        N_POINTS_PROGRESS((s,a) -> {
+        GAME_ID((l, e) -> e.state.getGameID()),
+        GENERATION((l, e) -> ((TMGameState)e.state).getGeneration()),
+        N_POINTS_PROGRESS((l, e) -> {
+
+            TMGameState s = ((TMGameState)e.state);
             String ss = "[";
             for(int i = 0; i < s.getNPlayers(); i++) {
 //            ss += s.countPoints(i) + ",";
@@ -52,20 +51,16 @@ public class TMProgressListener extends GameListener {
             return ss.replace(",]", "]");
         });
 
-        private final BiFunction<TMGameState, TMAction, Object> lambda;
+        private final BiFunction<TMProgressListener, Event, Object> lambda;
 
-        TMProgressAttributes(BiFunction<TMGameState, TMAction, Object> lambda) {
+        TMProgressAttributes(BiFunction<TMProgressListener, Event, Object> lambda) {
             this.lambda = lambda;
         }
 
         @Override
-        public Object get(AbstractGameState state, AbstractAction action) {
-            return lambda.apply((TMGameState) state, (TMAction) action);
+        public Object get(GameListener listener, Event event) {
+            return lambda.apply((TMProgressListener) listener, event);
         }
 
-        @Override
-        public Type getType() {
-            return Type.STATE_ACTION;
-        }
     }
 }

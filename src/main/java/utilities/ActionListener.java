@@ -1,19 +1,15 @@
 package utilities;
 
 import core.AbstractGameState;
-import core.CoreConstants;
-import core.Game;
-import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
 import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static core.CoreConstants.GameEvents.ACTION_CHOSEN;
-import static core.CoreConstants.GameEvents.GAME_EVENT;
 
 public class ActionListener extends GameListener {
 
@@ -29,17 +25,12 @@ public class ActionListener extends GameListener {
     }
 
     @Override
-    public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        // Here we do nothing, as we are only interested in Action events
-    }
-
-    @Override
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-        if (type == ACTION_CHOSEN || type == GAME_EVENT) {
+    public void onEvent(Event event) {
+        if (event.type == Event.GameEvent.ACTION_CHOSEN || event.type == Event.GameEvent.GAME_EVENT) {
+            AbstractGameState state = event.game.getGameState();
             Map<String, Object> data = Arrays.stream(attributesToRecord)
-                    .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(state, action)));
+                    .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(this, event)));
             logger.record(data);
         }
     }
-
 }

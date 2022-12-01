@@ -7,6 +7,7 @@ import core.ParameterFactory;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 import games.GameType;
 import players.PlayerFactory;
 import players.learners.AbstractLearner;
@@ -34,7 +35,7 @@ public class ProgressiveLearner {
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
     IStateFeatureVector phi;
-    CoreConstants.GameEvents frequency;
+    Event.GameEvent frequency;
     boolean currentPlayerOnly;
     String phiClass, prefix;
     boolean useOnlyLast;
@@ -80,7 +81,7 @@ public class ProgressiveLearner {
         defaultHeuristic = getArg(args, "defaultHeuristic", "players.heuristics.NullHeuristic");
         heuristic = getArg(args, "heuristic", "players.heuristics.LinearStateHeuristic");
         currentPlayerOnly = getArg(args, "stateCPO", false);
-        frequency = CoreConstants.GameEvents.valueOf(getArg(args, "stateFreq", "ACTION_TAKEN"));
+        frequency = Event.GameEvent.valueOf(getArg(args, "stateFreq", "ACTION_TAKEN"));
     }
 
     public static void main(String[] args) {

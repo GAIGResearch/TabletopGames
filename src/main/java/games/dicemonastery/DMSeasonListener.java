@@ -7,6 +7,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
 import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -20,17 +21,11 @@ public class DMSeasonListener extends GameListener {
     }
 
     @Override
-    public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        // nothing
-    }
-
-    @Override
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-        if (type == CoreConstants.GameEvents.ROUND_OVER) {
-            for (int p = 0; p < state.getNPlayers(); p++) {
-                int finalP = p;
+    public void onEvent(Event event) {
+        if (event.type == Event.GameEvent.ROUND_OVER) {
+            for (int p = 0; p < event.state.getNPlayers(); p++) {
                 Map<String, Object> data = Arrays.stream(DiceMonasteryStateAttributes.values())
-                        .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(state, finalP), (a, b) -> a, LinkedHashMap::new));
+                        .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(this, event), (a, b) -> a, LinkedHashMap::new));
                 logger.record(data);
             }
         }

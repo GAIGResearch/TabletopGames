@@ -1,12 +1,16 @@
 package games.pandemic;
 
+import core.AbstractGameState;
 import core.Game;
 import core.components.BoardNode;
 import core.components.Counter;
 import core.interfaces.IGameMetric;
 import core.properties.PropertyIntArray;
+import evaluation.GameListener;
+import evaluation.metrics.Event;
 import utilities.Hash;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static games.pandemic.PandemicConstants.colors;
@@ -14,31 +18,32 @@ import static games.pandemic.PandemicConstants.infectionHash;
 import static utilities.Utils.GameResult.WIN;
 
 public enum PandemicCompetitionRankingAttributes implements IGameMetric {
-    GAME_WIN((s) -> Math.max(0,s.getGameState().getGameStatus().value)),
+    GAME_WIN((l, e) -> Math.max(0,e.state.getGameStatus().value)),
     // Exception: game ticks lower are better if win rate > winNeutralRange[1],
     //              and higher are better if win rate < winNeutralRange[0] (otherwise considered equal)
     // ~ reward finishing winning games quickly, but finishing losing games slowly (with neutral range allowance)
-    GAME_TICKS((s) -> s.getGameState().getGameStatus()==WIN? s.getTick() : -s.getTick()),
-    GAME_TICKS_RAW(Game::getTick),
-    N_DISEASE_CURED((s) -> countDisease(s, 1, false)+countDisease(s, 2, false)),
-    N_OUTBREAKS((s) -> ((Counter) ((PandemicGameState)s.getGameState()).getComponent(PandemicConstants.outbreaksHash)).getValue()),
+    GAME_TICKS((l, e) -> e.state.getGameStatus()==WIN? e.state.getGameTick() : -e.state.getGameTick()),
+    GAME_TICKS_RAW((l,e) -> e.state.getGameTick()),
+    N_DISEASE_CURED((l, e) -> countDisease(e.state, 1, false)+countDisease(e.state, 2, false)),
+    N_OUTBREAKS((l, e) -> ((Counter) ((PandemicGameState)e.state).getComponent(PandemicConstants.outbreaksHash)).getValue()),
     N_CITY_DANGER(PandemicCompetitionRankingAttributes::countCityDanger),
-    N_DISEASE_CUBES_LEFT((s)-> countDisease(s, 0, true)),
-    N_DISEASE_ERADICATED((s) -> countDisease(s, 2, false));
+    N_DISEASE_CUBES_LEFT((l, e)-> countDisease(e.state, 0, true)),
+    N_DISEASE_ERADICATED((l, e) -> countDisease(e.state, 2, false));
 
-    private final Function<Game, Object> lambda;
+    private final BiFunction<PandemicCompetitionListener, Event, Object> lambda;
 
-    PandemicCompetitionRankingAttributes(Function<Game, Object> lambda) {
+    PandemicCompetitionRankingAttributes(BiFunction<PandemicCompetitionListener, Event, Object> lambda) {
         this.lambda = lambda;
     }
 
     @Override
-    public Object get(Game game) {
-        return lambda.apply(game);
+    public Object get(GameListener listener, Event event)
+    {
+        return lambda.apply((PandemicCompetitionListener) listener, event);
     }
 
-    static int countDisease(Game game, int targetValue, boolean cubes) {
-        PandemicGameState pgs = (PandemicGameState) game.getGameState();
+    static int countDisease(AbstractGameState state, int targetValue, boolean cubes) {
+        PandemicGameState pgs = (PandemicGameState) state;
         int count = 0;
         for (String color: colors) {
             if (cubes) {
@@ -51,8 +56,8 @@ public enum PandemicCompetitionRankingAttributes implements IGameMetric {
         return count;
     }
 
-    static int countCityDanger(Game game) {
-        PandemicGameState pgs = (PandemicGameState) game.getGameState();
+    static int countCityDanger(PandemicCompetitionListener listener, Event event) {
+        PandemicGameState pgs = (PandemicGameState) event.state;
         PandemicParameters pp = (PandemicParameters) pgs.getGameParameters();
         int count = 0;
 
@@ -68,8 +73,5 @@ public enum PandemicCompetitionRankingAttributes implements IGameMetric {
         }
         return count;
     }
-    @Override
-    public Type getType() {
-        return Type.GAME;
-    }
+
 }

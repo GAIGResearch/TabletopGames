@@ -51,7 +51,7 @@ public class GameReport {
                             "\tnGames=        The number of games to run for each game type. Defaults to 1000.\n" +
                             "\tlistener=      The full class name of an IGameListener implementation. Or the location\n" +
                             "\t               of a json file from which a listener can be instantiated.\n" +
-                            "\t               Defaults to utilities.GameStatisticsListener. \n" +
+                            "\t               Defaults to evaluation.metrics.GameStatisticsListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
@@ -72,7 +72,7 @@ public class GameReport {
         String gameParams = getArg(args, "gameParam", "");
         String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
         String statsLog = getArg(args, "statsLog", "SummaryLogger.txt");
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameStatisticsListener").split("\\|")));
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.metrics.GameStatisticsListener").split("\\|")));
         List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
 
         if (listenerClasses.size() > 1 && logFiles.size() > 1 && listenerClasses.size() != logFiles.size())

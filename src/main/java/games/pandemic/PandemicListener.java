@@ -9,6 +9,7 @@ import core.components.Counter;
 import core.components.Deck;
 import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 import utilities.Hash;
 
 import java.util.LinkedHashMap;
@@ -24,18 +25,19 @@ public class PandemicListener extends GameListener {
     }
 
     @Override
-    public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        if (type == CoreConstants.GameEvents.GAME_OVER) {
-            PandemicGameState state = (PandemicGameState) game.getGameState();
+    public void onEvent(Event event)
+    {
+        if(event.type == Event.GameEvent.GAME_OVER) {
+            PandemicGameState state = (PandemicGameState) event.state;
             Map<String, Object> data = new LinkedHashMap<>();
-            data.put("Game", game.getGameType().name());
-            data.put("GameID", game.getGameState().getGameID());
-            data.put("Seed", game.getGameState().getGameParameters().getRandomSeed());
+            data.put("Game", state.getGameType().name());
+            data.put("GameID", state.getGameID());
+            data.put("Seed", state.getGameParameters().getRandomSeed());
             data.put("Players", state.getNPlayers());
-            data.put("PlayerType", game.getPlayers().get(0).toString());
+            //data.put("PlayerType", state.getPlayers().get(0).toString());
             data.put("Rounds", state.getTurnOrder().getRoundCounter());
             data.put("Turns", state.getTurnOrder().getTurnCounter());
-            data.put("Ticks", game.getTick());
+            data.put("Ticks", state.getGameTick());
             data.put("GameStatus", state.getGameStatus());
             data.put("playerCardsLeft", ((Deck<Card>) state.getComponent(playerDeckHash)).getSize());
             data.put("infectionDeckSize", ((Deck<Card>) state.getComponent(infectionHash)).getSize());
@@ -51,11 +53,6 @@ public class PandemicListener extends GameListener {
             data.put("blackCubeCounter", ((Counter) state.getComponent(Hash.GetInstance().hash("Disease Cube black"))).getValue());
             logger.record(data);
         }
-    }
-
-    @Override
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-        // nothing
     }
 
 }

@@ -6,6 +6,7 @@ import core.Game;
 import core.actions.AbstractAction;
 import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -19,25 +20,29 @@ import java.util.stream.IntStream;
 public abstract class FeatureListener extends GameListener {
 
     List<StateFeatureListener.LocalDataWrapper> currentData = new ArrayList<>();
-    CoreConstants.GameEvents frequency;
+    Event.GameEvent frequency;
     boolean currentPlayerOnly = false;
 
-    protected FeatureListener(IStatisticLogger logger, CoreConstants.GameEvents frequency, boolean currentPlayerOnly) {
+    protected FeatureListener(IStatisticLogger logger, Event.GameEvent frequency, boolean currentPlayerOnly) {
         super(logger, null);
         this.currentPlayerOnly = currentPlayerOnly;
         this.frequency = frequency;
     }
 
     @Override
-    public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        if (type == CoreConstants.GameEvents.GAME_OVER) {
+    public void onEvent(Event event)
+    {
+        if(event.type == Event.GameEvent.GAME_OVER) {
+
             // first we record a final state for each player
-            onEvent(frequency, game.getGameState(), null);
+            if(event.type == frequency)
+                processFinalState(event.state, null);
+
             // now we can update the result
-            int totP = game.getGameState().getNPlayers();
-            double[] finalScores = IntStream.range(0, totP).mapToDouble(game.getGameState()::getGameScore).toArray();
-            double[] winLoss = Arrays.stream(game.getGameState().getPlayerResults()).mapToDouble(r -> {
-                switch(r) {
+            int totP = event.state.getNPlayers();
+            double[] finalScores = IntStream.range(0, totP).mapToDouble(event.state::getGameScore).toArray();
+            double[] winLoss = Arrays.stream(event.state.getPlayerResults()).mapToDouble(r -> {
+                switch (r) {
                     case WIN:
                         return 1.0;
                     case DRAW:
@@ -46,14 +51,13 @@ public abstract class FeatureListener extends GameListener {
                         return 0.0;
                 }
             }).toArray();
-            double[] ordinal = IntStream.range(0, totP).mapToDouble(game.getGameState()::getOrdinalPosition).toArray();
-            double finalRound = game.getGameState().getTurnOrder().getRoundCounter();
-
+            double[] ordinal = IntStream.range(0, totP).mapToDouble(event.state::getOrdinalPosition).toArray();
+            double finalRound = event.state.getTurnOrder().getRoundCounter();
             for (StateFeatureListener.LocalDataWrapper record : currentData) {
                 // we use a LinkedHashMap so that the order of the keys is preserved, and hence the
                 // data is written to file in a sensible order for human viewing
                 Map<String, Double> data = new LinkedHashMap<>();
-                data.put("GameID", (double) game.getGameState().getGameID());
+                data.put("GameID", (double) event.state.getGameID());
                 data.put("Player", (double) record.player);
                 data.put("Round", (double) record.gameRound);
                 data.put("Turn", (double) record.gameTurn);
@@ -61,7 +65,7 @@ public abstract class FeatureListener extends GameListener {
                 for (int i = 0; i < record.array.length; i++) {
                     data.put(names()[i], record.array[i]);
                 }
-                data.put("PlayerCount", (double) game.getPlayers().size());
+                data.put("PlayerCount", (double) event.game.getPlayers().size());
                 data.put("TotalRounds", finalRound);
                 data.put("Win", winLoss[record.player]);
                 data.put("Ordinal", ordinal[record.player]);
@@ -71,6 +75,7 @@ public abstract class FeatureListener extends GameListener {
             logger.processDataAndNotFinish();
             currentData = new ArrayList<>();
         }
+
     }
 
     public abstract String[] names();
@@ -80,19 +85,18 @@ public abstract class FeatureListener extends GameListener {
     public void setLogger(IStatisticLogger newLogger) {
         this.logger = newLogger;
     }
-    @Override
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
+
+
+    public void processFinalState(AbstractGameState state, AbstractAction action) {
         // we record one state for each player after every action is taken
-        if (type == frequency) {
-            if (currentPlayerOnly && state.isNotTerminal()) {
-                int p = state.getCurrentPlayer();
+        if (currentPlayerOnly && state.isNotTerminal()) {
+            int p = state.getCurrentPlayer();
+            double[] phi = extractFeatureVector(action, state, p);
+            currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state));
+        } else {
+            for (int p = 0; p < state.getNPlayers(); p++) {
                 double[] phi = extractFeatureVector(action, state, p);
                 currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state));
-            } else {
-                for (int p = 0; p < state.getNPlayers(); p++) {
-                    double[] phi = extractFeatureVector(action, state, p);
-                    currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state));
-                }
             }
         }
     }

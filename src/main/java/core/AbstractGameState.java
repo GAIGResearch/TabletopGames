@@ -43,8 +43,12 @@ public abstract class AbstractGameState {
     protected TurnOrder turnOrder;
     private Area allComponents;
 
+    // Game tick, number of iterations of game loop
+    private int tick = 0;
+
     // Timers for all players
     protected ElapsedCpuChessTimer[] playerTimer;
+
     // Game being played
     protected final GameType gameType;
 
@@ -95,6 +99,7 @@ public abstract class AbstractGameState {
         history = new ArrayList<>();
         historyText = new ArrayList<>();
         playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
+        tick = 0;
         _reset();
     }
 
@@ -131,6 +136,7 @@ public abstract class AbstractGameState {
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
+    public final int getGameTick() {return tick;}
     public final Component getComponentById(int id) {
         Component c = allComponents.getComponent(id);
         if (c == null) {
@@ -183,6 +189,7 @@ public abstract class AbstractGameState {
         s.playerResults = playerResults.clone();
         s.gamePhase = gamePhase;
         s.coreGameParameters = coreGameParameters;
+        s.tick = tick;
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
@@ -458,6 +465,7 @@ public abstract class AbstractGameState {
     public CoreParameters getCoreGameParameters() {
         return coreGameParameters;
     }
+    public void advanceGameTick() {tick++;}
 
     @Override
     public boolean equals(Object o) {

@@ -1,69 +1,66 @@
 package games.dicemonastery;
 
-import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
+import evaluation.GameListener;
+import evaluation.metrics.Event;
 import games.dicemonastery.actions.*;
 
 import java.util.function.BiFunction;
 
 public enum DiceMonasteryActionAttributes implements IGameMetric {
 
-    GAME_ID((s, a) -> s.getGameID()),
-    SEASON((s, a) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getSeason()),
-    YEAR((s, a) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getYear()),
-    PLAYER((s, a) -> s.getCurrentPlayer()),
-    ACTION_TYPE((s, a) -> a == null ? "NONE" : a.getClass().getSimpleName()),
-    ACTION_DESCRIPTION((s, a) -> a == null ? "NONE" : a.getString(s)),
-    PIETY((s, a) -> {
-        if (a == null) return 0;
-        if (a instanceof ChooseMonk) return ((ChooseMonk) a).piety;
-        if (a instanceof PromoteMonk) return ((PromoteMonk) a).pietyLevelToPromote;
+    GAME_ID((l, e) -> e.state.getGameID()),
+    SEASON((l, e) -> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getSeason()),
+    YEAR((l, e) -> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getYear()),
+    PLAYER((l, e) -> e.state.getCurrentPlayer()),
+    ACTION_TYPE((l, e) -> e.action == null ? "NONE" : e.action.getClass().getSimpleName()),
+    ACTION_DESCRIPTION((l, e) -> e.action == null ? "NONE" : e.action.getString(e.state)),
+    PIETY((l, e) -> {
+        if (e.action == null) return 0;
+        if (e.action instanceof ChooseMonk) return ((ChooseMonk) e.action).piety;
+        if (e.action instanceof PromoteMonk) return ((PromoteMonk) e.action).pietyLevelToPromote;
         return 0;
     }),
-    LOCATION((s, a) -> {
-        if (a instanceof PlaceMonk) return ((PlaceMonk) a).destination.name();
-        if (a instanceof ChooseMonk) return ((ChooseMonk) a).destination.name();
-        if (a instanceof PromoteMonk) return ((PromoteMonk) a).location.name();
-        return ((DiceMonasteryTurnOrder) s.getTurnOrder()).currentAreaBeingExecuted.name();
+    LOCATION((l, e) -> {
+        if (e.action instanceof PlaceMonk) return ((PlaceMonk) e.action).destination.name();
+        if (e.action instanceof ChooseMonk) return ((ChooseMonk) e.action).destination.name();
+        if (e.action instanceof PromoteMonk) return ((PromoteMonk) e.action).location.name();
+        return ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).currentAreaBeingExecuted.name();
     }),
-    THING((s, a) -> {
-        if (a == null) return "";
-        if (a instanceof Buy) return ((Buy) a).resource.name();
-        if (a instanceof Sell) return ((Sell) a).resource.name();
-        if (a instanceof BuyTreasure) return ((BuyTreasure) a).treasure.getComponentName();
-        if (a instanceof WriteText) return ((WriteText) a).textType.getComponentName();
-        if (a instanceof TakeToken) return ((TakeToken) a).token.name();
-        if (a instanceof GoOnPilgrimage) return ((GoOnPilgrimage) a).destination.destination;
+    THING((l, e) -> {
+        if (e.action == null) return "";
+        if (e.action instanceof Buy) return ((Buy) e.action).resource.name();
+        if (e.action instanceof Sell) return ((Sell) e.action).resource.name();
+        if (e.action instanceof BuyTreasure) return ((BuyTreasure) e.action).treasure.getComponentName();
+        if (e.action instanceof WriteText) return ((WriteText) e.action).textType.getComponentName();
+        if (e.action instanceof TakeToken) return ((TakeToken) e.action).token.name();
+        if (e.action instanceof GoOnPilgrimage) return ((GoOnPilgrimage) e.action).destination.destination;
         return "";
     }),
-    VALUE((s, a) -> {
-        if (a == null) return 0;
-        if (a instanceof Buy) return ((Buy) a).cost;
-        if (a instanceof Sell) return ((Sell) a).price;
-        if (a instanceof SummerBid)
-            return ((SummerBid) a).beer + 2 * ((SummerBid) a).mead;
-        if (a instanceof Pray) return ((Pray) a).prayerCount;
-        if (a instanceof TakeToken) return 2 - s.availableBonusTokens(((TakeToken) a).fromArea).size();
-        if (a instanceof UseMonk) return ((UseMonk) a).getActionPoints();
+    VALUE((l, e) -> {
+        if (e.action == null) return 0;
+        if (e.action instanceof Buy) return ((Buy) e.action).cost;
+        if (e.action instanceof Sell) return ((Sell) e.action).price;
+        if (e.action instanceof SummerBid)
+            return ((SummerBid) e.action).beer + 2 * ((SummerBid) e.action).mead;
+        if (e.action instanceof Pray) return ((Pray) e.action).prayerCount;
+        if (e.action instanceof TakeToken)
+            return 2 - ((DiceMonasteryGameState)e.state).availableBonusTokens(((TakeToken) e.action).fromArea).size();
+        if (e.action instanceof UseMonk) return ((UseMonk) e.action).getActionPoints();
         return 0;
     }),
-    ACTIONS_LEFT((s, a) -> ((DiceMonasteryTurnOrder) s.getTurnOrder()).getActionPointsLeft())
+    ACTIONS_LEFT((l, e) -> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getActionPointsLeft())
     ;
 
-    private final BiFunction<DiceMonasteryGameState, AbstractAction, Object> lambda;
+    private final BiFunction<GameListener, Event, Object> lambda;
 
-    DiceMonasteryActionAttributes(BiFunction<DiceMonasteryGameState, AbstractAction, Object> lambda) {
+    DiceMonasteryActionAttributes(BiFunction<GameListener, Event, Object> lambda) {
         this.lambda = lambda;
     }
 
     @Override
-    public Object get(AbstractGameState state, AbstractAction action) {
-        return lambda.apply((DiceMonasteryGameState) state, action);
+    public Object get(GameListener listener, Event event) {
+        return lambda.apply(listener, event);
     }
 
-    @Override
-    public Type getType() {
-        return Type.STATE_ACTION;
-    }
 }

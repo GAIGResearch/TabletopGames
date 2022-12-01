@@ -5,6 +5,7 @@ import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -23,11 +24,11 @@ public class StateFeatureListener extends FeatureListener {
             throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
             this((IStatisticLogger) Class.forName(loggerString).getConstructor().newInstance(),
                     (IStateFeatureVector) Class.forName(phiString).getConstructor().newInstance(),
-                    CoreConstants.GameEvents.valueOf(frequencyString),
+                    Event.GameEvent.valueOf(frequencyString),
                     currentPlayerOnly);
     }
 
-    public StateFeatureListener(IStatisticLogger logger, IStateFeatureVector phi, CoreConstants.GameEvents frequency, boolean currentPlayerOnly) {
+    public StateFeatureListener(IStatisticLogger logger, IStateFeatureVector phi, Event.GameEvent frequency, boolean currentPlayerOnly) {
         super(logger, frequency, currentPlayerOnly);
         this.phiFn = phi;
     }

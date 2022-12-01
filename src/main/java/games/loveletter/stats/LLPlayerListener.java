@@ -3,20 +3,18 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import core.components.Deck;
 import core.interfaces.IGameMetric;
 import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.BaronAction;
 import games.loveletter.actions.GuardAction;
 import games.loveletter.actions.PrinceAction;
 import games.loveletter.actions.PrincessAction;
-import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class LLPlayerListener extends GameListener {
@@ -32,29 +30,7 @@ public class LLPlayerListener extends GameListener {
         winningCards = null;
         losingCards = null;
     }
-    @Override
-    public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        if (type == CoreConstants.GameEvents.GAME_OVER) {
-            AbstractGameState state = game.getGameState();
-            for (int i = 0; i < state.getNPlayers(); i++) {
-                final int playerID = i;
-                Map<String, Object> data = Arrays.stream(LLPlayerListener.LLPlayerAttributes.values())
-                        .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(state, playerID)));
 
-                String wins = processCards(winningCards, playerID);
-                data.put("WINS_REASON", wins);
-
-                String losses = processCards(losingCards, playerID);
-                data.put("LOSE_REASON", losses);
-
-                loggerArray[i].record(data);
-                logger.record(data);
-            }
-
-            winningCards = null;
-            losingCards = null;
-        }
-    }
 
     private String processCards(String token, int playerID)
     {
@@ -68,8 +44,32 @@ public class LLPlayerListener extends GameListener {
         return ss.toString();
     }
 
+
     @Override
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
+    public void onEvent(Event event) {
+
+        if(event.type == Event.GameEvent.GAME_OVER) {
+            for (int i = 0; i < event.state.getNPlayers(); i++) {
+                Map<String, Object> data = Arrays.stream(LLPlayerAttributes.values())
+                        .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(this, event)));
+                String wins = processCards(winningCards, i);
+                data.put("WINS_REASON", wins);
+                String losses = processCards(losingCards, i);
+                data.put("LOSE_REASON", losses);
+                loggerArray[i].record(data);
+                logger.record(data);
+            }
+            winningCards = null;
+            losingCards = null;
+        }else if(event.type == Event.GameEvent.ACTION_TAKEN){
+            processAction(event.state, event.action);
+        }
+    }
+
+
+    public void processAction(AbstractGameState state, AbstractAction action) {
+
+        //TODO: I'm not sure this is called.
         if((state.getGameStatus() == Utils.GameResult.GAME_END))
         {
             winningCards = "NA";
@@ -176,62 +176,4 @@ public class LLPlayerListener extends GameListener {
         }
         super.allGamesFinished();
     }
-
-
-    public enum LLPlayerAttributes implements IGameMetric {
-        RESULT((s, p) -> s.getPlayerResults()[p].value),
-
-        ACTIONS_PLAYED((s, p) -> {
-            Deck<LoveLetterCard> played = s.getPlayerDiscardCards().get(p);
-
-            StringBuilder ss = new StringBuilder();
-
-            for (LoveLetterCard card : played.getComponents()) {
-                ss.append(card.cardType).append(",");
-            }
-            if (ss.toString().equals("")) return ss.toString();
-            ss.append("]");
-            return ss.toString().replace(",]", "");
-        }),
-
-        ACTIONS_PLAYED_WIN((s, p) -> {
-            StringBuilder ss = new StringBuilder();
-            if(s.getPlayerResults()[p] == Utils.GameResult.WIN) {
-
-                String lastHistory = s.getHistoryAsText().get(((ArrayList) s.getHistoryAsText()).size()-1);
-
-                Deck<LoveLetterCard> played = s.getPlayerDiscardCards().get(p);
-                if(played.getSize() == 0)
-                {
-                    //Won by play of the opponent.
-                    ss.append("");
-                }
-
-                for (LoveLetterCard card : played.getComponents()) {
-                    ss.append(card.cardType).append(",");
-                }
-                if (ss.toString().equals("")) return ss.toString();
-                ss.append("]");
-            }
-            return ss.toString().replace(",]", "");
-        });
-
-        private final BiFunction<LoveLetterGameState, Integer, Object> lambda_sp;
-
-        LLPlayerAttributes(BiFunction<LoveLetterGameState, Integer, Object> lambda) {
-            this.lambda_sp = lambda;
-        }
-
-        public Object get(AbstractGameState state, int player) {
-            return lambda_sp.apply((LoveLetterGameState) state, player);
-        }
-
-        @Override
-        public Type getType() {
-            return Type.STATE_PLAYER;
-        }
-    }
-
-
-
 }

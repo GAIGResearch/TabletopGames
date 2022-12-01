@@ -5,6 +5,7 @@ import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 /**
  * This provides a generic way of recording training data from games. After each move is made, it will record a feature
  * vector of the current state (for each player?) and the current score.
@@ -15,7 +16,7 @@ public class ActionFeatureListener extends FeatureListener {
 
     IActionFeatureVector psiFn;
 
-    public ActionFeatureListener(IStatisticLogger logger, IActionFeatureVector psi, CoreConstants.GameEvents frequency, boolean currentPlayerOnly) {
+    public ActionFeatureListener(IStatisticLogger logger, IActionFeatureVector psi, Event.GameEvent frequency, boolean currentPlayerOnly) {
         super(logger, frequency, currentPlayerOnly);
         this.psiFn = psi;
     }

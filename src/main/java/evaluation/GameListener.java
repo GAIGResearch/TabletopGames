@@ -6,15 +6,18 @@ import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
 import core.interfaces.IStatisticLogger;
-import utilities.GameStatisticsListener;
+import evaluation.metrics.Event;
+import evaluation.metrics.GameStatisticsListener;
 import utilities.Pair;
 import utilities.Utils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 public class GameListener {
 
     //Default logger for the listener.
@@ -28,51 +31,15 @@ public class GameListener {
         this.metrics = new HashMap<>();
         for(Pair<String, IGameMetric> p : metrics)
             this.metrics.put(p.a,p.b);
-
-
     }
     /**
-     * This is used to register Game Start and Game Over events
-     * <p>
-     * It provides a link to the Game, from which the state can be obtained, or
-     * details of the players. Any changes to the State will then apply in the game.
-     *
-     * @param type Either ABOUT_TO_START or GAME_OVER
-     * @param game The Game
+     * Manages all events.
+     * @param event  Event has information about its type and data fields for game, state, action and player.
+     *               It's not guaranteed that the data fields are different to null, so a check is necessary.
      */
-    public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        if (type == CoreConstants.GameEvents.GAME_OVER) {
-            AbstractGameState state = game.getGameState();
-            Map<String, Object> data = new TreeMap<>();
-            for (String attrStr : metrics.keySet()) {
-                switch (metrics.get(attrStr).getType())
-                {
-                    case STATE_ACTION: data.put(attrStr, metrics.get(attrStr).get(state, null));
-                        break;
-                    case STATE_PLAYER: data.put(attrStr, metrics.get(attrStr).get(state, -1));
-                        break;
-                    case GAME: data.put(attrStr, metrics.get(attrStr).get(game));
-                        break;
-                }
-            }
-            logger.record(data);
-        }
-    }
-    /**
-     * Registers all other event types.
-     * The state will always be provided, but action will be null except for ACTION_CHOSEN events
-     * <p>
-     * The state provided is *deliberately* not a copy, but the actual state to avoid performance overheads
-     * Hence it is *vital* that any implementation of this method only reads data from the state
-     * and does not modify it!
-     *
-     * @param type   The GameEvent
-     * @param state  The current Game state
-     * @param action The Action that have just been Chosen (if relevant; else null)
-     */
-    // for all other event types
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-    }
+    public void onEvent(Event event) { }
+
+
     /**
      * This is called when all processing is finished, for example after running a sequence of games
      * As such, no state is provided.
@@ -83,9 +50,11 @@ public class GameListener {
         if (logger != null)
             logger.processDataAndFinish();
     }
+
     public IStatisticLogger getLogger() {
         return logger;
     }
+
     public static GameListener createListener(String listenerClass, IStatisticLogger logger) {
         // first we check to see if listenerClass is a file or not
         GameListener listener = null;
@@ -113,6 +82,7 @@ public class GameListener {
 
         return listener;
     }
+
     static GameListener createListener(String listenerClass) {
         GameListener listener = null;
         try {
@@ -127,6 +97,7 @@ public class GameListener {
             return new GameStatisticsListener();
         return listener;
     }
+
     public static void main(String args[])
     {
         Utils.loadClassFromFile("data/metrics/loveletter.json");

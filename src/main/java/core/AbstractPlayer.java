@@ -2,6 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 import utilities.SummaryLogger;
 
 import java.util.Collections;
@@ -97,7 +98,7 @@ public abstract class AbstractPlayer {
         this.statsLogger = logger;
     }
 
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {  }
+    public void onEvent(Event event) {  }
 
     public abstract AbstractPlayer copy();
 

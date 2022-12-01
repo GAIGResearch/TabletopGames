@@ -3,6 +3,7 @@ package games.dicemonastery.heuristics;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import evaluation.metrics.Event;
 import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.DiceMonasteryStateAttributes;
 
@@ -80,7 +81,7 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
 
         // first we calculate each feature for the state
         double[] featureVal = features.stream().mapToDouble(f -> {
-            Object obj = f.get(state, player);
+            Object obj = f.get(null, Event.createEvent(Event.GameEvent.GAME_EVENT, state, player));
             if (obj instanceof Number) return ((Number) obj).doubleValue();
             if (obj instanceof Boolean) return (Boolean) obj ? 1.0 : 0.0;
             return 0.0;
@@ -115,7 +116,7 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
 
         // first we calculate each feature for the state
         double[] featureVal = features.stream().mapToDouble(f -> {
-            Object obj = f.get(state, player);
+            Object obj = f.get(null, Event.createEvent(Event.GameEvent.GAME_EVENT, state, player));
             if (obj instanceof Number) return ((Number) obj).doubleValue();
             return 0.0;
         }).toArray();

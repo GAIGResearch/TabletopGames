@@ -2,6 +2,7 @@ package players.heuristics;
 
 import core.*;
 import core.actions.AbstractAction;
+import evaluation.metrics.Event;
 import players.mcts.ITreeProcessor;
 import players.mcts.SingleTreeNode;
 import utilities.Pair;
@@ -210,17 +211,14 @@ public class LearnedValue extends AbstractPlayer implements ITreeProcessor {
         }
     }
 
-    public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-        if (type == CoreConstants.GameEvents.GAME_OVER) {
-            // we record the current state
+    @Override
+    public void onEvent(Event event) {
+        if (event.type == Event.GameEvent.GAME_OVER) {
             count++;
             mergeWithAndWriteToFile();
         }
     }
 
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-        onGameEvent(type, null);
-    }
 
     @Override
     public void process(SingleTreeNode node) {

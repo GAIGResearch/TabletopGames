@@ -5,6 +5,7 @@ import core.actions.DoNothing;
 import evaluation.GameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
+import evaluation.metrics.Event;
 import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
@@ -22,14 +23,12 @@ import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.Timer;
-import java.awt.*;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static core.CoreConstants.GameEvents;
 import static utilities.Utils.componentToImage;
 
 public class Game {
@@ -50,8 +49,6 @@ public class Game {
     private double nextTime, copyTime, agentTime, actionComputeTime;
     // Keeps track of action spaces for each game tick, pairs of (player ID, #actions)
     private ArrayList<Pair<Integer, Integer>> actionSpaceSize;
-    // Game tick, number of iterations of game loop
-    private int tick;
     // Number of times an agent is asked for decisions
     private int nDecisions;
     // Number of actions taken in a turn by a player
@@ -394,14 +391,13 @@ public class Game {
         copyTime = 0;
         agentTime = 0;
         actionComputeTime = 0;
-        tick = 0;
         nDecisions = 0;
         actionSpaceSize = new ArrayList<>();
         nActionsPerTurnSum = 0;
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
         lastPlayer = -1;
-        listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START, this)));
     }
 
     /**
@@ -553,7 +549,7 @@ public class Game {
             }
             // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
             AbstractAction finalAction = action;
-            listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
+            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, this, finalAction)));
         } else {
             currentPlayer.registerUpdatedObservation(observation);
         }
@@ -577,14 +573,16 @@ public class Game {
             forwardModel.next(gameState, action);
             nextTime += (System.nanoTime() - s);
         }
-        tick++;
+
+        gameState.advanceGameTick();
 
         lastPlayer = activePlayer;
 
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
         // (such as the next player)
         AbstractAction finalAction1 = action;
-        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_TAKEN, gameState.copy(), finalAction1.copy()));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN, this, finalAction1.copy())));
+
         if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
         return action;
     }
@@ -600,7 +598,7 @@ public class Game {
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
-        listeners.forEach(l -> l.onGameEvent(GameEvents.GAME_OVER, this));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, this)));
         if (gameState.coreGameParameters.verbose) {
             System.out.println("Game Over");
         }
@@ -621,9 +619,9 @@ public class Game {
      * Timers average at the end of the game.
      */
     private void terminateTimers() {
-        nextTime /= tick;
-        copyTime /= tick;
-        actionComputeTime /= tick;
+        nextTime /= gameState.getGameTick();
+        copyTime /= gameState.getGameTick();
+        actionComputeTime /= gameState.getGameTick();
         agentTime /= nDecisions;
         if (nActionsPerTurnCount > 0)
             nActionsPerTurnSum /= nActionsPerTurnCount;
@@ -690,7 +688,7 @@ public class Game {
      * @return - tick number
      */
     public int getTick() {
-        return tick;
+        return gameState.getGameTick();
     }
 
     /**
@@ -734,6 +732,9 @@ public class Game {
             listeners.add(listener);
             gameState.turnOrder.addListener(listener);
         }
+    }
+    public List<GameListener> getListeners() {
+        return listeners;
     }
 
     public void clearListeners() {
@@ -867,7 +868,7 @@ public class Game {
             // This is LIKELY not in YUV420P format, so we're going to convert it using some handy utilities.
             if (converter == null)
                 converter = MediaPictureConverterFactory.createConverter(screen, picture);
-            converter.toPicture(picture, screen, tick);
+            converter.toPicture(picture, screen, gameState.getGameTick());
 
             do {
                 encoder.encode(packet, picture);

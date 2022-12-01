@@ -7,6 +7,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
 import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.actions.PayForAction;
 import games.terraformingmars.actions.TMAction;
@@ -23,39 +24,39 @@ public class TMActListener extends GameListener {
     }
 
     @Override
-    public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-    }
-
-    @Override
-    public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-        if (type == CoreConstants.GameEvents.ACTION_CHOSEN) {
+    public void onEvent(Event event) {
+        if (event.type == Event.GameEvent.ACTION_CHOSEN) {
+            AbstractGameState state = event.state;
             Map<String, Object> data = Arrays.stream(TMActAttributes.values())
-                    .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(state, action)));
+                    .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(this, event)));
             logger.record(data);
         }
     }
 
     public enum TMActAttributes implements IGameMetric {
-        GAME_ID((s, a) -> s.getGameID()),
-        GENERATION((s, a) -> s.getGeneration()),
-        PLAYER((s, a) -> s.getCurrentPlayer()),
-        ACTION_TYPE((s, a) -> a == null ? "NONE" : (a instanceof PayForAction ? ((PayForAction)a).action.getClass().getSimpleName() : (a.pass? "Pass" : a.getClass().getSimpleName())) + "(" + a.actionType + ")");
-//    ACTION_DESCRIPTION((s, a) ->  a == null ? "NONE" : a.getString(s)),;
+        GAME_ID((l, e) -> e.state.getGameID()),
+        GENERATION((l, e) -> ((TMGameState)e.state).getGeneration()),
+        PLAYER((l, e) -> e.state.getCurrentPlayer()),
+        ACTION_TYPE((l, e) -> {
+            if(e.action == null) return "NONE";
+            TMAction tma = (TMAction) e.action;
+            if(tma instanceof PayForAction)
+                return ((PayForAction) tma).action.getClass().getSimpleName();
+            if(tma.pass) return "Pass";
+            return tma.getClass().getSimpleName() + "(" + tma.actionType + ")";
+        });
+//    ACTION_DESCRIPTION((l, e) ->  e.action == null ? "NONE" : e.action.getString(s)),;
 
-        private final BiFunction<TMGameState, TMAction, Object> lambda;
+        private final BiFunction<TMActListener, Event, Object> lambda;
 
-        TMActAttributes(BiFunction<TMGameState, TMAction, Object> lambda) {
+        TMActAttributes(BiFunction<TMActListener, Event, Object> lambda) {
             this.lambda = lambda;
         }
 
         @Override
-        public Object get(AbstractGameState state, AbstractAction action) {
-            return lambda.apply((TMGameState) state, (TMAction) action);
+        public Object get(GameListener listener, Event event) {
+            return lambda.apply((TMActListener) listener, event);
         }
 
-        @Override
-        public Type getType() {
-            return Type.STATE_ACTION;
-        }
     }
 }

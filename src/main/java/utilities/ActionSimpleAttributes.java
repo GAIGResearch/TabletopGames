@@ -3,6 +3,8 @@ package utilities;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
+import evaluation.GameListener;
+import evaluation.metrics.Event;
 
 import java.util.function.BiFunction;
 
@@ -15,28 +17,24 @@ import java.util.function.BiFunction;
  */
 public enum ActionSimpleAttributes implements IGameMetric {
 
-    GAME_ID((s, a) -> s.getGameID()),
-    ROUND((s, a) -> (s.getTurnOrder()).getRoundCounter()),
-    TURN((s, a) -> (s.getTurnOrder()).getTurnCounter()),
-    PLAYER((s, a) -> s.getCurrentPlayer()),
-    PLAYER_SCORE((s, a) -> s.getGameScore(s.getCurrentPlayer())),
-    ACTION_TYPE((s, a) -> a == null ? "NONE" : a.getClass().getSimpleName()),
-    ACTION_DESCRIPTION((s, a) -> a == null ? "NONE" : a.getString(s))
+    GAME_ID((l, e) -> e.state.getGameID()),
+    ROUND((l, e) -> (e.state.getTurnOrder()).getRoundCounter()),
+    TURN((l, e) -> (e.state.getTurnOrder()).getTurnCounter()),
+    PLAYER((l, e) -> e.state.getCurrentPlayer()),
+    PLAYER_SCORE((l, e) -> e.state.getGameScore(e.state.getCurrentPlayer())),
+    ACTION_TYPE((l, e) -> e.action == null ? "NONE" : e.action.getClass().getSimpleName()),
+    ACTION_DESCRIPTION((l, e) -> e.action == null ? "NONE" : e.action.getString(e.state))
     ;
 
-    private final BiFunction<AbstractGameState, AbstractAction, Object> lambda;
+    private final BiFunction<ActionListener, Event, Object> lambda;
 
-    ActionSimpleAttributes(BiFunction<AbstractGameState, AbstractAction, Object> lambda) {
+    ActionSimpleAttributes(BiFunction<ActionListener, Event, Object> lambda) {
         this.lambda = lambda;
     }
 
     @Override
-    public Object get(AbstractGameState state, AbstractAction action) {
-        return lambda.apply(state, action);
+    public Object get(GameListener listener, Event event) {
+        return lambda.apply((ActionListener)listener, event);
     }
 
-    @Override
-    public Type getType() {
-        return Type.STATE_ACTION;
-    }
 }
