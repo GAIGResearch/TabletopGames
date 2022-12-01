@@ -1,9 +1,5 @@
 package evaluation;
 
-import core.AbstractGameState;
-import core.CoreConstants;
-import core.Game;
-import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
@@ -13,11 +9,9 @@ import utilities.Utils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 public class GameListener {
 
     //Default logger for the listener.
@@ -37,7 +31,32 @@ public class GameListener {
      * @param event  Event has information about its type and data fields for game, state, action and player.
      *               It's not guaranteed that the data fields are different to null, so a check is necessary.
      */
-    public void onEvent(Event event) { }
+    public void onEvent(Event event) {
+        Map<String, Object> data = new TreeMap<>();
+        for (String attrStr : metrics.keySet()) {
+            data.put(attrStr, metrics.get(attrStr).get(this, event));
+        }
+        logger.record(data);
+    }
+
+    /**
+     * Computes all the metrics passed in the array, triggered by the
+     * event "e".
+     * @param gameMetrics Set of metrics to be recorded.
+     * @param e Event that triggered this recording process.
+     * @param log True if the metrics are to be recorded into this listener's logger.
+     */
+    protected void getMetrics(IGameMetric[] gameMetrics, Event e, boolean log)
+    {
+        Map<String, Object> data = new TreeMap<>();
+        for (IGameMetric gameMetric : gameMetrics) {
+            Object result = gameMetric.get(this, e);
+            if(log)
+                data.put(gameMetric.name(), result);
+        }
+        if(log)
+            logger.record(data);
+    }
 
 
     /**

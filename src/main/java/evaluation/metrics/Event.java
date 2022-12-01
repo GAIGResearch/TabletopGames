@@ -45,12 +45,12 @@ public class Event
 
     public static Event createEvent(GameEvent type, Game game)
     {
-        return Event.createEvent(type, game, null, null, -1);
+        return Event.createEvent(type, game, game.getGameState(), null, -1);
     }
 
     public static Event createEvent(GameEvent type, Game game, AbstractAction action)
     {
-        return Event.createEvent(type, game, null, action, -1);
+        return Event.createEvent(type, game, game.getGameState(), action, -1);
     }
 
     public static Event createEvent(GameEvent type, AbstractGameState state)

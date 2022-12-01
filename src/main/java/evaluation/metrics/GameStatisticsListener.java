@@ -4,6 +4,7 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.Game;
 import core.interfaces.IComponentContainer;
+import core.interfaces.IGameMetric;
 import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;
 import utilities.Pair;
@@ -18,50 +19,36 @@ public class GameStatisticsListener extends GameListener {
     Map<String, Object> collectedData = new LinkedHashMap<>();
     AbstractForwardModel fm;
 
+    public GameStatisticsListener(IStatisticLogger logger, Pair<String, IGameMetric>[] metrics) {
+        super(logger, metrics);
+    }
     public GameStatisticsListener(IStatisticLogger logger) {
         super(logger, null);
     }
     public GameStatisticsListener() {
         super(null, null);
     }
+
     @Override
     public void onEvent(Event event)
     {
         switch (event.type)
         {
             case ABOUT_TO_START:
-                processStart(event.game);
+                processStart(event);
                 break;
             case GAME_OVER:
-                processEnd(event.game);
+                getMetrics(EndGameStatisticsAttributes.values(), event, true);
+                collectedData = new HashMap<>();
                 break;
-
+            default:
+                getMetrics(GameStatisticsAttributes.values(), event, false);
         }
     }
 
-//    public void processActionChosen(Game game, AbstractAction action)
-//    {
-//        AbstractGameState state = game.getGameState();
-//        int player = state.getCurrentPlayer();
-//        if (fm == null) {
-//            throw new AssertionError("We have not yet received an ABOUT_TO_START event to initialise the required ForwardModel");
-//        }
-//        List<AbstractAction> allActions = fm.computeAvailableActions(state);
-//        if (allActions.size() < 2)
-//        {
-//            decisionPoints.add(0);
-//            return;
-//        }
-//        decisionPoints.add(1);
-//
-//        scores.add(state.getGameScore(player));
-//        Pair<Integer, int[]> allComp = countComponents(state);
-//        components.add(allComp.a);
-//        visibilityOnTurn.add(allComp.b[player] / (double) allComp.a);
-//    }
 
-
-    private void processStart(Game game) {
+    private void processStart(Event event) {
+        Game game = event.game;
         AbstractGameState state = game.getGameState();
         long s = System.nanoTime();
         fm = game.getForwardModel();
@@ -76,67 +63,6 @@ public class GameStatisticsListener extends GameListener {
         collectedData.put("StateSizeStart", components.a);
         collectedData.put("HiddenInfoStart", Arrays.stream(components.b).sum() / (double) components.a / state.getNPlayers());
     }
-
-    private void processEnd(Game game) {
-        //    Retrieves a list with one entry per game tick, each a pair (active player ID, # actions)
-//        List<Pair<Integer, Integer>> actionSpaceRecord = game.getActionSpaceSize();
-//        TAGStatSummary stats = actionSpaceRecord.stream()
-//                .map(r -> r.b)
-//                .filter(size -> size > 1)
-//                .collect(new TAGSummariser());
-
-        //ACTION SPACE
-//        collectedData.put("ActionSpaceMean", stats.mean());
-//        collectedData.put("ActionSpaceMin", stats.min());
-//        collectedData.put("ActionSpaceMedian", stats.median());
-//        collectedData.put("ActionSpaceMax", stats.max());
-//        collectedData.put("ActionSpaceSkew", stats.skew());
-//        collectedData.put("ActionSpaceKurtosis", stats.kurtosis());
-//        collectedData.put("ActionSpaceVarCoeff", Math.abs(stats.sd() / stats.mean()));
-
-
-//        collectedData.put("TimeNext", game.getNextTime() / 1e3);
-//        collectedData.put("TimeCopy", game.getCopyTime() / 1e3);
-//        collectedData.put("TimeActionCompute", game.getActionComputeTime() / 1e3);
-//        collectedData.put("TimeAgent", game.getAgentTime() / 1e3);
-
-
-
-        //SCORE
-//        TAGStatSummary sc = scores.stream().collect(new TAGSummariser());
-//        collectedData.put("ScoreMedian", sc.median());
-//        collectedData.put("ScoreMean", sc.mean());
-//        collectedData.put("ScoreMax", sc.max());
-//        collectedData.put("ScoreMin", sc.min());
-//        collectedData.put("ScoreVarCoeff", Math.abs(sc.sd() / sc.mean()));
-//        TAGStatSummary scoreDelta = scores.size() > 1 ?
-//                IntStream.range(0, scores.size() - 1)
-//                        .mapToObj(i -> !scores.get(i + 1).equals(scores.get(i)) ? 1.0 : 0.0)
-//                        .collect(new TAGSummariser())
-//                : new TAGStatSummary();
-//        collectedData.put("ScoreDelta", scoreDelta.mean()); // percentage of actions that lead to a change in score
-
-//        TAGStatSummary stateSize = components.stream().collect(new TAGSummariser());
-//        collectedData.put("StateSizeMedian", stateSize.median());
-//        collectedData.put("StateSizeMean", stateSize.mean());
-//        collectedData.put("StateSizeMax", stateSize.max());
-//        collectedData.put("StateSizeMin", stateSize.min());
-//        collectedData.put("StateSizeVarCoeff", Math.abs(stateSize.sd() / stateSize.mean()));
-
-//        TAGStatSummary visibility = visibilityOnTurn.stream().collect(new TAGSummariser());
-//        collectedData.put("HiddenInfoMedian", visibility.median());
-//        collectedData.put("HiddenInfoMean", visibility.mean());
-//        collectedData.put("HiddenInfoMax", visibility.max());
-//        collectedData.put("HiddenInfoMin", visibility.min());
-//        collectedData.put("HiddenInfoVarCoeff", Math.abs(visibility.sd() / visibility.mean()));
-
-//        TAGStatSummary movesWithDecision = decisionPoints.stream().collect(new TAGSummariser());
-//        collectedData.put("DecisionPointsMean", movesWithDecision.mean());
-
-//        logger.record(collectedData);
-//        collectedData = new HashMap<>();
-    }
-
 
 
     /**
@@ -156,6 +82,7 @@ public class GameStatisticsListener extends GameListener {
             hiddenByPlayer[p] = state.getUnknownComponentsIds(p).size();
         return new Pair<>(total, hiddenByPlayer);
     }
+
     public List<Double> getScores() {
         return scores;
     }
@@ -168,4 +95,98 @@ public class GameStatisticsListener extends GameListener {
     public List<Integer> getDecisionPoints() {
         return decisionPoints;
     }
+    public AbstractForwardModel getForwardModel() { return fm; }
+
+    public void addScore(double score) {scores.add(score);}
+    public void addDecision(int decision) {decisionPoints.add(decision);}
+    public void addComponent(int componentCount) {components.add(componentCount);}
+    public void addVisibility(double vis) {visibilityOnTurn.add(vis);}
+
 }
+
+/// IN PRINCIPLE THE BELOW IS NOT NECESSARY.
+
+//    public void processActionChosen(Event event)
+//    {
+//        AbstractGameState state = event.state;
+//        // each action taken, we record branching factor and states (this is triggered when the decision is made,
+//        // so before it is executed
+//        int player = state.getCurrentPlayer();
+//        if (fm == null) {
+//            throw new AssertionError("We have not yet received an ABOUT_TO_START event to initialise the required ForwardModel");
+//        }
+//        List<AbstractAction> allActions = fm.computeAvailableActions(state);
+//        if (allActions.size() < 2)
+//        {
+//            decisionPoints.add(0);
+//            return;
+//        }
+//        decisionPoints.add(1);
+//
+//        scores.add(state.getGameScore(player));
+//        Pair<Integer, int[]> allComp = countComponents(state);
+//        components.add(allComp.a);
+//        visibilityOnTurn.add(allComp.b[player] / (double) allComp.a);
+//    }
+//
+//
+//    private void processEnd(Event event) {
+//
+//        Game game = event.game;
+//        List<Pair<Integer, Integer>> actionSpaceRecord = game.getActionSpaceSize();
+//        TAGStatSummary stats = actionSpaceRecord.stream()
+//                .map(r -> r.b)
+//                .filter(size -> size > 1)
+//                .collect(new TAGSummariser());
+//        collectedData.put("ActionSpaceMean", stats.mean());
+//        collectedData.put("ActionSpaceMin", stats.min());
+//        collectedData.put("ActionSpaceMedian", stats.median());
+//        collectedData.put("ActionSpaceMax", stats.max());
+//        collectedData.put("ActionSpaceSkew", stats.skew());
+//        collectedData.put("ActionSpaceKurtosis", stats.kurtosis());
+//        collectedData.put("ActionSpaceVarCoeff", Math.abs(stats.sd() / stats.mean()));
+//        collectedData.put("Decisions", stats.n());
+//        collectedData.put("TimeNext", game.getNextTime() / 1e3);
+//        collectedData.put("TimeCopy", game.getCopyTime() / 1e3);
+//        collectedData.put("TimeActionCompute", game.getActionComputeTime() / 1e3);
+//        collectedData.put("TimeAgent", game.getAgentTime() / 1e3);
+//
+//        collectedData.put("Ticks", game.getTick());
+//        collectedData.put("Rounds", game.getGameState().getTurnOrder().getRoundCounter());
+//        collectedData.put("ActionsPerTurn", game.getNActionsPerTurn());
+//
+//        TAGStatSummary sc = scores.stream().collect(new TAGSummariser());
+//        collectedData.put("ScoreMedian", sc.median());
+//        collectedData.put("ScoreMean", sc.mean());
+//        collectedData.put("ScoreMax", sc.max());
+//        collectedData.put("ScoreMin", sc.min());
+//        collectedData.put("ScoreVarCoeff", Math.abs(sc.sd() / sc.mean()));
+//        TAGStatSummary scoreDelta = scores.size() > 1 ?
+//                IntStream.range(0, scores.size() - 1)
+//                        .mapToObj(i -> !scores.get(i + 1).equals(scores.get(i)) ? 1.0 : 0.0)
+//                        .collect(new TAGSummariser())
+//                : new TAGStatSummary();
+//        collectedData.put("ScoreDelta", scoreDelta.mean()); // percentage of actions that lead to a change in score
+//
+//        TAGStatSummary stateSize = components.stream().collect(new TAGSummariser());
+//        collectedData.put("StateSizeMedian", stateSize.median());
+//        collectedData.put("StateSizeMean", stateSize.mean());
+//        collectedData.put("StateSizeMax", stateSize.max());
+//        collectedData.put("StateSizeMin", stateSize.min());
+//        collectedData.put("StateSizeVarCoeff", Math.abs(stateSize.sd() / stateSize.mean()));
+//
+//        TAGStatSummary visibility = visibilityOnTurn.stream().collect(new TAGSummariser());
+//        collectedData.put("HiddenInfoMedian", visibility.median());
+//        collectedData.put("HiddenInfoMean", visibility.mean());
+//        collectedData.put("HiddenInfoMax", visibility.max());
+//        collectedData.put("HiddenInfoMin", visibility.min());
+//        collectedData.put("HiddenInfoVarCoeff", Math.abs(visibility.sd() / visibility.mean()));
+//
+//        TAGStatSummary movesWithDecision = decisionPoints.stream().collect(new TAGSummariser());
+//        collectedData.put("DecisionPointsMean", movesWithDecision.mean());
+//
+//
+//        logger.record(collectedData);
+//        collectedData = new HashMap<>();
+//
+//    }

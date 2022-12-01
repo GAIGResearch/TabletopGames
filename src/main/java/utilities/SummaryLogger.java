@@ -67,49 +67,57 @@ public class SummaryLogger implements IStatisticLogger {
             System.out.println(this);
 
         if (logFile != null) {
-            // We now write this to the file
-            boolean exists = logFile.exists();
-            StringBuilder header = new StringBuilder();
-            StringBuilder data = new StringBuilder();
-            for (String key : otherData.keySet()) {
-                header.append(key).append("\t");
-                data.append(otherData.get(key)).append("\t");
-            }
-            for (String key : numericData.keySet()) {
-                if (numericData.get(key).n() == 1) {
-                    header.append(key).append("\t");
-                    data.append(String.format("%.3g\t", numericData.get(key).mean()));
-                } else {
-                    header.append(key).append("\t").append(key).append("_se\t");
-                    data.append(String.format("%.3g\t%.2g\t", numericData.get(key).mean(), numericData.get(key).stdErr()));
-                    header.append(key).append("_sd\t");
-                    data.append(String.format("%.3g\t", numericData.get(key).sd()));
-                    header.append(key).append("_median\t");
-                    data.append(String.format("%.3g\t", numericData.get(key).median()));
-                    header.append(key).append("_min\t");
-                    data.append(String.format("%.3g\t", numericData.get(key).min()));
-                    header.append(key).append("_max\t");
-                    data.append(String.format("%.3g\t", numericData.get(key).max()));
-                    header.append(key).append("_skew\t");
-                    data.append(String.format("%.3g\t", numericData.get(key).skew()));
-                    header.append(key).append("_kurtosis\t");
-                    data.append(String.format("%.3g\t", numericData.get(key).kurtosis()));
-                }
-            }
-            header.append("\n");
-            data.append("\n");
 
             try {
-                FileWriter writer = new FileWriter(logFile, true);
-                if (!exists)
-                    writer.write(header.toString());
-                writer.write(data.toString());
-                writer.flush();
-                writer.close();
+                if(logFile.exists())
+                {
+                    Pair<String, String> data = getFileOutput();
+                    FileWriter writer = new FileWriter(logFile, true);
+                    writer.write(data.a); //header
+                    writer.write(data.b); //body
+                    writer.flush();
+                    writer.close();
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public Pair<String, String> getFileOutput()
+    {
+        // We now write this to the file
+        StringBuilder header = new StringBuilder();
+        StringBuilder data = new StringBuilder();
+        for (String key : otherData.keySet()) {
+            header.append(key).append("\t");
+            data.append(otherData.get(key)).append("\t");
+        }
+        for (String key : numericData.keySet()) {
+            if (numericData.get(key).n() == 1) {
+                header.append(key).append("\t");
+                data.append(String.format("%.3g\t", numericData.get(key).mean()));
+            } else {
+                header.append(key).append("\t").append(key).append("_se\t");
+                data.append(String.format("%.3g\t%.2g\t", numericData.get(key).mean(), numericData.get(key).stdErr()));
+                header.append(key).append("_sd\t");
+                data.append(String.format("%.3g\t", numericData.get(key).sd()));
+                header.append(key).append("_median\t");
+                data.append(String.format("%.3g\t", numericData.get(key).median()));
+                header.append(key).append("_min\t");
+                data.append(String.format("%.3g\t", numericData.get(key).min()));
+                header.append(key).append("_max\t");
+                data.append(String.format("%.3g\t", numericData.get(key).max()));
+                header.append(key).append("_skew\t");
+                data.append(String.format("%.3g\t", numericData.get(key).skew()));
+                header.append(key).append("_kurtosis\t");
+                data.append(String.format("%.3g\t", numericData.get(key).kurtosis()));
+            }
+        }
+        header.append("\n");
+        data.append("\n");
+        return new Pair<>(header.toString(), data.toString());
     }
 
     @Override

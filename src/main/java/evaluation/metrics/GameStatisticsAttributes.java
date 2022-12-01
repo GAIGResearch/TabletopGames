@@ -13,30 +13,32 @@ import java.util.function.BiFunction;
 public enum GameStatisticsAttributes implements IGameMetric {
     DECISION_POINTS((l, e) ->
     {
-        AbstractForwardModel fm = e.game.getForwardModel();
-        List<AbstractAction> allActions = fm.computeAvailableActions(e.game.getGameState());
-        if (allActions.size() < 2)
-            return 0.0;
-        else
-            return 1.0;
-
+        AbstractForwardModel fm = l.getForwardModel();
+        List<AbstractAction> allActions = fm.computeAvailableActions(e.state);
+        int decision = allActions.size() < 2 ? 0 : 1;
+        l.addDecision(decision);
+        return (double)decision;
     }),
     SCORES((l, e) ->
     {
-        AbstractGameState gs = e.game.getGameState();
-        int player = gs.getCurrentPlayer();
-        return gs.getGameScore(player);
+        int player = e.state.getCurrentPlayer();
+        double score = e.state.getGameScore(player);
+        l.addScore(score);
+        return score;
     }),
     COMPONENTS ((l, e) -> {
-        Pair<Integer, int[]> allComp = countComponents(e.game.getGameState());
-        return (double) allComp.a;
+        int components = countComponents(e.state).a;
+        l.addComponent(components);
+        return (double) components;
     }),
     VISIBILITY((l, e) ->
     {
-        AbstractGameState gs = e.game.getGameState();
+        AbstractGameState gs = e.state;
         int player = gs.getCurrentPlayer();
         Pair<Integer, int[]> allComp = countComponents(gs);
-         return (allComp.b[player] / (double) allComp.a);
+        double visibilityPerc = (allComp.b[player] / (double) allComp.a);
+        l.addVisibility(visibilityPerc);
+        return visibilityPerc;
     });
 
     static Pair<Integer, int[]> countComponents(AbstractGameState state)
