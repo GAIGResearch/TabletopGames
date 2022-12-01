@@ -1,11 +1,11 @@
 package games.sirius;
 
 
-import core.components.Component;
-import core.properties.Property;
+import core.CoreConstants;
+import core.components.*;
 import utilities.Utils;
 
-import java.util.HashMap;
+import java.util.*;
 
 enum MoonType {
     MINING, TRADING
@@ -13,26 +13,51 @@ enum MoonType {
 
 public class Moon extends Component {
 
-    public Moon(String name, MoonType type) {
+    Deck<SiriusCard> deck;
+    Random rnd;
+    MoonType moonType;
+
+    public Moon(String name, MoonType type, Random rnd) {
         super(Utils.ComponentType.AREA, name);
-        this.type = type;
+        init(type, rnd);
+    }
+    private Moon(String name, MoonType type, Random rnd, int componentID)  {
+        super(Utils.ComponentType.AREA, name, componentID);
+        init(type, rnd);
+    }
+    private void init(MoonType type, Random rnd) {
+        deck = new Deck<>("Cards on " + componentName, -1, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
+        this.rnd = rnd;
+        this.moonType = type;
     }
 
-    public final MoonType type;
+    public SiriusCard drawCard() {
+        return deck.draw();
+    }
+
+    public void addCard(SiriusCard card) {
+        deck.add(card);
+    }
+
+    public void shuffle() {
+        deck.shuffle(rnd);
+    }
 
     @Override
-    public Component copy() {
-        return this; // immutable
+    public Moon copy() {
+        Moon retValue = new Moon(this.componentName, this.moonType, new Random(rnd.nextInt()), componentID);
+        copyComponentTo(retValue);
+        return retValue;
     }
 
     @Override
-    public void setProperty(Property prop) {
-        throw new AssertionError("No Properties allowed for immutability");
+    public int hashCode() {
+        return Objects.hash(deck, moonType);
     }
 
-    public void setProperties(HashMap<Integer, Property> props) {
-        throw new AssertionError("No Properties allowed for immutability");
+    @Override
+    public String toString() {
+        return componentName + "(" + moonType + ")";
     }
-
 }
 

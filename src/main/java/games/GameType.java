@@ -12,7 +12,6 @@ import games.cantstop.CantStopGameState;
 import games.cantstop.gui.CantStopGUIManager;
 import games.catan.CatanForwardModel;
 import games.catan.CatanGameState;
-import games.catan.CatanParameters;
 import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
@@ -34,6 +33,8 @@ import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
 import games.pandemic.gui.PandemicGUIManager;
+import games.sirius.SiriusGameState;
+import games.sirius.SiriusForwardModel;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.gui.TMGUI;
@@ -287,12 +288,30 @@ public enum GameType {
                 add(GridMovement);
                 add(ModularBoard);
             }}),
-    TerraformingMars (1, 5,
-            new ArrayList<Category>() {{ add(Economic); add(Environmental); add(Manufacturing); add(TerritoryBuilding);
-                add(Cards); add(Strategy); add(Exploration); }},
-            new ArrayList<Mechanic>() {{ add(Drafting); add(EndGameBonus); add(HandManagement); add(HexagonGrid);
-                add(Income); add(SetCollection); add(TakeThat); add(TilePlacement); add(ProgressiveTurnOrder);
-                add(VariablePlayerPowers); add(EngineBuilding); add(TableauBuilding);}}),
+    TerraformingMars(1, 5,
+            new ArrayList<Category>() {{
+                add(Economic);
+                add(Environmental);
+                add(Manufacturing);
+                add(TerritoryBuilding);
+                add(Cards);
+                add(Strategy);
+                add(Exploration);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(Drafting);
+                add(EndGameBonus);
+                add(HandManagement);
+                add(HexagonGrid);
+                add(Income);
+                add(SetCollection);
+                add(TakeThat);
+                add(TilePlacement);
+                add(ProgressiveTurnOrder);
+                add(VariablePlayerPowers);
+                add(EngineBuilding);
+                add(TableauBuilding);
+            }}),
     Stratego(2, 2,
             new ArrayList<Category>() {{
                 add(Strategy);
@@ -311,6 +330,13 @@ public enum GameType {
             }},
             new ArrayList<Mechanic>() {{
                 add(PushYourLuck);
+            }}),
+    Sirius(2, 5,
+            new ArrayList<Category>() {{
+                add(Strategy);
+            }},
+            new ArrayList<Mechanic>() {{
+                add(SimultaneousActionSelection);
             }}
     );
 
@@ -365,6 +391,8 @@ public enum GameType {
                 return Stratego;
             case "cantstop":
                 return CantStop;
+            case "sirius":
+                return Sirius;
         }
         System.out.println("Game type not found, returning null. ");
         return null;
@@ -475,6 +503,10 @@ public enum GameType {
             case CantStop:
                 forwardModel = new CantStopForwardModel();
                 gameState = new CantStopGameState(params, nPlayers);
+                break;
+            case Sirius:
+                forwardModel = new SiriusForwardModel();
+                gameState = new SiriusGameState(params, nPlayers);
                 break;
             default:
                 throw new AssertionError("Game not yet supported : " + this);
