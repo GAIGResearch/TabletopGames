@@ -1,8 +1,10 @@
-package games.dominion;
+package games.dominion.metrics;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IGameAttribute;
+import games.dominion.DominionConstants;
+import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
 
 import java.util.function.*;

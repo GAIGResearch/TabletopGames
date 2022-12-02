@@ -263,6 +263,10 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 .collect(toList());
     }
 
+    public Map<CardType, Integer> getCardsIncludedInGame() {
+        return cardsIncludedInGame;
+    }
+
     public void setDefended(int playerId) {
         defenceStatus[playerId] = true;
     }

@@ -1,10 +1,8 @@
-package games.dominion;
+package games.dominion.players;
 
 import core.AbstractGameState;
-import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import games.dominion.actions.BuyCard;
-import games.dominion.cards.CardType;
+import games.dominion.DominionGameState;
 
 import java.util.List;
 import java.util.Random;

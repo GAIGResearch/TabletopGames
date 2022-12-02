@@ -1,9 +1,10 @@
 package test.games.dominion;
 
+import core.Game;
 import core.components.PartialObservableDeck;
+import games.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
-import games.dominion.DominionGame;
 import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;
 import games.dominion.actions.AttackReaction;
@@ -23,7 +24,7 @@ public class TestFullObservabilityCopy {
 
     @Test
     public void gameStateCopyVanilla() {
-        DominionGame game = new DominionGame(new DominionParameters(36), 4);
+        Game game = new Game(GameType.Dominion, new DominionForwardModel(), new DominionGameState(new DominionParameters(36), 4));
         DominionGameState startState = (DominionGameState) game.getGameState();
         startState.setDefended(2);
 
@@ -58,7 +59,7 @@ public class TestFullObservabilityCopy {
 
     @Test
     public void gameStateCopyWithActionInProgress() {
-        DominionGame game = new DominionGame(new DominionParameters(36), 4);
+        Game game = new Game(GameType.Dominion, new DominionForwardModel(), new DominionGameState(new DominionParameters(36), 4));
         DominionGameState startState = (DominionGameState) game.getGameState();
         startState.endOfTurn(0);
         startState.endOfTurn(1);
