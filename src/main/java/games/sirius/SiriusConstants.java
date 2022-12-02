@@ -16,4 +16,5 @@ public class SiriusConstants {
         AMMONIA, CONTRABAND, SMUGGLER, FAVOUR
     }
 
+
 }

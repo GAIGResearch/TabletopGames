@@ -3,7 +3,7 @@ package games.sirius;
 import core.AbstractParameters;
 import evaluation.TunableParameters;
 
-import java.util.*;
+import java.util.Objects;
 
 public class SiriusParameters extends TunableParameters {
 
@@ -12,8 +12,24 @@ public class SiriusParameters extends TunableParameters {
     public int ammonia = 22;
     public int cardsPerEmptyMoon = 2;
     public int cardsPerNonEmptyMoon = 1;
+    public int[] ammoniaTrack = new int[] {
+            0,
+            0, 0, 0, 0, 2,
+            0, 0, 0, 0, 3,
+            0, 0, 0, 0, 4,
+            0, 0, 0, 0, 5,
+            0, 0, 0, 0, 6
+    };
+    public int[] contrabandTrack = new int[] {
+            0,
+            0, 0, 0, 0, 0, 2,
+            0, 0, 0, 0, 0, 3,
+            0, 0, 0, 0, 0, 4,
+            0, 0, 0, 0, 0, 5,
+            0, 0, 0, 0, 0, 6
+    };
 
-    public SiriusParameters()  {
+    public SiriusParameters() {
         super();
         addTunableParameter("ammonia", 22);
         addTunableParameter("superAmmonia", 5);

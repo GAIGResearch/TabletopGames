@@ -36,7 +36,6 @@ public class SellCards extends AbstractAction {
         }
         return true;
     }
-
     private Optional<SiriusCard> getMatchingCard(Deck<SiriusCard> hand, int val) {
         return hand.stream().filter(c -> c.cardType == salesType && c.value == val).findFirst();
     }

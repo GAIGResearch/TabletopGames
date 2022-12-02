@@ -10,6 +10,7 @@ public class PlayerArea {
     Deck<SiriusCard> deck;
     Deck<SiriusCard> soldCards;
     int player;
+    int medalTotal;
 
     public PlayerArea(int player) {
         this.player = player;

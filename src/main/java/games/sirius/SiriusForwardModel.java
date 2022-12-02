@@ -2,10 +2,13 @@ package games.sirius;
 
 import core.*;
 import core.actions.*;
+import core.components.Deck;
 import games.sirius.SiriusConstants.SiriusPhase;
 import games.sirius.actions.MoveToMoon;
 import games.sirius.actions.SellCards;
 import games.sirius.actions.TakeCard;
+import utilities.Utils;
+import weka.core.pmml.jaxbbindings.SimpleRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,7 +52,8 @@ public class SiriusForwardModel extends AbstractForwardModel {
         Arrays.fill(state.moveSelected, -1);
         // All players start on Sirius
         state.playerAreas = IntStream.range(0, state.getNPlayers()).mapToObj(PlayerArea::new).collect(toList());
-
+        state.contrabandMedals = params.contrabandTrack.clone();
+        state.ammoniaMedals = params.ammoniaTrack.clone();
         state.setGamePhase(Move);
     }
 
@@ -60,6 +64,18 @@ public class SiriusForwardModel extends AbstractForwardModel {
 
         SiriusTurnOrder turnOrder = (SiriusTurnOrder) state.getTurnOrder();
         turnOrder.endPlayerTurn(state);
+        // check game end
+        if (state.ammoniaTrack == state.ammoniaMedals.length - 1) {
+            state.setGameStatus(Utils.GameResult.GAME_END);
+            int[] finalScores = new int[state.getNPlayers()];
+            for (int p = 0; p < state.getNPlayers(); p++) {
+                finalScores[p] = (int) state.getGameScore(p);
+            }
+            int winningScore = Arrays.stream(finalScores).max().orElseThrow(() -> new AssertionError("No MAX score found"));
+            for (int p = 0; p < state.getNPlayers(); p++) {
+                state.setPlayerResult(finalScores[p] == winningScore ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
+            }
+        }
     }
 
     @Override
@@ -81,9 +97,12 @@ public class SiriusForwardModel extends AbstractForwardModel {
                         break;
                     case TRADING:
                         // TODO: For the moment we just sell all our Ammonia cards, without doing anything more subtle
-                        retValue.add(
-                                new SellCards(state.getPlayerHand(player).stream().filter(c -> c.cardType == AMMONIA).collect(toList()))
-                        );
+                        Deck<SiriusCard> hand = state.getPlayerHand(player);
+                        if (hand.getSize() > 0) {
+                            retValue.add(
+                                    new SellCards(hand.stream().filter(c -> c.cardType == AMMONIA).collect(toList()))
+                            );
+                        }
                         break;
                 }
                 if (retValue.isEmpty())
