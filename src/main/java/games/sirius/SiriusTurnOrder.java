@@ -19,6 +19,7 @@ public class SiriusTurnOrder extends TurnOrder {
     public SiriusTurnOrder(int nPlayers) {
         super(nPlayers);
         nextPlayer = new int[nPlayers];
+        Arrays.setAll(nextPlayer, i -> i == nextPlayer.length - 1 ? -1 : i + 1);
     }
 
     @Override
@@ -32,9 +33,11 @@ public class SiriusTurnOrder extends TurnOrder {
                 for (int i = 0; i < state.moveSelected.length; i++)
                     if (i != turnOwner && state.moveSelected[i] == -1) return i;
                 // else we change phase
-                return 0; // we don't actually know yet...
+                return getPlayerAtRank(1);
             case Draw:
-                return nextPlayer[getCurrentPlayer(state)];
+                // if there is no next player (i.e. -1), then the next is 0 for Move
+                int defaultNext = nextPlayer[getCurrentPlayer(state)];
+                return defaultNext > -1 ? defaultNext : 0;
             default:
                 throw new AssertionError("Unknown Phase " + phase);
         }
@@ -50,7 +53,7 @@ public class SiriusTurnOrder extends TurnOrder {
         switch (phase) {
             case Move:
                 if (state.allMovesSelected()) {
-                    applyMovesAndSetTurnOrder(state);
+                    state.applyChosenMoves();
                     state.setGamePhase(SiriusPhase.Draw);
                 }
                 break;
@@ -63,19 +66,30 @@ public class SiriusTurnOrder extends TurnOrder {
                 break;
         }
         turnCounter++;
-        int oldTurnOwner = turnOwner;
         turnOwner = nextPlayer(state);
-        nextPlayer[oldTurnOwner] = -1;
     }
 
     protected boolean allActionsComplete() {
         return nextPlayer[turnOwner] == -1;  // the current player is last to move
     }
-
-    protected void applyMovesAndSetTurnOrder(SiriusGameState state) {
-        state.applyChosenMoves();
-        // TODO: Replace placeholder that takes actions in simple order
-        Arrays.setAll(nextPlayer, i -> i == nextPlayer.length - 1 ? 0 : i + 1);
+    // returns the current rank of the player for determining move order (1 is first, and so on)
+    public int getRank(int player) {
+        int count = -1;
+        int nxt = player;
+        do {
+            nxt = nextPlayer[nxt];
+            count++;
+        } while (nxt > -1);
+        return nPlayers - count;
+    }
+    public int getPlayerAtRank(int rank) {
+        // this is not very efficient - but it is only a rarely needed function call
+        // so current design decision is not to add to the state information
+        for (int p = 0; p < nPlayers; p++) {
+            int r = getRank(p);
+            if (r == rank) return p;
+        }
+        throw new AssertionError("Should not be reachable");
     }
 
     // for unit-testing
@@ -99,6 +113,11 @@ public class SiriusTurnOrder extends TurnOrder {
                 }
             }
         }
+        // move first rank player to last
+        int pFirst = getPlayerAtRank(1);
+        int pLast = getPlayerAtRank(nPlayers);
+        nextPlayer[pFirst] = -1;
+        nextPlayer[pLast] = pFirst;
         roundCounter++;
     }
 

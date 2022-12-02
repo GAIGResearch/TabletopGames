@@ -12,4 +12,8 @@ public class SiriusConstants {
         MINING, TRADING
     }
 
+    public enum SiriusCardType {
+        AMMONIA, CONTRABAND, SMUGGLER, FAVOUR
+    }
+
 }

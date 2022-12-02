@@ -93,4 +93,22 @@ public class TestTurnOrder {
 
     }
 
+    @Test
+    public void testRankCalculation() {
+        assertEquals(1, sto.getRank(0));
+        assertEquals(2, sto.getRank(1));
+        assertEquals(3, sto.getRank(2));
+        assertEquals(0, sto.getPlayerAtRank(1));
+        assertEquals(1, sto.getPlayerAtRank(2));
+        assertEquals(2, sto.getPlayerAtRank(3));
+
+        sto.endRound(state);
+        assertEquals(3, sto.getRank(0));
+        assertEquals(1, sto.getRank(1));
+        assertEquals(2, sto.getRank(2));
+        assertEquals(1, sto.getPlayerAtRank(1));
+        assertEquals(2, sto.getPlayerAtRank(2));
+        assertEquals(0, sto.getPlayerAtRank(3));
+    }
+
 }

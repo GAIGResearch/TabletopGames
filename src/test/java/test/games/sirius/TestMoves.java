@@ -11,6 +11,7 @@ import players.simple.RandomPlayer;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
@@ -109,7 +110,7 @@ public class TestMoves {
         assertEquals(distinctCardValues.size(), actions.size());
         assertTrue(distinctCardValues.stream().map(TakeCard::new).allMatch(actions::contains));
 
-        state.getMoon(1).addCard(new SiriusCard("TestAmmonia", 4));
+        state.getMoon(1).addCard(new SiriusCard("TestAmmonia", AMMONIA, 4));
         List<AbstractAction> extendedActions = fm.computeAvailableActions(state);
         assertEquals(distinctCardValues.size() + 1, extendedActions.size());
     }
@@ -117,7 +118,7 @@ public class TestMoves {
     @Test
     public void testTakeCardFunctionsAsExpected() {
         TakeCard action = new TakeCard(1);
-        state.getMoon(1).addCard(new SiriusCard("ammonia", 1));
+        state.getMoon(1).addCard(new SiriusCard("ammonia", AMMONIA, 1));
         assertEquals(3,state.getMoon(1).getDeckSize());
         assertEquals(0,state.getPlayerHand(0).getSize());
         state.movePlayerTo(0, 1);

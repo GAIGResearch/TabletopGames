@@ -49,12 +49,12 @@ public class SiriusGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        return 0;
+        return getGameScore(playerId) / 25.0;
     }
 
     @Override
     public double getGameScore(int playerId) {
-        return 0;
+        return playerAreas.get(playerId).soldCards.getSize();
     }
 
     @Override
@@ -103,6 +103,10 @@ public class SiriusGameState extends AbstractGameState {
     }
     public Deck<SiriusCard> getPlayerHand(int player) {
         return playerAreas.get(player).deck;
+    }
+    public void sellCard(SiriusCard card) {
+        playerAreas.get(getCurrentPlayer()).soldCards.add(card);
+        playerAreas.get(getCurrentPlayer()).deck.remove(card);
     }
 
     @Override

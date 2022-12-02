@@ -2,16 +2,19 @@ package games.sirius;
 
 import core.components.Card;
 import core.properties.Property;
+import games.sirius.SiriusConstants.SiriusCardType;
 
 import java.util.Objects;
 
 public class SiriusCard extends Card {
 
     public final int value;
+    public final SiriusCardType cardType;
 
-    public SiriusCard(String name, int value) {
+    public SiriusCard(String name, SiriusCardType type, int value) {
         super(name);
         this.value = value;
+        this.cardType = type;
     }
 
     @Override
