@@ -7,17 +7,22 @@ import core.interfaces.IGameMetric;
 import evaluation.GameListener;
 import utilities.Pair;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiFunction;
 
 public enum GameStatisticsAttributes implements IGameMetric {
     DECISION_POINTS((l, e) ->
     {
-        AbstractForwardModel fm = l.getForwardModel();
+//        AbstractForwardModel fm = e.game.getForwardModel();
+        AbstractForwardModel fm = l.getGame().getForwardModel();
         List<AbstractAction> allActions = fm.computeAvailableActions(e.state);
         int decision = allActions.size() < 2 ? 0 : 1;
         l.addDecision(decision);
         return (double)decision;
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.ACTION_CHOSEN);
+    }
     }),
     SCORES((l, e) ->
     {
@@ -25,12 +30,16 @@ public enum GameStatisticsAttributes implements IGameMetric {
         double score = e.state.getGameScore(player);
         l.addScore(score);
         return score;
-    }),
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.ACTION_CHOSEN);
+    }}),
     COMPONENTS ((l, e) -> {
         int components = countComponents(e.state).a;
         l.addComponent(components);
         return (double) components;
-    }),
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.ACTION_CHOSEN);
+    }}),
     VISIBILITY((l, e) ->
     {
         AbstractGameState gs = e.state;
@@ -39,7 +48,9 @@ public enum GameStatisticsAttributes implements IGameMetric {
         double visibilityPerc = (allComp.b[player] / (double) allComp.a);
         l.addVisibility(visibilityPerc);
         return visibilityPerc;
-    });
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.ACTION_CHOSEN);
+    }});
 
     static Pair<Integer, int[]> countComponents(AbstractGameState state)
     {
@@ -51,12 +62,26 @@ public enum GameStatisticsAttributes implements IGameMetric {
     }
 
     private final BiFunction<GameStatisticsListener, Event, Double> lambda;
+    private HashSet<Event.GameEvent> eventTypes;
+
     GameStatisticsAttributes(BiFunction<GameStatisticsListener, Event, Double> lambda) {
         this.lambda = lambda;
+        this.eventTypes = null;
+    }
+
+    GameStatisticsAttributes(BiFunction<GameStatisticsListener, Event, Double> lambda, HashSet<Event.GameEvent> events) {
+        this.lambda = lambda;
+        this.eventTypes = events;
     }
 
     @Override
     public Object get(GameListener listener, Event event) {
         return lambda.apply((GameStatisticsListener) listener, event);
+    }
+
+    public boolean listens(Event.GameEvent eventType)
+    {
+        if(eventTypes == null) return true; //by default, we listen to all types.
+        return eventTypes.contains(eventType);
     }
 }

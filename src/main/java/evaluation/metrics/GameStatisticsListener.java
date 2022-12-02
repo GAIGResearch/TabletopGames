@@ -17,7 +17,6 @@ public class GameStatisticsListener extends GameListener {
     List<Integer> components = new ArrayList<>();
     List<Integer> decisionPoints = new ArrayList<>();
     Map<String, Object> collectedData = new LinkedHashMap<>();
-    AbstractForwardModel fm;
 
     public GameStatisticsListener(IStatisticLogger logger, Pair<String, IGameMetric>[] metrics) {
         super(logger, metrics);
@@ -32,26 +31,17 @@ public class GameStatisticsListener extends GameListener {
     @Override
     public void onEvent(Event event)
     {
-        switch (event.type)
-        {
-            case ABOUT_TO_START:
-                processStart(event);
-                break;
-            case GAME_OVER:
-                getMetrics(EndGameStatisticsAttributes.values(), event, true);
-                collectedData = new HashMap<>();
-                break;
-            default:
-                getMetrics(GameStatisticsAttributes.values(), event, false);
-        }
+        //Could it be merged into one?
+        getMetrics(EndGameStatisticsAttributes.values(), event, true);
+        getMetrics(GameStatisticsAttributes.values(), event, false);
     }
 
 
     private void processStart(Event event) {
-        Game game = event.game;
+        //Game game = event.game;
         AbstractGameState state = game.getGameState();
         long s = System.nanoTime();
-        fm = game.getForwardModel();
+        AbstractForwardModel fm = game.getForwardModel();
 
         collectedData.put("Game", game.getGameState().getGameID());
         collectedData.put("Players", String.valueOf(game.getGameState().getNPlayers()));
@@ -95,7 +85,7 @@ public class GameStatisticsListener extends GameListener {
     public List<Integer> getDecisionPoints() {
         return decisionPoints;
     }
-    public AbstractForwardModel getForwardModel() { return fm; }
+//    public AbstractForwardModel getForwardModel() { return fm; }
 
     public void addScore(double score) {scores.add(score);}
     public void addDecision(int decision) {decisionPoints.add(decision);}

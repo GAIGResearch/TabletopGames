@@ -41,7 +41,7 @@ public class Game {
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
-    protected List<GameListener> listeners = new ArrayList<>();
+    private List<GameListener> listeners = new ArrayList<>();
     /* Game Statistics */
     private int lastPlayer; // used to track actions per 'turn'
     private JFrame frame;
@@ -397,7 +397,7 @@ public class Game {
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
         lastPlayer = -1;
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START, this)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START)));
     }
 
     /**
@@ -549,7 +549,7 @@ public class Game {
             }
             // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
             AbstractAction finalAction = action;
-            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, this, finalAction)));
+            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction)));
         } else {
             currentPlayer.registerUpdatedObservation(observation);
         }
@@ -581,7 +581,7 @@ public class Game {
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
         // (such as the next player)
         AbstractAction finalAction1 = action;
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN, this, finalAction1.copy())));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN, gameState, finalAction1.copy())));
 
         if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
         return action;
@@ -598,7 +598,7 @@ public class Game {
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, this)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER)));
         if (gameState.coreGameParameters.verbose) {
             System.out.println("Game Over");
         }
@@ -731,6 +731,7 @@ public class Game {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
             gameState.turnOrder.addListener(listener);
+            listener.setGame(this);
         }
     }
     public List<GameListener> getListeners() {

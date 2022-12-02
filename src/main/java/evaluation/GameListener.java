@@ -1,5 +1,6 @@
 package evaluation;
 
+import core.Game;
 import core.interfaces.IGameMetric;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
@@ -20,12 +21,16 @@ public class GameListener {
     //List of metrics we are going to extract.
     HashMap<String, IGameMetric> metrics;
 
+    //Game this listener listens to
+    protected Game game;
+
     public GameListener(IStatisticLogger logger, Pair<String, IGameMetric>[] metrics) {
         this.logger = logger;
         this.metrics = new HashMap<>();
         for(Pair<String, IGameMetric> p : metrics)
             this.metrics.put(p.a,p.b);
     }
+
     /**
      * Manages all events.
      * @param event  Event has information about its type and data fields for game, state, action and player.
@@ -50,9 +55,11 @@ public class GameListener {
     {
         Map<String, Object> data = new TreeMap<>();
         for (IGameMetric gameMetric : gameMetrics) {
-            Object result = gameMetric.get(this, e);
-            if(log)
-                data.put(gameMetric.name(), result);
+            if (gameMetric.listens(e.type)) {
+                Object result = gameMetric.get(this, e);
+                if (log)
+                    data.put(gameMetric.name(), result);
+            }
         }
         if(log)
             logger.record(data);
@@ -73,6 +80,8 @@ public class GameListener {
     public IStatisticLogger getLogger() {
         return logger;
     }
+    public void setGame(Game game) { this.game = game; }
+    public Game getGame() { return game; }
 
     public static GameListener createListener(String listenerClass, IStatisticLogger logger) {
         // first we check to see if listenerClass is a file or not

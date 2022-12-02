@@ -65,7 +65,7 @@ public abstract class FeatureListener extends GameListener {
                 for (int i = 0; i < record.array.length; i++) {
                     data.put(names()[i], record.array[i]);
                 }
-                data.put("PlayerCount", (double) event.game.getPlayers().size());
+                data.put("PlayerCount", (double) game.getPlayers().size());
                 data.put("TotalRounds", finalRound);
                 data.put("Win", winLoss[record.player]);
                 data.put("Ordinal", ordinal[record.player]);

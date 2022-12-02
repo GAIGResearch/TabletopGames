@@ -27,7 +27,7 @@ public class ActionListener extends GameListener {
     @Override
     public void onEvent(Event event) {
         if (event.type == Event.GameEvent.ACTION_CHOSEN || event.type == Event.GameEvent.GAME_EVENT) {
-            AbstractGameState state = event.game.getGameState();
+            //AbstractGameState state = game.getGameState();
             Map<String, Object> data = Arrays.stream(attributesToRecord)
                     .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(this, event)));
             logger.record(data);

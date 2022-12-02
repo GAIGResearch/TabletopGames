@@ -1,6 +1,5 @@
 package evaluation.metrics;
 import core.AbstractGameState;
-import core.Game;
 import core.actions.AbstractAction;
 
 public class Event
@@ -20,51 +19,43 @@ public class Event
         //     This is useful if we want to update a GUI or similar.
     }
 
+    private Event() {}
+
     public GameEvent type;
-    public Game game;
     public AbstractGameState state;
     public AbstractAction action;
     public int playerID;
 
-
     public static Event createEvent(GameEvent type,
-                                    Game game,
                                     AbstractGameState gameState,
                                     AbstractAction action,
                                     int playerID)
     {
         Event e = new Event();
         e.type = type;
-        e.game = game;
         e.state = gameState;
         e.action = action;
         e.playerID = playerID;
         return e;
     }
 
-
-    public static Event createEvent(GameEvent type, Game game)
+    public static Event createEvent(GameEvent type)
     {
-        return Event.createEvent(type, game, game.getGameState(), null, -1);
-    }
-
-    public static Event createEvent(GameEvent type, Game game, AbstractAction action)
-    {
-        return Event.createEvent(type, game, game.getGameState(), action, -1);
+        return Event.createEvent(type, null, null, -1);
     }
 
     public static Event createEvent(GameEvent type, AbstractGameState state)
     {
-        return Event.createEvent(type, null, state, null, -1);
+        return Event.createEvent(type, state, null, -1);
     }
 
     public static Event createEvent(GameEvent type, AbstractGameState state, AbstractAction action)
     {
-        return Event.createEvent(type, null, state, action, -1);
+        return Event.createEvent(type, state, action, -1);
     }
 
     public static Event createEvent(GameEvent type, AbstractGameState state, int playerID)
     {
-        return Event.createEvent(type, null, state, null, playerID);
+        return Event.createEvent(type, state, null, playerID);
     }
 }

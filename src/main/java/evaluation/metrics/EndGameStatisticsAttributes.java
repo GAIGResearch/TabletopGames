@@ -6,6 +6,7 @@ import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.TAGSummariser;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.stream.IntStream;
 public enum EndGameStatisticsAttributes implements IGameMetric {
     ACTION_SPACE((l,e) ->
     {
-        List<Pair<Integer, Integer>> actionSpaceRecord = e.game.getActionSpaceSize();
+        List<Pair<Integer, Integer>> actionSpaceRecord = l.getGame().getActionSpaceSize();
         TAGStatSummary stats = actionSpaceRecord.stream()
                 .map(r -> r.b)
                 .filter(size -> size > 1)
@@ -30,39 +31,46 @@ public enum EndGameStatisticsAttributes implements IGameMetric {
         collectedData.put("ActionSpaceKurtosis", stats.kurtosis());
         collectedData.put("ActionSpaceVarCoeff", Math.abs(stats.sd() / stats.mean()));
         return collectedData;
-    }),
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.GAME_OVER);
+    }}),
     TIMES((l,e) ->
     {
         Map<String, Object> collectedData = new LinkedHashMap<>();
-        collectedData.put("TimeNext", e.game.getNextTime() / 1e3);
-        collectedData.put("TimeCopy", e.game.getCopyTime() / 1e3);
-        collectedData.put("TimeActionCompute", e.game.getActionComputeTime() / 1e3);
-        collectedData.put("TimeAgent", e.game.getAgentTime() / 1e3);
+        collectedData.put("TimeNext", l.getGame().getNextTime() / 1e3);
+        collectedData.put("TimeCopy", l.getGame().getCopyTime() / 1e3);
+        collectedData.put("TimeActionCompute", l.getGame().getActionComputeTime() / 1e3);
+        collectedData.put("TimeAgent", l.getGame().getAgentTime() / 1e3);
         return collectedData;
-    }),
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.GAME_OVER);
+    }}),
     DURATION((l,e) -> {
         Map<String, Object> collectedData = new LinkedHashMap<>();
-        collectedData.put("Turns", e.game.getGameState().getTurnOrder().getTurnCounter());
-        collectedData.put("Ticks", e.game.getTick());
-        collectedData.put("Rounds", e.game.getGameState().getTurnOrder().getRoundCounter());
+        collectedData.put("Turns", l.getGame().getGameState().getTurnOrder().getTurnCounter());
+        collectedData.put("Ticks", l.getGame().getTick());
+        collectedData.put("Rounds", l.getGame().getGameState().getTurnOrder().getRoundCounter());
         return collectedData;
-    }),
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.GAME_OVER);
+    }}),
     DECISIONS((l,e) ->
     {
-        List<Pair<Integer, Integer>> actionSpaceRecord = e.game.getActionSpaceSize();
+        List<Pair<Integer, Integer>> actionSpaceRecord = l.getGame().getActionSpaceSize();
         TAGStatSummary stats = actionSpaceRecord.stream()
                 .map(r -> r.b)
                 .filter(size -> size > 1)
                 .collect(new TAGSummariser());
         Map<String, Object> collectedData = new LinkedHashMap<>();
         List<Integer> decisionPoints = l.getDecisionPoints();
-        collectedData.put("ActionsPerTurnSum", e.game.getNActionsPerTurn());
+        collectedData.put("ActionsPerTurnSum", l.getGame().getNActionsPerTurn());
         TAGStatSummary movesWithDecision = decisionPoints.stream().collect(new TAGSummariser());
         collectedData.put("Decisions", stats.n());
         collectedData.put("DecisionPointsMean", movesWithDecision.mean());
         return collectedData;
-
-    }),
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.GAME_OVER);
+    }}),
     SCORE((l, e) ->
     {
         Map<String, Object> collectedData = new LinkedHashMap<>();
@@ -80,7 +88,9 @@ public enum EndGameStatisticsAttributes implements IGameMetric {
                 : new TAGStatSummary();
         collectedData.put("ScoreDelta", scoreDelta.mean()); // percentage of actions that lead to a change in score
         return collectedData;
-    }),
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.GAME_OVER);
+    }}),
     STATE_SIZE((l, e) ->
     {
         Map<String, Object> collectedData = new LinkedHashMap<>();
@@ -92,7 +102,9 @@ public enum EndGameStatisticsAttributes implements IGameMetric {
         collectedData.put("StateSizeMin", stateSize.min());
         collectedData.put("StateSizeVarCoeff", Math.abs(stateSize.sd() / stateSize.mean()));
         return collectedData;
-    }),
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.GAME_OVER);
+    }}),
     VISIBILITY((l, e) -> {
         Map<String, Object> collectedData = new LinkedHashMap<>();
         List<Double> visibilityOnTurn = l.getVisibility();
@@ -103,10 +115,21 @@ public enum EndGameStatisticsAttributes implements IGameMetric {
         collectedData.put("HiddenInfoMin", visibility.min());
         collectedData.put("HiddenInfoVarCoeff", Math.abs(visibility.sd() / visibility.mean()));
         return collectedData;
-    });
+    }, new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.GAME_OVER);
+    }});
+
     private final BiFunction<GameStatisticsListener, Event, Object> lambda;
+    private HashSet<Event.GameEvent> eventTypes;
+
     EndGameStatisticsAttributes(BiFunction<GameStatisticsListener, Event, Object> lambda) {
         this.lambda = lambda;
+        this.eventTypes = null;
+    }
+
+    EndGameStatisticsAttributes(BiFunction<GameStatisticsListener, Event, Object> lambda,  HashSet<Event.GameEvent> events) {
+        this.lambda = lambda;
+        this.eventTypes = events;
     }
 
     public Object get(GameListener listener, Event event)
@@ -114,4 +137,9 @@ public enum EndGameStatisticsAttributes implements IGameMetric {
         return lambda.apply((GameStatisticsListener)listener, event);
     }
 
+    public boolean listens(Event.GameEvent eventType)
+    {
+        if(eventTypes == null) return true; //by default, we listen to all types.
+        return eventTypes.contains(eventType);
+    }
 }
