@@ -26,6 +26,7 @@ public class GiveCard extends DrawCard implements IPrintable {
 
             ExplodingKittensCard c = from.pick(fromIndex);
             to.add(c);
+            executed = true;
         }
         gs.setMainGamePhase();
         ekto.endPlayerTurnStep(gs);
@@ -46,7 +47,7 @@ public class GiveCard extends DrawCard implements IPrintable {
 
     @Override
     public void printToConsole(AbstractGameState gameState) {
-        System.out.println(this.toString());
+        System.out.println(this);
     }
 
     @Override

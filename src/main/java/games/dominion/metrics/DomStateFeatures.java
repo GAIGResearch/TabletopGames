@@ -1,7 +1,9 @@
-package games.dominion;
+package games.dominion.metrics;
 
 import core.AbstractGameState;
 import core.components.Deck;
+import games.dominion.DominionConstants;
+import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
 import players.heuristics.AbstractStateFeature;

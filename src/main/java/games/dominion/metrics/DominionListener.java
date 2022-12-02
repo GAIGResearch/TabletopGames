@@ -1,4 +1,4 @@
-package games.dominion;
+package games.dominion.metrics;
 
 import core.AbstractGameState;
 import core.CoreConstants;
