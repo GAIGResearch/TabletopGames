@@ -1,9 +1,5 @@
 package games.sushigo.testing;
 
-import core.AbstractGameState;
-import core.CoreConstants;
-import core.Game;
-import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
 import evaluation.GameListener;
 import core.interfaces.IStatisticLogger;

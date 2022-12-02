@@ -1,9 +1,9 @@
-package games.dominion;
+package games.dominion.players;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
-import games.dicemonastery.heuristics.DontPassPolicy;
+import games.dominion.DominionGameState;
 import games.dominion.actions.BuyCard;
 import games.dominion.actions.EndPhase;
 import games.dominion.cards.CardType;
@@ -23,7 +23,7 @@ public class BigMoney extends AbstractPlayer {
         DominionGameState state = (DominionGameState) gameState;
         int player = gameState.getCurrentPlayer();
         int cash = state.availableSpend(player);
-        int provinces = state.cardsIncludedInGame.getOrDefault(CardType.PROVINCE, 0);
+        int provinces = state.getCardsIncludedInGame().getOrDefault(CardType.PROVINCE, 0);
 
         if (state.getGamePhase() != DominionGameState.DominionGamePhase.Buy)
             return new EndPhase();

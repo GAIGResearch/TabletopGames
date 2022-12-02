@@ -3,7 +3,9 @@ package test.players.mcts;
 import core.*;
 import core.actions.*;
 import core.interfaces.IStatisticLogger;
-import games.dominion.DominionGame;
+import games.GameType;
+import games.dominion.DominionForwardModel;
+import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;
 import org.junit.*;
 import players.PlayerConstants;
@@ -42,7 +44,7 @@ public class MCTSNodesAndVisitsTests {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(244)));
-        return new DominionGame(players, DominionParameters.firstGame(330245));
+        return new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.firstGame(330245), players.size()));
     }
 
     @Test

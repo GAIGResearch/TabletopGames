@@ -1,12 +1,13 @@
 package test.games.dominion;
 
 import core.AbstractPlayer;
+import core.Game;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.PartialObservableDeck;
+import games.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
-import games.dominion.DominionGame;
 import games.dominion.DominionGameState;
 import games.dominion.DominionGameState.DominionGamePhase;
 import games.dominion.DominionParameters;
@@ -31,8 +32,8 @@ public class BaseActionCardsTest {
             new TestPlayer(),
             new TestPlayer());
 
-    DominionGame game = new DominionGame(players, DominionParameters.firstGame(System.currentTimeMillis()));
-    DominionGame gameImprovements = new DominionGame(players, DominionParameters.improvements(System.currentTimeMillis()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.firstGame(System.currentTimeMillis()), players.size()));
+    Game gameImprovements = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.improvements(System.currentTimeMillis()), players.size()));
     DominionForwardModel fm = new DominionForwardModel();
 
     @Test
