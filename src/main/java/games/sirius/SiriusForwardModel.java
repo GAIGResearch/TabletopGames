@@ -17,6 +17,7 @@ import java.util.stream.IntStream;
 
 import static games.sirius.SiriusConstants.MoonType.*;
 import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
+import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
 import static games.sirius.SiriusConstants.SiriusPhase.Move;
 import static java.util.stream.Collectors.toList;
 
@@ -36,9 +37,9 @@ public class SiriusForwardModel extends AbstractForwardModel {
             state.ammoniaDeck.add(new SiriusCard("Hyper Ammonia", AMMONIA, 3));
         }
         state.ammoniaDeck.shuffle(state.rnd);
-        state.moons.add(new Moon("Sirius", TRADING, state.rnd));
-        state.moons.add(new Moon("Mining_1", MINING, state.rnd));
-        state.moons.add(new Moon("Mining_2", MINING, state.rnd));
+        state.moons.add(new Moon("Sirius", TRADING, state.rnd, state.getNPlayers()));
+        state.moons.add(new Moon("Mining_1", MINING, state.rnd, state.getNPlayers()));
+        state.moons.add(new Moon("Mining_2", MINING, state.rnd, state.getNPlayers()));
         for (Moon moon : state.getAllMoons()) {
             if (moon.getMoonType() == MINING) {
                 for (int i = 0; i < params.cardsPerEmptyMoon; i++) {
@@ -52,8 +53,11 @@ public class SiriusForwardModel extends AbstractForwardModel {
         Arrays.fill(state.moveSelected, -1);
         // All players start on Sirius
         state.playerAreas = IntStream.range(0, state.getNPlayers()).mapToObj(PlayerArea::new).collect(toList());
-        state.contrabandMedals = params.contrabandTrack.clone();
-        state.ammoniaMedals = params.ammoniaTrack.clone();
+        for (int i = 0; i < params.contrabandTrack; i++) {
+
+        }
+        state.contrabandMedals = Arrays.stream(params.contrabandTrack).mapToObj(v -> v == 0 ? null : new Medal(CONTRABAND, v)).toArray();
+        state.ammoniaMedals = (Medal[]) Arrays.stream(params.ammoniaTrack).mapToObj(v -> v == 0 ? null : new Medal(AMMONIA, v)).toArray();
         state.setGamePhase(Move);
     }
 

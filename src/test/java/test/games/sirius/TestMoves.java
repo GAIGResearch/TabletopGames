@@ -4,6 +4,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.components.PartialObservableDeck;
 import games.GameType;
 import games.dicemonastery.actions.Sell;
 import games.sirius.SiriusCard;
@@ -144,6 +145,26 @@ public class TestMoves {
     }
 
     @Test
+    public void testTakeCardLooksAtWholeMoonDeck() {
+        TakeCard action = new TakeCard(1);
+        state.getMoon(1).addCard(new SiriusCard("ammonia", AMMONIA, 1));
+        state.movePlayerTo(0, 1);
+        PartialObservableDeck<SiriusCard> deck = state.getMoon(1).getDeck();
+        for (int i = 0; i < 3; i++) {
+            assertFalse(deck.getVisibilityForPlayer(i, 0));
+            assertFalse(deck.getVisibilityForPlayer(i, 1));
+            assertFalse(deck.getVisibilityForPlayer(i, 2));
+        }
+        fm.next(state, action);
+        deck = state.getMoon(1).getDeck();
+        for (int i = 0; i < 2; i++) {
+            assertTrue(deck.getVisibilityForPlayer(i, 0));
+            assertFalse(deck.getVisibilityForPlayer(i, 1));
+            assertFalse(deck.getVisibilityForPlayer(i, 2));
+        }
+    }
+
+    @Test
     public void testSellActionsAtSirius() {
         state.setGamePhase(Draw);
         assertEquals(1, fm.computeAvailableActions(state).size());
@@ -214,5 +235,6 @@ public class TestMoves {
         assertFalse(state.isNotTerminal());
         assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[1]);
     }
+
 
 }

@@ -20,6 +20,7 @@ public class TakeCard extends AbstractAction {
         SiriusCard card = currentLocation.drawCard(c -> c.value == valueTaken)
                 .orElseThrow(() -> new AssertionError("No card with that value found : " + valueTaken));
         state.addCardToHand(player, card);
+        currentLocation.lookAtDeck(player); // and they know what the other cards are
         return true;
     }
 
