@@ -16,6 +16,7 @@ import games.explodingkittens.ExplodingKittensParameters;
 import games.loveletter.LoveLetterParameters;
 import games.pandemic.PandemicParameters;
 import games.poker.PokerGameParameters;
+import games.sirius.SiriusParameters;
 import games.stratego.StrategoParams;
 import games.sushigo.SGParameters;
 import games.terraformingmars.TMGameParameters;
@@ -71,6 +72,8 @@ public class ParameterFactory {
                 return new TMGameParameters(seed);
             case CantStop:
                 return new CantStopParameters(seed);
+            case Sirius:
+                return new SiriusParameters();
         }
         throw new AssertionError("No default Parameters specified for Game " + game);
 

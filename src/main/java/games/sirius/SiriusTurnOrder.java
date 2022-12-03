@@ -2,7 +2,7 @@ package games.sirius;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.turnorders.*;
+import core.turnorders.TurnOrder;
 import games.sirius.SiriusConstants.SiriusPhase;
 
 import java.util.Arrays;
@@ -72,6 +72,7 @@ public class SiriusTurnOrder extends TurnOrder {
     protected boolean allActionsComplete() {
         return nextPlayer[turnOwner] == -1;  // the current player is last to move
     }
+
     // returns the current rank of the player for determining move order (1 is first, and so on)
     public int getRank(int player) {
         int count = -1;
@@ -82,6 +83,7 @@ public class SiriusTurnOrder extends TurnOrder {
         } while (nxt > -1);
         return nPlayers - count;
     }
+
     public int getPlayerAtRank(int rank) {
         // this is not very efficient - but it is only a rarely needed function call
         // so current design decision is not to add to the state information
@@ -109,7 +111,8 @@ public class SiriusTurnOrder extends TurnOrder {
             if (moon.getMoonType() == MINING) {
                 int drawLimit = moon.getDeckSize() == 0 ? params.cardsPerEmptyMoon : params.cardsPerNonEmptyMoon;
                 for (int i = 0; i < drawLimit; i++) {
-                    moon.addCard((SiriusCard) state.ammoniaDeck.draw());
+                    if (state.ammoniaDeck.getSize() > 0)
+                        moon.addCard((SiriusCard) state.ammoniaDeck.draw());
                 }
             }
         }

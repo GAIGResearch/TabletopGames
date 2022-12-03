@@ -8,8 +8,8 @@ import core.interfaces.IGameAttribute;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static core.CoreConstants.GameEvents.ACTION_CHOSEN;
@@ -32,6 +32,19 @@ public class ActionListener implements IGameListener {
     public ActionListener(IStatisticLogger logger, IGameAttribute... attributes) {
         this.logger = logger;
         this.attributesToRecord = attributes;
+    }
+    public ActionListener(IStatisticLogger logger, Supplier<IGameAttribute> attributes) {
+        List<IGameAttribute> attributeList = new ArrayList<>();
+        boolean done = false;
+        do {
+            IGameAttribute next = attributes.get();
+            if (next != null)
+                attributeList.add(next);
+            else
+                done = true;
+        } while (!done);
+        attributesToRecord = attributeList.toArray(new IGameAttribute[]{});
+        this.logger = logger;
     }
 
     @Override

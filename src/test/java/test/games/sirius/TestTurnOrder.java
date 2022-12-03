@@ -111,5 +111,4 @@ public class TestTurnOrder {
         assertEquals(0, sto.getPlayerAtRank(3));
     }
 
-
 }

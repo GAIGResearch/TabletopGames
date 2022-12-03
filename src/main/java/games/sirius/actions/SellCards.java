@@ -9,7 +9,7 @@ import java.util.*;
 
 public class SellCards extends AbstractAction {
 
-    SiriusConstants.SiriusCardType salesType;
+    public final SiriusConstants.SiriusCardType salesType;
     int[] saleValues;
 
     public SellCards(List<SiriusCard> cardsToSell) {
@@ -35,6 +35,9 @@ public class SellCards extends AbstractAction {
             cardToSell.ifPresent(state::sellCard);
         }
         return true;
+    }
+    public int getTotalValue() {
+        return Arrays.stream(saleValues).sum();
     }
     private Optional<SiriusCard> getMatchingCard(Deck<SiriusCard> hand, int val) {
         return hand.stream().filter(c -> c.cardType == salesType && c.value == val).findFirst();
