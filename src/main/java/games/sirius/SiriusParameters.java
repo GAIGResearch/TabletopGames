@@ -10,6 +10,9 @@ public class SiriusParameters extends TunableParameters {
     public int hyperAmmonia = 3;
     public int superAmmonia = 5;
     public int ammonia = 22;
+    public int brokenContraband = 9;
+    public int contraband = 9;
+    public int glowingContraband = 9;
     public int cardsPerEmptyMoon = 2;
     public int cardsPerNonEmptyMoon = 1;
     public int[] ammoniaTrack = new int[] {
@@ -20,11 +23,14 @@ public class SiriusParameters extends TunableParameters {
             0, 0, 0, 0, 6
     };
     public int[] contrabandTrack = new int[] {
-            0, 0, 0, 0, 0, 2,
-            0, 0, 0, 0, 0, 3,
-            0, 0, 0, 0, 0, 4,
-            0, 0, 0, 0, 0, 5,
-            0, 0, 0, 0, 0, 6
+            0, 0, 0, 0, 2, 0,
+            0, 0, 0, 0, 0, 0,
+            3, 0, 0, 0, 0, 0,
+            0, 0, 4, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            5, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0,
+            6
     };
 
     public SiriusParameters() {
@@ -32,6 +38,9 @@ public class SiriusParameters extends TunableParameters {
         addTunableParameter("ammonia", 22);
         addTunableParameter("superAmmonia", 5);
         addTunableParameter("hyperAmmonia", 3);
+        addTunableParameter("contraband", 9);
+        addTunableParameter("brokenContraband", 9);
+        addTunableParameter("glowingContraband", 9);
     }
 
     @Override
@@ -39,6 +48,9 @@ public class SiriusParameters extends TunableParameters {
         ammonia = (int) getParameterValue("ammonia");
         superAmmonia = (int) getParameterValue("superAmmonia");
         hyperAmmonia = (int) getParameterValue("hyperAmmonia");
+        contraband = (int) getParameterValue("contraband");
+        brokenContraband = (int) getParameterValue("brokenContraband");
+        glowingContraband = (int) getParameterValue("glowingContraband");
     }
 
     @Override
@@ -50,14 +62,17 @@ public class SiriusParameters extends TunableParameters {
     protected boolean _equals(Object o) {
         if (o instanceof SiriusParameters) {
             SiriusParameters other = (SiriusParameters) o;
-            return ammonia == other.ammonia && superAmmonia == other.superAmmonia && hyperAmmonia == other.hyperAmmonia;
+            return ammonia == other.ammonia && superAmmonia == other.superAmmonia && hyperAmmonia == other.hyperAmmonia &&
+                    contraband == other.contraband && brokenContraband == other.brokenContraband && other.glowingContraband == glowingContraband &&
+                    other.cardsPerEmptyMoon == cardsPerEmptyMoon && other.cardsPerNonEmptyMoon == cardsPerNonEmptyMoon;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ammonia, superAmmonia, hyperAmmonia);
+        return Objects.hash(ammonia, superAmmonia, hyperAmmonia, contraband, brokenContraband, glowingContraband,
+                cardsPerEmptyMoon, cardsPerNonEmptyMoon);
     }
 
     @Override

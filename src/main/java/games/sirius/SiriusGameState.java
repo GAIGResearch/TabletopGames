@@ -5,17 +5,23 @@ import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
+import core.components.PartialObservableDeck;
+import core.interfaces.IComponentContainer;
 import games.GameType;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
+import static games.sirius.SiriusConstants.MoonType.MINING;
+import static games.sirius.SiriusConstants.MoonType.PROCESSING;
 import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
 import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
 import static java.util.stream.Collectors.toList;
 
 public class SiriusGameState extends AbstractGameState {
     Deck<SiriusCard> ammoniaDeck;
+    Deck<SiriusCard> contrabandDeck;
     List<PlayerArea> playerAreas;
     List<Moon> moons;
     Random rnd;
@@ -35,9 +41,12 @@ public class SiriusGameState extends AbstractGameState {
     protected List<Component> _getAllComponents() {
         List<Component> retValue = new ArrayList<>();
         retValue.add(ammoniaDeck);
+        retValue.add(contrabandDeck);
         retValue.addAll(moons);
-        for (PlayerArea pa : playerAreas)
+        for (PlayerArea pa : playerAreas) {
             retValue.add(pa.deck);
+            retValue.add(pa.soldCards);
+        }
         return retValue;
     }
 
@@ -45,6 +54,7 @@ public class SiriusGameState extends AbstractGameState {
     protected SiriusGameState _copy(int playerId) {
         SiriusGameState retValue = new SiriusGameState(gameParameters.copy(), getNPlayers());
         retValue.ammoniaDeck = ammoniaDeck.copy();
+        retValue.contrabandDeck = contrabandDeck.copy();
         retValue.playerAreas = playerAreas.stream().map(PlayerArea::copy).collect(toList());
         retValue.moons = moons.stream().map(Moon::copy).collect(toList());
         retValue.playerLocations = playerLocations.clone();
@@ -54,60 +64,106 @@ public class SiriusGameState extends AbstractGameState {
             Arrays.fill(retValue.moveSelected, -1);
             retValue.moveSelected[playerId] = moveSelected[playerId];
 
-            // Now gather up all unknown cards for reshuffling
-            // Unknown Ammonia cards are the draw pile, unseen moon piles, and other player hands
-            List<SiriusCard> allCards = new ArrayList<>(ammoniaDeck.getComponents());
-            allCards.addAll(playerAreas.stream().flatMap(pa -> pa.deck.stream()).collect(toList()));
-            allCards.addAll(moons.stream().flatMap(m -> m.deck.stream()).collect(toList()));
+            List<Deck<SiriusCard>> ammoniaDecks = new ArrayList<>();
+            ammoniaDecks.add(retValue.ammoniaDeck);
+            ammoniaDecks.addAll(moons.stream().filter(m -> m.moonType == MINING).map(Moon::getDeck).collect(toList()));
+            ammoniaDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
+            reshuffle(playerId, ammoniaDecks, c -> c.cardType == AMMONIA);
 
-            Deck<SiriusCard> unseenAmmonia = retValue.ammoniaDeck;
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i != playerId)
-                    unseenAmmonia.add(retValue.getPlayerHand(i));
-            }
-            for (int m = 0; m < moons.size(); m++) {
-                Moon moon = retValue.getMoon(m);
-                for (int i = 0; i < moon.deck.getSize(); i++) {
-                    if (!moon.deck.getVisibilityForPlayer(i, playerId)) {
-                        unseenAmmonia.add(moon.deck.get(i));  // we leave the card in place in the Moon deck
-                    }
-                }
-            }
-            // shuffle the unknown cards
-            unseenAmmonia.shuffle(retValue.rnd);
-
-            // and put the shuffled cards in place
-            for (int p = 0; p < getNPlayers(); p++) {
-                if (p != playerId) {
-                    Deck<SiriusCard> playerHand = retValue.getPlayerHand(p);
-                    for (int i = 0; i < playerHand.getSize(); i++)
-                        playerHand.setComponent(i, unseenAmmonia.draw());
-                }
-            }
-            for (int m = 0; m < moons.size(); m++) {
-                Moon moon = retValue.getMoon(m);
-                for (int i = 0; i < moon.deck.getSize(); i++) {
-                    if (!moon.deck.getVisibilityForPlayer(i, playerId)) {
-                        moon.deck.setComponent(i, unseenAmmonia.draw());
-                    }
-                }
-            }
-            retValue.ammoniaDeck = unseenAmmonia;
-
-            // sanity checks
-            List<SiriusCard> allCardsPost = new ArrayList<>(retValue.ammoniaDeck.getComponents());
-            allCardsPost.addAll(retValue.playerAreas.stream().flatMap(pa -> pa.deck.stream()).collect(toList()));
-            allCardsPost.addAll(retValue.moons.stream().flatMap(m -> m.deck.stream()).collect(toList()));
-            if (allCardsPost.size() != allCards.size()) {
-                throw new AssertionError("Problem with shuffling");
-            }
-
+            List<Deck<SiriusCard>> contrabandDecks = new ArrayList<>();
+            ammoniaDecks.add(retValue.contrabandDeck);
+            ammoniaDecks.addAll(moons.stream().filter(m -> m.moonType == PROCESSING).map(Moon::getDeck).collect(toList()));
+            ammoniaDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
+            reshuffle(playerId, contrabandDecks, c -> c.cardType == CONTRABAND);
         }
         retValue.ammoniaTrack = ammoniaTrack;
         retValue.contrabandTrack = contrabandTrack;
         retValue.ammoniaMedals = new HashMap<>(ammoniaMedals);
         retValue.contrabandMedals = new HashMap<>(contrabandMedals);
         return retValue;
+    }
+
+    // Reshuffles all cards across the list of decks that meet the lambda predicate, and are not visible to player
+    private void reshuffle(int player, List<Deck<SiriusCard>> decks, Predicate<SiriusCard> lambda) {
+        // Now gather up all unknown cards for reshuffling
+        // Unknown Ammonia cards are the draw pile, unseen moon piles, and other player hands
+
+        int totalDeckSizePre = decks.stream().mapToInt(IComponentContainer::getSize).sum();
+
+        Deck<SiriusCard> allCards = new Deck<>("temp", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+
+        // The fully observable decks care now filtered to remove any that are visible to us
+        for (Deck<SiriusCard> d : decks) {
+            if (d instanceof PartialObservableDeck) {
+                PartialObservableDeck<SiriusCard> pod = (PartialObservableDeck<SiriusCard>) d;
+                for (int i = 0; i < pod.getSize(); i++) {
+                    if (!pod.getVisibilityForPlayer(i, player) && lambda.test(pod.get(i)))
+                        allCards.add(pod.get(i));
+                }
+            } else {
+                switch (d.getVisibilityMode()) {
+                    case VISIBLE_TO_ALL:
+                        // don't shuffle
+                        break;
+                    case VISIBLE_TO_OWNER:
+                        if (d.getOwnerId() == player)
+                            break;
+                    case HIDDEN_TO_ALL:
+                        allCards.add(d.stream().filter(lambda).collect(toList()));
+                        break;
+                    case FIRST_VISIBLE_TO_ALL:
+                        Deck<SiriusCard> temp = d.copy();
+                        temp.draw();
+                        allCards.add(temp.stream().filter(lambda).collect(toList()));
+                        break;
+                    case LAST_VISIBLE_TO_ALL:
+                        throw new AssertionError("Not supported : LAST_VISIBLE_TO_ALL");
+                    case MIXED_VISIBILITY:
+                        throw new AssertionError("Not supported : MIXED_VISIBILITTY");
+                }
+            }
+        }
+        allCards.shuffle(rnd);
+
+        // and put the shuffled cards in place
+        for (Deck<SiriusCard> d : decks) {
+            if (d instanceof PartialObservableDeck) {
+                PartialObservableDeck<SiriusCard> pod = (PartialObservableDeck<SiriusCard>) d;
+                for (int i = 0; i < pod.getSize(); i++) {
+                    if (!pod.getVisibilityForPlayer(i, player) && lambda.test(pod.get(i)))
+                        pod.setComponent(i, allCards.draw());
+                }
+            } else {
+                switch (d.getVisibilityMode()) {
+                    case VISIBLE_TO_ALL:
+                        break;
+                    case VISIBLE_TO_OWNER:
+                        if (d.getOwnerId() == player)
+                            break;
+                    case HIDDEN_TO_ALL:
+                        for (int i = 0; i < d.getSize(); i++)
+                            if (lambda.test(d.get(i)))
+                                d.setComponent(i, allCards.draw());
+                        break;
+                    case FIRST_VISIBLE_TO_ALL:
+                        for (int i = 1; i < d.getSize(); i++)
+                            if (lambda.test(d.get(i)))
+                                d.setComponent(i, allCards.draw());
+                        break;
+                    case LAST_VISIBLE_TO_ALL:
+                        throw new AssertionError("Not supported : LAST_VISIBLE_TO_ALL");
+                    case MIXED_VISIBILITY:
+                        throw new AssertionError("Not supported : MIXED_VISIBILITTY");
+                }
+            }
+        }
+
+        int totalDeckSizePost = decks.stream().mapToInt(IComponentContainer::getSize).sum();
+
+        // sanity checks
+        if (totalDeckSizePost != totalDeckSizePre || allCards.getSize() > 0) {
+            throw new AssertionError("Problem with shuffling");
+        }
     }
 
     @Override
@@ -123,7 +179,8 @@ public class SiriusGameState extends AbstractGameState {
 
     @Override
     protected void _reset() {
-        ammoniaDeck = new Deck<>("ammoniaDeck", -1, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
+        ammoniaDeck = new Deck<>("ammoniaDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        contrabandDeck = new Deck<>("contrabandDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         moons = new ArrayList<>();
         ammoniaTrack = 0;
         contrabandTrack = 0;
