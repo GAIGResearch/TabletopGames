@@ -8,6 +8,7 @@ import games.sirius.SiriusConstants.SiriusPhase;
 import java.util.Arrays;
 
 import static games.sirius.SiriusConstants.MoonType.MINING;
+import static games.sirius.SiriusConstants.MoonType.PROCESSING;
 
 public class SiriusTurnOrder extends TurnOrder {
 
@@ -67,6 +68,17 @@ public class SiriusTurnOrder extends TurnOrder {
         }
         turnCounter++;
         turnOwner = nextPlayer(state);
+
+        // This next bit ensures that the player knows the cards they can select from
+        // This has to be done before computeAvailableActions as this latter uses a re-determinised
+        // state, meaning that the actions may not be possible in the actual game state
+        if (state.getGamePhase() == SiriusPhase.Draw) {
+            Moon nextMoon = state.getMoon(state.getLocationIndex(turnOwner));
+            if (nextMoon.moonType == MINING || nextMoon.moonType == PROCESSING) {
+                nextMoon.lookAtDeck(turnOwner);
+            }
+        }
+
     }
 
     protected boolean allActionsComplete() {

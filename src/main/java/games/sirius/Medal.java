@@ -18,4 +18,18 @@ public class Medal extends Component {
     public Component copy() {
         return this; // immutable
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Medal) {
+            Medal other = (Medal) obj;
+            return other.value == value && other.medalType == medalType;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return -379043 + value * 31 + 31 * 7 * medalType.ordinal();
+    }
 }

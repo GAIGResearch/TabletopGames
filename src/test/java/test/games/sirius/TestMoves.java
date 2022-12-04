@@ -6,30 +6,20 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.PartialObservableDeck;
 import games.GameType;
-import games.dicemonastery.actions.Sell;
-import games.sirius.SiriusCard;
-import games.sirius.SiriusForwardModel;
-import games.sirius.SiriusGameState;
-import games.sirius.SiriusParameters;
-import games.sirius.actions.MoveToMoon;
-import games.sirius.actions.SellCards;
-import games.sirius.actions.TakeCard;
+import games.sirius.*;
+import games.sirius.actions.*;
 import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
 import static games.sirius.SiriusConstants.SiriusPhase.Draw;
 import static java.util.stream.Collectors.toList;
 import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class TestMoves {
 
@@ -210,15 +200,17 @@ public class TestMoves {
                 new SiriusCard("b", AMMONIA, 2),
                 new SiriusCard("a", AMMONIA, 3)
         ));
-        assertEquals(Arrays.toString(new int[]{0, 0, 0, 0, 2, 0, 0, 0, 0, 3}),
-                Arrays.toString(Arrays.copyOfRange(state.getMedals(AMMONIA), 1, 11) ));
+        assertEquals(5, state.getMedals(AMMONIA).size());
+        assertEquals(new Medal(AMMONIA, 2), state.getMedals(AMMONIA).get(5));
+        assertEquals(new Medal(AMMONIA, 3), state.getMedals(AMMONIA).get(10));
 
         fm.next(state, action);
         assertEquals(0, state.getPlayerHand(0).getSize());
-        assertEquals(5, state.getGameScore(0), 0.01);
         assertEquals(6, state.getTrackPosition(AMMONIA));
-        assertEquals(Arrays.toString(new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 3}),
-                Arrays.toString(Arrays.copyOfRange(state.getMedals(AMMONIA), 1, 11) ));
+        assertEquals(5, state.getGameScore(0), 0.01);
+        assertEquals(4, state.getMedals(AMMONIA).size());
+        assertNull(state.getMedals(AMMONIA).get(4));
+        assertEquals(new Medal(AMMONIA, 3), state.getMedals(AMMONIA).get(10));
     }
 
     @Test

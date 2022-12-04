@@ -8,6 +8,7 @@ import core.components.Deck;
 import games.GameType;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
 import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
@@ -55,6 +56,10 @@ public class SiriusGameState extends AbstractGameState {
 
             // Now gather up all unknown cards for reshuffling
             // Unknown Ammonia cards are the draw pile, unseen moon piles, and other player hands
+            List<SiriusCard> allCards = new ArrayList<>(ammoniaDeck.getComponents());
+            allCards.addAll(playerAreas.stream().flatMap(pa -> pa.deck.stream()).collect(toList()));
+            allCards.addAll(moons.stream().flatMap(m -> m.deck.stream()).collect(toList()));
+
             Deck<SiriusCard> unseenAmmonia = retValue.ammoniaDeck;
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i != playerId)
@@ -75,19 +80,28 @@ public class SiriusGameState extends AbstractGameState {
             for (int p = 0; p < getNPlayers(); p++) {
                 if (p != playerId) {
                     Deck<SiriusCard> playerHand = retValue.getPlayerHand(p);
-                    for (int i = 0; i < retValue.playerAreas.get(p).deck.getSize(); i++)
-                        playerHand.setComponent(i, ammoniaDeck.draw());
+                    for (int i = 0; i < playerHand.getSize(); i++)
+                        playerHand.setComponent(i, unseenAmmonia.draw());
                 }
             }
             for (int m = 0; m < moons.size(); m++) {
                 Moon moon = retValue.getMoon(m);
                 for (int i = 0; i < moon.deck.getSize(); i++) {
                     if (!moon.deck.getVisibilityForPlayer(i, playerId)) {
-                        moon.deck.setComponent(i, ammoniaDeck.draw());
+                        moon.deck.setComponent(i, unseenAmmonia.draw());
                     }
                 }
             }
             retValue.ammoniaDeck = unseenAmmonia;
+
+            // sanity checks
+            List<SiriusCard> allCardsPost = new ArrayList<>(retValue.ammoniaDeck.getComponents());
+            allCardsPost.addAll(retValue.playerAreas.stream().flatMap(pa -> pa.deck.stream()).collect(toList()));
+            allCardsPost.addAll(retValue.moons.stream().flatMap(m -> m.deck.stream()).collect(toList()));
+            if (allCardsPost.size() != allCards.size()) {
+                throw new AssertionError("Problem with shuffling");
+            }
+
         }
         retValue.ammoniaTrack = ammoniaTrack;
         retValue.contrabandTrack = contrabandTrack;
@@ -175,12 +189,12 @@ public class SiriusGameState extends AbstractGameState {
         }
     }
 
-    public Medal[] getMedals(SiriusConstants.SiriusCardType track) {
+    public Map<Integer, Medal> getMedals(SiriusConstants.SiriusCardType track) {
         switch (track) {
             case AMMONIA:
-                return ammoniaMedals.clone();
+                return ammoniaMedals;
             case CONTRABAND:
-                return contrabandMedals.clone();
+                return contrabandMedals;
             default:
                 throw new IllegalArgumentException("No medals for " + track);
         }
@@ -192,22 +206,16 @@ public class SiriusGameState extends AbstractGameState {
         pa.deck.remove(card);
         if (card.cardType == AMMONIA) {
             for (int i = 0; i < card.value; i++) {
-                if (ammoniaTrack < ammoniaMedals.length - 1) {
-                    ammoniaTrack++;
-                    if (ammoniaMedals[ammoniaTrack] != null) {
-                        pa.medals.add(ammoniaMedals[ammoniaTrack]);
-                        ammoniaMedals[ammoniaTrack] = null;
-                    }
+                ammoniaTrack++;
+                if (ammoniaMedals.containsKey(ammoniaTrack)) {
+                    pa.medals.add(ammoniaMedals.remove(ammoniaTrack));
                 }
             }
         } else if (card.cardType == CONTRABAND) {
             for (int i = 0; i < card.value; i++) {
-                if (contrabandTrack < contrabandMedals.length) {
-                    contrabandTrack++;
-                    if (contrabandMedals[contrabandTrack] != null) {
-                        pa.medals.add(contrabandMedals[contrabandTrack]);
-                        contrabandMedals[contrabandTrack] = null;
-                    }
+                contrabandTrack++;
+                if (contrabandMedals.containsKey(contrabandTrack)) {
+                    pa.medals.add(contrabandMedals.remove(contrabandTrack));
                 }
             }
         }
@@ -224,10 +232,8 @@ public class SiriusGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         int retValue = Objects.hash(playerAreas, turnOrder, gamePhase, moons, ammoniaDeck, gameParameters, gameStatus,
-                ammoniaTrack, contrabandTrack);
+                ammoniaTrack, contrabandTrack, ammoniaMedals, contrabandMedals);
         return retValue + 31 * Arrays.hashCode(playerResults)
-                + 31 * 31 * Arrays.hashCode(ammoniaMedals)
-                + 31 * 31 * 31 * Arrays.hashCode(contrabandMedals)
                 - 255 * Arrays.hashCode(playerLocations)
                 - 31 * 255 * Arrays.hashCode(moveSelected);
     }

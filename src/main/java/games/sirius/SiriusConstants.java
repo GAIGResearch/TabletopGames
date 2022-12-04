@@ -9,7 +9,7 @@ public class SiriusConstants {
     }
 
     public enum MoonType {
-        MINING, TRADING
+        MINING, TRADING, PROCESSING, METROPOLIS, OUTPOST
     }
 
     public enum SiriusCardType {

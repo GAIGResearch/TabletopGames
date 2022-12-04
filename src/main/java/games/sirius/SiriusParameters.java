@@ -13,7 +13,6 @@ public class SiriusParameters extends TunableParameters {
     public int cardsPerEmptyMoon = 2;
     public int cardsPerNonEmptyMoon = 1;
     public int[] ammoniaTrack = new int[] {
-            0,
             0, 0, 0, 0, 2,
             0, 0, 0, 0, 3,
             0, 0, 0, 0, 4,
@@ -21,7 +20,6 @@ public class SiriusParameters extends TunableParameters {
             0, 0, 0, 0, 6
     };
     public int[] contrabandTrack = new int[] {
-            0,
             0, 0, 0, 0, 0, 2,
             0, 0, 0, 0, 0, 3,
             0, 0, 0, 0, 0, 4,

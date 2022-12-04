@@ -1,21 +1,23 @@
 package games.sirius;
 
-import core.*;
-import core.actions.*;
+import core.AbstractForwardModel;
+import core.AbstractGameState;
+import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.Deck;
 import games.sirius.SiriusConstants.SiriusPhase;
 import games.sirius.actions.MoveToMoon;
 import games.sirius.actions.SellCards;
 import games.sirius.actions.TakeCard;
 import utilities.Utils;
-import weka.core.pmml.jaxbbindings.SimpleRule;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static games.sirius.SiriusConstants.MoonType.*;
+import static games.sirius.SiriusConstants.MoonType.MINING;
+import static games.sirius.SiriusConstants.MoonType.TRADING;
 import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
 import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
 import static games.sirius.SiriusConstants.SiriusPhase.Move;
@@ -33,7 +35,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
         for (int i = 0; i < params.superAmmonia; i++) {
             state.ammoniaDeck.add(new SiriusCard("Super Ammonia", AMMONIA, 2));
         }
-        for (int i = 0; i < params.ammonia; i++) {
+        for (int i = 0; i < params.hyperAmmonia; i++) {
             state.ammoniaDeck.add(new SiriusCard("Hyper Ammonia", AMMONIA, 3));
         }
         state.ammoniaDeck.shuffle(state.rnd);
@@ -53,11 +55,16 @@ public class SiriusForwardModel extends AbstractForwardModel {
         Arrays.fill(state.moveSelected, -1);
         // All players start on Sirius
         state.playerAreas = IntStream.range(0, state.getNPlayers()).mapToObj(PlayerArea::new).collect(toList());
-        for (int i = 0; i < params.contrabandTrack; i++) {
 
+        // initialise medals from parameters
+        for (int i = 0; i < params.contrabandTrack.length; i++) {
+            if (params.contrabandTrack[i] > 0)
+                state.contrabandMedals.put(i+1, new Medal(CONTRABAND, params.contrabandTrack[i]));
         }
-        state.contrabandMedals = Arrays.stream(params.contrabandTrack).mapToObj(v -> v == 0 ? null : new Medal(CONTRABAND, v)).toArray();
-        state.ammoniaMedals = (Medal[]) Arrays.stream(params.ammoniaTrack).mapToObj(v -> v == 0 ? null : new Medal(AMMONIA, v)).toArray();
+        for (int i = 0; i < params.ammoniaTrack.length; i++) {
+            if (params.ammoniaTrack[i] > 0)
+                state.ammoniaMedals.put(i+1, new Medal(AMMONIA, params.ammoniaTrack[i]));
+        }
         state.setGamePhase(Move);
     }
 
@@ -69,7 +76,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
         SiriusTurnOrder turnOrder = (SiriusTurnOrder) state.getTurnOrder();
         turnOrder.endPlayerTurn(state);
         // check game end
-        if (state.ammoniaTrack == state.ammoniaMedals.length - 1) {
+        if (state.ammoniaMedals.isEmpty()) {
             state.setGameStatus(Utils.GameResult.GAME_END);
             int[] finalScores = new int[state.getNPlayers()];
             for (int p = 0; p < state.getNPlayers(); p++) {
