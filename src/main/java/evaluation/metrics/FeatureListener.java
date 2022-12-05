@@ -21,7 +21,7 @@ public abstract class FeatureListener extends GameListener {
     boolean currentPlayerOnly = false;
 
     protected FeatureListener(IStatisticLogger logger, Event.GameEvent frequency, boolean currentPlayerOnly) {
-        super(logger, new IGameMetric[]{});
+        super(logger, new AbstractMetric[]{});
         this.currentPlayerOnly = currentPlayerOnly;
         this.frequency = frequency;
     }

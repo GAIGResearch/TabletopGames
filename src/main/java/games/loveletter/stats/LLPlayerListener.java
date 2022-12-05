@@ -2,6 +2,7 @@ package games.loveletter.stats;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
+import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.GameListener;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
@@ -23,7 +24,7 @@ public class LLPlayerListener extends GameListener {
     String losingCards;
 
     public LLPlayerListener(IStatisticLogger[] loggerArray, IStatisticLogger aggregate) {
-        super(aggregate, new IGameMetric[]{});
+        super(aggregate, new AbstractMetric[]{});
         this.loggerArray = loggerArray;
         winningCards = null;
         losingCards = null;

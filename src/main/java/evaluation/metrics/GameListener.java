@@ -17,26 +17,33 @@ public class GameListener {
     protected HashMap<Event.GameEvent, IStatisticLogger> loggers;
 
     //List of metrics we are going to extract.
-    protected HashMap<String, IGameMetric> metrics;
+    protected HashMap<String, AbstractMetric> metrics;
 
     //Game this listener listens to
     protected Game game;
 
     public GameListener() {}
 
-    public GameListener(IStatisticLogger logger, IGameMetric[] metrics) {
+    public GameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
         setup(logger);
-        for (IGameMetric p : metrics) {
-            this.metrics.put(p.name(), p);
+        for (AbstractMetric m : metrics) {
+            this.metrics.put(m.name(), m);
         }
     }
-
-    public GameListener(IStatisticLogger logger, Pair<String, IGameMetric>[] metrics) {
-        setup(logger);
-        for (Pair<String, IGameMetric> p : metrics) {
-            this.metrics.put(p.a, p.b);
-        }
-    }
+//
+//    public GameListener(IStatisticLogger logger, IGameMetric[] metrics) {
+//        setup(logger);
+//        for (IGameMetric p : metrics) {
+//            this.enumMetrics.put(p.name(), p);
+//        }
+//    }
+//
+//    public GameListener(IStatisticLogger logger, Pair<String, IGameMetric>[] metrics) {
+//        setup(logger);
+//        for (Pair<String, IGameMetric> p : metrics) {
+//            this.enumMetrics.put(p.a, p.b);
+//        }
+//    }
 
     /**
      * Initializes loggers based on the type provided. Initializes metrics hashmap.
@@ -58,17 +65,17 @@ public class GameListener {
     public void onEvent(Event event) {
         Map<String, Object> data = new TreeMap<>();
         for (String attrStr : metrics.keySet()) {
-            IGameMetric metric = metrics.get(attrStr);
+            AbstractMetric metric = metrics.get(attrStr);
             if (metric.listens(event.type)) {
                 // Apply metric
                 if (metric.isRecordedPerPlayer()) {
                     for (int i = 0; i < event.state.getNPlayers(); i++) {
                         // TODO: separate this data to be able to get per-player summaries?
                         event.playerID = i;
-                        data.put(event.type + ":" + i + ":" + attrStr, metric.get(this, event));
+                        data.put(event.type + ":" + i + ":" + attrStr, metric.run(this, event));
                     }
                 } else {
-                    data.put(event.type + ":" + attrStr, metric.get(this, event));
+                    data.put(event.type + ":" + attrStr, metric.run(this, event));
                 }
             }
         }
@@ -140,7 +147,7 @@ public class GameListener {
                 }
             }
         }
-        if(listener == null) return new GameListener(logger, new Pair[0]); //default
+        if(listener == null) return new GameListener(logger, new AbstractMetric[0]); //default
 
         return listener;
     }
@@ -156,13 +163,13 @@ public class GameListener {
             e.printStackTrace();
         }
         if(listener == null)
-            return new GameListener(null, new Pair[0]);
+            return new GameListener(null, new AbstractMetric[0]);
         return listener;
     }
 
     public static void main(String args[])
     {
-        Utils.loadClassFromFile("data/metrics/loveletter.json");
+        Utils.loadClassFromFile("data/metrics/loveletter2.json");
     }
 
 }

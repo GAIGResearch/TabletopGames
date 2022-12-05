@@ -3,8 +3,6 @@ package core.interfaces;
 import evaluation.metrics.GameListener;
 import evaluation.metrics.Event;
 
-import java.util.HashSet;
-
 public interface IGameMetric {
 
     /**

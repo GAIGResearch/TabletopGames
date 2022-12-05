@@ -1,6 +1,7 @@
 package test.games.coltexpress;
 
 import core.AbstractPlayer;
+import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.GameListener;
 import core.interfaces.IGameMetric;
 import core.interfaces.IStatisticLogger;
@@ -44,7 +45,7 @@ public class TestRoundCardVisibilityAndShuffling {
 
     static class TestRoundEndListener extends GameListener {
 
-        public TestRoundEndListener(IStatisticLogger logger, Pair<String, IGameMetric>[] metrics) {
+        public TestRoundEndListener(IStatisticLogger logger, AbstractMetric[] metrics) {
             super(logger, metrics);
         }
 

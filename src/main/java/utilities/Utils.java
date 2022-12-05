@@ -339,29 +339,15 @@ public abstract class Utils {
                 } else if (arg instanceof JSONArray) {
                     Object first = ((JSONArray) arg).get(0);
                     if (first instanceof JSONObject) {
-                        // we have recursion
-                        // we need to instantiate this, and then stick it in
+                        Class<?> arrayClass = determineArrayClass((JSONArray) arg);
 
-                        Object info = ((JSONObject) first).get("info");
-
-                        if(info!=null) // Enhanced json objects with an info tag
-                        {
-                            Pair<String, T>[] arr = (Pair<String, T>[]) Array.newInstance(Pair.class,((JSONArray) arg).size());
-                            argClasses[i] = arr.getClass();
-                            for (int j = 0; j < ((JSONArray) arg).size(); j++) {
-                                JSONObject obj = (JSONObject) ((JSONArray) arg).get(j);
-                                arr[j] = new Pair<>((String) obj.get("info"), loadClassFromJSON(obj));
-                            }
-                            arg = arr;
-                        }else {
-                            first = loadClassFromJSON((JSONObject) first);
-                            T[] arr = (T[]) Array.newInstance(first.getClass(), ((JSONArray) arg).size());
-                            argClasses[i] = arr.getClass();
-                            for (int j = 0; j < ((JSONArray) arg).size(); j++) {
-                                arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
-                            }
-                            arg = arr;
+                        T[] arr = (T[]) Array.newInstance(arrayClass, ((JSONArray) arg).size());
+                        argClasses[i] = arr.getClass();
+                        for (int j = 0; j < ((JSONArray) arg).size(); j++) {
+                            arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
                         }
+                        arg = arr;
+
                     } else if (first instanceof Long) {
                         argClasses[i] = int[].class;
                         args[i] = ((Long) first).intValue();
@@ -377,10 +363,18 @@ public abstract class Utils {
                 }
                 args[i] = arg;
             }
+
+            if (cl.contains("$")) //For inner classes.
+            {
+                Object retValue = Utils.extractInnerInstance(cl);
+                return outputClass.cast(retValue);
+            }
+
             Class<?> clazz = Class.forName(cl);
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
+
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
         } catch (ReflectiveOperationException e) {
@@ -390,6 +384,42 @@ public abstract class Utils {
             e.printStackTrace();
             throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
         }
+    }
+
+    public static Class<?> determineArrayClass(JSONArray array)
+    {
+        if(array.size() == 1)
+        {
+            JSONObject first = (JSONObject) array.get(0);
+            return loadClassFromJSON(first).getClass();
+        }else
+        {
+            JSONObject first = (JSONObject) array.get(0);
+            JSONObject second = (JSONObject) array.get(1);
+            String firstCl = (String) first.getOrDefault("class", "");
+            String secondCl = (String) second.getOrDefault("class", "");
+            if(firstCl.equalsIgnoreCase(secondCl))
+                return loadClassFromJSON(first).getClass();
+            else
+            {
+                // An array of two different classes. Either the array class is a common superclass or it's wrong.
+                // We return the superclass of the first one.
+                Object firstClass = loadClassFromJSON(first);
+                return firstClass.getClass().getSuperclass();
+            }
+        }
+    }
+
+    public static Object extractInnerInstance(String cl) throws ReflectiveOperationException, IllegalArgumentException
+    {
+        //Retrieve the outer class and an instance of that object.
+        Class<?> outerClazz = Class.forName(cl.substring(0, cl.lastIndexOf("$")));
+        Object outerInstance = ConstructorUtils.getMatchingAccessibleConstructor(outerClazz).newInstance();
+
+        //Retrieve constructor and object of the inner class.
+        Class<?> innerClazz = Class.forName(cl);
+        Constructor<?> innerCtor = innerClazz.getDeclaredConstructor(outerClazz);
+        return innerCtor.newInstance(outerInstance);
     }
 
 

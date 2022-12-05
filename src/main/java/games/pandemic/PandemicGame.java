@@ -1,6 +1,7 @@
 package games.pandemic;
 
 import core.*;
+import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.GameListener;
 import games.GameType;
 import games.pandemic.stats.PandemicAttributes;
@@ -66,7 +67,7 @@ public class PandemicGame extends Game {
 
         // logging setup
         FileStatsLogger logger = new FileStatsLogger(logFile);
-        GameListener pl = new GameListener(logger, PandemicAttributes.values());
+        GameListener pl = new GameListener(logger, new AbstractMetric[0]); //PandemicAttributes.values()); //TODO: Use pandemic metrics
         ArrayList<GameListener> listeners = new ArrayList<>();
         listeners.add((pl));
 
@@ -145,7 +146,7 @@ public class PandemicGame extends Game {
         for (int p = 0; p < playersToTest.length; p++) {
 
             // logging setup
-            GameListener pl = new GameListener(new SummaryLogger(), PandemicCompetitionRankingAttributes.values());
+            GameListener pl = new GameListener(new SummaryLogger(), new AbstractMetric[0]); //PandemicCompetitionRankingAttributes.values().values()); //TODO: Use pandemic metrics
             ArrayList<GameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 
