@@ -16,8 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static games.sirius.SiriusConstants.MoonType.MINING;
-import static games.sirius.SiriusConstants.MoonType.TRADING;
+import static games.sirius.SiriusConstants.MoonType.*;
 import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
 import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
 import static games.sirius.SiriusConstants.SiriusPhase.Move;
@@ -39,14 +38,36 @@ public class SiriusForwardModel extends AbstractForwardModel {
             state.ammoniaDeck.add(new SiriusCard("Hyper Ammonia", AMMONIA, 3));
         }
         state.ammoniaDeck.shuffle(state.rnd);
+        for (int i = 0; i < params.brokenContraband; i++) {
+            state.contrabandDeck.add(new SiriusCard("Broken Contraband", CONTRABAND, 1));
+        }
+        for (int i = 0; i < params.contraband; i++) {
+            state.contrabandDeck.add(new SiriusCard("Contraband", CONTRABAND, 2));
+        }
+        for (int i = 0; i < params.glowingContraband; i++) {
+            state.contrabandDeck.add(new SiriusCard("Glowing Contraband", CONTRABAND, 0));
+        }
+        state.contrabandDeck.shuffle(state.rnd);
         state.moons.add(new Moon("Sirius", TRADING, state.rnd, state.getNPlayers()));
-        state.moons.add(new Moon("Mining_1", MINING, state.rnd, state.getNPlayers()));
-        state.moons.add(new Moon("Mining_2", MINING, state.rnd, state.getNPlayers()));
+        state.moons.add(new Moon("Mining Outpost", MINING, state.rnd, state.getNPlayers()));
+        state.moons.add(new Moon("Processing Station", PROCESSING, state.rnd, state.getNPlayers()));
         for (Moon moon : state.getAllMoons()) {
-            if (moon.getMoonType() == MINING) {
-                for (int i = 0; i < params.cardsPerEmptyMoon; i++) {
-                    moon.addCard((SiriusCard) state.ammoniaDeck.draw());
-                }
+            switch (moon.moonType) {
+                case MINING:
+                    for (int i = 0; i < params.cardsPerEmptyMoon; i++) {
+                        moon.addCard(state.ammoniaDeck.draw());
+                    }
+                    break;
+                case PROCESSING:
+                    for (int i = 0; i < params.cardsPerEmptyMoon; i++) {
+                        moon.addCard(state.contrabandDeck.draw());
+                    }
+                    break;
+                case TRADING:
+                    break; // no deck
+                case METROPOLIS:
+                case OUTPOST:
+                    throw new AssertionError("Not yet implemented");
             }
         }
 
@@ -59,11 +80,11 @@ public class SiriusForwardModel extends AbstractForwardModel {
         // initialise medals from parameters
         for (int i = 0; i < params.contrabandTrack.length; i++) {
             if (params.contrabandTrack[i] > 0)
-                state.contrabandMedals.put(i+1, new Medal(CONTRABAND, params.contrabandTrack[i]));
+                state.contrabandMedals.put(i + 1, new Medal(CONTRABAND, params.contrabandTrack[i]));
         }
         for (int i = 0; i < params.ammoniaTrack.length; i++) {
             if (params.ammoniaTrack[i] > 0)
-                state.ammoniaMedals.put(i+1, new Medal(AMMONIA, params.ammoniaTrack[i]));
+                state.ammoniaMedals.put(i + 1, new Medal(AMMONIA, params.ammoniaTrack[i]));
         }
         state.setGamePhase(Move);
     }
@@ -104,16 +125,18 @@ public class SiriusForwardModel extends AbstractForwardModel {
                 Moon currentMoon = state.getMoon(currentLocation);
                 switch (currentMoon.moonType) {
                     case MINING:
+                    case PROCESSING:
                         retValue = currentMoon.deck.stream().map(c -> new TakeCard(c.value)).distinct().collect(toList());
                         break;
                     case TRADING:
-                        // TODO: For the moment we just sell all our Ammonia cards, without doing anything more subtle
+                        // TODO: For the moment we just sell all our Ammonia/Contraband cards, without doing anything more subtle
                         Deck<SiriusCard> hand = state.getPlayerHand(player);
-                        if (hand.getSize() > 0) {
-                            retValue.add(
-                                    new SellCards(hand.stream().filter(c -> c.cardType == AMMONIA).collect(toList()))
-                            );
-                        }
+                        List<SiriusCard> ammoniaInHand = hand.stream().filter(c -> c.cardType == AMMONIA).collect(toList());
+                        if (ammoniaInHand.size() > 0)
+                            retValue.add(new SellCards(ammoniaInHand));
+                        List<SiriusCard> contrabandInHand = hand.stream().filter(c -> c.cardType == CONTRABAND).collect(toList());
+                        if (contrabandInHand.size() > 0)
+                            retValue.add(new SellCards(contrabandInHand));
                         break;
                 }
                 if (retValue.isEmpty())

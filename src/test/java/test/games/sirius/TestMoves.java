@@ -2,8 +2,7 @@ package test.games.sirius;
 
 import core.AbstractPlayer;
 import core.Game;
-import core.actions.AbstractAction;
-import core.actions.DoNothing;
+import core.actions.*;
 import core.components.PartialObservableDeck;
 import games.GameType;
 import games.sirius.*;
@@ -136,20 +135,21 @@ public class TestMoves {
 
     @Test
     public void testTakeCardLooksAtWholeMoonDeck() {
-        TakeCard action = new TakeCard(1);
+        state.setGamePhase(Draw);
         state.getMoon(1).addCard(new SiriusCard("ammonia", AMMONIA, 1));
-        state.movePlayerTo(0, 1);
+        state.movePlayerTo(1, 1);
         PartialObservableDeck<SiriusCard> deck = state.getMoon(1).getDeck();
         for (int i = 0; i < 3; i++) {
             assertFalse(deck.getVisibilityForPlayer(i, 0));
             assertFalse(deck.getVisibilityForPlayer(i, 1));
             assertFalse(deck.getVisibilityForPlayer(i, 2));
         }
-        fm.next(state, action);
+        state.getTurnOrder().endPlayerTurn(state);
+        // ending the previous player's turn will ensure that the next player looks at all the cards at their current location
         deck = state.getMoon(1).getDeck();
         for (int i = 0; i < 2; i++) {
-            assertTrue(deck.getVisibilityForPlayer(i, 0));
-            assertFalse(deck.getVisibilityForPlayer(i, 1));
+            assertFalse(deck.getVisibilityForPlayer(i, 0));
+            assertTrue(deck.getVisibilityForPlayer(i, 1));
             assertFalse(deck.getVisibilityForPlayer(i, 2));
         }
     }

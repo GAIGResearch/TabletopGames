@@ -257,19 +257,31 @@ public class SiriusGameState extends AbstractGameState {
         }
     }
 
-    public void sellCard(SiriusCard card) {
+    public Deck<SiriusCard> getDeck(SiriusConstants.SiriusCardType type) {
+        switch (type) {
+            case AMMONIA:
+                return ammoniaDeck;
+            case CONTRABAND:
+                return contrabandDeck;
+            case SMUGGLER:
+            case FAVOUR:
+        }
+        throw new AssertionError("Not yet implemented");
+    }
+
+    public void sellCard(SiriusCard card, int amount) {
         PlayerArea pa = playerAreas.get(getCurrentPlayer());
         pa.soldCards.add(card);
         pa.deck.remove(card);
         if (card.cardType == AMMONIA) {
-            for (int i = 0; i < card.value; i++) {
+            for (int i = 0; i < amount; i++) {
                 ammoniaTrack++;
                 if (ammoniaMedals.containsKey(ammoniaTrack)) {
                     pa.medals.add(ammoniaMedals.remove(ammoniaTrack));
                 }
             }
         } else if (card.cardType == CONTRABAND) {
-            for (int i = 0; i < card.value; i++) {
+            for (int i = 0; i < amount; i++) {
                 contrabandTrack++;
                 if (contrabandMedals.containsKey(contrabandTrack)) {
                     pa.medals.add(contrabandMedals.remove(contrabandTrack));
