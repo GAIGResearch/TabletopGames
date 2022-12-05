@@ -4,27 +4,18 @@ import core.*;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
-import evodef.*;
 import games.GameType;
-import utilities.SummaryLogger;
+import evaluation.loggers.SummaryLogger;
 
-import java.util.*;
-import java.util.stream.*;
-import static java.util.stream.Collectors.*;
-import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
-import core.interfaces.IStatisticLogger;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
-import games.GameType;
-import utilities.SummaryLogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;

@@ -1,7 +1,10 @@
-package utilities;
+package evaluation.summarisers;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 /**
  * This class is used to model the statistics of several numbers.  For the statistics
@@ -9,31 +12,26 @@ import java.util.Collections;
  * of how many, the sum and the sum of the squares is sufficient (plus max and min, for max and min).
  */
 
-public class TAGStatSummary {
+public class TAGNumericStatSummary extends TAGStatSummary {
 
-    public String name; // defaults to ""
-
-    private int n;
     private double sum, sumsq;
     private double min, max;
     private double mean, median, sd;
-
     private double lastAdded;
     private boolean valid;
 
     private ArrayList<Double> elements;
 
-    public TAGStatSummary() {
+    public TAGNumericStatSummary() {
         this("");
     }
 
-    public TAGStatSummary(String name) {
-        this.name = name;
-        reset();
+    public TAGNumericStatSummary(String name) {
+        super(name, StatType.Numeric);
     }
 
-    public final void reset() {
-        n = 0;
+    public void reset() {
+        super.reset();
         sum = 0;
         sumsq = 0;
         // Ensure that the first number to be added will fix up min and max to be that number
@@ -115,16 +113,12 @@ public class TAGStatSummary {
         return sd;
     }
 
-    public int n() {
-        return n;
-    }
-
     public double stdErr() {
         return sd() / Math.sqrt(n);
     }
 
-    public void add(TAGStatSummary ss) {
-        n += ss.n;
+    public void add(TAGNumericStatSummary ss) {
+        super.add(ss);
         sum += ss.sum;
         sumsq += ss.sumsq;
         lastAdded = ss.lastAdded;
@@ -193,20 +187,42 @@ public class TAGStatSummary {
         return elements;
     }
 
-    public TAGStatSummary copy() {
-        TAGStatSummary ss = new TAGStatSummary();
+    public TAGNumericStatSummary copy() {
+        TAGNumericStatSummary ss = new TAGNumericStatSummary();
 
         ss.name = this.name;
+        ss.n = this.n;
+        ss.type = this.type;
+
         ss.sum = this.sum;
         ss.sumsq = this.sumsq;
         ss.min = this.min;
         ss.max = this.max;
         ss.mean = this.mean;
         ss.sd = this.sd;
-        ss.n = this.n;
         ss.valid = this.valid;
         ss.lastAdded = this.lastAdded;
 
         return ss;
+    }
+
+    @Override
+    public Map<String, Object> getSummary() {
+        Map<String, Object> data = new HashMap<>();
+        data.put(name + "Median", median());
+        data.put(name + "Mean", mean());
+        data.put(name + "Max", max());
+        data.put(name + "Min", min());
+        data.put(name + "VarCoeff", Math.abs(sd()/mean()));
+        data.put(name + "Skew", skew());
+        data.put(name + "Kurtosis", kurtosis());
+
+        TAGNumericStatSummary delta = elements.size() > 1 ?
+                IntStream.range(0, elements.size() - 1)
+                        .mapToObj(i -> !elements.get(i + 1).equals(elements.get(i)) ? 1.0 : 0.0)
+                        .collect(new TAGSummariser())
+                : new TAGNumericStatSummary();
+        data.put(name + "Delta", delta.mean()); // percentage of times this value changed consecutively
+        return data;
     }
 }

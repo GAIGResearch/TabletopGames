@@ -1,12 +1,9 @@
-package utilities;
+package evaluation.metrics;
 
 import core.AbstractGameState;
-import core.CoreConstants;
-import core.Game;
 import core.actions.AbstractAction;
-import evaluation.GameListener;
+import core.interfaces.IGameMetric;
 import core.interfaces.IStatisticLogger;
-import evaluation.metrics.Event;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -24,7 +21,7 @@ public abstract class FeatureListener extends GameListener {
     boolean currentPlayerOnly = false;
 
     protected FeatureListener(IStatisticLogger logger, Event.GameEvent frequency, boolean currentPlayerOnly) {
-        super(logger, null);
+        super(logger, new IGameMetric[]{});
         this.currentPlayerOnly = currentPlayerOnly;
         this.frequency = frequency;
     }
@@ -70,9 +67,9 @@ public abstract class FeatureListener extends GameListener {
                 data.put("Win", winLoss[record.player]);
                 data.put("Ordinal", ordinal[record.player]);
                 data.put("FinalScore", finalScores[record.player]);
-                logger.record(data);
+                loggers.get(event.type).record(data);
             }
-            logger.processDataAndNotFinish();
+            loggers.get(event.type).processDataAndNotFinish();
             currentData = new ArrayList<>();
         }
 
@@ -83,7 +80,10 @@ public abstract class FeatureListener extends GameListener {
     public abstract double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
     public void setLogger(IStatisticLogger newLogger) {
-        this.logger = newLogger;
+        this.loggers = new HashMap<>();
+        for (Event.GameEvent event: Event.GameEvent.values()) {
+            this.loggers.put(event, newLogger.emptyCopy(event.name()));
+        }
     }
 
 

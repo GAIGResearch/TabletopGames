@@ -1,7 +1,5 @@
-package utilities;
+package evaluation.summarisers;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,34 +9,26 @@ import java.util.Map;
  * of how many, the sum and the sum of the squares is sufficient (plus max and min, for max and min).
  */
 
-public class TAGStringStatSummary {
+public class TAGOccurrenceStatSummary extends TAGStatSummary {
 
-    public String name; // defaults to ""
+    private HashMap<Object, Integer> elements;  // Map from element to count of how many times it appeared
 
-    private int n; // Total number of elements (sum of values in map)
-    private HashMap<String, Integer> elements;  // Map from element to count of how many times it appeared
-
-    public TAGStringStatSummary() {
+    public TAGOccurrenceStatSummary() {
         this("");
     }
 
-    public TAGStringStatSummary(String name) {
-        this.name = name;
-        reset();
+    public TAGOccurrenceStatSummary(String name) {
+        super(name, StatType.Occurrence);
     }
 
-    public final void reset() {
-        n = 0;
+    public void reset() {
+        super.reset();
         elements = new HashMap<>();
     }
 
-    public int n() {
-        return n;
-    }
-
-    public void add(TAGStringStatSummary ss) {
-        n += ss.n;
-        for (Map.Entry<String, Integer> els: ss.elements.entrySet()) {
+    public void add(TAGOccurrenceStatSummary ss) {
+        super.add(ss);
+        for (Map.Entry<Object, Integer> els: ss.elements.entrySet()) {
             if (elements.containsKey(els.getKey())) {
                 elements.put(els.getKey(), elements.get(els.getKey()) + els.getValue());
             } else {
@@ -51,13 +41,17 @@ public class TAGStringStatSummary {
         String[] els = s.split(",");
         n += els.length;
         for (String e: els) {
-            if (!elements.containsKey(e)) elements.put(e, 0);
-            elements.put(e, elements.get(e) + 1);
+            add(e);
         }
     }
 
-    public void add(String... xa) {
-        for (String x : xa) {
+    public void add(Object o) {
+        if (!elements.containsKey(o)) elements.put(o, 0);
+        elements.put(o, elements.get(o) + 1);
+    }
+
+    public void add(Object... xa) {
+        for (Object x : xa) {
             add(x);
         }
     }
@@ -73,17 +67,28 @@ public class TAGStringStatSummary {
         return (name == null) ? "[" : (name + ": [") + elements.toString() + "]";
     }
 
-    public HashMap<String, Integer> getElements() {
+    public HashMap<Object, Integer> getElements() {
         return elements;
     }
 
-    public TAGStringStatSummary copy() {
-        TAGStringStatSummary ss = new TAGStringStatSummary();
+    public TAGOccurrenceStatSummary copy() {
+        TAGOccurrenceStatSummary ss = new TAGOccurrenceStatSummary();
 
         ss.name = this.name;
         ss.n = this.n;
+        ss.type = this.type;
+
         ss.elements = new HashMap<>(elements);
 
         return ss;
+    }
+
+    @Override
+    public Map<String, Object> getSummary() {
+        Map<String, Object> data = new HashMap<>();
+        for (Object key: elements.keySet()) {
+            data.put(key.toString(), elements.get(key));
+        }
+        return data;
     }
 }

@@ -1,10 +1,8 @@
 package games.loveletter.stats;
 import core.AbstractGameState;
-import core.CoreConstants;
-import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
 import games.loveletter.LoveLetterGameState;
@@ -25,12 +23,11 @@ public class LLPlayerListener extends GameListener {
     String losingCards;
 
     public LLPlayerListener(IStatisticLogger[] loggerArray, IStatisticLogger aggregate) {
-        super(aggregate, null);
+        super(aggregate, new IGameMetric[]{});
         this.loggerArray = loggerArray;
         winningCards = null;
         losingCards = null;
     }
-
 
     private String processCards(String token, int playerID)
     {
@@ -57,7 +54,7 @@ public class LLPlayerListener extends GameListener {
                 String losses = processCards(losingCards, i);
                 data.put("LOSE_REASON", losses);
                 loggerArray[i].record(data);
-                logger.record(data);
+                loggers.get(event.type).record(data);
             }
             winningCards = null;
             losingCards = null;

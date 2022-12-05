@@ -1,14 +1,16 @@
 package games.pandemic;
 
 import core.*;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import games.GameType;
+import games.pandemic.stats.PandemicAttributes;
+import games.pandemic.stats.PandemicCompetitionRankingAttributes;
 import players.PlayerType;
 import players.human.ActionController;
 import players.mcts.MCTSPlayer;
-import utilities.FileStatsLogger;
-import utilities.SummaryLogger;
-import utilities.TAGStatSummary;
+import evaluation.loggers.FileStatsLogger;
+import evaluation.loggers.SummaryLogger;
+import evaluation.summarisers.TAGNumericStatSummary;
 
 import java.util.*;
 public class PandemicGame extends Game {
@@ -27,7 +29,7 @@ public class PandemicGame extends Game {
         boolean printStatSummary = false;
 
         // Save win rate statistics over all games
-        TAGStatSummary statSummary = new TAGStatSummary(""+seed);
+        TAGNumericStatSummary statSummary = new TAGNumericStatSummary(""+seed);
 
         // Play n repetitions of this game and record player results
         Game game = null;
@@ -64,7 +66,7 @@ public class PandemicGame extends Game {
 
         // logging setup
         FileStatsLogger logger = new FileStatsLogger(logFile);
-        PandemicListener pl = new PandemicListener(logger);
+        GameListener pl = new GameListener(logger, PandemicAttributes.values());
         ArrayList<GameListener> listeners = new ArrayList<>();
         listeners.add((pl));
 
@@ -99,8 +101,8 @@ public class PandemicGame extends Game {
      * iterate through all tiebreaks before returning 0 (tied)
      */
     public static int compare(SummaryLogger[] statSummaries, int playerId, int otherId, TieBreak[] tieBreaks, int tieBreakTier) {
-        double player = statSummaries[playerId].summary().get(tieBreaks[tieBreakTier].name()).mean();
-        double other = statSummaries[otherId].summary().get(tieBreaks[tieBreakTier].name()).mean();
+        double player = ((TAGNumericStatSummary)statSummaries[playerId].summary().get(tieBreaks[tieBreakTier].name())).mean();
+        double other = ((TAGNumericStatSummary)statSummaries[otherId].summary().get(tieBreaks[tieBreakTier].name())).mean();
         if (player == other && tieBreakTier < tieBreaks.length-1) {
             return compare(statSummaries, playerId, otherId, tieBreaks, tieBreakTier + 1);
         }
@@ -143,8 +145,7 @@ public class PandemicGame extends Game {
         for (int p = 0; p < playersToTest.length; p++) {
 
             // logging setup
-            sumLogs[p] = new SummaryLogger();
-            PandemicCompetitionListener pl = new PandemicCompetitionListener(sumLogs[p]);
+            GameListener pl = new GameListener(new SummaryLogger(), PandemicCompetitionRankingAttributes.values());
             ArrayList<GameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 

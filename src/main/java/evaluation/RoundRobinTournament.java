@@ -4,6 +4,7 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.ParameterFactory;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.GameListener;
 import games.GameType;
 import players.PlayerFactory;
 import players.mcts.BasicMCTSPlayer;
@@ -11,7 +12,7 @@ import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
-import utilities.FileStatsLogger;
+import evaluation.loggers.FileStatsLogger;
 
 import java.io.FileWriter;
 import java.util.*;

@@ -2,17 +2,17 @@ package evaluation;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.CoreConstants;
 import core.ParameterFactory;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
+import evaluation.metrics.GameListener;
 import games.GameType;
 import players.PlayerFactory;
 import players.learners.AbstractLearner;
-import utilities.FileStatsLogger;
-import utilities.StateFeatureListener;
+import evaluation.loggers.FileStatsLogger;
+import evaluation.metrics.StateFeatureListener;
 import utilities.Utils;
 
 import java.io.File;

@@ -1,10 +1,6 @@
-package utilities;
+package evaluation.metrics;
 
-import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
-import evaluation.GameListener;
-import evaluation.metrics.Event;
 
 import java.util.function.BiFunction;
 
@@ -26,15 +22,25 @@ public enum ActionSimpleAttributes implements IGameMetric {
     ACTION_DESCRIPTION((l, e) -> e.action == null ? "NONE" : e.action.getString(e.state))
     ;
 
-    private final BiFunction<ActionListener, Event, Object> lambda;
+    private final BiFunction<GameListener, Event, Object> lambda;
 
-    ActionSimpleAttributes(BiFunction<ActionListener, Event, Object> lambda) {
+    ActionSimpleAttributes(BiFunction<GameListener, Event, Object> lambda) {
         this.lambda = lambda;
     }
 
     @Override
     public Object get(GameListener listener, Event event) {
-        return lambda.apply((ActionListener)listener, event);
+        return lambda.apply(listener, event);
+    }
+
+    @Override
+    public boolean listens(Event.GameEvent eventType) {
+        return eventType == Event.GameEvent.ACTION_CHOSEN || eventType == Event.GameEvent.GAME_EVENT;
+    }
+
+    @Override
+    public boolean isRecordedPerPlayer() {
+        return false;
     }
 
 }

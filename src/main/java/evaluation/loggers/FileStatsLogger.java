@@ -1,6 +1,7 @@
-package utilities;
+package evaluation.loggers;
 
 import core.interfaces.IStatisticLogger;
+import evaluation.summarisers.TAGStatSummary;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,6 +15,8 @@ import static java.util.stream.Collectors.toList;
  */
 public class FileStatsLogger implements IStatisticLogger {
 
+    private String fileName;
+    private boolean append;
     private String delimiter;
     private FileWriter writer;
     public String doubleFormat = "%.3g";
@@ -31,6 +34,8 @@ public class FileStatsLogger implements IStatisticLogger {
      */
     public FileStatsLogger(String fileName, String delimiter, boolean append) {
         this.delimiter = delimiter;
+        this.fileName = fileName;
+        this.append = append;
         try {
             File file = new File(fileName);
             if (file.exists() && append)
@@ -133,4 +138,9 @@ public class FileStatsLogger implements IStatisticLogger {
     public Map<String, TAGStatSummary> summary() {
         return new HashMap<>();
     }
+
+    @Override
+    public FileStatsLogger emptyCopy(String id) {
+        return new FileStatsLogger(fileName, delimiter, append);
+    }  // todo include id in filename
 }

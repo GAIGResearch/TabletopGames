@@ -8,10 +8,9 @@ import core.interfaces.IStatisticLogger;
 import evodef.MultiSolutionEvaluator;
 import evodef.SearchSpace;
 import games.GameType;
-import utilities.SummaryLogger;
+import evaluation.loggers.SummaryLogger;
 
 import java.util.*;
-import java.util.function.BiFunction;
 
 /**
  * Game Evaluator is used for NTBEA optimisation of parameters. It implements the SolutionEvaluator interface.

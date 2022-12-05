@@ -5,11 +5,11 @@ import core.actions.AbstractAction;
 public class Event
 {
     public enum GameEvent {
-        ABOUT_TO_START, GAME_OVER,
-        ROUND_OVER, TURN_OVER,
-        ACTION_CHOSEN,
-        ACTION_TAKEN,
-        GAME_EVENT
+        ABOUT_TO_START(true), GAME_OVER(true),
+        ROUND_OVER(false), TURN_OVER(false),
+        ACTION_CHOSEN(false),
+        ACTION_TAKEN(false),
+        GAME_EVENT(false);
         // Mostly self-explanatory, except:
         // GAME_EVENT is some game-specific event that is worthy of notice and is not linked directly to a player action
         //     An example might be the draw of a Epidemic card in Pandemic
@@ -17,6 +17,13 @@ public class Event
         //     Hence it contains the Game State used to make the decision - this is important in Expert Iteration for example.
         // ACTION_TAKEN is triggered after a decision is implemented. The state hence contains the results of the action.
         //     This is useful if we want to update a GUI or similar.
+
+        boolean oncePerGame;
+        GameEvent(boolean oncePerGame) {this.oncePerGame = oncePerGame;}
+
+        public boolean isOncePerGame() {
+            return oncePerGame;
+        }
     }
 
     private Event() {}

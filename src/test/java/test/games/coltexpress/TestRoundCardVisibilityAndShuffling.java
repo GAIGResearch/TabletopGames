@@ -1,11 +1,7 @@
 package test.games.coltexpress;
 
-import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.CoreConstants;
-import core.Game;
-import core.actions.AbstractAction;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import core.interfaces.IGameMetric;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;

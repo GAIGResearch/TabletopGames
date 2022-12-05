@@ -1,9 +1,11 @@
-package games.dicemonastery;
+package games.dicemonastery.stats;
 
-import core.AbstractGameState;
 import core.interfaces.IGameMetric;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import evaluation.metrics.Event;
+import games.dicemonastery.DiceMonasteryConstants;
+import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.DiceMonasteryTurnOrder;
 import games.dicemonastery.components.Monk;
 
 import java.util.function.BiFunction;
@@ -12,15 +14,15 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 
 public enum DiceMonasteryStateAttributes implements IGameMetric {
 
-    GAME_ID((l, e)-> e.state.getGameID()),
-    SEASON((l, e)-> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getSeason()),
-    SPRING((l, e)-> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getSeason() == DiceMonasteryConstants.Season.SPRING),
-    AUTUMN((l, e)-> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getSeason() == DiceMonasteryConstants.Season.AUTUMN),
-    YEAR((l, e)-> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getYear()),
+    GAME_ID((l, e)-> e.state.getGameID(), false),
+    SEASON((l, e)-> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getSeason(), false),
+    SPRING((l, e)-> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getSeason() == DiceMonasteryConstants.Season.SPRING, false),
+    AUTUMN((l, e)-> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getSeason() == DiceMonasteryConstants.Season.AUTUMN, false),
+    YEAR((l, e)-> ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getYear(), false),
     TURN((l, e)-> {
         DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) e.state.getTurnOrder();
         return (dmto.getYear() - 1) * 4 + dmto.getSeason().ordinal() + 1;
-    }),
+    }, false),
     PLAYER((l, e)-> e.playerID),
     MONKS_IN_MEADOW((l, e)-> ((DiceMonasteryGameState)e.state).monksIn(MEADOW, e.playerID).size()),
     MONKS_IN_KITCHEN((l, e)-> ((DiceMonasteryGameState)e.state).monksIn(KITCHEN, e.playerID).size()),
@@ -84,14 +86,30 @@ public enum DiceMonasteryStateAttributes implements IGameMetric {
     TREASURE((l, e)-> ((DiceMonasteryGameState)e.state).getTreasures(e.playerID).stream().mapToInt(t -> t.vp).sum());
 
     private final BiFunction<GameListener, Event, Object> lambda;
+    private final boolean recordedPerPlayer;
 
     DiceMonasteryStateAttributes(BiFunction<GameListener, Event, Object> lambda) {
+        this(lambda, true);  // default true
+    }
+
+    DiceMonasteryStateAttributes(BiFunction<GameListener, Event, Object> lambda, boolean recordedPerPlayer) {
         this.lambda = lambda;
+        this.recordedPerPlayer = recordedPerPlayer;
     }
 
     @Override
     public Object get(GameListener listener, Event event) {
         return lambda.apply(listener, event);
+    }
+
+    @Override
+    public boolean listens(Event.GameEvent eventType) {
+        return eventType == Event.GameEvent.ROUND_OVER;  // Dice Monastery Attributes respond to round over
+    }
+
+    @Override
+    public boolean isRecordedPerPlayer() {
+        return recordedPerPlayer;
     }
 
 }

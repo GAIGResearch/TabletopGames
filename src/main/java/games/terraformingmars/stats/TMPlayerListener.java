@@ -1,11 +1,7 @@
 package games.terraformingmars.stats;
 
-import core.AbstractGameState;
-import core.CoreConstants;
-import core.Game;
-import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
 import games.terraformingmars.TMGameState;
@@ -25,7 +21,7 @@ public class TMPlayerListener extends GameListener {
     IStatisticLogger[] loggerArray;
 
     public TMPlayerListener(IStatisticLogger[] loggerArray, IStatisticLogger aggregate) {
-        super(aggregate, null);
+        super(aggregate, new IGameMetric[]{});
         this.loggerArray = loggerArray;
     }
 
@@ -37,7 +33,7 @@ public class TMPlayerListener extends GameListener {
                 Map<String, Object> data = Arrays.stream(TMPlayerAttributes.values())
                         .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(this, event)));
                 loggerArray[i].record(data);
-                logger.record(data);
+                loggers.get(event.type).record(data);
             }
         }
     }
@@ -268,6 +264,16 @@ public class TMPlayerListener extends GameListener {
 
         public Object get(GameListener listener, Event event) {
             return lambda_sp.apply((TMPlayerListener) listener, event);
+        }
+
+        @Override
+        public boolean listens(Event.GameEvent eventType) {
+            return eventType == Event.GameEvent.GAME_OVER;
+        }
+
+        @Override
+        public boolean isRecordedPerPlayer() {
+            return true;
         }
 
     }

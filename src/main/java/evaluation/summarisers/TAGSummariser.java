@@ -1,10 +1,10 @@
-package utilities;
+package evaluation.summarisers;
 
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.*;
 
-public class TAGSummariser implements Collector<Number, TAGStatSummary, TAGStatSummary> {
+public class TAGSummariser implements Collector<Number, TAGNumericStatSummary, TAGNumericStatSummary> {
 
     /**
      * A function that creates and returns a new mutable result container.
@@ -12,8 +12,8 @@ public class TAGSummariser implements Collector<Number, TAGStatSummary, TAGStatS
      * @return a function which returns a new, mutable result container
      */
     @Override
-    public Supplier<TAGStatSummary> supplier() {
-        return TAGStatSummary::new;
+    public Supplier<TAGNumericStatSummary> supplier() {
+        return TAGNumericStatSummary::new;
     }
 
     /**
@@ -22,8 +22,8 @@ public class TAGSummariser implements Collector<Number, TAGStatSummary, TAGStatS
      * @return a function which folds a value into a mutable result container
      */
     @Override
-    public BiConsumer<TAGStatSummary, Number> accumulator() {
-        return TAGStatSummary::add;
+    public BiConsumer<TAGNumericStatSummary, Number> accumulator() {
+        return TAGNumericStatSummary::add;
     }
 
     /**
@@ -35,7 +35,7 @@ public class TAGSummariser implements Collector<Number, TAGStatSummary, TAGStatS
      * result
      */
     @Override
-    public BinaryOperator<TAGStatSummary> combiner() {
+    public BinaryOperator<TAGNumericStatSummary> combiner() {
         return (ss1, ss2) -> {
             ss1.add(ss2);
             return ss1;
@@ -54,7 +54,7 @@ public class TAGSummariser implements Collector<Number, TAGStatSummary, TAGStatS
      * result
      */
     @Override
-    public Function<TAGStatSummary, TAGStatSummary> finisher() {
+    public Function<TAGNumericStatSummary, TAGNumericStatSummary> finisher() {
         return ss -> ss;
     }
 

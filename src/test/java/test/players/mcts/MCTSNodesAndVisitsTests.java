@@ -11,7 +11,7 @@ import org.junit.*;
 import players.PlayerConstants;
 import players.mcts.*;
 import players.simple.RandomPlayer;
-import utilities.SummaryLogger;
+import evaluation.loggers.SummaryLogger;
 
 import java.util.*;
 

@@ -1,17 +1,18 @@
-package games.pandemic;
+package games.pandemic.stats;
 
 import core.AbstractGameState;
-import core.Game;
 import core.components.BoardNode;
 import core.components.Counter;
 import core.interfaces.IGameMetric;
 import core.properties.PropertyIntArray;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import evaluation.metrics.Event;
+import games.pandemic.PandemicConstants;
+import games.pandemic.PandemicGameState;
+import games.pandemic.PandemicParameters;
 import utilities.Hash;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import static games.pandemic.PandemicConstants.colors;
 import static games.pandemic.PandemicConstants.infectionHash;
@@ -30,16 +31,26 @@ public enum PandemicCompetitionRankingAttributes implements IGameMetric {
     N_DISEASE_CUBES_LEFT((l, e)-> countDisease(e.state, 0, true)),
     N_DISEASE_ERADICATED((l, e) -> countDisease(e.state, 2, false));
 
-    private final BiFunction<PandemicCompetitionListener, Event, Object> lambda;
+    private final BiFunction<GameListener, Event, Object> lambda;
 
-    PandemicCompetitionRankingAttributes(BiFunction<PandemicCompetitionListener, Event, Object> lambda) {
+    PandemicCompetitionRankingAttributes(BiFunction<GameListener, Event, Object> lambda) {
         this.lambda = lambda;
     }
 
     @Override
     public Object get(GameListener listener, Event event)
     {
-        return lambda.apply((PandemicCompetitionListener) listener, event);
+        return lambda.apply(listener, event);
+    }
+
+    @Override
+    public boolean listens(Event.GameEvent eventType) {
+        return eventType == Event.GameEvent.GAME_OVER;
+    }
+
+    @Override
+    public boolean isRecordedPerPlayer() {
+        return false;
     }
 
     static int countDisease(AbstractGameState state, int targetValue, boolean cubes) {
@@ -56,16 +67,16 @@ public enum PandemicCompetitionRankingAttributes implements IGameMetric {
         return count;
     }
 
-    static int countCityDanger(PandemicCompetitionListener listener, Event event) {
+    static int countCityDanger(GameListener listener, Event event) {
         PandemicGameState pgs = (PandemicGameState) event.state;
         PandemicParameters pp = (PandemicParameters) pgs.getGameParameters();
         int count = 0;
 
-        for (BoardNode bn: pgs.world.getBoardNodes()) {
+        for (BoardNode bn: pgs.getWorld().getBoardNodes()) {
             PropertyIntArray infectionArray = (PropertyIntArray) bn.getProperty(infectionHash);
             int[] array = infectionArray.getValues();
             for (int a: array) {
-                if (a >= pp.maxCubesPerCity-1) {
+                if (a >= pp.getMaxCubesPerCity() -1) {
                     count++;
                     break;
                 }

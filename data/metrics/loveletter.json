@@ -1,19 +1,34 @@
 {
-  "class": "evaluation.GameListener",
+  "class": "evaluation.metrics.GameListener",
   "args": [
     {
-      "class" : "utilities.SummaryLogger"
+      "class" : "evaluation.loggers.SummaryLogger"
     },
     [
       {
-        "info": "Cards discarded by players",
-        "enum": "games.loveletter.stats.LLGameAttributes",
+        "info": "# Cards discarded by players",
+        "enum": "games.loveletter.stats.LLStateActionAttributes",
         "value": "DISCARDED_CARDS"
       },
       {
-        "info": "Number of ticks played",
-        "enum": "utilities.GameMetric",
-        "value": "TICKS"
+        "info": "Score",
+        "enum": "evaluation.metrics.GameStatisticsAttributes",
+        "value": "SCORE"
+      },
+      {
+        "info": "Game status",
+        "enum": "evaluation.metrics.GameStatisticsAttributes",
+        "value": "GAME_STATUS"
+      },
+      {
+        "info": "Analysis on action space",
+        "enum": "evaluation.metrics.GameStatisticsAttributes",
+        "value": "ACTION_SPACE"
+      },
+      {
+        "info": "Stats on execution times",
+        "enum": "evaluation.metrics.EndGameStatisticsAttributes",
+        "value": "TIMES"
       }
     ]
   ]

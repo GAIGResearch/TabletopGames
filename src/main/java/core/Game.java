@@ -2,7 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.metrics.Event;
@@ -18,7 +18,7 @@ import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
-import utilities.TAGStatSummary;
+import evaluation.summarisers.TAGNumericStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
@@ -193,12 +193,12 @@ public class Game {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
-        TAGStatSummary[] overall = new TAGStatSummary[nPlayers];
+        TAGNumericStatSummary[] overall = new TAGNumericStatSummary[nPlayers];
         String[] agentNames = new String[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
             String[] split = players.get(i).getClass().toString().split("\\.");
             String agentName = split[split.length - 1] + "-" + i;
-            overall[i] = new TAGStatSummary("Overall " + agentName);
+            overall[i] = new TAGNumericStatSummary("Overall " + agentName);
             agentNames[i] = agentName;
         }
 
@@ -206,9 +206,9 @@ public class Game {
         for (GameType gt : gamesToPlay) {
 
             // Save win rate statistics over all repetitions of this game
-            TAGStatSummary[] statSummaries = new TAGStatSummary[nPlayers];
+            TAGNumericStatSummary[] statSummaries = new TAGNumericStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new TAGStatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
+                statSummaries[i] = new TAGNumericStatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
             }
 
             // Play n repetitions of this game and record player results
@@ -271,18 +271,18 @@ public class Game {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
-        TAGStatSummary[] overall = new TAGStatSummary[nPlayers];
+        TAGNumericStatSummary[] overall = new TAGNumericStatSummary[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
-            overall[i] = new TAGStatSummary("Overall Player " + i);
+            overall[i] = new TAGNumericStatSummary("Overall Player " + i);
         }
 
         // For each game...
         for (GameType gt : gamesToPlay) {
 
             // Save win rate statistics over all repetitions of this game
-            TAGStatSummary[] statSummaries = new TAGStatSummary[nPlayers];
+            TAGNumericStatSummary[] statSummaries = new TAGNumericStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new TAGStatSummary("Game: " + gt.name() + "; Player: " + i);
+                statSummaries[i] = new TAGNumericStatSummary("Game: " + gt.name() + "; Player: " + i);
             }
 
             // Play n repetitions of this game and record player results
@@ -317,7 +317,7 @@ public class Game {
      * @param statSummaries - object recording statistics
      * @param game          - finished game
      */
-    public static void recordPlayerResults(TAGStatSummary[] statSummaries, Game game) {
+    public static void recordPlayerResults(TAGNumericStatSummary[] statSummaries, Game game) {
         int nPlayers = statSummaries.length;
         Utils.GameResult[] results = game.getGameState().getPlayerResults();
         for (int p = 0; p < nPlayers; p++) {
@@ -598,7 +598,7 @@ public class Game {
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, gameState)));
         if (gameState.coreGameParameters.verbose) {
             System.out.println("Game Over");
         }

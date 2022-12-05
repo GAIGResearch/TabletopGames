@@ -1,11 +1,10 @@
-package utilities;
+package evaluation.metrics;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStatisticLogger;
-import evaluation.metrics.Event;
+
 /**
  * This provides a generic way of recording training data from games. After each move is made, it will record a feature
  * vector of the current state (for each player?) and the current score.

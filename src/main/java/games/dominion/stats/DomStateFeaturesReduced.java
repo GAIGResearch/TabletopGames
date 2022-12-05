@@ -1,4 +1,4 @@
-package games.dominion.metrics;
+package games.dominion.stats;
 
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;

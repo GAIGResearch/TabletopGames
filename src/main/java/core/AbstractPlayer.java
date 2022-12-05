@@ -3,7 +3,6 @@ package core;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
-import utilities.SummaryLogger;
 
 import java.util.Collections;
 import java.util.List;

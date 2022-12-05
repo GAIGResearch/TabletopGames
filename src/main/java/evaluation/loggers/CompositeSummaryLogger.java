@@ -1,5 +1,7 @@
-package utilities;
+package evaluation.loggers;
 import core.interfaces.IStatisticLogger;
+import evaluation.summarisers.TAGStatSummary;
+import utilities.Pair;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -20,7 +22,6 @@ public class CompositeSummaryLogger implements IStatisticLogger {
     public CompositeSummaryLogger(String logFile) {
         this.logFile = new File(logFile);
     }
-
 
     @Override
     public void record(Map<String, ?> data) {
@@ -75,5 +76,11 @@ public class CompositeSummaryLogger implements IStatisticLogger {
     @Override
     public Map<String, TAGStatSummary> summary() {
         return null;
+    }
+
+    @Override
+    public CompositeSummaryLogger emptyCopy(String id) {
+        if (logFile == null) return new CompositeSummaryLogger();
+        return new CompositeSummaryLogger(logFile.getPath());  // todo include id in filename
     }
 }

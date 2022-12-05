@@ -2,7 +2,7 @@ package gui;
 
 import core.*;
 import core.actions.AbstractAction;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import evaluation.TunableParameters;
 import evaluation.metrics.Event;
 import games.GameType;
@@ -487,16 +487,15 @@ public class Frontend extends GUI {
 
     private void listenForDecisions() {
         // add a listener to detect every time an action has been taken
-        gameRunning.addListener(new GameListener(null, null) {
-
+        gameRunning.addListener(new GameListener() {
             @Override
             public void onEvent(evaluation.metrics.Event event)
             {
                 if(event.type == Event.GameEvent.ACTION_TAKEN)
                     updateSampleActions(event.state.copy());
             }
-
         });
+
         // and then do this at the start of the game
         updateSampleActions(gameRunning.getGameState());
     }

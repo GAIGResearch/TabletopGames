@@ -1,39 +1,16 @@
 package evaluation.metrics;
-import core.Game;
 import core.interfaces.IGameMetric;
-import evaluation.GameListener;
 import utilities.Pair;
-import utilities.TAGStatSummary;
-import utilities.TAGSummariser;
+import evaluation.summarisers.TAGStatSummary;
+import evaluation.summarisers.TAGSummariser;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.IntStream;
 
 public enum EndGameStatisticsAttributes implements IGameMetric {
-    ACTION_SPACE((l,e) ->
-    {
-        List<Pair<Integer, Integer>> actionSpaceRecord = l.getGame().getActionSpaceSize();
-        TAGStatSummary stats = actionSpaceRecord.stream()
-                .map(r -> r.b)
-                .filter(size -> size > 1)
-                .collect(new TAGSummariser());
-        Map<String, Object> collectedData = new LinkedHashMap<>();
-        collectedData.put("ActionSpaceMean", stats.mean());
-        collectedData.put("ActionSpaceMin", stats.min());
-        collectedData.put("ActionSpaceMedian", stats.median());
-        collectedData.put("ActionSpaceMax", stats.max());
-        collectedData.put("ActionSpaceSkew", stats.skew());
-        collectedData.put("ActionSpaceKurtosis", stats.kurtosis());
-        collectedData.put("ActionSpaceVarCoeff", Math.abs(stats.sd() / stats.mean()));
-        return collectedData;
-    }, new HashSet<Event.GameEvent>() {{
-        add(Event.GameEvent.GAME_OVER);
-    }}),
     TIMES((l,e) ->
     {
         Map<String, Object> collectedData = new LinkedHashMap<>();
@@ -54,92 +31,73 @@ public enum EndGameStatisticsAttributes implements IGameMetric {
     }, new HashSet<Event.GameEvent>() {{
         add(Event.GameEvent.GAME_OVER);
     }}),
+    ORDINAL((l,e) -> e.state.getOrdinalPosition(e.playerID), new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.GAME_OVER);
+    }}, true),
+    PLAYER_TYPE((l,e) -> l.game.getPlayers().get(e.playerID).toString(), new HashSet<Event.GameEvent>() {{
+        add(Event.GameEvent.GAME_OVER);
+    }}, true),
     DECISIONS((l,e) ->
     {
         List<Pair<Integer, Integer>> actionSpaceRecord = l.getGame().getActionSpaceSize();
-        TAGStatSummary stats = actionSpaceRecord.stream()
+        TAGStatSummary statsDecisionsAll = actionSpaceRecord.stream()
+                .map(r -> r.b)
+                .collect(new TAGSummariser());
+        TAGStatSummary statsDecisions = actionSpaceRecord.stream()
                 .map(r -> r.b)
                 .filter(size -> size > 1)
                 .collect(new TAGSummariser());
         Map<String, Object> collectedData = new LinkedHashMap<>();
-        List<Integer> decisionPoints = l.getDecisionPoints();
+
         collectedData.put("ActionsPerTurnSum", l.getGame().getNActionsPerTurn());
-        TAGStatSummary movesWithDecision = decisionPoints.stream().collect(new TAGSummariser());
-        collectedData.put("Decisions", stats.n());
-        collectedData.put("DecisionPointsMean", movesWithDecision.mean());
-        return collectedData;
-    }, new HashSet<Event.GameEvent>() {{
-        add(Event.GameEvent.GAME_OVER);
-    }}),
-    SCORE((l, e) ->
-    {
-        Map<String, Object> collectedData = new LinkedHashMap<>();
-        List<Double> scores = l.getScores();
-        TAGStatSummary sc = scores.stream().collect(new TAGSummariser());
-        collectedData.put("ScoreMedian", sc.median());
-        collectedData.put("ScoreMean", sc.mean());
-        collectedData.put("ScoreMax", sc.max());
-        collectedData.put("ScoreMin", sc.min());
-        collectedData.put("ScoreVarCoeff", Math.abs(sc.sd() / sc.mean()));
-        TAGStatSummary scoreDelta = scores.size() > 1 ?
-                IntStream.range(0, scores.size() - 1)
-                        .mapToObj(i -> !scores.get(i + 1).equals(scores.get(i)) ? 1.0 : 0.0)
-                        .collect(new TAGSummariser())
-                : new TAGStatSummary();
-        collectedData.put("ScoreDelta", scoreDelta.mean()); // percentage of actions that lead to a change in score
-        return collectedData;
-    }, new HashSet<Event.GameEvent>() {{
-        add(Event.GameEvent.GAME_OVER);
-    }}),
-    STATE_SIZE((l, e) ->
-    {
-        Map<String, Object> collectedData = new LinkedHashMap<>();
-        List<Integer> components = l.getComponents();
-        TAGStatSummary stateSize = components.stream().collect(new TAGSummariser());
-        collectedData.put("StateSizeMedian", stateSize.median());
-        collectedData.put("StateSizeMean", stateSize.mean());
-        collectedData.put("StateSizeMax", stateSize.max());
-        collectedData.put("StateSizeMin", stateSize.min());
-        collectedData.put("StateSizeVarCoeff", Math.abs(stateSize.sd() / stateSize.mean()));
-        return collectedData;
-    }, new HashSet<Event.GameEvent>() {{
-        add(Event.GameEvent.GAME_OVER);
-    }}),
-    VISIBILITY((l, e) -> {
-        Map<String, Object> collectedData = new LinkedHashMap<>();
-        List<Double> visibilityOnTurn = l.getVisibility();
-        TAGStatSummary visibility = visibilityOnTurn.stream().collect(new TAGSummariser());
-        collectedData.put("HiddenInfoMedian", visibility.median());
-        collectedData.put("HiddenInfoMean", visibility.mean());
-        collectedData.put("HiddenInfoMax", visibility.max());
-        collectedData.put("HiddenInfoMin", visibility.min());
-        collectedData.put("HiddenInfoVarCoeff", Math.abs(visibility.sd() / visibility.mean()));
+        collectedData.put("Decisions", statsDecisions.n());
+        collectedData.put("DecisionPointsMean", statsDecisions.n() * 1.0 / statsDecisionsAll.n());
         return collectedData;
     }, new HashSet<Event.GameEvent>() {{
         add(Event.GameEvent.GAME_OVER);
     }});
 
-    private final BiFunction<GameStatisticsListener, Event, Object> lambda;
-    private HashSet<Event.GameEvent> eventTypes;
+    private final BiFunction<GameListener, Event, Object> lambda;
+    private final HashSet<Event.GameEvent> eventTypes;
+    private final boolean recordedPerPlayer;
 
-    EndGameStatisticsAttributes(BiFunction<GameStatisticsListener, Event, Object> lambda) {
+    EndGameStatisticsAttributes(BiFunction<GameListener, Event, Object> lambda, boolean recordedPerPlayer) {
         this.lambda = lambda;
         this.eventTypes = null;
+        this.recordedPerPlayer = recordedPerPlayer;
     }
 
-    EndGameStatisticsAttributes(BiFunction<GameStatisticsListener, Event, Object> lambda,  HashSet<Event.GameEvent> events) {
+    EndGameStatisticsAttributes(BiFunction<GameListener, Event, Object> lambda) {
+        this.lambda = lambda;
+        this.eventTypes = null;
+        this.recordedPerPlayer = false;
+    }
+
+    EndGameStatisticsAttributes(BiFunction<GameListener, Event, Object> lambda,  HashSet<Event.GameEvent> events) {
         this.lambda = lambda;
         this.eventTypes = events;
+        this.recordedPerPlayer = false;
+    }
+
+    EndGameStatisticsAttributes(BiFunction<GameListener, Event, Object> lambda,  HashSet<Event.GameEvent> events, boolean recordedPerPlayer) {
+        this.lambda = lambda;
+        this.eventTypes = events;
+        this.recordedPerPlayer = recordedPerPlayer;
     }
 
     public Object get(GameListener listener, Event event)
     {
-        return lambda.apply((GameStatisticsListener)listener, event);
+        return lambda.apply(listener, event);
     }
 
     public boolean listens(Event.GameEvent eventType)
     {
         if(eventTypes == null) return true; //by default, we listen to all types.
         return eventTypes.contains(eventType);
+    }
+
+    @Override
+    public boolean isRecordedPerPlayer() {
+        return recordedPerPlayer;
     }
 }

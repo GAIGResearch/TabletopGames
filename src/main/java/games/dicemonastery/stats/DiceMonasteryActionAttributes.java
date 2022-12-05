@@ -1,8 +1,10 @@
-package games.dicemonastery;
+package games.dicemonastery.stats;
 
 import core.interfaces.IGameMetric;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import evaluation.metrics.Event;
+import games.dicemonastery.DiceMonasteryGameState;
+import games.dicemonastery.DiceMonasteryTurnOrder;
 import games.dicemonastery.actions.*;
 
 import java.util.function.BiFunction;
@@ -25,7 +27,7 @@ public enum DiceMonasteryActionAttributes implements IGameMetric {
         if (e.action instanceof PlaceMonk) return ((PlaceMonk) e.action).destination.name();
         if (e.action instanceof ChooseMonk) return ((ChooseMonk) e.action).destination.name();
         if (e.action instanceof PromoteMonk) return ((PromoteMonk) e.action).location.name();
-        return ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).currentAreaBeingExecuted.name();
+        return ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getCurrentArea().name();
     }),
     THING((l, e) -> {
         if (e.action == null) return "";
@@ -61,6 +63,16 @@ public enum DiceMonasteryActionAttributes implements IGameMetric {
     @Override
     public Object get(GameListener listener, Event event) {
         return lambda.apply(listener, event);
+    }
+
+    @Override
+    public boolean listens(Event.GameEvent eventType) {
+        return eventType == Event.GameEvent.ACTION_CHOSEN;  // TODO
+    }
+
+    @Override
+    public boolean isRecordedPerPlayer() {
+        return false;
     }
 
 }

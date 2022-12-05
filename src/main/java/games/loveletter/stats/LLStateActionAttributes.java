@@ -1,11 +1,8 @@
 package games.loveletter.stats;
-import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.interfaces.IGameMetric;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import evaluation.metrics.Event;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.actions.DrawCard;
 
 import java.util.function.BiFunction;
 
@@ -19,14 +16,24 @@ public enum LLStateActionAttributes implements IGameMetric {
         return nCards;
     });
 
-    private final BiFunction<LLPlayerListener, Event, Object> lambda_sa;
-    LLStateActionAttributes(BiFunction<LLPlayerListener, Event, Object> lambda) {
+    private final BiFunction<GameListener, Event, Object> lambda_sa;
+    LLStateActionAttributes(BiFunction<GameListener, Event, Object> lambda) {
         this.lambda_sa = lambda;
     }
 
     @Override
     public Object get(GameListener listener, Event event) {
-        return lambda_sa.apply((LLPlayerListener) listener, event);
+        return lambda_sa.apply(listener, event);
+    }
+
+    @Override
+    public boolean listens(Event.GameEvent eventType) {
+        return eventType == Event.GameEvent.GAME_OVER;
+    }
+
+    @Override
+    public boolean isRecordedPerPlayer() {
+        return false;
     }
 
 }

@@ -1,9 +1,7 @@
-package games.sushigo;
+package games.sushigo.stats;
 
 import core.interfaces.IGameMetric;
-import core.AbstractGameState;
-import core.actions.AbstractAction;
-import evaluation.GameListener;
+import evaluation.metrics.GameListener;
 import evaluation.metrics.Event;
 
 import java.util.function.*;
@@ -22,6 +20,16 @@ public enum SGGameAttributes implements IGameMetric {
     @Override
     public Object get(GameListener listener, Event event) {
         return lambda.apply(listener, event);
+    }
+
+    @Override
+    public boolean listens(Event.GameEvent eventType) {
+        return eventType == Event.GameEvent.GAME_OVER;
+    }
+
+    @Override
+    public boolean isRecordedPerPlayer() {
+        return false;
     }
 
 }

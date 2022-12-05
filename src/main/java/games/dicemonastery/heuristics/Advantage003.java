@@ -5,7 +5,7 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import evaluation.metrics.Event;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.DiceMonasteryStateAttributes;
+import games.dicemonastery.stats.DiceMonasteryStateAttributes;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
