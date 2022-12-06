@@ -20,7 +20,9 @@ public class TakeAllCards extends AbstractAction {
         switch (location.getMoonType()) {
             case MINING:
             case PROCESSING:
-                state.getPlayerHand(player).add(location.getDeck());
+                while (location.getDeck().getSize() > 0) {
+                    state.getPlayerHand(player).add(location.getDeck().draw());
+                }
                 break;
             case METROPOLIS:
             case OUTPOST:

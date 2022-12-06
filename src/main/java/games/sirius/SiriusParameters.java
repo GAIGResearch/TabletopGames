@@ -38,9 +38,9 @@ public class SiriusParameters extends TunableParameters {
         addTunableParameter("ammonia", 22);
         addTunableParameter("superAmmonia", 5);
         addTunableParameter("hyperAmmonia", 3);
-        addTunableParameter("contraband", 12);
-        addTunableParameter("brokenContraband", 12);
-        addTunableParameter("glowingContraband", 12);
+        addTunableParameter("contraband", 11);
+        addTunableParameter("brokenContraband", 11);
+        addTunableParameter("glowingContraband", 11);
     }
 
     @Override

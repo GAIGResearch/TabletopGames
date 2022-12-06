@@ -59,7 +59,7 @@ public class Moon extends Component {
         }
     }
     public PartialObservableDeck<SiriusCard> getDeck() {
-        return deck.copy();
+        return deck;
     }
 
     public void addCard(SiriusCard card) {

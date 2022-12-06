@@ -160,6 +160,19 @@ public class TestMoves {
     }
 
     @Test
+    public void testTakeAllCardsFunctionsAsExpected() {
+        state.setGamePhase(Draw);
+        TakeAllCards action = new TakeAllCards(1);
+        state.getMoon(1).addCard(new SiriusCard("ammonia", AMMONIA, 1));
+        assertEquals(3, state.getMoon(1).getDeckSize());
+        assertEquals(0, state.getPlayerHand(0).getSize());
+        state.movePlayerTo(0, 1);
+        fm.next(state, action);
+        assertEquals(0, state.getMoon(1).getDeckSize());
+        assertEquals(3, state.getPlayerHand(0).getSize());
+    }
+
+    @Test
     public void testTakeCardLooksAtWholeMoonDeck() {
         state.setGamePhase(Draw);
         state.getMoon(1).addCard(new SiriusCard("ammonia", AMMONIA, 1));
