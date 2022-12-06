@@ -42,13 +42,6 @@ public class TestGlowingContraband {
     }
 
     @Test
-    public void testInitialContrabandSetup() {
-        assertEquals(params.brokenContraband, state.getDeck(CONTRABAND).stream().filter(c -> c.value == 1).count(), 2);
-        assertEquals(params.contraband, state.getDeck(CONTRABAND).stream().filter(c -> c.value == 2).count(), 2);
-        assertEquals(params.glowingContraband, state.getDeck(CONTRABAND).stream().filter(c -> c.value == 0).count(), 2);
-    }
-
-    @Test
     public void testSellCardsWithOneToThreeGlowingContraband() {
         for (int gc = 1; gc <= 4; gc++) {
             // execute on a copy

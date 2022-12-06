@@ -8,6 +8,7 @@ import core.components.Deck;
 import games.sirius.SiriusConstants.SiriusPhase;
 import games.sirius.actions.MoveToMoon;
 import games.sirius.actions.SellCards;
+import games.sirius.actions.TakeAllCards;
 import games.sirius.actions.TakeCard;
 import utilities.Utils;
 
@@ -97,7 +98,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
         SiriusTurnOrder turnOrder = (SiriusTurnOrder) state.getTurnOrder();
         turnOrder.endPlayerTurn(state);
         // check game end
-        if (state.ammoniaMedals.isEmpty()) {
+        if (state.ammoniaMedals.isEmpty() && state.contrabandMedals.isEmpty()) {
             state.setGameStatus(Utils.GameResult.GAME_END);
             int[] finalScores = new int[state.getNPlayers()];
             for (int p = 0; p < state.getNPlayers(); p++) {
@@ -126,7 +127,10 @@ public class SiriusForwardModel extends AbstractForwardModel {
                 switch (currentMoon.moonType) {
                     case MINING:
                     case PROCESSING:
-                        retValue = currentMoon.deck.stream().map(c -> new TakeCard(c.value)).distinct().collect(toList());
+                        if (state.getPlayersAt(currentLocation).length == 1)
+                            retValue.add(new TakeAllCards(currentLocation));
+                        else
+                            retValue = currentMoon.deck.stream().map(c -> new TakeCard(c.value)).distinct().collect(toList());
                         break;
                     case TRADING:
                         // TODO: For the moment we just sell all our Ammonia/Contraband cards, without doing anything more subtle

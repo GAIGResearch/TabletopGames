@@ -219,6 +219,15 @@ public class SiriusGameState extends AbstractGameState {
         return playerLocations[player];
     }
 
+    public int[] getPlayersAt(int location) {
+        List<Integer> players = new ArrayList<>();
+        for (int i = 0 ; i < playerLocations.length; i++) {
+            if (playerLocations[i] == location)
+                players.add(i);
+        }
+        return players.stream().mapToInt(i -> i).toArray();
+    }
+
     public Moon getMoon(int index) {
         return moons.get(index);
     }

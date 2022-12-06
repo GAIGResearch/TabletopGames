@@ -51,11 +51,14 @@ public class SiriusTurnOrder extends TurnOrder {
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, state, null));
         state.getPlayerTimer()[getCurrentPlayer(state)].incrementTurn();
 
+        boolean firstTurnOfDraw = false;
         switch (phase) {
             case Move:
                 if (state.allMovesSelected()) {
                     state.applyChosenMoves();
                     state.setGamePhase(SiriusPhase.Draw);
+                    firstPlayer = getPlayerAtRank(1);
+                    firstTurnOfDraw = true;
                 }
                 break;
             case Draw:
@@ -67,7 +70,7 @@ public class SiriusTurnOrder extends TurnOrder {
                 break;
         }
         turnCounter++;
-        turnOwner = nextPlayer(state);
+        turnOwner = firstTurnOfDraw ? firstPlayer : nextPlayer(state);
 
         // This next bit ensures that the player knows the cards they can select from
         // This has to be done before computeAvailableActions as this latter uses a re-determinised
@@ -124,7 +127,14 @@ public class SiriusTurnOrder extends TurnOrder {
                 int drawLimit = moon.getDeckSize() == 0 ? params.cardsPerEmptyMoon : params.cardsPerNonEmptyMoon;
                 for (int i = 0; i < drawLimit; i++) {
                     if (state.ammoniaDeck.getSize() > 0)
-                        moon.addCard((SiriusCard) state.ammoniaDeck.draw());
+                        moon.addCard(state.ammoniaDeck.draw());
+                }
+            }
+            if (moon.getMoonType() == PROCESSING) {
+                int drawLimit = moon.getDeckSize() == 0 ? params.cardsPerEmptyMoon : params.cardsPerNonEmptyMoon;
+                for (int i = 0; i < drawLimit; i++) {
+                    if (state.contrabandDeck.getSize() > 0)
+                        moon.addCard(state.contrabandDeck.draw());
                 }
             }
         }

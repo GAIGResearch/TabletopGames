@@ -85,7 +85,7 @@ public class Moon extends Component {
 
     @Override
     public String toString() {
-        return componentName + "(" + moonType + ")";
+        return componentName + " (" + moonType + ")";
     }
 }
 

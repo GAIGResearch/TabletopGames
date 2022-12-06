@@ -15,6 +15,7 @@ import utilities.Utils;
 import java.util.*;
 
 import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
+import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
 import static games.sirius.SiriusConstants.SiriusPhase.Draw;
 import static java.util.stream.Collectors.toList;
 import static junit.framework.TestCase.assertFalse;
@@ -26,13 +27,16 @@ public class TestMoves {
     SiriusGameState state;
     SiriusForwardModel fm = new SiriusForwardModel();
     List<AbstractPlayer> players = new ArrayList<>();
+    SiriusParameters params = new SiriusParameters();
 
     @Before
     public void setup() {
-        players = Arrays.asList(new RandomPlayer(),
+        players = Arrays.asList(
                 new RandomPlayer(),
-                new RandomPlayer());
-        game = GameType.Sirius.createGameInstance(3, 34, new SiriusParameters());
+                new RandomPlayer(),
+                new RandomPlayer()
+        );
+        game = GameType.Sirius.createGameInstance(3, 34, params);
         game.reset(players);
         state = (SiriusGameState) game.getGameState();
     }
@@ -107,17 +111,39 @@ public class TestMoves {
     }
 
     @Test
-    public void testTakeCardActionsInDrawPhase() {
+    public void testTakeCardActionsInDrawPhaseWithMultiplePlayersPresent() {
         state.setGamePhase(Draw);
-        state.movePlayerTo(0, 1);
-        List<Integer> distinctCardValues = state.getMoon(1).getDeck().stream().mapToInt(c -> c.value).distinct().boxed().collect(toList());
+        state.movePlayerTo(0, 2);
+        state.movePlayerTo(1, 2);
+        List<Integer> distinctCardValues = state.getMoon(2).getDeck().stream().mapToInt(c -> c.value).distinct().boxed().collect(toList());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(distinctCardValues.size(), actions.size());
         assertTrue(distinctCardValues.stream().map(TakeCard::new).allMatch(actions::contains));
 
-        state.getMoon(1).addCard(new SiriusCard("TestAmmonia", AMMONIA, 4));
+        state.getMoon(2).addCard(new SiriusCard("Test", CONTRABAND, 4));
         List<AbstractAction> extendedActions = fm.computeAvailableActions(state);
         assertEquals(distinctCardValues.size() + 1, extendedActions.size());
+    }
+
+    @Test
+    public void testTakeAllCardsIfOnlyPlayerPresent() {
+        state.setGamePhase(Draw);
+        state.movePlayerTo(0, 1);
+        state.movePlayerTo(1, 2);
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(1, actions.size());
+        assertEquals(new TakeAllCards(1), actions.get(0));
+
+        fm.next(state, actions.get(0));
+        assertEquals(2, state.getPlayerHand(0).getSize());
+        assertEquals(0, state.getPlayerHand(1).getSize());
+
+        actions = fm.computeAvailableActions(state);
+        assertEquals(1, actions.size());
+        assertEquals(new TakeAllCards(2), actions.get(0));
+
+        fm.next(state, actions.get(0));
+        assertEquals(2, state.getPlayerHand(1).getSize());
     }
 
     @Test
@@ -192,6 +218,7 @@ public class TestMoves {
 
     @Test
     public void testMedalGainedOnSale() {
+        state.setGamePhase(Draw);
         state.addCardToHand(0, new SiriusCard("test", AMMONIA, 1));
         state.addCardToHand(0, new SiriusCard("test", AMMONIA, 2));
         state.addCardToHand(0, new SiriusCard("test", AMMONIA, 3));
@@ -214,8 +241,9 @@ public class TestMoves {
     }
 
     @Test
-    public void testEndGameOnAmmoniaTrack() {
+    public void testEndGameOnAmmoniaAndContrabandTracks() {
         testMedalGainedOnSale();
+        assertEquals(1, state.getCurrentPlayer());
         state.addCardToHand(1, new SiriusCard("test", AMMONIA, 19));
         SellCards action = new SellCards(Collections.singletonList(
                 new SiriusCard("a", AMMONIA, 19)
@@ -224,8 +252,19 @@ public class TestMoves {
         assertEquals(0, state.getPlayerHand(1).getSize());
         assertEquals(1 + 3 + 4 + 5 + 6, state.getGameScore(1), 0.01);
         assertEquals(25, state.getTrackPosition(AMMONIA));
+        assertTrue(state.isNotTerminal());
+        assertEquals(2, state.getCurrentPlayer());
+        state.addCardToHand(2, new SiriusCard("test", CONTRABAND, params.contrabandTrack.length));
+        action = new SellCards(Collections.singletonList(
+                new SiriusCard("a", CONTRABAND, params.contrabandTrack.length)
+        ));
+        fm.next(state, action);
+        assertEquals(0, state.getPlayerHand(2).getSize());
+        assertEquals(params.contrabandTrack.length, state.getTrackPosition(CONTRABAND));
         assertFalse(state.isNotTerminal());
-        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[1]);
+        assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[0]);
+        assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[1]);
+        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[2]);
     }
 
 

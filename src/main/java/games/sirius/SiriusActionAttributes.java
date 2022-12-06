@@ -25,6 +25,7 @@ public class SiriusActionAttributes implements Supplier<IGameAttribute> {
         GAME_ID((s, a) -> s.getGameID()),
         ROUND((s, a) -> s.getTurnOrder().getRoundCounter()),
         TURN((s, a) -> s.getTurnOrder().getTurnCounter()),
+        PHASE((s, a) -> s.getGamePhase()),
         PLAYER((s, a) -> s.getCurrentPlayer()),
         ACTION_TYPE((s, a) -> a == null ? "NONE" : a.getClass().getSimpleName()),
         ACTION_DESCRIPTION((s, a) -> a == null ? "NONE" : a.getString(s)),

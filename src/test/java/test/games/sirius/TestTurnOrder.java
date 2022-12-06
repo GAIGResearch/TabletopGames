@@ -55,7 +55,6 @@ public class TestTurnOrder {
     @Test
     public void testCardsOnEmptyMiningMoons() {
         int base = params.cardsPerEmptyMoon;
-        int increment = params.cardsPerNonEmptyMoon;
         // N at start
         for (Moon moon : state.getAllMoons()) {
             if (moon.getMoonType() == MINING) {
@@ -73,7 +72,43 @@ public class TestTurnOrder {
     }
 
     @Test
+    public void testCardsOnProcessingMoons() {
+        int base = params.cardsPerEmptyMoon;
+        int increment = params.cardsPerNonEmptyMoon;
+        // N at start
+        for (Moon moon : state.getAllMoons()) {
+            if (moon.getMoonType() == PROCESSING)
+                assertEquals(base, moon.getDeckSize());
+        }
+        // at endRound we expect more to be added
+        sto.endRound(state);
+        for (Moon moon : state.getAllMoons()) {
+            if (moon.getMoonType() == PROCESSING)
+                assertEquals(base + increment, moon.getDeckSize());
+        }
+    }
+    @Test
+    public void testCardsOnEmptyProcessingMoons() {
+        int base = params.cardsPerEmptyMoon;
+        // N at start
+        for (Moon moon : state.getAllMoons()) {
+            if (moon.getMoonType() == PROCESSING) {
+                assertEquals(base, moon.getDeckSize());
+                for (int i = 0; i < base; i++)
+                    moon.drawCard();
+            }
+        }
+        // at endRound we expect more to be added
+        sto.endRound(state);
+        for (Moon moon : state.getAllMoons()) {
+            if (moon.getMoonType() == PROCESSING)
+                assertEquals(base, moon.getDeckSize());
+        }
+    }
+
+    @Test
     public void testNextPlayer() {
+        assertEquals(0, sto.getRoundCounter());
         assertEquals(1, sto.nextPlayer(state));
         fm.next(state, new MoveToMoon(1));
         assertEquals(2, sto.nextPlayer(state));
@@ -90,6 +125,32 @@ public class TestTurnOrder {
         assertEquals(0, sto.nextPlayer(state));
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(SiriusConstants.SiriusPhase.Move, state.getGamePhase());
+        assertEquals(1, sto.getRoundCounter());
+
+        // Round 2
+        assertEquals(0, sto.getTurnOwner());
+        assertEquals(1, sto.nextPlayer(state));
+        fm.next(state, new MoveToMoon(0));
+        assertEquals(1, sto.getTurnOwner());
+        assertEquals(2, sto.nextPlayer(state));
+        fm.next(state, new MoveToMoon(0));
+        assertEquals(2, sto.getTurnOwner());
+        assertEquals(1, sto.nextPlayer(state));
+        assertEquals(SiriusConstants.SiriusPhase.Move, state.getGamePhase());
+        fm.next(state, new MoveToMoon(2));
+
+        assertEquals(SiriusConstants.SiriusPhase.Draw, state.getGamePhase());
+        assertEquals(1, sto.getTurnOwner());
+        assertEquals(2, sto.nextPlayer(state));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+        assertEquals(2, sto.getTurnOwner());
+        assertEquals(0, sto.nextPlayer(state));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+        assertEquals(0, sto.getTurnOwner());
+        assertEquals(0, sto.nextPlayer(state));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+        assertEquals(SiriusConstants.SiriusPhase.Move, state.getGamePhase());
+        assertEquals(2, sto.getRoundCounter());
 
     }
 
