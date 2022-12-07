@@ -520,16 +520,20 @@ public class SingleTreeNode {
      * <p>
      * In some case Action is mutable, and will change state when advance() is called - so this method always copies
      * first for safety
+     *Returns the last actor
      *
      * @param gs  - current game state
      * @param act - action to apply
      */
-    protected void advance(AbstractGameState gs, AbstractAction act) {
+    protected int advance(AbstractGameState gs, AbstractAction act) {
         // we execute a copy(), because this can change the action, so we then don't find the node later!
+        int lastActor = gs.getCurrentPlayer();
         forwardModel.next(gs, act.copy());
         root.fmCallsCount++;
         if (params.opponentTreePolicy == SelfOnly && gs.getCurrentPlayer() != decisionPlayer)
-            advanceToTurnOfPlayer(gs, decisionPlayer);
+            return advanceToTurnOfPlayer(gs, decisionPlayer);
+        else
+            return lastActor;
     }
 
     /**
@@ -538,8 +542,9 @@ public class SingleTreeNode {
      *
      * @param id
      */
-    protected void advanceToTurnOfPlayer(AbstractGameState gs, int id) {
+    protected int advanceToTurnOfPlayer(AbstractGameState gs, int id) {
         // For the moment we only have one opponent model - that of a random player
+        int lastActor = gs.getCurrentPlayer();
         while (gs.getCurrentPlayer() != id && gs.isNotTerminalForPlayer(id)) {
             //       AbstractGameState preGS = gs.copy();
             AbstractPlayer oppModel = opponentModels[gs.getCurrentPlayer()];
@@ -547,9 +552,11 @@ public class SingleTreeNode {
             if (availableActions.isEmpty())
                 throw new AssertionError("Should always have at least one action possible...");
             AbstractAction action = oppModel.getAction(gs, availableActions);
+            lastActor = gs.getCurrentPlayer();
             forwardModel.next(gs, action);
             root.fmCallsCount++;
         }
+        return lastActor;
     }
 
     /**
@@ -818,10 +825,10 @@ public class SingleTreeNode {
                 if (availableActions.isEmpty())
                     break;
                 AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
-                lastActor = rolloutState.getCurrentPlayer();
+             //   lastActor = rolloutState.getCurrentPlayer();
                 rolloutActions.add(new Pair<>(lastActor, next));
                 int startingFMCalls = root.fmCallsCount;
-                advance(rolloutState, next);
+                lastActor = advance(rolloutState, next);
                 // rollout moves can be tracked by total forward model calls
                 // as these may occur for opponent moves, which should count against our budget
                 rolloutDepth += (root.fmCallsCount - startingFMCalls);
@@ -854,7 +861,12 @@ public class SingleTreeNode {
                 case DEFAULT:
                     return true;
                 case END_TURN:
-                    return lastActor == decisionPlayer && currentActor != decisionPlayer;
+                    if (params.opponentTreePolicy == SelfOnly) {
+                        // We check this here, as the advance() method always takes us to the turn of the decisionPlayer
+                        int nextActor = rollerState.getTurnOrder().nextPlayer(rollerState);
+                        return nextActor != decisionPlayer;
+                    }
+                    return lastActor == decisionPlayer && currentActor != decisionPlayer ;
                 case START_TURN:
                     return lastActor != decisionPlayer && currentActor == decisionPlayer;
                 case END_ROUND:
