@@ -166,7 +166,7 @@ public class MultiTreeNode extends SingleTreeNode {
             // for the decisionPlayer, or they are out of the game (in which case they will never get to expand a node)
         } while (currentState.isNotTerminal() &&
                 !(actionsInRollout.size() >= params.rolloutLength &&
-                        (nodeExpanded[decisionPlayer] || !currentState.isNotTerminalForPlayer(decisionPlayer))));
+                        (maxDepthReached[decisionPlayer] || nodeExpanded[decisionPlayer] || !currentState.isNotTerminalForPlayer(decisionPlayer))));
 
         for (int i = 0; i < nodeExpanded.length; i++) {
             updateCurrentLocation(i, currentState);
