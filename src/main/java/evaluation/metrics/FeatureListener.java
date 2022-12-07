@@ -2,7 +2,6 @@ package evaluation.metrics;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IGameMetric;
 import core.interfaces.IStatisticLogger;
 
 import java.util.*;

@@ -4,8 +4,6 @@ import core.*;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.GameListener;
 import games.GameType;
-import games.pandemic.stats.PandemicAttributes;
-import games.pandemic.stats.PandemicCompetitionRankingAttributes;
 import players.PlayerType;
 import players.human.ActionController;
 import players.mcts.MCTSPlayer;

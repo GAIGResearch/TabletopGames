@@ -1,9 +1,7 @@
 package evaluation.metrics;
 
 import core.Game;
-import core.interfaces.IGameMetric;
 import core.interfaces.IStatisticLogger;
-import utilities.Pair;
 import utilities.Utils;
 import evaluation.summarisers.TAGStatSummary;
 

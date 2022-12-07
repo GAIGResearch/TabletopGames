@@ -5,31 +5,12 @@
       "class" : "evaluation.loggers.SummaryLogger"
     },
     [
-      {
-        "info": "# Cards discarded by players",
-        "enum": "games.loveletter.stats.LLStateActionAttributes",
-        "value": "DISCARDED_CARDS"
-      },
-      {
-        "info": "Score",
-        "enum": "evaluation.metrics.GameStatisticsAttributes",
-        "value": "SCORE"
-      },
-      {
-        "info": "Game status",
-        "enum": "evaluation.metrics.GameStatisticsAttributes",
-        "value": "GAME_STATUS"
-      },
-      {
-        "info": "Analysis on action space",
-        "enum": "evaluation.metrics.GameStatisticsAttributes",
-        "value": "ACTION_SPACE"
-      },
-      {
-        "info": "Stats on execution times",
-        "enum": "evaluation.metrics.EndGameStatisticsAttributes",
-        "value": "TIMES"
-      }
+      {"class": "evaluation.metrics.MiscGameMetrics$ActionSimple" },
+      {"class": "evaluation.metrics.GameMetrics$PlayerType" },
+      {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
+      {"class": "evaluation.metrics.GameMetrics$GameScore" },
+      {"class": "evaluation.metrics.GameMetrics$ActionSpace" },
+      {"class": "games.loveletter.stats.LoveLetterMetrics$ActionsPlayedWin" }
     ]
   ]
 }

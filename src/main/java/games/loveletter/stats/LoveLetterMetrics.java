@@ -9,7 +9,7 @@ import utilities.Utils;
 
 public class LoveLetterMetrics {
 
-    public class ActionsPlayed extends AbstractMetric
+    public static class ActionsPlayed extends AbstractMetric
     {
         public ActionsPlayed() {
             addEventType(Event.GameEvent.ACTION_TAKEN);
@@ -29,7 +29,7 @@ public class LoveLetterMetrics {
         }
     }
 
-    public class ActionsPlayedWin extends AbstractMetric
+    public static class ActionsPlayedWin extends AbstractMetric
     {
         public ActionsPlayedWin() {
             addEventType(Event.GameEvent.ACTION_TAKEN);
@@ -51,4 +51,21 @@ public class LoveLetterMetrics {
         }
     }
 
+    public static class DiscardedCards extends AbstractMetric
+    {
+        public DiscardedCards() {
+            addEventType(Event.GameEvent.GAME_OVER);
+            recordPerPlayer = true;
+        }
+
+        @Override
+        public Object run(GameListener listener, Event e) {
+            int nCards = 0;
+            LoveLetterGameState llgs = (LoveLetterGameState) e.state;
+            for (int i = 0; i < e.state.getNPlayers(); i++) {
+                nCards += llgs.getPlayerDiscardCards().get(i).getSize();
+            }
+            return nCards;
+        }
+    }
 }

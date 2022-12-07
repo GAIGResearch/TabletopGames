@@ -3,7 +3,6 @@ package test.games.coltexpress;
 import core.AbstractPlayer;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.GameListener;
-import core.interfaces.IGameMetric;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
 import games.coltexpress.ColtExpressForwardModel;
@@ -13,7 +12,6 @@ import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.cards.RoundCard;
 import org.junit.Test;
 import players.simple.RandomPlayer;
-import utilities.Pair;
 
 import java.util.Arrays;
 import java.util.List;

@@ -364,12 +364,6 @@ public abstract class Utils {
                 args[i] = arg;
             }
 
-            if (cl.contains("$")) //For inner classes.
-            {
-                Object retValue = Utils.extractInnerInstance(cl);
-                return outputClass.cast(retValue);
-            }
-
             Class<?> clazz = Class.forName(cl);
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             Object retValue = constructor.newInstance(args);
@@ -388,40 +382,26 @@ public abstract class Utils {
 
     public static Class<?> determineArrayClass(JSONArray array)
     {
-        if(array.size() == 1)
+        if(array.size() > 1)
         {
             JSONObject first = (JSONObject) array.get(0);
-            return loadClassFromJSON(first).getClass();
-        }else
-        {
-            JSONObject first = (JSONObject) array.get(0);
-            JSONObject second = (JSONObject) array.get(1);
             String firstCl = (String) first.getOrDefault("class", "");
-            String secondCl = (String) second.getOrDefault("class", "");
-            if(firstCl.equalsIgnoreCase(secondCl))
-                return loadClassFromJSON(first).getClass();
-            else
-            {
-                // An array of two different classes. Either the array class is a common superclass or it's wrong.
+            for (int i = 1; i < array.size(); ++i) {
+                JSONObject second = (JSONObject) array.get(i);
+                String secondCl = (String) second.getOrDefault("class", "");
+                if (firstCl.equalsIgnoreCase(secondCl)) continue;
+                // We have an array of two different classes.
+                // Either the array class is a common superclass or it's wrong.
                 // We return the superclass of the first one.
                 Object firstClass = loadClassFromJSON(first);
                 return firstClass.getClass().getSuperclass();
             }
         }
+
+        //Either one single class or multiple repetitions of the same class.
+        JSONObject first = (JSONObject) array.get(0);
+        return loadClassFromJSON(first).getClass();
     }
-
-    public static Object extractInnerInstance(String cl) throws ReflectiveOperationException, IllegalArgumentException
-    {
-        //Retrieve the outer class and an instance of that object.
-        Class<?> outerClazz = Class.forName(cl.substring(0, cl.lastIndexOf("$")));
-        Object outerInstance = ConstructorUtils.getMatchingAccessibleConstructor(outerClazz).newInstance();
-
-        //Retrieve constructor and object of the inner class.
-        Class<?> innerClazz = Class.forName(cl);
-        Constructor<?> innerCtor = innerClazz.getDeclaredConstructor(outerClazz);
-        return innerCtor.newInstance(outerInstance);
-    }
-
 
     public static Object searchEnum(Object[] enumConstants, String search) {
         for (Object obj : enumConstants) {

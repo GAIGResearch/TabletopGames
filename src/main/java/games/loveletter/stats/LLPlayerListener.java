@@ -1,7 +1,6 @@
 package games.loveletter.stats;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IGameMetric;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.GameListener;
 import core.interfaces.IStatisticLogger;
@@ -12,10 +11,6 @@ import games.loveletter.actions.GuardAction;
 import games.loveletter.actions.PrinceAction;
 import games.loveletter.actions.PrincessAction;
 import utilities.Utils;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 public class LLPlayerListener extends GameListener {
 
     IStatisticLogger[] loggerArray;
@@ -47,15 +42,16 @@ public class LLPlayerListener extends GameListener {
     public void onEvent(Event event) {
 
         if(event.type == Event.GameEvent.GAME_OVER) {
+            //TODO: This needs work.
             for (int i = 0; i < event.state.getNPlayers(); i++) {
-                Map<String, Object> data = Arrays.stream(LLPlayerAttributes.values())
-                        .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(this, event)));
+//                Map<String, Object> data = Arrays.stream(LLPlayerAttributes.values())
+//                        .collect(Collectors.toMap(IGameMetric::name, attr -> attr.get(this, event)));
                 String wins = processCards(winningCards, i);
-                data.put("WINS_REASON", wins);
+//                data.put("WINS_REASON", wins);
                 String losses = processCards(losingCards, i);
-                data.put("LOSE_REASON", losses);
-                loggerArray[i].record(data);
-                loggers.get(event.type).record(data);
+//                data.put("LOSE_REASON", losses);
+//                loggerArray[i].record(data);
+//                loggers.get(event.type).record(data);
             }
             winningCards = null;
             losingCards = null;
