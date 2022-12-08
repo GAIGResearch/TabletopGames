@@ -206,6 +206,11 @@ public abstract class AbstractGameState {
     }
 
     public boolean isActionInProgress() {
+        // This checkActionsInProgress is essential
+        // When an action is completely executed this is marked on the Action (accessible via IExtendedSequence.executionComplete())
+        // However this does not [currently] actively remove the action from the queue on the game state. Whenever we check the actionsInProgress queue, we
+        // therefore first have to remove any completed actions (which is what checkActionsInProgress() does).
+        checkActionsInProgress();
         return !actionsInProgress.empty();
     }
 
