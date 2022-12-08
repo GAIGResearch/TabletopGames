@@ -7,8 +7,8 @@ import games.sirius.SiriusConstants.SiriusPhase;
 
 import java.util.Arrays;
 
-import static games.sirius.SiriusConstants.MoonType.MINING;
-import static games.sirius.SiriusConstants.MoonType.PROCESSING;
+import static games.sirius.SiriusConstants.MoonType.*;
+import static games.sirius.SiriusConstants.SiriusCardType.FAVOUR;
 
 public class SiriusTurnOrder extends TurnOrder {
 
@@ -51,26 +51,34 @@ public class SiriusTurnOrder extends TurnOrder {
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, state, null));
         state.getPlayerTimer()[getCurrentPlayer(state)].incrementTurn();
 
-        boolean firstTurnOfDraw = false;
+        boolean firstTurnOfPhase = false;
         switch (phase) {
             case Move:
                 if (state.allMovesSelected()) {
                     state.applyChosenMoves();
                     state.setGamePhase(SiriusPhase.Draw);
                     firstPlayer = getPlayerAtRank(1);
-                    firstTurnOfDraw = true;
+                    firstTurnOfPhase = true;
                 }
                 break;
             case Draw:
                 if (allActionsComplete()) {
+                    //   endRound(state);
+                    //   Arrays.fill(state.moveSelected, -1);
+                    state.setGamePhase(SiriusPhase.Favour);
+                    firstTurnOfPhase = true;
+                }
+                break;
+            case Favour:
+                if (allActionsComplete()) {
                     endRound(state);
                     Arrays.fill(state.moveSelected, -1);
                     state.setGamePhase(SiriusPhase.Move);
+                    firstTurnOfPhase = true;
                 }
-                break;
         }
         turnCounter++;
-        turnOwner = firstTurnOfDraw ? firstPlayer : nextPlayer(state);
+        turnOwner = firstTurnOfPhase ? firstPlayer : nextPlayer(state);
 
         // This next bit ensures that the player knows the cards they can select from
         // This has to be done before computeAvailableActions as this latter uses a re-determinised
@@ -135,6 +143,12 @@ public class SiriusTurnOrder extends TurnOrder {
                 for (int i = 0; i < drawLimit; i++) {
                     if (state.contrabandDeck.getSize() > 0)
                         moon.addCard(state.contrabandDeck.draw());
+                }
+            }
+            if (moon.getMoonType() == METROPOLIS) {
+                int drawLimit = state.getNPlayers() - moon.getDeckSize();
+                for (int i = 0; i < drawLimit; i++) {
+                    moon.addCard(new SiriusCard("Favour", FAVOUR, 1));
                 }
             }
         }

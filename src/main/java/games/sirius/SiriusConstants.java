@@ -5,7 +5,7 @@ import core.interfaces.IGamePhase;
 public class SiriusConstants {
 
     public enum SiriusPhase implements IGamePhase {
-        Move, Draw
+        Move, Draw, Favour
     }
 
     public enum MoonType {

@@ -18,8 +18,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static games.sirius.SiriusConstants.MoonType.*;
-import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
-import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
+import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static games.sirius.SiriusConstants.SiriusPhase.Move;
 import static java.util.stream.Collectors.toList;
 
@@ -52,6 +51,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
         state.moons.add(new Moon("Sirius", TRADING, state.rnd, state.getNPlayers()));
         state.moons.add(new Moon("Mining Outpost", MINING, state.rnd, state.getNPlayers()));
         state.moons.add(new Moon("Processing Station", PROCESSING, state.rnd, state.getNPlayers()));
+        state.moons.add(new Moon("Metropolis", METROPOLIS, state.rnd, state.getNPlayers()));
         for (Moon moon : state.getAllMoons()) {
             switch (moon.moonType) {
                 case MINING:
@@ -67,6 +67,9 @@ public class SiriusForwardModel extends AbstractForwardModel {
                 case TRADING:
                     break; // no deck
                 case METROPOLIS:
+                    for (int i = 0; i < state.getNPlayers(); i++) {
+                        moon.addCard(new SiriusCard("Favour", FAVOUR, 1));
+                    }
                 case OUTPOST:
                     throw new AssertionError("Not yet implemented");
             }
@@ -125,6 +128,9 @@ public class SiriusForwardModel extends AbstractForwardModel {
             case Draw:
                 Moon currentMoon = state.getMoon(currentLocation);
                 switch (currentMoon.moonType) {
+                    case METROPOLIS:
+                        retValue.add(new TakeCard(1));
+                        break;
                     case MINING:
                     case PROCESSING:
                         if (state.getPlayersAt(currentLocation).length == 1)
@@ -145,6 +151,14 @@ public class SiriusForwardModel extends AbstractForwardModel {
                 }
                 if (retValue.isEmpty())
                     retValue.add(new DoNothing());
+                break;
+            case Favour:
+                retValue.add(new PassOnFavour());
+                if (state.getPlayerHand(player).stream().anyMatch(c -> c.cardType == FAVOUR)) {
+                    retValue.add( new FavourToChangeRank);
+                    retValue.add( new FavourToAddCartel)
+                            // TODO: given limited action space, I can just enumerate the options here
+                }
                 break;
         }
         return retValue;
