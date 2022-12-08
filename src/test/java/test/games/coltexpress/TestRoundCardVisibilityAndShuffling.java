@@ -1,6 +1,7 @@
 package test.games.coltexpress;
 
 import core.AbstractPlayer;
+import evaluation.loggers.SummaryLogger;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.GameListener;
 import core.interfaces.IStatisticLogger;
@@ -37,7 +38,7 @@ public class TestRoundCardVisibilityAndShuffling {
         // check shuffling. The work is done in TestRoundEndListener()
 
         // This checks the counts of
-        game.addListener(new TestRoundEndListener(null, null));
+        game.addListener(new TestRoundEndListener(new SummaryLogger(), new AbstractMetric[0]));
         game.run();
     }
 
