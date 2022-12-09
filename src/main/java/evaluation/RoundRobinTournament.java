@@ -32,7 +32,7 @@ public class RoundRobinTournament extends AbstractTournament {
     double[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
-    public boolean verbose = true;
+    public boolean verbose = false;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
