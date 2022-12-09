@@ -4,15 +4,15 @@ import core.AbstractGameState;
 import players.heuristics.AbstractStateFeature;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
-import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
+import static games.sirius.SiriusConstants.SiriusCardType.*;
 
 public class SiriusStateFeatures extends AbstractStateFeature {
 
     String[] localNames = new String[]{"SALE_SCORE", "HAND_SIZE", "AMMONIA_TRACK", "CONTRABAND_TRACK", "AMMONIA_DECK", "CONTRABAND_DECK",
             "MEDAL_COUNT", "MEDAL_SCORE", "AM_2", "AM_3", "AM_4", "AM_5", "AM_6", "CM_2", "CM_3", "CM_4", "CM_5", "CM_6",
-            "CARTEL_1", "CARTEL_2", "CARTEL_3"};
+            "CARTEL_1", "CARTEL_2", "CARTEL_3", "FAVOUR_CARDS", "AMMONIA_TOT", "CONT_TOT", "GLOWING"};
 
     @Override
     protected double maxScore() {
@@ -56,6 +56,11 @@ public class SiriusStateFeatures extends AbstractStateFeature {
         retValue[18] = state.getMoon(1).getCartelOwner() == playerID ? 1 : 0;
         retValue[19] = state.getMoon(2).getCartelOwner() == playerID ? 1 : 0;
         retValue[20] = state.getMoon(3).getCartelOwner() == playerID ? 1 : 0;
+        retValue[21] = state.getPlayerHand(playerID).stream().filter(c -> c.cardType == FAVOUR).count();
+        retValue[22] = state.getPlayerHand(playerID).stream().filter((c -> c.cardType == AMMONIA)).mapToInt(c -> c.value).sum();
+        retValue[23] = state.getPlayerHand(playerID).stream().filter((c -> c.cardType == CONTRABAND)).mapToInt(c -> c.value).sum();
+        retValue[24] = state.getPlayerHand(playerID).stream().filter((c -> c.cardType == CONTRABAND && c.value == 0)).count();
+
         return retValue;
     }
 }

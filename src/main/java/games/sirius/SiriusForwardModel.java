@@ -99,15 +99,10 @@ public class SiriusForwardModel extends AbstractForwardModel {
         SiriusTurnOrder turnOrder = (SiriusTurnOrder) state.getTurnOrder();
         turnOrder.endPlayerTurn(state);
         // check game end
-        if (state.ammoniaMedals.isEmpty() && state.contrabandMedals.isEmpty()) {
+        if ((state.ammoniaMedals.isEmpty() && state.contrabandMedals.isEmpty()) || turnOrder.getRoundCounter() > 25) {
             state.setGameStatus(Utils.GameResult.GAME_END);
-            int[] finalScores = new int[state.getNPlayers()];
             for (int p = 0; p < state.getNPlayers(); p++) {
-                finalScores[p] = (int) state.getGameScore(p);
-            }
-            int winningScore = Arrays.stream(finalScores).max().orElseThrow(() -> new AssertionError("No MAX score found"));
-            for (int p = 0; p < state.getNPlayers(); p++) {
-                state.setPlayerResult(finalScores[p] == winningScore ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
+                state.setPlayerResult(state.getOrdinalPosition(p) == 1 ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
             }
         }
     }

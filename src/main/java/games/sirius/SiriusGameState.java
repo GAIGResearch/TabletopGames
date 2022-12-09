@@ -178,6 +178,15 @@ public class SiriusGameState extends AbstractGameState {
     }
 
     @Override
+    public double getTiebreak(int player) {
+        PlayerArea pa = playerAreas.get(player);
+        int medals = pa.medals.size();
+        int soldCards = pa.soldCards.getSize();
+        int rank = ((SiriusTurnOrder) turnOrder).getRank(player);
+        return medals * 10000 + soldCards * 100 - rank;
+    }
+
+    @Override
     protected void _reset() {
         ammoniaDeck = new Deck<>("ammoniaDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         contrabandDeck = new Deck<>("contrabandDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
@@ -316,6 +325,45 @@ public class SiriusGameState extends AbstractGameState {
         return retValue + 31 * Arrays.hashCode(playerResults)
                 - 255 * Arrays.hashCode(playerLocations)
                 - 31 * 255 * Arrays.hashCode(moveSelected);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        int result = Objects.hash(gameParameters);
+        sb.append(result).append("|");
+        result = Objects.hash(turnOrder);
+        sb.append(result).append("|");
+        result = Objects.hash(getAllComponents());
+        sb.append(result).append("|");
+        result = Objects.hash(gameStatus);
+        sb.append(result).append("|");
+        result = Objects.hash(gamePhase);
+        sb.append(result).append("|");
+        result = Arrays.hashCode(playerResults);
+        sb.append(result).append("|*|");
+        result = Objects.hash(ammoniaDeck);
+        sb.append(result).append("|");
+        result = Objects.hash(ammoniaMedals);
+        sb.append(result).append("|");
+        result = Objects.hash(ammoniaTrack);
+        sb.append(result).append("|");
+        result = Objects.hash(contrabandDeck);
+        sb.append(result).append("|");
+        result = Objects.hash(contrabandMedals);
+        sb.append(result).append("|2|");
+        result = Objects.hash(contrabandTrack);
+        sb.append(result).append("|3|");
+        result = Objects.hash(playerAreas);
+        sb.append(result).append("|4|");
+        result = Objects.hash(moons);
+        sb.append(result).append("|5|");
+        result = Arrays.hashCode(moveSelected);
+        sb.append(result).append("|6|");
+        result = Arrays.hashCode(playerLocations);
+        sb.append(result).append("|6|");
+        sb.append(result);
+        return sb.toString();
     }
 
 }

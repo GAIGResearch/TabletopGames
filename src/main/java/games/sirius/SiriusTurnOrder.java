@@ -193,7 +193,7 @@ public class SiriusTurnOrder extends TurnOrder {
     protected TurnOrder _copy() {
         SiriusTurnOrder retValue = new SiriusTurnOrder(nPlayers);
         retValue.nextPlayer = nextPlayer.clone();
-        retValue.playerByRank = nextPlayer.clone();
+        retValue.playerByRank = playerByRank.clone();
         return retValue;
     }
 
