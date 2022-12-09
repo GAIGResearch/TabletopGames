@@ -6,10 +6,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Deck;
 import games.sirius.SiriusConstants.SiriusPhase;
-import games.sirius.actions.MoveToMoon;
-import games.sirius.actions.SellCards;
-import games.sirius.actions.TakeAllCards;
-import games.sirius.actions.TakeCard;
+import games.sirius.actions.*;
 import utilities.Utils;
 
 import java.util.ArrayList;
@@ -70,6 +67,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
                     for (int i = 0; i < state.getNPlayers(); i++) {
                         moon.addCard(new SiriusCard("Favour", FAVOUR, 1));
                     }
+                    break;
                 case OUTPOST:
                     throw new AssertionError("Not yet implemented");
             }
@@ -118,6 +116,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         SiriusGameState state = (SiriusGameState) gameState;
         SiriusPhase phase = (SiriusPhase) state.getGamePhase();
+        SiriusTurnOrder sto = (SiriusTurnOrder) state.getTurnOrder();
         List<AbstractAction> retValue = new ArrayList<>();
         int player = state.getCurrentPlayer();
         int currentLocation = state.getLocationIndex(player);
@@ -155,9 +154,13 @@ public class SiriusForwardModel extends AbstractForwardModel {
             case Favour:
                 retValue.add(new PassOnFavour());
                 if (state.getPlayerHand(player).stream().anyMatch(c -> c.cardType == FAVOUR)) {
-                    retValue.add( new FavourToChangeRank);
-                    retValue.add( new FavourToAddCartel)
-                            // TODO: given limited action space, I can just enumerate the options here
+                    retValue.addAll(IntStream.rangeClosed(1, state.getNPlayers())
+                            .filter(r -> r != sto.getRank(player))
+                            .mapToObj(FavourForRank::new).collect(toList()));
+                    List<Moon> moons = state.getAllMoons();
+                    retValue.addAll(IntStream.range(0, moons.size())
+                            .filter(i -> moons.get(i).getMoonType() != TRADING && moons.get(i).cartelPlayer != player)
+                            .mapToObj(FavourForCartel::new).collect(toList()));
                 }
                 break;
         }

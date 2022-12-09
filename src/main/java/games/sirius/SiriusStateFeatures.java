@@ -11,7 +11,8 @@ import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
 public class SiriusStateFeatures extends AbstractStateFeature {
 
     String[] localNames = new String[]{"SALE_SCORE", "HAND_SIZE", "AMMONIA_TRACK", "CONTRABAND_TRACK", "AMMONIA_DECK", "CONTRABAND_DECK",
-            "MEDAL_COUNT", "MEDAL_SCORE", "AM_2", "AM_3", "AM_4", "AM_5", "AM_6", "CM_2", "CM_3", "CM_4", "CM_5", "CM_6"};
+            "MEDAL_COUNT", "MEDAL_SCORE", "AM_2", "AM_3", "AM_4", "AM_5", "AM_6", "CM_2", "CM_3", "CM_4", "CM_5", "CM_6",
+            "CARTEL_1", "CARTEL_2", "CARTEL_3"};
 
     @Override
     protected double maxScore() {
@@ -52,6 +53,9 @@ public class SiriusStateFeatures extends AbstractStateFeature {
         retValue[15] = medals.contains(new Medal(CONTRABAND, 4)) ? 1 : 0;
         retValue[16] = medals.contains(new Medal(CONTRABAND, 5)) ? 1 : 0;
         retValue[17] = medals.contains(new Medal(CONTRABAND, 6)) ? 1 : 0;
+        retValue[18] = state.getMoon(1).getCartelOwner() == playerID ? 1 : 0;
+        retValue[19] = state.getMoon(2).getCartelOwner() == playerID ? 1 : 0;
+        retValue[20] = state.getMoon(3).getCartelOwner() == playerID ? 1 : 0;
         return retValue;
     }
 }

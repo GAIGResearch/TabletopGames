@@ -75,15 +75,17 @@ public class TestMoves {
     @Test
     public void allMovesAvailableExceptForCurrentLocation() {
         List<AbstractAction> moves = fm.computeAvailableActions(state);
-        assertEquals(2, moves.size());
+        assertEquals(3, moves.size());
         assertEquals(new MoveToMoon(1), moves.get(0));
         assertEquals(new MoveToMoon(2), moves.get(1));
+        assertEquals(new MoveToMoon(3), moves.get(2));
 
         state.movePlayerTo(0, 1);
         moves = fm.computeAvailableActions(state);
-        assertEquals(2, moves.size());
+        assertEquals(3, moves.size());
         assertEquals(new MoveToMoon(0), moves.get(0));
         assertEquals(new MoveToMoon(2), moves.get(1));
+        assertEquals(new MoveToMoon(3), moves.get(2));
     }
 
     @Test

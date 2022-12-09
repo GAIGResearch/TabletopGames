@@ -14,6 +14,7 @@ public class Moon extends Component {
     PartialObservableDeck<SiriusCard> deck;
     Random rnd;
     MoonType moonType;
+    int cartelPlayer = -1;
 
     public Moon(String name, MoonType type, Random rnd, int nPlayers) {
         super(Utils.ComponentType.AREA, name);
@@ -41,6 +42,14 @@ public class Moon extends Component {
         return retValue;
     }
 
+    public void setCartelOwner(int player) {
+        cartelPlayer = player;
+    }
+
+    public int getCartelOwner() {
+        return cartelPlayer;
+    }
+
     public MoonType getMoonType() {
         return moonType;
     }
@@ -54,6 +63,7 @@ public class Moon extends Component {
             deck.setVisibilityOfComponent(i, player, true);
         }
     }
+
     public PartialObservableDeck<SiriusCard> getDeck() {
         return deck;
     }
@@ -70,18 +80,19 @@ public class Moon extends Component {
     public Moon copy() {
         Moon retValue = new Moon(this.componentName, this.moonType, new Random(rnd.nextInt()), componentID);
         retValue.deck = deck.copy();
+        retValue.cartelPlayer = cartelPlayer;
         copyComponentTo(retValue);
         return retValue;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(deck, moonType);
+        return Objects.hash(deck, moonType, cartelPlayer);
     }
 
     @Override
     public String toString() {
-        return componentName + " (" + moonType + ")";
+        return String.format("%s (%s) %s", componentName, moonType, cartelPlayer > -1 ? "Cartel :  " + cartelPlayer : "");
     }
 }
 

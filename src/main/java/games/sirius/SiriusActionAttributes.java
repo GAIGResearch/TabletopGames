@@ -33,11 +33,14 @@ public class SiriusActionAttributes implements Supplier<IGameAttribute> {
         THING((s, a) -> {
             if (a == null) return "";
             if (a instanceof SellCards) return ((SellCards) a).salesType;
+            if (a instanceof FavourForCartel) return s.getMoon(((FavourForCartel) a).cartelLocation).getComponentName();
             return "";
         }),
         VALUE((s, a) -> {
             if (a == null) return 0;
             if (a instanceof SellCards) return ((SellCards) a).getTotalValue();
+            if (a instanceof FavourForCartel) return ((FavourForCartel) a).cartelLocation;
+            if (a instanceof FavourForRank) return ((FavourForRank) a).newRank;
             return 0;
         });
 

@@ -122,11 +122,21 @@ public class TestTurnOrder {
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(2, sto.nextPlayer(state));
         fm.next(state, fm.computeAvailableActions(state).get(0));
+        assertEquals(1, sto.nextPlayer(state));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+
+        assertEquals(1, sto.getRoundCounter());
+        assertEquals(1, sto.getPlayerAtRank(1));
+
+        assertEquals(SiriusConstants.SiriusPhase.Favour, state.getGamePhase());
+        assertEquals(2, sto.nextPlayer(state));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(0, sto.nextPlayer(state));
         fm.next(state, fm.computeAvailableActions(state).get(0));
-        assertEquals(SiriusConstants.SiriusPhase.Move, state.getGamePhase());
-        assertEquals(1, sto.getRoundCounter());
+        assertEquals(0, sto.nextPlayer(state));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
 
+        assertEquals(SiriusConstants.SiriusPhase.Move, state.getGamePhase());
         // Round 2
         assertEquals(0, sto.getTurnOwner());
         assertEquals(1, sto.nextPlayer(state));
@@ -147,10 +157,22 @@ public class TestTurnOrder {
         assertEquals(0, sto.nextPlayer(state));
         fm.next(state, fm.computeAvailableActions(state).get(0));
         assertEquals(0, sto.getTurnOwner());
+        assertEquals(2, sto.nextPlayer(state));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+
+        assertEquals(2, sto.getRoundCounter());
+
+        assertEquals(SiriusConstants.SiriusPhase.Favour, state.getGamePhase());
+        assertEquals(2, sto.getTurnOwner());
         assertEquals(0, sto.nextPlayer(state));
         fm.next(state, fm.computeAvailableActions(state).get(0));
-        assertEquals(SiriusConstants.SiriusPhase.Move, state.getGamePhase());
-        assertEquals(2, sto.getRoundCounter());
+        assertEquals(0, sto.getTurnOwner());
+        assertEquals(1, sto.nextPlayer(state));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+        assertEquals(1, sto.getTurnOwner());
+        assertEquals(0, sto.nextPlayer(state));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
+
 
     }
 

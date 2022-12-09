@@ -30,14 +30,16 @@ public class SiriusCard extends Card {
 
     @Override
     public int hashCode() {
-        return Objects.hash(value, componentName); // deliberately excludes componentID
+        return Objects.hash(cardType, value, componentName); // deliberately excludes componentID
     }
 
     @Override
     public boolean equals(Object o) {
         if (o instanceof SiriusCard) {
             SiriusCard other = (SiriusCard) o;
-            return other.componentID == componentID && other.value == value && Objects.equals(other.componentName, componentName);
+            return other.value == value && other.componentID == componentID
+                    && other.cardType == cardType
+                    && Objects.equals(other.componentName, componentName);
         }
         return false;
     }
