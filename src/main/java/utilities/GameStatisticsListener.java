@@ -56,7 +56,7 @@ public class GameStatisticsListener implements IGameListener {
             long s = System.nanoTime();
             fm = game.getForwardModel();
 
-            collectedData.put("Game", game.getGameState().getGameID());
+            collectedData.put("GameID", game.getGameState().getGameID());
             collectedData.put("Players", String.valueOf(game.getGameState().getNPlayers()));
             collectedData.put("PlayerType", game.getPlayers().get(0).toString());
             fm.setup(state);
@@ -88,6 +88,7 @@ public class GameStatisticsListener implements IGameListener {
             collectedData.put("Ticks", game.getTick());
             collectedData.put("Rounds", game.getGameState().getTurnOrder().getRoundCounter());
             collectedData.put("ActionsPerTurn", game.getNActionsPerTurn());
+            collectedData.put("Game", game.getGameType().name());
 
             TAGStatSummary sc = scores.stream().collect(new TAGSummariser());
             collectedData.put("ScoreMedian", sc.median());
