@@ -90,7 +90,7 @@ public class WekaLogisticLearner extends AbstractLearner {
     public void writeToFile(String file) {
         try (FileWriter writer = new FileWriter(file, false)) {
             writer.write("BIAS\t" + String.join("\t", descriptions) + "\n");
-            writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.3g", d)).collect(Collectors.joining("\t")));
+            writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.4f", d)).collect(Collectors.joining("\t")));
             writer.write("\n");
         } catch (Exception e) {
             e.printStackTrace();
