@@ -16,7 +16,9 @@ import players.simple.RandomPlayer;
 import utilities.FileStatsLogger;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static utilities.Utils.GameResult;
 import static utilities.Utils.getArg;
@@ -31,7 +33,6 @@ public class RoundRobinTournament extends AbstractTournament {
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
     private double exploreEpsilon;
-    public boolean verbose = true;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -172,7 +173,7 @@ public class RoundRobinTournament extends AbstractTournament {
     @Override
     public void runTournament() {
         for (int g = 0; g < games.size(); g++) {
-            if (verbose)
+            if (debug)
                 System.out.println("Playing " + games.get(g).getGameType().name());
 
             LinkedList<Integer> matchUp = new LinkedList<>();
@@ -218,7 +219,7 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int agentID : agentIDs)
             matchUpPlayers.add(this.agents.get(agentID));
 
-        if(verbose)
+        if(debug)
         {
             StringBuffer sb = new StringBuffer();
             sb.append("[");
@@ -256,7 +257,7 @@ public class RoundRobinTournament extends AbstractTournament {
                     if(results[j] == GameResult.DRAW) pointsPerPlayer[agentIDs.get(j)] += pointsPerDraw;
             }
 
-            if(verbose)
+            if(debug)
             {
                 StringBuffer sb = new StringBuffer();
                 sb.append("[");
@@ -281,29 +282,29 @@ public class RoundRobinTournament extends AbstractTournament {
         HashMap<String, Double> ranked = new HashMap<>();
 
         // To console
-        if (verbose)  System.out.printf("============= %s - %d games played ============= \n", games.get(game_index).getGameType().name(), gameCounter);
+        System.out.printf("============= %s - %d games played ============= \n", games.get(game_index).getGameType().name(), gameCounter);
         for (int i = 0; i < this.agents.size(); i++) {
 
             ranked.put(agents.get(i).toString(), pointsPerPlayer[i]);
 
             String str = String.format("%s got %.2f points. ", agents.get(i), pointsPerPlayer[i]);
             if(toFile) dataDump.add(str);
-            if (verbose) System.out.print(str);
+            System.out.print(str);
 
             str = String.format("%s won %.1f%% of the %d games of the tournament. ",
                     agents.get(i), 100.0 * pointsPerPlayer[i] / gameCounter, gameCounter);
             if(toFile) dataDump.add(str);
-            if (verbose) System.out.print(str);
+             System.out.print(str);
 
             str = String.format("%s won %.1f%% of the %d games it played during the tournament.\n",
                     agents.get(i), 100.0 * pointsPerPlayer[i] / gamesPerPlayer, gamesPerPlayer);
             if(toFile) dataDump.add(str);
-            if (verbose) System.out.print(str);
+             System.out.print(str);
         }
 
         String str = "---- Ranking ---- \n";
         if(toFile) dataDump.add(str);
-        if (verbose)  System.out.print(str);
+        System.out.print(str);
 
         // Sort by points.
         Map<String, Double> valueDescSortMap = ranked.entrySet().stream()
@@ -316,7 +317,7 @@ public class RoundRobinTournament extends AbstractTournament {
         {
             str = String.format("%s: %.2f\n", name, valueDescSortMap.get(name));
             if(toFile) dataDump.add(str);
-            if (verbose) System.out.print(str);
+            System.out.print(str);
         }
 
         // To file
