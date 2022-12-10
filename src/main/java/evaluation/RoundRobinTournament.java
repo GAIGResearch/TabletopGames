@@ -16,9 +16,7 @@ import players.simple.RandomPlayer;
 import utilities.FileStatsLogger;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static utilities.Utils.GameResult;
 import static utilities.Utils.getArg;
@@ -32,7 +30,8 @@ public class RoundRobinTournament extends AbstractTournament {
     double[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
-    public boolean verbose = false;
+    private double exploreEpsilon;
+    public boolean verbose = true;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -103,10 +102,10 @@ public class RoundRobinTournament extends AbstractTournament {
             return;
         }
         /* 1. Settings for the tournament */
-        GameType gameToPlay = GameType.valueOf(getArg(args, "game", "SushiGo"));
-        int nPlayersPerGame = getArg(args, "nPlayers", 4);
+        GameType gameToPlay = GameType.valueOf(getArg(args, "game", "Uno"));
+        int nPlayersPerGame = getArg(args, "nPlayers", 2);
         boolean selfPlay = getArg(args, "selfPlay", false);
-        String mode = getArg(args, "mode", "random");
+        String mode = getArg(args, "mode", "exhaustive");
         int matchups = getArg(args, "matchups", 1);
         String playerDirectory = getArg(args, "players", "");
         String gameParams = getArg(args, "gameParams", "");
@@ -239,6 +238,7 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int i = 0; i < this.gamesPerMatchUp; i++) {
 
             games.get(gameIdx).reset(matchUpPlayers, currentSeed + i + 1);
+            games.get(gameIdx).setExploration(exploreEpsilon);
             games.get(gameIdx).run();  // Always running tournaments without visuals
             GameResult[] results = games.get(gameIdx).getGameState().getPlayerResults();
 
@@ -331,5 +331,17 @@ public class RoundRobinTournament extends AbstractTournament {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Sets the epsilon to be used for exploration in all games in the tournament
+     * This is when we want to add noise at the environmental level (e.g. for exploration during learning)
+     * independently of any exploration at the individual agent level
+     * @param epsilon
+     * @return this
+     */
+    public RoundRobinTournament setExploration(double epsilon) {
+        this.exploreEpsilon = epsilon;
+        return this;
     }
 }

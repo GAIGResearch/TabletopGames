@@ -61,6 +61,8 @@ public class Game {
     private int nDecisions;
     // Number of actions taken in a turn by a player
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
+    private double exploreEpsilon;
+    Random rnd = new Random(System.currentTimeMillis());
 
     private boolean pause, stop;
     private boolean debug = false;
@@ -545,11 +547,18 @@ public class Game {
                 action = observedActions.get(0);
                 currentPlayer.registerUpdatedObservation(observation);
             } else {
-                // Get action from player, and time it
-                s = System.nanoTime();
-                if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
-                action = currentPlayer.getAction(observation, observedActions);
-                agentTime += (System.nanoTime() - s);
+                boolean explore = rnd.nextDouble() < exploreEpsilon;
+                if (explore) {
+                    int roll = rnd.nextInt(observedActions.size());
+                    action = observedActions.get(roll);
+                    currentPlayer.registerUpdatedObservation(observation);
+                } else {
+                    // Get action from player, and time it
+                    s = System.nanoTime();
+                    if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
+                    action = currentPlayer.getAction(observation, observedActions);
+                    agentTime += (System.nanoTime() - s);
+                }
                 nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
@@ -753,6 +762,16 @@ public class Game {
      */
     public List<AbstractPlayer> getPlayers() {
         return players;
+    }
+
+    /**
+     * Sets the epsilon to be used for exploration in all games in the tournament
+     * This is when we want to add noise at the environmental level (e.g. for exploration during learning)
+     * independently of any exploration at the individual agent level
+     * @param epsilon
+     */
+    public void setExploration(double epsilon) {
+        exploreEpsilon = epsilon;
     }
 
     public boolean isPaused() {
