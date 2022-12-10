@@ -39,7 +39,7 @@ public class SiriusStateFeatures extends AbstractStateFeature {
         retValue[2] = state.ammoniaTrack;
         retValue[3] = state.contrabandTrack;
         retValue[4] = state.ammoniaDeck.getSize();
-        retValue[5] = 0; // TODO
+        retValue[5] = state.contrabandDeck.getSize(); // TODO
         Set<Medal> medals = new HashSet<>(state.playerAreas.get(playerID).medals);
         retValue[6] = medals.size();
         retValue[7] = medals.stream().mapToInt(m -> m.value).sum();
