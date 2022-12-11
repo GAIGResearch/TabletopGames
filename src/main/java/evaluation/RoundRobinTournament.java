@@ -282,7 +282,7 @@ public class RoundRobinTournament extends AbstractTournament {
         HashMap<String, Double> ranked = new HashMap<>();
 
         // To console
-        System.out.printf("============= %s - %d games played ============= \n", games.get(game_index).getGameType().name(), gameCounter);
+        System.out.printf("============= %s - %d games played ============= %n", games.get(game_index).getGameType().name(), gameCounter);
         for (int i = 0; i < this.agents.size(); i++) {
 
             ranked.put(agents.get(i).toString(), pointsPerPlayer[i]);
@@ -296,7 +296,7 @@ public class RoundRobinTournament extends AbstractTournament {
             if(toFile) dataDump.add(str);
              System.out.print(str);
 
-            str = String.format("%s won %.1f%% of the %d games it played during the tournament.\n",
+            str = String.format("%s won %.1f%% of the %d games it played during the tournament.%n",
                     agents.get(i), 100.0 * pointsPerPlayer[i] / gamesPerPlayer, gamesPerPlayer);
             if(toFile) dataDump.add(str);
              System.out.print(str);
