@@ -45,10 +45,10 @@ public class SiriusForwardModel extends AbstractForwardModel {
             state.contrabandDeck.add(new SiriusCard("Glowing Contraband", CONTRABAND, 0));
         }
         state.contrabandDeck.shuffle(state.rnd);
-        state.moons.add(new Moon("Sirius", TRADING, state.rnd, state.getNPlayers()));
-        state.moons.add(new Moon("Mining Outpost", MINING, state.rnd, state.getNPlayers()));
-        state.moons.add(new Moon("Processing Station", PROCESSING, state.rnd, state.getNPlayers()));
-        state.moons.add(new Moon("Metropolis", METROPOLIS, state.rnd, state.getNPlayers()));
+        state.moons.add(new Moon("Sirius", TRADING, state.getNPlayers()));
+        state.moons.add(new Moon("Mining Outpost", MINING, state.getNPlayers()));
+        state.moons.add(new Moon("Processing Station", PROCESSING, state.getNPlayers()));
+        state.moons.add(new Moon("Metropolis", METROPOLIS, state.getNPlayers()));
         for (Moon moon : state.getAllMoons()) {
             switch (moon.moonType) {
                 case MINING:

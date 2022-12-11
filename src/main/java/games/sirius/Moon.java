@@ -1,34 +1,35 @@
 package games.sirius;
 
 
-import core.components.*;
+import core.components.Component;
+import core.components.PartialObservableDeck;
 import games.sirius.SiriusConstants.MoonType;
 import utilities.Utils;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
 import java.util.function.Predicate;
 
 
 public class Moon extends Component {
 
     PartialObservableDeck<SiriusCard> deck;
-    Random rnd;
     MoonType moonType;
     int cartelPlayer = -1;
 
-    public Moon(String name, MoonType type, Random rnd, int nPlayers) {
+    public Moon(String name, MoonType type, int nPlayers) {
         super(Utils.ComponentType.AREA, name);
-        init(type, rnd, nPlayers);
+        init(type, nPlayers);
     }
 
-    private Moon(String name, MoonType type, Random rnd, int componentID, int nPlayers) {
+    private Moon(String name, MoonType type, int componentID, int nPlayers) {
         super(Utils.ComponentType.AREA, name, componentID);
-        init(type, rnd, nPlayers);
+        init(type, nPlayers);
     }
 
-    private void init(MoonType type, Random rnd, int nPlayers) {
+    private void init(MoonType type, int nPlayers) {
         deck = new PartialObservableDeck<>("Cards on " + componentName, nPlayers);
-        this.rnd = rnd;
         this.moonType = type;
     }
 
@@ -42,12 +43,12 @@ public class Moon extends Component {
         return retValue;
     }
 
-    public void setCartelOwner(int player) {
-        cartelPlayer = player;
-    }
-
     public int getCartelOwner() {
         return cartelPlayer;
+    }
+
+    public void setCartelOwner(int player) {
+        cartelPlayer = player;
     }
 
     public MoonType getMoonType() {
@@ -72,13 +73,9 @@ public class Moon extends Component {
         deck.add(card);
     }
 
-    public void shuffle() {
-        deck.shuffle(rnd);
-    }
-
     @Override
     public Moon copy() {
-        Moon retValue = new Moon(this.componentName, this.moonType, new Random(rnd.nextInt()), componentID);
+        Moon retValue = new Moon(this.componentName, this.moonType, componentID, getDeckSize());
         retValue.deck = deck.copy();
         retValue.cartelPlayer = cartelPlayer;
         copyComponentTo(retValue);
@@ -87,7 +84,7 @@ public class Moon extends Component {
 
     @Override
     public int hashCode() {
-        return Objects.hash(deck, moonType, cartelPlayer);
+        return Objects.hash(deck, moonType, cartelPlayer, componentID);
     }
 
     @Override

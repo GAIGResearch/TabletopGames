@@ -6,6 +6,7 @@ import core.interfaces.IGameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import games.GameType;
+import games.sirius.SiriusGameState;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
@@ -521,6 +522,7 @@ public class Game {
         // to reconstruct the starting hands etc.)
         AbstractGameState observation = gameState.copy(activePlayer);
         copyTime += (System.nanoTime() - s);
+  //      System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n", copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
 
         // Get actions for the player
         s = System.nanoTime();
@@ -612,6 +614,9 @@ public class Game {
             ((IPrintable) gameState).printToConsole();
         }
 
+        // Timers should average
+        terminateTimers();
+
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
         listeners.forEach(l -> l.onGameEvent(GameEvents.GAME_OVER, this));
@@ -623,9 +628,6 @@ public class Game {
         for (AbstractPlayer player : players) {
             player.finalizePlayer(gameState.copy(player.getPlayerID()));
         }
-
-        // Timers should average
-        terminateTimers();
 
         // Close video recording writer
         terminateVideoRecording();
@@ -676,6 +678,7 @@ public class Game {
      * @return - copy time
      */
     public double getCopyTime() {
+        System.out.printf("Average copy time was %.3f microseconsds%n", copyTime / 1e3);
         return copyTime;
     }
 

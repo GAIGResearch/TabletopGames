@@ -56,24 +56,27 @@ public class SiriusGameState extends AbstractGameState {
         retValue.ammoniaDeck = ammoniaDeck.copy();
         retValue.contrabandDeck = contrabandDeck.copy();
         retValue.playerAreas = playerAreas.stream().map(PlayerArea::copy).collect(toList());
-        retValue.moons = moons.stream().map(Moon::copy).collect(toList());
+        retValue.moons = new ArrayList<>();
+        for (Moon m : moons) {
+            retValue.moons.add(m.copy());
+        }
         retValue.playerLocations = playerLocations.clone();
         retValue.moveSelected = moveSelected.clone();
-        if (playerId != -1) {
+        if (playerId > -1) {
             // we only know our card choice
             Arrays.fill(retValue.moveSelected, -1);
             retValue.moveSelected[playerId] = moveSelected[playerId];
 
             List<Deck<SiriusCard>> ammoniaDecks = new ArrayList<>();
             ammoniaDecks.add(retValue.ammoniaDeck);
-            ammoniaDecks.addAll(moons.stream().filter(m -> m.moonType == MINING).map(Moon::getDeck).collect(toList()));
+            ammoniaDecks.addAll(retValue.moons.stream().filter(m -> m.moonType == MINING).map(Moon::getDeck).collect(toList()));
             ammoniaDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
             reshuffle(playerId, ammoniaDecks, c -> c.cardType == AMMONIA);
 
             List<Deck<SiriusCard>> contrabandDecks = new ArrayList<>();
-            ammoniaDecks.add(retValue.contrabandDeck);
-            ammoniaDecks.addAll(moons.stream().filter(m -> m.moonType == PROCESSING).map(Moon::getDeck).collect(toList()));
-            ammoniaDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
+            contrabandDecks.add(retValue.contrabandDeck);
+            contrabandDecks.addAll(retValue.moons.stream().filter(m -> m.moonType == PROCESSING).map(Moon::getDeck).collect(toList()));
+            contrabandDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
             reshuffle(playerId, contrabandDecks, c -> c.cardType == CONTRABAND);
         }
         retValue.ammoniaTrack = ammoniaTrack;
@@ -191,6 +194,7 @@ public class SiriusGameState extends AbstractGameState {
         ammoniaDeck = new Deck<>("ammoniaDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         contrabandDeck = new Deck<>("contrabandDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         moons = new ArrayList<>();
+        playerAreas = new ArrayList<>();
         ammoniaTrack = 0;
         contrabandTrack = 0;
         ammoniaMedals = new HashMap<>();
