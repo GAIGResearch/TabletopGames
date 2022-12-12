@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 public abstract class AbstractLearner implements ILearner {
 
@@ -17,7 +16,6 @@ public abstract class AbstractLearner implements ILearner {
     protected double[][] target;
     protected double[][] currentScore;
     String[] descriptions;
-    private final Random rnd = new Random(System.currentTimeMillis());
     double gamma;
     Target targetType;
 
