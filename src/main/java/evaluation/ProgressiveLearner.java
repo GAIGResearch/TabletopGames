@@ -30,6 +30,7 @@ public class ProgressiveLearner {
     List<AbstractPlayer> agents;
     ILearner learner;
     int nPlayers, matchups, iterations, iter, finalMatchups;
+    double maxExplore;
     AbstractPlayer basePlayer;
     AbstractPlayer[] agentsPerGeneration;
     String[] dataFilesByIteration;
@@ -55,6 +56,7 @@ public class ProgressiveLearner {
         finalMatchups = getArg(args, "finalMatchups", 1000);
         iterations = getArg(args, "iterations", 100);
         useOnlyLast = getArg(args, "useOnlyLast", false);
+        maxExplore = getArg(args, "explore", 0.0);
         agentsPerGeneration = new AbstractPlayer[iterations];
         dataFilesByIteration = new String[iterations];
         String learnerClass = getArg(args, "learner", "");
@@ -96,7 +98,7 @@ public class ProgressiveLearner {
                             "\t               This location(s) for this injection in the JSON file must be marked with '*FILE*'\n" +
                             "\t               The content of the 'heuristic' argument will be injected to replace *HEURISTIC* in the file.\n" +
                             "\t               It can also optionally have the class to be used as FeatureVector marked with '*PHI*'\n" +
-                            "\t               in which case the value specifies in the statePhi argument will be injected.\n" +
+                            "\t               in which case the value specified in the statePhi argument will be injected.\n" +
                             "\t               A default heuristic can be specified for the initial iteration with '*DEFAULT*'\n" +
                             "\t               in which case the defaultHeuristic argument will be used.\n" +
                             "\tfileName=      The prefix to use on the files generate on each learning iteration.\n" +
@@ -106,6 +108,8 @@ public class ProgressiveLearner {
                             "\t               generate a file that the heuristic can read.\n" +
                             "\ttarget=        The target to use (WIN, ORDINAL, SCORE, WIN_MEAN, ORD_MEAN)\n" +
                             "\tgamma=         The discount factor to use - this is applied per round, not per action\n" +
+                            "\texplore=       The starting exploration rate - at which random actions are taken by agents.\n" +
+                            "\t               This will reduce linearly to zero for the final iteration.\n" +
                             "\tdir=           The directory containing agent JSON files for learned heuristics and raw data\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tmatchups=      Defaults to 1. The number of games to play before the learning process is called.\n" +
@@ -119,7 +123,7 @@ public class ProgressiveLearner {
                             "\tdefaultHeuristic=Defaults to a null heuristic (random play). This is only used in the first iteration\n" +
                             "\t               when we have no data.  \n" +
                             "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n" +
-                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000."
+                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000.\n"
             );
             return;
         }
@@ -198,6 +202,7 @@ public class ProgressiveLearner {
         RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
                 System.currentTimeMillis(), params);
         tournament.verbose = false;
+        tournament.setExploration(maxExplore * (iterations - iter - 1) / (iterations - 1));
 
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;

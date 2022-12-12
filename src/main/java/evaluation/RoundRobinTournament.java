@@ -30,6 +30,7 @@ public class RoundRobinTournament extends AbstractTournament {
     int[] pointsPerPlayer;
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
+    private double exploreEpsilon;
     public boolean verbose = true;
 
     /**
@@ -224,7 +225,7 @@ public class RoundRobinTournament extends AbstractTournament {
         long currentSeed = games.get(gameIdx).getGameState().getGameParameters().getRandomSeed();
         for (int i = 0; i < this.gamesPerMatchUp; i++) {
             games.get(gameIdx).reset(matchUpPlayers, currentSeed + i + 1);
-
+            games.get(gameIdx).setExploration(exploreEpsilon);
             games.get(gameIdx).run();  // Always running tournaments without visuals
 
             GameResult[] results = games.get(gameIdx).getGameState().getPlayerResults();
@@ -234,5 +235,17 @@ public class RoundRobinTournament extends AbstractTournament {
         }
         games.get(gameIdx).clearListeners();
         matchUpsRun++;
+    }
+
+    /**
+     * Sets the epsilon to be used for exploration in all games in the tournament
+     * This is when we want to add noise at the environmental level (e.g. for exploration during learning)
+     * independently of any exploration at the individual agent level
+     * @param epsilon
+     * @return this
+     */
+    public RoundRobinTournament setExploration(double epsilon) {
+        this.exploreEpsilon = epsilon;
+        return this;
     }
 }

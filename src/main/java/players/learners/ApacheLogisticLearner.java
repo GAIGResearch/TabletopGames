@@ -26,12 +26,15 @@ public class ApacheLogisticLearner extends AbstractLearner {
                 .option("delimiter", "\t")
                 .option("header", "true")
                 .option("inferSchema", "true")
-                .csv("LL_Log_4P_2.data");
+                .csv("Apache_0.data");
 
         df.show(10);
 
-        String[] regressors = new String[]{"SCORE", "SCORE_ADV", "TREASURE", "ACTION", "SILVER_IN_DECK", "GOLD_IN_DECK",
-                "PROVINCE_IN_DECK", "ESTATE_IN_DECK", "DUCHY_IN_DECK", "TR_H", "AC_LEFT", "BUY_LEFT", "TOT_CRDS", "ROUND11", "OUR_TURN"};
+        String[] regressors = new String[]{"POINT_ADVANTAGE", "POINTS", "THREE_BOXES", "TWO_BOXES"};
+
+
+        //"GOLD_IN_DECK", "PROVINCE_IN_DECK", "ESTATE_IN_DECK", "DUCHY_IN_DECK", "TR_H", "AC_LEFT", "BUY_LEFT", "TOT_CRDS", "ROUND11", "OUR_TURN"};
+
         // headers are not case-sensitive, so ORDINAL7 is the current position, and Ordinal119 is the final achieved position
         try {
             df.createTempView("data");
@@ -39,7 +42,7 @@ public class ApacheLogisticLearner extends AbstractLearner {
             e.printStackTrace();
         }
         // for 4 players
-        df = spark.sql("select " + String.join(", ", regressors) + ", (1 - (Ordinal119 - 1) / 3) as Ordinal From data");
+        df = spark.sql(String.format("select %s, (1 - (Ordinal13 - 1) / 3) as Ordinal From data", String.join(", ", regressors)));
 
         df.show(10);
 
@@ -68,73 +71,81 @@ public class ApacheLogisticLearner extends AbstractLearner {
 
     }
 
-    @Override
-    public void learnFrom(String... files) {
-        loadData(files);
-        // first add the target to the data array so that we can convert to an apache dataset (we just add on the target)
-        double[][] apacheDataArray = new double[dataArray.length][dataArray[0].length + 1];
-        for (int i = 0; i < dataArray.length; i++) {
-            System.arraycopy(dataArray[i], 0, apacheDataArray[i], 0, descriptions.length + 1);
-            apacheDataArray[i][descriptions.length + 1] = target[i][0]; // add target to end
+        @Override
+        public void learnFrom (String...files){
+            loadData(files);
+            // first add the target to the data array so that we can convert to an apache dataset (we just add on the target)
+            double[][] apacheDataArray = new double[dataArray.length][dataArray[0].length];
+            for (int i = 0; i < dataArray.length; i++) {
+                // we skip the BIAS at the front here, as we add that in separately
+                System.arraycopy(dataArray[i], 1, apacheDataArray[i], 0, descriptions.length);
+                apacheDataArray[i][descriptions.length] = target[i][0]; // add target to end
+            }
+            // convert the raw data into Rows
+            List<Row> rowList = Arrays.stream(apacheDataArray)
+                    .map(doubleArray -> Arrays.stream(doubleArray).boxed().toArray())
+                    .map(RowFactory::create)
+                    .collect(toList());
+            // use the header to get the names, and all of them are double by design
+            String[] apacheHeader = new String[descriptions.length + 1];
+            System.arraycopy(descriptions, 0, apacheHeader, 0, descriptions.length);
+            apacheHeader[descriptions.length] = "target";
+            // set up the column names
+            StructType schema = new StructType(Arrays.stream(apacheHeader)
+                    .map(name -> new StructField(name, DataTypes.DoubleType, true, Metadata.empty()))
+                    .toArray(StructField[]::new)
+            );
+
+            // and convert to an apache Dataset
+            Dataset<Row> apacheData = spark.createDataFrame(rowList, schema);
+
+            if (debug)
+                apacheData.show(10);
+
+            RFormula formula = new RFormula()
+                    .setFormula("target ~ " + String.join(" + ", descriptions))
+                    .setFeaturesCol("features")
+                    .setLabelCol("target");
+
+            Dataset<Row> training = formula.fit(apacheData).transform(apacheData).select("features", "target");
+
+            if (debug)
+                training.show(10);
+
+            GeneralizedLinearRegression lr = new GeneralizedLinearRegression()
+                    .setFitIntercept(true)
+                    .setMaxIter(10)
+                    .setFamily("Binomial")
+                    .setLink("Logit")
+                    .setRegParam(0.1)
+                    .setLabelCol("target")
+                    .setFeaturesCol("features");
+
+            GeneralizedLinearRegressionModel lrModel = lr.fit(training);
+
+            if (debug)
+                System.out.println(lrModel.coefficients());
+
+            coefficients = new double[descriptions.length + 1];
+            coefficients[0] = lrModel.intercept();
+            double[] coeffs = lrModel.coefficients().toArray();
+            System.arraycopy(coeffs, 0, coefficients, 1, coeffs.length);
+
         }
-        // convert the raw data into Rows
-        List<Row> rowList = Arrays.stream(apacheDataArray).map(doubles -> RowFactory.create(Arrays.stream(doubles).boxed())).collect(toList());
-        // use the header to get the names, and all of them are double by design
-        String[] apacheHeader = new String[descriptions.length + 2];
-        apacheHeader[0] = "BIAS";
-        System.arraycopy(descriptions, 0, apacheHeader, 1, descriptions.length);
-        apacheHeader[descriptions.length + 1] = "target";
-        // set up the column names
-        StructType schema = new StructType(Arrays.stream(apacheHeader)
-                .map(name -> new StructField(name, DataTypes.DoubleType, true, Metadata.empty())).toArray(StructField[]::new));
 
-        // and convert to an apache Dataset
-        Dataset<Row> apacheData = spark.createDataFrame(rowList, schema);
+        @Override
+        public void writeToFile (String file) {
+            try (FileWriter writer = new FileWriter(file, false)) {
+                writer.write("BIAS\t" + String.join("\t", descriptions) + "\n");
+                writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.4f", d)).collect(joining("\t")));
+                writer.write("\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
-        if (debug)
-            apacheData.show(10);
-
-        RFormula formula = new RFormula()
-                .setFormula("target ~ " + String.join("BIAS + ", descriptions))
-                .setFeaturesCol("features")
-                .setLabelCol("target");
-
-        Dataset<Row> training = formula.fit(apacheData).transform(apacheData).select("features", "target");
-
-        if (debug)
-            training.show(10);
-
-        GeneralizedLinearRegression lr = new GeneralizedLinearRegression()
-                .setMaxIter(10)
-                .setFamily("Binomial")
-                .setLink("Logit")
-                .setRegParam(0.1)
-                //       .setElasticNetParam(0.8)
-                .setLabelCol("target")
-                .setFeaturesCol("features");
-
-        GeneralizedLinearRegressionModel lrModel = lr.fit(training);
-
-        if (debug)
-            System.out.println(lrModel.coefficients());
-
-        coefficients = lrModel.coefficients().toArray();
-
-    }
-
-    @Override
-    public void writeToFile(String file) {
-        try (FileWriter writer = new FileWriter(file, false)) {
-            writer.write("BIAS\t" + String.join("\t", descriptions) + "\n");
-            writer.write(Arrays.stream(coefficients).mapToObj(d -> String.format("%.3g", d)).collect(joining("\t")));
-            writer.write("\n");
-        } catch (Exception e) {
-            e.printStackTrace();
+        @Override
+        public String name() {
+            return "ApacheLogistic";
         }
     }
-
-    @Override
-    public String name() {
-        return "ApacheLogistic";
-    }
-}
