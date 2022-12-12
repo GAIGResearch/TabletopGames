@@ -1,9 +1,6 @@
 package players.learners;
 
 import core.interfaces.ILearner;
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instances;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -19,9 +16,6 @@ public abstract class AbstractLearner implements ILearner {
     protected String[] header;
     protected double[][] target;
     protected double[][] currentScore;
-    protected ArrayList<Attribute> attributes;
-    protected boolean addNoise = false;
-    protected double noiseLevel = 0.01;
     String[] descriptions;
     private final Random rnd = new Random(System.currentTimeMillis());
     double gamma;
@@ -87,10 +81,7 @@ public abstract class AbstractLearner implements ILearner {
                 || !header[header.length - 5].equals("PlayerCount")) {
             throw new AssertionError("Unexpected final header entries " + String.join("", header));
         }
-        attributes = new ArrayList<>();
-        attributes.add(new Attribute("BIAS"));
-        for (int i = 5; i < header.length - 5; i++)
-            attributes.add(new Attribute(header[i]));
+
         dataArray = new double[data.size()][];
         target = new double[data.size()][1];
         currentScore = new double[data.size()][1];
@@ -118,28 +109,4 @@ public abstract class AbstractLearner implements ILearner {
         }
     }
 
-    protected Instances createInstances(boolean includeBias) {
-        List<String> values = new ArrayList<>();
-        values.add("0");
-        values.add("1");
-        attributes.add(new Attribute("Win", values));
-        Instances dataInstances = new Instances("data", attributes, dataArray.length - 1);
-        if (!includeBias)
-            attributes.remove(0);
-        for (int i = 0; i < dataArray.length; i++) {
-            double[] record = new double[dataArray[i].length - 1];
-            System.arraycopy(dataArray[i], includeBias ? 0 : 1, record, 0, record.length);
-            // we may skip the bias term in dataArray at position 0
-            if (addNoise)
-                for (int j = 1; j < record.length; j++)  // we do not add noise to the BIAS term
-                    record[j] += rnd.nextDouble() * noiseLevel; // to avoid WEKA removing
-            double[] XandY = new double[record.length + 1];
-            System.arraycopy(record, 0, XandY, 0, record.length);
-            XandY[record.length] = 1.0 - target[i][0]; // this puts the first category (0) for a win, and the second (1) as a loss.
-            // this means that we learn a classifier to identify wins, and the coefficients are more naturally interpretable
-            dataInstances.add(new DenseInstance(1.0, XandY));
-        }
-        dataInstances.setClassIndex(attributes.size() - 1);
-        return dataInstances;
-    }
 }
