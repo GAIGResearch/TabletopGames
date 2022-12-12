@@ -9,12 +9,12 @@ import java.util.Objects;
 
 import libsvm.*;
 
-public class SimpleSVMLearner extends AbstractLearner {
+public class SVMLearner extends AbstractLearner {
 
     svm_model model;
     svm_parameter params = new svm_parameter();
 
-    public SimpleSVMLearner() {
+    public SVMLearner() {
         params.gamma = 5.0;
         params.kernel_type = svm_parameter.RBF;
         params.degree = 2;
@@ -25,7 +25,7 @@ public class SimpleSVMLearner extends AbstractLearner {
         params.p = 0.003;
         params.shrinking = 1;
     }
-    public SimpleSVMLearner(svm_parameter params) {
+    public SVMLearner(svm_parameter params) {
         this.params = params;
     }
 
@@ -36,7 +36,7 @@ public class SimpleSVMLearner extends AbstractLearner {
         String[] files = Objects.requireNonNull(dir.list());
         files = Arrays.stream(files).map(file -> args[0] + File.separator + file).toArray(String[]::new);
 
-        SimpleSVMLearner learner = new SimpleSVMLearner();
+        SVMLearner learner = new SVMLearner();
         learner.learnFrom(files);
         learner.writeToFile("test_SVM_NU_06.txt");
     }
