@@ -45,6 +45,7 @@ public class ExplodingKittensParameters extends TunableParameters {
             if (c == ExplodingKittensCard.CardType.EXPLODING_KITTEN) addTunableParameter(c.name() + " count", -1);
             else addTunableParameter(c.name() + " count", cardCounts.get(c), Arrays.asList(1,2,3,4,5));
         }
+        _reset();
     }
 
     @Override

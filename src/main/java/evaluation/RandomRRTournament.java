@@ -15,6 +15,7 @@ public class RandomRRTournament extends RoundRobinTournament {
 
     private int totalMatchups;
     private IntSupplier idStream;
+    private int reportPeriod;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -25,9 +26,10 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RandomRRTournament(List<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                              boolean selfPlay, int totalMatchUps, long seed, AbstractParameters gameParams) {
+                              boolean selfPlay, int totalMatchUps, int reportPeriod, long seed, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, 1, selfPlay, gameParams);
         this.totalMatchups = totalMatchUps;
+        this.reportPeriod = reportPeriod;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
     }
 
@@ -47,6 +49,8 @@ public class RandomRRTournament extends RoundRobinTournament {
             for (int j = 0; j < nPlayers; j++)
                 matchup.add(idStream.getAsInt());
             evaluateMatchUp(matchup, gameIdx);
+            if((i+1) % reportPeriod == 0)
+                reportResults(gameIdx);
         }
     }
 

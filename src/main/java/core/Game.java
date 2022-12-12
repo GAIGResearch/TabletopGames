@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static core.CoreConstants.*;
 import static core.CoreConstants.GameEvents;
 import static games.GameType.*;
 import static utilities.Utils.componentToImage;
@@ -79,6 +80,8 @@ public class Game {
     String codecName = null;
     int snapsPerSecond = 10;
     private int turnPause;
+
+    public boolean paused;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -232,6 +235,7 @@ public class Game {
                 } else {
                     break;
                 }
+                // System.out.println("Game " + i + "/" + nRepetitions);
             }
 
             if (game != null) {
@@ -494,7 +498,7 @@ public class Game {
         return this.getPlayers().get(activePlayer) instanceof HumanGUIPlayer;
     }
 
-    public final void oneAction() {
+    public final AbstractAction oneAction() {
 
         // we pause before each action is taken if running with a delay (e.g. for video recording with random players)
         if (turnPause > 0)
@@ -596,6 +600,7 @@ public class Game {
         AbstractAction finalAction1 = action;
         listeners.forEach(l -> l.onEvent(GameEvents.ACTION_TAKEN, gameState.copy(), finalAction1.copy()));
         if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
+        return action;
     }
 
     /**
@@ -773,6 +778,10 @@ public class Game {
         return pause;
     }
 
+    public void flipPaused() {
+        this.paused = !this.paused;
+    }
+
     public void setPaused(boolean paused) {
         this.pause = paused;
     }
@@ -923,7 +932,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Pandemic");
+        String gameType = Utils.getArg(args, "game", "TerraformingMars");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int playerCount = Utils.getArg(args, "nPlayers", 2);
         int turnPause = Utils.getArg(args, "turnPause", 0);
@@ -935,13 +944,13 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
 
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
-//        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 //        players.add(new HumanConsolePlayer());

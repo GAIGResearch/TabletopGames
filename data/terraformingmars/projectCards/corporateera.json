@@ -1,0 +1,4964 @@
+[{
+  "number": 208,
+  "annotation": "(Action: Draw 2 cards.)",
+  "cardType": "Active",
+  "cost": 21,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.TagsPlayedRequirement",
+      "data": {
+        "tags": [
+          "Science"
+        ],
+        "nMin": [
+          3
+        ],
+        "nTags": 3
+      }
+    }
+  ],
+  "tags": [
+    "Building",
+    "Science"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Card",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 2.0,
+        "freeActionPoint": false,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Energy",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -1
+            }
+          }
+        ],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "AI Central"
+},{
+  "number": 207,
+  "annotation": "(Increase your MC production 1 step for every 2 Building tags you have, including this.)",
+  "cardType": "Automated",
+  "cost": 13,
+  "tags": [
+    "Building",
+    "Science"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 0.5,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Medical Lab"
+},{
+  "number": 204,
+  "annotation": "(Draw two cards.)",
+  "cardType": "Event",
+  "cost": 5,
+  "tags": [
+    "Event",
+    "Space",
+    "Science"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Card",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Technology Demonstration"
+},{
+  "number": 201,
+  "annotation": "(Decrease any Energy production 1 step and increase your own 1 step.)",
+  "cardType": "Automated",
+  "cost": 3,
+  "tags": [
+    "Power"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -2,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Energy",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -2
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": -1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Energy Tapping"
+},{
+  "number": 199,
+  "annotation": "(Action: Spend 2 MC to draw a card.)",
+  "cardType": "Active",
+  "cost": 11,
+  "tags": [
+    "Science"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.CompoundAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "MegaCredit",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -2.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Card",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": 1.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "MegaCredit",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -2.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Card",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": 1.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.PlaceTile",
+      "data": {
+        "respectingAdjacency": true,
+        "onMars": true,
+        "mapTileID": -1,
+        "tile": "Restricted",
+        "mapType": "Ground",
+        "volcanicRestriction": false,
+        "removeResourcesAdjacentOwner": false,
+        "removeResourcesAmount": 0,
+        "removeResourcesProd": false,
+        "placed": false,
+        "impossible": false,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Restricted Area"
+},{
+  "number": 197,
+  "annotation": "(Raise your TR 1 step for each Jovian tag you have, including this.)",
+  "cardType": "Automated",
+  "cost": 33,
+  "tags": [
+    "Space",
+    "Jovian"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "TR",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "tagToCount": "Jovian",
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 2.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Terraforming Ganymede"
+},{
+  "number": 196,
+  "annotation": "(Draw 1 card.)",
+  "cardType": "Automated",
+  "cost": 9,
+  "tags": [
+    "Space",
+    "Science"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Card",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Lagrange Observatory"
+},{
+  "number": 195,
+  "annotation": "(The next card you play this generation costs 8 MC less.)",
+  "cardType": "Event",
+  "cost": 0,
+  "tags": [
+    "Event"
+  ],
+  "nPoints": -1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Indentured Workers"
+},{
+  "number": 194,
+  "annotation": "(Action: Spend any amount of Energy and gain that amount of MC.)",
+  "cardType": "Active",
+  "cost": 4,
+  "tags": [
+    "Building",
+    "Power"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResource": "MegaCredit",
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": false,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Power Infrastructure"
+},{
+  "number": 192,
+  "annotation": "LOOK AT THE TOP 3 CARDS FROM THE DECK. TAKE 1 OF THEM INTO HAND AND DISCARD THE OTHER 2",
+  "cardType": "Event",
+  "cost": 2,
+  "tags": [
+    "Event",
+    "Science"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.TopCardDecision",
+      "data": {
+        "stage": 0,
+        "nCardsKept": 0,
+        "nCardsLook": 3,
+        "nCardsKeep": 1,
+        "buy": false,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Invention Contest"
+},{
+  "number": 186,
+  "annotation": "(Requires two cities in play. Increase your MC up 1 step.)",
+  "cardType": "Automated",
+  "cost": 6,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.TilePlacedRequirement",
+      "data": {
+        "tile": "City",
+        "threshold": 2,
+        "max": false,
+        "any": true
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Rad-Suits"
+},{
+  "number": 185,
+  "annotation": "(When you play a Science tag, including this, either add a Science resource to this card, or remove a Science resource from this card to draw a card.)",
+  "cardType": "Active",
+  "cost": 10,
+  "tags": [
+    "Building",
+    "Earth",
+    "Science"
+  ],
+  "persistingEffects": [
+    {
+      "name": "games.terraformingmars.rules.effects.PlayCardEffect",
+      "data": {
+        "tagsOnCard": [
+          "Science"
+        ],
+        "mustBeCurrentPlayer": true,
+        "effectAction": {
+          "name": "games.terraformingmars.actions.ChoiceAction",
+          "data": {
+            "actions": [
+              {
+                "name": "games.terraformingmars.actions.AddResourceOnCard",
+                "data": {
+                  "resource": "Science",
+                  "amount": 1,
+                  "chooseAny": false,
+                  "minResRequirement": 0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              },
+              {
+                "name": "games.terraformingmars.actions.CompoundAction",
+                "data": {
+                  "actions": [
+                    {
+                      "name": "games.terraformingmars.actions.AddResourceOnCard",
+                      "data": {
+                        "resource": "Science",
+                        "amount": -1,
+                        "chooseAny": false,
+                        "minResRequirement": 0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    },
+                    {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "Card",
+                        "production": false,
+                        "targetPlayer": -1,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": 1.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    }
+                  ],
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [
+                    {
+                      "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                      "data": {
+                        "action": {
+                          "name": "games.terraformingmars.actions.AddResourceOnCard",
+                          "data": {
+                            "resource": "Science",
+                            "amount": -1,
+                            "chooseAny": false,
+                            "minResRequirement": 0,
+                            "freeActionPoint": true,
+                            "player": -1,
+                            "pass": false,
+                            "requirements": [],
+                            "cost": 0
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                      "data": {
+                        "action": {
+                          "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                          "data": {
+                            "resource": "Card",
+                            "production": false,
+                            "targetPlayer": -1,
+                            "counterResourceProduction": false,
+                            "any": false,
+                            "opponents": false,
+                            "onMars": false,
+                            "counterID": -1,
+                            "change": 1.0,
+                            "freeActionPoint": true,
+                            "player": -1,
+                            "pass": false,
+                            "requirements": [],
+                            "cost": 0
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "cost": 0
+                }
+              }
+            ],
+            "finished": false,
+            "freeActionPoint": true,
+            "player": -1,
+            "pass": false,
+            "requirements": [
+              {
+                "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                "data": {
+                  "action": {
+                    "name": "games.terraformingmars.actions.CompoundAction",
+                    "data": {
+                      "actions": [
+                        {
+                          "name": "games.terraformingmars.actions.AddResourceOnCard",
+                          "data": {
+                            "resource": "Science",
+                            "amount": -1,
+                            "chooseAny": false,
+                            "minResRequirement": 0,
+                            "freeActionPoint": true,
+                            "player": -1,
+                            "pass": false,
+                            "requirements": [],
+                            "cost": 0
+                          }
+                        },
+                        {
+                          "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                          "data": {
+                            "resource": "Card",
+                            "production": false,
+                            "targetPlayer": -1,
+                            "counterResourceProduction": false,
+                            "any": false,
+                            "opponents": false,
+                            "onMars": false,
+                            "counterID": -1,
+                            "change": 1.0,
+                            "freeActionPoint": true,
+                            "player": -1,
+                            "pass": false,
+                            "requirements": [],
+                            "cost": 0
+                          }
+                        }
+                      ],
+                      "freeActionPoint": true,
+                      "player": -1,
+                      "pass": false,
+                      "requirements": [
+                        {
+                          "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                          "data": {
+                            "action": {
+                              "name": "games.terraformingmars.actions.AddResourceOnCard",
+                              "data": {
+                                "resource": "Science",
+                                "amount": -1,
+                                "chooseAny": false,
+                                "minResRequirement": 0,
+                                "freeActionPoint": true,
+                                "player": -1,
+                                "pass": false,
+                                "requirements": [],
+                                "cost": 0
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                          "data": {
+                            "action": {
+                              "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                              "data": {
+                                "resource": "Card",
+                                "production": false,
+                                "targetPlayer": -1,
+                                "counterResourceProduction": false,
+                                "any": false,
+                                "opponents": false,
+                                "onMars": false,
+                                "counterID": -1,
+                                "change": 1.0,
+                                "freeActionPoint": true,
+                                "player": -1,
+                                "pass": false,
+                                "requirements": [],
+                                "cost": 0
+                              }
+                            }
+                          }
+                        }
+                      ],
+                      "cost": 0
+                    }
+                  }
+                }
+              },
+              {
+                "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                "data": {
+                  "action": {
+                    "name": "games.terraformingmars.actions.AddResourceOnCard",
+                    "data": {
+                      "resource": "Science",
+                      "amount": 1,
+                      "chooseAny": false,
+                      "minResRequirement": 0,
+                      "freeActionPoint": true,
+                      "player": -1,
+                      "pass": false,
+                      "requirements": [],
+                      "cost": 0
+                    }
+                  }
+                }
+              }
+            ],
+            "cost": 0
+          }
+        }
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.AddResourceOnCard",
+      "data": {
+        "resource": "Science",
+        "amount": 1,
+        "chooseAny": false,
+        "minResRequirement": 0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "resourceOnCard": "Science",
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Olympus Conference"
+},{
+  "number": 182,
+  "annotation": "(Decrease your Energy production 1 step and increase your MC production 3 steps. Place a City tile.)",
+  "cardType": "Automated",
+  "cost": 11,
+  "tags": [
+    "Building",
+    "City"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Energy",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -1
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 3.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.PlaceTile",
+      "data": {
+        "respectingAdjacency": true,
+        "onMars": true,
+        "mapTileID": -1,
+        "tile": "City",
+        "mapType": "Ground",
+        "volcanicRestriction": false,
+        "adjacencyRequirement": {
+          "tileTypes": {
+            "City": 1
+          },
+          "owned": false,
+          "noneAdjacent": false,
+          "reversed": true
+        },
+        "removeResourcesAdjacentOwner": false,
+        "removeResourcesAmount": 0,
+        "removeResourcesProd": false,
+        "placed": false,
+        "impossible": false,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": -2.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Corporate Stronghold"
+},{
+  "number": 180,
+  "annotation": "(Decrease your Energy production 1 step and increase your titanium and your MC production 1 step each.)",
+  "cardType": "Automated",
+  "cost": 6,
+  "tags": [
+    "Building"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Energy",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -1
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Titanium",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Fuel Factory"
+},{
+  "number": 175,
+  "annotation": "(Increase your MC production 1 step for each space tag your have, including this one.)",
+  "cardType": "Automated",
+  "cost": 10,
+  "tags": [
+    "Space"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "tagToCount": "Space",
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Satellites"
+},{
+  "number": 173,
+  "annotation": "OPPONENTS MAY NOT REMOVE YOUR",
+  "cardType": "Active",
+  "cost": 5,
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Protected Habitats"
+},{
+  "number": 160,
+  "annotation": "(Requires 2 Power tags. Decrease any Energy production 1 step and increase your own 1 step.)",
+  "cardType": "Automated",
+  "cost": 5,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.TagsPlayedRequirement",
+      "data": {
+        "tags": [
+          "Power"
+        ],
+        "nMin": [
+          2
+        ],
+        "nTags": 2
+      }
+    }
+  ],
+  "tags": [
+    "Power"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -2,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Energy",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -2
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Power Supply Consortium"
+},{
+  "number": 156,
+  "annotation": "(Effect: After you pay for a standard project, except selling patents, you gain 3 MC.)",
+  "cardType": "Active",
+  "cost": 6,
+  "tags": [
+    "Science"
+  ],
+  "persistingEffects": [
+    {
+      "name": "games.terraformingmars.rules.effects.PayForActionEffect",
+      "data": {
+        "minCost": 0,
+        "actionType": "StandardProject",
+        "mustBeCurrentPlayer": true,
+        "effectAction": {
+          "name": "games.terraformingmars.actions.ModifyPlayerResource",
+          "data": {
+            "resource": "MegaCredit",
+            "production": false,
+            "targetPlayer": -1,
+            "counterResourceProduction": false,
+            "any": false,
+            "opponents": false,
+            "onMars": false,
+            "counterID": -1,
+            "change": 3.0,
+            "freeActionPoint": true,
+            "player": -1,
+            "pass": false,
+            "requirements": [],
+            "cost": 0
+          }
+        }
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Standard Technology"
+},{
+  "number": 154,
+  "annotation": "(Action: Spend 8 heat to increase your terraform rating 1 step.)",
+  "cardType": "Active",
+  "cost": 3,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.CounterRequirement",
+      "data": {
+        "counterCode": "Temperature",
+        "counterID": -1,
+        "thresholdIdx": 0,
+        "max": false
+      }
+    }
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.CompoundAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Heat",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -8.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "TR",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": 1.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "TR",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": 1.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Heat",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -8.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Caretaker Contract"
+},{
+  "number": 151,
+  "annotation": "(Decrease your MC production 1 step. Gain 10 MC.)",
+  "cardType": "Event",
+  "cost": 3,
+  "tags": [
+    "Event",
+    "Earth"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "MegaCredit",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -1
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 10.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Investment Loan"
+},{
+  "number": 150,
+  "annotation": "(Effect: When you play a card, you pay 2 MC less for it.)",
+  "cardType": "Active",
+  "cost": 14,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.TagsPlayedRequirement",
+      "data": {
+        "tags": [
+          "Science"
+        ],
+        "nMin": [
+          7
+        ],
+        "nTags": 7
+      }
+    }
+  ],
+  "tags": [
+    "Science"
+  ],
+  "discountEffects": [
+    {
+      "requirement": {
+        "name": "games.terraformingmars.rules.requirements.TagOnCardRequirement",
+        "data": {}
+      },
+      "amount": 2
+    }
+  ],
+  "nPoints": 3.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Anti-gravity Technology"
+},{
+  "number": 149,
+  "annotation": "ADD 1 RESOURCE TO A CARD WITH AT LEAST 1 RESOURCE ON IT",
+  "cardType": "Event",
+  "cost": 1,
+  "tags": [
+    "Event"
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "CEO\u0027s Favorite Project"
+},{
+  "number": 144,
+  "annotation": "(Increase your titanium production 1 step.)",
+  "cardType": "Automated",
+  "cost": 7,
+  "tags": [
+    "Building"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Titanium",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Titanium Mine"
+},{
+  "number": 137,
+  "annotation": "(Increase your MC production 1 step for each Earth tag you have, including this.)",
+  "cardType": "Automated",
+  "cost": 8,
+  "tags": [
+    "Earth"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "tagToCount": "Earth",
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Cartel"
+},{
+  "number": 125,
+  "annotation": "(Decrease your energy production 1 step and any MC production 2 steps. increase your MC production 2 steps.",
+  "cardType": "Automated",
+  "cost": 3,
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Energy",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -1
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -2,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "MegaCredit",
+              "amount": 2,
+              "production": true,
+              "cardID": -1,
+              "player": -2
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": -1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Hackers"
+},{
+  "number": 124,
+  "annotation": "(Steal up to 2 steel, or 3 MC from any player.)",
+  "cardType": "Event",
+  "cost": 1,
+  "tags": [
+    "Event"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ChoiceAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.CompoundAction",
+            "data": {
+              "actions": [
+                {
+                  "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                  "data": {
+                    "resource": "Steel",
+                    "production": false,
+                    "targetPlayer": -2,
+                    "counterResourceProduction": false,
+                    "any": false,
+                    "opponents": false,
+                    "onMars": false,
+                    "counterID": -1,
+                    "change": -2.0,
+                    "freeActionPoint": true,
+                    "player": -1,
+                    "pass": false,
+                    "requirements": [],
+                    "cost": 0
+                  }
+                },
+                {
+                  "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                  "data": {
+                    "resource": "Steel",
+                    "production": false,
+                    "targetPlayer": -1,
+                    "counterResourceProduction": false,
+                    "any": false,
+                    "opponents": false,
+                    "onMars": false,
+                    "counterID": -1,
+                    "change": 2.0,
+                    "freeActionPoint": true,
+                    "player": -1,
+                    "pass": false,
+                    "requirements": [],
+                    "cost": 0
+                  }
+                }
+              ],
+              "freeActionPoint": true,
+              "player": -1,
+              "pass": false,
+              "requirements": [
+                {
+                  "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                  "data": {
+                    "action": {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "Steel",
+                        "production": false,
+                        "targetPlayer": -1,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": 2.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                  "data": {
+                    "action": {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "Steel",
+                        "production": false,
+                        "targetPlayer": -2,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": -2.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    }
+                  }
+                }
+              ],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.CompoundAction",
+            "data": {
+              "actions": [
+                {
+                  "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                  "data": {
+                    "resource": "MegaCredit",
+                    "production": false,
+                    "targetPlayer": -2,
+                    "counterResourceProduction": false,
+                    "any": false,
+                    "opponents": false,
+                    "onMars": false,
+                    "counterID": -1,
+                    "change": -3.0,
+                    "freeActionPoint": true,
+                    "player": -1,
+                    "pass": false,
+                    "requirements": [],
+                    "cost": 0
+                  }
+                },
+                {
+                  "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                  "data": {
+                    "resource": "MegaCredit",
+                    "production": false,
+                    "targetPlayer": -1,
+                    "counterResourceProduction": false,
+                    "any": false,
+                    "opponents": false,
+                    "onMars": false,
+                    "counterID": -1,
+                    "change": 3.0,
+                    "freeActionPoint": true,
+                    "player": -1,
+                    "pass": false,
+                    "requirements": [],
+                    "cost": 0
+                  }
+                }
+              ],
+              "freeActionPoint": true,
+              "player": -1,
+              "pass": false,
+              "requirements": [
+                {
+                  "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                  "data": {
+                    "action": {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "MegaCredit",
+                        "production": false,
+                        "targetPlayer": -1,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": 3.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                  "data": {
+                    "action": {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "MegaCredit",
+                        "production": false,
+                        "targetPlayer": -2,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": -3.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    }
+                  }
+                }
+              ],
+              "cost": 0
+            }
+          }
+        ],
+        "finished": false,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.CompoundAction",
+                "data": {
+                  "actions": [
+                    {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "Steel",
+                        "production": false,
+                        "targetPlayer": -2,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": -2.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    },
+                    {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "Steel",
+                        "production": false,
+                        "targetPlayer": -1,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": 2.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    }
+                  ],
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [
+                    {
+                      "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                      "data": {
+                        "action": {
+                          "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                          "data": {
+                            "resource": "Steel",
+                            "production": false,
+                            "targetPlayer": -1,
+                            "counterResourceProduction": false,
+                            "any": false,
+                            "opponents": false,
+                            "onMars": false,
+                            "counterID": -1,
+                            "change": 2.0,
+                            "freeActionPoint": true,
+                            "player": -1,
+                            "pass": false,
+                            "requirements": [],
+                            "cost": 0
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                      "data": {
+                        "action": {
+                          "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                          "data": {
+                            "resource": "Steel",
+                            "production": false,
+                            "targetPlayer": -2,
+                            "counterResourceProduction": false,
+                            "any": false,
+                            "opponents": false,
+                            "onMars": false,
+                            "counterID": -1,
+                            "change": -2.0,
+                            "freeActionPoint": true,
+                            "player": -1,
+                            "pass": false,
+                            "requirements": [],
+                            "cost": 0
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.CompoundAction",
+                "data": {
+                  "actions": [
+                    {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "MegaCredit",
+                        "production": false,
+                        "targetPlayer": -2,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": -3.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    },
+                    {
+                      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                      "data": {
+                        "resource": "MegaCredit",
+                        "production": false,
+                        "targetPlayer": -1,
+                        "counterResourceProduction": false,
+                        "any": false,
+                        "opponents": false,
+                        "onMars": false,
+                        "counterID": -1,
+                        "change": 3.0,
+                        "freeActionPoint": true,
+                        "player": -1,
+                        "pass": false,
+                        "requirements": [],
+                        "cost": 0
+                      }
+                    }
+                  ],
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [
+                    {
+                      "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                      "data": {
+                        "action": {
+                          "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                          "data": {
+                            "resource": "MegaCredit",
+                            "production": false,
+                            "targetPlayer": -1,
+                            "counterResourceProduction": false,
+                            "any": false,
+                            "opponents": false,
+                            "onMars": false,
+                            "counterID": -1,
+                            "change": 3.0,
+                            "freeActionPoint": true,
+                            "player": -1,
+                            "pass": false,
+                            "requirements": [],
+                            "cost": 0
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                      "data": {
+                        "action": {
+                          "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                          "data": {
+                            "resource": "MegaCredit",
+                            "production": false,
+                            "targetPlayer": -2,
+                            "counterResourceProduction": false,
+                            "any": false,
+                            "opponents": false,
+                            "onMars": false,
+                            "counterID": -1,
+                            "change": -3.0,
+                            "freeActionPoint": true,
+                            "player": -1,
+                            "pass": false,
+                            "requirements": [],
+                            "cost": 0
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Hired Raiders"
+},{
+  "number": 123,
+  "annotation": "(Action: Spend 7 MC to increase your steel production 1 step.)",
+  "cardType": "Active",
+  "cost": 4,
+  "tags": [
+    "Building"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.CompoundAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "MegaCredit",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -7.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Steel",
+              "production": true,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": 1.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Steel",
+                  "production": true,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": 1.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "MegaCredit",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -7.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.PlaceTile",
+      "data": {
+        "respectingAdjacency": true,
+        "onMars": true,
+        "mapTileID": -1,
+        "tile": "IndustrialBuilding",
+        "mapType": "Ground",
+        "volcanicRestriction": false,
+        "adjacencyRequirement": {
+          "tileTypes": {
+            "City": 1
+          },
+          "owned": false,
+          "noneAdjacent": false,
+          "reversed": false
+        },
+        "removeResourcesAdjacentOwner": false,
+        "removeResourcesAmount": 0,
+        "removeResourcesProd": false,
+        "placed": false,
+        "impossible": false,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Industrial Center"
+},{
+  "number": 121,
+  "annotation": "(Remove up to 3 titanium from any player, or 4 steel, or 7 MC.)",
+  "cardType": "Event",
+  "cost": 1,
+  "tags": [
+    "Event"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ChoiceAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Titanium",
+              "production": false,
+              "targetPlayer": -2,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -3.0,
+              "freeActionPoint": true,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Steel",
+              "production": false,
+              "targetPlayer": -2,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -4.0,
+              "freeActionPoint": true,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "MegaCredit",
+              "production": false,
+              "targetPlayer": -2,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -7.0,
+              "freeActionPoint": true,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "finished": false,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "MegaCredit",
+                  "production": false,
+                  "targetPlayer": -2,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -7.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Steel",
+                  "production": false,
+                  "targetPlayer": -2,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -4.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Titanium",
+                  "production": false,
+                  "targetPlayer": -2,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -3.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Sabotage"
+},{
+  "number": 112,
+  "annotation": "(Raise your TR 2 steps.)",
+  "cardType": "Event",
+  "cost": 7,
+  "tags": [
+    "Event",
+    "Earth"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "TR",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": -2.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Bribed Committee"
+},{
+  "number": 111,
+  "annotation": "LOOK AT THE TOP 4 CARDS FROM THE DECK. TAKE 2 OF THEM INTO HAND AND DISCARD THE OTHER 2",
+  "cardType": "Event",
+  "cost": 7,
+  "tags": [
+    "Event",
+    "Earth"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.TopCardDecision",
+      "data": {
+        "stage": 0,
+        "nCardsKept": 0,
+        "nCardsLook": 4,
+        "nCardsKeep": 2,
+        "buy": false,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Business Contacts"
+},{
+  "number": 110,
+  "annotation": "(Decrease your MC production 1 step. Action: look at the top card and either buy it or discard it.)",
+  "cardType": "Active",
+  "cost": 4,
+  "tags": [
+    "Earth"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.TopCardDecision",
+      "data": {
+        "stage": 0,
+        "nCardsKept": 0,
+        "nCardsLook": 1,
+        "nCardsKeep": 0,
+        "buy": true,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "MegaCredit",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -1
+            }
+          }
+        ],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Business Network"
+},{
+  "number": 109,
+  "annotation": "(Effect: After you play an event card, you gain 3MC.)",
+  "cardType": "Active",
+  "cost": 6,
+  "tags": [
+    "Earth"
+  ],
+  "persistingEffects": [
+    {
+      "name": "games.terraformingmars.rules.effects.PlayCardEffect",
+      "data": {
+        "tagsOnCard": [
+          "Event"
+        ],
+        "mustBeCurrentPlayer": true,
+        "effectAction": {
+          "name": "games.terraformingmars.actions.ModifyPlayerResource",
+          "data": {
+            "resource": "MegaCredit",
+            "production": false,
+            "targetPlayer": -1,
+            "counterResourceProduction": false,
+            "any": false,
+            "opponents": false,
+            "onMars": false,
+            "counterID": -1,
+            "change": 3.0,
+            "freeActionPoint": true,
+            "player": -1,
+            "pass": false,
+            "requirements": [],
+            "cost": 0
+          }
+        }
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Media Group"
+},{
+  "number": 107,
+  "annotation": "(Gain 1 MC for each event EVER PLAYED by all players.)",
+  "cardType": "Automated",
+  "cost": 8,
+  "tags": [
+    "Earth"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Media Archives"
+},{
+  "number": 106,
+  "annotation": "(Increase your MC production 3 steps.)",
+  "cardType": "Automated",
+  "cost": 10,
+  "tags": [
+    "Earth"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 3.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Acquired Company"
+},{
+  "number": 105,
+  "annotation": "(Effect: When you play an Earth card, you pay 3 MC less for it.)",
+  "cardType": "Active",
+  "cost": 1,
+  "tags": [
+    "Earth"
+  ],
+  "discountEffects": [
+    {
+      "requirement": {
+        "name": "games.terraformingmars.rules.requirements.TagOnCardRequirement",
+        "data": {
+          "tags": [
+            "Earth"
+          ]
+        }
+      },
+      "amount": 3
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Earth Office"
+},{
+  "number": 99,
+  "annotation": "(Increase your MC production 1 step for each space tag your OPPONENTS have.)",
+  "cardType": "Automated",
+  "cost": 12,
+  "tags": [
+    "Space"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "tagToCount": "Space",
+        "any": false,
+        "opponents": true,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Toll Station"
+},{
+  "number": 98,
+  "annotation": "(Reduce your heat production 2 steps and increase your MC production 3 steps.)",
+  "cardType": "Automated",
+  "cost": 13,
+  "tags": [
+    "Building"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Heat",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Heat",
+              "amount": 2,
+              "production": true,
+              "cardID": -1,
+              "player": -1
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 3.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 2.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Tropical Resort"
+},{
+  "number": 95,
+  "annotation": "(Action: Spend 6 Energy to add a science resource to this card.)",
+  "cardType": "Active",
+  "cost": 12,
+  "tags": [
+    "Building",
+    "Science"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.CompoundAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Energy",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -6.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.AddResourceOnCard",
+            "data": {
+              "resource": "Science",
+              "amount": 1,
+              "chooseAny": false,
+              "minResRequirement": 0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.AddResourceOnCard",
+                "data": {
+                  "resource": "Science",
+                  "amount": 1,
+                  "chooseAny": false,
+                  "minResRequirement": 0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Energy",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -6.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 2.0,
+  "pointsResource": "Science",
+  "pointsTileAdjacent": false,
+  "resourceOnCard": "Science",
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Physics Complex"
+},{
+  "number": 94,
+  "annotation": "(Effect: When you play a Space card, you pay 2 MC less for it.)",
+  "cardType": "Active",
+  "cost": 8,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.TagsPlayedRequirement",
+      "data": {
+        "tags": [
+          "Science"
+        ],
+        "nMin": [
+          5
+        ],
+        "nTags": 5
+      }
+    }
+  ],
+  "tags": [
+    "Power",
+    "Science"
+  ],
+  "discountEffects": [
+    {
+      "requirement": {
+        "name": "games.terraformingmars.rules.requirements.TagOnCardRequirement",
+        "data": {
+          "tags": [
+            "Space"
+          ]
+        }
+      },
+      "amount": 2
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 6.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Mass Converter"
+},{
+  "number": 92,
+  "annotation": "(Increase your titanium production 2 steps and your MC production 2 steps. 1 VP per Jovian tag you have.)",
+  "cardType": "Automated",
+  "cost": 41,
+  "tags": [
+    "Space",
+    "Jovian"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Titanium",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTag": "Jovian",
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "IO Mining Industries"
+},{
+  "number": 91,
+  "annotation": "(Requires 3 science tags. Increase your MC production 2 steps.)",
+  "cardType": "Automated",
+  "cost": 12,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.TagsPlayedRequirement",
+      "data": {
+        "tags": [
+          "Science"
+        ],
+        "nMin": [
+          3
+        ],
+        "nTags": 3
+      }
+    }
+  ],
+  "tags": [
+    "Science"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 2.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Gene Repair"
+},{
+  "number": 90,
+  "annotation": "(Counts as playing 2 science cards. Draw 2 cards.)",
+  "cardType": "Automated",
+  "cost": 11,
+  "tags": [
+    "Science",
+    "Science"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Card",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Research"
+},{
+  "number": 86,
+  "annotation": "(Duplicate only the production box of one of your building cards.)",
+  "cardType": "Automated",
+  "cost": 9,
+  "tags": [
+    "Science"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.DuplicateImmediateEffect",
+      "data": {
+        "tagRequirement": "Building",
+        "actionClassName": "ModifyPlayerResource",
+        "production": true,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Robotic Workforce"
+},{
+  "number": 85,
+  "annotation": "(Decrease your energy production 1 step and increase your MC production 4 steps.)",
+  "cardType": "Automated",
+  "cost": 16,
+  "tags": [
+    "Building"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Energy",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -1
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 4.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.PlaceTile",
+      "data": {
+        "respectingAdjacency": true,
+        "onMars": true,
+        "mapTileID": -1,
+        "tile": "CommercialBuilding",
+        "mapType": "Ground",
+        "volcanicRestriction": false,
+        "removeResourcesAdjacentOwner": false,
+        "removeResourcesAmount": 0,
+        "removeResourcesProd": false,
+        "placed": false,
+        "impossible": false,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTile": "City",
+  "pointsTileAdjacent": true,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Commercial District"
+},{
+  "number": 84,
+  "cardType": "Automated",
+  "cost": 6,
+  "tags": [
+    "Space",
+    "Science"
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Trans-Neptune Probe"
+},{
+  "number": 82,
+  "annotation": "(Increase your MC production 3 steps.)",
+  "cardType": "Automated",
+  "cost": 24,
+  "tags": [
+    "Space",
+    "Jovian"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 3.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 2.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Callisto Penal Mines"
+},{
+  "number": 79,
+  "annotation": "(Effect: When you play a Space card, you pay 2 MC less for it.)",
+  "cardType": "Active",
+  "cost": 13,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.TagsPlayedRequirement",
+      "data": {
+        "tags": [
+          "Science"
+        ],
+        "nMin": [
+          4
+        ],
+        "nTags": 4
+      }
+    }
+  ],
+  "tags": [
+    "Power",
+    "Science"
+  ],
+  "discountEffects": [
+    {
+      "requirement": {
+        "name": "games.terraformingmars.rules.requirements.TagOnCardRequirement",
+        "data": {
+          "tags": [
+            "Space"
+          ]
+        }
+      },
+      "amount": 2
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 4.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Quantum Extractor"
+},{
+  "number": 74,
+  "annotation": "(Effect: When you play a plant, microbe, or an animal tag, including this, gain 1 plant or add 1 resource to THAT CARD.)",
+  "cardType": "Active",
+  "cost": 9,
+  "tags": [
+    "Microbe",
+    "Science"
+  ],
+  "persistingEffects": [
+    {
+      "name": "games.terraformingmars.rules.effects.PlayCardEffect",
+      "data": {
+        "tagsOnCard": [
+          "Animal",
+          "Plant",
+          "Microbe"
+        ],
+        "mustBeCurrentPlayer": true,
+        "effectAction": {
+          "name": "games.terraformingmars.actions.ChoiceAction",
+          "data": {
+            "actions": [
+              {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Plant",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": 1.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              },
+              {
+                "name": "games.terraformingmars.actions.AddResourceOnCard",
+                "data": {
+                  "amount": 1,
+                  "chooseAny": false,
+                  "minResRequirement": 0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            ],
+            "finished": false,
+            "freeActionPoint": true,
+            "player": -1,
+            "pass": false,
+            "requirements": [
+              {
+                "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                "data": {
+                  "action": {
+                    "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                    "data": {
+                      "resource": "Plant",
+                      "production": false,
+                      "targetPlayer": -1,
+                      "counterResourceProduction": false,
+                      "any": false,
+                      "opponents": false,
+                      "onMars": false,
+                      "counterID": -1,
+                      "change": 1.0,
+                      "freeActionPoint": true,
+                      "player": -1,
+                      "pass": false,
+                      "requirements": [],
+                      "cost": 0
+                    }
+                  }
+                }
+              },
+              {
+                "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                "data": {
+                  "action": {
+                    "name": "games.terraformingmars.actions.AddResourceOnCard",
+                    "data": {
+                      "amount": 1,
+                      "chooseAny": false,
+                      "minResRequirement": 0,
+                      "freeActionPoint": true,
+                      "player": -1,
+                      "pass": false,
+                      "requirements": [],
+                      "cost": 0
+                    }
+                  }
+                }
+              }
+            ],
+            "cost": 0
+          }
+        }
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Plant",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Viral Enhancers"
+},{
+  "number": 73,
+  "annotation": "(Effect: When you play a Science tag, including this, you may discard a card from hand to draw a card.)",
+  "cardType": "Active",
+  "cost": 8,
+  "tags": [
+    "Building",
+    "Science"
+  ],
+  "persistingEffects": [
+    {
+      "name": "games.terraformingmars.rules.effects.PlayCardEffect",
+      "data": {
+        "tagsOnCard": [
+          "Science"
+        ],
+        "mustBeCurrentPlayer": true,
+        "effectAction": {
+          "name": "games.terraformingmars.actions.CompoundAction",
+          "data": {
+            "actions": [
+              {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Card",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -1.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              },
+              {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Card",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": 1.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            ],
+            "freeActionPoint": true,
+            "player": -1,
+            "pass": false,
+            "requirements": [
+              {
+                "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                "data": {
+                  "action": {
+                    "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                    "data": {
+                      "resource": "Card",
+                      "production": false,
+                      "targetPlayer": -1,
+                      "counterResourceProduction": false,
+                      "any": false,
+                      "opponents": false,
+                      "onMars": false,
+                      "counterID": -1,
+                      "change": -1.0,
+                      "freeActionPoint": true,
+                      "player": -1,
+                      "pass": false,
+                      "requirements": [],
+                      "cost": 0
+                    }
+                  }
+                }
+              },
+              {
+                "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+                "data": {
+                  "action": {
+                    "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                    "data": {
+                      "resource": "Card",
+                      "production": false,
+                      "targetPlayer": -1,
+                      "counterResourceProduction": false,
+                      "any": false,
+                      "opponents": false,
+                      "onMars": false,
+                      "counterID": -1,
+                      "change": 1.0,
+                      "freeActionPoint": true,
+                      "player": -1,
+                      "pass": false,
+                      "requirements": [],
+                      "cost": 0
+                    }
+                  }
+                }
+              }
+            ],
+            "cost": 0
+          }
+        }
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.CompoundAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Card",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -1.0,
+              "freeActionPoint": true,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Card",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": 1.0,
+              "freeActionPoint": true,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Card",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -1.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Card",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": 1.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Mars University"
+},{
+  "number": 71,
+  "annotation": "(Effect: Each titanium you have is worth 1 MC extra. Each steel you have is worth 1 MC extra. )",
+  "cardType": "Active",
+  "cost": 9,
+  "tags": [
+    "Science"
+  ],
+  "resourceMappings": [
+    {
+      "from": "Steel",
+      "to": "MegaCredit",
+      "rate": 1.0
+    },
+    {
+      "from": "Titanium",
+      "to": "MegaCredit",
+      "rate": 1.0
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Advanced Alloys"
+},{
+  "number": 70,
+  "annotation": "(Effect: When you play a card, you pay 2 MC less for it.)",
+  "cardType": "Active",
+  "cost": 23,
+  "tags": [
+    "Earth"
+  ],
+  "discountEffects": [
+    {
+      "requirement": {
+        "name": "games.terraformingmars.rules.requirements.TagOnCardRequirement",
+        "data": {}
+      },
+      "amount": 2
+    }
+  ],
+  "nPoints": 2.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Earth Catapult"
+},{
+  "number": 69,
+  "annotation": "(Action: Spend 1 plant or 1 steel to gain 7MC.)",
+  "cardType": "Active",
+  "cost": 17,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.CounterRequirement",
+      "data": {
+        "counterCode": "Oxygen",
+        "counterID": -1,
+        "thresholdIdx": 8,
+        "max": true
+      }
+    }
+  ],
+  "tags": [
+    "Building"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.CompoundAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Plant",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -1.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "MegaCredit",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": 7.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "MegaCredit",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": 7.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Plant",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -1.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.CompoundAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Steel",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -1.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "MegaCredit",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": 7.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Steel",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -1.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "MegaCredit",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": 7.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Energy",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -1
+            }
+          }
+        ],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Electro Catapult"
+},{
+  "number": 68,
+  "annotation": "(Increase your MC production 2 steps.)",
+  "cardType": "Automated",
+  "cost": 6,
+  "tags": [
+    "Earth"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Sponsors"
+},{
+  "number": 66,
+  "annotation": "PLACE YOUR MARKER ON A NON-RESERVED AREA. ONLY YOU MAY PLACE A TILE HERE.",
+  "cardType": "Event",
+  "cost": 1,
+  "tags": [
+    "Event"
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Land Claim"
+},{
+  "number": 65,
+  "annotation": "(Decrease your Energy production 1 step and increase your steel production 2 steps.)",
+  "cardType": "Automated",
+  "cost": 6,
+  "tags": [
+    "Building"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Energy",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -1
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Steel",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 2.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Building Industries"
+},{
+  "number": 64,
+  "annotation": "(Place this tile on an area with a steel or titanium placement bonus, adjacent to another of your tiles. Increase your production of that resource 1 step.)",
+  "cardType": "Automated",
+  "cost": 4,
+  "tags": [
+    "Building"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.PlaceTile",
+      "data": {
+        "respectingAdjacency": true,
+        "onMars": true,
+        "mapTileID": -1,
+        "tile": "Mine",
+        "resourcesGainedRestriction": [
+          "Steel",
+          "Titanium"
+        ],
+        "volcanicRestriction": false,
+        "adjacencyRequirement": {
+          "owned": true,
+          "noneAdjacent": false,
+          "reversed": false
+        },
+        "removeResourcesAdjacentOwner": false,
+        "removeResourcesAmount": 0,
+        "removeResourcesProd": false,
+        "placed": false,
+        "impossible": false,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Mining Area"
+},{
+  "number": 62,
+  "annotation": "(Gain 5 steel.)",
+  "cardType": "Event",
+  "cost": 5,
+  "tags": [
+    "Event"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Steel",
+        "production": false,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 5.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Mineral Deposit"
+},{
+  "number": 61,
+  "annotation": "(Requires that you have steel production. Decrease any steel production 1 step and increase your own 1 step.)",
+  "cardType": "Automated",
+  "cost": 6,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.CounterRequirement",
+      "data": {
+        "counterCode": "Steelprod",
+        "counterID": -1,
+        "thresholdIdx": 1,
+        "max": false
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Steel",
+        "production": true,
+        "targetPlayer": -2,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Steel",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -2
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Steel",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Great Escarpment Consortium"
+},{
+  "number": 57,
+  "annotation": "(Increase your titanium production 1 step.)",
+  "cardType": "Automated",
+  "cost": 15,
+  "tags": [
+    "Space",
+    "Jovian"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Titanium",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Vesta Shipyard"
+},{
+  "number": 56,
+  "annotation": "(Increase your steel production 1 step.)",
+  "cardType": "Automated",
+  "cost": 4,
+  "tags": [
+    "Building"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Steel",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Mine"
+},{
+  "number": 51,
+  "annotation": "(Increase your MC production 1 step for each Earth tag you have.)",
+  "cardType": "Automated",
+  "cost": 12,
+  "tags": [
+    "Space",
+    "Jovian"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "tagToCount": "Earth",
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Miranda Resort"
+},{
+  "number": 50,
+  "annotation": "(Remove up to 2 Animals or 5 Plants from any player.)",
+  "cardType": "Event",
+  "cost": 1,
+  "tags": [
+    "Event",
+    "Microbe"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ChoiceAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Animal",
+              "production": false,
+              "targetPlayer": -2,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -2.0,
+              "freeActionPoint": true,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Plant",
+              "production": false,
+              "targetPlayer": -2,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -5.0,
+              "freeActionPoint": true,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "finished": false,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Animal",
+                  "production": false,
+                  "targetPlayer": -2,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -2.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Plant",
+                  "production": false,
+                  "targetPlayer": -2,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -5.0,
+                  "freeActionPoint": true,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Virus"
+},{
+  "number": 49,
+  "annotation": "(Action: Add 1 Microbe to this card. 1 VP per 4 Microbes on this card.)",
+  "cardType": "Active",
+  "cost": 4,
+  "tags": [
+    "Microbe"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.AddResourceOnCard",
+      "data": {
+        "resource": "Microbe",
+        "amount": 1,
+        "chooseAny": false,
+        "minResRequirement": 0,
+        "freeActionPoint": false,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.25,
+  "pointsResource": "Microbe",
+  "pointsTileAdjacent": false,
+  "resourceOnCard": "Microbe",
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Tardigrades"
+},{
+  "number": 46,
+  "annotation": "(Requires 3 Science tags. Increase your Energy production and your MC production up one step each.)",
+  "cardType": "Automated",
+  "cost": 8,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.TagsPlayedRequirement",
+      "data": {
+        "tags": [
+          "Science"
+        ],
+        "nMin": [
+          3
+        ],
+        "nTags": 3
+      }
+    }
+  ],
+  "tags": [
+    "Power"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Energy",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "MegaCredit",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Lightning Harvest"
+},{
+  "number": 28,
+  "annotation": "(Action: Spend 1 titanium to add 1 fighter resource to this card.)",
+  "cardType": "Active",
+  "cost": 12,
+  "tags": [
+    "Space"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.CompoundAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Titanium",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -1.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.AddResourceOnCard",
+            "data": {
+              "resource": "Fighter",
+              "amount": 1,
+              "chooseAny": false,
+              "minResRequirement": 0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Titanium",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -1.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.AddResourceOnCard",
+                "data": {
+                  "resource": "Fighter",
+                  "amount": 1,
+                  "chooseAny": false,
+                  "minResRequirement": 0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsResource": "Fighter",
+  "pointsTileAdjacent": false,
+  "resourceOnCard": "Fighter",
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Security Fleet"
+},{
+  "number": 27,
+  "cardType": "Event",
+  "cost": 24,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.TagsPlayedRequirement",
+      "data": {
+        "tags": [
+          "Science"
+        ],
+        "nMin": [
+          5
+        ],
+        "nTags": 5
+      }
+    }
+  ],
+  "tags": [
+    "Event",
+    "Space",
+    "Earth"
+  ],
+  "nPoints": 4.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Interstellar Colony Ship"
+},{
+  "number": 25,
+  "annotation": "(Effect: When you play a Space card, you pay 2 MC less for it.)",
+  "cardType": "Active",
+  "cost": 10,
+  "tags": [
+    "Space"
+  ],
+  "discountEffects": [
+    {
+      "requirement": {
+        "name": "games.terraformingmars.rules.requirements.TagOnCardRequirement",
+        "data": {
+          "tags": [
+            "Space"
+          ]
+        }
+      },
+      "amount": 2
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Space Station"
+},{
+  "number": 14,
+  "annotation": "(Action: Spend 1 Energy to draw a card.)",
+  "cardType": "Active",
+  "cost": 11,
+  "tags": [
+    "Building",
+    "Science"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.CompoundAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Energy",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -1.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Card",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": 1.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Energy",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -1.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Card",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": 1.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Development Center"
+},{
+  "number": 13,
+  "annotation": "(Action: Spend 1 steel to gain 5 MC.)",
+  "cardType": "Active",
+  "cost": 27,
+  "tags": [
+    "Space",
+    "Building"
+  ],
+  "actions": [
+    {
+      "name": "games.terraformingmars.actions.CompoundAction",
+      "data": {
+        "actions": [
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "Steel",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": -1.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          },
+          {
+            "name": "games.terraformingmars.actions.ModifyPlayerResource",
+            "data": {
+              "resource": "MegaCredit",
+              "production": false,
+              "targetPlayer": -1,
+              "counterResourceProduction": false,
+              "any": false,
+              "opponents": false,
+              "onMars": false,
+              "counterID": -1,
+              "change": 5.0,
+              "freeActionPoint": false,
+              "player": -1,
+              "pass": false,
+              "requirements": [],
+              "cost": 0
+            }
+          }
+        ],
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "Steel",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": -1.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          },
+          {
+            "name": "games.terraformingmars.rules.requirements.PlayableActionRequirement",
+            "data": {
+              "action": {
+                "name": "games.terraformingmars.actions.ModifyPlayerResource",
+                "data": {
+                  "resource": "MegaCredit",
+                  "production": false,
+                  "targetPlayer": -1,
+                  "counterResourceProduction": false,
+                  "any": false,
+                  "opponents": false,
+                  "onMars": false,
+                  "counterID": -1,
+                  "change": 5.0,
+                  "freeActionPoint": false,
+                  "player": -1,
+                  "pass": false,
+                  "requirements": [],
+                  "cost": 0
+                }
+              }
+            }
+          }
+        ],
+        "actionType": "ActiveAction",
+        "cost": 0
+      }
+    }
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Titanium",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 2.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Space Elevator"
+},{
+  "number": 6,
+  "annotation": "ACTION: LOOK AT THE TOP CARD AND EITHER BUY IT OR DISCARD IT",
+  "cardType": "Active",
+  "cost": 9,
+  "tags": [
+    "Science"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.TopCardDecision",
+      "data": {
+        "stage": 0,
+        "nCardsKept": 0,
+        "nCardsLook": 1,
+        "nCardsKeep": 0,
+        "buy": true,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 0.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Inventors\u0027 Guild"
+},{
+  "number": 2,
+  "annotation": "(Requires that you have titanium production. Decrease any titanium production 1 step and increase your own 1 step.)",
+  "cardType": "Automated",
+  "cost": 13,
+  "requirements": [
+    {
+      "name": "games.terraformingmars.rules.requirements.CounterRequirement",
+      "data": {
+        "counterCode": "Titaniumprod",
+        "counterID": -1,
+        "thresholdIdx": 1,
+        "max": false
+      }
+    }
+  ],
+  "tags": [
+    "Jovian"
+  ],
+  "immediateEffects": [
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Titanium",
+        "production": true,
+        "targetPlayer": -2,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": -1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [
+          {
+            "name": "games.terraformingmars.rules.requirements.ResourceRequirement",
+            "data": {
+              "resource": "Titanium",
+              "amount": 1,
+              "production": true,
+              "cardID": -1,
+              "player": -2
+            }
+          }
+        ],
+        "cost": 0
+      }
+    },
+    {
+      "name": "games.terraformingmars.actions.ModifyPlayerResource",
+      "data": {
+        "resource": "Titanium",
+        "production": true,
+        "targetPlayer": -1,
+        "counterResourceProduction": false,
+        "any": false,
+        "opponents": false,
+        "onMars": false,
+        "counterID": -1,
+        "change": 1.0,
+        "freeActionPoint": true,
+        "player": -1,
+        "pass": false,
+        "requirements": [],
+        "cost": 0
+      }
+    }
+  ],
+  "nPoints": 1.0,
+  "pointsTileAdjacent": false,
+  "canResourcesBeRemoved": true,
+  "type": "CARD",
+  "componentName": "Asteroid Mining Consortium"
+},]

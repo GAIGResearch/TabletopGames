@@ -161,7 +161,7 @@ public class ProgressiveLearner {
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
         RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
-                System.currentTimeMillis(), params);
+                finalMatchups, System.currentTimeMillis(), params);
 
         tournament.listeners = new ArrayList<>();
         IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
@@ -200,7 +200,7 @@ public class ProgressiveLearner {
     private void runGamesWithAgents() {
         // Run!
         RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
-                System.currentTimeMillis(), params);
+                matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
         tournament.setExploration(maxExplore * (iterations - iter - 1) / (iterations - 1));
 

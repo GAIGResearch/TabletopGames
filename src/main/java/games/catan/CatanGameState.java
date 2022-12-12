@@ -25,10 +25,10 @@ public class CatanGameState extends AbstractGameState {
     protected CatanTile[][] board;
     protected Graph<Settlement, Road> catanGraph;
     protected Card boughtDevCard; // used to keep a reference to a dev card bought in the current turn to avoid playing it
-    protected int scores[]; // score for each player
-    protected int victoryPoints[]; // secret points from victory cards
-    protected int knights[]; // knight count for each player
-    protected int exchangeRates[][]; // exchange rate with bank for each resource
+    protected int[] scores; // score for each player
+    protected int[] victoryPoints; // secret points from victory cards
+    protected int[] knights; // knight count for each player
+    protected int[][] exchangeRates; // exchange rate with bank for each resource
     protected int largestArmy; // playerID of the player currently holding the largest army
     protected int longestRoad; // playerID of the player currently holding the longest road
     protected int longestRoadLength;
@@ -56,8 +56,7 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected List<Component> _getAllComponents() {
-        List<Component> components = new ArrayList<>(areas.values());
-        return components;
+        return new ArrayList<>(areas.values());
     }
 
     // Getters & setters
@@ -101,8 +100,51 @@ public class CatanGameState extends AbstractGameState {
     }
 
     @Override
-    protected boolean _equals(Object o) {
+    protected boolean _equals(Object obj) {
+        if (obj instanceof CatanGameState) {
+            CatanGameState o = (CatanGameState) obj;
+            return boughtDevCard.equals(o.boughtDevCard) && catanGraph.equals(o.catanGraph) &&
+                    largestArmy == o.largestArmy && longestRoad == o.longestRoad &&
+                    longestRoadLength == o.longestRoadLength && o.currentTradeOffer.equals(currentTradeOffer) &&
+                    rollValue == o.rollValue && Arrays.equals(scores, o.scores) &&
+                    Arrays.equals(victoryPoints, o.victoryPoints) && Arrays.equals(knights, o.knights) &&
+                    Arrays.deepEquals(exchangeRates, o.exchangeRates) && Arrays.deepEquals(board, o.board);
+        }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase, catanGraph, boughtDevCard,
+                largestArmy, longestRoad, longestRoadLength, currentTradeOffer, rollValue);
+        result = 31 * result + Arrays.hashCode(playerResults);
+        result = 31 * result + Arrays.hashCode(scores);
+        result = 31 * result + Arrays.hashCode(victoryPoints);
+        result = 31 * result + Arrays.hashCode(knights);
+        result = 31 * result + Arrays.deepHashCode(exchangeRates);
+        result = 31 * result + Arrays.deepHashCode(board);
+        return result;
+    }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(gameParameters.hashCode()).append("|");
+        sb.append(turnOrder.hashCode()).append("|");
+        sb.append(gameStatus.hashCode()).append("|");
+        sb.append(Arrays.hashCode(playerResults)).append("|*|");
+        sb.append(catanGraph.hashCode()).append("|");
+        sb.append(boughtDevCard == null ? 0 : boughtDevCard.hashCode()).append("|");
+        sb.append(largestArmy).append("|");
+        sb.append(longestRoad).append("|");
+        sb.append(longestRoadLength).append("|");
+        sb.append(rollValue).append("|");
+        sb.append(currentTradeOffer == null ? 0 : currentTradeOffer.hashCode()).append("|");
+        sb.append(Arrays.hashCode(scores)).append("|");
+        sb.append(Arrays.hashCode(victoryPoints)).append("|");
+        sb.append(Arrays.hashCode(knights)).append("|");
+        sb.append(Arrays.deepHashCode(exchangeRates)).append("|");
+        sb.append(Arrays.deepHashCode(board)).append("|");
+        return sb.toString();
     }
 
     public void setBoard(CatanTile[][] board) {

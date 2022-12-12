@@ -16,10 +16,12 @@ import java.util.Objects;
 public class PrinceAction extends core.actions.DrawCard implements IPrintable {
 
     private final int opponentID;
+    private boolean playerDiscardedPrincess;
 
     public PrinceAction(int deckFrom, int deckTo, int fromIndex, int opponentID) {
         super(deckFrom, deckTo, fromIndex);
         this.opponentID = opponentID;
+        this.playerDiscardedPrincess = false;
     }
 
     @Override
@@ -28,14 +30,16 @@ public class PrinceAction extends core.actions.DrawCard implements IPrintable {
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
         Deck<LoveLetterCard> opponentDiscardPile = llgs.getPlayerDiscardCards().get(opponentID);
         Deck<LoveLetterCard> drawPile = llgs.getDrawPile();
+        playerDiscardedPrincess = false;
 
         if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
             LoveLetterCard card = opponentDeck.draw();
 
             // if the discarded card is a princess, the targeted player loses the game
-            if (card.cardType == LoveLetterCard.CardType.Princess)
-                ((LoveLetterGameState)gs).killPlayer(opponentID);
-            else
+            if (card.cardType == LoveLetterCard.CardType.Princess) {
+                ((LoveLetterGameState) gs).killPlayer(opponentID);
+                playerDiscardedPrincess = true;
+            }else
             {
                 // draw a new card from the draw pile.
                 // in case the draw pile is empty the targeted player receives the reserve card
@@ -67,12 +71,17 @@ public class PrinceAction extends core.actions.DrawCard implements IPrintable {
 
     @Override
     public String toString(){
-        return "Prince - player "+ opponentID + " discards its card and draws a new one";
+        String str = "Prince - player "+ opponentID + " discards its card and draws a new one.";
+        if (playerDiscardedPrincess) str += " Player "+ opponentID + " discarded Princess. ";
+        return str;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Prince (player " + opponentID + " discards card, draws card)";
+        String str = "Prince (player " + opponentID + " discards card, draws card).";
+        if (playerDiscardedPrincess) str += " Player "+ opponentID + " discarded Princess. ";
+        //return "Prince (player " + opponentID + " discards card, draws card)";
+        return str;
     }
 
     @Override
@@ -82,7 +91,14 @@ public class PrinceAction extends core.actions.DrawCard implements IPrintable {
 
     @Override
     public AbstractAction copy() {
-        return new PrinceAction(deckFrom, deckTo, fromIndex, opponentID);
+        PrinceAction pa = new PrinceAction(deckFrom, deckTo, fromIndex, opponentID);
+        pa.setDiscardedPrincess(playerDiscardedPrincess);
+        return pa;
+    }
+
+    public void setDiscardedPrincess(boolean discPrincess)
+    {
+        this.playerDiscardedPrincess = discPrincess;
     }
 
     public int getOpponentID() {

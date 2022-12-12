@@ -7,8 +7,6 @@ import players.human.ActionController;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
-
 
 public class CantStopGUIManager extends AbstractGUIManager {
 
@@ -25,7 +23,7 @@ public class CantStopGUIManager extends AbstractGUIManager {
         height = cantStopHeight;
 
         JPanel infoPanel = createGameStateInfoPanel("Can't Stop", state, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight);
 
         parent.setLayout(new BorderLayout());
         parent.add(view, BorderLayout.CENTER);

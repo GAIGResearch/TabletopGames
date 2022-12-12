@@ -16,8 +16,8 @@ public class SummaryLogger implements IStatisticLogger {
 
     File logFile;
     public boolean printToConsole = true;
-    Map<String, TAGStatSummary> allData = new LinkedHashMap<>();
-    Map<String, String> otherData = new LinkedHashMap<>();
+    Map<String, TAGStatSummary> numericData = new LinkedHashMap<>();
+    Map<String, TAGStringStatSummary> otherData = new LinkedHashMap<>();
 
     public SummaryLogger() {
     }
@@ -29,11 +29,13 @@ public class SummaryLogger implements IStatisticLogger {
     @Override
     public void record(String key, Object value) {
         if (value instanceof Number) {
-            if (!allData.containsKey(key))
-                allData.put(key, new TAGStatSummary());
-            allData.get(key).add((Number) value);
+            if (!numericData.containsKey(key))
+                numericData.put(key, new TAGStatSummary());
+            numericData.get(key).add((Number) value);
         } else {
-            otherData.put(key, value.toString());
+            if (!otherData.containsKey(key))
+                otherData.put(key, new TAGStringStatSummary());
+            otherData.get(key).add(value.toString());
         }
     }
 
@@ -51,7 +53,12 @@ public class SummaryLogger implements IStatisticLogger {
 
     @Override
     public Map<String, TAGStatSummary> summary() {
-        return allData;
+        return numericData;
+    }
+
+    @Override
+    public Map<String, TAGStringStatSummary> summaryStringData() {
+        return otherData;
     }
 
     @Override
@@ -68,25 +75,25 @@ public class SummaryLogger implements IStatisticLogger {
                 header.append(key).append("\t");
                 data.append(otherData.get(key)).append("\t");
             }
-            for (String key : allData.keySet()) {
-                if (allData.get(key).n() == 1) {
+            for (String key : numericData.keySet()) {
+                if (numericData.get(key).n() == 1) {
                     header.append(key).append("\t");
-                    data.append(String.format("%.3g\t", allData.get(key).mean()));
+                    data.append(String.format("%.3g\t", numericData.get(key).mean()));
                 } else {
                     header.append(key).append("\t").append(key).append("_se\t");
-                    data.append(String.format("%.3g\t%.2g\t", allData.get(key).mean(), allData.get(key).stdErr()));
+                    data.append(String.format("%.3g\t%.2g\t", numericData.get(key).mean(), numericData.get(key).stdErr()));
                     header.append(key).append("_sd\t");
-                    data.append(String.format("%.3g\t", allData.get(key).sd()));
+                    data.append(String.format("%.3g\t", numericData.get(key).sd()));
                     header.append(key).append("_median\t");
-                    data.append(String.format("%.3g\t", allData.get(key).median()));
+                    data.append(String.format("%.3g\t", numericData.get(key).median()));
                     header.append(key).append("_min\t");
-                    data.append(String.format("%.3g\t", allData.get(key).min()));
+                    data.append(String.format("%.3g\t", numericData.get(key).min()));
                     header.append(key).append("_max\t");
-                    data.append(String.format("%.3g\t", allData.get(key).max()));
+                    data.append(String.format("%.3g\t", numericData.get(key).max()));
                     header.append(key).append("_skew\t");
-                    data.append(String.format("%.3g\t", allData.get(key).skew()));
+                    data.append(String.format("%.3g\t", numericData.get(key).skew()));
                     header.append(key).append("_kurtosis\t");
-                    data.append(String.format("%.3g\t", allData.get(key).kurtosis()));
+                    data.append(String.format("%.3g\t", numericData.get(key).kurtosis()));
                 }
             }
             header.append("\n");
@@ -114,10 +121,12 @@ public class SummaryLogger implements IStatisticLogger {
     @Override
     public String toString() {
         // We want to print out something vaguely pretty
-        List<String> alphabeticOrder = allData.keySet().stream().sorted().collect(toList());
+
+        // Print numeric data, stat summaries
+        List<String> alphabeticOrder = numericData.keySet().stream().sorted().collect(toList());
         StringBuilder sb = new StringBuilder();
         for (String key : alphabeticOrder) {
-            TAGStatSummary stats = allData.get(key);
+            TAGStatSummary stats = numericData.get(key);
             if (stats.n() == 1) {
                 sb.append(String.format("%30s  %8.3g\n", key, stats.mean()));
             } else {
@@ -125,6 +134,14 @@ public class SummaryLogger implements IStatisticLogger {
                         stats.mean(), stats.stdErr(), stats.median(), (int) stats.min(), (int) stats.max(), stats.sd(), stats.skew(), stats.kurtosis(), stats.n()));
             }
         }
+
+        // Print other data, each item toString + percentage of times it was that value
+        List<String> alphabeticOrder2 = otherData.keySet().stream().sorted().collect(toList());
+        for (String key: alphabeticOrder2) {
+            TAGStringStatSummary stats = otherData.get(key);
+            sb.append(String.format("%30s  %30s\n", key, stats.shortString()));
+        }
+
         return sb.toString();
     }
 }

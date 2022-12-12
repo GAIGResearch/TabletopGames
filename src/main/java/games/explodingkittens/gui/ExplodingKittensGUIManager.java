@@ -7,15 +7,14 @@ import core.AbstractPlayer;
 import core.Game;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensGameState;
+import gui.ScreenHighlight;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Collection;
 
 
 public class ExplodingKittensGUIManager extends AbstractGUIManager {
@@ -107,7 +106,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Exploding Kittens", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
 
                 // Add all views to frame
                 parent.setLayout(new BorderLayout());

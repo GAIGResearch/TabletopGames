@@ -187,6 +187,8 @@ class BasicTreeNode {
             BasicTreeNode child = children.get(action);
             if (child == null)
                 throw new AssertionError("Should not be here");
+            else if (bestAction == null)
+                bestAction = action;
 
             // Find child value
             double hvVal = child.totValue;

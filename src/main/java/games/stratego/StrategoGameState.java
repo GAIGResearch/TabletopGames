@@ -95,6 +95,10 @@ public class StrategoGameState extends AbstractGameState {
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        return gridBoard.hashCode();
+    }
 
     public GridBoard<Piece> getGridBoard() {
         return gridBoard;

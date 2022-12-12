@@ -16,6 +16,7 @@ import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.*;
+import gui.ScreenHighlight;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
@@ -37,8 +38,7 @@ import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction
 import static games.pandemic.gui.PandemicCardView.*;
 import static javax.swing.ScrollPaneConstants.*;
 
-@SuppressWarnings("rawtypes")
-public class PandemicGUIManager extends AbstractGUIManager {
+public class PandemicGUIManager extends AbstractGUIManager implements ScreenHighlight {
     PandemicCardView[] playerCards;
     JLabel[][] playerHandCardCounts;
     ArrayList<PandemicCardView>[] playerHands;
@@ -90,7 +90,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
         JPanel gameStateInfo = createGameStateInfoPanel(gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
-        JComponent actionPanel = createActionPanel(highlights, 300, 80, this::bufferReset);
+        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{this}, 300, 80, this::bufferReset);
         JPanel side = new JPanel();
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
         side.add(gameStateInfo);
@@ -398,7 +398,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
             }
         } else {
             // Clear all highlights if it's not human acting
-            clearAllHighlights();
+            clearHighlights();
             updateCardHighlightDisplay();
         }
 
@@ -417,7 +417,7 @@ public class PandemicGUIManager extends AbstractGUIManager {
         }
     }
 
-    protected void clearAllHighlights() {
+    public void clearHighlights() {
         playerHighlights.clear();
         for (int i = 0; i < playerCards.length; i++) {
             handCardHighlights[i].clear();
