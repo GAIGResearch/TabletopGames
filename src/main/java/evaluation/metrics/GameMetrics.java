@@ -24,6 +24,18 @@ public class GameMetrics
         }
     }
 
+
+    public static class GameName extends AbstractMetric{
+
+        public GameName() {addEventType(Event.GameEvent.ABOUT_TO_START);}
+
+        @Override
+        public Object run(GameListener listener, Event e) {
+            return listener.getGame().getGameType().name();
+        }
+    }
+
+
     public static class GameSeeds extends AbstractMetric{
 
         public GameSeeds() {addEventType(Event.GameEvent.ABOUT_TO_START);}
