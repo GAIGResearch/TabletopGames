@@ -260,24 +260,18 @@ public class TerraformingMarsMetrics {
         }
     }
 
-    public static class ResourceProduction extends AbstractMetric {
+    public static class PlayerResourceProduction extends AbstractMetric {
 
-        public ResourceProduction() {addEventType(Event.GameEvent.GAME_OVER);}
+        public PlayerResourceProduction() {addEventType(Event.GameEvent.GAME_OVER); this.recordPerPlayer = true;}
 
         @Override
         public Object run(GameListener listener, Event e) {
-            String ss = "[";
+            StringBuilder ss = new StringBuilder();
             TMGameState tmgs = (TMGameState) e.state;
-            for (int i = 0; i < tmgs.getNPlayers(); i++) {
-                ss += "{";
-                for (TMTypes.Resource r: tmgs.getPlayerProduction()[i].keySet()) {
-                    ss += r.name() + ":" + tmgs.getPlayerProduction()[i].get(r).getValue() + ",";
-                }
-                ss += "},";
-                ss = ss.replace(",}", "}");
+            for (TMTypes.Resource r: tmgs.getPlayerProduction()[e.playerID].keySet()) {
+                ss.append(r.name()).append(":").append(tmgs.getPlayerProduction()[e.playerID].get(r).getValue()).append(",");
             }
-            ss += "]";
-            return ss.replace(",]", "]");
+            return ss.toString();
         }
     }
 

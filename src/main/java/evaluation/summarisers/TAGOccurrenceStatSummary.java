@@ -14,7 +14,7 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
     private HashMap<Object, Integer> elements;  // Map from element to count of how many times it appeared
 
     public TAGOccurrenceStatSummary() {
-        this("");
+        this("unnamed");
     }
 
     public TAGOccurrenceStatSummary(String name) {
@@ -65,6 +65,20 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
 
     public String shortString() {
         return (name == null) ? "[" : (name + ": [") + elements.toString() + "]";
+    }
+
+    public String stringSummary()
+    {
+        StringBuilder stb = new StringBuilder();
+
+        //header
+        stb.append(name).append("\n").append("\tCount\tMeasure\n");
+        for(Object k : elements.keySet())
+        {
+            // count - string
+            stb.append("\t").append(elements.get(k)).append("\t").append(k.toString()).append("\n");
+        }
+        return stb.toString();
     }
 
     public HashMap<Object, Integer> getElements() {

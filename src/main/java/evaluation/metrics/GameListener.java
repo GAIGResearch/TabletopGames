@@ -28,20 +28,7 @@ public class GameListener {
             this.metrics.put(m.name(), m);
         }
     }
-//
-//    public GameListener(IStatisticLogger logger, IGameMetric[] metrics) {
-//        setup(logger);
-//        for (IGameMetric p : metrics) {
-//            this.enumMetrics.put(p.name(), p);
-//        }
-//    }
-//
-//    public GameListener(IStatisticLogger logger, Pair<String, IGameMetric>[] metrics) {
-//        setup(logger);
-//        for (Pair<String, IGameMetric> p : metrics) {
-//            this.enumMetrics.put(p.a, p.b);
-//        }
-//    }
+
 
     /**
      * Initializes loggers based on the type provided. Initializes metrics hashmap.
@@ -70,7 +57,8 @@ public class GameListener {
                     for (int i = 0; i < event.state.getNPlayers(); i++) {
                         // TODO: separate this data to be able to get per-player summaries?
                         event.playerID = i;
-                        data.put(event.type + ":" + i + ":" + attrStr, metric.run(this, event));
+                        //data.put(event.type + ":" + i + ":" + attrStr, metric.run(this, event));
+                        data.put(attrStr + ":" + i + ":" + event.type, metric.run(this, event));
                     }
                 } else {
                     data.put(event.type + ":" + attrStr, metric.run(this, event));

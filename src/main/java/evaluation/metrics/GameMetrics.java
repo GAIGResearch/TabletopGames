@@ -2,13 +2,9 @@ package evaluation.metrics;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.Game;
-import core.components.Component;
-import core.components.Counter;
 import core.interfaces.IComponentContainer;
 import evaluation.summarisers.TAGStatSummary;
 import evaluation.summarisers.TAGSummariser;
-import games.pandemic.PandemicGameState;
-import utilities.Hash;
 import utilities.Pair;
 
 import java.util.*;

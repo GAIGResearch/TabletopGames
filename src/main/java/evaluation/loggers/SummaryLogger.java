@@ -78,7 +78,7 @@ public class SummaryLogger implements IStatisticLogger {
 
     @Override
     public void processDataAndFinish() {
-        if (printToConsole)
+        if (printToConsole && data.size() > 0)
             System.out.println(this);
 
         if (logFile != null) {
@@ -87,11 +87,13 @@ public class SummaryLogger implements IStatisticLogger {
                 if(logFile.exists())
                 {
                     Pair<String, String> data = getFileOutput();
-                    FileWriter writer = new FileWriter(logFile, true);
-                    writer.write(data.a); //header
-                    writer.write(data.b); //body
-                    writer.flush();
-                    writer.close();
+                    if(data != null) {
+                        FileWriter writer = new FileWriter(logFile, true);
+                        writer.write(data.a); //header
+                        writer.write(data.b); //body
+                        writer.flush();
+                        writer.close();
+                    }
                 }
 
             } catch (IOException e) {
@@ -102,6 +104,8 @@ public class SummaryLogger implements IStatisticLogger {
 
     public Pair<String, String> getFileOutput()
     {
+        if(data.size() == 0) return null;
+
         // We now write this to the file
         StringBuilder header = new StringBuilder();
         StringBuilder outputData = new StringBuilder();
@@ -155,16 +159,17 @@ public class SummaryLogger implements IStatisticLogger {
             if (summary instanceof TAGNumericStatSummary) {
                 // Print numeric data, stat summaries
                 TAGNumericStatSummary stats = (TAGNumericStatSummary) summary;
+                sb.append(key).append("\n");
                 if (stats.n() == 1) {
-                    sb.append(String.format("%30s  %8.3g\n", key, stats.mean()));
+                    sb.append(String.format("\tValue: %8.3g\n", stats.mean()));
                 } else {
-                    sb.append(String.format("%30s  Mean: %8.3g +/- %6.2g,\tMedian: %8.3g,\tRange: [%3d, %3d],\tpop sd %8.3g,\tskew %8.3g,\tkurtosis %8.3g,\tn=%d\n", key,
+                    sb.append(String.format("\tMean: %8.3g +/- %6.2g,\tMedian: %8.3g,\tRange: [%3d, %3d],\tPop sd: %8.3g,\tSkew: %8.3g,\tKurtosis: %8.3g,\tN: %d\n",
                             stats.mean(), stats.stdErr(), stats.median(), (int) stats.min(), (int) stats.max(), stats.sd(), stats.skew(), stats.kurtosis(), stats.n()));
                 }
             } else {
                 // Print other data, each item toString + percentage of times it was that value
                 TAGOccurrenceStatSummary stats = (TAGOccurrenceStatSummary) summary;
-                sb.append(String.format("%30s  %30s\n", key, stats.shortString()));
+                sb.append(stats.stringSummary());
             }
         }
 
