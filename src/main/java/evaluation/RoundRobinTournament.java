@@ -2,7 +2,6 @@ package evaluation;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.Game;
 import core.ParameterFactory;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
@@ -15,7 +14,6 @@ import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.FileStatsLogger;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -147,13 +145,21 @@ public class RoundRobinTournament extends AbstractTournament {
                 new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, selfPlay, matchups, reportPeriod,
                         System.currentTimeMillis(), params);
 
-        if(resultsFile.length() > 0)
+        if (resultsFile.length() > 0)
             tournament.setOutputFileName(resultsFile);
 
         tournament.listeners = new ArrayList<>();
         for (int l = 0; l < listenerClasses.size(); l++) {
-            IStatisticLogger logger = new FileStatsLogger(listenerFiles.get(l));
-            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), logger);
+            IStatisticLogger logger = null;
+            if (!listenerClasses.isEmpty()) {
+                if (listenerFiles.size() == 1)
+                    logger = new FileStatsLogger(listenerFiles.get(0));
+                else
+                    logger = new FileStatsLogger(listenerFiles.get(l));
+            }
+            IGameListener gameTracker = logger == null
+                    ? IGameListener.createListener(listenerClasses.get(l))
+                    : IGameListener.createListener(listenerClasses.get(l), logger);
             tournament.listeners.add(gameTracker);
         }
         tournament.runTournament();
@@ -219,13 +225,12 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int agentID : agentIDs)
             matchUpPlayers.add(this.agents.get(agentID));
 
-        if(debug)
-        {
+        if (debug) {
             StringBuffer sb = new StringBuffer();
             sb.append("[");
             for (int agentID : agentIDs)
                 sb.append(this.agents.get(agentID).toString()).append(",");
-            sb.setCharAt(sb.length()-1, ']');
+            sb.setCharAt(sb.length() - 1, ']');
             System.out.println(sb);
         }
 
@@ -244,26 +249,23 @@ public class RoundRobinTournament extends AbstractTournament {
             GameResult[] results = games.get(gameIdx).getGameState().getPlayerResults();
 
             int numDraws = 0;
-            for (int j = 0; j < matchUpPlayers.size(); j++)
-            {
-                if(results[j] == GameResult.WIN)  pointsPerPlayer[agentIDs.get(j)] += 1;
-                if(results[j] == GameResult.DRAW) numDraws++;
+            for (int j = 0; j < matchUpPlayers.size(); j++) {
+                if (results[j] == GameResult.WIN) pointsPerPlayer[agentIDs.get(j)] += 1;
+                if (results[j] == GameResult.DRAW) numDraws++;
             }
 
-            if(numDraws>0)
-            {
+            if (numDraws > 0) {
                 double pointsPerDraw = 1.0 / numDraws;
                 for (int j = 0; j < matchUpPlayers.size(); j++)
-                    if(results[j] == GameResult.DRAW) pointsPerPlayer[agentIDs.get(j)] += pointsPerDraw;
+                    if (results[j] == GameResult.DRAW) pointsPerPlayer[agentIDs.get(j)] += pointsPerDraw;
             }
 
-            if(debug)
-            {
+            if (debug) {
                 StringBuffer sb = new StringBuffer();
                 sb.append("[");
                 for (int j = 0; j < matchUpPlayers.size(); j++)
                     sb.append(results[j]).append(",");
-                sb.setCharAt(sb.length()-1, ']');
+                sb.setCharAt(sb.length() - 1, ']');
                 System.out.println(sb);
             }
 
@@ -273,8 +275,7 @@ public class RoundRobinTournament extends AbstractTournament {
     }
 
 
-    protected void reportResults(int game_index)
-    {
+    protected void reportResults(int game_index) {
         int gameCounter = (gamesPerMatchUp * matchUpsRun);
         int gamesPerPlayer = gameCounter * playersPerGame.get(game_index) / agents.size();
         boolean toFile = resultsFileName != null;
@@ -288,44 +289,42 @@ public class RoundRobinTournament extends AbstractTournament {
             ranked.put(agents.get(i).toString(), pointsPerPlayer[i]);
 
             String str = String.format("%s got %.2f points. ", agents.get(i), pointsPerPlayer[i]);
-            if(toFile) dataDump.add(str);
+            if (toFile) dataDump.add(str);
             System.out.print(str);
 
             str = String.format("%s won %.1f%% of the %d games of the tournament. ",
                     agents.get(i), 100.0 * pointsPerPlayer[i] / gameCounter, gameCounter);
-            if(toFile) dataDump.add(str);
-             System.out.print(str);
+            if (toFile) dataDump.add(str);
+            System.out.print(str);
 
             str = String.format("%s won %.1f%% of the %d games it played during the tournament.%n",
                     agents.get(i), 100.0 * pointsPerPlayer[i] / gamesPerPlayer, gamesPerPlayer);
-            if(toFile) dataDump.add(str);
-             System.out.print(str);
+            if (toFile) dataDump.add(str);
+            System.out.print(str);
         }
 
         String str = "---- Ranking ---- \n";
-        if(toFile) dataDump.add(str);
+        if (toFile) dataDump.add(str);
         System.out.print(str);
 
         // Sort by points.
         Map<String, Double> valueDescSortMap = ranked.entrySet().stream()
-                .sorted(Map.Entry.<String, Double> comparingByValue().reversed())
+                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
                         LinkedHashMap::new));
 
         // for(String name : ranked.keySet())
-        for(String name : valueDescSortMap.keySet())
-        {
+        for (String name : valueDescSortMap.keySet()) {
             str = String.format("%s: %.2f\n", name, valueDescSortMap.get(name));
-            if(toFile) dataDump.add(str);
+            if (toFile) dataDump.add(str);
             System.out.print(str);
         }
 
         // To file
-        if(toFile)
-        {
+        if (toFile) {
             try {
                 FileWriter writer = new FileWriter(resultsFileName, true);
-                for(String line : dataDump)
+                for (String line : dataDump)
                     writer.write(line);
                 writer.close();
             } catch (Exception e) {
@@ -338,6 +337,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * Sets the epsilon to be used for exploration in all games in the tournament
      * This is when we want to add noise at the environmental level (e.g. for exploration during learning)
      * independently of any exploration at the individual agent level
+     *
      * @param epsilon
      * @return this
      */
