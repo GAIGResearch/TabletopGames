@@ -58,10 +58,13 @@ public class GameListener {
                         // TODO: separate this data to be able to get per-player summaries?
                         event.playerID = i;
                         //data.put(event.type + ":" + i + ":" + attrStr, metric.run(this, event));
-                        data.put(attrStr + ":" + i + ":" + event.type, metric.run(this, event));
+                        Object metricResult = metric.run(this, event);
+                        if(metricResult != null) data.put(attrStr + ":" + i + ":" + event.type, metricResult);
                     }
                 } else {
-                    data.put(event.type + ":" + attrStr, metric.run(this, event));
+
+                    Object metricResult = metric.run(this, event);
+                    if(metricResult != null) data.put(event.type + ":" + attrStr, metricResult);
                 }
             }
         }
@@ -155,7 +158,7 @@ public class GameListener {
 
     public static void main(String args[])
     {
-        Utils.loadClassFromFile("data/metrics/loveletter2.json");
+        Utils.loadClassFromFile("data/metrics/loveletter.json");
     }
 
 }

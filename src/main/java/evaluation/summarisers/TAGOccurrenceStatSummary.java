@@ -1,8 +1,8 @@
 package evaluation.summarisers;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.*;
 /**
  * This class is used to model the statistics of several numbers.  For the statistics
  * we choose here it is not necessary to store all the numbers - just keeping a running total
@@ -69,15 +69,18 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
 
     public String stringSummary()
     {
+        TreeSet<DataMeasure> sortedByVal = new TreeSet<>();
+
         StringBuilder stb = new StringBuilder();
 
         //header
-        stb.append(name).append("\n").append("\tCount\tMeasure\n");
+        stb.append(name).append("\n").append("\tCount - Measure\n");
         for(Object k : elements.keySet())
-        {
-            // count - string
-            stb.append("\t").append(elements.get(k)).append("\t").append(k.toString()).append("\n");
-        }
+            sortedByVal.add(new DataMeasure(k.toString(), elements.get(k)));
+
+        for(DataMeasure d : sortedByVal)
+            stb.append("\t").append(d.toString()).append("\n");
+
         return stb.toString();
     }
 
@@ -105,4 +108,30 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
         }
         return data;
     }
+
+    private class DataMeasure implements Comparable
+    {
+        private String data;
+        private int count;
+        private boolean orderDesc = true;
+
+        DataMeasure(String data, int count)
+        {
+            this.data = data;
+            this.count = count;
+        }
+
+        @Override
+        public int compareTo(@NotNull Object o) {
+            if(!(o instanceof DataMeasure)) return 0;
+            int comparison = Integer.compare(this.count, ((DataMeasure)o).count);
+            return orderDesc ? -comparison : comparison;
+        }
+
+        public String toString()
+        {
+            return count + " - " + data;
+        }
+    }
+
 }
