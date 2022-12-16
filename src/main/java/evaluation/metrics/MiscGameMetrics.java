@@ -7,7 +7,7 @@ import utilities.Pair;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-public class MiscGameMetrics {
+public class MiscGameMetrics implements IMetricsCollection {
 
     public static class GameStartMetrics extends AbstractMetric{
 

@@ -31,4 +31,6 @@ public abstract class AbstractMetric
     {
         return this.getClass().getSimpleName();
     }
+
+    public Object[] getAllowedParameters() { return new String[0];}
 }

@@ -295,6 +295,53 @@ public abstract class Utils {
         return allData;
     }
 
+
+    /**
+     * Returns a list of objects arrays, each one a combination of elements from the param
+     *  Example: input [[1, 2] [3] [4, 5]] ===> output [[1, 3, 4], [2, 3, 4], [1, 3, 5], [2, 3, 5]]
+     * Algorithm from <a href="https://www.geeksforgeeks.org/combinations-from-n-arrays-picking-one-element-from-each-array/">here</a>
+     * @param arr A list of array objects to combine/
+     * @return the combination of elements.
+     */
+    public static List<Object[]> generateCombinations(List<Object[]> arr)
+    {
+        ArrayList<Object[]> combinations = new ArrayList<>();
+
+        // Number of arrays
+        int n = arr.size();
+
+        // To keep track of next element in each of the n arrays
+        int[] indices = new int[n];
+
+        // Initialize with first element's index
+        for(int i = 0; i < n; i++) indices[i] = 0;
+
+        while (true)
+        {
+            // Add current combination
+            Object[] objs = new Object[n];
+            for(int i = 0; i < n; i++) objs[i] = arr.get(i)[indices[i]];
+            combinations.add(objs);
+
+            // Find the rightmost array that has more elements left after the current element in that array
+            int next = n - 1;
+            while (next >= 0 && (indices[next] + 1 >= arr.get(next).length))
+                next--;
+
+            // No such array is found so no more combinations left
+            if (next < 0)
+                return combinations;
+
+            // If found move to next element in that array
+            indices[next]++;
+
+            // For all arrays to the right of this array current index again points to first element
+            for(int i = next + 1; i < n; i++)
+                indices[i] = 0;
+        }
+    }
+
+
     /**
      * Given a JSONObject, this will load the instance of the class.
      * this assumes that the JSON object has:

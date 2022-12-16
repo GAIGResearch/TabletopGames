@@ -1,13 +1,12 @@
 package games.pandemic.stats;
 import core.AbstractGameState;
 import core.components.BoardNode;
-import core.components.Card;
 import core.components.Counter;
-import core.components.Deck;
 import core.properties.PropertyIntArray;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.GameListener;
+import evaluation.metrics.IMetricsCollection;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
@@ -15,7 +14,7 @@ import utilities.Hash;
 
 import static games.pandemic.PandemicConstants.*;
 import static utilities.Utils.GameResult.WIN;
-public class PandemicCompetitionMetrics {
+public class PandemicCompetitionMetrics implements IMetricsCollection {
 
     public static class GameWin extends AbstractMetric {
 

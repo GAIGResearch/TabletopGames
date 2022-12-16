@@ -2,13 +2,17 @@ package games.dominion.stats;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.GameListener;
+import evaluation.metrics.IMetricsCollection;
 import games.dominion.DominionConstants;
 import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
-public class DominionMetrics {
+
+public class DominionMetrics implements IMetricsCollection {
 
 
     public static class VictoryCardsLeft extends AbstractMetric {
+
+        public VictoryCardsLeft() {this(CardType.LIBRARY.name());}
 
         private CardType type;
         public VictoryCardsLeft(String type) {
@@ -22,6 +26,8 @@ public class DominionMetrics {
         public Object run(GameListener listener, Event e) {
             return ((DominionGameState)e.state).cardsOfType(type, -1, DominionConstants.DeckType.SUPPLY);
         }
+
+        public Object[] getAllowedParameters() { return CardType.values(); }
     }
 
     public static class EmptySupplySlots extends AbstractMetric {

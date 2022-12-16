@@ -2,9 +2,7 @@ package games.terraformingmars.stats;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.GameListener;
-import games.dicemonastery.DiceMonasteryConstants;
-import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.components.Monk;
+import evaluation.metrics.IMetricsCollection;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -15,16 +13,13 @@ import games.terraformingmars.components.TMMapTile;
 import utilities.Pair;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
-public class TerraformingMarsMetrics {
+import java.util.*;
 
 
-
+public class TerraformingMarsMetrics implements IMetricsCollection {
     public static class ParameterComplete extends AbstractMetric {
 
+        public ParameterComplete(){ this("Oxygen"); }
         private TMTypes.GlobalParameter parameter;
         public ParameterComplete(String param) {
             addEventType(Event.GameEvent.GAME_OVER);
@@ -38,11 +33,14 @@ public class TerraformingMarsMetrics {
             ArrayList<Pair<Integer, Integer>> increases = tmgs.getGlobalParameters().get(parameter).getIncreases();
             return increases.get(increases.size() - 1).a;
         }
+
+        public Object[] getAllowedParameters() { return TMTypes.GlobalParameter.values(); }
     }
 
 
     public static class ParameterIncrease extends AbstractMetric {
 
+        public ParameterIncrease(){this("Oxygen"); }
         private TMTypes.GlobalParameter parameter;
         public ParameterIncrease(String param) {
             addEventType(Event.GameEvent.GAME_OVER);
@@ -55,6 +53,7 @@ public class TerraformingMarsMetrics {
             TMGameState tmgs = (TMGameState) e.state;
             return (tmgs.getGlobalParameters().get(parameter).getIncreasesString());
         }
+        public Object[] getAllowedParameters() { return TMTypes.GlobalParameter.values(); }
     }
 
     public static class Generation extends AbstractMetric {
@@ -308,6 +307,8 @@ public class TerraformingMarsMetrics {
 
     public static class PlayerParameterContribution extends AbstractMetric {
 
+        public PlayerParameterContribution() {this("Oxygen"); }
+
         private TMTypes.GlobalParameter parameter;
         public PlayerParameterContribution(String param) {
             addEventType(Event.GameEvent.GAME_OVER);
@@ -326,6 +327,7 @@ public class TerraformingMarsMetrics {
             }
             return count*1.0 / increases.size();
         }
+        public Object[] getAllowedParameters() { return TMTypes.GlobalParameter.values(); }
     }
 
     public static class PlayerResult extends AbstractMetric {
@@ -362,7 +364,7 @@ public class TerraformingMarsMetrics {
     }
 
     public static class PlayerPlayedCardsPerType extends AbstractMetric {
-
+        public PlayerPlayedCardsPerType(){this("Automated"); }
         private TMTypes.CardType type;
         public PlayerPlayedCardsPerType(String cardType) {
             addEventType(Event.GameEvent.GAME_OVER);
@@ -381,6 +383,7 @@ public class TerraformingMarsMetrics {
             }
             return c;
         }
+        public Object[] getAllowedParameters() { return TMTypes.CardType.values(); }
     }
 
     public static class PlayerAllCardsPlayed extends AbstractMetric {
@@ -678,7 +681,7 @@ public class TerraformingMarsMetrics {
 
 
     public static class PlayerProduction extends AbstractMetric {
-
+        public PlayerProduction(){this("MegaCredit");}
         private TMTypes.Resource type;
         public PlayerProduction(String res) {
             addEventType(Event.GameEvent.GAME_OVER);
@@ -692,9 +695,12 @@ public class TerraformingMarsMetrics {
         public Object run(GameListener listener, Event e) {
             return ((TMGameState)e.state).getPlayerProduction()[e.playerID].get(type).getValue();
         }
+        public Object[] getAllowedParameters() { return TMTypes.Resource.values(); }
     }
 
     public static class PlayerResource extends AbstractMetric {
+
+        public PlayerResource(){this("MegaCredit");}
 
         private TMTypes.Resource type;
         public PlayerResource(String res) {
@@ -709,12 +715,13 @@ public class TerraformingMarsMetrics {
         public Object run(GameListener listener, Event e) {
             return ((TMGameState)e.state).getPlayerResources()[e.playerID].get(type).getValue();
         }
+        public Object[] getAllowedParameters() { return TMTypes.Resource.values(); }
     }
 
 
     public static class PlayerHandSize extends AbstractMetric {
 
-        public PlayerHandSize(String res) {
+        public PlayerHandSize() {
             addEventType(Event.GameEvent.GAME_OVER);
             recordPerPlayer = true;
         }

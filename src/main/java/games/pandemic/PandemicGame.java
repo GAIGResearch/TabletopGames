@@ -4,12 +4,14 @@ import core.*;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.GameListener;
 import games.GameType;
+import games.pandemic.stats.PandemicMetrics;
 import players.PlayerType;
 import players.human.ActionController;
 import players.mcts.MCTSPlayer;
 import evaluation.loggers.FileStatsLogger;
 import evaluation.loggers.SummaryLogger;
 import evaluation.summarisers.TAGNumericStatSummary;
+import players.simple.RandomPlayer;
 
 import java.util.*;
 public class PandemicGame extends Game {
@@ -65,15 +67,16 @@ public class PandemicGame extends Game {
 
         // logging setup
         FileStatsLogger logger = new FileStatsLogger(logFile);
-        GameListener pl = new GameListener(logger, new AbstractMetric[0]); //PandemicAttributes.values()); //TODO: Use pandemic metrics
+        GameListener pl = new GameListener(logger, new PandemicMetrics().getAllMetrics());
+
         ArrayList<GameListener> listeners = new ArrayList<>();
         listeners.add((pl));
 
         List<AbstractPlayer> players = new ArrayList<>();
 
         for (int i = 0; i < nPlayers; i++){
-            players.add(new MCTSPlayer());
-//            players.add(new RandomPlayer());
+//            players.add(new MCTSPlayer());
+            players.add(new RandomPlayer());
         }
 
         PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
@@ -141,22 +144,22 @@ public class PandemicGame extends Game {
 
         ActionController ac = null; // new ActionController();
         SummaryLogger[] sumLogs = new SummaryLogger[playersToTest.length];
-        for (int p = 0; p < playersToTest.length; p++) {
+        for (PlayerType playerType : playersToTest) {
 
             // logging setup
-            GameListener pl = new GameListener(new SummaryLogger(), new AbstractMetric[0]); //PandemicCompetitionRankingAttributes.values().values()); //TODO: Use pandemic metrics
+            GameListener pl = new GameListener(new SummaryLogger(), new PandemicMetrics().getAllMetrics());
             ArrayList<GameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 
             PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
 
             List<AbstractPlayer> players = new ArrayList<>();
-            for (int i = 0; i < nPlayers; i++){
-                players.add(playersToTest[p].createPlayerInstance(params.getRandomSeed()));
+            for (int i = 0; i < nPlayers; i++) {
+                players.add(playerType.createPlayerInstance(params.getRandomSeed()));
             }
             runCompetition(configFile, players, params.getRandomSeed(), false, listeners, nRepetitions, ac);
 
-            System.out.println(playersToTest[p].name());
+            System.out.println(playerType.name());
             System.out.println("-----------------");
             pl.allGamesFinished();
         }

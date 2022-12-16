@@ -8,7 +8,7 @@ import evaluation.summarisers.TAGSummariser;
 import utilities.Pair;
 
 import java.util.*;
-public class GameMetrics
+public class GameMetrics implements IMetricsCollection
 {
     public static class GameID extends AbstractMetric{
 

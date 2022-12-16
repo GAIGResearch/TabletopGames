@@ -2,6 +2,7 @@ package games.dicemonastery.stats;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.GameListener;
+import evaluation.metrics.IMetricsCollection;
 import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.DiceMonasteryTurnOrder;
@@ -9,7 +10,7 @@ import games.dicemonastery.actions.*;
 import games.dicemonastery.components.Monk;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
-public class DiceMonasteryMetrics {
+public class DiceMonasteryMetrics implements IMetricsCollection {
 
     public static class Season extends AbstractMetric {
 
@@ -106,6 +107,7 @@ public class DiceMonasteryMetrics {
 
     public static class IsSeason extends AbstractMetric {
 
+        public IsSeason(){this(DiceMonasteryConstants.Season.SPRING.name());}
         DiceMonasteryConstants.Season season;
         public IsSeason(String seasonName) {
             addEventType(Event.GameEvent.ROUND_OVER);
@@ -117,6 +119,8 @@ public class DiceMonasteryMetrics {
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getSeason() == season;
         }
+
+        public Object[] getAllowedParameters() { return DiceMonasteryConstants.Season.values(); }
     }
 
 
@@ -134,6 +138,7 @@ public class DiceMonasteryMetrics {
 
     public static class MonksIn extends AbstractMetric {
 
+        public MonksIn(){this(STOREROOM.name());}
         private DiceMonasteryConstants.ActionArea where;
         public MonksIn(String where) {
             addEventType(Event.GameEvent.ROUND_OVER);
@@ -145,11 +150,14 @@ public class DiceMonasteryMetrics {
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryGameState)e.state).monksIn(where, e.playerID).size();
         }
+
+        public Object[] getAllowedParameters() { return DiceMonasteryConstants.ActionArea.values(); }
     }
 
 
     public static class APIn extends AbstractMetric {
 
+        public APIn() {this (STOREROOM.name());}
         private DiceMonasteryConstants.ActionArea where;
         public APIn(String where) {
             addEventType(Event.GameEvent.ROUND_OVER);
@@ -161,11 +169,14 @@ public class DiceMonasteryMetrics {
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryGameState)e.state).monksIn(where, e.playerID).stream().mapToDouble(Monk::getPiety).sum();
         }
+
+        public Object[] getAllowedParameters() { return DiceMonasteryConstants.ActionArea.values(); }
     }
 
 
     public static class MonkPiety extends AbstractMetric {
 
+        public MonkPiety() {this ("4");}
         private int piety;
 
         public MonkPiety(String piety) {
@@ -178,6 +189,8 @@ public class DiceMonasteryMetrics {
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryGameState)e.state).monksIn(null, e.playerID).stream().filter(m -> m.getPiety() == piety).count();
         }
+
+        public Object[] getAllowedParameters() { return new Integer[]{1, 2, 3, 4, 5}; } //TODO: James check these are sensible numbers.
     }
 
 
@@ -185,6 +198,9 @@ public class DiceMonasteryMetrics {
 
         private DiceMonasteryConstants.Resource resource;
         private DiceMonasteryConstants.ActionArea area;
+
+        public ResourceInArea() {this(DiceMonasteryConstants.Resource.SHILLINGS.name(), STOREROOM.name());}
+
         public ResourceInArea(String res, String area) {
             addEventType(Event.GameEvent.ROUND_OVER);
             this.resource = DiceMonasteryConstants.Resource.valueOf(res);
@@ -195,6 +211,10 @@ public class DiceMonasteryMetrics {
         @Override
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryGameState)e.state).getResource(e.playerID, resource, area);
+        }
+
+        public Object[] getAllowedParameters() {
+            return new Object[] {DiceMonasteryConstants.Resource.values(),  DiceMonasteryConstants.ActionArea.values()};
         }
     }
 

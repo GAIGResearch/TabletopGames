@@ -5,6 +5,7 @@ import core.components.Deck;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.GameListener;
+import evaluation.metrics.IMetricsCollection;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.BaronAction;
 import games.loveletter.actions.GuardAction;
@@ -13,7 +14,7 @@ import games.loveletter.actions.PrincessAction;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.Utils;
 
-public class LoveLetterMetrics {
+public class LoveLetterMetrics implements IMetricsCollection {
 
     public static class ActionsPlayed extends AbstractMetric
     {
