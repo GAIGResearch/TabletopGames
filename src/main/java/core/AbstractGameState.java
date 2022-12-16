@@ -91,7 +91,6 @@ public abstract class AbstractGameState {
         gameStatus = GAME_ONGOING;
         playerResults = new Utils.GameResult[getNPlayers()];
         Arrays.fill(playerResults, GAME_ONGOING);
-        gamePhase = DefaultGamePhase.Main;
         history = new ArrayList<>();
         historyText = new ArrayList<>();
         playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
