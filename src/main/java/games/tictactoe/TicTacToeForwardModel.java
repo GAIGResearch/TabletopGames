@@ -2,6 +2,7 @@ package games.tictactoe;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
@@ -13,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class TicTacToeForwardModel extends AbstractForwardModel {
+public class TicTacToeForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -40,13 +41,7 @@ public class TicTacToeForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel _copy() {
-        return new TicTacToeForwardModel();
-    }
-
-    @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) currentState.getGameParameters();
         int gridSize = tttgp.gridSize;
         if (currentState.getTurnOrder().getRoundCounter() == (gridSize * gridSize)) {
