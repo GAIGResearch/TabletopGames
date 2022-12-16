@@ -28,7 +28,7 @@ public class GiveCard extends DrawCard implements IPrintable {
             to.add(c);
             executed = true;
         }
-        gs.setMainGamePhase();
+        gs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
         ekto.endPlayerTurnStep(gs);
         ekto.addReactivePlayer(ekgs.getPlayerGettingAFavor());
         return true;

@@ -351,7 +351,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         PandemicGameState pgs = (PandemicGameState) gameState;
         if (((PandemicTurnOrder) gameState.getTurnOrder()).reactionsFinished()) {
-            gameState.setMainGamePhase();
+            gameState.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
         }
         if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.DiscardReaction)
             return getDiscardActions(pgs);

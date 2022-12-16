@@ -24,7 +24,7 @@ public class EndPlayerTurn extends RuleNode {
     @Override
     protected boolean run(AbstractGameState gs) {
         gs.getTurnOrder().endPlayerTurn(gs);
-        gs.setMainGamePhase();
+        gs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
         return true;
     }
 

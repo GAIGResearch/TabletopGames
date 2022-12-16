@@ -35,7 +35,7 @@ public class ChooseSeeTheFutureOrder extends RearrangeDeckOfCards implements IPr
             }
         }
 
-        gs.setMainGamePhase();
+        gs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
         return true;
     }
 

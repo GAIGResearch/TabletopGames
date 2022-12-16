@@ -140,7 +140,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                 }
                 actionStack.clear();
                 if (ekgs.getGamePhase() == Nope) {
-                    ekgs.setMainGamePhase();
+                    ekgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
                 }
             }
         } else {

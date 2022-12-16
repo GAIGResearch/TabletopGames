@@ -114,9 +114,6 @@ public abstract class AbstractGameState {
     public final void setGamePhase(IGamePhase gamePhase) {
         this.gamePhase = gamePhase;
     }
-    public final void setMainGamePhase() {
-        this.gamePhase = DefaultGamePhase.Main;
-    }
 
     // Getters
     public final TurnOrder getTurnOrder(){return turnOrder;}
