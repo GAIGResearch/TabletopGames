@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.*;
 public class DiceMonasteryTurnOrder extends TurnOrder {
 
     public DiceMonasteryTurnOrder(int nPlayers, DiceMonasteryParams params) {
-        super(nPlayers, params.YEARS);
+        super(nPlayers, params.YEARS * 4 - 1);
     }
 
     private DiceMonasteryTurnOrder(int nPlayers) {
@@ -26,6 +26,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     }
 
     Season season = SPRING;
+    int year = 1;
     ActionArea currentAreaBeingExecuted = null;
     int abbot = 0; // the current 'first player '
     List<Integer> playerOrderForCurrentArea;
@@ -36,6 +37,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     @Override
     protected void _reset() {
         season = SPRING;
+        year = 1;
         turnOwner = 0;
         abbot = 0;
         actionPointsLeftForCurrentPlayer = 0;
@@ -50,6 +52,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
         retValue.season = season;
         retValue.roundCounter = roundCounter;
         retValue.abbot = abbot;
+        retValue.year = year;
         retValue.currentAreaBeingExecuted = currentAreaBeingExecuted;
         retValue.playerOrderForCurrentArea = playerOrderForCurrentArea != null ? new ArrayList<>(playerOrderForCurrentArea) : null;
         retValue.turnOwnerTakenReward = turnOwnerTakenReward;
@@ -155,13 +158,17 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     @Override
     public void _endRound(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
+        DiceMonasteryParams params = (DiceMonasteryParams) state.getGameParameters();
         switch (season) {
             case SPRING:
             case AUTUMN:
                 state.springAutumnHousekeeping();
                 break;
             case SUMMER:
+                break;
             case WINTER:
+                if (year == params.YEARS)
+                    state.endGame();
                 break;
         }
     }
@@ -170,8 +177,10 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     public void _startRound(AbstractGameState gameState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
         season = season.next();
-        if (season == SPRING)
+        if (season == SPRING) {
             abbot = (abbot + 1 + nPlayers) % nPlayers;
+            year++;
+        }
         if (season == SUMMER && getYear() == 1)
             season = season.next(); // we skip Summer in the first year
         state.checkAtLeastOneMonk();
@@ -273,7 +282,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     }
 
     public int getYear() {
-        return roundCounter + 1;
+        return year;
     }
 
     public int getAbbot() {
@@ -298,7 +307,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
             DiceMonasteryTurnOrder other = (DiceMonasteryTurnOrder) o;
             return other.season == season && other.abbot == abbot &&
                     other.turnOwnerTakenReward == turnOwnerTakenReward &&
-                    other.turnOwnerPrayed == turnOwnerPrayed &&
+                    other.turnOwnerPrayed == turnOwnerPrayed && other.year == year &&
                     other.currentAreaBeingExecuted == currentAreaBeingExecuted &&
                     other.actionPointsLeftForCurrentPlayer == actionPointsLeftForCurrentPlayer &&
                     other.playerOrderForCurrentArea.equals(playerOrderForCurrentArea) &&
@@ -310,7 +319,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
 
     @Override
     public int hashCode() {
-        return super.hashCode() + 31 * Objects.hash(season, abbot, currentAreaBeingExecuted,
+        return super.hashCode() + 31 * Objects.hash(season, abbot, currentAreaBeingExecuted, year,
                 actionPointsLeftForCurrentPlayer, turnOwnerTakenReward, turnOwnerPrayed, playersToMakeVikingDecisions);
     }
 
