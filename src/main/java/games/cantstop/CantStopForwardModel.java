@@ -2,6 +2,7 @@ package games.cantstop;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Dice;
 import games.cantstop.actions.*;
@@ -12,7 +13,7 @@ import java.util.*;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 
-public class CantStopForwardModel extends AbstractForwardModel {
+public class CantStopForwardModel extends StandardForwardModel {
 
     private final Pass passAction = new Pass(false);
     private final RollDice rollAction = new RollDice();
@@ -26,8 +27,7 @@ public class CantStopForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         if (action instanceof Pass) {
             Pass pass = (Pass) action;
             CantStopGameState state = (CantStopGameState) currentState;
@@ -104,10 +104,5 @@ public class CantStopForwardModel extends AbstractForwardModel {
                 throw new AssertionError("Unknown phase " + phase);
         }
         return retValue;
-    }
-
-    @Override
-    protected CantStopForwardModel _copy() {
-        return this;
     }
 }
