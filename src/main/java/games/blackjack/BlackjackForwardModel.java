@@ -3,6 +3,7 @@ package games.blackjack;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.*;
 
 
-public class BlackjackForwardModel extends AbstractForwardModel {
+public class BlackjackForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         BlackjackGameState bjgs = (BlackjackGameState) firstState;
@@ -45,8 +46,8 @@ public class BlackjackForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState gameState, AbstractAction action){
-        action.execute(gameState);
+    protected void _afterAction(AbstractGameState gameState, AbstractAction action){
+        // do nothing
     }
 
     @Override
@@ -95,10 +96,5 @@ public class BlackjackForwardModel extends AbstractForwardModel {
 //            }
 //        }
 //    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new BlackjackForwardModel();
-    }
 
 }
