@@ -52,6 +52,7 @@ public class DBGameState extends AbstractGameState {
         dbgs.cells = cells;
         dbgs.edgeToCellMap = edgeToCellMap;
         dbgs.cellToEdgesMap = cellToEdgesMap;
+        dbgs.lastActionScored = lastActionScored;
 
         dbgs.nCellsPerPlayer = nCellsPerPlayer.clone();
         dbgs.cellToOwnerMap = (HashMap<DBCell, Integer>) cellToOwnerMap.clone();
@@ -103,10 +104,39 @@ public class DBGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), cellToOwnerMap, edgeToOwnerMap, lastActionScored);
+        int result = Objects.hash(gameParameters, turnOrder, gamePhase, gameStatus, cellToOwnerMap, edgeToOwnerMap, lastActionScored);
         result = 31 * result + Arrays.hashCode(nCellsPerPlayer);
         return result;
     }
+
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        int result = Objects.hash(gameParameters);
+        sb.append(result).append("|");
+        result = Objects.hash(turnOrder);
+        sb.append(result).append("|");
+        result = Objects.hash(getAllComponents());
+        sb.append(result).append("|");
+        result = Objects.hash(gameStatus);
+        sb.append(result).append("|");
+        result = Objects.hash(gamePhase);
+        sb.append(result).append("|");
+        result = Arrays.hashCode(playerResults);
+        sb.append(result).append("|*|");
+        result = Arrays.hashCode(nCellsPerPlayer);
+        sb.append(result).append("|");
+        result = Objects.hashCode(cellToOwnerMap);
+        sb.append(result).append("|");
+        result = Objects.hashCode(edgeToOwnerMap);
+        sb.append(result).append("|");
+        result = Objects.hashCode(lastActionScored);
+        sb.append(result).append("|");
+
+        return sb.toString();
+    }
+
 
     public int countCompleteEdges(DBCell c) {
         int retValue = 0;
