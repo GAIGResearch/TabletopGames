@@ -2,6 +2,7 @@ package games.uno;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.uno.UnoGameParameters.UnoScoring;
@@ -17,7 +18,7 @@ import static core.CoreConstants.VisibilityMode.*;
 import static games.uno.UnoGameParameters.UnoScoring.CHALLENGE;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
-public class UnoForwardModel extends AbstractForwardModel {
+public class UnoForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -153,14 +154,10 @@ public class UnoForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState gameState, AbstractAction action) {
-        action.execute(gameState);
+    protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         if (checkRoundEnd((UnoGameState) gameState)) {
             return;
         }
-//        if (checkRunningTotal((UnoGameState)gameState)) {
-//            return;
-//        }
         if (gameState.getGameStatus() == GAME_ONGOING) {
             gameState.getTurnOrder().endPlayerTurn(gameState);
         }
@@ -362,11 +359,6 @@ public class UnoForwardModel extends AbstractForwardModel {
                 }
             }
         }
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new UnoForwardModel();
     }
 }
 

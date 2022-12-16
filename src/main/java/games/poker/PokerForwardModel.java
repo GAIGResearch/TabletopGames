@@ -2,6 +2,7 @@ package games.poker;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -18,7 +19,7 @@ import static games.poker.PokerGameState.PokerGamePhase.*;
 import static utilities.Utils.GameResult.LOSE;
 
 
-public class PokerForwardModel extends AbstractForwardModel {
+public class PokerForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -98,9 +99,7 @@ public class PokerForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState gameState, AbstractAction action) {
-        action.execute(gameState);
-
+    protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         // Check end of street to add more community cards
         PokerGameState pgs = (PokerGameState) gameState;
         PokerGameParameters pgp = (PokerGameParameters) gameState.getGameParameters();
@@ -369,10 +368,5 @@ public class PokerForwardModel extends AbstractForwardModel {
         }
 
         return actions;
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new PokerForwardModel();
     }
 }
