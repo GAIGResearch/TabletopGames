@@ -2,6 +2,7 @@ package games.coltexpress;
 
 import core.AbstractGameState;
 import core.AbstractForwardModel;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.actions.DrawCard;
@@ -24,7 +25,7 @@ import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanAc
 import static utilities.Utils.GameResult.LOSE;
 import static utilities.Utils.GameResult.WIN;
 
-public class ColtExpressForwardModel extends AbstractForwardModel {
+public class ColtExpressForwardModel extends StandardForwardModel {
 
     @Override
     public void _setup(AbstractGameState firstState) {
@@ -110,21 +111,9 @@ public class ColtExpressForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel _copy() {
-        return new ColtExpressForwardModel();
-    }
-
-    @Override
-    protected void _next(AbstractGameState gameState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
         ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) gameState.getTurnOrder();
-        if (action != null) {
-            action.execute(gameState);
-        } else {
-            if (gameState.getCoreGameParameters().verbose)
-                System.out.println("Player cannot do anything since he has drawn cards or " +
-                    " doesn't have any targets available");
-        }
 
         IGamePhase gamePhase = cegs.getGamePhase();
         if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
