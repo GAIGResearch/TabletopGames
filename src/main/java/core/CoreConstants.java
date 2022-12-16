@@ -48,6 +48,7 @@ public class CoreConstants {
     }
 
     // Default game phases: main, player reaction, end.
+    // This is only a simple default - and is completely ignored for many games with a more complicated structure
     public enum DefaultGamePhase implements IGamePhase {
         Main,
         PlayerReaction,

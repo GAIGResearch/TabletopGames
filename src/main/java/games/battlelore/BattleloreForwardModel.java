@@ -2,6 +2,7 @@ package games.battlelore;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.battlelore.actions.AttackUnitsAction;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class BattleloreForwardModel extends AbstractForwardModel {
+public class BattleloreForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState initialState) {
@@ -50,9 +51,8 @@ public class BattleloreForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         BattleloreGameState state = (BattleloreGameState) currentState;
-        action.execute(currentState);
 
         int playerId = state.getCurrentPlayer();
         Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ?
@@ -196,11 +196,6 @@ public class BattleloreForwardModel extends AbstractForwardModel {
             }
         }
         return allyUnitsRemainInArea && enemyUnitsRemainInArea;
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new BattleloreForwardModel();
     }
 
     /**
