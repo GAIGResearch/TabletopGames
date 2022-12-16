@@ -2,6 +2,7 @@ package games.stratego;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.stratego.actions.Move;
@@ -13,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class StrategoForwardModel extends AbstractForwardModel {
+public class StrategoForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -67,9 +68,7 @@ public class StrategoForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
-
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         if (currentState.getGameStatus() == Utils.GameResult.GAME_END){
             return;
         }
@@ -90,10 +89,5 @@ public class StrategoForwardModel extends AbstractForwardModel {
                 currentState.setPlayerResult(Utils.GameResult.DRAW, 1-currentState.getCurrentPlayer());
             }
         }
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new StrategoForwardModel();
     }
 }
