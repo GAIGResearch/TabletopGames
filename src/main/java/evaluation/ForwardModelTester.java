@@ -59,7 +59,7 @@ public class ForwardModelTester {
             game.reset(allPlayers, seed);
 
             decision = 0;
-            boolean allFine = true;
+            boolean allFine;
             do {
                 AbstractGameState stateCopy = game.getGameState().copy();
                 stateHistory.add(stateCopy);
@@ -80,6 +80,7 @@ public class ForwardModelTester {
             } while (allFine && game.getGameState().isNotTerminal());
         }
     }
+
 
     private boolean checkHistory() {
         // Here we run through the history of game state to make sure that their hashcodes are unchanged

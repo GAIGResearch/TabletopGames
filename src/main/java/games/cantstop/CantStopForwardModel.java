@@ -52,7 +52,7 @@ public class CantStopForwardModel extends StandardForwardModel {
         for (Integer trackNumber : state.temporaryMarkerPositions.keySet()) {
             int maxValue = params.maxValue(trackNumber);
             int newValue = state.temporaryMarkerPositions.get(trackNumber);
-            state.playerMarkerPositions.get(playerId)[trackNumber] = newValue;
+            state.playerMarkerPositions[playerId][trackNumber] = newValue;
             if (newValue == maxValue) {
                 state.completedColumns[trackNumber] = true;
                 // and then check game end condition
