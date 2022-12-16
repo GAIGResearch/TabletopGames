@@ -1,6 +1,7 @@
 package games.connect4;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
@@ -14,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public class Connect4ForwardModel extends AbstractForwardModel {
+public class Connect4ForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -50,13 +51,7 @@ public class Connect4ForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel _copy() {
-        return new Connect4ForwardModel();
-    }
-
-    @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         Connect4GameParameters c4gp = (Connect4GameParameters) currentState.getGameParameters();
         int gridSize = c4gp.gridSize;
         if (currentState.getTurnOrder().getRoundCounter() == (gridSize * gridSize)) {
