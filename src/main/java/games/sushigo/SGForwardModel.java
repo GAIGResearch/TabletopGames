@@ -3,6 +3,7 @@ package games.sushigo;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.sushigo.actions.ChopSticksAction;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
-public class SGForwardModel extends AbstractForwardModel {
+public class SGForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -122,12 +123,7 @@ public class SGForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.getGameStatus() == Utils.GameResult.GAME_END) return;
-
-        //Perform action
-        action.execute(currentState);
-
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         //Rotate deck and reveal cards
         SGGameState SGGS = (SGGameState) currentState;
         int turn = SGGS.getTurnOrder().getTurnCounter();
@@ -437,10 +433,5 @@ public class SGForwardModel extends AbstractForwardModel {
             actions.add(new ChopSticksAction(SGGS.getCurrentPlayer()));
         }
         return actions;
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new SGForwardModel();
     }
 }
