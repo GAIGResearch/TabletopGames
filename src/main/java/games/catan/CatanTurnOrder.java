@@ -1,6 +1,7 @@
 package games.catan;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IGamePhase;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
@@ -27,7 +28,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         super._reset();
         turnStep = 0;
         actionsTakenInCurrentStage = 0;
-        nextGamePhase = AbstractGameState.DefaultGamePhase.Main;
+        nextGamePhase = CoreConstants.DefaultGamePhase.Main;
         developmentCardPlayed = false;
     }
 
@@ -101,7 +102,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         if (gamePhase == Build) {
             if (actionsTakenInCurrentStage >= ((CatanParameters) gameState.getGameParameters()).max_build_actions_allowed) {
                 endPlayerTurn(gameState);
-                setGamePhase(AbstractGameState.DefaultGamePhase.Main, gameState);
+                setGamePhase(CoreConstants.DefaultGamePhase.Main, gameState);
             }
             return;
         }
@@ -120,7 +121,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
             endPlayerTurn(gameState);
             if (getRoundCounter() >= 2) {
                 // After 2 rounds of setup the main game phase starts
-                setGamePhase(AbstractGameState.DefaultGamePhase.Main, gameState);
+                setGamePhase(CoreConstants.DefaultGamePhase.Main, gameState);
             }
         }
     }

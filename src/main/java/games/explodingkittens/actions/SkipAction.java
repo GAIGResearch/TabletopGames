@@ -22,7 +22,7 @@ public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
         // Discard the card played
         super.execute(gs);
         // Execute action
-        gs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
+        gs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
         ((ExplodingKittensTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         return true;
     }

@@ -31,13 +31,6 @@ import static utilities.Utils.GameResult.GAME_ONGOING;
  */
 public abstract class AbstractGameState {
 
-    // Default game phases: main, player reaction, end.
-    public enum DefaultGamePhase implements IGamePhase {
-        Main,
-        PlayerReaction,
-        End
-    }
-
     // Parameters, forward model and turn order for the game
     protected final AbstractParameters gameParameters;
     protected TurnOrder turnOrder;

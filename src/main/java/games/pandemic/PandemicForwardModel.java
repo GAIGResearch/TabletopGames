@@ -1,9 +1,6 @@
 package games.pandemic;
 
-import core.AbstractForwardModel;
-import core.AbstractGameData;
-import core.AbstractGameState;
-import core.AbstractParameters;
+import core.*;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Area;
@@ -18,13 +15,11 @@ import core.rules.GameOverCondition;
 import core.rules.Node;
 import core.rules.nodetypes.ConditionNode;
 import core.rules.nodetypes.RuleNode;
-import core.rules.rulenodes.ForceAllPlayerReaction;
 import games.pandemic.actions.AddResearchStation;
 import games.pandemic.actions.InfectCity;
 import games.pandemic.rules.conditions.*;
 import games.pandemic.rules.gameOver.*;
 import games.pandemic.rules.rules.*;
-import gui.GameFlowDiagram;
 import utilities.Hash;
 
 import java.util.*;
@@ -351,13 +346,13 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         PandemicGameState pgs = (PandemicGameState) gameState;
         if (((PandemicTurnOrder) gameState.getTurnOrder()).reactionsFinished()) {
-            gameState.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
+            gameState.setGamePhase(CoreConstants.DefaultGamePhase.Main);
         }
         if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.DiscardReaction)
             return getDiscardActions(pgs);
         else if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.RPReaction)
             return getRPactions(pgs);
-        else if (gameState.getGamePhase() == AbstractGameState.DefaultGamePhase.PlayerReaction)
+        else if (gameState.getGamePhase() == CoreConstants.DefaultGamePhase.PlayerReaction)
             return getEventActions(pgs);
         else if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.Forecast)
             return getForecastActions(pgs);

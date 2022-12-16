@@ -173,7 +173,7 @@ public class CatanForwardModel extends AbstractForwardModel {
             cto.endTurnStage(gs);
         }
 
-        if (gs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main) {
+        if (gs.getGamePhase() == CoreConstants.DefaultGamePhase.Main) {
             // reset recently bought dev card to null
             gs.boughtDevCard = null;
             rollDiceAndAllocateResources(gs);

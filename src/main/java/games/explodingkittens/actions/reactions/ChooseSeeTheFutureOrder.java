@@ -1,6 +1,7 @@
 package games.explodingkittens.actions.reactions;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.RearrangeDeckOfCards;
 import core.components.PartialObservableDeck;
@@ -35,7 +36,7 @@ public class ChooseSeeTheFutureOrder extends RearrangeDeckOfCards implements IPr
             }
         }
 
-        gs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
+        gs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
         return true;
     }
 

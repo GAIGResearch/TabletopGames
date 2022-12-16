@@ -1,5 +1,6 @@
 package games.explodingkittens.actions.reactions;
 
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
@@ -16,7 +17,7 @@ public class PlaceExplodingKitten extends DrawCard implements IPrintable {
     public boolean execute(AbstractGameState gs) {
         boolean success = super.execute(gs);
 
-        gs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
+        gs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
         ((ExplodingKittensTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
         return success;
     }

@@ -2,6 +2,7 @@ package games.explodingkittens;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.CoreConstants.VisibilityMode;
 import core.actions.AbstractAction;
 import core.components.Deck;
@@ -82,7 +83,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
         ekgs.setActionStack(new Stack<>());
         ekgs.orderOfPlayerDeath = new int[ekgs.getNPlayers()];
-        ekgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
+        ekgs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
     }
 
     /**
@@ -140,7 +141,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                 }
                 actionStack.clear();
                 if (ekgs.getGamePhase() == Nope) {
-                    ekgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
+                    ekgs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
                 }
             }
         } else {
@@ -184,7 +185,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
         // Find actions for the player depending on current game phase
         int player = ekgs.getCurrentPlayer();
-        if (AbstractGameState.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
+        if (CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
             actions = playerActions(ekgs, player);
         } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals(ekgs.getGamePhase())) {
             actions = placeKittenActions(ekgs, player);

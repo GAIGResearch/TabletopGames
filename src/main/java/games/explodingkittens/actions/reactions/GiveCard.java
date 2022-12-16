@@ -1,5 +1,6 @@
 package games.explodingkittens.actions.reactions;
 
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
@@ -28,7 +29,7 @@ public class GiveCard extends DrawCard implements IPrintable {
             to.add(c);
             executed = true;
         }
-        gs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
+        gs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
         ekto.endPlayerTurnStep(gs);
         ekto.addReactivePlayer(ekgs.getPlayerGettingAFavor());
         return true;

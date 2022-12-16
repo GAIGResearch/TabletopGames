@@ -141,8 +141,8 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             throw new AssertionError("Hand should not get this big");
         IGamePhase gamePhase = llgs.getGamePhase();
         if (gamePhase == Draw) {
-            llgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
-        } else if (gamePhase == AbstractGameState.DefaultGamePhase.Main) {
+            llgs.setGamePhase(DefaultGamePhase.Main);
+        } else if (gamePhase == DefaultGamePhase.Main) {
             llgs.setGamePhase(Draw);
             llgs.getTurnOrder().endPlayerTurn(gameState);
             checkEndOfRound(llgs);
@@ -307,7 +307,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         ArrayList<AbstractAction> actions;
         int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
-        if (gameState.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {
+        if (gameState.getGamePhase().equals(DefaultGamePhase.Main)) {
             actions = playerActions(llgs, player);
         } else if (gameState.getGamePhase().equals(LoveLetterGameState.LoveLetterGamePhase.Draw)) {
             // In draw phase, the players can only draw cards.
