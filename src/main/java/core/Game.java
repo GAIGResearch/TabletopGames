@@ -678,7 +678,7 @@ public class Game {
      * @return - copy time
      */
     public double getCopyTime() {
-        System.out.printf("Average copy time was %.3f microseconsds%n", copyTime / 1e3);
+      //  System.out.printf("Average copy time was %.3f microseconsds%n", copyTime / 1e3);
         return copyTime;
     }
 
