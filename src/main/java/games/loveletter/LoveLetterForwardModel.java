@@ -2,6 +2,7 @@ package games.loveletter;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -17,7 +18,7 @@ import static core.CoreConstants.*;
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
 
-public class LoveLetterForwardModel extends AbstractForwardModel {
+public class LoveLetterForwardModel extends StandardForwardModel {
 
     /**
      * Creates the initial game-state of Love Letter.
@@ -131,11 +132,10 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState gameState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         // each turn begins with the player drawing a card after which one card will be played
         // switch the phase after each executed action
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
-        action.execute(gameState);
 
         if (llgs.playerHandCards.get(gameState.getCurrentPlayer()).getSize() > 2)
             throw new AssertionError("Hand should not get this big");
@@ -318,11 +318,6 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         }
 
         return actions;
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new LoveLetterForwardModel();
     }
 
     /**
