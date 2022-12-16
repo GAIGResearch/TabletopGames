@@ -20,7 +20,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
     private boolean firstAction;  // In double turns, allows players to take two turns before changing turn owner
     private int fullPlayerTurnCounter;  // Extra counter for how many turns in a round were played (full turn by all players)
 
-    public ColtExpressTurnOrder(int nPlayers, int nMaxRounds){
+    public ColtExpressTurnOrder(int nPlayers, int nMaxRounds) {
         super(nPlayers, nMaxRounds);
         firstPlayer = 0;
         turnOwner = 0;
@@ -57,15 +57,16 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
     /**
      * Initializes current turn type and direction of play.
+     *
      * @param round - round card.
-     * @param turn - turn index (of turn type array in round card).
+     * @param turn  - turn index (of turn type array in round card).
      */
-    private void initTurn(RoundCard round, int turn, ColtExpressGameState state){
+    private void initTurn(RoundCard round, int turn, ColtExpressGameState state) {
         boolean[] allTrue = new boolean[nPlayers];
         Arrays.fill(allTrue, true);
         state.rounds.setVisibilityOfComponent(roundCounter, allTrue);
         currentTurnType = round.getTurnTypes()[turn];
-        switch (round.getTurnTypes()[turn]){
+        switch (round.getTurnTypes()[turn]) {
             case NormalTurn:
             case DoubleTurn:
             case HiddenTurn:
@@ -79,10 +80,11 @@ public class ColtExpressTurnOrder extends TurnOrder {
         }
     }
 
-    public boolean isHiddenTurn(){
+    public boolean isHiddenTurn() {
         return currentTurnType == RoundCard.TurnType.HiddenTurn;
     }
-    public RoundCard.TurnType getCurrentTurnType(){
+
+    public RoundCard.TurnType getCurrentTurnType() {
         return currentTurnType;
     }
 
@@ -95,7 +97,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
             // Return ID of player on the next card in the planned actions deck
             ColtExpressGameState cegs = (ColtExpressGameState) gameState;
             if (cegs.plannedActions.getSize() > 0) {
-                int idx = cegs.plannedActions.getSize()-1;
+                int idx = cegs.plannedActions.getSize() - 1;
                 int id = cegs.plannedActions.get(idx).playerID;
 
                 // ID could be -1 if bullets introduced in the deck (e.g. by GS copy with PO), try to find the next one
@@ -127,20 +129,16 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
     /**
      * In Colt Express, this round is equivalent to a turn played by all players (one turn type in round card).
+     *
      * @param gameState - current game state.
      */
     @Override
-    public void endRound(AbstractGameState gameState) {
-        if (gameState.getGameStatus() != GAME_ONGOING) return;
-
-        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
-
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
-
-        turnCounter = 0;
+    public void _endRound(AbstractGameState gameState) {
         fullPlayerTurnCounter++;
-        moveToNextPlayer(gameState, nextPlayer(gameState));
+    }
 
+    @Override
+    public void _startRound(AbstractGameState gameState) {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
         RoundCard currentRoundCard = cegs.getRounds().get(roundCounter);
         if (fullPlayerTurnCounter < currentRoundCard.getTurnTypes().length) {
@@ -154,9 +152,10 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
     /**
      * Ends the round with the corresponding end event.
+     *
      * @param gameState - current game state.
      */
-    public void endRoundCard(ColtExpressGameState gameState){
+    public void endRoundCard(ColtExpressGameState gameState) {
         // End card event
         gameState.getRounds().get(roundCounter).endRoundCardEvent(gameState);
         // Move to next round

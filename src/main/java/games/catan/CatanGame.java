@@ -28,7 +28,7 @@ import java.util.Random;
 
 public class CatanGame extends Game {
     public CatanGame(List<AbstractPlayer> agents, CatanParameters params) {
-        super(GameType.Catan, agents, new CatanForwardModel(params, agents.size()), new CatanGameState(params, agents.size()));
+        super(GameType.Catan, agents, new CatanForwardModel(), new CatanGameState(params, agents.size()));
     }
 
     public CatanGame(List<AbstractPlayer> agents, CatanParameters params, CatanForwardModel model, CatanGameState gameState) {
@@ -59,7 +59,7 @@ public class CatanGame extends Game {
 //        agents.add(new CatanRuleBasedPlayer(new Random()));
 
         CatanParameters params = new CatanParameters("data/", System.currentTimeMillis());
-        CatanForwardModel forwardModel = new CatanForwardModel(params, agents.size());
+        CatanForwardModel forwardModel = new CatanForwardModel();
         CatanGameState gs = new CatanGameState(params, agents.size());
 
         CatanGame game = new CatanGame(agents, params, forwardModel, gs);

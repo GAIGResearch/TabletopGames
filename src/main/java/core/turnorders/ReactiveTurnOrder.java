@@ -39,6 +39,14 @@ public class ReactiveTurnOrder extends TurnOrder {
     }
 
     @Override
+    public void _endRound(AbstractGameState gameState) {
+    }
+
+    @Override
+    public void _startRound(AbstractGameState gameState) {
+    }
+
+    @Override
     protected void _reset() {
         reactivePlayers = new LinkedList<>();
     }

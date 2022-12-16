@@ -153,26 +153,25 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
     }
 
     @Override
-    public void endRound(AbstractGameState gs) {
+    public void _endRound(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
         switch (season) {
             case SPRING:
             case AUTUMN:
                 state.springAutumnHousekeeping();
                 break;
             case SUMMER:
-                break;
             case WINTER:
-                abbot = (abbot + 1 + nPlayers) % nPlayers;
-                if (getYear() >= nMaxRounds) {
-                    state.endGame();
-                    return;
-                }
-                roundCounter++;  // increment year
                 break;
         }
+    }
+
+    @Override
+    public void _startRound(AbstractGameState gameState) {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
         season = season.next();
+        if (season == SPRING)
+            abbot = (abbot + 1 + nPlayers) % nPlayers;
         if (season == SUMMER && getYear() == 1)
             season = season.next(); // we skip Summer in the first year
         state.checkAtLeastOneMonk();

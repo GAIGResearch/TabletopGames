@@ -155,10 +155,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
      *
      * @param gameState - current game state.
      */
-    public void endRound(AbstractGameState gameState) {
-        roundCounter++;
+    public void _endRound(AbstractGameState gameState) {
         turnStep = 0;
-        turnCounter = 0;
-        moveToNextPlayer(gameState, nextPlayer(gameState));
     }
 }

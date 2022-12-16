@@ -66,28 +66,15 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
     }
 
     @Override
-    public void endRound(AbstractGameState gameState) {
-
-        if (gameState.getGameStatus() != GAME_ONGOING) return;
-
-        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
-
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
+    public void _endRound(AbstractGameState gameState) {
 
         PokerGameState pgs = (PokerGameState) gameState;
         Arrays.fill(pgs.playerFold, false);
 
-        roundCounter++;
-        if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
-            gameState.setGameStatus(GAME_END);
-        }
-        else {
-            turnCounter = 0;
-            turnOwner = roundFirstPlayer;
-            roundFirstPlayer = nextPlayer(gameState);
-            firstPlayer = roundFirstPlayer;
-            moveToNextPlayer(gameState, roundFirstPlayer);
-        }
+        turnCounter = 0;
+        turnOwner = roundFirstPlayer;
+        roundFirstPlayer = nextPlayer(gameState);
+        firstPlayer = roundFirstPlayer;
     }
 
     @Override

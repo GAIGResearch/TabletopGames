@@ -22,6 +22,15 @@ public class AlternatingTurnOrder extends TurnOrder {
     }
 
     @Override
+    public void _endRound(AbstractGameState gameState) {
+        // do nothing
+    }
+    @Override
+    public void _startRound(AbstractGameState gameState) {
+        // do nothing
+    }
+
+    @Override
     protected void _reset() {
         direction = 1;
     }

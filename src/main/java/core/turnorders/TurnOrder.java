@@ -157,7 +157,8 @@ public abstract class TurnOrder {
      * If there are no players still playing, game ends and method returns.
      * @param gameState - current game state.
      */
-    public void endRound(AbstractGameState gameState) {
+    public final void endRound(AbstractGameState gameState) {
+        _endRound(gameState);
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
@@ -172,7 +173,18 @@ public abstract class TurnOrder {
             turnCounter = 0;
             moveToNextPlayer(gameState, firstPlayer);
         }
+        _startRound(gameState);
     }
+
+    /**
+     * This needs to be implemented with any game-specific end of round processing
+     * The main turnOrder.endRound() will deal with listeners, timers, incrementing the round counter
+     * and moving to the next player
+     * @param gameState
+     */
+    public abstract void _endRound(AbstractGameState gameState);
+
+    public abstract void _startRound(AbstractGameState gameState);
 
     /**
      * Returns the current player acting in a given game state.

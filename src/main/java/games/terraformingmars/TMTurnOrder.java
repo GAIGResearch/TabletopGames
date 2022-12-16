@@ -55,8 +55,7 @@ public class TMTurnOrder extends AlternatingTurnOrder {
     }
 
     @Override
-    public void endRound(AbstractGameState gameState) {
-        super.endRound(gameState);
+    public void _startRound(AbstractGameState gameState) {
         Arrays.fill(this.passed, false);
         nPassed = 0;
     }

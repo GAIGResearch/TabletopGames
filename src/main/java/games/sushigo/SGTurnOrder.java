@@ -26,11 +26,8 @@ public class SGTurnOrder extends StandardTurnOrder {
     }
 
     @Override
-    public void endRound(AbstractGameState gameState) {
-        //super.endRound(gameState);
-        if (gameState.getGameStatus() != GAME_ONGOING) return;
+    public void _startRound(AbstractGameState gameState) {
         SGGameState SGGS = (SGGameState) gameState;
-        roundCounter++;
 
         for (int i = 0; i < SGGS.getNPlayers(); i++){
             //Clear fields ignoring dumplings

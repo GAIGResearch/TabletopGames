@@ -11,7 +11,6 @@ import core.turnorders.StandardTurnOrder;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import org.graalvm.compiler.core.common.type.ArithmeticOpTable;
 
 import java.util.ArrayList;
 import java.util.List;
