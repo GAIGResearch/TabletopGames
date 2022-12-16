@@ -172,8 +172,8 @@ public abstract class TurnOrder {
         else {
             turnCounter = 0;
             moveToNextPlayer(gameState, firstPlayer);
+            _startRound(gameState);
         }
-        _startRound(gameState);
     }
 
     /**

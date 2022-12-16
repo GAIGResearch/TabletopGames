@@ -135,6 +135,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
     @Override
     public void _endRound(AbstractGameState gameState) {
         fullPlayerTurnCounter++;
+        roundCounter--;  // a little hacky; but Colt Express uses TurnOrder.roundCounter to refer to the total number of game rounds, and this should not be incremented as defult
     }
 
     @Override
