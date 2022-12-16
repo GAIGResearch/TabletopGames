@@ -1,8 +1,8 @@
 package games.dicemonastery;
 
-import core.AbstractForwardModel;
 import core.AbstractGameData;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Card;
@@ -24,8 +24,7 @@ import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public class DiceMonasteryForwardModel extends AbstractForwardModel {
-
+public class DiceMonasteryForwardModel extends StandardForwardModel {
 
     public final AbstractAction SOW_WHEAT = new SowWheat();
     public final AbstractAction HARVEST_WHEAT = new HarvestWheat(1);
@@ -111,11 +110,9 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) currentState;
         DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder)state.getTurnOrder();
-
-        action.execute(state);
 
         // We do this here to get direct access to TurnOrder (we could do this in the Actions..but that adds extra
         // set() options on State/TurnOrder that really shouldn't be publicly accessible
@@ -351,9 +348,4 @@ public class DiceMonasteryForwardModel extends AbstractForwardModel {
                     .mapToObj(m -> new Pair<>(b, m)))
             .collect(toList());
 
-    @Override
-    protected DiceMonasteryForwardModel _copy() {
-        // no mutable state
-        return this;
-    }
 }
