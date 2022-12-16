@@ -2,6 +2,7 @@ package games.dotsboxes;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import utilities.Utils;
 import utilities.Vector2D;
@@ -11,7 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class DBForwardModel extends AbstractForwardModel {
+public class DBForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -51,15 +52,10 @@ public class DBForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DBGameState dbgs = (DBGameState) currentState;
         DBParameters dbp = (DBParameters) currentState.getGameParameters();
 
-        // Will need to check if any cells completed through this action, as that would keep the turn to the current
-        // player, otherwise it changes. So keep track of current number of cells completed before action is executed.
-        int nCellsCompleteBefore = dbgs.cellToOwnerMap.size();
-        // Execute action
-        action.execute(currentState);
         // Check end of game (when all cells completed)
         if (dbgs.cellToOwnerMap.size() == dbp.gridWidth * dbp.gridHeight) {
             // Game is over. Set status and find winner
@@ -82,7 +78,7 @@ public class DBForwardModel extends AbstractForwardModel {
         }
 
         // If not returned, check if the action completed one more box, otherwise move to the next player
-        if (dbgs.cellToOwnerMap.size() == nCellsCompleteBefore) {
+        if (dbgs.getLastActionScored()) {
             currentState.getTurnOrder().endPlayerTurn(currentState);
         }
     }
@@ -101,10 +97,5 @@ public class DBForwardModel extends AbstractForwardModel {
         }
 
         return new ArrayList<>(actions);
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new DBForwardModel();
     }
 }

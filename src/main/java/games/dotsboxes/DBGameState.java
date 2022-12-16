@@ -28,6 +28,7 @@ public class DBGameState extends AbstractGameState {
     int[] nCellsPerPlayer;
     HashMap<DBCell, Integer> cellToOwnerMap;  // Mapping from each cell to its owner, if complete
     HashMap<DBEdge, Integer> edgeToOwnerMap;  // Mapping from each edge to its owner, if placed
+    boolean lastActionScored;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -85,6 +86,7 @@ public class DBGameState extends AbstractGameState {
         nCellsPerPlayer = null;
         cellToOwnerMap = null;
         edgeToOwnerMap = null;
+        lastActionScored = false;
     }
 
     @Override
@@ -94,13 +96,14 @@ public class DBGameState extends AbstractGameState {
         if (!super.equals(o)) return false;
         DBGameState that = (DBGameState) o;
         return Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) &&
+                lastActionScored == that.lastActionScored &&
                 Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap) &&
                 Objects.equals(cellToOwnerMap, that.cellToOwnerMap);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), cellToOwnerMap, edgeToOwnerMap);
+        int result = Objects.hash(super.hashCode(), cellToOwnerMap, edgeToOwnerMap, lastActionScored);
         result = 31 * result + Arrays.hashCode(nCellsPerPlayer);
         return result;
     }
@@ -114,4 +117,6 @@ public class DBGameState extends AbstractGameState {
         }
         return retValue;
     }
+    public boolean getLastActionScored(){return lastActionScored;}
+    public void setLastActionScored(boolean value){lastActionScored = value;}
 }
