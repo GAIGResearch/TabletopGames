@@ -2,6 +2,7 @@ package games.diamant;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
@@ -10,6 +11,7 @@ import core.turnorders.StandardTurnOrder;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
+import org.graalvm.compiler.core.common.type.ArithmeticOpTable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -275,4 +277,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     public List<Counter>     getTreasureChests() { return treasureChests; }
     public Deck<DiamantCard> getPath()           { return path;           }
     public ActionsPlayed     getActionsPlayed()  { return actionsPlayed;  }
+    public void setActionPlayed(int player, AbstractAction action) {
+        actionsPlayed.put(player, action);
+    }
 }

@@ -7,7 +7,11 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action){
-        action.execute(currentState);
+        if (action != null) {
+            action.execute(currentState);
+        } else {
+            throw new AssertionError("No action selected by current player");
+        }
         _afterAction(currentState, action);
     }
 

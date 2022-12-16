@@ -2,6 +2,7 @@ package games.diamant;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -19,7 +20,7 @@ import java.util.Random;
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
-public class DiamantForwardModel extends AbstractForwardModel {
+public class DiamantForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;
@@ -85,10 +86,8 @@ public class DiamantForwardModel extends AbstractForwardModel {
      * @param action:       action to be executed
      */
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DiamantGameState dgs = (DiamantGameState) currentState;
-        dgs.actionsPlayed.put(dgs.getCurrentPlayer(), action);
-
         // If all players has an action, execute them
         if (dgs.actionsPlayed.size() == dgs.getNPlayers()) {
             playActions(dgs);
@@ -98,7 +97,7 @@ public class DiamantForwardModel extends AbstractForwardModel {
     }
 
 
-    private void playActions(DiamantGameState dgs) {
+    public void playActions(DiamantGameState dgs) {
         // How many players play ExitFromCave?
         int nPlayersExit = 0;
         for (int p : dgs.actionsPlayed.keySet())
@@ -236,11 +235,6 @@ public class DiamantForwardModel extends AbstractForwardModel {
             actions.add(new OutOfCave());
 
         return actions;
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new DiamantForwardModel();
     }
 
     /**
