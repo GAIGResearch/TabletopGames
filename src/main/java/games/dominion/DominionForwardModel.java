@@ -11,7 +11,7 @@ import java.util.*;
 
 import static java.util.stream.Collectors.*;
 
-public class DominionForwardModel extends AbstractForwardModel {
+public class DominionForwardModel extends StandardForwardModel {
     /**
      * Performs initial game setup according to game rules
      * - sets up decks and shuffles
@@ -67,10 +67,8 @@ public class DominionForwardModel extends AbstractForwardModel {
      * @param action       - action requested to be played by a player.
      */
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DominionGameState state = (DominionGameState) currentState;
-
-        action.execute(state);
 
         int playerID = state.getCurrentPlayer();
 
@@ -157,16 +155,5 @@ public class DominionForwardModel extends AbstractForwardModel {
             default:
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
         }
-    }
-
-    /**
-     * Gets a copy of the FM with a new random number generator.
-     *
-     * @return - new forward model with different random seed (keeping logic).
-     */
-    @Override
-    protected AbstractForwardModel _copy() {
-        // no internal state as yet
-        return this;
     }
 }
