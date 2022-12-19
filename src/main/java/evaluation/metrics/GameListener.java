@@ -2,6 +2,9 @@ package evaluation.metrics;
 
 import core.Game;
 import core.interfaces.IStatisticLogger;
+import evaluation.summarisers.TAGNumericStatSummary;
+import evaluation.summarisers.TAGOccurrenceStatSummary;
+import utilities.Pair;
 import utilities.Utils;
 import evaluation.summarisers.TAGStatSummary;
 
@@ -49,26 +52,53 @@ public class GameListener {
      */
     public void onEvent(Event event) {
         Map<String, Object> data = new TreeMap<>();
+        Map<String, TAGStatSummary> aggregators = new HashMap<>();
+
         for (String attrStr : metrics.keySet()) {
             AbstractMetric metric = metrics.get(attrStr);
             if (metric.listens(event.type)) {
                 // Apply metric
                 if (metric.isRecordedPerPlayer()) {
+                    ArrayList<Object> metricResults = new ArrayList<>();
                     for (int i = 0; i < event.state.getNPlayers(); i++) {
-                        // TODO: separate this data to be able to get per-player summaries?
                         event.playerID = i;
-                        //data.put(event.type + ":" + i + ":" + attrStr, metric.run(this, event));
                         Object metricResult = metric.run(this, event);
-                        if(metricResult != null) data.put(attrStr + ":" + i + ":" + event.type, metricResult);
+                        if(metricResult != null){
+                            metricResults.add(metricResult);
+                            data.put(attrStr + ":" + i + ":" + event.type, metricResult);
+                        }
                     }
-                } else {
-
+                    //Aggregates per-player metrics for all players.
+                    aggregators.put(attrStr + ":All:" + event.type, aggregate(metricResults));
+                }
+                else
+                {
                     Object metricResult = metric.run(this, event);
                     if(metricResult != null) data.put(event.type + ":" + attrStr, metricResult);
                 }
             }
         }
+
         loggers.get(event.type).record(data);
+
+        if(aggregators.size() > 0)
+        {
+            for(String k : aggregators.keySet())
+            {
+                TAGStatSummary ss = aggregators.get(k);
+                if(ss.type == TAGStatSummary.StatType.Numeric)
+                {
+                    ArrayList<Double> aggData = ((TAGNumericStatSummary) ss).getElements();
+                    for(Double d : aggData)
+                        loggers.get(event.type).record(k, d);
+                }else if(ss.type == TAGStatSummary.StatType.Occurrence)
+                {
+                    HashMap<Object, Integer> aggData = ((TAGOccurrenceStatSummary) ss).getElements();
+                    for(Object o : aggData.keySet())
+                        loggers.get(event.type).record(k, o);
+                }
+            }
+        }
 
         // Process data from events recorded multiple times during game
         if (event.type == Event.GameEvent.GAME_OVER) {
@@ -87,6 +117,27 @@ public class GameListener {
                 }
             }
         }
+    }
+
+    private TAGStatSummary aggregate(ArrayList<Object> metricsData)
+    {
+        if(metricsData.size() > 0) {
+            if (metricsData.get(0) instanceof Number) {
+                TAGNumericStatSummary ss = new TAGNumericStatSummary();
+                for (Object metricsDatum : metricsData) {
+                    if (metricsDatum instanceof Integer) ss.add((Integer) metricsDatum);
+                    if (metricsDatum instanceof Double) ss.add((Double) metricsDatum);
+                }
+                return ss;
+            }
+            if (metricsData.get(0) instanceof String) {
+                TAGOccurrenceStatSummary ss = new TAGOccurrenceStatSummary();
+                for (Object metricsDatum : metricsData)
+                    ss.add(metricsDatum);
+                return ss;
+            }
+        }
+        return null;
     }
 
     protected void processMetricGameOver(String key, TAGStatSummary dataLogged, IStatisticLogger gameOverLogger) {

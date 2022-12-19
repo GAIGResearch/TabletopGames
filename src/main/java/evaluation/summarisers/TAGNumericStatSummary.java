@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static evaluation.summarisers.TAGStatSummary.StatType.Numeric;
+
 /**
  * This class is used to model the statistics of several numbers.  For the statistics
  * we choose here it is not necessary to store all the numbers - just keeping a running total
@@ -27,7 +29,7 @@ public class TAGNumericStatSummary extends TAGStatSummary {
     }
 
     public TAGNumericStatSummary(String name) {
-        super(name, StatType.Numeric);
+        super(name, Numeric);
     }
 
     public void reset() {

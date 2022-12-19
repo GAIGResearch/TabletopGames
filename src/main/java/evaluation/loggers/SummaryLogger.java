@@ -163,8 +163,8 @@ public class SummaryLogger implements IStatisticLogger {
                 if (stats.n() == 1) {
                     sb.append(String.format("\tValue: %8.3g\n", stats.mean()));
                 } else {
-                    sb.append(String.format("\tMean: %8.3g +/- %6.2g,\tMedian: %8.3g,\tRange: [%3d, %3d],\tPop sd: %8.3g,\tSkew: %8.3g,\tKurtosis: %8.3g,\tN: %d\n",
-                            stats.mean(), stats.stdErr(), stats.median(), (int) stats.min(), (int) stats.max(), stats.sd(), stats.skew(), stats.kurtosis(), stats.n()));
+                    sb.append(String.format("\tMean: %8.3g +/- %6.2g,\tMedian: %8.3g,\tSum: %8.3g,\tRange: [%3d, %3d],\tPop sd: %8.3g,\tSkew: %8.3g,\tKurtosis: %8.3g,\tN: %d\n",
+                            stats.mean(), stats.stdErr(), stats.median(), stats.sum(), (int) stats.min(), (int) stats.max(), stats.sd(), stats.skew(), stats.kurtosis(), stats.n()));
                 }
             } else {
                 // Print other data, each item toString + percentage of times it was that value

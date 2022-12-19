@@ -20,7 +20,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
     public static class ParameterComplete extends AbstractMetric {
 
         public ParameterComplete(){ this("Oxygen"); }
-        private TMTypes.GlobalParameter parameter;
+        private final TMTypes.GlobalParameter parameter;
         public ParameterComplete(String param) {
             addEventType(Event.GameEvent.GAME_OVER);
             this.parameter = TMTypes.GlobalParameter.valueOf(param);
@@ -41,7 +41,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
     public static class ParameterIncrease extends AbstractMetric {
 
         public ParameterIncrease(){this("Oxygen"); }
-        private TMTypes.GlobalParameter parameter;
+        private final TMTypes.GlobalParameter parameter;
         public ParameterIncrease(String param) {
             addEventType(Event.GameEvent.GAME_OVER);
             this.parameter = TMTypes.GlobalParameter.valueOf(param);
@@ -309,7 +309,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
         public PlayerParameterContribution() {this("Oxygen"); }
 
-        private TMTypes.GlobalParameter parameter;
+        private final TMTypes.GlobalParameter parameter;
         public PlayerParameterContribution(String param) {
             addEventType(Event.GameEvent.GAME_OVER);
             this.parameter = TMTypes.GlobalParameter.valueOf(param);
@@ -365,7 +365,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerPlayedCardsPerType extends AbstractMetric {
         public PlayerPlayedCardsPerType(){this("Automated"); }
-        private TMTypes.CardType type;
+        private final TMTypes.CardType type;
         public PlayerPlayedCardsPerType(String cardType) {
             addEventType(Event.GameEvent.GAME_OVER);
             recordPerPlayer = true;
@@ -395,14 +395,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
         @Override
         public Object run(GameListener listener, Event e) {
-            String ss = "";
+            StringBuilder ss = new StringBuilder();
             TMGameState s = ((TMGameState)e.state);
             for (TMCard card: s.getPlayedCards()[e.playerID].getComponents()) {
-                ss += card.getComponentName() + ",";
+                ss.append(card.getComponentName()).append(",");
             }
-            if (ss.equals("")) return ss;
-            ss += "]";
-            return ss.replace(",]", "");
+            if (ss.toString().equals("")) return ss.toString();
+            ss.append("]");
+            return ss.toString().replace(",]", "");
         }
     }
 
@@ -418,13 +418,13 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         public Object run(GameListener listener, Event e) {
             TMGameState s = ((TMGameState)e.state);
             if (s.getPlayerResults()[e.playerID] == Utils.GameResult.WIN) {
-                String ss = "";
+                StringBuilder ss = new StringBuilder();
                 for (TMCard card : s.getPlayedCards()[e.playerID].getComponents()) {
-                    ss += card.getComponentName() + ",";
+                    ss.append(card.getComponentName()).append(",");
                 }
-                if (ss.equals("")) return ss;
-                ss += "]";
-                return ss.replace(",]", "");
+                if (ss.toString().equals("")) return ss.toString();
+                ss.append("]");
+                return ss.toString().replace(",]", "");
             }
             return "";
         }
@@ -507,16 +507,16 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
         @Override
         public Object run(GameListener listener, Event e) {
-            String ms = "";
+            StringBuilder ms = new StringBuilder();
             TMGameState s = ((TMGameState)e.state);
             for(Milestone m: s.getMilestones()) {
                 if (m.isClaimed() && m.claimed == e.playerID) {
-                    ms += m.getComponentName() + ",";
+                    ms.append(m.getComponentName()).append(",");
                 }
             }
-            ms += "]";
-            if (ms.equals("]")) return "";
-            return ms.replace(",]", "");
+            ms.append("]");
+            if (ms.toString().equals("]")) return "";
+            return ms.toString().replace(",]", "");
         }
     }
 
@@ -682,7 +682,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerProduction extends AbstractMetric {
         public PlayerProduction(){this("MegaCredit");}
-        private TMTypes.Resource type;
+        private final TMTypes.Resource type;
         public PlayerProduction(String res) {
             addEventType(Event.GameEvent.GAME_OVER);
             recordPerPlayer = true;
@@ -702,7 +702,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
         public PlayerResource(){this("MegaCredit");}
 
-        private TMTypes.Resource type;
+        private final TMTypes.Resource type;
         public PlayerResource(String res) {
             addEventType(Event.GameEvent.GAME_OVER);
             recordPerPlayer = true;

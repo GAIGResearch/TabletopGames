@@ -1,7 +1,6 @@
 package evaluation.summarisers;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.*;
 /**
  * This class is used to model the statistics of several numbers.  For the statistics
@@ -37,22 +36,28 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
         }
     }
 
+    private void addSingle(Object o)
+    {
+        if (!elements.containsKey(o)) elements.put(o, 0);
+        elements.put(o, elements.get(o) + 1);
+        n++;
+    }
+
     public void add(String s) {
         String[] els = s.split(",");
-        n += els.length;
         for (String e: els) {
-            add(e);
+            //add(e); //This creates Stack Overflow.
+            addSingle(e);
         }
     }
 
     public void add(Object o) {
-        if (!elements.containsKey(o)) elements.put(o, 0);
-        elements.put(o, elements.get(o) + 1);
+        addSingle(o);
     }
 
     public void add(Object... xa) {
         for (Object x : xa) {
-            add(x);
+            addSingle(x);
         }
     }
 
@@ -109,11 +114,10 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
         return data;
     }
 
-    private class DataMeasure implements Comparable
+    private static class DataMeasure implements Comparable
     {
-        private String data;
-        private int count;
-        private boolean orderDesc = true;
+        private final String data;
+        private final int count;
 
         DataMeasure(String data, int count)
         {
@@ -125,7 +129,14 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
         public int compareTo(@NotNull Object o) {
             if(!(o instanceof DataMeasure)) return 0;
             int comparison = Integer.compare(this.count, ((DataMeasure)o).count);
-            return orderDesc ? -comparison : comparison;
+            if(comparison == 0) return this.data.compareTo(((DataMeasure)o).data);
+            return -comparison; //This is to sort from high count to lower count.
+        }
+
+        public boolean equals(Object o)
+        {
+            if(!(o instanceof DataMeasure)) return false;
+            return this.data.equals(((DataMeasure)o).data) && this.count == ((DataMeasure)o).count;
         }
 
         public String toString()
