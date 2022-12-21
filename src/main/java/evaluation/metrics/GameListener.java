@@ -75,7 +75,7 @@ public class GameListener {
                 else
                 {
                     Object metricResult = metric.run(this, event);
-                    if(metricResult != null) data.put(event.type + ":" + attrStr, metricResult);
+                    if(metricResult != null) data.put(attrStr + ":" + event.type, metricResult);
                 }
             }
         }
