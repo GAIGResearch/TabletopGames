@@ -1,12 +1,18 @@
 package evaluation.loggers;
 
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.TimeStamp;
+import evaluation.metrics.TimeStampSummary;
 import evaluation.summarisers.TAGNumericStatSummary;
+import evaluation.summarisers.TAGTimeSeriesSummary;
 import utilities.Pair;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
 import evaluation.summarisers.TAGStatSummary;
+import utilities.StatSummary;
+import weka.core.pmml.jaxbbindings.TimeSeries;
 
 import java.io.*;
+import java.sql.Time;
 import java.util.*;
 
 import static java.util.stream.Collectors.*;
@@ -37,11 +43,30 @@ public class SummaryLogger implements IStatisticLogger {
                 summary = new TAGNumericStatSummary(key);
                 data.put(key, summary);
             }
-            ((TAGNumericStatSummary)summary).add((Number) value);
-        } else {
+            ((TAGNumericStatSummary) summary).add((Number) value);
+
+        }else if(value instanceof TimeStamp){
+            if (!data.containsKey(key)) {
+                summary = new TAGTimeSeriesSummary(key);
+                data.put(key, summary);
+            }
+            ((TAGTimeSeriesSummary) summary).append((TimeStamp) value);
+        } else if(value instanceof ArrayList && ((ArrayList<?>) value).get(0) instanceof TimeStamp){
+            TimeStamp ts = (TimeStamp) ((ArrayList<?>) value).get(0);
+            if(!(ts instanceof TimeStampSummary)) return;
+
+            if (!data.containsKey(key)) {
+                summary = new TAGTimeSeriesSummary(key);
+                data.put(key, summary);
+            }
+            for(TimeStampSummary tst : ((ArrayList<TimeStampSummary>) value))
+                ((TAGTimeSeriesSummary) summary).append(tst);
+
+            return; //Nothing to do here.
+        }else {
             if (value instanceof Map && ((Map<?, ?>) value).keySet().iterator().next() instanceof String) {
                 // A collection of other stats that should be recorded separately, ignore key // TODO: maybe we want to keep the key too in the name of records?
-                record((Map<String, ?>) value);
+                record(key, (Map<String, ?>) value);
             } else {
                 // Some other kind of object, record occurrences
                 if (!data.containsKey(key)) {
@@ -58,7 +83,7 @@ public class SummaryLogger implements IStatisticLogger {
      *
      * @param data A map of name -> Number pairs
      */
-    @Override
+
     public void record(Map<String, ?> data) {
         for (String key : data.keySet()) {
             record(key, data.get(key));
@@ -135,6 +160,8 @@ public class SummaryLogger implements IStatisticLogger {
                     header.append(key).append("_kurtosis\t");
                     outputData.append(String.format("%.3g\t", statSummary.kurtosis()));
                 }
+            } else if (summary instanceof TAGTimeSeriesSummary) {
+                header.append(key).append("\t").append("Not implemented\n");
             }
         }
         header.append("\n");
@@ -166,6 +193,36 @@ public class SummaryLogger implements IStatisticLogger {
                     sb.append(String.format("\tMean: %8.3g +/- %6.2g,\tMedian: %8.3g,\tSum: %8.3g,\tRange: [%3d, %3d],\tPop sd: %8.3g,\tSkew: %8.3g,\tKurtosis: %8.3g,\tN: %d\n",
                             stats.mean(), stats.stdErr(), stats.median(), stats.sum(), (int) stats.min(), (int) stats.max(), stats.sd(), stats.skew(), stats.kurtosis(), stats.n()));
                 }
+            } else if (summary instanceof TAGTimeSeriesSummary) {
+                TAGTimeSeriesSummary stats = (TAGTimeSeriesSummary) summary;
+                sb.append(key).append("\n");
+                ArrayList<TimeStamp> series = (ArrayList<TimeStamp>) stats.getElements();
+                int lastX = -1;
+
+                ArrayList<TimeStamp> oneSeries = new ArrayList<>();
+                for(int i = 0; i < series.size(); i++)
+                {
+                    TimeStamp ts = series.get(i);
+
+                    int x = ts.x;
+                    if(x <= lastX)
+                    {
+                        //new series
+                        String seriesString = seriesToString(oneSeries, (ts instanceof TimeStampSummary));
+                        sb.append(seriesString);
+                        oneSeries.clear();
+                        oneSeries.add(ts);
+                    }else oneSeries.add(ts);
+
+                    if(i == series.size()-1)
+                    {
+                        String seriesString = seriesToString(oneSeries, (ts instanceof TimeStampSummary));
+                        sb.append(seriesString);
+                    }
+
+                    lastX = x;
+                }
+
             } else {
                 // Print other data, each item toString + percentage of times it was that value
                 TAGOccurrenceStatSummary stats = (TAGOccurrenceStatSummary) summary;
@@ -175,4 +232,24 @@ public class SummaryLogger implements IStatisticLogger {
 
         return sb.toString();
     }
+
+    private String seriesToString(ArrayList<TimeStamp> oneSeries, boolean isSummary)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[n: ").append(oneSeries.size()).append("; ");
+
+        for (TimeStamp ts : oneSeries) {
+            if(!isSummary)
+                sb.append(ts.v).append(",");
+            else {
+                TimeStampSummary tss = (TimeStampSummary) ts;
+                sb.append(tss.values.mean()).append(";");
+            }
+        }
+
+        sb.append("]\n");
+        return sb.toString().replace(",]", "]");
+
+    }
+
 }

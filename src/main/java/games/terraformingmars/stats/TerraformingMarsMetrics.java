@@ -1,8 +1,5 @@
 package games.terraformingmars.stats;
-import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
-import evaluation.metrics.IMetricsCollection;
+import evaluation.metrics.*;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
@@ -274,26 +271,64 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         }
     }
 
-    public static class PointsProgress extends AbstractMetric {
-
-        public PointsProgress() {addEventType(Event.GameEvent.ROUND_OVER);}
+    public static class TRPointsProgress extends AbstractMetric {
+        public TRPointsProgress() {addEventType(Event.GameEvent.ROUND_OVER); recordPerPlayer = true;}
 
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
-            StringBuilder ss = new StringBuilder("[");
-            for (int i = 0; i < s.getNPlayers(); i++) {
-                ss.append("(").append(s.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue())
-                        .append(",").append(s.countPointsMilestones(i)).append(",").append(s.countPointsAwards(i))
-                        .append(",").append(s.countPointsBoard(i)).append(",").append(s.countPointsCards(i)).append("),");
-            }
-            ss.append("]");
-            return ss.toString().replace(",]", "]");
+            int x = e.state.getTurnOrder().getRoundCounter();
+            return new TimeStamp(x, s.getPlayerResources()[e.playerID].get(TMTypes.Resource.TR).getValue());
         }
     }
 
-    /// PLAYER
 
+    public static class AwardsPointProgress extends AbstractMetric {
+        public AwardsPointProgress() {addEventType(Event.GameEvent.ROUND_OVER); recordPerPlayer = true;}
+
+        @Override
+        public Object run(GameListener listener, Event e) {
+            TMGameState s = ((TMGameState) e.state);
+            int x = e.state.getTurnOrder().getRoundCounter();
+            return new TimeStamp(x, s.countPointsAwards(e.playerID));
+        }
+    }
+
+
+    public static class MilestonesPointsProgress extends AbstractMetric {
+        public MilestonesPointsProgress() {addEventType(Event.GameEvent.ROUND_OVER); recordPerPlayer = true;}
+
+        @Override
+        public Object run(GameListener listener, Event e) {
+            TMGameState s = ((TMGameState) e.state);
+            int x = e.state.getTurnOrder().getRoundCounter();
+            return new TimeStamp(x, s.countPointsMilestones(e.playerID));
+        }
+    }
+
+
+    public static class CardsPointsProgress extends AbstractMetric {
+        public CardsPointsProgress() {addEventType(Event.GameEvent.ROUND_OVER); recordPerPlayer = true;}
+
+        @Override
+        public Object run(GameListener listener, Event e) {
+            TMGameState s = ((TMGameState) e.state);
+            int x = e.state.getTurnOrder().getRoundCounter();
+            return new TimeStamp(x, s.countPointsCards(e.playerID));
+        }
+    }
+
+
+    public static class BoardPointsProgress extends AbstractMetric {
+        public BoardPointsProgress() {addEventType(Event.GameEvent.ROUND_OVER); recordPerPlayer = true;}
+
+        @Override
+        public Object run(GameListener listener, Event e) {
+            TMGameState s = ((TMGameState) e.state);
+            int x = e.state.getTurnOrder().getRoundCounter();
+            return new TimeStamp(x, s.countPointsBoard(e.playerID));
+        }
+    }
 
     public static class PlayerCardsPlayed extends AbstractMetric {
 
@@ -722,13 +757,15 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
     public static class PlayerHandSize extends AbstractMetric {
 
         public PlayerHandSize() {
-            addEventType(Event.GameEvent.GAME_OVER);
+            addEventType(Event.GameEvent.ROUND_OVER);
             recordPerPlayer = true;
         }
 
         @Override
         public Object run(GameListener listener, Event e) {
-            return ((TMGameState)e.state).getPlayerHands()[e.playerID].getSize();
+            TMGameState s = ((TMGameState) e.state);
+            int x = e.state.getTurnOrder().getRoundCounter();
+            return new TimeStamp(x, ((TMGameState)e.state).getPlayerHands()[e.playerID].getSize());
         }
     }
 }

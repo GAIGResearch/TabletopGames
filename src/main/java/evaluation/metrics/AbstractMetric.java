@@ -2,10 +2,11 @@ package evaluation.metrics;
 import java.util.HashSet;
 public abstract class AbstractMetric
 {
-//    public String name;
     private HashSet<Event.GameEvent> eventTypes;
 
     protected boolean recordPerPlayer = false;
+
+    protected boolean aggregate = true;
 
     public abstract Object run(GameListener listener, Event e);
 
@@ -26,6 +27,8 @@ public abstract class AbstractMetric
     public boolean isRecordedPerPlayer() {
         return recordPerPlayer;
     }
+
+    public boolean aggregate() {return aggregate;}
 
     public String name()
     {

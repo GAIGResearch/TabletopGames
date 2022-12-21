@@ -4,7 +4,7 @@ import core.Game;
 import core.interfaces.IStatisticLogger;
 import evaluation.summarisers.TAGNumericStatSummary;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
-import utilities.Pair;
+import evaluation.summarisers.TAGTimeSeriesSummary;
 import utilities.Utils;
 import evaluation.summarisers.TAGStatSummary;
 
@@ -69,7 +69,8 @@ public class GameListener {
                         }
                     }
                     //Aggregates per-player metrics for all players.
-                    aggregators.put(attrStr + ":All:" + event.type, aggregate(metricResults));
+                    if(metric.aggregate())
+                        aggregators.put(attrStr + ":All:" + event.type, aggregate(metricResults));
                 }
                 else
                 {
@@ -96,6 +97,11 @@ public class GameListener {
                     HashMap<Object, Integer> aggData = ((TAGOccurrenceStatSummary) ss).getElements();
                     for(Object o : aggData.keySet())
                         loggers.get(event.type).record(k, o);
+                }else if(ss.type == TAGStatSummary.StatType.Time)
+                {
+                    ArrayList<TimeStamp> aggData = (ArrayList<TimeStamp>) ss.getElements();
+                    for(TimeStamp t : aggData)
+                        loggers.get(event.type).record(k, t);
                 }
             }
         }
@@ -109,10 +115,14 @@ public class GameListener {
                         // Summarise at the end
                         IStatisticLogger logger = loggers.get(e);
                         Map<String, TAGStatSummary> dataLogged = logger.summary();
+                        ArrayList<String> keyDeletes = new ArrayList<>();
                         for (String key : dataLogged.keySet()) {
                             TAGStatSummary dataLoggedKey = dataLogged.get(key);
                             processMetricGameOver(key, dataLoggedKey, gameOverLogger);
+                            if(key.contains(":All:")) keyDeletes.add(key);
                         }
+                        for(String kDel : keyDeletes)
+                            dataLogged.remove(kDel);
                     }
                 }
             }
@@ -129,11 +139,18 @@ public class GameListener {
                     if (metricsDatum instanceof Double) ss.add((Double) metricsDatum);
                 }
                 return ss;
-            }
-            if (metricsData.get(0) instanceof String) {
+            }else if (metricsData.get(0) instanceof String) {
                 TAGOccurrenceStatSummary ss = new TAGOccurrenceStatSummary();
                 for (Object metricsDatum : metricsData)
                     ss.add(metricsDatum);
+                return ss;
+            }else if (metricsData.get(0) instanceof TimeStamp) {
+                //This is a time series.
+                TAGTimeSeriesSummary ss = new TAGTimeSeriesSummary();
+                for (Object metricsDatum : metricsData) {
+                    TimeStamp timeStamp = (TimeStamp) metricsDatum;
+                    ss.append(timeStamp.x, timeStamp.v);
+                }
                 return ss;
             }
         }
@@ -141,7 +158,7 @@ public class GameListener {
     }
 
     protected void processMetricGameOver(String key, TAGStatSummary dataLogged, IStatisticLogger gameOverLogger) {
-        gameOverLogger.record(dataLogged.getSummary());
+        gameOverLogger.record(dataLogged.getSummary(key));
     }
 
     /**

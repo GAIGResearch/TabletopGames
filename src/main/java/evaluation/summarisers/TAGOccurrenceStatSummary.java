@@ -106,10 +106,10 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
     }
 
     @Override
-    public Map<String, Object> getSummary() {
+    public Map<String, Object> getSummary(String key) {
         Map<String, Object> data = new HashMap<>();
-        for (Object key: elements.keySet()) {
-            data.put(key.toString(), elements.get(key));
+        for (Object k: elements.keySet()) {
+            data.put(k.toString(), elements.get(k));
         }
         return data;
     }

@@ -36,6 +36,11 @@
       { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerNumAwardsFunded" },
       { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerAwardsFunded" },
       { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerMapCoverage" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerHandSize" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$TRPointsProgress" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$CardsPointsProgress" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$BoardPointsProgress" },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$AwardsPointProgress" },
 
       { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$ParameterComplete", "args": [ "Temperature" ] },
       { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$ParameterIncrease", "args": [ "Oxygen" ] },
