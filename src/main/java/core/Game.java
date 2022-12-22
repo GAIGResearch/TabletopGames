@@ -15,26 +15,21 @@ import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSParams;
 import players.simple.RandomPlayer;
-import players.mcts.MCTSPlayer;
-import players.simple.OSLAPlayer;
 import utilities.Pair;
 import utilities.TAGStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
-import javax.swing.Timer;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static core.CoreConstants.*;
 import static core.CoreConstants.GameEvents;
-import static games.GameType.*;
 import static utilities.Utils.componentToImage;
 
 public class Game {
@@ -42,12 +37,17 @@ public class Game {
     private static final AtomicInteger idFountain = new AtomicInteger(0);
     // Type of game
     private final GameType gameType;
+    public boolean paused;
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
     protected List<IGameListener> listeners = new ArrayList<>();
+    String fileName = "output.mp4";
+    String formatName = "mp4";
+    String codecName = null;
+    int snapsPerSecond = 10;
     /* Game Statistics */
     private int lastPlayer; // used to track actions per 'turn'
     private JFrame frame;
@@ -61,12 +61,8 @@ public class Game {
     private int nDecisions;
     // Number of actions taken in a turn by a player
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
-    private double exploreEpsilon;
-    Random rnd = new Random(System.currentTimeMillis());
-
     private boolean pause, stop;
     private boolean debug = false;
-
     // Video recording
     private Rectangle areaBounds;
     private MediaPictureConverter converter = null;
@@ -75,13 +71,7 @@ public class Game {
     private Encoder encoder;
     private Muxer muxer;
     private boolean recordingVideo = false;
-    String fileName = "output.mp4";
-    String formatName = "mp4";
-    String codecName = null;
-    int snapsPerSecond = 10;
     private int turnPause;
-
-    public boolean paused;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -128,8 +118,7 @@ public class Game {
         if (parameterConfigFile != null) {
             AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, parameterConfigFile);
             game = gameToPlay.createGameInstance(players.size(), seed, params);
-        }
-        else game = gameToPlay.createGameInstance(players.size(), seed);
+        } else game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
             if (listeners != null)
                 listeners.forEach(game::addListener);
@@ -181,10 +170,6 @@ public class Game {
         }
 
         return game;
-    }
-
-    public void setTurnPause(int turnPause) {
-        this.turnPause = turnPause;
     }
 
     /**
@@ -337,6 +322,59 @@ public class Game {
         }
     }
 
+    /**
+     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
+     * some games for some screen sizes due to the vagaries of Java Swing...
+     * <p>
+     * Test class used to run a specific game. The user must specify:
+     * 1. Action controller for GUI interactions / null for no visuals
+     * 2. Random seed for the game
+     * 3. Players for the game
+     * 4. Game parameter configuration
+     * 5. Mode of running
+     * and then run this class.
+     */
+    public static void main(String[] args) {
+        String gameType = Utils.getArg(args, "game", "TerraformingMars");
+        boolean useGUI = Utils.getArg(args, "gui", true);
+        int playerCount = Utils.getArg(args, "nPlayers", 2);
+        int turnPause = Utils.getArg(args, "turnPause", 0);
+        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+
+        ActionController ac = new ActionController(); //null;
+
+        /* Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
+
+        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new MCTSPlayer());
+//        MCTSParams params1 = new MCTSParams();
+//        players.add(new MCTSPlayer(params1));
+//        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
+        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanConsolePlayer());
+//        players.add(new FirstActionPlayer());
+//        players.add(new HumanConsolePlayer());
+
+        /* 4. Game parameter configuration. Set to null to ignore and use default parameters */
+        String gameParams = null;
+
+        /* 5. Run! */
+        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+
+//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        games.remove(LoveLetter);
+//        games.remove(Pandemic);
+//        games.remove(TicTacToe);
+//        runMany(games, players, 100L, 100, false, false, null, turnPause);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
+    }
+
+    public void setTurnPause(int turnPause) {
+        this.turnPause = turnPause;
+    }
 
     /**
      * Performs GUI update.
@@ -547,18 +585,11 @@ public class Game {
                 action = observedActions.get(0);
                 currentPlayer.registerUpdatedObservation(observation);
             } else {
-                boolean explore = rnd.nextDouble() < exploreEpsilon;
-                if (explore) {
-                    int roll = rnd.nextInt(observedActions.size());
-                    action = observedActions.get(roll);
-                    currentPlayer.registerUpdatedObservation(observation);
-                } else {
-                    // Get action from player, and time it
-                    s = System.nanoTime();
-                    if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
-                    action = currentPlayer.getAction(observation, observedActions);
-                    agentTime += (System.nanoTime() - s);
-                }
+                // Get action from player, and time it
+                s = System.nanoTime();
+                if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
+                action = currentPlayer.getActionWithExploration(observation, observedActions);
+                agentTime += (System.nanoTime() - s);
                 nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
@@ -764,26 +795,16 @@ public class Game {
         return players;
     }
 
-    /**
-     * Sets the epsilon to be used for exploration in all games in the tournament
-     * This is when we want to add noise at the environmental level (e.g. for exploration during learning)
-     * independently of any exploration at the individual agent level
-     * @param epsilon
-     */
-    public void setExploration(double epsilon) {
-        exploreEpsilon = epsilon;
-    }
-
     public boolean isPaused() {
         return pause;
     }
 
-    public void flipPaused() {
-        this.paused = !this.paused;
-    }
-
     public void setPaused(boolean paused) {
         this.pause = paused;
+    }
+
+    public void flipPaused() {
+        this.paused = !this.paused;
     }
 
     public boolean isStopped() {
@@ -916,57 +937,6 @@ public class Game {
             // Finally, let's clean up after ourselves.
             muxer.close();
         }
-    }
-
-
-    /**
-     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
-     * some games for some screen sizes due to the vagaries of Java Swing...
-     * <p>
-     * Test class used to run a specific game. The user must specify:
-     * 1. Action controller for GUI interactions / null for no visuals
-     * 2. Random seed for the game
-     * 3. Players for the game
-     * 4. Game parameter configuration
-     * 5. Mode of running
-     * and then run this class.
-     */
-    public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "TerraformingMars");
-        boolean useGUI = Utils.getArg(args, "gui", true);
-        int playerCount = Utils.getArg(args, "nPlayers", 2);
-        int turnPause = Utils.getArg(args, "turnPause", 0);
-        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
-
-        ActionController ac = new ActionController(); //null;
-
-        /* Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
-
-        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new MCTSPlayer());
-//        MCTSParams params1 = new MCTSParams();
-//        players.add(new MCTSPlayer(params1));
-//        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-//        players.add(new FirstActionPlayer());
-//        players.add(new HumanConsolePlayer());
-
-        /* 4. Game parameter configuration. Set to null to ignore and use default parameters */
-        String gameParams = null;
-
-        /* 5. Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
-
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.remove(LoveLetter);
-//        games.remove(Pandemic);
-//        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, false, false, null, turnPause);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
     }
 
 }

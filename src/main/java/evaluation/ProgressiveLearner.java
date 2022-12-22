@@ -202,7 +202,9 @@ public class ProgressiveLearner {
         RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
                 matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
-        tournament.setExploration(maxExplore * (iterations - iter - 1) / (iterations - 1));
+        double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
+        System.out.println("Explore = " + exploreEpsilon);
+        agents.forEach(p -> p.setExploration(exploreEpsilon));
 
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
