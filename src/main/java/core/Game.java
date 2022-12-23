@@ -603,6 +603,9 @@ public class Game {
             ((IPrintable) gameState).printToConsole();
         }
 
+        // Timers should average
+        terminateTimers();
+
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
         listeners.forEach(l -> l.onGameEvent(GameEvents.GAME_OVER, this));
@@ -614,9 +617,6 @@ public class Game {
         for (AbstractPlayer player : players) {
             player.finalizePlayer(gameState.copy(player.getPlayerID()));
         }
-
-        // Timers should average
-        terminateTimers();
 
         // Close video recording writer
         terminateVideoRecording();
