@@ -91,7 +91,7 @@ public class DominionForwardModel extends StandardForwardModel {
                 if (state.buysLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
                     // change phase
                     if (state.gameOver()) {
-                        endOfGameProcessing(state);
+                        state.endGame();
                     } else {
                         state.endOfTurn(playerID);
                     }
@@ -101,19 +101,6 @@ public class DominionForwardModel extends StandardForwardModel {
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
         }
 
-    }
-
-    private void endOfGameProcessing(DominionGameState state) {
-        state.setGameStatus(Utils.GameResult.GAME_END);
-        int[] finalScores = new int[state.playerCount];
-        for (int p = 0; p < state.playerCount; p++) {
-            int finalP = p;
-            finalScores[p] = state.getTotal(p, c -> c.victoryPoints(finalP, state));
-        }
-        int winningScore = Arrays.stream(finalScores).max().getAsInt();
-        for (int p = 0; p < state.playerCount; p++) {
-            state.setPlayerResult(finalScores[p] == winningScore ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
-        }
     }
 
     private void processDelayedActions(TriggerType trigger, DominionGameState state) {

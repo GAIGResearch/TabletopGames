@@ -1,12 +1,12 @@
 package games.cantstop;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Dice;
-import games.cantstop.actions.*;
-import utilities.Utils;
+import games.cantstop.actions.Pass;
+import games.cantstop.actions.RollDice;
+import games.cantstop.actions.AllocateDice;
 
 import java.util.*;
 
@@ -71,9 +71,7 @@ public class CantStopForwardModel extends StandardForwardModel {
                 state.completedColumns[trackNumber] = true;
                 // and then check game end condition
                 if (state.getGameScore(playerId) >= params.COLUMNS_TO_WIN) {
-                    state.setGameStatus(Utils.GameResult.GAME_END);
-                    for (int p = 0; p < state.getNPlayers(); p++)
-                        state.setPlayerResult(p == playerId ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
+                    state.endGame();
                 }
             }
         }

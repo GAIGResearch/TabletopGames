@@ -269,49 +269,24 @@ public class PokerForwardModel extends StandardForwardModel {
                 }
             }
             if (maxMoney > 0) {
-                // Game ended
-                for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
-                    if (pgs.playerMoney[playerID].getValue() == maxMoney) {
-                        pgs.setPlayerResult(Utils.GameResult.WIN, playerID);
-                    } else {
-                        pgs.setPlayerResult(LOSE, playerID);
-                    }
-                }
-                pgs.setGameStatus(Utils.GameResult.GAME_END);
+                pgs.endGame();
                 return true;
             }
         } else {
             if (pgs.getTurnOrder().getRoundCounter() >= pgp.maxRounds) {
                 // Max rounds reached, the player with most money wins
-                int maxMoney = 0;
-                for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
-                    int money = pgs.playerMoney[playerID].getValue();
-                    if (money > maxMoney) {
-                        maxMoney = money;
-                    }
-                }
-                for (int playerID = 0; playerID < pgs.getNPlayers(); playerID++) {
-                    if (pgs.playerMoney[playerID].getValue() == maxMoney) {
-                        pgs.setPlayerResult(Utils.GameResult.WIN, playerID);
-                    } else {
-                        pgs.setPlayerResult(LOSE, playerID);
-                    }
-                }
-                pgs.setGameStatus(Utils.GameResult.GAME_END);
+                pgs.endGame();
                 return true;
             } else {
                 int stillAlive = 0;
-                int id = -1;
                 for (int i = 0; i < pgs.getNPlayers(); i++) {
                     if (pgs.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING) {
                         stillAlive++;
-                        id = i;
                         if (stillAlive > 1) break;
                     }
                 }
                 if (stillAlive == 1) {
-                    pgs.setPlayerResult(Utils.GameResult.WIN, id);
-                    pgs.setGameStatus(Utils.GameResult.GAME_END);
+                    pgs.endGame();
                     return true;
                 }
             }

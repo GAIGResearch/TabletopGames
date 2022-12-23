@@ -152,7 +152,7 @@ public class DiamantForwardModel extends StandardForwardModel {
 
         // No more caves ?
         if (dgs.nCave == dp.nCaves)
-            EndGame(dgs);
+            dgs.endGame();
         else {
             Random r = new Random(dgs.getGameParameters().getRandomSeed());
 
@@ -174,41 +174,6 @@ public class DiamantForwardModel extends StandardForwardModel {
 
             drawAndPlayCard(dgs);
         }
-    }
-
-    /**
-     * Finishes the game and obtains who is the winner
-     *
-     * @param dgs: current game state
-     */
-    private void EndGame(DiamantGameState dgs) {
-        int maxGems = 0;
-        List<Integer> bestPlayers = new ArrayList<>();
-
-        for (int p = 0; p < dgs.getNPlayers(); p++) {
-            int nGems = dgs.treasureChests.get(p).getValue();
-            if (nGems > maxGems) {
-                bestPlayers.clear();
-                bestPlayers.add(p);
-                maxGems = nGems;
-            } else if (nGems == maxGems) {
-                bestPlayers.add(p);
-            }
-        }
-
-        boolean moreThanOneWinner = bestPlayers.size() > 1;
-
-        for (int p = 0; p < dgs.getNPlayers(); p++) {
-            if (bestPlayers.contains(p)) {
-                if (moreThanOneWinner)
-                    dgs.setPlayerResult(Utils.GameResult.DRAW, p);
-                else
-                    dgs.setPlayerResult(Utils.GameResult.WIN, p);
-            } else
-                dgs.setPlayerResult(Utils.GameResult.LOSE, p);
-        }
-
-        dgs.setGameStatus(Utils.GameResult.GAME_END);
     }
 
 

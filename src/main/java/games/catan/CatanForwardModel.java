@@ -126,25 +126,13 @@ public class CatanForwardModel extends StandardForwardModel {
         }
 
         // win condition
-        if (gs.getGameScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win) {
-            for (int i = 0; i < gs.getNPlayers(); i++) {
-                if (i == gs.getCurrentPlayer()) {
-                    gs.setPlayerResult(Utils.GameResult.WIN, i);
-                } else {
-                    gs.setPlayerResult(Utils.GameResult.LOSE, i);
-                }
-            }
-            gs.setGameStatus(Utils.GameResult.GAME_END);
+        if (gs.getGameScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win
+                || (params.max_round_count != -1 && gs.getTurnOrder().getRoundCounter() > params.max_round_count)) {
+            currentState.endGame();
             if (gs.getCoreGameParameters().verbose) {
                 System.out.println("Game over! winner = " + gs.getCurrentPlayer());
             }
-        } else if (params.max_round_count != -1 && gs.getTurnOrder().getRoundCounter() > params.max_round_count) { // end in tie if round limit exceeded
-            for (int i = 0; i < gs.getNPlayers(); i++) {
-                gs.setPlayerResult(Utils.GameResult.DRAW, i);
-            }
-            gs.setGameStatus(Utils.GameResult.GAME_END);
         }
-
         // prevents multiple DoNothing actions with multi-action turn stages
         if (action instanceof DoNothing && (gs.getGamePhase() == Build || gs.getGamePhase() == Trade)) {
             cto.skipTurnStage(gs);

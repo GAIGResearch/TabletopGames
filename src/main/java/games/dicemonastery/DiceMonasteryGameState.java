@@ -7,7 +7,6 @@ import core.components.Deck;
 import core.components.Token;
 import games.GameType;
 import games.dicemonastery.components.*;
-import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -509,18 +508,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 moveCube(player, GRAIN, MEADOW, SUPPLY);
         }
         // Deliberately do not check monks here...that is done afterwards...Winter housekeeping is done before winter actions
-    }
-
-    void endGame() {
-        setGameStatus(Utils.GameResult.GAME_END);
-        int[] finalScores = new int[getNPlayers()];
-        for (int p = 0; p < getNPlayers(); p++) {
-            finalScores[p] = (int) getGameScore(p);
-        }
-        int winningScore = Arrays.stream(finalScores).max().orElseThrow(() -> new AssertionError("No MAX score found"));
-        for (int p = 0; p < getNPlayers(); p++) {
-            setPlayerResult(finalScores[p] == winningScore ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
-        }
     }
 
     @Override

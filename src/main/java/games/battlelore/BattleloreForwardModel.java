@@ -79,13 +79,8 @@ public class BattleloreForwardModel extends StandardForwardModel {
                 break;
         }
 
-        if (checkGameEnd((BattleloreGameState) currentState, playerId)) {
-            registerWinner(state, playerId);
-        } else if (state.getTurnOrder().getRoundCounter() > maxTurnsToPlay) {
-            if (state.getGameScore(0) == state.getGameScore(1))
-                registerWinner(state, -1);
-            else
-                registerWinner(state, state.getGameScore(0) >= state.getGameScore(1) ? 0 : 1);
+        if (checkGameEnd((BattleloreGameState) currentState, playerId) || state.getTurnOrder().getRoundCounter() > maxTurnsToPlay) {
+            currentState.endGame();
         }
     }
 
@@ -209,23 +204,4 @@ public class BattleloreForwardModel extends StandardForwardModel {
         return gameState.getGameScore(playerId) >= parameters.WIN_SCORE;
     }
 
-
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
-        }
-    }
-
-
-    private void registerWinner(BattleloreGameState gameState, int winnerID) {
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
-        if (winnerID != -1) {
-            gameState.setPlayerResult(Utils.GameResult.WIN, winnerID);
-            gameState.setPlayerResult(Utils.GameResult.LOSE, winnerID == 0 ? 1 : 0);
-        } else {
-            gameState.setPlayerResult(Utils.GameResult.DRAW, 0);
-            gameState.setPlayerResult(Utils.GameResult.DRAW, 1);
-        }
-    }
 }

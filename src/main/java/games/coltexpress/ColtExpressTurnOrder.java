@@ -135,7 +135,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
     @Override
     public void _endRound(AbstractGameState gameState) {
         fullPlayerTurnCounter++;
-        roundCounter--;  // a little hacky; but Colt Express uses TurnOrder.roundCounter to refer to the total number of game rounds, and this should not be incremented as defult
+        roundCounter--;  // a little hacky; but Colt Express uses TurnOrder.roundCounter to refer to the total number of game rounds, and this should not be incremented as default
     }
 
     @Override
@@ -168,9 +168,8 @@ public class ColtExpressTurnOrder extends TurnOrder {
             turnOwner = firstPlayerOfRound;
             initTurn(gameState.getRounds().get(roundCounter), 0, gameState);
             gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.PlanActions);
-            gameState.setGameStatus(GAME_ONGOING);
         } else {
-            gameState.setGameStatus(GAME_END);
+            gameState.endGame();
         }
     }
 

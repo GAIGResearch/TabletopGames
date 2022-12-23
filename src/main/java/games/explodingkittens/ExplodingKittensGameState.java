@@ -113,10 +113,6 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         return ekgs;
     }
 
-    private void moveHiddenCards(PartialObservableDeck<?> from, PartialObservableDeck<?> to) {
-
-    }
-
     @Override
     protected double _getHeuristicScore(int playerId) {
         return new ExplodingKittensHeuristic().evaluateState(this, playerId);
@@ -132,7 +128,11 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
      */
     @Override
     public double getGameScore(int playerId) {
-        return playerResults[playerId].value;
+        if (playerResults[playerId] == Utils.GameResult.LOSE)
+            // knocked out
+            return orderOfPlayerDeath[playerId];
+        // otherwise our current score is the number knocked out + 1
+        return Arrays.stream(playerResults).filter(status -> status == Utils.GameResult.LOSE).count() + 1;
     }
 
     @Override
@@ -175,7 +175,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         }
         orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
         if (nPlayersActive == 1) {
-            this.gameStatus = Utils.GameResult.GAME_END;
+            endGame();
         }
         ((ExplodingKittensTurnOrder) getTurnOrder()).endPlayerTurnStep(this);
 

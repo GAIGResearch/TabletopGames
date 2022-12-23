@@ -13,62 +13,58 @@ import utilities.ElapsedCpuChessTimer;
 import utilities.Utils;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static utilities.Utils.GameResult.*;
 
 
 /**
  * Contains all game state information.
- *
+ * <p>
  * This is distinct from the Game, of which it is a component. The Game also controls the players in the game, and
  * this information is not present in (and must not be present in) the AbstractGameState.
- *
+ * <p>
  * A copy of the AbstractGameState is provided to each AbstractPlayer when it is their turn to act.
  * Separately the AbstractPlayer has a ForwardModel to be used if needed - this caters for the possibility that
  * agents may want to use a different/learned forward model in some use cases.
- *
  */
 public abstract class AbstractGameState {
 
     // Parameters, forward model and turn order for the game
     protected final AbstractParameters gameParameters;
-    protected TurnOrder turnOrder;
-    private Area allComponents;
-
-    // Timers for all players
-    protected ElapsedCpuChessTimer[] playerTimer;
     // Game being played
     protected final GameType gameType;
-
-    // A record of all actions taken to reach this game state
-    private List<AbstractAction> history = new ArrayList<>();
-    private List<String> historyText = new ArrayList<>();
-
+    protected TurnOrder turnOrder;
+    // Timers for all players
+    protected ElapsedCpuChessTimer[] playerTimer;
     // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
     protected Utils.GameResult gameStatus;
     protected Utils.GameResult[] playerResults;
-
     // Current game phase
     protected IGamePhase gamePhase;
-
     // Stack for extended actions
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
-
-    private int gameID;
     CoreParameters coreGameParameters;
+    private Area allComponents;
+    // A record of all actions taken to reach this game state
+    private List<AbstractAction> history = new ArrayList<>();
+    private List<String> historyText = new ArrayList<>();
+    private int gameID;
 
     /**
      * Constructor. Initialises some generic game state variables.
+     *
      * @param gameParameters - game parameters.
-     * @param turnOrder - turn order for this game.
+     * @param turnOrder      - turn order for this game.
      */
-    public AbstractGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType){
+    public AbstractGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType) {
         this.gameParameters = gameParameters;
         this.turnOrder = turnOrder;
         this.gameType = gameType;
         this.coreGameParameters = new CoreParameters();
     }
+
     protected AbstractGameState(AbstractParameters gameParameters, GameType type) {
         this.gameParameters = gameParameters;
         this.gameType = type;
@@ -97,38 +93,72 @@ public abstract class AbstractGameState {
         reset();
     }
 
+    public final void setPlayerResult(Utils.GameResult result, int playerIdx) {
+        this.playerResults[playerIdx] = result;
+    }
+
+    // Getters
+    public final TurnOrder getTurnOrder() {
+        return turnOrder;
+    }
+
     // Setters
     public final void setTurnOrder(TurnOrder turnOrder) {
         this.turnOrder = turnOrder;
     }
-    public final void setGameStatus(Utils.GameResult status) { this.gameStatus = status; }
-    public final void setPlayerResult(Utils.GameResult result, int playerIdx) {  this.playerResults[playerIdx] = result; }
+
+    public final int getCurrentPlayer() {
+        return turnOrder.getCurrentPlayer(this);
+    }
+
+    public final Utils.GameResult getGameStatus() {
+        return gameStatus;
+    }
+
+    public final void setGameStatus(Utils.GameResult status) {
+        this.gameStatus = status;
+    }
+
+    public final AbstractParameters getGameParameters() {
+        return this.gameParameters;
+    }
+
+    public final int getNPlayers() {
+        return turnOrder.nPlayers();
+    }
+
+    public final Utils.GameResult[] getPlayerResults() {
+        return playerResults;
+    }
+
+    public final boolean isNotTerminal() {
+        return gameStatus == GAME_ONGOING;
+    }
+
+    public final boolean isNotTerminalForPlayer(int player) {
+        return playerResults[player] == GAME_ONGOING && gameStatus == GAME_ONGOING;
+    }
+
+    public final IGamePhase getGamePhase() {
+        return gamePhase;
+    }
+
     public final void setGamePhase(IGamePhase gamePhase) {
         this.gamePhase = gamePhase;
     }
 
-    // Getters
-    public final TurnOrder getTurnOrder(){return turnOrder;}
-    public final int getCurrentPlayer() { return turnOrder.getCurrentPlayer(this); }
-    public final Utils.GameResult getGameStatus() {  return gameStatus; }
-    public final AbstractParameters getGameParameters() { return this.gameParameters; }
-    public final int getNPlayers() { return turnOrder.nPlayers(); }
-    public final Utils.GameResult[] getPlayerResults() { return playerResults; }
-    public final boolean isNotTerminal(){ return gameStatus == GAME_ONGOING; }
-    public final boolean isNotTerminalForPlayer(int player){ return playerResults[player] == GAME_ONGOING && gameStatus == GAME_ONGOING; }
-    public final IGamePhase getGamePhase() {
-        return gamePhase;
-    }
     public final Component getComponentById(int id) {
         Component c = allComponents.getComponent(id);
         if (c == null) {
             try {
                 addAllComponents();
                 c = allComponents.getComponent(id);
-            } catch (Exception ignored) {}  // Can crash from concurrent modifications if running with GUI TODO: this is an ugly fix
+            } catch (Exception ignored) {
+            }  // Can crash from concurrent modifications if running with GUI TODO: this is an ugly fix
         }
         return c;
     }
+
     public final Area getAllComponents() {
         addAllComponents(); // otherwise the list of allComponents is only ever updated when we copy the state!
         return allComponents;
@@ -159,6 +189,7 @@ public abstract class AbstractGameState {
     /**
      * Copies the current game state, including super class methods, given player ID.
      * Reduces state variables to only those that the player observes.
+     *
      * @param playerId - player observing the state
      * @return - reduced copy of the game state.
      */
@@ -227,9 +258,25 @@ public abstract class AbstractGameState {
         }
     }
 
+    public final void endGame() {
+        setGameStatus(Utils.GameResult.GAME_END);
+        // If we have more than one person in Ordinal position of 1, then this is a draw
+        boolean drawn = IntStream.range(0, getNPlayers()).map(this::getOrdinalPosition).filter(i -> i == 1).count() > 1;
+        for (int p = 0; p < getNPlayers(); p++) {
+            int o = getOrdinalPosition(p);
+            if (o == 1 && drawn)
+                setPlayerResult(DRAW, p);
+            else if (o == 1)
+                setPlayerResult(WIN, p);
+            else
+                setPlayerResult(LOSE, p);
+        }
+    }
+
     /**
      * Returns all components used in the game and referred to by componentId from actions or rules.
      * This method is called after initialising the game state.
+     *
      * @return - List of components in the game.
      */
     protected abstract List<Component> _getAllComponents();
@@ -237,6 +284,7 @@ public abstract class AbstractGameState {
     /**
      * Create a copy of the game state containing only those components the given player can observe (if partial
      * observable).
+     *
      * @param playerId - player observing this game state.
      */
     protected abstract AbstractGameState _copy(int playerId);
@@ -245,6 +293,7 @@ public abstract class AbstractGameState {
      * Provide a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
      * This should generally be in the range [-1, +1], with +1 being a certain win, and -1 being a certain loss
+     *
      * @param playerId - player observing the state.
      * @return - double, score of current state.
      */
@@ -255,6 +304,7 @@ public abstract class AbstractGameState {
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      * (Unlike _getHeuristicScore(), there is no constraint on the range..whatever the game rules say.
+     *
      * @param playerId - player observing the state.
      * @return - double, score of current state
      */
@@ -265,15 +315,17 @@ public abstract class AbstractGameState {
      * Implementing this may be a simpler approach in many cases than re-implementing getOrdinalPosition()
      * For example in ColtExpress, the tie break is the number of bullet cards in hand - and this only affects the outcome
      * if the score is a tie.
+     *
      * @param playerId
      * @return
      */
     public double getTiebreak(int playerId) {
         return 0.0;
     }
+
     /**
      * Returns the ordinal position of a player using getGameScore().
-     *
+     * <p>
      * If a Game does not have a score, but does have the concept of player position (e.g. in a race)
      * then this method should be overridden.
      * This may also apply for games with important tie-breaking rules not visible in the raw score.
@@ -282,8 +334,6 @@ public abstract class AbstractGameState {
      * @return The ordinal position of the player; 1 is 1st, 2 is 2nd and so on.
      */
     public int getOrdinalPosition(int playerId) {
-        if (playerResults[playerId] == Utils.GameResult.WIN)
-            return 1;
         double playerScore = getGameScore(playerId);
         int ordinal = 1;
         for (int i = 0, n = getNPlayers(); i < n; i++) {
@@ -301,10 +351,10 @@ public abstract class AbstractGameState {
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.
      * Depending on the game, in the copies these might be completely missing, or just randomized.
-     *
+     * <p>
      * Generally speaking there is no need to implement this method if you consistently use PartialObservableDeck,
      * Deck, and IComponentContainer (for anything else that contains Components)
-     *
+     * <p>
      * Only if you have some top-level item (say a single face-down Event Card that is not in a Deck), should you need to implement
      * this.
      *
@@ -349,7 +399,7 @@ public abstract class AbstractGameState {
             }
         }
         // we also need to run through the contents in case that contains any Containers
-        container.getComponents().stream().filter(c -> c instanceof IComponentContainer<?>).forEach( c->
+        container.getComponents().stream().filter(c -> c instanceof IComponentContainer<?>).forEach(c ->
                 retValue.addAll(unknownComponents((IComponentContainer<?>) c, player))
         );
         return retValue;
@@ -367,6 +417,7 @@ public abstract class AbstractGameState {
 
     /**
      * Public access copy method, which always does a full copy of the game state.
+     *
      * @return - full copy of this game state.
      */
     public final AbstractGameState copy() {
@@ -390,6 +441,7 @@ public abstract class AbstractGameState {
      * Subjective heuristic function definition.
      * This should generally be in the range [-1, +1], with +1 being a certain win, and -1 being a certain loss
      * The default implementation calls the game-specific heuristic
+     *
      * @param playerId - player observing the state.
      * @return - double, score of current state.
      */
@@ -400,6 +452,7 @@ public abstract class AbstractGameState {
     /**
      * Retrieves a list of component IDs which are hidden in partially observable copies of games.
      * Depending on the game, in the copies these might be completely missing, or just randomized.
+     *
      * @param playerId - ID of player observing the state.
      * @return - list of component IDs unobservable by the given player.
      */
@@ -415,7 +468,7 @@ public abstract class AbstractGameState {
                 retValue.addAll(unknownComponents((IComponentContainer<?>) c, playerId));
         }
         retValue.addAll(_getUnknownComponentsIds(playerId));
-        return  retValue;
+        return retValue;
     }
 
     /**
@@ -434,17 +487,25 @@ public abstract class AbstractGameState {
     public List<AbstractAction> getHistory() {
         return new ArrayList<>(history);
     }
+
     public List<String> getHistoryAsText() {
         return new ArrayList<>(historyText);
     }
 
-    void setGameID(int id) {gameID = id;} // package level deliberately
-    public int getGameID() {return gameID;}
-    void setCoreGameParameters(CoreParameters coreGameParameters) {
-        this.coreGameParameters = coreGameParameters;
+    public int getGameID() {
+        return gameID;
     }
+
+    void setGameID(int id) {
+        gameID = id;
+    } // package level deliberately
+
     public CoreParameters getCoreGameParameters() {
         return coreGameParameters;
+    }
+
+    void setCoreGameParameters(CoreParameters coreGameParameters) {
+        this.coreGameParameters = coreGameParameters;
     }
 
     @Override

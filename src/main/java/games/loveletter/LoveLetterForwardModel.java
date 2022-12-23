@@ -210,14 +210,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
         // One player won, game is over
         if (bestPlayers.size() == 1) {
-            llgs.setGameStatus(Utils.GameResult.GAME_END);
-            for (int i = 0; i < llgs.getNPlayers(); i++) {
-                if (bestPlayers.contains(i)) {
-                    llgs.setPlayerResult(Utils.GameResult.WIN, i);
-                } else {
-                    llgs.setPlayerResult(Utils.GameResult.LOSE, i);
-                }
-            }
+            llgs.endGame();
             return true;
         }
         return false;
@@ -282,19 +275,6 @@ public class LoveLetterForwardModel extends StandardForwardModel {
                 }
                 // Everyone tied for most points here wins the round
                 return bestPlayersByDiscardPoints;
-            }
-        }
-    }
-
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        // Print game result
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
-            Utils.GameResult[] playerResults = gameState.getPlayerResults();
-            for (int j = 0; j < gameState.getNPlayers(); j++) {
-                if (playerResults[j] == Utils.GameResult.WIN)
-                    System.out.println("Player " + j + " won");
             }
         }
     }

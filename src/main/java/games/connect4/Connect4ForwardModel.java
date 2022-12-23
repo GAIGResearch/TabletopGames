@@ -235,14 +235,6 @@ public class Connect4ForwardModel extends StandardForwardModel {
         return false;
     }
 
-
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
-        }
-    }
-
     /**
      * Inform the game this player has won.
      *

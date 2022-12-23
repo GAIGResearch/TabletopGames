@@ -1,7 +1,5 @@
 package games.terraformingmars;
 
-import com.google.gson.*;
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
@@ -14,15 +12,10 @@ import games.terraformingmars.components.Award;
 import games.terraformingmars.components.Milestone;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
-import games.terraformingmars.rules.Discount;
-import games.terraformingmars.rules.effects.Effect;
-import games.terraformingmars.rules.requirements.Requirement;
 import games.terraformingmars.rules.requirements.TagOnCardRequirement;
-import utilities.SimpleSerializer;
 import utilities.Utils;
 import utilities.Vector2D;
 
-import java.io.FileWriter;
 import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.*;
@@ -294,7 +287,6 @@ public class TMForwardModel extends StandardForwardModel {
 
                 // Check game end before next research phase
                 if (checkGameEnd(gs)) {
-                    gs.setGameStatus(Utils.GameResult.GAME_END);
 
                     if (gs.getNPlayers() == 1) {
                         // If solo, game goes for 14 generations regardless of global parameters
@@ -303,30 +295,10 @@ public class TMForwardModel extends StandardForwardModel {
                             if (p != null && p.countsForEndGame() && !gs.globalParameters.get(p).isMaximum())
                                 won = Utils.GameResult.LOSE;
                         }
+                        gs.setGameStatus(Utils.GameResult.GAME_END);
                         gs.setPlayerResult(won, 0);
                     } else {
-                        ArrayList<Integer> best = new ArrayList<>();
-                        int bestPoints = 0;
-                        for (int i = 0; i < gs.getNPlayers(); i++) {
-                            int points = gs.countPoints(i);
-                            if (points > bestPoints) {
-                                bestPoints = points;
-                            }
-                        }
-                        for (int i = 0; i < gs.getNPlayers(); i++) {
-                            int points = gs.countPoints(i);
-                            if (points == bestPoints) {
-                                best.add(i);
-                            }
-                        }
-                        // TODO tiebreaker
-                        for (int i = 0; i < gs.getNPlayers(); i++) {
-                            if (best.contains(i) && (gs.getNPlayers() != 1 || gs.generation <= params.soloMaxGen)) {
-                                gs.setPlayerResult(Utils.GameResult.WIN, i);
-                            } else {
-                                gs.setPlayerResult(Utils.GameResult.LOSE, i);
-                            }
-                        }
+                        gs.endGame();
                     }
 
                     return;

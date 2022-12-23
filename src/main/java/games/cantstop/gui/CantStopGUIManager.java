@@ -1,7 +1,7 @@
 package games.cantstop.gui;
 
 import core.*;
-import games.cantstop.*;
+import games.cantstop.CantStopGameState;
 import gui.*;
 import players.human.ActionController;
 

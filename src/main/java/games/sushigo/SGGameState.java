@@ -179,6 +179,15 @@ public class SGGameState extends AbstractGameState {
             return playerScore[playerId] / 50.0;
         return getPlayerResults()[playerId].value;
     }
+    @Override
+    public double getTiebreak(int playerId) {
+        // Tie break is number of puddings
+        int amount = 0;
+        for (int i = 0; i < getPlayerFields().get(playerId).getSize(); i++) {
+            if (getPlayerFields().get(playerId).get(i).type == SGCard.SGCardType.Pudding) amount++;
+        }
+        return amount;
+    }
 
     @Override
     public double getGameScore(int playerId) {

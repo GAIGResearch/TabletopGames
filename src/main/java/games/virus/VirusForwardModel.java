@@ -1,6 +1,5 @@
 package games.virus;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
@@ -32,7 +31,7 @@ public class VirusForwardModel extends StandardForwardModel {
         vgs.playerBodies = new ArrayList<>(vgs.getNPlayers());
 
         // Create an empty body for each player
-        for (int i=0; i<vgs.getNPlayers(); i++) {
+        for (int i = 0; i < vgs.getNPlayers(); i++) {
             vgs.playerBodies.add(new VirusBody());
         }
 
@@ -52,65 +51,67 @@ public class VirusForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
-        checkGameEnd((VirusGameState)gameState);
+        checkGameEnd((VirusGameState) gameState);
         if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING)
             gameState.getTurnOrder().endPlayerTurn(gameState);
     }
 
     /**
      * Create all the cards and include them into the drawPile
+     *
      * @param vgs - Virus game state
      */
     private void createCards(VirusGameState vgs) {
         VirusGameParameters vgp = (VirusGameParameters) vgs.getGameParameters();
 
         // Organs, Virus and Medicine cards
-        for (VirusCard.OrganType organ: VirusCard.OrganType.values()) {
+        for (VirusCard.OrganType organ : VirusCard.OrganType.values()) {
             if (organ != Wild && organ != Treatment) {
-                for (int i=0; i<vgp.nCardsPerOrgan; i++)
+                for (int i = 0; i < vgp.nCardsPerOrgan; i++)
                     vgs.drawDeck.add(new VirusCard(organ, VirusCard.VirusCardType.Organ));
 
-                for (int i=0; i<vgp.nCardsPerVirus; i++)
+                for (int i = 0; i < vgp.nCardsPerVirus; i++)
                     vgs.drawDeck.add(new VirusCard(organ, VirusCard.VirusCardType.Virus));
 
-                for (int i=0; i<vgp.nCardsPerMedicine; i++)
+                for (int i = 0; i < vgp.nCardsPerMedicine; i++)
                     vgs.drawDeck.add(new VirusCard(organ, VirusCard.VirusCardType.Medicine));
             }
         }
 
         //  Wilds cards
-        for (int i=0; i<vgp.nCardsPerWildOrgan; i++)
+        for (int i = 0; i < vgp.nCardsPerWildOrgan; i++)
             vgs.drawDeck.add(new VirusCard(Wild, VirusCard.VirusCardType.Organ));
 
-        for (int i=0; i<vgp.nCardsPerWildVirus; i++)
+        for (int i = 0; i < vgp.nCardsPerWildVirus; i++)
             vgs.drawDeck.add(new VirusCard(Wild, VirusCard.VirusCardType.Virus));
 
-        for (int i=0; i<vgp.nCardsPerWildMedicine; i++)
+        for (int i = 0; i < vgp.nCardsPerWildMedicine; i++)
             vgs.drawDeck.add(new VirusCard(Wild, VirusCard.VirusCardType.Medicine));
 
         // Treatment cards
-        for (int i=0; i<vgp.nCardsPerTreatmentOrganThief; i++)
+        for (int i = 0; i < vgp.nCardsPerTreatmentOrganThief; i++)
             vgs.drawDeck.add(new VirusTreatmentCard(VirusTreatmentCard.TreatmentType.OrganThief));
 
-        for (int i=0; i<vgp.nCardsPerTreatmentSpreading; i++)
+        for (int i = 0; i < vgp.nCardsPerTreatmentSpreading; i++)
             vgs.drawDeck.add(new VirusTreatmentCard(VirusTreatmentCard.TreatmentType.Spreading));
 
-        for (int i=0; i<vgp.nCardsPerTreatmentTransplant; i++)
+        for (int i = 0; i < vgp.nCardsPerTreatmentTransplant; i++)
             vgs.drawDeck.add(new VirusTreatmentCard(VirusTreatmentCard.TreatmentType.Transplant));
 
-        for (int i=0; i<vgp.nCardsPerTreatmentLatexGlove; i++)
+        for (int i = 0; i < vgp.nCardsPerTreatmentLatexGlove; i++)
             vgs.drawDeck.add(new VirusTreatmentCard(VirusTreatmentCard.TreatmentType.LatexGlove));
 
-        for (int i=0; i<vgp.nCardsPerTreatmentMedicalError; i++)
+        for (int i = 0; i < vgp.nCardsPerTreatmentMedicalError; i++)
             vgs.drawDeck.add(new VirusTreatmentCard(VirusTreatmentCard.TreatmentType.MedicalError));
     }
 
     /**
      * Draw cards to players
+     *
      * @param vgs - Virus game state
      */
     private void drawCardsToPlayers(VirusGameState vgs) {
-        int nCards = ((VirusGameParameters)vgs.getGameParameters()).nCardsPlayerHand;
+        int nCards = ((VirusGameParameters) vgs.getGameParameters()).nCardsPlayerHand;
         for (int i = 0; i < vgs.getNPlayers(); i++) {
             String playerDeckName = "Player" + i + "Deck";
             vgs.playerDecks.add(new Deck<>(playerDeckName, i, VisibilityMode.VISIBLE_TO_OWNER));
@@ -122,22 +123,17 @@ public class VirusForwardModel extends StandardForwardModel {
 
     /**
      * Check if the game is end. A player wins when have, at least, 4 organs not infected
+     *
      * @param vgs - Virus game state
      */
     public void checkGameEnd(VirusGameState vgs) {
         for (int i = 0; i < vgs.getNPlayers(); i++) {
-            if (vgs.playerBodies.get(i).getNOrganHealthy() >= VirusCard.OrganType.values().length-2) {
-                for (int j = 0; j < vgs.getNPlayers(); j++) {
-                    if (i == j)
-                        vgs.setPlayerResult(Utils.GameResult.WIN, i);
-                    else
-                        vgs.setPlayerResult(Utils.GameResult.LOSE, j);
-                }
-                vgs.setGameStatus(Utils.GameResult.GAME_END);
+            if (vgs.playerBodies.get(i).getNOrganHealthy() >= VirusCard.OrganType.values().length - 2) {
+                vgs.endGame();
                 break;
             }
         }
-        int nMaxRounds = ((VirusGameParameters)vgs.getGameParameters()).nMaxRounds;
+        int nMaxRounds = ((VirusGameParameters) vgs.getGameParameters()).nMaxRounds;
         if (vgs.getGameStatus() == Utils.GameResult.GAME_ONGOING && vgs.getTurnOrder().getRoundCounter() >= nMaxRounds) {
             for (int i = 0; i < vgs.getNPlayers(); i++) {
                 vgs.setPlayerResult(Utils.GameResult.DRAW, i);
@@ -148,15 +144,14 @@ public class VirusForwardModel extends StandardForwardModel {
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        VirusGameState            vgs        = (VirusGameState) gameState;
-        ArrayList<AbstractAction> actions    = new ArrayList<>();
-        VirusGameParameters       vgp        = (VirusGameParameters) vgs.getGameParameters();
-        int                       player     = vgs.getCurrentPlayer();
-        Deck<VirusCard>           playerHand = vgs.playerDecks.get(player);
+        VirusGameState vgs = (VirusGameState) gameState;
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        VirusGameParameters vgp = (VirusGameParameters) vgs.getGameParameters();
+        int player = vgs.getCurrentPlayer();
+        Deck<VirusCard> playerHand = vgs.playerDecks.get(player);
 
         // If the playerHand has no cards (it has suffered a LatexGlove) then play DrawNewPlayerHand
-        if (playerHand.getSize() == 0)
-        {
+        if (playerHand.getSize() == 0) {
             actions.add(new DrawNewPlayerHand(playerHand.getComponentID()));
             return actions;
         }
@@ -195,14 +190,14 @@ public class VirusForwardModel extends StandardForwardModel {
 
     /**
      * Compute possible actions given a treatment card and add to actions
-     * @param gameState - Virus game state
-     * @param card - card that can be played
-     * @param actions - list of actions to be filled
+     *
+     * @param gameState  - Virus game state
+     * @param card       - card that can be played
+     * @param actions    - list of actions to be filled
      * @param playerHand - Player hand
      */
     private void addActionForTreatmentCard(VirusGameState gameState, VirusTreatmentCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
-        switch (card.treatmentType)
-        {
+        switch (card.treatmentType) {
             case OrganThief:
                 addActionForOrganThief(gameState, card, actions, playerHand);
                 break;
@@ -223,9 +218,10 @@ public class VirusForwardModel extends StandardForwardModel {
 
     /**
      * Compute possible actions given an OrganThief treatment card
-     * @param gameState - Virus game state
-     * @param card - card that can be played
-     * @param actions - list of actions to be filled
+     *
+     * @param gameState  - Virus game state
+     * @param card       - card that can be played
+     * @param actions    - list of actions to be filled
      * @param playerHand - Player hand
      */
     private void addActionForOrganThief(VirusGameState gameState, VirusCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
@@ -239,12 +235,12 @@ public class VirusForwardModel extends StandardForwardModel {
                 for (VirusCard.OrganType organ : VirusCard.OrganType.values()) {
                     if (itsBody.hasOrgan(organ) && itsBody.organNotYetImmunised(organ) && !myBody.hasOrgan(organ)) {
                         actions.add(new PlayOrganThief(playerHand.getComponentID(),
-                                                       gameState.discardDeck.getComponentID(),
-                                                       cardIdx,
-                                                       myBody.getComponentID(),
-                                                       itsBody.getComponentID(),
-                                                       otherPlayer,
-                                                       organ));
+                                gameState.discardDeck.getComponentID(),
+                                cardIdx,
+                                myBody.getComponentID(),
+                                itsBody.getComponentID(),
+                                otherPlayer,
+                                organ));
                     }
                 }
             }
@@ -271,9 +267,10 @@ public class VirusForwardModel extends StandardForwardModel {
     /**
      * Compute possible actions given a Spreading treatment card
      * NOTE: Only one virus can be spreading to another player (This is a simplification of the original game)
-     * @param gameState - Virus game state
-     * @param card - card that can be played
-     * @param actions - list of actions to be filled
+     *
+     * @param gameState  - Virus game state
+     * @param card       - card that can be played
+     * @param actions    - list of actions to be filled
      * @param playerHand - Player hand
      */
     private void addActionForSpreading(VirusGameState gameState, VirusCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
@@ -281,20 +278,16 @@ public class VirusForwardModel extends StandardForwardModel {
         int cardIdx = playerHand.getComponents().indexOf(card);
         VirusBody myBody = gameState.playerBodies.get(playerId);
 
-        for (VirusCard.OrganType myOrganType: VirusCard.OrganType.values())
-        {
-            if (myBody.hasOrgan(myOrganType) && myBody.hasOrganInfected(myOrganType))
-            {
+        for (VirusCard.OrganType myOrganType : VirusCard.OrganType.values()) {
+            if (myBody.hasOrgan(myOrganType) && myBody.hasOrganInfected(myOrganType)) {
                 boolean isWild = myBody.hasOrganInfectedWild(myOrganType);
                 for (int otherPlayerId = 0; otherPlayerId < gameState.getNPlayers(); otherPlayerId++) {
                     if (otherPlayerId != playerId) {
                         VirusBody otherBody = gameState.playerBodies.get(otherPlayerId);
 
-                        for (VirusCard.OrganType otherOrganType: VirusCard.OrganType.values()) {
-                            if (isWild)
-                            {
-                                if (otherBody.hasOrganNeutral(otherOrganType))
-                                {
+                        for (VirusCard.OrganType otherOrganType : VirusCard.OrganType.values()) {
+                            if (isWild) {
+                                if (otherBody.hasOrganNeutral(otherOrganType)) {
                                     actions.add(new PlaySpreading(playerHand.getComponentID(),
                                             gameState.discardDeck.getComponentID(),
                                             cardIdx,
@@ -304,11 +297,8 @@ public class VirusForwardModel extends StandardForwardModel {
                                             myOrganType,
                                             otherOrganType));
                                 }
-                            }
-                            else
-                            {
-                                if (otherBody.hasOrganNeutral(otherOrganType) && (myOrganType == otherOrganType || otherOrganType == Wild))
-                                {
+                            } else {
+                                if (otherBody.hasOrganNeutral(otherOrganType) && (myOrganType == otherOrganType || otherOrganType == Wild)) {
                                     actions.add(new PlaySpreading(playerHand.getComponentID(),
                                             gameState.discardDeck.getComponentID(),
                                             cardIdx,
@@ -331,8 +321,7 @@ public class VirusForwardModel extends StandardForwardModel {
         int cardIdx = playerHand.getComponents().indexOf(card);
         VirusBody myBody = gameState.playerBodies.get(playerId);
 
-        for (VirusCard.OrganType myOrganType: VirusCard.OrganType.values())
-        {
+        for (VirusCard.OrganType myOrganType : VirusCard.OrganType.values()) {
             for (int otherPlayer = 0; otherPlayer < gameState.getNPlayers(); otherPlayer++) {
                 if (otherPlayer != playerId) {
                     VirusBody otherBody = gameState.playerBodies.get(otherPlayer);
@@ -342,8 +331,7 @@ public class VirusForwardModel extends StandardForwardModel {
                                 otherBody.hasOrgan(otherOrganType) &&
                                 otherBody.organNotYetImmunised(otherOrganType) &&
                                 !myBody.hasOrgan(otherOrganType) &&
-                                !otherBody.hasOrgan(myOrganType))
-                        {
+                                !otherBody.hasOrgan(myOrganType)) {
                             actions.add(new PlayTransplant(playerHand.getComponentID(),
                                     gameState.discardDeck.getComponentID(),
                                     cardIdx,
@@ -353,7 +341,7 @@ public class VirusForwardModel extends StandardForwardModel {
                                     otherPlayer,
                                     myOrganType,
                                     otherOrganType
-                                   ));
+                            ));
                         }
                     }
                 }
@@ -386,9 +374,10 @@ public class VirusForwardModel extends StandardForwardModel {
      * Organ:    Add if it does not exit yet in the player's body
      * Medicine: Apply only in own body if organ exists and it is not immunised yet.
      * Virus:    It can be applied in other players' organ, if exist and they are not immunised yet.
-     * @param gameState - Virus game state
-     * @param card - card that can be played
-     * @param actions - list of actions to be filled
+     *
+     * @param gameState  - Virus game state
+     * @param card       - card that can be played
+     * @param actions    - list of actions to be filled
      * @param playerHand - Player hand
      */
     private void addActionsForCard(VirusGameState gameState, VirusCard card, ArrayList<AbstractAction> actions, Deck<VirusCard> playerHand) {
@@ -415,8 +404,7 @@ public class VirusForwardModel extends StandardForwardModel {
                 // - the wild organ and it has not been yet immunised
                 // A medicine Wild can be played in any not yet immunised organ
                 VirusBody myBody = gameState.playerBodies.get(playerID);
-                for (VirusCard.OrganType organ: VirusCard.OrganType.values())
-                {
+                for (VirusCard.OrganType organ : VirusCard.OrganType.values()) {
                     if (myBody.hasOrgan(organ) && myBody.organNotYetImmunised(organ)) {  // Organ exists and it not immunised
                         if (card.organ == VirusCard.OrganType.Wild ||                  // It is a medicine wild
                                 organ == VirusCard.OrganType.Wild ||                   // It is the organ wild

@@ -12,7 +12,6 @@ import games.cantstop.CantStopGameState;
 import games.cantstop.gui.CantStopGUIManager;
 import games.catan.CatanForwardModel;
 import games.catan.CatanGameState;
-import games.catan.CatanParameters;
 import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;

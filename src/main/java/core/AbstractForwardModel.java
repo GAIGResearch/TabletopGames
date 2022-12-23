@@ -78,6 +78,9 @@ public abstract class AbstractForwardModel {
      * The last thing to be called in the game loop, after the game is finished.
      */
     protected void endGame(AbstractGameState gameState) {
+        if (gameState.getCoreGameParameters().verbose) {
+            System.out.println(Arrays.toString(gameState.getPlayerResults()));
+        }
     }
 
     /**

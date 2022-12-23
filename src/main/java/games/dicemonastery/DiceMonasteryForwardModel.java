@@ -106,11 +106,6 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
     }
 
     @Override
-    protected void endGame(AbstractGameState gameState) {
-        super.endGame(gameState);
-    }
-
-    @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) currentState;
         DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder)state.getTurnOrder();

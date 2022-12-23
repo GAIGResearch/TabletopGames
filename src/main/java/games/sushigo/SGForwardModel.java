@@ -144,8 +144,7 @@ public class SGForwardModel extends StandardForwardModel {
             GiveMakiPoints(SGGS);
             if (SGGS.getTurnOrder().getRoundCounter() >= 2) {
                 GivePuddingPoints(SGGS);
-                SetWinner(SGGS);
-                currentState.setGameStatus(Utils.GameResult.GAME_END);
+                SGGS.endGame();
                 return;
             }
             SGGS.getTurnOrder().endRound(currentState);
@@ -179,58 +178,6 @@ public class SGForwardModel extends StandardForwardModel {
                 SGGS.setPlayerChopsticksActivated(i, false);
             }
         }
-    }
-
-    private void SetWinner(SGGameState SGGS) {
-        int currentBestScore = 0;
-        List<Integer> winners = new ArrayList<>();
-        for (int i = 0; i < SGGS.getNPlayers(); i++) {
-            if (SGGS.getGameScore(i) > currentBestScore) {
-                currentBestScore = (int) SGGS.getGameScore(i);
-                winners.clear();
-                winners.add(i);
-            } else if (SGGS.getGameScore(i) == currentBestScore) winners.add(i);
-        }
-
-        //More than 1 winner, check pudding amount
-        if (winners.size() > 1) {
-            List<Integer> trueWinners = new ArrayList<>();
-            int bestPuddingScore = 0;
-            for (int i = 0; i < winners.size(); i++) {
-                if (GetPuddingAmount(winners.get(i), SGGS) > bestPuddingScore) {
-                    bestPuddingScore = GetPuddingAmount(winners.get(i), SGGS);
-                    trueWinners.clear();
-                    trueWinners.add(winners.get(i));
-                } else if (GetPuddingAmount(winners.get(i), SGGS) == bestPuddingScore) trueWinners.add(winners.get(i));
-            }
-
-            if (trueWinners.size() > 1) {
-                for (int i = 0; i < SGGS.getNPlayers(); i++) {
-                    SGGS.setPlayerResult(Utils.GameResult.LOSE, i);
-                }
-                for (int i = 0; i < trueWinners.size(); i++) {
-                    SGGS.setPlayerResult(Utils.GameResult.DRAW, trueWinners.get(i));
-                }
-            } else {
-                for (int i = 0; i < SGGS.getNPlayers(); i++) {
-                    SGGS.setPlayerResult(Utils.GameResult.LOSE, i);
-                }
-                SGGS.setPlayerResult(Utils.GameResult.WIN, trueWinners.get(0));
-            }
-        } else {
-            for (int i = 0; i < SGGS.getNPlayers(); i++) {
-                SGGS.setPlayerResult(Utils.GameResult.LOSE, i);
-            }
-            SGGS.setPlayerResult(Utils.GameResult.WIN, winners.get(0));
-        }
-    }
-
-    private int GetPuddingAmount(int playerId, SGGameState SGGS) {
-        int amount = 0;
-        for (int i = 0; i < SGGS.getPlayerFields().get(playerId).getSize(); i++) {
-            if (SGGS.getPlayerFields().get(playerId).get(i).type == SGCard.SGCardType.Pudding) amount++;
-        }
-        return amount;
     }
 
     private void GiveMakiPoints(SGGameState SGGS) {

@@ -177,21 +177,6 @@ public class ColtExpressForwardModel extends StandardForwardModel {
     }
 
     @Override
-    protected void endGame(AbstractGameState gameState) {
-        ColtExpressGameState cegs = (ColtExpressGameState) gameState;
-
-        Arrays.fill(cegs.getPlayerResults(), LOSE);
-
-        for (int p = 0; p < cegs.getNPlayers(); p++) {
-            cegs.setPlayerResult(cegs.getOrdinalPosition(p) == 1 ? WIN : LOSE, p);
-        }
-
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println(Arrays.toString(cegs.getPlayerResults()));
-        }
-    }
-
-    @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
 

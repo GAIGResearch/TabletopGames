@@ -151,28 +151,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         }
     }
 
-
-    /**
-     * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
-     * The last thing to be called in the game loop, after the game is finished.
-     * Exploding kittens updates the status of players still alive as winners.
-     */
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        for (int i = 0; i < gameState.getNPlayers(); i++){
-            if (gameState.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING)
-                gameState.setPlayerResult(Utils.GameResult.WIN, i);
-        }
-
-        // Print end game result
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
-            for (int j = 0; j < gameState.getNPlayers(); j++) {
-                System.out.println("Player " + j + ": " + gameState.getPlayerResults()[j]);
-            }
-        }
-    }
-
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
      * @return - List of AbstractAction objects.
@@ -331,7 +309,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         }
 
         if (cardIdx != -1) {
-            List<ExplodingKittensCard> cards = ekgs.drawPile.getComponents();
             int numberOfCards = ekgs.drawPile.getSize();
             int n = Math.min(((ExplodingKittensParameters) ekgs.getGameParameters()).nSeeFutureCards, numberOfCards);
             if (n > 0) {
