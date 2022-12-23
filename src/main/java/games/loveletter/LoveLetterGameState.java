@@ -140,16 +140,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     }
 
     @Override
-    protected void _reset() {
-        gamePhase = Draw;
-        playerHandCards = new ArrayList<>();
-        playerDiscardCards = new ArrayList<>();
-        drawPile = null;
-        reserveCards = null;
-        effectProtection = new boolean[getNPlayers()];
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof LoveLetterGameState)) return false;

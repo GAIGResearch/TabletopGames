@@ -271,24 +271,6 @@ public class SGGameState extends AbstractGameState {
     }
 
     @Override
-    protected void _reset() {
-        playerHands = new ArrayList<>();
-        playerFields = new ArrayList<>();
-        drawPile = null;
-        discardPile = null;
-        cardAmount = 0;
-        deckRotations = 0;
-        playerScore = null;
-        playerCardPicks = null;
-        playerExtraCardPicks = null;
-        playerScoreToAdd = null;
-        playerWasabiAvailable = null;
-        playerChopSticksAmount = null;
-        playerChopsticksActivated = null;
-        playerExtraTurns = null;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
 
         if (this == o) return true;

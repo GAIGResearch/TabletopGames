@@ -76,14 +76,6 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected void _reset() {
-        playerBodies = new ArrayList<>();
-        playerDecks = new ArrayList<>();
-        drawDeck = null;
-        discardDeck = null;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof VirusGameState)) return false;

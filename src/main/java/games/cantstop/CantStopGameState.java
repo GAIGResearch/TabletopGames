@@ -120,24 +120,6 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected void _reset() {
-        CantStopParameters params = (CantStopParameters) getGameParameters();
-        completedColumns = new boolean[13];
-        playerMarkerPositions = new int[getNPlayers()][13];
-        temporaryMarkerPositions = new HashMap<>();
-        dice = new ArrayList<>();
-        for (int i = 0; i < params.DICE_NUMBER; i++) {
-            dice.add(new Dice(params.DICE_SIDES));
-        }
-        if (rnd == null) {
-            rnd = new Random(System.currentTimeMillis());
-        } else {
-            rnd = new Random(rnd.nextLong());
-        }
-        gamePhase = CantStopGamePhase.Decision;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (o instanceof CantStopGameState) {
             CantStopGameState other = (CantStopGameState) o;

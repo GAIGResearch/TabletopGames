@@ -28,6 +28,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
     protected void _setup(AbstractGameState firstState) {
         LoveLetterGameState llgs = (LoveLetterGameState)firstState;
 
+        llgs.effectProtection = new boolean[llgs.getNPlayers()];
         // Set up all variables
         llgs.drawPile = new PartialObservableDeck<>("drawPile", llgs.getNPlayers());
         llgs.reserveCards = new PartialObservableDeck<>("reserveCards", llgs.getNPlayers());

@@ -162,7 +162,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
         return ids;
     }
 
-    @Override
     protected void _reset() {
         mainDeck       = null;
         discardDeck    = null;

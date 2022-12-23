@@ -39,6 +39,7 @@ public class BattleloreForwardModel extends StandardForwardModel {
         gameState.gameBoard = new GridBoard<>(hexWidth, hexHeight);
         gameState.unitTypes = new ArrayList<>();
         gameState.unitTypes = _data.getUnits();
+        gameState.playerScores = new int[gameState.getNPlayers()];
 
         for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameState.gameBoard.getHeight(); y++) {

@@ -76,7 +76,6 @@ public class CatanGameState extends AbstractGameState {
         return areas.get(playerId);
     }
 
-    @Override
     protected void _reset() {
         // set everything to null (except for Random number generator)
         this.areas = null;
@@ -89,8 +88,7 @@ public class CatanGameState extends AbstractGameState {
         scores = new int[getNPlayers()];
         knights = new int[getNPlayers()];
         exchangeRates = new int[getNPlayers()][CatanParameters.Resources.values().length];
-        for (int i = 0; i < exchangeRates.length; i++)
-            Arrays.fill(exchangeRates[i], pp.default_exchange_rate);
+        for (int[] exchangeRate : exchangeRates) Arrays.fill(exchangeRate, pp.default_exchange_rate);
         victoryPoints = new int[getNPlayers()];
         longestRoadLength = pp.min_longest_road;
         largestArmy = -1;

@@ -56,11 +56,6 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    protected void _reset() {
-        gridBoard = null;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TicTacToeGameState)) return false;

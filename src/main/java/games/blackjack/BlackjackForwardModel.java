@@ -1,6 +1,5 @@
 package games.blackjack;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;

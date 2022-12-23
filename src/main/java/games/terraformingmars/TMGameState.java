@@ -278,11 +278,6 @@ public class TMGameState extends AbstractGameState {
     }
 
     @Override
-    protected void _reset() {
-
-    }
-
-    @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TMGameState)) return false;

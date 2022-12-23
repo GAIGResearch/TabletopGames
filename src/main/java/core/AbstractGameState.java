@@ -87,7 +87,6 @@ public abstract class AbstractGameState {
         history = new ArrayList<>();
         historyText = new ArrayList<>();
         playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
-        _reset();
     }
 
     /**
@@ -355,11 +354,6 @@ public abstract class AbstractGameState {
         );
         return retValue;
     }
-
-    /**
-     * Resets variables initialised for this game state.
-     */
-    protected abstract void _reset();
 
     /**
      * Checks if the given object is the same as the current.

@@ -45,7 +45,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
         rnd = new Random(gameParameters.getRandomSeed());
     }
 
-    @Override
     protected void _reset() {
         actionAreas = new HashMap<>();
         Arrays.stream(ActionArea.values()).forEach(a ->

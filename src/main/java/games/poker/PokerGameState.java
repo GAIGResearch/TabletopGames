@@ -238,12 +238,6 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected void _reset() {
-        playerDecks = new ArrayList<>();
-        drawDeck = null;
-    }
-
-    @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PokerGameState)) return false;

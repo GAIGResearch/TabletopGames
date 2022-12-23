@@ -23,6 +23,7 @@ public class Connect4ForwardModel extends StandardForwardModel {
         int gridSize = c4gp.gridSize;
         Connect4GameState state = (Connect4GameState) firstState;
         state.gridBoard = new GridBoard<>(gridSize, gridSize, new Token(Connect4Constants.emptyCell));
+        state.winnerCells = new LinkedList<>();
     }
 
     @Override

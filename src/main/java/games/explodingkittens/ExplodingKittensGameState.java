@@ -18,14 +18,6 @@ import static core.CoreConstants.VisibilityMode;
 
 public class ExplodingKittensGameState extends AbstractGameState implements IPrintable {
 
-    // Exploding kittens adds 4 phases on top of default ones.
-    public enum ExplodingKittensGamePhase implements IGamePhase {
-        Nope,
-        Defuse,
-        Favor,
-        SeeTheFuture
-    }
-
     // Cards in each player's hand, index corresponds to player ID
     List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards;
     // Cards in the draw pile
@@ -37,10 +29,10 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     // Current stack of actions
     Stack<AbstractAction> actionStack;
     int[] orderOfPlayerDeath;
-
     public ExplodingKittensGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new ExplodingKittensTurnOrder(nPlayers), GameType.ExplodingKittens);
         playerGettingAFavor = -1;
+        playerHandCards = new ArrayList<>();
     }
 
     @Override
@@ -153,15 +145,6 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     @Override
-    protected void _reset() {
-        playerHandCards = new ArrayList<>();
-        drawPile = null;
-        discardPile = null;
-        playerGettingAFavor = -1;
-        actionStack = null;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ExplodingKittensGameState)) return false;
@@ -203,24 +186,20 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         return playerGettingAFavor;
     }
 
-    public PartialObservableDeck<ExplodingKittensCard> getDrawPile() {
-        return drawPile;
-    }
-
     public void setPlayerGettingAFavor(int playerGettingAFavor) {
         this.playerGettingAFavor = playerGettingAFavor;
     }
 
+    public PartialObservableDeck<ExplodingKittensCard> getDrawPile() {
+        return drawPile;
+    }
+
+    protected void setDrawPile(PartialObservableDeck<ExplodingKittensCard> drawPile) {
+        this.drawPile = drawPile;
+    }
+
     public Deck<ExplodingKittensCard> getDiscardPile() {
         return discardPile;
-    }
-
-    public Stack<AbstractAction> getActionStack() {
-        return actionStack;
-    }
-
-    public List<PartialObservableDeck<ExplodingKittensCard>> getPlayerHandCards() {
-        return playerHandCards;
     }
 
     // Protected, only accessible in this package and subclasses
@@ -228,23 +207,27 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         this.discardPile = discardPile;
     }
 
-    protected void setDrawPile(PartialObservableDeck<ExplodingKittensCard> drawPile) {
-        this.drawPile = drawPile;
-    }
-
-    protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards) {
-        this.playerHandCards = playerHandCards;
+    public Stack<AbstractAction> getActionStack() {
+        return actionStack;
     }
 
     protected void setActionStack(Stack<AbstractAction> actionStack) {
         this.actionStack = actionStack;
     }
 
-    // Printing functions for the game state and decks.
+    public List<PartialObservableDeck<ExplodingKittensCard>> getPlayerHandCards() {
+        return playerHandCards;
+    }
+
+    protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards) {
+        this.playerHandCards = playerHandCards;
+    }
 
     public void printToConsole() {
         System.out.println(toString());
     }
+
+    // Printing functions for the game state and decks.
 
     @Override
     public String toString() {
@@ -277,5 +260,13 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         s += "Missing Draws: " + ((ExplodingKittensTurnOrder) turnOrder).requiredDraws + "\n";
         s += "============================\n";
         return s;
+    }
+
+    // Exploding kittens adds 4 phases on top of default ones.
+    public enum ExplodingKittensGamePhase implements IGamePhase {
+        Nope,
+        Defuse,
+        Favor,
+        SeeTheFuture
     }
 }

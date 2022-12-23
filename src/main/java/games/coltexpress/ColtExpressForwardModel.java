@@ -33,6 +33,13 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         ColtExpressGameState cegs = (ColtExpressGameState) firstState;
         ColtExpressParameters cep = (ColtExpressParameters) firstState.getGameParameters();
 
+        cegs.bulletsLeft = new int[cegs.getNPlayers()];
+        cegs.playerCharacters = new HashMap<>();
+        cegs.playerPlayingBelle = -1;
+        cegs.plannedActions = null;
+        cegs.trainCompartments = new LinkedList<>();
+        cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers());
+
         setupRounds(cegs, cep);
         setupTrain(cegs);
         cegs.playerCharacters = new HashMap<>();

@@ -222,11 +222,6 @@ public class BattleloreGameState extends AbstractGameState {
         return playerScores[playerId];
     }
 
-    @Override
-    protected void _reset() {
-        gameBoard = null;
-        playerScores = new int[getNPlayers()];
-    }
 
     @Override
     protected boolean _equals(Object o) {

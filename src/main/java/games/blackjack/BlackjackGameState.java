@@ -152,12 +152,6 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
     }
 
     @Override
-    protected void _reset() {
-        drawDeck = null;
-        playerDecks = null;
-    }
-
-    @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BlackjackGameState)) return false;

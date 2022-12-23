@@ -118,7 +118,6 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
         return 0;
     }
 
-    @Override
     protected void _reset() {
         areas = null;
         tempDeck = null;

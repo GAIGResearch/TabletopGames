@@ -23,6 +23,20 @@ public class CantStopForwardModel extends StandardForwardModel {
     protected void _setup(AbstractGameState firstState) {
         // everything is reset in CantStopGameState._reset();
         // nothing extra is required here - except to set the Phase
+        CantStopGameState state = (CantStopGameState) firstState;
+        CantStopParameters params = (CantStopParameters) state.getGameParameters();
+        state.completedColumns = new boolean[13];
+        state.playerMarkerPositions = new int[state.getNPlayers()][13];
+        state.temporaryMarkerPositions = new HashMap<>();
+        state.dice = new ArrayList<>();
+        for (int i = 0; i < params.DICE_NUMBER; i++) {
+            state.dice.add(new Dice(params.DICE_SIDES));
+        }
+        if (state.rnd == null) {
+            state.rnd = new Random(System.currentTimeMillis());
+        } else {
+            state.rnd = new Random(state.rnd.nextLong());
+        }
         firstState.setGamePhase(CantStopGamePhase.Decision);
     }
 

@@ -82,11 +82,6 @@ public class StrategoGameState extends AbstractGameState {
     }
 
     @Override
-    protected void _reset() {
-        gridBoard = null;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (o instanceof StrategoGameState) {
             StrategoGameState other = (StrategoGameState) o;

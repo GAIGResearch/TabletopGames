@@ -217,16 +217,6 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
         }
     }
 
-
-    @Override
-    protected void _reset() {
-        playerDecks = new ArrayList<>();
-        drawDeck = null;
-        discardDeck = null;
-        currentCard = null;
-        currentColor = null;
-    }
-
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;

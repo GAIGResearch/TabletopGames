@@ -83,14 +83,6 @@ public class DBGameState extends AbstractGameState {
     }
 
     @Override
-    protected void _reset() {
-        nCellsPerPlayer = null;
-        cellToOwnerMap = null;
-        edgeToOwnerMap = null;
-        lastActionScored = false;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DBGameState)) return false;

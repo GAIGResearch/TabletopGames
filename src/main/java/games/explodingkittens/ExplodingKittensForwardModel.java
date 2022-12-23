@@ -31,7 +31,9 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
 
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)firstState;
         ExplodingKittensParameters ekp = (ExplodingKittensParameters)firstState.getGameParameters();
-
+        ekgs.playerHandCards = new ArrayList<>();
+        ekgs.playerGettingAFavor = -1;
+        ekgs.actionStack = null;
         // Set up draw pile deck
         PartialObservableDeck<ExplodingKittensCard> drawPile = new PartialObservableDeck<>("Draw Pile", firstState.getNPlayers());
         ekgs.setDrawPile(drawPile);

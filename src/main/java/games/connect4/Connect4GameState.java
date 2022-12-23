@@ -25,6 +25,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     public Connect4GameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Connect4);
         winnerCells = new LinkedList<>();
+        gridBoard = null;
     }
 
     @Override
@@ -62,11 +63,6 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     @Override
     public double getGameScore(int playerId) {
         return playerResults[playerId].value;
-    }
-
-    @Override
-    protected void _reset() {
-        gridBoard = null;
     }
 
     @Override

@@ -28,6 +28,7 @@ public class CatanForwardModel extends StandardForwardModel {
     protected void _setup(AbstractGameState firstState) {
 
         CatanGameState state = (CatanGameState) firstState;
+        state._reset();
         CatanParameters params = (CatanParameters) state.getGameParameters();
 
         state.setBoard(generateBoard(params));

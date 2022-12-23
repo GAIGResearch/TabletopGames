@@ -19,6 +19,7 @@ public class DBForwardModel extends StandardForwardModel {
         DBGameState dbgs = (DBGameState) firstState;
         DBParameters dbp = (DBParameters) firstState.getGameParameters();
 
+        dbgs.lastActionScored = false;
         // Generate edge to cell mapping and all cell objects with appropriate constructor
         dbgs.edgeToCellMap = new HashMap<>();
         dbgs.cellToEdgesMap = new HashMap<>();

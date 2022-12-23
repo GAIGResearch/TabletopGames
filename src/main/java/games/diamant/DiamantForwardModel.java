@@ -1,6 +1,5 @@
 package games.diamant;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
@@ -25,9 +24,7 @@ public class DiamantForwardModel extends StandardForwardModel {
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;
         Random r = new Random(dgs.getGameParameters().getRandomSeed());
-
-        dgs.hands = new ArrayList<>();
-        dgs.treasureChests = new ArrayList<>();
+        dgs._reset();
 
         for (int i = 0; i < dgs.getNPlayers(); i++) {
             String counter_hand_name = "CounterHand" + i;

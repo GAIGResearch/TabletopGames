@@ -38,6 +38,7 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) firstState;
+        state._reset();
         DiceMonasteryParams params = (DiceMonasteryParams) state.getGameParameters();
         AbstractGameData _data = new AbstractGameData();
         _data.load(params.getDataPath());

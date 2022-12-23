@@ -147,6 +147,7 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         PandemicGameState state = (PandemicGameState) firstState;
+        state._reset();
         PandemicParameters pp = (PandemicParameters) state.getGameParameters();
 
         AbstractGameData _data = new AbstractGameData();

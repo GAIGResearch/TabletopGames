@@ -1,6 +1,5 @@
 package games.sushigo;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
@@ -18,15 +17,14 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.joining;
-
 public class SGForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
         SGGameState SGGS = (SGGameState) firstState;
         SGParameters parameters = (SGParameters) SGGS.getGameParameters();
-
+        SGGS.cardAmount = 0;
+        SGGS.deckRotations = 0;
         //Setup player scores
         SGGS.playerScore = new int[firstState.getNPlayers()];
         SGGS.playerCardPicks = new int[firstState.getNPlayers()];

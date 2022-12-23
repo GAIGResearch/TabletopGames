@@ -241,21 +241,6 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         return -bulletsTaken;
     }
 
-
-    @Override
-    protected void _reset() {
-        playerHandCards = new ArrayList<>();
-        playerDecks = new ArrayList<>();
-        playerLoot = new ArrayList<>();
-        bulletsLeft = new int[getNPlayers()];
-        playerCharacters = new HashMap<>();
-        playerPlayingBelle = -1;
-        plannedActions = null;
-        trainCompartments = new LinkedList<>();
-        rounds = new PartialObservableDeck<>("Rounds", -1, getNPlayers());
-        gamePhase = ColtExpressGamePhase.PlanActions;
-    }
-
     @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;

@@ -2,6 +2,8 @@ package games.dominion;
 
 import core.*;
 import core.actions.*;
+import core.components.Deck;
+import core.components.PartialObservableDeck;
 import games.dominion.actions.*;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
@@ -9,6 +11,7 @@ import utilities.Utils;
 
 import java.util.*;
 
+import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static java.util.stream.Collectors.*;
 
 public class DominionForwardModel extends StandardForwardModel {
@@ -24,6 +27,7 @@ public class DominionForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DominionGameState state = (DominionGameState) firstState;
+        state._reset();
         DominionParameters params = state.params;
 
         for (int i = 0; i < state.playerCount; i++) {

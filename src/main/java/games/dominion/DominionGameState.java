@@ -401,7 +401,6 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
     /**
      * Resets variables initialised for this game state.
      */
-    @Override
     protected void _reset() {
         playerHands = new PartialObservableDeck[playerCount];
         playerDrawPiles = new PartialObservableDeck[playerCount];
