@@ -5,7 +5,6 @@ import utilities.Utils;
 
 public abstract class StandardForwardModel extends AbstractForwardModel {
 
-
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action){
         if (action != null) {

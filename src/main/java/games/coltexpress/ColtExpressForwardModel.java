@@ -1,7 +1,6 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
-import core.AbstractForwardModel;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
@@ -16,14 +15,11 @@ import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 import utilities.Group;
-import utilities.Utils;
 
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode;
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanActions;
-import static utilities.Utils.GameResult.LOSE;
-import static utilities.Utils.GameResult.WIN;
 
 public class ColtExpressForwardModel extends StandardForwardModel {
 
@@ -62,20 +58,20 @@ public class ColtExpressForwardModel extends StandardForwardModel {
                 cegs.playerPlayingBelle = playerIndex;
 
             Deck<ColtExpressCard> playerCards = new Deck<>("playerCards" + playerIndex, playerIndex, VisibilityMode.HIDDEN_TO_ALL);
-            for (ColtExpressCard.CardType type : cep.cardCounts.keySet()){
+            for (ColtExpressCard.CardType type : cep.cardCounts.keySet()) {
                 for (int j = 0; j < cep.cardCounts.get(type); j++) {
                     playerCards.add(new ColtExpressCard(playerIndex, type));
                 }
             }
             cegs.playerDecks.add(playerCards);
-            playerCards.shuffle(new Random(cep.getRandomSeed()+playerIndex));
+            playerCards.shuffle(new Random(cep.getRandomSeed() + playerIndex));
 
             Deck<ColtExpressCard> playerHand = new Deck<>("playerHand" + playerIndex, playerIndex, VisibilityMode.VISIBLE_TO_OWNER);
 
             cegs.playerHandCards.add(playerHand);
 
             Deck<Loot> loot = new Deck<>("playerLoot" + playerIndex, playerIndex, VisibilityMode.HIDDEN_TO_ALL);
-            for (Group<LootType, Integer, Integer> e: cep.playerStartLoot) {
+            for (Group<LootType, Integer, Integer> e : cep.playerStartLoot) {
                 LootType lootType = e.a;
                 int value = e.b;
                 int nLoot = e.c;
@@ -90,12 +86,12 @@ public class ColtExpressForwardModel extends StandardForwardModel {
             else
                 cegs.getTrainCompartments().get(1).addPlayerInside(playerIndex);
         }
-        distributeCards(cegs);
+        cegs.distributeCards();
 
         firstState.setGamePhase(PlanActions);
     }
 
-    private void setupRounds(ColtExpressGameState cegs, ColtExpressParameters cep){
+    private void setupRounds(ColtExpressGameState cegs, ColtExpressParameters cep) {
         cegs.rounds = new PartialObservableDeck<>("Rounds", -1, cegs.getNPlayers());
 
         // Add 1 random end round card
@@ -105,7 +101,7 @@ public class ColtExpressForwardModel extends StandardForwardModel {
 
         // Add random round cards
         ArrayList<ColtExpressTypes.RegularRoundCard> availableRounds = new ArrayList<>(Arrays.asList(cep.roundCards));
-        for (int i = 0; i < cep.nMaxRounds-1; i++) {
+        for (int i = 0; i < cep.nMaxRounds - 1; i++) {
             Random r = new Random(cep.getRandomSeed() + cegs.getTurnOrder().getRoundCounter() + i);
             int choice = r.nextInt(availableRounds.size());
             cegs.rounds.add(cegs.getRoundCard(availableRounds.get(choice), cegs.getNPlayers()));
@@ -126,15 +122,8 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {
             System.out.println("character drafting is not implemented yet");
             throw new UnsupportedOperationException("not implemented yet");
-        } else if (PlanActions.equals(gamePhase)) {
-            ceto.endPlayerTurn(gameState);
-        } else if (ColtExpressGameState.ColtExpressGamePhase.ExecuteActions.equals(gamePhase)) {
-            ceto.endPlayerTurn(gameState);
-            if (cegs.plannedActions.getSize() == 0) {
-                ceto.endRoundCard((ColtExpressGameState) gameState);
-                distributeCards((ColtExpressGameState) gameState);
-            }
         }
+        ceto.endPlayerTurn(gameState);
     }
 
     @Override
@@ -142,38 +131,18 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         _next(gameState, action);
     }
 
-    private CharacterType pickRandomCharacterType(Random rnd, HashSet<CharacterType> characters){
+    private CharacterType pickRandomCharacterType(Random rnd, HashSet<CharacterType> characters) {
         int size = characters.size();
         int item = rnd.nextInt(size);
         int i = 0;
-        for(CharacterType obj : characters) {
-            if (i == item){
+        for (CharacterType obj : characters) {
+            if (i == item) {
                 characters.remove(obj);
                 return obj;
             }
             i++;
         }
         return null;
-    }
-
-    private void distributeCards(ColtExpressGameState cegs){
-        for (int playerIndex = 0; playerIndex < cegs.getNPlayers(); playerIndex++) {
-            Deck<ColtExpressCard> playerHand = cegs.playerHandCards.get(playerIndex);
-            Deck<ColtExpressCard> playerDeck = cegs.playerDecks.get(playerIndex);
-
-            playerDeck.add(playerHand);
-            playerHand.clear();
-
-            for (int i = 0; i < ((ColtExpressParameters)cegs.getGameParameters()).nCardsInHand; i++) {
-                playerHand.add(playerDeck.draw());
-            }
-            if (cegs.playerCharacters.get(playerIndex) == CharacterType.Doc) {
-                for (int i = 0; i < ((ColtExpressParameters) cegs.getGameParameters()).nCardsInHandExtraDoc; i++) {
-                    playerHand.add(playerDeck.draw());
-                }
-            }
-
-        }
     }
 
     @Override
@@ -193,10 +162,10 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         return actions;
     }
 
-    private ArrayList<AbstractAction> schemingActions(ColtExpressGameState cegs){
+    private ArrayList<AbstractAction> schemingActions(ColtExpressGameState cegs) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
-        ColtExpressParameters cep = (ColtExpressParameters)cegs.getGameParameters();
+        ColtExpressParameters cep = (ColtExpressParameters) cegs.getGameParameters();
         ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) cegs.getTurnOrder();
         int player = cegs.getCurrentPlayer();
 
@@ -207,7 +176,7 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         int toID = cegs.plannedActions.getComponentID();
 
         // Add 1 action for each card type in player's hand
-        for (int i = 0; i < playerHand.getSize(); i++){
+        for (int i = 0; i < playerHand.getSize(); i++) {
             ColtExpressCard c = playerHand.get(i);
             if (c.cardType == ColtExpressCard.CardType.Bullet || types.contains(c.cardType))
                 continue;
@@ -229,16 +198,16 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         return actions;
     }
 
-    private ArrayList<AbstractAction> stealingActions(ColtExpressGameState cegs)
-    {
+    private ArrayList<AbstractAction> stealingActions(ColtExpressGameState cegs) {
         int player = cegs.getCurrentPlayer();
         ArrayList<AbstractAction> actions = new ArrayList<>();
         if (cegs.plannedActions.getSize() == 0) {
-            actions.add(new DoNothing());
-            return actions;
+            // actions.add(new DoNothing());
+            //  return actions;
+            throw new AssertionError("Error - no actions available");
         }
 
-        int cardIdx = cegs.plannedActions.getSize()-1;
+        int cardIdx = cegs.plannedActions.getSize() - 1;
         int deckFromID = cegs.plannedActions.getComponentID();
         int deckToID = cegs.playerDecks.get(player).getComponentID();
 
@@ -252,9 +221,8 @@ public class ColtExpressForwardModel extends StandardForwardModel {
             return actions;
         }
 
-        if (player == plannedActionCard.playerID)
-        {
-            switch (plannedActionCard.cardType){
+        if (player == plannedActionCard.playerID) {
+            switch (plannedActionCard.cardType) {
                 case Punch:
                     createPunchingActions(cegs, actions, player, cardIdx);
                     break;
@@ -272,17 +240,17 @@ public class ColtExpressForwardModel extends StandardForwardModel {
                     }
                     break;
                 case MoveMarshal:
-                    for (int i = 0; i < cegs.trainCompartments.size(); i++){
+                    for (int i = 0; i < cegs.trainCompartments.size(); i++) {
                         Compartment compartment = cegs.trainCompartments.get(i);
-                        if (compartment.containsMarshal){
+                        if (compartment.containsMarshal) {
                             if (i > 0)
                                 // Move marshal left
                                 actions.add(new MoveMarshalAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
-                                        cegs.trainCompartments.get(i-1).getComponentID()));
+                                        cegs.trainCompartments.get(i - 1).getComponentID()));
                             if (i < cegs.trainCompartments.size() - 1)
                                 // Move marshal right
                                 actions.add(new MoveMarshalAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
-                                        cegs.trainCompartments.get(i+1).getComponentID()));
+                                        cegs.trainCompartments.get(i + 1).getComponentID()));
                             break;
                         }
                     }
@@ -299,7 +267,7 @@ public class ColtExpressForwardModel extends StandardForwardModel {
                             for (Loot loot : availableLoot.getComponents()) {
                                 lootTypes.add(loot.getLootType());
                             }
-                            for (LootType lt: lootTypes) {
+                            for (LootType lt : lootTypes) {
                                 actions.add(new CollectMoneyAction(deckFromID, deckToID, cardIdx, lt,
                                         availableLoot.getComponentID()));
                             }
@@ -307,38 +275,38 @@ public class ColtExpressForwardModel extends StandardForwardModel {
                         }
                     }
                     if (actions.size() == 0) {
-                        actions.add(new CollectMoneyAction(deckFromID, deckToID, cardIdx,null, -1));
+                        actions.add(new CollectMoneyAction(deckFromID, deckToID, cardIdx, null, -1));
                     }
                     break;
                 case MoveSideways:
-                    for (int i = 0; i < cegs.trainCompartments.size(); i++){
+                    for (int i = 0; i < cegs.trainCompartments.size(); i++) {
                         Compartment compartment = cegs.trainCompartments.get(i);
-                        if (compartment.playersOnTopOfCompartment.contains(player)){
+                        if (compartment.playersOnTopOfCompartment.contains(player)) {
                             // Rules for movement on top
-                            for (int offset = 1; offset < ((ColtExpressParameters)cegs.getGameParameters()).nRoofMove; offset++){
-                                if ((i-offset) >= 0) {
+                            for (int offset = 1; offset < ((ColtExpressParameters) cegs.getGameParameters()).nRoofMove; offset++) {
+                                if ((i - offset) >= 0) {
                                     // Move left
                                     actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
-                                            cegs.trainCompartments.get(i-offset).getComponentID()));
+                                            cegs.trainCompartments.get(i - offset).getComponentID()));
                                 }
-                                if ((i+offset) <= cegs.trainCompartments.size()-1) {
+                                if ((i + offset) <= cegs.trainCompartments.size() - 1) {
                                     // Move right
                                     actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
-                                            cegs.trainCompartments.get(i+offset).getComponentID()));
+                                            cegs.trainCompartments.get(i + offset).getComponentID()));
                                 }
                             }
                             break;
-                        } else if (compartment.playersInsideCompartment.contains(player)){
+                        } else if (compartment.playersInsideCompartment.contains(player)) {
                             // Inside can only move to adjacent compartment
-                            if ((i-1) >= 0) {
+                            if ((i - 1) >= 0) {
                                 // Move left
                                 actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
-                                        cegs.trainCompartments.get(i-1).getComponentID()));
+                                        cegs.trainCompartments.get(i - 1).getComponentID()));
                             }
-                            if ((i+1) <= cegs.trainCompartments.size()-1) {
+                            if ((i + 1) <= cegs.trainCompartments.size() - 1) {
                                 // Move right
                                 actions.add(new MoveSidewaysAction(deckFromID, deckToID, cardIdx, compartment.getComponentID(),
-                                        cegs.trainCompartments.get(i+1).getComponentID()));
+                                        cegs.trainCompartments.get(i + 1).getComponentID()));
                             }
                             break;
                         }
@@ -350,12 +318,13 @@ public class ColtExpressForwardModel extends StandardForwardModel {
             }
 
         } else {
-            actions.add(new DoNothing());
+            throw new AssertionError("Error - player ID does not match expectation");
+            // actions.add(new DoNothing());
         }
         return actions;
     }
 
-    private void createPunchingActions(ColtExpressGameState cegs, ArrayList<AbstractAction> actions, int player, int cardIdx){
+    private void createPunchingActions(ColtExpressGameState cegs, ArrayList<AbstractAction> actions, int player, int cardIdx) {
         int deckFromID = cegs.plannedActions.getComponentID();
         int deckToID = cegs.playerDecks.get(player).getComponentID();
         boolean playerIsCheyenne = cegs.playerCharacters.get(player) == CharacterType.Cheyenne;
@@ -364,11 +333,10 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         Compartment playerCompartment = null;
         HashSet<Integer> availableTargets = new HashSet<>();
 
-        for (int i = 0; i < cegs.trainCompartments.size(); i++)
-        {
+        for (int i = 0; i < cegs.trainCompartments.size(); i++) {
             Compartment compartment = cegs.trainCompartments.get(i);
             if (compartment.playersOnTopOfCompartment.contains(player)) {
-                for (Integer targetID : compartment.playersOnTopOfCompartment){
+                for (Integer targetID : compartment.playersOnTopOfCompartment) {
                     if (targetID != player)
                         availableTargets.add(targetID);
                 }
@@ -376,8 +344,8 @@ public class ColtExpressForwardModel extends StandardForwardModel {
                 playerCompartmentIndex = i;
                 playerCompartment = compartment;
                 break;
-            } else if (compartment.playersInsideCompartment.contains(player)){
-                for (Integer targetID : compartment.playersInsideCompartment){
+            } else if (compartment.playersInsideCompartment.contains(player)) {
+                for (Integer targetID : compartment.playersInsideCompartment) {
                     if (targetID != player)
                         availableTargets.add(targetID);
                 }
@@ -412,7 +380,7 @@ public class ColtExpressForwardModel extends StandardForwardModel {
                         for (Loot loot : availableLoot.getComponents()) {
                             lootTypes.add(loot.getLootType());
                         }
-                        for (LootType lt: lootTypes) {
+                        for (LootType lt : lootTypes) {
                             actions.add(new PunchAction(deckFromID, deckToID, cardIdx, targetPlayer,
                                     sourceCompID, targetCompartment.getComponentID(),
                                     lt, availableLoot.getComponentID(), playerIsCheyenne));
@@ -441,15 +409,14 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         Compartment playerCompartment = null;
         boolean playerOnTop = false;
 
-        for (int i = 0; i < cegs.trainCompartments.size(); i++)
-        {
+        for (int i = 0; i < cegs.trainCompartments.size(); i++) {
             Compartment compartment = cegs.trainCompartments.get(i);
             if (compartment.playersOnTopOfCompartment.contains(player)) {
                 playerCompartmentIndex = i;
                 playerCompartment = compartment;
                 playerOnTop = true;
                 break;
-            } else if (compartment.playersInsideCompartment.contains(player)){
+            } else if (compartment.playersInsideCompartment.contains(player)) {
                 playerCompartmentIndex = i;
                 playerCompartment = compartment;
                 break;
@@ -528,12 +495,12 @@ public class ColtExpressForwardModel extends StandardForwardModel {
         // Choose random compartment configurations
         Random random = new Random(cegs.getGameParameters().getRandomSeed());
         ArrayList<Integer> availableCompartments = new ArrayList<>();
-        for (int i = 0; i < ((ColtExpressParameters)cegs.getGameParameters()).trainCompartmentConfigurations.size() - 1; i++) {
+        for (int i = 0; i < ((ColtExpressParameters) cegs.getGameParameters()).trainCompartmentConfigurations.size() - 1; i++) {
             availableCompartments.add(i);
         }
         for (int i = 0; i < cegs.getNPlayers(); i++) {
             int which = random.nextInt(availableCompartments.size());
-            cegs.trainCompartments.add(new Compartment(cegs.getNPlayers(), i, which, (ColtExpressParameters)cegs.getGameParameters()));
+            cegs.trainCompartments.add(new Compartment(cegs.getNPlayers(), i, which, (ColtExpressParameters) cegs.getGameParameters()));
             availableCompartments.remove(Integer.valueOf(which));
         }
 

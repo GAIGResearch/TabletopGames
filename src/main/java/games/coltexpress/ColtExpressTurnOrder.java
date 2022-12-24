@@ -2,13 +2,15 @@ package games.coltexpress;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import games.coltexpress.cards.RoundCard;
 import core.turnorders.TurnOrder;
+import games.coltexpress.ColtExpressGameState.ColtExpressGamePhase;
+import games.coltexpress.cards.RoundCard;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-import static utilities.Utils.GameResult.GAME_END;
+import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.ExecuteActions;
+import static games.coltexpress.cards.RoundCard.TurnType.DoubleTurn;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 
@@ -19,6 +21,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
     private int direction;  // Direction of play, 1 is clockwise, -1 is anticlockwise
     private boolean firstAction;  // In double turns, allows players to take two turns before changing turn owner
     private int fullPlayerTurnCounter;  // Extra counter for how many turns in a round were played (full turn by all players)
+    private int subTurnCounter;
 
     public ColtExpressTurnOrder(int nPlayers, int nMaxRounds) {
         super(nPlayers, nMaxRounds);
@@ -26,6 +29,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
         turnOwner = 0;
         fullPlayerTurnCounter = 0;
         turnCounter = 0;
+        subTurnCounter = 0;
         roundCounter = 0;
         firstPlayerOfRound = 0;
         direction = 1;
@@ -38,6 +42,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
         firstPlayer = 0;
         turnOwner = 0;
         turnCounter = 0;
+        subTurnCounter = 0;
         roundCounter = 0;
         fullPlayerTurnCounter = 0;
         direction = 1;
@@ -51,6 +56,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
         ceto.currentTurnType = currentTurnType;
         ceto.direction = direction;
         ceto.firstAction = firstAction;
+        ceto.subTurnCounter = subTurnCounter;
         ceto.fullPlayerTurnCounter = fullPlayerTurnCounter;
         return ceto;
     }
@@ -62,10 +68,9 @@ public class ColtExpressTurnOrder extends TurnOrder {
      * @param turn  - turn index (of turn type array in round card).
      */
     private void initTurn(RoundCard round, int turn, ColtExpressGameState state) {
-        boolean[] allTrue = new boolean[nPlayers];
-        Arrays.fill(allTrue, true);
-        state.rounds.setVisibilityOfComponent(roundCounter, allTrue);
         currentTurnType = round.getTurnTypes()[turn];
+        turnOwner = firstPlayerOfRound;
+        firstAction = true;
         switch (round.getTurnTypes()[turn]) {
             case NormalTurn:
             case DoubleTurn:
@@ -90,10 +95,10 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
     @Override
     public int nextPlayer(AbstractGameState gameState) {
-        if (gameState.getGamePhase() == ColtExpressGameState.ColtExpressGamePhase.DraftCharacter) {
+        if (gameState.getGamePhase() == ColtExpressGamePhase.DraftCharacter) {
             // Return next player
             return (nPlayers + turnOwner + direction) % nPlayers;
-        } else if (gameState.getGamePhase() == ColtExpressGameState.ColtExpressGamePhase.ExecuteActions) {
+        } else if (gameState.getGamePhase() == ExecuteActions) {
             // Return ID of player on the next card in the planned actions deck
             ColtExpressGameState cegs = (ColtExpressGameState) gameState;
             if (cegs.plannedActions.getSize() > 0) {
@@ -108,14 +113,13 @@ public class ColtExpressTurnOrder extends TurnOrder {
                     id = cegs.plannedActions.get(idx).playerID;
                     if (id != -1) return id;
                 }
-                // If no legal cards left, return next player
-                return (nPlayers + turnOwner + direction) % nPlayers;
+                return id;
             }
             // Return next player if no cards in deck
             return (nPlayers + turnOwner + direction) % nPlayers;
         } else {
             // Return next player in the round, double up if a double turn
-            if (currentTurnType == RoundCard.TurnType.DoubleTurn) {
+            if (currentTurnType == DoubleTurn) {
                 if (firstAction) {
                     firstAction = false;
                     return turnOwner;
@@ -134,21 +138,52 @@ public class ColtExpressTurnOrder extends TurnOrder {
      */
     @Override
     public void _endRound(AbstractGameState gameState) {
-        fullPlayerTurnCounter++;
-        roundCounter--;  // a little hacky; but Colt Express uses TurnOrder.roundCounter to refer to the total number of game rounds, and this should not be incremented as default
+
     }
 
     @Override
     public void _startRound(AbstractGameState gameState) {
+
+    }
+
+    @Override
+    public void endPlayerTurn(AbstractGameState gameState) {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
-        RoundCard currentRoundCard = cegs.getRounds().get(roundCounter);
-        if (fullPlayerTurnCounter < currentRoundCard.getTurnTypes().length) {
-            // Initialize next full player turn
-            initTurn(currentRoundCard, fullPlayerTurnCounter, cegs);
+        if (gameState.getGameStatus() != GAME_ONGOING) return;
+
+        gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
+
+        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, gameState, null));
+
+        turnCounter++;
+        ColtExpressGamePhase phase = (ColtExpressGamePhase) cegs.getGamePhase();
+        if (phase == ExecuteActions) {
+            // if executing, we do not use subTurnCounter, but use the player who planned the actions
+            if (cegs.plannedActions.getSize() == 0) {
+                // end of Round
+                endRound(cegs);
+                endRoundCard(cegs);
+                cegs.distributeCards();
+                return; // this will set next player
+            }
         } else {
-            // All turns in this round played, execute the actions
-            gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.ExecuteActions);
+            // Planning Actions
+            subTurnCounter++;
+            int turnsInRound = currentTurnType == DoubleTurn ? nPlayers * 2 : nPlayers;
+            if (subTurnCounter % turnsInRound == 0) {
+                fullPlayerTurnCounter++;
+                subTurnCounter = 0;
+                RoundCard currentRoundCard = cegs.getRounds().get(roundCounter);
+                if (fullPlayerTurnCounter < currentRoundCard.getTurnTypes().length) {
+                    initTurn(currentRoundCard, fullPlayerTurnCounter, cegs);
+                    return;
+                } else {
+                    // All turns in this round played, execute the actions
+                    gameState.setGamePhase(ExecuteActions);
+                }
+            }
         }
+        moveToNextPlayer(gameState, nextPlayer(gameState));
     }
 
     /**
@@ -160,14 +195,16 @@ public class ColtExpressTurnOrder extends TurnOrder {
         // End card event
         gameState.getRounds().get(roundCounter).endRoundCardEvent(gameState);
         // Move to next round
-        roundCounter++;
         if (roundCounter < gameState.getRounds().getSize()) {
             firstPlayerOfRound = (firstPlayerOfRound + 1) % nPlayers;
             turnCounter = 0;
+            subTurnCounter = 0;
             fullPlayerTurnCounter = 0;
-            turnOwner = firstPlayerOfRound;
             initTurn(gameState.getRounds().get(roundCounter), 0, gameState);
-            gameState.setGamePhase(ColtExpressGameState.ColtExpressGamePhase.PlanActions);
+            gameState.setGamePhase(ColtExpressGamePhase.PlanActions);
+            boolean[] allTrue = new boolean[nPlayers];
+            Arrays.fill(allTrue, true);
+            gameState.rounds.setVisibilityOfComponent(roundCounter, allTrue);
         } else {
             gameState.endGame();
         }
@@ -187,11 +224,12 @@ public class ColtExpressTurnOrder extends TurnOrder {
                 direction == that.direction &&
                 firstAction == that.firstAction &&
                 fullPlayerTurnCounter == that.fullPlayerTurnCounter &&
+                subTurnCounter == that.subTurnCounter &&
                 currentTurnType == that.currentTurnType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), firstPlayerOfRound, currentTurnType, direction, firstAction, fullPlayerTurnCounter);
+        return Objects.hash(super.hashCode(), firstPlayerOfRound, currentTurnType, direction, firstAction, fullPlayerTurnCounter, subTurnCounter);
     }
 }

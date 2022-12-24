@@ -1,22 +1,14 @@
 package test.games.coltexpress;
 
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.CoreConstants;
-import core.Game;
+import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IGameListener;
-import games.coltexpress.ColtExpressForwardModel;
-import games.coltexpress.ColtExpressGame;
-import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.*;
 import games.coltexpress.cards.RoundCard;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static core.CoreConstants.GameEvents.ROUND_OVER;
 import static java.util.stream.Collectors.toList;
@@ -24,7 +16,8 @@ import static org.junit.Assert.*;
 
 public class TestRoundCardVisibilityAndShuffling {
 
-    List<AbstractPlayer> players = Arrays.asList(new RandomPlayer(),
+    List<AbstractPlayer> players = Arrays.asList(
+            new RandomPlayer(),
             new RandomPlayer(),
             new RandomPlayer());
 
@@ -57,6 +50,7 @@ public class TestRoundCardVisibilityAndShuffling {
                 for (int i = 0; i < state.getTurnOrder().getRoundCounter(); i++)
                     assertTrue(state.getRounds().getVisibilityForPlayer(i, 0));
                 assertEquals(visibleRoundCards, state.getTurnOrder().getRoundCounter() + 1);
+                // Added knowledge of 'hack' that for Colt Express the Round counter is one less than it shoudl be at ROUND_OVER
 
                 // 1 card visible at end of Round 0, and so on.
 

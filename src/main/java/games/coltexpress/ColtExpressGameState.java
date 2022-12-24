@@ -319,6 +319,26 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
         return playersWithMostSuccessfulShots;
     }
 
+    void distributeCards(){
+        for (int playerIndex = 0; playerIndex < getNPlayers(); playerIndex++) {
+            Deck<ColtExpressCard> playerHand = playerHandCards.get(playerIndex);
+            Deck<ColtExpressCard> playerDeck = playerDecks.get(playerIndex);
+
+            playerDeck.add(playerHand);
+            playerHand.clear();
+
+            for (int i = 0; i < ((ColtExpressParameters) getGameParameters()).nCardsInHand; i++) {
+                playerHand.add(playerDeck.draw());
+            }
+            if (playerCharacters.get(playerIndex) == CharacterType.Doc) {
+                for (int i = 0; i < ((ColtExpressParameters) getGameParameters()).nCardsInHandExtraDoc; i++) {
+                    playerHand.add(playerDeck.draw());
+                }
+            }
+
+        }
+    }
+
     // Getters, setters
     public LinkedList<Compartment> getTrainCompartments() {
         return trainCompartments;
