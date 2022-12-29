@@ -53,14 +53,9 @@ public class Connect4ForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        Connect4GameParameters c4gp = (Connect4GameParameters) currentState.getGameParameters();
-        int gridSize = c4gp.gridSize;
-        if (currentState.getTurnOrder().getRoundCounter() == (gridSize * gridSize)) {
-            currentState.setGameStatus(Utils.GameResult.GAME_END);
-            return;
-        }
+        Connect4GameState c4gs = (Connect4GameState) currentState;
 
-        if (checkGameEnd((Connect4GameState) currentState)) {
+        if (checkGameEnd(c4gs)) {
             return;
         }
         currentState.getTurnOrder().endPlayerTurn(currentState);
