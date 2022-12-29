@@ -50,7 +50,7 @@ public class CatanGameState extends AbstractGameState {
     HashMap<Integer, Area> areas;
 
     public CatanGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters) pp).n_actions_per_turn), GameType.Catan);
+        super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters) pp).max_round_count), GameType.Catan);
         _reset();
     }
 
@@ -153,11 +153,11 @@ public class CatanGameState extends AbstractGameState {
         return board;
     }
 
-    public void setGraph(Graph graph) {
+    public void setGraph(Graph<Settlement, Road> graph) {
         this.catanGraph = graph;
     }
 
-    public Graph getGraph() {
+    public Graph<Settlement, Road> getGraph() {
         return catanGraph;
     }
 

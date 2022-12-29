@@ -42,7 +42,7 @@ public class Road implements Copiable {
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    protected Road clone() throws CloneNotSupportedException {
         return this.copy();
     }
 
