@@ -167,7 +167,7 @@ public abstract class TurnOrder {
 
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
-            gameState.setGameStatus(GAME_END);
+            gameState.endGame();
         }
         else {
             turnCounter = 0;
@@ -229,7 +229,7 @@ public abstract class TurnOrder {
             turnOwner = nextPlayer(gameState);
             n++;
             if (n >= nPlayers) {
-                gameState.setGameStatus(GAME_END);
+                gameState.endGame();
                 break;
             }
         }

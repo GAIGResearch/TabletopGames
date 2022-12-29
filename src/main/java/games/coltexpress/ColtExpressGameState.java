@@ -218,7 +218,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
             ColtExpressParameters cep = (ColtExpressParameters) gameParameters;
             // the full shooter reward is given at the end of the game
             // so we only partially incorporate this into the 'score'
-            double gameProgress = ceto.getRoundCounter() / (double) cep.nMaxRounds;
+            double gameProgress = ceto.getRoundCounter() / (double) getRounds().getSize();
             if (!isNotTerminal() && gameProgress != 1.0)
                 throw new AssertionError("Unexpected");
             retValue += cep.shooterReward * gameProgress;

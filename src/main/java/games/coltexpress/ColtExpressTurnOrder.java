@@ -161,8 +161,8 @@ public class ColtExpressTurnOrder extends TurnOrder {
             // if executing, we do not use subTurnCounter, but use the player who planned the actions
             if (cegs.plannedActions.getSize() == 0) {
                 // end of Round
-                endRound(cegs);
                 endRoundCard(cegs);
+                endRound(cegs);
                 cegs.distributeCards();
                 return; // this will set next player
             }
