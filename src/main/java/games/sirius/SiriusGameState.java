@@ -70,13 +70,14 @@ public class SiriusGameState extends AbstractGameState {
             List<Deck<SiriusCard>> ammoniaDecks = new ArrayList<>();
             ammoniaDecks.add(retValue.ammoniaDeck);
             ammoniaDecks.addAll(retValue.moons.stream().filter(m -> m.moonType == MINING).map(Moon::getDeck).collect(toList()));
-            ammoniaDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
+            // player hands (cargo + crew) are face up
+      //      ammoniaDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
             reshuffle(playerId, ammoniaDecks, c -> c.cardType == AMMONIA);
 
             List<Deck<SiriusCard>> contrabandDecks = new ArrayList<>();
             contrabandDecks.add(retValue.contrabandDeck);
             contrabandDecks.addAll(retValue.moons.stream().filter(m -> m.moonType == PROCESSING).map(Moon::getDeck).collect(toList()));
-            contrabandDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
+       //     contrabandDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
             reshuffle(playerId, contrabandDecks, c -> c.cardType == CONTRABAND);
         }
         retValue.ammoniaTrack = ammoniaTrack;
@@ -209,11 +210,6 @@ public class SiriusGameState extends AbstractGameState {
     // for testing
     public int[] getMoveSelected() {
         return moveSelected.clone();
-    }
-
-    protected boolean allMovesSelected() {
-        for (int b : moveSelected) if (b == -1) return false;
-        return true;
     }
 
     protected void applyChosenMoves() {

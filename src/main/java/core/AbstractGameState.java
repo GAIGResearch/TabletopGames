@@ -435,9 +435,9 @@ public abstract class AbstractGameState {
      *
      * @param action The action that has just been applied (or is about to be applied) to the game state
      */
-    protected void recordAction(AbstractAction action) {
+    protected void recordAction(AbstractAction action, int player) {
         history.add(action);
-        historyText.add("Player " + this.getCurrentPlayer() + " : " + action.getString(this));
+        historyText.add("Player " + player + " : " + action.getString(this));
     }
 
     /**

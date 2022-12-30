@@ -16,7 +16,7 @@ import java.util.*;
 
 import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
 import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
-import static games.sirius.SiriusConstants.SiriusPhase.Draw;
+import static games.sirius.SiriusConstants.SiriusPhase.*;
 import static java.util.stream.Collectors.toList;
 import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.*;
@@ -117,14 +117,28 @@ public class TestMoves {
         state.setGamePhase(Draw);
         state.movePlayerTo(0, 2);
         state.movePlayerTo(1, 2);
-        List<Integer> distinctCardValues = state.getMoon(2).getDeck().stream().mapToInt(c -> c.value).distinct().boxed().collect(toList());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(distinctCardValues.size(), actions.size());
-        assertTrue(distinctCardValues.stream().map(TakeCard::new).allMatch(actions::contains));
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(1, actions.size());
+        assertEquals(new TakeCard(), actions.get(0));
 
         state.getMoon(2).addCard(new SiriusCard("Test", CONTRABAND, 4));
         List<AbstractAction> extendedActions = fm.computeAvailableActions(state);
-        assertEquals(distinctCardValues.size() + 1, extendedActions.size());
+        assertEquals(1, extendedActions.size());
+
+        // now run through actions
+        int count = 0;
+        do {
+            AbstractAction action = fm.computeAvailableActions(state).get(0);
+            fm.next(state, action);
+            count++;
+        } while (state.getGamePhase() == Draw);
+        assertEquals(Favour, state.getGamePhase());
+        assertEquals(4, count); // three cards from the moon, plus a DoNothing on Sirius
+        // this means that I need to skip turn order in the Draw phase if at a Moon with no cards to be drawn
+        assertEquals(1, state.getPlayerHand(1).getSize());
+        assertEquals(2, state.getPlayerHand(0).getSize());
+
     }
 
     @Test
@@ -134,23 +148,35 @@ public class TestMoves {
         state.movePlayerTo(1, 2);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size());
-        assertEquals(new TakeAllCards(1), actions.get(0));
+        assertEquals(new TakeCard(), actions.get(0));
 
-        fm.next(state, actions.get(0));
-        assertEquals(2, state.getPlayerHand(0).getSize());
+        fm.next(state, actions.get(0)); // p0
+        assertEquals(1, state.getPlayerHand(0).getSize());
         assertEquals(0, state.getPlayerHand(1).getSize());
 
         actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size());
-        assertEquals(new TakeAllCards(2), actions.get(0));
+        assertEquals(new TakeCard(), actions.get(0));
 
-        fm.next(state, actions.get(0));
+        fm.next(state, actions.get(0)); // p1
+        assertEquals(1, state.getPlayerHand(1).getSize());
+
+        // now run through actions
+        int count = 0;
+        do {
+            AbstractAction action = fm.computeAvailableActions(state).get(0);
+            fm.next(state, action);
+            count++;
+        } while (state.getGamePhase() == Draw);
+        assertEquals(Favour, state.getGamePhase());
+        assertEquals(3, count); // one more card from each moon, plus a DoNothing on Sirius
         assertEquals(2, state.getPlayerHand(1).getSize());
+        assertEquals(2, state.getPlayerHand(0).getSize());
     }
 
     @Test
     public void testTakeCardFunctionsAsExpected() {
-        TakeCard action = new TakeCard(1);
+        TakeCard action = new TakeCard();
         state.getMoon(1).addCard(new SiriusCard("ammonia", AMMONIA, 1));
         assertEquals(3, state.getMoon(1).getDeckSize());
         assertEquals(0, state.getPlayerHand(0).getSize());
@@ -161,21 +187,9 @@ public class TestMoves {
         assertEquals(1, state.getPlayerHand(0).draw().value);
     }
 
-    @Test
-    public void testTakeAllCardsFunctionsAsExpected() {
-        state.setGamePhase(Draw);
-        TakeAllCards action = new TakeAllCards(1);
-        state.getMoon(1).addCard(new SiriusCard("ammonia", AMMONIA, 1));
-        assertEquals(3, state.getMoon(1).getDeckSize());
-        assertEquals(0, state.getPlayerHand(0).getSize());
-        state.movePlayerTo(0, 1);
-        fm.next(state, action);
-        assertEquals(0, state.getMoon(1).getDeckSize());
-        assertEquals(3, state.getPlayerHand(0).getSize());
-    }
 
     @Test
-    public void testTakeCardLooksAtWholeMoonDeck() {
+    public void testTakeCardDoesNotLookAtWholeMoonDeck() {
         state.setGamePhase(Draw);
         state.getMoon(1).addCard(new SiriusCard("ammonia", AMMONIA, 1));
         state.movePlayerTo(1, 1);
@@ -190,7 +204,7 @@ public class TestMoves {
         deck = state.getMoon(1).getDeck();
         for (int i = 0; i < 2; i++) {
             assertFalse(deck.getVisibilityForPlayer(i, 0));
-            assertTrue(deck.getVisibilityForPlayer(i, 1));
+            assertFalse(deck.getVisibilityForPlayer(i, 1));
             assertFalse(deck.getVisibilityForPlayer(i, 2));
         }
     }

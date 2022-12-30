@@ -48,7 +48,7 @@ public class TestFavours {
         SiriusCard topCard = state.getMoon(3).getDeck().peek();
         assertEquals(FAVOUR, topCard.cardType);
         assertEquals(1, topCard.value);
-        TakeCard action = new TakeCard(1);
+        TakeCard action = new TakeCard();
         fm.next(state, action);
         assertEquals(1, state.getPlayerHand(0).getSize());
         assertEquals(topCard, state.getPlayerHand(0).get(0));
@@ -104,7 +104,7 @@ public class TestFavours {
         FavourForRank action = new FavourForRank(1);
         assertEquals(1, state.getPlayerHand(2).getSize());
         assertEquals(3, sto.getRank(2));
-        assertEquals(0, sto.nextPlayer(state));
+        assertEquals(0, sto.nextPlayerAndPhase(state).a.intValue());
         fm.next(state, action);
         assertEquals(0, state.getPlayerHand(2).getSize());
         assertEquals(1, sto.getRank(2));

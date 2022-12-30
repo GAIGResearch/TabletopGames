@@ -16,8 +16,8 @@ public class PlayerArea {
 
     public PlayerArea(int player) {
         this.player = player;
-        deck = new Deck<>("Cards of Player " + player, player, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
-        soldCards = new Deck<>("Sold Cards of Player " + player, player, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
+        deck = new Deck<>("Cards of Player " + player, player, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        soldCards = new Deck<>("Sold Cards of Player " + player, player, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         medals = new ArrayList<>();
     }
 

@@ -6,10 +6,8 @@ import games.sirius.*;
 
 public class TakeCard extends AbstractAction {
 
-    public final int valueTaken;
+    public TakeCard() {
 
-    public TakeCard(int value) {
-        valueTaken = value;
     }
 
     @Override
@@ -17,8 +15,10 @@ public class TakeCard extends AbstractAction {
         SiriusGameState state = (SiriusGameState) gs;
         int player = state.getCurrentPlayer();
         Moon currentLocation = state.getMoon(state.getLocationIndex(player));
-        SiriusCard card = currentLocation.drawCard(c -> c.value == valueTaken)
-                .orElseThrow(() -> new AssertionError("No card with that value found : " + valueTaken));
+        if (currentLocation.getDeck().getSize() == 0) {
+            throw new AssertionError("No cards available at " + currentLocation);
+        }
+        SiriusCard card = currentLocation.drawCard();
         state.addCardToHand(player, card);
         return true;
     }
@@ -30,23 +30,23 @@ public class TakeCard extends AbstractAction {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof TakeCard) {
-            return valueTaken == ((TakeCard) obj).valueTaken;
-        }
-        return false;
+        return obj instanceof TakeCard;
     }
 
     @Override
     public int hashCode() {
-        return valueTaken + 2798423;
+        return 2798423;
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        SiriusGameState state = (SiriusGameState) gameState;
+        int player = state.getCurrentPlayer();
+        return "Take Card at " + state.getMoon(state.getLocationIndex(player));
     }
+
     @Override
     public String toString() {
-        return "Take Card of value " + valueTaken;
+        return "Take Card";
     }
 }

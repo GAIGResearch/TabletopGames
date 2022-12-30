@@ -21,6 +21,8 @@ import static java.util.stream.Collectors.toList;
 
 public class SiriusForwardModel extends AbstractForwardModel {
 
+    public static TakeCard takeCard = new TakeCard();
+
     @Override
     protected void _setup(AbstractGameState firstState) {
         SiriusGameState state = (SiriusGameState) firstState;
@@ -123,14 +125,10 @@ public class SiriusForwardModel extends AbstractForwardModel {
                 Moon currentMoon = state.getMoon(currentLocation);
                 switch (currentMoon.moonType) {
                     case METROPOLIS:
-                        retValue.add(new TakeCard(1));
-                        break;
                     case MINING:
                     case PROCESSING:
-                        if (state.getPlayersAt(currentLocation).length == 1)
-                            retValue.add(new TakeAllCards(currentLocation));
-                        else
-                            retValue = currentMoon.deck.stream().map(c -> new TakeCard(c.value)).distinct().collect(toList());
+                        if (state.getPlayersAt(currentLocation).length > 0)
+                            retValue.add(takeCard);
                         break;
                     case TRADING:
                         // TODO: For the moment we just sell all our Ammonia/Contraband cards, without doing anything more subtle

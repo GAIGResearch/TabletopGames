@@ -4,17 +4,22 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.turnorders.TurnOrder;
 import games.sirius.SiriusConstants.SiriusPhase;
+import org.apache.commons.lang.NotImplementedException;
+import utilities.Pair;
 
 import java.util.Arrays;
+import java.util.function.IntPredicate;
 
 import static games.sirius.SiriusConstants.MoonType.*;
 import static games.sirius.SiriusConstants.SiriusCardType.FAVOUR;
-import static games.sirius.SiriusConstants.SiriusPhase.Move;
+import static games.sirius.SiriusConstants.SiriusPhase.*;
 
 public class SiriusTurnOrder extends TurnOrder {
 
     int[] playerByRank; // this is indexed by rank and holds the current player at that rank
-    int[] nextPlayer; // this is indexed by player and indicated the next player. It is updated at the start of each raound.
+    int[] nextPlayer; // this is indexed by player and indicates the next player in rank. It is updated at the start of each round.
+    boolean[] playedInThisPhase;
+
     // We have different rules for different phases
     // During move selection we are formally simultaneous  (moveSelected)
     // While for everything else we go strictly in order of current ranking (nextPlayer)
@@ -24,30 +29,67 @@ public class SiriusTurnOrder extends TurnOrder {
         nextPlayer = new int[nPlayers];
         playerByRank = new int[nPlayers + 1];
         Arrays.setAll(playerByRank, i -> i - 1);
+        playedInThisPhase = new boolean[nPlayers];
         updatePlayerOrder();
     }
 
     @Override
     public int nextPlayer(AbstractGameState gs) {
-        SiriusGameState state = (SiriusGameState) gs;
+        throw new NotImplementedException("Not implemented - use nextPlayerAndPhase");
+    }
+
+    public Pair<Integer, SiriusPhase> nextPlayerAndPhase(SiriusGameState state) {
         SiriusPhase phase = (SiriusPhase) state.getGamePhase();
         switch (phase) {
             case Move:
                 // In this case move selection is simultaneous
                 // so the next player is the first one who has not selected a move (and is not us)
                 for (int i = 0; i < state.moveSelected.length; i++)
-                    if (i != turnOwner && state.moveSelected[i] == -1) return i;
-                // else we change phase, and the next player is the firstPlayer
-                return getPlayerAtRank(1);
+                    if (i != turnOwner && state.moveSelected[i] == -1) return new Pair<>(i, Move);
+                // else we change phase, and the next player is the firstPlayer (who will always have an action available)
+                return new Pair<>(getPlayerAtRank(1), Draw);
+            case Draw:
+                // The next player is whoever has a card to draw (or has not drawn one yet)
+                int nextPlayerInPhase = getFirstMatchingPlayerFrom(nextPlayer[turnOwner], i -> {
+                    Moon moon = state.getMoon(state.getLocationIndex(i));
+                    switch (moon.moonType) {
+                        case TRADING:
+                        case METROPOLIS:
+                            // need to have not yet acted - in these locations we just get one action
+                            return !playedInThisPhase[i];
+                        default:
+                            // needs to have cards available to take
+                            return moon.getDeck().getSize() > 0;
+                    }
+                });
+                // if -1, then we shift phase so the next player will be the first one with a Favour card
+                // but this takes place after roiling the rank, so that the current second player will go first
+                // this may be nobody...in which case we go back to Move
+                if (nextPlayerInPhase > -1)
+                    return new Pair<>(nextPlayerInPhase, Draw);
+                nextPlayerInPhase = getFirstMatchingPlayerFrom(getPlayerAtRank(2), i -> state.getPlayerHand(i).stream().anyMatch(c -> c.cardType == FAVOUR));
+                if (nextPlayerInPhase > -1)
+                    return new Pair<>(nextPlayerInPhase, Favour);
+                return new Pair<>(0, Move);
             case Favour:
                 // if there is no next player (i.e. -1), then the next is 0 for Move
-                return nextPlayer[getCurrentPlayer(state)] > -1 ? nextPlayer[getCurrentPlayer(state)] : 0;
-            case Draw:
-                // if there is no next player (i.e. -1), then the next is the current last player for Favours
-                return nextPlayer[getCurrentPlayer(state)] > -1 ? nextPlayer[getCurrentPlayer(state)] : getPlayerAtRank(2);
+                nextPlayerInPhase = getFirstMatchingPlayerFrom(nextPlayer[turnOwner], i -> !playedInThisPhase[i] && state.getPlayerHand(i).stream().anyMatch(c -> c.cardType == FAVOUR));
+                if (nextPlayerInPhase > -1)
+                    return new Pair<>(nextPlayerInPhase, Favour);
+                return new Pair<>(0, Move);
             default:
                 throw new AssertionError("Unknown Phase " + phase);
         }
+    }
+
+    private int getFirstMatchingPlayerFrom(int startFrom, IntPredicate test) {
+        // we go through in nextPlayer order from startFrom
+        int player = startFrom;
+        for (int i = 0; i < nPlayers; i++) {
+            if (test.test(player)) return player;
+            player = nextPlayer[player];
+        }
+        return -1;
     }
 
     @Override
@@ -57,52 +99,49 @@ public class SiriusTurnOrder extends TurnOrder {
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, state, null));
         state.getPlayerTimer()[getCurrentPlayer(state)].incrementTurn();
 
-        boolean firstTurnOfPhase = false;
-        switch (phase) {
-            case Move:
-                if (state.allMovesSelected()) {
+        playedInThisPhase[turnOwner] = true;
+        turnCounter++;
+
+        Pair<Integer, SiriusPhase> nextPlayerAndPhase = nextPlayerAndPhase(state); // record this before we change the phase
+        SiriusPhase nextPhase = nextPlayerAndPhase.b;
+        int nextPlayer = nextPlayerAndPhase.a;
+
+        if (nextPlayerAndPhase.b != phase) {
+            // we end the phase here
+            playedInThisPhase = new boolean[nPlayers];
+            switch (phase) {
+                case Move:
+                    if (nextPhase != Draw) {
+                        throw new AssertionError("Impossible Phase to follow Move : " + nextPhase);
+                    }
                     state.applyChosenMoves();
                     state.setGamePhase(SiriusPhase.Draw);
-                    firstTurnOfPhase = true;
-                }
-                break;
-            case Draw:
-                if (allActionsComplete()) {
+                    break;
+                case Draw:
+                    if (nextPhase != Move && nextPhase != Favour) {
+                        throw new AssertionError("Impossible Phase to follow Draw : " + nextPhase);
+                    }
+                    // move first rank player to last, and shuffle the others
+                    setRank(playerByRank[1], nPlayers);
+                    updatePlayerOrder();
+                    state.setGamePhase(nextPhase);
+                    if (nextPhase == Move) { // this could happen if no-one has a Favour card
+                        endRound(state);
+                        Arrays.fill(state.moveSelected, -1);
+                    }
+                    break;
+                case Favour:
+                    if (nextPhase != Move) {
+                        throw new AssertionError("Impossible Phase to follow Favour : " + nextPhase);
+                    }
+                    updatePlayerOrder(); // after Favour cards played
                     endRound(state);
-                    state.setGamePhase(SiriusPhase.Favour);
-                    firstTurnOfPhase = true;
-                }
-                break;
-            case Favour:
-                if (allActionsComplete()) {
                     Arrays.fill(state.moveSelected, -1);
                     state.setGamePhase(Move);
-                    firstTurnOfPhase = true;
-                    updatePlayerOrder();
-                }
-        }
-        turnCounter++;
-        if (firstTurnOfPhase) {
-            if (state.getGamePhase() == Move)
-                turnOwner = 0;
-            else
-                turnOwner = playerByRank[1];
-        } else
-            turnOwner = nextPlayer(state);
-
-        // This next bit ensures that the player knows the cards they can select from
-        // This has to be done before computeAvailableActions as this latter uses a re-determinised
-        // state, meaning that the actions may not be possible in the actual game state
-        if (state.getGamePhase() == SiriusPhase.Draw) {
-            Moon nextMoon = state.getMoon(state.getLocationIndex(turnOwner));
-            if (nextMoon.moonType == MINING || nextMoon.moonType == PROCESSING) {
-                nextMoon.lookAtDeck(turnOwner);
             }
         }
-    }
 
-    protected boolean allActionsComplete() {
-        return nextPlayer[turnOwner] == -1;  // the current player is last to move
+        turnOwner = nextPlayer;
     }
 
     // returns the current rank of the player for determining move order (1 is first, and so on)
@@ -134,7 +173,7 @@ public class SiriusTurnOrder extends TurnOrder {
         for (int r = 1; r < nPlayers; r++) {
             nextPlayer[playerByRank[r]] = playerByRank[r + 1];
         }
-        nextPlayer[playerByRank[nPlayers]] = -1;
+        nextPlayer[playerByRank[nPlayers]] = playerByRank[1];  // we loop back to the start
     }
 
     public int getPlayerAtRank(int rank) {
@@ -177,9 +216,6 @@ public class SiriusTurnOrder extends TurnOrder {
                     state.addCardToHand(moon.getCartelOwner(), new SiriusCard("Favour", FAVOUR, 1));
             }
         }
-        // move first rank player to last, and shuffle the others
-        setRank(playerByRank[1], nPlayers);
-        updatePlayerOrder();
         roundCounter++;
     }
 
@@ -193,21 +229,23 @@ public class SiriusTurnOrder extends TurnOrder {
     protected TurnOrder _copy() {
         SiriusTurnOrder retValue = new SiriusTurnOrder(nPlayers);
         retValue.nextPlayer = nextPlayer.clone();
+        retValue.playedInThisPhase = playedInThisPhase.clone();
         retValue.playerByRank = playerByRank.clone();
         return retValue;
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode() + 31 * Arrays.hashCode(nextPlayer) + 31 * 31 * Arrays.hashCode(playerByRank);
+        return super.hashCode() + 31 * Arrays.hashCode(nextPlayer) + 31 * 31 * Arrays.hashCode(playerByRank) + 31 * 31 * 31 * Arrays.hashCode(playedInThisPhase);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SiriusTurnOrder) {
             SiriusTurnOrder other = (SiriusTurnOrder) obj;
-            return Arrays.equals(nextPlayer, other.nextPlayer) && Arrays.equals(playerByRank, other.playerByRank)
-                    && super.equals(obj);
+            return Arrays.equals(nextPlayer, other.nextPlayer) && Arrays.equals(playerByRank, other.playerByRank) &&
+                    Arrays.equals(playedInThisPhase, other.playedInThisPhase) &&
+                    super.equals(obj);
         }
         return false;
     }
