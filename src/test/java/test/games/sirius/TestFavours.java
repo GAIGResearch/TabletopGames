@@ -2,21 +2,20 @@ package test.games.sirius;
 
 import core.AbstractPlayer;
 import core.Game;
-import core.actions.*;
-import core.components.PartialObservableDeck;
+import core.actions.AbstractAction;
 import games.GameType;
 import games.sirius.*;
 import games.sirius.actions.*;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 import players.simple.RandomPlayer;
-import utilities.Utils;
 
 import java.util.*;
 
 import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static games.sirius.SiriusConstants.SiriusPhase.*;
-import static java.util.stream.Collectors.*;
-import static org.junit.Assert.*;
+import static junit.framework.TestCase.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 
 public class TestFavours {
@@ -57,24 +56,24 @@ public class TestFavours {
     @Test
     public void testComputeAvailableFavourActions() {
         state.addCardToHand(1, new SiriusCard("Favour", FAVOUR, 1));
-        state.setGamePhase(Favour);
-        for (int p = 0; p < 3; p++) {
-            assertEquals(p, state.getCurrentPlayer());
-            List<AbstractAction> actions = fm.computeAvailableActions(state);
-            if (p == 1) {
-                assertEquals(6, actions.size());
-                assertEquals(new PassOnFavour(), actions.get(0));
-                assertEquals(new FavourForRank(1), actions.get(1));
-                assertEquals(new FavourForRank(3), actions.get(2));
-                assertEquals(new FavourForCartel(1), actions.get(3));
-                assertEquals(new FavourForCartel(2), actions.get(4));
-                assertEquals(new FavourForCartel(3), actions.get(5));
-            } else {
-                assertEquals(1, actions.size());
-                assertEquals(new PassOnFavour(), actions.get(0));
-            }
-            fm.next(state, new PassOnFavour());
-        }
+        moveToPhase(Favour);
+        assertEquals(1, state.getCurrentPlayer());
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(6, actions.size());
+        assertEquals(new PassOnFavour(), actions.get(0));
+        assertEquals(new FavourForRank(2), actions.get(1));
+        assertEquals(new FavourForRank(3), actions.get(2));
+        assertEquals(new FavourForCartel(1), actions.get(3));
+        assertEquals(new FavourForCartel(2), actions.get(4));
+        assertEquals(new FavourForCartel(3), actions.get(5));
+        fm.next(state, new PassOnFavour());
+    }
+
+    private void moveToPhase(SiriusConstants.SiriusPhase phase) {
+        // players will always move to MINING and take AMMONIA cards
+        do {
+            fm.next(state, fm.computeAvailableActions(state).get(0));
+        } while (state.getGamePhase() != phase);
     }
 
     @Test
@@ -82,12 +81,13 @@ public class TestFavours {
         state.addCardToHand(0, new SiriusCard("Favour", FAVOUR, 1));
         state.getMoon(1).setCartelOwner(0);
         state.getMoon(2).setCartelOwner(1);
-        state.setGamePhase(Favour);
+        moveToPhase(Favour);
+        assertEquals(0, state.getCurrentPlayer());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(5, actions.size());
         assertEquals(new PassOnFavour(), actions.get(0));
-        assertEquals(new FavourForRank(2), actions.get(1));
-        assertEquals(new FavourForRank(3), actions.get(2));
+        assertEquals(new FavourForRank(1), actions.get(1));
+        assertEquals(new FavourForRank(2), actions.get(2));
         assertEquals(new FavourForCartel(2), actions.get(3));
         assertEquals(new FavourForCartel(3), actions.get(4));
     }
@@ -98,28 +98,67 @@ public class TestFavours {
         // we should change rank (but not the nextPlayer)
         // and the card should vanish
         state.addCardToHand(2, new SiriusCard("Favour", FAVOUR, 1));
-        state.setGamePhase(Favour);
-        fm.next(state, new PassOnFavour());
-        fm.next(state, new PassOnFavour());
+        state.addCardToHand(0, new SiriusCard("Favour", FAVOUR, 1));
+        moveToPhase(Favour);
+        // we have now shifted rank
+        assertEquals(1, sto.getRank(1));
+        assertEquals(2, sto.getRank(2));
+        assertEquals(3, sto.getRank(0));
+        assertEquals(2, state.getCurrentPlayer());
         FavourForRank action = new FavourForRank(1);
+        assertEquals(2, state.getCurrentPlayer());
         assertEquals(1, state.getPlayerHand(2).getSize());
-        assertEquals(3, sto.getRank(2));
         assertEquals(0, sto.nextPlayerAndPhase(state).a.intValue());
         fm.next(state, action);
         assertEquals(0, state.getPlayerHand(2).getSize());
+        assertEquals(2, sto.getRank(1));
         assertEquals(1, sto.getRank(2));
+        assertEquals(3, sto.getRank(0));
+        assertEquals(0, state.getCurrentPlayer());
+
+        action = new FavourForRank(2);
+        fm.next(state, action);
+        assertEquals(3, sto.getRank(1));
+        assertEquals(1, sto.getRank(2));
+        assertEquals(2, sto.getRank(0));
         assertEquals(0, state.getCurrentPlayer());
     }
 
     @Test
-    public void testChangeCartelWithFavour() {
-        state.setGamePhase(Favour);
+    public void testNotAbleToUseTwoFavourCardsByMovingToLastPlace() {
+        // we should change rank (but not the nextPlayer)
+        // and the card should vanish
+        state.addCardToHand(2, new SiriusCard("Favour", FAVOUR, 1));
+        state.addCardToHand(2, new SiriusCard("Favour", FAVOUR, 1));
         state.addCardToHand(0, new SiriusCard("Favour", FAVOUR, 1));
+        moveToPhase(Favour);
+        // we have now shifted rank : p1, p2, p0
+        assertEquals(2, state.getCurrentPlayer());
+        FavourForRank action = new FavourForRank(3);
+        assertEquals(2, state.getCurrentPlayer());
+        fm.next(state, action);
+        assertEquals(1, sto.getRank(1));
+        assertEquals(3, sto.getRank(2));
+        assertEquals(2, sto.getRank(0));
+        assertEquals(0, state.getCurrentPlayer());
+        fm.next(state, new PassOnFavour());
+        assertEquals(0, state.getCurrentPlayer());
+        assertEquals(Move, state.getGamePhase());
+        assertEquals(1, sto.getRank(1));
+        assertEquals(3, sto.getRank(2));
+        assertEquals(2, sto.getRank(0));
+    }
+
+    @Test
+    public void testChangeCartelWithFavour() {
+        state.addCardToHand(0, new SiriusCard("Favour", FAVOUR, 1));
+        moveToPhase(Favour);
         FavourForCartel action = new FavourForCartel(1);
         assertEquals(-1, state.getMoon(1).getCartelOwner());
+        assertEquals(1, state.getPlayerHand(0).stream().filter(c -> c.cardType == FAVOUR).count());
         fm.next(state, action);
         assertEquals(0, state.getMoon(1).getCartelOwner());
-        assertEquals(0, state.getPlayerHand(0).getSize());
+        assertTrue(state.getPlayerHand(0).stream().noneMatch(c -> c.cardType == FAVOUR));
     }
 
     @Test

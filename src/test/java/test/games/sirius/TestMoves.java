@@ -14,8 +14,7 @@ import utilities.Utils;
 
 import java.util.*;
 
-import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
-import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
+import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static games.sirius.SiriusConstants.SiriusPhase.*;
 import static java.util.stream.Collectors.toList;
 import static junit.framework.TestCase.assertFalse;
@@ -115,6 +114,7 @@ public class TestMoves {
     @Test
     public void testTakeCardActionsInDrawPhaseWithMultiplePlayersPresent() {
         state.setGamePhase(Draw);
+        state.addCardToHand(2, new SiriusCard("Favour", FAVOUR, 1));
         state.movePlayerTo(0, 2);
         state.movePlayerTo(1, 2);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
@@ -168,7 +168,7 @@ public class TestMoves {
             fm.next(state, action);
             count++;
         } while (state.getGamePhase() == Draw);
-        assertEquals(Favour, state.getGamePhase());
+        assertEquals(Move, state.getGamePhase()); // skip Favaour phase as no-one has any cards
         assertEquals(3, count); // one more card from each moon, plus a DoNothing on Sirius
         assertEquals(2, state.getPlayerHand(1).getSize());
         assertEquals(2, state.getPlayerHand(0).getSize());
