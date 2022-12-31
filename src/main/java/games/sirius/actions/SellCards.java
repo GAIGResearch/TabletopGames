@@ -64,6 +64,8 @@ public class SellCards extends AbstractAction {
         return Arrays.stream(saleValues).sum();
     }
 
+    public int getTotalCards() {return saleValues.length;}
+
     private Optional<SiriusCard> getMatchingCard(Deck<SiriusCard> hand, int v) {
         int val = v == 10 ? 0 : v; // to cater for Glowing Contraband
         return hand.stream().filter(c -> c.cardType == salesType && c.value == val).findFirst();

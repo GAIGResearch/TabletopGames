@@ -35,7 +35,7 @@ public class SiriusTurnOrder extends TurnOrder {
 
     @Override
     public int nextPlayer(AbstractGameState gs) {
-        throw new NotImplementedException("Not implemented - use nextPlayerAndPhase");
+        return nextPlayerAndPhase((SiriusGameState) gs).a;
     }
 
     public Pair<Integer, SiriusPhase> nextPlayerAndPhase(SiriusGameState state) {

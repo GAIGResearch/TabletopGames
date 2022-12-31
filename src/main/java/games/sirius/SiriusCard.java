@@ -6,6 +6,8 @@ import games.sirius.SiriusConstants.SiriusCardType;
 
 import java.util.Objects;
 
+import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
+
 public class SiriusCard extends Card {
 
     public final int value;

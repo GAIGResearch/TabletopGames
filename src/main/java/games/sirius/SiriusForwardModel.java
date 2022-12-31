@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 import static games.sirius.SiriusConstants.MoonType.*;
 import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static games.sirius.SiriusConstants.SiriusPhase.Move;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 public class SiriusForwardModel extends AbstractForwardModel {
 
@@ -120,18 +120,14 @@ public class SiriusForwardModel extends AbstractForwardModel {
                     case METROPOLIS:
                     case MINING:
                     case PROCESSING:
-                        if (state.getPlayersAt(currentLocation).length > 0)
+                        if (currentMoon.getDeck().getSize() > 0)
                             retValue.add(takeCard);
                         break;
                     case TRADING:
-                        // TODO: For the moment we just sell all our Ammonia/Contraband cards, without doing anything more subtle
                         Deck<SiriusCard> hand = state.getPlayerHand(player);
-                        List<SiriusCard> ammoniaInHand = hand.stream().filter(c -> c.cardType == AMMONIA).collect(toList());
-                        if (ammoniaInHand.size() > 0)
-                            retValue.add(new SellCards(ammoniaInHand));
-                        List<SiriusCard> contrabandInHand = hand.stream().filter(c -> c.cardType == CONTRABAND).collect(toList());
-                        if (contrabandInHand.size() > 0)
-                            retValue.add(new SellCards(contrabandInHand));
+                        retValue.addAll(saleOptionsFrom(hand, AMMONIA));
+                        retValue.addAll(saleOptionsFrom(hand, CONTRABAND));
+                        retValue.add(new DoNothing()); // it is permissible to decide not to sell
                         break;
                 }
                 if (retValue.isEmpty())
@@ -149,6 +145,46 @@ public class SiriusForwardModel extends AbstractForwardModel {
                             .mapToObj(FavourForCartel::new).collect(toList()));
                 }
                 break;
+        }
+        return retValue;
+    }
+
+    private List<SellCards> saleOptionsFrom(Deck<SiriusCard> hand, SiriusConstants.SiriusCardType type) {
+        List<SiriusCard> matchingCards = hand.stream().filter(c -> c.cardType == type).collect(toList());
+        // Given that players can have quite a few cards, I'll avoid a naive combinatorics approach
+        // We can count how many of each type we have (1, 2, 3)
+        // We can then have a x b x c options; if we have - say, 2 Super Ammonia and 6 Ammonia
+        // then this will generate 3 x 7 Sales options = 21
+        // while the naive approach generates 2^8 = 256
+        Map<Integer, Long> countPerCardType = matchingCards.stream().collect(groupingBy(c -> c.value, counting()));
+        List<SellCards> salesOptions = new ArrayList<>();
+        for (int value3 = 0; value3 <= countPerCardType.getOrDefault(3, 0L); value3++) {
+            for (int value2 = 0; value2 <= countPerCardType.getOrDefault(2, 0L); value2++) {
+                for (int value1 = 0; value1 <= countPerCardType.getOrDefault(1, 0L); value1++) {
+                    for (int value0 = 0; value0 <= countPerCardType.getOrDefault(0, 0L) / 3L; value0++) {
+                        List<SiriusCard> salesOption = new ArrayList<>();
+                        if (value0 > 0) { // special case as Glowing Contraband
+                            salesOption.addAll(matchingCards.stream().filter(c -> c.value == 0).limit(value0 * 3L).collect(toList()));
+                        }
+                        if (value1 > 0)
+                            salesOption.addAll(matchingCards.stream().filter(c -> c.value == 1).limit(value1).collect(toList()));
+                        if (value2 > 0)
+                            salesOption.addAll(matchingCards.stream().filter(c -> c.value == 2).limit(value2).collect(toList()));
+                        if (value3 > 0)
+                            salesOption.addAll(matchingCards.stream().filter(c -> c.value == 3).limit(value3).collect(toList()));
+                        if (!salesOption.isEmpty())
+                            salesOptions.add(new SellCards(salesOption));
+                    }
+                }
+            }
+        }
+        Map<Integer, List<SellCards>> uniqueValueSales = salesOptions.stream().collect(groupingBy(SellCards::getTotalValue));
+        // we then reduce the branching factor a bit by considering the option that sells most cards for each value.
+        List<SellCards> retValue = new ArrayList<>();
+        for (List<SellCards> so : uniqueValueSales.values()) {
+            if (so.size() >= 1)
+                so.sort(Comparator.comparingInt(sc -> -sc.getTotalCards())); //reverse order
+            retValue.add(so.get(0));
         }
         return retValue;
     }

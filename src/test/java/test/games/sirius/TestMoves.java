@@ -8,17 +8,16 @@ import core.components.PartialObservableDeck;
 import games.GameType;
 import games.sirius.*;
 import games.sirius.actions.*;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import players.simple.RandomPlayer;
+import scala.concurrent.impl.FutureConvertersImpl;
 import utilities.Utils;
 
 import java.util.*;
 
 import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static games.sirius.SiriusConstants.SiriusPhase.*;
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class TestMoves {
 
@@ -210,7 +209,7 @@ public class TestMoves {
     }
 
     @Test
-    public void testSellActionsAtSirius() {
+    public void testSellAmmoniaActionsAtSirius() {
         state.setGamePhase(Draw);
         assertEquals(1, fm.computeAvailableActions(state).size());
         assertEquals(new DoNothing(), fm.computeAvailableActions(state).get(0));
@@ -218,13 +217,108 @@ public class TestMoves {
         state.addCardToHand(0, new SiriusCard("test", AMMONIA, 1));
         state.addCardToHand(0, new SiriusCard("test", AMMONIA, 2));
         state.addCardToHand(0, new SiriusCard("test", AMMONIA, 1));
+        // options should be (2, 1, 1), (2, 1), (2), (1, 1), (1), ()
+        // with the (2) dominated by (1, 1) for a total of 5
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(5, actions.size() );
+        assertTrue(actions.contains(new SellCards(Arrays.asList(
+                new SiriusCard("test", AMMONIA, 1),
+                new SiriusCard("test", AMMONIA, 1),
+                new SiriusCard("test", AMMONIA, 2)))));
+        assertTrue(actions.contains(new SellCards(Arrays.asList(
+                new SiriusCard("test", AMMONIA, 1),
+                new SiriusCard("test", AMMONIA, 2)))));
+        assertTrue(actions.contains(new SellCards(Arrays.asList(
+                new SiriusCard("test", AMMONIA, 1),
+                new SiriusCard("test", AMMONIA, 1)))));
+        assertTrue(actions.contains(new SellCards(Collections.singletonList(
+                new SiriusCard("test", AMMONIA, 1)))));
+        assertTrue(actions.contains(new DoNothing()));
+    }
 
-        assertEquals(1, fm.computeAvailableActions(state).size());
-        assertEquals(new SellCards(Arrays.asList(
-                new SiriusCard("a", AMMONIA, 1),
-                new SiriusCard("b", AMMONIA, 1),
-                new SiriusCard("a", AMMONIA, 2)
-        )), fm.computeAvailableActions(state).get(0));
+    @Test
+    public void testSellContrabandActionsAtSirius() {
+        state.setGamePhase(Draw);
+
+        state.addCardToHand(0, new SiriusCard("test", AMMONIA, 1));
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, 3));
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, 1));
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, 0));
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, 0));
+        // options should be :
+        // Nothing
+        // 1 Ammonia
+        // 1 Contraband
+        // 3 Contraband
+        // (1,3) Contraband
+
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(5, actions.size() );
+        assertTrue(actions.contains(new SellCards(Arrays.asList(
+                new SiriusCard("test", CONTRABAND, 1),
+                new SiriusCard("test", CONTRABAND, 3)))));
+        assertTrue(actions.contains(new SellCards(Collections.singletonList(
+                new SiriusCard("test", CONTRABAND, 1)))));
+        assertTrue(actions.contains(new SellCards(Collections.singletonList(
+                new SiriusCard("test", CONTRABAND, 3)))));
+        assertTrue(actions.contains(new SellCards(Collections.singletonList(
+                new SiriusCard("test", AMMONIA, 1)))));
+        assertTrue(actions.contains(new DoNothing()));
+    }
+
+    @Test
+    public void testSellGlowingContrabandActionsAtSirius() {
+        state.setGamePhase(Draw);
+
+        state.addCardToHand(0, new SiriusCard("test", AMMONIA, 1));
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, 3));
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, 1));
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, 0));
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, 0));
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, 0));
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, 0));
+        // options should be :
+        // Nothing
+        // 1 Ammonia
+        // 1 Contraband
+        // 3 Contraband
+        // (1,3) Contraband
+        // 3x Glowing
+        // 1 + 3xg
+        // 3 + 3xg
+        // (1, 3, 3xG)
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(9, actions.size() );
+        assertTrue(actions.contains(new SellCards(Arrays.asList(
+                new SiriusCard("test", CONTRABAND, 0),
+                new SiriusCard("test", CONTRABAND, 0),
+                new SiriusCard("test", CONTRABAND, 0)))));
+        assertTrue(actions.contains(new SellCards(Arrays.asList(
+                new SiriusCard("test", CONTRABAND, 0),
+                new SiriusCard("test", CONTRABAND, 0),
+                new SiriusCard("test", CONTRABAND, 1),
+                new SiriusCard("test", CONTRABAND, 0)))));
+        assertTrue(actions.contains(new SellCards(Arrays.asList(
+                new SiriusCard("test", CONTRABAND, 0),
+                new SiriusCard("test", CONTRABAND, 0),
+                new SiriusCard("test", CONTRABAND, 3),
+                new SiriusCard("test", CONTRABAND, 0)))));
+        assertTrue(actions.contains(new SellCards(Arrays.asList(
+                new SiriusCard("test", CONTRABAND, 0),
+                new SiriusCard("test", CONTRABAND, 0),
+                new SiriusCard("test", CONTRABAND, 1),
+                new SiriusCard("test", CONTRABAND, 3),
+                new SiriusCard("test", CONTRABAND, 0)))));
+        assertTrue(actions.contains(new SellCards(Arrays.asList(
+                new SiriusCard("test", CONTRABAND, 1),
+                new SiriusCard("test", CONTRABAND, 3)))));
+        assertTrue(actions.contains(new SellCards(Collections.singletonList(
+                new SiriusCard("test", CONTRABAND, 1)))));
+        assertTrue(actions.contains(new SellCards(Collections.singletonList(
+                new SiriusCard("test", CONTRABAND, 3)))));
+        assertTrue(actions.contains(new SellCards(Collections.singletonList(
+                new SiriusCard("test", AMMONIA, 1)))));
+        assertTrue(actions.contains(new DoNothing()));
 
     }
 
@@ -300,6 +394,21 @@ public class TestMoves {
         assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[0]);
         assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[1]);
         assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[2]);
+    }
+
+    @Test
+    public void testTakeCardOnlyPossibleIfCardsAvailable() {
+        state.setGamePhase(Draw);
+        state.movePlayerTo(0, 1);
+        assertEquals(1, fm.computeAvailableActions(state).size());
+        assertEquals(new TakeCard(), fm.computeAvailableActions(state).get(0));
+
+        do {
+            state.getMoon(1).drawCard();
+        } while (state.getMoon(1).getDeck().getSize() > 0);
+
+        assertEquals(1, fm.computeAvailableActions(state).size());
+        assertEquals(new DoNothing(), fm.computeAvailableActions(state).get(0));
     }
 
 
