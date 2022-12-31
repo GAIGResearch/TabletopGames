@@ -732,6 +732,8 @@ public class SingleTreeNode {
     public double exp3Value(AbstractAction action) {
         double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
+        if (actionVisits == 0)
+            return 0.0;
         double meanActionValue = (actionValue / actionVisits);
         if (params.biasVisits > 0) {
             double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
@@ -749,6 +751,8 @@ public class SingleTreeNode {
     public double rmValue(AbstractAction action) {
         double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
+        if (actionVisits == 0)
+            return 0.0;
         if (params.biasVisits > 0) {
             double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
             actionValue = (1.0 - beta) * actionValue + beta * ((totValue[decisionPlayer] / nVisits) + advantagesOfActionsFromOLS.getOrDefault(action, 0.0));
