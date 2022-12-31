@@ -737,6 +737,8 @@ public class SingleTreeNode {
     public double exp3Value(AbstractAction action) {
         double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
+        if (actionVisits == 0)
+            return 0.0;
         double meanActionValue = (actionValue / actionVisits);
         if (params.biasVisits > 0) {
             double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
@@ -748,12 +750,17 @@ public class SingleTreeNode {
             meanActionValue = Utils.normalise(meanActionValue, root.lowReward, root.highReward);
         else
             meanActionValue = meanActionValue - (totValue[decisionPlayer] / nVisits);
-        return Math.exp(meanActionValue);
+        double retValue = Math.exp(meanActionValue);
+        if (Double.isNaN(retValue))
+            throw new AssertionError("We have a non-number in EXP3 somewhere");
+        return retValue;
     }
 
     public double rmValue(AbstractAction action) {
         double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
+        if (actionVisits == 0)
+            return 0.0;
         if (params.biasVisits > 0) {
             double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
             actionValue = (1.0 - beta) * actionValue + beta * ((totValue[decisionPlayer] / nVisits) + advantagesOfActionsFromOLS.getOrDefault(action, 0.0));
