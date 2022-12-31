@@ -130,12 +130,13 @@ public abstract class AbstractForwardModel {
      */
     public final void next(AbstractGameState currentState, AbstractAction action) {
         if (action != null) {
+            int player = currentState.getCurrentPlayer();
             if (currentState.isActionInProgress()) {
                 // we register the action with the currently active ActionSequence
                 currentState.currentActionInProgress().registerActionTaken(currentState, action);
             }
             _next(currentState, action);
-            currentState.recordAction(action);
+            currentState.recordAction(action, player);
         } else {
             if (currentState.coreGameParameters.verbose) {
                 System.out.println("Invalid action.");

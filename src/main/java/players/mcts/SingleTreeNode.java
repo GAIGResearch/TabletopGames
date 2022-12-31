@@ -193,6 +193,8 @@ public class SingleTreeNode {
                 if (!children.containsKey(action)) {
                     children.put(action, null); // mark a new node to be expanded
                     // This *does* rely on a good equals method being implemented for Actions
+                    if (!children.containsKey(action))
+                        throw new AssertionError("We have an action that does not obey the equals/hashcode contract" + action);
                 }
             }
         }
@@ -962,11 +964,13 @@ public class SingleTreeNode {
                 Arrays.stream(actionVisits()).boxed().collect(toSet()).size() == 1) {
             policy = SIMPLE;
         }
-
         if (params.selectionPolicy == TREE) {
             bestAction = treePolicyAction(false);
         } else {
             for (AbstractAction action : children.keySet()) {
+                if (!children.containsKey(action)) {
+                    throw new AssertionError("Hashcode / equals contract issue for " + action);
+                }
                 if (children.get(action) != null) {
                     double childValue = actionVisits(action); // if ROBUST
                     if (policy == SIMPLE)
@@ -975,7 +979,7 @@ public class SingleTreeNode {
                     // Apply small noise to break ties randomly
                     childValue = noise(childValue, params.epsilon, rnd.nextDouble());
 
-                    // Save best value (highest visit count)
+                    // Save best value
                     if (childValue > bestValue) {
                         bestValue = childValue;
                         bestAction = action;
