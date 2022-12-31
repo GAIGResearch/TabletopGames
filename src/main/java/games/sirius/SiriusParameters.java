@@ -8,6 +8,7 @@ import java.util.Objects;
 public class SiriusParameters extends TunableParameters {
 
     public int hyperAmmonia = 3;
+    public int maxRounds = 25;
     public int superAmmonia = 5;
     public int ammonia = 22;
     public int brokenContraband = 9;
@@ -15,22 +16,23 @@ public class SiriusParameters extends TunableParameters {
     public int glowingContraband = 9;
     public int cardsPerEmptyMoon = 2;
     public int cardsPerNonEmptyMoon = 1;
+    public int[] medalValues = new int[]{2, 2, 3, 3, 4, 4, 5, 5, 6, 6};
     public int[] ammoniaTrack = new int[] {
-            0, 0, 0, 0, 2,
-            0, 0, 0, 0, 3,
-            0, 0, 0, 0, 4,
-            0, 0, 0, 0, 5,
-            0, 0, 0, 0, 6
+            0, 0, 0, 0, 1,
+            0, 0, 0, 0, 1,
+            0, 0, 0, 0, 1,
+            0, 0, 0, 0, 1,
+            0, 0, 0, 0, 1
     };
     public int[] contrabandTrack = new int[] {
-            0, 0, 0, 0, 2, 0,
+            0, 0, 0, 0, 1, 0,
             0, 0, 0, 0, 0, 0,
-            3, 0, 0, 0, 0, 0,
-            0, 0, 4, 0, 0, 0,
+            1, 0, 0, 0, 0, 0,
+            0, 0, 1, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            5, 0, 0, 0, 0, 0,
+            1, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0,
-            6
+            1
     };
 
     public SiriusParameters() {

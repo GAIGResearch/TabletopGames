@@ -9,9 +9,7 @@ import games.sirius.SiriusConstants.SiriusPhase;
 import games.sirius.actions.*;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static games.sirius.SiriusConstants.MoonType.*;
@@ -41,7 +39,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
             state.contrabandDeck.add(new SiriusCard("Broken Contraband", CONTRABAND, 1));
         }
         for (int i = 0; i < params.contraband; i++) {
-            state.contrabandDeck.add(new SiriusCard("Contraband", CONTRABAND, 2));
+            state.contrabandDeck.add(new SiriusCard("Contraband", CONTRABAND, 3));
         }
         for (int i = 0; i < params.glowingContraband; i++) {
             state.contrabandDeck.add(new SiriusCard("Glowing Contraband", CONTRABAND, 0));
@@ -81,27 +79,22 @@ public class SiriusForwardModel extends AbstractForwardModel {
         // All players start on Sirius
         state.playerAreas = IntStream.range(0, state.getNPlayers()).mapToObj(PlayerArea::new).collect(toList());
 
-        // initialise medals from parameters
-        for (int i = 0; i < params.contrabandTrack.length; i++) {
-            if (params.contrabandTrack[i] > 0)
-                state.contrabandMedals.put(i + 1, new Medal(CONTRABAND, params.contrabandTrack[i]));
-        }
-        for (int i = 0; i < params.ammoniaTrack.length; i++) {
-            if (params.ammoniaTrack[i] > 0)
-                state.ammoniaMedals.put(i + 1, new Medal(AMMONIA, params.ammoniaTrack[i]));
-        }
+        state.medalCount = 0;
         state.setGamePhase(Move);
     }
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
         SiriusGameState state = (SiriusGameState) currentState;
+        SiriusParameters params = (SiriusParameters) state.getGameParameters();
         action.execute(state);
 
         SiriusTurnOrder turnOrder = (SiriusTurnOrder) state.getTurnOrder();
         turnOrder.endPlayerTurn(state);
         // check game end
-        if ((state.ammoniaMedals.isEmpty() && state.contrabandMedals.isEmpty()) || turnOrder.getRoundCounter() > 25) {
+        if (state.ammoniaTrack >= params.ammoniaTrack.length - 1 ||
+                state.contrabandTrack >= params.contrabandTrack.length - 1 ||
+                turnOrder.getRoundCounter() >= params.maxRounds) {
             state.setGameStatus(Utils.GameResult.GAME_END);
             for (int p = 0; p < state.getNPlayers(); p++) {
                 state.setPlayerResult(state.getOrdinalPosition(p) == 1 ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);

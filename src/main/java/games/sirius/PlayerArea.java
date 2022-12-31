@@ -34,4 +34,8 @@ public class PlayerArea {
         return retValue;
     }
 
+    public List<Medal> getMedals() {
+        return new ArrayList<>(medals);
+    }
+
 }

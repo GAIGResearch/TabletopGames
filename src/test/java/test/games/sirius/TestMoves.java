@@ -2,7 +2,8 @@ package test.games.sirius;
 
 import core.AbstractPlayer;
 import core.Game;
-import core.actions.*;
+import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.PartialObservableDeck;
 import games.GameType;
 import games.sirius.*;
@@ -16,9 +17,8 @@ import java.util.*;
 
 import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static games.sirius.SiriusConstants.SiriusPhase.*;
-import static java.util.stream.Collectors.toList;
 import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class TestMoves {
 
@@ -254,23 +254,22 @@ public class TestMoves {
         SellCards action = new SellCards(Arrays.asList(
                 new SiriusCard("a", AMMONIA, 1),
                 new SiriusCard("b", AMMONIA, 2),
-                new SiriusCard("a", AMMONIA, 3)
+                new SiriusCard("c", AMMONIA, 3)
         ));
-        assertEquals(5, state.getMedals(AMMONIA).size());
-        assertEquals(new Medal(AMMONIA, 2), state.getMedals(AMMONIA).get(5));
-        assertEquals(new Medal(AMMONIA, 3), state.getMedals(AMMONIA).get(10));
+        assertEquals(0, state.getMedalsTaken());
+        assertEquals(0, state.getPlayerArea(0).getMedals().size());
 
         fm.next(state, action);
         assertEquals(0, state.getPlayerHand(0).getSize());
         assertEquals(6, state.getTrackPosition(AMMONIA));
         assertEquals(5, state.getGameScore(0), 0.01);
-        assertEquals(4, state.getMedals(AMMONIA).size());
-        assertNull(state.getMedals(AMMONIA).get(4));
-        assertEquals(new Medal(AMMONIA, 3), state.getMedals(AMMONIA).get(10));
+        assertEquals(1, state.getMedalsTaken());
+        assertEquals(1, state.getPlayerArea(0).getMedals().size());
+        assertEquals(new Medal(AMMONIA, 2), state.getPlayerArea(0).getMedals().get(0));
     }
 
     @Test
-    public void testEndGameOnAmmoniaAndContrabandTracks() {
+    public void testEndGameOnAmmoniaTrack() {
         testMedalGainedOnSale();
         assertEquals(1, state.getCurrentPlayer());
         state.addCardToHand(1, new SiriusCard("test", AMMONIA, 19));
@@ -279,21 +278,28 @@ public class TestMoves {
         ));
         fm.next(state, action);
         assertEquals(0, state.getPlayerHand(1).getSize());
-        assertEquals(1 + 3 + 4 + 5 + 6, state.getGameScore(1), 0.01);
+        assertEquals(1 + 2 + 3 + 3 + 4, state.getGameScore(1), 0.01);
         assertEquals(25, state.getTrackPosition(AMMONIA));
-        assertTrue(state.isNotTerminal());
-        assertEquals(2, state.getCurrentPlayer());
-        state.addCardToHand(2, new SiriusCard("test", CONTRABAND, params.contrabandTrack.length));
-        action = new SellCards(Collections.singletonList(
+        assertFalse(state.isNotTerminal());
+        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[1]);
+    }
+
+    @Test
+    public void testEndGameOnContrabandTrack() {
+        state.setGamePhase(Draw);
+        assertEquals(0, state.getCurrentPlayer());
+        state.addCardToHand(0, new SiriusCard("test", CONTRABAND, params.contrabandTrack.length));
+        AbstractAction action = new SellCards(Collections.singletonList(
                 new SiriusCard("a", CONTRABAND, params.contrabandTrack.length)
         ));
         fm.next(state, action);
-        assertEquals(0, state.getPlayerHand(2).getSize());
+        assertEquals(0, state.getPlayerHand(0).getSize());
         assertEquals(params.contrabandTrack.length, state.getTrackPosition(CONTRABAND));
+        assertEquals(1 + 2 + 2 + 3 + 3 + 4, state.getGameScore(0), 0.01);
         assertFalse(state.isNotTerminal());
-        assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[0]);
+        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[0]);
         assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[1]);
-        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[2]);
+        assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[2]);
     }
 
 

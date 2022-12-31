@@ -1,22 +1,15 @@
 package games.sirius;
 
-import core.AbstractGameState;
-import core.AbstractParameters;
-import core.CoreConstants;
-import core.components.Component;
-import core.components.Deck;
-import core.components.PartialObservableDeck;
+import core.*;
+import core.components.*;
 import core.interfaces.IComponentContainer;
 import games.GameType;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 
-import static games.sirius.SiriusConstants.MoonType.MINING;
-import static games.sirius.SiriusConstants.MoonType.PROCESSING;
-import static games.sirius.SiriusConstants.SiriusCardType.AMMONIA;
-import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
+import static games.sirius.SiriusConstants.MoonType.*;
+import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static java.util.stream.Collectors.toList;
 
 public class SiriusGameState extends AbstractGameState {
@@ -27,8 +20,7 @@ public class SiriusGameState extends AbstractGameState {
     Random rnd;
     int[] playerLocations;
     int[] moveSelected;
-    Map<Integer, Medal> ammoniaMedals;
-    Map<Integer, Medal> contrabandMedals;
+    int medalCount;
     int ammoniaTrack;
     int contrabandTrack;
 
@@ -71,19 +63,18 @@ public class SiriusGameState extends AbstractGameState {
             ammoniaDecks.add(retValue.ammoniaDeck);
             ammoniaDecks.addAll(retValue.moons.stream().filter(m -> m.moonType == MINING).map(Moon::getDeck).collect(toList()));
             // player hands (cargo + crew) are face up
-      //      ammoniaDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
+            //      ammoniaDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
             reshuffle(playerId, ammoniaDecks, c -> c.cardType == AMMONIA);
 
             List<Deck<SiriusCard>> contrabandDecks = new ArrayList<>();
             contrabandDecks.add(retValue.contrabandDeck);
             contrabandDecks.addAll(retValue.moons.stream().filter(m -> m.moonType == PROCESSING).map(Moon::getDeck).collect(toList()));
-       //     contrabandDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
+            //     contrabandDecks.addAll(IntStream.range(0, getNPlayers()).filter(i -> i != playerId).mapToObj(retValue::getPlayerHand).collect(toList()));
             reshuffle(playerId, contrabandDecks, c -> c.cardType == CONTRABAND);
         }
         retValue.ammoniaTrack = ammoniaTrack;
         retValue.contrabandTrack = contrabandTrack;
-        retValue.ammoniaMedals = new HashMap<>(ammoniaMedals);
-        retValue.contrabandMedals = new HashMap<>(contrabandMedals);
+        retValue.medalCount = medalCount;
         return retValue;
     }
 
@@ -198,8 +189,6 @@ public class SiriusGameState extends AbstractGameState {
         playerAreas = new ArrayList<>();
         ammoniaTrack = 0;
         contrabandTrack = 0;
-        ammoniaMedals = new HashMap<>();
-        contrabandMedals = new HashMap<>();
     }
 
     // This marks a decision as having been made, but does not yet implement this decision
@@ -266,15 +255,12 @@ public class SiriusGameState extends AbstractGameState {
         }
     }
 
-    public Map<Integer, Medal> getMedals(SiriusConstants.SiriusCardType track) {
-        switch (track) {
-            case AMMONIA:
-                return ammoniaMedals;
-            case CONTRABAND:
-                return contrabandMedals;
-            default:
-                throw new IllegalArgumentException("No medals for " + track);
-        }
+    public int getMedalsTaken() {
+        return medalCount;
+    }
+
+    public PlayerArea getPlayerArea(int player) {
+        return playerAreas.get(player);
     }
 
     public Deck<SiriusCard> getDeck(SiriusConstants.SiriusCardType type) {
@@ -293,18 +279,21 @@ public class SiriusGameState extends AbstractGameState {
         PlayerArea pa = playerAreas.get(getCurrentPlayer());
         pa.soldCards.add(card);
         pa.deck.remove(card);
+        SiriusParameters params = (SiriusParameters) gameParameters;
         if (card.cardType == AMMONIA) {
             for (int i = 0; i < amount; i++) {
                 ammoniaTrack++;
-                if (ammoniaMedals.containsKey(ammoniaTrack)) {
-                    pa.medals.add(ammoniaMedals.remove(ammoniaTrack));
+                if (ammoniaTrack < params.ammoniaTrack.length && params.ammoniaTrack[ammoniaTrack] == 1) {
+                    pa.medals.add(new Medal(AMMONIA, params.medalValues[medalCount]));
+                    medalCount++;
                 }
             }
         } else if (card.cardType == CONTRABAND) {
             for (int i = 0; i < amount; i++) {
                 contrabandTrack++;
-                if (contrabandMedals.containsKey(contrabandTrack)) {
-                    pa.medals.add(contrabandMedals.remove(contrabandTrack));
+                if (contrabandTrack < params.contrabandTrack.length && params.contrabandTrack[contrabandTrack] == 1) {
+                    pa.medals.add(new Medal(CONTRABAND, params.medalValues[medalCount]));
+                    medalCount++;
                 }
             }
         }
@@ -321,7 +310,7 @@ public class SiriusGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         int retValue = Objects.hash(playerAreas, turnOrder, gamePhase, moons, ammoniaDeck, gameParameters, gameStatus,
-                ammoniaTrack, contrabandTrack, ammoniaMedals, contrabandMedals);
+                ammoniaTrack, contrabandTrack, medalCount);
         return retValue + 31 * Arrays.hashCode(playerResults)
                 - 255 * Arrays.hashCode(playerLocations)
                 - 31 * 255 * Arrays.hashCode(moveSelected);
@@ -344,13 +333,11 @@ public class SiriusGameState extends AbstractGameState {
         sb.append(result).append("|*|");
         result = Objects.hash(ammoniaDeck);
         sb.append(result).append("|");
-        result = Objects.hash(ammoniaMedals);
+        result = Objects.hash(medalCount);
         sb.append(result).append("|");
         result = Objects.hash(ammoniaTrack);
         sb.append(result).append("|");
         result = Objects.hash(contrabandDeck);
-        sb.append(result).append("|");
-        result = Objects.hash(contrabandMedals);
         sb.append(result).append("|2|");
         result = Objects.hash(contrabandTrack);
         sb.append(result).append("|3|");
