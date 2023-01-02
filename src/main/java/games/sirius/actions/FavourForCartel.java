@@ -2,6 +2,7 @@ package games.sirius.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Deck;
 import games.sirius.*;
 
 import static games.sirius.SiriusConstants.SiriusCardType.FAVOUR;
@@ -22,11 +23,14 @@ public class FavourForCartel extends AbstractAction {
         if (moon.getMoonType() == SiriusConstants.MoonType.TRADING)
             throw new IllegalArgumentException("Cannot have a Cartel on Sirius");
         moon.setCartelOwner(state.getCurrentPlayer());
-        SiriusCard favourCard = state.getPlayerHand(player).stream()
-                .filter(c -> c.cardType == FAVOUR).findFirst()
-                .orElseThrow(() -> new AssertionError("No Favour card available"));
-        state.getPlayerHand(player).remove(favourCard);
-        return true;
+        Deck<SiriusCard> hand = state.getPlayerHand(player);
+        for (int i = 0; i < hand.getSize(); i++) {
+            if (hand.get(i).cardType == FAVOUR) {
+                hand.remove(i);
+                return true;
+            }
+        }
+        throw new AssertionError("No Favour card available");
     }
 
     @Override

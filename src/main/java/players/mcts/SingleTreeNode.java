@@ -639,7 +639,7 @@ public class SingleTreeNode {
         for (AbstractAction action : availableActions) {
             SingleTreeNode[] childArray = children.get(action);
             if (childArray == null)
-                throw new AssertionError("Should not be here");
+                throw new AssertionError("Should not be here with a null child array");
 
             // Find child value
             double hvVal = actionTotValue(action, decisionPlayer);

@@ -2,6 +2,7 @@ package games.sirius.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Deck;
 import games.sirius.SiriusCard;
 import games.sirius.SiriusConstants;
 import games.sirius.SiriusGameState;
@@ -23,11 +24,14 @@ public class FavourForRank extends AbstractAction {
         SiriusTurnOrder sto = (SiriusTurnOrder) state.getTurnOrder();
         int player = state.getCurrentPlayer();
         sto.setRank(player, newRank);
-        SiriusCard favourCard = state.getPlayerHand(player).stream()
-                .filter(c -> c.cardType == FAVOUR).findFirst()
-                .orElseThrow(() -> new AssertionError("No Favour card available"));
-        state.getPlayerHand(player).remove(favourCard);
-        return true;
+        Deck<SiriusCard> hand = state.getPlayerHand(player);
+        for (int i = 0; i < hand.getSize(); i++) {
+            if (hand.get(i).cardType == FAVOUR) {
+                hand.remove(i);
+                return true;
+            }
+        }
+        throw new AssertionError("No Favour card available");
     }
 
     @Override
