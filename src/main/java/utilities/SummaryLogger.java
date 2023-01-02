@@ -144,7 +144,10 @@ public class SummaryLogger implements IStatisticLogger {
         List<String> alphabeticOrder2 = otherData.keySet().stream().sorted().collect(toList());
         for (String key : alphabeticOrder2) {
             TAGStringStatSummary stats = otherData.get(key);
-            sb.append(String.format("%30s  %30s\n", key, stats.shortString()));
+            String outputString = (stats.getElements().size() == 1) ?
+                    // special case; everything has the same value
+                    stats.getElements().keySet().stream().findFirst().get() : "Multiple";
+            sb.append(String.format("%30s  %30s\n", key, outputString));
         }
 
         return sb.toString();
