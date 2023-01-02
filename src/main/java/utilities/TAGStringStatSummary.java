@@ -16,7 +16,7 @@ public class TAGStringStatSummary {
     public String name; // defaults to ""
 
     private int n; // Total number of elements (sum of values in map)
-    private HashMap<String, Integer> elements;  // Map from element to count of how many times it appeared
+    private Map<String, Integer> elements;  // Map from element to count of how many times it appeared
 
     public TAGStringStatSummary() {
         this("");
@@ -73,7 +73,7 @@ public class TAGStringStatSummary {
         return (name == null) ? "[" : (name + ": [") + elements.toString() + "]";
     }
 
-    public HashMap<String, Integer> getElements() {
+    public Map<String, Integer> getElements() {
         return elements;
     }
 

@@ -4,9 +4,8 @@ import core.*;
 import games.GameType;
 import utilities.Pair;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class AbstractTournament {
     // List of players taking part in the tournament
@@ -17,6 +16,7 @@ public abstract class AbstractTournament {
     protected List<Integer> playersPerGame;
     // Filename to write the results of the tournament
     protected String resultsFileName;
+
 
     /**
      * Constructor, initialises the tournament given a list of players, a game to play and the number of players

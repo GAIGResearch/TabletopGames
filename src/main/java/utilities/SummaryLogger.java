@@ -5,7 +5,7 @@ import core.interfaces.IStatisticLogger;
 import java.io.*;
 import java.util.*;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Statistics Logger that just takes in Numeric data and maintains summary statistics for each type:
@@ -14,8 +14,8 @@ import static java.util.stream.Collectors.*;
  */
 public class SummaryLogger implements IStatisticLogger {
 
-    File logFile;
     public boolean printToConsole = true;
+    File logFile;
     Map<String, TAGStatSummary> numericData = new LinkedHashMap<>();
     Map<String, TAGStringStatSummary> otherData = new LinkedHashMap<>();
 
@@ -73,7 +73,12 @@ public class SummaryLogger implements IStatisticLogger {
             StringBuilder data = new StringBuilder();
             for (String key : otherData.keySet()) {
                 header.append(key).append("\t");
-                data.append(otherData.get(key)).append("\t");
+                TAGStringStatSummary allEntries = otherData.get(key);
+                if (allEntries.getElements().size() == 1) {
+                    // special case; everything has the same value
+                    data.append(allEntries.getElements().keySet().stream().findFirst().get()).append("\t");
+                } else
+                    data.append("Multiple\t");
             }
             for (String key : numericData.keySet()) {
                 if (numericData.get(key).n() == 1) {
@@ -137,7 +142,7 @@ public class SummaryLogger implements IStatisticLogger {
 
         // Print other data, each item toString + percentage of times it was that value
         List<String> alphabeticOrder2 = otherData.keySet().stream().sorted().collect(toList());
-        for (String key: alphabeticOrder2) {
+        for (String key : alphabeticOrder2) {
             TAGStringStatSummary stats = otherData.get(key);
             sb.append(String.format("%30s  %30s\n", key, stats.shortString()));
         }

@@ -1,8 +1,6 @@
 package evaluation;
 
-import core.AbstractParameters;
-import core.AbstractPlayer;
-import core.ParameterFactory;
+import core.*;
 import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
 import games.GameType;
@@ -18,8 +16,7 @@ import java.io.FileWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static utilities.Utils.GameResult;
-import static utilities.Utils.getArg;
+import static utilities.Utils.*;
 
 
 public class RoundRobinTournament extends AbstractTournament {
@@ -27,8 +24,9 @@ public class RoundRobinTournament extends AbstractTournament {
     public final boolean selfPlay;
     private final int gamesPerMatchUp;
     protected List<IGameListener> listeners;
-    double[] pointsPerPlayer;
+    protected LinkedHashMap<Integer, Double> finalRanking; // contains index of agent in agents
     LinkedList<Integer> agentIDs;
+    double[] pointsPerPlayer;
     private int matchUpsRun;
     private double exploreEpsilon;
 
@@ -191,6 +189,21 @@ public class RoundRobinTournament extends AbstractTournament {
             listener.allGamesFinished();
     }
 
+    public int getWinnerIndex() {
+        if (finalRanking == null || finalRanking.isEmpty())
+            throw new UnsupportedOperationException("Cannot get winner before results have been calculated");
+
+        // The winner is the first key in finalRanking
+        for (Integer key : finalRanking.keySet()) {
+            return key;
+        }
+        throw new AssertionError("Should not be reachable");
+    }
+
+    public AbstractPlayer getWinner() {
+        return agents.get(getWinnerIndex());
+    }
+
     /**
      * Recursively creates one combination of players and evaluates it.
      *
@@ -274,20 +287,28 @@ public class RoundRobinTournament extends AbstractTournament {
         matchUpsRun++;
     }
 
+    protected void calculateFinalResults() {
+        finalRanking = new LinkedHashMap<>();
+        for (int i = 0; i < this.agents.size(); i++) {
+            finalRanking.put(i, pointsPerPlayer[i]);
+        }
+        // Sort by points.
+        finalRanking = finalRanking.entrySet().stream()
+                .sorted(Map.Entry.<Integer, Double>comparingByValue().reversed())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
+                        LinkedHashMap::new));
+    }
 
     protected void reportResults(int game_index) {
+        calculateFinalResults();
         int gameCounter = (gamesPerMatchUp * matchUpsRun);
         int gamesPerPlayer = gameCounter * playersPerGame.get(game_index) / agents.size();
         boolean toFile = resultsFileName != null;
         ArrayList<String> dataDump = new ArrayList<>();
-        HashMap<String, Double> ranked = new HashMap<>();
 
         // To console
         System.out.printf("============= %s - %d games played ============= %n", games.get(game_index).getGameType().name(), gameCounter);
         for (int i = 0; i < this.agents.size(); i++) {
-
-            ranked.put(agents.get(i).toString(), pointsPerPlayer[i]);
-
             String str = String.format("%s got %.2f points. ", agents.get(i), pointsPerPlayer[i]);
             if (toFile) dataDump.add(str);
             System.out.print(str);
@@ -307,15 +328,9 @@ public class RoundRobinTournament extends AbstractTournament {
         if (toFile) dataDump.add(str);
         System.out.print(str);
 
-        // Sort by points.
-        Map<String, Double> valueDescSortMap = ranked.entrySet().stream()
-                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
-                        LinkedHashMap::new));
-
         // for(String name : ranked.keySet())
-        for (String name : valueDescSortMap.keySet()) {
-            str = String.format("%s: %.2f\n", name, valueDescSortMap.get(name));
+        for (Integer i : finalRanking.keySet()) {
+            str = String.format("%s: %.2f\n", agents.get(i).toString(), finalRanking.get(i));
             if (toFile) dataDump.add(str);
             System.out.print(str);
         }
