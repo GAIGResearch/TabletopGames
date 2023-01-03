@@ -73,7 +73,12 @@ public class SummaryLogger implements IStatisticLogger {
             StringBuilder data = new StringBuilder();
             for (String key : otherData.keySet()) {
                 header.append(key).append("\t");
-                data.append(otherData.get(key)).append("\t");
+                TAGStringStatSummary allEntries = otherData.get(key);
+                if (allEntries.getElements().size() == 1) {
+                    // special case; everything has the same value
+                    data.append(allEntries.getElements().keySet().stream().findFirst().get()).append("\t");
+                } else
+                    data.append("Multiple\t");
             }
             for (String key : numericData.keySet()) {
                 if (numericData.get(key).n() == 1) {
@@ -139,7 +144,11 @@ public class SummaryLogger implements IStatisticLogger {
         List<String> alphabeticOrder2 = otherData.keySet().stream().sorted().collect(toList());
         for (String key: alphabeticOrder2) {
             TAGStringStatSummary stats = otherData.get(key);
-            sb.append(String.format("%30s  %30s\n", key, stats.shortString()));
+            String outputString = (stats.getElements().size() == 1) ?
+                    // special case; everything has the same value
+                    stats.getElements().keySet().stream().findFirst().get() : "Multiple";
+            sb.append(String.format("%30s  %30s\n", key, outputString));
+
         }
 
         return sb.toString();
