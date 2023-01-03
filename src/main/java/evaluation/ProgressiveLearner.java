@@ -14,8 +14,9 @@ import players.learners.AbstractLearner;
 import utilities.FileStatsLogger;
 import utilities.StateFeatureListener;
 import utilities.Utils;
-
+import org.apache.commons.io.FileUtils;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -164,7 +165,17 @@ public class ProgressiveLearner {
         IGameListener gameTracker = IGameListener.createListener("utilities.GameResultListener", logger);
         tournament.listeners.add(gameTracker);
         tournament.runTournament();
-      // gameTracker.allGamesFinished(); // This is done in tournament
+        int winnerIndex = tournament.getWinnerIndex();
+        if (winnerIndex != finalAgents.size() - 1) {
+            // if the basePlayer won, then meh!
+            String fileName = String.format("%s_Winner.txt", prefix);
+            try {
+                FileUtils.copyFile(new File(learnedFilesByIteration[winnerIndex]), new File(fileName));
+            } catch (IOException e) {
+                System.out.println("Error copying the final winning heuristic");
+                e.printStackTrace();
+            }
+        }
     }
 
     private void loadAgents() {
