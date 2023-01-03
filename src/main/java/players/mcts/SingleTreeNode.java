@@ -968,7 +968,7 @@ public class SingleTreeNode {
                 Arrays.stream(actionVisits()).boxed().collect(toSet()).size() == 1) {
             policy = SIMPLE;
         }
-        if (params.selectionPolicy == TREE) {
+        if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
             bestAction = treePolicyAction(false);
         } else {
             for (AbstractAction action : children.keySet()) {
