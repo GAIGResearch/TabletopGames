@@ -982,7 +982,7 @@ public class SingleTreeNode {
             policy = SIMPLE;
         }
 
-        if (params.selectionPolicy == TREE) {
+        if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
             bestAction = treePolicyAction(false);
         } else {
             for (AbstractAction action : children.keySet()) {
