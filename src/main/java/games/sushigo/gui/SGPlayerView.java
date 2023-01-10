@@ -2,7 +2,6 @@ package games.sushigo.gui;
 
 import core.components.Deck;
 import games.sushigo.SGGameState;
-import games.sushigo.SGParameters;
 import games.sushigo.cards.SGCard;
 
 import javax.swing.*;
@@ -63,7 +62,7 @@ public class SGPlayerView extends JComponent {
     public void update(SGGameState gameState)
     {
         gs = gameState;
-        playerHandView.updateComponent(gameState.getPlayerDecks().get(playerId));
+        playerHandView.updateComponent(gameState.getPlayerHands().get(playerId));
         playerCardView.updateComponent(gameState.getPlayerFields().get(playerId));
         nPoints = gameState.getPlayerScore()[playerId];
     }

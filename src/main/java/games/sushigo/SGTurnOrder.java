@@ -5,8 +5,6 @@ import core.turnorders.StandardTurnOrder;
 import games.sushigo.cards.SGCard;
 import utilities.Utils;
 
-import static utilities.Utils.GameResult.GAME_ONGOING;
-
 public class SGTurnOrder extends StandardTurnOrder {
     public SGTurnOrder(int nPlayers) {
         super(nPlayers);
@@ -40,7 +38,7 @@ public class SGTurnOrder extends StandardTurnOrder {
             }
 
             //Draw new hands
-            for (int j = 0; j < SGGS.cardAmount; j++)
+            for (int j = 0; j < SGGS.nCardsInHand; j++)
             {
                 SGGS.playerHands.get(i).add(SGGS.drawPile.draw());
             }

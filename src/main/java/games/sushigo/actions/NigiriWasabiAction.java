@@ -21,8 +21,9 @@ public class NigiriWasabiAction extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        SGGameState SGGS = (SGGameState) gs;
-        Deck<SGCard> hand =  SGGS.getPlayerDecks().get(playerId);
+        SGGameState sggs = (SGGameState) gs;
+        SGParameters parameters = (SGParameters) sggs.getGameParameters();
+        Deck<SGCard> hand =  sggs.getPlayerHands().get(playerId);
         int cardIndex = -1;
         for (int i = 0; i < hand.getSize(); i++) {
             if (hand.get(i).type == cardType) {
@@ -32,30 +33,14 @@ public class NigiriWasabiAction extends AbstractAction {
         }
         if (cardIndex == -1)
             throw new AssertionError("No card found in hand of type " + cardType);
-        if(SGGS.getPlayerChopSticksActivated(playerId) && SGGS.getPlayerExtraTurns(playerId) == 0)
+        if(sggs.getPlayerChopSticksActivated(playerId) && sggs.getPlayerExtraTurns(playerId) == 0)
         {
-            SGGS.setPlayerExtraCardPick(cardIndex, playerId);
+            sggs.setPlayerExtraCardPick(cardIndex, playerId);
         }
-        else SGGS.setPlayerCardPick(cardIndex, playerId);
-        SGGS.setPlayerScoreToAdd(playerId,SGGS.getPlayerScoreToAdd(playerId) + GetCardScore(cardType, SGGS, playerId));
-        SGGS.setPlayerWasabiAvailable(playerId, SGGS.getPlayerWasabiAvailable(playerId) - 1);
+        else sggs.setPlayerCardPick(cardIndex, playerId);
+        sggs.setPlayerScoreToAdd(playerId,sggs.getPlayerScoreToAdd(playerId) + cardType.getCardScore(sggs, playerId) * parameters.multiplierWasabi);
+        sggs.getPlayerWasabiAvailable(playerId).decrement(1);
         return true;
-    }
-
-    private int GetCardScore(SGCard.SGCardType cardType, SGGameState SGGS, int playerId)
-    {
-        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
-        switch (cardType)
-        {
-            case SquidNigiri:
-                return parameters.valueSquidNigiri * parameters.multiplierWasabi;
-            case SalmonNigiri:
-                return parameters.valueSalmonNigiri * parameters.multiplierWasabi;
-            case EggNigiri:
-                return parameters.valueEggNigiri * parameters.multiplierWasabi;
-            default:
-                return -1;
-        }
     }
 
     @Override

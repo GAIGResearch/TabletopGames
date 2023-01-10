@@ -2,6 +2,9 @@ package games.sushigo;
 
 import core.AbstractParameters;
 
+import java.util.Arrays;
+import java.util.HashMap;
+
 public class SGParameters extends AbstractParameters {
     public String dataPath = "data/sushigo/";
 
@@ -22,22 +25,16 @@ public class SGParameters extends AbstractParameters {
     public int valueMakiSecond = 3;
     public int valueTempuraPair = 5;
     public int valueSashimiTriss = 10;
-    public int valueDumpling = 1;
-    public int valueDumplingPair = 3;
-    public int valueDumplingTriss = 6;
-    public int valueDumplingQuad = 10;
-    public int valueDumplingPent = 15;
+    public int[] valueDumpling = new int[] {1, 3, 6, 10, 15};
     public int valueSquidNigiri = 3;
     public int valueSalmonNigiri = 2;
     public int valueEggNigiri = 1;
     public int multiplierWasabi = 3;
     public int valuePuddingMost = 6;
     public int valuePuddingLeast = -6;
+    public int puddingValue = 3;
 
-    public int cardAmountTwoPlayers = 10;
-    public int cardAmountThreePlayers = 9;
-    public int cardAmountFourPlayers = 8;
-    public int cardAmountFivePlayers = 7;
+    public int nCards = 10;  // for 2 players
 
     public SGParameters(long seed) {
         super(seed);
@@ -66,22 +63,16 @@ public class SGParameters extends AbstractParameters {
         sgp.valueMakiSecond = valueMakiSecond;
         sgp.valueTempuraPair = valueTempuraPair;
         sgp.valueSashimiTriss = valueSashimiTriss;
-        sgp.valueDumpling = valueDumpling;
-        sgp.valueDumplingPair = valueDumplingPair;
-        sgp.valueDumplingTriss = valueDumplingTriss;
-        sgp.valueDumplingQuad = valueDumplingQuad;
-        sgp.valueDumplingPent = valueDumplingPent;
+        sgp.valueDumpling = valueDumpling.clone();
         sgp.valueSquidNigiri = valueSquidNigiri;
         sgp.valueSalmonNigiri = valueSalmonNigiri;
         sgp.valueEggNigiri = valueEggNigiri;
         sgp.multiplierWasabi = multiplierWasabi;
         sgp.valuePuddingMost = valuePuddingMost;
         sgp.valuePuddingLeast = valuePuddingLeast;
+        sgp.puddingValue = puddingValue;
 
-        sgp.cardAmountTwoPlayers = cardAmountTwoPlayers;
-        sgp.cardAmountThreePlayers = cardAmountThreePlayers;
-        sgp.cardAmountFourPlayers = cardAmountFourPlayers;
-        sgp.cardAmountFivePlayers = cardAmountFivePlayers;
+        sgp.nCards = nCards;
         return sgp;
     }
 
@@ -107,20 +98,14 @@ public class SGParameters extends AbstractParameters {
                 valueMakiSecond == that.valueMakiSecond &&
                 valueTempuraPair == that.valueTempuraPair &&
                 valueSashimiTriss == that.valueSashimiTriss &&
-                valueDumpling == that.valueDumpling &&
-                valueDumplingPair == that.valueDumplingPair &&
-                valueDumplingTriss == that.valueDumplingTriss &&
-                valueDumplingQuad == that.valueDumplingQuad &&
-                valueDumplingPent == that.valueDumplingPent &&
+                Arrays.equals(valueDumpling, that.valueDumpling) &&
                 valueSquidNigiri == that.valueSquidNigiri &&
                 valueSalmonNigiri == that.valueSalmonNigiri &&
                 valueEggNigiri == that.valueEggNigiri &&
                 multiplierWasabi == that.multiplierWasabi &&
                 valuePuddingMost == that.valuePuddingMost &&
                 valuePuddingLeast == that.valuePuddingLeast &&
-                cardAmountTwoPlayers == that.cardAmountTwoPlayers &&
-                cardAmountThreePlayers == that.cardAmountThreePlayers &&
-                cardAmountFourPlayers == that.cardAmountFourPlayers &&
-                cardAmountFivePlayers == that.cardAmountFivePlayers;
+                nCards == that.nCards &&
+        puddingValue == that.puddingValue;
     }
 }

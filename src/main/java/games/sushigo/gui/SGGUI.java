@@ -67,7 +67,7 @@ public class SGGUI extends AbstractGUIManager {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    SGPlayerView playerHand = new SGPlayerView(parsedGameState.getPlayerDecks().get(i), parsedGameState.getPlayerFields().get(i), i, humanID, parameters.getDataPath());
+                    SGPlayerView playerHand = new SGPlayerView(parsedGameState.getPlayerHands().get(i), parsedGameState.getPlayerFields().get(i), i, humanID, parameters.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");

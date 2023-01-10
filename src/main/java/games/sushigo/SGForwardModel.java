@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.components.Counter;
 import core.components.Deck;
 import games.sushigo.actions.ChopSticksAction;
 import games.sushigo.actions.NigiriWasabiAction;
@@ -11,150 +12,128 @@ import games.sushigo.actions.PlayCardAction;
 import games.sushigo.cards.SGCard;
 import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static games.sushigo.cards.SGCard.SGCardType.*;
 
 public class SGForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
-        SGGameState SGGS = (SGGameState) firstState;
-        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
-        SGGS.cardAmount = 0;
-        SGGS.deckRotations = 0;
-        //Setup player scores
-        SGGS.playerScore = new int[firstState.getNPlayers()];
-        SGGS.playerCardPicks = new int[firstState.getNPlayers()];
-        SGGS.playerExtraCardPicks = new int[firstState.getNPlayers()];
-        SGGS.playerTempuraAmount = new int[firstState.getNPlayers()];
-        SGGS.playerSashimiAmount = new int[firstState.getNPlayers()];
-        SGGS.playerDumplingAmount = new int[firstState.getNPlayers()];
-        SGGS.playerWasabiAvailable = new int[firstState.getNPlayers()];
-        SGGS.playerChopSticksAmount = new int[firstState.getNPlayers()];
-        SGGS.playerScoreToAdd = new int[firstState.getNPlayers()];
-        SGGS.playerChopsticksActivated = new boolean[firstState.getNPlayers()];
-        SGGS.playerExtraTurns = new int[firstState.getNPlayers()];
-        Arrays.fill(SGGS.getPlayerCardPicks(), -1);
+        SGGameState gs = (SGGameState) firstState;
+        SGParameters parameters = (SGParameters) gs.getGameParameters();
+        gs.nCardsInHand = 0;
+        gs.deckRotations = 0;
+        gs.playerScore = new Counter[firstState.getNPlayers()];
+        gs.playerCardPicks = new int[firstState.getNPlayers()];
+        gs.playerExtraCardPicks = new int[firstState.getNPlayers()];
+        gs.playedCards = new HashMap[firstState.getNPlayers()];
+        gs.playerWasabiAvailable = new Counter[firstState.getNPlayers()];
+        gs.playerChopsticksActivated = new boolean[firstState.getNPlayers()];
+        gs.playerExtraTurns = new int[firstState.getNPlayers()];
+        Arrays.fill(gs.getPlayerCardPicks(), -1);
 
         //Setup draw & discard piles
-        SetupDrawpile(SGGS);
-        SGGS.discardPile = new Deck<SGCard>("Discard pile", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
+        setupDrawpile(gs);
+        gs.discardPile = new Deck<>("Discard pile", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
 
         //Setup player hands and fields
-        SGGS.playerHands = new ArrayList<>();
-        SGGS.playerFields = new ArrayList<>();
-        switch (firstState.getNPlayers()) {
-            case 2:
-                SGGS.cardAmount = parameters.cardAmountTwoPlayers;
-                break;
-            case 3:
-                SGGS.cardAmount = parameters.cardAmountThreePlayers;
-                break;
-            case 4:
-                SGGS.cardAmount = parameters.cardAmountFourPlayers;
-                break;
-            case 5:
-                SGGS.cardAmount = parameters.cardAmountFivePlayers;
-                break;
-
+        gs.playerHands = new ArrayList<>();
+        gs.nCardsInHand = parameters.nCards - firstState.getNPlayers() + 2;
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            gs.playerHands.add(new Deck<>("Player" + i + " hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
+            gs.playedCards[i] = new HashMap<>();
+            for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
+                gs.playedCards[i].put(type, new Counter(0, 0, -1, type.name()));
+            }
         }
-        for (int i = 0; i < SGGS.getNPlayers(); i++) {
-            SGGS.playerHands.add(new Deck<SGCard>("Player" + i + " hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
-            SGGS.playerFields.add(new Deck<SGCard>("Player" + "Card field", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
-        }
-        DrawNewHands(SGGS);
+        drawNewHands(gs);
 
-        SGGS.getTurnOrder().setStartingPlayer(0);
+        gs.getTurnOrder().setStartingPlayer(0);
     }
 
-    public void DrawNewHands(SGGameState SGGS) {
-        for (int i = 0; i < SGGS.getNPlayers(); i++) {
-            for (int j = 0; j < SGGS.cardAmount; j++) {
-                SGGS.playerHands.get(i).add(SGGS.drawPile.draw());
+    public void drawNewHands(SGGameState gs) {
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            for (int j = 0; j < gs.nCardsInHand; j++) {
+                gs.playerHands.get(i).add(gs.drawPile.draw());
             }
         }
     }
 
-    private void SetupDrawpile(SGGameState SGGS) {
-        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
-        SGGS.drawPile = new Deck<SGCard>("Draw pile", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+    private void setupDrawpile(SGGameState gs) {
+        SGParameters parameters = (SGParameters) gs.getGameParameters();
+        gs.drawPile = new Deck<>("Draw pile", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         for (int i = 0; i < parameters.nMaki_3Cards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Maki_3));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.Maki, 3));
         }
         for (int i = 0; i < parameters.nMaki_2Cards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Maki_2));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.Maki, 2));
         }
         for (int i = 0; i < parameters.nMaki_1Cards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Maki_1));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.Maki, 1));
         }
         for (int i = 0; i < parameters.nChopstickCards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Chopsticks));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.Chopsticks));
         }
         for (int i = 0; i < parameters.nTempuraCards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Tempura));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.Tempura));
         }
         for (int i = 0; i < parameters.nSashimiCards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Sashimi));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.Sashimi));
         }
         for (int i = 0; i < parameters.nDumplingCards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Dumpling));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.Dumpling));
         }
         for (int i = 0; i < parameters.nSquidNigiriCards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.SquidNigiri));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.SquidNigiri));
         }
         for (int i = 0; i < parameters.nSalmonNigiriCards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.SalmonNigiri));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.SalmonNigiri));
         }
         for (int i = 0; i < parameters.nEggNigiriCards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.EggNigiri));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.EggNigiri));
         }
         for (int i = 0; i < parameters.nWasabiCards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Wasabi));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.Wasabi));
         }
         for (int i = 0; i < parameters.nPuddingCards; i++) {
-            SGGS.drawPile.add(new SGCard(SGCard.SGCardType.Pudding));
+            gs.drawPile.add(new SGCard(SGCard.SGCardType.Pudding));
         }
-        SGGS.drawPile.shuffle(new Random());
+        gs.drawPile.shuffle(new Random());
     }
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         //Rotate deck and reveal cards
-        SGGameState SGGS = (SGGameState) currentState;
-        int turn = SGGS.getTurnOrder().getTurnCounter();
-        if ((turn + 1) % SGGS.getNPlayers() == 0 && SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) <= 0) {
-            RevealCards(SGGS);
-            RemoveUsedChopsticks(SGGS);
-            RotateDecks(SGGS);
+        SGGameState gs = (SGGameState) currentState;
+        int turn = gs.getTurnOrder().getTurnCounter();
+        if ((turn + 1) % gs.getNPlayers() == 0 && gs.getPlayerExtraTurns(gs.getCurrentPlayer()) <= 0) {
+            revealCards(gs);
+            removeUsedChopsticks(gs);
+            rotateDecks(gs);
 
-            //Clear points
-            for (int i = 0; i < SGGS.getNPlayers(); i++) {
-                SGGS.setPlayerScoreToAdd(i, 0);
-            }
             //clear picks
-            Arrays.fill(SGGS.getPlayerCardPicks(), -1);
+            Arrays.fill(gs.getPlayerCardPicks(), -1);
         }
 
 
         //Check if game/round over
-        if (IsRoundOver(SGGS) && SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) <= 0) {
-            GiveMakiPoints(SGGS);
-            if (SGGS.getTurnOrder().getRoundCounter() >= 2) {
-                GivePuddingPoints(SGGS);
-                SGGS.endGame();
+        if (isRoundOver(gs) && gs.getPlayerExtraTurns(gs.getCurrentPlayer()) <= 0) {
+            giveMakiPoints(gs);
+            if (gs.getTurnOrder().getRoundCounter() >= 2) {
+                givePuddingPoints(gs);
+                gs.endGame();
                 return;
             }
-            SGGS.getTurnOrder().endRound(currentState);
+            gs.getTurnOrder().endRound(currentState);
             return;
         }
 
         //End turn
         if (currentState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
-            if (SGGS.getPlayerChopSticksActivated(SGGS.getCurrentPlayer()) && SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) > 0) {
-                SGGS.setPlayerExtraTurns(SGGS.getCurrentPlayer(), SGGS.getPlayerExtraTurns(SGGS.getCurrentPlayer()) - 1);
+            if (gs.getPlayerChopSticksActivated(gs.getCurrentPlayer()) && gs.getPlayerExtraTurns(gs.getCurrentPlayer()) > 0) {
+                gs.setPlayerExtraTurns(gs.getCurrentPlayer(), gs.getPlayerExtraTurns(gs.getCurrentPlayer()) - 1);
                 return;
                 // if we use chopsticks it is still our go, so don't end player turn
             }
@@ -164,41 +143,21 @@ public class SGForwardModel extends StandardForwardModel {
         }
     }
 
-    private void RemoveUsedChopsticks(SGGameState SGGS) {
-        for (int i = 0; i < SGGS.getNPlayers(); i++) {
-            if (SGGS.getPlayerChopSticksActivated(i)) {
-                for (int j = 0; j < SGGS.getPlayerFields().get(i).getSize(); j++) {
-                    if (SGGS.getPlayerFields().get(i).get(j).type == SGCard.SGCardType.Chopsticks) {
-                        SGGS.getPlayerFields().get(i).remove(j);
-                        SGGS.setPlayerChopSticksAmount(i, SGGS.getPlayerChopSticksAmount(i) - 1);
-                        break;
-                    }
-                }
-                SGGS.getPlayerDecks().get(i).add(new SGCard(SGCard.SGCardType.Chopsticks));
-                SGGS.setPlayerChopsticksActivated(i, false);
+    private void removeUsedChopsticks(SGGameState gs) {
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            if (gs.getPlayerChopSticksActivated(i)) {
+                gs.playedCards[i].get(SGCard.SGCardType.Chopsticks).decrement(1);
+                gs.getPlayerHands().get(i).add(new SGCard(SGCard.SGCardType.Chopsticks));
+                gs.setPlayerChopsticksActivated(i, false);
             }
         }
     }
 
-    private void GiveMakiPoints(SGGameState SGGS) {
+    private void giveMakiPoints(SGGameState gs) {
         //Calculate maki points for each player
-        int[] makiPlayerPoints = new int[SGGS.getNPlayers()];
-        for (int i = 0; i < SGGS.getNPlayers(); i++) {
-            for (int j = 0; j < SGGS.getPlayerFields().get(i).getSize(); j++) {
-                switch (SGGS.getPlayerFields().get(i).get(j).type) {
-                    case Maki_1:
-                        makiPlayerPoints[i] += 1;
-                        break;
-                    case Maki_2:
-                        makiPlayerPoints[i] += 2;
-                        break;
-                    case Maki_3:
-                        makiPlayerPoints[i] += 3;
-                        break;
-                    default:
-                        break;
-                }
-            }
+        int[] makiPlayerPoints = new int[gs.getNPlayers()];
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            makiPlayerPoints[i] = gs.playedCards[i].get(Maki).getValue();
         }
 
         //Calculate who has the most points and who has the second most points
@@ -224,7 +183,7 @@ public class SGForwardModel extends StandardForwardModel {
         }
 
         //Calculate the score each player gets
-        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
+        SGParameters parameters = (SGParameters) gs.getGameParameters();
         int mostScore = parameters.valueMakiMost;
         int secondScore = parameters.valueMakiSecond;
         if (!mostPlayers.isEmpty()) mostScore /= mostPlayers.size();
@@ -232,34 +191,27 @@ public class SGForwardModel extends StandardForwardModel {
 
         //Add score to players
         if (currentBest != 0) {
-            for (int i = 0; i < mostPlayers.size(); i++) {
-                SGGS.setGameScore(mostPlayers.get(i), (int) SGGS.getGameScore(mostPlayers.get(i)) + mostScore);
+            for (Integer mostPlayer : mostPlayers) {
+                gs.getPlayerScore()[mostPlayer].increment(mostScore);
             }
         }
         if (secondBest != 0) {
-            for (int i = 0; i < secondPlayers.size(); i++) {
-                SGGS.setGameScore(secondPlayers.get(i), (int) SGGS.getGameScore(secondPlayers.get(i)) + secondScore);
+            for (Integer secondPlayer : secondPlayers) {
+                gs.getPlayerScore()[secondPlayer].increment(secondScore);
             }
         }
     }
 
-    private void GivePuddingPoints(SGGameState SGGS) {
+    private void givePuddingPoints(SGGameState gs) {
+        SGParameters parameters = (SGParameters) gs.getGameParameters();
+
         //Calculate maki points for each player
-        int[] puddingPlayerPoints = new int[SGGS.getNPlayers()];
-        for (int i = 0; i < SGGS.getNPlayers(); i++) {
-            for (int j = 0; j < SGGS.getPlayerFields().get(i).getSize(); j++) {
-                switch (SGGS.getPlayerFields().get(i).get(j).type) {
-                    case Pudding:
-                        puddingPlayerPoints[i] += 3;
-                        break;
-                    default:
-                        break;
-                }
-            }
+        int[] puddingPlayerPoints = new int[gs.getNPlayers()];
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            puddingPlayerPoints[i] = gs.playedCards[i].get(Pudding).getValue() * parameters.puddingValue;
         }
 
         //Calculate who has the most points and who has the second most points
-        SGParameters parameters = (SGParameters) SGGS.getGameParameters();
         int currentBest = 0;
         int currentWorst = parameters.nPuddingCards + 1;
         List<Integer> mostPlayers = new ArrayList<>();
@@ -290,92 +242,95 @@ public class SGForwardModel extends StandardForwardModel {
 
         //Add score to players
         if (currentBest != 0) {
-            for (int i = 0; i < mostPlayers.size(); i++) {
-                SGGS.setGameScore(mostPlayers.get(i), (int) SGGS.getGameScore(mostPlayers.get(i)) + mostScore);
+            for (Integer mostPlayer : mostPlayers) {
+                gs.getPlayerScore()[mostPlayer].increment(mostScore);
             }
         }
-        for (int i = 0; i < leastPlayers.size(); i++) {
-            SGGS.setGameScore(leastPlayers.get(i), (int) SGGS.getGameScore(leastPlayers.get(i)) + leastScore);
+        for (Integer leastPlayer : leastPlayers) {
+            gs.getPlayerScore()[leastPlayer].increment(leastScore);
         }
     }
 
-    boolean IsRoundOver(SGGameState SGGS) {
-        for (int i = 0; i < SGGS.getPlayerDecks().size(); i++) {
-            if (SGGS.getPlayerDecks().get(i).getSize() > 0) return false;
+    boolean isRoundOver(SGGameState sggs) {
+        for (int i = 0; i < sggs.getPlayerHands().size(); i++) {
+            if (sggs.getPlayerHands().get(i).getSize() > 0) return false;
         }
         return true;
     }
 
-    void RevealCards(SGGameState SGGS) {
-        for (int i = 0; i < SGGS.getNPlayers(); i++) {
+    void revealCards(SGGameState gs) {
+        for (int i = 0; i < gs.getNPlayers(); i++) {
             //Moves the card from the players hand to field
-            if (SGGS.getPlayerCardPicks()[i] < 0) SGGS.setPlayerCardPick(0, i);
-            if (SGGS.getPlayerDecks().get(i).getSize() <= SGGS.getPlayerCardPicks()[i]) continue;
-            SGCard cardToReveal = SGGS.getPlayerDecks().get(i).get(SGGS.getPlayerCardPicks()[i]);
-            SGGS.getPlayerDecks().get(i).remove(cardToReveal);
-            SGGS.getPlayerFields().get(i).add(cardToReveal);
-
-            if (SGGS.getPlayerChopSticksActivated(i)) {
-                if (SGGS.getPlayerCardPicks()[i] < SGGS.getPlayerExtraCardPicks()[i])
-                    SGGS.setPlayerExtraCardPick(SGGS.getPlayerExtraCardPicks()[i] - 1, i);
-                if (SGGS.getPlayerDecks().get(i).getSize() > SGGS.getPlayerExtraCardPicks()[i]) {
-                    SGCard extraCardToReveal = SGGS.getPlayerDecks().get(i).get(SGGS.getPlayerExtraCardPicks()[i]);
-                    SGGS.getPlayerDecks().get(i).remove(extraCardToReveal);
-                    SGGS.getPlayerFields().get(i).add(extraCardToReveal);
-                }
-            }
+            if (gs.getPlayerCardPicks()[i] < 0) gs.setPlayerCardPick(0, i);
+            if (gs.getPlayerHands().get(i).getSize() <= gs.getPlayerCardPicks()[i]) continue;
+            SGCard cardToReveal = gs.getPlayerHands().get(i).get(gs.getPlayerCardPicks()[i]);
+            gs.getPlayerHands().get(i).remove(cardToReveal);
+            gs.playedCards[i].get(cardToReveal.type).increment(cardToReveal.count);
 
             //Add points to player
-            SGGS.setGameScore(i, (int) SGGS.getGameScore(i) + SGGS.getPlayerScoreToAdd(i));
+            gs.getPlayerScore()[i].increment(cardToReveal.type.getCardScore(gs, i));
+
+            if (gs.getPlayerChopSticksActivated(i)) {
+                if (gs.getPlayerCardPicks()[i] < gs.getPlayerExtraCardPicks()[i])
+                    gs.setPlayerExtraCardPick(gs.getPlayerExtraCardPicks()[i] - 1, i);
+                if (gs.getPlayerHands().get(i).getSize() > gs.getPlayerExtraCardPicks()[i]) {
+                    SGCard extraCardToReveal = gs.getPlayerHands().get(i).get(gs.getPlayerExtraCardPicks()[i]);
+                    gs.getPlayerHands().get(i).remove(extraCardToReveal);
+                    gs.playedCards[i].get(extraCardToReveal.type).increment(extraCardToReveal.count);
+
+                    //Add points to player
+                    gs.getPlayerScore()[i].increment(extraCardToReveal.type.getCardScore(gs, i));
+                }
+            }
         }
     }
 
 
-    void RotateDecks(SGGameState SGGS) {
+    void rotateDecks(SGGameState SGGS) {
         SGGS.deckRotations++;
         Deck<SGCard> tempDeck;
-        tempDeck = SGGS.getPlayerDecks().get(0).copy();
+        tempDeck = SGGS.getPlayerHands().get(0).copy();
         for (int i = 1; i < SGGS.getNPlayers(); i++) {
-            SGGS.getPlayerDecks().set(i - 1, SGGS.getPlayerDecks().get(i).copy());
+            SGGS.getPlayerHands().set(i - 1, SGGS.getPlayerHands().get(i).copy());
         }
-        SGGS.getPlayerDecks().set(SGGS.getNPlayers() - 1, tempDeck.copy());
+        SGGS.getPlayerHands().set(SGGS.getNPlayers() - 1, tempDeck.copy());
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        SGGameState SGGS = (SGGameState) gameState;
+        SGGameState sggs = (SGGameState) gameState;
         List<AbstractAction> actions = new ArrayList<>();
 
-        Deck<SGCard> currentPlayerHand = SGGS.getPlayerDecks().get(SGGS.getCurrentPlayer());
+        int currentPlayer = sggs.getCurrentPlayer();
+        Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(currentPlayer);
         for (int i = 0; i < currentPlayerHand.getSize(); i++) {
-            if (SGGS.getPlayerCardPicks()[SGGS.getCurrentPlayer()] == i) continue;
-            switch (currentPlayerHand.get(i).type) {
-                case Maki_1:
-                case Maki_2:
-                case Maki_3:
+            SGCard.SGCardType cardType = currentPlayerHand.get(i).type;
+            if (sggs.getPlayerCardPicks()[currentPlayer] == i) continue;
+            switch (cardType) {
+                case Maki:
                 case Tempura:
                 case Sashimi:
                 case Dumpling:
                 case Wasabi:
                 case Chopsticks:
                 case Pudding:
-                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), currentPlayerHand.get(i).type));
+                    actions.add(new PlayCardAction(currentPlayer, cardType));
                     break;
                 case SquidNigiri:
                 case SalmonNigiri:
                 case EggNigiri:
-                    actions.add(new PlayCardAction(SGGS.getCurrentPlayer(), currentPlayerHand.get(i).type));
-                    if (SGGS.getPlayerWasabiAvailable(SGGS.getCurrentPlayer()) > 0)
-                        actions.add(new NigiriWasabiAction(SGGS.getCurrentPlayer(), currentPlayerHand.get(i).type));
+                    actions.add(new PlayCardAction(currentPlayer, cardType));
+                    if (sggs.getPlayerWasabiAvailable(currentPlayer).getValue() > 0)
+                        actions.add(new NigiriWasabiAction(currentPlayer, cardType));
                     break;
             }
         }
         // remove duplicate actions
         actions = actions.stream().distinct().collect(Collectors.toList());
-        if (SGGS.getPlayerChopSticksAmount(SGGS.getCurrentPlayer()) > 0 &&
-                !SGGS.getPlayerChopSticksActivated(SGGS.getCurrentPlayer()) &&
-                SGGS.getPlayerDecks().get(SGGS.getCurrentPlayer()).getSize() > 1) {
-            actions.add(new ChopSticksAction(SGGS.getCurrentPlayer()));
+        if (sggs.playedCards[currentPlayer].get(Chopsticks).getValue() > 0 &&
+                !sggs.getPlayerChopSticksActivated(currentPlayer) &&
+                sggs.getPlayerHands().get(currentPlayer).getSize() > 1) {
+            actions.add(new ChopSticksAction(currentPlayer));
         }
         return actions;
     }
