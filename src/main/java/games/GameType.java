@@ -44,7 +44,7 @@ import games.stratego.StrategoGameState;
 import games.stratego.gui.StrategoGUIManager;
 import games.sushigo.SGForwardModel;
 import games.sushigo.SGGameState;
-import games.sushigo.gui.SGGUI;
+import games.sushigo.gui.SGGUIManager;
 import games.tictactoe.TicTacToeForwardModel;
 import games.tictactoe.TicTacToeGameState;
 import games.tictactoe.gui.*;
@@ -558,7 +558,7 @@ public enum GameType {
                 gui = new DiceMonasteryGUI(parent, game, ac, human);
                 break;
             case SushiGo:
-                gui = new SGGUI(parent, game, ac, human);
+                gui = new SGGUIManager(parent, game, ac, human);
                 break;
             case Stratego:
                 gui = new StrategoGUIManager(parent, game, ac);

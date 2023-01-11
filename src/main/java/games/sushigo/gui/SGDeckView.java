@@ -8,7 +8,7 @@ import utilities.ImageIO;
 
 import java.awt.*;
 
-import static games.sushigo.gui.SGGUI.*;
+import static games.sushigo.gui.SGGUIManager.*;
 
 public class SGDeckView extends DeckView<SGCard> {
 
@@ -24,12 +24,18 @@ public class SGDeckView extends DeckView<SGCard> {
     @Override
     public void drawComponent(Graphics2D g, Rectangle rect, SGCard card, boolean front) {
         Image cardFace = getCardImage(card);
-        CardView.drawCard(g, rect, card, cardFace, backOfCard, front);
+        int fontSize = g.getFont().getSize();
+        CardView.drawCard(g, new Rectangle(rect.x, rect.y, rect.width, rect.height-fontSize), card, cardFace, backOfCard, front);
+        g.drawString(card.type.name(), rect.x + 2, (int)(rect.y + rect.height - fontSize*1.5));
     }
 
     private Image getCardImage(SGCard card)
     {
-        return ImageIO.GetInstance().getImage(dataPath + card.type + ".png");
+        String cardName = card.type.name().toLowerCase();
+        if (card.type == SGCard.SGCardType.Maki) {
+            cardName = cardName + "_" + card.count;
+        }
+        return ImageIO.GetInstance().getImage(dataPath + cardName + ".png");
     }
 
 }

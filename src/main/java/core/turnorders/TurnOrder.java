@@ -5,15 +5,12 @@ import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
 import core.interfaces.IGameListener;
-import games.dicemonastery.DiceMonasteryGameState;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static utilities.Utils.GameResult.GAME_END;
 import static utilities.Utils.GameResult.GAME_ONGOING;
 
 public abstract class TurnOrder {
@@ -138,16 +135,19 @@ public abstract class TurnOrder {
         }
     }
 
-    // helper function to avoid time-consuming string manipulations is the message is not actually
+    // helper function to avoid time-consuming string manipulations if the message is not actually
     // going to be logged anywhere
     public void logEvent(Supplier<String> eventText, AbstractGameState state) {
-        if (listeners.isEmpty())
+        if (listeners.isEmpty() && !state.getCoreGameParameters().recordEventHistory)
             return; // to avoid expensive string manipulations
         logEvent(eventText.get(), state);
     }
     public void logEvent(String eventText, AbstractGameState state) {
         AbstractAction logAction = new LogEvent(eventText);
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.GAME_EVENT, state, logAction));
+        if (state.getCoreGameParameters().recordEventHistory) {
+            state.recordHistory(eventText);
+        }
     }
 
     /**
@@ -164,6 +164,9 @@ public abstract class TurnOrder {
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
 
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
+        if (gameState.getCoreGameParameters().recordEventHistory) {
+            gameState.recordHistory(CoreConstants.GameEvents.ROUND_OVER.name());
+        }
 
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) {

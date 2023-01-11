@@ -1,13 +1,16 @@
 package games.sushigo;
 
 import core.AbstractGameState;
+import core.components.Deck;
 import core.turnorders.StandardTurnOrder;
 import games.sushigo.cards.SGCard;
 import utilities.Utils;
 
+import java.util.Random;
+
 public class SGTurnOrder extends StandardTurnOrder {
-    public SGTurnOrder(int nPlayers) {
-        super(nPlayers);
+    public SGTurnOrder(int nPlayers, int nMaxRounds) {
+        super(nPlayers, nMaxRounds);
     }
     public SGTurnOrder() {}
 
@@ -24,32 +27,48 @@ public class SGTurnOrder extends StandardTurnOrder {
     }
 
     @Override
-    public void _startRound(AbstractGameState gameState) {
-        SGGameState SGGS = (SGGameState) gameState;
+    public void _endRound(AbstractGameState gameState) {
+        SGGameState gs = (SGGameState) gameState;
 
-        for (int i = 0; i < SGGS.getNPlayers(); i++){
-            //Clear fields ignoring dumplings
-            for(int j = SGGS.getPlayerFields().get(i).getSize() - 1; j >= 0; j--)
-            {
-                if (SGGS.getPlayerFields().get(i).get(j).type != SGCard.SGCardType.Pudding)
-                {
-                    SGGS.getPlayerFields().get(i).remove(j);
+        // Apply card end of round rules
+        for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
+            type.onRoundEnd(gs);
+        }
+
+        // Clear played hands if they get discarded between rounds, they go in the discard pile
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            Deck<SGCard> cardsToKeep = gs.playedCards.get(i).copy();
+            cardsToKeep.clear();
+            for (SGCard card : gs.playedCards.get(i).getComponents()) {
+                if (card.type.isDiscardedBetweenRounds()) {
+                    gs.discardPile.add(card);
+                    gs.playedCardTypes[i].get(card.type).setValue(0);
+                } else {
+                    cardsToKeep.add(card);
                 }
             }
+            gs.playedCards.get(i).clear();
+            gs.playedCards.get(i).add(cardsToKeep);
+        }
+    }
 
-            //Draw new hands
-            for (int j = 0; j < SGGS.nCardsInHand; j++)
+    @Override
+    public void _startRound(AbstractGameState gameState) {
+        SGGameState gs = (SGGameState) gameState;
+
+        //Draw new hands for players
+        for (int i = 0; i < gs.getNPlayers(); i++){
+            for (int j = 0; j < gs.nCardsInHand; j++)
             {
-                SGGS.playerHands.get(i).add(SGGS.drawPile.draw());
+                if (gs.drawPile.getSize() == 0) {
+                    // Reshuffle discard into draw pile
+                    gs.drawPile.add(gs.discardPile);
+                    gs.discardPile.clear();
+                    gs.drawPile.shuffle(new Random(gs.getGameParameters().getRandomSeed()));
+                }
+                gs.playerHands.get(i).add(gs.drawPile.draw());
             }
-            SGGS.deckRotations = 0;
-
-            //Clear counters
-            SGGS.setPlayerTempuraAmount(i, 0);
-            SGGS.setPlayerSashimiAmount(i, 0);
-            SGGS.setPlayerDumplingAmount(i, 0);
-            SGGS.setPlayerWasabiAvailable(i, 0);
-            SGGS.setPlayerChopSticksAmount(i, 0);
+            gs.deckRotations = 0;
         }
     }
 }

@@ -6,6 +6,7 @@ import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import games.GameType;
+import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
 
 import java.util.*;
@@ -15,15 +16,12 @@ public class SGGameState extends AbstractGameState {
     Deck<SGCard> drawPile;
     Deck<SGCard> discardPile;
     int nCardsInHand = 0;
-    int[] playerCardPicks;
-    int[] playerExtraCardPicks;
-    int[] playerExtraTurns;
 
-    HashMap<SGCard.SGCardType, Counter>[] playedCards;
+    List<List<ChooseCard>> cardChoices;  // one list per player, per turn, indicates the actions chosen by the player, saved for simultaneous execution
+    HashMap<SGCard.SGCardType, Counter>[] playedCardTypes;
+    List<Deck<SGCard>> playedCards;
     Counter[] playerScore;
-    Counter[] playerWasabiAvailable;
 
-    boolean[] playerChopsticksActivated;
     Random rnd;
     int deckRotations = 0;
 
@@ -34,7 +32,7 @@ public class SGGameState extends AbstractGameState {
      * @param nPlayers       - amount of players for this game.
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new SGTurnOrder(nPlayers), GameType.SushiGo);
+        super(gameParameters, new SGTurnOrder(nPlayers, ((SGParameters)gameParameters).nRounds), GameType.SushiGo);
         rnd = new Random(gameParameters.getRandomSeed());
     }
 
@@ -44,72 +42,74 @@ public class SGGameState extends AbstractGameState {
             addAll(playerHands);
             add(drawPile);
             add(discardPile);
+            addAll(playedCards);
             for (int i = 0; i < getNPlayers(); i++) {
                 add(playerScore[i]);
-                addAll(playedCards[i].values());
-                add(playerWasabiAvailable[i]);
+                addAll(playedCardTypes[i].values());
             }
         }};
     }
 
+
+
     @Override
     protected AbstractGameState _copy(int playerId) {
         SGGameState copy = new SGGameState(gameParameters.copy(), getNPlayers());
-        copy.playerCardPicks = playerCardPicks.clone();
-        copy.playerExtraCardPicks = playerExtraCardPicks.clone();
-        copy.playerChopsticksActivated = playerChopsticksActivated.clone();
-        copy.playerExtraTurns = playerExtraTurns.clone();
 
         copy.playerScore = new Counter[getNPlayers()];
-        copy.playedCards = new HashMap[getNPlayers()];
-        copy.playerWasabiAvailable = new Counter[getNPlayers()];
+        copy.playedCardTypes = new HashMap[getNPlayers()];
+        copy.playedCards = new ArrayList<>();
         for (int i = 0; i < getNPlayers(); i++) {
+            copy.playedCards.add(playedCards.get(i).copy());
             copy.playerScore[i] = playerScore[i].copy();
-            copy.playedCards[i] = new HashMap<>();
-            for (SGCard.SGCardType ct: playedCards[i].keySet()) {
-                copy.playedCards[i].put(ct, playedCards[i].get(ct).copy());
+            copy.playedCardTypes[i] = new HashMap<>();
+            for (SGCard.SGCardType ct: playedCardTypes[i].keySet()) {
+                copy.playedCardTypes[i].put(ct, playedCardTypes[i].get(ct).copy());
             }
-            copy.playerWasabiAvailable[i] = playerWasabiAvailable[i].copy();
         }
 
         copy.nCardsInHand = nCardsInHand;
         copy.deckRotations = deckRotations;
 
-        //Copy player hands
+        // Copy player hands
         copy.playerHands = new ArrayList<>();
         for (Deck<SGCard> d : playerHands) {
             copy.playerHands.add(d.copy());
         }
 
-        //Other decks
+        // Other decks
         copy.drawPile = drawPile.copy();
         copy.discardPile = discardPile.copy();
+        copy.cardChoices = new ArrayList<>();
 
         // Now we need to redeterminise
-        // discard pile and player fields are known - it is just the hands of other players we need to
-        // shuffle with the draw deck and then redraw
-        // however we do know the contents of the hands of players to our T to our left, where
-        // T is the number of player turns so far, as we saw that hand on its way through our own
         if (playerId != -1) {
 
-            // firstly blank out the 'unseen' actions of other players
+            // We don't know what other players have chosen for this round, hide card choices
             for (int i = 0; i < getNPlayers(); i++) {
-                if (i == getCurrentPlayer())
-                    continue;
-                copy.playerCardPicks[i] = -1;
-                copy.playerExtraCardPicks[i] = -1;
-                copy.playerChopsticksActivated[i] = false;
-                // we will now rechoose these actions with out opponent model
-                // and not have incorrect perfect information
+                if (i == playerId) {
+                    copy.cardChoices.add(new ArrayList<>(cardChoices.get(i)));
+                } else {
+                    // Replace others with hidden choices
+                    ArrayList<ChooseCard> hiddenChoice = new ArrayList<>();
+                    for (ChooseCard c: cardChoices.get(i)) {
+                        hiddenChoice.add(c.getHiddenChoice());
+                    }
+                    copy.cardChoices.add(hiddenChoice);
+                }
             }
 
+            // We need to shuffle the hands of other players with the draw deck and then redraw
+
+            // Add player hands unseen back to the draw pile
             for (int p = 0; p < copy.playerHands.size(); p++) {
                 if (hasNotSeenHand(playerId, p)) {
                     copy.drawPile.add(playerHands.get(p));
                 }
             }
             copy.drawPile.shuffle(rnd);
-            // now we draw into the unknown player hands
+
+            // Now we draw into the unknown player hands
             for (int p = 0; p < copy.playerHands.size(); p++) {
                 if (hasNotSeenHand(playerId, p)) {
                     Deck<SGCard> hand = copy.playerHands.get(p);
@@ -125,7 +125,15 @@ public class SGGameState extends AbstractGameState {
         return copy;
     }
 
+    /**
+     * we do know the contents of the hands of players to our T to our left, where T is the number of player turns
+     * so far, as we saw that hand on its way through our own
+     * @param playerId - id of player whose vision we're checking
+     * @param opponentId - id of opponent owning the hand of cards we're checking vision of
+     * @return - true if player has not seen the opponent's hand of cards, false otherwise
+     */
     public boolean hasNotSeenHand(int playerId, int opponentId) {
+        if (playerId == opponentId) return false;
         int opponentSpacesToLeft = opponentId - playerId;
         if (opponentSpacesToLeft < 0)
             opponentSpacesToLeft = getNPlayers() + opponentSpacesToLeft;
@@ -136,24 +144,20 @@ public class SGGameState extends AbstractGameState {
         return playerScore;
     }
 
-    public int[] getPlayerCardPicks() {
-        return playerCardPicks;
+        public List<Deck<SGCard>> getPlayerHands() {
+            return playerHands;
+        }
+
+        public void clearCardChoices() {
+        for (int i = 0; i < getNPlayers(); i++) cardChoices.get(i).clear();
     }
 
-    public void setPlayerCardPick(int cardIndex, int playerId) {
-        this.playerCardPicks[playerId] = cardIndex;
+    public void addCardChoice(ChooseCard chooseCard, int playerId) {
+        cardChoices.get(playerId).add(chooseCard);
     }
 
-    public int[] getPlayerExtraCardPicks() {
-        return playerExtraCardPicks;
-    }
-
-    public void setPlayerExtraCardPick(int cardIndex, int playerId) {
-        this.playerExtraCardPicks[playerId] = cardIndex;
-    }
-
-    public List<Deck<SGCard>> getPlayerHands() {
-        return playerHands;
+    public List<List<ChooseCard>> getCardChoices() {
+        return cardChoices;
     }
 
     @Override
@@ -165,7 +169,7 @@ public class SGGameState extends AbstractGameState {
     @Override
     public double getTiebreak(int playerId) {
         // Tie-break is number of puddings
-        return playedCards[playerId].get(SGCard.SGCardType.Pudding).getValue();
+        return playedCardTypes[playerId].get(SGCard.SGCardType.Pudding).getValue();
     }
 
     @Override
@@ -173,34 +177,17 @@ public class SGGameState extends AbstractGameState {
         return playerScore[playerId].getValue();
     }
 
-    public HashMap<SGCard.SGCardType, Counter>[] getPlayedCards() {
+    public HashMap<SGCard.SGCardType, Counter>[] getPlayedCardTypes() {
+        return playedCardTypes;
+    }
+
+    public Counter getPlayedCardTypes(SGCard.SGCardType cardType, int player) {
+        return playedCardTypes[player].get(cardType);
+    }
+
+    public List<Deck<SGCard>> getPlayedCards() {
         return playedCards;
     }
-
-    public Counter getPlayedCards(SGCard.SGCardType cardType, int player) {
-        return playedCards[player].get(cardType);
-    }
-
-    public Counter getPlayerWasabiAvailable(int playerId) {
-        return playerWasabiAvailable[playerId];
-    }
-
-    public boolean getPlayerChopSticksActivated(int playerId) {
-        return playerChopsticksActivated[playerId];
-    }
-
-    public int getPlayerExtraTurns(int playerId) {
-        return playerExtraTurns[playerId];
-    }
-
-    public void setPlayerChopsticksActivated(int playerId, boolean value) {
-        playerChopsticksActivated[playerId] = value;
-    }
-
-    public void setPlayerExtraTurns(int playerId, int value) {
-        playerExtraTurns[playerId] = value;
-    }
-
 
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
@@ -228,12 +215,7 @@ public class SGGameState extends AbstractGameState {
                 Objects.equals(drawPile, that.drawPile) &&
                 Objects.equals(discardPile, that.discardPile) &&
                 deckRotations == that.deckRotations &&
-                Arrays.equals(playerScore, that.playerScore) &&
-                Arrays.equals(playerCardPicks, that.playerCardPicks) &&
-                Arrays.equals(playerExtraCardPicks, that.playerExtraCardPicks) &&
-                Arrays.equals(playerWasabiAvailable, that.playerWasabiAvailable) &&
-                Arrays.equals(playerChopsticksActivated, that.playerChopsticksActivated) &&
-                Arrays.equals(playerExtraTurns, that.playerExtraTurns);
+                Arrays.equals(playerScore, that.playerScore);
     }
 
     @Override
@@ -242,11 +224,7 @@ public class SGGameState extends AbstractGameState {
         retValue = 31 * retValue + Arrays.hashCode(playerResults);
         retValue = 31 * retValue + Objects.hash(nCardsInHand, playerHands, drawPile, discardPile, deckRotations);
         retValue = retValue * 31 + Arrays.hashCode(playerScore);
-        retValue = retValue * 31 + Arrays.hashCode(playerExtraCardPicks);
-        retValue = retValue * 31 + Arrays.hashCode(playedCards);
-        retValue = retValue * 31 + Arrays.hashCode(playerWasabiAvailable);
-        retValue = retValue * 31 + Arrays.hashCode(playerChopsticksActivated);
-        retValue = retValue * 31 + Arrays.hashCode(playerExtraTurns);
+        retValue = retValue * 31 + Arrays.hashCode(playedCardTypes);
         return retValue;
     }
 
@@ -259,12 +237,7 @@ public class SGGameState extends AbstractGameState {
         sb.append(discardPile.hashCode()).append("|");
         sb.append(deckRotations).append("|*|");
         sb.append(Arrays.hashCode(playerScore)).append("|");
-        sb.append(Arrays.hashCode(playerExtraCardPicks)).append("|");
-        sb.append(Arrays.hashCode(playedCards)).append("|");
-        sb.append(Arrays.hashCode(playerWasabiAvailable)).append("|");
-        sb.append(Arrays.hashCode(playerChopsticksActivated)).append("|");
-        sb.append(Arrays.hashCode(playerExtraTurns)).append("|");
-
+        sb.append(Arrays.hashCode(playedCardTypes)).append("|");
         return sb.toString();
     }
 }

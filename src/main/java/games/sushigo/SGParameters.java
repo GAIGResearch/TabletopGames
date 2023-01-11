@@ -8,6 +8,8 @@ import java.util.HashMap;
 public class SGParameters extends AbstractParameters {
     public String dataPath = "data/sushigo/";
 
+    public int nRounds = 3;
+
     public int nMaki_3Cards = 12;
     public int nMaki_2Cards = 8;
     public int nMaki_1Cards = 6;
@@ -32,7 +34,6 @@ public class SGParameters extends AbstractParameters {
     public int multiplierWasabi = 3;
     public int valuePuddingMost = 6;
     public int valuePuddingLeast = -6;
-    public int puddingValue = 3;
 
     public int nCards = 10;  // for 2 players
 
@@ -70,9 +71,9 @@ public class SGParameters extends AbstractParameters {
         sgp.multiplierWasabi = multiplierWasabi;
         sgp.valuePuddingMost = valuePuddingMost;
         sgp.valuePuddingLeast = valuePuddingLeast;
-        sgp.puddingValue = puddingValue;
 
         sgp.nCards = nCards;
+        sgp.nRounds = nRounds;
         return sgp;
     }
 
@@ -106,6 +107,6 @@ public class SGParameters extends AbstractParameters {
                 valuePuddingMost == that.valuePuddingMost &&
                 valuePuddingLeast == that.valuePuddingLeast &&
                 nCards == that.nCards &&
-        puddingValue == that.puddingValue;
+                nRounds == that.nRounds;
     }
 }

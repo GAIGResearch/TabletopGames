@@ -102,10 +102,12 @@ public abstract class DeckView<T extends Component> extends ComponentView {
             int offset = Math.max((rect.width - itemWidth) / deck.getSize(), minCardOffset);
             rects = new Rectangle[deck.getSize()];
             for (int i = deck.getSize() - 1; i >= 0; i--) {
-                T card = deck.get(i);
-                Rectangle r = new Rectangle(rect.x + offset * i, rect.y, itemWidth, itemHeight);
-                rects[i] = r;
-                drawComponent(g, r, card, front || componentVisibility(deck, i));
+                if (i < deck.getSize()) {
+                    T card = deck.get(i);
+                    Rectangle r = new Rectangle(rect.x + offset * i, rect.y, itemWidth, itemHeight);
+                    rects[i] = r;
+                    drawComponent(g, r, card, front || componentVisibility(deck, i));
+                }
             }
             if (cardHighlight != -1) {
                 // Draw this one on top

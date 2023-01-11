@@ -481,6 +481,14 @@ public abstract class AbstractGameState {
         historyText.add("Player " + player + " : " + action.getString(this));
     }
 
+    public void logEvent(String string) {
+        turnOrder.logEvent(string, this);
+    }
+
+    public void recordHistory(String history) {
+        historyText.add(history);
+    }
+
     /**
      * @return All actions that have been executed on this state since reset()/initialisation
      */

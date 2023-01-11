@@ -5,7 +5,10 @@ import core.components.Counter;
 import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
 
-import java.util.function.BiFunction;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class SGCard extends Card {
 
@@ -19,32 +22,177 @@ public class SGCard extends Card {
         EggNigiri,
         Wasabi,
         Chopsticks,
-        Pudding;
+        Pudding(false);
 
         static {
-            Tempura.cardScore = (gs, p) -> {
-                Counter amount = gs.getPlayedCards(Tempura, p);
-                return ((SGParameters)gs.getGameParameters()).valueTempuraPair * ((amount.getValue()+1) % 2);
+            Tempura.onReveal = (gs, p) -> {
+                // Adds points for pairs (/2)
+                Counter amount = gs.getPlayedCardTypes(Tempura, p);
+                int value = ((SGParameters)gs.getGameParameters()).valueTempuraPair * (amount.getValue() / 2);
+                gs.getPlayerScore()[p].increment(value);
             };
-            Sashimi.cardScore = (gs, p) -> {
-                Counter amount = gs.getPlayedCards(Sashimi, p);
-                return ((SGParameters)gs.getGameParameters()).valueSashimiTriss * ((amount.getValue()+1) % 3);
+            Sashimi.onReveal = (gs, p) -> {
+                // Adds points for triplets (/3)
+                Counter amount = gs.getPlayedCardTypes(Sashimi, p);
+                int value = ((SGParameters)gs.getGameParameters()).valueSashimiTriss * (amount.getValue() / 3);
+                gs.getPlayerScore()[p].increment(value);
             };
-            Dumpling.cardScore = (gs, p) -> {
-                Counter amount = gs.getPlayedCards(Dumpling, p);
-                int val = Math.min(amount.getValue()+1, ((SGParameters)gs.getGameParameters()).valueDumpling.length-1);
-                return ((SGParameters)gs.getGameParameters()).valueDumpling[val];
+            Dumpling.onReveal = (gs, p) -> {
+                // Add points depending on how many were collected, parameter array used for increments
+                Counter amount = gs.getPlayedCardTypes(Dumpling, p);
+                int idx = Math.min(amount.getValue(), ((SGParameters)gs.getGameParameters()).valueDumpling.length)-1;
+                int value = ((SGParameters)gs.getGameParameters()).valueDumpling[idx];
+                gs.getPlayerScore()[p].increment(value);
             };
-            SquidNigiri.cardScore = (gs,p) -> ((SGParameters)gs.getGameParameters()).valueSquidNigiri;
-            SalmonNigiri.cardScore = (gs,p) -> ((SGParameters)gs.getGameParameters()).valueSalmonNigiri;
-            EggNigiri.cardScore = (gs,p) -> ((SGParameters)gs.getGameParameters()).valueEggNigiri;
+            SquidNigiri.onReveal = (gs, p) -> {
+                // Gives points, more if played on Wasabi
+                int value = ((SGParameters)gs.getGameParameters()).valueSquidNigiri;
+                if (gs.getPlayedCardTypes()[p].get(Wasabi).getValue() > 0) {
+                    value *= ((SGParameters)gs.getGameParameters()).multiplierWasabi;
+                    gs.getPlayedCardTypes()[p].get(Wasabi).decrement(1);
+                }
+                gs.getPlayerScore()[p].increment(value);
+            };
+            SalmonNigiri.onReveal = (gs, p) -> {
+                // Gives points, more if played on Wasabi
+                int value = ((SGParameters)gs.getGameParameters()).valueSalmonNigiri;
+                if (gs.getPlayedCardTypes()[p].get(Wasabi).getValue() > 0) {
+                    value *= ((SGParameters)gs.getGameParameters()).multiplierWasabi;
+                    gs.getPlayedCardTypes()[p].get(Wasabi).decrement(1);
+                }
+                gs.getPlayerScore()[p].increment(value);
+            };
+            EggNigiri.onReveal = (gs, p) -> {
+                // Gives points, more if played on Wasabi
+                int value = ((SGParameters) gs.getGameParameters()).valueEggNigiri;
+                if (gs.getPlayedCardTypes()[p].get(Wasabi).getValue() > 0) {
+                    value *= ((SGParameters)gs.getGameParameters()).multiplierWasabi;
+                    gs.getPlayedCardTypes()[p].get(Wasabi).decrement(1);
+                }
+                gs.getPlayerScore()[p].increment(value);
+            };
+
+            Maki.onRoundEnd = gs -> {
+                // Gives points to the player that has the most Maki rolls, and also to second most
+
+                // Calculate who has the most points and who has the second most points
+                int most = 0;
+                int secondMost = 0;
+                HashSet<Integer> mostPlayers = new HashSet<>();
+                HashSet<Integer> secondPlayers = new HashSet<>();
+                for (int i = 0; i < gs.getNPlayers(); i++) {
+                    int nMakiRolls = gs.getPlayedCardTypes()[i].get(Maki).getValue();
+
+                    if (nMakiRolls > most) {
+                        secondMost = most;
+                        secondPlayers.clear();
+                        secondPlayers.addAll(mostPlayers);
+
+                        most = nMakiRolls;
+                        mostPlayers.clear();
+                        mostPlayers.add(i);
+                    }
+                    else if (nMakiRolls == most && nMakiRolls != 0) mostPlayers.add(i);
+                    else if (nMakiRolls > secondMost) {
+                        secondMost = nMakiRolls;
+                        secondPlayers.clear();
+                        secondPlayers.add(i);
+                    } else if (nMakiRolls == secondMost && nMakiRolls != 0) secondPlayers.add(i);
+                }
+
+                // Calculate the score each player gets and award the points
+                SGParameters parameters = (SGParameters) gs.getGameParameters();
+                int mostScore = parameters.valueMakiMost;
+                int secondScore = parameters.valueMakiSecond;
+                if (!mostPlayers.isEmpty()) {
+                    // Best score is split among the tied players with no remainder
+                    mostScore /= mostPlayers.size();
+                    for (Integer mostPlayer : mostPlayers) {
+                        gs.getPlayerScore()[mostPlayer].increment(mostScore);
+                        gs.logEvent("Player " + mostPlayer + " scores " + mostScore + " from Maki rolls (most:" + most + ")");
+                    }
+                }
+                if (!secondPlayers.isEmpty() && mostPlayers.size() == 1) {
+                    // Second-best score is split among the tied players with no remainder, only awarded if no ties for most
+                    secondScore /= secondPlayers.size();
+                    for (Integer secondPlayer : secondPlayers) {
+                        gs.getPlayerScore()[secondPlayer].increment(secondScore);
+                        gs.logEvent("Player " + secondPlayer + " scores " + secondScore + " from Maki rolls (second most:" + secondMost + ")");
+                    }
+                }
+            };
+
+            Pudding.onGameEnd = gs -> {
+                // Gives points at the end for most pudding cards. Points lost for least pudding cards (not in 2-player games)
+                SGParameters parameters = (SGParameters) gs.getGameParameters();
+
+                //Calculate who has the most points and who has the least points
+                int best = gs.getPlayedCardTypes()[0].get(Pudding).getValue();
+                int worst = best;
+                HashSet<Integer> mostPlayers = new HashSet<>();
+                HashSet<Integer> leastPlayers = new HashSet<>();
+                for (int i = 0; i < gs.getNPlayers(); i++) {
+                    int nPuddings = gs.getPlayedCardTypes()[i].get(Pudding).getValue();
+
+                    if (nPuddings > best) {
+                        best = nPuddings;
+                        mostPlayers.clear();
+                        mostPlayers.add(i);
+                    }
+                    else if (nPuddings == best && nPuddings != 0) mostPlayers.add(i);
+                    if (nPuddings < worst) {
+                        worst = nPuddings;
+                        leastPlayers.clear();
+                        leastPlayers.add(i);
+                    } else if (nPuddings == worst) leastPlayers.add(i);
+                }
+                if (best > worst) {
+
+                    // Calculate the score each player gets, only if there's a difference in number of puddings, otherwise no one gets points
+                    int mostScore = parameters.valuePuddingMost;
+                    int leastScore = parameters.valuePuddingLeast;
+                    if (!mostPlayers.isEmpty()) {
+                        // Best score is split among the tied players with no remainder
+                        mostScore /= mostPlayers.size();
+                        for (Integer mostPlayer : mostPlayers) {
+                            gs.getPlayerScore()[mostPlayer].increment(mostScore);
+                            gs.logEvent("Player " + mostPlayer + " scores " + mostScore + " from Puddings (most:" + best + ")");
+                        }
+                    }
+                    if (!leastPlayers.isEmpty() && gs.getNPlayers() > 2) {
+                        // Least score is split among the tied players with no remainder, only awarded in games with more than 2 players
+                        leastScore /= leastPlayers.size();
+                        for (Integer leastPlayer : leastPlayers) {
+                            gs.getPlayerScore()[leastPlayer].increment(leastScore);
+                            gs.logEvent("Player " + leastPlayer + " scores " + leastScore + " from Puddings (least:" + worst + ")");
+                        }
+                    }
+                }
+            };
         }
 
-        private BiFunction<SGGameState, Integer, Integer> cardScore;  // effectively final
+        private BiConsumer<SGGameState, Integer> onReveal;  // effectively final, should not be modified
+        private Consumer<SGGameState> onRoundEnd, onGameEnd;  // effectively final, should not be modified
+        private boolean discardedBetweenRounds = true;
+        SGCardType() {}
+        SGCardType(boolean discardedBetweenRounds) {
+            this.discardedBetweenRounds = discardedBetweenRounds;
+        }
 
-        public int getCardScore(SGGameState gs, int playerId) {
-            if (cardScore == null) return 0;
-            return cardScore.apply(gs, playerId);
+        public void onReveal(SGGameState gs, int playerId) {
+            if (onReveal != null) onReveal.accept(gs, playerId);
+        }
+
+        public void onRoundEnd(SGGameState gs) {
+            if (onRoundEnd != null) onRoundEnd.accept(gs);
+        }
+
+        public void onGameEnd(SGGameState gs) {
+            if (onGameEnd != null) onGameEnd.accept(gs);
+        }
+
+        public boolean isDiscardedBetweenRounds() {
+            return discardedBetweenRounds;
         }
     }
 
@@ -73,5 +221,19 @@ public class SGCard extends Card {
     @Override
     public String toString() {
         return type.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SGCard)) return false;
+        if (!super.equals(o)) return false;
+        SGCard sgCard = (SGCard) o;
+        return count == sgCard.count && type == sgCard.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), type, count);
     }
 }
