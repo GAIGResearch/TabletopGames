@@ -197,7 +197,7 @@ public class SGCard extends Card {
     }
 
     public final SGCardType type;
-    public final int count;  // 1 by default, could be 1, 2, 3 for Makis
+    public final int count;  // Number of tokens of this type on the card. 1 by default, could be 1, 2, 3 for Makis
 
     public SGCard(SGCardType type)
     {
