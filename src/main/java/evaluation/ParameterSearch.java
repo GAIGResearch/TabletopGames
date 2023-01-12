@@ -19,7 +19,6 @@ import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import utilities.Pair;
 import utilities.StatSummary;
-import utilities.SummaryLogger;
 import utilities.Utils;
 
 import java.io.File;

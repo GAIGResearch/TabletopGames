@@ -4,13 +4,10 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.Game;
 import core.ParameterFactory;
-import core.interfaces.IGameListener;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.GameListener;
 import games.GameType;
-import games.terraformingmars.stats.TMStatsVisualiser;
 import players.PlayerFactory;
-import players.simple.RandomPlayer;
-import utilities.FileStatsLogger;
 import utilities.Pair;
 
 import java.util.*;
@@ -55,7 +52,7 @@ public class GameReport {
                             "\tnGames=        The number of games to run for each game type. Defaults to 1000.\n" +
                             "\tlistener=      The full class name of an IGameListener implementation. Or the location\n" +
                             "\t               of a json file from which a listener can be instantiated.\n" +
-                            "\t               Defaults to utilities.GameStatisticsListener. \n" +
+                            "\t               Defaults to evaluation.metrics.GameStatisticsListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
@@ -74,9 +71,9 @@ public class GameReport {
         String playerDescriptor = getArg(args, "player", "");
         String opponentDescriptor = getArg(args, "opponent", "random");
         String gameParams = getArg(args, "gameParam", "");
-        String loggerClass = getArg(args, "logger", "utilities.SummaryLogger");
-        String statsLog = getArg(args, "statsLog", "");
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameStatisticsListener").split("\\|")));
+        String loggerClass = getArg(args, "logger", "evaluation.loggers.SummaryLogger");  // TODO: why is this separate, read all from json!
+        String statsLog = getArg(args, "statsLog", "SummaryLogger.txt");
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.metrics.GameStatisticsListener").split("\\|")));
         List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
 
         if (listenerClasses.size() > 1 && logFiles.size() > 1 && listenerClasses.size() != logFiles.size())
@@ -112,12 +109,12 @@ public class GameReport {
         if (nPlayers.size() > 1 && nPlayers.size() != games.size())
             throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list");
 
-        List<IGameListener> gameTrackers = new ArrayList<>();
+        List<GameListener> gameTrackers = new ArrayList<>();
         for (int i = 0; i < listenerClasses.size(); i++) {
             String logFile = logFiles.size() == 1 ? logFiles.get(0) : logFiles.get(i);
             String listenerClass = listenerClasses.size() == 1 ? listenerClasses.get(0) : listenerClasses.get(i);
             IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
-            IGameListener gameTracker = IGameListener.createListener(listenerClass, logger);
+            GameListener gameTracker = GameListener.createListener(listenerClass, logger);
             gameTrackers.add(gameTracker);
         }
 
@@ -145,7 +142,7 @@ public class GameReport {
                 Game game = params == null ?
                         gameType.createGameInstance(playerCount) :
                         gameType.createGameInstance(playerCount, params);
-                for (IGameListener gameTracker : gameTrackers)
+                for (GameListener gameTracker : gameTrackers)
                     game.addListener(gameTracker);
 
                 if (playerDescriptor.isEmpty() && opponentDescriptor.isEmpty()) {
@@ -194,7 +191,7 @@ public class GameReport {
         }
 
         // Once all games are complete, let the gameTracker know
-        for (IGameListener gameTracker : gameTrackers) {
+        for (GameListener gameTracker : gameTrackers) {
             gameTracker.allGamesFinished();
         }
         if (statsLogger != null)

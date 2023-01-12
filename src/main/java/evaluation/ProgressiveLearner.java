@@ -2,17 +2,17 @@ package evaluation;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.CoreConstants;
 import core.ParameterFactory;
-import core.interfaces.IGameListener;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
+import evaluation.metrics.GameListener;
 import games.GameType;
 import players.PlayerFactory;
 import players.learners.AbstractLearner;
-import utilities.FileStatsLogger;
-import utilities.StateFeatureListener;
+import evaluation.loggers.FileStatsLogger;
+import evaluation.metrics.StateFeatureListener;
 import utilities.Utils;
 import org.apache.commons.io.FileUtils;
 import java.io.File;
@@ -36,7 +36,7 @@ public class ProgressiveLearner {
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
     IStateFeatureVector phi;
-    CoreConstants.GameEvents frequency;
+    Event.GameEvent frequency;
     boolean currentPlayerOnly;
     String phiClass, prefix;
     boolean useOnlyLast;
@@ -82,7 +82,7 @@ public class ProgressiveLearner {
         defaultHeuristic = getArg(args, "defaultHeuristic", "players.heuristics.NullHeuristic");
         heuristic = getArg(args, "heuristic", "players.heuristics.LinearStateHeuristic");
         currentPlayerOnly = getArg(args, "stateCPO", false);
-        frequency = CoreConstants.GameEvents.valueOf(getArg(args, "stateFreq", "ACTION_TAKEN"));
+        frequency = Event.GameEvent.valueOf(getArg(args, "stateFreq", "ACTION_TAKEN"));
     }
 
     public static void main(String[] args) {
@@ -162,7 +162,7 @@ public class ProgressiveLearner {
 
         tournament.listeners = new ArrayList<>();
         IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
-        IGameListener gameTracker = IGameListener.createListener("utilities.GameResultListener", logger);
+        GameListener gameTracker = GameListener.createListener("utilities.GameResultListener", logger);
         tournament.listeners.add(gameTracker);
         tournament.runTournament();
         int winnerIndex = tournament.getWinnerIndex();
