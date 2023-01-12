@@ -10,7 +10,7 @@ public class PandemicConstants {
 
     public final static int playerLocationHash = Hash.GetInstance().hash("playerLocation");
     public final static int neighboursHash = Hash.GetInstance().hash("neighbours");
-    public final static int researchStationHash = Hash.GetInstance().hash("researchStation");
+    public final static int researchStationHash = Hash.GetInstance().hash("Research Stations");
     public final static int playerCardHash = Hash.GetInstance().hash("playerCard");
     public final static int pandemicBoardHash = Hash.GetInstance().hash("pandemicBoard");
     public final static int infectionRateHash = Hash.GetInstance().hash("Infection Rate");

@@ -295,6 +295,53 @@ public abstract class Utils {
         return allData;
     }
 
+
+    /**
+     * Returns a list of objects arrays, each one a combination of elements from the param
+     *  Example: input [[1, 2] [3] [4, 5]] ===> output [[1, 3, 4], [2, 3, 4], [1, 3, 5], [2, 3, 5]]
+     * Algorithm from <a href="https://www.geeksforgeeks.org/combinations-from-n-arrays-picking-one-element-from-each-array/">here</a>
+     * @param arr A list of array objects to combine/
+     * @return the combination of elements.
+     */
+    public static List<Object[]> generateCombinations(List<Object[]> arr)
+    {
+        ArrayList<Object[]> combinations = new ArrayList<>();
+
+        // Number of arrays
+        int n = arr.size();
+
+        // To keep track of next element in each of the n arrays
+        int[] indices = new int[n];
+
+        // Initialize with first element's index
+        for(int i = 0; i < n; i++) indices[i] = 0;
+
+        while (true)
+        {
+            // Add current combination
+            Object[] objs = new Object[n];
+            for(int i = 0; i < n; i++) objs[i] = arr.get(i)[indices[i]];
+            combinations.add(objs);
+
+            // Find the rightmost array that has more elements left after the current element in that array
+            int next = n - 1;
+            while (next >= 0 && (indices[next] + 1 >= arr.get(next).length))
+                next--;
+
+            // No such array is found so no more combinations left
+            if (next < 0)
+                return combinations;
+
+            // If found move to next element in that array
+            indices[next]++;
+
+            // For all arrays to the right of this array current index again points to first element
+            for(int i = next + 1; i < n; i++)
+                indices[i] = 0;
+        }
+    }
+
+
     /**
      * Given a JSONObject, this will load the instance of the class.
      * this assumes that the JSON object has:
@@ -339,15 +386,15 @@ public abstract class Utils {
                 } else if (arg instanceof JSONArray) {
                     Object first = ((JSONArray) arg).get(0);
                     if (first instanceof JSONObject) {
-                        // we have recursion
-                        // we need to instantiate this, and then stick it in
-                        first = loadClassFromJSON((JSONObject) first);
-                        T[] arr = (T[]) Array.newInstance(first.getClass(),((JSONArray) arg).size());
+                        Class<?> arrayClass = determineArrayClass((JSONArray) arg);
+
+                        T[] arr = (T[]) Array.newInstance(arrayClass, ((JSONArray) arg).size());
                         argClasses[i] = arr.getClass();
                         for (int j = 0; j < ((JSONArray) arg).size(); j++) {
                             arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
                         }
                         arg = arr;
+
                     } else if (first instanceof Long) {
                         argClasses[i] = int[].class;
                         args[i] = ((Long) first).intValue();
@@ -363,10 +410,12 @@ public abstract class Utils {
                 }
                 args[i] = arg;
             }
+
             Class<?> clazz = Class.forName(cl);
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
+
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
         } catch (ReflectiveOperationException e) {
@@ -376,6 +425,38 @@ public abstract class Utils {
             e.printStackTrace();
             throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
         }
+    }
+
+    public static Class<?> determineArrayClass(JSONArray array)
+    {
+        if(array.size() > 1)
+        {
+            JSONObject first = (JSONObject) array.get(0);
+            String firstCl = (String) first.getOrDefault("class", "");
+            for (int i = 1; i < array.size(); ++i) {
+                JSONObject second = (JSONObject) array.get(i);
+                String secondCl = (String) second.getOrDefault("class", "");
+                if (firstCl.equalsIgnoreCase(secondCl)) continue;
+                // We have an array of two different classes.
+                // Either the array class is a common superclass or it's wrong.
+                // We return the superclass of the first one.
+                Object firstClass = loadClassFromJSON(first);
+                return firstClass.getClass().getSuperclass();
+            }
+        }
+
+        //Either one single class or multiple repetitions of the same class.
+        JSONObject first = (JSONObject) array.get(0);
+        return loadClassFromJSON(first).getClass();
+    }
+
+    public static Object searchEnum(Object[] enumConstants, String search) {
+        for (Object obj : enumConstants) {
+            if (obj.toString().compareToIgnoreCase(search) == 0) {
+                return obj;
+            }
+        }
+        return null;
     }
 
     public static <T extends Enum<?>> T searchEnum(Class<T> enumeration, String search) {

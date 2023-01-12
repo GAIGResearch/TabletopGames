@@ -11,7 +11,7 @@ import org.junit.*;
 import players.PlayerConstants;
 import players.mcts.*;
 import players.simple.RandomPlayer;
-import utilities.SummaryLogger;
+import evaluation.loggers.SummaryLogger;
 
 import java.util.*;
 
@@ -95,6 +95,7 @@ public class MCTSNodesAndVisitsTests {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
         params.maxTreeDepth = 3;
         params.information = MCTSEnums.Information.Closed_Loop;
+        params.discardStateAfterEachIteration = false;
         Game game = createGame(params);
         runGame(game, 4, new int[0], new int[0]);
     }
@@ -103,6 +104,7 @@ public class MCTSNodesAndVisitsTests {
     public void reducedDepth3() {
         params.maxTreeDepth = 3;
         params.information = MCTSEnums.Information.Closed_Loop;
+        params.discardStateAfterEachIteration = false;
         Game game = createGame(params);
         runGame(game, 4, new int[0], new int[0]);
     }

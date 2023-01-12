@@ -1,0 +1,17 @@
+{
+  "class": "evaluation.metrics.GameListener",
+  "args": [
+    {
+      "class" : "evaluation.loggers.SummaryLogger"
+    },
+    [
+      {"class": "evaluation.metrics.MiscGameMetrics$ActionSample" },
+      {"class": "evaluation.metrics.GameMetrics$PlayerType" },
+      {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
+      {"class": "evaluation.metrics.GameMetrics$GameScore" },
+      {"class": "evaluation.metrics.GameMetrics$ActionSpace" },
+      {"class": "games.loveletter.stats.LoveLetterMetrics$ActionsPlayedWin" },
+      {"class": "games.loveletter.stats.LoveLetterMetrics$WinningCards" }
+    ]
+  ]
+}
