@@ -29,20 +29,20 @@ public class SGCard extends Card {
                 // Adds points for pairs (/2)
                 Counter amount = gs.getPlayedCardTypes(Tempura, p);
                 int value = ((SGParameters)gs.getGameParameters()).valueTempuraPair * (amount.getValue() / 2);
-                gs.getPlayerScore()[p].increment(value);
+                gs.addPlayerScore(p, value, Tempura);
             };
             Sashimi.onReveal = (gs, p) -> {
                 // Adds points for triplets (/3)
                 Counter amount = gs.getPlayedCardTypes(Sashimi, p);
                 int value = ((SGParameters)gs.getGameParameters()).valueSashimiTriss * (amount.getValue() / 3);
-                gs.getPlayerScore()[p].increment(value);
+                gs.addPlayerScore(p, value, Sashimi);
             };
             Dumpling.onReveal = (gs, p) -> {
                 // Add points depending on how many were collected, parameter array used for increments
                 Counter amount = gs.getPlayedCardTypes(Dumpling, p);
                 int idx = Math.min(amount.getValue(), ((SGParameters)gs.getGameParameters()).valueDumpling.length)-1;
                 int value = ((SGParameters)gs.getGameParameters()).valueDumpling[idx];
-                gs.getPlayerScore()[p].increment(value);
+                gs.addPlayerScore(p, value, Dumpling);
             };
             SquidNigiri.onReveal = (gs, p) -> {
                 // Gives points, more if played on Wasabi
@@ -51,7 +51,7 @@ public class SGCard extends Card {
                     value *= ((SGParameters)gs.getGameParameters()).multiplierWasabi;
                     gs.getPlayedCardTypes()[p].get(Wasabi).decrement(1);
                 }
-                gs.getPlayerScore()[p].increment(value);
+                gs.addPlayerScore(p, value, SquidNigiri);
             };
             SalmonNigiri.onReveal = (gs, p) -> {
                 // Gives points, more if played on Wasabi
@@ -60,7 +60,7 @@ public class SGCard extends Card {
                     value *= ((SGParameters)gs.getGameParameters()).multiplierWasabi;
                     gs.getPlayedCardTypes()[p].get(Wasabi).decrement(1);
                 }
-                gs.getPlayerScore()[p].increment(value);
+                gs.addPlayerScore(p, value, SalmonNigiri);
             };
             EggNigiri.onReveal = (gs, p) -> {
                 // Gives points, more if played on Wasabi
@@ -69,7 +69,7 @@ public class SGCard extends Card {
                     value *= ((SGParameters)gs.getGameParameters()).multiplierWasabi;
                     gs.getPlayedCardTypes()[p].get(Wasabi).decrement(1);
                 }
-                gs.getPlayerScore()[p].increment(value);
+                gs.addPlayerScore(p, value, EggNigiri);
             };
 
             Maki.onRoundEnd = gs -> {
@@ -108,16 +108,20 @@ public class SGCard extends Card {
                     // Best score is split among the tied players with no remainder
                     mostScore /= mostPlayers.size();
                     for (Integer mostPlayer : mostPlayers) {
-                        gs.getPlayerScore()[mostPlayer].increment(mostScore);
-                        gs.logEvent("Player " + mostPlayer + " scores " + mostScore + " from Maki rolls (most:" + most + ")");
+                        gs.addPlayerScore(mostPlayer, mostScore, Maki);
+                        if (gs.getCoreGameParameters().recordEventHistory) {
+                            gs.logEvent("Player " + mostPlayer + " scores " + mostScore + " from Maki rolls (most:" + most + ")");
+                        }
                     }
                 }
                 if (!secondPlayers.isEmpty() && mostPlayers.size() == 1) {
                     // Second-best score is split among the tied players with no remainder, only awarded if no ties for most
                     secondScore /= secondPlayers.size();
                     for (Integer secondPlayer : secondPlayers) {
-                        gs.getPlayerScore()[secondPlayer].increment(secondScore);
-                        gs.logEvent("Player " + secondPlayer + " scores " + secondScore + " from Maki rolls (second most:" + secondMost + ")");
+                        gs.addPlayerScore(secondPlayer, secondScore, Maki);
+                        if (gs.getCoreGameParameters().recordEventHistory) {
+                            gs.logEvent("Player " + secondPlayer + " scores " + secondScore + " from Maki rolls (second most:" + secondMost + ")");
+                        }
                     }
                 }
             };
@@ -155,16 +159,20 @@ public class SGCard extends Card {
                         // Best score is split among the tied players with no remainder
                         mostScore /= mostPlayers.size();
                         for (Integer mostPlayer : mostPlayers) {
-                            gs.getPlayerScore()[mostPlayer].increment(mostScore);
-                            gs.logEvent("Player " + mostPlayer + " scores " + mostScore + " from Puddings (most:" + best + ")");
+                            gs.addPlayerScore(mostPlayer, mostScore, Pudding);
+                            if (gs.getCoreGameParameters().recordEventHistory) {
+                                gs.logEvent("Player " + mostPlayer + " scores " + mostScore + " from Puddings (most:" + best + ")");
+                            }
                         }
                     }
                     if (!leastPlayers.isEmpty() && gs.getNPlayers() > 2) {
                         // Least score is split among the tied players with no remainder, only awarded in games with more than 2 players
                         leastScore /= leastPlayers.size();
                         for (Integer leastPlayer : leastPlayers) {
-                            gs.getPlayerScore()[leastPlayer].increment(leastScore);
-                            gs.logEvent("Player " + leastPlayer + " scores " + leastScore + " from Puddings (least:" + worst + ")");
+                            gs.addPlayerScore(leastPlayer, leastScore, Pudding);
+                            if (gs.getCoreGameParameters().recordEventHistory) {
+                                gs.logEvent("Player " + leastPlayer + " scores " + leastScore + " from Puddings (least:" + worst + ")");
+                            }
                         }
                     }
                 }

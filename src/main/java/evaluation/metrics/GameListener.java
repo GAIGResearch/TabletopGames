@@ -181,21 +181,37 @@ public class GameListener {
     public void setGame(Game game) { this.game = game; }
     public Game getGame() { return game; }
 
-    public static GameListener createListener(String listenerClass, IStatisticLogger logger) {
+    public static GameListener createListener(String listenerClass, IStatisticLogger logger, String metricsClass) {
         // first we check to see if listenerClass is a file or not
         GameListener listener = null;
+        AbstractMetric[] metrics = null;
         File listenerDetails = new File(listenerClass);
         if (listenerDetails.exists()) {
             // in this case we construct from file
             listener = Utils.loadClassFromFile(listenerClass);
         } else {
+            if (!metricsClass.equals("")) {
+                try {
+                    Class<?> clazz = Class.forName(metricsClass);
+                    Constructor<?> constructor;
+                    try {
+                        constructor = clazz.getConstructor();
+                        IMetricsCollection metricsInstance = (IMetricsCollection) constructor.newInstance();
+                        metrics = metricsInstance.getAllMetrics();
+                    } catch (NoSuchMethodException e) {
+                        return createListener(listenerClass);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             if (!listenerClass.equals("")) {
                 try {
                     Class<?> clazz = Class.forName(listenerClass);
                     Constructor<?> constructor;
                     try {
-                        constructor = clazz.getConstructor(IStatisticLogger.class);
-                        listener = (GameListener) constructor.newInstance(logger);
+                        constructor = clazz.getConstructor(IStatisticLogger.class, AbstractMetric[].class);
+                        listener = (GameListener) constructor.newInstance(logger, metrics);
                     } catch (NoSuchMethodException e) {
                         return createListener(listenerClass);
                     }
@@ -204,7 +220,11 @@ public class GameListener {
                 }
             }
         }
-        if(listener == null) return new GameListener(logger, new AbstractMetric[0]); //default
+        if(listener == null) {
+            // default
+            metrics = new GameMetrics().getAllMetrics();
+            return new GameListener(logger, metrics);
+        }
 
         return listener;
     }

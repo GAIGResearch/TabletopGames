@@ -22,6 +22,10 @@ public class SGGameState extends AbstractGameState {
     List<Deck<SGCard>> playedCards;
     Counter[] playerScore;
 
+    // For statistics, not changed between rounds
+    HashMap<SGCard.SGCardType, Counter>[] playedCardTypesAllGame;
+    HashMap<SGCard.SGCardType, Counter>[] pointsPerCardType;
+
     Random rnd;
     int deckRotations = 0;
 
@@ -58,13 +62,19 @@ public class SGGameState extends AbstractGameState {
 
         copy.playerScore = new Counter[getNPlayers()];
         copy.playedCardTypes = new HashMap[getNPlayers()];
+        copy.playedCardTypesAllGame = new HashMap[getNPlayers()];
+        copy.pointsPerCardType = new HashMap[getNPlayers()];
         copy.playedCards = new ArrayList<>();
         for (int i = 0; i < getNPlayers(); i++) {
             copy.playedCards.add(playedCards.get(i).copy());
             copy.playerScore[i] = playerScore[i].copy();
             copy.playedCardTypes[i] = new HashMap<>();
+            copy.playedCardTypesAllGame[i] = new HashMap<>();
+            copy.pointsPerCardType[i] = new HashMap<>();
             for (SGCard.SGCardType ct: playedCardTypes[i].keySet()) {
                 copy.playedCardTypes[i].put(ct, playedCardTypes[i].get(ct).copy());
+                copy.playedCardTypesAllGame[i].put(ct, playedCardTypesAllGame[i].get(ct).copy());
+                copy.pointsPerCardType[i].put(ct, pointsPerCardType[i].get(ct).copy());
             }
         }
 
@@ -144,11 +154,16 @@ public class SGGameState extends AbstractGameState {
         return playerScore;
     }
 
-        public List<Deck<SGCard>> getPlayerHands() {
+    public void addPlayerScore(int p, int amount, SGCard.SGCardType fromType) {
+        playerScore[p].increment(amount);
+        pointsPerCardType[p].get(fromType).increment(amount);
+    }
+
+    public List<Deck<SGCard>> getPlayerHands() {
             return playerHands;
         }
 
-        public void clearCardChoices() {
+    public void clearCardChoices() {
         for (int i = 0; i < getNPlayers(); i++) cardChoices.get(i).clear();
     }
 
@@ -181,6 +196,14 @@ public class SGGameState extends AbstractGameState {
         return playedCardTypes;
     }
 
+    public HashMap<SGCard.SGCardType, Counter>[] getPlayedCardTypesAllGame() {
+        return playedCardTypesAllGame;
+    }
+
+    public HashMap<SGCard.SGCardType, Counter>[] getPointsPerCardType() {
+        return pointsPerCardType;
+    }
+
     public Counter getPlayedCardTypes(SGCard.SGCardType cardType, int player) {
         return playedCardTypes[player].get(cardType);
     }
@@ -206,26 +229,21 @@ public class SGGameState extends AbstractGameState {
     }
 
     @Override
-    protected boolean _equals(Object o) {
-
+    public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof SGGameState)) return false;
+        if (!super.equals(o)) return false;
         SGGameState that = (SGGameState) o;
-        return Objects.equals(playerHands, that.playerHands) &&
-                Objects.equals(drawPile, that.drawPile) &&
-                Objects.equals(discardPile, that.discardPile) &&
-                deckRotations == that.deckRotations &&
-                Arrays.equals(playerScore, that.playerScore);
+        return nCardsInHand == that.nCardsInHand && deckRotations == that.deckRotations && Objects.equals(playerHands, that.playerHands) && Objects.equals(drawPile, that.drawPile) && Objects.equals(discardPile, that.discardPile) && Objects.equals(cardChoices, that.cardChoices) && Arrays.equals(playedCardTypes, that.playedCardTypes) && Objects.equals(playedCards, that.playedCards) && Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame) && Objects.equals(rnd, that.rnd);
     }
 
     @Override
     public int hashCode() {
-        int retValue = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase);
-        retValue = 31 * retValue + Arrays.hashCode(playerResults);
-        retValue = 31 * retValue + Objects.hash(nCardsInHand, playerHands, drawPile, discardPile, deckRotations);
-        retValue = retValue * 31 + Arrays.hashCode(playerScore);
-        retValue = retValue * 31 + Arrays.hashCode(playedCardTypes);
-        return retValue;
+        int result = Objects.hash(super.hashCode(), playerHands, drawPile, discardPile, nCardsInHand, cardChoices, playedCards, rnd, deckRotations);
+        result = 31 * result + Arrays.hashCode(playedCardTypes);
+        result = 31 * result + Arrays.hashCode(playerScore);
+        result = 31 * result + Arrays.hashCode(playedCardTypesAllGame);
+        return result;
     }
 
     @Override

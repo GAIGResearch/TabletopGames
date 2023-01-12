@@ -2,11 +2,15 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import evaluation.loggers.FileStatsLogger;
+import evaluation.loggers.SummaryLogger;
 import evaluation.metrics.GameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.metrics.Event;
 import games.GameType;
+import games.pandemic.stats.PandemicMetrics;
+import games.sushigo.metrics.SushiGoMetrics;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
@@ -616,6 +620,11 @@ public class Game {
 
         // Close video recording writer
         terminateVideoRecording();
+
+        // Inform listeners of game end
+//        for (GameListener gameTracker : listeners) {
+//            gameTracker.allGamesFinished();
+//        }
     }
 
     /**
@@ -918,6 +927,7 @@ public class Game {
         int playerCount = Utils.getArg(args, "nPlayers", 2);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+        ArrayList<GameListener> listeners = null;
 
         ActionController ac = new ActionController(); //null;
 
@@ -939,8 +949,13 @@ public class Game {
         /* 4. Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;
 
+        // Custom listeners set up
+//        SummaryLogger logger = new SummaryLogger();
+//        GameListener pl = new GameListener(logger, new SushiGoMetrics().getAllMetrics());
+//        listeners.add((pl));
+
         /* 5. Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, listeners, useGUI ? ac : null, turnPause);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);

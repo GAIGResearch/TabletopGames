@@ -24,6 +24,8 @@ public class SGForwardModel extends StandardForwardModel {
         gs.playerScore = new Counter[firstState.getNPlayers()];
         gs.cardChoices = new ArrayList<>(firstState.getNPlayers());
         gs.playedCardTypes = new HashMap[firstState.getNPlayers()];
+        gs.playedCardTypesAllGame = new HashMap[firstState.getNPlayers()];
+        gs.pointsPerCardType = new HashMap[firstState.getNPlayers()];
         gs.playedCards = new ArrayList<>();
 
         // Setup draw & discard piles
@@ -39,8 +41,12 @@ public class SGForwardModel extends StandardForwardModel {
             gs.playerHands.add(new Deck<>("Player " + i + " hand", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
             gs.playedCards.add(new Deck<>("Player " + i + " played cards", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
             gs.playedCardTypes[i] = new HashMap<>();
+            gs.playedCardTypesAllGame[i] = new HashMap<>();
+            gs.pointsPerCardType[i] = new HashMap<>();
             for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
-                gs.playedCardTypes[i].put(type, new Counter(0, 0, Integer.MAX_VALUE, type.name()));
+                gs.playedCardTypes[i].put(type, new Counter(0, 0, Integer.MAX_VALUE, "Played cards " + type.name()));
+                gs.playedCardTypesAllGame[i].put(type, new Counter(0, 0, Integer.MAX_VALUE, "Played cards (all) " + type.name()));
+                gs.pointsPerCardType[i].put(type, new Counter(0, 0, Integer.MAX_VALUE, "Points per " + type.name()));
             }
             gs.cardChoices.add(new ArrayList<>());
 
@@ -157,6 +163,7 @@ public class SGForwardModel extends StandardForwardModel {
                 hand.remove(cardToReveal);
                 gs.playedCards.get(i).add(cardToReveal);
                 gs.playedCardTypes[i].get(cardToReveal.type).increment(cardToReveal.count);
+                gs.playedCardTypesAllGame[i].get(cardToReveal.type).increment(cardToReveal.count);
 
                 //Add points to player
                 cardToReveal.type.onReveal(gs, i);

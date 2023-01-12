@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.ParameterFactory;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.GameListener;
 import games.GameType;
 import players.PlayerFactory;
@@ -23,7 +24,7 @@ public class GameReport {
     public static boolean debug = true;
 
     /**
-     * The idea here is that we get statistics from the the decisions of a particular agent in
+     * The idea here is that we get statistics from the decisions of a particular agent in
      * a game, or set of games
      *
      * @param args
@@ -55,6 +56,7 @@ public class GameReport {
                             "\t               Defaults to evaluation.metrics.GameStatisticsListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
+                            "\tmetrics=       The full class name of an IMetricsCollection implementation.\n" +
                             "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
                             "\t               This is ignored if a json file is provided for the listener.\n" +
                             "\t               Defaults to utilities.SummaryLogger. \n" +
@@ -73,7 +75,8 @@ public class GameReport {
         String gameParams = getArg(args, "gameParam", "");
         String loggerClass = getArg(args, "logger", "evaluation.loggers.SummaryLogger");  // TODO: why is this separate, read all from json!
         String statsLog = getArg(args, "statsLog", "SummaryLogger.txt");
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.metrics.GameStatisticsListener").split("\\|")));
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.metrics.GameListener").split("\\|")));
+        List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
         List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
 
         if (listenerClasses.size() > 1 && logFiles.size() > 1 && listenerClasses.size() != logFiles.size())
@@ -112,9 +115,10 @@ public class GameReport {
         List<GameListener> gameTrackers = new ArrayList<>();
         for (int i = 0; i < listenerClasses.size(); i++) {
             String logFile = logFiles.size() == 1 ? logFiles.get(0) : logFiles.get(i);
-            String listenerClass = listenerClasses.size() == 1 ? listenerClasses.get(0) : listenerClasses.get(i);
+            String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(i);
+            String listenerClass = listenerClasses.get(i);
             IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
-            GameListener gameTracker = GameListener.createListener(listenerClass, logger);
+            GameListener gameTracker = GameListener.createListener(listenerClass, logger, metricsClass);
             gameTrackers.add(gameTracker);
         }
 

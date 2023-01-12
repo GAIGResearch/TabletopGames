@@ -87,6 +87,7 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               Defaults to utilities.GameResultListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
+                            "\tmetrics=       The full class name of an IMetricsCollection implementation.\n" +
                             "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file.\n" +
                             "\t               Defaults to RoundRobinReport.txt\n" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
@@ -114,6 +115,7 @@ public class RoundRobinTournament extends AbstractTournament {
         int reportPeriod = getArg(args, "reportPeriod", matchups); //matchups
 
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameResultListener").split("\\|")));
+        List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
         List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
 
         if (listenerClasses.size() > 1 && listenerFiles.size() > 1 && listenerClasses.size() != listenerFiles.size())
@@ -152,7 +154,8 @@ public class RoundRobinTournament extends AbstractTournament {
         tournament.listeners = new ArrayList<>();
         for (int l = 0; l < listenerClasses.size(); l++) {
             IStatisticLogger logger = new FileStatsLogger(listenerFiles.get(l));
-            GameListener gameTracker = GameListener.createListener(listenerClasses.get(l), logger);
+            String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(l);
+            GameListener gameTracker = GameListener.createListener(listenerClasses.get(l), logger, metricsClass);
             tournament.listeners.add(gameTracker);
         }
         tournament.runTournament();
