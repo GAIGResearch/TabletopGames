@@ -61,9 +61,9 @@ public class TAGTimeSeriesSummary extends TAGStatSummary{
     }
 
     @Override
-    public HashMap<String, Object> getSummary(String key) {
+    public HashMap<String, Object> getSummary() {
         HashMap<String, Object> data = new HashMap<>();
-        data.put(key, processValues(series));
+        data.put(name, processValues(series));
         return data;
     }
 

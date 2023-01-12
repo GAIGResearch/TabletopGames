@@ -47,17 +47,23 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
         String[] els = s.split(",");
         for (String e: els) {
             //add(e); //This creates Stack Overflow.
-            addSingle(e);
+            if (!e.equals("")) {
+                addSingle(e);
+            }
         }
     }
 
     public void add(Object o) {
-        addSingle(o);
+        if (o instanceof String) {
+            add((String)o);
+        } else {
+            addSingle(o);
+        }
     }
 
     public void add(Object... xa) {
         for (Object x : xa) {
-            addSingle(x);
+            add(x);
         }
     }
 
@@ -107,7 +113,7 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
     }
 
     @Override
-    public Map<String, Object> getSummary(String key) {
+    public Map<String, Object> getSummary() {
         Map<String, Object> data = new HashMap<>();
         for (Object k: elements.keySet()) {
             data.put(k.toString(), elements.get(k));

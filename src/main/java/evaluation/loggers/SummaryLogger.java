@@ -194,6 +194,7 @@ public class SummaryLogger implements IStatisticLogger {
             Map<String, Map<String, TAGStatSummary>> eventGroupData = groupedData.get(group);
 
             // Group parameterized data further by metric
+            split[0] = split[0].replace(")(", " > ");
             String[] split2 = split[0].split("\\(");
             String metricName = split2[0];
             String params = "";

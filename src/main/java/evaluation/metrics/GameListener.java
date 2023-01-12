@@ -1,5 +1,6 @@
 package evaluation.metrics;
 
+import core.AbstractGameState;
 import core.Game;
 import core.interfaces.IStatisticLogger;
 import evaluation.summarisers.TAGNumericStatSummary;
@@ -118,20 +119,29 @@ public class GameListener {
                         ArrayList<String> keyDeletes = new ArrayList<>();
                         for (String key : dataLogged.keySet()) {
                             TAGStatSummary dataLoggedKey = dataLogged.get(key);
-                            Map<String, Object> toRecord = new HashMap<>();
-                            Map<String, Object> summaryData = dataLoggedKey.getSummary(key);
-                            for (String k: summaryData.keySet()) {
-                                toRecord.put(key.split(":")[0] + "(" + k + ")" + ":" + e, summaryData.get(k));
-                            }
-                            gameOverLogger.record(toRecord);
-                            if(key.contains(":All:")) keyDeletes.add(key);
+                            processMetricGameOver(metrics.get(key.split(":")[0]), event, dataLoggedKey, gameOverLogger);
+//                            if(key.contains(":All:"))
+                                keyDeletes.add(key);
                         }
                         for(String kDel : keyDeletes)
                             dataLogged.remove(kDel);
+                        // TODO reset for next game?
                     }
                 }
             }
         }
+    }
+
+    /**
+     * @param metric - metric that has to post-process
+     * @param event - event type where the metric was logged
+     * @param dataLogged - data logged for this metric for this game
+     * @param gameOverLogger - logger in which to record the summarised version of this data for one data point per game
+     */
+    protected void processMetricGameOver(AbstractMetric metric, Event event, TAGStatSummary dataLogged, IStatisticLogger gameOverLogger) {
+//        gameOverLogger.record(dataLogged.getSummary());
+        Map<String, Object> toRecord = metric.postProcessingGameOver(event, dataLogged);
+        gameOverLogger.record(toRecord);
     }
 
     private TAGStatSummary aggregate(ArrayList<Object> metricsData)

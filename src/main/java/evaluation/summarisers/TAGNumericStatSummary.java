@@ -209,7 +209,7 @@ public class TAGNumericStatSummary extends TAGStatSummary {
     }
 
     @Override
-    public Map<String, Object> getSummary(String key) {
+    public Map<String, Object> getSummary() {
         Map<String, Object> data = new HashMap<>();
         data.put(name + "Median", median());
         data.put(name + "Mean", mean());

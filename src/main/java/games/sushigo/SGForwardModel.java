@@ -8,6 +8,7 @@ import core.components.Counter;
 import core.components.Deck;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
+import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
@@ -67,41 +68,11 @@ public class SGForwardModel extends StandardForwardModel {
      */
     private void setupDrawPile(SGGameState gs) {
         SGParameters parameters = (SGParameters) gs.getGameParameters();
-        for (int i = 0; i < parameters.nMaki_3Cards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.Maki, 3));
-        }
-        for (int i = 0; i < parameters.nMaki_2Cards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.Maki, 2));
-        }
-        for (int i = 0; i < parameters.nMaki_1Cards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.Maki, 1));
-        }
-        for (int i = 0; i < parameters.nChopstickCards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.Chopsticks));
-        }
-        for (int i = 0; i < parameters.nTempuraCards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.Tempura));
-        }
-        for (int i = 0; i < parameters.nSashimiCards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.Sashimi));
-        }
-        for (int i = 0; i < parameters.nDumplingCards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.Dumpling));
-        }
-        for (int i = 0; i < parameters.nSquidNigiriCards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.SquidNigiri));
-        }
-        for (int i = 0; i < parameters.nSalmonNigiriCards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.SalmonNigiri));
-        }
-        for (int i = 0; i < parameters.nEggNigiriCards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.EggNigiri));
-        }
-        for (int i = 0; i < parameters.nWasabiCards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.Wasabi));
-        }
-        for (int i = 0; i < parameters.nPuddingCards; i++) {
-            gs.drawPile.add(new SGCard(SGCard.SGCardType.Pudding));
+        for (Pair<SGCard.SGCardType, Integer> p: parameters.nCardsPerType.keySet()) {
+            int count = parameters.nCardsPerType.get(p);
+            for (int i = 0; i < count; i++) {
+                gs.drawPile.add(new SGCard(p.a, p.b));
+            }
         }
         gs.drawPile.shuffle(new Random(parameters.getRandomSeed()));
     }

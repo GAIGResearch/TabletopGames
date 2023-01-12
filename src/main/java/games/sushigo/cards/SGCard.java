@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 public class SGCard extends Card {
 
     public enum SGCardType {
-        Maki,
+        Maki(new int[]{1,2,3}),
         Tempura,
         Sashimi,
         Dumpling,
@@ -182,9 +182,13 @@ public class SGCard extends Card {
         private BiConsumer<SGGameState, Integer> onReveal;  // effectively final, should not be modified
         private Consumer<SGGameState> onRoundEnd, onGameEnd;  // effectively final, should not be modified
         private boolean discardedBetweenRounds = true;
+        private int[] iconCountVariation = new int[]{1};
         SGCardType() {}
         SGCardType(boolean discardedBetweenRounds) {
             this.discardedBetweenRounds = discardedBetweenRounds;
+        }
+        SGCardType(int[] iconCountVariation) {
+            this.iconCountVariation = iconCountVariation;
         }
 
         public void onReveal(SGGameState gs, int playerId) {
@@ -201,6 +205,10 @@ public class SGCard extends Card {
 
         public boolean isDiscardedBetweenRounds() {
             return discardedBetweenRounds;
+        }
+
+        public int[] getIconCountVariation() {
+            return iconCountVariation;
         }
     }
 
@@ -228,7 +236,7 @@ public class SGCard extends Card {
 
     @Override
     public String toString() {
-        return type.toString();
+        return type.toString() + (count>1? "-" + count : "");
     }
 
     @Override

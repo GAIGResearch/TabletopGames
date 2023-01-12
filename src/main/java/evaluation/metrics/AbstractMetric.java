@@ -1,5 +1,14 @@
 package evaluation.metrics;
+import evaluation.summarisers.TAGOccurrenceStatSummary;
+import evaluation.summarisers.TAGStatSummary;
+import games.sushigo.SGParameters;
+import games.sushigo.cards.SGCard;
+import utilities.Pair;
+
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+
 public abstract class AbstractMetric
 {
     private HashSet<Event.GameEvent> eventTypes;
@@ -36,4 +45,14 @@ public abstract class AbstractMetric
     }
 
     public Object[] getAllowedParameters() { return new String[0];}
+
+    public Map<String, Object> postProcessingGameOver(Event e, TAGStatSummary recordedData) {
+        // Process the recorded data during the game and return game over summarised data
+        Map<String, Object> toRecord = new HashMap<>();
+        Map<String, Object> summaryData = recordedData.getSummary();
+        for (String k: summaryData.keySet()) {
+            toRecord.put(name() + "(" + k + ")" + ":" + e.type, summaryData.get(k));
+        }
+        return toRecord;
+    }
 }
