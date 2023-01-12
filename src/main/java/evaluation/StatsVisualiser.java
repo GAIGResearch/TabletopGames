@@ -2,6 +2,7 @@ package evaluation;
 
 import evaluation.metrics.GameListener;
 import games.GameType;
+import games.terraformingmars.stats.TMStatsVisualiser;
 //import games.terraformingmars.stats.TMStatsVisualiser;
 
 import javax.swing.*;
@@ -25,7 +26,7 @@ public abstract class StatsVisualiser extends JFrame {
 
     static StatsVisualiser getVisualiserForGame(GameType gameType, List<GameListener> listeners) {
         switch (gameType) {
-//            case TerraformingMars: return new TMStatsVisualiser(listeners);
+            case TerraformingMars: return new TMStatsVisualiser(listeners);
             default: return null;
         }
     }

@@ -27,8 +27,11 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState tmgs = (TMGameState) e.state;
-            ArrayList<Pair<Integer, Integer>> increases = tmgs.getGlobalParameters().get(parameter).getIncreases();
-            return increases.get(increases.size() - 1).a;
+            if (tmgs.getGlobalParameters().containsKey(parameter)) {
+                ArrayList<Pair<Integer, Integer>> increases = tmgs.getGlobalParameters().get(parameter).getIncreases();
+                return increases.get(increases.size() - 1).a;
+            }
+            return 0;
         }
 
         public Object[] getAllowedParameters() { return TMTypes.GlobalParameter.values(); }
@@ -48,7 +51,10 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState tmgs = (TMGameState) e.state;
-            return (tmgs.getGlobalParameters().get(parameter).getIncreasesString());
+            if (tmgs.getGlobalParameters().containsKey(parameter)) {
+                return (tmgs.getGlobalParameters().get(parameter).getIncreasesString());
+            }
+            return "";
         }
         public Object[] getAllowedParameters() { return TMTypes.GlobalParameter.values(); }
     }
@@ -356,11 +362,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         public Object run(GameListener listener, Event e) {
             int count = 0;
             TMGameState s = ((TMGameState)e.state);
-            ArrayList<Pair<Integer, Integer>> increases = s.getGlobalParameters().get(parameter).getIncreases();
-            for (Pair<Integer, Integer> pair: increases) {
-                if (Objects.equals(pair.b, e.playerID)) count++;
+            if (s.getGlobalParameters().containsKey(parameter)) {
+                ArrayList<Pair<Integer, Integer>> increases = s.getGlobalParameters().get(parameter).getIncreases();
+                for (Pair<Integer, Integer> pair : increases) {
+                    if (Objects.equals(pair.b, e.playerID)) count++;
+                }
+                return count * 1.0 / increases.size();
             }
-            return count*1.0 / increases.size();
+            return 0;
         }
         public Object[] getAllowedParameters() { return TMTypes.GlobalParameter.values(); }
     }
@@ -503,6 +512,19 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             return ((TMGameState)e.state).countPointsMilestones(e.playerID);
+        }
+    }
+
+    public static class PlayerPointsAwards extends AbstractMetric {
+
+        public PlayerPointsAwards() {
+            addEventType(Event.GameEvent.GAME_OVER);
+            recordPerPlayer = true;
+        }
+
+        @Override
+        public Object run(GameListener listener, Event e) {
+            return ((TMGameState)e.state).countPointsAwards(e.playerID);
         }
     }
 
@@ -730,7 +752,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         public Object run(GameListener listener, Event e) {
             return ((TMGameState)e.state).getPlayerProduction()[e.playerID].get(type).getValue();
         }
-        public Object[] getAllowedParameters() { return TMTypes.Resource.values(); }
+        public Object[] getAllowedParameters() { return TMTypes.Resource.getPlayerBoardResources(); }
     }
 
     public static class PlayerResource extends AbstractMetric {
@@ -750,7 +772,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         public Object run(GameListener listener, Event e) {
             return ((TMGameState)e.state).getPlayerResources()[e.playerID].get(type).getValue();
         }
-        public Object[] getAllowedParameters() { return TMTypes.Resource.values(); }
+        public Object[] getAllowedParameters() { return TMTypes.Resource.getPlayerBoardResources(); }
     }
 
 
