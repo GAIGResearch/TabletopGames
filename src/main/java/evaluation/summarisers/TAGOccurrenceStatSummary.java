@@ -79,7 +79,8 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
         StringBuilder stb = new StringBuilder();
 
         //header
-        stb.append(name).append("\n").append("\tCount - Measure\n");
+//        stb.append(name).append("\n");
+        stb.append("\tCount - Measure\n");
         for(Object k : elements.keySet())
             sortedByVal.add(new DataMeasure(k.toString(), elements.get(k)));
 

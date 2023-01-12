@@ -118,7 +118,12 @@ public class GameListener {
                         ArrayList<String> keyDeletes = new ArrayList<>();
                         for (String key : dataLogged.keySet()) {
                             TAGStatSummary dataLoggedKey = dataLogged.get(key);
-                            processMetricGameOver(key, dataLoggedKey, gameOverLogger);
+                            Map<String, Object> toRecord = new HashMap<>();
+                            Map<String, Object> summaryData = dataLoggedKey.getSummary(key);
+                            for (String k: summaryData.keySet()) {
+                                toRecord.put(key.split(":")[0] + "(" + k + ")" + ":" + e, summaryData.get(k));
+                            }
+                            gameOverLogger.record(toRecord);
                             if(key.contains(":All:")) keyDeletes.add(key);
                         }
                         for(String kDel : keyDeletes)
@@ -155,10 +160,6 @@ public class GameListener {
             }
         }
         return null;
-    }
-
-    protected void processMetricGameOver(String key, TAGStatSummary dataLogged, IStatisticLogger gameOverLogger) {
-        gameOverLogger.record(dataLogged.getSummary(key));
     }
 
     /**
