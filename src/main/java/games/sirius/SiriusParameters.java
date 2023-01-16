@@ -18,6 +18,7 @@ public class SiriusParameters extends TunableParameters {
     public int cardsPerNonEmptyMoon = 1;
     public int[] medalValues = new int[]{2, 2, 3, 3, 4, 4, 5, 5, 6, 6};
     public int[] ammoniaTrack = new int[] {
+            0,
             0, 0, 0, 0, 1,
             0, 0, 0, 0, 1,
             0, 0, 0, 0, 1,
@@ -25,13 +26,14 @@ public class SiriusParameters extends TunableParameters {
             0, 0, 0, 0, 1
     };
     public int[] contrabandTrack = new int[] {
-            0, 0, 0, 0, 1, 0,
-            0, 0, 0, 0, 0, 0,
-            1, 0, 0, 0, 0, 0,
-            0, 0, 1, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
-            1, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0,
+            0,
+            0, 0, 0, 0, 1,
+            0, 0, 0, 0, 0,
+            1, 0, 0, 0, 0,
+            0, 0, 1, 0, 0,
+            0, 0, 0, 0, 0,
+            1, 0, 0, 0, 0,
+            0, 0, 0, 0, 0,
             1
     };
 
