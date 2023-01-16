@@ -92,6 +92,18 @@ public class TestFavours {
         assertEquals(new FavourForCartel(3), actions.get(4));
     }
 
+    @Test
+    public void pointsForCartels() {
+        assertEquals(0.0, state.getGameScore(2), 0.01);
+        state.getMoon(2).setCartelOwner(2);
+        assertEquals(1.0 * params.pointsPerCartel, state.getGameScore(2), 0.01);
+        state.getMoon(1).setCartelOwner(2);
+        assertEquals(2.0 * params.pointsPerCartel, state.getGameScore(2), 0.01);
+        state.getMoon(1).setCartelOwner(0);
+        assertEquals(1.0 * params.pointsPerCartel, state.getGameScore(2), 0.01);
+        assertEquals(1.0 * params.pointsPerCartel, state.getGameScore(0), 0.01);
+    }
+
 
     @Test
     public void testChangeRankWithFavour() {

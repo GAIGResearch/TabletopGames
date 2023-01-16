@@ -168,7 +168,9 @@ public class SiriusGameState extends AbstractGameState {
 
     @Override
     public double getGameScore(int playerId) {
-        return playerAreas.get(playerId).soldCards.getSize() +
+        SiriusParameters parameters = (SiriusParameters) gameParameters;
+        long cartels = moons.stream().filter(m -> m.cartelPlayer == playerId).count();
+        return cartels * parameters.pointsPerCartel + playerAreas.get(playerId).soldCards.getSize() +
                 playerAreas.get(playerId).medals.stream().mapToInt(m -> m.value).sum();
     }
 

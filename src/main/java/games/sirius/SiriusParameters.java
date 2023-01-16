@@ -16,6 +16,7 @@ public class SiriusParameters extends TunableParameters {
     public int glowingContraband = 9;
     public int cardsPerEmptyMoon = 2;
     public int cardsPerNonEmptyMoon = 1;
+    public int pointsPerCartel = 3;
     public int[] medalValues = new int[]{2, 2, 3, 3, 4, 4, 5, 5, 6, 6};
     public int[] ammoniaTrack = new int[] {
             0,
@@ -45,6 +46,7 @@ public class SiriusParameters extends TunableParameters {
         addTunableParameter("contraband", 9);
         addTunableParameter("brokenContraband", 9);
         addTunableParameter("glowingContraband", 9);
+        addTunableParameter("pointsPerCartel", 3);
     }
 
     @Override
@@ -55,6 +57,7 @@ public class SiriusParameters extends TunableParameters {
         contraband = (int) getParameterValue("contraband");
         brokenContraband = (int) getParameterValue("brokenContraband");
         glowingContraband = (int) getParameterValue("glowingContraband");
+        pointsPerCartel = (int) getParameterValue("pointsPerCartel");
     }
 
     @Override
@@ -68,6 +71,7 @@ public class SiriusParameters extends TunableParameters {
             SiriusParameters other = (SiriusParameters) o;
             return ammonia == other.ammonia && superAmmonia == other.superAmmonia && hyperAmmonia == other.hyperAmmonia &&
                     contraband == other.contraband && brokenContraband == other.brokenContraband && other.glowingContraband == glowingContraband &&
+                    other.pointsPerCartel == pointsPerCartel &&
                     other.cardsPerEmptyMoon == cardsPerEmptyMoon && other.cardsPerNonEmptyMoon == cardsPerNonEmptyMoon;
         }
         return false;
@@ -76,7 +80,7 @@ public class SiriusParameters extends TunableParameters {
     @Override
     public int hashCode() {
         return Objects.hash(ammonia, superAmmonia, hyperAmmonia, contraband, brokenContraband, glowingContraband,
-                cardsPerEmptyMoon, cardsPerNonEmptyMoon);
+                cardsPerEmptyMoon, cardsPerNonEmptyMoon, pointsPerCartel);
     }
 
     @Override
