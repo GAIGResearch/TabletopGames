@@ -1,7 +1,7 @@
 package games.uno;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
@@ -9,14 +9,11 @@ import games.uno.UnoGameParameters.UnoScoring;
 import games.uno.actions.NoCards;
 import games.uno.actions.PlayCard;
 import games.uno.cards.UnoCard;
-import utilities.Utils;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.*;
-import static games.uno.UnoGameParameters.UnoScoring.CHALLENGE;
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class UnoForwardModel extends StandardForwardModel {
 
@@ -249,12 +246,12 @@ public class UnoForwardModel extends StandardForwardModel {
                     );
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
                         if (playerScores[i] == maxScore) {
-                            ugs.setPlayerResult(Utils.GameResult.WIN, i);
+                            ugs.setPlayerResult(CoreConstants.GameResult.WIN, i);
                         } else {
-                            ugs.setPlayerResult(Utils.GameResult.LOSE, i);
+                            ugs.setPlayerResult(CoreConstants.GameResult.LOSE, i);
                         }
                     }
-                    ugs.setGameStatus(Utils.GameResult.GAME_END);
+                    ugs.setGameStatus(CoreConstants.GameResult.GAME_END);
                     return true;
                 case INCREMENTAL:
                     // in this case the game ends when one player breaches the threshold.
@@ -264,12 +261,12 @@ public class UnoForwardModel extends StandardForwardModel {
                     );
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
                         if (playerScores[i] == minScore) {
-                            ugs.setPlayerResult(Utils.GameResult.WIN, i);
+                            ugs.setPlayerResult(CoreConstants.GameResult.WIN, i);
                         } else {
-                            ugs.setPlayerResult(Utils.GameResult.LOSE, i);
+                            ugs.setPlayerResult(CoreConstants.GameResult.LOSE, i);
                         }
                     }
-                    ugs.setGameStatus(Utils.GameResult.GAME_END);
+                    ugs.setGameStatus(CoreConstants.GameResult.GAME_END);
                     return true;
                 case CHALLENGE:
                     // this is the most complicated case
@@ -279,7 +276,7 @@ public class UnoForwardModel extends StandardForwardModel {
                     for (int i = 0; i < ugs.getNPlayers(); i++) {
                         if (ugs.getPlayerResults()[i] == GAME_ONGOING) {
                             if (playerScores[i] >= ugp.nWinPoints) {
-                                ugs.setPlayerResult(Utils.GameResult.LOSE, i);
+                                ugs.setPlayerResult(CoreConstants.GameResult.LOSE, i);
                                 ugs.expulsionRound[i] = ugs.getTurnOrder().getRoundCounter();
                                 if (playerScores[i] < lowScore) {
                                     lowScore = playerScores[i];
@@ -298,20 +295,20 @@ public class UnoForwardModel extends StandardForwardModel {
                         case 0:
                             // everyone breached, so winner is the lowest score
                             for (int p : lowScoreIds) {
-                                ugs.setPlayerResult(Utils.GameResult.WIN, p);
+                                ugs.setPlayerResult(CoreConstants.GameResult.WIN, p);
                                 ugs.expulsionRound[p] = ugs.getTurnOrder().getRoundCounter() + 1;
                             }
-                            ugs.setGameStatus(Utils.GameResult.GAME_END);
+                            ugs.setGameStatus(CoreConstants.GameResult.GAME_END);
                             return true;
                         case 1:
                             for (int p = 0; p < ugs.getNPlayers(); p++) {
                                 if (ugs.getPlayerResults()[p] == GAME_ONGOING) {
-                                    ugs.setPlayerResult(Utils.GameResult.WIN, p);
+                                    ugs.setPlayerResult(CoreConstants.GameResult.WIN, p);
                                     ugs.expulsionRound[p] = ugs.getTurnOrder().getRoundCounter() + 1;
                                 }
                             }
                             // we then continue to the case 1:
-                            ugs.setGameStatus(Utils.GameResult.GAME_END);
+                            ugs.setGameStatus(CoreConstants.GameResult.GAME_END);
                             return true;
                         default:
                             // continue
@@ -353,7 +350,7 @@ public class UnoForwardModel extends StandardForwardModel {
         if (gameState.getCoreGameParameters().verbose) {
             System.out.println("Game Results:");
             for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
-                if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {
+                if (gameState.getPlayerResults()[playerID] == CoreConstants.GameResult.WIN) {
                     System.out.println("The winner is the player : " + playerID);
                     break;
                 }

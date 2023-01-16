@@ -1,13 +1,12 @@
 package games.connect4;
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.components.Token;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -155,8 +154,8 @@ public class Connect4ForwardModel extends StandardForwardModel {
         }
 
         if (!gap) { //tie
-            gameState.setGameStatus(Utils.GameResult.DRAW);
-            Arrays.fill(gameState.getPlayerResults(), Utils.GameResult.DRAW);
+            gameState.setGameStatus(CoreConstants.GameResult.DRAW);
+            Arrays.fill(gameState.getPlayerResults(), CoreConstants.GameResult.DRAW);
             return true;
         }
 
@@ -236,10 +235,10 @@ public class Connect4ForwardModel extends StandardForwardModel {
      * @param winnerSymbol - which player won.
      */
     private void registerWinner(Connect4GameState gameState, Token winnerSymbol, LinkedList<Pair<Integer, Integer>> winPos) {
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
+        gameState.setGameStatus(CoreConstants.GameResult.GAME_END);
         int winningPlayer = Connect4Constants.playerMapping.indexOf(winnerSymbol);
-        gameState.setPlayerResult(Utils.GameResult.WIN, winningPlayer);
-        gameState.setPlayerResult(Utils.GameResult.LOSE, 1 - winningPlayer);
+        gameState.setPlayerResult(CoreConstants.GameResult.WIN, winningPlayer);
+        gameState.setPlayerResult(CoreConstants.GameResult.LOSE, 1 - winningPlayer);
         gameState.registerWinningCells(winPos);
     }
 }

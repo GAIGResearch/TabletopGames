@@ -2,9 +2,9 @@ package gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import players.human.ActionController;
-import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,7 +70,7 @@ public abstract class AbstractGUIManager {
      * @param gameState - current game state to be used in updating visuals.
      */
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && !(actionButtons == null)) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !(actionButtons == null)) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 actionButtons[i].setVisible(true);

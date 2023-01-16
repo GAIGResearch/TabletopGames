@@ -2,11 +2,11 @@ package core.rules;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.rules.nodetypes.BranchingRuleNode;
 import core.rules.nodetypes.ConditionNode;
 import core.rules.nodetypes.RuleNode;
-import utilities.Utils;
 
 import java.util.HashMap;
 
@@ -59,7 +59,7 @@ public abstract class AbstractRuleBasedForwardModel extends AbstractForwardModel
      */
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.getGameStatus() != Utils.GameResult.GAME_ONGOING) return;
+        if (currentState.getGameStatus() != CoreConstants.GameResult.GAME_ONGOING) return;
         
         if (nextRule == null) {
             nextRule = lastRule.getNext();  // Go back to parent, skip it and go to next rule

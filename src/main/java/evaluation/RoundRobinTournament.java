@@ -18,7 +18,7 @@ import java.io.FileWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static utilities.Utils.GameResult;
+import static core.CoreConstants.GameResult;
 import static utilities.Utils.getArg;
 
 

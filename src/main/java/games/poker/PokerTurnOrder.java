@@ -1,13 +1,12 @@
 package games.poker;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.turnorders.AlternatingTurnOrder;
 import evaluation.metrics.Event;
 
 import java.util.Arrays;
 
-import static utilities.Utils.GameResult.*;
+import static core.CoreConstants.GameResult.*;
 
 public class PokerTurnOrder extends AlternatingTurnOrder {
     int roundFirstPlayer;

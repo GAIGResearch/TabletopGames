@@ -1,6 +1,7 @@
 package games.virus;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
@@ -8,7 +9,6 @@ import games.virus.actions.*;
 import games.virus.cards.VirusCard;
 import games.virus.cards.VirusTreatmentCard;
 import games.virus.components.VirusBody;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -52,7 +52,7 @@ public class VirusForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         checkGameEnd((VirusGameState) gameState);
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING)
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING)
             gameState.getTurnOrder().endPlayerTurn(gameState);
     }
 
@@ -134,10 +134,10 @@ public class VirusForwardModel extends StandardForwardModel {
             }
         }
         int nMaxRounds = ((VirusGameParameters) vgs.getGameParameters()).nMaxRounds;
-        if (vgs.getGameStatus() == Utils.GameResult.GAME_ONGOING && vgs.getTurnOrder().getRoundCounter() >= nMaxRounds) {
+        if (vgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && vgs.getTurnOrder().getRoundCounter() >= nMaxRounds) {
             for (int i = 0; i < vgs.getNPlayers(); i++) {
-                vgs.setPlayerResult(Utils.GameResult.DRAW, i);
-                vgs.setGameStatus(Utils.GameResult.GAME_END);
+                vgs.setPlayerResult(CoreConstants.GameResult.DRAW, i);
+                vgs.setGameStatus(CoreConstants.GameResult.GAME_END);
             }
         }
     }
@@ -447,7 +447,7 @@ public class VirusForwardModel extends StandardForwardModel {
         if (gameState.getCoreGameParameters().verbose) {
             System.out.println("Game Results:");
             for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
-                if (gameState.getPlayerResults()[playerID] == Utils.GameResult.WIN) {
+                if (gameState.getPlayerResults()[playerID] == CoreConstants.GameResult.WIN) {
                     System.out.println("The winner is the player : " + playerID);
                     break;
                 }

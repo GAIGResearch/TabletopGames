@@ -1,9 +1,9 @@
 package games.uno;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
-import utilities.Utils;
 
 public class UnoHeuristic extends TunableParameters implements IStateHeuristic {
 
@@ -28,11 +28,11 @@ public class UnoHeuristic extends TunableParameters implements IStateHeuristic {
     public double evaluateState(AbstractGameState gs, int playerId) {
         UnoGameState ugs = (UnoGameState) gs;
         UnoGameParameters ugp = ((UnoGameParameters) ugs.getGameParameters());
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (playerResult == Utils.GameResult.LOSE)
+        if (playerResult == CoreConstants.GameResult.LOSE)
             return -1;
-        if (playerResult == Utils.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN)
             return 1;
 
         int nColors = ugp.colors.length;

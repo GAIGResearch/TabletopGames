@@ -9,7 +9,6 @@ import players.PlayerConstants;
 import players.mcts.*;
 import players.simple.RandomPlayer;
 import evaluation.loggers.SummaryLogger;
-import utilities.Utils;
 
 import java.util.*;
 import java.util.function.*;
@@ -85,13 +84,13 @@ public class RewardsForParanoiaTests {
                 .map(SingleTreeNode::getActor)
                 .collect(groupingBy(Function.identity(), counting()));
         // we then check that all players have som nodes in the tree
-        Utils.GameResult[] results = mctsPlayer.getRoot(0).getState().getPlayerResults();
+        CoreConstants.GameResult[] results = mctsPlayer.getRoot(0).getState().getPlayerResults();
         System.out.println("Nodes by player: " + nodeCountByDecisionMaker);
-        if (results[0] == Utils.GameResult.GAME_ONGOING)
+        if (results[0] == CoreConstants.GameResult.GAME_ONGOING)
             assertTrue(nodeCountByDecisionMaker.get(0) > 10);
-        if (results[1] == Utils.GameResult.GAME_ONGOING)
+        if (results[1] == CoreConstants.GameResult.GAME_ONGOING)
             assertTrue(nodeCountByDecisionMaker.get(1) > 10);
-        if (results[2] == Utils.GameResult.GAME_ONGOING)
+        if (results[2] == CoreConstants.GameResult.GAME_ONGOING)
             assertTrue(nodeCountByDecisionMaker.get(2) > 10);
         return true;
     };

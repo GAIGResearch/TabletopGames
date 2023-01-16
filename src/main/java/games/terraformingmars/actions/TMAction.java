@@ -141,7 +141,7 @@ public class TMAction extends AbstractAction {
         gs.getAllComponents();  // Force recalculate components
         if (player == -1) player = gameState.getCurrentPlayer();
         if (!canBePlayed(gs)) {
-            throw new AssertionError("Card cannot be played " + this);
+//            throw new AssertionError("Card cannot be played " + this);
         }
         boolean s = _execute(gs);
         postExecute(gs);

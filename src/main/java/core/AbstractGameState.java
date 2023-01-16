@@ -10,13 +10,12 @@ import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
 import games.GameType;
 import utilities.ElapsedCpuChessTimer;
-import utilities.Utils;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
-import static utilities.Utils.GameResult.*;
+import static core.CoreConstants.GameResult.*;
 
 
 /**
@@ -45,8 +44,8 @@ public abstract class AbstractGameState {
     // Game being played
     protected final GameType gameType;
     // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
-    protected Utils.GameResult gameStatus;
-    protected Utils.GameResult[] playerResults;
+    protected CoreConstants.GameResult gameStatus;
+    protected CoreConstants.GameResult[] playerResults;
     // Current game phase
     protected IGamePhase gamePhase;
     // Stack for extended actions
@@ -83,7 +82,7 @@ public abstract class AbstractGameState {
         turnOrder.reset();
         allComponents = new Area(-1, "All Components");
         gameStatus = GAME_ONGOING;
-        playerResults = new Utils.GameResult[getNPlayers()];
+        playerResults = new CoreConstants.GameResult[getNPlayers()];
         Arrays.fill(playerResults, GAME_ONGOING);
         history = new ArrayList<>();
         historyText = new ArrayList<>();
@@ -99,7 +98,7 @@ public abstract class AbstractGameState {
         reset();
     }
 
-    public final void setPlayerResult(Utils.GameResult result, int playerIdx) {
+    public final void setPlayerResult(CoreConstants.GameResult result, int playerIdx) {
         this.playerResults[playerIdx] = result;
     }
 
@@ -117,11 +116,11 @@ public abstract class AbstractGameState {
         return turnOrder.getCurrentPlayer(this);
     }
 
-    public final Utils.GameResult getGameStatus() {
+    public final CoreConstants.GameResult getGameStatus() {
         return gameStatus;
     }
 
-    public final void setGameStatus(Utils.GameResult status) {
+    public final void setGameStatus(CoreConstants.GameResult status) {
         this.gameStatus = status;
     }
 
@@ -133,7 +132,7 @@ public abstract class AbstractGameState {
         return turnOrder.nPlayers();
     }
 
-    public final Utils.GameResult[] getPlayerResults() {
+    public final CoreConstants.GameResult[] getPlayerResults() {
         return playerResults;
     }
 
@@ -267,7 +266,7 @@ public abstract class AbstractGameState {
     }
 
     public final void endGame() {
-        setGameStatus(Utils.GameResult.GAME_END);
+        setGameStatus(CoreConstants.GameResult.GAME_END);
         // If we have more than one person in Ordinal position of 1, then this is a draw
         boolean drawn = IntStream.range(0, getNPlayers()).map(this::getOrdinalPosition).filter(i -> i == 1).count() > 1;
         for (int p = 0; p < getNPlayers(); p++) {

@@ -2,15 +2,11 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import evaluation.loggers.FileStatsLogger;
-import evaluation.loggers.SummaryLogger;
 import evaluation.metrics.GameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.metrics.Event;
 import games.GameType;
-import games.pandemic.stats.PandemicMetrics;
-import games.sushigo.metrics.SushiGoMetrics;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
@@ -323,9 +319,9 @@ public class Game {
      */
     public static void recordPlayerResults(TAGNumericStatSummary[] statSummaries, Game game) {
         int nPlayers = statSummaries.length;
-        Utils.GameResult[] results = game.getGameState().getPlayerResults();
+        CoreConstants.GameResult[] results = game.getGameState().getPlayerResults();
         for (int p = 0; p < nPlayers; p++) {
-            if (results[p] == Utils.GameResult.WIN || results[p] == Utils.GameResult.LOSE || results[p] == Utils.GameResult.DRAW) {
+            if (results[p] == CoreConstants.GameResult.WIN || results[p] == CoreConstants.GameResult.LOSE || results[p] == CoreConstants.GameResult.DRAW) {
                 statSummaries[p].add(results[p].value);
             }
         }

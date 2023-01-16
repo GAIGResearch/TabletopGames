@@ -1,5 +1,6 @@
 package games.dotsboxes;
 
+import core.CoreConstants;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import core.AbstractGameState;
@@ -11,7 +12,6 @@ import javax.swing.*;
 import java.awt.*;
 
 import utilities.ImageIO;
-import utilities.Utils;
 
 import java.util.List;
 
@@ -109,7 +109,7 @@ public class DBGUIManager extends AbstractGUIManager {
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         DBEdge db = view.getHighlight();
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && db != null) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && db != null) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             boolean found = false;
             for (AbstractAction a: actions) {

@@ -13,7 +13,7 @@ import games.pandemic.PandemicParameters;
 import utilities.Hash;
 
 import static games.pandemic.PandemicConstants.*;
-import static utilities.Utils.GameResult.WIN;
+import static core.CoreConstants.GameResult.WIN;
 public class PandemicCompetitionMetrics implements IMetricsCollection {
 
     public static class GameWin extends AbstractMetric {

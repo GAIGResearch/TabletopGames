@@ -1,6 +1,5 @@
 package games.loveletter;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
@@ -10,7 +9,6 @@ import core.interfaces.IGamePhase;
 import games.GameType;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -53,7 +51,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
         // Reset player status
         for (int i = 0; i < llgs.getNPlayers(); i++) {
-            llgs.setPlayerResult(Utils.GameResult.GAME_ONGOING, i);
+            llgs.setPlayerResult(GameResult.GAME_ONGOING, i);
         }
 
         // Add all cards to the draw pile
@@ -162,7 +160,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
         int playersAlive = 0;
         int soleWinner = -1;
         for (int i = 0; i < llgs.getNPlayers(); i++) {
-            if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE && llgs.playerHandCards.get(i).getSize() > 0) {
+            if (llgs.getPlayerResults()[i] != GameResult.LOSE && llgs.playerHandCards.get(i).getSize() > 0) {
                 playersAlive += 1;
                 soleWinner = i;
             }
@@ -241,7 +239,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
             HashSet<Integer> bestPlayers = new HashSet<>();
             int bestValue = 0;
             for (int i = 0; i < llgs.getNPlayers(); i++) {
-                if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE) {
+                if (llgs.getPlayerResults()[i] != GameResult.LOSE) {
                     int points = llgs.playerHandCards.get(i).peek().cardType.getValue();
                     if (points > bestValue){
                         bestValue = points;
@@ -324,7 +322,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
                 switch (playerDeck.getComponents().get(card).cardType) {
                     case Priest:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
                                 continue;
                             actions.add(new PriestAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
@@ -333,7 +331,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
                     case Guard:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
                                 continue;
                             for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values())
                                 if (type != LoveLetterCard.CardType.Guard) {
@@ -345,7 +343,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
                     case Baron:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
                                 continue;
                             actions.add(new BaronAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
@@ -359,7 +357,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
                     case Prince:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
                                 continue;
                             actions.add(new PrinceAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
@@ -368,7 +366,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
                     case King:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
                                 continue;
                             actions.add(new KingAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));

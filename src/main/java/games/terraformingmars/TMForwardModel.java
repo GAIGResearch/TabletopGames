@@ -13,7 +13,6 @@ import games.terraformingmars.components.Milestone;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.requirements.TagOnCardRequirement;
-import utilities.Utils;
 import utilities.Vector2D;
 
 import java.util.*;
@@ -290,12 +289,12 @@ public class TMForwardModel extends StandardForwardModel {
 
                     if (gs.getNPlayers() == 1) {
                         // If solo, game goes for 14 generations regardless of global parameters
-                        Utils.GameResult won = Utils.GameResult.WIN;
+                        CoreConstants.GameResult won = CoreConstants.GameResult.WIN;
                         for (TMTypes.GlobalParameter p : gs.globalParameters.keySet()) {
                             if (p != null && p.countsForEndGame() && !gs.globalParameters.get(p).isMaximum())
-                                won = Utils.GameResult.LOSE;
+                                won = CoreConstants.GameResult.LOSE;
                         }
-                        gs.setGameStatus(Utils.GameResult.GAME_END);
+                        gs.setGameStatus(CoreConstants.GameResult.GAME_END);
                         gs.setPlayerResult(won, 0);
                     } else {
                         gs.endGame();

@@ -1,5 +1,6 @@
 package games.sushigo.metrics;
 
+import core.CoreConstants;
 import core.components.Deck;
 import evaluation.metrics.*;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
@@ -8,10 +9,7 @@ import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
-import games.terraformingmars.TMGameState;
-import games.terraformingmars.components.TMCard;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -117,7 +115,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         public Object run(GameListener listener, Event e) {
             SGGameState gs = (SGGameState) e.state;
             for (int i = 0; i < gs.getNPlayers(); i++) {
-                if (gs.getPlayerResults()[i] == Utils.GameResult.WIN) {
+                if (gs.getPlayerResults()[i] == CoreConstants.GameResult.WIN) {
                     return gs.getPlayedCardTypesAllGame()[i].get(type).getValue();
                 }
             }

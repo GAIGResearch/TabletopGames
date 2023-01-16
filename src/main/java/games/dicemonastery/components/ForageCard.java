@@ -1,5 +1,6 @@
 package games.dicemonastery.components;
 
+import core.CoreConstants;
 import core.components.Component;
 import core.properties.*;
 import utilities.*;
@@ -31,7 +32,7 @@ public class ForageCard extends Component {
     }
 
     private ForageCard(int green, int red, int blue) {
-        super(Utils.ComponentType.CARD, "Forage Card");
+        super(CoreConstants.ComponentType.CARD, "Forage Card");
         this.blue = blue;
         this.green = green;
         this.red = red;

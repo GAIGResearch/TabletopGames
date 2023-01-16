@@ -1,4 +1,5 @@
 package games.terraformingmars.stats;
+import core.CoreConstants;
 import evaluation.metrics.*;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
@@ -8,7 +9,6 @@ import games.terraformingmars.components.Milestone;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.components.TMMapTile;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -402,7 +402,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState s = ((TMGameState)e.state);
-            if (s.getPlayerResults()[e.playerID] == Utils.GameResult.WIN) return s.getPlayerCorporations()[e.playerID].getComponentName();
+            if (s.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN) return s.getPlayerCorporations()[e.playerID].getComponentName();
             else return "";
         }
     }
@@ -461,7 +461,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState s = ((TMGameState)e.state);
-            if (s.getPlayerResults()[e.playerID] == Utils.GameResult.WIN) {
+            if (s.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN) {
                 StringBuilder ss = new StringBuilder();
                 for (TMCard card : s.getPlayedCards()[e.playerID].getComponents()) {
                     ss.append(card.getComponentName()).append(",");

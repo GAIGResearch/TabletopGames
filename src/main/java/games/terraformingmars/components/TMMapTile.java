@@ -1,19 +1,15 @@
 package games.terraformingmars.components;
 
 import core.components.Component;
-import core.components.Counter;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.ModifyGlobalParameter;
-import games.terraformingmars.rules.effects.Bonus;
-import games.terraformingmars.rules.effects.Effect;
-import games.terraformingmars.rules.effects.GlobalParameterEffect;
 import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-import static utilities.Utils.ComponentType.BOARD_NODE;
+import static core.CoreConstants.ComponentType.BOARD_NODE;
 
 public class TMMapTile extends Component {
     int x, y;

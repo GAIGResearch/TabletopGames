@@ -13,7 +13,6 @@ import games.explodingkittens.actions.reactions.GiveCard;
 import games.explodingkittens.actions.reactions.PassAction;
 import games.explodingkittens.actions.reactions.PlaceExplodingKitten;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -221,7 +220,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                 case ATTACK:
                     for (int targetPlayer = 0; targetPlayer < ekgs.getNPlayers(); targetPlayer++) {
 
-                        if (targetPlayer == playerID || ekgs.getPlayerResults()[targetPlayer] != Utils.GameResult.GAME_ONGOING)
+                        if (targetPlayer == playerID || ekgs.getPlayerResults()[targetPlayer] != CoreConstants.GameResult.GAME_ONGOING)
                             continue;
 
                         actions.add(new AttackAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, targetPlayer));

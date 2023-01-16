@@ -1,19 +1,19 @@
 package games.uno;
 
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
 import games.GameType;
 import games.uno.cards.*;
-import utilities.Utils;
 
 import java.util.*;
 
 import static games.uno.UnoGameParameters.UnoScoring.*;
 import static games.uno.cards.UnoCard.UnoCardType.Wild;
-import static utilities.Utils.GameResult.*;
+import static core.CoreConstants.GameResult.*;
 
 public class UnoGameState extends AbstractGameState implements IPrintable {
     List<Deck<UnoCard>> playerDecks;
@@ -192,7 +192,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int getOrdinalPosition(int playerId) {
-        if (playerResults[playerId] == Utils.GameResult.WIN)
+        if (playerResults[playerId] == CoreConstants.GameResult.WIN)
             return 1;
         UnoGameParameters ugp = (UnoGameParameters) gameParameters;
         if (ugp.scoringMethod == CHALLENGE) {

@@ -1,10 +1,10 @@
 package games.sushigo;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.Deck;
 import core.turnorders.StandardTurnOrder;
 import games.sushigo.cards.SGCard;
-import utilities.Utils;
 
 import java.util.Random;
 
@@ -16,7 +16,7 @@ public class SGTurnOrder extends StandardTurnOrder {
 
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
-        if(gameState.getGameStatus() != Utils.GameResult.GAME_ONGOING) return;
+        if(gameState.getGameStatus() != CoreConstants.GameResult.GAME_ONGOING) return;
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));
     }

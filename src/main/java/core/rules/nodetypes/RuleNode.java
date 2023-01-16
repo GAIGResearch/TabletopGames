@@ -1,13 +1,13 @@
 package core.rules.nodetypes;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.rules.GameOverCondition;
 import core.rules.Node;
-import utilities.Utils;
 
 import java.util.ArrayList;
 
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 /**
  * Executes a piece of game logic and moves on to the next Node. Can trigger game end if it has game over conditions
@@ -73,7 +73,7 @@ public abstract class RuleNode extends Node {
         boolean interrupted = !run(gs);
         if (gameOverConditions != null && gameOverConditions.size() > 0) {
             for (GameOverCondition goc: gameOverConditions) {  // TODO: this triggers first condition, maybe order matters/loss first
-                Utils.GameResult result = goc.test(gs);
+                CoreConstants.GameResult result = goc.test(gs);
                 if (result != GAME_ONGOING) {
                     gs.setGameStatus(result);
 //                    childNext = null;

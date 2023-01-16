@@ -1,5 +1,6 @@
 package games.loveletter.stats;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import evaluation.metrics.AbstractMetric;
@@ -12,7 +13,6 @@ import games.loveletter.actions.GuardAction;
 import games.loveletter.actions.PrinceAction;
 import games.loveletter.actions.PrincessAction;
 import games.loveletter.cards.LoveLetterCard;
-import utilities.Utils;
 
 public class LoveLetterMetrics implements IMetricsCollection {
 
@@ -46,7 +46,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             StringBuilder ss = new StringBuilder();
-            if (e.state.getPlayerResults()[e.playerID] == Utils.GameResult.WIN) {
+            if (e.state.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN) {
                 Deck<LoveLetterCard> played = ((LoveLetterGameState)e.state).getPlayerDiscardCards().get(e.playerID);
                 for (LoveLetterCard card : played.getComponents()) {
                     ss.append(card.cardType).append(",");
@@ -94,12 +94,12 @@ public class LoveLetterMetrics implements IMetricsCollection {
             if(e.type == Event.GameEvent.ACTION_TAKEN){
                 processAction(e.state, e.action);
             }else if(e.type == Event.GameEvent.GAME_OVER) {
-                Utils.GameResult[] results = e.state.getPlayerResults();
+                CoreConstants.GameResult[] results = e.state.getPlayerResults();
                 String winStr = null, loseStr = null;
                 for (int i = 0; i < results.length; i++) {
-                    if(results[i] == Utils.GameResult.WIN)
+                    if(results[i] == CoreConstants.GameResult.WIN)
                         winStr = "Win: " + processCards(winningCards, i);
-                    else if (results[i] == Utils.GameResult.LOSE)
+                    else if (results[i] == CoreConstants.GameResult.LOSE)
                         loseStr = "Lose: " + processCards(losingCards, i);
                 }
                 return winStr + " " + loseStr;
@@ -121,7 +121,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
 
         private void processAction(AbstractGameState state, AbstractAction action) {
 
-            if((state.getGameStatus() == Utils.GameResult.GAME_END))
+            if((state.getGameStatus() == CoreConstants.GameResult.GAME_END))
             {
                 winningCards = "NA";
                 losingCards = "NA";
@@ -133,7 +133,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
                 String[] tokens = lastAction.split(" ");
                 int whoPlayedIt = Integer.parseInt(tokens[1]);
 
-                boolean playAndWin = llgs.getPlayerResults()[whoPlayedIt] == Utils.GameResult.WIN;
+                boolean playAndWin = llgs.getPlayerResults()[whoPlayedIt] == CoreConstants.GameResult.WIN;
 
                 if(action instanceof PrincessAction)
                 {
@@ -188,7 +188,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
                     losingCards  = ("Guard (opp)");
                 }else if(action instanceof PrinceAction)
                 {
-                    if(llgs.getPlayerResults()[currentPlayerID] == Utils.GameResult.WIN) { //made the opponent discard princess.
+                    if(llgs.getPlayerResults()[currentPlayerID] == CoreConstants.GameResult.WIN) { //made the opponent discard princess.
                         winningCards = ("Prince");
                         losingCards = "Prince (opp)";
                     }else{
@@ -206,9 +206,9 @@ public class LoveLetterMetrics implements IMetricsCollection {
             for(int i = 0; i < llgs.getPlayerResults().length; ++i)
             {
                 int numCardsPlayerHand = llgs.getPlayerHandCards().get(i).getSize();
-                if(llgs.getPlayerResults()[i] == Utils.GameResult.WIN && numCardsPlayerHand>0)
+                if(llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN && numCardsPlayerHand>0)
                     winningCards = (llgs.getPlayerHandCards().get(i).get(0).cardType + " (end)");
-                else if (llgs.getPlayerResults()[i] == Utils.GameResult.LOSE  && numCardsPlayerHand>0)
+                else if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.LOSE  && numCardsPlayerHand>0)
                     losingCards = (llgs.getPlayerHandCards().get(i).get(0).cardType + " (end)");
                 else{
                     //This is a draw in the showdown.

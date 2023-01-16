@@ -1,10 +1,7 @@
 package games.poker.gui;
 
-import core.CoreParameters;
+import core.*;
 import gui.AbstractGUIManager;
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.Game;
 import games.poker.PokerForwardModel;
 import games.poker.PokerGameParameters;
 import games.poker.PokerGameState;
@@ -14,7 +11,6 @@ import gui.ScreenHighlight;
 import players.human.ActionController;
 import utilities.ImageIO;
 import utilities.Pair;
-import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -285,7 +281,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 for (int i = 0; i < pgs.getNPlayers(); i++) {
                     playerHands[i].setFront(true);
                     // Highlight fold and eliminated players
-                    if (pgs.getPlayerResults()[i] == Utils.GameResult.LOSE) {
+                    if (pgs.getPlayerResults()[i] == CoreConstants.GameResult.LOSE) {
                         playerHands[i].setBorder(playerViewCompoundBordersEliminated[i]);
                     } else if (pgs.getPlayerFold()[i]) {
                         playerHands[i].setBorder(playerViewCompoundBordersFold[i]);
@@ -336,7 +332,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 }
 
                 // Highlight active, first and fold players
-                if (gameState.getPlayerResults()[i] == Utils.GameResult.LOSE) {
+                if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.LOSE) {
                     playerHands[i].setBorder(playerViewCompoundBordersEliminated[i]);
                 } else if (i == gameState.getTurnOrder().getFirstPlayer()) {
                     playerHands[i].setBorder(playerViewCompoundBordersFirst[i]);

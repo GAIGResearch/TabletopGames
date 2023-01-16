@@ -1,11 +1,11 @@
 package games.blackjack;
 
+import core.CoreConstants;
 import core.turnorders.AlternatingTurnOrder;
 import core.AbstractGameState;
 import core.turnorders.TurnOrder;
-import utilities.Utils;
 
-import static utilities.Utils.GameResult.*;
+import static core.CoreConstants.GameResult.*;
 
 public class BlackjackTurnOrder extends AlternatingTurnOrder {
 
@@ -34,20 +34,20 @@ public class BlackjackTurnOrder extends AlternatingTurnOrder {
             bjgs.setPlayerResult(GAME_END, bjgs.dealerPlayer);
             if (score[bjgs.dealerPlayer] > params.winScore) {
                 // Dealer went bust, everyone else wins
-                bjgs.setPlayerResult(Utils.GameResult.LOSE, bjgs.dealerPlayer);
+                bjgs.setPlayerResult(CoreConstants.GameResult.LOSE, bjgs.dealerPlayer);
             }
 
             for (int i = 0; i < bjgs.getNPlayers()-1; i++) {  // Check all players and compare to dealer
                 if (bjgs.getPlayerResults()[i] != LOSE) {
                     if (score[bjgs.dealerPlayer] > params.winScore) {
                         // Dealer went bust, everyone else wins
-                        bjgs.setPlayerResult(Utils.GameResult.WIN, i);
+                        bjgs.setPlayerResult(CoreConstants.GameResult.WIN, i);
                     } else if (score[bjgs.dealerPlayer] > score[i]) {
-                        bjgs.setPlayerResult(Utils.GameResult.LOSE, i);
+                        bjgs.setPlayerResult(CoreConstants.GameResult.LOSE, i);
                     } else if (score[bjgs.dealerPlayer] < score[i]) {
-                        bjgs.setPlayerResult(Utils.GameResult.WIN, i);
+                        bjgs.setPlayerResult(CoreConstants.GameResult.WIN, i);
                     } else if (score[bjgs.dealerPlayer] == score[i]) {
-                        bjgs.setPlayerResult(Utils.GameResult.DRAW, i);
+                        bjgs.setPlayerResult(CoreConstants.GameResult.DRAW, i);
                     }
                 }
             }

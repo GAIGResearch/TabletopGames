@@ -1,6 +1,8 @@
 package evaluation.summarisers;
 
 import org.jetbrains.annotations.NotNull;
+import utilities.Pair;
+
 import java.util.*;
 /**
  * This class is used to model the statistics of several numbers.  For the statistics
@@ -65,6 +67,43 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
         for (Object x : xa) {
             add(x);
         }
+    }
+
+    public void add(double[] xa) {
+        for (double x : xa) {
+            add(x);
+        }
+    }
+    public void add(int[] xa) {
+        for (int x : xa) {
+            add(x);
+        }
+    }
+
+    public Pair<Object, Integer> getHighestOccurrence() {
+        Object maxO = null;
+        int max = 0;
+        for (Object o: elements.keySet()) {
+            if (elements.get(o) > max) {
+                max = elements.get(o);
+                maxO = o;
+            }
+        }
+        if (maxO != null) return new Pair<>(maxO, max);
+        return null;
+    }
+
+    public Pair<Object, Integer> getLowestOccurrence() {
+        Object minO = null;
+        int min = Integer.MAX_VALUE;
+        for (Object o: elements.keySet()) {
+            if (elements.get(o) < min) {
+                min = elements.get(o);
+                minO = o;
+            }
+        }
+        if (minO != null) return new Pair<>(minO, min);
+        return null;
     }
 
     @Override

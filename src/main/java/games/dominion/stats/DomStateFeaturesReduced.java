@@ -1,12 +1,12 @@
 package games.dominion.stats;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateFeatureVector;
 import games.dominion.DominionConstants;
 import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
-import utilities.Utils;
 
 public class DomStateFeaturesReduced implements IStateFeatureVector {
 
@@ -17,7 +17,7 @@ public class DomStateFeaturesReduced implements IStateFeatureVector {
     @Override
     public double[] featureVector(AbstractGameState gs, int playerId) {
         DominionGameState state = (DominionGameState) gs;
-        Utils.GameResult playerResult = state.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = state.getPlayerResults()[playerId];
 
         double[] retValue = new double[names.length];
 

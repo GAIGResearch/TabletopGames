@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.turnorders.AlternatingTurnOrder;
 import core.turnorders.TurnOrder;
 
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 
 public class LoveLetterTurnOrder extends AlternatingTurnOrder {

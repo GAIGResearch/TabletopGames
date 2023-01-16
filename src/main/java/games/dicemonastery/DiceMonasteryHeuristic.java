@@ -1,10 +1,10 @@
 package games.dicemonastery;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import games.dicemonastery.components.Monk;
-import utilities.Utils;
 
 import java.util.Arrays;
 
@@ -67,7 +67,7 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
     public double evaluateState(AbstractGameState gs, int playerId) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
-        Utils.GameResult playerResult = state.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = state.getPlayerResults()[playerId];
 
         if (!gs.isNotTerminal()) {
             if (scoreOnly) {

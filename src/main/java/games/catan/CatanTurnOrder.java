@@ -9,7 +9,7 @@ import core.turnorders.TurnOrder;
 import java.util.LinkedList;
 
 import static games.catan.CatanGameState.CatanGamePhase.*;
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class CatanTurnOrder extends ReactiveTurnOrder {
     protected int turnStep;

@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
 
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class ReactiveTurnOrder extends TurnOrder {
 

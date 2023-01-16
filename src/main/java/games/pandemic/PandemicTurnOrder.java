@@ -3,12 +3,11 @@ package games.pandemic;
 import core.AbstractGameState;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
-import utilities.Utils;
 
 import java.util.LinkedList;
 import java.util.Objects;
 
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class PandemicTurnOrder extends ReactiveTurnOrder {
     protected int nStepsPerTurn;  // Number of steps in a turn before player's turn is finished

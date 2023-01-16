@@ -1,13 +1,12 @@
 package games.tictactoe;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.components.Token;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +44,7 @@ public class TicTacToeForwardModel extends StandardForwardModel {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) currentState.getGameParameters();
         int gridSize = tttgp.gridSize;
         if (currentState.getTurnOrder().getRoundCounter() == (gridSize * gridSize)) {
-            currentState.setGameStatus(Utils.GameResult.GAME_END);
+            currentState.setGameStatus(CoreConstants.GameResult.GAME_END);
             return;
         }
 
@@ -136,8 +135,8 @@ public class TicTacToeForwardModel extends StandardForwardModel {
         boolean tie = gridBoard.getComponents().stream().noneMatch(t -> t.getTokenType().equals(TicTacToeConstants.emptyCell));
 
         if (tie) {
-            gameState.setGameStatus(Utils.GameResult.DRAW);
-            Arrays.fill(gameState.getPlayerResults(), Utils.GameResult.DRAW);
+            gameState.setGameStatus(CoreConstants.GameResult.DRAW);
+            Arrays.fill(gameState.getPlayerResults(), CoreConstants.GameResult.DRAW);
         }
 
         return tie;
@@ -156,9 +155,9 @@ public class TicTacToeForwardModel extends StandardForwardModel {
      * @param winnerSymbol - which player won.
      */
     private void registerWinner(TicTacToeGameState gameState, Token winnerSymbol) {
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
+        gameState.setGameStatus(CoreConstants.GameResult.GAME_END);
         int winningPlayer = TicTacToeConstants.playerMapping.indexOf(winnerSymbol);
-        gameState.setPlayerResult(Utils.GameResult.WIN, winningPlayer);
-        gameState.setPlayerResult(Utils.GameResult.LOSE, 1 - winningPlayer);
+        gameState.setPlayerResult(CoreConstants.GameResult.WIN, winningPlayer);
+        gameState.setPlayerResult(CoreConstants.GameResult.LOSE, 1 - winningPlayer);
     }
 }

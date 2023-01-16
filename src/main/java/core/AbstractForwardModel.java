@@ -2,7 +2,6 @@ package core;
 
 import core.actions.AbstractAction;
 import utilities.ElapsedCpuChessTimer;
-import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,9 +17,9 @@ public abstract class AbstractForwardModel {
      * @param firstState - initial state.
      */
     protected void abstractSetup(AbstractGameState firstState) {
-        firstState.gameStatus = Utils.GameResult.GAME_ONGOING;
-        firstState.playerResults = new Utils.GameResult[firstState.getNPlayers()];
-        Arrays.fill(firstState.playerResults, Utils.GameResult.GAME_ONGOING);
+        firstState.gameStatus = CoreConstants.GameResult.GAME_ONGOING;
+        firstState.playerResults = new CoreConstants.GameResult[firstState.getNPlayers()];
+        Arrays.fill(firstState.playerResults, CoreConstants.GameResult.GAME_ONGOING);
         firstState.gamePhase = CoreConstants.DefaultGamePhase.Main;
         firstState.playerTimer = new ElapsedCpuChessTimer[firstState.getNPlayers()];
         for (int i = 0; i < firstState.getNPlayers(); i++) {
@@ -101,7 +100,7 @@ public abstract class AbstractForwardModel {
      */
     protected final void disqualifyOrRandomAction(boolean flag, AbstractGameState gameState) {
         if (flag) {
-            gameState.setPlayerResult(Utils.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
+            gameState.setPlayerResult(CoreConstants.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
             gameState.turnOrder.endPlayerTurn(gameState);
         } else {
             List<AbstractAction> possibleActions = computeAvailableActions(gameState);

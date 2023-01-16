@@ -1,10 +1,10 @@
 package games.poker;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.FrenchCard;
 import core.interfaces.*;
 import evaluation.TunableParameters;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -71,7 +71,7 @@ public class PokerHeuristic extends TunableParameters implements IStateHeuristic
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
         PokerGameState pgs = (PokerGameState) gs;
         PokerGameParameters params = (PokerGameParameters) pgs.getGameParameters();
 
@@ -80,7 +80,7 @@ public class PokerHeuristic extends TunableParameters implements IStateHeuristic
             maxMoney = gs.getNPlayers() * params.nStartingMoney; // all of the money in the game
         }
 
-        if (playerResult != Utils.GameResult.GAME_ONGOING)
+        if (playerResult != CoreConstants.GameResult.GAME_ONGOING)
             return pgs.playerMoney[playerId].getValue() / maxMoney;
         // given the nature of Poker, we do not return Win/Lose, but the amount of money at the end of the game
         // as a fraction of the total the player could have won

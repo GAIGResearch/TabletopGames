@@ -4,7 +4,6 @@ import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IComponentContainer;
 import games.virus.cards.VirusCard;
-import utilities.Utils;
 
 import java.util.List;
 
@@ -28,14 +27,14 @@ public class VirusOrgan extends Component implements IComponentContainer<VirusCa
 
     public VirusOrgan()
     {
-        super(Utils.ComponentType.TOKEN);
+        super(ComponentType.TOKEN);
         state = VirusOrganState.None;
         cards = new Deck<>("DeckOnOrgan", VISIBLE_TO_ALL);
     }
 
     protected VirusOrgan(int ID)
     {
-        super(Utils.ComponentType.TOKEN, ID);
+        super(ComponentType.TOKEN, ID);
         state = VirusOrganState.None;
         cards = new Deck<>("DeckOnOrgan", VISIBLE_TO_ALL);
     }

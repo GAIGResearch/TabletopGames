@@ -1,5 +1,6 @@
 package test.games.dicemonastery;
 
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.dicemonastery.*;
@@ -9,7 +10,6 @@ import games.dicemonastery.components.Monk;
 import games.dicemonastery.components.Treasure;
 import org.junit.Test;
 import players.simple.RandomPlayer;
-import utilities.Utils;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -259,7 +259,7 @@ public class CoreGameLoopTests {
 
         assertEquals(4, turnOrder.getYear());
         assertEquals(WINTER, turnOrder.getSeason());
-        assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch(r -> r == Utils.GameResult.GAME_ONGOING));
+        assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch(r -> r == CoreConstants.GameResult.GAME_ONGOING));
     }
 
     @Test

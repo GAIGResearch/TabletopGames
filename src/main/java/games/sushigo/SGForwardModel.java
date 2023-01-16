@@ -9,7 +9,6 @@ import core.components.Deck;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.util.*;
 import static games.sushigo.cards.SGCard.SGCardType.*;
@@ -116,7 +115,7 @@ public class SGForwardModel extends StandardForwardModel {
         }
 
         // End player turn
-        if (currentState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
             currentState.getTurnOrder().endPlayerTurn(currentState);
         }
     }
