@@ -982,7 +982,10 @@ public class SingleTreeNode {
             policy = SIMPLE;
         }
 
-        if (params.selectionPolicy == TREE) {
+        if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
+            // the check on unexpanded actions is to catch the rare case that we have not explored all actions at the root
+            // this can then lead to problems as treePolicyAction assumes it is only called on a completely expanded node
+            // (and this is good, as it throws an error as a bug-check if this is not true).
             bestAction = treePolicyAction(false);
         } else {
             for (AbstractAction action : children.keySet()) {
