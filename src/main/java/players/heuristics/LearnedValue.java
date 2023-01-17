@@ -81,8 +81,8 @@ public class LearnedValue extends AbstractPlayer implements IGameListener, ITree
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
-        return valueHeuristic.getAction(gameState, possibleActions);
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+        return valueHeuristic._getAction(gameState, possibleActions);
     }
 
     private long initialiseFromFile() {

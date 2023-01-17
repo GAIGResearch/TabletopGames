@@ -70,7 +70,7 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
 
         if (possibleActions.size() == 1)
             return possibleActions.get(0);

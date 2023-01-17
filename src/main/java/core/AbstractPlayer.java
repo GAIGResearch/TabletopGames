@@ -56,17 +56,26 @@ public abstract class AbstractPlayer {
         this.forwardModel = model;
     }
 
-    /* Methods that should be implemented in subclass */
-
-    public final AbstractAction getActionWithExploration(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+    /**
+     * This is the main method called by Game to get an Action. It implements an epsilon-Greedy wrapper around
+     * of the main agent policy. In most cases exploreEpsilon will be zero; but this is useful where we
+     * with to implement noise in the game - the main current example of this is in evaluation.ProgressiveLearner.
+     * @param gameState
+     * @param possibleActions
+     * @return
+     */
+    public final AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         boolean explore = rnd.nextDouble() < exploreEpsilon;
         if (explore) {
             int roll = rnd.nextInt(possibleActions.size());
             return possibleActions.get(roll);
         } else {
-            return getAction(gameState, possibleActions);
+            return _getAction(gameState, possibleActions);
         }
     }
+
+
+    /* Methods that should be implemented in subclass */
 
     /**
      * Generate a valid action to play in the game. Valid actions can be found by accessing
@@ -74,7 +83,7 @@ public abstract class AbstractPlayer {
      *
      * @param gameState observation of the current game state
      */
-    public abstract AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions);
+    public abstract AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions);
 
     /* Methods that can be implemented in subclass */
 
