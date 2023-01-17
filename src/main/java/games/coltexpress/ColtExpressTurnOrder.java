@@ -2,6 +2,7 @@ package games.coltexpress;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import evaluation.metrics.Event;
 import games.coltexpress.cards.RoundCard;
 import core.turnorders.TurnOrder;
 
@@ -135,7 +136,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
 
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ROUND_OVER, gameState)));
 
         turnCounter = 0;
         fullPlayerTurnCounter++;

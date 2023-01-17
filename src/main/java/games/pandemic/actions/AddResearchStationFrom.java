@@ -29,7 +29,7 @@ public class AddResearchStationFrom extends AddResearchStation {
         // Remove research station from "fromCity" location
         BoardNode bn = pgs.getWorld().getNodeByStringProperty(nameHash, fromCity);
         if (bn != null) {
-            bn.setProperty(new PropertyBoolean("researchStation", false));
+            bn.setProperty(new PropertyBoolean("Research Stations", false));
             pgs.removeResearchStation(((PropertyString) bn.getProperty(nameHash)).value);
         }
 

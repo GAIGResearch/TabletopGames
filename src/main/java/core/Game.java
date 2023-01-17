@@ -2,9 +2,10 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.interfaces.IGameListener;
+import evaluation.metrics.GameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
+import evaluation.metrics.Event;
 import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
@@ -17,10 +18,11 @@ import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
-import utilities.TAGStatSummary;
+import evaluation.summarisers.TAGNumericStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -43,11 +45,8 @@ public class Game {
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
-    protected List<IGameListener> listeners = new ArrayList<>();
-    String fileName = "output.mp4";
-    String formatName = "mp4";
-    String codecName = null;
-    int snapsPerSecond = 10;
+    private List<GameListener> listeners = new ArrayList<>();
+
     /* Game Statistics */
     private int lastPlayer; // used to track actions per 'turn'
     private JFrame frame;
@@ -55,8 +54,6 @@ public class Game {
     private double nextTime, copyTime, agentTime, actionComputeTime;
     // Keeps track of action spaces for each game tick, pairs of (player ID, #actions)
     private ArrayList<Pair<Integer, Integer>> actionSpaceSize;
-    // Game tick, number of iterations of game loop
-    private int tick;
     // Number of times an agent is asked for decisions
     private int nDecisions;
     // Number of actions taken in a turn by a player
@@ -71,6 +68,10 @@ public class Game {
     private Encoder encoder;
     private Muxer muxer;
     private boolean recordingVideo = false;
+    String fileName = "output.mp4";
+    String formatName = "mp4";
+    String codecName = null;
+    int snapsPerSecond = 10;
     private int turnPause;
 
     /**
@@ -112,7 +113,7 @@ public class Game {
      * @return - game instance created for the run
      */
     public static Game runOne(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                              boolean randomizeParameters, List<IGameListener> listeners, ActionController ac, int turnPause) {
+                              boolean randomizeParameters, List<GameListener> listeners, ActionController ac, int turnPause) {
         // Creating game instance (null if not implemented)
         Game game;
         if (parameterConfigFile != null) {
@@ -184,16 +185,16 @@ public class Game {
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
                                int nRepetitions, boolean randomizeParameters,
-                               boolean detailedStatistics, List<IGameListener> listeners, int turnPause) {
+                               boolean detailedStatistics, List<GameListener> listeners, int turnPause) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
-        TAGStatSummary[] overall = new TAGStatSummary[nPlayers];
+        TAGNumericStatSummary[] overall = new TAGNumericStatSummary[nPlayers];
         String[] agentNames = new String[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
             String[] split = players.get(i).getClass().toString().split("\\.");
             String agentName = split[split.length - 1] + "-" + i;
-            overall[i] = new TAGStatSummary("Overall " + agentName);
+            overall[i] = new TAGNumericStatSummary("Overall " + agentName);
             agentNames[i] = agentName;
         }
 
@@ -201,9 +202,9 @@ public class Game {
         for (GameType gt : gamesToPlay) {
 
             // Save win rate statistics over all repetitions of this game
-            TAGStatSummary[] statSummaries = new TAGStatSummary[nPlayers];
+            TAGNumericStatSummary[] statSummaries = new TAGNumericStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new TAGStatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
+                statSummaries[i] = new TAGNumericStatSummary("{Game: " + gt.name() + "; Player: " + agentNames[i] + "}");
             }
 
             // Play n repetitions of this game and record player results
@@ -262,22 +263,22 @@ public class Game {
      * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, int nRepetitions,
-                               long[] seeds, ActionController ac, boolean randomizeParameters, List<IGameListener> listeners, int turnPause) {
+                               long[] seeds, ActionController ac, boolean randomizeParameters, List<GameListener> listeners, int turnPause) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
-        TAGStatSummary[] overall = new TAGStatSummary[nPlayers];
+        TAGNumericStatSummary[] overall = new TAGNumericStatSummary[nPlayers];
         for (int i = 0; i < nPlayers; i++) {
-            overall[i] = new TAGStatSummary("Overall Player " + i);
+            overall[i] = new TAGNumericStatSummary("Overall Player " + i);
         }
 
         // For each game...
         for (GameType gt : gamesToPlay) {
 
             // Save win rate statistics over all repetitions of this game
-            TAGStatSummary[] statSummaries = new TAGStatSummary[nPlayers];
+            TAGNumericStatSummary[] statSummaries = new TAGNumericStatSummary[nPlayers];
             for (int i = 0; i < nPlayers; i++) {
-                statSummaries[i] = new TAGStatSummary("Game: " + gt.name() + "; Player: " + i);
+                statSummaries[i] = new TAGNumericStatSummary("Game: " + gt.name() + "; Player: " + i);
             }
 
             // Play n repetitions of this game and record player results
@@ -312,7 +313,7 @@ public class Game {
      * @param statSummaries - object recording statistics
      * @param game          - finished game
      */
-    public static void recordPlayerResults(TAGStatSummary[] statSummaries, Game game) {
+    public static void recordPlayerResults(TAGNumericStatSummary[] statSummaries, Game game) {
         int nPlayers = statSummaries.length;
         Utils.GameResult[] results = game.getGameState().getPlayerResults();
         for (int p = 0; p < nPlayers; p++) {
@@ -439,14 +440,13 @@ public class Game {
         copyTime = 0;
         agentTime = 0;
         actionComputeTime = 0;
-        tick = 0;
         nDecisions = 0;
         actionSpaceSize = new ArrayList<>();
         nActionsPerTurnSum = 0;
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
         lastPlayer = -1;
-        listeners.forEach(l -> l.onGameEvent(GameEvents.ABOUT_TO_START, this));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START)));
     }
 
     /**
@@ -598,7 +598,7 @@ public class Game {
             }
             // We publish an ACTION_CHOSEN message before we implement the action, so that observers can record the state that led to the decision
             AbstractAction finalAction = action;
-            listeners.forEach(l -> l.onEvent(GameEvents.ACTION_CHOSEN, gameState, finalAction));
+            listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_CHOSEN, gameState, finalAction)));
         } else {
             currentPlayer.registerUpdatedObservation(observation);
         }
@@ -622,14 +622,16 @@ public class Game {
             forwardModel.next(gameState, action);
             nextTime += (System.nanoTime() - s);
         }
-        tick++;
+
+        gameState.advanceGameTick();
 
         lastPlayer = activePlayer;
 
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
         // (such as the next player)
         AbstractAction finalAction1 = action;
-        listeners.forEach(l -> l.onEvent(GameEvents.ACTION_TAKEN, gameState.copy(), finalAction1.copy()));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ACTION_TAKEN, gameState, finalAction1.copy())));
+
         if (debug) System.out.printf("Finishing oneAction for player %s%n", activePlayer);
         return action;
     }
@@ -645,7 +647,7 @@ public class Game {
 
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
-        listeners.forEach(l -> l.onGameEvent(GameEvents.GAME_OVER, this));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, gameState)));
         if (gameState.coreGameParameters.verbose) {
             System.out.println("Game Over");
         }
@@ -666,9 +668,9 @@ public class Game {
      * Timers average at the end of the game.
      */
     private void terminateTimers() {
-        nextTime /= tick;
-        copyTime /= tick;
-        actionComputeTime /= tick;
+        nextTime /= gameState.getGameTick();
+        copyTime /= gameState.getGameTick();
+        actionComputeTime /= gameState.getGameTick();
         agentTime /= nDecisions;
         if (nActionsPerTurnCount > 0)
             nActionsPerTurnSum /= nActionsPerTurnCount;
@@ -735,7 +737,7 @@ public class Game {
      * @return - tick number
      */
     public int getTick() {
-        return tick;
+        return gameState.getGameTick();
     }
 
     /**
@@ -774,11 +776,15 @@ public class Game {
         return gameType;
     }
 
-    public void addListener(IGameListener listener) {
+    public void addListener(GameListener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
             gameState.turnOrder.addListener(listener);
+            listener.setGame(this);
         }
+    }
+    public List<GameListener> getListeners() {
+        return listeners;
     }
 
     public void clearListeners() {
@@ -912,7 +918,7 @@ public class Game {
             // This is LIKELY not in YUV420P format, so we're going to convert it using some handy utilities.
             if (converter == null)
                 converter = MediaPictureConverterFactory.createConverter(screen, picture);
-            converter.toPicture(picture, screen, tick);
+            converter.toPicture(picture, screen, gameState.getGameTick());
 
             do {
                 encoder.encode(packet, picture);

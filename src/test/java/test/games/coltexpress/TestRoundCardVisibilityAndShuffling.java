@@ -1,11 +1,11 @@
 package test.games.coltexpress;
 
-import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.CoreConstants;
-import core.Game;
-import core.actions.AbstractAction;
-import core.interfaces.IGameListener;
+import evaluation.loggers.SummaryLogger;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.GameListener;
+import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGame;
 import games.coltexpress.ColtExpressGameState;
@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static core.CoreConstants.GameEvents.ROUND_OVER;
+import static evaluation.metrics.Event.GameEvent.ROUND_OVER;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
@@ -38,20 +38,21 @@ public class TestRoundCardVisibilityAndShuffling {
         // check shuffling. The work is done in TestRoundEndListener()
 
         // This checks the counts of
-        game.addListener(new TestRoundEndListener());
+        game.addListener(new TestRoundEndListener(new SummaryLogger(), new AbstractMetric[0]));
         game.run();
     }
 
-    static class TestRoundEndListener implements IGameListener {
-        @Override
-        public void onGameEvent(CoreConstants.GameEvents type, Game game) {
+    static class TestRoundEndListener extends GameListener {
 
+        public TestRoundEndListener(IStatisticLogger logger, AbstractMetric[] metrics) {
+            super(logger, metrics);
         }
 
+
         @Override
-        public void onEvent(CoreConstants.GameEvents type, AbstractGameState gameState, AbstractAction action) {
-            if (type == ROUND_OVER) {
-                ColtExpressGameState state = (ColtExpressGameState) gameState;
+        public void onEvent(Event event) {
+            if (event.type == ROUND_OVER) {
+                ColtExpressGameState state = (ColtExpressGameState) event.state;
                 long visibleRoundCards = state.getRounds().getVisibleComponents(0).stream().filter(Objects::nonNull).count();
                 System.out.printf("End of Round: %d, Visible Cards: %d%n", state.getTurnOrder().getRoundCounter(), visibleRoundCards);
                 for (int i = 0; i < state.getTurnOrder().getRoundCounter(); i++)

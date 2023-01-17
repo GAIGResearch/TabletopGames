@@ -6,7 +6,7 @@ import games.terraformingmars.TMTypes;
 import games.terraformingmars.components.TMMapTile;
 import gui.views.ComponentView;
 import utilities.ImageIO;
-import utilities.TAGStringStatSummary;
+import evaluation.summarisers.TAGOccurrenceStatSummary;
 
 import java.awt.*;
 import static games.terraformingmars.gui.Utils.*;
@@ -20,10 +20,10 @@ public class TMBoardHeatMap extends ComponentView {
     int spacing = 10;
 
     int tileSize;
-    TAGStringStatSummary stats;
+    TAGOccurrenceStatSummary stats;
     int minCount = 0, maxCount = 0, nGames;
 
-    public TMBoardHeatMap(TMGameState gs, TAGStringStatSummary stats, int nGames) {
+    public TMBoardHeatMap(TMGameState gs, TAGOccurrenceStatSummary stats, int nGames) {
         super(gs.getBoard(), 0, 0);
         this.gs = gs;
         this.stats = stats;
