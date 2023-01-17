@@ -39,13 +39,13 @@ public class ActionTests {
         do {
             // first take random action until we get to the point required
             while (state.getGamePhase() == USE_MONKS)
-                fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+                fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
 
             // then place all monks randomly
             do {
                 int player = state.getCurrentPlayer();
                 List<AbstractAction> availableActions = fm.computeAvailableActions(state);
-                AbstractAction chosen = rnd.getAction(state, availableActions);
+                AbstractAction chosen = rnd._getAction(state, availableActions);
                 if (overrides.containsKey(player) && availableActions.contains(new PlaceMonk(player, overrides.get(player)))) {
                     chosen = new PlaceMonk(player, overrides.get(player));
                 }
@@ -54,7 +54,7 @@ public class ActionTests {
 
             // then act randomly until we get to the point required
             while (turnOrder.getCurrentArea() != region) {
-                fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+                fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
             }
         } while (turnOrder.getSeason() != season);
     }
@@ -1015,7 +1015,7 @@ public class ActionTests {
                 assertTrue(availableActions.stream().noneMatch(a -> a instanceof TakeToken));
             }
             // and take action at random
-            fm.next(state, rnd.getAction(state, availableActions));
+            fm.next(state, rnd._getAction(state, availableActions));
         }
     }
 
@@ -1049,7 +1049,7 @@ public class ActionTests {
     public void endOfYearPromotion() {
         turnOrder.setAbbot(1);
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (turnOrder.getSeason() != WINTER);
 
         // We have now moved to Winter

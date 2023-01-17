@@ -101,7 +101,7 @@ public class MultiTreeMCTSTests {
 
         // o (p1) is now set to win on their next turn
 
-        AbstractAction action = mctsPlayer.getAction(state, fm.computeAvailableActions(state));
+        AbstractAction action = mctsPlayer._getAction(state, fm.computeAvailableActions(state));
         assertEquals(new SetGridValueAction<>(board, 2, 2, x), action);
         // this is the only logical move to prevent the o player winning on their turn
 
@@ -131,7 +131,7 @@ public class MultiTreeMCTSTests {
 
         // o (p1) is now set to win on their next turn
 
-        AbstractAction action = mctsPlayer.getAction(state, fm.computeAvailableActions(state));
+        AbstractAction action = mctsPlayer._getAction(state, fm.computeAvailableActions(state));
         assertEquals(new SetGridValueAction<>(board, 2, 2, x), action);
         // this is the only logical move to prevent the o player winning on their turn
 
@@ -168,7 +168,7 @@ public class MultiTreeMCTSTests {
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                ._getAction(state, fm.computeAvailableActions(state));
 
         TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
         System.out.println(stats);
@@ -222,7 +222,7 @@ public class MultiTreeMCTSTests {
 
         // need to call this to set up root
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                ._getAction(state, fm.computeAvailableActions(state));
 
         TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
         System.out.println(stats);
@@ -288,7 +288,7 @@ public class MultiTreeMCTSTests {
         // this puts player 1 in the lead
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                ._getAction(state, fm.computeAvailableActions(state));
 
 
         // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea
@@ -320,7 +320,7 @@ public class MultiTreeMCTSTests {
         // this puts player 1 in the lead
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                ._getAction(state, fm.computeAvailableActions(state));
 
 
         // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea

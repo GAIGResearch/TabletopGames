@@ -8,11 +8,8 @@ import evaluation.summarisers.TAGTimeSeriesSummary;
 import utilities.Pair;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
 import evaluation.summarisers.TAGStatSummary;
-import utilities.StatSummary;
-import weka.core.pmml.jaxbbindings.TimeSeries;
 
 import java.io.*;
-import java.sql.Time;
 import java.util.*;
 
 import static java.util.stream.Collectors.*;

@@ -82,7 +82,7 @@ public class SVMEvaluator implements SolutionEvaluator {
         // we instantiate the SVM
         long startTime = System.currentTimeMillis();
         svm_parameter params = (svm_parameter) searchSpace.getAgent(solution);
-        SimpleSVMLearner learner = new SimpleSVMLearner(params);
+        SVMLearner learner = new SVMLearner(params);
 
         // train it on the available data
         learner.learnFrom(trainingData);

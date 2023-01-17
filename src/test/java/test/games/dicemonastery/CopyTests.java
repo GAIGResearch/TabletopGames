@@ -94,7 +94,7 @@ public class CopyTests {
     public void usingAllMonks() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
 
         int startHash = state.hashCode();
@@ -120,7 +120,7 @@ public class CopyTests {
     public void seasonMovesOnAfterPlacingAndUsingAllMonks() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
 
         do { // until we have two players left wit monks in the Chapel
@@ -214,20 +214,20 @@ public class CopyTests {
         state.addResource(2, BREAD, 2);
         state.addResource(2, HONEY, 10);
 
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
 
         int startHash = state.hashCode();
         DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
         assertEquals(startHash, copy.hashCode());
 
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
 
         int midHash = state.hashCode();
         DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
 
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
@@ -266,7 +266,7 @@ public class CopyTests {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (!(turnOrder.getSeason() == SUMMER));
 
         for (int p = 0; p < state.getNPlayers(); p++) {
@@ -426,7 +426,7 @@ public class CopyTests {
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (!(turnOrder.getSeason() == SUMMER));
     }
 
