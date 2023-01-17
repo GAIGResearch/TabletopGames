@@ -2,10 +2,11 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import evaluation.metrics.GameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.metrics.Event;
+import evaluation.metrics.GameListener;
+import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
@@ -18,7 +19,6 @@ import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
-import evaluation.summarisers.TAGNumericStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
@@ -30,8 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static core.CoreConstants.GameEvents;
+import evaluation.metrics.*;
 import static utilities.Utils.componentToImage;
 
 public class Game {
