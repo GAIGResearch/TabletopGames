@@ -15,7 +15,7 @@ public class SiriusStateFeatures extends AbstractStateFeature {
             "AM_MEDAL_SCORE", "CB_MEDAL_SCORE", "AM_MEDALS", "CB_MEDALS", "MEDAL_2", "MEDAL_3", "MEDAL_4", "MEDAL_5", "MEDAL_6",
             "TOT_HAND", "AM_HAND", "CB_HAND", "FV_HAND", "AM3_HAND", "AM2_HAND", "CB3_HAND", "GC_HAND",
             "TOT_SOLD", "AM3_SOLD", "CB3_SOLD", "GC_SOLD",
-            "CARTEL_1", "CARTEL_2", "CARTEL_3"};
+            "CARTEL_AM", "CARTEL_CB", "CARTEL_FV"};
 
     @Override
     protected double maxScore() {
