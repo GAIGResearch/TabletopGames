@@ -3,7 +3,7 @@ package games.sushigo.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
 import gui.AbstractGUIManager;
@@ -102,7 +102,7 @@ public class SGGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Sushi GO", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
 
                 // Add all views to frame
                 parent.setLayout(new BorderLayout());

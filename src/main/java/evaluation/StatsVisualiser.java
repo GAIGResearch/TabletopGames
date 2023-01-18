@@ -9,9 +9,9 @@ import evaluation.summarisers.TAGStatSummary;
 import games.GameType;
 import games.terraformingmars.stats.TMStatsVisualiser;
 import gui.TiledImage;
-import utilities.plotting.BarPlot;
-import utilities.plotting.DotPlot;
-import utilities.plotting.PiePlot;
+import gui.plotting.BarPlot;
+import gui.plotting.DotPlot;
+import gui.plotting.PiePlot;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;

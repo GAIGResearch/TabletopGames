@@ -9,7 +9,7 @@ import games.stratego.StrategoGameState;
 import games.stratego.actions.Move;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -18,7 +18,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StrategoGUIManager extends AbstractGUIManager implements ScreenHighlight{
+public class StrategoGUIManager extends AbstractGUIManager implements IScreenHighlight {
 
     StrategoBoardView view;
 
@@ -40,7 +40,7 @@ public class StrategoGUIManager extends AbstractGUIManager implements ScreenHigh
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Stratego", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{this},
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{this},
                 width, defaultActionPanelHeight);
 
         parent.setLayout(new BorderLayout());

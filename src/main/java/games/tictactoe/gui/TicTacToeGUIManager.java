@@ -9,7 +9,7 @@ import core.actions.SetGridValueAction;
 import core.components.Token;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
@@ -35,7 +35,7 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Tic Tac Toe", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view},
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view},
                 width, defaultActionPanelHeight, true);
 
         parent.setLayout(new BorderLayout());

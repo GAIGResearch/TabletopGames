@@ -94,22 +94,22 @@ public abstract class AbstractGUIManager {
      * @param opaque - true by default. if false, all panels created are not opaque (transparent).
      * @return - JComponent containing all action buttons.
      */
-    protected JComponent createActionPanelOpaque(ScreenHighlight[] highlights, int width, int height, boolean opaque) {
+    protected JComponent createActionPanelOpaque(IScreenHighlight[] highlights, int width, int height, boolean opaque) {
         return createActionPanel(highlights, width, height, true, opaque, null);
     }
 
-    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height) {
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height) {
         return createActionPanel(highlights, width, height, true, true, null);
     }
 
-    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, Consumer<ActionButton> onActionSelected) {
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, Consumer<ActionButton> onActionSelected) {
         return createActionPanel(highlights, width, height, true, true, onActionSelected);
     }
 
-    protected JComponent createActionPanel (ScreenHighlight[]highlights,int width, int height, boolean boxLayout){
+    protected JComponent createActionPanel (IScreenHighlight[]highlights, int width, int height, boolean boxLayout){
         return createActionPanel(highlights, width, height, boxLayout, true, null);
     }
-    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, boolean boxLayout, boolean opaque, Consumer<ActionButton> onActionSelected) {
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout, boolean opaque, Consumer<ActionButton> onActionSelected) {
         JPanel actionPanel = new JPanel();
         if (boxLayout) {
             actionPanel.setLayout(new BoxLayout(actionPanel, BoxLayout.Y_AXIS));
@@ -253,15 +253,15 @@ public abstract class AbstractGUIManager {
         AbstractAction action;
         ActionButton[] actionButtons;
 
-        public ActionButton(ActionController ac, ScreenHighlight[] highlights) {
+        public ActionButton(ActionController ac, IScreenHighlight[] highlights) {
             this(ac, highlights, null);
         }
 
-        public ActionButton(ActionController ac, ScreenHighlight[] highlights, Consumer<ActionButton> onActionSelected) {
+        public ActionButton(ActionController ac, IScreenHighlight[] highlights, Consumer<ActionButton> onActionSelected) {
             addActionListener(e -> {
                 ac.addAction(action);
                 if (highlights != null) {
-                    for (ScreenHighlight c : highlights) {
+                    for (IScreenHighlight c : highlights) {
                         c.clearHighlights();
                     }
                 }

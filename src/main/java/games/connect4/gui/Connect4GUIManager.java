@@ -10,7 +10,7 @@ import games.connect4.Connect4Constants;
 import games.connect4.Connect4GameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -34,7 +34,7 @@ public class Connect4GUIManager extends AbstractGUIManager {
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Connect 4", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view},
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view},
                 width, defaultActionPanelHeight);
 
         parent.setLayout(new BorderLayout());

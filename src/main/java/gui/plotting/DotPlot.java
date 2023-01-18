@@ -1,4 +1,4 @@
-package utilities.plotting;
+package gui.plotting;
 
 import evaluation.summarisers.TAGOccurrenceStatSummary;
 import utilities.Pair;

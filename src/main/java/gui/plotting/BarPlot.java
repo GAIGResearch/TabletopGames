@@ -1,4 +1,4 @@
-package utilities.plotting;
+package gui.plotting;
 
 import org.jetbrains.annotations.NotNull;
 

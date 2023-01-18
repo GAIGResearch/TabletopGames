@@ -11,7 +11,7 @@ import games.terraformingmars.gui.*;
 import utilities.ImageIO;
 import evaluation.summarisers.TAGNumericStatSummary;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
-import utilities.plotting.PiePlot;
+import gui.plotting.PiePlot;
 
 import javax.swing.*;
 import java.awt.*;

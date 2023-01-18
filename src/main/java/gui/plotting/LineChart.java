@@ -1,4 +1,4 @@
-package utilities.plotting;
+package gui.plotting;
 
 import org.knowm.xchart.*;
 import org.knowm.xchart.style.lines.SeriesLines;

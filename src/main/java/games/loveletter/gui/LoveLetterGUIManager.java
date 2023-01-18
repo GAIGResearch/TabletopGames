@@ -13,7 +13,7 @@ import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -172,7 +172,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                 JPanel infoPanel = createGameStateInfoPanel("Love Letter", gameState, width, defaultInfoPanelHeight);
                 infoPanel.setOpaque(false);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
                 actionPanel.setOpaque(false);
 
                 main.add(infoPanel, BorderLayout.NORTH);
@@ -226,7 +226,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
     }
 
     @Override
-    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
         JPanel actionPanel = new JPanel();
         actionPanel.setOpaque(false);
         if (boxLayout) {
