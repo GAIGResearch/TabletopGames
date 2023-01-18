@@ -5,7 +5,7 @@ import core.actions.DoNothing;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import gui.AbstractGUIManager;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import evaluation.metrics.*;
+
 import static utilities.Utils.componentToImage;
 
 public class Game {

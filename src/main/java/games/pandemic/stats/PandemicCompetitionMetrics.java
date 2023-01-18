@@ -5,7 +5,7 @@ import core.components.Counter;
 import core.properties.PropertyIntArray;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import evaluation.metrics.IMetricsCollection;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;

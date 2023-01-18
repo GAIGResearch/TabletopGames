@@ -3,6 +3,7 @@ import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.Game;
 import core.interfaces.IComponentContainer;
+import evaluation.listeners.GameListener;
 import evaluation.summarisers.TAGStatSummary;
 import evaluation.summarisers.TAGSummariser;
 import utilities.Pair;
@@ -167,7 +168,7 @@ public class GameMetrics implements IMetricsCollection
     public static class PlayerType extends AbstractMetric{
         @Override
         public Object run(GameListener listener, Event e) {
-            return listener.game.getPlayers().get(e.playerID).toString();
+            return listener.getGame().getPlayers().get(e.playerID).toString();
         }
         @Override
         public Set<Event.GameEvent> getEventTypes() {

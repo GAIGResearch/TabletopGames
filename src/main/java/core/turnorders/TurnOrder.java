@@ -3,7 +3,7 @@ package core.turnorders;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import evaluation.metrics.Event;
 
 import java.util.ArrayList;

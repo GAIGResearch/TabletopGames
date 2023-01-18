@@ -1,7 +1,7 @@
 package games.terraformingmars.stats;
 
 import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import evaluation.StatsVisualiser;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameParameters;

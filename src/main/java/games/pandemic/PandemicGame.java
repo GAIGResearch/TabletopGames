@@ -1,13 +1,11 @@
 package games.pandemic;
 
 import core.*;
-import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import games.GameType;
 import games.pandemic.stats.PandemicMetrics;
 import players.PlayerType;
 import players.human.ActionController;
-import players.mcts.MCTSPlayer;
 import evaluation.loggers.FileStatsLogger;
 import evaluation.loggers.SummaryLogger;
 import evaluation.summarisers.TAGNumericStatSummary;

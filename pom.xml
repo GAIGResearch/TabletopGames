@@ -182,7 +182,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.RoundRobinTournament</mainClass>
+                                    <mainClass>evaluation.tournaments.RoundRobinTournament</mainClass>
                                 </manifest>
                             </archive>
                             <finalName>Tournament</finalName>

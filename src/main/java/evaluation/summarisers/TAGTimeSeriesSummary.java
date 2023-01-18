@@ -1,8 +1,6 @@
 package evaluation.summarisers;
 
-import evaluation.metrics.TimeStamp;
-import evaluation.metrics.TimeStampSummary;
-import utilities.Pair;
+import utilities.TimeStamp;
 
 import java.util.*;
 

@@ -2,7 +2,7 @@ package evaluation;
 
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import evaluation.summarisers.TAGNumericStatSummary;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
 import evaluation.summarisers.TAGStatSummary;

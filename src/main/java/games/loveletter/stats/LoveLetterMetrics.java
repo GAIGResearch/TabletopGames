@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import evaluation.metrics.IMetricsCollection;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.BaronAction;

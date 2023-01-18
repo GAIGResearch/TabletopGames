@@ -1,10 +1,10 @@
-package evaluation;
+package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.ParameterFactory;
 import core.interfaces.IStatisticLogger;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import games.GameType;
 import players.PlayerFactory;
 import players.mcts.BasicMCTSPlayer;
@@ -342,5 +342,12 @@ public class RoundRobinTournament extends AbstractTournament {
                 e.printStackTrace();
             }
         }
+    }
+
+    public List<GameListener> getListeners() {
+        return listeners;
+    }
+    public void setListeners(List<GameListener> listeners) {
+        this.listeners = listeners;
     }
 }

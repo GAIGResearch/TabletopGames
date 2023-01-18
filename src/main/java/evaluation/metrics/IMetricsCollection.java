@@ -10,6 +10,13 @@ import java.util.List;
 
 import static utilities.Utils.generateCombinations;
 
+/**
+ * All metric collections should implement this interface. It gives access to the method which returns a list of
+ * all metrics in the class, one instance per class, or one instance per parameter combination for parameterized metrics.
+ * Metrics within the class that implements this interface should be <b>static classes</b> which extend
+ * either {@link AbstractMetric} or {@link AbstractParameterizedMetric} (if the metric has any parameters, such as
+ * recording data per type of card - the 'card type' can be a parameter).
+ */
 public interface IMetricsCollection
 {
     default AbstractMetric[] getAllMetrics()
@@ -40,10 +47,6 @@ public interface IMetricsCollection
                     Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
                     for(Object[] combParams : combinations)
                     {
-//                        Object[] paramsStr = new Object[combParams.length];
-//                        for(int i = 0; i < paramsStr.length; i++) {
-//                            paramsStr[i] = combParams[i];
-//                        }
                         AbstractParameterizedMetric retValue;
                         if (combParams.length == 1) {
                             retValue = (AbstractParameterizedMetric) constructor.newInstance(combParams[0]);
@@ -61,7 +64,6 @@ public interface IMetricsCollection
                 throw new RuntimeException(e);
             }
         }
-
 
         return metrics.toArray(new AbstractMetric[0]);
     }

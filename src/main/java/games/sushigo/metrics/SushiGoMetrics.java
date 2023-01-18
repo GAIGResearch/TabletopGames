@@ -2,6 +2,7 @@ package games.sushigo.metrics;
 
 import core.CoreConstants;
 import core.components.Deck;
+import evaluation.listeners.GameListener;
 import evaluation.metrics.*;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
 import evaluation.summarisers.TAGStatSummary;

@@ -5,8 +5,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.ParameterFactory;
 import core.interfaces.IStatisticLogger;
-import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import games.GameType;
 import players.PlayerFactory;
 import utilities.Pair;
@@ -74,7 +73,7 @@ public class GameReport {
         String gameParams = getArg(args, "gameParam", "");
         String loggerClass = getArg(args, "logger", "evaluation.loggers.SummaryLogger");  // TODO: why is this separate, read all from json!
         String statsLog = getArg(args, "statsLog", "SummaryLogger.txt");
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.metrics.GameListener").split("\\|")));
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.GameListener").split("\\|")));
         List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
         List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
 

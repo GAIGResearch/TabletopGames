@@ -1,4 +1,4 @@
-package evaluation;
+package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;

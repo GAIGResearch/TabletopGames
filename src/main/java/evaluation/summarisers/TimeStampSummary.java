@@ -1,10 +1,11 @@
-package evaluation.metrics;
+package evaluation.summarisers;
 
 import utilities.StatSummary;
+import utilities.TimeStamp;
 
 import java.util.ArrayList;
 
-public class TimeStampSummary extends TimeStamp{
+public class TimeStampSummary extends TimeStamp {
 
     public StatSummary values;
 
@@ -14,7 +15,6 @@ public class TimeStampSummary extends TimeStamp{
         this.values = new StatSummary();
         for(Double d : values) this.values.add(d);
     }
-
 
     public String toString()
     {

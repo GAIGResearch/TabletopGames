@@ -1,8 +1,8 @@
 package evaluation.loggers;
 
 import core.interfaces.IStatisticLogger;
-import evaluation.metrics.TimeStamp;
-import evaluation.metrics.TimeStampSummary;
+import utilities.TimeStamp;
+import evaluation.summarisers.TimeStampSummary;
 import evaluation.summarisers.TAGNumericStatSummary;
 import evaluation.summarisers.TAGTimeSeriesSummary;
 import utilities.Pair;

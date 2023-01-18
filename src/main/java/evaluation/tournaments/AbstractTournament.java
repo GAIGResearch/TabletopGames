@@ -1,4 +1,4 @@
-package evaluation;
+package evaluation.tournaments;
 
 import core.*;
 import games.GameType;

@@ -1,9 +1,11 @@
-package evaluation.metrics;
+package evaluation.listeners;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IActionFeatureVector;
 import core.interfaces.IStatisticLogger;
+import evaluation.listeners.FeatureListener;
+import evaluation.metrics.Event;
 
 /**
  * This provides a generic way of recording training data from games. After each move is made, it will record a feature

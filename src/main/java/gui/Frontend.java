@@ -2,7 +2,7 @@ package gui;
 
 import core.*;
 import core.actions.AbstractAction;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import evaluation.TunableParameters;
 import evaluation.metrics.Event;
 import games.GameType;

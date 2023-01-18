@@ -2,6 +2,7 @@ package evaluation.metrics;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.Game;
+import evaluation.listeners.GameListener;
 import utilities.Pair;
 
 import java.util.*;
