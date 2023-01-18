@@ -17,8 +17,10 @@ import static java.util.stream.Collectors.*;
 
 public class DiceMonasteryTurnOrder extends TurnOrder {
 
+    static final int seasonsPerYear = 4;
+
     public DiceMonasteryTurnOrder(int nPlayers, DiceMonasteryParams params) {
-        super(nPlayers, params.YEARS * 4 - 1);
+        super(nPlayers, params.YEARS * seasonsPerYear - 1);
     }
 
     private DiceMonasteryTurnOrder(int nPlayers) {
