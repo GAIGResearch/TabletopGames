@@ -208,23 +208,42 @@ public class TAGNumericStatSummary extends TAGStatSummary {
         return ss;
     }
 
+//    @Override
+//    public Map<String, Object> getSummary() {
+//        Map<String, Object> data = new HashMap<>();
+//        data.put(name + "Median", median());
+//        data.put(name + "Mean", mean());
+//        data.put(name + "Max", max());
+//        data.put(name + "Min", min());
+//        data.put(name + "VarCoeff", Math.abs(sd()/mean()));
+//        data.put(name + "Skew", skew());
+//        data.put(name + "Kurtosis", kurtosis());
+//
+//        TAGNumericStatSummary delta = elements.size() > 1 ?
+//                IntStream.range(0, elements.size() - 1)
+//                        .mapToObj(i -> !elements.get(i + 1).equals(elements.get(i)) ? 1.0 : 0.0)
+//                        .collect(new TAGSummariser())
+//                : new TAGNumericStatSummary();
+//        data.put(name + "Delta", delta.mean()); // percentage of times this value changed consecutively
+//        return data;
+//    }
     @Override
     public Map<String, Object> getSummary() {
         Map<String, Object> data = new HashMap<>();
-        data.put(name + "Median", median());
-        data.put(name + "Mean", mean());
-        data.put(name + "Max", max());
-        data.put(name + "Min", min());
-        data.put(name + "VarCoeff", Math.abs(sd()/mean()));
-        data.put(name + "Skew", skew());
-        data.put(name + "Kurtosis", kurtosis());
+        data.put("Median", median());
+        data.put("Mean", mean());
+        data.put("Max", max());
+        data.put("Min", min());
+        data.put("VarCoeff", Math.abs(sd()/mean()));
+        data.put("Skew", skew());
+        data.put("Kurtosis", kurtosis());
 
         TAGNumericStatSummary delta = elements.size() > 1 ?
                 IntStream.range(0, elements.size() - 1)
                         .mapToObj(i -> !elements.get(i + 1).equals(elements.get(i)) ? 1.0 : 0.0)
                         .collect(new TAGSummariser())
                 : new TAGNumericStatSummary();
-        data.put(name + "Delta", delta.mean()); // percentage of times this value changed consecutively
+        data.put("Delta", delta.mean()); // percentage of times this value changed consecutively
         return data;
     }
 }

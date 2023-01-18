@@ -14,15 +14,13 @@ import games.loveletter.actions.PrinceAction;
 import games.loveletter.actions.PrincessAction;
 import games.loveletter.cards.LoveLetterCard;
 
+import java.util.*;
+
+@SuppressWarnings("unused")
 public class LoveLetterMetrics implements IMetricsCollection {
 
     public static class ActionsPlayed extends AbstractMetric
     {
-        public ActionsPlayed() {
-            addEventType(Event.GameEvent.ACTION_TAKEN);
-            recordPerPlayer = true;
-        }
-
         @Override
         public Object run(GameListener listener, Event e) {
             Deck<LoveLetterCard> played = ((LoveLetterGameState)e.state).getPlayerDiscardCards().get(e.playerID);
@@ -34,15 +32,18 @@ public class LoveLetterMetrics implements IMetricsCollection {
             ss.append("]");
             return ss.toString().replace(",]", "");
         }
+        @Override
+        public boolean isRecordedPerPlayer() {
+            return true;
+        }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
+        }
     }
 
     public static class ActionsPlayedWin extends AbstractMetric
     {
-        public ActionsPlayedWin() {
-            addEventType(Event.GameEvent.ACTION_TAKEN);
-            recordPerPlayer = true;
-        }
-
         @Override
         public Object run(GameListener listener, Event e) {
             StringBuilder ss = new StringBuilder();
@@ -56,15 +57,18 @@ public class LoveLetterMetrics implements IMetricsCollection {
             }
             return ss.toString().replace(",]", "");
         }
+        @Override
+        public boolean isRecordedPerPlayer() {
+            return true;
+        }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
+        }
     }
 
     public static class DiscardedCards extends AbstractMetric
     {
-        public DiscardedCards() {
-            addEventType(Event.GameEvent.GAME_OVER);
-            recordPerPlayer = true;
-        }
-
         @Override
         public Object run(GameListener listener, Event e) {
             int nCards = 0;
@@ -74,6 +78,14 @@ public class LoveLetterMetrics implements IMetricsCollection {
             }
             return nCards;
         }
+        @Override
+        public boolean isRecordedPerPlayer() {
+            return true;
+        }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
     }
 
     public static class WinningCards extends AbstractMetric
@@ -82,15 +94,17 @@ public class LoveLetterMetrics implements IMetricsCollection {
         String losingCards;
 
         public WinningCards() {
-            addEventType(Event.GameEvent.ACTION_TAKEN);
-            addEventType(Event.GameEvent.GAME_OVER);
+            super();
             winningCards = null;
             losingCards = null;
         }
 
         @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return new HashSet<>(Arrays.asList(Event.GameEvent.ACTION_TAKEN, Event.GameEvent.GAME_OVER));
+        }
+        @Override
         public Object run(GameListener listener, Event e) {
-
             if(e.type == Event.GameEvent.ACTION_TAKEN){
                 processAction(e.state, e.action);
             }else if(e.type == Event.GameEvent.GAME_OVER) {
@@ -220,6 +234,4 @@ public class LoveLetterMetrics implements IMetricsCollection {
 
         }
     }
-
-
 }

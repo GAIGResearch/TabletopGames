@@ -8,101 +8,103 @@ import evaluation.summarisers.TAGSummariser;
 import utilities.Pair;
 
 import java.util.*;
+
+@SuppressWarnings("unused")
 public class GameMetrics implements IMetricsCollection
 {
     public static class GameID extends AbstractMetric{
-
-        public GameID() {addEventType(Event.GameEvent.ABOUT_TO_START);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return e.state.getGameID();
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ABOUT_TO_START);
+        }
     }
 
-
     public static class GameName extends AbstractMetric{
-
-        public GameName() {addEventType(Event.GameEvent.ABOUT_TO_START);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return listener.getGame().getGameType().name();
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ABOUT_TO_START);
+        }
     }
 
-
     public static class GameSeeds extends AbstractMetric{
-
-        public GameSeeds() {addEventType(Event.GameEvent.ABOUT_TO_START);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return e.state.getGameParameters().getRandomSeed();
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ABOUT_TO_START);
+        }
     }
 
     public static class GameStatus extends AbstractMetric{
-
-        public GameStatus() {addEventType(Event.GameEvent.GAME_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return e.state.getGameStatus();
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
     }
 
     public static class GameScore extends AbstractMetric{
-
-        public GameScore() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             int player = e.state.getCurrentPlayer();
             return e.state.getGameScore(player);
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
     }
 
     public static class ActionSpace extends AbstractMetric{
-
-        public ActionSpace() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             Game g = listener.getGame();
             AbstractForwardModel fm = g.getForwardModel();
             return fm.computeAvailableActions(g.getGameState()).size();
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
     }
 
     public static class StateSize extends AbstractMetric{
-
-        public StateSize() {
-            addEventType(Event.GameEvent.ACTION_CHOSEN);
-            addEventType(Event.GameEvent.ABOUT_TO_START);
-        }
-
         @Override
         public Object run(GameListener listener, Event e) {
             int components = countComponents(e.state).a;
             return (double) components;
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return new HashSet<>(Arrays.asList(Event.GameEvent.ACTION_CHOSEN, Event.GameEvent.ABOUT_TO_START));
+        }
     }
 
     public static class CurrentPlayer extends AbstractMetric{
-
-        public CurrentPlayer() {addEventType(Event.GameEvent.ROUND_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return e.state.getCurrentPlayer();
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
     }
 
     public static class CurrentPlayerVisibility extends AbstractMetric{
-
-        public CurrentPlayerVisibility() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             AbstractGameState gs = e.state;
@@ -110,12 +112,13 @@ public class GameMetrics implements IMetricsCollection
             Pair<Integer, int[]> allComp = countComponents(gs);
             return (allComp.b[player] / (double) allComp.a);
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
     }
 
     public static class ComputationTimes extends AbstractMetric{
-
-        public ComputationTimes() {addEventType(Event.GameEvent.GAME_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             Map<String, Object> collectedData = new LinkedHashMap<>();
@@ -125,12 +128,13 @@ public class GameMetrics implements IMetricsCollection
             collectedData.put("TimeAgent", listener.getGame().getAgentTime() / 1e3);
             return collectedData;
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
     }
 
     public static class GameDuration extends AbstractMetric{
-
-        public GameDuration() {addEventType(Event.GameEvent.GAME_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             Map<String, Object> collectedData = new LinkedHashMap<>();
@@ -139,32 +143,43 @@ public class GameMetrics implements IMetricsCollection
             collectedData.put("Rounds", listener.getGame().getGameState().getTurnOrder().getRoundCounter());
             return collectedData;
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
     }
 
     public static class OrdinalPosition extends AbstractMetric{
-
-        public OrdinalPosition() {addEventType(Event.GameEvent.GAME_OVER);recordPerPlayer = true;}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return e.state.getOrdinalPosition(e.playerID);
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+        @Override
+        public boolean isRecordedPerPlayer() {
+            return true;
+        }
     }
 
     public static class PlayerType extends AbstractMetric{
-
-        public PlayerType() {addEventType(Event.GameEvent.GAME_OVER);recordPerPlayer = true;}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return listener.game.getPlayers().get(e.playerID).toString();
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+        @Override
+        public boolean isRecordedPerPlayer() {
+            return true;
+        }
     }
 
-    public static class Decisions extends AbstractMetric{
-
-        public Decisions() {addEventType(Event.GameEvent.GAME_OVER);}
-
+    public static class Decisions extends AbstractMetric {
         @Override
         public Object run(GameListener listener, Event e) {
             List<Pair<Integer, Integer>> actionSpaceRecord = listener.getGame().getActionSpaceSize();
@@ -182,12 +197,13 @@ public class GameMetrics implements IMetricsCollection
             collectedData.put("DecisionPointsMean", statsDecisions.n() * 1.0 / statsDecisionsAll.n());
             return collectedData;
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
     }
 
     public static class ActionTypes extends AbstractMetric {
-
-        public ActionTypes() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
         @Override
         public Object run(GameListener listener, Event e) {
 
@@ -196,8 +212,11 @@ public class GameMetrics implements IMetricsCollection
             collectedData.put("ActionsDescription", e.action == null ? "NONE" : e.action.getString(e.state));
             return collectedData;
         }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
     }
-
 
     /**
      * Returns the total number of components in the state as the first element of the returned value

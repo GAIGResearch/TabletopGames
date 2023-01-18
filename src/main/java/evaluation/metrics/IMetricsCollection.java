@@ -1,6 +1,8 @@
 package evaluation.metrics;
 
 import org.apache.commons.lang3.reflect.ConstructorUtils;
+import utilities.Group;
+import utilities.Pair;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -18,50 +20,42 @@ public interface IMetricsCollection
             try {
                 Constructor<?> defaultCtor = ConstructorUtils.getMatchingAccessibleConstructor(clazz);
                 AbstractMetric met = (AbstractMetric) defaultCtor.newInstance();
-                Object[] paramValues = (Object[]) clazz.getSuperclass().getDeclaredMethod("getAllowedParameters").invoke(met);
-                if(paramValues.length == 0)
-                {
-                    metrics.add(met);
-                }else{
 
-                    //More than one parameter in the constructor of the metric.
-                    //paramValues contains several arrays, each with all possible value for each param.
-                    if(paramValues[0] instanceof Object[])
-                    {
-                        Class<?>[] argClass = new Class<?>[paramValues.length];
-                        List<Object[]> allParams = new ArrayList<>();
-                        for (int i = 0; i < paramValues.length; i++) {
-                            Object[] pArray = (Object[]) paramValues[i];
-                            allParams.add(pArray);
-                            argClass[i] = String.class; //TODO: This assumes the arguments are always a string. Hell yeah.
-                        }
+                if (clazz.getSuperclass() == AbstractParameterizedMetric.class) {
+                    // A parameterized class, create all combinations
+                    List<Group<String, List<?>, ?>> paramValues = (List<Group<String, List<?>, ?>>) clazz.getSuperclass().getDeclaredMethod("getAllowedParameters").invoke(met);
 
-                        //Get all the combinations for all values for all parameters
-                        List<Object[]> combinations = generateCombinations(allParams);
-
-                        //Build each one of the possible metrics.
-                        Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClass);
-                        for(Object[] combParams : combinations)
-                        {
-                            String[] paramsStr = new String[combParams.length];
-                            for(int i = 0; i < paramsStr.length; i++)
-                                paramsStr[i] = combParams[i].toString();
-
-                            Object retValue = constructor.newInstance(paramsStr);
-                            metrics.add((AbstractMetric) retValue);
-                        }
-
-                    }else {
-
-                       //One parameter only in the constructor of the metric. paramValues contains all possible values for that param.
-                       for (Object p : paramValues) {
-
-                            //TODO: This assumes the arguments are always a string. Hell yeah.
-                            Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, String.class);
-                            Object retValue = constructor.newInstance(p.toString());
-                            metrics.add((AbstractMetric) retValue);
-                        }
+                    Class<?>[] argClasses = new Class<?>[paramValues.size()];
+                    List<Object[]> allParams = new ArrayList<>();
+                    for (int i = 0; i < paramValues.size(); i++) {
+                        Object[] pArray = paramValues.get(i).b.toArray();
+                        allParams.add(pArray);
+                        argClasses[i] = Object.class; //paramValues.get(i).c.getClass();
                     }
+
+                    //Get all the combinations for all values for all parameters
+                    List<Object[]> combinations = generateCombinations(allParams);
+
+                    //Build each one of the possible metrics.
+                    Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
+                    for(Object[] combParams : combinations)
+                    {
+//                        Object[] paramsStr = new Object[combParams.length];
+//                        for(int i = 0; i < paramsStr.length; i++) {
+//                            paramsStr[i] = combParams[i];
+//                        }
+                        AbstractParameterizedMetric retValue;
+                        if (combParams.length == 1) {
+                            retValue = (AbstractParameterizedMetric) constructor.newInstance(combParams[0]);
+                        } else {
+                            retValue = (AbstractParameterizedMetric) constructor.newInstance(combParams);
+                        }
+                        metrics.add(retValue);
+                    }
+
+                } else {
+                    // Non-parameterized metric
+                    metrics.add(met);
                 }
             }catch(Exception e) {
                 throw new RuntimeException(e);

@@ -18,6 +18,8 @@ import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -111,6 +113,8 @@ public abstract class StatsVisualiser extends JFrame {
     protected TAGNumericStatSummary visualiseNumericMetricAsLabel(String metricName, Event.GameEvent event, String alternatePrintName) {
         gridBagConstraints.gridy++;
         TAGNumericStatSummary stats = (TAGNumericStatSummary) getStats(metricName, event);
+        List<String> sorted = new ArrayList<>(loggers.get(event).summary().keySet());
+        Collections.sort(sorted);
         if (alternatePrintName == null) alternatePrintName = metricName.split(":")[0];
         getContentPane().add(new JLabel(String.format("%30s  %8.3g +/- %6.2g", alternatePrintName + ":", stats.mean(), stats.sd())), gridBagConstraints);
         return stats;

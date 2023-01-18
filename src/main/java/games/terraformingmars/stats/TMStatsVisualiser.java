@@ -122,7 +122,7 @@ public class TMStatsVisualiser extends StatsVisualiser {
         getContentPane().add(Box.createRigidArea(new Dimension(0, 20)), gridBagConstraints);
 
         // Card stats
-        visualiseNumericMetricAsLabel("PlayerCardsPlayed:All", Event.GameEvent.GAME_OVER, "Cards played");
+//        visualiseNumericMetricAsLabel("PlayerCardsPlayed:All", Event.GameEvent.GAME_OVER, "Cards played");
         visualiseNumericMetricAsLabel("PlayerPlayedCardsPerType (Automated):All", Event.GameEvent.GAME_OVER, "Cards played (automated)");
         visualiseNumericMetricAsLabel("PlayerPlayedCardsPerType (Active):All", Event.GameEvent.GAME_OVER, "Cards played (active)");
         visualiseNumericMetricAsLabel("PlayerPlayedCardsPerType (Event):All", Event.GameEvent.GAME_OVER, "Cards played (event)");

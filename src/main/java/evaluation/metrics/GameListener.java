@@ -1,6 +1,5 @@
 package evaluation.metrics;
 
-import core.AbstractGameState;
 import core.Game;
 import core.interfaces.IStatisticLogger;
 import evaluation.summarisers.TAGNumericStatSummary;
@@ -29,7 +28,7 @@ public class GameListener {
     public GameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
         setup(logger);
         for (AbstractMetric m : metrics) {
-            this.metrics.put(m.name(), m);
+            this.metrics.put(m.getName(), m);
         }
     }
 
@@ -70,7 +69,7 @@ public class GameListener {
                         }
                     }
                     //Aggregates per-player metrics for all players.
-                    if(metric.aggregate())
+                    if(metric.isAggregate())
                         aggregators.put(attrStr + ":All:" + event.type, aggregate(metricResults));
                 }
                 else
