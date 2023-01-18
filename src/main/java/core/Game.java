@@ -2,10 +2,11 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import evaluation.metrics.GameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.metrics.Event;
+import evaluation.metrics.GameListener;
+import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
@@ -18,17 +19,18 @@ import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
-import evaluation.summarisers.TAGNumericStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.Timer;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import evaluation.metrics.*;
 import static utilities.Utils.componentToImage;
 
 public class Game {
@@ -36,12 +38,14 @@ public class Game {
     private static final AtomicInteger idFountain = new AtomicInteger(0);
     // Type of game
     private final GameType gameType;
+    public boolean paused;
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
     private List<GameListener> listeners = new ArrayList<>();
+
     /* Game Statistics */
     private int lastPlayer; // used to track actions per 'turn'
     private JFrame frame;
@@ -53,10 +57,8 @@ public class Game {
     private int nDecisions;
     // Number of actions taken in a turn by a player
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
-
     private boolean pause, stop;
     private boolean debug = false;
-
     // Video recording
     private Rectangle areaBounds;
     private MediaPictureConverter converter = null;
@@ -70,8 +72,6 @@ public class Game {
     String codecName = null;
     int snapsPerSecond = 10;
     private int turnPause;
-
-    public boolean paused;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -118,8 +118,7 @@ public class Game {
         if (parameterConfigFile != null) {
             AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, parameterConfigFile);
             game = gameToPlay.createGameInstance(players.size(), seed, params);
-        }
-        else game = gameToPlay.createGameInstance(players.size(), seed);
+        } else game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
             if (listeners != null)
                 listeners.forEach(game::addListener);
@@ -171,10 +170,6 @@ public class Game {
         }
 
         return game;
-    }
-
-    public void setTurnPause(int turnPause) {
-        this.turnPause = turnPause;
     }
 
     /**
@@ -327,6 +322,9 @@ public class Game {
         }
     }
 
+    public void setTurnPause(int turnPause) {
+        this.turnPause = turnPause;
+    }
 
     /**
      * Performs GUI update.
@@ -764,12 +762,12 @@ public class Game {
         return pause;
     }
 
-    public void flipPaused() {
-        this.paused = !this.paused;
-    }
-
     public void setPaused(boolean paused) {
         this.pause = paused;
+    }
+
+    public void flipPaused() {
+        this.paused = !this.paused;
     }
 
     public boolean isStopped() {
@@ -905,6 +903,7 @@ public class Game {
     }
 
 
+
     /**
      * The recommended way to run a game is via evaluations.Frontend, however that may not work on
      * some games for some screen sizes due to the vagaries of Java Swing...
@@ -918,12 +917,11 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "SushiGo");
+        String gameType = Utils.getArg(args, "game", "TerraformingMars");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int playerCount = Utils.getArg(args, "nPlayers", 2);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
-        ArrayList<GameListener> listeners = null;
 
         ActionController ac = new ActionController(); //null;
 
@@ -931,13 +929,13 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
 
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
-//        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 //        players.add(new HumanConsolePlayer());
@@ -945,13 +943,8 @@ public class Game {
         /* 4. Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;
 
-        // Custom listeners set up
-//        SummaryLogger logger = new SummaryLogger();
-//        GameListener pl = new GameListener(logger, new SushiGoMetrics().getAllMetrics());
-//        listeners.add((pl));
-
         /* 5. Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, listeners, useGUI ? ac : null, turnPause);
+        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);

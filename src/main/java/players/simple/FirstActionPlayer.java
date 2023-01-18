@@ -18,7 +18,7 @@ public class FirstActionPlayer extends AbstractPlayer{
      */
 
     @Override
-    public AbstractAction getAction(AbstractGameState observation, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
         return actions.get(0);
     }
 

@@ -24,6 +24,7 @@ public class DiamantGame extends Game {
         agents.add(new OSLAPlayer());
         agents.add(new HumanConsolePlayer());
 
+
         // Play n games and return the pct of wins of each player
         double [] playerWins = new double[agents.size()];
         for (int i=0; i<agents.size(); i++)

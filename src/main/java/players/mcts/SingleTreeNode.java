@@ -548,7 +548,7 @@ public class SingleTreeNode {
             List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs);
             if (availableActions.isEmpty())
                 throw new AssertionError("Should always have at least one action possible...");
-            AbstractAction action = oppModel.getAction(gs, availableActions);
+            AbstractAction action = oppModel._getAction(gs, availableActions);
             forwardModel.next(gs, action);
             root.fmCallsCount++;
         }
@@ -823,7 +823,7 @@ public class SingleTreeNode {
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState);
                 if (availableActions.isEmpty())
                     break;
-                AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
+                AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()]._getAction(rolloutState, availableActions);
                 lastActor = rolloutState.getCurrentPlayer();
                 rolloutActions.add(new Pair<>(lastActor, next));
                 int startingFMCalls = root.fmCallsCount;

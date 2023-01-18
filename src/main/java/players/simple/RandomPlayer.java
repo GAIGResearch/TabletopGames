@@ -25,7 +25,7 @@ public class RandomPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState observation, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
         int randomAction = rnd.nextInt(actions.size());
         return actions.get(randomAction);
     }
