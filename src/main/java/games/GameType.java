@@ -281,7 +281,7 @@ public enum GameType {
             params.setRandomSeed(seed);
         }
 
-        return new Game(this, createForwardModel(), createGameState(params, nPlayers));
+        return new Game(this, createForwardModel(params, nPlayers), createGameState(params, nPlayers));
     }
     public Game createGameInstance(int nPlayers) {
         return createGameInstance(nPlayers, System.currentTimeMillis(), createParameters(System.currentTimeMillis()));
