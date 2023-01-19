@@ -6,8 +6,6 @@ import register.GameType;
 
 import java.util.*;
 
-import static register.ParameterFactory.getDefaultParams;
-
 public abstract class AbstractParameters {
 
     // Random seed for this game
@@ -166,7 +164,7 @@ public abstract class AbstractParameters {
     }
 
     static public AbstractParameters createFromFile(GameType game, String fileName) {
-        AbstractParameters params = getDefaultParams(game, System.currentTimeMillis());
+        AbstractParameters params = game.createParameters(System.currentTimeMillis());
         if (fileName.isEmpty())
             return params;
         if (params instanceof TunableParameters) {
