@@ -1,13 +1,21 @@
 package evaluation;
 
 import core.*;
-import core.interfaces.*;
+import core.interfaces.IGameHeuristic;
+import core.interfaces.IStateHeuristic;
+import core.interfaces.IStatisticLogger;
+import games.GameType;
+import evaluation.loggers.SummaryLogger;
+
+import core.AbstractPlayer;
+import core.Game;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
-import games.GameType;
-import utilities.SummaryLogger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;

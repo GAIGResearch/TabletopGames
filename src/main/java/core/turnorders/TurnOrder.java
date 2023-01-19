@@ -1,16 +1,14 @@
 package core.turnorders;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
-import core.interfaces.IGameListener;
-import games.dicemonastery.DiceMonasteryGameState;
+import evaluation.metrics.GameListener;
+import evaluation.metrics.Event;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static utilities.Utils.GameResult.GAME_END;
@@ -28,7 +26,7 @@ public abstract class TurnOrder {
     protected int turnCounter;  // Number of turns in this round
     protected int roundCounter;  // 1 round = (1 turn) x nPlayers(alive)
 
-    protected List<IGameListener> listeners = new ArrayList<>();
+    protected List<GameListener> listeners = new ArrayList<>();
 
     public TurnOrder(int nPlayers, int nMaxRounds) {
         reset();
@@ -129,7 +127,7 @@ public abstract class TurnOrder {
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
 
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, gameState, null));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState)));
 
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
@@ -147,7 +145,7 @@ public abstract class TurnOrder {
     }
     public void logEvent(String eventText, AbstractGameState state) {
         AbstractAction logAction = new LogEvent(eventText);
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.GAME_EVENT, state, logAction));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_EVENT, state, logAction)));
     }
 
     /**
@@ -163,7 +161,7 @@ public abstract class TurnOrder {
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
 
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ROUND_OVER, gameState)));
 
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
@@ -253,7 +251,7 @@ public abstract class TurnOrder {
         return Objects.hash(nPlayers, turnOwner, turnCounter, roundCounter, firstPlayer, nMaxRounds);
     }
 
-    public void addListener(IGameListener listener) {
+    public void addListener(GameListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
     }

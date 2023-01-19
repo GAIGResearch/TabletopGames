@@ -4,12 +4,15 @@ package utilities.plotting;
 import javax.swing.*;
 import java.awt.*;
 
-import static games.terraformingmars.stats.TMStatsVisualiser.*;
-
 public class PiePlot extends JComponent {
     double[] data;
     String[] dataLabels;
     double sumData;
+
+    public static int fontSize = 16;
+    public static Font defaultFont = new Font("Prototype", Font.BOLD, fontSize);
+    public static Font defaultFontSmall = new Font("Prototype", Font.BOLD, fontSize-5);
+    public static Color fontColor = Color.white;
 
     final Dimension size;
     final static int padding = 1;

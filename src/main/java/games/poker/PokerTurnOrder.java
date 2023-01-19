@@ -3,6 +3,7 @@ package games.poker;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.turnorders.AlternatingTurnOrder;
+import evaluation.metrics.Event;
 
 import java.util.Arrays;
 
@@ -24,7 +25,7 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
         if (gameState.getGameStatus() != GAME_ONGOING) return;
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, gameState, null));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState)));
 
         turnCounter++;
         moveToNextPlayer(gameState, nextPlayer(gameState));

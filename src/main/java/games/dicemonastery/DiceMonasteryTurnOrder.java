@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.Component;
 import core.turnorders.TurnOrder;
+import evaluation.metrics.Event;
 import games.dicemonastery.components.Monk;
 
 import java.util.*;
@@ -66,7 +67,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
 
     @Override
     public void endPlayerTurn(AbstractGameState gameState) {
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, gameState, null));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState)));
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
         switch (season) {
             case SPRING:
