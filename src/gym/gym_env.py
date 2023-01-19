@@ -15,7 +15,7 @@ java.lang.System.out.println("Hello World!!")
 # PandemicGame.main([""])
 # from games.tictactoe import TicTacToeGame
 # TicTacToeGame.main([""])
-import java
+# import java
 
 # Import Calls
 GYMEnv = jpype.JClass("core.GYMEnv")
@@ -25,6 +25,7 @@ GameType = jpype.JClass("games.GameType")
 ActionController = jpype.JClass("players.human.ActionController")
 RandomPlayer = jpype.JClass("players.simple.RandomPlayer")
 MCTSPlayer = jpype.JClass("players.mcts.MCTSPlayer")
+OSLAPlayer = jpype.JClass("players.simple.OSLAPlayer")
 PythonAgent = jpype.JClass("players.python.PythonAgent")
 TicTacToeStateVector = jpype.JClass("games.tictactoe.TicTacToeStateVector")
 Utils = jpype.JClass("utilities.Utils")
@@ -41,13 +42,13 @@ Utils = jpype.JClass("utilities.Utils")
 # gameType = "pandemic"
 
 class TAG():
-    def __init__(self, seed=42, game="Pandemic"):
+    def __init__(self, seed=42, game="Diamant"):
         null = jpype.java.lang.String @ None
         null_list = jpype.java.util.List @ None
         gameType = Utils.getArg([""], "game", game)
         players = jpype.java.util.ArrayList()
-        players.add(PythonAgent())
-        players.add(PythonAgent())
+        players.add(RandomPlayer())
+        players.add(OSLAPlayer())
         # players.add(PythonAgent())
         self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed))
         self.gs = None
@@ -80,18 +81,22 @@ if __name__ == "__main__":
 
     start_time = time.time()
     steps = 0
+    wins = 0
     for e in range(EPISODES):
         obs = env.reset()
         done = False
         while not done:
-            steps +=1
+            steps += 1
+
             rnd_action = random.randint(0, len(env.getActions())-1)
             # print(f"player {env.env.getPlayerID()} choose action {rnd_action}")
             obs, reward, done, info = env.step(rnd_action)
             if done:
                 print(f"Game over rewards {reward} in {steps} steps results =  {env.env.getPlayerResults()[0]}")
+                if str(env.env.getPlayerResults()[0]) == "WIN":
+                    wins += 1
                 break
 
-    print(f"{EPISODES} episodes done in {time.time() - start_time} with total steps = {steps}")
+    print(f"win rate = {wins/EPISODES} {EPISODES} episodes done in {time.time() - start_time} with total steps = {steps}")
     env.close()
 
