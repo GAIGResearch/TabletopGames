@@ -32,6 +32,8 @@ public abstract class AbstractGameState {
 
     // Parameters, forward model and turn order for the game
     protected final AbstractParameters gameParameters;
+    // Game being played
+    protected final GameType gameType;
     protected TurnOrder turnOrder;
     private Area allComponents;
 
@@ -41,8 +43,6 @@ public abstract class AbstractGameState {
     // Timers for all players
     protected ElapsedCpuChessTimer[] playerTimer;
 
-    // Game being played
-    protected final GameType gameType;
     // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
     protected CoreConstants.GameResult gameStatus;
     protected CoreConstants.GameResult[] playerResults;
@@ -98,44 +98,71 @@ public abstract class AbstractGameState {
         reset();
     }
 
-    public final void setPlayerResult(CoreConstants.GameResult result, int playerIdx) {
-        this.playerResults[playerIdx] = result;
-    }
-
     // Getters
+    public CoreParameters getCoreGameParameters() {
+        return coreGameParameters;
+    }
     public final TurnOrder getTurnOrder() {
         return turnOrder;
     }
-
-    // Setters
-    public final void setTurnOrder(TurnOrder turnOrder) {
-        this.turnOrder = turnOrder;
-    }
-
     public final int getCurrentPlayer() {
         return turnOrder.getCurrentPlayer(this);
     }
-
     public final CoreConstants.GameResult getGameStatus() {
         return gameStatus;
     }
-
-    public final void setGameStatus(CoreConstants.GameResult status) {
-        this.gameStatus = status;
-    }
-
     public final AbstractParameters getGameParameters() {
         return this.gameParameters;
     }
-
     public final int getNPlayers() {
         return turnOrder.nPlayers();
     }
-
     public final CoreConstants.GameResult[] getPlayerResults() {
         return playerResults;
     }
+    public final IGamePhase getGamePhase() {
+        return gamePhase;
+    }
+    public final ElapsedCpuChessTimer[] getPlayerTimer() {
+        return playerTimer;
+    }
+    public final GameType getGameType() {
+        return gameType;
+    }
 
+    /**
+     * @return All actions that have been executed on this state since reset()/initialisation
+     */
+    public List<AbstractAction> getHistory() { return new ArrayList<>(history);}
+    public List<String> getHistoryAsText() {
+        return new ArrayList<>(historyText);
+    }
+    public int getGameID() {
+        return gameID;
+    }
+
+    // Setters
+    void setCoreGameParameters(CoreParameters coreGameParameters) {
+        this.coreGameParameters = coreGameParameters;
+    }
+    public final void setTurnOrder(TurnOrder turnOrder) {
+        this.turnOrder = turnOrder;
+    }
+    public final void setGameStatus(CoreConstants.GameResult status) {
+        this.gameStatus = status;
+    }
+    public final void setPlayerResult(CoreConstants.GameResult result, int playerIdx) {
+        this.playerResults[playerIdx] = result;
+    }
+    public final void setGamePhase(IGamePhase gamePhase) {
+        this.gamePhase = gamePhase;
+    }
+    void setGameID(int id) {
+        gameID = id;
+    } // package level deliberately
+
+
+    /* Limited access final methods */
     public final boolean isNotTerminal() {
         return gameStatus == GAME_ONGOING;
     }
@@ -143,15 +170,6 @@ public abstract class AbstractGameState {
     public final boolean isNotTerminalForPlayer(int player) {
         return playerResults[player] == GAME_ONGOING && gameStatus == GAME_ONGOING;
     }
-
-    public final IGamePhase getGamePhase() {
-        return gamePhase;
-    }
-
-    public final void setGamePhase(IGamePhase gamePhase) {
-        this.gamePhase = gamePhase;
-    }
-
     public final int getGameTick() {return tick;}
     public final Component getComponentById(int id) {
         Component c = allComponents.getComponent(id);
@@ -181,15 +199,38 @@ public abstract class AbstractGameState {
         return _getAllComponents();
     }
 
-
-    /* Limited access final methods */
-
     /**
      * Adds all components given by the game to the allComponents map in the correct way, first clearing the map.
      */
     protected final void addAllComponents() {
         allComponents.clear();
         allComponents.putComponents(_getAllComponents());
+    }
+
+    public final void endGame() {
+        setGameStatus(CoreConstants.GameResult.GAME_END);
+        // If we have more than one person in Ordinal position of 1, then this is a draw
+        boolean drawn = IntStream.range(0, getNPlayers()).map(this::getOrdinalPosition).filter(i -> i == 1).count() > 1;
+        for (int p = 0; p < getNPlayers(); p++) {
+            int o = getOrdinalPosition(p);
+            if (o == 1 && drawn)
+                setPlayerResult(DRAW, p);
+            else if (o == 1)
+                setPlayerResult(WIN, p);
+            else
+                setPlayerResult(LOSE, p);
+        }
+    }
+
+    /**
+     * Public access copy method, which always does a full copy of the game state.
+     * (I.e. with no shuffling of hidden data)
+     * Implement _copy() for game-specific functionality
+     *
+     * @return - full copy of this game state.
+     */
+    public final AbstractGameState copy() {
+        return copy(-1);
     }
 
     /**
@@ -236,13 +277,23 @@ public abstract class AbstractGameState {
         return s;
     }
 
-    /* Methods to be implemented by subclass, protected access. */
+    /**
+     * Used by ForwardModel.next() to log history (very useful for debugging)
+     *
+     * @param action The action that has just been applied (or is about to be applied) to the game state
+     */
+    protected final void recordAction(AbstractAction action, int player) {
+        history.add(action);
+        historyText.add("Player " + player + " : " + action.getString(this));
+    }
 
-    public IExtendedSequence currentActionInProgress() {
+    /* Methods dealing with ExtendedActions and the actionStack */
+
+    public final IExtendedSequence currentActionInProgress() {
         return actionsInProgress.isEmpty() ? null : actionsInProgress.peek();
     }
 
-    public boolean isActionInProgress() {
+    public final boolean isActionInProgress() {
         // This checkActionsInProgress is essential
         // When an action is completely executed this is marked on the Action (accessible via IExtendedSequence.executionComplete())
         // However this does not [currently] actively remove the action from the queue on the game state. Whenever we check the actionsInProgress queue, we
@@ -251,34 +302,25 @@ public abstract class AbstractGameState {
         return !actionsInProgress.empty();
     }
 
-    public void setActionInProgress(IExtendedSequence action) {
+    public final void setActionInProgress(IExtendedSequence action) {
         if (action == null && !actionsInProgress.isEmpty())
             actionsInProgress.pop();
         else
             actionsInProgress.push(action);
     }
 
-    void checkActionsInProgress() {
+    final void checkActionsInProgress() {
         while (!actionsInProgress.isEmpty() &&
                 currentActionInProgress().executionComplete(this)) {
             actionsInProgress.pop();
         }
     }
-
-    public final void endGame() {
-        setGameStatus(CoreConstants.GameResult.GAME_END);
-        // If we have more than one person in Ordinal position of 1, then this is a draw
-        boolean drawn = IntStream.range(0, getNPlayers()).map(this::getOrdinalPosition).filter(i -> i == 1).count() > 1;
-        for (int p = 0; p < getNPlayers(); p++) {
-            int o = getOrdinalPosition(p);
-            if (o == 1 && drawn)
-                setPlayerResult(DRAW, p);
-            else if (o == 1)
-                setPlayerResult(WIN, p);
-            else
-                setPlayerResult(LOSE, p);
-        }
+    public final Stack<IExtendedSequence> getActionsInProgress() {
+        return actionsInProgress;
     }
+
+
+    /* Methods to be implemented by subclass, protected access. */
 
     /**
      * Returns all components used in the game and referred to by componentId from actions or rules.
@@ -318,7 +360,7 @@ public abstract class AbstractGameState {
     public abstract double getGameScore(int playerId);
 
     /**
-     * This is an optinal implementation and is used in getOrdinalPosition() to break any ties based on pure game score
+     * This is an optional implementation and is used in getOrdinalPosition() to break any ties based on pure game score
      * Implementing this may be a simpler approach in many cases than re-implementing getOrdinalPosition()
      * For example in ColtExpress, the tie break is the number of bullet cards in hand - and this only affects the outcome
      * if the score is a tie.
@@ -354,6 +396,7 @@ public abstract class AbstractGameState {
         }
         return ordinal;
     }
+
 
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.
@@ -420,29 +463,6 @@ public abstract class AbstractGameState {
      */
     protected abstract boolean _equals(Object o);
 
-    /* ####### Public AI agent API ####### */
-
-    /**
-     * Public access copy method, which always does a full copy of the game state.
-     *
-     * @return - full copy of this game state.
-     */
-    public final AbstractGameState copy() {
-        return copy(-1);
-    }
-
-    public final ElapsedCpuChessTimer[] getPlayerTimer() {
-        return playerTimer;
-    }
-
-    public final GameType getGameType() {
-        return gameType;
-    }
-
-    public final Stack<IExtendedSequence> getActionsInProgress() {
-        return actionsInProgress;
-    }
-
     /**
      * Retrieves a simple numerical assessment of the current game state, the bigger the better.
      * Subjective heuristic function definition.
@@ -479,53 +499,13 @@ public abstract class AbstractGameState {
     }
 
     /**
-     * Used by ForwardModel.next() to log history (very useful for debugging)
-     *
-     * @param action The action that has just been applied (or is about to be applied) to the game state
+     * The equals method is final, but is left here so it is next to hashcode, which is not final
+     * @param o
+     * @return
      */
-    protected void recordAction(AbstractAction action, int player) {
-        history.add(action);
-        historyText.add("Player " + player + " : " + action.getString(this));
-    }
-
-    public void logEvent(String string) {
-        turnOrder.logEvent(string, this);
-    }
-
-    public void recordHistory(String history) {
-        historyText.add(history);
-    }
-
-    /**
-     * @return All actions that have been executed on this state since reset()/initialisation
-     */
-    public List<AbstractAction> getHistory() {
-        return new ArrayList<>(history);
-    }
-
-    public List<String> getHistoryAsText() {
-        return new ArrayList<>(historyText);
-    }
-
-    public int getGameID() {
-        return gameID;
-    }
-
-    void setGameID(int id) {
-        gameID = id;
-    } // package level deliberately
-
-    public CoreParameters getCoreGameParameters() {
-        return coreGameParameters;
-    }
-    public void advanceGameTick() {tick++;}
-
-    void setCoreGameParameters(CoreParameters coreGameParameters) {
-        this.coreGameParameters = coreGameParameters;
-    }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof AbstractGameState)) return false;
         AbstractGameState gameState = (AbstractGameState) o;
@@ -540,6 +520,13 @@ public abstract class AbstractGameState {
         // we deliberately exclude history from this equality check
     }
 
+    /**
+     * Override the hashCode as needed for individual game states
+     * Equality of hashcodes can sometimes require excluding allComponents from the hash
+     * TODO: Remove this annoyance, make hashcode final, and add a _hashcode() abstract method
+     * (It is OK for two java objects to be not equal and have the same hashcode)
+     * @return
+     */
     @Override
     public int hashCode() {
         int result = Objects.hash(gameParameters, turnOrder, allComponents, gameStatus, gamePhase);
