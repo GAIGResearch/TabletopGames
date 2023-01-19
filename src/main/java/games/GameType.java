@@ -67,7 +67,8 @@ public enum GameType {
     Pandemic(2, 4,
             Arrays.asList(Strategy, Medical),
             Arrays.asList(ActionPoints, Cooperative, HandManagement, PointToPointMovement, SetCollection, Trading, VariablePlayerPowers),
-            PandemicGameState.class, PandemicForwardModel.class, PandemicParameters.class, PandemicGUIManager.class),
+            PandemicGameState.class, PandemicForwardModel.class, PandemicParameters.class, PandemicGUIManager.class,
+            "data/pandemic/"),
     TicTacToe(2, 2,
             Arrays.asList(Simple, Abstract),
             Collections.singletonList(PatternBuilding),
@@ -132,7 +133,8 @@ public enum GameType {
     Battlelore(2, 2,
             Arrays.asList(Fantasy, Miniatures, Wargame),
             Arrays.asList(Campaign, BattleCardDriven, CommandCards, DiceRolling, GridMovement, ModularBoard, VariablePlayerPowers),
-            BattleloreGameState.class, BattleloreForwardModel.class, BattleloreGameParameters.class, BattleloreGUI.class),
+            BattleloreGameState.class, BattleloreForwardModel.class, BattleloreGameParameters.class, BattleloreGUI.class,
+            "data/battlelore/"),
     SushiGo(2, 5,
             Arrays.asList(Strategy, Cards),
             Arrays.asList(SetCollection, PushYourLuck, SimultaneousActionSelection),
@@ -168,9 +170,13 @@ public enum GameType {
     private final List<Category> categories;
     private final List<Mechanic> mechanics;
 
+    // Data paths
+    private final String dataPath;
+
     GameType(int minPlayers, int maxPlayers, List<Category> categories, List<Mechanic> mechanics,
              Class<? extends AbstractGameState> gameStateClass, Class<? extends AbstractForwardModel> forwardModelClass,
-             Class<? extends AbstractParameters> parameterClass, Class<? extends AbstractGUIManager> guiManagerClass) {
+             Class<? extends AbstractParameters> parameterClass, Class<? extends AbstractGUIManager> guiManagerClass,
+             String dataPath) {
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
         this.categories = categories;
@@ -179,6 +185,13 @@ public enum GameType {
         this.forwardModelClass = forwardModelClass;
         this.parameterClass = parameterClass;
         this.guiManagerClass = guiManagerClass;
+        this.dataPath = dataPath;
+    }
+
+    GameType(int minPlayers, int maxPlayers, List<Category> categories, List<Mechanic> mechanics,
+             Class<? extends AbstractGameState> gameStateClass, Class<? extends AbstractForwardModel> forwardModelClass,
+             Class<? extends AbstractParameters> parameterClass, Class<? extends AbstractGUIManager> guiManagerClass) {
+        this(minPlayers, maxPlayers, categories, mechanics, gameStateClass, forwardModelClass, parameterClass, guiManagerClass, null);
     }
 
     // Getters
@@ -193,6 +206,9 @@ public enum GameType {
     }
     public List<Mechanic> getMechanics() {
         return mechanics;
+    }
+    public String getDataPath() {
+        return dataPath;
     }
 
     public AbstractGameState createGameState(AbstractParameters params, int nPlayers) {
@@ -223,14 +239,16 @@ public enum GameType {
     public AbstractParameters createParameters(long seed) {
         if (parameterClass == null) throw new AssertionError("No parameter class declared for the game: " + this);
         try {
-            Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, Long.class);
-            return (AbstractParameters) constructorGS.newInstance(seed);
+            if (dataPath != null) {
+                Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, String.class, Long.class);
+                return (AbstractParameters) constructorGS.newInstance(dataPath, seed);
+            } else {
+                Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, Long.class);
+                return (AbstractParameters) constructorGS.newInstance(seed);
+            }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-        //TODO: some games have a datapath extra argument
-//                return new BattleloreGameParameters("data/battlelore/", seed);
-//                return new PandemicParameters("data/pandemic/", seed);
     }
 
     /**
