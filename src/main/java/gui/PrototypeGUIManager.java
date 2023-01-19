@@ -14,7 +14,7 @@ import players.human.HumanGUIPlayer;
 import javax.swing.*;
 import java.awt.*;
 
-public class PrototypeGUIManager extends AbstractGUIManager {
+public class PrototypeGUIManager extends JGUIManager {
     JComponent view;
     int width, height;
 

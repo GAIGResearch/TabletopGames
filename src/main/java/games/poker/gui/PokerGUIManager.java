@@ -8,6 +8,7 @@ import games.poker.PokerGameState;
 import games.poker.components.MoneyPot;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.JGUIManager;
 import players.human.ActionController;
 import utilities.ImageIO;
 import utilities.Pair;
@@ -21,7 +22,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class PokerGUIManager extends AbstractGUIManager {
+public class PokerGUIManager extends JGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 130;

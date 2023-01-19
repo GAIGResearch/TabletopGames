@@ -20,7 +20,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static gui.AbstractGUIManager.defaultItemSize;
+import static gui.JGUIManager.defaultItemSize;
 import static games.terraformingmars.gui.TMCardView.drawResource;
 import static games.terraformingmars.gui.Utils.*;
 

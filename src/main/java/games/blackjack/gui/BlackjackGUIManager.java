@@ -15,7 +15,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
-public class BlackjackGUIManager extends AbstractGUIManager {
+public class BlackjackGUIManager extends JGUIManager {
     final static int playerWidth = 300;
     final static int playerHeight = 130;
     final static int cardWidth = 90;

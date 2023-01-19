@@ -10,6 +10,7 @@ import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.components.Compartment;
 import gui.IScreenHighlight;
 import gui.GamePanel;
+import gui.JGUIManager;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -22,7 +23,7 @@ import java.util.List;
 
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.ExecuteActions;
 
-public class ColtExpressGUIManager extends AbstractGUIManager {
+public class ColtExpressGUIManager extends JGUIManager {
     // Settings for display area sizes
     final static int playerAreaWidth = 470;
     final static int playerAreaWidthScroll = 290;

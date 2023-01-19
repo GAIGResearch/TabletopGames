@@ -16,6 +16,7 @@ import games.terraformingmars.rules.requirements.Requirement;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.JGUIManager;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
@@ -34,7 +35,7 @@ import java.util.List;
 import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
 import static javax.swing.JOptionPane.OK_CANCEL_OPTION;
 
-public class TMGUI extends AbstractGUIManager {
+public class TMGUI extends JGUIManager {
 
     TMBoardView view;
     TMPlayerView playerView;

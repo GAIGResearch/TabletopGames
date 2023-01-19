@@ -12,6 +12,7 @@ import games.tictactoe.TicTacToeGameState;
 import gui.IScreenHighlight;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.JGUIManager;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -19,7 +20,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TicTacToeGUIManager extends AbstractGUIManager {
+public class TicTacToeGUIManager extends JGUIManager {
 
     TTTBoardView view;
 

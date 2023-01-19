@@ -6,6 +6,7 @@ import gui.GamePanel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import gui.JGUIManager;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -15,7 +16,7 @@ import utilities.ImageIO;
 
 import java.util.List;
 
-public class DBGUIManager extends AbstractGUIManager {
+public class DBGUIManager extends JGUIManager {
     DBGridBoardView view;
     int gapRight = 30;
 

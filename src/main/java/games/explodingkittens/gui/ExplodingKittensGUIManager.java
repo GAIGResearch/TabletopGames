@@ -8,6 +8,7 @@ import core.Game;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensGameState;
 import gui.IScreenHighlight;
+import gui.JGUIManager;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -17,7 +18,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 
-public class ExplodingKittensGUIManager extends AbstractGUIManager {
+public class ExplodingKittensGUIManager extends JGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 135;

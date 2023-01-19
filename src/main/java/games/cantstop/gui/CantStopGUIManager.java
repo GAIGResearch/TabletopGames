@@ -8,7 +8,7 @@ import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
 
-public class CantStopGUIManager extends AbstractGUIManager {
+public class CantStopGUIManager extends JGUIManager {
 
     CantStopBoardView view;
     static int cantStopWidth = 600;

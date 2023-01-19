@@ -55,6 +55,7 @@ import games.virus.VirusForwardModel;
 import games.virus.VirusGameState;
 import games.dicemonastery.*;
 import games.dominion.*;
+import glgui.GLGamePanel;
 import gui.*;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -527,7 +528,8 @@ public enum GameType {
                 gui = new LoveLetterGUIManager(parent, game, ac, human);
                 break;
             case TicTacToe:
-                gui = new TicTacToeGUIManager(parent, game, ac);
+                //gui = new TicTacToeGUIManager(parent, game, ac);
+                gui = new TicTacToeGLGUIManager(new GLGamePanel(), game, ac);
                 break;
             case Connect4:
                 gui = new Connect4GUIManager(parent, game, ac);

@@ -9,13 +9,14 @@ import games.catan.CatanTile;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.JGUIManager;
 import players.human.ActionController;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 
-public class CatanGUI extends AbstractGUIManager {
+public class CatanGUI extends JGUIManager {
     CatanGameState gs;
     CatanTile[][] board;
     CatanBoardView boardView;

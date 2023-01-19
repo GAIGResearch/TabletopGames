@@ -5,13 +5,14 @@ import games.dominion.*;
 import gui.IScreenHighlight;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.JGUIManager;
 import players.human.ActionController;
 
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 
-public class DominionGUIManager extends AbstractGUIManager {
+public class DominionGUIManager extends JGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 360;
     final static int playerAreaHeight = 180;

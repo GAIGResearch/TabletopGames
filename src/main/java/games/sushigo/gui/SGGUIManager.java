@@ -8,6 +8,7 @@ import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.JGUIManager;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -16,7 +17,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
-public class SGGUIManager extends AbstractGUIManager {
+public class SGGUIManager extends JGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 200;

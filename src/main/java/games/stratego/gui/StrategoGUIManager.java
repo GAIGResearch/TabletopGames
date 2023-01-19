@@ -10,6 +10,7 @@ import games.stratego.actions.Move;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.JGUIManager;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
@@ -18,7 +19,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StrategoGUIManager extends AbstractGUIManager implements IScreenHighlight {
+public class StrategoGUIManager extends JGUIManager implements IScreenHighlight {
 
     StrategoBoardView view;
 

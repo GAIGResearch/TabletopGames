@@ -14,6 +14,7 @@ import games.loveletter.cards.LoveLetterCard;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.JGUIManager;
 import players.human.ActionController;
 import utilities.ImageIO;
 
@@ -27,7 +28,7 @@ import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.List;
 
-public class LoveLetterGUIManager extends AbstractGUIManager {
+public class LoveLetterGUIManager extends JGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 135;

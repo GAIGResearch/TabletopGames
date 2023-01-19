@@ -19,6 +19,7 @@ import games.pandemic.actions.*;
 import gui.IScreenHighlight;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
+import gui.JGUIManager;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Hash;
@@ -38,7 +39,7 @@ import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction
 import static games.pandemic.gui.PandemicCardView.*;
 import static javax.swing.ScrollPaneConstants.*;
 
-public class PandemicGUIManager extends AbstractGUIManager implements IScreenHighlight {
+public class PandemicGUIManager extends JGUIManager implements IScreenHighlight {
     PandemicCardView[] playerCards;
     JLabel[][] playerHandCardCounts;
     ArrayList<PandemicCardView>[] playerHands;

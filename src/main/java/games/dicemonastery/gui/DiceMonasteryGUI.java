@@ -7,6 +7,7 @@ import games.dicemonastery.DiceMonasteryGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.JGUIManager;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -20,7 +21,7 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 
-public class DiceMonasteryGUI extends AbstractGUIManager {
+public class DiceMonasteryGUI extends JGUIManager {
 
     // Settings for display areas
     final static int playerAreaWidth = 360;

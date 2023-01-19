@@ -13,7 +13,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-import static gui.AbstractGUIManager.*;
+import static gui.JGUIManager.*;
 import static games.terraformingmars.gui.TMGUI.focusPlayer;
 import static games.terraformingmars.gui.Utils.*;
 

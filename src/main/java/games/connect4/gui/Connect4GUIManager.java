@@ -11,6 +11,7 @@ import games.connect4.Connect4GameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
+import gui.JGUIManager;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -18,7 +19,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Connect4GUIManager extends AbstractGUIManager {
+public class Connect4GUIManager extends JGUIManager {
 
     Connect4BoardView view;
 

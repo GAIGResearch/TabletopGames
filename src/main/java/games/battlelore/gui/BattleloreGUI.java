@@ -7,11 +7,12 @@ import core.AbstractPlayer;
 import core.Game;
 import games.battlelore.BattleloreGameState;
 import gui.IScreenHighlight;
+import gui.JGUIManager;
 import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
 
-public class BattleloreGUI extends AbstractGUIManager {
+public class BattleloreGUI extends JGUIManager {
     BattleloreBoardView view;
 
     public BattleloreGUI(GamePanel parent, Game game, ActionController ac) {

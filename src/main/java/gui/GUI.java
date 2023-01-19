@@ -28,14 +28,4 @@ public class GUI extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         repaint();
     }
-
-    /**
-     * Checks if the window is open.
-     * @return true if open, false otherwise
-     */
-    public final boolean isWindowOpen() {
-        return !wi.windowClosed;
-    }
-
-
 }

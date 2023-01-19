@@ -8,6 +8,7 @@ import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
 import gui.IScreenHighlight;
 import gui.GamePanel;
+import gui.JGUIManager;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -17,7 +18,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 
-public class UnoGUIManager extends AbstractGUIManager {
+public class UnoGUIManager extends JGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 130;
