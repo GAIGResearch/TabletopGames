@@ -3,6 +3,7 @@ package gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants;
+import core.Game;
 import core.actions.AbstractAction;
 import players.human.ActionController;
 
@@ -15,9 +16,10 @@ import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
 
-@SuppressWarnings("rawtypes")
 public abstract class AbstractGUIManager {
     protected GamePanel parent;
+    protected Game game;
+    protected int humanPlayerId;
 
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
@@ -33,14 +35,15 @@ public abstract class AbstractGUIManager {
     protected JTextPane historyInfo;
     protected JScrollPane historyContainer;
     private int actionsAtLastUpdate;
-    private WindowInput wi;
 
     protected int width, height;
 
-    public AbstractGUIManager(GamePanel parent, ActionController ac, int maxActionSpace) {
+    public AbstractGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
         this.ac = ac;
-        this.maxActionSpace = maxActionSpace;
+        this.maxActionSpace = getMaxActionSpace();
         this.parent = parent;
+        this.game = game;
+        this.humanPlayerId = human;
 
         gameStatus = new JLabel();
         playerStatus = new JLabel();
@@ -53,6 +56,14 @@ public abstract class AbstractGUIManager {
     }
 
     /* Methods that should/can be implemented by subclass */
+
+    /**
+     * Defines how many action button objects will be created and cached for usage if needed. Less is better, but
+     * should not be smaller than the number of actions available to players in any game state.
+     *
+     * @return maximum size of the action space (maximum actions available to a player for any decision point in the game)
+     */
+    public abstract int getMaxActionSpace();
 
     /**
      * Updates all GUI elements. Must be implemented by subclass.
@@ -232,23 +243,12 @@ public abstract class AbstractGUIManager {
             }
     }
 
-    /**
-     * Checks if the window is open.
-     *
-     * @return true if open, false otherwise
-     */
-    public final boolean isWindowOpen() {
-        return true;  // TODO
-//        return !wi.windowClosed;
-    }
-
     /* Helper class */
 
     /**
      * JButton with an associated action. This action is added to the human agent action queue for execution
      * in the game when the button is clicked. Any associated highlights from the GUI are cleared.
      */
-    @SuppressWarnings("rawtypes")
     protected static class ActionButton extends JButton {
         AbstractAction action;
         ActionButton[] actionButtons;

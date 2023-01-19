@@ -3,7 +3,7 @@ package games.loveletter;
 import core.AbstractParameters;
 import core.Game;
 import evaluation.TunableParameters;
-import register.GameType;
+import games.GameType;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.Arrays;

@@ -2,7 +2,7 @@ package test.games.dominion;
 
 import core.Game;
 import core.components.PartialObservableDeck;
-import register.GameType;
+import games.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;

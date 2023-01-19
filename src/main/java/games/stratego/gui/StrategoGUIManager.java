@@ -22,8 +22,8 @@ public class StrategoGUIManager extends AbstractGUIManager implements IScreenHig
 
     StrategoBoardView view;
 
-    public StrategoGUIManager(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 100);
+    public StrategoGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+        super(parent, game, ac, human);
 
         if (game == null) return;
 
@@ -51,6 +51,11 @@ public class StrategoGUIManager extends AbstractGUIManager implements IScreenHig
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 100;
     }
 
     /**

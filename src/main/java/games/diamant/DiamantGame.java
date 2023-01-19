@@ -1,7 +1,7 @@
 package games.diamant;
 
 import core.*;
-import register.GameType;
+import games.GameType;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.simple.OSLAPlayer;

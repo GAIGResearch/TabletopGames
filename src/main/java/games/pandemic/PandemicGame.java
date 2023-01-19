@@ -2,7 +2,7 @@ package games.pandemic;
 
 import core.*;
 import evaluation.listeners.GameListener;
-import register.GameType;
+import games.GameType;
 import games.pandemic.stats.PandemicMetrics;
 import players.PlayerType;
 import players.human.ActionController;

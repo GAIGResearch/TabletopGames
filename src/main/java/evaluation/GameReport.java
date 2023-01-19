@@ -5,7 +5,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.interfaces.IStatisticLogger;
 import evaluation.listeners.GameListener;
-import register.GameType;
+import games.GameType;
 import players.PlayerFactory;
 import utilities.Pair;
 

@@ -3,7 +3,7 @@ package test.players.mcts;
 import core.*;
 import core.actions.*;
 import core.interfaces.IStatisticLogger;
-import register.GameType;
+import games.GameType;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;

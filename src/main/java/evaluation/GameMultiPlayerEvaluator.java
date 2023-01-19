@@ -7,7 +7,7 @@ import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
 import evodef.MultiSolutionEvaluator;
 import evodef.SearchSpace;
-import register.GameType;
+import games.GameType;
 import evaluation.loggers.SummaryLogger;
 
 import java.util.*;

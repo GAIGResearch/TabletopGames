@@ -1,7 +1,7 @@
 package games.uno;
 
 import core.*;
-import register.GameType;
+import games.GameType;
 import players.simple.OSLAPlayer;
 
 import java.util.*;

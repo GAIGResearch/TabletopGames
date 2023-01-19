@@ -4,7 +4,10 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
 import core.interfaces.IGamePhase;
-import register.GameType;
+import core.turnorders.TurnOrder;
+import games.GameType;
+import games.sushigo.SGParameters;
+import games.sushigo.SGTurnOrder;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.*;
@@ -73,7 +76,16 @@ public class TMGameState extends AbstractGameState {
      * @param gameParameters - game parameters.
      */
     public TMGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new TMTurnOrder(nPlayers, ((TMGameParameters) gameParameters).nActionsPerPlayer), GameType.TerraformingMars);
+        super(gameParameters, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new TMTurnOrder(nPlayers, ((TMGameParameters) gameParameters).nActionsPerPlayer);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.TerraformingMars;
     }
 
     @Override

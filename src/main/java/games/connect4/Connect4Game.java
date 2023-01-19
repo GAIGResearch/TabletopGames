@@ -2,7 +2,7 @@ package games.connect4;
 
 import core.Game;
 import core.AbstractPlayer;
-import register.GameType;
+import games.GameType;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 

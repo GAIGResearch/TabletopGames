@@ -8,7 +8,8 @@ import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
-import register.GameType;
+import core.turnorders.TurnOrder;
+import games.GameType;
 import utilities.Pair;
 
 import java.util.ArrayList;
@@ -23,9 +24,19 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     LinkedList<Pair<Integer, Integer>> winnerCells;
 
     public Connect4GameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Connect4);
+        super(gameParameters, nPlayers);
         winnerCells = new LinkedList<>();
         gridBoard = null;
+    }
+
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new AlternatingTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Connect4;
     }
 
     @Override

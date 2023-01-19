@@ -8,7 +8,9 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import register.GameType;
+import core.turnorders.StandardTurnOrder;
+import core.turnorders.TurnOrder;
+import games.GameType;
 
 import java.util.ArrayList;
 import java.util.*;
@@ -18,7 +20,6 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
     Deck<FrenchCard> drawDeck;
     int dealerPlayer;
 
-
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -26,7 +27,17 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
      * @param nPlayers       - number of players for this game.
      */
     public BlackjackGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new BlackjackTurnOrder(nPlayers), GameType.Blackjack);
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new BlackjackTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Blackjack;
     }
 
     @Override

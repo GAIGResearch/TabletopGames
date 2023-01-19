@@ -9,7 +9,9 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import register.GameType;
+import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
+import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
 import java.util.*;
@@ -30,9 +32,18 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     Stack<AbstractAction> actionStack;
     int[] orderOfPlayerDeath;
     public ExplodingKittensGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ExplodingKittensTurnOrder(nPlayers), GameType.ExplodingKittens);
+        super(gameParameters, nPlayers);
         playerGettingAFavor = -1;
         playerHandCards = new ArrayList<>();
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new ExplodingKittensTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.ExplodingKittens;
     }
 
     @Override

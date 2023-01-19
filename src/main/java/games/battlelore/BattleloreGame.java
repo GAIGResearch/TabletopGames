@@ -2,7 +2,7 @@ package games.battlelore;
 
 import core.AbstractPlayer;
 import core.Game;
-import register.GameType;
+import games.GameType;
 
 import java.util.List;
 import java.util.Random;

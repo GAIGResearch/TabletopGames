@@ -3,7 +3,7 @@ package evaluation;
 import core.*;
 import core.actions.AbstractAction;
 import players.*;
-import register.GameType;
+import games.GameType;
 import utilities.Utils;
 
 import java.util.*;

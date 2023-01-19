@@ -1,7 +1,7 @@
 package games.poker;
 
 import core.*;
-import register.GameType;
+import games.GameType;
 
 import players.human.HumanConsolePlayer;
 import core.AbstractGameState;

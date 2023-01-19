@@ -3,7 +3,7 @@ package games.coltexpress;
 import core.AbstractParameters;
 import core.Game;
 import evaluation.TunableParameters;
-import register.GameType;
+import games.GameType;
 import games.coltexpress.cards.ColtExpressCard;
 import utilities.Group;
 

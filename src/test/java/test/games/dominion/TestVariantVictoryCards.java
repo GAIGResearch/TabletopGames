@@ -2,7 +2,7 @@ package test.games.dominion;
 
 import core.AbstractPlayer;
 import core.Game;
-import register.GameType;
+import games.GameType;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;

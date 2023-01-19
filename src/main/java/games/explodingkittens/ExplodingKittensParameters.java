@@ -3,7 +3,7 @@ package games.explodingkittens;
 import core.AbstractParameters;
 import core.Game;
 import evaluation.TunableParameters;
-import register.GameType;
+import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
 import java.util.Arrays;

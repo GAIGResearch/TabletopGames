@@ -8,7 +8,7 @@ import core.interfaces.ITunableParameters;
 import evodef.EvoAlg;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
-import register.GameType;
+import games.GameType;
 import ntbea.MultiNTupleBanditEA;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;

@@ -6,7 +6,9 @@ import core.components.Component;
 import core.components.Dice;
 import core.interfaces.IPrintable;
 import core.turnorders.StandardTurnOrder;
-import register.GameType;
+import core.turnorders.TurnOrder;
+import games.GameType;
+import games.blackjack.BlackjackTurnOrder;
 
 import java.util.*;
 
@@ -26,7 +28,7 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     private CantStopGameState(CantStopGameState copyFrom) {
         // used by copy method only
-        super(copyFrom.gameParameters, GameType.CantStop);
+        super(copyFrom.gameParameters, copyFrom.getNPlayers());
         // TurnOrder will be copied later
         completedColumns = copyFrom.completedColumns.clone();
         playerMarkerPositions = new int[copyFrom.getNPlayers()][];
@@ -43,7 +45,17 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
     }
 
     public CantStopGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.CantStop);
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new StandardTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.CantStop;
     }
 
     public void rollDice() {

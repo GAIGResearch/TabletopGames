@@ -1,7 +1,7 @@
 package evaluation.tournaments;
 
 import core.*;
-import register.GameType;
+import games.GameType;
 import utilities.Pair;
 
 import java.util.ArrayList;

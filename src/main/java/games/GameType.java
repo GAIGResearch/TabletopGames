@@ -1,74 +1,41 @@
-package register;
+package games;
 
 import core.*;
-import games.battlelore.BattleloreForwardModel;
-import games.battlelore.BattleloreGameParameters;
-import games.battlelore.BattleloreGameState;
+import games.battlelore.*;
 import games.battlelore.gui.BattleloreGUI;
-import games.blackjack.BlackjackForwardModel;
-import games.blackjack.BlackjackGameState;
-import games.blackjack.BlackjackParameters;
+import games.blackjack.*;
 import games.blackjack.gui.BlackjackGUIManager;
-import games.cantstop.CantStopForwardModel;
-import games.cantstop.CantStopGameState;
-import games.cantstop.CantStopParameters;
+import games.cantstop.*;
 import games.cantstop.gui.CantStopGUIManager;
-import games.catan.CatanForwardModel;
-import games.catan.CatanGameState;
-import games.catan.CatanParameters;
+import games.catan.*;
 import games.catan.gui.CatanGUI;
-import games.coltexpress.ColtExpressForwardModel;
-import games.coltexpress.ColtExpressGameState;
-import games.coltexpress.ColtExpressParameters;
+import games.coltexpress.*;
 import games.coltexpress.gui.ColtExpressGUIManager;
-import games.connect4.Connect4ForwardModel;
-import games.connect4.Connect4GameParameters;
-import games.connect4.Connect4GameState;
+import games.connect4.*;
 import games.connect4.gui.Connect4GUIManager;
-import games.diamant.DiamantForwardModel;
-import games.diamant.DiamantGameState;
-import games.diamant.DiamantParameters;
+import games.diamant.*;
 import games.dominion.gui.DominionGUIManager;
-import games.dotsboxes.DBForwardModel;
-import games.dotsboxes.DBGUIManager;
-import games.dotsboxes.DBGameState;
-import games.dotsboxes.DBParameters;
-import games.explodingkittens.ExplodingKittensForwardModel;
-import games.explodingkittens.ExplodingKittensGameState;
-import games.explodingkittens.ExplodingKittensParameters;
+import games.dotsboxes.*;
+import games.explodingkittens.*;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
-import games.pandemic.PandemicForwardModel;
-import games.pandemic.PandemicGameState;
-import games.pandemic.PandemicParameters;
+import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
-import games.stratego.StrategoParams;
-import games.sushigo.SGParameters;
-import games.terraformingmars.TMForwardModel;
-import games.terraformingmars.TMGameParameters;
-import games.terraformingmars.TMGameState;
+import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
 import games.poker.gui.*;
 import games.dicemonastery.gui.*;
-import games.stratego.StrategoForwardModel;
-import games.stratego.StrategoGameState;
+import games.stratego.*;
 import games.stratego.gui.StrategoGUIManager;
-import games.sushigo.SGForwardModel;
-import games.sushigo.SGGameState;
+import games.sushigo.*;
 import games.sushigo.gui.SGGUIManager;
-import games.tictactoe.TicTacToeForwardModel;
-import games.tictactoe.TicTacToeGameParameters;
-import games.tictactoe.TicTacToeGameState;
+import games.tictactoe.*;
 import games.tictactoe.gui.*;
-import games.uno.UnoForwardModel;
-import games.uno.UnoGameParameters;
-import games.uno.UnoGameState;
+import games.uno.*;
 import games.uno.gui.*;
-import games.virus.VirusForwardModel;
-import games.virus.VirusGameParameters;
-import games.virus.VirusGameState;
+import games.virus.*;
 import games.dicemonastery.*;
 import games.dominion.*;
 import gui.*;
@@ -81,9 +48,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static core.CoreConstants.*;
-import static register.GameType.Category.Number;
-import static register.GameType.Category.*;
-import static register.GameType.Mechanic.*;
+import static games.GameType.Category.Number;
+import static games.GameType.Category.*;
+import static games.GameType.Mechanic.*;
 
 /**
  * Encapsulates all games available in the framework, with minimum and maximum number of players as per game rules.
@@ -245,6 +212,7 @@ public enum GameType {
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
+        // TODO: Pandemic rule-based FM different constructor
     }
 
     public AbstractParameters createParameters(long seed) {
@@ -255,6 +223,9 @@ public enum GameType {
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
+        //TODO: some games have a datapath extra argument
+//                return new BattleloreGameParameters("data/battlelore/", seed);
+//                return new PandemicParameters("data/pandemic/", seed);
     }
 
     /**
@@ -286,16 +257,6 @@ public enum GameType {
         }
     }
 
-//                gui = new PandemicGUIManager(parent, game, ac);
-//                gui = new TicTacToeGUIManager(parent, game, ac);
-//                gui = new Connect4GUIManager(parent, game, ac);
-//                    gui = new DBGUIManager(parent, game.getGameState(), ac);
-//                gui = new CatanGUI(parent, game, ac);
-//                gui = new TMGUI(parent, game, ac);
-//                gui = new BattleloreGUI(parent, game, ac);
-//                gui = new StrategoGUIManager(parent, game, ac);
-//                gui = new CantStopGUIManager(parent, game, ac);
-
     /**
      * Creates an instance of the given game type with nPlayers number of players and random seed.
      *
@@ -311,10 +272,6 @@ public enum GameType {
         }
         if (params == null) {
             params = createParameters(seed);
-
-            //TODO: some games have a datapath extra argument
-//                return new BattleloreGameParameters("data/battlelore/", seed);
-//                return new PandemicParameters("data/pandemic/", seed);
         } else {
             params.setRandomSeed(seed);
         }
@@ -329,7 +286,7 @@ public enum GameType {
     }
     public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {
         if (gameParams == null) {
-            return createGameInstance(nPlayers, System.currentTimeMillis(), gameParams);
+            return createGameInstance(nPlayers, System.currentTimeMillis(), null);
         } else {
             return createGameInstance(nPlayers, gameParams.getRandomSeed(), gameParams);
         }
@@ -360,6 +317,7 @@ public enum GameType {
         }
     }
 
+    @SuppressWarnings("unused")
     public enum Category {
         Strategy,
         Simple,
@@ -391,9 +349,7 @@ public enum GameType {
         Wargame;
 
         /**
-         * Retrieves a list of all games within this category.
-         *
-         * @return - list of game types.
+         * @return a list of all games within this category.
          */
         public List<GameType> getAllGames() {
             ArrayList<GameType> games = new ArrayList<>();
@@ -406,9 +362,7 @@ public enum GameType {
         }
 
         /**
-         * Retrieves a list of all games that are NOT within this category.
-         *
-         * @return - list of game types.
+         * @return a list of all games that are NOT within this category.
          */
         public List<GameType> getAllGamesExcluding() {
             ArrayList<GameType> games = new ArrayList<>();
@@ -421,6 +375,7 @@ public enum GameType {
         }
     }
 
+    @SuppressWarnings("unused")
     public enum Mechanic {
         Cooperative,
         ActionPoints,
@@ -466,9 +421,7 @@ public enum GameType {
         MoveThroughDeck;
 
         /**
-         * Retrieves a list of all games using this mechanic.
-         *
-         * @return - list of game types.
+         * @return a list of all games using this mechanic.
          */
         public List<GameType> getAllGames() {
             ArrayList<GameType> games = new ArrayList<>();
@@ -481,9 +434,7 @@ public enum GameType {
         }
 
         /**
-         * Retrieves a list of all games that do NOT use this mechanic.
-         *
-         * @return - list of game types.
+         * @return a list of all games that do NOT use this mechanic.
          */
         public List<GameType> getAllGamesExcluding() {
             ArrayList<GameType> games = new ArrayList<>();

@@ -6,7 +6,7 @@ import evaluation.ITPSearchSpace;
 import evaluation.ParameterSearch;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
-import register.GameType;
+import games.GameType;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
 import org.json.simple.JSONObject;

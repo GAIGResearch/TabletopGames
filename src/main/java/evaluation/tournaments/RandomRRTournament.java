@@ -2,7 +2,7 @@ package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import register.GameType;
+import games.GameType;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

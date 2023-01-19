@@ -23,8 +23,8 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
 
     TTTBoardView view;
 
-    public TicTacToeGUIManager(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 1);
+    public TicTacToeGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+        super(parent, game, ac, human);
         if (game == null) return;
 
         TicTacToeGameState gameState = (TicTacToeGameState) game.getGameState();
@@ -46,6 +46,11 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 1;
     }
 
     /**

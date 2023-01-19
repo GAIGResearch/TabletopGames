@@ -44,8 +44,6 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
 
     // Currently active player
     int activePlayer = -1;
-    // ID of human player
-    int humanID;
 
     int highlightPlayerIdx = 0;
 
@@ -57,8 +55,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
     LoveLetterForwardModel fm;
 
     public LoveLetterGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, ac, 50);
-        this.humanID = humanID;
+        super(parent, game, ac, humanID);
 
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
@@ -188,6 +185,11 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
             }
         }
 
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 50;
     }
 
 
@@ -345,7 +347,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
             llgs = (LoveLetterGameState)gameState.copy();
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 boolean front = i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || i == humanID
+                        || i == humanPlayerId
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable;
                 playerHands[i].update(llgs, front);
 

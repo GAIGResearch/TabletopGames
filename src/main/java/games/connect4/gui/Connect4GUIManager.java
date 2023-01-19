@@ -22,8 +22,8 @@ public class Connect4GUIManager extends AbstractGUIManager {
 
     Connect4BoardView view;
 
-    public Connect4GUIManager(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 1);
+    public Connect4GUIManager(GamePanel parent, Game game, ActionController ac, int humanId) {
+        super(parent, game, ac, humanId);
         if (game == null) return;
 
         Connect4GameState gameState = (Connect4GameState) game.getGameState();
@@ -45,6 +45,11 @@ public class Connect4GUIManager extends AbstractGUIManager {
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 1;
     }
 
     /**

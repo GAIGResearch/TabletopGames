@@ -2,7 +2,7 @@ package games.catan;
 
 import core.AbstractPlayer;
 import core.Game;
-import register.GameType;
+import games.GameType;
 import players.human.ActionController;
 import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;

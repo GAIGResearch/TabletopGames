@@ -7,7 +7,7 @@ import core.turnorders.ReactiveTurnOrder;
 import evaluation.metrics.Event;
 import evaluation.listeners.GameListener;
 import evaluation.summarisers.TAGNumericStatSummary;
-import register.GameType;
+import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;

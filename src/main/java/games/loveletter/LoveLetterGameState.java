@@ -8,7 +8,9 @@ import core.interfaces.IGamePhase;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import register.GameType;
+import core.turnorders.TurnOrder;
+import games.GameType;
+import games.explodingkittens.ExplodingKittensTurnOrder;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.*;
@@ -49,8 +51,16 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     }
 
     public LoveLetterGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new LoveLetterTurnOrder(nPlayers), GameType.LoveLetter);
-        gamePhase = Draw;
+        super(gameParameters, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new LoveLetterTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.LoveLetter;
     }
 
     @Override

@@ -9,7 +9,7 @@ import evaluation.metrics.Event;
 import evaluation.listeners.GameListener;
 import evaluation.tournaments.RandomRRTournament;
 import evaluation.tournaments.RoundRobinTournament;
-import register.GameType;
+import games.GameType;
 import players.PlayerFactory;
 import players.learners.AbstractLearner;
 import evaluation.loggers.FileStatsLogger;

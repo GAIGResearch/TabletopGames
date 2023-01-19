@@ -2,9 +2,10 @@ package gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.Game;
 import core.components.Component;
 import core.components.Deck;
-import register.GameType;
+import games.GameType;
 import gui.views.AreaView;
 import gui.views.CardView;
 import gui.views.ComponentView;
@@ -21,24 +22,24 @@ public class PrototypeGUIManager extends AbstractGUIManager {
     protected ComponentView[] componentViews;
     protected int maxComponentsInDeck = 100;
 
-    public PrototypeGUIManager(GamePanel parent, GameType game, AbstractGameState gameState, ActionController ac, int maxActionSpace) {
-        this(parent, game, gameState, ac, maxActionSpace, defaultDisplayWidth, defaultDisplayHeight);
+    public PrototypeGUIManager(GamePanel parent, GameType gameType, Game game, ActionController ac, int humanId, int maxActionSpace) {
+        this(parent, gameType, game, ac, humanId, maxActionSpace, defaultDisplayWidth, defaultDisplayHeight);
     }
 
-    public PrototypeGUIManager(GamePanel parent, GameType game, AbstractGameState gameState, ActionController ac, int maxActionSpace,
+    public PrototypeGUIManager(GamePanel parent, GameType gameType, Game game, ActionController ac, int humanId, int maxActionSpace,
                                int displayWidth, int displayHeight) {
-        super(parent, ac, maxActionSpace);
+        super(parent, game, ac, humanId);
         this.width = displayWidth;
         this.height = displayHeight;
 
-        if (gameState != null) {
-            view = new AreaView(gameState.getAllComponents(), width, height);
+        if (game != null) {
+            view = new AreaView(game.getGameState().getAllComponents(), width, height);
         } else {
             view = new JPanel();
         }
         JPanel infoPanel = new JPanel();
-        if (game != null && gameState != null) {
-            infoPanel = createGameStateInfoPanel(game.name(), gameState, width, defaultInfoPanelHeight);
+        if (game != null) {
+            infoPanel = createGameStateInfoPanel(gameType.name(), game.getGameState(), width, defaultInfoPanelHeight);
         }
         JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true);
 
@@ -84,6 +85,11 @@ public class PrototypeGUIManager extends AbstractGUIManager {
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 0;
     }
 
     @Override

@@ -4,7 +4,7 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IStatisticLogger;
 import evaluation.listeners.GameListener;
-import register.GameType;
+import games.GameType;
 import players.PlayerFactory;
 import players.mcts.BasicMCTSPlayer;
 import players.mcts.MCTSPlayer;

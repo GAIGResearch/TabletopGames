@@ -4,7 +4,7 @@ import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
-import register.GameType;
+import games.GameType;
 import games.cantstop.CantStopForwardModel;
 import games.cantstop.CantStopGamePhase;
 import games.cantstop.CantStopGameState;

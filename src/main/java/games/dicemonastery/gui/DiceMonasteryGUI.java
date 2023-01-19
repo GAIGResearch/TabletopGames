@@ -37,7 +37,7 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
     MainBoard mainBoard;
 
     public DiceMonasteryGUI(GamePanel p, Game game, ActionController ac, int humanID) {
-        super(p, ac, 20);
+        super(p, game, ac, humanID);
         this.humanId = humanID;
 
         if (game != null && game.getGameState() != null) {
@@ -102,6 +102,11 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
             parent.repaint();
         }
 
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 20;
     }
 
 

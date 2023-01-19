@@ -3,7 +3,7 @@ package games.dicemonastery;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
-import register.GameType;
+import games.GameType;
 
 import java.util.List;
 

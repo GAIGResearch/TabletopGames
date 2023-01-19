@@ -6,7 +6,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
-import register.GameType;
+import games.GameType;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
 
@@ -33,6 +33,8 @@ public class LoveLetterForwardModel extends StandardForwardModel {
         llgs.affectionTokens = new int[llgs.getNPlayers()];
         llgs.playerHandCards = new ArrayList<>(llgs.getNPlayers());
         llgs.playerDiscardCards = new ArrayList<>(llgs.getNPlayers());
+
+        llgs.setGamePhase(Draw);
 
         // Set up first round
         setupRound(llgs, null);
