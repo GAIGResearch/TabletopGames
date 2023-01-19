@@ -22,15 +22,16 @@ public abstract class AbstractParameterizedMetric extends AbstractMetric
         super();
         List<Group<String, List<?>, ?>> parameters = getAllowedParameters();
         if (parameters.size() != 1) throw new RuntimeException("Number of parameters supplied doesn't match number of parameters recorded");
+        if (!parameters.get(0).b.contains(arg)) throw new RuntimeException("Given argument (" + arg + ") is not one of the possible values: " + parameters.get(0).b.toString());
         parameterValues.put(parameters.get(0).a, arg);
-        // TODO check given value in possible values
     }
     public AbstractParameterizedMetric(Object... args) {
         super();
         List<Group<String, List<?>, ?>> parameters = getAllowedParameters();
         if (args.length != parameters.size()) throw new RuntimeException("Number of parameters supplied doesn't match number of parameters recorded");
-        IntStream.range(0, args.length).forEach(i -> parameterValues.put(parameters.get(i).a, args[i]));
-        // TODO check given value in possible values
+        IntStream.range(0, args.length).forEach(i -> {
+            if (!parameters.get(i).b.contains(args[i]) || parameters.get(i).c.getClass() != args[i].getClass()) throw new RuntimeException("Given argument " + i + " (" + args[i] + ") is not one of the possible values: " + parameters.get(i).b.toString());
+            parameterValues.put(parameters.get(i).a, args[i]);});
     }
 
     /**
