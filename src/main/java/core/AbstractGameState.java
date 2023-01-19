@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.LogEvent;
 import core.components.Area;
 import core.components.Component;
 import core.components.PartialObservableDeck;
@@ -8,10 +9,13 @@ import core.interfaces.IComponentContainer;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
+import evaluation.listeners.GameListener;
+import evaluation.metrics.Event;
 import games.GameType;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -38,6 +42,10 @@ public abstract class AbstractGameState {
 
     // Game tick, number of iterations of game loop
     private int tick = 0;
+
+    // Migrated from TurnOrder..may move later
+    protected int currentPlayer, nPlayers;
+    protected List<GameListener> listeners = new ArrayList<>();
 
     // Timers for all players
     protected ElapsedCpuChessTimer[] playerTimer;
@@ -100,7 +108,7 @@ public abstract class AbstractGameState {
         return this.gameParameters;
     }
     public final int getNPlayers() {
-        return turnOrder.nPlayers();
+        return nPlayers;
     }
     public int getCurrentPlayer() {
         throw new AssertionError("Not yet implemented");
@@ -146,6 +154,15 @@ public abstract class AbstractGameState {
         gameID = id;
     } // package level deliberately
     void advanceGameTick() {tick++;}
+
+    public void addListener(GameListener listener) {
+        if (!listeners.contains(listener))
+            listeners.add(listener);
+    }
+
+    public void clearListeners() {
+        listeners.clear();
+    }
 
     /* Limited access final methods */
     public final boolean isNotTerminal() {
@@ -271,8 +288,20 @@ public abstract class AbstractGameState {
         historyText.add("Player " + player + " : " + action.getString(this));
     }
 
-    public void logEvent(String string) {
-        turnOrder.logEvent(string, this);
+
+    // helper function to avoid time-consuming string manipulations if the message is not actually
+    // going to be logged anywhere
+    public void logEvent(Supplier<String> eventText) {
+        if (listeners.isEmpty() && !getCoreGameParameters().recordEventHistory)
+            return; // to avoid expensive string manipulations
+        logEvent(eventText.get());
+    }
+    public void logEvent(String eventText) {
+        AbstractAction logAction = new LogEvent(eventText);
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_EVENT, this, logAction)));
+        if (getCoreGameParameters().recordEventHistory) {
+            recordHistory(eventText);
+        }
     }
 
     public void recordHistory(String history) {

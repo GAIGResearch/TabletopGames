@@ -37,7 +37,6 @@ public abstract class TurnOrder {
         reset();
         this.nPlayers = nPlayers;
     }
-
     public TurnOrder() {}
 
     public final void setStartingPlayer(int player) {
