@@ -8,6 +8,7 @@ import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.catan.actions.OfferPlayerTrade;
 import games.catan.components.Edge;
@@ -49,8 +50,18 @@ public class CatanGameState extends AbstractGameState {
     HashMap<Integer, Area> areas;
 
     public CatanGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters) pp).max_round_count), GameType.Catan);
+        super(pp, nPlayers);
         _reset();
+    }
+
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new CatanTurnOrder(nPlayers, ((CatanParameters) getGameParameters()).max_round_count);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Catan;
     }
 
     @Override

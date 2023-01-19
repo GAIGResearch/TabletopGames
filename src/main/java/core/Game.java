@@ -116,7 +116,7 @@ public class Game {
         // Creating game instance (null if not implemented)
         Game game;
         if (parameterConfigFile != null) {
-            AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, parameterConfigFile);
+            AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, parameterConfigFile);
             game = gameToPlay.createGameInstance(players.size(), seed, params);
         } else game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {

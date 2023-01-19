@@ -8,7 +8,10 @@ import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
+import games.terraformingmars.TMGameParameters;
+import games.terraformingmars.TMTurnOrder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +23,16 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     GridBoard<Token> gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.TicTacToe);
+        super(gameParameters, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new AlternatingTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.TicTacToe;
     }
 
     @Override

@@ -3,7 +3,6 @@ package evaluation;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.Game;
-import core.ParameterFactory;
 import core.interfaces.IStatisticLogger;
 import evaluation.listeners.GameListener;
 import games.GameType;
@@ -140,7 +139,7 @@ public class GameReport {
                     continue;
                 }
 
-                AbstractParameters params = ParameterFactory.createFromFile(gameType, gameParams);
+                AbstractParameters params = AbstractParameters.createFromFile(gameType, gameParams);
                 Game game = params == null ?
                         gameType.createGameInstance(playerCount) :
                         gameType.createGameInstance(playerCount, params);

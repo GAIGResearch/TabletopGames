@@ -13,7 +13,10 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import core.turnorders.TurnOrder;
 import games.GameType;
+import games.pandemic.PandemicParameters;
+import games.pandemic.PandemicTurnOrder;
 import games.poker.components.MoneyPot;
 import utilities.Pair;
 
@@ -49,7 +52,16 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
      */
 
     public PokerGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new PokerTurnOrder(nPlayers), GameType.Poker);
+        super(gameParameters, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new PokerTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Poker;
     }
 
     @Override

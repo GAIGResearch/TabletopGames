@@ -31,7 +31,7 @@ public class DominionGUIManager extends AbstractGUIManager {
     DominionMarketView marketView;
 
     public DominionGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, ac, 20);
+        super(parent, game, ac, humanID);
         this.humanId = humanID;
         // Now we set up the GUI
 
@@ -109,6 +109,11 @@ public class DominionGUIManager extends AbstractGUIManager {
             parent.repaint();
         }
 
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 20;
     }
 
     /**

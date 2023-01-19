@@ -51,7 +51,7 @@ public class Frontend extends GUI {
         gameParameterEditWindow = new JFrame[GameType.values().length];
         for (int i = 0; i < gameNames.length; i++) {
             gameNames[i] = GameType.values()[i].name();
-            AbstractParameters params = ParameterFactory.getDefaultParams(GameType.values()[i], 0);
+            AbstractParameters params = GameType.values()[i].createParameters(0);
             if (params instanceof TunableParameters) {
                 gameParameters[i] = (TunableParameters) params;
                 gameParameterEditWindow[i] = new JFrame();

@@ -5,6 +5,8 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
+import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
@@ -36,8 +38,17 @@ public class SGGameState extends AbstractGameState {
      * @param nPlayers       - amount of players for this game.
      */
     public SGGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new SGTurnOrder(nPlayers, ((SGParameters)gameParameters).nRounds), GameType.SushiGo);
+        super(gameParameters, nPlayers);
         rnd = new Random(gameParameters.getRandomSeed());
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new SGTurnOrder(nPlayers, ((SGParameters)gameParameters).nRounds);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.SushiGo;
     }
 
     @Override

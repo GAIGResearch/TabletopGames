@@ -33,16 +33,13 @@ public class UnoGUIManager extends AbstractGUIManager {
 
     // Currently active player
     int activePlayer = -1;
-    // ID of human player
-    int humanID;
 
     // Border highlight of active player
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
     Border[] playerViewBorders;
 
     public UnoGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, ac, 15);
-        this.humanID = humanID;
+        super(parent, game, ac, humanID);
 
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
@@ -123,6 +120,11 @@ public class UnoGUIManager extends AbstractGUIManager {
     }
 
     @Override
+    public int getMaxActionSpace() {
+        return 15;
+    }
+
+    @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
@@ -135,7 +137,7 @@ public class UnoGUIManager extends AbstractGUIManager {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update((UnoGameState) gameState);
                 if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || i == humanID
+                        || i == humanPlayerId
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                     playerHands[i].playerHandView.setFront(true);
                     playerHands[i].setFocusable(true);

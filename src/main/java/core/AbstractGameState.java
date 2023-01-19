@@ -61,20 +61,17 @@ public abstract class AbstractGameState {
      * Constructor. Initialises some generic game state variables.
      *
      * @param gameParameters - game parameters.
-     * @param turnOrder      - turn order for this game.
+     * @param nPlayers      - number of players in the game
      */
-    public AbstractGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType) {
+    public AbstractGameState(AbstractParameters gameParameters, int nPlayers) {
         this.gameParameters = gameParameters;
-        this.turnOrder = turnOrder;
-        this.gameType = gameType;
+        this.turnOrder = _createTurnOrder(nPlayers);
+        this.gameType = _getGameType();
         this.coreGameParameters = new CoreParameters();
     }
 
-    protected AbstractGameState(AbstractParameters gameParameters, GameType type) {
-        this.gameParameters = gameParameters;
-        this.gameType = type;
-    }
-
+    protected abstract TurnOrder _createTurnOrder(int nPlayers);
+    protected abstract GameType _getGameType();
 
     /**
      * Resets variables initialised for this game state.

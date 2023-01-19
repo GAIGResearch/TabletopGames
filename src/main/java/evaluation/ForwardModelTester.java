@@ -2,9 +2,8 @@ package evaluation;
 
 import core.*;
 import core.actions.AbstractAction;
-import games.*;
-import org.apache.commons.math3.analysis.function.Abs;
 import players.*;
+import games.GameType;
 import utilities.Utils;
 
 import java.util.*;

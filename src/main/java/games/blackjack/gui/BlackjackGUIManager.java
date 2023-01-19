@@ -25,14 +25,12 @@ public class BlackjackGUIManager extends AbstractGUIManager {
     BlackjackPlayerView[] playerHands;
 
     int activePlayer = -1;
-    int humanID;
 
     Border highlightActive = BorderFactory.createLineBorder(new Color(47,132,220), 3);
     Border[] playerViewBorders;
 
     public BlackjackGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, ac, 15);
-        this.humanID = humanID;
+        super(parent, game, ac, humanID);
 
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
@@ -128,6 +126,11 @@ public class BlackjackGUIManager extends AbstractGUIManager {
                 parent.repaint();
             }
         }
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 15;
     }
 
 

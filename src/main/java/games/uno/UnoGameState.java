@@ -6,6 +6,8 @@ import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
+import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.uno.cards.*;
 
@@ -31,7 +33,16 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers       - number of players for this game.
      */
     public UnoGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new UnoTurnOrder(nPlayers), GameType.Uno);
+        super(gameParameters, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new UnoTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Uno;
     }
 
     @Override
