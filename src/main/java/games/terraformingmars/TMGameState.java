@@ -1,6 +1,7 @@
 package games.terraformingmars;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.*;
 import core.interfaces.IGamePhase;
@@ -22,7 +23,7 @@ import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.CorporationSelect;
 
-public class TMGameState extends AbstractGameState {
+public class TMGameState extends AbstractGameStateWithTurnOrder {
 
     enum TMPhase implements IGamePhase {
         CorporationSelect,
@@ -108,7 +109,7 @@ public class TMGameState extends AbstractGameState {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         Random rnd = new Random(getGameParameters().getRandomSeed());
         TMGameState copy = new TMGameState(gameParameters, getNPlayers());
 

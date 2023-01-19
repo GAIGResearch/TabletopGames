@@ -1,6 +1,7 @@
 package games.cantstop;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Dice;
@@ -13,7 +14,7 @@ import java.util.*;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class CantStopGameState extends AbstractGameState implements IPrintable {
+public class CantStopGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
 
     // The core game state is made up of the 11 tracks (2 through 12), with the positions of each player,
     // and the temporary markers if in the middle of someone's turn
@@ -26,7 +27,7 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     private CantStopGameState(CantStopGameState copyFrom) {
         // used by copy method only
-        super(copyFrom.gameParameters, GameType.CantStop);
+        this(copyFrom.gameParameters, copyFrom.getNPlayers());
         // TurnOrder will be copied later
         completedColumns = copyFrom.completedColumns.clone();
         playerMarkerPositions = new int[copyFrom.getNPlayers()][];
@@ -91,7 +92,7 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected CantStopGameState _copy(int playerId) {
+    protected CantStopGameState __copy(int playerId) {
         return new CantStopGameState(this);
         // substance dealt with in private constructor above
     }

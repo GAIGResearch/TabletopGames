@@ -1,6 +1,7 @@
 package games.explodingkittens;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.actions.AbstractAction;
@@ -16,7 +17,7 @@ import java.util.*;
 
 import static core.CoreConstants.VisibilityMode;
 
-public class ExplodingKittensGameState extends AbstractGameState implements IPrintable {
+public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
 
     // Cards in each player's hand, index corresponds to player ID
     List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards;
@@ -45,7 +46,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         ExplodingKittensGameState ekgs = new ExplodingKittensGameState(gameParameters.copy(), getNPlayers());
         ekgs.discardPile = discardPile.copy();
         ekgs.playerGettingAFavor = playerGettingAFavor;

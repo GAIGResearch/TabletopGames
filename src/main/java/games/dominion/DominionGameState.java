@@ -1,6 +1,7 @@
 package games.dominion;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Card;
@@ -24,7 +25,7 @@ import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
-public class DominionGameState extends AbstractGameState implements IPrintable {
+public class DominionGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
 
     Random rnd;
     int playerCount;
@@ -282,7 +283,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      * @param playerId - player observing this game state.
      */
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         DominionGameState retValue = new DominionGameState(gameParameters.copy(), playerCount);
         for (CardType ct : cardsIncludedInGame.keySet()) {
             retValue.cardsIncludedInGame.put(ct, cardsIncludedInGame.get(ct));

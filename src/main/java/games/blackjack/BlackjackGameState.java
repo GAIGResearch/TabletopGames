@@ -1,6 +1,7 @@
 package games.blackjack;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
@@ -13,7 +14,7 @@ import games.GameType;
 import java.util.ArrayList;
 import java.util.*;
 
-public class BlackjackGameState extends AbstractGameState implements IPrintable {
+public class BlackjackGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
     List<PartialObservableDeck<FrenchCard>> playerDecks;
     Deck<FrenchCard> drawDeck;
     int dealerPlayer;
@@ -91,7 +92,7 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
 
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         BlackjackGameState copy = new BlackjackGameState(gameParameters.copy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
         for (PartialObservableDeck<FrenchCard> d : playerDecks) {

@@ -1,6 +1,7 @@
 package games.stratego;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class StrategoGameState extends AbstractGameState {
+public class StrategoGameState extends AbstractGameStateWithTurnOrder {
     GridBoard<Piece> gridBoard;
 
     /**
@@ -24,18 +25,14 @@ public class StrategoGameState extends AbstractGameState {
         super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Stratego);
     }
 
-    protected StrategoGameState(AbstractParameters gameParameters) {
-        super(gameParameters, GameType.Stratego);
-    }
-
     @Override
     protected List<Component> _getAllComponents() {
         return new ArrayList<Component>() {{ add(gridBoard);}};
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
-        StrategoGameState s = new StrategoGameState(gameParameters);
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+        StrategoGameState s = new StrategoGameState(gameParameters, 2);
         s.gridBoard = gridBoard.emptyCopy();
         Piece.Alliance playerAlliance = null;
 

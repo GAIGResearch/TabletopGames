@@ -34,7 +34,6 @@ public abstract class AbstractGameState {
     protected final AbstractParameters gameParameters;
     // Game being played
     protected final GameType gameType;
-    protected TurnOrder turnOrder;
     private Area allComponents;
 
     // Game tick, number of iterations of game loop
@@ -61,26 +60,17 @@ public abstract class AbstractGameState {
      * Constructor. Initialises some generic game state variables.
      *
      * @param gameParameters - game parameters.
-     * @param turnOrder      - turn order for this game.
      */
-    public AbstractGameState(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType) {
+    public AbstractGameState(AbstractParameters gameParameters, GameType gameType) {
         this.gameParameters = gameParameters;
-        this.turnOrder = turnOrder;
         this.gameType = gameType;
         this.coreGameParameters = new CoreParameters();
     }
-
-    protected AbstractGameState(AbstractParameters gameParameters, GameType type) {
-        this.gameParameters = gameParameters;
-        this.gameType = type;
-    }
-
 
     /**
      * Resets variables initialised for this game state.
      */
     void reset() {
-        turnOrder.reset();
         allComponents = new Area(-1, "All Components");
         gameStatus = GAME_ONGOING;
         playerResults = new CoreConstants.GameResult[getNPlayers()];
@@ -103,12 +93,6 @@ public abstract class AbstractGameState {
     public CoreParameters getCoreGameParameters() {
         return coreGameParameters;
     }
-    public final TurnOrder getTurnOrder() {
-        return turnOrder;
-    }
-    public final int getCurrentPlayer() {
-        return turnOrder.getCurrentPlayer(this);
-    }
     public final CoreConstants.GameResult getGameStatus() {
         return gameStatus;
     }
@@ -117,6 +101,9 @@ public abstract class AbstractGameState {
     }
     public final int getNPlayers() {
         return turnOrder.nPlayers();
+    }
+    public int getCurrentPlayer() {
+        throw new AssertionError("Not yet implemented");
     }
     public final CoreConstants.GameResult[] getPlayerResults() {
         return playerResults;
@@ -145,9 +132,6 @@ public abstract class AbstractGameState {
     // Setters
     void setCoreGameParameters(CoreParameters coreGameParameters) {
         this.coreGameParameters = coreGameParameters;
-    }
-    public final void setTurnOrder(TurnOrder turnOrder) {
-        this.turnOrder = turnOrder;
     }
     public final void setGameStatus(CoreConstants.GameResult status) {
         this.gameStatus = status;
@@ -244,7 +228,6 @@ public abstract class AbstractGameState {
     public final AbstractGameState copy(int playerId) {
         AbstractGameState s = _copy(playerId);
         // Copy super class things
-        s.turnOrder = turnOrder.copy();
         s.allComponents = allComponents.emptyCopy();
         s.gameStatus = gameStatus;
         s.playerResults = playerResults.clone();
@@ -519,7 +502,6 @@ public abstract class AbstractGameState {
         if (!(o instanceof AbstractGameState)) return false;
         AbstractGameState gameState = (AbstractGameState) o;
         return Objects.equals(gameParameters, gameState.gameParameters) &&
-                Objects.equals(turnOrder, gameState.turnOrder) &&
                 Objects.equals(allComponents, gameState.allComponents) &&
                 gameStatus == gameState.gameStatus &&
                 Arrays.equals(playerResults, gameState.playerResults) &&
@@ -538,7 +520,7 @@ public abstract class AbstractGameState {
      */
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, allComponents, gameStatus, gamePhase);
+        int result = Objects.hash(gameParameters, allComponents, gameStatus, gamePhase);
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }

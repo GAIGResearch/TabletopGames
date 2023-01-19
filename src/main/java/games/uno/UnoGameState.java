@@ -1,5 +1,6 @@
 package games.uno;
 
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
@@ -15,7 +16,7 @@ import static games.uno.UnoGameParameters.UnoScoring.*;
 import static games.uno.cards.UnoCard.UnoCardType.Wild;
 import static core.CoreConstants.GameResult.*;
 
-public class UnoGameState extends AbstractGameState implements IPrintable {
+public class UnoGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
     List<Deck<UnoCard>> playerDecks;
     Deck<UnoCard> drawDeck;
     Deck<UnoCard> discardDeck;
@@ -124,7 +125,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         UnoGameState copy = new UnoGameState(gameParameters.copy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
 

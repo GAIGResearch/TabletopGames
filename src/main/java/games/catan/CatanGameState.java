@@ -1,5 +1,6 @@
 package games.catan;
 
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.AbstractGameState;
 import core.CoreConstants;
@@ -20,7 +21,7 @@ import java.util.*;
 import static core.CoreConstants.*;
 import static games.catan.CatanConstants.*;
 
-public class CatanGameState extends AbstractGameState {
+public class CatanGameState extends AbstractGameStateWithTurnOrder {
     protected CatanTile[][] board;
     protected Graph<Settlement, Road> catanGraph;
     protected Card boughtDevCard; // used to keep a reference to a dev card bought in the current turn to avoid playing it
@@ -512,7 +513,7 @@ public class CatanGameState extends AbstractGameState {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         CatanGameState copy = new CatanGameState(getGameParameters(), getNPlayers());
         copy.gamePhase = gamePhase;
         copy.board = copyBoard();

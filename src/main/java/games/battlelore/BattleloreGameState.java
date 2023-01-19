@@ -1,6 +1,7 @@
 package games.battlelore;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
@@ -12,7 +13,7 @@ import games.battlelore.components.Unit;
 
 import java.util.*;
 
-public class BattleloreGameState extends AbstractGameState {
+public class BattleloreGameState extends AbstractGameStateWithTurnOrder {
 
     public enum BattleloreGamePhase implements IGamePhase {
         CommandAndOrderStep, //Player Plays One Command Card
@@ -187,7 +188,7 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), getNPlayers());
 
 

@@ -1,6 +1,7 @@
 package games.dotsboxes;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
@@ -11,7 +12,7 @@ import games.GameType;
 
 import java.util.*;
 
-public class DBGameState extends AbstractGameState {
+public class DBGameState extends AbstractGameStateWithTurnOrder {
 
     IStateHeuristic heuristic;
 
@@ -46,7 +47,7 @@ public class DBGameState extends AbstractGameState {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         DBGameState dbgs = new DBGameState(gameParameters, getNPlayers());
         dbgs.edges = edges;
         dbgs.cells = cells;

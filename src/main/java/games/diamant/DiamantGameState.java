@@ -1,6 +1,7 @@
 package games.diamant;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.actions.AbstractAction;
 import core.components.Component;
@@ -18,7 +19,7 @@ import java.util.Objects;
 import java.util.Random;
 
 
-public class DiamantGameState extends AbstractGameState implements IPrintable {
+public class DiamantGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
     Deck<DiamantCard>          mainDeck;
     Deck<DiamantCard>          discardDeck;
     Deck<DiamantCard>          path;
@@ -78,7 +79,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId)
+    protected AbstractGameStateWithTurnOrder __copy(int playerId)
     {
         Random r = new Random(getGameParameters().getRandomSeed());
 

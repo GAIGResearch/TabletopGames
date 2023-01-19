@@ -1,6 +1,7 @@
 package games.connect4;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
+public class Connect4GameState extends AbstractGameStateWithTurnOrder implements IPrintable, IGridGameState<Token> {
 
     GridBoard<Token> gridBoard;
     LinkedList<Pair<Integer, Integer>> winnerCells;
@@ -36,7 +37,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         Connect4GameState s = new Connect4GameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
 

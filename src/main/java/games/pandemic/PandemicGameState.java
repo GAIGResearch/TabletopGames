@@ -1,5 +1,6 @@
 package games.pandemic;
 
+import core.AbstractGameStateWithTurnOrder;
 import core.interfaces.IFeatureRepresentation;
 import core.interfaces.IGamePhase;
 import core.components.*;
@@ -17,7 +18,7 @@ import static core.CoreConstants.*;
 import static games.pandemic.PandemicGameState.PandemicGamePhase.Forecast;
 
 
-public class PandemicGameState extends AbstractGameState implements IFeatureRepresentation {
+public class PandemicGameState extends AbstractGameStateWithTurnOrder implements IFeatureRepresentation {
 
     // The Pandemic game phase enum distinguishes 3 more phases on top of the default ones for players forced to
     // discard cards, a player wishing to play a "Forecast" event card
@@ -211,7 +212,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         PandemicGameState gs = new PandemicGameState(gameParameters.copy(), getNPlayers());
 
         gs.areas = new HashMap<>();

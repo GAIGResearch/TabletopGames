@@ -1,6 +1,7 @@
 package games.sushigo;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Counter;
@@ -11,7 +12,7 @@ import games.sushigo.cards.SGCard;
 
 import java.util.*;
 
-public class SGGameState extends AbstractGameState {
+public class SGGameState extends AbstractGameStateWithTurnOrder {
     List<Deck<SGCard>> playerHands;
     Deck<SGCard> drawPile;
     Deck<SGCard> discardPile;
@@ -57,7 +58,7 @@ public class SGGameState extends AbstractGameState {
 
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         SGGameState copy = new SGGameState(gameParameters.copy(), getNPlayers());
 
         copy.playerScore = new Counter[getNPlayers()];

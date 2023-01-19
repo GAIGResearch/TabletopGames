@@ -1,5 +1,6 @@
 package games.virus;
 
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.AbstractGameState;
 import core.components.Component;
@@ -14,7 +15,7 @@ import games.virus.components.VirusOrgan;
 import java.util.*;
 
 
-public class VirusGameState extends AbstractGameState implements IPrintable {
+public class VirusGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
     List<VirusBody>       playerBodies;   // Each player has a body
     List<Deck<VirusCard>> playerDecks;    // Each player has a deck with 3 cards
     Deck<VirusCard>       drawDeck;       // The deck with the not yet played cards, It is not visible for any player
@@ -35,7 +36,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         VirusGameState vgs = new VirusGameState(gameParameters.copy(), getNPlayers());
         vgs.drawDeck = drawDeck.copy();
         vgs.discardDeck = discardDeck.copy();

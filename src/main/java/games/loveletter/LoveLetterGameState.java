@@ -1,5 +1,6 @@
 package games.loveletter;
 
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.AbstractGameState;
 import core.CoreConstants;
@@ -15,7 +16,7 @@ import java.util.*;
 
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
-public class LoveLetterGameState extends AbstractGameState implements IPrintable {
+public class LoveLetterGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
 
     // Love letter adds one game phase on top of default phases
     public enum LoveLetterGamePhase implements IGamePhase {
@@ -64,7 +65,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         LoveLetterGameState llgs = new LoveLetterGameState(gameParameters.copy(), getNPlayers());
         llgs.drawPile = drawPile.copy();
         llgs.reserveCards = reserveCards.copy();

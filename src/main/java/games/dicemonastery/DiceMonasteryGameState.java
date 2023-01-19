@@ -1,6 +1,7 @@
 package games.dicemonastery;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
@@ -21,7 +22,7 @@ import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-public class DiceMonasteryGameState extends AbstractGameState {
+public class DiceMonasteryGameState extends AbstractGameStateWithTurnOrder {
 
     Map<ActionArea, DMArea> actionAreas = new HashMap<>();
     Map<Integer, Monk> allMonks = new HashMap<>();
@@ -523,7 +524,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
         List<Map<Resource, Integer>> playerTreasuries = new ArrayList<>();
     */
     @Override
-    protected DiceMonasteryGameState _copy(int playerId) {
+    protected DiceMonasteryGameState __copy(int playerId) {
         DiceMonasteryGameState retValue = new DiceMonasteryGameState(gameParameters.copy(), getNPlayers());
         DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
         rnd = new Random(System.currentTimeMillis());

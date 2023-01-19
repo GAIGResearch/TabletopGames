@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
@@ -20,7 +21,7 @@ import utilities.Pair;
 import static utilities.Utils.generateCombinations;
 
 
-public class PokerGameState extends AbstractGameState implements IPrintable {
+public class PokerGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
     List<Deck<FrenchCard>>  playerDecks;
     Counter[]               playerMoney;
     Counter[]               playerBet;
@@ -170,7 +171,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         PokerGameState copy = new PokerGameState(gameParameters.copy(), getNPlayers());
         copy.communityCards = communityCards.copy();
         copy.moneyPots = new ArrayList<>();

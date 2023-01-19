@@ -1,6 +1,7 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
@@ -21,7 +22,7 @@ import java.util.*;
 import static core.CoreConstants.VisibilityMode;
 import static java.util.stream.Collectors.toList;
 
-public class ColtExpressGameState extends AbstractGameState implements IPrintable {
+public class ColtExpressGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
 
     // Colt express adds 4 game phases
     public enum ColtExpressGamePhase implements IGamePhase {
@@ -70,7 +71,7 @@ public class ColtExpressGameState extends AbstractGameState implements IPrintabl
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         ColtExpressGameState copy = new ColtExpressGameState(gameParameters, getNPlayers());
 
         // These are always visible
