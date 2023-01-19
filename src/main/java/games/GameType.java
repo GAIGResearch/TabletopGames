@@ -1,6 +1,7 @@
 package games;
 
 import core.*;
+import core.rules.AbstractRuleBasedForwardModel;
 import games.battlelore.*;
 import games.battlelore.gui.BattleloreGUI;
 import games.blackjack.*;
@@ -204,15 +205,19 @@ public enum GameType {
         }
     }
 
-    public AbstractForwardModel createForwardModel() {
+    public AbstractForwardModel createForwardModel(AbstractParameters params, int nPlayers) {
         if (forwardModelClass == null) throw new AssertionError("No forward model class declared for the game: " + this);
         try {
-            Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(forwardModelClass);
-            return (AbstractForwardModel) constructorGS.newInstance();
+            if (forwardModelClass.getSuperclass() == AbstractRuleBasedForwardModel.class) {
+                Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(forwardModelClass, AbstractParameters.class, Integer.class);
+                return (AbstractForwardModel) constructorGS.newInstance(params, nPlayers);
+            } else {
+                Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(forwardModelClass);
+                return (AbstractForwardModel) constructorGS.newInstance();
+            }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-        // TODO: Pandemic rule-based FM different constructor
     }
 
     public AbstractParameters createParameters(long seed) {
