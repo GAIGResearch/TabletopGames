@@ -2,10 +2,7 @@ package games.sushigo;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.components.Component;
-import core.components.Counter;
-import core.components.Deck;
-import core.turnorders.AlternatingTurnOrder;
+import core.components.*;
 import core.turnorders.TurnOrder;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
@@ -41,9 +38,10 @@ public class SGGameState extends AbstractGameState {
         super(gameParameters, nPlayers);
         rnd = new Random(gameParameters.getRandomSeed());
     }
+
     @Override
     protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new SGTurnOrder(nPlayers, ((SGParameters)gameParameters).nRounds);
+        return new SGTurnOrder(nPlayers, ((SGParameters) gameParameters).nRounds);
     }
 
     @Override
@@ -66,7 +64,6 @@ public class SGGameState extends AbstractGameState {
     }
 
 
-
     @Override
     protected AbstractGameState _copy(int playerId) {
         SGGameState copy = new SGGameState(gameParameters.copy(), getNPlayers());
@@ -82,7 +79,7 @@ public class SGGameState extends AbstractGameState {
             copy.playedCardTypes[i] = new HashMap<>();
             copy.playedCardTypesAllGame[i] = new HashMap<>();
             copy.pointsPerCardType[i] = new HashMap<>();
-            for (SGCard.SGCardType ct: playedCardTypes[i].keySet()) {
+            for (SGCard.SGCardType ct : playedCardTypes[i].keySet()) {
                 copy.playedCardTypes[i].put(ct, playedCardTypes[i].get(ct).copy());
                 copy.playedCardTypesAllGame[i].put(ct, playedCardTypesAllGame[i].get(ct).copy());
                 copy.pointsPerCardType[i].put(ct, pointsPerCardType[i].get(ct).copy());
@@ -103,9 +100,12 @@ public class SGGameState extends AbstractGameState {
         copy.discardPile = discardPile.copy();
         copy.cardChoices = new ArrayList<>();
 
-        // Now we need to redeterminise
-        if (playerId != -1) {
-
+        if (playerId == -1) {
+            for (int i = 0; i < getNPlayers(); i++) {
+                copy.cardChoices.add(new ArrayList<>(cardChoices.get(i)));
+            }
+        } else {
+            // Now we need to redeterminise
             // We don't know what other players have chosen for this round, hide card choices
             for (int i = 0; i < getNPlayers(); i++) {
                 if (i == playerId) {
@@ -113,7 +113,7 @@ public class SGGameState extends AbstractGameState {
                 } else {
                     // Replace others with hidden choices
                     ArrayList<ChooseCard> hiddenChoice = new ArrayList<>();
-                    for (ChooseCard c: cardChoices.get(i)) {
+                    for (ChooseCard c : cardChoices.get(i)) {
                         hiddenChoice.add(c.getHiddenChoice());
                     }
                     copy.cardChoices.add(hiddenChoice);
@@ -149,7 +149,8 @@ public class SGGameState extends AbstractGameState {
     /**
      * we do know the contents of the hands of players to our T to our left, where T is the number of player turns
      * so far, as we saw that hand on its way through our own
-     * @param playerId - id of player whose vision we're checking
+     *
+     * @param playerId   - id of player whose vision we're checking
      * @param opponentId - id of opponent owning the hand of cards we're checking vision of
      * @return - true if player has not seen the opponent's hand of cards, false otherwise
      */
@@ -171,8 +172,8 @@ public class SGGameState extends AbstractGameState {
     }
 
     public List<Deck<SGCard>> getPlayerHands() {
-            return playerHands;
-        }
+        return playerHands;
+    }
 
     public void clearCardChoices() {
         for (int i = 0; i < getNPlayers(); i++) cardChoices.get(i).clear();
@@ -192,6 +193,7 @@ public class SGGameState extends AbstractGameState {
             return playerScore[playerId].getValue() / 50.0;
         return getPlayerResults()[playerId].value;
     }
+
     @Override
     public double getTiebreak(int playerId) {
         // Tie-break is number of puddings
@@ -245,12 +247,19 @@ public class SGGameState extends AbstractGameState {
         if (!(o instanceof SGGameState)) return false;
         if (!super.equals(o)) return false;
         SGGameState that = (SGGameState) o;
-        return nCardsInHand == that.nCardsInHand && deckRotations == that.deckRotations && Objects.equals(playerHands, that.playerHands) && Objects.equals(drawPile, that.drawPile) && Objects.equals(discardPile, that.discardPile) && Objects.equals(cardChoices, that.cardChoices) && Arrays.equals(playedCardTypes, that.playedCardTypes) && Objects.equals(playedCards, that.playedCards) && Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame) && Objects.equals(rnd, that.rnd);
+        return nCardsInHand == that.nCardsInHand && deckRotations == that.deckRotations &&
+                Objects.equals(playerHands, that.playerHands) && Objects.equals(drawPile, that.drawPile) &&
+                Objects.equals(discardPile, that.discardPile) && Objects.equals(cardChoices, that.cardChoices) &&
+                Arrays.equals(playedCardTypes, that.playedCardTypes) && Objects.equals(playedCards, that.playedCards) &&
+                Arrays.equals(playerScore, that.playerScore) && Arrays.equals(playedCardTypesAllGame, that.playedCardTypesAllGame) &&
+                Objects.equals(rnd, that.rnd);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), playerHands, drawPile, discardPile, nCardsInHand, cardChoices, playedCards, rnd, deckRotations);
+        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase, playerHands, drawPile, discardPile,
+                nCardsInHand, cardChoices, playedCards, deckRotations);
+        result = 31 * result + Arrays.hashCode(playerResults);
         result = 31 * result + Arrays.hashCode(playedCardTypes);
         result = 31 * result + Arrays.hashCode(playerScore);
         result = 31 * result + Arrays.hashCode(playedCardTypesAllGame);
@@ -264,9 +273,13 @@ public class SGGameState extends AbstractGameState {
         sb.append(playerHands.hashCode()).append("|");
         sb.append(drawPile.hashCode()).append("|");
         sb.append(discardPile.hashCode()).append("|");
+        sb.append(cardChoices.hashCode()).append("|");
+        sb.append(playedCards.hashCode()).append("|");
         sb.append(deckRotations).append("|*|");
         sb.append(Arrays.hashCode(playerScore)).append("|");
         sb.append(Arrays.hashCode(playedCardTypes)).append("|");
+        sb.append(Arrays.hashCode(playedCardTypesAllGame)).append("|");
+        sb.append(super.hashCode()).append("|");
         return sb.toString();
     }
 }

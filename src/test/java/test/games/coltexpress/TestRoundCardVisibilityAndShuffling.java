@@ -53,7 +53,7 @@ public class TestRoundCardVisibilityAndShuffling {
             if (event.type == ROUND_OVER) {
                 ColtExpressGameState state = (ColtExpressGameState) event.state;
                 long visibleRoundCards = state.getRounds().getVisibleComponents(0).stream().filter(Objects::nonNull).count();
-                System.out.printf("End of Round: %d, Visible Cards: %d%n", state.getTurnOrder().getRoundCounter(), visibleRoundCards);
+                System.out.printf("End of Round: %d, Turn %d, Visible Cards: %d%n", state.getTurnOrder().getRoundCounter(), state.getTurnOrder().getTurnCounter(), visibleRoundCards);
                 for (int i = 0; i < state.getTurnOrder().getRoundCounter(); i++)
                     assertTrue(state.getRounds().getVisibilityForPlayer(i, 0));
                 assertEquals(visibleRoundCards, state.getTurnOrder().getRoundCounter() + 1);
