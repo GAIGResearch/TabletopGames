@@ -2,17 +2,15 @@ package evaluation.metrics;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.Game;
+import evaluation.listeners.GameListener;
 import utilities.Pair;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+@SuppressWarnings("unused")
 public class MiscGameMetrics implements IMetricsCollection {
 
     public static class GameStartMetrics extends AbstractMetric{
-
-        public GameStartMetrics() {addEventType(Event.GameEvent.ABOUT_TO_START);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             Game game = listener.getGame();
@@ -33,14 +31,13 @@ public class MiscGameMetrics implements IMetricsCollection {
 
             return collectedData;
         }
-    }
-    public static class ActionSample extends AbstractMetric{
-
-        public ActionSample(){
-            addEventType(Event.GameEvent.ACTION_CHOSEN);
-            addEventType(Event.GameEvent.GAME_EVENT);
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ABOUT_TO_START);
         }
+    }
 
+    public static class ActionSample extends AbstractMetric{
         @Override
         public Object run(GameListener listener, Event e) {
             Map<String, Object> collectedData = new HashMap<>();
@@ -52,6 +49,10 @@ public class MiscGameMetrics implements IMetricsCollection {
             collectedData.put("Action Type", e.action == null ? "NONE" : e.action.getClass().getSimpleName());
             collectedData.put("Action Description", e.action == null ? "NONE" : e.action.getString(e.state));
             return collectedData;
+        }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return new HashSet<>(Arrays.asList(Event.GameEvent.ACTION_CHOSEN, Event.GameEvent.GAME_EVENT));
         }
     }
 }

@@ -1,5 +1,5 @@
 package gui;
 
-public interface ScreenHighlight {
+public interface IScreenHighlight {
     void clearHighlights();
 }

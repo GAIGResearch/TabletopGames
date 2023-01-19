@@ -3,7 +3,7 @@ package games.sushigo.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
 import gui.AbstractGUIManager;
@@ -16,7 +16,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 
-public class SGGUI extends AbstractGUIManager {
+public class SGGUIManager extends AbstractGUIManager {
     // Settings for display areas
     final static int playerAreaWidth = 300;
     final static int playerAreaHeight = 200;
@@ -36,7 +36,7 @@ public class SGGUI extends AbstractGUIManager {
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
     Border[] playerViewBorders;
 
-    public SGGUI(GamePanel parent, Game game, ActionController ac, int humanID) {
+    public SGGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
         super(parent, ac, 15);
         this.humanID = humanID;
 
@@ -67,7 +67,7 @@ public class SGGUI extends AbstractGUIManager {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    SGPlayerView playerHand = new SGPlayerView(parsedGameState.getPlayerDecks().get(i), parsedGameState.getPlayerFields().get(i), i, humanID, parameters.getDataPath());
+                    SGPlayerView playerHand = new SGPlayerView(parsedGameState.getPlayerHands().get(i), parsedGameState.getPlayedCards().get(i), i, humanID, parameters.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -102,7 +102,7 @@ public class SGGUI extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Sushi GO", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
 
                 // Add all views to frame
                 parent.setLayout(new BorderLayout());

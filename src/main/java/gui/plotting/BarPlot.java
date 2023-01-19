@@ -1,4 +1,4 @@
-package utilities.plotting;
+package gui.plotting;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +22,7 @@ public class BarPlot extends JComponent {
     double barWidth, unitHeight = 20;
     boolean stretchY = true, orderData, reverseOrder = true;
 
-    final Dimension size;
+    Dimension size;
     int padding = 1;
     int maxWidth = 300, maxHeight = 150;
     Color barColor = new Color(174, 241, 124, 190);
@@ -147,10 +147,14 @@ public class BarPlot extends JComponent {
 
     public void setMaxHeight(int maxHeight) {
         this.maxHeight = maxHeight;
+        if (maxY * unitHeight > maxHeight || stretchY) unitHeight = maxHeight / maxY;
+        size = new Dimension((int)(barWidth * data.length) + fontSize + padding*2, maxHeight + fontSize*2 + padding*5);
     }
 
     public void setMaxWidth(int maxWidth) {
         this.maxWidth = maxWidth;
+        barWidth = Math.max(maxWidth / data.length, 10);
+        size = new Dimension((int)(barWidth * data.length) + fontSize + padding*2, maxHeight + fontSize*2 + padding*5);
     }
 
     @Override

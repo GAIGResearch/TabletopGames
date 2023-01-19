@@ -16,7 +16,7 @@ import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import games.pandemic.PandemicTurnOrder;
 import games.pandemic.actions.*;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
@@ -38,7 +38,7 @@ import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction
 import static games.pandemic.gui.PandemicCardView.*;
 import static javax.swing.ScrollPaneConstants.*;
 
-public class PandemicGUIManager extends AbstractGUIManager implements ScreenHighlight {
+public class PandemicGUIManager extends AbstractGUIManager implements IScreenHighlight {
     PandemicCardView[] playerCards;
     JLabel[][] playerHandCardCounts;
     ArrayList<PandemicCardView>[] playerHands;
@@ -90,7 +90,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements ScreenHigh
         JPanel gameStateInfo = createGameStateInfoPanel(gameState);
         JPanel playerAreas = createPlayerAreas();
         JPanel counterArea = createCounterArea();
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{this}, 300, 80, this::bufferReset);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{this}, 300, 80, this::bufferReset);
         JPanel side = new JPanel();
         side.setLayout(new BoxLayout(side, BoxLayout.Y_AXIS));
         side.add(gameStateInfo);

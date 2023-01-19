@@ -1,13 +1,12 @@
 package games.stratego;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.stratego.actions.Move;
 import games.stratego.components.Piece;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,7 +68,7 @@ public class StrategoForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.getGameStatus() == Utils.GameResult.GAME_END){
+        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_END){
             return;
         }
 
@@ -78,15 +77,15 @@ public class StrategoForwardModel extends StandardForwardModel {
         List<AbstractAction> actions = _computeAvailableActions(currentState);
         if (actions.isEmpty()){
             // If the player can't take any actions, they lose
-            currentState.setGameStatus(Utils.GameResult.GAME_END);
-            currentState.setPlayerResult(Utils.GameResult.LOSE, currentState.getCurrentPlayer());
-            currentState.setPlayerResult(Utils.GameResult.WIN, 1-currentState.getCurrentPlayer());
+            currentState.setGameStatus(CoreConstants.GameResult.GAME_END);
+            currentState.setPlayerResult(CoreConstants.GameResult.LOSE, currentState.getCurrentPlayer());
+            currentState.setPlayerResult(CoreConstants.GameResult.WIN, 1-currentState.getCurrentPlayer());
         } else {
             if (currentState.getTurnOrder().getRoundCounter() >= ((StrategoParams)currentState.getGameParameters()).maxRounds) {
                 // Max rounds reached, draw
-                currentState.setGameStatus(Utils.GameResult.GAME_END);
-                currentState.setPlayerResult(Utils.GameResult.DRAW, currentState.getCurrentPlayer());
-                currentState.setPlayerResult(Utils.GameResult.DRAW, 1-currentState.getCurrentPlayer());
+                currentState.setGameStatus(CoreConstants.GameResult.GAME_END);
+                currentState.setPlayerResult(CoreConstants.GameResult.DRAW, currentState.getCurrentPlayer());
+                currentState.setPlayerResult(CoreConstants.GameResult.DRAW, 1-currentState.getCurrentPlayer());
             }
         }
     }

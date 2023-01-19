@@ -8,7 +8,7 @@ import games.catan.CatanGameState;
 import games.catan.CatanTile;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -41,7 +41,7 @@ public class CatanGUI extends AbstractGUIManager {
         boardView = new CatanBoardView(gs, 500, 500);
 
         // Bottom area will show actions available
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[0], 400, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], 400, defaultActionPanelHeight, false);
 
         parent.setLayout(new FlowLayout());
         parent.add(createGameStateInfoPanel(gs), new FlowLayout(FlowLayout.LEADING));
@@ -82,7 +82,7 @@ public class CatanGUI extends AbstractGUIManager {
         boardView = new CatanBoardView(gs, 500, 500);
 
         // Bottom area will show actions available
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[0], 400, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], 400, defaultActionPanelHeight, false);
 
         gp.setLayout(new FlowLayout());
         gp.add(createGameStateInfoPanel(gs), new FlowLayout(FlowLayout.LEADING));

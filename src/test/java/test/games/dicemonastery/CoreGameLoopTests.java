@@ -1,5 +1,6 @@
 package test.games.dicemonastery;
 
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.dicemonastery.*;
@@ -9,7 +10,6 @@ import games.dicemonastery.components.Monk;
 import games.dicemonastery.components.Treasure;
 import org.junit.Test;
 import players.simple.RandomPlayer;
-import utilities.Utils;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -99,7 +99,7 @@ public class CoreGameLoopTests {
         state.createMonk(5, 3);
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 1);
 
         // at this point we should have 1 monks still to place for P3, and 0 each for all other players
@@ -115,7 +115,7 @@ public class CoreGameLoopTests {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
 
         do {
@@ -134,7 +134,7 @@ public class CoreGameLoopTests {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
         assertEquals(0, state.monksIn(DORMITORY, -1).size());
 
@@ -172,7 +172,7 @@ public class CoreGameLoopTests {
         do {
             List<AbstractAction> available = fm.computeAvailableActions(state).stream()
                     .filter(a -> !(a instanceof PlaceMonk) || ((PlaceMonk) a).destination != MEADOW).collect(toList());
-            fm.next(state, rnd.getAction(state, available));
+            fm.next(state, rnd._getAction(state, available));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
 
         assertEquals(0, state.monksIn(MEADOW, -1).size());
@@ -191,13 +191,13 @@ public class CoreGameLoopTests {
         fm.next(state, new PlaceMonk(0, CHAPEL)); // ensure we have one monk at least in the CHAPEL, so that we can stop before Housekeeping
         do {
             List<AbstractAction> available = fm.computeAvailableActions(state);
-            fm.next(state, rnd.getAction(state, available));
+            fm.next(state, rnd._getAction(state, available));
         } while (state.monksIn(DORMITORY, -1).size() > 1);
         // This should leave us with one monk left in the Dormitory
 
         do {
             List<AbstractAction> available = fm.computeAvailableActions(state);
-            fm.next(state, rnd.getAction(state, available));
+            fm.next(state, rnd._getAction(state, available));
         } while (!state.monksIn(LIBRARY, -1).isEmpty()  || !state.monksIn(GATEHOUSE, -1).isEmpty());
         // This should leave us with just the CHAPEL to process, and that has no mechanism to gain Resources
         // so we can now track what resources we have at the end of Spring
@@ -211,7 +211,7 @@ public class CoreGameLoopTests {
         // Now advance into Autumn (no Summer in year 1)
         do {
             List<AbstractAction> available = fm.computeAvailableActions(state);
-            fm.next(state, rnd.getAction(state, available));
+            fm.next(state, rnd._getAction(state, available));
         } while (turnOrder.getSeason() != AUTUMN);
 
         List<Map<Resource, Integer>> summerResources = new ArrayList<>();
@@ -254,12 +254,12 @@ public class CoreGameLoopTests {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.isNotTerminal());
 
         assertEquals(4, turnOrder.getYear());
         assertEquals(WINTER, turnOrder.getSeason());
-        assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch(r -> r == Utils.GameResult.GAME_ONGOING));
+        assertTrue(Arrays.stream(state.getPlayerResults()).noneMatch(r -> r == CoreConstants.GameResult.GAME_ONGOING));
     }
 
     @Test
@@ -267,7 +267,7 @@ public class CoreGameLoopTests {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
 
         do {
-            AbstractAction action = rnd.getAction(state, fm.computeAvailableActions(state));
+            AbstractAction action = rnd._getAction(state, fm.computeAvailableActions(state));
             //    System.out.printf("Current Player %d has %d in DORMITORY about to %s%n",
             //            state.getCurrentPlayer(), state.monksIn(DORMITORY, state.getCurrentPlayer()).size(), action.getString(state));
             fm.next(state, action);
@@ -293,7 +293,7 @@ public class CoreGameLoopTests {
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
 
         // we now want to check that the first player has the most piety in that area
@@ -320,7 +320,7 @@ public class CoreGameLoopTests {
                     lastPlayer = state.getCurrentPlayer();
                 }
             }
-            AbstractAction actionChosen = rnd.getAction(state, fm.computeAvailableActions(state));
+            AbstractAction actionChosen = rnd._getAction(state, fm.computeAvailableActions(state));
             if (actionChosen instanceof VisitMarket) {
                 playerSwitchExpected = false;
             } else if (state.currentActionInProgress() instanceof VisitMarket) {
@@ -361,7 +361,7 @@ public class CoreGameLoopTests {
         assertEquals(1, turnOrder.nextPlayer(state));
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (turnOrder.getCurrentArea() != GATEHOUSE);
 
         assertEquals(2, state.getCurrentPlayer());
@@ -381,7 +381,7 @@ public class CoreGameLoopTests {
         state.addResource(2, HONEY, 10);
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // last Action of Autumn -> WINTER
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state))); // last Action of Autumn -> WINTER
         } while (turnOrder.getSeason() != WINTER);
         assertEquals(WINTER, turnOrder.getSeason());
 
@@ -399,11 +399,11 @@ public class CoreGameLoopTests {
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (turnOrder.getSeason() != AUTUMN);
         fm.next(state, new PlaceMonk(0, CHAPEL)); // ensure we have at least one in the CHAPEL in the AUTUMN
         do {
-            AbstractAction action = rnd.getAction(state, fm.computeAvailableActions(state));
+            AbstractAction action = rnd._getAction(state, fm.computeAvailableActions(state));
     //        System.out.printf("Player: %d, %s%n", state.getCurrentPlayer(), action);
             fm.next(state, action);
         } while (!(turnOrder.getSeason() == AUTUMN && turnOrder.getCurrentArea() == CHAPEL));
@@ -441,7 +441,7 @@ public class CoreGameLoopTests {
         int pietyOneMonksInChapel = (int) state.monksIn(CHAPEL, 1).stream().filter(m -> m.getPiety() == 1).count();
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // last few actions of Autumn -> WINTER
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state))); // last few actions of Autumn -> WINTER
         } while (turnOrder.getSeason() != WINTER);
         assertEquals(WINTER, turnOrder.getSeason());
         int monksOnPilgrimage = state.monksIn(PILGRIMAGE, 1).size();
@@ -480,7 +480,7 @@ public class CoreGameLoopTests {
         state.addResource(0, GRAIN, 20 - state.getResource(0, GRAIN, STOREROOM));
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // last Action of Autumn -> WINTER
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state))); // last Action of Autumn -> WINTER
         } while (turnOrder.getSeason() != WINTER);
 
         assertEquals(0, state.getResource(0, BREAD, STOREROOM));
@@ -496,8 +496,8 @@ public class CoreGameLoopTests {
 
         state.monksIn(DORMITORY, 1).forEach(state::retireMonk);  // retire all of P1's monks so that their turn will be skipped
 
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // P0 PlaceMonk
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // P0 ChooseMonk
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state))); // P0 PlaceMonk
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state))); // P0 ChooseMonk
 
         assertEquals(2, state.getCurrentPlayer());
         assertEquals(0, state.monksIn(null, 1).size());
@@ -510,7 +510,7 @@ public class CoreGameLoopTests {
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (turnOrder.getSeason() != SUMMER);
         // repeat until all of Player 0's monks are back in the dormitory
         // before we do the Bidding we remove all of P0's monks
@@ -519,7 +519,7 @@ public class CoreGameLoopTests {
         assertEquals(0, state.monksIn(DORMITORY, 0).size());
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (turnOrder.getSeason() != AUTUMN);
         assertEquals(1, state.monksIn(DORMITORY, 0).size());
     }
@@ -531,7 +531,7 @@ public class CoreGameLoopTests {
         advanceToJustBeforeStartofWinterandRemoveFood();
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // last Action of Autumn -> WINTER
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state))); // last Action of Autumn -> WINTER
         } while (turnOrder.getSeason() != WINTER);
 
         assertEquals(0, state.getCurrentPlayer());
@@ -539,7 +539,7 @@ public class CoreGameLoopTests {
         state.monksIn(PILGRIMAGE, 1).forEach(state::retireMonk);  // retire all of P1's monks on pilgrimage
         state.createMonk(6, 1); // and give them a P6 monk to retire
         assertEquals(1, state.monksIn(DORMITORY, 1).size());
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(1, fm.computeAvailableActions(state).size());
         assertEquals(new PromoteMonk(6, DORMITORY), fm.computeAvailableActions(state).get(0));
@@ -548,7 +548,7 @@ public class CoreGameLoopTests {
         assertEquals(0, state.monksIn(DORMITORY, 1).size());
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (turnOrder.getSeason() != SPRING);
 
         // and check that a free monk has been assigned
@@ -562,7 +562,7 @@ public class CoreGameLoopTests {
         DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (!(turnOrder.getSeason() == SUMMER));
 
         for (int p = 0; p < 4; p++)
@@ -877,10 +877,10 @@ public class CoreGameLoopTests {
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(0, turnOrder.nextPlayer(state));
 
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // take token
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state))); // take token
         assertEquals(1, fm.computeAvailableActions(state).size());
         assertEquals(new PromoteMonk(6, MEADOW), fm.computeAvailableActions(state).get(0));
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // promote monk
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state))); // promote monk
 
         assertEquals(MEADOW, turnOrder.getCurrentArea());
         assertEquals(0, state.getCurrentPlayer());
@@ -900,7 +900,7 @@ public class CoreGameLoopTests {
 
         // place monks randomly
         while (state.getGamePhase() == PLACE_MONKS) {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         }
 
         assertEquals(USE_MONKS, state.getGamePhase());
@@ -908,7 +908,7 @@ public class CoreGameLoopTests {
         int currentPlayer = state.getCurrentPlayer();
         assertEquals(1, state.getResource(currentPlayer, PRAYER, STOREROOM));
 
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // take token
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state))); // take token
         assertEquals(2, state.getResource(currentPlayer, PRAYER, STOREROOM));
 
         assertEquals(3, fm.computeAvailableActions(state).size());
@@ -931,7 +931,7 @@ public class CoreGameLoopTests {
 
         // place monks randomly
         while (state.getGamePhase() == PLACE_MONKS) {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         }
 
         assertEquals(USE_MONKS, state.getGamePhase());
@@ -939,7 +939,7 @@ public class CoreGameLoopTests {
         int currentPlayer = state.getCurrentPlayer();
         assertEquals(0, state.getResource(currentPlayer, PRAYER, STOREROOM));
 
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state))); // take token
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state))); // take token
         assertEquals(1, state.getResource(currentPlayer, PRAYER, STOREROOM));
 
         assertEquals(2, fm.computeAvailableActions(state).size());

@@ -12,7 +12,9 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         } else {
             throw new AssertionError("No action selected by current player");
         }
-        _afterAction(currentState, action);
+        if (! currentState.isActionInProgress()) {
+            _afterAction(currentState, action);
+        }
     }
 
     protected abstract void _afterAction(AbstractGameState currentState, AbstractAction actionTaken);

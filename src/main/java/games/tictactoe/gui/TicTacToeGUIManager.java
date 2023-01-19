@@ -2,17 +2,17 @@ package games.tictactoe.gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.Token;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
-import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,7 +35,7 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Tic Tac Toe", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view},
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view},
                 width, defaultActionPanelHeight, true);
 
         parent.setLayout(new BorderLayout());
@@ -55,7 +55,7 @@ public class TicTacToeGUIManager extends AbstractGUIManager {
      */
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             ArrayList<Rectangle> highlight = view.getHighlight();
 

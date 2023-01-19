@@ -2,6 +2,7 @@ package games.dominion;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
@@ -14,7 +15,6 @@ import games.dominion.DominionConstants.DeckType;
 import games.dominion.actions.IDelayedAction;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
-import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -347,9 +347,9 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (getPlayerResults()[playerId] == Utils.GameResult.LOSE)
+        if (getPlayerResults()[playerId] == CoreConstants.GameResult.LOSE)
             return -1.0;
-        if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
+        if (getPlayerResults()[playerId] == CoreConstants.GameResult.WIN)
             return 1.0;
 
         int score = getTotal(playerId, c -> c.victoryPoints(playerId, this));

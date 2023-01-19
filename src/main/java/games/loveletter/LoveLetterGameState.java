@@ -2,6 +2,7 @@ package games.loveletter;
 
 import core.AbstractParameters;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.Component;
 import core.interfaces.IGamePhase;
 import core.components.Deck;
@@ -9,7 +10,6 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.GameType;
 import games.loveletter.cards.LoveLetterCard;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -200,7 +200,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
      * @param playerID - ID of player dead
      */
     public void killPlayer(int playerID){
-        setPlayerResult(Utils.GameResult.LOSE, playerID);
+        setPlayerResult(CoreConstants.GameResult.LOSE, playerID);
 
         // a losing player needs to discard all cards
         while (playerHandCards.get(playerID).getSize() > 0)

@@ -128,7 +128,7 @@ public class MultiTreeNode extends SingleTreeNode {
                 if (availableActions.isEmpty())
                     throw new AssertionError("We should always have something to choose from");
 
-                AbstractAction chosen = agent.getAction(currentState, availableActions);
+                AbstractAction chosen = agent._getAction(currentState, availableActions);
                 actionsInRollout.add(new Pair<>(currentActor, chosen));
                 if (debug)
                     System.out.printf("Rollout action chosen for P%d - %s %n", currentActor, chosen);

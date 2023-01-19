@@ -5,21 +5,26 @@ import core.components.Counter;
 import core.properties.PropertyIntArray;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import evaluation.metrics.IMetricsCollection;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
 import utilities.Hash;
 
+import java.util.Collections;
+import java.util.Set;
+
 import static games.pandemic.PandemicConstants.*;
-import static utilities.Utils.GameResult.WIN;
+import static core.CoreConstants.GameResult.WIN;
+
+@SuppressWarnings("unused")
 public class PandemicCompetitionMetrics implements IMetricsCollection {
 
     public static class GameWin extends AbstractMetric {
-
-        public GameWin() {addEventType(Event.GameEvent.GAME_OVER);}
-
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
         @Override
         public Object run(GameListener listener, Event e) {
             return Math.max(0,e.state.getGameStatus().value);
@@ -27,9 +32,9 @@ public class PandemicCompetitionMetrics implements IMetricsCollection {
     }
     
     public static class GameTicks extends AbstractMetric {
-
-        public GameTicks() {addEventType(Event.GameEvent.GAME_OVER);}
-
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
         @Override
         public Object run(GameListener listener, Event e) {
             return e.state.getGameStatus()==WIN? e.state.getGameTick() : -e.state.getGameTick();
@@ -37,9 +42,9 @@ public class PandemicCompetitionMetrics implements IMetricsCollection {
     }
 
     public static class GameTicksRaw extends AbstractMetric {
-
-        public GameTicksRaw() {addEventType(Event.GameEvent.GAME_OVER);}
-
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
         @Override
         public Object run(GameListener listener, Event e) {
             return e.state.getGameTick();
@@ -47,9 +52,9 @@ public class PandemicCompetitionMetrics implements IMetricsCollection {
     }
 
     public static class NumCuredDiseases extends AbstractMetric {
-
-        public NumCuredDiseases() {addEventType(Event.GameEvent.GAME_OVER);}
-
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
         @Override
         public Object run(GameListener listener, Event e) {
             return countDisease(e.state, 1, false)+countDisease(e.state, 2, false);
@@ -57,9 +62,9 @@ public class PandemicCompetitionMetrics implements IMetricsCollection {
     }
 
     public static class NumOutbreaks extends AbstractMetric {
-
-        public NumOutbreaks() {addEventType(Event.GameEvent.GAME_OVER);}
-
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
         @Override
         public Object run(GameListener listener, Event e) {
             return ((Counter) ((PandemicGameState)e.state).getComponent(PandemicConstants.outbreaksHash)).getValue();
@@ -67,9 +72,9 @@ public class PandemicCompetitionMetrics implements IMetricsCollection {
     }
 
     public static class NumEndangeredCities extends AbstractMetric {
-
-        public NumEndangeredCities() {addEventType(Event.GameEvent.GAME_OVER);}
-
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
         @Override
         public Object run(GameListener listener, Event e) {
             return countCityDanger(listener, e);
@@ -77,9 +82,9 @@ public class PandemicCompetitionMetrics implements IMetricsCollection {
     }
 
     public static class NumDiseaseCubesLeft extends AbstractMetric {
-
-        public NumDiseaseCubesLeft() {addEventType(Event.GameEvent.GAME_OVER);}
-
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
         @Override
         public Object run(GameListener listener, Event e) {
             return countDisease(e.state, 0, true);
@@ -87,15 +92,14 @@ public class PandemicCompetitionMetrics implements IMetricsCollection {
     }
 
     public static class NumErradicatedDiseases extends AbstractMetric {
-
-        public NumErradicatedDiseases() {addEventType(Event.GameEvent.GAME_OVER);}
-
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
         @Override
         public Object run(GameListener listener, Event e) {
             return countDisease(e.state, 2, false);
         }
     }
-
 
     static int countDisease(AbstractGameState state, int targetValue, boolean cubes) {
         PandemicGameState pgs = (PandemicGameState) state;

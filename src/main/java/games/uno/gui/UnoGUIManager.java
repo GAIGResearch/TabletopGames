@@ -6,7 +6,7 @@ import core.AbstractPlayer;
 import core.Game;
 import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import gui.GamePanel;
 import players.human.ActionController;
 
@@ -108,7 +108,7 @@ public class UnoGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Uno", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
 
                 // Add all views to frame
                 parent.setLayout(new BorderLayout());

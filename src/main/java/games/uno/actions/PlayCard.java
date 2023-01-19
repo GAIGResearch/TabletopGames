@@ -2,6 +2,7 @@ package games.uno.actions;
 
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.components.Card;
@@ -11,7 +12,6 @@ import games.uno.UnoGameParameters;
 import games.uno.UnoTurnOrder;
 import games.uno.cards.UnoCard;
 import games.uno.UnoGameState;
-import utilities.Utils;
 
 import java.util.List;
 import java.util.Objects;
@@ -52,7 +52,7 @@ public class PlayCard extends DrawCard implements IPrintable {
         if (ugp.scoringMethod == CHALLENGE) {
             players = 0;
             for (int p = 0; p < ugs.getNPlayers(); p++) {
-                if (ugs.getPlayerResults()[p] == Utils.GameResult.GAME_ONGOING)
+                if (ugs.getPlayerResults()[p] == CoreConstants.GameResult.GAME_ONGOING)
                     players++;
             }
         }

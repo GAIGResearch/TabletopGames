@@ -2,13 +2,13 @@ package games.blackjack;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.GameType;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.*;
@@ -118,10 +118,10 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        Utils.GameResult playerResult = getPlayerResults()[playerId];
-        if (playerResult == Utils.GameResult.LOSE)
+        CoreConstants.GameResult playerResult = getPlayerResults()[playerId];
+        if (playerResult == CoreConstants.GameResult.LOSE)
             return -1;
-        if (playerResult == Utils.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN)
             return 1;
 
         // if game not over, return the score scaled by the maximum score possible

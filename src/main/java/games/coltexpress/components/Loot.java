@@ -1,8 +1,8 @@
 package games.coltexpress.components;
 
+import core.CoreConstants;
 import core.components.Component;
 import games.coltexpress.ColtExpressTypes;
-import utilities.Utils;
 
 public class Loot extends Component {
 
@@ -10,13 +10,13 @@ public class Loot extends Component {
     private ColtExpressTypes.LootType type;
 
     public Loot(ColtExpressTypes.LootType type, int value){
-        super(Utils.ComponentType.TOKEN, type.toString());
+        super(CoreConstants.ComponentType.TOKEN, type.toString());
         this.type = type;
         this.value = value;
     }
 
     private Loot(ColtExpressTypes.LootType type, int value, int ID){
-        super(Utils.ComponentType.TOKEN, type.toString(), ID);
+        super(CoreConstants.ComponentType.TOKEN, type.toString(), ID);
         this.type = type;
         this.value = value;
     }

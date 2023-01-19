@@ -1,35 +1,47 @@
-package utilities.plotting;
+package gui.plotting;
+
+import evaluation.summarisers.TAGOccurrenceStatSummary;
+import utilities.Pair;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class DotPlot extends JComponent {
     double[] data;
+    TAGOccurrenceStatSummary occurrenceData;
     int minY, maxY;
     int xTickWidth;
 
-    final Dimension size;
+    Dimension size;
     int padding = 2;
     int maxWidth = 300, maxHeight = 20, dotRadius = maxHeight/2;
-    Color dotColor = new Color(22, 230, 250, 40);
+    Color dotColor = new Color(22, 230, 250);
+    int colorAlpha;
     Color outlineColor = Color.white;
 
     public DotPlot(double[] data, int minY, int maxY) {
         this.data = data;
-        this.minY = minY;
-        this.maxY = maxY;
-        xTickWidth = Math.max(maxWidth / maxY, 1);
-        size = new Dimension(maxWidth + padding*3, maxHeight+padding);
+        init(minY, maxY);
     }
     public DotPlot(Double[] data, int minY, int maxY) {
         this.data = new double[data.length];
         for (int i = 0 ; i < data.length; i++) {
             this.data[i] = data[i];
         }
+        init(minY, maxY);
+    }
+    private void init(int minY, int maxY) {
         this.minY = minY;
         this.maxY = maxY;
         xTickWidth = Math.max(maxWidth / maxY, 1);
         size = new Dimension(maxWidth + padding*3, maxHeight+padding);
+        occurrenceData = new TAGOccurrenceStatSummary();
+        occurrenceData.add(data);
+        Pair<Object, Integer> highestOccurrence = occurrenceData.getHighestOccurrence();
+        if (highestOccurrence != null) {
+            colorAlpha = Math.max(255/highestOccurrence.b,5);
+            dotColor = new Color(dotColor.getRed(), dotColor.getGreen(), dotColor.getBlue(), colorAlpha);
+        }
     }
 
     @Override
@@ -68,7 +80,7 @@ public class DotPlot extends JComponent {
     }
 
     public void setDotColor(Color dotColor) {
-        this.dotColor = dotColor;
+        this.dotColor = new Color(dotColor.getRed(), dotColor.getGreen(), dotColor.getBlue(), colorAlpha);
     }
 
     public void setOutlineColor(Color outlineColor) {

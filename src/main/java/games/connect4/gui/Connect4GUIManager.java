@@ -1,6 +1,7 @@
 package games.connect4.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
@@ -9,9 +10,8 @@ import games.connect4.Connect4Constants;
 import games.connect4.Connect4GameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
-import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -34,7 +34,7 @@ public class Connect4GUIManager extends AbstractGUIManager {
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Connect 4", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view},
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view},
                 width, defaultActionPanelHeight);
 
         parent.setLayout(new BorderLayout());
@@ -54,7 +54,7 @@ public class Connect4GUIManager extends AbstractGUIManager {
      */
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
             List<core.actions.AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             ArrayList<Rectangle> highlight = view.getHighlight();
 

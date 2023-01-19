@@ -1,6 +1,8 @@
 package evaluation.summarisers;
 
 import org.jetbrains.annotations.NotNull;
+import utilities.Pair;
+
 import java.util.*;
 /**
  * This class is used to model the statistics of several numbers.  For the statistics
@@ -47,18 +49,61 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
         String[] els = s.split(",");
         for (String e: els) {
             //add(e); //This creates Stack Overflow.
-            addSingle(e);
+            if (!e.equals("")) {
+                addSingle(e);
+            }
         }
     }
 
     public void add(Object o) {
-        addSingle(o);
+        if (o instanceof String) {
+            add((String)o);
+        } else {
+            addSingle(o);
+        }
     }
 
     public void add(Object... xa) {
         for (Object x : xa) {
-            addSingle(x);
+            add(x);
         }
+    }
+
+    public void add(double[] xa) {
+        for (double x : xa) {
+            add(x);
+        }
+    }
+    public void add(int[] xa) {
+        for (int x : xa) {
+            add(x);
+        }
+    }
+
+    public Pair<Object, Integer> getHighestOccurrence() {
+        Object maxO = null;
+        int max = 0;
+        for (Object o: elements.keySet()) {
+            if (elements.get(o) > max) {
+                max = elements.get(o);
+                maxO = o;
+            }
+        }
+        if (maxO != null) return new Pair<>(maxO, max);
+        return null;
+    }
+
+    public Pair<Object, Integer> getLowestOccurrence() {
+        Object minO = null;
+        int min = Integer.MAX_VALUE;
+        for (Object o: elements.keySet()) {
+            if (elements.get(o) < min) {
+                min = elements.get(o);
+                minO = o;
+            }
+        }
+        if (minO != null) return new Pair<>(minO, min);
+        return null;
     }
 
     @Override
@@ -79,7 +124,8 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
         StringBuilder stb = new StringBuilder();
 
         //header
-        stb.append(name).append("\n").append("\tCount - Measure\n");
+//        stb.append(name).append("\n");
+        stb.append("\tCount - Measure\n");
         for(Object k : elements.keySet())
             sortedByVal.add(new DataMeasure(k.toString(), elements.get(k)));
 
@@ -106,7 +152,7 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
     }
 
     @Override
-    public Map<String, Object> getSummary(String key) {
+    public Map<String, Object> getSummary() {
         Map<String, Object> data = new HashMap<>();
         for (Object k: elements.keySet()) {
             data.put(k.toString(), elements.get(k));

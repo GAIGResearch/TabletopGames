@@ -3,7 +3,7 @@ package core.turnorders;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import evaluation.metrics.Event;
 
 import java.util.ArrayList;
@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static utilities.Utils.GameResult.GAME_END;
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public abstract class TurnOrder {
 
@@ -136,16 +135,19 @@ public abstract class TurnOrder {
         }
     }
 
-    // helper function to avoid time-consuming string manipulations is the message is not actually
+    // helper function to avoid time-consuming string manipulations if the message is not actually
     // going to be logged anywhere
     public void logEvent(Supplier<String> eventText, AbstractGameState state) {
-        if (listeners.isEmpty())
+        if (listeners.isEmpty() && !state.getCoreGameParameters().recordEventHistory)
             return; // to avoid expensive string manipulations
         logEvent(eventText.get(), state);
     }
     public void logEvent(String eventText, AbstractGameState state) {
         AbstractAction logAction = new LogEvent(eventText);
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_EVENT, state, logAction)));
+        if (state.getCoreGameParameters().recordEventHistory) {
+            state.recordHistory(eventText);
+        }
     }
 
     /**
@@ -162,6 +164,9 @@ public abstract class TurnOrder {
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
 
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ROUND_OVER, gameState)));
+        if (gameState.getCoreGameParameters().recordEventHistory) {
+            gameState.recordHistory(Event.GameEvent.ROUND_OVER.name());
+        }
 
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) {

@@ -2,10 +2,11 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import evaluation.metrics.GameListener;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.metrics.Event;
+import evaluation.listeners.GameListener;
+import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
@@ -18,17 +19,18 @@ import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
-import evaluation.summarisers.TAGNumericStatSummary;
 import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.Timer;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import static utilities.Utils.componentToImage;
 
 public class Game {
@@ -36,12 +38,14 @@ public class Game {
     private static final AtomicInteger idFountain = new AtomicInteger(0);
     // Type of game
     private final GameType gameType;
+    public boolean paused;
     // List of agents/players that play this game.
     protected List<AbstractPlayer> players;
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
     private List<GameListener> listeners = new ArrayList<>();
+
     /* Game Statistics */
     private int lastPlayer; // used to track actions per 'turn'
     private JFrame frame;
@@ -53,10 +57,8 @@ public class Game {
     private int nDecisions;
     // Number of actions taken in a turn by a player
     private int nActionsPerTurn, nActionsPerTurnSum, nActionsPerTurnCount;
-
     private boolean pause, stop;
     private boolean debug = false;
-
     // Video recording
     private Rectangle areaBounds;
     private MediaPictureConverter converter = null;
@@ -70,8 +72,6 @@ public class Game {
     String codecName = null;
     int snapsPerSecond = 10;
     private int turnPause;
-
-    public boolean paused;
 
     /**
      * Game constructor. Receives a list of players, a forward model and a game state. Sets unique and final
@@ -118,8 +118,7 @@ public class Game {
         if (parameterConfigFile != null) {
             AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, parameterConfigFile);
             game = gameToPlay.createGameInstance(players.size(), seed, params);
-        }
-        else game = gameToPlay.createGameInstance(players.size(), seed);
+        } else game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
             if (listeners != null)
                 listeners.forEach(game::addListener);
@@ -171,10 +170,6 @@ public class Game {
         }
 
         return game;
-    }
-
-    public void setTurnPause(int turnPause) {
-        this.turnPause = turnPause;
     }
 
     /**
@@ -319,14 +314,17 @@ public class Game {
      */
     public static void recordPlayerResults(TAGNumericStatSummary[] statSummaries, Game game) {
         int nPlayers = statSummaries.length;
-        Utils.GameResult[] results = game.getGameState().getPlayerResults();
+        CoreConstants.GameResult[] results = game.getGameState().getPlayerResults();
         for (int p = 0; p < nPlayers; p++) {
-            if (results[p] == Utils.GameResult.WIN || results[p] == Utils.GameResult.LOSE || results[p] == Utils.GameResult.DRAW) {
+            if (results[p] == CoreConstants.GameResult.WIN || results[p] == CoreConstants.GameResult.LOSE || results[p] == CoreConstants.GameResult.DRAW) {
                 statSummaries[p].add(results[p].value);
             }
         }
     }
 
+    public void setTurnPause(int turnPause) {
+        this.turnPause = turnPause;
+    }
 
     /**
      * Performs GUI update.
@@ -397,7 +395,7 @@ public class Game {
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
         lastPlayer = -1;
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START, gameState)));
     }
 
     /**
@@ -602,6 +600,9 @@ public class Game {
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, gameState)));
+        if (gameState.coreGameParameters.recordEventHistory) {
+            gameState.recordHistory(Event.GameEvent.GAME_OVER.name());
+        }
         if (gameState.coreGameParameters.verbose) {
             System.out.println("Game Over");
         }
@@ -613,6 +614,11 @@ public class Game {
 
         // Close video recording writer
         terminateVideoRecording();
+
+        // Inform listeners of game end
+//        for (GameListener gameTracker : listeners) {
+//            gameTracker.allGamesFinished();
+//        }
     }
 
     /**
@@ -756,12 +762,12 @@ public class Game {
         return pause;
     }
 
-    public void flipPaused() {
-        this.paused = !this.paused;
-    }
-
     public void setPaused(boolean paused) {
         this.pause = paused;
+    }
+
+    public void flipPaused() {
+        this.paused = !this.paused;
     }
 
     public boolean isStopped() {
@@ -895,6 +901,7 @@ public class Game {
             muxer.close();
         }
     }
+
 
 
     /**

@@ -15,11 +15,10 @@ import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.requirements.Requirement;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
-import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -230,7 +229,7 @@ public class TMGUI extends AbstractGUIManager {
         actionLabel.setFont(defaultFont);
         actionLabel.setForeground(fontColor);
         actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false, null);
         JPanel actionWrapper = new JPanel();
         actionWrapper.add(actionLabel);
         actionWrapper.add(actionPanel);
@@ -329,7 +328,7 @@ public class TMGUI extends AbstractGUIManager {
     }
 
     private void createActionMenu(AbstractPlayer player, TMGameState gs) {
-        if (gs.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+        if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
             TMForwardModel fm = (TMForwardModel) player.getForwardModel();
             List<AbstractAction> actions = fm.getAllActions(gs);
             List<AbstractAction> legalActions = fm.computeAvailableActions(gs);
@@ -369,7 +368,7 @@ public class TMGUI extends AbstractGUIManager {
 
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
 
             // Reset buttons
             for (ActionButton actionButton : actionButtons) {
@@ -511,11 +510,11 @@ public class TMGUI extends AbstractGUIManager {
 
             TMGameState gs = ((TMGameState) gameState);
 
-            if (gameState.getGameStatus() == Utils.GameResult.GAME_END) {
+            if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_END) {
                 int win = -1;
                 String displayText = "<html><table><tr><td>Player</td><td>TR</td><td>Milestones</td><td>Awards</td><td>Board</td><td>Cards</td><td>Total</td></tr>";
                 for (int i = 0; i < gameState.getNPlayers(); i++) {
-                    if (gameState.getPlayerResults()[i] == Utils.GameResult.WIN) win = i;
+                    if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.WIN) win = i;
 
                     int tr = gs.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue();
                     int milestones = gs.countPointsMilestones(i);

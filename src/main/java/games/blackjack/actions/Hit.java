@@ -1,13 +1,13 @@
 package games.blackjack.actions;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
-import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -45,12 +45,12 @@ public class Hit extends AbstractAction implements IPrintable {
         // Check if bust or win score
         int points = bjgs.calculatePoints(playerID);
         if (points > ((BlackjackParameters)gameState.getGameParameters()).winScore) {
-            gameState.setPlayerResult(Utils.GameResult.LOSE, playerID);
+            gameState.setPlayerResult(CoreConstants.GameResult.LOSE, playerID);
             if (advanceTurnOrder) {
                 gameState.getTurnOrder().endPlayerTurn(gameState);
             }
         } else if (points == ((BlackjackParameters)gameState.getGameParameters()).winScore) {
-            gameState.setPlayerResult(Utils.GameResult.WIN, playerID);
+            gameState.setPlayerResult(CoreConstants.GameResult.WIN, playerID);
             if (advanceTurnOrder) {
                 gameState.getTurnOrder().endPlayerTurn(gameState);
             }

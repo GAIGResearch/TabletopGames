@@ -1,8 +1,8 @@
 package players.heuristics;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateFeatureVector;
-import utilities.Utils;
 
 public abstract class AbstractStateFeature implements IStateFeatureVector {
 
@@ -38,7 +38,7 @@ public abstract class AbstractStateFeature implements IStateFeatureVector {
         retValue[1] = (ourSc - maxOtherScore) / maxScore() * 2.0;
         retValue[2] = ordinal / (double) state.getNPlayers();
         retValue[3] = state.getCurrentPlayer() == playerID ? 1 : 0;
-        retValue[4] = state.getPlayerResults()[playerID] == Utils.GameResult.WIN ? 1.0 : 0.0;
+        retValue[4] = state.getPlayerResults()[playerID] == CoreConstants.GameResult.WIN ? 1.0 : 0.0;
         retValue[5] = state.isNotTerminal() ? 0.0 : state.getOrdinalPosition(playerID) / (double) state.getNPlayers();
         retValue[6] = state.getTurnOrder().getRoundCounter() / maxRounds();
 

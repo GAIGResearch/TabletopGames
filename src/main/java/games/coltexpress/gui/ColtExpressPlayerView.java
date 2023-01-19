@@ -1,5 +1,6 @@
 package games.coltexpress.gui;
 
+import core.CoreConstants;
 import core.components.Deck;
 import games.coltexpress.ColtExpressGameState;
 import games.coltexpress.ColtExpressParameters;
@@ -7,7 +8,6 @@ import games.coltexpress.ColtExpressTypes;
 import games.coltexpress.cards.ColtExpressCard;
 import games.coltexpress.components.Loot;
 import utilities.ImageIO;
-import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -124,7 +124,7 @@ public class ColtExpressPlayerView extends JComponent {
         playerDeck = gameState.getPlayerDecks().get(playerId);
         playerHand.updateComponent(gameState.getPlayerHandCards().get(playerId));
         playerLoot.updateComponent(gameState.getLoot(playerId));
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_END && !gameEnd) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_END && !gameEnd) {
             gameEnd = true;
             playerLoot.setFront(true);
             bestShooter = gameState.getBestShooters().contains(playerId);

@@ -1,8 +1,5 @@
-package evaluation.metrics;
+package utilities;
 
-import utilities.StatSummary;
-
-import java.util.ArrayList;
 
 public class TimeStamp {
 
@@ -14,7 +11,6 @@ public class TimeStamp {
         this.x = x;
         this.v = value;
     }
-
 
     public String toString()
     {

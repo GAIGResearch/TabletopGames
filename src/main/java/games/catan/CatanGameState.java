@@ -14,7 +14,6 @@ import games.catan.components.Edge;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -548,9 +547,9 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (getPlayerResults()[playerId] == Utils.GameResult.LOSE)
+        if (getPlayerResults()[playerId] == GameResult.LOSE)
             return -1.0;
-        if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
+        if (getPlayerResults()[playerId] == GameResult.WIN)
             return 1.0;
         return (double) (scores[playerId]) / 10.0;
     }

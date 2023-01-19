@@ -555,30 +555,17 @@ public abstract class Utils {
         return img;
     }
 
-    public enum ComponentType {
-        DECK,
-        AREA,
-        BOARD,
-        BOARD_NODE,
-        CARD,
-        COUNTER,
-        DICE,
-        TOKEN
-    }
-
-    public enum GameResult {
-        WIN(1),
-        DRAW(0),
-        LOSE(-1),
-        DISQUALIFY(-2),
-        GAME_ONGOING(0),
-        GAME_END(3);
-
-        public final double value;
-
-        GameResult(double value) {
-            this.value = value;
+    /**
+     * Accept a string, like aCamelString
+     * @param s - input string in camel case
+     * @return string with each word separated by a space
+     */
+    public static String splitCamelCaseString(String s){
+        StringBuilder r = new StringBuilder();
+        for (String w : s.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])")) {
+            r.append(w).append(" ");
         }
+        return r.toString().trim();
     }
 
 }

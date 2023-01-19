@@ -1,9 +1,6 @@
 package evaluation;
 
-import core.AbstractGameState;
-import core.AbstractParameters;
-import core.AbstractPlayer;
-import core.ParameterFactory;
+import core.*;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
@@ -201,7 +198,7 @@ public class ParameterSearch {
 
         } else {
             if (evalMethod.equals("Win"))
-                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == Utils.GameResult.WIN ? 1.0 : 0.0;
+                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN ? 1.0 : 0.0;
             if (evalMethod.equals("Score"))
                 stateHeuristic = AbstractGameState::getGameScore;
             if (evalMethod.equals("Heuristic"))
@@ -259,7 +256,7 @@ public class ParameterSearch {
         String evalMethod = getArg(args, "eval", "Win");
         IStateHeuristic stateHeuristic = null;
         if (evalMethod.equals("Win"))
-            stateHeuristic = (s, p) -> s.getPlayerResults()[p] == Utils.GameResult.WIN ? 1.0 : 0.0;
+            stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN ? 1.0 : 0.0;
         if (evalMethod.equals("Score"))
             stateHeuristic = AbstractGameState::getGameScore;
         if (evalMethod.equals("Heuristic"))

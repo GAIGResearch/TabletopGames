@@ -1,7 +1,7 @@
 package games.dotsboxes;
 
+import core.CoreConstants;
 import core.components.Component;
-import utilities.Utils;
 import utilities.Vector2D;
 
 import java.util.Objects;
@@ -10,12 +10,12 @@ public class DBCell extends Component {
     final Vector2D position;  // Position of this cell in the grid
 
     public DBCell(int x, int y) {
-        super(Utils.ComponentType.BOARD_NODE, "Box");
+        super(CoreConstants.ComponentType.BOARD_NODE, "Box");
         position = new Vector2D(x, y);
     }
 
     private DBCell(int componentID, Vector2D position) {
-        super(Utils.ComponentType.BOARD_NODE, "Box", componentID);
+        super(CoreConstants.ComponentType.BOARD_NODE, "Box", componentID);
         this.position = position;
     }
 

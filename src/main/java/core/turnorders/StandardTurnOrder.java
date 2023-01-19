@@ -4,6 +4,9 @@ import core.AbstractGameState;
 
 public class StandardTurnOrder extends TurnOrder{
 
+    public StandardTurnOrder(int nPlayers, int nMaxRounds) {
+        super(nPlayers, nMaxRounds);
+    }
     public StandardTurnOrder(int playerCount) {
         super(playerCount);
     }

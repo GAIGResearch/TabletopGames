@@ -1,11 +1,11 @@
-package evaluation.metrics;
+package evaluation.listeners;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
+import evaluation.listeners.FeatureListener;
 import evaluation.metrics.Event;
-import evaluation.metrics.FeatureListener;
 
 import java.lang.reflect.InvocationTargetException;
 

@@ -2,6 +2,7 @@ package games.explodingkittens;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
@@ -10,7 +11,6 @@ import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -128,18 +128,18 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
      */
     @Override
     public double getGameScore(int playerId) {
-        if (playerResults[playerId] == Utils.GameResult.LOSE)
+        if (playerResults[playerId] == CoreConstants.GameResult.LOSE)
             // knocked out
             return orderOfPlayerDeath[playerId];
         // otherwise our current score is the number knocked out + 1
-        return Arrays.stream(playerResults).filter(status -> status == Utils.GameResult.LOSE).count() + 1;
+        return Arrays.stream(playerResults).filter(status -> status == CoreConstants.GameResult.LOSE).count() + 1;
     }
 
     @Override
     public int getOrdinalPosition(int playerId) {
-        if (playerResults[playerId] == Utils.GameResult.WIN)
+        if (playerResults[playerId] == CoreConstants.GameResult.WIN)
             return 1;
-        if (playerResults[playerId] == Utils.GameResult.LOSE)
+        if (playerResults[playerId] == CoreConstants.GameResult.LOSE)
             return getNPlayers() - orderOfPlayerDeath[playerId] + 1;
         return 1;  // anyone still alive is jointly winning
     }
@@ -168,10 +168,10 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
      * @param playerID - player who was killed in a kitten explosion.
      */
     public void killPlayer(int playerID) {
-        setPlayerResult(Utils.GameResult.LOSE, playerID);
+        setPlayerResult(CoreConstants.GameResult.LOSE, playerID);
         int nPlayersActive = 0;
         for (int i = 0; i < getNPlayers(); i++) {
-            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
+            if (playerResults[i] == CoreConstants.GameResult.GAME_ONGOING) nPlayersActive++;
         }
         orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
         if (nPlayersActive == 1) {

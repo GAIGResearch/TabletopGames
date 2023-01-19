@@ -2,23 +2,23 @@ package games.stratego.gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import games.stratego.StrategoGameState;
 import games.stratego.actions.Move;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
-import utilities.Utils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StrategoGUIManager extends AbstractGUIManager implements ScreenHighlight{
+public class StrategoGUIManager extends AbstractGUIManager implements IScreenHighlight {
 
     StrategoBoardView view;
 
@@ -40,7 +40,7 @@ public class StrategoGUIManager extends AbstractGUIManager implements ScreenHigh
         this.height = defaultItemSize * gameState.getGridBoard().getHeight();
 
         JPanel infoPanel = createGameStateInfoPanel("Stratego", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{this},
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{this},
                 width, defaultActionPanelHeight);
 
         parent.setLayout(new BorderLayout());
@@ -60,7 +60,7 @@ public class StrategoGUIManager extends AbstractGUIManager implements ScreenHigh
      */
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             ArrayList<Rectangle> highlight = view.getHighlight();
 

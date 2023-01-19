@@ -40,7 +40,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
         if (game != null && gameState != null) {
             infoPanel = createGameStateInfoPanel(game.name(), gameState, width, defaultInfoPanelHeight);
         }
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, true);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, true);
 
         JPanel deckView = new JPanel();
         componentViews = new ComponentView[maxComponentsInDeck];

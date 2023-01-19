@@ -1,5 +1,4 @@
 package games.poker;
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
@@ -11,12 +10,11 @@ import games.poker.actions.*;
 import games.poker.actions.Fold;
 import games.poker.components.MoneyPot;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.util.*;
 
 import static games.poker.PokerGameState.PokerGamePhase.*;
-import static utilities.Utils.GameResult.LOSE;
+import static core.CoreConstants.GameResult.LOSE;
 
 
 public class PokerForwardModel extends StandardForwardModel {
@@ -280,7 +278,7 @@ public class PokerForwardModel extends StandardForwardModel {
             } else {
                 int stillAlive = 0;
                 for (int i = 0; i < pgs.getNPlayers(); i++) {
-                    if (pgs.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING) {
+                    if (pgs.getPlayerResults()[i] == CoreConstants.GameResult.GAME_ONGOING) {
                         stillAlive++;
                         if (stillAlive > 1) break;
                     }

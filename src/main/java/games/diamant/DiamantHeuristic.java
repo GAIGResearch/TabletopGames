@@ -1,10 +1,10 @@
 package games.diamant;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.Counter;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
-import utilities.Utils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,10 +48,10 @@ public class DiamantHeuristic extends TunableParameters implements IStateHeurist
      */
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
-        if (playerResult == Utils.GameResult.LOSE)
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
+        if (playerResult == CoreConstants.GameResult.LOSE)
             return -1;
-        if (playerResult == Utils.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN)
             return 1;
 
         DiamantGameState dgs = (DiamantGameState) gs;

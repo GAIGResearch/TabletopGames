@@ -15,13 +15,11 @@ import games.coltexpress.cards.RoundCard;
 import games.coltexpress.components.Compartment;
 import games.coltexpress.components.Loot;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode;
 import static java.util.stream.Collectors.toList;
-import static utilities.Utils.GameResult.WIN;
 
 public class ColtExpressGameState extends AbstractGameState implements IPrintable {
 

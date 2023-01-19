@@ -3,7 +3,7 @@ package test.games.coltexpress;
 import core.AbstractPlayer;
 import evaluation.loggers.SummaryLogger;
 import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
 import games.coltexpress.ColtExpressForwardModel;

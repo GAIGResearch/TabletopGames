@@ -1,19 +1,17 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import evaluation.metrics.Event;
 import games.coltexpress.cards.RoundCard;
 import core.turnorders.TurnOrder;
 import games.coltexpress.ColtExpressGameState.ColtExpressGamePhase;
-import games.coltexpress.cards.RoundCard;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.ExecuteActions;
 import static games.coltexpress.cards.RoundCard.TurnType.DoubleTurn;
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 
 public class ColtExpressTurnOrder extends TurnOrder {

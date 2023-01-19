@@ -9,7 +9,6 @@ import core.components.Area;
 import core.AbstractParameters;
 import games.GameType;
 import utilities.Hash;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -84,16 +83,16 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     }
 
     @Override
-    public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
-        HashMap<HashMap<Integer, Double>, Utils.GameResult> terminals = new HashMap<>();
-        terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, Utils.GameResult.WIN);
-        terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, Utils.GameResult.LOSE);
+    public HashMap<HashMap<Integer, Double>, GameResult> getTerminalFeatures(int playerId) {
+        HashMap<HashMap<Integer, Double>, GameResult> terminals = new HashMap<>();
+        terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, GameResult.WIN);
+        terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, GameResult.LOSE);
         terminals.put(new HashMap<Integer, Double>() {{ put(2, (double) ((PandemicParameters)gameParameters).loseMaxOutbreak); }},
-                Utils.GameResult.LOSE);
+                GameResult.LOSE);
         int i = 3;
         for (String color: colors) {
             int id = i;
-            terminals.put(new HashMap<Integer, Double>() {{ put(id, 0.0); }}, Utils.GameResult.LOSE);
+            terminals.put(new HashMap<Integer, Double>() {{ put(id, 0.0); }}, GameResult.LOSE);
             i++;
         }
         return terminals;

@@ -1,7 +1,7 @@
 package games.dotsboxes;
 
+import core.CoreConstants;
 import core.components.Component;
-import utilities.Utils;
 import utilities.Vector2D;
 
 import java.util.Objects;
@@ -13,7 +13,7 @@ public class DBEdge extends Component {
     final Vector2D to;
 
     public DBEdge(Vector2D from, Vector2D to) {
-        super(Utils.ComponentType.TOKEN);
+        super(CoreConstants.ComponentType.TOKEN);
         this.from = from;
         this.to = to;
     }

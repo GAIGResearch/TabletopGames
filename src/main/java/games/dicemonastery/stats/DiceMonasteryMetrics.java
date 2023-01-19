@@ -1,21 +1,24 @@
 package games.dicemonastery.stats;
-import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
-import evaluation.metrics.IMetricsCollection;
+import evaluation.listeners.GameListener;
+import evaluation.metrics.*;
 import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.DiceMonasteryTurnOrder;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.Monk;
+import utilities.Group;
+
+import java.util.*;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
+
+@SuppressWarnings("unused")
 public class DiceMonasteryMetrics implements IMetricsCollection {
 
     public static class Season extends AbstractMetric {
-
-        public Season() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
         @Override
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getSeason();
@@ -23,19 +26,16 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
     }
 
     public static class Year extends AbstractMetric {
-
-        public Year() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getYear();
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
     }
 
     public static class Piety extends AbstractMetric {
-
-        public Piety() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             if (e.action == null) return 0;
@@ -43,12 +43,12 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             if (e.action instanceof PromoteMonk) return ((PromoteMonk) e.action).pietyLevelToPromote;
             return 0;
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
     }
 
     public static class Location extends AbstractMetric {
-
-        public Location() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             if (e.action instanceof PlaceMonk) return ((PlaceMonk) e.action).destination.name();
@@ -56,12 +56,12 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             if (e.action instanceof PromoteMonk) return ((PromoteMonk) e.action).location.name();
             return ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getCurrentArea().name();
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
     }
 
     public static class Thing extends AbstractMetric {
-
-        public Thing() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             if (e.action == null) return "";
@@ -73,12 +73,12 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             if (e.action instanceof GoOnPilgrimage) return ((GoOnPilgrimage) e.action).destination.destination;
             return "";
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
     }
 
     public static class Value extends AbstractMetric {
-
-        public Value() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             if (e.action == null) return 0;
@@ -92,201 +92,189 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             if (e.action instanceof UseMonk) return ((UseMonk) e.action).getActionPoints();
             return 0;
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
     }
 
     public static class ActionPointsLeft extends AbstractMetric {
-
-        public ActionPointsLeft() {addEventType(Event.GameEvent.ACTION_CHOSEN);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return  ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getActionPointsLeft();
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
     }
 
 
-    public static class IsSeason extends AbstractMetric {
-
-        public IsSeason(){this(DiceMonasteryConstants.Season.SPRING.name());}
-        DiceMonasteryConstants.Season season;
-        public IsSeason(String seasonName) {
-            addEventType(Event.GameEvent.ROUND_OVER);
-            season = DiceMonasteryConstants.Season.valueOf(seasonName);
-        }
-        public String name() {return getClass().getSimpleName() + " (" + season + ")";}
-
+    public static class IsSeason extends AbstractParameterizedMetric {
+        public IsSeason(){super();}
+        public IsSeason(Object arg){super(arg);}
         @Override
         public Object run(GameListener listener, Event e) {
+            DiceMonasteryConstants.Season season = (DiceMonasteryConstants.Season) getParameterValue("season");
             return ((DiceMonasteryTurnOrder) e.state.getTurnOrder()).getSeason() == season;
         }
-
-        public Object[] getAllowedParameters() { return DiceMonasteryConstants.Season.values(); }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
+        public List<Group<String, List<?>, ?>> getAllowedParameters() {
+            return Collections.singletonList(new Group<>("season", Arrays.asList(DiceMonasteryConstants.Season.values()), DiceMonasteryConstants.Season.SPRING));
+        }
     }
 
 
     public static class Turn extends AbstractMetric {
-
-        public Turn() {addEventType(Event.GameEvent.ROUND_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) e.state.getTurnOrder();
             return (dmto.getYear() - 1) * 4 + dmto.getSeason().ordinal() + 1;
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
     }
 
 
-    public static class MonksIn extends AbstractMetric {
-
-        public MonksIn(){this(STOREROOM.name());}
-        private DiceMonasteryConstants.ActionArea where;
-        public MonksIn(String where) {
-            addEventType(Event.GameEvent.ROUND_OVER);
-            this.where = DiceMonasteryConstants.ActionArea.valueOf(where);
-        }
-        public String name() {return getClass().getSimpleName() + " (" + where + ")";}
-
+    public static class MonksIn extends AbstractParameterizedMetric {
+        public MonksIn(){super();}
+        public MonksIn(Object arg){super(arg);}
         @Override
         public Object run(GameListener listener, Event e) {
+            DiceMonasteryConstants.ActionArea where = (DiceMonasteryConstants.ActionArea) getParameterValue("where");
             return ((DiceMonasteryGameState)e.state).monksIn(where, e.playerID).size();
         }
-
-        public Object[] getAllowedParameters() { return DiceMonasteryConstants.ActionArea.values(); }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
+        public List<Group<String, List<?>, ?>> getAllowedParameters() {
+            return Collections.singletonList(new Group<>("where", Arrays.asList(DiceMonasteryConstants.ActionArea.values()), STOREROOM));
+        }
     }
 
-
-    public static class APIn extends AbstractMetric {
-
-        public APIn() {this (STOREROOM.name());}
-        private DiceMonasteryConstants.ActionArea where;
-        public APIn(String where) {
-            addEventType(Event.GameEvent.ROUND_OVER);
-            this.where = DiceMonasteryConstants.ActionArea.valueOf(where);
-        }
-        public String name() {return getClass().getSimpleName() + " (" + where + ")";}
-
+    public static class APIn extends AbstractParameterizedMetric {
+        public APIn(){super();}
+        public APIn(Object arg){super(arg);}
         @Override
         public Object run(GameListener listener, Event e) {
+            DiceMonasteryConstants.ActionArea where = (DiceMonasteryConstants.ActionArea) getParameterValue("where");
             return ((DiceMonasteryGameState)e.state).monksIn(where, e.playerID).stream().mapToDouble(Monk::getPiety).sum();
         }
-
-        public Object[] getAllowedParameters() { return DiceMonasteryConstants.ActionArea.values(); }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
+        public List<Group<String, List<?>, ?>> getAllowedParameters() {
+            return Collections.singletonList(new Group<>("where", Arrays.asList(DiceMonasteryConstants.ActionArea.values()), STOREROOM));
+        }
     }
 
-
-    public static class MonkPiety extends AbstractMetric {
-
-        public MonkPiety() {this ("4");}
-        private int piety;
-
-        public MonkPiety(String piety) {
-            addEventType(Event.GameEvent.ROUND_OVER);
-            this.piety = Integer.parseInt(piety);
+    public static class MonkPiety extends AbstractParameterizedMetric {
+        public MonkPiety(){super();}
+        public MonkPiety(Object arg){super(arg);}
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
-        public String name() {return getClass().getSimpleName() + " (" + piety + ")";}
-
         @Override
         public Object run(GameListener listener, Event e) {
+            int piety = (int) getParameterValue("piety");
             return ((DiceMonasteryGameState)e.state).monksIn(null, e.playerID).stream().filter(m -> m.getPiety() == piety).count();
         }
-
-        public Object[] getAllowedParameters() { return new Integer[]{1, 2, 3, 4, 5}; } //TODO: James check these are sensible numbers.
+        public List<Group<String, List<?>, ?>> getAllowedParameters() {
+            return Collections.singletonList(new Group<>("piety", Arrays.asList(1, 2, 3, 4, 5), 4)); //TODO: James check these are sensible numbers.
+        }
     }
 
 
-    public static class ResourceInArea extends AbstractMetric {
-
-        private DiceMonasteryConstants.Resource resource;
-        private DiceMonasteryConstants.ActionArea area;
-
-        public ResourceInArea() {this(DiceMonasteryConstants.Resource.SHILLINGS.name(), STOREROOM.name());}
-
-        public ResourceInArea(String res, String area) {
-            addEventType(Event.GameEvent.ROUND_OVER);
-            this.resource = DiceMonasteryConstants.Resource.valueOf(res);
-            this.area =  DiceMonasteryConstants.ActionArea.valueOf(area);
-        }
-        public String name() {return getClass().getSimpleName() + " (" + resource + " in " + area + ")";}
-
+    public static class ResourceInArea extends AbstractParameterizedMetric {
+        public ResourceInArea(){super();}
+        public ResourceInArea(Object... arg){super(arg);}
         @Override
         public Object run(GameListener listener, Event e) {
+            DiceMonasteryConstants.Resource resource = (DiceMonasteryConstants.Resource) getParameterValue("resource");
+            DiceMonasteryConstants.ActionArea area = (DiceMonasteryConstants.ActionArea) getParameterValue("area");
             return ((DiceMonasteryGameState)e.state).getResource(e.playerID, resource, area);
         }
-
-        public Object[] getAllowedParameters() {
-            return new Object[] {DiceMonasteryConstants.Resource.values(),  DiceMonasteryConstants.ActionArea.values()};
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
+        public List<Group<String, List<?>, ?>> getAllowedParameters() {
+            return new ArrayList<>(Arrays.asList(
+                    new Group<>("resource", Arrays.asList(DiceMonasteryConstants.Resource.values()), DiceMonasteryConstants.Resource.SHILLINGS),
+                    new Group<>("area", Arrays.asList(DiceMonasteryConstants.ActionArea.values()), STOREROOM)
+                    ));
         }
     }
 
     public static class WritingSets extends AbstractMetric {
-
-        public WritingSets() {addEventType(Event.GameEvent.ROUND_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return Math.min(((DiceMonasteryGameState)e.state).getResource(e.playerID, DiceMonasteryConstants.Resource.VELLUM, STOREROOM),
                     ((DiceMonasteryGameState)e.state).getResource(e.playerID, DiceMonasteryConstants.Resource.CANDLE, STOREROOM));
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
     }
 
     public static class Pigments extends AbstractMetric {
-
-        public Pigments() {addEventType(Event.GameEvent.ROUND_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryGameState)e.state).getStores(e.playerID, r -> r.isPigment).size();
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
     }
 
     public static class Inks extends AbstractMetric {
-
-        public Inks() {addEventType(Event.GameEvent.ROUND_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryGameState)e.state).getStores(e.playerID, r -> r.isInk).size();
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
     }
 
     public static class MonksCount extends AbstractMetric {
-
-        public MonksCount() {addEventType(Event.GameEvent.ROUND_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryGameState)e.state).monksIn(null, e.playerID).size();
+        }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
     }
 
 
     public static class PietySum extends AbstractMetric {
-
-        public PietySum() {addEventType(Event.GameEvent.ROUND_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryGameState)e.state).monksIn(null, e.playerID).stream().mapToInt(Monk::getPiety).sum();
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
     }
 
     public static class VictoryPoints extends AbstractMetric {
-
-        public VictoryPoints() {addEventType(Event.GameEvent.ROUND_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryGameState)e.state).getVictoryPoints(e.playerID);
         }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
     }
 
     public static class TreasureSum extends AbstractMetric {
-
-        public TreasureSum() {addEventType(Event.GameEvent.ROUND_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return ((DiceMonasteryGameState)e.state).getTreasures(e.playerID).stream().mapToInt(t -> t.vp).sum();
+        }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
     }
 

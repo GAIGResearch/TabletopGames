@@ -4,7 +4,6 @@ import core.*;
 import games.GameType;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +38,9 @@ public class VirusGame extends Game {
             Game game = new VirusGame(agents, gameParameters);
             game.run();
 
-            Utils.GameResult [] results =  game.getGameState().getPlayerResults();
+            CoreConstants.GameResult[] results =  game.getGameState().getPlayerResults();
             for (int j=0; j<agents.size(); j++)
-                if (results[j] == Utils.GameResult.WIN)
+                if (results[j] == CoreConstants.GameResult.WIN)
                 {
                     playerWins[j] += 1;
                     break;

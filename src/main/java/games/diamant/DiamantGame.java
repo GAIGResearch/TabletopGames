@@ -6,7 +6,6 @@ import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +24,7 @@ public class DiamantGame extends Game {
         agents.add(new OSLAPlayer());
         agents.add(new HumanConsolePlayer());
 
+
         // Play n games and return the pct of wins of each player
         double [] playerWins = new double[agents.size()];
         for (int i=0; i<agents.size(); i++)
@@ -38,14 +38,14 @@ public class DiamantGame extends Game {
             Game game = new DiamantGame(agents, gameParameters);
             game.run();
 
-            Utils.GameResult [] results =  game.getGameState().getPlayerResults();
+            CoreConstants.GameResult[] results =  game.getGameState().getPlayerResults();
             for (int j=0; j<agents.size(); j++)
-                if (results[j] == Utils.GameResult.WIN)
+                if (results[j] == CoreConstants.GameResult.WIN)
                 {
                     playerWins[j] += 1;
                     System.out.print("W");
                 }
-                else if (results[j] == Utils.GameResult.LOSE)
+                else if (results[j] == CoreConstants.GameResult.LOSE)
                     System.out.print("L");
                 else
                     System.out.print("D");
