@@ -56,6 +56,8 @@ import static games.GameType.Mechanic.*;
 /**
  * Encapsulates all games available in the framework, with minimum and maximum number of players as per game rules.
  * All games further include a list of categories and mechanics, which can be used to filter the game collection.
+ * Additionally: classes where the game state, forward model, parameters and GUI manager (optional, can be null) are implemented,
+ * and path to where JSON data for the game is stored (optional).
  */
 public enum GameType {
 
