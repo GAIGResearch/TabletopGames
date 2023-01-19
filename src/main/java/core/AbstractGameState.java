@@ -43,6 +43,10 @@ public abstract class AbstractGameState {
     // Timers for all players
     protected ElapsedCpuChessTimer[] playerTimer;
 
+    // A record of all actions taken to reach this game state
+    private List<AbstractAction> history = new ArrayList<>();
+    private List<String> historyText = new ArrayList<>();
+
     // Status of the game, and status for each player (in cooperative games, the game status is also each player's status)
     protected CoreConstants.GameResult gameStatus;
     protected CoreConstants.GameResult[] playerResults;
@@ -51,9 +55,6 @@ public abstract class AbstractGameState {
     // Stack for extended actions
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     CoreParameters coreGameParameters;
-    // A record of all actions taken to reach this game state
-    private List<AbstractAction> history = new ArrayList<>();
-    private List<String> historyText = new ArrayList<>();
     private int gameID;
 
     /**
@@ -160,7 +161,7 @@ public abstract class AbstractGameState {
     void setGameID(int id) {
         gameID = id;
     } // package level deliberately
-
+    void advanceGameTick() {tick++;}
 
     /* Limited access final methods */
     public final boolean isNotTerminal() {
