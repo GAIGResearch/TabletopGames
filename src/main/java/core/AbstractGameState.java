@@ -288,6 +288,14 @@ public abstract class AbstractGameState {
         historyText.add("Player " + player + " : " + action.getString(this));
     }
 
+    public void logEvent(String string) {
+        turnOrder.logEvent(string, this);
+    }
+
+    public void recordHistory(String history) {
+        historyText.add(history);
+    }
+
     /* Methods dealing with ExtendedActions and the actionStack */
 
     public final IExtendedSequence currentActionInProgress() {
