@@ -2,7 +2,7 @@ package games.terraformingmars;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -23,7 +23,7 @@ import static games.terraformingmars.TMTypes.Resource.TR;
 import static games.terraformingmars.TMTypes.StandardProject.*;
 import static games.terraformingmars.TMTypes.ActionType.*;
 
-public class TMForwardModel extends StandardForwardModel {
+public class TMForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {

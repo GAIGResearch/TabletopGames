@@ -139,9 +139,9 @@ public class GameMetrics implements IMetricsCollection
         @Override
         public Object run(GameListener listener, Event e) {
             Map<String, Object> collectedData = new LinkedHashMap<>();
-            collectedData.put("Turns", listener.getGame().getGameState().getTurnOrder().getTurnCounter());
+            collectedData.put("Turns", listener.getGame().getGameState().getTurnCounter());
             collectedData.put("Ticks", listener.getGame().getTick());
-            collectedData.put("Rounds", listener.getGame().getGameState().getTurnOrder().getRoundCounter());
+            collectedData.put("Rounds", listener.getGame().getGameState().getRoundCounter());
             return collectedData;
         }
         @Override

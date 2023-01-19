@@ -2,7 +2,7 @@ package games.stratego;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.stratego.actions.Move;
@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class StrategoForwardModel extends StandardForwardModel {
+public class StrategoForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -71,8 +71,9 @@ public class StrategoForwardModel extends StandardForwardModel {
         if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_END){
             return;
         }
+        StrategoGameState sgs = (StrategoGameState) currentState;
 
-        currentState.getTurnOrder().endPlayerTurn(currentState);
+        sgs.getTurnOrder().endPlayerTurn(currentState);
 
         List<AbstractAction> actions = _computeAvailableActions(currentState);
         if (actions.isEmpty()){
@@ -81,7 +82,7 @@ public class StrategoForwardModel extends StandardForwardModel {
             currentState.setPlayerResult(CoreConstants.GameResult.LOSE, currentState.getCurrentPlayer());
             currentState.setPlayerResult(CoreConstants.GameResult.WIN, 1-currentState.getCurrentPlayer());
         } else {
-            if (currentState.getTurnOrder().getRoundCounter() >= ((StrategoParams)currentState.getGameParameters()).maxRounds) {
+            if (sgs.getTurnOrder().getRoundCounter() >= ((StrategoParams)currentState.getGameParameters()).maxRounds) {
                 // Max rounds reached, draw
                 currentState.setGameStatus(CoreConstants.GameResult.GAME_END);
                 currentState.setPlayerResult(CoreConstants.GameResult.DRAW, currentState.getCurrentPlayer());

@@ -42,8 +42,8 @@ public class MiscGameMetrics implements IMetricsCollection {
         public Object run(GameListener listener, Event e) {
             Map<String, Object> collectedData = new HashMap<>();
             collectedData.put("Game ID", e.state.getGameID());
-            collectedData.put("Round",  (e.state.getTurnOrder()).getRoundCounter());
-            collectedData.put("Turn",  (e.state.getTurnOrder()).getTurnCounter());
+            collectedData.put("Round",  e.state.getRoundCounter());
+            collectedData.put("Turn",  e.state.getTurnCounter());
             collectedData.put("Player",  e.state.getCurrentPlayer());
             collectedData.put("Player Score", e.state.getGameScore(e.state.getCurrentPlayer()));
             collectedData.put("Action Type", e.action == null ? "NONE" : e.action.getClass().getSimpleName());

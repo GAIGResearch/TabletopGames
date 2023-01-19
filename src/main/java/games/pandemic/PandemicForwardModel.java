@@ -346,7 +346,8 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         PandemicGameState pgs = (PandemicGameState) gameState;
-        if (((PandemicTurnOrder) gameState.getTurnOrder()).reactionsFinished()) {
+        PandemicTurnOrder pto = (PandemicTurnOrder) pgs.getTurnOrder();
+        if (pto.reactionsFinished()) {
             gameState.setGamePhase(CoreConstants.DefaultGamePhase.Main);
         }
         if (gameState.getGamePhase() == PandemicGameState.PandemicGamePhase.DiscardReaction)
@@ -363,6 +364,12 @@ public class PandemicForwardModel extends AbstractRuleBasedForwardModel {
     @Override
     protected AbstractForwardModel _copy() {
         return new PandemicForwardModel(copyRoot());
+    }
+
+    @Override
+    protected void endPlayerTurn(AbstractGameState state) {
+        PandemicGameState pgs = (PandemicGameState) state;
+        pgs.getTurnOrder().endPlayerTurn(state);
     }
 
     @Override

@@ -94,8 +94,8 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
      */
     @Override
     protected void _next(AbstractGameState gameState, AbstractAction action) {
-        ExplodingKittensTurnOrder ekTurnOrder = (ExplodingKittensTurnOrder) gameState.getTurnOrder();
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
+        ExplodingKittensTurnOrder ekTurnOrder = (ExplodingKittensTurnOrder) ekgs.getTurnOrder();
         Stack<AbstractAction> actionStack = ekgs.getActionStack();
 
         if (action instanceof IsNopeable) {
@@ -184,6 +184,12 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
     @Override
     protected AbstractForwardModel _copy() {
         return new ExplodingKittensForwardModel();
+    }
+
+    @Override
+    protected void endPlayerTurn(AbstractGameState state) {
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) state;
+        ekgs.getTurnOrder().endPlayerTurn(ekgs);
     }
 
     private ArrayList<AbstractAction> playerActions(ExplodingKittensGameState ekgs, int playerID){

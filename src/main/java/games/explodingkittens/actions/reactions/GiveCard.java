@@ -20,7 +20,7 @@ public class GiveCard extends DrawCard implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
-        ExplodingKittensTurnOrder ekto = ((ExplodingKittensTurnOrder) gs.getTurnOrder());
+        ExplodingKittensTurnOrder ekto = ((ExplodingKittensTurnOrder) ekgs.getTurnOrder());
         if (fromIndex > -1) { // to allow for GiveCard to occur when the target's deck is empty
             Deck<ExplodingKittensCard> from = (Deck<ExplodingKittensCard>) ekgs.getComponentById(deckFrom);
             Deck<ExplodingKittensCard> to = (Deck<ExplodingKittensCard>) ekgs.getComponentById(deckTo);

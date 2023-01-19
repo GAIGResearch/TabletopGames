@@ -1,6 +1,6 @@
 package games.pandemic.rules.rules;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 import games.pandemic.PandemicTurnOrder;
@@ -30,7 +30,7 @@ public class ForceRPReaction extends RuleNode {
     }
 
     @Override
-    protected boolean run(AbstractGameState gs) {
+    protected boolean run(AbstractGameStateWithTurnOrder gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
         int nPlayers = gs.getNPlayers();
 

@@ -532,7 +532,7 @@ public class TMGUI extends AbstractGUIManager {
 
             if (player instanceof HumanGUIPlayer) {
                 TMAction action = (TMAction) gameState.getHistory().get(gameState.getHistory().size()-1);
-                TMTurnOrder turnOrder = (TMTurnOrder) gameState.getTurnOrder();
+                TMTurnOrder turnOrder = (TMTurnOrder) gs.getTurnOrder();
                 if (!action.equals(lastAction) || !turnOrder.equals(this.turnOrder)) {
                     createActionMenu(player, (TMGameState) gameState);
                     this.lastAction = action.copy();

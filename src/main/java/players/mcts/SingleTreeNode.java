@@ -130,9 +130,9 @@ public class SingleTreeNode {
         this.opponentModels = root.opponentModels;
         this.forwardModel = root.forwardModel;
         this.rnd = root.rnd;
-        this.round = state.getTurnOrder().getRoundCounter();
-        this.turn = state.getTurnOrder().getTurnCounter();
-        this.turnOwner = state.getTurnOrder().getTurnOwner();
+        this.round = state.getRoundCounter();
+        this.turn = state.getTurnCounter();
+        this.turnOwner = state.getTurnOwner();
         this.terminalNode = !state.isNotTerminal();
 
         decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
@@ -805,7 +805,7 @@ public class SingleTreeNode {
     protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int decisionPlayer, int lastActor) {
         int rolloutDepth = 0; // counting from end of tree
 
-        int roundAtStartOfRollout = openLoopState.getTurnOrder().getRoundCounter();
+        int roundAtStartOfRollout = openLoopState.getRoundCounter();
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
@@ -864,7 +864,7 @@ public class SingleTreeNode {
                 case START_TURN:
                     return lastActor != decisionPlayer && currentActor == decisionPlayer;
                 case END_ROUND:
-                    return rollerState.getTurnOrder().getRoundCounter() != roundAtStartOfRollout;
+                    return rollerState.getRoundCounter() != roundAtStartOfRollout;
             }
         }
         return false;

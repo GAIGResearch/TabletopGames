@@ -275,7 +275,7 @@ public class PokerGUIManager extends AbstractGUIManager {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
-            if (pgs.getTurnOrder().getRoundCounter() != gameState.getTurnOrder().getRoundCounter()) {
+            if (pgs.getTurnOrder().getRoundCounter() != gameState.getRoundCounter()) {
                 // New round
                 // Paint final state of previous round, showing all hands
                 for (int i = 0; i < pgs.getNPlayers(); i++) {
@@ -334,7 +334,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 // Highlight active, first and fold players
                 if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.LOSE) {
                     playerHands[i].setBorder(playerViewCompoundBordersEliminated[i]);
-                } else if (i == gameState.getTurnOrder().getFirstPlayer()) {
+                } else if (i == gameState.getFirstPlayer()) {
                     playerHands[i].setBorder(playerViewCompoundBordersFirst[i]);
                 } else if (pgs.getPlayerFold()[i]) {
                     playerHands[i].setBorder(playerViewCompoundBordersFold[i]);

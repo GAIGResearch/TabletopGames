@@ -24,7 +24,7 @@ public class ChooseSeeTheFutureOrder extends RearrangeDeckOfCards implements IPr
 
         // set the visibility again since it has been changed by aboves execute
         PartialObservableDeck<ExplodingKittensCard> drawPile = ((ExplodingKittensGameState)gs).getDrawPile();
-        int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
+        int playerID = gs.getCurrentPlayer();
 
         for (int i = 0; i < newCardOrder.length; i++) {
             for (int j = 0; j < gs.getNPlayers(); j++){

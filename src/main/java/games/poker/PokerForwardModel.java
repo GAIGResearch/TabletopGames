@@ -1,7 +1,7 @@
 package games.poker;
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -17,7 +17,7 @@ import static games.poker.PokerGameState.PokerGamePhase.*;
 import static core.CoreConstants.GameResult.LOSE;
 
 
-public class PokerForwardModel extends StandardForwardModel {
+public class PokerForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -105,7 +105,7 @@ public class PokerForwardModel extends StandardForwardModel {
         pgs.playerActStreet[pgs.getCurrentPlayer()] = true;
 
         if (!(action instanceof Fold || action instanceof Check || action instanceof Call)) {
-            gameState.getTurnOrder().endPlayerTurn(gameState);
+            pgs.getTurnOrder().endPlayerTurn(gameState);
         } else {
             boolean remainingDecisions = false;
             int stillAlive = 0;
@@ -122,7 +122,7 @@ public class PokerForwardModel extends StandardForwardModel {
                 roundEnd(pgs);
             } else if (!remainingDecisions) {
                 // Add community cards
-                gameState.getTurnOrder().setTurnOwner(gameState.getTurnOrder().getFirstPlayer());
+                gameState.setTurnOwner(gameState.getFirstPlayer());
                 pgs.setBet(false);
                 Arrays.fill(pgs.playerActStreet, false);
 

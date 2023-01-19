@@ -3,6 +3,7 @@ package games.pandemic.rules.conditions;
 import core.AbstractGameState;
 import core.rules.Node;
 import core.rules.nodetypes.ConditionNode;
+import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicTurnOrder;
 
 public class ActionsPerTurnPlayed extends ConditionNode {
@@ -24,7 +25,8 @@ public class ActionsPerTurnPlayed extends ConditionNode {
 
     @Override
     public boolean test(AbstractGameState gs) {
-        return ((PandemicTurnOrder)gs.getTurnOrder()).getTurnStep() >= n_actions;
+        PandemicGameState pgs = (PandemicGameState) gs;
+        return ((PandemicTurnOrder)pgs.getTurnOrder()).getTurnStep() >= n_actions;
     }
 
     @Override

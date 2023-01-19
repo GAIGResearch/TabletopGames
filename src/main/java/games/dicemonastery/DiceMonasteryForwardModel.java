@@ -2,7 +2,7 @@ package games.dicemonastery;
 
 import core.AbstractGameData;
 import core.AbstractGameState;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Card;
@@ -24,7 +24,7 @@ import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public class DiceMonasteryForwardModel extends StandardForwardModel {
+public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder {
 
     public final AbstractAction SOW_WHEAT = new SowWheat();
     public final AbstractAction HARVEST_WHEAT = new HarvestWheat(1);

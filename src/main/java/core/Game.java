@@ -216,7 +216,7 @@ public class Game {
                 game = runOne(gt, null, players, s, randomizeParameters, listeners, null, turnPause);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
-                    offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
+                    offset = game.getGameState().getRoundCounter() * game.getGameState().getNPlayers();
                 } else {
                     break;
                 }
@@ -439,9 +439,9 @@ public class Game {
                  * Players should never have access to the Game, or the main AbstractGameState, or to each other!
                  */
 
-                // Get player to ask for actions next
-                boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
-                        && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);
+                // Get player to ask for actions next (This horrendous line is for backwards compatibility).
+                boolean reacting = (gameState instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder)gameState).getTurnOrder() instanceof ReactiveTurnOrder
+                        && ((ReactiveTurnOrder) ((AbstractGameStateWithTurnOrder)gameState).getTurnOrder()).getReactivePlayers().size() > 0);
 
                 // Check if this is the same player as last, count number of actions per turn
                 if (!reacting) {
@@ -516,7 +516,7 @@ public class Game {
         actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
 
         if (gameState.coreGameParameters.verbose) {
-            System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
+            System.out.println("Round: " + gameState.getRoundCounter());
         }
 
         if (observation instanceof IPrintable && gameState.coreGameParameters.verbose) {
@@ -736,7 +736,7 @@ public class Game {
     public void addListener(GameListener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
-            gameState.turnOrder.addListener(listener);
+            gameState.addListener(listener);
             listener.setGame(this);
         }
     }
@@ -746,7 +746,7 @@ public class Game {
 
     public void clearListeners() {
         listeners.clear();
-        getGameState().turnOrder.clearListeners();
+        getGameState().clearListeners();
     }
 
     /**

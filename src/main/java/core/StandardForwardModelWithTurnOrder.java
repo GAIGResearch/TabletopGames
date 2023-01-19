@@ -1,9 +1,8 @@
 package core;
 
 import core.actions.AbstractAction;
-import utilities.Utils;
 
-public abstract class StandardForwardModel extends AbstractForwardModel {
+public abstract class StandardForwardModelWithTurnOrder extends AbstractForwardModel {
 
     @Override
     protected void _next(AbstractGameState currentState, AbstractAction action){
@@ -20,7 +19,13 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
     protected abstract void _afterAction(AbstractGameState currentState, AbstractAction actionTaken);
 
     @Override
-    public StandardForwardModel _copy() {
+    public void endPlayerTurn(AbstractGameState gs) {
+        AbstractGameStateWithTurnOrder state = (AbstractGameStateWithTurnOrder) gs;
+        state.getTurnOrder().endPlayerTurn(gs);
+    }
+
+    @Override
+    public StandardForwardModelWithTurnOrder _copy() {
         return this;
     }
 }

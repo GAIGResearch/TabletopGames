@@ -1,22 +1,8 @@
 package core;
 
-import core.actions.AbstractAction;
-import core.components.Area;
-import core.components.Component;
-import core.components.PartialObservableDeck;
-import core.interfaces.IComponentContainer;
-import core.interfaces.IExtendedSequence;
-import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
+import evaluation.listeners.GameListener;
 import games.GameType;
-import utilities.ElapsedCpuChessTimer;
-
-import java.util.*;
-import java.util.stream.IntStream;
-
-import static core.CoreConstants.GameResult.*;
-import static java.util.stream.Collectors.toList;
-
 
 /**
  * Contains all game state information.
@@ -54,12 +40,35 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
     public final TurnOrder getTurnOrder() {
         return turnOrder;
     }
+    @Override
+    public int getRoundCounter() {return turnOrder.getRoundCounter();}
+    @Override
+    public int getTurnCounter() {return turnOrder.getTurnCounter();}
+    @Override
+    public int getTurnOwner() {return turnOrder.getTurnOwner();}
+    @Override
+    public int getFirstPlayer() {return turnOrder.getFirstPlayer();}
+    @Override
+    public int getNPlayers() {return turnOrder.nPlayers();}
+    @Override
+    public int getCurrentPlayer() {return turnOrder.getCurrentPlayer(this);}
 
+    @Override
+    public void setTurnOwner(int newTurnOwner) {turnOrder.setTurnOwner(newTurnOwner);}
+    @Override
+    public void setStartingPlayer(int newFirstPlayer) {turnOrder.setStartingPlayer(newFirstPlayer);}
     public final void setTurnOrder(TurnOrder turnOrder) {
         this.turnOrder = turnOrder;
     }
 
-    /* Methods to be implemented by subclass, protected access. */
+
+    public void addListener(GameListener listener) {
+        turnOrder.addListener(listener);
+    }
+
+    public void clearListeners() {
+        turnOrder.clearListeners();
+    }
 
     /**
      * Create a copy of the game state containing only those components the given player can observe (if partial

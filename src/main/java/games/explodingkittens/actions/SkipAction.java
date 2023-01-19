@@ -6,6 +6,7 @@ import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
+import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.ExplodingKittensTurnOrder;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
@@ -22,8 +23,9 @@ public class SkipAction extends DrawCard implements IsNopeable, IPrintable {
         // Discard the card played
         super.execute(gs);
         // Execute action
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
         gs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
-        ((ExplodingKittensTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
+        ((ExplodingKittensTurnOrder)ekgs.getTurnOrder()).endPlayerTurnStep(gs);
         return true;
     }
 

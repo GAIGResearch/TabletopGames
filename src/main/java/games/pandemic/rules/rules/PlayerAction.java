@@ -1,8 +1,7 @@
 package games.pandemic.rules.rules;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.actions.DrawCard;
-import core.actions.RearrangeDeckOfCards;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
@@ -18,7 +17,6 @@ import games.pandemic.actions.TreatDisease;
 import utilities.Hash;
 
 import static core.CoreConstants.playerHandHash;
-import static games.pandemic.PandemicConstants.countryHash;
 import static core.CoreConstants.nameHash;
 
 public class PlayerAction extends core.rules.rulenodes.PlayerAction {
@@ -43,7 +41,7 @@ public class PlayerAction extends core.rules.rulenodes.PlayerAction {
     }
 
     @Override
-    protected boolean run(AbstractGameState gs) {
+    protected boolean run(AbstractGameStateWithTurnOrder gs) {
         if(super.run(gs)) {
             PandemicGameState pgs = (PandemicGameState) gs;
             PandemicTurnOrder pto = (PandemicTurnOrder) pgs.getTurnOrder();

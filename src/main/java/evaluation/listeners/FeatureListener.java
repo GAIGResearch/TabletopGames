@@ -50,7 +50,7 @@ public abstract class FeatureListener extends GameListener {
                 }
             }).toArray();
             double[] ordinal = IntStream.range(0, totP).mapToDouble(event.state::getOrdinalPosition).toArray();
-            double finalRound = event.state.getTurnOrder().getRoundCounter();
+            double finalRound = event.state.getRoundCounter();
             for (StateFeatureListener.LocalDataWrapper record : currentData) {
                 // we use a LinkedHashMap so that the order of the keys is preserved, and hence the
                 // data is written to file in a sensible order for human viewing
@@ -112,8 +112,8 @@ public abstract class FeatureListener extends GameListener {
 
         LocalDataWrapper(int player, double[] contents, AbstractGameState state) {
             array = contents;
-            this.gameTurn = state.getTurnOrder().getTurnCounter();
-            this.gameRound = state.getTurnOrder().getRoundCounter();
+            this.gameTurn = state.getTurnCounter();
+            this.gameRound = state.getRoundCounter();
             this.player = player;
             this.currentScore = state.getGameScore(player);
         }

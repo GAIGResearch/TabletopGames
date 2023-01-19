@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
+import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
 
@@ -47,12 +48,12 @@ public class Hit extends AbstractAction implements IPrintable {
         if (points > ((BlackjackParameters)gameState.getGameParameters()).winScore) {
             gameState.setPlayerResult(CoreConstants.GameResult.LOSE, playerID);
             if (advanceTurnOrder) {
-                gameState.getTurnOrder().endPlayerTurn(gameState);
+                bjgs.getTurnOrder().endPlayerTurn(gameState);
             }
         } else if (points == ((BlackjackParameters)gameState.getGameParameters()).winScore) {
             gameState.setPlayerResult(CoreConstants.GameResult.WIN, playerID);
             if (advanceTurnOrder) {
-                gameState.getTurnOrder().endPlayerTurn(gameState);
+                bjgs.getTurnOrder().endPlayerTurn(gameState);
             }
         }
 

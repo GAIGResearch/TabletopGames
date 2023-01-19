@@ -44,7 +44,7 @@ public abstract class AbstractGameState {
     private int tick = 0;
 
     // Migrated from TurnOrder..may move later
-    protected int currentPlayer, nPlayers;
+    protected int currentPlayer, nPlayers, roundCounter, turnCounter, turnOwner, firstPlayer;
     protected List<GameListener> listeners = new ArrayList<>();
 
     // Timers for all players
@@ -107,9 +107,7 @@ public abstract class AbstractGameState {
     public final AbstractParameters getGameParameters() {
         return this.gameParameters;
     }
-    public final int getNPlayers() {
-        return nPlayers;
-    }
+    public int getNPlayers() { return nPlayers; }
     public int getCurrentPlayer() {
         throw new AssertionError("Not yet implemented");
     }
@@ -136,6 +134,10 @@ public abstract class AbstractGameState {
     public int getGameID() {
         return gameID;
     }
+    public int getRoundCounter() {return roundCounter;}
+    public int getTurnCounter() {return turnCounter;}
+    public int getTurnOwner() {return turnOwner;}
+    public int getFirstPlayer() {return firstPlayer;}
 
     // Setters
     void setCoreGameParameters(CoreParameters coreGameParameters) {
@@ -154,6 +156,12 @@ public abstract class AbstractGameState {
         gameID = id;
     } // package level deliberately
     void advanceGameTick() {tick++;}
+
+    public void setTurnOwner(int newTurnOwner) {turnOwner = newTurnOwner;}
+    public void setStartingPlayer(int newFirstPlayer) {
+        firstPlayer = newFirstPlayer;
+        turnOwner = newFirstPlayer;
+    }
 
     public void addListener(GameListener listener) {
         if (!listeners.contains(listener))

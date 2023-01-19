@@ -2,7 +2,7 @@ package games.tictactoe;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class TicTacToeForwardModel extends StandardForwardModel {
+public class TicTacToeForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -27,7 +27,7 @@ public class TicTacToeForwardModel extends StandardForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
+        int player = gameState.getCurrentPlayer();
 
         if (gameState.isNotTerminal())
             for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
@@ -43,7 +43,7 @@ public class TicTacToeForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) currentState.getGameParameters();
         int gridSize = tttgp.gridSize;
-        if (currentState.getTurnOrder().getRoundCounter() == (gridSize * gridSize)) {
+        if (currentState.getRoundCounter() == (gridSize * gridSize)) {
             currentState.setGameStatus(CoreConstants.GameResult.GAME_END);
             return;
         }
@@ -51,7 +51,8 @@ public class TicTacToeForwardModel extends StandardForwardModel {
         if (checkGameEnd((TicTacToeGameState) currentState)) {
             return;
         }
-        currentState.getTurnOrder().endPlayerTurn(currentState);
+        TicTacToeGameState tttgs = (TicTacToeGameState) currentState;
+        tttgs.getTurnOrder().endPlayerTurn(currentState);
     }
 
     /**

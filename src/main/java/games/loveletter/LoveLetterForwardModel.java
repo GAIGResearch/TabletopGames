@@ -1,7 +1,7 @@
 package games.loveletter;
 
 import core.AbstractGameState;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -16,7 +16,7 @@ import static core.CoreConstants.*;
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
 
-public class LoveLetterForwardModel extends StandardForwardModel {
+public class LoveLetterForwardModel extends StandardForwardModelWithTurnOrder {
 
     /**
      * Creates the initial game-state of Love Letter.
@@ -285,7 +285,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         ArrayList<AbstractAction> actions;
-        int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
+        int player = gameState.getCurrentPlayer();
         if (gameState.getGamePhase().equals(DefaultGamePhase.Main)) {
             actions = playerActions(llgs, player);
         } else if (gameState.getGamePhase().equals(LoveLetterGameState.LoveLetterGamePhase.Draw)) {

@@ -1,7 +1,7 @@
 package games.coltexpress;
 
 import core.AbstractGameState;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.actions.DrawCard;
@@ -21,7 +21,7 @@ import java.util.*;
 import static core.CoreConstants.VisibilityMode;
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.PlanActions;
 
-public class ColtExpressForwardModel extends StandardForwardModel {
+public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     public void _setup(AbstractGameState firstState) {
@@ -116,7 +116,7 @@ public class ColtExpressForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         ColtExpressGameState cegs = (ColtExpressGameState) gameState;
-        ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) gameState.getTurnOrder();
+        ColtExpressTurnOrder ceto = (ColtExpressTurnOrder) cegs.getTurnOrder();
 
         IGamePhase gamePhase = cegs.getGamePhase();
         if (ColtExpressGameState.ColtExpressGamePhase.DraftCharacter.equals(gamePhase)) {

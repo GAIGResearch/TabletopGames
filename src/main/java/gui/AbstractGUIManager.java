@@ -197,10 +197,10 @@ public abstract class AbstractGUIManager {
                 .mapToObj(p -> String.format("%.0f", gameState.getGameScore(p)))
                 .collect(joining(", ")));
         gamePhase.setText("Game phase: " + gameState.getGamePhase());
-        turnOwner.setText("Turn owner: " + gameState.getTurnOrder().getTurnOwner());
-        turn.setText("Turn: " + gameState.getTurnOrder().getTurnCounter() +
-                "; Round: " + gameState.getTurnOrder().getRoundCounter());
-        currentPlayer.setText("Current player: " + gameState.getTurnOrder().getCurrentPlayer(gameState));
+        turnOwner.setText("Turn owner: " + gameState.getTurnOwner());
+        turn.setText("Turn: " + gameState.getTurnCounter() +
+                "; Round: " + gameState.getRoundCounter());
+        currentPlayer.setText("Current player: " + gameState.getCurrentPlayer());
     }
 
 

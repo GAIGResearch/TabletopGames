@@ -2,19 +2,15 @@ package games.dominion;
 
 import core.*;
 import core.actions.*;
-import core.components.Deck;
-import core.components.PartialObservableDeck;
 import games.dominion.actions.*;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
-import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static java.util.stream.Collectors.*;
 
-public class DominionForwardModel extends StandardForwardModel {
+public class DominionForwardModel extends StandardForwardModelWithTurnOrder {
     /**
      * Performs initial game setup according to game rules
      * - sets up decks and shuffles

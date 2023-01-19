@@ -298,7 +298,8 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
 
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
-        gameTurnStep.setText("Turn step: " + ((PandemicTurnOrder)gameState.getTurnOrder()).getTurnStep());
+        PandemicGameState pgs = (PandemicGameState) gameState;
+        gameTurnStep.setText("Turn step: " + ((PandemicTurnOrder)pgs.getTurnOrder()).getTurnStep());
     }
 
     private JPanel createCounterArea() {
@@ -328,10 +329,10 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
     protected void _update(AbstractPlayer player, AbstractGameState gameState){
         this.gameState = (PandemicGameState) gameState;
         boardView.gameState = this.gameState;
-        boolean newTurn = gameState.getTurnOrder().getCurrentPlayer(gameState) != activePlayer || currentGamePhase == null || !currentGamePhase.equals(gameState.getGamePhase());
+        boolean newTurn = this.gameState.getTurnOrder().getCurrentPlayer(gameState) != activePlayer || currentGamePhase == null || !currentGamePhase.equals(gameState.getGamePhase());
 
         currentGamePhase = gameState.getGamePhase();
-        activePlayer = gameState.getTurnOrder().getCurrentPlayer(gameState);
+        activePlayer = this.gameState.getTurnOrder().getCurrentPlayer(gameState);
         // Update counters
         Counter cnY = (Counter) this.gameState.getComponent(Hash.GetInstance().hash("Disease Cube yellow"));
         cY.updateComponent(cnY);

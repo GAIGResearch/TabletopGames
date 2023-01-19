@@ -27,7 +27,7 @@ public class ActionTests {
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
     DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 4));
     DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
-    DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) game.getGameState().getTurnOrder();
+    DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
     RandomPlayer rnd = new RandomPlayer();
     List<Treasure> allTreasures = state.availableTreasures();
     Treasure cape = allTreasures.stream().filter(t -> t.getComponentName().equals("Cape"))

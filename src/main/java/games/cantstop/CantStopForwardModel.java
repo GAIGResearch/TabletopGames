@@ -1,7 +1,7 @@
 package games.cantstop;
 
 import core.AbstractGameState;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.Dice;
 import games.cantstop.actions.Pass;
@@ -13,7 +13,7 @@ import java.util.*;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 
-public class CantStopForwardModel extends StandardForwardModel {
+public class CantStopForwardModel extends StandardForwardModelWithTurnOrder {
 
     private final Pass passAction = new Pass(false);
     private final RollDice rollAction = new RollDice();

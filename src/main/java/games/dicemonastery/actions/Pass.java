@@ -10,7 +10,7 @@ public class Pass extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) gs.getTurnOrder();
+        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         state.useAP(turnOrder.getActionPointsLeft());
 
         return true;

@@ -40,7 +40,7 @@ public class PandemicGame extends Game {
             game = runOne(GameType.Pandemic, parameterConfigFile, players, s, randomizeParameters, listeners, ac, 0);
             if (game != null) {
                 statSummary.add(game.getGameState().getGameStatus().value);
-                offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
+                offset = game.getGameState().getRoundCounter() * game.getGameState().getNPlayers();
             } else {
                 break;
             }

@@ -15,7 +15,7 @@ public class PilgrimageTests {
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
     DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 4));
     DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
-    DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) game.getGameState().getTurnOrder();
+    DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
     @Test
     public void basicFunctionalityShort() {

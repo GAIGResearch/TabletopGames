@@ -2,7 +2,7 @@ package games.uno;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.uno.UnoGameParameters.UnoScoring;
@@ -15,7 +15,7 @@ import java.util.*;
 import static core.CoreConstants.VisibilityMode.*;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 
-public class UnoForwardModel extends StandardForwardModel {
+public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -156,7 +156,8 @@ public class UnoForwardModel extends StandardForwardModel {
             return;
         }
         if (gameState.getGameStatus() == GAME_ONGOING) {
-            gameState.getTurnOrder().endPlayerTurn(gameState);
+            UnoGameState ugs = (UnoGameState) gameState;
+            ugs.getTurnOrder().endPlayerTurn(gameState);
         }
     }
 

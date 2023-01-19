@@ -43,7 +43,7 @@ public class PlayCard extends DrawCard implements IPrintable {
         UnoCard cardToBePlayed = (UnoCard) gameState.getComponentById(cardId);
         ugs.updateCurrentCard(cardToBePlayed);
 
-        int nextPlayer = gameState.getTurnOrder().nextPlayer(gameState);
+        int nextPlayer = ugs.getTurnOrder().nextPlayer(gameState);
         Deck<UnoCard> drawDeck = ugs.getDrawDeck();
         Deck<UnoCard> discardDeck = ugs.getDiscardDeck();
         List<Deck<UnoCard>> playerDecks = ugs.getPlayerDecks();
@@ -60,13 +60,13 @@ public class PlayCard extends DrawCard implements IPrintable {
         switch (cardToBePlayed.type) {
             case Reverse:
                 if (players == 2) { // Reverse cards are SKIP for 2 players
-                    ((UnoTurnOrder) gameState.getTurnOrder()).skip();
+                    ((UnoTurnOrder) ugs.getTurnOrder()).skip();
                 } else {
-                    ((UnoTurnOrder) gameState.getTurnOrder()).reverse();
+                    ((UnoTurnOrder) ugs.getTurnOrder()).reverse();
                 }
                 break;
             case Skip:
-                ((UnoTurnOrder) gameState.getTurnOrder()).skip();
+                ((UnoTurnOrder) ugs.getTurnOrder()).skip();
                 break;
             case Draw:
                 for (int i = 0; i < cardToBePlayed.drawN; i++) {
@@ -82,7 +82,7 @@ public class PlayCard extends DrawCard implements IPrintable {
                     }
                     playerDecks.get(nextPlayer).add(drawDeck.draw());
                 }
-                ((UnoTurnOrder) gameState.getTurnOrder()).skip();
+                ((UnoTurnOrder) ugs.getTurnOrder()).skip();
                 break;
             case Wild:
                 ugs.updateCurrentCard(cardToBePlayed, color);
@@ -101,7 +101,7 @@ public class PlayCard extends DrawCard implements IPrintable {
                     playerDecks.get(nextPlayer).add(drawDeck.draw());
                 }
                 if (cardToBePlayed.drawN > 0) {
-                    ((UnoTurnOrder) gameState.getTurnOrder()).skip();
+                    ((UnoTurnOrder) ugs.getTurnOrder()).skip();
                 }
                 break;
         }

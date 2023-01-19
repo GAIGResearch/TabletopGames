@@ -2,7 +2,7 @@ package games.sushigo;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -13,7 +13,7 @@ import utilities.Pair;
 import java.util.*;
 import static games.sushigo.cards.SGCard.SGCardType.*;
 
-public class SGForwardModel extends StandardForwardModel {
+public class SGForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -115,8 +115,8 @@ public class SGForwardModel extends StandardForwardModel {
         }
 
         // End player turn
-        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            currentState.getTurnOrder().endPlayerTurn(currentState);
+        if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
+            gs.getTurnOrder().endPlayerTurn(currentState);
         }
     }
 

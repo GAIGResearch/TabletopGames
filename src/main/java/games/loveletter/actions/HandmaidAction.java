@@ -17,7 +17,7 @@ public class HandmaidAction extends core.actions.DrawCard implements IPrintable 
     @Override
     public boolean execute(AbstractGameState gs) {
         // set the player's protection status
-        ((LoveLetterGameState) gs).setProtection(gs.getTurnOrder().getCurrentPlayer(gs), true);
+        ((LoveLetterGameState) gs).setProtection(gs.getCurrentPlayer(), true);
         return super.execute(gs);
     }
 

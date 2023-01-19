@@ -2,7 +2,7 @@ package games.virus;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.virus.actions.*;
@@ -16,7 +16,7 @@ import static core.CoreConstants.VisibilityMode;
 import static games.virus.cards.VirusCard.OrganType.Treatment;
 import static games.virus.cards.VirusCard.OrganType.Wild;
 
-public class VirusForwardModel extends StandardForwardModel {
+public class VirusForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -51,9 +51,10 @@ public class VirusForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
-        checkGameEnd((VirusGameState) gameState);
-        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING)
-            gameState.getTurnOrder().endPlayerTurn(gameState);
+        VirusGameState vgs = (VirusGameState) gameState;
+        checkGameEnd(vgs);
+        if (vgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING)
+            vgs.getTurnOrder().endPlayerTurn(gameState);
     }
 
     /**

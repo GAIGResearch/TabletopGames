@@ -2,7 +2,7 @@ package games.catan;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Area;
@@ -14,7 +14,6 @@ import games.catan.actions.*;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -22,7 +21,7 @@ import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.*;
 import static games.catan.CatanGameState.CatanGamePhase.*;
 
-public class CatanForwardModel extends StandardForwardModel {
+public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {

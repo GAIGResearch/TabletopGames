@@ -296,7 +296,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
-            int x = e.state.getTurnOrder().getRoundCounter();
+            int x = e.state.getRoundCounter();
             return new TimeStamp(x, s.getPlayerResources()[e.playerID].get(TMTypes.Resource.TR).getValue());
         }
         @Override
@@ -314,7 +314,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
-            int x = e.state.getTurnOrder().getRoundCounter();
+            int x = e.state.getRoundCounter();
             return new TimeStamp(x, s.countPointsAwards(e.playerID));
         }
         @Override
@@ -332,7 +332,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
-            int x = e.state.getTurnOrder().getRoundCounter();
+            int x = e.state.getRoundCounter();
             return new TimeStamp(x, s.countPointsMilestones(e.playerID));
         }
         @Override
@@ -350,7 +350,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
-            int x = e.state.getTurnOrder().getRoundCounter();
+            int x = e.state.getRoundCounter();
             return new TimeStamp(x, s.countPointsCards(e.playerID));
         }
         @Override
@@ -368,7 +368,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
-            int x = e.state.getTurnOrder().getRoundCounter();
+            int x = e.state.getRoundCounter();
             return new TimeStamp(x, s.countPointsBoard(e.playerID));
         }
         @Override
@@ -883,7 +883,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
-            int x = e.state.getTurnOrder().getRoundCounter();
+            int x = e.state.getRoundCounter();
             return new TimeStamp(x, ((TMGameState)e.state).getPlayerHands()[e.playerID].getSize());
         }
         @Override

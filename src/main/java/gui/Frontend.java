@@ -510,8 +510,8 @@ public class Frontend extends GUI {
             AI_debug.setTitle(String.format("Player %d, Tick %d, Round %d, Turn %d",
                     nextPlayerID,
                     gameRunning.getTick(),
-                    state.getTurnOrder().getRoundCounter(),
-                    state.getTurnOrder().getTurnCounter()));
+                    state.getRoundCounter(),
+                    state.getTurnCounter()));
             Map<AbstractAction, Map<String, Object>> decisionStats = nextPlayer.getDecisionStats();
             if (decisionStats.size() > 1) {
                 AITableModel AIDecisions = new AITableModel(nextPlayer.getDecisionStats());

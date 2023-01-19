@@ -1,6 +1,6 @@
 package games.pandemic.rules.rules;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
@@ -35,7 +35,7 @@ public class InfectCities extends RuleNode {
     }
 
     @Override
-    protected boolean run(AbstractGameState gs) {
+    protected boolean run(AbstractGameStateWithTurnOrder gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
         if (!pgs.isQuietNight()) {
             // Infecting with top cards of infection deck if it's not a quiet night

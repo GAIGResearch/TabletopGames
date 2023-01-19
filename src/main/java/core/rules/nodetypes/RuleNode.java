@@ -1,6 +1,6 @@
 package core.rules.nodetypes;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.CoreConstants;
 import core.rules.GameOverCondition;
 import core.rules.Node;
@@ -50,7 +50,7 @@ public abstract class RuleNode extends Node {
      * @param gs - game state to modify.
      * @return - true if successfully executed, false if not and game loop should be interrupted after the execution.
      */
-    protected abstract boolean run(AbstractGameState gs);
+    protected abstract boolean run(AbstractGameStateWithTurnOrder gs);
 
     /**
      * Adds a new game over condition to this node.
@@ -67,7 +67,7 @@ public abstract class RuleNode extends Node {
      * @return - the next child to execute if the rule did not request an interruption, or null otherwise (and if
      * requirements for execution are not met, or the game is over).
      */
-    public final Node execute(AbstractGameState gs) {
+    public final Node execute(AbstractGameStateWithTurnOrder gs) {
         if (requireAction() && action == null) return null;
 
         boolean interrupted = !run(gs);

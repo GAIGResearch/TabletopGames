@@ -2,7 +2,7 @@ package games.blackjack;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.*;
 
 
-public class BlackjackForwardModel extends StandardForwardModel {
+public class BlackjackForwardModel extends StandardForwardModelWithTurnOrder {
     @Override
     protected void _setup(AbstractGameState firstState) {
         BlackjackGameState bjgs = (BlackjackGameState) firstState;

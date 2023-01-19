@@ -1,7 +1,7 @@
 package games.diamant;
 
 import core.AbstractGameState;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -10,7 +10,6 @@ import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,7 @@ import java.util.Random;
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
-public class DiamantForwardModel extends StandardForwardModel {
+public class DiamantForwardModel extends StandardForwardModelWithTurnOrder {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;

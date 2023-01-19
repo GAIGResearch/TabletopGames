@@ -1,8 +1,7 @@
 package games.battlelore;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.battlelore.actions.AttackUnitsAction;
@@ -12,13 +11,11 @@ import games.battlelore.actions.SkipTurnAction;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
-import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class BattleloreForwardModel extends StandardForwardModel {
+public class BattleloreForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState initialState) {
@@ -109,7 +106,7 @@ public class BattleloreForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         BattleloreGameState state = (BattleloreGameState) gameState;
-        int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
+        int player = gameState.getCurrentPlayer();
         Unit.Faction playerFaction = player == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
         ArrayList<AbstractAction> actions = new ArrayList<>();

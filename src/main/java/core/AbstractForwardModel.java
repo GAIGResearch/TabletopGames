@@ -72,6 +72,8 @@ public abstract class AbstractForwardModel {
      */
     protected abstract AbstractForwardModel _copy();
 
+    protected abstract void endPlayerTurn(AbstractGameState state);
+
     /**
      * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
      * The last thing to be called in the game loop, after the game is finished.
@@ -101,7 +103,7 @@ public abstract class AbstractForwardModel {
     protected final void disqualifyOrRandomAction(boolean flag, AbstractGameState gameState) {
         if (flag) {
             gameState.setPlayerResult(CoreConstants.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
-            gameState.turnOrder.endPlayerTurn(gameState);
+            endPlayerTurn(gameState);
         } else {
             List<AbstractAction> possibleActions = computeAvailableActions(gameState);
             int randomAction = new Random(gameState.getGameParameters().getRandomSeed()).nextInt(possibleActions.size());

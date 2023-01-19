@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
+import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.ExplodingKittensTurnOrder;
 
 public class PlaceExplodingKitten extends DrawCard implements IPrintable {
@@ -18,7 +19,8 @@ public class PlaceExplodingKitten extends DrawCard implements IPrintable {
         boolean success = super.execute(gs);
 
         gs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
-        ((ExplodingKittensTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
+        ((ExplodingKittensTurnOrder)ekgs.getTurnOrder()).endPlayerTurnStep(gs);
         return success;
     }
 

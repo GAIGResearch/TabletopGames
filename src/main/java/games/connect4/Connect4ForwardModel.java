@@ -1,7 +1,7 @@
 package games.connect4;
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
@@ -14,7 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public class Connect4ForwardModel extends StandardForwardModel {
+public class Connect4ForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -29,7 +29,7 @@ public class Connect4ForwardModel extends StandardForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         Connect4GameState c4gs = (Connect4GameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
+        int player = c4gs.getTurnOrder().getCurrentPlayer(gameState);
 
         if (gameState.isNotTerminal())
             for (int x = 0; x < c4gs.gridBoard.getWidth(); x++) {
@@ -57,7 +57,7 @@ public class Connect4ForwardModel extends StandardForwardModel {
         if (checkGameEnd(c4gs)) {
             return;
         }
-        currentState.getTurnOrder().endPlayerTurn(currentState);
+        c4gs.getTurnOrder().endPlayerTurn(currentState);
     }
 
     /**
