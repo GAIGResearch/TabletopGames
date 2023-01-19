@@ -6,7 +6,7 @@ import evaluation.listeners.GameListener;
 import evaluation.summarisers.TAGNumericStatSummary;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
 import evaluation.summarisers.TAGStatSummary;
-import games.GameType;
+import register.GameType;
 import games.terraformingmars.stats.TMStatsVisualiser;
 import gui.TiledImage;
 import gui.plotting.BarPlot;

@@ -3,7 +3,7 @@ package games.poker;
 import core.AbstractParameters;
 import core.Game;
 import evaluation.TunableParameters;
-import games.GameType;
+import register.GameType;
 //import games.uno.UnoGameParameters;
 
 import java.util.Arrays;

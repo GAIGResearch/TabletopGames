@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.components.Component;
 import core.components.Deck;
-import games.GameType;
+import register.GameType;
 import gui.views.AreaView;
 import gui.views.CardView;
 import gui.views.ComponentView;

@@ -2,7 +2,7 @@ package games.dominion;
 
 import core.*;
 import evaluation.TunableParameters;
-import games.GameType;
+import register.GameType;
 import games.dominion.cards.*;
 
 import java.util.*;

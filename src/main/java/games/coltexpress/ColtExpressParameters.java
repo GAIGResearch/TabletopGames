@@ -3,9 +3,8 @@ package games.coltexpress;
 import core.AbstractParameters;
 import core.Game;
 import evaluation.TunableParameters;
-import games.GameType;
+import register.GameType;
 import games.coltexpress.cards.ColtExpressCard;
-import games.loveletter.cards.LoveLetterCard;
 import utilities.Group;
 
 import java.util.*;

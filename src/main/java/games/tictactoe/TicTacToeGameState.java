@@ -8,7 +8,7 @@ import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
-import games.GameType;
+import register.GameType;
 
 import java.util.ArrayList;
 import java.util.List;

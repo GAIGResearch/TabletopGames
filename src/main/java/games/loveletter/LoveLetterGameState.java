@@ -8,7 +8,7 @@ import core.interfaces.IGamePhase;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import games.GameType;
+import register.GameType;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.*;

@@ -7,7 +7,7 @@ import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
 import core.AbstractParameters;
-import games.GameType;
+import register.GameType;
 import utilities.Hash;
 
 import java.util.*;

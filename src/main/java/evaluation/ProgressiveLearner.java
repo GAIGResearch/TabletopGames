@@ -2,7 +2,6 @@ package evaluation;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.ParameterFactory;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
@@ -10,7 +9,7 @@ import evaluation.metrics.Event;
 import evaluation.listeners.GameListener;
 import evaluation.tournaments.RandomRRTournament;
 import evaluation.tournaments.RoundRobinTournament;
-import games.GameType;
+import register.GameType;
 import players.PlayerFactory;
 import players.learners.AbstractLearner;
 import evaluation.loggers.FileStatsLogger;
@@ -76,7 +75,7 @@ public class ProgressiveLearner {
         String gameParams = getArg(args, "gameParams", "");
         dataDir = getArg(args, "dir", "");
 
-        params = ParameterFactory.createFromFile(gameToPlay, gameParams);
+        params = AbstractParameters.createFromFile(gameToPlay, gameParams);
 
         phiClass = getArg(args, "statePhi", "");
         if (phiClass.equals(""))

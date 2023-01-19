@@ -7,7 +7,7 @@ import core.turnorders.ReactiveTurnOrder;
 import evaluation.metrics.Event;
 import evaluation.listeners.GameListener;
 import evaluation.summarisers.TAGNumericStatSummary;
-import games.GameType;
+import register.GameType;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
@@ -116,7 +116,7 @@ public class Game {
         // Creating game instance (null if not implemented)
         Game game;
         if (parameterConfigFile != null) {
-            AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, parameterConfigFile);
+            AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, parameterConfigFile);
             game = gameToPlay.createGameInstance(players.size(), seed, params);
         } else game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {

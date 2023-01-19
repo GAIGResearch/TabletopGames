@@ -6,7 +6,7 @@ import evaluation.ITPSearchSpace;
 import evaluation.ParameterSearch;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
-import games.GameType;
+import register.GameType;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
@@ -211,7 +211,7 @@ public class SVMEvaluator implements SolutionEvaluator {
         long seed = getArg(args, "seed", System.currentTimeMillis());
         String logfile = getArg(args, "logFile", "");
         String paramFile = getArg(args, "gameParam", "");
-        AbstractParameters gameParams = ParameterFactory.createFromFile(game, paramFile);
+        AbstractParameters gameParams = AbstractParameters.createFromFile(game, paramFile);
         int gamePerEval = getArg(args, "gamesPerEval", 10);
         int hood = getArg(args, "hood", Math.min(50, searchSpaceSize / 100));
         String trainingData = getArg(args, "trainingData", "");

@@ -13,7 +13,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import games.GameType;
+import register.GameType;
 import games.poker.components.MoneyPot;
 import utilities.Pair;
 

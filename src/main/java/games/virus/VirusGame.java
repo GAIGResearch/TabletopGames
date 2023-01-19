@@ -1,7 +1,7 @@
 package games.virus;
 
 import core.*;
-import games.GameType;
+import register.GameType;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 

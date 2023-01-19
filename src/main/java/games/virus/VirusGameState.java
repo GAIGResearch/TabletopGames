@@ -6,7 +6,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
-import games.GameType;
+import register.GameType;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
 import games.virus.components.VirusOrgan;

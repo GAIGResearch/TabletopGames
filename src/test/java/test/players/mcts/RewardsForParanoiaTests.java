@@ -3,7 +3,7 @@ package test.players.mcts;
 import core.*;
 import core.actions.*;
 import core.interfaces.IStatisticLogger;
-import games.GameType;
+import register.GameType;
 import org.junit.*;
 import players.PlayerConstants;
 import players.mcts.*;

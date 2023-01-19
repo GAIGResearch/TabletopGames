@@ -1,27 +1,17 @@
 package games.catan;
 
 import core.AbstractPlayer;
-import core.AbstractForwardModel;
 import core.Game;
-import games.GameType;
-import games.catan.gui.CatanGUI;
-import gui.AbstractGUIManager;
-import gui.GUI;
-import gui.GamePanel;
-import players.PlayerConstants;
+import register.GameType;
 import players.human.ActionController;
-import players.human.HumanConsolePlayer;
-import players.human.HumanGUIPlayer;
 import players.mcts.MCTSEnums;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
-import players.simple.CatanRuleBasedPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import evaluation.listeners.GameListener;
 import evaluation.TunableParameters;
 import evaluation.metrics.Event;
-import games.GameType;
+import register.GameType;
 import gui.models.AITableModel;
 import players.PlayerParameters;
 import players.PlayerType;

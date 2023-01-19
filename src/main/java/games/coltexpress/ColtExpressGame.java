@@ -1,7 +1,7 @@
 package games.coltexpress;
 
 import core.*;
-import games.GameType;
+import register.GameType;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.simple.RandomPlayer;

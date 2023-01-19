@@ -8,7 +8,7 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import games.GameType;
+import register.GameType;
 
 import java.util.ArrayList;
 import java.util.*;

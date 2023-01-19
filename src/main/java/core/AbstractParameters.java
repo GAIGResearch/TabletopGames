@@ -1,8 +1,12 @@
 package core;
 
 import core.interfaces.ITunableParameters;
+import evaluation.TunableParameters;
+import register.GameType;
 
 import java.util.*;
+
+import static register.ParameterFactory.getDefaultParams;
 
 public abstract class AbstractParameters {
 
@@ -159,5 +163,17 @@ public abstract class AbstractParameters {
     @Override
     public int hashCode() {
         return Objects.hash(thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS);
+    }
+
+    static public AbstractParameters createFromFile(GameType game, String fileName) {
+        AbstractParameters params = getDefaultParams(game, System.currentTimeMillis());
+        if (fileName.isEmpty())
+            return params;
+        if (params instanceof TunableParameters) {
+            TunableParameters.loadFromJSONFile((TunableParameters) params, fileName);
+            return params;
+        } else {
+            throw new AssertionError("JSON parameter initialisation not supported for " + game);
+        }
     }
 }

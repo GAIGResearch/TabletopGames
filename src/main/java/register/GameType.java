@@ -1,39 +1,52 @@
-package games;
+package register;
 
 import core.*;
 import games.battlelore.BattleloreForwardModel;
+import games.battlelore.BattleloreGameParameters;
 import games.battlelore.BattleloreGameState;
 import games.battlelore.gui.BattleloreGUI;
 import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
+import games.blackjack.BlackjackParameters;
 import games.blackjack.gui.BlackjackGUIManager;
 import games.cantstop.CantStopForwardModel;
 import games.cantstop.CantStopGameState;
+import games.cantstop.CantStopParameters;
 import games.cantstop.gui.CantStopGUIManager;
 import games.catan.CatanForwardModel;
 import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 import games.catan.gui.CatanGUI;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGameState;
+import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.connect4.Connect4ForwardModel;
+import games.connect4.Connect4GameParameters;
 import games.connect4.Connect4GameState;
 import games.connect4.gui.Connect4GUIManager;
 import games.diamant.DiamantForwardModel;
 import games.diamant.DiamantGameState;
+import games.diamant.DiamantParameters;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.DBForwardModel;
 import games.dotsboxes.DBGUIManager;
 import games.dotsboxes.DBGameState;
+import games.dotsboxes.DBParameters;
 import games.explodingkittens.ExplodingKittensForwardModel;
 import games.explodingkittens.ExplodingKittensGameState;
+import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.PandemicForwardModel;
 import games.pandemic.PandemicGameState;
+import games.pandemic.PandemicParameters;
 import games.pandemic.gui.PandemicGUIManager;
+import games.stratego.StrategoParams;
+import games.sushigo.SGParameters;
 import games.terraformingmars.TMForwardModel;
+import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
@@ -46,25 +59,31 @@ import games.sushigo.SGForwardModel;
 import games.sushigo.SGGameState;
 import games.sushigo.gui.SGGUIManager;
 import games.tictactoe.TicTacToeForwardModel;
+import games.tictactoe.TicTacToeGameParameters;
 import games.tictactoe.TicTacToeGameState;
 import games.tictactoe.gui.*;
 import games.uno.UnoForwardModel;
+import games.uno.UnoGameParameters;
 import games.uno.UnoGameState;
 import games.uno.gui.*;
 import games.virus.VirusForwardModel;
+import games.virus.VirusGameParameters;
 import games.virus.VirusGameState;
 import games.dicemonastery.*;
 import games.dominion.*;
 import gui.*;
+import org.apache.commons.lang3.reflect.ConstructorUtils;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static core.CoreConstants.*;
-import static games.GameType.Category.Number;
-import static games.GameType.Category.*;
-import static games.GameType.Mechanic.*;
+import static register.GameType.Category.Number;
+import static register.GameType.Category.*;
+import static register.GameType.Mechanic.*;
 
 /**
  * Encapsulates all games available in the framework, with minimum and maximum number of players as per game rules.
@@ -75,299 +94,98 @@ public enum GameType {
     /**
      * Each game in the framework corresponds to a enum value here, giving minimum players, maximum players,
      * a list of categories the game belongs to, and a list of mechanics the game uses.
-     * Add here all games, planned or implemented.
+     * Add here all games implemented.
      */
     Pandemic(2, 4,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(Medical);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(ActionPoints);
-                add(Cooperative);
-                add(HandManagement);
-                add(PointToPointMovement);
-                add(SetCollection);
-                add(Trading);
-                add(VariablePlayerPowers);
-            }}),
+            Arrays.asList(Strategy, Medical),
+            Arrays.asList(ActionPoints, Cooperative, HandManagement, PointToPointMovement, SetCollection, Trading, VariablePlayerPowers),
+            PandemicGameState.class, PandemicForwardModel.class, PandemicParameters.class, PandemicGUIManager.class),
     TicTacToe(2, 2,
-            new ArrayList<Category>() {{
-                add(Simple);
-                add(Abstract);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(PatternBuilding);
-            }}),
+            Arrays.asList(Simple, Abstract),
+            Collections.singletonList(PatternBuilding),
+            TicTacToeGameState.class, TicTacToeForwardModel.class, TicTacToeGameParameters.class, TicTacToeGUIManager.class),
     Connect4(2, 2,
-            new ArrayList<Category>() {{
-                add(Simple);
-                add(Abstract);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(PatternBuilding);
-            }}),
+            Arrays.asList(Simple, Abstract),
+            Collections.singletonList(PatternBuilding),
+            Connect4GameState.class, Connect4ForwardModel.class, Connect4GameParameters.class, Connect4GUIManager.class),
     ExplodingKittens(2, 5,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(Animals);
-                add(Cards);
-                add(ComicBook);
-                add(Humour);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(HandManagement);
-                add(HotPotato);
-                add(PlayerElimination);
-                add(PushYourLuck);
-                add(SetCollection);
-                add(TakeThat);
-            }}),
+            Arrays.asList(Strategy, Animals, Cards, ComicBook, Humour),
+            Arrays.asList(HandManagement, HotPotato, PlayerElimination, PushYourLuck, SetCollection, TakeThat),
+            ExplodingKittensGameState.class, ExplodingKittensForwardModel.class, ExplodingKittensParameters.class, ExplodingKittensGUIManager.class),
     LoveLetter(2, 4,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(Deduction);
-                add(Renaissance);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(HandManagement);
-                add(PlayerElimination);
-            }}),
+            Arrays.asList(Cards, Deduction, Renaissance),
+            Arrays.asList(HandManagement, PlayerElimination),
+            LoveLetterGameState.class, LoveLetterForwardModel.class, LoveLetterParameters.class, LoveLetterGUIManager.class),
     Uno(2, 10,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(ComicBook);
-                add(Number);
-                add(MoviesTVRadio);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(HandManagement);
-                add(LoseATurn);
-                add(TakeThat);
-            }}),
+            Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio),
+            Arrays.asList(HandManagement, LoseATurn, TakeThat),
+            UnoGameState.class, UnoForwardModel.class, UnoGameParameters.class, UnoGUIManager.class),
     Virus(2, 6,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(Medical);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(CardDrafting);
-                add(SetCollection);
-                add(TakeThat);
-            }}),
-    ColtExpress(2, 6,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(AmericanWest);
-                add(Fighting);
-                add(Trains);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(ActionQueue);
-                add(HandManagement);
-                add(Memory);
-                add(ProgrammedEvent);
-                add(SimultaneousActionSelection);
-                add(TakeThat);
-                add(VariablePlayerPowers);
-            }}),
+            Arrays.asList(Cards, Medical),
+            Arrays.asList(CardDrafting, SetCollection, TakeThat),
+            VirusGameState.class, VirusForwardModel.class, VirusGameParameters.class, null),
+    ColtExpress(2,
+            6,
+            Arrays.asList(Strategy, AmericanWest, Fighting, Trains),
+            Arrays.asList(ActionQueue, HandManagement, Memory, ProgrammedEvent, SimultaneousActionSelection, TakeThat, VariablePlayerPowers),
+            ColtExpressGameState.class, ColtExpressForwardModel.class, ColtExpressParameters.class, ColtExpressGUIManager.class),
     DotsAndBoxes(2, 6,
-            new ArrayList<Category>() {{
-                add(Simple);
-                add(Abstract);
-                add(TerritoryBuilding);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(Enclosure);
-            }}),
+            Arrays.asList(Simple, Abstract, TerritoryBuilding),
+            Collections.singletonList(Enclosure),
+            DBGameState.class, DBForwardModel.class, DBParameters.class, DBGUIManager.class),
     Poker(2, 14,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(ComicBook);
-                add(Number);
-                add(MoviesTVRadio);
-                add(Bluffing);
-            }},
-
-            new ArrayList<Mechanic>() {{
-                add(HandManagement);
-                add(LoseATurn);
-                add(TakeThat);
-            }}),
+            Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio, Bluffing),
+            Arrays.asList(HandManagement, LoseATurn, TakeThat),
+            PokerGameState.class, PokerForwardModel.class, PokerGameParameters.class, PokerGUIManager.class),
     Blackjack(2, 7,
-            new ArrayList<games.GameType.Category>() {{
-                add(Cards);
-                add(ComicBook);
-                add(Number);
-                add(MoviesTVRadio);
-            }},
-            new ArrayList<games.GameType.Mechanic>() {{
-                add(HandManagement);
-                add(LoseATurn);
-                add(TakeThat);
-            }}),
+            Arrays.asList(Cards, ComicBook, Number, MoviesTVRadio),
+            Arrays.asList(HandManagement, LoseATurn, TakeThat),
+            BlackjackGameState.class, BlackjackForwardModel.class, BlackjackParameters.class, BlackjackGUIManager.class),
     Diamant(2, 6,
-            new ArrayList<Category>() {{
-                add(Adventure);
-                add(Bluffing);
-                add(Exploration);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(MoveThroughDeck);
-                add(PushYourLuck);
-                add(SimultaneousActionSelection);
-            }}),
+            Arrays.asList(Adventure, Bluffing, Exploration),
+            Arrays.asList(MoveThroughDeck, PushYourLuck, SimultaneousActionSelection),
+            DiamantGameState.class, DiamantForwardModel.class, DiamantParameters.class, null),
     DiceMonastery(2, 4,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(Medieval);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(SetCollection);
-                add(WorkerPlacement);
-                add(EngineBuilding);
-            }}),
+            Arrays.asList(Strategy, Medieval),
+            Arrays.asList(SetCollection, WorkerPlacement, EngineBuilding),
+            DiceMonasteryGameState.class, DiceMonasteryForwardModel.class, DiceMonasteryParams.class, DiceMonasteryGUI.class),
     Dominion(2, 4,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(Strategy);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(DeckManagement);
-            }}),
+            Arrays.asList(Cards, Strategy),
+            Collections.singletonList(DeckManagement),
+            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
     DominionSizeDistortion(2, 4,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(Strategy);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(DeckManagement);
-            }}),
+            Arrays.asList(Cards, Strategy),
+            Collections.singletonList(DeckManagement),
+            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
     DominionImprovements(2, 4,
-            new ArrayList<Category>() {{
-                add(Cards);
-                add(Strategy);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(DeckManagement);
-            }}),
+            Arrays.asList(Cards, Strategy),
+            Collections.singletonList(DeckManagement),
+            DominionGameState.class, DominionForwardModel.class, DominionParameters.class, DominionGUIManager.class),
     Battlelore(2, 2,
-            new ArrayList<Category>() {{
-                add(Fantasy);
-                add(Miniatures);
-                add(Wargame);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(Campaign);
-                add(BattleCardDriven);
-                add(CommandCards);
-                add(DiceRolling);
-                add(GridMovement);
-                add(ModularBoard);
-                add(VariablePlayerPowers);
-            }}),
+            Arrays.asList(Fantasy, Miniatures, Wargame),
+            Arrays.asList(Campaign, BattleCardDriven, CommandCards, DiceRolling, GridMovement, ModularBoard, VariablePlayerPowers),
+            BattleloreGameState.class, BattleloreForwardModel.class, BattleloreGameParameters.class, BattleloreGUI.class),
     SushiGo(2, 5,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(Cards);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(SetCollection);
-                add(PushYourLuck);
-                add(SimultaneousActionSelection);
-            }}),
+            Arrays.asList(Strategy, Cards),
+            Arrays.asList(SetCollection, PushYourLuck, SimultaneousActionSelection),
+            SGGameState.class, SGForwardModel.class, SGParameters.class, SGGUIManager.class),
     Catan(3, 4,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(Cards);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(Memory);
-                add(GridMovement);
-                add(ModularBoard);
-            }}),
+            Arrays.asList(Strategy, Cards),
+            Arrays.asList(Memory, GridMovement, ModularBoard),
+            CatanGameState.class, CatanForwardModel.class, CatanParameters.class, CatanGUI.class),
     TerraformingMars (1, 5,
-            new ArrayList<Category>() {{ add(Economic); add(Environmental); add(Manufacturing); add(TerritoryBuilding);
-                add(Cards); add(Strategy); add(Exploration); }},
-            new ArrayList<Mechanic>() {{ add(Drafting); add(EndGameBonus); add(HandManagement); add(HexagonGrid);
-                add(Income); add(SetCollection); add(TakeThat); add(TilePlacement); add(ProgressiveTurnOrder);
-                add(VariablePlayerPowers); add(EngineBuilding); add(TableauBuilding);}}),
+            Arrays.asList(Economic, Environmental, Manufacturing, TerritoryBuilding, Cards, Strategy, Exploration),
+            Arrays.asList(Drafting, EndGameBonus, HandManagement, HexagonGrid, Income, SetCollection, TakeThat, TilePlacement, ProgressiveTurnOrder, VariablePlayerPowers, EngineBuilding, TableauBuilding),
+            TMGameState.class, TMForwardModel.class, TMGameParameters.class, TMGUI.class),
     Stratego(2, 2,
-            new ArrayList<Category>() {{
-                add(Strategy);
-                add(Bluffing);
-                add(Deduction);
-                add(Abstract);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(Memory);
-                add(GridMovement);
-            }}),
+            Arrays.asList(Strategy, Bluffing, Deduction, Abstract),
+            Arrays.asList(Memory, GridMovement),
+            StrategoGameState.class, StrategoForwardModel.class, StrategoParams.class, StrategoGUIManager.class),
     CantStop(2, 4,
-            new ArrayList<Category>() {{
-                add(Dice);
-                add(Abstract);
-            }},
-            new ArrayList<Mechanic>() {{
-                add(PushYourLuck);
-            }}
+            Arrays.asList(Dice, Abstract),
+            Collections.singletonList(PushYourLuck),
+            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class
     );
-
-    /**
-     * Converts a given string to the enum type corresponding to the game.
-     * Add here all games, planned or implemented.
-     *
-     * @param game - string of a game type
-     * @return - GameType corresponding to String
-     */
-    public GameType stringToGameType(String game) {
-        switch (game.toLowerCase()) {
-            case "pandemic":
-                return Pandemic;
-            case "tictactoe":
-                return TicTacToe;
-            case "connect4":
-                return Connect4;
-            case "explodingkittens":
-                return ExplodingKittens;
-            case "loveletter":
-                return LoveLetter;
-            case "uno":
-                return Uno;
-            case "blackjack":
-                return Blackjack;
-            case "virus":
-                return Virus;
-            case "coltexpress":
-                return ColtExpress;
-            case "dotsandboxes":
-                return DotsAndBoxes;
-            case "diamant":
-                return Diamant;
-            case "poker":
-                return Poker;
-            case "dominion":
-                return Dominion;
-            case "dominionsizedistortion":
-                return DominionSizeDistortion;
-            case "dominionimprovements":
-                return DominionImprovements;
-            case "catan":
-                return Catan;
-            case "battlelore":
-                return Battlelore;
-            case "dicemonastery":
-                return DiceMonastery;
-            case "sushigo":
-                return SushiGo;
-            case "stratego":
-                return Stratego;
-            case "cantstop":
-                return CantStop;
-        }
-        System.out.println("Game type not found, returning null. ");
-        return null;
-    }
 
     /**
      * Creates an instance of the given game type, with a specific number of players and game seed.
@@ -376,110 +194,122 @@ public enum GameType {
      * @param nPlayers - number of players taking part in the game, used for initialisation.
      * @param seed     - seed for this game.
      * @param params   - Parameters to use for the game. If not specified then we use the default.
-     * @return - instance of Game object; null if game not implemented.
+     * @return - instance of Game object
      */
     public Game createGameInstance(int nPlayers, long seed, AbstractParameters params) {
         if (nPlayers < minPlayers || nPlayers > maxPlayers) {
             throw new IllegalArgumentException("Unsupported number of players: " + nPlayers
                     + ". Should be in range [" + minPlayers + "," + maxPlayers + "].");
         }
+        try {
+            if (params == null) {
+                Constructor<?> constructorParams = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, Long.class);
+                    params = (AbstractParameters) constructorParams.newInstance(seed);
 
-        if (params == null) {
-            params = ParameterFactory.getDefaultParams(this, seed);
-        } else {
-            params.setRandomSeed(seed);
-        }
-        AbstractForwardModel forwardModel;
-        AbstractGameState gameState;
+                    //TODO: some games have a datapath extra argument
+//                return new BattleloreGameParameters("data/battlelore/", seed);
+//                return new PandemicParameters("data/pandemic/", seed);
+    //            params = ParameterFactory.getDefaultParams(this, seed);
+            } else {
+                params.setRandomSeed(seed);
+            }
 
-        switch (this) {
-            case Pandemic:
-                forwardModel = new PandemicForwardModel(params, nPlayers);
-                gameState = new PandemicGameState(params, nPlayers);
-                break;
-            case TicTacToe:
-                forwardModel = new TicTacToeForwardModel();
-                gameState = new TicTacToeGameState(params, nPlayers);
-                break;
-            case Connect4:
-                forwardModel = new Connect4ForwardModel();
-                gameState = new Connect4GameState(params, nPlayers);
-                break;
-            case ExplodingKittens:
-                forwardModel = new ExplodingKittensForwardModel();
-                gameState = new ExplodingKittensGameState(params, nPlayers);
-                break;
-            case LoveLetter:
-                forwardModel = new LoveLetterForwardModel();
-                gameState = new LoveLetterGameState(params, nPlayers);
-                break;
-            case Uno:
-                forwardModel = new UnoForwardModel();
-                gameState = new UnoGameState(params, nPlayers);
-                break;
-            case Blackjack:
-                forwardModel = new BlackjackForwardModel();
-                gameState = new BlackjackGameState(params, nPlayers);
-                break;
-            case Poker:
-                forwardModel = new PokerForwardModel();
-                gameState = new PokerGameState(params, nPlayers);
-                break;
-            case Virus:
-                forwardModel = new VirusForwardModel();
-                gameState = new VirusGameState(params, nPlayers);
-                break;
-            case ColtExpress:
-                forwardModel = new ColtExpressForwardModel();
-                gameState = new ColtExpressGameState(params, nPlayers);
-                break;
-            case DotsAndBoxes:
-                forwardModel = new DBForwardModel();
-                gameState = new DBGameState(params, nPlayers);
-                break;
-            case Diamant:
-                forwardModel = new DiamantForwardModel();
-                gameState = new DiamantGameState(params, nPlayers);
-                break;
-            case DiceMonastery:
-                forwardModel = new DiceMonasteryForwardModel();
-                gameState = new DiceMonasteryGameState(params, nPlayers);
-                break;
-            case Dominion:
-            case DominionImprovements:
-            case DominionSizeDistortion:
-                forwardModel = new DominionForwardModel();
-                gameState = new DominionGameState(params, nPlayers);
-                break;
-            case TerraformingMars:
-                forwardModel = new TMForwardModel();
-                gameState = new TMGameState(params, nPlayers);
-                break;
-            case Catan:
-                forwardModel = new CatanForwardModel();
-                gameState = new CatanGameState(params, nPlayers);
-                break;
-            case Battlelore:
-                forwardModel = new BattleloreForwardModel();
-                gameState = new BattleloreGameState(params, nPlayers);
-                break;
-            case SushiGo:
-                forwardModel = new SGForwardModel();
-                gameState = new SGGameState(params, nPlayers);
-                break;
-            case Stratego:
-                forwardModel = new StrategoForwardModel();
-                gameState = new StrategoGameState(params, nPlayers);
-                break;
-            case CantStop:
-                forwardModel = new CantStopForwardModel();
-                gameState = new CantStopGameState(params, nPlayers);
-                break;
-            default:
-                throw new AssertionError("Game not yet supported : " + this);
+            Constructor<?> constructorFM = ConstructorUtils.getMatchingAccessibleConstructor(forwardModelClass);
+            AbstractForwardModel forwardModel = (AbstractForwardModel) constructorFM.newInstance();
+            Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(gameStateClass, AbstractParameters.class, Integer.class);
+            AbstractGameState gameState = (AbstractGameState) constructorGS.newInstance(params, nPlayers);
+
+            return new Game(this, forwardModel, gameState);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
         }
 
-        return new Game(this, forwardModel, gameState);
+//        switch (this) {
+//            case Pandemic:
+//                forwardModel = new PandemicForwardModel(params, nPlayers);
+//                gameState = new PandemicGameState(params, nPlayers);
+//                break;
+//            case TicTacToe:
+//                forwardModel = new TicTacToeForwardModel();
+//                gameState = new TicTacToeGameState(params, nPlayers);
+//                break;
+//            case Connect4:
+//                forwardModel = new Connect4ForwardModel();
+//                gameState = new Connect4GameState(params, nPlayers);
+//                break;
+//            case ExplodingKittens:
+//                forwardModel = new ExplodingKittensForwardModel();
+//                gameState = new ExplodingKittensGameState(params, nPlayers);
+//                break;
+//            case LoveLetter:
+//                forwardModel = new LoveLetterForwardModel();
+//                gameState = new LoveLetterGameState(params, nPlayers);
+//                break;
+//            case Uno:
+//                forwardModel = new UnoForwardModel();
+//                gameState = new UnoGameState(params, nPlayers);
+//                break;
+//            case Blackjack:
+//                forwardModel = new BlackjackForwardModel();
+//                gameState = new BlackjackGameState(params, nPlayers);
+//                break;
+//            case Poker:
+//                forwardModel = new PokerForwardModel();
+//                gameState = new PokerGameState(params, nPlayers);
+//                break;
+//            case Virus:
+//                forwardModel = new VirusForwardModel();
+//                gameState = new VirusGameState(params, nPlayers);
+//                break;
+//            case ColtExpress:
+//                forwardModel = new ColtExpressForwardModel();
+//                gameState = new ColtExpressGameState(params, nPlayers);
+//                break;
+//            case DotsAndBoxes:
+//                forwardModel = new DBForwardModel();
+//                gameState = new DBGameState(params, nPlayers);
+//                break;
+//            case Diamant:
+//                forwardModel = new DiamantForwardModel();
+//                gameState = new DiamantGameState(params, nPlayers);
+//                break;
+//            case DiceMonastery:
+//                forwardModel = new DiceMonasteryForwardModel();
+//                gameState = new DiceMonasteryGameState(params, nPlayers);
+//                break;
+//            case Dominion:
+//            case DominionImprovements:
+//            case DominionSizeDistortion:
+//                forwardModel = new DominionForwardModel();
+//                gameState = new DominionGameState(params, nPlayers);
+//                break;
+//            case TerraformingMars:
+//                forwardModel = new TMForwardModel();
+//                gameState = new TMGameState(params, nPlayers);
+//                break;
+//            case Catan:
+//                forwardModel = new CatanForwardModel();
+//                gameState = new CatanGameState(params, nPlayers);
+//                break;
+//            case Battlelore:
+//                forwardModel = new BattleloreForwardModel();
+//                gameState = new BattleloreGameState(params, nPlayers);
+//                break;
+//            case SushiGo:
+//                forwardModel = new SGForwardModel();
+//                gameState = new SGGameState(params, nPlayers);
+//                break;
+//            case Stratego:
+//                forwardModel = new StrategoForwardModel();
+//                gameState = new StrategoGameState(params, nPlayers);
+//                break;
+//            case CantStop:
+//                forwardModel = new CantStopForwardModel();
+//                gameState = new CantStopGameState(params, nPlayers);
+//                break;
+//            default:
+//                throw new AssertionError("Game not yet supported : " + this);
+//        }
     }
 
     /**
@@ -576,8 +406,8 @@ public enum GameType {
     private final int minPlayers, maxPlayers;
 
     // boardgamegeek.com topic classification of games
-    private final ArrayList<Category> categories;
-    private final ArrayList<Mechanic> mechanics;
+    private final List<Category> categories;
+    private final List<Mechanic> mechanics;
 
     public enum Category {
         Strategy,
@@ -714,12 +544,22 @@ public enum GameType {
             return games;
         }
     }
+    Class<? extends AbstractGameState> gameStateClass;
+    Class<? extends AbstractForwardModel> forwardModelClass;
+    Class<? extends AbstractParameters> parameterClass;
+    Class<? extends AbstractGUIManager> guiManagerClass;
 
-    GameType(int minPlayers, int maxPlayers, ArrayList<Category> categories, ArrayList<Mechanic> mechanics) {
+    GameType(int minPlayers, int maxPlayers, List<Category> categories, List<Mechanic> mechanics,
+             Class<? extends AbstractGameState> gameStateClass, Class<? extends AbstractForwardModel> forwardModelClass,
+             Class<? extends AbstractParameters> parameterClass, Class<? extends AbstractGUIManager> guiManagerClass) {
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
         this.categories = categories;
         this.mechanics = mechanics;
+        this.gameStateClass = gameStateClass;
+        this.forwardModelClass = forwardModelClass;
+        this.parameterClass = parameterClass;
+        this.guiManagerClass = guiManagerClass;
     }
 
     // Getters
@@ -731,11 +571,11 @@ public enum GameType {
         return maxPlayers;
     }
 
-    public ArrayList<Category> getCategories() {
+    public List<Category> getCategories() {
         return categories;
     }
 
-    public ArrayList<Mechanic> getMechanics() {
+    public List<Mechanic> getMechanics() {
         return mechanics;
     }
 

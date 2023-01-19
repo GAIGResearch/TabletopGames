@@ -8,7 +8,7 @@ import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
-import games.GameType;
+import register.GameType;
 import games.catan.actions.OfferPlayerTrade;
 import games.catan.components.Edge;
 import games.catan.components.Graph;

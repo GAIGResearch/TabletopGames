@@ -1,7 +1,7 @@
 package games.cantstop;
 
 import core.*;
-import games.GameType;
+import register.GameType;
 import players.human.*;
 import players.simple.*;
 

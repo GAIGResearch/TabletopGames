@@ -6,7 +6,7 @@ import core.Game;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import games.GameType;
+import register.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;

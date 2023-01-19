@@ -5,7 +5,7 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
-import games.GameType;
+import register.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
 

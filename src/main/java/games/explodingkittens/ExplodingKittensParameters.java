@@ -3,9 +3,8 @@ package games.explodingkittens;
 import core.AbstractParameters;
 import core.Game;
 import evaluation.TunableParameters;
-import games.GameType;
+import register.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import games.loveletter.cards.LoveLetterCard;
 
 import java.util.Arrays;
 import java.util.HashMap;

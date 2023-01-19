@@ -8,7 +8,7 @@ import core.interfaces.IComponentContainer;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
-import games.GameType;
+import register.GameType;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.*;

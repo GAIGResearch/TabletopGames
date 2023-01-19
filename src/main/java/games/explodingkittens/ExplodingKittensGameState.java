@@ -9,7 +9,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import games.GameType;
+import register.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
 import java.util.*;

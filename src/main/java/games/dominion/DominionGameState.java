@@ -10,7 +10,7 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import core.turnorders.StandardTurnOrder;
-import games.GameType;
+import register.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.actions.IDelayedAction;
 import games.dominion.cards.CardType;

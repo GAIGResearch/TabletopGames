@@ -8,7 +8,7 @@ import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.turnorders.StandardTurnOrder;
-import games.GameType;
+import register.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
 

@@ -6,7 +6,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
-import games.GameType;
+import register.GameType;
 import games.uno.cards.*;
 
 import java.util.*;

@@ -4,7 +4,7 @@ import core.*;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
-import games.GameType;
+import register.GameType;
 import evaluation.loggers.SummaryLogger;
 
 import core.AbstractPlayer;

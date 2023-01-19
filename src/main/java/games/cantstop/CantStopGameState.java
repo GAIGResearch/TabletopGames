@@ -6,7 +6,7 @@ import core.components.Component;
 import core.components.Dice;
 import core.interfaces.IPrintable;
 import core.turnorders.StandardTurnOrder;
-import games.GameType;
+import register.GameType;
 
 import java.util.*;
 

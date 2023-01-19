@@ -3,7 +3,7 @@ package games.diamant;
 import core.AbstractParameters;
 import core.Game;
 import evaluation.TunableParameters;
-import games.GameType;
+import register.GameType;
 
 import java.util.Arrays;
 

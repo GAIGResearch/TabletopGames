@@ -6,7 +6,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
-import games.GameType;
+import register.GameType;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
 

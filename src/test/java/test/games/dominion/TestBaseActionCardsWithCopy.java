@@ -4,7 +4,7 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import games.GameType;
+import register.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;

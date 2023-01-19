@@ -2,14 +2,14 @@ package evaluation;
 
 import core.AbstractPlayer;
 import core.Game;
-import games.GameType;
+import register.GameType;
 import players.simple.RandomPlayer;
 import players.PlayerType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static games.GameType.*;
+import static register.GameType.*;
 import static players.PlayerType.*;
 
 public class AIReport {
