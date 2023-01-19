@@ -12,10 +12,7 @@ import core.Game;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;

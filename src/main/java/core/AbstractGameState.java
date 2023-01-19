@@ -44,9 +44,6 @@ public abstract class AbstractGameState {
     // Timers for all players
     protected ElapsedCpuChessTimer[] playerTimer;
 
-    // Game being played
-    protected final GameType gameType;
-
     // A record of all actions taken to reach this game state
     private List<AbstractAction> history = new ArrayList<>();
     private List<String> historyText = new ArrayList<>();
@@ -59,10 +56,6 @@ public abstract class AbstractGameState {
     // Stack for extended actions
     protected Stack<IExtendedSequence> actionsInProgress = new Stack<>();
     CoreParameters coreGameParameters;
-    private Area allComponents;
-    // A record of all actions taken to reach this game state
-    private List<AbstractAction> history = new ArrayList<>();
-    private List<String> historyText = new ArrayList<>();
     private int gameID;
 
     /**
@@ -169,7 +162,7 @@ public abstract class AbstractGameState {
     void setGameID(int id) {
         gameID = id;
     } // package level deliberately
-
+    void advanceGameTick() {tick++;}
 
     /* Limited access final methods */
     public final boolean isNotTerminal() {
