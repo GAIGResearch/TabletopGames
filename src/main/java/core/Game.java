@@ -572,8 +572,6 @@ public class Game {
             nextTime += (System.nanoTime() - s);
         }
 
-        gameState.advanceGameTick();
-
         lastPlayer = activePlayer;
 
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action

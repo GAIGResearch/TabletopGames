@@ -17,6 +17,7 @@ public abstract class AbstractParameters {
     long incrementActionS = 0, incrementTurnS = 0, incrementRoundS = 0;
     // Increment in seconds, added after a custom milestone (to be added manually in game implementation). Default 0.
     long incrementMilestoneS = 0;
+    int maxRounds = -1;
 
     public AbstractParameters(long seed) {
         randomSeed = seed;
@@ -154,13 +155,14 @@ public abstract class AbstractParameters {
                 incrementActionS == that.incrementActionS &&
                 incrementTurnS == that.incrementTurnS &&
                 incrementRoundS == that.incrementRoundS &&
+                maxRounds == that.maxRounds &&
                 incrementMilestoneS == that.incrementMilestoneS;
-        // equals and hashcode deliberatley excludes the random seed
+        // equals and hashcode deliberately excludes the random seed
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS);
+        return Objects.hash(thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS, maxRounds);
     }
 
     static public AbstractParameters createFromFile(GameType game, String fileName) {

@@ -144,6 +144,7 @@ public abstract class AbstractForwardModel {
             }
             illegalActionPlayed(currentState, action);
         }
+        currentState.advanceGameTick();
     }
 
     /**
