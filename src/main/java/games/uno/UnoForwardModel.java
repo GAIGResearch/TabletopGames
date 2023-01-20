@@ -345,18 +345,5 @@ public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
 
         return actions;
     }
-
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println("Game Results:");
-            for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
-                if (gameState.getPlayerResults()[playerID] == CoreConstants.GameResult.WIN) {
-                    System.out.println("The winner is the player : " + playerID);
-                    break;
-                }
-            }
-        }
-    }
 }
 

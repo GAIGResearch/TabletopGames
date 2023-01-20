@@ -103,7 +103,7 @@ public class SGForwardModel extends StandardForwardModelWithTurnOrder {
                         type.onGameEnd(gs);
                     }
                     // Decide winner
-                    gs.endGame();
+                    endGame(gs);
                     return;
                 }
                 return;

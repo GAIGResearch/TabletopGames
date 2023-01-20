@@ -297,7 +297,7 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
                         gs.setGameStatus(CoreConstants.GameResult.GAME_END);
                         gs.setPlayerResult(won, 0);
                     } else {
-                        gs.endGame();
+                        endGame(gs);
                     }
 
                     return;

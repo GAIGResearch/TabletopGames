@@ -58,6 +58,9 @@ public abstract class AbstractParameters {
         this.thinkingTimeMins = thinkingTimeMins;
     }
 
+    public void setMaxRounds(int max) {
+        maxRounds = max;
+    }
 
     /**
      * Retrieve total thinking time for the game, in minutes
@@ -102,6 +105,15 @@ public abstract class AbstractParameters {
      */
     public long getIncrementMilestoneS() {
         return incrementMilestoneS;
+    }
+
+    /**
+     * Retrieve the  maximum number of rounds before a game is terminated
+     *
+     * @return - milestone increment
+     */
+    public int getMaxRounds() {
+        return maxRounds;
     }
 
     /**

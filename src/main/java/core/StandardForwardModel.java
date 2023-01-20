@@ -4,6 +4,8 @@ import core.actions.AbstractAction;
 import evaluation.metrics.Event;
 
 import static core.CoreConstants.GameResult.GAME_ONGOING;
+import static evaluation.metrics.Event.GameEvent.ROUND_OVER;
+import static evaluation.metrics.Event.GameEvent.TURN_OVER;
 
 public abstract class StandardForwardModel extends AbstractForwardModel {
 
@@ -18,9 +20,13 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         _afterAction(currentState, action);
     }
 
-    protected abstract void _beforeAction(AbstractGameState currentState, AbstractAction actionTaken);
+    protected void _beforeAction(AbstractGameState currentState, AbstractAction actionTaken) {
+        // override if needed
+    }
 
-    protected abstract void _afterAction(AbstractGameState currentState, AbstractAction actionTaken);
+    protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken){
+        // override if needed
+    }
 
     /**
      * The default assumption is that after a player has in finished their turn, play will proceed
@@ -46,7 +52,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         if (gs.getGameStatus() != GAME_ONGOING) return;
 
         gs.getPlayerTimer()[gs.getCurrentPlayer()].incrementTurn();
-        gs.listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gs)));
+        gs.listeners.forEach(l -> l.onEvent(Event.createEvent(TURN_OVER, gs)));
         gs.turnCounter++;
         gs.turnOwner = nextPlayer;
     }
@@ -67,14 +73,14 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
 
         gs.getPlayerTimer()[gs.getCurrentPlayer()].incrementRound();
 
-        gs.listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ROUND_OVER, gs)));
+        gs.listeners.forEach(l -> l.onEvent(Event.createEvent(ROUND_OVER, gs)));
         if (gs.getCoreGameParameters().recordEventHistory) {
-            gs.recordHistory(Event.GameEvent.ROUND_OVER.name());
+            gs.recordHistory(ROUND_OVER.name());
         }
 
         gs.roundCounter++;
         if (gs.getGameParameters().maxRounds != -1 && gs.roundCounter == gs.getGameParameters().maxRounds) {
-            gs.endGame();
+            endGame(gs);
         } else {
             gs.turnCounter = 0;
             gs.turnOwner = firstPlayerOfNextRound;
@@ -82,9 +88,12 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         }
     }
 
-
+    /**
+     * A Forward Model should be stateless - and hence have no need to implement a _copy() method
+     * @return
+     */
     @Override
-    public StandardForwardModel _copy() {
+    public final StandardForwardModel _copy() {
         return this;
     }
 }

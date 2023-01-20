@@ -151,7 +151,7 @@ public class DiamantForwardModel extends StandardForwardModelWithTurnOrder {
 
         // No more caves ?
         if (dgs.nCave == dp.nCaves)
-            dgs.endGame();
+            endGame(dgs);
         else {
             Random r = new Random(dgs.getGameParameters().getRandomSeed());
 

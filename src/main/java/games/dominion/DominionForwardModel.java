@@ -87,7 +87,7 @@ public class DominionForwardModel extends StandardForwardModelWithTurnOrder {
                 if (state.buysLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
                     // change phase
                     if (state.gameOver()) {
-                        state.endGame();
+                        endGame(state);
                     } else {
                         state.endOfTurn(playerID);
                     }

@@ -6,6 +6,9 @@ import utilities.ElapsedCpuChessTimer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
+
+import static core.CoreConstants.GameResult.*;
 
 public abstract class AbstractForwardModel {
 
@@ -73,16 +76,6 @@ public abstract class AbstractForwardModel {
     protected abstract AbstractForwardModel _copy();
 
     protected abstract void endPlayerTurn(AbstractGameState state);
-
-    /**
-     * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
-     * The last thing to be called in the game loop, after the game is finished.
-     */
-    protected void endGame(AbstractGameState gameState) {
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
-        }
-    }
 
     /**
      * Current player tried to play an illegal action.
@@ -160,6 +153,31 @@ public abstract class AbstractForwardModel {
         }
         return _computeAvailableActions(gameState);
     }
+
+    /**
+     * Performs any end of game computations, as needed.
+     * This should not normally need to be overriden - but can be. For example if a game is purely co-operative
+     * or has an insta-win situation without the concept of a game score.
+     * The last thing to be called in the game loop, after the game is finished.
+     */
+    protected void endGame(AbstractGameState gs) {
+        gs.setGameStatus(CoreConstants.GameResult.GAME_END);
+        // If we have more than one person in Ordinal position of 1, then this is a draw
+        boolean drawn = IntStream.range(0, gs.getNPlayers()).map(gs::getOrdinalPosition).filter(i -> i == 1).count() > 1;
+        for (int p = 0; p < gs.getNPlayers(); p++) {
+            int o = gs.getOrdinalPosition(p);
+            if (o == 1 && drawn)
+                gs.setPlayerResult(DRAW, p);
+            else if (o == 1)
+                gs.setPlayerResult(WIN, p);
+            else
+                gs.setPlayerResult(LOSE, p);
+        }
+        if (gs.getCoreGameParameters().verbose) {
+            System.out.println(Arrays.toString(gs.getPlayerResults()));
+        }
+    }
+
 
     /**
      * Returns a copy of this forward model with a new random seed.

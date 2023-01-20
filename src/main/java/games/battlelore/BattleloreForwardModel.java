@@ -77,7 +77,7 @@ public class BattleloreForwardModel extends StandardForwardModelWithTurnOrder {
         }
 
         if (checkGameEnd((BattleloreGameState) currentState, playerId) || state.getTurnOrder().getRoundCounter() > maxTurnsToPlay) {
-            currentState.endGame();
+            endGame(currentState);
         }
     }
 

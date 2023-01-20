@@ -171,7 +171,7 @@ public class DiceMonasteryTurnOrder extends TurnOrder {
                 break;
             case WINTER:
                 if (year == params.YEARS)
-                    state.endGame();
+                    endGame(state);
                 break;
         }
     }

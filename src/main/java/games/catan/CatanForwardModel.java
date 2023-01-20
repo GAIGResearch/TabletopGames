@@ -125,9 +125,8 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
         }
 
         // win condition
-        if (gs.getGameScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win
-                || (params.max_round_count != -1 && gs.getTurnOrder().getRoundCounter() > params.max_round_count)) {
-            currentState.endGame();
+        if (gs.getGameScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win) {
+            endGame(currentState);
             if (gs.getCoreGameParameters().verbose) {
                 System.out.println("Game over! winner = " + gs.getCurrentPlayer());
             }

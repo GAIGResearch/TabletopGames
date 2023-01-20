@@ -187,7 +187,7 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
         }
         orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
         if (nPlayersActive == 1) {
-            endGame();
+            turnOrder.endGame(this);
         }
         ((ExplodingKittensTurnOrder) getTurnOrder()).endPlayerTurnStep(this);
 

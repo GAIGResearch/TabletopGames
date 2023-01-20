@@ -1,17 +1,21 @@
 package core.turnorders;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
 import evaluation.listeners.GameListener;
 import evaluation.metrics.Event;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
-import static core.CoreConstants.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.*;
+import static core.CoreConstants.GameResult.LOSE;
 
 public abstract class TurnOrder {
 
@@ -169,7 +173,7 @@ public abstract class TurnOrder {
 
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
-            gameState.endGame();
+            endGame(gameState);
         }
         else {
             turnCounter = 0;
@@ -231,11 +235,37 @@ public abstract class TurnOrder {
             turnOwner = nextPlayer(gameState);
             n++;
             if (n >= nPlayers) {
-                gameState.endGame();
+                endGame(gameState);
                 break;
             }
         }
     }
+
+
+    /**
+     * Performs any end of game computations, as needed.
+     * The last thing to be called in the game loop, after the game is finished.
+     *
+     * This is a copy of the method on AbstractForwardModel for backwards compatibility
+     */
+    public final void endGame(AbstractGameState gs) {
+        gs.setGameStatus(CoreConstants.GameResult.GAME_END);
+        // If we have more than one person in Ordinal position of 1, then this is a draw
+        boolean drawn = IntStream.range(0, gs.getNPlayers()).map(gs::getOrdinalPosition).filter(i -> i == 1).count() > 1;
+        for (int p = 0; p < gs.getNPlayers(); p++) {
+            int o = gs.getOrdinalPosition(p);
+            if (o == 1 && drawn)
+                gs.setPlayerResult(DRAW, p);
+            else if (o == 1)
+                gs.setPlayerResult(WIN, p);
+            else
+                gs.setPlayerResult(LOSE, p);
+        }
+        if (gs.getCoreGameParameters().verbose) {
+            System.out.println(Arrays.toString(gs.getPlayerResults()));
+        }
+    }
+
 
     @Override
     public boolean equals(Object o) {

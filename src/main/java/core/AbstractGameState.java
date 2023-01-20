@@ -218,21 +218,6 @@ public abstract class AbstractGameState {
         allComponents.putComponents(_getAllComponents());
     }
 
-    public final void endGame() {
-        setGameStatus(CoreConstants.GameResult.GAME_END);
-        // If we have more than one person in Ordinal position of 1, then this is a draw
-        boolean drawn = IntStream.range(0, getNPlayers()).map(this::getOrdinalPosition).filter(i -> i == 1).count() > 1;
-        for (int p = 0; p < getNPlayers(); p++) {
-            int o = getOrdinalPosition(p);
-            if (o == 1 && drawn)
-                setPlayerResult(DRAW, p);
-            else if (o == 1)
-                setPlayerResult(WIN, p);
-            else
-                setPlayerResult(LOSE, p);
-        }
-    }
-
     /**
      * Public access copy method, which always does a full copy of the game state.
      * (I.e. with no shuffling of hidden data)

@@ -71,7 +71,7 @@ public class CantStopForwardModel extends StandardForwardModelWithTurnOrder {
                 state.completedColumns[trackNumber] = true;
                 // and then check game end condition
                 if (state.getGameScore(playerId) >= params.COLUMNS_TO_WIN) {
-                    state.endGame();
+                    endGame(state);
                 }
             }
         }

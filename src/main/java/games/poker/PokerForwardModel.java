@@ -267,13 +267,13 @@ public class PokerForwardModel extends StandardForwardModelWithTurnOrder {
                 }
             }
             if (maxMoney > 0) {
-                pgs.endGame();
+                endGame(pgs);
                 return true;
             }
         } else {
             if (pgs.getTurnOrder().getRoundCounter() >= pgp.maxRounds) {
                 // Max rounds reached, the player with most money wins
-                pgs.endGame();
+                endGame(pgs);
                 return true;
             } else {
                 int stillAlive = 0;
@@ -284,7 +284,7 @@ public class PokerForwardModel extends StandardForwardModelWithTurnOrder {
                     }
                 }
                 if (stillAlive == 1) {
-                    pgs.endGame();
+                    endGame(pgs);
                     return true;
                 }
             }

@@ -58,7 +58,7 @@ public class DBForwardModel extends StandardForwardModelWithTurnOrder {
         // Check end of game (when all cells completed)
         if (dbgs.cellToOwnerMap.size() == dbp.gridWidth * dbp.gridHeight) {
             // Game is over. Set status and find winner
-            dbgs.endGame();
+            endGame(dbgs);
         } else if (dbgs.getLastActionScored()) {
             // If not returned, check if the action completed one more box, otherwise move to the next player
             dbgs.getTurnOrder().endPlayerTurn(currentState);

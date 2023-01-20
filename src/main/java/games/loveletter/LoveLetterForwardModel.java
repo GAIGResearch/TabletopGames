@@ -210,7 +210,7 @@ public class LoveLetterForwardModel extends StandardForwardModelWithTurnOrder {
 
         // One player won, game is over
         if (bestPlayers.size() == 1) {
-            llgs.endGame();
+            endGame(llgs);
             return true;
         }
         return false;

@@ -207,7 +207,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
             Arrays.fill(allTrue, true);
             gameState.rounds.setVisibilityOfComponent(roundCounter, allTrue);
         } else {
-            gameState.endGame();
+            endGame(gameState);
         }
     }
 

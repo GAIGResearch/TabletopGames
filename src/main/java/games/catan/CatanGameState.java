@@ -57,7 +57,7 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
 
     @Override
     protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new CatanTurnOrder(nPlayers, ((CatanParameters) getGameParameters()).max_round_count);
+        return new CatanTurnOrder(nPlayers, getGameParameters().getMaxRounds());
     }
 
     @Override

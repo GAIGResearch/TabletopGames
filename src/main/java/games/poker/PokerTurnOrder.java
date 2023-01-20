@@ -40,7 +40,7 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
             nTries++;
         }
         if (nTries > gameState.getNPlayers()) {
-            gameState.endGame();
+            endGame(gameState);
         }
         return next;
     }
@@ -55,7 +55,7 @@ public class PokerTurnOrder extends AlternatingTurnOrder {
                 nTries++;
             }
             if (nTries > pgs.getNPlayers()) {
-                pgs.endGame();
+                endGame(pgs);
             }
         }
         endPlayerTurn(pgs);

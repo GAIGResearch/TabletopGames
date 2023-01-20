@@ -130,7 +130,7 @@ public class VirusForwardModel extends StandardForwardModelWithTurnOrder {
     public void checkGameEnd(VirusGameState vgs) {
         for (int i = 0; i < vgs.getNPlayers(); i++) {
             if (vgs.playerBodies.get(i).getNOrganHealthy() >= VirusCard.OrganType.values().length - 2) {
-                vgs.endGame();
+                endGame(vgs);
                 break;
             }
         }
@@ -443,16 +443,4 @@ public class VirusForwardModel extends StandardForwardModelWithTurnOrder {
         }
     }
 
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println("Game Results:");
-            for (int playerID = 0; playerID < gameState.getNPlayers(); playerID++) {
-                if (gameState.getPlayerResults()[playerID] == CoreConstants.GameResult.WIN) {
-                    System.out.println("The winner is the player : " + playerID);
-                    break;
-                }
-            }
-        }
-    }
 }
