@@ -20,10 +20,24 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         _afterAction(currentState, action);
     }
 
+    /**
+     * This is a method hook for any game-specific functionality that should run before an Action is executed
+     * by the forward model
+     *
+     * @param currentState
+     * @param actionTaken
+     */
     protected void _beforeAction(AbstractGameState currentState, AbstractAction actionTaken) {
         // override if needed
     }
 
+    /**
+     * This is a method hook for any game-specific functionality that should run after an Action is executed
+     * by the forward model
+     *
+     * @param currentState
+     * @param actionTaken
+     */
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken){
         // override if needed
     }
