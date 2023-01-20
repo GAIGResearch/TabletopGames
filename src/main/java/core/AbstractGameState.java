@@ -108,7 +108,13 @@ public abstract class AbstractGameState {
         return this.gameParameters;
     }
     public int getNPlayers() { return nPlayers; }
-    public int getCurrentPlayer() {return turnOwner;}
+    public int getCurrentPlayer() {
+        if (isActionInProgress()) {
+            return actionsInProgress.peek().getCurrentPlayer(this);
+        }
+        // else we have the data locally
+        return turnOwner;
+    }
     public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
     public final IGamePhase getGamePhase() {
         return gamePhase;

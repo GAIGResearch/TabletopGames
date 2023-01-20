@@ -4,9 +4,11 @@ import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.GameType;
+import games.cantstop.actions.Pass;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
 import games.dominion.DominionGameState;
@@ -95,7 +97,9 @@ public class TestCoreGameLoop {
         state.addCard(CardType.COPPER, 0, DeckType.TABLE);
         state.addCard(CardType.COPPER, 1, DeckType.TABLE);
         assertEquals(1, state.getDeck(DeckType.TABLE, 0).getSize());
-        state.endOfTurn(0);
+        assertEquals(0, state.getCurrentPlayer());
+        fm.next(state, new EndPhase());
+        assertEquals(1, state.getCurrentPlayer());
         assertEquals(5, state.getDeck(DeckType.HAND, 0).getSize());
         assertEquals(0, state.getDeck(DeckType.DRAW, 0).getSize());
         assertEquals(0, state.getDeck(DeckType.TABLE, 0).getSize());
@@ -120,12 +124,17 @@ public class TestCoreGameLoop {
             assertEquals(DominionGamePhase.Play, state.getGamePhase());
         }
     }
+    private void moveForwardToNextPlayer(DominionGameState state) {
+        int startingPlayer = state.getCurrentPlayer();
+        while (state.getCurrentPlayer() == startingPlayer)
+            fm.next(state, new EndPhase());
+    }
 
     @Test
     public void reshuffleOfDiscardIntoDeck() {
         DominionGameState state = (DominionGameState) game.getGameState();
         for (int i = 0; i < 4; i++)
-            state.endOfTurn(i);
+            moveForwardToNextPlayer(state);
         assertEquals(0, state.getCurrentPlayer());
         state.setGamePhase(DominionGamePhase.Buy);
         BuyCard newBuy = new BuyCard(CardType.MOAT, 0);

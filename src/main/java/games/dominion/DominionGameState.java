@@ -28,7 +28,7 @@ import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
-public class DominionGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+public class DominionGameState extends AbstractGameState implements IPrintable {
 
     Random rnd;
     int playerCount;
@@ -64,10 +64,6 @@ public class DominionGameState extends AbstractGameStateWithTurnOrder implements
         params = (DominionParameters) gameParameters;
         this._reset();
     }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new StandardTurnOrder(nPlayers);
-    }
 
     @Override
     protected GameType _getGameType() {
@@ -88,34 +84,6 @@ public class DominionGameState extends AbstractGameStateWithTurnOrder implements
         deck.add(newCard);
     }
 
-    public void endOfTurn(int playerID) {
-        if (playerID != getCurrentPlayer()) {
-            System.out.println(this);
-            throw new AssertionError("Cannot end turn if it is not your turn currently");
-        }
-        // 1) put hand and cards played into discard
-        // 2) draw 5 new cards
-        // 3) shuffle and move discard if we run out
-        Deck<DominionCard> hand = playerHands[playerID];
-        Deck<DominionCard> discard = playerDiscards[playerID];
-        Deck<DominionCard> table = playerTableaux[playerID];
-
-        discard.add(hand);
-        discard.add(table);
-        table.clear();
-        hand.clear();
-        for (int i = 0; i < params.HAND_SIZE; i++)
-            drawCard(playerID);
-
-        defenceStatus = new boolean[playerCount];  // resets to false
-
-        actionsLeftForCurrentPlayer = 1;
-        spentSoFar = 0;
-        additionalSpendAvailable = 0;
-        buysLeftForCurrentPlayer = 1;
-        setGamePhase(DominionGameState.DominionGamePhase.Play);
-        getTurnOrder().endPlayerTurn(this);
-    }
 
     public boolean gameOver() {
         return cardsIncludedInGame.get(CardType.PROVINCE) == 0 ||
@@ -191,7 +159,7 @@ public class DominionGameState extends AbstractGameStateWithTurnOrder implements
     }
 
     public int availableSpend(int playerID) {
-        if (playerID != turnOrder.getTurnOwner()) {
+        if (playerID != turnOwner) {
             System.out.println(this);
             throw new AssertionError(String.format("Not yet supported : Player %d trying to spend in turn of player %d", playerID, getCurrentPlayer()));
         }
@@ -295,7 +263,7 @@ public class DominionGameState extends AbstractGameStateWithTurnOrder implements
      * @param playerId - player observing this game state.
      */
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         DominionGameState retValue = new DominionGameState(gameParameters.copy(), playerCount);
         for (CardType ct : cardsIncludedInGame.keySet()) {
             retValue.cardsIncludedInGame.put(ct, cardsIncludedInGame.get(ct));
@@ -468,7 +436,7 @@ public class DominionGameState extends AbstractGameStateWithTurnOrder implements
     @Override
     public String toString() {
         StringBuilder retValue = new StringBuilder();
-        retValue.append(String.format("Turn: %d, Current Player: %d, Phase: %s%n", turnOrder.getRoundCounter(), getCurrentPlayer(), gamePhase));
+        retValue.append(String.format("Turn: %d, Current Player: %d, Phase: %s%n", getRoundCounter(), getCurrentPlayer(), gamePhase));
         for (Map.Entry<CardType, Integer> s : cardsIncludedInGame.entrySet()) {
             retValue.append(String.format("\t%2d %s%n", s.getValue(), s.getKey()));
         }
