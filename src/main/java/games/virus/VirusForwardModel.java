@@ -29,7 +29,6 @@ public class VirusForwardModel extends StandardForwardModel {
         // 4. There is a discard card. Empty at the beginning.
 
         VirusGameState vgs = (VirusGameState) firstState;
-        firstState.getGameParameters().setMaxRounds(((VirusGameParameters)firstState.getGameParameters()).nMaxRounds);  // TODO: this is max rounds for timeout
 
         vgs.playerBodies = new ArrayList<>(vgs.getNPlayers());
 

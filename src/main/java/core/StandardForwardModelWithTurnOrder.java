@@ -2,6 +2,16 @@ package core;
 
 import core.actions.AbstractAction;
 
+/**
+ * This is purely for old-style game implementations from before January 2023 that use the now deprecated TurnOrder
+ *
+ * This has been deprecated because it all too often led to a mixture of logic and state, and ambiguity over where any individual piece
+ * of game logic should be implemented.
+ * The new standard (See StandardForwardModel) is to have a clean separation of:
+ *  - state within something that extends AbstractGameState
+ *  - game logic within something that extends AbstractForwardModel (and this has new method hooks to help)
+ */
+@Deprecated
 public abstract class StandardForwardModelWithTurnOrder extends AbstractForwardModel {
 
     @Override

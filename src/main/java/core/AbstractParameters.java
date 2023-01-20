@@ -10,8 +10,12 @@ public abstract class AbstractParameters {
 
     // Random seed for this game
     long randomSeed;
-    // Maximum nmber of rounds in the game
+    // Maximum number of rounds in the game - according to the rules
+    // Once this is reached we end the game - and determine winners/losers in the normal way
     int maxRounds = -1;
+    // Maximum number of rounds in the game before we timeout from boredom
+    // If this is reached then we set the GameResult (and player results) to be TIMEOUT
+    int timeoutRounds = -1;
 
     // Player thinking time for the entire game, in minutes. Default max value.
     long thinkingTimeMins = 90;
@@ -63,6 +67,9 @@ public abstract class AbstractParameters {
     public void setMaxRounds(int max) {
         maxRounds = max;
     }
+    public void setTimeoutRounds(int max) {
+        timeoutRounds = max;
+    }
 
     /**
      * Retrieve total thinking time for the game, in minutes
@@ -110,12 +117,23 @@ public abstract class AbstractParameters {
     }
 
     /**
-     * Retrieve the  maximum number of rounds before a game is terminated
+     * Retrieve the  maximum number of rounds before a game is terminated (According to the rules)
+     * This is a valid end to a game, so winners/losers are determined as normal.
      *
      * @return - milestone increment
      */
     public int getMaxRounds() {
         return maxRounds;
+    }
+    /**
+     * Retrieve the  maximum number of rounds before a game is terminated due to a 'timeout'
+     * This is treated as an invalid end to the game, and the Game and all Player Results will
+     * be set to TIMEOUT
+     *
+     * @return - milestone increment
+     */
+    public int getTimeoutRounds() {
+        return timeoutRounds;
     }
 
     /**
@@ -169,14 +187,14 @@ public abstract class AbstractParameters {
                 incrementActionS == that.incrementActionS &&
                 incrementTurnS == that.incrementTurnS &&
                 incrementRoundS == that.incrementRoundS &&
-                maxRounds == that.maxRounds &&
+                maxRounds == that.maxRounds && timeoutRounds == that.timeoutRounds &&
                 incrementMilestoneS == that.incrementMilestoneS;
         // equals and hashcode deliberately excludes the random seed
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS, maxRounds);
+        return Objects.hash(thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS, maxRounds, timeoutRounds);
     }
 
     static public AbstractParameters createFromFile(GameType game, String fileName) {
