@@ -26,16 +26,6 @@ public class GTGameState extends AbstractGameState {
     }
 
     /**
-     * @param nPlayers - number of players in the game.
-     * @return A {@link TurnOrder} object, given the number of players in the game. Usually an
-     * {@link core.turnorders.AlternatingTurnOrder}, but custom turn order subclasses may be defined for the game.
-     */
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new AlternatingTurnOrder(nPlayers);
-    }
-
-    /**
      * @return the enum value corresponding to this game, declared in {@link GameType}.
      */
     @Override
