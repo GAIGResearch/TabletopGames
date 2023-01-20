@@ -2,7 +2,6 @@ package core;
 
 import core.turnorders.TurnOrder;
 import evaluation.listeners.GameListener;
-import games.GameType;
 
 /**
  * Contains all game state information.
@@ -22,12 +21,14 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
      * Constructor. Initialises some generic game state variables.
      *
      * @param gameParameters - game parameters.
-     * @param turnOrder      - turn order for this game.
+     * @param nPlayers      - number of players in the game
      */
-    public AbstractGameStateWithTurnOrder(AbstractParameters gameParameters, TurnOrder turnOrder, GameType gameType) {
-        super(gameParameters, gameType);
-        this.turnOrder = turnOrder;
+    public AbstractGameStateWithTurnOrder(AbstractParameters gameParameters, int nPlayers) {
+        super(gameParameters, nPlayers);
+        this.turnOrder = _createTurnOrder(nPlayers);
     }
+
+    protected abstract TurnOrder _createTurnOrder(int nPlayers);
 
     /**
      * Resets variables initialised for this game state.

@@ -21,7 +21,6 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toList;
 import static core.CoreConstants.GameResult.*;
 
-
 /**
  * Contains all game state information.
  * <p>
@@ -37,7 +36,7 @@ public abstract class AbstractGameState {
     // Parameters, forward model and turn order for the game
     protected final AbstractParameters gameParameters;
     // Game being played
-    protected final GameType gameType;
+    protected final GameType gameType = _getGameType();
     private Area allComponents;
 
     // Game tick, number of iterations of game loop
@@ -69,11 +68,13 @@ public abstract class AbstractGameState {
      *
      * @param gameParameters - game parameters.
      */
-    public AbstractGameState(AbstractParameters gameParameters, GameType gameType) {
+    public AbstractGameState(AbstractParameters gameParameters, int nPlayers) {
+        this.nPlayers = nPlayers;
         this.gameParameters = gameParameters;
-        this.gameType = gameType;
         this.coreGameParameters = new CoreParameters();
     }
+
+    protected abstract GameType _getGameType();
 
     /**
      * Resets variables initialised for this game state.
