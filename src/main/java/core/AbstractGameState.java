@@ -42,8 +42,9 @@ public abstract class AbstractGameState {
     // Game tick, number of iterations of game loop
     private int tick = 0;
 
-    // Migrated from TurnOrder..may move later
-    protected int currentPlayer, nPlayers, roundCounter, turnCounter, turnOwner, firstPlayer;
+    // Migrated from TurnOrder...may move later
+    protected int currentPlayer, roundCounter, turnCounter, turnOwner, firstPlayer;
+    protected int nPlayers;
     protected List<GameListener> listeners = new ArrayList<>();
 
     // Timers for all players
@@ -107,12 +108,8 @@ public abstract class AbstractGameState {
         return this.gameParameters;
     }
     public int getNPlayers() { return nPlayers; }
-    public int getCurrentPlayer() {
-        throw new AssertionError("Not yet implemented");
-    }
-    public final CoreConstants.GameResult[] getPlayerResults() {
-        return playerResults;
-    }
+    public int getCurrentPlayer() {return turnOwner;}
+    public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }

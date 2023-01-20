@@ -16,7 +16,7 @@ import java.util.*;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class CantStopGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     // The core game state is made up of the 11 tracks (2 through 12), with the positions of each player,
     // and the temporary markers if in the middle of someone's turn
@@ -47,11 +47,6 @@ public class CantStopGameState extends AbstractGameStateWithTurnOrder implements
 
     public CantStopGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-    }
-
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new StandardTurnOrder(nPlayers);
     }
 
     @Override
@@ -104,7 +99,7 @@ public class CantStopGameState extends AbstractGameStateWithTurnOrder implements
     }
 
     @Override
-    protected CantStopGameState __copy(int playerId) {
+    protected CantStopGameState _copy(int playerId) {
         return new CantStopGameState(this);
         // substance dealt with in private constructor above
     }
@@ -147,9 +142,8 @@ public class CantStopGameState extends AbstractGameStateWithTurnOrder implements
 
     @Override
     public int hashCode() {
-        int hash = Objects.hash(gameStatus, gamePhase, turnOrder, gameParameters,
-                temporaryMarkerPositions, dice);
-        hash = hash * 31 + Arrays.hashCode(playerResults);
+        int hash = Objects.hash(temporaryMarkerPositions, dice);
+        hash = hash * 31 + super.hashCode();
         hash = hash * 31 + Arrays.hashCode(completedColumns);
         hash = hash * 31 + Arrays.deepHashCode(playerMarkerPositions);
         // rnd is deliberately excluded
@@ -160,8 +154,6 @@ public class CantStopGameState extends AbstractGameStateWithTurnOrder implements
     public String toString() {
         StringBuilder sb = new StringBuilder();
         int result = Objects.hash(gameParameters);
-        sb.append(result).append("|");
-        result = Objects.hash(turnOrder);
         sb.append(result).append("|");
         result = Objects.hash(getAllComponents());
         sb.append(result).append("|");

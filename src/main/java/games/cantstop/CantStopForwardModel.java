@@ -1,9 +1,11 @@
 package games.cantstop;
 
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.Dice;
+import core.forwardModels.SequentialActionForwardModel;
 import games.cantstop.actions.Pass;
 import games.cantstop.actions.RollDice;
 import games.cantstop.actions.AllocateDice;
@@ -13,7 +15,7 @@ import java.util.*;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 
-public class CantStopForwardModel extends StandardForwardModelWithTurnOrder {
+public class CantStopForwardModel extends StandardForwardModel {
 
     private final Pass passAction = new Pass(false);
     private final RollDice rollAction = new RollDice();
@@ -53,10 +55,11 @@ public class CantStopForwardModel extends StandardForwardModelWithTurnOrder {
             // then we clear temp markers and pass to the next player
 
             if (state.isNotTerminal()) {
-                state.getTurnOrder().endPlayerTurn(state);
+                endPlayerTurn(state);
                 state.setGamePhase(CantStopGamePhase.Decision);
             }
         }
+        // Until a player explicitly passes, it is still their turn
     }
 
     public void makeTemporaryMarkersPermanentAndClear(CantStopGameState state) {
