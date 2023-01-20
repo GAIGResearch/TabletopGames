@@ -309,7 +309,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             // Pause after round finished, full display
-            if (llgs.getTurnOrder().getRoundCounter() != gameState.getRoundCounter()) {
+            if (llgs.getRoundCounter() != gameState.getRoundCounter()) {
                 // New round
                 // Paint final state of previous round, showing all hands
 

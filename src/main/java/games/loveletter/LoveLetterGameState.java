@@ -1,6 +1,5 @@
 package games.loveletter;
 
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.AbstractGameState;
 import core.CoreConstants;
@@ -9,16 +8,14 @@ import core.interfaces.IGamePhase;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import core.turnorders.TurnOrder;
 import games.GameType;
-import games.explodingkittens.ExplodingKittensTurnOrder;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.*;
 
-import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
-public class LoveLetterGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+@SuppressWarnings("unchecked")
+public class LoveLetterGameState extends AbstractGameState implements IPrintable {
 
     // Love letter adds one game phase on top of default phases
     public enum LoveLetterGamePhase implements IGamePhase {
@@ -45,7 +42,7 @@ public class LoveLetterGameState extends AbstractGameStateWithTurnOrder implemen
 
     /**
      * For unit testing
-     * @param playerId
+     * @param playerId - ID of player queried
      */
     public void addAffectionToken(int playerId) {
         affectionTokens[playerId]++;
@@ -53,10 +50,6 @@ public class LoveLetterGameState extends AbstractGameStateWithTurnOrder implemen
 
     public LoveLetterGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-    }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new LoveLetterTurnOrder(nPlayers);
     }
 
     @Override
@@ -75,7 +68,7 @@ public class LoveLetterGameState extends AbstractGameStateWithTurnOrder implemen
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         LoveLetterGameState llgs = new LoveLetterGameState(gameParameters.copy(), getNPlayers());
         llgs.drawPile = drawPile.copy();
         llgs.reserveCards = reserveCards.copy();
@@ -137,14 +130,6 @@ public class LoveLetterGameState extends AbstractGameStateWithTurnOrder implemen
         return new LoveLetterHeuristic().evaluateState(this, playerId);
     }
 
-    /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
-     * of victory points, etc.
-     * If a game does not support this directly, then just return 0.0
-     *
-     * @param playerId
-     * @return - double, score of current state
-     */
     @Override
     public double getGameScore(int playerId) {
         return affectionTokens[playerId];

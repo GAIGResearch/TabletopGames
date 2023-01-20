@@ -7,8 +7,8 @@ import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.Token;
+import games.GameType;
 import games.loveletter.LoveLetterForwardModel;
-import games.loveletter.LoveLetterGame;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.tictactoe.*;
@@ -74,7 +74,9 @@ public class MultiTreeMCTSTests {
         players.add(new RandomPlayer(new Random(3023)));
         TicTacToeGameParameters gameParams = new TicTacToeGameParameters(3812);
         gameParams.gridSize = gridSize;
-        return new TicTacToeGame(players, gameParams);
+        Game game = GameType.TicTacToe.createGameInstance(2, gameParams);
+        game.reset(players);
+        return game;
     }
 
     public Game createLoveLetter(MCTSParams params) {
@@ -85,7 +87,9 @@ public class MultiTreeMCTSTests {
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(3024)));
         LoveLetterParameters gameParams = new LoveLetterParameters(3812);
-        return new LoveLetterGame(players, gameParams);
+        Game game = GameType.LoveLetter.createGameInstance(players.size(), gameParams);
+        game.reset(players);
+        return game;
     }
 
     @Test

@@ -6,6 +6,7 @@ import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.Token;
+import games.GameType;
 import games.loveletter.*;
 import games.tictactoe.*;
 import org.junit.Before;
@@ -52,7 +53,9 @@ public class OMATests {
         players.add(new RandomPlayer(new Random(3023)));
         TicTacToeGameParameters gameParams = new TicTacToeGameParameters(3812);
         gameParams.gridSize = gridSize;
-        return new TicTacToeGame(players, gameParams);
+        Game game = GameType.TicTacToe.createGameInstance(2, gameParams);
+        game.reset(players);
+        return game;
     }
 
     public Game createLoveLetter(MCTSParams params) {
@@ -62,7 +65,9 @@ public class OMATests {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(-36572)));
-        return new LoveLetterGame(players, new LoveLetterParameters(68274));
+        Game game = GameType.LoveLetter.createGameInstance(players.size(), new LoveLetterParameters(68274));
+        game.reset(players);
+        return game;
     }
 
 

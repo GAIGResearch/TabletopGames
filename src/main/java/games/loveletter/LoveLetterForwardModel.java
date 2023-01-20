@@ -1,7 +1,7 @@
 package games.loveletter;
 
 import core.AbstractGameState;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -16,7 +16,7 @@ import static core.CoreConstants.*;
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
 
-public class LoveLetterForwardModel extends StandardForwardModelWithTurnOrder {
+public class LoveLetterForwardModel extends StandardForwardModel {
 
     /**
      * Creates the initial game-state of Love Letter.
@@ -66,7 +66,7 @@ public class LoveLetterForwardModel extends StandardForwardModelWithTurnOrder {
         }
 
         // Put one card to the side, such that player's won't know all cards in the game
-        Random r = new Random(llgs.getGameParameters().getRandomSeed() + llgs.getTurnOrder().getRoundCounter());
+        Random r = new Random(llgs.getGameParameters().getRandomSeed() + llgs.getRoundCounter());
         llgs.drawPile.shuffle(r);
         llgs.reserveCards.clear();
         llgs.reserveCards.add(llgs.drawPile.draw());
@@ -123,7 +123,7 @@ public class LoveLetterForwardModel extends StandardForwardModelWithTurnOrder {
             for (int i: previousWinners) {
                 n++;
                 if (n == nextPlayer) {
-                    llgs.getTurnOrder().setTurnOwner(i);
+                    llgs.setTurnOwner(i);
                 }
             }
         }
@@ -138,14 +138,14 @@ public class LoveLetterForwardModel extends StandardForwardModelWithTurnOrder {
         // switch the phase after each executed action
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
 
-        if (llgs.playerHandCards.get(gameState.getCurrentPlayer()).getSize() > 2)
+        if (llgs.playerHandCards.get(llgs.getCurrentPlayer()).getSize() > 2)
             throw new AssertionError("Hand should not get this big");
         IGamePhase gamePhase = llgs.getGamePhase();
         if (gamePhase == Draw) {
             llgs.setGamePhase(DefaultGamePhase.Main);
         } else if (gamePhase == DefaultGamePhase.Main) {
             llgs.setGamePhase(Draw);
-            llgs.getTurnOrder().endPlayerTurn(gameState);
+            endPlayerTurn(llgs);
             checkEndOfRound(llgs);
         } else {
             throw new IllegalArgumentException("The game phase " + llgs.getGamePhase() +
@@ -178,7 +178,7 @@ public class LoveLetterForwardModel extends StandardForwardModelWithTurnOrder {
             }
 
             // Otherwise, end the round and set up the next
-            llgs.getTurnOrder().endRound(llgs);
+            endRound(llgs);
             setupRound(llgs, winners);
         }
     }
