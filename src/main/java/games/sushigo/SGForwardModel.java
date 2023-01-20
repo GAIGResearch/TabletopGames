@@ -78,6 +78,8 @@ public class SGForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
+        if (currentState.isActionInProgress())
+            return; // we only want to trigger this processing if an extended action sequence (i.e. Chopsticks) has been terminated
         SGGameState gs = (SGGameState) currentState;
 
         // Check if all players made their choice
