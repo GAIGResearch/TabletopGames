@@ -46,14 +46,4 @@ public class GTForwardModel extends StandardForwardModel {
         actions.add(new GTAction());
         return actions;
     }
-
-    /**
-     * Applies custom game rules or events that take place after a player's action was executed. May be left empty
-     * @param currentState - game state to modify using game logic
-     * @param actionTaken - the action that was just taken by the current player
-     */
-    @Override
-    protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
-        // TODO: apply any game rules or events that take place after a player's action was executed
-    }
 }

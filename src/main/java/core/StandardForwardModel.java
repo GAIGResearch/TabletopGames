@@ -24,10 +24,10 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      * This is a method hook for any game-specific functionality that should run before an Action is executed
      * by the forward model
      *
-     * @param currentState
-     * @param actionTaken
+     * @param currentState - the current game state
+     * @param actionChosen - the action chosen by the current player, not yet applied to the game state
      */
-    protected void _beforeAction(AbstractGameState currentState, AbstractAction actionTaken) {
+    protected void _beforeAction(AbstractGameState currentState, AbstractAction actionChosen) {
         // override if needed
     }
 
@@ -35,21 +35,41 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      * This is a method hook for any game-specific functionality that should run after an Action is executed
      * by the forward model
      *
-     * @param currentState
-     * @param actionTaken
+     * @param currentState the current game state
+     * @param actionTaken the action taken by the current player, already applied to the game state
      */
     protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken){
         // override if needed
     }
 
+
     /**
-     * The default assumption is that after a player has in finished their turn, play will proceed
-     * sequentially to the next player, looping back to player zero once all players have acted.
-     * If this is not the case, then use the alternative method with a specific argument for the next player
+     * End the player turn. This will publish a TURN_OVER event, increases the turn counter and changes the currentPlayer on the
+     * game state to be the one specified.
      *
-     * It is the responsibility of the game-specific forward model that extends this class to call endPlayerTurn()
+     * @param gs - game state to end current player's turn in.
+     * @param nextPlayer - the player whose turn it is next.
+     */
+    public final void endPlayerTurn(AbstractGameState gs, int nextPlayer) {
+        if (gs.getGameStatus() != GAME_ONGOING) return;
+
+        gs.getPlayerTimer()[gs.getCurrentPlayer()].incrementTurn();
+        gs.listeners.forEach(l -> l.onEvent(Event.createEvent(TURN_OVER, gs)));
+        if (gs.getCoreGameParameters().recordEventHistory) {
+            gs.recordHistory(TURN_OVER.name());
+        }
+        gs.turnCounter++;
+        gs.turnOwner = nextPlayer;
+    }
+    /**
+     * <p>The default assumption is that after a player has finished their turn, play will proceed
+     * sequentially to the next player, looping back to player 0 once all players have acted.
+     * If this is not the case, then use the alternative method with a specific argument for the next player</p>
      *
-     * @param gs
+     * <p>It is the responsibility of the game-specific forward model that extends this class to call endPlayerTurn()
+     * and perform any other end-of-turn game logic.</p>
+     *
+     * @param gs - game state to end current player's turn in.
      */
     @Override
     public final void endPlayerTurn(AbstractGameState gs) {
@@ -57,41 +77,26 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
     }
 
     /**
-     * End the player turn. This will publish a TURN_OVER event, and change the currentPlayer on the
-     * game state to be the one specified.
+     * <p>Method executed at the end of a Round (however that is defined in a game).
+     * It increments player timers and publishes a ROUND_OVER event.
+     * It resets the turn counter to 0, sets the currentPlayer to the one specified (0 in default method),
+     * and increments the Round counter.
+     * If maximum number of rounds is set, and it is reached, the game ends.
+     * If there are no players still playing, the game ends and method returns.</p>
      *
-     * @param gs
-     */
-    public final void endPlayerTurn(AbstractGameState gs, int nextPlayer) {
-        if (gs.getGameStatus() != GAME_ONGOING) return;
-
-        gs.getPlayerTimer()[gs.getCurrentPlayer()].incrementTurn();
-        gs.listeners.forEach(l -> l.onEvent(Event.createEvent(TURN_OVER, gs)));
-        gs.turnCounter++;
-        gs.turnOwner = nextPlayer;
-    }
-
-    /**
-     * Method executed at the end of a Round (however that is defined in a game)
-     * It publishes a ROUND_OVER event.
-     * It resets the turn counter, sets the currentPlayer to the one specified, and increments the Round counter.
-     * If maximum number of rounds reached, game ends.
-     * If there are no players still playing, game ends and method returns.
-     *
-     *  It is the responsibility of the game-specific forward model that extends this class to call endPlayerTurn()
+     * <p>It is the responsibility of the game-specific forward model that extends this class to call endRound()</p>
      *
      * @param gs - current game state.
+     * @param firstPlayerOfNextRound the first player to act in the next round
      */
     public final void endRound(AbstractGameState gs, int firstPlayerOfNextRound) {
         if (gs.getGameStatus() != GAME_ONGOING) return;
 
         gs.getPlayerTimer()[gs.getCurrentPlayer()].incrementRound();
-
         gs.listeners.forEach(l -> l.onEvent(Event.createEvent(ROUND_OVER, gs)));
         if (gs.getCoreGameParameters().recordEventHistory) {
             gs.recordHistory(ROUND_OVER.name());
         }
-
         gs.roundCounter++;
         if (gs.getGameParameters().maxRounds != -1 && gs.roundCounter == gs.getGameParameters().maxRounds) {
             endGame(gs);
@@ -101,10 +106,13 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
             gs.firstPlayer = firstPlayerOfNextRound;
         }
     }
+    public final void endRound(AbstractGameState gs) {
+        endRound(gs, 0);
+    }
 
     /**
      * A Forward Model should be stateless - and hence have no need to implement a _copy() method
-     * @return
+     * @return this
      */
     @Override
     public final StandardForwardModel _copy() {
