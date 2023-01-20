@@ -6,18 +6,22 @@ import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
+import core.interfaces.IVectorisable;
 import core.turnorders.StandardTurnOrder;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 
-public class DiamantGameState extends AbstractGameState implements IPrintable {
+public class DiamantGameState extends AbstractGameState implements IPrintable, IVectorisable {
     Deck<DiamantCard>          mainDeck;
     Deck<DiamantCard>          discardDeck;
     Deck<DiamantCard>          path;
@@ -25,6 +29,26 @@ public class DiamantGameState extends AbstractGameState implements IPrintable {
     List<Counter> treasureChests;
     List<Counter> hands;
     List<Boolean> playerInCave;
+
+    @Override
+    public JSONObject getObservationJson() {
+        final JSONObject json = new JSONObject();
+        json.put("cave", nCave);
+        json.put("playersInCave", playerInCave.size());
+        json.put("pathNoGems", nGemsOnPath);
+        json.put("chestNoGems", getTreasureChests().get(getCurrentPlayer()).getValue());
+        json.put("hazardScorpionsOnPath", nHazardExplosionsOnPath);
+        json.put("hazardSnakesOnPath", nHazardSnakesOnPath);
+        json.put("hazardRockfallsOnPath", nHazardRockfallsOnPath);
+        json.put("hazardPoisonOnPath", nHazardPoissonGasOnPath);
+        json.put("hazardExplosionsOnPath", nHazardExplosionsOnPath);
+        return json;
+    }
+
+    @Override
+    public int getObservationSpace() {
+        return 9;
+    }
 
     // helper data class to store interesting information
     static class PlayerTurnRecord {
