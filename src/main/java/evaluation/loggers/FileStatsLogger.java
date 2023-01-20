@@ -26,7 +26,7 @@ public class FileStatsLogger implements IStatisticLogger {
     private Set<String> allKeys = new LinkedHashSet<>();
 
     /**
-     * Note that one line will be output to the file per Map<String, ?>
+     * Note that one line will be output to the file per {@code Map<String, ?>}
      * provided via record()
      *
      * @param fileName  The full location of the file to write results to

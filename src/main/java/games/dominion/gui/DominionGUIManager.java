@@ -120,7 +120,6 @@ public class DominionGUIManager extends AbstractGUIManager {
      * Updates all GUI elements. Must be implemented by subclass.
      *  @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
-     * @param actionTaken
      */
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
