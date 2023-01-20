@@ -4,7 +4,7 @@ import javax.swing.*;
 
 
 @SuppressWarnings("rawtypes")
-public class GUI extends JFrame {
+public class GUI extends JFrame implements IGUI  {
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
     public static int defaultInfoPanelHeight = 180;
@@ -28,4 +28,15 @@ public class GUI extends JFrame {
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         repaint();
     }
+
+    @Override
+    public void init() {
+        setFrameProperties();
+        validate();
+        pack();
+    }
+
+    public void repaint() { super.repaint(); }
+    public int getWidth() {return super.getWidth();}
+    public int getHeight() {return super.getHeight();}
 }

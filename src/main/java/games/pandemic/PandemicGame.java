@@ -37,7 +37,7 @@ public class PandemicGame extends Game {
             Long s = seed;
             if (s == -1) s = System.currentTimeMillis();
             s += offset;
-            game = runOne(GameType.Pandemic, parameterConfigFile, players, s, randomizeParameters, listeners, ac, 0);
+            game = new GameRunner().runOne(GameType.Pandemic, parameterConfigFile, players, s, randomizeParameters, listeners, ac, 0);
             if (game != null) {
                 statSummary.add(game.getGameState().getGameStatus().value);
                 offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();

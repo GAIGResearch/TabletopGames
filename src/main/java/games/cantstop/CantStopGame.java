@@ -22,7 +22,7 @@ public class CantStopGame extends Game {
         agents.add(new OSLAPlayer());
         agents.add(new HumanConsolePlayer());
 
-        runOne(GameType.CantStop, null, agents, System.currentTimeMillis() + 1000,
+        new GameRunner().runOne(GameType.CantStop, null, agents, System.currentTimeMillis() + 1000,
                 false, null, null, 0);
     }
 

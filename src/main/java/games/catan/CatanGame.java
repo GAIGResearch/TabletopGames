@@ -3,6 +3,7 @@ package games.catan;
 import core.AbstractPlayer;
 import core.AbstractForwardModel;
 import core.Game;
+import core.GameRunner;
 import games.GameType;
 import games.catan.gui.CatanGUI;
 import gui.AbstractGUIManager;
@@ -73,7 +74,7 @@ public class CatanGame extends Game {
 //        frame.setFrameProperties();
         ActionController ac = new ActionController();
 
-        game.runOne(GameType.Catan, "",  agents, System.currentTimeMillis(), false, null, ac, 200);
+        new GameRunner().runOne(GameType.Catan, "",  agents, System.currentTimeMillis(), false, null, ac, 200);
         System.out.println(game.gameState.getGameStatus());
 
 //        runMany(players, forwardModel);
