@@ -3,8 +3,6 @@ package gametemplate;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
-import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
 
 import java.util.ArrayList;
@@ -15,6 +13,8 @@ import java.util.List;
  * in the Forward Model or actions modifying the state of the game.</p>
  * <p>Most variables held here should be {@link Component} subclasses as much as possible.</p>
  * <p>No initialisation or game logic should be included here (not in the constructor either). This is all handled externally.</p>
+ * <p>Computation may be included in functions here for ease of access, but only if this is querying the game state information.
+ * Functions on the game state should never <b>change</b> the state of the game.</p>
  */
 public class GTGameState extends AbstractGameState {
     /**

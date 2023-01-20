@@ -19,9 +19,9 @@ public class NoCards extends AbstractAction implements IPrintable {
         UnoGameState ugs = (UnoGameState)gs;
         Deck<UnoCard> drawDeck = ugs.getDrawDeck();
         Deck<UnoCard> discardDeck = ugs.getDiscardDeck();
-        Deck<UnoCard> playerDeck = ugs.getPlayerDecks().get(ugs.getTurnOrder().getCurrentPlayer(gs));
+        Deck<UnoCard> playerDeck = ugs.getPlayerDecks().get(ugs.getCurrentPlayer());
 
-        Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getTurnOrder().getRoundCounter());
+        Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getRoundCounter());
 
         if (drawDeck.getSize() == 0) {
             drawDeck.add(discardDeck);

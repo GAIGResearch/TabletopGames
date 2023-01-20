@@ -1,14 +1,11 @@
 package games.uno;
 
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
 import games.uno.cards.*;
 
@@ -18,7 +15,7 @@ import static games.uno.UnoGameParameters.UnoScoring.*;
 import static games.uno.cards.UnoCard.UnoCardType.Wild;
 import static core.CoreConstants.GameResult.*;
 
-public class UnoGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+public class UnoGameState extends AbstractGameState implements IPrintable {
     List<Deck<UnoCard>> playerDecks;
     Deck<UnoCard> drawDeck;
     Deck<UnoCard> discardDeck;
@@ -26,6 +23,10 @@ public class UnoGameState extends AbstractGameStateWithTurnOrder implements IPri
     String currentColor;
     int[] playerScore;
     int[] expulsionRound;
+
+    // Turn order data
+    boolean skipTurn;
+    int direction;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -35,10 +36,6 @@ public class UnoGameState extends AbstractGameStateWithTurnOrder implements IPri
      */
     public UnoGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-    }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new UnoTurnOrder(nPlayers);
     }
 
     @Override
@@ -98,6 +95,17 @@ public class UnoGameState extends AbstractGameStateWithTurnOrder implements IPri
         return playerScore;
     }
 
+    public int getNextPlayer() {
+        int playersToMove = skipTurn ? 2 : 1;
+        int nextOwner = turnOwner;
+        do {
+            nextOwner = (nPlayers + nextOwner + direction) % nPlayers;
+            if (isNotTerminalForPlayer(nextOwner))
+                playersToMove--;
+        } while (playersToMove > 0);
+        return nextOwner;
+    }
+
     /**
      * Calculates points for all players, as sum of values of cards in the hands of all other players in the game.
      * Note that this is formally a UNO variant (but stops the game going on for ever)
@@ -135,8 +143,24 @@ public class UnoGameState extends AbstractGameStateWithTurnOrder implements IPri
         return nPoints;
     }
 
+    public boolean isSkipTurn() {
+        return skipTurn;
+    }
+
+    public void setSkipTurn(boolean skipTurn) {
+        this.skipTurn = skipTurn;
+    }
+
+    public int getDirection() {
+        return direction;
+    }
+
+    public void reverseDirection() {
+        this.direction *= -1;
+    }
+
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected UnoGameState _copy(int playerId) {
         UnoGameState copy = new UnoGameState(gameParameters.copy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
 
@@ -144,6 +168,9 @@ public class UnoGameState extends AbstractGameStateWithTurnOrder implements IPri
             copy.playerDecks.add(d.copy());
         }
         copy.drawDeck = drawDeck.copy();
+
+        copy.skipTurn = skipTurn;
+        copy.direction = direction;
 
         if (getCoreGameParameters().partialObservable && playerId != -1) {
             // Other player cards and the draw deck are unknown.
@@ -185,7 +212,7 @@ public class UnoGameState extends AbstractGameStateWithTurnOrder implements IPri
      * of victory points, etc.
      * If a game does not support this directly, then just return 0.0
      *
-     * @param playerId
+     * @param playerId - player ID to retrieve game score for
      * @return - double, score of current state
      */
     @Override
@@ -230,22 +257,19 @@ public class UnoGameState extends AbstractGameStateWithTurnOrder implements IPri
     }
 
     @Override
-    protected boolean _equals(Object o) {
+    public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof UnoGameState)) return false;
+        if (!super.equals(o)) return false;
         UnoGameState that = (UnoGameState) o;
-        return Objects.equals(playerDecks, that.playerDecks) &&
-                Objects.equals(drawDeck, that.drawDeck) &&
-                Objects.equals(discardDeck, that.discardDeck) &&
-                Objects.equals(currentCard, that.currentCard) &&
-                Objects.equals(currentColor, that.currentColor) &&
-                Arrays.equals(playerScore, that.playerScore);
+        return skipTurn == that.skipTurn && direction == that.direction && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(discardDeck, that.discardDeck) && Objects.equals(currentCard, that.currentCard) && Objects.equals(currentColor, that.currentColor) && Arrays.equals(playerScore, that.playerScore) && Arrays.equals(expulsionRound, that.expulsionRound);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, discardDeck, currentCard, currentColor);
+        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, discardDeck, currentCard, currentColor, skipTurn, direction);
         result = 31 * result + Arrays.hashCode(playerScore);
+        result = 31 * result + Arrays.hashCode(expulsionRound);
         return result;
     }
 

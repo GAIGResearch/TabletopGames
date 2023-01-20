@@ -2,7 +2,7 @@ package games.uno;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.uno.UnoGameParameters.UnoScoring;
@@ -15,7 +15,7 @@ import java.util.*;
 import static core.CoreConstants.VisibilityMode.*;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 
-public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
+public class UnoForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -37,7 +37,9 @@ public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
         ugs.discardDeck = new Deck<>("DiscardDeck", VISIBLE_TO_ALL);
 
         // Player 0 starts the game
-        ugs.getTurnOrder().setStartingPlayer(0);
+        ugs.setStartingPlayer(0);
+        ugs.skipTurn = false;
+        ugs.direction = 1;
 
         // Set up first round
         setupRound(ugs);
@@ -98,7 +100,7 @@ public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
      * @param ugs - current game state.
      */
     private void setupRound(UnoGameState ugs) {
-        Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getTurnOrder().getRoundCounter());
+        Random r = new Random(ugs.getGameParameters().getRandomSeed() + ugs.getRoundCounter());
 
         // Refresh player decks
         for (int i = 0; i < ugs.getNPlayers(); i++) {
@@ -136,14 +138,15 @@ public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
                 System.out.println("First card no number " + ugs.currentColor);
             }
             if (ugs.currentCard.type == UnoCard.UnoCardType.Reverse) {
-                ((UnoTurnOrder) ugs.getTurnOrder()).reverse();
+                ugs.direction *= -1;
             } else if (ugs.currentCard.type == UnoCard.UnoCardType.Draw) {
                 int player = ugs.getCurrentPlayer();
                 for (int i = 0; i < ugs.currentCard.drawN; i++) {
                     ugs.playerDecks.get(player).add(ugs.drawDeck.draw());
                 }
             }
-            ugs.getTurnOrder().endPlayerTurn(ugs);
+            endPlayerTurn(ugs, ugs.getNextPlayer());
+            ugs.skipTurn = false;
         }
 
         // add current card to discard deck
@@ -157,7 +160,8 @@ public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
         }
         if (gameState.getGameStatus() == GAME_ONGOING) {
             UnoGameState ugs = (UnoGameState) gameState;
-            ugs.getTurnOrder().endPlayerTurn(gameState);
+            endPlayerTurn(ugs, ugs.getNextPlayer());
+            ugs.skipTurn = false;
         }
     }
 
@@ -204,7 +208,7 @@ public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
             }
 
 //            System.out.println("Round end " + Arrays.toString(ugs.playerScore));
-            ugs.getTurnOrder().endRound(ugs);
+            endRound(ugs);
 
             // Did this player just hit N points to win? Win condition check!
             if (checkGameEnd(ugs, ugs.playerScore)) return true;
@@ -278,7 +282,7 @@ public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
                         if (ugs.getPlayerResults()[i] == GAME_ONGOING) {
                             if (playerScores[i] >= ugp.nWinPoints) {
                                 ugs.setPlayerResult(CoreConstants.GameResult.LOSE, i);
-                                ugs.expulsionRound[i] = ugs.getTurnOrder().getRoundCounter();
+                                ugs.expulsionRound[i] = ugs.getRoundCounter();
                                 if (playerScores[i] < lowScore) {
                                     lowScore = playerScores[i];
                                 }
@@ -297,7 +301,7 @@ public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
                             // everyone breached, so winner is the lowest score
                             for (int p : lowScoreIds) {
                                 ugs.setPlayerResult(CoreConstants.GameResult.WIN, p);
-                                ugs.expulsionRound[p] = ugs.getTurnOrder().getRoundCounter() + 1;
+                                ugs.expulsionRound[p] = ugs.getRoundCounter() + 1;
                             }
                             ugs.setGameStatus(CoreConstants.GameResult.GAME_END);
                             return true;
@@ -305,7 +309,7 @@ public class UnoForwardModel extends StandardForwardModelWithTurnOrder {
                             for (int p = 0; p < ugs.getNPlayers(); p++) {
                                 if (ugs.getPlayerResults()[p] == GAME_ONGOING) {
                                     ugs.setPlayerResult(CoreConstants.GameResult.WIN, p);
-                                    ugs.expulsionRound[p] = ugs.getTurnOrder().getRoundCounter() + 1;
+                                    ugs.expulsionRound[p] = ugs.getRoundCounter() + 1;
                                 }
                             }
                             // we then continue to the case 1:
