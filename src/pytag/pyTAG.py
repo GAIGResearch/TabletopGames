@@ -47,8 +47,8 @@ class PyTAG():
         pass
 
     def step(self, action):
-        self.gs = self.env.step(action)
-        obs = self.gs.getFeatureVector()
+        self.env.step(action)
+        obs = self.env.getObservationVector()
         reward = self.env.getReward()
         done = self.env.isDone()
         return obs, reward, done, ""

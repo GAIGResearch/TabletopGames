@@ -81,6 +81,13 @@ public class GYMEnv {
         else throw new Exception("Function is not implemented");
     }
 
+    public double[] getObservationVector() throws Exception {
+        if (gameState instanceof IVectorisable) {
+            return ((IVectorisable) gameState).getObservationVector();
+        }
+        else throw new Exception("Function is not implemented");
+    }
+
     // Gets the action space as an integer
     public int getActionSpace() throws Exception {
         if (forwardModel instanceof IOrderedActionSpace) {
@@ -161,7 +168,7 @@ public class GYMEnv {
     }
 
 
-    public AbstractGameState step(int a) throws Exception {
+    public void step(int a) throws Exception {
         // execute action and loop until a PythonAgent is required to make a decision
         playAction(a);
 
@@ -173,7 +180,7 @@ public class GYMEnv {
 
             if (isDone()){
                 // game is over
-                return observation;
+                return;
             }
 
             // Start the timer for this decision
@@ -215,7 +222,7 @@ public class GYMEnv {
         AbstractGameState observation = gameState.copy(activePlayer);
         this.availableActions = forwardModel.computeAvailableActions(observation);
 
-        return observation;
+        return;
     }
 
 

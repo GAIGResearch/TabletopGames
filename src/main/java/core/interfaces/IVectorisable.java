@@ -11,6 +11,8 @@ public interface IVectorisable {
     // Gets observations as a JSON
     JSONObject getObservationJson();
 
+    double[] getObservationVector();
+
     // Gets the size of the observation vector
     int getObservationSpace();
 }

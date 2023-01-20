@@ -46,6 +46,21 @@ public class DiamantGameState extends AbstractGameState implements IPrintable, I
     }
 
     @Override
+    public double[] getObservationVector() {
+        double[] retVal = new double[getObservationSpace()];
+        retVal[0] = getTreasureChests().get(getCurrentPlayer()).getValue();
+        retVal[1] = nGemsOnPath;
+        retVal[2] = playerInCave.size();
+        retVal[3] = nCave;
+        retVal[4] = nHazardExplosionsOnPath;
+        retVal[5] = nHazardPoissonGasOnPath;
+        retVal[6] = nHazardRockfallsOnPath;
+        retVal[7] = nHazardScorpionsOnPath;
+        retVal[8] = nHazardSnakesOnPath;
+        return retVal;
+    }
+
+    @Override
     public int getObservationSpace() {
         return 9;
     }
@@ -299,20 +314,4 @@ public class DiamantGameState extends AbstractGameState implements IPrintable, I
     public List<Counter>     getTreasureChests() { return treasureChests; }
     public Deck<DiamantCard> getPath()           { return path;           }
     public ActionsPlayed     getActionsPlayed()  { return actionsPlayed;  }
-
-    public double[] getFeatureVector() {
-        String[] names = new String[]{"BANKED POINTS", "CAVE POINTS", "NPLAYERS", "CAVES LEFT"
-                , "TRAP1", "TRAP2", "TRAP3", "TRAP4", "TRAP5"};
-        double[] retVal = new double[names.length];
-        retVal[0] = getTreasureChests().get(getCurrentPlayer()).getValue();
-        retVal[1] = nGemsOnPath;
-        retVal[2] = playerInCave.size();
-        retVal[3] = nCave;
-        retVal[4] = nHazardExplosionsOnPath;
-        retVal[5] = nHazardPoissonGasOnPath;
-        retVal[6] = nHazardRockfallsOnPath;
-        retVal[7] = nHazardScorpionsOnPath;
-        retVal[8] = nHazardSnakesOnPath;
-        return retVal;
-    }
 }
