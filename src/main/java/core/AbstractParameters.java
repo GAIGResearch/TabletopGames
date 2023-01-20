@@ -10,6 +10,8 @@ public abstract class AbstractParameters {
 
     // Random seed for this game
     long randomSeed;
+    // Maximum nmber of rounds in the game
+    int maxRounds = -1;
 
     // Player thinking time for the entire game, in minutes. Default max value.
     long thinkingTimeMins = 90;
@@ -17,7 +19,7 @@ public abstract class AbstractParameters {
     long incrementActionS = 0, incrementTurnS = 0, incrementRoundS = 0;
     // Increment in seconds, added after a custom milestone (to be added manually in game implementation). Default 0.
     long incrementMilestoneS = 0;
-    int maxRounds = -1;
+
 
     public AbstractParameters(long seed) {
         randomSeed = seed;

@@ -22,6 +22,6 @@ public abstract class SequentialActionForwardModel extends StandardForwardModel 
         // All we need to do is end the player turn after every action
         endPlayerTurn(currentState);
         if (currentState.getCurrentPlayer() == 0)
-            endRound(currentState, 0);
+            endRound(currentState);
     }
 }

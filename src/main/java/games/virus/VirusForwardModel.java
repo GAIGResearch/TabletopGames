@@ -2,7 +2,7 @@ package games.virus;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import games.virus.actions.*;
@@ -16,7 +16,9 @@ import static core.CoreConstants.VisibilityMode;
 import static games.virus.cards.VirusCard.OrganType.Treatment;
 import static games.virus.cards.VirusCard.OrganType.Wild;
 
-public class VirusForwardModel extends StandardForwardModelWithTurnOrder {
+// Official Rules
+// https://tranjisgames.com/wp-content/uploads/2017/02/VIRUS-RULES-eng.pdf
+public class VirusForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -27,6 +29,7 @@ public class VirusForwardModel extends StandardForwardModelWithTurnOrder {
         // 4. There is a discard card. Empty at the beginning.
 
         VirusGameState vgs = (VirusGameState) firstState;
+        firstState.getGameParameters().setMaxRounds(((VirusGameParameters)firstState.getGameParameters()).nMaxRounds);  // TODO: this is max rounds for timeout
 
         vgs.playerBodies = new ArrayList<>(vgs.getNPlayers());
 
@@ -54,7 +57,7 @@ public class VirusForwardModel extends StandardForwardModelWithTurnOrder {
         VirusGameState vgs = (VirusGameState) gameState;
         checkGameEnd(vgs);
         if (vgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING)
-            vgs.getTurnOrder().endPlayerTurn(gameState);
+            endPlayerTurn(gameState);
     }
 
     /**
@@ -132,13 +135,6 @@ public class VirusForwardModel extends StandardForwardModelWithTurnOrder {
             if (vgs.playerBodies.get(i).getNOrganHealthy() >= VirusCard.OrganType.values().length - 2) {
                 endGame(vgs);
                 break;
-            }
-        }
-        int nMaxRounds = ((VirusGameParameters) vgs.getGameParameters()).nMaxRounds;
-        if (vgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && vgs.getTurnOrder().getRoundCounter() >= nMaxRounds) {
-            for (int i = 0; i < vgs.getNPlayers(); i++) {
-                vgs.setPlayerResult(CoreConstants.GameResult.DRAW, i);
-                vgs.setGameStatus(CoreConstants.GameResult.GAME_END);
             }
         }
     }

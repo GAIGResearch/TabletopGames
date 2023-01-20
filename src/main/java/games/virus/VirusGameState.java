@@ -1,15 +1,11 @@
 package games.virus;
 
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.AbstractGameState;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
-import games.uno.UnoTurnOrder;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
 import games.virus.components.VirusOrgan;
@@ -17,7 +13,7 @@ import games.virus.components.VirusOrgan;
 import java.util.*;
 
 
-public class VirusGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+public class VirusGameState extends AbstractGameState implements IPrintable {
     List<VirusBody>       playerBodies;   // Each player has a body
     List<Deck<VirusCard>> playerDecks;    // Each player has a deck with 3 cards
     Deck<VirusCard>       drawDeck;       // The deck with the not yet played cards, It is not visible for any player
@@ -25,10 +21,6 @@ public class VirusGameState extends AbstractGameStateWithTurnOrder implements IP
 
     public VirusGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-    }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new AlternatingTurnOrder(nPlayers);
     }
 
     @Override
@@ -47,7 +39,7 @@ public class VirusGameState extends AbstractGameStateWithTurnOrder implements IP
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         VirusGameState vgs = new VirusGameState(gameParameters.copy(), getNPlayers());
         vgs.drawDeck = drawDeck.copy();
         vgs.discardDeck = discardDeck.copy();
@@ -100,9 +92,7 @@ public class VirusGameState extends AbstractGameStateWithTurnOrder implements IP
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase);
-        result = 31 * result + Arrays.hashCode(playerResults);
-        return result * 31 + Objects.hash(playerBodies, playerDecks, drawDeck, discardDeck);
+        return Objects.hash(super.hashCode(), playerBodies, playerDecks, drawDeck, discardDeck);
     }
 
     public Deck<VirusCard> getDiscardDeck() {
@@ -117,22 +107,15 @@ public class VirusGameState extends AbstractGameStateWithTurnOrder implements IP
         return playerDecks;
     }
 
-    public List<VirusBody> getPlayerBodies() {
-        return playerBodies;
-    }
-
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(gameParameters.hashCode()).append("|");
-        sb.append(turnOrder.hashCode()).append("|");
-        sb.append(gameStatus.hashCode()).append("|");
-        sb.append(gamePhase.hashCode()).append("|");
-        sb.append(Arrays.hashCode(playerResults)).append("|*|");
-        sb.append(playerBodies.hashCode()).append("|");
-        sb.append(playerDecks.hashCode()).append("|");
-        sb.append(drawDeck.hashCode()).append("|");
-        sb.append(discardDeck.hashCode()).append("|");
-        return sb.toString();
+        return gameParameters.hashCode() + "|" +
+                gameStatus.hashCode() + "|" +
+                gamePhase.hashCode() + "|" +
+                Arrays.hashCode(playerResults) + "|*|" +
+                playerBodies.hashCode() + "|" +
+                playerDecks.hashCode() + "|" +
+                drawDeck.hashCode() + "|" +
+                discardDeck.hashCode() + "|";
     }
     @Override
     public void printToConsole() {
