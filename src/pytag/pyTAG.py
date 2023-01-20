@@ -10,7 +10,8 @@ class PyTAG():
     def __init__(self, agents, seed=42, game="Diamant", jar_path="ModernBoardGame.jar"):
         # JPYPE setup
         jpype.addClassPath(jar_path)
-        jpype.startJVM()
+        if not jpype.isJVMStarted():
+            jpype.startJVM()
 
         Utils = jpype.JClass("utilities.Utils")
         GYMEnv = jpype.JClass("core.GYMEnv")
