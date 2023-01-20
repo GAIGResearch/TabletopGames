@@ -75,8 +75,6 @@ public class AttackUnitsAction extends AbstractAction {
             for (Unit unit : attackerUnits) {
                 unit.SetCanAttack(false);
             }
-
-            state.IncrementTurn(playerID);
             return true;
         }
     }

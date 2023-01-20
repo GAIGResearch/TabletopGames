@@ -1,7 +1,7 @@
 package games.battlelore;
 
 import core.AbstractGameState;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.battlelore.actions.AttackUnitsAction;
@@ -15,7 +15,7 @@ import games.battlelore.components.Unit;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BattleloreForwardModel extends StandardForwardModelWithTurnOrder {
+public class BattleloreForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState initialState) {
@@ -68,7 +68,7 @@ public class BattleloreForwardModel extends StandardForwardModelWithTurnOrder {
                 break;
             case AttackStep:
                 if (state.GetReadyForAttackUnitsFromTile(playerFaction).isEmpty()) {
-                    state.getTurnOrder().endPlayerTurn(state);
+                    endPlayerTurn(state);
                     currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep);
                 }
                 break;
@@ -76,9 +76,11 @@ public class BattleloreForwardModel extends StandardForwardModelWithTurnOrder {
                 break;
         }
 
-        if (checkGameEnd((BattleloreGameState) currentState, playerId) || state.getTurnOrder().getRoundCounter() > maxTurnsToPlay) {
+        if (checkGameEnd((BattleloreGameState) currentState, playerId) || state.getRoundCounter() > maxTurnsToPlay) {
             endGame(currentState);
         }
+
+        endPlayerTurn(currentState);
     }
 
     private void PutLearningScenarioUnits(BattleloreGameState gameState) {
