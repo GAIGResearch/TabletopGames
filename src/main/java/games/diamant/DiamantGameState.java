@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.Random;
 
 
-public class DiamantGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+public class DiamantGameState extends AbstractGameState implements IPrintable {
     Deck<DiamantCard>          mainDeck;
     Deck<DiamantCard>          discardDeck;
     Deck<DiamantCard>          path;
@@ -67,10 +67,6 @@ public class DiamantGameState extends AbstractGameStateWithTurnOrder implements 
     public DiamantGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new StandardTurnOrder(nPlayers);
-    }
 
     @Override
     protected GameType _getGameType() {
@@ -90,7 +86,7 @@ public class DiamantGameState extends AbstractGameStateWithTurnOrder implements 
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId)
+    protected AbstractGameState _copy(int playerId)
     {
         Random r = new Random(getGameParameters().getRandomSeed());
 

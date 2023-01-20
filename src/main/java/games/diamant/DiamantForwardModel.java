@@ -1,7 +1,7 @@
 package games.diamant;
 
 import core.AbstractGameState;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -18,7 +18,7 @@ import java.util.Random;
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
-public class DiamantForwardModel extends StandardForwardModelWithTurnOrder {
+public class DiamantForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;
@@ -44,7 +44,7 @@ public class DiamantForwardModel extends StandardForwardModelWithTurnOrder {
         // Draw first card and play it
         drawAndPlayCard(dgs);
 
-        dgs.getTurnOrder().setStartingPlayer(0);
+        dgs.setFirstPlayer(0);
     }
 
     /**
@@ -84,12 +84,12 @@ public class DiamantForwardModel extends StandardForwardModelWithTurnOrder {
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DiamantGameState dgs = (DiamantGameState) currentState;
-        // If all players has an action, execute them
+        // If all players have an action, execute them
         if (dgs.actionsPlayed.size() == dgs.getNPlayers()) {
             playActions(dgs);
             dgs.actionsPlayed.clear();
         }
-        dgs.getTurnOrder().endPlayerTurn(dgs);
+        endPlayerTurn(dgs);
     }
 
 
