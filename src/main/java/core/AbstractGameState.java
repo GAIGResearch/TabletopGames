@@ -8,7 +8,6 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IComponentContainer;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IGamePhase;
-import core.turnorders.TurnOrder;
 import evaluation.listeners.GameListener;
 import evaluation.metrics.Event;
 import games.GameType;
@@ -16,7 +15,6 @@ import utilities.ElapsedCpuChessTimer;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 import static core.CoreConstants.GameResult.*;
@@ -154,7 +152,7 @@ public abstract class AbstractGameState {
     void advanceGameTick() {tick++;}
 
     public void setTurnOwner(int newTurnOwner) {turnOwner = newTurnOwner;}
-    public void setStartingPlayer(int newFirstPlayer) {
+    public void setFirstPlayer(int newFirstPlayer) {
         firstPlayer = newFirstPlayer;
         turnOwner = newFirstPlayer;
     }

@@ -19,7 +19,6 @@ public class Check extends AbstractAction implements IPrintable {
     public boolean execute(AbstractGameState gameState) {
         PokerGameState pgs = (PokerGameState) gameState;
         pgs.getPlayerNeedsToCall()[playerId] = false;
-        pgs.getTurnOrder().endPlayerTurn(pgs);
         return true;
     }
 

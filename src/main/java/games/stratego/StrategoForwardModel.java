@@ -38,7 +38,7 @@ public class StrategoForwardModel extends StandardForwardModel {
             state.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
         }
 
-        state.setStartingPlayer(0);
+        state.setFirstPlayer(0);
     }
 
     @Override

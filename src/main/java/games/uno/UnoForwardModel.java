@@ -37,7 +37,7 @@ public class UnoForwardModel extends StandardForwardModel {
         ugs.discardDeck = new Deck<>("DiscardDeck", VISIBLE_TO_ALL);
 
         // Player 0 starts the game
-        ugs.setStartingPlayer(0);
+        ugs.setFirstPlayer(0);
         ugs.skipTurn = false;
         ugs.direction = 1;
 

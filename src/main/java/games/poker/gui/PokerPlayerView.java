@@ -3,7 +3,6 @@ package games.poker.gui;
 import core.components.Deck;
 import games.poker.PokerGameState;
 import core.components.FrenchCard;
-import games.poker.PokerTurnOrder;
 
 import java.awt.*;
 
@@ -55,7 +54,7 @@ public class PokerPlayerView extends PokerDeckView {
      */
     public void update(PokerGameState gameState) {
         this.component = gameState.getPlayerDecks().get(playerId);
-        firstPlayerOfRound = ((PokerTurnOrder) gameState.getTurnOrder()).getRoundFirstPlayer() == playerId;
+        firstPlayerOfRound = gameState.getFirstPlayer() == playerId;
         bet = gameState.getPlayerBet()[playerId].getValue();
     }
 

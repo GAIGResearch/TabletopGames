@@ -277,7 +277,7 @@ public class PokerGUIManager extends AbstractGUIManager {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
-            if (pgs.getTurnOrder().getRoundCounter() != gameState.getRoundCounter()) {
+            if (pgs.getRoundCounter() != gameState.getRoundCounter()) {
                 // New round
                 // Paint final state of previous round, showing all hands
                 for (int i = 0; i < pgs.getNPlayers(); i++) {

@@ -58,7 +58,7 @@ public class SGForwardModel extends StandardForwardModel {
         }
 
         // Set starting player
-        gs.setStartingPlayer(0);
+        gs.setFirstPlayer(0);
     }
 
     /**

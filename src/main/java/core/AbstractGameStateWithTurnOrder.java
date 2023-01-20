@@ -57,7 +57,7 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
     @Override
     public void setTurnOwner(int newTurnOwner) {turnOrder.setTurnOwner(newTurnOwner);}
     @Override
-    public void setStartingPlayer(int newFirstPlayer) {turnOrder.setStartingPlayer(newFirstPlayer);}
+    public void setFirstPlayer(int newFirstPlayer) {turnOrder.setStartingPlayer(newFirstPlayer);}
     public final void setTurnOrder(TurnOrder turnOrder) {
         this.turnOrder = turnOrder;
     }

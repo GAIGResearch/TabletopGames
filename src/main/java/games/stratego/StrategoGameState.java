@@ -1,14 +1,10 @@
 package games.stratego;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
-import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
-import games.poker.PokerTurnOrder;
 import games.stratego.components.Piece;
 
 import java.util.ArrayList;

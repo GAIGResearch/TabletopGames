@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
@@ -14,17 +13,15 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import core.turnorders.TurnOrder;
 import games.GameType;
-import games.pandemic.PandemicParameters;
-import games.pandemic.PandemicTurnOrder;
 import games.poker.components.MoneyPot;
 import utilities.Pair;
 
+import static core.CoreConstants.GameResult.LOSE;
 import static utilities.Utils.generateCombinations;
 
 
-public class PokerGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+public class PokerGameState extends AbstractGameState implements IPrintable {
     List<Deck<FrenchCard>>  playerDecks;
     Counter[]               playerMoney;
     Counter[]               playerBet;
@@ -55,10 +52,6 @@ public class PokerGameState extends AbstractGameStateWithTurnOrder implements IP
     public PokerGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new PokerTurnOrder(nPlayers);
-    }
 
     @Override
     protected GameType _getGameType() {
@@ -75,6 +68,19 @@ public class PokerGameState extends AbstractGameStateWithTurnOrder implements IP
             this.addAll(Arrays.asList(playerMoney));
             this.addAll(Arrays.asList(playerBet));
         }};
+    }
+
+    public int getNextPlayer() {
+        int next = (nPlayers + turnOwner + 1) % nPlayers;
+        int nTries = 1;
+        while ((playerFold[next] || getPlayerResults()[next] == LOSE) && nTries <= getNPlayers()) {
+            next = (nPlayers + next + 1) % nPlayers;
+            nTries++;
+        }
+//        if (nTries > getNPlayers()) {
+//            endGame(gameState);
+//        }
+        return next;
     }
 
     public void placeBet(int amount, int player) {
@@ -170,10 +176,6 @@ public class PokerGameState extends AbstractGameStateWithTurnOrder implements IP
         return playerBet;
     }
 
-    public boolean[] getPlayerActStreet() {
-        return playerActStreet;
-    }
-
     public boolean isBet() {
         return bet;
     }
@@ -183,7 +185,7 @@ public class PokerGameState extends AbstractGameStateWithTurnOrder implements IP
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         PokerGameState copy = new PokerGameState(gameParameters.copy(), getNPlayers());
         copy.communityCards = communityCards.copy();
         copy.moneyPots = new ArrayList<>();
@@ -256,41 +258,36 @@ public class PokerGameState extends AbstractGameStateWithTurnOrder implements IP
         if (!(o instanceof PokerGameState)) return false;
         if (!super.equals(o)) return false;
         PokerGameState that = (PokerGameState) o;
-        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Arrays.equals(playerMoney, that.playerMoney) && Arrays.equals(playerBet, that.playerBet) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold) && Arrays.equals(playerActStreet, that.playerActStreet) && Objects.equals(moneyPots, that.moneyPots);
+        return bet == that.bet && Objects.equals(playerDecks, that.playerDecks) && Arrays.equals(playerMoney, that.playerMoney) && Arrays.equals(playerBet, that.playerBet) && Objects.equals(drawDeck, that.drawDeck) && Objects.equals(communityCards, that.communityCards) && Objects.equals(moneyPots, that.moneyPots) && Arrays.equals(playerNeedsToCall, that.playerNeedsToCall) && Arrays.equals(playerFold, that.playerFold) && Arrays.equals(playerActStreet, that.playerActStreet);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase, playerDecks, drawDeck, communityCards, moneyPots, bet);
+        int result = Objects.hash(super.hashCode(), playerDecks, drawDeck, communityCards, moneyPots, bet);
         result = 31 * result + Arrays.hashCode(playerMoney);
         result = 31 * result + Arrays.hashCode(playerBet);
         result = 31 * result + Arrays.hashCode(playerNeedsToCall);
         result = 31 * result + Arrays.hashCode(playerFold);
         result = 31 * result + Arrays.hashCode(playerActStreet);
-        result = 31 * result + Arrays.hashCode(playerResults);
-
         return result;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Objects.hash(gameParameters)).append("|");
-        sb.append(Objects.hash(turnOrder)).append("|");
-        sb.append(Objects.hash(gameStatus)).append("|");
-        sb.append(Objects.hash(gamePhase)).append("|*|");
-        sb.append(Objects.hash(playerDecks)).append("|");
-        sb.append(Objects.hash(drawDeck)).append("|");
-        sb.append(Objects.hash(communityCards)).append("|");
-        sb.append(Objects.hash(moneyPots)).append("|");
-        sb.append(Objects.hash(bet)).append("|*|");
-        sb.append(Arrays.hashCode(playerMoney)).append("|");
-        sb.append(Arrays.hashCode(playerBet)).append("|");
-        sb.append(Arrays.hashCode(playerNeedsToCall)).append("|");
-        sb.append(Arrays.hashCode(playerFold)).append("|");
-        sb.append(Arrays.hashCode(playerMoney)).append("|");
-        sb.append(Arrays.hashCode(playerResults)).append("|");
-        return sb.toString();
+        return Objects.hash(gameParameters) + "|" +
+                Objects.hash(gameStatus) + "|" +
+                Objects.hash(gamePhase) + "|*|" +
+                Objects.hash(playerDecks) + "|" +
+                Objects.hash(drawDeck) + "|" +
+                Objects.hash(communityCards) + "|" +
+                Objects.hash(moneyPots) + "|" +
+                Objects.hash(bet) + "|*|" +
+                Arrays.hashCode(playerMoney) + "|" +
+                Arrays.hashCode(playerBet) + "|" +
+                Arrays.hashCode(playerNeedsToCall) + "|" +
+                Arrays.hashCode(playerFold) + "|" +
+                Arrays.hashCode(playerMoney) + "|" +
+                Arrays.hashCode(playerResults) + "|";
     }
 
     enum PokerHand {
@@ -305,8 +302,8 @@ public class PokerGameState extends AbstractGameStateWithTurnOrder implements IP
         OnePair (9),
         HighCard (10);
 
-        static int pokerHandSize = 5;
-        int rank;
+        static final int pokerHandSize = 5;
+        final int rank;
         PokerHand(int rank) {
             this.rank = rank;
         }
