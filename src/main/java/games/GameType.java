@@ -39,6 +39,10 @@ import games.uno.gui.*;
 import games.virus.*;
 import games.dicemonastery.*;
 import games.dominion.*;
+import gametemplate.GTForwardModel;
+import gametemplate.GTGUIManager;
+import gametemplate.GTGameState;
+import gametemplate.GTParameters;
 import gui.*;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import players.human.ActionController;
@@ -61,6 +65,10 @@ import static games.GameType.Mechanic.*;
  */
 public enum GameType {
 
+    /**
+     * Game template example, see template in package {@link gametemplate}
+     */
+    GameTemplate(1,8, null, null, GTGameState.class, GTForwardModel.class, GTParameters.class, GTGUIManager.class),
     /**
      * Each game in the framework corresponds to a enum value here, giving minimum players, maximum players,
      * a list of categories the game belongs to, and a list of mechanics the game uses.
