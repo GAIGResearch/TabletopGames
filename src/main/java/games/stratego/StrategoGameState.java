@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class StrategoGameState extends AbstractGameStateWithTurnOrder {
+public class StrategoGameState extends AbstractGameState {
     GridBoard<Piece> gridBoard;
 
     /**
@@ -25,10 +25,6 @@ public class StrategoGameState extends AbstractGameStateWithTurnOrder {
      */
     public StrategoGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-    }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new AlternatingTurnOrder(nPlayers);
     }
 
     @Override
@@ -42,7 +38,7 @@ public class StrategoGameState extends AbstractGameStateWithTurnOrder {
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         StrategoGameState s = new StrategoGameState(gameParameters, 2);
         s.gridBoard = gridBoard.emptyCopy();
         Piece.Alliance playerAlliance = null;

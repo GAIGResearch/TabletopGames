@@ -2,7 +2,7 @@ package games.stratego;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.stratego.actions.Move;
@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class StrategoForwardModel extends StandardForwardModelWithTurnOrder {
+public class StrategoForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -38,7 +38,7 @@ public class StrategoForwardModel extends StandardForwardModelWithTurnOrder {
             state.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
         }
 
-        state.getTurnOrder().setStartingPlayer(0);
+        state.setStartingPlayer(0);
     }
 
     @Override
@@ -73,20 +73,20 @@ public class StrategoForwardModel extends StandardForwardModelWithTurnOrder {
         }
         StrategoGameState sgs = (StrategoGameState) currentState;
 
-        sgs.getTurnOrder().endPlayerTurn(currentState);
+        endPlayerTurn(sgs);
 
-        List<AbstractAction> actions = _computeAvailableActions(currentState);
+        List<AbstractAction> actions = _computeAvailableActions(sgs);
         if (actions.isEmpty()){
             // If the player can't take any actions, they lose
-            currentState.setGameStatus(CoreConstants.GameResult.GAME_END);
-            currentState.setPlayerResult(CoreConstants.GameResult.LOSE, currentState.getCurrentPlayer());
-            currentState.setPlayerResult(CoreConstants.GameResult.WIN, 1-currentState.getCurrentPlayer());
+            sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
+            sgs.setPlayerResult(CoreConstants.GameResult.LOSE, sgs.getCurrentPlayer());
+            sgs.setPlayerResult(CoreConstants.GameResult.WIN, 1-sgs.getCurrentPlayer());
         } else {
-            if (sgs.getTurnOrder().getRoundCounter() >= ((StrategoParams)currentState.getGameParameters()).maxRounds) {
+            if (sgs.getRoundCounter() >= ((StrategoParams)sgs.getGameParameters()).maxRounds) {
                 // Max rounds reached, draw
-                currentState.setGameStatus(CoreConstants.GameResult.GAME_END);
-                currentState.setPlayerResult(CoreConstants.GameResult.DRAW, currentState.getCurrentPlayer());
-                currentState.setPlayerResult(CoreConstants.GameResult.DRAW, 1-currentState.getCurrentPlayer());
+                sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
+                sgs.setPlayerResult(CoreConstants.GameResult.DRAW, sgs.getCurrentPlayer());
+                sgs.setPlayerResult(CoreConstants.GameResult.DRAW, 1-sgs.getCurrentPlayer());
             }
         }
     }
