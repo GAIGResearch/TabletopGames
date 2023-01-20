@@ -4,7 +4,6 @@ import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.interfaces.IComponentContainer;
 
 import java.util.List;
 import java.util.Random;
@@ -26,10 +25,7 @@ public class DeterminisationUtilities {
      * @param <C>
      */
     public static <C extends Component> void reshuffle(int player, List<Deck<C>> decks, Predicate<C> lambda, Random rnd) {
-        // Now gather up all unknown cards for reshuffling
-        // Unknown Ammonia cards are the draw pile, unseen moon piles, and other player hands
-
-        int totalDeckSizePre = decks.stream().mapToInt(IComponentContainer::getSize).sum();
+        // Gather up all unknown cards for reshuffling
 
         Deck<C> allCards = new Deck<>("temp", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
 

@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-
 public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
 
     GridBoard<Token> gridBoard;
