@@ -260,6 +260,12 @@ public abstract class AbstractGameState {
         s.gamePhase = gamePhase;
         s.coreGameParameters = coreGameParameters;
         s.tick = tick;
+        s.currentPlayer = currentPlayer;
+        s.nPlayers = nPlayers;
+        s.roundCounter = roundCounter;
+        s.turnCounter = turnCounter;
+        s.turnOwner = turnOwner;
+        s.firstPlayer = firstPlayer;
 
         if (!coreGameParameters.competitionMode) {
             s.history = new ArrayList<>(history);
@@ -540,25 +546,36 @@ public abstract class AbstractGameState {
         if (!(o instanceof AbstractGameState)) return false;
         AbstractGameState gameState = (AbstractGameState) o;
         return Objects.equals(gameParameters, gameState.gameParameters) &&
-                Objects.equals(allComponents, gameState.allComponents) &&
-                gameStatus == gameState.gameStatus &&
+                gameStatus == gameState.gameStatus && currentPlayer == gameState.currentPlayer &&
+                nPlayers == gameState.nPlayers && roundCounter == gameState.roundCounter &&
+                turnCounter == gameState.turnCounter && turnOwner == gameState.turnOwner &&
+                firstPlayer == gameState.firstPlayer && tick == gameState.tick &&
                 Arrays.equals(playerResults, gameState.playerResults) &&
                 Objects.equals(gamePhase, gameState.gamePhase) &&
                 Objects.equals(actionsInProgress, gameState.actionsInProgress) &&
                 _equals(o);
-        // we deliberately exclude history from this equality check
+        // we deliberately exclude history and allComponents from this equality check
+        // this is because history is deliberately erased at times to hide hidden information (and is read-only)
+        // and allComponents is not always populated (it is a convenience to get hold of all components in a game
+        // at the superclass level - the actually important components are instantiated in sub-classes, and should be
+        // included in the _equals() method implemented there
     }
 
     /**
      * Override the hashCode as needed for individual game states
-     * Equality of hashcodes can sometimes require excluding allComponents from the hash
-     * TODO: Remove this annoyance, make hashcode final, and add a _hashcode() abstract method
      * (It is OK for two java objects to be not equal and have the same hashcode)
+     *
+     *         we deliberately exclude history and allComponents from the hashcode
+     *         this is because history is deliberately erased at times to hide hidden information (and is read-only)
+     *         and allComponents is not always populated (it is a convenience to get hold of all components in a game
+     *         at the superclass level - the actually important components are instantiated in sub-classes, and should be
+     *         included in the hashCode() method implemented there
      * @return
      */
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, allComponents, gameStatus, gamePhase);
+        int result = Objects.hash(gameParameters, gameStatus, gamePhase, actionsInProgress);
+        result = 31 * result + Objects.hash(tick, currentPlayer, nPlayers, roundCounter, turnCounter, turnOwner, firstPlayer);
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }

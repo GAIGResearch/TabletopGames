@@ -88,7 +88,6 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
     /**
      * Override the hashCode as needed for individual game states
      * Equality of hashcodes can sometimes require excluding allComponents from the hash
-     * TODO: Remove this annoyance, make hashcode final, and add a _hashcode() abstract method
      * (It is OK for two java objects to be not equal and have the same hashcode)
      * @return
      */

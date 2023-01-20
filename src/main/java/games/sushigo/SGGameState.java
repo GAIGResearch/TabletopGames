@@ -258,9 +258,8 @@ public class SGGameState extends AbstractGameStateWithTurnOrder {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase, playerHands, drawPile, discardPile,
+        int result = Objects.hash(playerHands, drawPile, discardPile,
                 nCardsInHand, cardChoices, playedCards, deckRotations);
-        result = 31 * result + Arrays.hashCode(playerResults);
         result = 31 * result + Arrays.hashCode(playedCardTypes);
         result = 31 * result + Arrays.hashCode(playerScore);
         result = 31 * result + Arrays.hashCode(playedCardTypesAllGame);
