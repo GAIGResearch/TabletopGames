@@ -2,6 +2,7 @@ package games.dominion;
 
 import core.*;
 import core.actions.*;
+import core.components.Deck;
 import games.dominion.actions.*;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
@@ -10,7 +11,7 @@ import java.util.*;
 
 import static java.util.stream.Collectors.*;
 
-public class DominionForwardModel extends StandardForwardModelWithTurnOrder {
+public class DominionForwardModel extends StandardForwardModel {
     /**
      * Performs initial game setup according to game rules
      * - sets up decks and shuffles
@@ -89,7 +90,33 @@ public class DominionForwardModel extends StandardForwardModelWithTurnOrder {
                     if (state.gameOver()) {
                         endGame(state);
                     } else {
-                        state.endOfTurn(playerID);
+
+                        // 1) put hand and cards played into discard
+                        // 2) draw 5 new cards
+                        // 3) shuffle and move discard if we run out
+                        Deck<DominionCard> hand = state.playerHands[playerID];
+                        Deck<DominionCard> discard = state.playerDiscards[playerID];
+                        Deck<DominionCard> table = state.playerTableaux[playerID];
+
+                        discard.add(hand);
+                        discard.add(table);
+                        table.clear();
+                        hand.clear();
+                        for (int i = 0; i < state.params.HAND_SIZE; i++)
+                            state.drawCard(playerID);
+
+                        state.defenceStatus = new boolean[state.playerCount];  // resets to false
+
+                        state.actionsLeftForCurrentPlayer = 1;
+                        state.spentSoFar = 0;
+                        state.additionalSpendAvailable = 0;
+                        state.buysLeftForCurrentPlayer = 1;
+                        state.setGamePhase(DominionGameState.DominionGamePhase.Play);
+
+                        endPlayerTurn(state);
+                        // and we end the round if we get back to the first player
+                        if (state.getCurrentPlayer() == currentState.getFirstPlayer())
+                            endRound(state, state.getFirstPlayer());
                     }
                 }
                 break;
@@ -98,6 +125,8 @@ public class DominionForwardModel extends StandardForwardModelWithTurnOrder {
         }
 
     }
+
+
 
     private void processDelayedActions(TriggerType trigger, DominionGameState state) {
         Map<Boolean, List<IDelayedAction>> partition = state.delayedActions.stream()
