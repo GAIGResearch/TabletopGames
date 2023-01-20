@@ -41,7 +41,7 @@ Utils = jpype.JClass("utilities.Utils")
 # gameType = "pandemic"
 
 class TAG():
-    def __init__(self, seed=42, game="Pandemic"):
+    def __init__(self, seed=42, game="Diamant"):
         null = jpype.java.lang.String @ None
         null_list = jpype.java.util.List @ None
         gameType = Utils.getArg([""], "game", game)
@@ -72,6 +72,7 @@ class TAG():
 
     def close(self):
         jpype.shutdownJVM()
+
 
 if __name__ == "__main__":
     EPISODES = 100

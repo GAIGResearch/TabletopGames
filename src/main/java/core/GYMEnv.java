@@ -65,6 +65,7 @@ public class GYMEnv {
 
     // --Wrappers for interface functions--
 
+    // Gets observations in JSON
     public JSONObject getObservationJson() throws Exception {
         if (gameState instanceof IVectorisable) {
             return ((IVectorisable) gameState).getObservationJson();
@@ -72,6 +73,7 @@ public class GYMEnv {
         else throw new Exception("Function is not implemented");
     }
 
+    // Gets the observation space as an integer
     public int getObservationSpace() throws Exception {
         if (gameState instanceof IVectorisable) {
             return ((IVectorisable) gameState).getObservationSpace();
@@ -79,6 +81,7 @@ public class GYMEnv {
         else throw new Exception("Function is not implemented");
     }
 
+    // Gets the action space as an integer
     public int getActionSpace() throws Exception {
         if (forwardModel instanceof IOrderedActionSpace) {
             return ((IOrderedActionSpace) forwardModel).getActionSpace();
@@ -86,6 +89,7 @@ public class GYMEnv {
         else throw new Exception("Function is not implemented");
     }
 
+    // Gets the actions as an integer array
     public int[] getFixedActionSpace() throws Exception {
         if (forwardModel instanceof IOrderedActionSpace) {
             return ((IOrderedActionSpace) forwardModel).getFixedActionSpace();
@@ -93,6 +97,7 @@ public class GYMEnv {
         else throw new Exception("Function is not implemented");
     }
 
+    // Gets the action mask as a boolean array
     public boolean[] getActionMask() throws Exception {
         if (forwardModel instanceof IOrderedActionSpace) {
             return ((IOrderedActionSpace) forwardModel).getActionMask(gameState);
@@ -100,6 +105,7 @@ public class GYMEnv {
         else throw new Exception("Function is not implemented");
     }
 
+    // Plays an action given an actionID
     public void playAction(int actionID) throws Exception {
         if (forwardModel instanceof IOrderedActionSpace) {
             ((IOrderedActionSpace) forwardModel).nextPython(gameState, actionID);
@@ -154,10 +160,10 @@ public class GYMEnv {
 //        return new TicTacToeStateVector().featureVector(gameState, gameState.getCurrentPlayer());
     }
 
-    public AbstractGameState step(int a){
+
+    public AbstractGameState step(int a) throws Exception {
         // execute action and loop until a PythonAgent is required to make a decision
-        AbstractAction a_ = this.availableActions.get(a);
-        forwardModel.next(gameState, a_);
+        playAction(a);
 
         int activePlayer = gameState.getCurrentPlayer();
         AbstractPlayer currentPlayer = players.get(activePlayer);
@@ -211,6 +217,65 @@ public class GYMEnv {
 
         return observation;
     }
+
+
+//    public AbstractGameState step(int a){
+//        // execute action and loop until a PythonAgent is required to make a decision
+//        AbstractAction a_ = this.availableActions.get(a);
+//        forwardModel.next(gameState, a_);
+//
+//        int activePlayer = gameState.getCurrentPlayer();
+//        AbstractPlayer currentPlayer = players.get(activePlayer);
+//        while ( !(currentPlayer instanceof PythonAgent)){
+//            AbstractGameState observation = gameState.copy(activePlayer);
+//            List<core.actions.AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+//
+//            if (isDone()){
+//                // game is over
+//                return observation;
+//            }
+//
+//            // Start the timer for this decision
+//            gameState.playerTimer[activePlayer].resume();
+//
+//            // Either ask player which action to use or, in case no actions are available, report the updated observation
+//            core.actions.AbstractAction action = null;
+//            if (observedActions.size() > 0) {
+//                if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
+//                    // Can only do 1 action, so do it.
+//                    action = observedActions.get(0);
+//                    currentPlayer.registerUpdatedObservation(observation);
+//                } else {
+//                    // Get action from player, and time it
+//                    action = currentPlayer.getAction(observation, observedActions);
+//                }
+//            } else {
+//                currentPlayer.registerUpdatedObservation(observation);
+//            }
+//
+//            // End the timer for this decision
+//            gameState.playerTimer[activePlayer].pause();
+//            gameState.playerTimer[activePlayer].incrementAction();
+//
+//            if (gameState.coreGameParameters.verbose && !(action == null)) {
+//                System.out.println(action);
+//            }
+//            if (action == null)
+//                throw new AssertionError("We have a NULL action in the Game loop");
+//
+//            // Check player timeout
+//            forwardModel.next(gameState, action);
+//            tick++;
+//
+//            lastPlayer = activePlayer;
+//            currentPlayer = players.get(gameState.getCurrentPlayer());
+//
+//        }
+//        AbstractGameState observation = gameState.copy(activePlayer);
+//        this.availableActions = forwardModel.computeAvailableActions(observation);
+//
+//        return observation;
+//    }
 
     public int getTick(){
         return this.tick;
