@@ -139,7 +139,7 @@ public class VirusBody extends Component implements IComponentContainer<VirusOrg
     /**
      * Returns the cards in the organ organType and set the state of the organ to None
      * @param organType: organ type
-     * @return Deck<VirusCard> included in the organ
+     * @return {@code Deck<VirusCard>} included in the organ
      */
     public Deck<VirusCard> removeOrgan(VirusCard.OrganType organType)
     {
