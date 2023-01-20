@@ -5,6 +5,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
+import core.interfaces.IOrderedActionSpace;
 import games.diamant.actions.ContinueInCave;
 import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
@@ -15,11 +16,12 @@ import utilities.Utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
-public class DiamantForwardModel extends AbstractForwardModel {
+public class DiamantForwardModel extends AbstractForwardModel implements IOrderedActionSpace {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;
@@ -292,6 +294,45 @@ public class DiamantForwardModel extends AbstractForwardModel {
                 // Start new cave
                 prepareNewCave(dgs);
             }
+        }
+    }
+
+    @Override
+    public int getActionSpace() {
+        return 3;
+    }
+
+    @Override
+    public int[] getFixedActionSpace() {
+        // Actions 0 - stay in cave 1 - leave cave 2 - out of cave (dummy action)
+        return IntStream.range(0, getActionSpace()).toArray();
+    }
+
+    @Override
+    public boolean[] getActionMask(AbstractGameState gameState) {
+        boolean[] actionMask;
+        DiamantGameState dgs = (DiamantGameState) gameState;
+        List<AbstractAction> actionsList = computeAvailableActions(dgs);
+
+        //Player out of cave
+        if (actionsList.size() == 1) return new boolean[]{false, false, true};
+
+        //Player in cave
+        else return new boolean[]{true, true, false};
+    }
+
+    @Override
+    public void nextPython(AbstractGameState state, int actionID) {
+        switch (actionID) {
+            case 0:
+                next(state, new ContinueInCave());
+                break;
+            case 1:
+                next(state, new ExitFromCave());
+                break;
+            case 2:
+                next(state, new OutOfCave());
+                break;
         }
     }
 }

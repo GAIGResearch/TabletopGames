@@ -3,10 +3,14 @@ package core;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Token;
+import core.interfaces.IOrderedActionSpace;
+import core.interfaces.IVectorisable;
 import games.GameType;
+import games.diamant.DiamantGameState;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
 import games.tictactoe.TicTacToeStateVector;
+import org.json.simple.JSONObject;
 import players.human.HumanGUIPlayer;
 import players.python.PythonAgent;
 import utilities.Utils;
@@ -19,6 +23,7 @@ import java.util.List;
 public class GYMEnv {
     private Game game;
     private AbstractGameState gameState;
+    private IVectorisable iface;
     private AbstractForwardModel forwardModel;
     private List<AbstractPlayer> players;
     private int turnPause = 0;
@@ -30,7 +35,8 @@ public class GYMEnv {
 
     // todo: set-up everything required to run an actual game in Pandemic
     //  - functions: init, getObs, step, finalise...
-    public GYMEnv(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed) {
+    public GYMEnv(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed) throws Exception {
+
         //                              boolean randomizeParameters, List<IGameListener> listeners
         this.players = players;
         // Creating game instance (null if not implemented)
@@ -38,6 +44,11 @@ public class GYMEnv {
             AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, parameterConfigFile);
             this.game = gameToPlay.createGameInstance(players.size(), seed, params);
         } else game = gameToPlay.createGameInstance(players.size(), seed);
+
+        assert game != null;
+        if (!(game.gameState instanceof IVectorisable && game.forwardModel instanceof IOrderedActionSpace)) {
+            throw new Exception("Game has not implemented Reinforcement Learning Interface");
+        }
 //        if (game != null) {
 //            if (listeners != null)
 //                listeners.forEach(game::addListener);
@@ -51,6 +62,53 @@ public class GYMEnv {
 //        }
 
     }
+
+    // --Wrappers for interface functions--
+
+    public JSONObject getObservationJson() throws Exception {
+        if (gameState instanceof IVectorisable) {
+            return ((IVectorisable) gameState).getObservationJson();
+        }
+        else throw new Exception("Function is not implemented");
+    }
+
+    public int getObservationSpace() throws Exception {
+        if (gameState instanceof IVectorisable) {
+            return ((IVectorisable) gameState).getObservationSpace();
+        }
+        else throw new Exception("Function is not implemented");
+    }
+
+    public int getActionSpace() throws Exception {
+        if (forwardModel instanceof IOrderedActionSpace) {
+            return ((IOrderedActionSpace) forwardModel).getActionSpace();
+        }
+        else throw new Exception("Function is not implemented");
+    }
+
+    public int[] getFixedActionSpace() throws Exception {
+        if (forwardModel instanceof IOrderedActionSpace) {
+            return ((IOrderedActionSpace) forwardModel).getFixedActionSpace();
+        }
+        else throw new Exception("Function is not implemented");
+    }
+
+    public boolean[] getActionMask() throws Exception {
+        if (forwardModel instanceof IOrderedActionSpace) {
+            return ((IOrderedActionSpace) forwardModel).getActionMask(gameState);
+        }
+        else throw new Exception("Function is not implemented");
+    }
+
+    public void playAction(int actionID) throws Exception {
+        if (forwardModel instanceof IOrderedActionSpace) {
+            ((IOrderedActionSpace) forwardModel).nextPython(gameState, actionID);
+        }
+        else throw new Exception("Function is not implemented");
+    }
+
+    // --End of Wrapper Functions--
+
 
     public AbstractGameState reset(){
         // Reset game instance, passing the players for this game
