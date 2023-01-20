@@ -9,12 +9,9 @@ import java.util.Objects;
 
 public class Stand extends AbstractAction implements IPrintable {
 
-
-
     @Override
     public boolean execute(AbstractGameState gs) {
-        BlackjackGameState bjgs = (BlackjackGameState) gs;
-        bjgs.getTurnOrder().endPlayerTurn(gs);
+        // Nothing to do
         return true;
     }
 
@@ -40,6 +37,6 @@ public class Stand extends AbstractAction implements IPrintable {
 
     @Override
     public String toString() {
-        return "Hit";
+        return "Stand";
     }
 }

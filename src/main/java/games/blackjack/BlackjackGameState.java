@@ -1,7 +1,6 @@
 package games.blackjack;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
@@ -9,14 +8,12 @@ import core.components.Deck;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import core.turnorders.StandardTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
 
 import java.util.ArrayList;
 import java.util.*;
 
-public class BlackjackGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
+public class BlackjackGameState extends AbstractGameState implements IPrintable {
     List<PartialObservableDeck<FrenchCard>> playerDecks;
     Deck<FrenchCard> drawDeck;
     int dealerPlayer;
@@ -29,11 +26,6 @@ public class BlackjackGameState extends AbstractGameStateWithTurnOrder implement
      */
     public BlackjackGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-    }
-
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new BlackjackTurnOrder(nPlayers);
     }
 
     @Override
@@ -103,7 +95,7 @@ public class BlackjackGameState extends AbstractGameStateWithTurnOrder implement
 
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         BlackjackGameState copy = new BlackjackGameState(gameParameters.copy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
         for (PartialObservableDeck<FrenchCard> d : playerDecks) {
@@ -174,14 +166,11 @@ public class BlackjackGameState extends AbstractGameStateWithTurnOrder implement
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, playerDecks, gameStatus, gamePhase, drawDeck, dealerPlayer);
-        result = 31 * result + Arrays.hashCode(playerResults);
-        return result;
+        return Objects.hash(super.hashCode(), playerDecks, drawDeck, dealerPlayer);
     }
 
     @Override
     public void printToConsole() {
-        // TODO fix
         String[] strings = new String[4];
 
         strings[0] = "Player      : " + getCurrentPlayer();

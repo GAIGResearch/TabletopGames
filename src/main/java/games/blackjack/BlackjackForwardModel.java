@@ -2,6 +2,7 @@ package games.blackjack;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.StandardForwardModel;
 import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
@@ -11,8 +12,11 @@ import games.blackjack.actions.Stand;
 import java.util.ArrayList;
 import java.util.*;
 
+import static core.CoreConstants.GameResult.*;
+import static core.CoreConstants.GameResult.LOSE;
 
-public class BlackjackForwardModel extends StandardForwardModelWithTurnOrder {
+
+public class BlackjackForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         BlackjackGameState bjgs = (BlackjackGameState) firstState;
@@ -26,7 +30,7 @@ public class BlackjackForwardModel extends StandardForwardModelWithTurnOrder {
         //shuffle the cards
         bjgs.drawDeck.shuffle(new Random((bjgs.getGameParameters().getRandomSeed())));
 
-        bjgs.getTurnOrder().setStartingPlayer(0);
+        bjgs.setFirstPlayer(0);
 
         //Create a hand for each player
         boolean[] visibility = new boolean[firstState.getNPlayers()];
@@ -46,7 +50,25 @@ public class BlackjackForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action){
-        // do nothing
+        BlackjackGameState bjgs = (BlackjackGameState) gameState;
+        if (action instanceof Hit) {
+            Hit hit = (Hit)action;
+            // Check if bust or win score
+            int points = bjgs.calculatePoints(hit.playerID);
+            if (points > ((BlackjackParameters)gameState.getGameParameters()).winScore) {
+                gameState.setPlayerResult(CoreConstants.GameResult.LOSE, hit.playerID);
+                if (hit.advanceTurnOrder) {
+                    _endTurn((BlackjackGameState) gameState);
+                }
+            } else if (points == ((BlackjackParameters)gameState.getGameParameters()).winScore) {
+                gameState.setPlayerResult(CoreConstants.GameResult.WIN, hit.playerID);
+                if (hit.advanceTurnOrder) {
+                    _endTurn((BlackjackGameState) gameState);
+                }
+            }
+        } else {
+            _endTurn(bjgs);
+        }
     }
 
     @Override
@@ -55,8 +77,8 @@ public class BlackjackForwardModel extends StandardForwardModelWithTurnOrder {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = bjgs.getCurrentPlayer();
 
-        //Check if current player is the dealer
-        //dealer must hit if score is <=16 otherwise must stand
+        // Check if current player is the dealer.
+        // Dealer must hit if score is <=16 otherwise must stand
         if (bjgs.getCurrentPlayer() == bjgs.dealerPlayer){
             if (bjgs.calculatePoints(bjgs.dealerPlayer) >= ((BlackjackParameters) bjgs.getGameParameters()).dealerStand){
 //                System.out.println("Stand");
@@ -72,6 +94,51 @@ public class BlackjackForwardModel extends StandardForwardModelWithTurnOrder {
             actions.add(new Stand());
         }
         return actions;
+    }
+
+    private void _endTurn(BlackjackGameState bjgs) {
+        if (bjgs.getTurnCounter() >= bjgs.getNPlayers()) {
+            // Everyone finished, game is over, assign results
+            bjgs.setGameStatus(GAME_END);
+
+            BlackjackParameters params = (BlackjackParameters) bjgs.getGameParameters();
+
+            int[] score = new int[bjgs.getNPlayers()];
+            for (int j = 0; j < bjgs.getNPlayers(); j++){
+                if (bjgs.getPlayerResults()[j] != LOSE) {
+                    score[j] = bjgs.calculatePoints(j);
+                }
+            }
+            bjgs.setPlayerResult(GAME_END, bjgs.dealerPlayer);
+            if (score[bjgs.dealerPlayer] > params.winScore) {
+                // Dealer went bust, everyone else wins
+                bjgs.setPlayerResult(CoreConstants.GameResult.LOSE, bjgs.dealerPlayer);
+            }
+
+            for (int i = 0; i < bjgs.getNPlayers()-1; i++) {  // Check all players and compare to dealer
+                if (bjgs.getPlayerResults()[i] != LOSE) {
+                    if (score[bjgs.dealerPlayer] > params.winScore) {
+                        // Dealer went bust, everyone else wins
+                        bjgs.setPlayerResult(CoreConstants.GameResult.WIN, i);
+                    } else if (score[bjgs.dealerPlayer] > score[i]) {
+                        bjgs.setPlayerResult(CoreConstants.GameResult.LOSE, i);
+                    } else if (score[bjgs.dealerPlayer] < score[i]) {
+                        bjgs.setPlayerResult(CoreConstants.GameResult.WIN, i);
+                    } else if (score[bjgs.dealerPlayer] == score[i]) {
+                        bjgs.setPlayerResult(CoreConstants.GameResult.DRAW, i);
+                    }
+                }
+            }
+
+            for (int i = 0; i < bjgs.getNPlayers(); i++) {
+                if (bjgs.getPlayerResults()[i] == GAME_ONGOING) {
+                    bjgs.setPlayerResult(LOSE, i);
+                }
+            }
+        }
+        else {
+            endPlayerTurn(bjgs);
+        }
     }
 
 }
