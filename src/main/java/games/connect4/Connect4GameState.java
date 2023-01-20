@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class Connect4GameState extends AbstractGameStateWithTurnOrder implements IPrintable, IGridGameState<Token> {
+public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
 
     GridBoard<Token> gridBoard;
     LinkedList<Pair<Integer, Integer>> winnerCells;
@@ -28,11 +28,6 @@ public class Connect4GameState extends AbstractGameStateWithTurnOrder implements
         super(gameParameters, nPlayers);
         winnerCells = new LinkedList<>();
         gridBoard = null;
-    }
-
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new AlternatingTurnOrder(nPlayers);
     }
 
     @Override
@@ -48,7 +43,7 @@ public class Connect4GameState extends AbstractGameStateWithTurnOrder implements
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         Connect4GameState s = new Connect4GameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
 
