@@ -58,8 +58,6 @@ public abstract class AbstractGameState {
     private int gameID;
 
     /**
-     * Constructor. Initialises some generic game state variables.
-     *
      * @param gameParameters - game parameters.
      * @param nPlayers      - number of players in the game
      */

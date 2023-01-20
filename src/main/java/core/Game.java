@@ -917,7 +917,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "TerraformingMars");
+        String gameType = Utils.getArg(args, "game", "GameTemplate");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int playerCount = Utils.getArg(args, "nPlayers", 2);
         int turnPause = Utils.getArg(args, "turnPause", 0);
