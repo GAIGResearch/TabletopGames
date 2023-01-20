@@ -1,7 +1,7 @@
 package games.dotsboxes;
 
 import core.AbstractGameState;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import utilities.Vector2D;
 
@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class DBForwardModel extends StandardForwardModelWithTurnOrder {
+public class DBForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -61,9 +61,8 @@ public class DBForwardModel extends StandardForwardModelWithTurnOrder {
             endGame(dbgs);
         } else if (dbgs.getLastActionScored()) {
             // If not returned, check if the action completed one more box, otherwise move to the next player
-            dbgs.getTurnOrder().endPlayerTurn(currentState);
+            endPlayerTurn(currentState);
         }
-
     }
 
     @Override

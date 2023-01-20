@@ -12,7 +12,7 @@ import games.GameType;
 
 import java.util.*;
 
-public class DBGameState extends AbstractGameStateWithTurnOrder {
+public class DBGameState extends AbstractGameState {
 
     IStateHeuristic heuristic;
 
@@ -40,10 +40,6 @@ public class DBGameState extends AbstractGameStateWithTurnOrder {
     public DBGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
     }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new AlternatingTurnOrder(nPlayers);
-    }
 
     @Override
     protected GameType _getGameType() {
@@ -56,7 +52,7 @@ public class DBGameState extends AbstractGameStateWithTurnOrder {
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected AbstractGameState _copy(int playerId) {
         DBGameState dbgs = new DBGameState(gameParameters, getNPlayers());
         dbgs.edges = edges;
         dbgs.cells = cells;
@@ -93,31 +89,25 @@ public class DBGameState extends AbstractGameStateWithTurnOrder {
     }
 
     @Override
-    protected boolean _equals(Object o) {
+    public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DBGameState)) return false;
         if (!super.equals(o)) return false;
         DBGameState that = (DBGameState) o;
-        return Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) &&
-                lastActionScored == that.lastActionScored &&
-                Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap) &&
-                Objects.equals(cellToOwnerMap, that.cellToOwnerMap);
+        return lastActionScored == that.lastActionScored && Objects.equals(heuristic, that.heuristic) && Objects.equals(edges, that.edges) && Objects.equals(cells, that.cells) && Objects.equals(edgeToCellMap, that.edgeToCellMap) && Objects.equals(cellToEdgesMap, that.cellToEdgesMap) && Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) && Objects.equals(cellToOwnerMap, that.cellToOwnerMap) && Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, gamePhase, gameStatus, cellToOwnerMap, edgeToOwnerMap, lastActionScored);
+        int result = Objects.hash(super.hashCode(), heuristic, edges, cells, edgeToCellMap, cellToEdgesMap, cellToOwnerMap, edgeToOwnerMap, lastActionScored);
         result = 31 * result + Arrays.hashCode(nCellsPerPlayer);
         return result;
     }
-
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         int result = Objects.hash(gameParameters);
-        sb.append(result).append("|");
-        result = Objects.hash(turnOrder);
         sb.append(result).append("|");
         result = Objects.hash(getAllComponents());
         sb.append(result).append("|");
