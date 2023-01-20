@@ -6,7 +6,9 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
+import games.poker.PokerTurnOrder;
 import games.stratego.components.Piece;
 
 import java.util.ArrayList;
@@ -22,7 +24,16 @@ public class StrategoGameState extends AbstractGameStateWithTurnOrder {
      * @param gameParameters - game parameters.
      */
     public StrategoGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Stratego);
+        super(gameParameters, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new AlternatingTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Stratego;
     }
 
     @Override

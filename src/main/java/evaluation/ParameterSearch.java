@@ -158,7 +158,7 @@ public class ParameterSearch {
         String logfile = getArg(args, "logFile", "");
         String evalMethod = getArg(args, "eval", "Win");
         String paramFile = getArg(args, "gameParam", "");
-        AbstractParameters gameParams = ParameterFactory.createFromFile(game, paramFile);
+        AbstractParameters gameParams = AbstractParameters.createFromFile(game, paramFile);
 
         ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));

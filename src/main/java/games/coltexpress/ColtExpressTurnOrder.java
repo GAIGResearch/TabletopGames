@@ -70,6 +70,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
     private void initTurn(RoundCard round, int turn, ColtExpressGameState state) {
         currentTurnType = round.getTurnTypes()[turn];
         turnOwner = firstPlayerOfRound;
+        firstPlayer = firstPlayerOfRound;
         firstAction = true;
         switch (round.getTurnTypes()[turn]) {
             case NormalTurn:
@@ -153,7 +154,7 @@ public class ColtExpressTurnOrder extends TurnOrder {
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
 
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ROUND_OVER, gameState)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState)));
 
         turnCounter++;
         ColtExpressGamePhase phase = (ColtExpressGamePhase) cegs.getGamePhase();

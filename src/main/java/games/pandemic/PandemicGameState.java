@@ -8,7 +8,9 @@ import core.properties.*;
 import core.AbstractGameState;
 import core.components.Area;
 import core.AbstractParameters;
+import core.turnorders.TurnOrder;
 import games.GameType;
+import games.loveletter.LoveLetterTurnOrder;
 import utilities.Hash;
 
 import java.util.*;
@@ -154,7 +156,16 @@ public class PandemicGameState extends AbstractGameStateWithTurnOrder implements
      * @param nPlayers - number of players.
      */
     public PandemicGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).nActionsPerTurn), GameType.Pandemic);
+        super(pp, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new PandemicTurnOrder(nPlayers, ((PandemicParameters)gameParameters).nActionsPerTurn);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Pandemic;
     }
 
     // Getters & setters

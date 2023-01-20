@@ -42,7 +42,6 @@ public class TMGUI extends AbstractGUIManager {
     TMCardView playerCorporation, lastCardPlayed;
     TMDeckDisplay playerCardsPlayed;
     JScrollPane paneHand, paneCardChoice, paneCardsPlayed;
-    JPanel infoPanel;
     JLabel generationCount;
 
     static int fontSize = 16;
@@ -58,15 +57,14 @@ public class TMGUI extends AbstractGUIManager {
     boolean focusCurrentPlayer;
     JButton focusPlayerButton;
 
-    boolean firstUpdate = true;
     boolean updateButtons = false;
     HashMap<TMTypes.ActionType, JMenu> actionMenus;
 
     TMAction lastAction;
     TMTurnOrder turnOrder;
 
-    public TMGUI(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 500);
+    public TMGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
+        super(parent, game, ac, humanId);
         if (game == null) return;
 
         // Make backgroundImage the content pane.
@@ -325,6 +323,11 @@ public class TMGUI extends AbstractGUIManager {
         parent.repaint();
 
         // TODO: display end of game scoring and winner (separate window?)
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 500;
     }
 
     private void createActionMenu(AbstractPlayer player, TMGameState gs) {

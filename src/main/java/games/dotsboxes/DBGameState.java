@@ -4,10 +4,10 @@ import core.AbstractGameState;
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
-import core.components.GridBoard;
-import core.components.Token;
 import core.interfaces.IStateHeuristic;
 import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.StandardTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
 
 import java.util.*;
@@ -38,7 +38,16 @@ public class DBGameState extends AbstractGameStateWithTurnOrder {
      * @param nPlayers      - number of players.
      */
     public DBGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.DotsAndBoxes);
+        super(gameParameters, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new AlternatingTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.DotsAndBoxes;
     }
 
     @Override

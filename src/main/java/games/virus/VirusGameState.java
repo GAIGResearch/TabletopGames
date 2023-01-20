@@ -7,7 +7,9 @@ import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
+import games.uno.UnoTurnOrder;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
 import games.virus.components.VirusOrgan;
@@ -22,7 +24,16 @@ public class VirusGameState extends AbstractGameStateWithTurnOrder implements IP
     Deck<VirusCard>       discardDeck;    // The deck with already played cards. It is visible for all players
 
     public VirusGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Virus);
+        super(gameParameters, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new AlternatingTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Virus;
     }
 
     @Override

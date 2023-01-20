@@ -7,6 +7,7 @@ import core.components.Component;
 import core.components.GridBoard;
 import core.interfaces.IGamePhase;
 import core.turnorders.StandardTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
@@ -34,8 +35,18 @@ public class BattleloreGameState extends AbstractGameStateWithTurnOrder {
     List<Unit> unitTypes;
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.Battlelore);
+        super(gameParameters, nPlayers);
         playerScores = new int[nPlayers];
+    }
+
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new StandardTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Battlelore;
     }
 
     public Unit GetUnitFromType(UnitType type) {

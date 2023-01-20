@@ -8,7 +8,10 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import core.turnorders.TurnOrder;
 import games.GameType;
+import games.catan.CatanParameters;
+import games.catan.CatanTurnOrder;
 import games.coltexpress.ColtExpressTypes.CharacterType;
 import games.coltexpress.actions.roundcardevents.RoundEvent;
 import games.coltexpress.cards.ColtExpressCard;
@@ -51,11 +54,20 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     Random rnd;
 
     public ColtExpressGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) gameParameters).nMaxRounds), GameType.ColtExpress);
+        super(gameParameters, nPlayers);
         gamePhase = ColtExpressGamePhase.PlanActions;
         trainCompartments = new LinkedList<>();
         playerPlayingBelle = -1;
         rnd = new Random(gameParameters.getRandomSeed());
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new ColtExpressTurnOrder(nPlayers, ((ColtExpressParameters) getGameParameters()).nMaxRounds);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.ColtExpress;
     }
 
     @Override

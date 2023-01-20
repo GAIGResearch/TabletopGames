@@ -46,7 +46,6 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
     PandemicBoardView boardView;
     PandemicCounterView cY, cR, cB, cK;
 
-    Game game;
     PandemicGameState gameState;
     int nPlayers;
     int maxCards;
@@ -60,8 +59,8 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
     // Game state info
     JLabel gameTurnStep;
 
-    public PandemicGUIManager(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 721);
+    public PandemicGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+        super(parent, game, ac, human);
         if (game == null || ac == null) return;
 
         this.game = game;
@@ -111,6 +110,11 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 750;
     }
 
     private void bufferReset(ActionButton ab) {

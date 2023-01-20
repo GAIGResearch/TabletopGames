@@ -34,6 +34,8 @@ public class LoveLetterForwardModel extends StandardForwardModelWithTurnOrder {
         llgs.playerHandCards = new ArrayList<>(llgs.getNPlayers());
         llgs.playerDiscardCards = new ArrayList<>(llgs.getNPlayers());
 
+        llgs.setGamePhase(Draw);
+
         // Set up first round
         setupRound(llgs, null);
     }

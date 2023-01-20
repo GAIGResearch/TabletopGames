@@ -6,6 +6,8 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.components.Token;
+import core.turnorders.StandardTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.dicemonastery.components.*;
 
@@ -41,8 +43,17 @@ public class DiceMonasteryGameState extends AbstractGameStateWithTurnOrder {
     Random rnd;
 
     public DiceMonasteryGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new DiceMonasteryTurnOrder(nPlayers, (DiceMonasteryParams) gameParameters), GameType.DiceMonastery);
+        super(gameParameters, nPlayers);
         rnd = new Random(gameParameters.getRandomSeed());
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new DiceMonasteryTurnOrder(nPlayers, (DiceMonasteryParams) gameParameters);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.DiceMonastery;
     }
 
     protected void _reset() {

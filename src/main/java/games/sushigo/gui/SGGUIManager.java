@@ -29,16 +29,12 @@ public class SGGUIManager extends AbstractGUIManager {
     // Currently active player
     int activePlayer = -1;
 
-    // ID of human player
-    int humanID;
-
     // Border highlight of active player
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
     Border[] playerViewBorders;
 
     public SGGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, ac, 15);
-        this.humanID = humanID;
+        super(parent, game, ac, humanID);
 
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
@@ -119,6 +115,11 @@ public class SGGUIManager extends AbstractGUIManager {
     }
 
     @Override
+    public int getMaxActionSpace() {
+        return 15;
+    }
+
+    @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
@@ -131,7 +132,7 @@ public class SGGUIManager extends AbstractGUIManager {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(parsedGameState);
                 if (i == gameState.getCurrentPlayer()
-                        || i == humanID) {
+                        || i == humanPlayerId) {
                     playerHands[i].playerHandView.setFront(true);
                     playerHands[i].setFocusable(true);
                 } else {

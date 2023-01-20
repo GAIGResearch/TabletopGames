@@ -11,7 +11,10 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import core.turnorders.StandardTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
+import games.dicemonastery.DiceMonasteryParams;
+import games.dicemonastery.DiceMonasteryTurnOrder;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.actions.IDelayedAction;
 import games.dominion.cards.CardType;
@@ -54,12 +57,21 @@ public class DominionGameState extends AbstractGameStateWithTurnOrder implements
      * @param nPlayers       - number of players
      */
     public DominionGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.Dominion);
+        super(gameParameters, nPlayers);
         rnd = new Random(gameParameters.getRandomSeed());
         playerCount = nPlayers;
         defenceStatus = new boolean[nPlayers];  // defaults to false
         params = (DominionParameters) gameParameters;
         this._reset();
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new StandardTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Dominion;
     }
 
     public boolean removeCardFromTable(CardType type) {

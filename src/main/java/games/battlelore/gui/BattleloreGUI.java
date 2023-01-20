@@ -14,8 +14,8 @@ import java.awt.*;
 public class BattleloreGUI extends AbstractGUIManager {
     BattleloreBoardView view;
 
-    public BattleloreGUI(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 25);
+    public BattleloreGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
+        super(parent, game, ac, humanId);
 
         if (game == null) {
             return;
@@ -41,6 +41,11 @@ public class BattleloreGUI extends AbstractGUIManager {
         parent.setVisible(true);
         parent.repaint();
 
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 25;
     }
 
     @Override

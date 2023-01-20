@@ -2,7 +2,6 @@ package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.ParameterFactory;
 import core.interfaces.IStatisticLogger;
 import evaluation.listeners.GameListener;
 import games.GameType;
@@ -140,7 +139,7 @@ public class RoundRobinTournament extends AbstractTournament {
             agents.add(new OSLAPlayer());
         }
 
-        AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, gameParams);
+        AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, gameParams);
 
         // Run!
         RoundRobinTournament tournament = mode.equals("exhaustive") ?
