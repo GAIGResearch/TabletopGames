@@ -1,14 +1,11 @@
 package games.terraformingmars;
 
-import core.AbstractGameState;
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
 import games.GameType;
-import games.sushigo.SGParameters;
-import games.sushigo.SGTurnOrder;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
 import games.terraformingmars.components.*;
