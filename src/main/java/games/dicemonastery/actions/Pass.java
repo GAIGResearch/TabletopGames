@@ -3,15 +3,13 @@ package games.dicemonastery.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.DiceMonasteryTurnOrder;
 
 public class Pass extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
-        state.useAP(turnOrder.getActionPointsLeft());
+        state.useAP(state.getActionPointsLeft());
 
         return true;
     }

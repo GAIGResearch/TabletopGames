@@ -6,7 +6,6 @@ import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.DiceMonasteryTurnOrder;
 import games.dicemonastery.components.MarketCard;
 
 import java.util.ArrayList;
@@ -35,11 +34,10 @@ public class VisitMarket extends UseMonk implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         MarketCard market = state.getCurrentMarket();
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         List<AbstractAction> retValue = new ArrayList<>();
         int money = state.getResource(player, SHILLINGS, STOREROOM);
-        if (money >= market.calf_skin && turnOrder.getSeason() == DiceMonasteryConstants.Season.SPRING)
+        if (money >= market.calf_skin && state.getSeason() == DiceMonasteryConstants.Season.SPRING)
             retValue.add(new Buy(CALF_SKIN, market.calf_skin));
         if (money >= market.grain)
             retValue.add(new Buy(GRAIN, market.grain));

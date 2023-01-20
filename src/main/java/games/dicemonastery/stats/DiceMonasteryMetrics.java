@@ -3,7 +3,6 @@ import evaluation.listeners.GameListener;
 import evaluation.metrics.*;
 import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.DiceMonasteryTurnOrder;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.Monk;
 import utilities.Group;
@@ -22,7 +21,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return ((DiceMonasteryTurnOrder) s.getTurnOrder()).getSeason();
+            return s.getSeason();
         }
     }
 
@@ -30,7 +29,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return ((DiceMonasteryTurnOrder) s.getTurnOrder()).getYear();
+            return s.getYear();
         }
         public Set<Event.GameEvent> getEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
@@ -57,7 +56,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             if (e.action instanceof ChooseMonk) return ((ChooseMonk) e.action).destination.name();
             if (e.action instanceof PromoteMonk) return ((PromoteMonk) e.action).location.name();
             DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return ((DiceMonasteryTurnOrder) s.getTurnOrder()).getCurrentArea().name();
+            return s.getCurrentArea().name();
         }
         public Set<Event.GameEvent> getEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
@@ -104,7 +103,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return  ((DiceMonasteryTurnOrder) s.getTurnOrder()).getActionPointsLeft();
+            return  s.getActionPointsLeft();
         }
         public Set<Event.GameEvent> getEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
@@ -119,7 +118,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
         public Object run(GameListener listener, Event e) {
             DiceMonasteryConstants.Season season = (DiceMonasteryConstants.Season) getParameterValue("season");
             DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return ((DiceMonasteryTurnOrder) s.getTurnOrder()).getSeason() == season;
+            return s.getSeason() == season;
         }
         public Set<Event.GameEvent> getEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
@@ -134,8 +133,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) s.getTurnOrder();
-            return (dmto.getYear() - 1) * 4 + dmto.getSeason().ordinal() + 1;
+            return (s.getYear() - 1) * 4 + s.getSeason().ordinal() + 1;
         }
         public Set<Event.GameEvent> getEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);

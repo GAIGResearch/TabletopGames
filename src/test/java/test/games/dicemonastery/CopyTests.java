@@ -1,7 +1,9 @@
 package test.games.dicemonastery;
 
+import core.Game;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import games.GameType;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.IlluminatedText;
@@ -25,7 +27,7 @@ import static org.junit.Assert.*;
 public class CopyTests {
 
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
-    DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 4));
+    Game game = GameType.DiceMonastery.createGameInstance(4, new DiceMonasteryParams(3));
     RandomPlayer rnd = new RandomPlayer();
     DiceMonasteryGameState s1 = (DiceMonasteryGameState) game.getGameState();
     List<Treasure> allTreasures = s1.availableTreasures();
@@ -264,10 +266,9 @@ public class CopyTests {
 
     private void summerBidSetup() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         do {
             fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
-        } while (!(turnOrder.getSeason() == SUMMER));
+        } while (!(state.getSeason() == SUMMER));
 
         for (int p = 0; p < state.getNPlayers(); p++) {
             for (DiceMonasteryConstants.Resource r : DiceMonasteryConstants.Resource.values()) {
@@ -423,11 +424,10 @@ public class CopyTests {
 
     private void advanceToSummer() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         do {
             fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
-        } while (!(turnOrder.getSeason() == SUMMER));
+        } while (!(state.getSeason() == SUMMER));
     }
 
     private void emptyAllStores() {

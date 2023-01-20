@@ -13,6 +13,7 @@ import evaluation.listeners.GameListener;
  * Separately the AbstractPlayer has a ForwardModel to be used if needed - this caters for the possibility that
  * agents may want to use a different/learned forward model in some use cases.
  */
+@Deprecated
 public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
 
     protected TurnOrder turnOrder;

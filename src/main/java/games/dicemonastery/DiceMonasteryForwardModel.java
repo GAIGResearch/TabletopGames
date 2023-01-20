@@ -2,11 +2,13 @@ package games.dicemonastery;
 
 import core.AbstractGameData;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Card;
 import core.components.Deck;
+import evaluation.metrics.Event;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.*;
 import utilities.Pair;
@@ -19,12 +21,12 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.BID;
 import static games.dicemonastery.DiceMonasteryConstants.Phase.SACRIFICE;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static games.dicemonastery.DiceMonasteryConstants.Season.SPRING;
+import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
-public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder {
+public class DiceMonasteryForwardModel extends StandardForwardModel {
 
     public final AbstractAction SOW_WHEAT = new SowWheat();
     public final AbstractAction HARVEST_WHEAT = new HarvestWheat(1);
@@ -105,36 +107,175 @@ public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder
         state.setGamePhase(Phase.PLACE_MONKS);
     }
 
+
+    public void _startRound(AbstractGameState gameState) {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
+        state.season = state.season.next();
+        if (state.season == SPRING) {
+            int newFirstPlayer = (state.getFirstPlayer() + 1 + state.getNPlayers()) % state.getNPlayers();
+            state.setFirstPlayer(newFirstPlayer);
+            state.year++;
+        }
+        if (state.season == SUMMER && state.year == 1)
+            state.season = state.season.next(); // we skip Summer in the first year
+        state.checkAtLeastOneMonk();
+        if (state.season == SUMMER)
+            state.setGamePhase(BID);
+        else
+            state.setGamePhase(Phase.PLACE_MONKS);
+      //  TODO: Account for this special case: int nextPlayer = state.firstPlayerWithMonks();
+        if (state.season == WINTER)
+            state.winterHousekeeping();  // this occurs at the start of WINTER, as it includes the Christmas Feast
+    }
+
+    public void _endRound(AbstractGameState gs) {
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
+        DiceMonasteryParams params = (DiceMonasteryParams) state.getGameParameters();
+        switch (state.season) {
+            case SPRING:
+            case AUTUMN:
+                state.springAutumnHousekeeping();
+                break;
+            case SUMMER:
+                break;
+            case WINTER:
+                if (state.year == params.YEARS)
+                    endGame(state);
+                break;
+        }
+    }
+
+
+    private void initialiseUseMonkBooleans(DiceMonasteryGameState state) {
+        state.turnOwnerTakenReward = false;
+        if (state.availableBonusTokens(state.currentAreaBeingExecuted).isEmpty())
+            playerTakesReward(state); // none to take
+    }
+
+    void playerTakesReward(DiceMonasteryGameState state) {
+        state.turnOwnerTakenReward = true;
+        state.turnOwnerPrayed = false;
+        if (state.currentAreaBeingExecuted == CHAPEL || state.currentAreaBeingExecuted == LIBRARY ||
+                state.getResource(state.getCurrentPlayer(), Resource.PRAYER, STOREROOM) == 0)
+            state.turnOwnerPrayed = true; // No prayers in CHAPEL or LIBRARY as they cannot be used on anything, and if we don't have any
+    }
+
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) currentState;
-        DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder)state.getTurnOrder();
 
-        // We do this here to get direct access to TurnOrder (we could do this in the Actions..but that adds extra
-        // set() options on State/TurnOrder that really shouldn't be publicly accessible
-        // and since this is core to the whole game loop, the muddying of responsibilities is acceptable
+        // We could do this in the Actions...but
+        // since this is core to the whole game loop, the muddying of responsibilities is acceptable
         if (action instanceof Pray)
-            dmto.turnOwnerPrayed = true;
+            state.turnOwnerPrayed = true;
         if (action instanceof TakeToken)
-            dmto.playerTakesReward(state);
+            playerTakesReward(state);
 
         if (state.isActionInProgress())
             return;
 
-        // We only consider the next phase once any extended actions are complete
-        state.getTurnOrder().endPlayerTurn(state);
-        //       DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder)state.getTurnOrder();
-        //       System.out.printf("After %s, end turn gives next player %d with %d action points\n", action, state.getCurrentPlayer(), dmto.getActionPointsLeft());
+        // The following code is hacked in from the old TurnOrder.endPlayerTurn...
+        // ... once we have selected (for each season) who the next player is then we need to call
+        // endPlayerTurn, and possibly endRound.
+
+        int nextPlayer = -1;
+        int currentPlayer = state.getCurrentPlayer();
+        boolean newRound = false;
+
+        switch (state.season) {
+            case SPRING:
+            case AUTUMN:
+                if (state.getGamePhase() == Phase.PLACE_MONKS) {
+                    // we move to the next player who still has monks to place
+                    if (state.actionAreas.get(ActionArea.DORMITORY).size() == 0) {
+                        // no monks left, so we move on to the next phase (which always starts with the MEADOW)
+                        state.setGamePhase(Phase.USE_MONKS);
+                        state.currentAreaBeingExecuted = ActionArea.MEADOW;
+                        state.setUpPlayerOrderForCurrentArea(); // impossible to have no monks placed at this point
+                        nextPlayer = state.playerOrderForCurrentArea.get(0);
+                        initialiseUseMonkBooleans(state);
+                        state.actionPointsLeftForCurrentPlayer = state.actionPoints(state.currentAreaBeingExecuted, currentPlayer);
+                    } else {
+                        nextPlayer = state.nextPlayer();
+                    }
+                } else if (state.getGamePhase() == Phase.USE_MONKS) {
+                    // first we check to see if we have finished using all monks; in which case move to next player
+                    if (state.actionPointsLeftForCurrentPlayer == 0) {
+                        // first move all Monks back to dormitory for the current player
+                        for (Monk m : state.monksIn(state.currentAreaBeingExecuted, currentPlayer)) {
+                            state.moveMonk(m.getComponentID(), state.currentAreaBeingExecuted, DORMITORY);
+                        }
+                        // then move to next player
+                        nextPlayer = state.nextPlayer();
+                        initialiseUseMonkBooleans(state);
+                        state.actionPointsLeftForCurrentPlayer = state.actionPoints(state.currentAreaBeingExecuted, currentPlayer);
+
+                        if (state.monksIn(state.currentAreaBeingExecuted, -1).isEmpty()) {
+                            // we have completed all actions for that area
+                            if (state.setUpPlayerOrderForCurrentArea()) {
+                                nextPlayer = state.playerOrderForCurrentArea.get(0);
+                                state.actionPointsLeftForCurrentPlayer = state.actionPoints(state.currentAreaBeingExecuted, currentPlayer);
+                                initialiseUseMonkBooleans(state);
+                            } else {
+                                newRound = true;  // new season
+                                nextPlayer = state.getFirstPlayer();
+                            }
+                        }
+                    }
+                }
+                break;
+            case SUMMER:
+                switch ((DiceMonasteryConstants.Phase) state.getGamePhase()) {
+                    case BID:
+                        nextPlayer = (currentPlayer + 1) % state.getNPlayers();
+                        if (state.allBidsIn()) {
+                            // we have completed SUMMER bidding
+                            state.playersToMakeVikingDecisions = state.executeBids();
+                            state.setGamePhase(SACRIFICE);
+                            if (!state.playersToMakeVikingDecisions.isEmpty())
+                                nextPlayer = state.playersToMakeVikingDecisions.get(0);
+                        }
+                        break;
+                    case SACRIFICE:
+                        state.playersToMakeVikingDecisions.remove(0);
+                        if (!state.playersToMakeVikingDecisions.isEmpty())
+                            nextPlayer = state.playersToMakeVikingDecisions.get(0);
+                        break;
+                }
+                if (state.getGamePhase() == SACRIFICE && state.playersToMakeVikingDecisions.isEmpty()) {
+                    // we have finished the raids, and all players have made sacrifice decisions
+                    newRound = true;
+                    nextPlayer = state.getFirstPlayer();
+                }
+                break;
+            case WINTER:
+                nextPlayer = (currentPlayer + 1) % state.getNPlayers();
+                // round over if we get back to abbot as first player
+                if (currentPlayer == state.getFirstPlayer()) {
+                    newRound = true;
+                    nextPlayer = (state.getFirstPlayer() + 1) % state.getNPlayers();
+                }
+                break;
+            default:
+                throw new AssertionError(String.format("Unknown Game Phase of %s in %s", state.getGamePhase(), state.season));
+        }
+
+        // TODO: This does not take account of the orphaned logic in nextPlayer to use the sequence in each area
+        endPlayerTurn(state, nextPlayer);
+        if (newRound) {
+            _endRound(state);
+            endRound(state, nextPlayer);
+            _startRound(state);
+        }
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
         DiceMonasteryParams params = state.getParams();
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
-        int currentPlayer = turnOrder.getCurrentPlayer(state);
-        int actionPointsAvailable = turnOrder.actionPointsLeftForCurrentPlayer;
-        switch (turnOrder.season) {
+        int currentPlayer = state.getCurrentPlayer();
+        int actionPointsAvailable = state.actionPointsLeftForCurrentPlayer;
+        switch (state.season) {
             case SPRING:
             case AUTUMN:
                 if (state.getGamePhase() == Phase.PLACE_MONKS) {
@@ -157,13 +298,13 @@ public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder
                             .map(a -> new PlaceMonk(currentPlayer, a, a == LIBRARY ? finalCondition : "")).collect(toList());
                 } else if (state.getGamePhase() == Phase.USE_MONKS) {
                     List<AbstractAction> retValue = new ArrayList<>();
-                    if (!turnOrder.turnOwnerTakenReward) {
+                    if (!state.turnOwnerTakenReward) {
                         // The first action of a player must be to take a BONUS_TOKEN, if there are any left
-                        return state.availableBonusTokens(turnOrder.currentAreaBeingExecuted).stream().distinct()
-                                .map(token -> new TakeToken(token, turnOrder.currentAreaBeingExecuted, currentPlayer))
+                        return state.availableBonusTokens(state.currentAreaBeingExecuted).stream().distinct()
+                                .map(token -> new TakeToken(token, state.currentAreaBeingExecuted, currentPlayer))
                                 .collect(toList());
                     }
-                    if (!turnOrder.turnOwnerPrayed) {
+                    if (!state.turnOwnerPrayed) {
                         return IntStream.rangeClosed(0, state.getResource(currentPlayer, PRAYER, STOREROOM))
                                 .mapToObj(Pray::new).collect(toList());
                     }
@@ -172,7 +313,7 @@ public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder
                     }
 
                     retValue.add(PASS);
-                    switch (turnOrder.currentAreaBeingExecuted) {
+                    switch (state.currentAreaBeingExecuted) {
                         case MEADOW:
                             DMArea meadow = state.actionAreas.get(MEADOW);
                             if (actionPointsAvailable >= params.takePigmentCost)
@@ -180,7 +321,7 @@ public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder
                                     if (meadow.count(pigment, -1) > 0)
                                         retValue.add(new TakePigment(pigment, params.takePigmentCost));
                                 }
-                            if (turnOrder.season == SPRING) {
+                            if (state.season == SPRING) {
                                 retValue.add(SOW_WHEAT);
                                 if (state.getResource(currentPlayer, SKEP, STOREROOM) > 0)
                                     retValue.add(PLACE_SKEP);
@@ -188,8 +329,8 @@ public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder
                                 int grainInField = meadow.count(GRAIN, currentPlayer);
                                 if (grainInField > 0) {
                                     retValue.add(HARVEST_WHEAT);
-                                    if (grainInField > 1 && turnOrder.getActionPointsLeft() > 1)
-                                        retValue.add(new HarvestWheat(Math.min(grainInField, turnOrder.getActionPointsLeft())));
+                                    if (grainInField > 1 && state.getActionPointsLeft() > 1)
+                                        retValue.add(new HarvestWheat(Math.min(grainInField, state.getActionPointsLeft())));
                                 }
                                 int skepsOut = meadow.count(SKEP, currentPlayer);
                                 if (skepsOut > 0) {
@@ -231,7 +372,7 @@ public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder
                             if (actionPointsAvailable >= 5)
                                 retValue.add(BEG_5);
                             else if (actionPointsAvailable > 1)
-                                retValue.add(new BegForAlms(turnOrder.getActionPointsLeft()));
+                                retValue.add(new BegForAlms(state.getActionPointsLeft()));
                             retValue.add(new VisitMarket());
                             if (actionPointsAvailable > 1) {
                                 int shillings = state.getResource(currentPlayer, SHILLINGS, STOREROOM);
@@ -251,11 +392,11 @@ public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder
                                 Deck<Pilgrimage> deck = state.pilgrimageDecks.get(pilgrimDeck);
                                 if (deck.getSize() > 0) {
                                     Pilgrimage topCard = deck.peek();
-                                    if (turnOrder.getActionPointsLeft() >= topCard.minPiety && highestPiety >= topCard.minPiety
+                                    if (state.getActionPointsLeft() >= topCard.minPiety && highestPiety >= topCard.minPiety
                                             && state.getResource(currentPlayer, SHILLINGS, STOREROOM) >= topCard.cost) {
                                         Set<Integer> validPieties = eligibleMonks.stream()
                                                 .map(Monk::getPiety)
-                                                .filter(piety -> piety >= topCard.minPiety && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
+                                                .filter(piety -> piety >= topCard.minPiety && piety <= state.getActionPointsLeft()).collect(toSet());
 
                                         validPieties.forEach(p -> retValue.add(new GoOnPilgrimage(topCard.copy(), p)));
                                     }
@@ -275,7 +416,7 @@ public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder
                                     continue;
                                 Set<Integer> validPieties = eligibleMonks.stream()
                                         .map(Monk::getPiety)
-                                        .filter(piety -> piety >= text.minPiety && piety <= turnOrder.getActionPointsLeft()).collect(toSet());
+                                        .filter(piety -> piety >= text.minPiety && piety <= state.getActionPointsLeft()).collect(toSet());
 
                                 validPieties.forEach(p -> retValue.add(new WriteText(text, p)));
                             }
@@ -285,10 +426,11 @@ public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder
                             eligibleMonks = state.monksIn(CHAPEL, currentPlayer);
                             Set<Integer> validPieties = eligibleMonks.stream().map(Monk::getPiety).collect(toSet());
                             retValue.addAll(validPieties.stream().map(piety -> new PromoteMonk(piety, CHAPEL, true)).collect(toList()));
-                            if (retValue.isEmpty()) retValue.add(new Pass()); // might be that last monk was promoted with a DEVOTION token and RETIRED
+                            if (retValue.isEmpty())
+                                retValue.add(new Pass()); // might be that last monk was promoted with a DEVOTION token and RETIRED
                             break;
                         default:
-                            throw new AssertionError("Unknown area : " + turnOrder.currentAreaBeingExecuted);
+                            throw new AssertionError("Unknown area : " + state.currentAreaBeingExecuted);
                     }
                     return retValue;
                 }
@@ -333,7 +475,7 @@ public class DiceMonasteryForwardModel extends StandardForwardModelWithTurnOrder
                     retValue.add(new DoNothing());
                 return retValue;
         }
-        throw new AssertionError("Not yet implemented combination " + turnOrder.season + " : " + state.getGamePhase());
+        throw new AssertionError("Not yet implemented combination " + state.season + " : " + state.getGamePhase());
     }
 
 
