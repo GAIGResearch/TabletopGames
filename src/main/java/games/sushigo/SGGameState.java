@@ -1,17 +1,16 @@
 package games.sushigo;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.*;
-import core.turnorders.TurnOrder;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
 
 import java.util.*;
 
-public class SGGameState extends AbstractGameStateWithTurnOrder {
+@SuppressWarnings("unchecked")
+public class SGGameState extends AbstractGameState {
     List<Deck<SGCard>> playerHands;
     Deck<SGCard> drawPile;
     Deck<SGCard> discardPile;
@@ -41,11 +40,6 @@ public class SGGameState extends AbstractGameStateWithTurnOrder {
     }
 
     @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new SGTurnOrder(nPlayers, ((SGParameters) gameParameters).nRounds);
-    }
-
-    @Override
     protected GameType _getGameType() {
         return GameType.SushiGo;
     }
@@ -64,9 +58,8 @@ public class SGGameState extends AbstractGameStateWithTurnOrder {
         }};
     }
 
-
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected SGGameState _copy(int playerId) {
         SGGameState copy = new SGGameState(gameParameters.copy(), getNPlayers());
 
         copy.playerScore = new Counter[getNPlayers()];
@@ -268,18 +261,16 @@ public class SGGameState extends AbstractGameStateWithTurnOrder {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(nCardsInHand).append("|");
-        sb.append(playerHands.hashCode()).append("|");
-        sb.append(drawPile.hashCode()).append("|");
-        sb.append(discardPile.hashCode()).append("|");
-        sb.append(cardChoices.hashCode()).append("|");
-        sb.append(playedCards.hashCode()).append("|");
-        sb.append(deckRotations).append("|*|");
-        sb.append(Arrays.hashCode(playerScore)).append("|");
-        sb.append(Arrays.hashCode(playedCardTypes)).append("|");
-        sb.append(Arrays.hashCode(playedCardTypesAllGame)).append("|");
-        sb.append(super.hashCode()).append("|");
-        return sb.toString();
+        return nCardsInHand + "|" +
+                playerHands.hashCode() + "|" +
+                drawPile.hashCode() + "|" +
+                discardPile.hashCode() + "|" +
+                cardChoices.hashCode() + "|" +
+                playedCards.hashCode() + "|" +
+                deckRotations + "|*|" +
+                Arrays.hashCode(playerScore) + "|" +
+                Arrays.hashCode(playedCardTypes) + "|" +
+                Arrays.hashCode(playedCardTypesAllGame) + "|" +
+                super.hashCode() + "|";
     }
 }

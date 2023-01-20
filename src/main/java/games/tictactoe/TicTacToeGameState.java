@@ -1,34 +1,25 @@
 package games.tictactoe;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.TurnOrder;
 import games.GameType;
-import games.terraformingmars.TMGameParameters;
-import games.terraformingmars.TMTurnOrder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 
-public class TicTacToeGameState extends AbstractGameStateWithTurnOrder implements IPrintable, IGridGameState<Token> {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
 
     GridBoard<Token> gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
-    }
-    @Override
-    protected TurnOrder _createTurnOrder(int nPlayers) {
-        return new AlternatingTurnOrder(nPlayers);
     }
 
     @Override
@@ -44,7 +35,7 @@ public class TicTacToeGameState extends AbstractGameStateWithTurnOrder implement
     }
 
     @Override
-    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
+    protected TicTacToeGameState _copy(int playerId) {
         TicTacToeGameState s = new TicTacToeGameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
         return s;
@@ -82,14 +73,11 @@ public class TicTacToeGameState extends AbstractGameStateWithTurnOrder implement
     }
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(Objects.hash(gameParameters)).append("|");
-        sb.append(Objects.hash(turnOrder)).append("|");
-        sb.append(Objects.hash(getAllComponents())).append("|");
-        sb.append(Objects.hash(gameStatus)).append("|");
-        sb.append(Objects.hash(gamePhase)).append("|*|");
-        sb.append(Objects.hash(gridBoard));
-        return sb.toString();
+        return Objects.hash(gameParameters) + "|" +
+                Objects.hash(getAllComponents()) + "|" +
+                Objects.hash(gameStatus) + "|" +
+                Objects.hash(gamePhase) + "|*|" +
+                Objects.hash(gridBoard);
     }
 
     @Override

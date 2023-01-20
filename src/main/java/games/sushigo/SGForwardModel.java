@@ -2,7 +2,7 @@ package games.sushigo;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -13,7 +13,8 @@ import utilities.Pair;
 import java.util.*;
 import static games.sushigo.cards.SGCard.SGCardType.*;
 
-public class SGForwardModel extends StandardForwardModelWithTurnOrder {
+@SuppressWarnings("unchecked")
+public class SGForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -57,7 +58,7 @@ public class SGForwardModel extends StandardForwardModelWithTurnOrder {
         }
 
         // Set starting player
-        gs.getTurnOrder().setStartingPlayer(0);
+        gs.setStartingPlayer(0);
     }
 
     /**
@@ -83,7 +84,7 @@ public class SGForwardModel extends StandardForwardModelWithTurnOrder {
         SGGameState gs = (SGGameState) currentState;
 
         // Check if all players made their choice
-        int turn = gs.getTurnOrder().getTurnCounter();
+        int turn = gs.getTurnCounter();
         if ((turn + 1) % gs.getNPlayers() == 0) {
             // They did! Reveal all cards at once. Process card reveal rules.
             revealCards(gs);
@@ -91,13 +92,14 @@ public class SGForwardModel extends StandardForwardModelWithTurnOrder {
             // Check if the round is over
             if (isRoundOver(gs)) {
                 // It is! Process end of round rules.
-                gs.getTurnOrder().endRound(currentState);
+                endRound(gs);
+                _endRound(gs);
 
                 // Clear card choices from this turn, ready for the next simultaneous choice.
                 gs.clearCardChoices();
 
                 // Check if the game is over
-                if (gs.getTurnOrder().getRoundCounter() >= ((SGParameters)gs.getGameParameters()).nRounds) {
+                if (gs.getRoundCounter() >= ((SGParameters)gs.getGameParameters()).nRounds) {
                     // It is! Process end of game rules.
                     for (SGCard.SGCardType type: values()) {
                         type.onGameEnd(gs);
@@ -106,6 +108,8 @@ public class SGForwardModel extends StandardForwardModelWithTurnOrder {
                     endGame(gs);
                     return;
                 }
+
+                _startRound(gs);
                 return;
             } else {
                 // Round is not over, keep going. Rotate hands for next player turns.
@@ -118,7 +122,47 @@ public class SGForwardModel extends StandardForwardModelWithTurnOrder {
 
         // End player turn
         if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            gs.getTurnOrder().endPlayerTurn(currentState);
+            endPlayerTurn(gs);
+        }
+    }
+
+    public void _endRound(SGGameState gs) {
+        // Apply card end of round rules
+        for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
+            type.onRoundEnd(gs);
+        }
+
+        // Clear played hands if they get discarded between rounds, they go in the discard pile
+        for (int i = 0; i < gs.getNPlayers(); i++) {
+            Deck<SGCard> cardsToKeep = gs.playedCards.get(i).copy();
+            cardsToKeep.clear();
+            for (SGCard card : gs.playedCards.get(i).getComponents()) {
+                if (card.type.isDiscardedBetweenRounds()) {
+                    gs.discardPile.add(card);
+                    gs.playedCardTypes[i].get(card.type).setValue(0);
+                } else {
+                    cardsToKeep.add(card);
+                }
+            }
+            gs.playedCards.get(i).clear();
+            gs.playedCards.get(i).add(cardsToKeep);
+        }
+    }
+
+    public void _startRound(SGGameState gs) {
+        //Draw new hands for players
+        for (int i = 0; i < gs.getNPlayers(); i++){
+            for (int j = 0; j < gs.nCardsInHand; j++)
+            {
+                if (gs.drawPile.getSize() == 0) {
+                    // Reshuffle discard into draw pile
+                    gs.drawPile.add(gs.discardPile);
+                    gs.discardPile.clear();
+                    gs.drawPile.shuffle(new Random(gs.getGameParameters().getRandomSeed()));
+                }
+                gs.playerHands.get(i).add(gs.drawPile.draw());
+            }
+            gs.deckRotations = 0;
         }
     }
 

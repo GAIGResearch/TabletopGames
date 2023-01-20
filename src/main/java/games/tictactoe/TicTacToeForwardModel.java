@@ -2,7 +2,7 @@ package games.tictactoe;
 
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModelWithTurnOrder;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class TicTacToeForwardModel extends StandardForwardModelWithTurnOrder {
+public class TicTacToeForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -41,18 +41,10 @@ public class TicTacToeForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        TicTacToeGameParameters tttgp = (TicTacToeGameParameters) currentState.getGameParameters();
-        int gridSize = tttgp.gridSize;
-        if (currentState.getRoundCounter() == (gridSize * gridSize)) {
-            currentState.setGameStatus(CoreConstants.GameResult.GAME_END);
+        if (checkAndProcessGameEnd((TicTacToeGameState) currentState)) {
             return;
         }
-
-        if (checkGameEnd((TicTacToeGameState) currentState)) {
-            return;
-        }
-        TicTacToeGameState tttgs = (TicTacToeGameState) currentState;
-        tttgs.getTurnOrder().endPlayerTurn(currentState);
+        endPlayerTurn(currentState);
     }
 
     /**
@@ -60,7 +52,7 @@ public class TicTacToeForwardModel extends StandardForwardModelWithTurnOrder {
      *
      * @param gameState - game state to check game end.
      */
-    private boolean checkGameEnd(TicTacToeGameState gameState) {
+    private boolean checkAndProcessGameEnd(TicTacToeGameState gameState) {
         GridBoard<Token> gridBoard = gameState.getGridBoard();
 
         // Check columns
