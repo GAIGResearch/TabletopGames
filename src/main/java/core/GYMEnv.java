@@ -66,7 +66,7 @@ public class GYMEnv {
     // --Wrappers for interface functions--
 
     // Gets observations in JSON
-    public JSONObject getObservationJson() throws Exception {
+    public String getObservationJson() throws Exception {
         if (gameState instanceof IVectorisable) {
             return ((IVectorisable) gameState).getObservationJson();
         }

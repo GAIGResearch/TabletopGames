@@ -31,7 +31,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable, I
     List<Boolean> playerInCave;
 
     @Override
-    public JSONObject getObservationJson() {
+    public String getObservationJson() {
         final JSONObject json = new JSONObject();
         json.put("cave", nCave);
         json.put("playersInCave", playerInCave.size());
@@ -42,7 +42,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable, I
         json.put("hazardRockfallsOnPath", nHazardRockfallsOnPath);
         json.put("hazardPoisonOnPath", nHazardPoissonGasOnPath);
         json.put("hazardExplosionsOnPath", nHazardExplosionsOnPath);
-        return json;
+        return json.toJSONString();
     }
 
     @Override

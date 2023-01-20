@@ -1,5 +1,6 @@
 import random
 import time
+import json
 import jpype
 from jpype import *
 import jpype.imports
@@ -31,7 +32,6 @@ class PyTAG():
         # self.action_space = gym.spaces.Discrete(self.env.ActionSpace())
         self.gs = None
 
-
     def getObs(self):
         return self.env.getFeatures()
 
@@ -43,8 +43,9 @@ class PyTAG():
     def getActions(self):
         return self.env.getActions()
 
-    def convertJSONtoObs(self, json):
-        pass
+    def get_observation_as_json(self):
+        java_json = self.env.getObservationJson()
+        return json.loads(str(java_json))
 
     def step(self, action):
         self.env.step(action)

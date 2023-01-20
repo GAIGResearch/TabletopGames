@@ -9,7 +9,7 @@ import java.util.List;
 public interface IVectorisable {
 
     // Gets observations as a JSON
-    JSONObject getObservationJson();
+    String getObservationJson();
 
     double[] getObservationVector();
 
