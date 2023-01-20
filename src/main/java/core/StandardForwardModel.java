@@ -3,7 +3,10 @@ package core;
 import core.actions.AbstractAction;
 import evaluation.metrics.Event;
 
+import java.util.Arrays;
+
 import static core.CoreConstants.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.TIMEOUT;
 import static evaluation.metrics.Event.GameEvent.ROUND_OVER;
 import static evaluation.metrics.Event.GameEvent.TURN_OVER;
 
@@ -36,18 +39,17 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      * by the forward model
      *
      * @param currentState the current game state
-     * @param actionTaken the action taken by the current player, already applied to the game state
+     * @param actionTaken  the action taken by the current player, already applied to the game state
      */
-    protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken){
+    protected void _afterAction(AbstractGameState currentState, AbstractAction actionTaken) {
         // override if needed
     }
-
 
     /**
      * End the player turn. This will publish a TURN_OVER event, increases the turn counter and changes the currentPlayer on the
      * game state to be the one specified.
      *
-     * @param gs - game state to end current player's turn in.
+     * @param gs         - game state to end current player's turn in.
      * @param nextPlayer - the player whose turn it is next.
      */
     public final void endPlayerTurn(AbstractGameState gs, int nextPlayer) {
@@ -61,6 +63,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         gs.turnCounter++;
         gs.turnOwner = nextPlayer;
     }
+
     /**
      * <p>The default assumption is that after a player has finished their turn, play will proceed
      * sequentially to the next player, looping back to player 0 once all players have acted.
@@ -86,7 +89,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      *
      * <p>It is the responsibility of the game-specific forward model that extends this class to call endRound()</p>
      *
-     * @param gs - current game state.
+     * @param gs                     - current game state.
      * @param firstPlayerOfNextRound the first player to act in the next round
      */
     public final void endRound(AbstractGameState gs, int firstPlayerOfNextRound) {
@@ -99,19 +102,26 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         }
         gs.roundCounter++;
         if (gs.getGameParameters().maxRounds != -1 && gs.roundCounter == gs.getGameParameters().maxRounds) {
+            endGame(gs); // we end the game validly
+        } else if (gs.getGameParameters().timeoutRounds != -1 && gs.roundCounter == gs.getGameParameters().timeoutRounds) {
             endGame(gs);
+            // then we override the Result to be Timeout
+            gs.setGameStatus(TIMEOUT);
+            Arrays.fill(gs.playerResults, TIMEOUT);
         } else {
             gs.turnCounter = 0;
             gs.turnOwner = firstPlayerOfNextRound;
             gs.firstPlayer = firstPlayerOfNextRound;
         }
     }
+
     public final void endRound(AbstractGameState gs) {
         endRound(gs, 0);
     }
 
     /**
      * A Forward Model should be stateless - and hence have no need to implement a _copy() method
+     *
      * @return this
      */
     @Override

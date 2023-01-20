@@ -61,6 +61,7 @@ public class CoreConstants {
         DRAW(0),
         LOSE(-1),
         DISQUALIFY(-2),
+        TIMEOUT(-3),
         GAME_ONGOING(0),
         GAME_END(3);
 

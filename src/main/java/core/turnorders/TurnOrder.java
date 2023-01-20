@@ -17,6 +17,16 @@ import java.util.stream.IntStream;
 import static core.CoreConstants.GameResult.*;
 import static core.CoreConstants.GameResult.LOSE;
 
+/**
+ * This is purely for old-style game implementations from before January 2023
+ *
+ * This has been deprecated because it all too often led to a mixture of logic and state, and ambiguity over where any individual piece
+ * of game logic should be implemented.
+ * The new standard (See StandardForwardModel) is to have a clean separation of:
+ *  - state within something that extends AbstractGameState
+ *  - game logic within something that extends AbstractForwardModel (and this has new method hooks to help)
+ */
+@Deprecated
 public abstract class TurnOrder {
 
     // Fixed
