@@ -5,6 +5,7 @@ import jpype
 from jpype import *
 import jpype.imports
 from utils.common import get_agent_class
+import numpy as np
 
 
 class PyTAG():
@@ -28,8 +29,8 @@ class PyTAG():
             players.add(agent_class())
         self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed))
         # todo get obs and action spaces
-        # self.observation_space = self.env.ObservationSpace()
-        # self.action_space = gym.spaces.Discrete(self.env.ActionSpace())
+        self.observation_space = 9 #self.env.getObservationSpace()
+        self.action_space = 3 #self.env.getActionSpace()
         self.gs = None
 
     def getObs(self):
@@ -37,7 +38,7 @@ class PyTAG():
 
     def reset(self):
         self.gs = self.env.reset()
-        obs = self.gs.getFeatureVector()
+        obs = np.asarray(self.env.getObservationVector())
         return obs
 
     def getActions(self):
@@ -49,10 +50,10 @@ class PyTAG():
 
     def step(self, action):
         self.env.step(action)
-        obs = self.env.getObservationVector()
+        obs = np.asarray(self.env.getObservationVector())
         reward = self.env.getReward()
         done = self.env.isDone()
-        return obs, reward, done, ""
+        return obs, reward, done, {}
 
     def close(self):
         jpype.shutdownJVM()
