@@ -1,9 +1,10 @@
+import os.path
 import random
 import time
 import json
 import jpype
 from jpype import *
-import jpype.imports
+# import jpype.imports
 from utils.common import get_agent_class
 import numpy as np
 
@@ -11,9 +12,13 @@ import numpy as np
 class PyTAG():
     def __init__(self, agents, seed=42, game="Diamant", jar_path="ModernBoardGame.jar"):
         # JPYPE setup
-        jpype.addClassPath(jar_path)
+        self.root_path = os.getcwd()
+        # jpype.addClassPath(os.path.join(self.root_path, jar_path))
         if not jpype.isJVMStarted():
-            jpype.startJVM()
+            jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=' + jar_path)
+            # jpype.startJVM() #classpath=os.path.join(self.root_path, jar_path))
+
+        print(jpype.java.lang.System.getProperty("java.class.path"))
 
         Utils = jpype.JClass("utilities.Utils")
         GYMEnv = jpype.JClass("core.GYMEnv")
