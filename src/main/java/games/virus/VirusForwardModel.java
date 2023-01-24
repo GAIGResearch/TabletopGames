@@ -55,8 +55,12 @@ public class VirusForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         VirusGameState vgs = (VirusGameState) gameState;
         checkGameEnd(vgs);
-        if (vgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING)
-            endPlayerTurn(gameState);
+        if (gameState.isNotTerminal()) {
+            if (vgs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING)
+                endPlayerTurn(gameState);
+            if (gameState.getCurrentPlayer() == 0)
+                endRound(gameState);
+        }
     }
 
     /**
