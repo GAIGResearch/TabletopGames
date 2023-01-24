@@ -1,14 +1,10 @@
 package games.dicemonastery;
 
-import core.AbstractGameData;
-import core.AbstractGameState;
-import core.StandardForwardModel;
-import core.StandardForwardModelWithTurnOrder;
+import core.*;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Card;
 import core.components.Deck;
-import evaluation.metrics.Event;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.*;
 import utilities.Pair;
@@ -18,16 +14,20 @@ import java.util.stream.IntStream;
 
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
-import static games.dicemonastery.DiceMonasteryConstants.Phase.BID;
-import static games.dicemonastery.DiceMonasteryConstants.Phase.SACRIFICE;
+import static games.dicemonastery.DiceMonasteryConstants.Phase.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
 import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 public class DiceMonasteryForwardModel extends StandardForwardModel {
 
+    // just create this once for performance - could also manually write out the array
+    private static final List<Pair<Integer, Integer>> bidCombinations = IntStream.rangeClosed(0, 3)
+            .boxed()
+            .flatMap(b -> IntStream.rangeClosed(0, 3)
+                    .mapToObj(m -> new Pair<>(b, m)))
+            .collect(toList());
     public final AbstractAction SOW_WHEAT = new SowWheat();
     public final AbstractAction HARVEST_WHEAT = new HarvestWheat(1);
     public final AbstractAction PLACE_SKEP = new PlaceSkep();
@@ -107,14 +107,14 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
         state.setGamePhase(Phase.PLACE_MONKS);
     }
 
-
-    public void _startRound(AbstractGameState gameState) {
+    public void startSeason(AbstractGameState gameState) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
         state.season = state.season.next();
         if (state.season == SPRING) {
-            int newFirstPlayer = (state.getFirstPlayer() + 1 + state.getNPlayers()) % state.getNPlayers();
-            state.setFirstPlayer(newFirstPlayer);
+            //  int newFirstPlayer = (state.getFirstPlayer() + 1 + state.getNPlayers()) % state.getNPlayers();
+            //   state.setFirstPlayer(newFirstPlayer); this is done in the main StandardForwardModel.endRound()
             state.year++;
+            //  System.out.printf("Setting Abbot to p%d in year %d%n", state.getFirstPlayer(), state.year);
         }
         if (state.season == SUMMER && state.year == 1)
             state.season = state.season.next(); // we skip Summer in the first year
@@ -123,33 +123,42 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
             state.setGamePhase(BID);
         else
             state.setGamePhase(Phase.PLACE_MONKS);
-      //  TODO: Account for this special case: int nextPlayer = state.firstPlayerWithMonks();
+        //  TODO: Account for this special case: int nextPlayer = state.firstPlayerWithMonks();
         if (state.season == WINTER)
             state.winterHousekeeping();  // this occurs at the start of WINTER, as it includes the Christmas Feast
     }
 
-    public void _endRound(AbstractGameState gs) {
+    public void endSeason(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         DiceMonasteryParams params = (DiceMonasteryParams) state.getGameParameters();
         switch (state.season) {
             case SPRING:
             case AUTUMN:
                 state.springAutumnHousekeeping();
+                endRound(gs);
                 break;
             case SUMMER:
+                endRound(gs);
                 break;
             case WINTER:
                 if (state.year == params.YEARS)
                     endGame(state);
+                else {
+                    int newAbbot = (state.getFirstPlayer() + 1) % state.getNPlayers();
+                    endRound(state, newAbbot);
+                }
                 break;
         }
+        if (state.isNotTerminal())
+            startSeason(state);
     }
 
-
-    private void initialiseUseMonkBooleans(DiceMonasteryGameState state) {
+    private void initialiseUseMonkBooleans(DiceMonasteryGameState state, int nextPlayer) {
         state.turnOwnerTakenReward = false;
         if (state.availableBonusTokens(state.currentAreaBeingExecuted).isEmpty())
             playerTakesReward(state); // none to take
+        state.actionPointsLeftForCurrentPlayer = state.actionPoints(state.currentAreaBeingExecuted, nextPlayer);
+      //  System.out.printf("Initialising for Player %d with %d AP in %s%n", nextPlayer, state.actionPointsLeftForCurrentPlayer, state.currentAreaBeingExecuted);
     }
 
     void playerTakesReward(DiceMonasteryGameState state) {
@@ -193,8 +202,7 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
                         state.currentAreaBeingExecuted = ActionArea.MEADOW;
                         state.setUpPlayerOrderForCurrentArea(); // impossible to have no monks placed at this point
                         nextPlayer = state.playerOrderForCurrentArea.get(0);
-                        initialiseUseMonkBooleans(state);
-                        state.actionPointsLeftForCurrentPlayer = state.actionPoints(state.currentAreaBeingExecuted, currentPlayer);
+                        initialiseUseMonkBooleans(state, nextPlayer);
                     } else {
                         nextPlayer = state.nextPlayer();
                     }
@@ -205,22 +213,23 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
                         for (Monk m : state.monksIn(state.currentAreaBeingExecuted, currentPlayer)) {
                             state.moveMonk(m.getComponentID(), state.currentAreaBeingExecuted, DORMITORY);
                         }
-                        // then move to next player
-                        nextPlayer = state.nextPlayer();
-                        initialiseUseMonkBooleans(state);
-                        state.actionPointsLeftForCurrentPlayer = state.actionPoints(state.currentAreaBeingExecuted, currentPlayer);
 
                         if (state.monksIn(state.currentAreaBeingExecuted, -1).isEmpty()) {
                             // we have completed all actions for that area
                             if (state.setUpPlayerOrderForCurrentArea()) {
                                 nextPlayer = state.playerOrderForCurrentArea.get(0);
-                                state.actionPointsLeftForCurrentPlayer = state.actionPoints(state.currentAreaBeingExecuted, currentPlayer);
-                                initialiseUseMonkBooleans(state);
+                                initialiseUseMonkBooleans(state, nextPlayer);
                             } else {
                                 newRound = true;  // new season
                                 nextPlayer = state.getFirstPlayer();
                             }
+                        } else {
+                            // then move to next player
+                            nextPlayer = state.nextPlayer();
+                            initialiseUseMonkBooleans(state, nextPlayer);
                         }
+                    } else {
+                        nextPlayer = currentPlayer;
                     }
                 }
                 break;
@@ -240,6 +249,8 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
                         state.playersToMakeVikingDecisions.remove(0);
                         if (!state.playersToMakeVikingDecisions.isEmpty())
                             nextPlayer = state.playersToMakeVikingDecisions.get(0);
+                        else
+                            nextPlayer = currentPlayer;
                         break;
                 }
                 if (state.getGamePhase() == SACRIFICE && state.playersToMakeVikingDecisions.isEmpty()) {
@@ -251,7 +262,7 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
             case WINTER:
                 nextPlayer = (currentPlayer + 1) % state.getNPlayers();
                 // round over if we get back to abbot as first player
-                if (currentPlayer == state.getFirstPlayer()) {
+                if (nextPlayer == state.getFirstPlayer()) {
                     newRound = true;
                     nextPlayer = (state.getFirstPlayer() + 1) % state.getNPlayers();
                 }
@@ -260,12 +271,12 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
                 throw new AssertionError(String.format("Unknown Game Phase of %s in %s", state.getGamePhase(), state.season));
         }
 
-        // TODO: This does not take account of the orphaned logic in nextPlayer to use the sequence in each area
+        if (nextPlayer == -1)
+            throw new AssertionError("No next player has been allocated for some reason");
+
         endPlayerTurn(state, nextPlayer);
         if (newRound) {
-            _endRound(state);
-            endRound(state, nextPlayer);
-            _startRound(state);
+            endSeason(state);
         }
     }
 
@@ -477,13 +488,5 @@ public class DiceMonasteryForwardModel extends StandardForwardModel {
         }
         throw new AssertionError("Not yet implemented combination " + state.season + " : " + state.getGamePhase());
     }
-
-
-    // just create this once for performance - could also manually write out the array
-    private static final List<Pair<Integer, Integer>> bidCombinations = IntStream.rangeClosed(0, 3)
-            .boxed()
-            .flatMap(b -> IntStream.rangeClosed(0, 3)
-                    .mapToObj(m -> new Pair<>(b, m)))
-            .collect(toList());
 
 }

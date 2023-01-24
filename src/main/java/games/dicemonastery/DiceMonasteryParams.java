@@ -45,7 +45,7 @@ public class DiceMonasteryParams extends TunableParameters {
     @Override
     public void _reset() {
         YEARS = (int) getParameterValue("YEARS");
-        setMaxRounds(YEARS * seasonsPerYear - 1);
+      //  setMaxRounds(YEARS * seasonsPerYear - 1);
         dataPath = (String) getParameterValue("dataPath");
         mandateTreasureLoss = (boolean) getParameterValue("mandateTreasureLoss");
         calfSkinsRotInWinter = (boolean) getParameterValue("calfSkinsRotInWinter");

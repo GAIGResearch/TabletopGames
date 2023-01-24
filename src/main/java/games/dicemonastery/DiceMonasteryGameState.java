@@ -294,7 +294,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public int getActionPointsLeft() {
-        throw new AssertionError("Not yet implemented");
+        return actionPointsLeftForCurrentPlayer;
     }
 
     public int getResource(int player, Resource resource, ActionArea location) {
@@ -492,7 +492,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public int actionPoints(ActionArea region, int player) {
-        return monksIn(currentAreaBeingExecuted, turnOwner).stream().mapToInt(Monk::getPiety).sum();
+        return monksIn(region, player).stream().mapToInt(Monk::getPiety).sum();
     }
 
     public void putToken(ActionArea area, BONUS_TOKEN token, int position) {
@@ -719,7 +719,11 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 other.writtenTexts.equals(writtenTexts) && other.treasuresCommissioned.equals(treasuresCommissioned) &&
                 other.pilgrimagesStarted.equals(pilgrimagesStarted) && other.pilgrimageDecks.equals(pilgrimageDecks) &&
                 other.marketCards == marketCards && other.forageCards == forageCards &&
-                other.season == season && other.year == year &&
+                other.season == season && other.year == year && other.currentAreaBeingExecuted == currentAreaBeingExecuted &&
+                other.turnOwnerTakenReward == turnOwnerTakenReward && other.turnOwnerPrayed == turnOwnerPrayed &&
+                other.actionPointsLeftForCurrentPlayer == actionPointsLeftForCurrentPlayer &&
+                other.playerOrderForCurrentArea.equals(playerOrderForCurrentArea) &&
+                other.playersToMakeVikingDecisions.equals(playersToMakeVikingDecisions) &&
                 Arrays.equals(other.victoryPoints, victoryPoints) && Arrays.equals(other.playerResults, playerResults);
     }
 
@@ -727,7 +731,9 @@ public class DiceMonasteryGameState extends AbstractGameState {
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
                 gameParameters, season, year, nextRetirementReward, playerBids, writtenTexts, treasuresCommissioned,
-                pilgrimageDecks, pilgrimagesStarted, treasuresOwnedPerPlayer, marketCards, forageCards) +
+                pilgrimageDecks, pilgrimagesStarted, treasuresOwnedPerPlayer, marketCards, forageCards,
+                currentAreaBeingExecuted, playerOrderForCurrentArea, turnOwnerPrayed, turnOwnerTakenReward, actionPointsLeftForCurrentPlayer,
+                playersToMakeVikingDecisions) +
                 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }
 

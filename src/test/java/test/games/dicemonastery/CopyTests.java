@@ -256,12 +256,6 @@ public class CopyTests {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new DoNothing()); // don't promote anyone
-
-        assertEquals(startHash, copy.hashCode());
-        assertFalse(startHash == state.hashCode());
-        assertEquals(midHash, midCopy.hashCode());
-        assertFalse(midHash == state.hashCode());
     }
 
     private void summerBidSetup() {

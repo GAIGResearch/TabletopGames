@@ -66,7 +66,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
 
     /**
      * <p>The default assumption is that after a player has finished their turn, play will proceed
-     * sequentially to the next player, looping back to player 0 once all players have acted.
+     * sequentially to the next player, looping back to the current first player once all players have acted.
      * If this is not the case, then use the alternative method with a specific argument for the next player</p>
      *
      * <p>It is the responsibility of the game-specific forward model that extends this class to call endPlayerTurn()
@@ -76,7 +76,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      */
     @Override
     public final void endPlayerTurn(AbstractGameState gs) {
-        endPlayerTurn(gs, (gs.nPlayers + gs.turnOwner + 1) % gs.nPlayers);
+        endPlayerTurn(gs, (gs.turnOwner + 1) % gs.nPlayers);
     }
 
     /**
@@ -115,8 +115,12 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         }
     }
 
+    /**
+     * End a round, with no change to the firstPlayer
+     * @param gs
+     */
     public final void endRound(AbstractGameState gs) {
-        endRound(gs, 0);
+        endRound(gs, gs.firstPlayer);
     }
 
     /**

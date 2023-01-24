@@ -528,7 +528,7 @@ public class CoreGameLoopTests {
         state.monksIn(PILGRIMAGE, 1).forEach(state::retireMonk);  // retire all of P1's monks on pilgrimage
         state.createMonk(6, 1); // and give them a P6 monk to retire
         assertEquals(1, state.monksIn(DORMITORY, 1).size());
-        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));  // p0 promotes a random monk
         assertEquals(1, state.getCurrentPlayer());
         assertEquals(1, fm.computeAvailableActions(state).size());
         assertEquals(new PromoteMonk(6, DORMITORY), fm.computeAvailableActions(state).get(0));
