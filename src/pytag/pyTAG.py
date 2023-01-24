@@ -3,26 +3,45 @@ import random
 import time
 import json
 import jpype
-from jpype import *
-# import jpype.imports
+from jpype import java
+import jpype.imports
+from jpype.types import *
 from utils.common import get_agent_class
 import numpy as np
 
 
 class PyTAG():
-    def __init__(self, agents, seed=42, game="Diamant", jar_path="ModernBoardGame.jar"):
+    def __init__(self, agents, seed=42, game="Diamant", jar_path="ModernBoardGame_jar.jar"):
         # JPYPE setup
         self.root_path = os.getcwd()
         # jpype.addClassPath(os.path.join(self.root_path, jar_path))
+        jpype.addClassPath(jpype.getDefaultJVMPath())
+        jpype.addClassPath(jar_path)
         if not jpype.isJVMStarted():
-            jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=' + jar_path)
-            # jpype.startJVM() #classpath=os.path.join(self.root_path, jar_path))
+            # jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=' + jar_path)
+            jpype.startJVM(convertStrings=False) #classpath=[jpype.getDefaultJVMPath(), jar_path]) #classpath=os.path.join(self.root_path, jar_path))
 
         print(jpype.java.lang.System.getProperty("java.class.path"))
+        # todo it sees the packages, but not the classes
+        import core
+        import games.catan
+        # from utilities import Utils
+        # jpype.JException
 
-        Utils = jpype.JClass("utilities.Utils")
         GYMEnv = jpype.JClass("core.GYMEnv")
+        Utils = jpype.JClass("utilities.Utils")
         GameType = jpype.JClass("games.GameType")
+
+        try:
+            # it does see the package structure as PyCharm makes recommendations in the debugger
+            GYMEnv = jpype.JClass("<core.GYMEnv>")
+            Utils = jpype.JClass("utilities.Utils")
+            GameType = jpype.JClass("games.GameType")
+        except jpype.JException as ex:
+            print("Caught base exception : ", str(ex))
+            print(ex.stacktrace())
+        except Exception as e:
+            print(e)
 
         null = jpype.java.lang.String @ None
         null_list = jpype.java.util.List @ None
