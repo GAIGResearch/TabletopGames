@@ -56,7 +56,7 @@ public class BattleloreForwardModel extends StandardForwardModel {
         Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ?
                 Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
-        int maxTurnsToPlay = ((BattleloreGameParameters)currentState.getGameParameters()).maxTurnsToPlay;
+        int maxRounds = currentState.getGameParameters().getMaxRounds();
         switch ((BattleloreGameState.BattleloreGamePhase) state.getGamePhase()) {
             case CommandAndOrderStep:
                 currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
@@ -76,11 +76,13 @@ public class BattleloreForwardModel extends StandardForwardModel {
                 break;
         }
 
-        if (checkGameEnd((BattleloreGameState) currentState, playerId) || state.getRoundCounter() > maxTurnsToPlay) {
+        if (checkGameEnd((BattleloreGameState) currentState, playerId) || state.getRoundCounter() >= maxRounds) {
             endGame(currentState);
         }
 
         endPlayerTurn(currentState);
+        if (currentState.getCurrentPlayer() == 0)
+            endRound(currentState);
     }
 
     private void PutLearningScenarioUnits(BattleloreGameState gameState) {

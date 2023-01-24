@@ -41,7 +41,7 @@ public abstract class AbstractGameState {
     private int tick = 0;
 
     // Migrated from TurnOrder...may move later
-    protected int currentPlayer, roundCounter, turnCounter, turnOwner, firstPlayer;
+    protected int roundCounter, turnCounter, turnOwner, firstPlayer;
     protected int nPlayers;
     protected List<GameListener> listeners = new ArrayList<>();
 
@@ -85,6 +85,11 @@ public abstract class AbstractGameState {
         historyText = new ArrayList<>();
         playerTimer = new ElapsedCpuChessTimer[getNPlayers()];
         tick = 0;
+        turnOwner = 0;
+        turnCounter = 0;
+        roundCounter = 0;
+        firstPlayer = 0;
+        actionsInProgress.empty();
     }
 
     /**
@@ -244,7 +249,6 @@ public abstract class AbstractGameState {
         s.gamePhase = gamePhase;
         s.coreGameParameters = coreGameParameters;
         s.tick = tick;
-        s.currentPlayer = currentPlayer;
         s.nPlayers = nPlayers;
         s.roundCounter = roundCounter;
         s.turnCounter = turnCounter;
@@ -530,7 +534,7 @@ public abstract class AbstractGameState {
         if (!(o instanceof AbstractGameState)) return false;
         AbstractGameState gameState = (AbstractGameState) o;
         return Objects.equals(gameParameters, gameState.gameParameters) &&
-                gameStatus == gameState.gameStatus && currentPlayer == gameState.currentPlayer &&
+                gameStatus == gameState.gameStatus &&
                 nPlayers == gameState.nPlayers && roundCounter == gameState.roundCounter &&
                 turnCounter == gameState.turnCounter && turnOwner == gameState.turnOwner &&
                 firstPlayer == gameState.firstPlayer && tick == gameState.tick &&
@@ -559,7 +563,7 @@ public abstract class AbstractGameState {
     @Override
     public int hashCode() {
         int result = Objects.hash(gameParameters, gameStatus, gamePhase, actionsInProgress);
-        result = 31 * result + Objects.hash(tick, currentPlayer, nPlayers, roundCounter, turnCounter, turnOwner, firstPlayer);
+        result = 31 * result + Objects.hash(tick, nPlayers, roundCounter, turnCounter, turnOwner, firstPlayer);
         result = 31 * result + Arrays.hashCode(playerResults);
         return result;
     }

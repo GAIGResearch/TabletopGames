@@ -34,7 +34,7 @@ public class CatanParameters extends AbstractParameters {
 
     public CatanParameters(long seed){
         super(seed);
-        setMaxRounds(300);
+        setMaxRounds(100);
     }
 
     public CatanParameters(String dataPath, long seed){

@@ -11,13 +11,11 @@ public class BattleloreGameParameters extends AbstractParameters {
     public final int WIN_SCORE = 4;
     private int meleeRange = 1;
     private int rangedRange = 5;
-    public int maxTurnsToPlay = 100;
-
-
 
     public BattleloreGameParameters(String dataPath, long seed) {
         super(seed);
         this.dataPath = dataPath;
+        setMaxRounds(100);
         super.setThinkingTimeMins(Long.MAX_VALUE);
     }
 
