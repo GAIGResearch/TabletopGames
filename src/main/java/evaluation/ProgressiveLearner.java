@@ -2,20 +2,22 @@ package evaluation;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.ParameterFactory;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
+import evaluation.tournaments.RandomRRTournament;
+import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import players.PlayerFactory;
 import players.learners.AbstractLearner;
 import evaluation.loggers.FileStatsLogger;
-import evaluation.metrics.StateFeatureListener;
+import evaluation.listeners.StateFeatureListener;
 import utilities.Utils;
-
+import org.apache.commons.io.FileUtils;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -73,7 +75,7 @@ public class ProgressiveLearner {
         String gameParams = getArg(args, "gameParams", "");
         dataDir = getArg(args, "dir", "");
 
-        params = ParameterFactory.createFromFile(gameToPlay, gameParams);
+        params = AbstractParameters.createFromFile(gameToPlay, gameParams);
 
         phiClass = getArg(args, "statePhi", "");
         if (phiClass.equals(""))
@@ -163,12 +165,22 @@ public class ProgressiveLearner {
         RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
                 finalMatchups, System.currentTimeMillis(), params);
 
-        tournament.listeners = new ArrayList<>();
+        tournament.setListeners(new ArrayList<>());
         IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
-        GameListener gameTracker = GameListener.createListener("utilities.GameResultListener", logger);
-        tournament.listeners.add(gameTracker);
+        GameListener gameTracker = GameListener.createListener("evaluation.metrics.GameListener", logger, null);
+        tournament.getListeners().add(gameTracker);
         tournament.runTournament();
-      // gameTracker.allGamesFinished(); // This is done in tournament
+        int winnerIndex = tournament.getWinnerIndex();
+        if (winnerIndex != finalAgents.size() - 1) {
+            // if the basePlayer won, then meh!
+            String fileName = String.format("%s_Winner.txt", prefix);
+            try {
+                FileUtils.copyFile(new File(learnedFilesByIteration[winnerIndex]), new File(fileName));
+            } catch (IOException e) {
+                System.out.println("Error copying the final winning heuristic");
+                e.printStackTrace();
+            }
+        }
     }
 
     private void loadAgents() {
@@ -209,7 +221,7 @@ public class ProgressiveLearner {
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
         StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi, frequency, currentPlayerOnly);
-        tournament.listeners = Collections.singletonList(dataTracker);
+        tournament.setListeners(Collections.singletonList(dataTracker));
         tournament.runTournament();
     }
 

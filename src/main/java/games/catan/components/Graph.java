@@ -51,7 +51,7 @@ public class Graph<N extends Copiable, E extends Copiable> {
         return nodes;
     }
 
-    /* Returns the the edges [src, dest, edge]
+    /* Returns the edges [src, dest, edge]
     *  */
     public List<Edge<N, E>> getEdges(N src){
         return map.get(src);

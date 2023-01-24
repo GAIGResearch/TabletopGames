@@ -1,44 +1,45 @@
 package games.dominion.stats;
-import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
-import evaluation.metrics.IMetricsCollection;
+import evaluation.listeners.GameListener;
+import evaluation.metrics.*;
 import games.dominion.DominionConstants;
 import games.dominion.DominionGameState;
 import games.dominion.cards.CardType;
+import utilities.Group;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+@SuppressWarnings("unused")
 public class DominionMetrics implements IMetricsCollection {
 
-
-    public static class VictoryCardsLeft extends AbstractMetric {
-
-        public VictoryCardsLeft() {this(CardType.LIBRARY.name());}
-
-        private CardType type;
-        public VictoryCardsLeft(String type) {
-            addEventType(Event.GameEvent.GAME_OVER);
-            this.type = CardType.valueOf(type);
-        }
-
-        public String name() {return "VictoryCardsLeft (" + type + ")";}
-
+    public static class VictoryCardsLeft extends AbstractParameterizedMetric {
+        public VictoryCardsLeft(){super();}
+        public VictoryCardsLeft(Object arg){super(arg);}
         @Override
         public Object run(GameListener listener, Event e) {
+            CardType type = (CardType) getParameterValue("type");
             return ((DominionGameState)e.state).cardsOfType(type, -1, DominionConstants.DeckType.SUPPLY);
         }
-
-        public Object[] getAllowedParameters() { return CardType.values(); }
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+        public List<Group<String, List<?>, ?>> getAllowedParameters() {
+            return Collections.singletonList(new Group<>("type", Arrays.asList(CardType.values()), CardType.LIBRARY.name()));
+        }
     }
 
     public static class EmptySupplySlots extends AbstractMetric {
-
-        public EmptySupplySlots() {addEventType(Event.GameEvent.GAME_OVER);}
-
         @Override
         public Object run(GameListener listener, Event e) {
             return ((DominionGameState)e.state).cardsIncludedInGame().stream()
                     .filter(c -> ((DominionGameState)e.state).cardsOfType(c, -1, DominionConstants.DeckType.SUPPLY) == 0)
                     .count();
+        }
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 }

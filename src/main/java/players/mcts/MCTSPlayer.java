@@ -5,7 +5,7 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
 import utilities.Pair;

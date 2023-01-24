@@ -130,9 +130,9 @@ public class SingleTreeNode {
         this.opponentModels = root.opponentModels;
         this.forwardModel = root.forwardModel;
         this.rnd = root.rnd;
-        this.round = state.getTurnOrder().getRoundCounter();
-        this.turn = state.getTurnOrder().getTurnCounter();
-        this.turnOwner = state.getTurnOrder().getTurnOwner();
+        this.round = state.getRoundCounter();
+        this.turn = state.getTurnCounter();
+        this.turnOwner = state.getTurnOwner();
         this.terminalNode = !state.isNotTerminal();
 
         decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
@@ -193,6 +193,8 @@ public class SingleTreeNode {
                 if (!children.containsKey(action)) {
                     children.put(action, null); // mark a new node to be expanded
                     // This *does* rely on a good equals method being implemented for Actions
+                    if (!children.containsKey(action))
+                        throw new AssertionError("We have an action that does not obey the equals/hashcode contract" + action);
                 }
             }
         }
@@ -730,6 +732,8 @@ public class SingleTreeNode {
     public double exp3Value(AbstractAction action) {
         double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
+        if (actionVisits == 0)
+            return 0.0;
         double meanActionValue = (actionValue / actionVisits);
         if (params.biasVisits > 0) {
             double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
@@ -747,6 +751,8 @@ public class SingleTreeNode {
     public double rmValue(AbstractAction action) {
         double actionValue = actionTotValue(action, decisionPlayer);
         int actionVisits = actionVisits(action);
+        if (actionVisits == 0)
+            return 0.0;
         if (params.biasVisits > 0) {
             double beta = Math.sqrt(params.biasVisits / (double) (params.biasVisits + 3 * actionVisits));
             actionValue = (1.0 - beta) * actionValue + beta * ((totValue[decisionPlayer] / nVisits) + advantagesOfActionsFromOLS.getOrDefault(action, 0.0));
@@ -799,7 +805,7 @@ public class SingleTreeNode {
     protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int decisionPlayer, int lastActor) {
         int rolloutDepth = 0; // counting from end of tree
 
-        int roundAtStartOfRollout = openLoopState.getTurnOrder().getRoundCounter();
+        int roundAtStartOfRollout = openLoopState.getRoundCounter();
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
@@ -858,7 +864,7 @@ public class SingleTreeNode {
                 case START_TURN:
                     return lastActor != decisionPlayer && currentActor == decisionPlayer;
                 case END_ROUND:
-                    return rollerState.getTurnOrder().getRoundCounter() != roundAtStartOfRollout;
+                    return rollerState.getRoundCounter() != roundAtStartOfRollout;
             }
         }
         return false;
@@ -962,11 +968,13 @@ public class SingleTreeNode {
                 Arrays.stream(actionVisits()).boxed().collect(toSet()).size() == 1) {
             policy = SIMPLE;
         }
-
-        if (params.selectionPolicy == TREE) {
+        if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
             bestAction = treePolicyAction(false);
         } else {
             for (AbstractAction action : children.keySet()) {
+                if (!children.containsKey(action)) {
+                    throw new AssertionError("Hashcode / equals contract issue for " + action);
+                }
                 if (children.get(action) != null) {
                     double childValue = actionVisits(action); // if ROBUST
                     if (policy == SIMPLE)
@@ -975,7 +983,7 @@ public class SingleTreeNode {
                     // Apply small noise to break ties randomly
                     childValue = noise(childValue, params.epsilon, rnd.nextDouble());
 
-                    // Save best value (highest visit count)
+                    // Save best value
                     if (childValue > bestValue) {
                         bestValue = childValue;
                         bestAction = action;

@@ -35,8 +35,6 @@ public class EndCardMarshallsRevenge extends RoundEvent {
                 break;
             }
         }
-
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
         return true;
     }
 

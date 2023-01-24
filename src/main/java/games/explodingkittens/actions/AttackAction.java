@@ -5,6 +5,7 @@ import core.actions.DrawCard;
 import core.AbstractGameState;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
+import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.ExplodingKittensTurnOrder;
 import games.explodingkittens.cards.ExplodingKittensCard;
 
@@ -24,8 +25,9 @@ public class AttackAction extends DrawCard implements IsNopeable, IPrintable {
     public boolean execute(AbstractGameState gs) {
         // Discard card played
         super.execute(gs);
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
         // Execute action
-        ((ExplodingKittensTurnOrder) gs.getTurnOrder()).registerAttackAction(attackTargetID);
+        ((ExplodingKittensTurnOrder) ekgs.getTurnOrder()).registerAttackAction(attackTargetID);
         return false;
     }
 

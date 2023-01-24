@@ -1,6 +1,7 @@
 package games.dotsboxes;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import utilities.Utils;
@@ -53,7 +54,7 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         DBGameState state = (DBGameState) gs;
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
         if (!state.isNotTerminal())
             return playerResult.value;

@@ -17,7 +17,7 @@ public class PrincessAction extends core.actions.DrawCard implements IPrintable 
     @Override
     public boolean execute(AbstractGameState gs) {
         // remove the player from the game
-        ((LoveLetterGameState)gs).killPlayer(gs.getTurnOrder().getCurrentPlayer(gs));
+        ((LoveLetterGameState)gs).killPlayer(gs.getCurrentPlayer());
         return super.execute(gs);
     }
 

@@ -9,6 +9,7 @@ import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;
 import games.dominion.actions.AttackReaction;
 import games.dominion.actions.DominionAction;
+import games.dominion.actions.EndPhase;
 import games.dominion.actions.Militia;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
@@ -21,6 +22,12 @@ import static org.junit.Assert.*;
 public class TestFullObservabilityCopy {
 
     DominionForwardModel fm = new DominionForwardModel();
+
+    private void moveForwardToNextPlayer(DominionGameState state) {
+        int startingPlayer = state.getCurrentPlayer();
+        while (state.getCurrentPlayer() == startingPlayer)
+            fm.next(state, new EndPhase());
+    }
 
     @Test
     public void gameStateCopyVanilla() {
@@ -40,9 +47,7 @@ public class TestFullObservabilityCopy {
         assertTrue(fullCopyHand.getDeckVisibility()[1]);
         IntStream.of(0, 2, 3).forEach(i -> assertFalse(fullCopyHand.getDeckVisibility()[i]));
 
-
-
-        fullCopy.endOfTurn(0);
+        moveForwardToNextPlayer(fullCopy);
         assertEquals(0, startState.getCurrentPlayer());
         assertEquals(1, fullCopy.getCurrentPlayer());
 
@@ -61,8 +66,8 @@ public class TestFullObservabilityCopy {
     public void gameStateCopyWithActionInProgress() {
         Game game = new Game(GameType.Dominion, new DominionForwardModel(), new DominionGameState(new DominionParameters(36), 4));
         DominionGameState startState = (DominionGameState) game.getGameState();
-        startState.endOfTurn(0);
-        startState.endOfTurn(1);
+        fm.endPlayerTurn(startState);
+        fm.endPlayerTurn(startState);
         assertEquals(2, startState.getCurrentPlayer());
         DominionAction militia = new Militia(2);
         startState.addCard(CardType.MILITIA, 2, DeckType.HAND);

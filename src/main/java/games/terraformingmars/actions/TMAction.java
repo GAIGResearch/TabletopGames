@@ -140,7 +140,9 @@ public class TMAction extends AbstractAction {
         TMGameState gs = (TMGameState) gameState;
         gs.getAllComponents();  // Force recalculate components
         if (player == -1) player = gameState.getCurrentPlayer();
-        if (!canBePlayed(gs)) return false;
+        if (!canBePlayed(gs)) {
+            throw new AssertionError("Card cannot be played " + this);
+        }
         boolean s = _execute(gs);
         postExecute(gs);
         return s;
@@ -249,7 +251,12 @@ public class TMAction extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof TMAction)) return false;
         TMAction tmAction = (TMAction) o;
-        return freeActionPoint == tmAction.freeActionPoint && player == tmAction.player && pass == tmAction.pass && cost == tmAction.cost && playCardID == tmAction.playCardID && cardID == tmAction.cardID && Objects.equals(costRequirement, tmAction.costRequirement) && Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType && standardProject == tmAction.standardProject && basicResourceAction == tmAction.basicResourceAction && costResource == tmAction.costResource;
+        return freeActionPoint == tmAction.freeActionPoint && player == tmAction.player && pass == tmAction.pass &&
+                cost == tmAction.cost && playCardID == tmAction.playCardID && cardID == tmAction.cardID &&
+                Objects.equals(costRequirement, tmAction.costRequirement) &&
+                Objects.equals(requirements, tmAction.requirements) && actionType == tmAction.actionType &&
+                standardProject == tmAction.standardProject && basicResourceAction == tmAction.basicResourceAction &&
+                costResource == tmAction.costResource;
     }
 
     @Override

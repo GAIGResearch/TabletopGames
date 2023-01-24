@@ -81,6 +81,11 @@
             <artifactId>spark-mllib_2.13</artifactId>
             <version>3.3.1</version>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.7</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -177,7 +182,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.RoundRobinTournament</mainClass>
+                                    <mainClass>evaluation.tournaments.RoundRobinTournament</mainClass>
                                 </manifest>
                             </archive>
                             <finalName>Tournament</finalName>

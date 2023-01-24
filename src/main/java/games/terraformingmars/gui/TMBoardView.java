@@ -8,7 +8,7 @@ import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.*;
 import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.effects.Bonus;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import gui.views.ComponentView;
 import utilities.ImageIO;
 import utilities.Vector2D;
@@ -24,7 +24,7 @@ import static gui.AbstractGUIManager.defaultItemSize;
 import static games.terraformingmars.gui.TMCardView.drawResource;
 import static games.terraformingmars.gui.Utils.*;
 
-public class TMBoardView extends ComponentView implements ScreenHighlight {
+public class TMBoardView extends ComponentView implements IScreenHighlight {
 
     TMGameState gs;
 

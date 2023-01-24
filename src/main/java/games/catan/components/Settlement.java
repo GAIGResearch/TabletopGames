@@ -68,9 +68,11 @@ public class Settlement implements Copiable {
         if (this == obj) return true;
         if (obj instanceof Settlement){
             Settlement otherAction = (Settlement)obj;
-            return id == otherAction.id && type == otherAction.type && harbour == otherAction.harbour &&
-                    owner == otherAction.owner;
+            return id == otherAction.id;
         }
+        // exclude owner and type as Settlement is used as a Key in the Graph<Settlement, Road> in Game state, and
+        // changing equality messes this map up. Yes, this is a bit of a hack, but fixing it will require
+        // some significant rewriting of the Catan code, and in the absence of unit tests, I'm wary. JG
         return false;
     }
 
@@ -84,7 +86,7 @@ public class Settlement implements Copiable {
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    protected Settlement clone() throws CloneNotSupportedException {
         return this.copy();
     }
 }

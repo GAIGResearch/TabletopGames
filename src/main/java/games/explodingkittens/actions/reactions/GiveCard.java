@@ -1,5 +1,6 @@
 package games.explodingkittens.actions.reactions;
 
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
 import core.AbstractGameState;
@@ -19,7 +20,7 @@ public class GiveCard extends DrawCard implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gs;
-        ExplodingKittensTurnOrder ekto = ((ExplodingKittensTurnOrder) gs.getTurnOrder());
+        ExplodingKittensTurnOrder ekto = ((ExplodingKittensTurnOrder) ekgs.getTurnOrder());
         if (fromIndex > -1) { // to allow for GiveCard to occur when the target's deck is empty
             Deck<ExplodingKittensCard> from = (Deck<ExplodingKittensCard>) ekgs.getComponentById(deckFrom);
             Deck<ExplodingKittensCard> to = (Deck<ExplodingKittensCard>) ekgs.getComponentById(deckTo);
@@ -28,7 +29,7 @@ public class GiveCard extends DrawCard implements IPrintable {
             to.add(c);
             executed = true;
         }
-        gs.setMainGamePhase();
+        gs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
         ekto.endPlayerTurnStep(gs);
         ekto.addReactivePlayer(ekgs.getPlayerGettingAFavor());
         return true;

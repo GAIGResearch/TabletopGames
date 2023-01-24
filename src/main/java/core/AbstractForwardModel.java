@@ -2,11 +2,13 @@ package core;
 
 import core.actions.AbstractAction;
 import utilities.ElapsedCpuChessTimer;
-import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
+
+import static core.CoreConstants.GameResult.*;
 
 public abstract class AbstractForwardModel {
 
@@ -18,10 +20,10 @@ public abstract class AbstractForwardModel {
      * @param firstState - initial state.
      */
     protected void abstractSetup(AbstractGameState firstState) {
-        firstState.gameStatus = Utils.GameResult.GAME_ONGOING;
-        firstState.playerResults = new Utils.GameResult[firstState.getNPlayers()];
-        Arrays.fill(firstState.playerResults, Utils.GameResult.GAME_ONGOING);
-        firstState.gamePhase = AbstractGameState.DefaultGamePhase.Main;
+        firstState.gameStatus = CoreConstants.GameResult.GAME_ONGOING;
+        firstState.playerResults = new CoreConstants.GameResult[firstState.getNPlayers()];
+        Arrays.fill(firstState.playerResults, CoreConstants.GameResult.GAME_ONGOING);
+        firstState.gamePhase = CoreConstants.DefaultGamePhase.Main;
         firstState.playerTimer = new ElapsedCpuChessTimer[firstState.getNPlayers()];
         for (int i = 0; i < firstState.getNPlayers(); i++) {
             firstState.playerTimer[i] = new ElapsedCpuChessTimer(firstState.gameParameters.thinkingTimeMins,
@@ -73,12 +75,7 @@ public abstract class AbstractForwardModel {
      */
     protected abstract AbstractForwardModel _copy();
 
-    /**
-     * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
-     * The last thing to be called in the game loop, after the game is finished.
-     */
-    protected void endGame(AbstractGameState gameState) {
-    }
+    protected abstract void endPlayerTurn(AbstractGameState state);
 
     /**
      * Current player tried to play an illegal action.
@@ -98,8 +95,8 @@ public abstract class AbstractForwardModel {
      */
     protected final void disqualifyOrRandomAction(boolean flag, AbstractGameState gameState) {
         if (flag) {
-            gameState.setPlayerResult(Utils.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
-            gameState.turnOrder.endPlayerTurn(gameState);
+            gameState.setPlayerResult(CoreConstants.GameResult.DISQUALIFY, gameState.getCurrentPlayer());
+            endPlayerTurn(gameState);
         } else {
             List<AbstractAction> possibleActions = computeAvailableActions(gameState);
             int randomAction = new Random(gameState.getGameParameters().getRandomSeed()).nextInt(possibleActions.size());
@@ -127,18 +124,20 @@ public abstract class AbstractForwardModel {
      */
     public final void next(AbstractGameState currentState, AbstractAction action) {
         if (action != null) {
+            int player = currentState.getCurrentPlayer();
+            currentState.recordAction(action, player);
             if (currentState.isActionInProgress()) {
                 // we register the action with the currently active ActionSequence
                 currentState.currentActionInProgress().registerActionTaken(currentState, action);
             }
             _next(currentState, action);
-            currentState.recordAction(action);
         } else {
             if (currentState.coreGameParameters.verbose) {
                 System.out.println("Invalid action.");
             }
             illegalActionPlayed(currentState, action);
         }
+        currentState.advanceGameTick();
     }
 
     /**
@@ -154,6 +153,31 @@ public abstract class AbstractForwardModel {
         }
         return _computeAvailableActions(gameState);
     }
+
+    /**
+     * Performs any end of game computations, as needed.
+     * This should not normally need to be overriden - but can be. For example if a game is purely co-operative
+     * or has an insta-win situation without the concept of a game score.
+     * The last thing to be called in the game loop, after the game is finished.
+     */
+    protected void endGame(AbstractGameState gs) {
+        gs.setGameStatus(CoreConstants.GameResult.GAME_END);
+        // If we have more than one person in Ordinal position of 1, then this is a draw
+        boolean drawn = IntStream.range(0, gs.getNPlayers()).map(gs::getOrdinalPosition).filter(i -> i == 1).count() > 1;
+        for (int p = 0; p < gs.getNPlayers(); p++) {
+            int o = gs.getOrdinalPosition(p);
+            if (o == 1 && drawn)
+                gs.setPlayerResult(DRAW, p);
+            else if (o == 1)
+                gs.setPlayerResult(WIN, p);
+            else
+                gs.setPlayerResult(LOSE, p);
+        }
+        if (gs.getCoreGameParameters().verbose) {
+            System.out.println(Arrays.toString(gs.getPlayerResults()));
+        }
+    }
+
 
     /**
      * Returns a copy of this forward model with a new random seed.

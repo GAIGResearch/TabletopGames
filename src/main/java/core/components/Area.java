@@ -2,7 +2,6 @@ package core.components;
 
 import core.CoreConstants;
 import core.interfaces.IComponentContainer;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -15,13 +14,13 @@ public class Area extends Component implements IComponentContainer<Component> {
     protected HashMap<Integer, Component> components;
 
     public Area(int owner, String name) {
-        super(Utils.ComponentType.AREA, "");
+        super(CoreConstants.ComponentType.AREA, "");
         this.components = new HashMap<>();
         this.ownerId = owner;
     }
 
     private Area(int owner, String name, int ID) {
-        super(Utils.ComponentType.AREA, "", ID);
+        super(CoreConstants.ComponentType.AREA, "", ID);
         this.components = new HashMap<>();
         this.ownerId = owner;
     }

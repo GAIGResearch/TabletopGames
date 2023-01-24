@@ -1,5 +1,7 @@
 package test.games.dicemonastery;
 
+import core.Game;
+import games.GameType;
 import games.dicemonastery.*;
 import games.dicemonastery.components.Monk;
 import games.dicemonastery.components.Pilgrimage;
@@ -13,9 +15,8 @@ import static org.junit.Assert.*;
 public class PilgrimageTests {
 
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
-    DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 4));
+    Game game = GameType.DiceMonastery.createGameInstance(4, new DiceMonasteryParams(3));
     DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
-    DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) game.getGameState().getTurnOrder();
 
     @Test
     public void basicFunctionalityShort() {
@@ -112,9 +113,11 @@ public class PilgrimageTests {
 
     @Test
     public void pilgrimageAdvancesInSpringAndSummerOnly() {
-        turnOrder.endRound(state);
-        turnOrder.endRound(state);
-        turnOrder.endRound(state);  // gets to SPRING in Year 2
+        fm.endSeason(state);
+        assertEquals(AUTUMN, state.getSeason());
+        fm.endSeason(state);
+        fm.endSeason(state);  // gets to SPRING in Year 2
+        assertEquals(SPRING, state.getSeason());
 
         Monk pilgrim1 = state.createMonk(5, 0);
         state.moveMonk(pilgrim1.getComponentID(), DORMITORY, GATEHOUSE);
@@ -128,13 +131,13 @@ public class PilgrimageTests {
         assertTrue(p1.isActive());
         assertTrue(p2.isActive());
 
-        turnOrder.endRound(state);  // SPRING -> SUMMER
-        assertEquals(SUMMER, turnOrder.getSeason());
+        fm.endSeason(state);  // SPRING -> SUMMER
+        assertEquals(SUMMER, state.getSeason());
         assertTrue(p1.isActive());
         assertTrue(p2.isActive());
 
-        turnOrder.endRound(state);  // SUMMER -> AUTUMN
-        assertEquals(AUTUMN, turnOrder.getSeason());
+        fm.endSeason(state);  // SUMMER -> AUTUMN
+        assertEquals(AUTUMN, state.getSeason());
         assertTrue(p1.isActive());
         assertTrue(p2.isActive());
         assertEquals(5, pilgrim1.getPiety());
@@ -143,8 +146,8 @@ public class PilgrimageTests {
         state.addResource(0, BREAD, 10);
         state.addResource(1, BREAD, 10);
 
-        turnOrder.endRound(state);  // AUTUMN -> WINTER
-        assertEquals(WINTER, turnOrder.getSeason());
+        fm.endSeason(state);  // AUTUMN -> WINTER
+        assertEquals(WINTER, state.getSeason());
         assertTrue(p1.isActive());
         assertFalse(p2.isActive());
         assertEquals(5, pilgrim1.getPiety());
@@ -153,7 +156,7 @@ public class PilgrimageTests {
 
     @Test
     public void pilgrimsSkipChristmasFeast() {
-        turnOrder.endRound(state); // SPRING -> AUTUMN
+        fm.endSeason(state); // SPRING -> AUTUMN
 
         Monk pilgrim1 = state.createMonk(5, 0);
         state.moveMonk(pilgrim1.getComponentID(), DORMITORY, GATEHOUSE);
@@ -164,7 +167,7 @@ public class PilgrimageTests {
         int totalPiety = state.monksIn(null, 0).stream().mapToInt(Monk::getPiety).sum();
         int totalMonksAboveOne = (int) state.monksIn(null, 0).stream().filter(m -> m.getPiety() > 1).count();
 
-        turnOrder.endRound(state); // AUTUMN -> WINTER
+        fm.endSeason(state); // AUTUMN -> WINTER
         assertEquals(totalPiety - totalMonksAboveOne + 1, state.monksIn(null, 0).stream().mapToInt(Monk::getPiety).sum());
         assertEquals(5, pilgrim1.getPiety());
     }
@@ -182,7 +185,7 @@ public class PilgrimageTests {
         assertEquals(5, state.getVictoryPoints(0)); // retirement benefit
         assertTrue(p1.isActive());
         assertEquals(RETIRED, state.getMonkLocation(pilgrim1.getComponentID()));
-        turnOrder.endRound(state);  // SPRING -> SUMMER
+        fm.endSeason(state);  // SPRING -> SUMMER
         assertFalse(p1.isActive());
         assertEquals(5, state.getVictoryPoints(0)); // no change
     }

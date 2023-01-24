@@ -1,5 +1,6 @@
 package core;
 
+import core.interfaces.IGamePhase;
 import utilities.Hash;
 
 public class CoreConstants {
@@ -34,5 +35,40 @@ public class CoreConstants {
      */
     public enum VisibilityMode {
         VISIBLE_TO_ALL, HIDDEN_TO_ALL, VISIBLE_TO_OWNER, FIRST_VISIBLE_TO_ALL, LAST_VISIBLE_TO_ALL, MIXED_VISIBILITY
+    }
+
+    // Default game phases: main, player reaction, end.
+    // This is only a simple default - and is completely ignored for many games with a more complicated structure
+    public enum DefaultGamePhase implements IGamePhase {
+        Main,
+        PlayerReaction,
+        End
+    }
+
+    public enum ComponentType {
+        DECK,
+        AREA,
+        BOARD,
+        BOARD_NODE,
+        CARD,
+        COUNTER,
+        DICE,
+        TOKEN
+    }
+
+    public enum GameResult {
+        WIN(1),
+        DRAW(0),
+        LOSE(-1),
+        DISQUALIFY(-2),
+        TIMEOUT(-3),
+        GAME_ONGOING(0),
+        GAME_END(3);
+
+        public final double value;
+
+        GameResult(double value) {
+            this.value = value;
+        }
     }
 }

@@ -3,7 +3,7 @@ package test.games.coltexpress;
 import core.AbstractPlayer;
 import evaluation.loggers.SummaryLogger;
 import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.GameListener;
+import evaluation.listeners.GameListener;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
 import games.coltexpress.ColtExpressForwardModel;
@@ -14,9 +14,7 @@ import games.coltexpress.cards.RoundCard;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static evaluation.metrics.Event.GameEvent.ROUND_OVER;
 import static java.util.stream.Collectors.toList;
@@ -24,7 +22,8 @@ import static org.junit.Assert.*;
 
 public class TestRoundCardVisibilityAndShuffling {
 
-    List<AbstractPlayer> players = Arrays.asList(new RandomPlayer(),
+    List<AbstractPlayer> players = Arrays.asList(
+            new RandomPlayer(),
             new RandomPlayer(),
             new RandomPlayer());
 
@@ -54,10 +53,11 @@ public class TestRoundCardVisibilityAndShuffling {
             if (event.type == ROUND_OVER) {
                 ColtExpressGameState state = (ColtExpressGameState) event.state;
                 long visibleRoundCards = state.getRounds().getVisibleComponents(0).stream().filter(Objects::nonNull).count();
-                System.out.printf("End of Round: %d, Visible Cards: %d%n", state.getTurnOrder().getRoundCounter(), visibleRoundCards);
+                System.out.printf("End of Round: %d, Turn %d, Visible Cards: %d%n", state.getTurnOrder().getRoundCounter(), state.getTurnOrder().getTurnCounter(), visibleRoundCards);
                 for (int i = 0; i < state.getTurnOrder().getRoundCounter(); i++)
                     assertTrue(state.getRounds().getVisibilityForPlayer(i, 0));
                 assertEquals(visibleRoundCards, state.getTurnOrder().getRoundCounter() + 1);
+                // Added knowledge of 'hack' that for Colt Express the Round counter is one less than it shoudl be at ROUND_OVER
 
                 // 1 card visible at end of Round 0, and so on.
 

@@ -28,9 +28,9 @@ public class FavorAction extends DrawCard implements IsNopeable, IPrintable {
 
         ExplodingKittensGameState ekgs = ((ExplodingKittensGameState)gs);
         ekgs.setGamePhase(Favor);
-        ekgs.setPlayerGettingAFavor(gs.getTurnOrder().getCurrentPlayer(gs));
+        ekgs.setPlayerGettingAFavor(gs.getCurrentPlayer());
 
-        ExplodingKittensTurnOrder ekto = (ExplodingKittensTurnOrder) gs.getTurnOrder();
+        ExplodingKittensTurnOrder ekto = (ExplodingKittensTurnOrder) ekgs.getTurnOrder();
         ekto.registerFavorAction(target);
         return true;
     }

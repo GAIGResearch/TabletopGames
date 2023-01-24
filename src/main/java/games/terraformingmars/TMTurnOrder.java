@@ -1,7 +1,6 @@
 package games.terraformingmars;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.turnorders.AlternatingTurnOrder;
 import core.turnorders.TurnOrder;
 import evaluation.metrics.Event;
@@ -10,7 +9,7 @@ import games.terraformingmars.actions.TMAction;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class TMTurnOrder extends AlternatingTurnOrder {
     final int nActionsPerPlayer;
@@ -56,8 +55,7 @@ public class TMTurnOrder extends AlternatingTurnOrder {
     }
 
     @Override
-    public void endRound(AbstractGameState gameState) {
-        super.endRound(gameState);
+    public void _startRound(AbstractGameState gameState) {
         Arrays.fill(this.passed, false);
         nPassed = 0;
     }

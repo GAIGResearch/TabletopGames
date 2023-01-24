@@ -1,11 +1,11 @@
 package core.rules;
 
 import core.AbstractGameState;
-import utilities.Utils;
+import core.CoreConstants;
 
 /**
  * Tests a game over condition, returning the result of the game.
  */
 public abstract class GameOverCondition {
-    public abstract Utils.GameResult test(AbstractGameState gs);
+    public abstract CoreConstants.GameResult test(AbstractGameState gs);
 }

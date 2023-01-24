@@ -37,7 +37,7 @@ public abstract class TAGStatSummary {
 
     public abstract Object getElements();
     public abstract TAGStatSummary copy();
-    public abstract Map<String, Object> getSummary(String key);
+    public abstract Map<String, Object> getSummary();
 
     public static TAGStatSummary construct(StatType type) {
         switch(type) {

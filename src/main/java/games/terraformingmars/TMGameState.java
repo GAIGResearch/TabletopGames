@@ -1,9 +1,10 @@
 package games.terraformingmars;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.*;
 import core.interfaces.IGamePhase;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.terraformingmars.actions.PlaceTile;
 import games.terraformingmars.actions.TMAction;
@@ -22,7 +23,7 @@ import java.util.*;
 
 import static games.terraformingmars.TMGameState.TMPhase.CorporationSelect;
 
-public class TMGameState extends AbstractGameState {
+public class TMGameState extends AbstractGameStateWithTurnOrder {
 
     enum TMPhase implements IGamePhase {
         CorporationSelect,
@@ -73,7 +74,16 @@ public class TMGameState extends AbstractGameState {
      * @param gameParameters - game parameters.
      */
     public TMGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new TMTurnOrder(nPlayers, ((TMGameParameters) gameParameters).nActionsPerPlayer), GameType.TerraformingMars);
+        super(gameParameters, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new TMTurnOrder(nPlayers, ((TMGameParameters) gameParameters).nActionsPerPlayer);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.TerraformingMars;
     }
 
     @Override
@@ -108,7 +118,7 @@ public class TMGameState extends AbstractGameState {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         Random rnd = new Random(getGameParameters().getRandomSeed());
         TMGameState copy = new TMGameState(gameParameters, getNPlayers());
 
@@ -275,11 +285,6 @@ public class TMGameState extends AbstractGameState {
     public double getGameScore(int playerId) {
         return playerResources[playerId].get(TMTypes.Resource.TR).getValue();
 //        return countPoints(playerId);
-    }
-
-    @Override
-    protected void _reset() {
-
     }
 
     @Override

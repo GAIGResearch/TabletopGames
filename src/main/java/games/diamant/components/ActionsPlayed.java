@@ -1,8 +1,8 @@
 package games.diamant.components;
 
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Component;
-import utilities.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +13,12 @@ public class ActionsPlayed extends Component
     public Map<Integer, AbstractAction> actions;
 
     public ActionsPlayed() {
-        super(Utils.ComponentType.COUNTER);
+        super(CoreConstants.ComponentType.COUNTER);
         actions = new HashMap<>();
     }
 
     public ActionsPlayed(int ID) {
-        super(Utils.ComponentType.COUNTER, ID);
+        super(CoreConstants.ComponentType.COUNTER, ID);
         actions = new HashMap<>();
     }
 

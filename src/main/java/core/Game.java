@@ -4,8 +4,8 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
+import evaluation.listeners.GameListener;
 import evaluation.metrics.Event;
-import evaluation.metrics.GameListener;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import gui.AbstractGUIManager;
@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import evaluation.metrics.*;
 import static utilities.Utils.componentToImage;
 
@@ -116,7 +117,7 @@ public class Game {
         // Creating game instance (null if not implemented)
         Game game;
         if (parameterConfigFile != null) {
-            AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, parameterConfigFile);
+            AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, parameterConfigFile);
             game = gameToPlay.createGameInstance(players.size(), seed, params);
         } else game = gameToPlay.createGameInstance(players.size(), seed);
         if (game != null) {
@@ -216,7 +217,7 @@ public class Game {
                 game = runOne(gt, null, players, s, randomizeParameters, listeners, null, turnPause);
                 if (game != null) {
                     recordPlayerResults(statSummaries, game);
-                    offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
+                    offset = game.getGameState().getRoundCounter() * game.getGameState().getNPlayers();
                 } else {
                     break;
                 }
@@ -314,62 +315,12 @@ public class Game {
      */
     public static void recordPlayerResults(TAGNumericStatSummary[] statSummaries, Game game) {
         int nPlayers = statSummaries.length;
-        Utils.GameResult[] results = game.getGameState().getPlayerResults();
+        CoreConstants.GameResult[] results = game.getGameState().getPlayerResults();
         for (int p = 0; p < nPlayers; p++) {
-            if (results[p] == Utils.GameResult.WIN || results[p] == Utils.GameResult.LOSE || results[p] == Utils.GameResult.DRAW) {
+            if (results[p] == CoreConstants.GameResult.WIN || results[p] == CoreConstants.GameResult.LOSE || results[p] == CoreConstants.GameResult.DRAW) {
                 statSummaries[p].add(results[p].value);
             }
         }
-    }
-
-    /**
-     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
-     * some games for some screen sizes due to the vagaries of Java Swing...
-     * <p>
-     * Test class used to run a specific game. The user must specify:
-     * 1. Action controller for GUI interactions / null for no visuals
-     * 2. Random seed for the game
-     * 3. Players for the game
-     * 4. Game parameter configuration
-     * 5. Mode of running
-     * and then run this class.
-     */
-    public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "TerraformingMars");
-        boolean useGUI = Utils.getArg(args, "gui", true);
-        int playerCount = Utils.getArg(args, "nPlayers", 2);
-        int turnPause = Utils.getArg(args, "turnPause", 0);
-        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
-
-        ActionController ac = new ActionController(); //null;
-
-        /* Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
-
-        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new MCTSPlayer());
-//        MCTSParams params1 = new MCTSParams();
-//        players.add(new MCTSPlayer(params1));
-//        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanConsolePlayer());
-//        players.add(new FirstActionPlayer());
-//        players.add(new HumanConsolePlayer());
-
-        /* 4. Game parameter configuration. Set to null to ignore and use default parameters */
-        String gameParams = null;
-
-        /* 5. Run! */
-        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
-
-//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
-//        games.remove(LoveLetter);
-//        games.remove(Pandemic);
-//        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, false, false, null, turnPause);
-//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
     }
 
     public void setTurnPause(int turnPause) {
@@ -445,7 +396,7 @@ public class Game {
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
         lastPlayer = -1;
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START, gameState)));
     }
 
     /**
@@ -489,9 +440,9 @@ public class Game {
                  * Players should never have access to the Game, or the main AbstractGameState, or to each other!
                  */
 
-                // Get player to ask for actions next
-                boolean reacting = (gameState.getTurnOrder() instanceof ReactiveTurnOrder
-                        && ((ReactiveTurnOrder) gameState.getTurnOrder()).getReactivePlayers().size() > 0);
+                // Get player to ask for actions next (This horrendous line is for backwards compatibility).
+                boolean reacting = (gameState instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder)gameState).getTurnOrder() instanceof ReactiveTurnOrder
+                        && ((ReactiveTurnOrder) ((AbstractGameStateWithTurnOrder)gameState).getTurnOrder()).getReactivePlayers().size() > 0);
 
                 // Check if this is the same player as last, count number of actions per turn
                 if (!reacting) {
@@ -566,7 +517,7 @@ public class Game {
         actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
 
         if (gameState.coreGameParameters.verbose) {
-            System.out.println("Round: " + gameState.getTurnOrder().getRoundCounter());
+            System.out.println("Round: " + gameState.getRoundCounter());
         }
 
         if (observation instanceof IPrintable && gameState.coreGameParameters.verbose) {
@@ -622,8 +573,6 @@ public class Game {
             nextTime += (System.nanoTime() - s);
         }
 
-        gameState.advanceGameTick();
-
         lastPlayer = activePlayer;
 
         // We publish an ACTION_TAKEN message once the action is taken so that observers can record the result of the action
@@ -644,9 +593,15 @@ public class Game {
             ((IPrintable) gameState).printToConsole();
         }
 
+        // Timers should average
+        terminateTimers();
+
         // Perform any end of game computations as required by the game
         forwardModel.endGame(gameState);
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, gameState)));
+        if (gameState.coreGameParameters.recordEventHistory) {
+            gameState.recordHistory(Event.GameEvent.GAME_OVER.name());
+        }
         if (gameState.coreGameParameters.verbose) {
             System.out.println("Game Over");
         }
@@ -656,11 +611,13 @@ public class Game {
             player.finalizePlayer(gameState.copy(player.getPlayerID()));
         }
 
-        // Timers should average
-        terminateTimers();
-
         // Close video recording writer
         terminateVideoRecording();
+
+        // Inform listeners of game end
+//        for (GameListener gameTracker : listeners) {
+//            gameTracker.allGamesFinished();
+//        }
     }
 
     /**
@@ -778,7 +735,7 @@ public class Game {
     public void addListener(GameListener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
-            gameState.turnOrder.addListener(listener);
+            gameState.addListener(listener);
             listener.setGame(this);
         }
     }
@@ -788,7 +745,7 @@ public class Game {
 
     public void clearListeners() {
         listeners.clear();
-        getGameState().turnOrder.clearListeners();
+        getGameState().clearListeners();
     }
 
     /**
@@ -942,6 +899,58 @@ public class Game {
             // Finally, let's clean up after ourselves.
             muxer.close();
         }
+    }
+
+
+
+    /**
+     * The recommended way to run a game is via evaluations.Frontend, however that may not work on
+     * some games for some screen sizes due to the vagaries of Java Swing...
+     * <p>
+     * Test class used to run a specific game. The user must specify:
+     * 1. Action controller for GUI interactions / null for no visuals
+     * 2. Random seed for the game
+     * 3. Players for the game
+     * 4. Game parameter configuration
+     * 5. Mode of running
+     * and then run this class.
+     */
+    public static void main(String[] args) {
+        String gameType = Utils.getArg(args, "game", "GameTemplate");
+        boolean useGUI = Utils.getArg(args, "gui", true);
+        int playerCount = Utils.getArg(args, "nPlayers", 2);
+        int turnPause = Utils.getArg(args, "turnPause", 0);
+        long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+
+        ActionController ac = new ActionController(); //null;
+
+        /* Set up players for the game */
+        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
+
+        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new MCTSPlayer());
+//        MCTSParams params1 = new MCTSParams();
+//        players.add(new MCTSPlayer(params1));
+//        players.add(new OSLAPlayer());
+//        players.add(new RMHCPlayer());
+        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanConsolePlayer());
+//        players.add(new FirstActionPlayer());
+//        players.add(new HumanConsolePlayer());
+
+        /* 4. Game parameter configuration. Set to null to ignore and use default parameters */
+        String gameParams = null;
+
+        /* 5. Run! */
+        runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
+
+//        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        games.remove(LoveLetter);
+//        games.remove(Pandemic);
+//        games.remove(TicTacToe);
+//        runMany(games, players, 100L, 100, false, false, null, turnPause);
+//        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
     }
 
 }

@@ -1,12 +1,13 @@
 package games.connect4;
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.components.Token;
+import core.forwardModels.SequentialActionForwardModel;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public class Connect4ForwardModel extends AbstractForwardModel {
+public class Connect4ForwardModel extends SequentialActionForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -22,13 +23,14 @@ public class Connect4ForwardModel extends AbstractForwardModel {
         int gridSize = c4gp.gridSize;
         Connect4GameState state = (Connect4GameState) firstState;
         state.gridBoard = new GridBoard<>(gridSize, gridSize, new Token(Connect4Constants.emptyCell));
+        state.winnerCells = new LinkedList<>();
     }
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         Connect4GameState c4gs = (Connect4GameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
+        int player = c4gs.getCurrentPlayer();
 
         if (gameState.isNotTerminal())
             for (int x = 0; x < c4gs.gridBoard.getWidth(); x++) {
@@ -50,24 +52,14 @@ public class Connect4ForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected AbstractForwardModel _copy() {
-        return new Connect4ForwardModel();
-    }
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
+        Connect4GameState c4gs = (Connect4GameState) currentState;
 
-    @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
-        Connect4GameParameters c4gp = (Connect4GameParameters) currentState.getGameParameters();
-        int gridSize = c4gp.gridSize;
-        if (currentState.getTurnOrder().getRoundCounter() == (gridSize * gridSize)) {
-            currentState.setGameStatus(Utils.GameResult.GAME_END);
+        // game-specific check for end of game
+        if (checkGameEnd(c4gs)) {
             return;
         }
-
-        if (checkGameEnd((Connect4GameState) currentState)) {
-            return;
-        }
-        currentState.getTurnOrder().endPlayerTurn(currentState);
+        super._afterAction(currentState, action);
     }
 
     /**
@@ -164,8 +156,8 @@ public class Connect4ForwardModel extends AbstractForwardModel {
         }
 
         if (!gap) { //tie
-            gameState.setGameStatus(Utils.GameResult.DRAW);
-            Arrays.fill(gameState.getPlayerResults(), Utils.GameResult.DRAW);
+            gameState.setGameStatus(CoreConstants.GameResult.DRAW);
+            Arrays.fill(gameState.getPlayerResults(), CoreConstants.GameResult.DRAW);
             return true;
         }
 
@@ -239,24 +231,16 @@ public class Connect4ForwardModel extends AbstractForwardModel {
         return false;
     }
 
-
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
-        }
-    }
-
     /**
      * Inform the game this player has won.
      *
      * @param winnerSymbol - which player won.
      */
     private void registerWinner(Connect4GameState gameState, Token winnerSymbol, LinkedList<Pair<Integer, Integer>> winPos) {
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
+        gameState.setGameStatus(CoreConstants.GameResult.GAME_END);
         int winningPlayer = Connect4Constants.playerMapping.indexOf(winnerSymbol);
-        gameState.setPlayerResult(Utils.GameResult.WIN, winningPlayer);
-        gameState.setPlayerResult(Utils.GameResult.LOSE, 1 - winningPlayer);
+        gameState.setPlayerResult(CoreConstants.GameResult.WIN, winningPlayer);
+        gameState.setPlayerResult(CoreConstants.GameResult.LOSE, 1 - winningPlayer);
         gameState.registerWinningCells(winPos);
     }
 }

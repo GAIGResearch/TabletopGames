@@ -2,6 +2,7 @@ package games.loveletter;
 
 import core.AbstractParameters;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.Component;
 import core.interfaces.IGamePhase;
 import core.components.Deck;
@@ -9,12 +10,11 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.GameType;
 import games.loveletter.cards.LoveLetterCard;
-import utilities.Utils;
 
 import java.util.*;
 
-import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
+@SuppressWarnings("unchecked")
 public class LoveLetterGameState extends AbstractGameState implements IPrintable {
 
     // Love letter adds one game phase on top of default phases
@@ -42,15 +42,19 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
     /**
      * For unit testing
-     * @param playerId
+     * @param playerId - ID of player queried
      */
     public void addAffectionToken(int playerId) {
         affectionTokens[playerId]++;
     }
 
     public LoveLetterGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new LoveLetterTurnOrder(nPlayers), GameType.LoveLetter);
-        gamePhase = Draw;
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.LoveLetter;
     }
 
     @Override
@@ -126,27 +130,9 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         return new LoveLetterHeuristic().evaluateState(this, playerId);
     }
 
-    /**
-     * This provides the current score in game turns. This will only be relevant for games that have the concept
-     * of victory points, etc.
-     * If a game does not support this directly, then just return 0.0
-     *
-     * @param playerId
-     * @return - double, score of current state
-     */
     @Override
     public double getGameScore(int playerId) {
         return affectionTokens[playerId];
-    }
-
-    @Override
-    protected void _reset() {
-        gamePhase = Draw;
-        playerHandCards = new ArrayList<>();
-        playerDiscardCards = new ArrayList<>();
-        drawPile = null;
-        reserveCards = null;
-        effectProtection = new boolean[getNPlayers()];
     }
 
     @Override
@@ -210,7 +196,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
      * @param playerID - ID of player dead
      */
     public void killPlayer(int playerID){
-        setPlayerResult(Utils.GameResult.LOSE, playerID);
+        setPlayerResult(CoreConstants.GameResult.LOSE, playerID);
 
         // a losing player needs to discard all cards
         while (playerHandCards.get(playerID).getSize() > 0)

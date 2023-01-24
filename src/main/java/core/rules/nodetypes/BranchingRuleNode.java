@@ -1,6 +1,6 @@
 package core.rules.nodetypes;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.rules.Node;
 
 /**
@@ -41,7 +41,7 @@ public abstract class BranchingRuleNode extends RuleNode {
      * @param gs - game state to modify.
      * @return - true if successfully executed, false if not and game loop should be interrupted after the execution.
      */
-    protected abstract boolean run(AbstractGameState gs);
+    protected abstract boolean run(AbstractGameStateWithTurnOrder gs);
 
     // Getters & Setters
     public final void setNext(Node[] children) {

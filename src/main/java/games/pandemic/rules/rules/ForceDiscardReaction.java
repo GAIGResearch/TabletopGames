@@ -1,12 +1,11 @@
 package games.pandemic.rules.rules;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.components.Card;
 import core.components.Deck;
 import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 import games.pandemic.PandemicGameState;
-import games.pandemic.PandemicParameters;
 import games.pandemic.PandemicTurnOrder;
 
 import static games.pandemic.PandemicGameState.PandemicGamePhase.DiscardReaction;
@@ -28,7 +27,7 @@ public class ForceDiscardReaction extends RuleNode {
     }
 
     @Override
-    protected boolean run(AbstractGameState gs) {
+    protected boolean run(AbstractGameStateWithTurnOrder gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
         // player needs to discard cards (doing 1 at a time)
         for (int i = 0; i < pgs.getNPlayers(); i++) {

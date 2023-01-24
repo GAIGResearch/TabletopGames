@@ -1,6 +1,8 @@
 package test.games.dicemonastery;
 
+import core.Game;
 import core.components.Component;
+import games.GameType;
 import games.dicemonastery.DiceMonasteryConstants.ActionArea;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.PlaceMonk;
@@ -18,13 +20,13 @@ import static org.junit.Assert.assertEquals;
 public class vOneEightTests {
 
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
-    DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 3));
+    Game game = GameType.DiceMonastery.createGameInstance(4, new DiceMonasteryParams(3));
     RandomPlayer rnd = new RandomPlayer();
 
     @Test
     public void bonusTokenDistribution() {
         for (int np = 2; np <= 4; np++) {
-            game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), np));
+            Game game = GameType.DiceMonastery.createGameInstance(np, new DiceMonasteryParams(3));
             DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
             DiceMonasteryParams params = (DiceMonasteryParams) state.getGameParameters();
             for (ActionArea area : ActionArea.values()) {
@@ -37,7 +39,6 @@ public class vOneEightTests {
     @Test
     public void bonusTokensRefreshedCorrectlyWithHousekeeping() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         fm.next(state, new PlaceMonk(0, CHAPEL)); // ensure we have one monk at least in the CHAPEL, so that we can stop before Housekeeping
         do {
@@ -51,7 +52,7 @@ public class vOneEightTests {
 
         do {
             fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
-        } while (turnOrder.getCurrentArea() != CHAPEL);  // stop when we are on the Chapel
+        } while (state.getCurrentArea() != CHAPEL);  // stop when we are on the Chapel
 
         // check that some bonus tokens have been removed as rewards (1 or 2)
         for (ActionArea area : ActionArea.values()) {
@@ -64,7 +65,7 @@ public class vOneEightTests {
 
         do {
             fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
-        } while (turnOrder.getSeason() != DiceMonasteryConstants.Season.SUMMER);  // stop when we have done HouseKeeping
+        } while (state.getSeason() != DiceMonasteryConstants.Season.SUMMER);  // stop when we have done HouseKeeping
 
         for (ActionArea area : ActionArea.values()) {
             if (area == CHAPEL || area.dieMinimum == 0) continue;
@@ -75,7 +76,6 @@ public class vOneEightTests {
     @Test
     public void gameScoreCorrectForBeerAndMead() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         assertEquals(0.0, state.getGameScore(0), 0.001);
         assertEquals(0.0, state.getGameScore(1), 0.001);

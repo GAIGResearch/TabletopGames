@@ -5,7 +5,6 @@ import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IComponentContainer;
 import games.virus.cards.VirusCard;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +16,7 @@ public class VirusBody extends Component implements IComponentContainer<VirusOrg
 
     public VirusBody()
     {
-        super(Utils.ComponentType.TOKEN);
+        super(CoreConstants.ComponentType.TOKEN);
         organs = new HashMap<>();
         for (VirusCard.OrganType oType : VirusCard.OrganType.values())
             if (oType != VirusCard.OrganType.Treatment)
@@ -26,7 +25,7 @@ public class VirusBody extends Component implements IComponentContainer<VirusOrg
 
     protected VirusBody(int ID)
     {
-        super(Utils.ComponentType.TOKEN, ID);
+        super(CoreConstants.ComponentType.TOKEN, ID);
         organs = new HashMap<>();
         for (VirusCard.OrganType oType : VirusCard.OrganType.values())
             organs.put(oType, new VirusOrgan());
@@ -140,7 +139,7 @@ public class VirusBody extends Component implements IComponentContainer<VirusOrg
     /**
      * Returns the cards in the organ organType and set the state of the organ to None
      * @param organType: organ type
-     * @return Deck<VirusCard> included in the organ
+     * @return {@code Deck<VirusCard>} included in the organ
      */
     public Deck<VirusCard> removeOrgan(VirusCard.OrganType organType)
     {

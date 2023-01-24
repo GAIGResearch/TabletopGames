@@ -1,9 +1,6 @@
 package evaluation;
 
-import core.AbstractGameState;
-import core.AbstractParameters;
-import core.AbstractPlayer;
-import core.ParameterFactory;
+import core.*;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
@@ -161,7 +158,7 @@ public class ParameterSearch {
         String logfile = getArg(args, "logFile", "");
         String evalMethod = getArg(args, "eval", "Win");
         String paramFile = getArg(args, "gameParam", "");
-        AbstractParameters gameParams = ParameterFactory.createFromFile(game, paramFile);
+        AbstractParameters gameParams = AbstractParameters.createFromFile(game, paramFile);
 
         ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
@@ -201,7 +198,7 @@ public class ParameterSearch {
 
         } else {
             if (evalMethod.equals("Win"))
-                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == Utils.GameResult.WIN ? 1.0 : 0.0;
+                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN ? 1.0 : 0.0;
             if (evalMethod.equals("Score"))
                 stateHeuristic = AbstractGameState::getGameScore;
             if (evalMethod.equals("Heuristic"))
@@ -259,7 +256,7 @@ public class ParameterSearch {
         String evalMethod = getArg(args, "eval", "Win");
         IStateHeuristic stateHeuristic = null;
         if (evalMethod.equals("Win"))
-            stateHeuristic = (s, p) -> s.getPlayerResults()[p] == Utils.GameResult.WIN ? 1.0 : 0.0;
+            stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN ? 1.0 : 0.0;
         if (evalMethod.equals("Score"))
             stateHeuristic = AbstractGameState::getGameScore;
         if (evalMethod.equals("Heuristic"))
@@ -311,7 +308,7 @@ public class ParameterSearch {
      * parameter settings, and the estimated mean score of these (with std error).
      *
      * @param data        The results of the NTBEA trials.
-     *                    The Pair<Double, Double> is the mean and std error on the mean for the final recommendation,
+     *                    The {@code Pair<Double, Double>} is the mean and std error on the mean for the final recommendation,
      *                    as calculated from the post-NTBEA evaluation trials.
      *                    The double[] is the best sampled settings from the main NTBEA trials (that are then evaluated to get
      *                    a more accurate estimate of their utility).
@@ -483,7 +480,7 @@ public class ParameterSearch {
      *                        and the Top 10 Tuples by trials.) This can be useful to visualise the parameter
      *                        landscape beyond the simple final recommendation and get a feel for which dimensions
      *                        really matter.
-     * @return This returns Pair<Mean, Std Error on Mean> as calculated from the evaluation games
+     * @return This returns {@code Pair<Mean, Std Error on Mean>} as calculated from the evaluation games
      */
     public static Pair<Double, Double> runNTBEA(SolutionEvaluator evaluator,
                                                 GameMultiPlayerEvaluator multiPlayerEvaluator,

@@ -1,10 +1,10 @@
 package core.components;
 
+import core.CoreConstants;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utilities.Utils.ComponentType;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class Counter extends Component {
     }
 
     public Counter(int valueIdx, int minimum, int maximum, String name) {
-        super(ComponentType.COUNTER, name);
+        super(CoreConstants.ComponentType.COUNTER, name);
         this.valueIdx = valueIdx;
         this.minimum = minimum;
         this.maximum = maximum;
@@ -35,7 +35,7 @@ public class Counter extends Component {
     }
 
     protected Counter(int[] values, int valueIdx, int minimum, int maximum, String name, int ID) {
-        super(ComponentType.COUNTER, name, ID);
+        super(CoreConstants.ComponentType.COUNTER, name, ID);
         this.values = values;
         this.valueIdx = valueIdx;
         this.minimum = minimum;

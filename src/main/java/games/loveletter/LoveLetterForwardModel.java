@@ -1,7 +1,7 @@
 package games.loveletter;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -9,7 +9,6 @@ import core.interfaces.IGamePhase;
 import games.GameType;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -17,7 +16,7 @@ import static core.CoreConstants.*;
 import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
 
-public class LoveLetterForwardModel extends AbstractForwardModel {
+public class LoveLetterForwardModel extends StandardForwardModel {
 
     /**
      * Creates the initial game-state of Love Letter.
@@ -27,12 +26,15 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
     protected void _setup(AbstractGameState firstState) {
         LoveLetterGameState llgs = (LoveLetterGameState)firstState;
 
+        llgs.effectProtection = new boolean[llgs.getNPlayers()];
         // Set up all variables
         llgs.drawPile = new PartialObservableDeck<>("drawPile", llgs.getNPlayers());
         llgs.reserveCards = new PartialObservableDeck<>("reserveCards", llgs.getNPlayers());
         llgs.affectionTokens = new int[llgs.getNPlayers()];
         llgs.playerHandCards = new ArrayList<>(llgs.getNPlayers());
         llgs.playerDiscardCards = new ArrayList<>(llgs.getNPlayers());
+
+        llgs.setGamePhase(Draw);
 
         // Set up first round
         setupRound(llgs, null);
@@ -51,7 +53,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
         // Reset player status
         for (int i = 0; i < llgs.getNPlayers(); i++) {
-            llgs.setPlayerResult(Utils.GameResult.GAME_ONGOING, i);
+            llgs.setPlayerResult(GameResult.GAME_ONGOING, i);
         }
 
         // Add all cards to the draw pile
@@ -64,7 +66,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         }
 
         // Put one card to the side, such that player's won't know all cards in the game
-        Random r = new Random(llgs.getGameParameters().getRandomSeed() + llgs.getTurnOrder().getRoundCounter());
+        Random r = new Random(llgs.getGameParameters().getRandomSeed() + llgs.getRoundCounter());
         llgs.drawPile.shuffle(r);
         llgs.reserveCards.clear();
         llgs.reserveCards.add(llgs.drawPile.draw());
@@ -121,7 +123,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             for (int i: previousWinners) {
                 n++;
                 if (n == nextPlayer) {
-                    llgs.getTurnOrder().setTurnOwner(i);
+                    llgs.setTurnOwner(i);
                 }
             }
         }
@@ -131,20 +133,19 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState gameState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         // each turn begins with the player drawing a card after which one card will be played
         // switch the phase after each executed action
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
-        action.execute(gameState);
 
-        if (llgs.playerHandCards.get(gameState.getCurrentPlayer()).getSize() > 2)
+        if (llgs.playerHandCards.get(llgs.getCurrentPlayer()).getSize() > 2)
             throw new AssertionError("Hand should not get this big");
         IGamePhase gamePhase = llgs.getGamePhase();
         if (gamePhase == Draw) {
-            llgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
-        } else if (gamePhase == AbstractGameState.DefaultGamePhase.Main) {
+            llgs.setGamePhase(DefaultGamePhase.Main);
+        } else if (gamePhase == DefaultGamePhase.Main) {
             llgs.setGamePhase(Draw);
-            llgs.getTurnOrder().endPlayerTurn(gameState);
+            endPlayerTurn(llgs);
             checkEndOfRound(llgs);
         } else {
             throw new IllegalArgumentException("The game phase " + llgs.getGamePhase() +
@@ -161,7 +162,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         int playersAlive = 0;
         int soleWinner = -1;
         for (int i = 0; i < llgs.getNPlayers(); i++) {
-            if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE && llgs.playerHandCards.get(i).getSize() > 0) {
+            if (llgs.getPlayerResults()[i] != GameResult.LOSE && llgs.playerHandCards.get(i).getSize() > 0) {
                 playersAlive += 1;
                 soleWinner = i;
             }
@@ -177,7 +178,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             }
 
             // Otherwise, end the round and set up the next
-            llgs.getTurnOrder().endRound(llgs);
+            endRound(llgs);
             setupRound(llgs, winners);
         }
     }
@@ -209,14 +210,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
         // One player won, game is over
         if (bestPlayers.size() == 1) {
-            llgs.setGameStatus(Utils.GameResult.GAME_END);
-            for (int i = 0; i < llgs.getNPlayers(); i++) {
-                if (bestPlayers.contains(i)) {
-                    llgs.setPlayerResult(Utils.GameResult.WIN, i);
-                } else {
-                    llgs.setPlayerResult(Utils.GameResult.LOSE, i);
-                }
-            }
+            endGame(llgs);
             return true;
         }
         return false;
@@ -247,7 +241,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
             HashSet<Integer> bestPlayers = new HashSet<>();
             int bestValue = 0;
             for (int i = 0; i < llgs.getNPlayers(); i++) {
-                if (llgs.getPlayerResults()[i] != Utils.GameResult.LOSE) {
+                if (llgs.getPlayerResults()[i] != GameResult.LOSE) {
                     int points = llgs.playerHandCards.get(i).peek().cardType.getValue();
                     if (points > bestValue){
                         bestValue = points;
@@ -285,19 +279,6 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         }
     }
 
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        // Print game result
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
-            Utils.GameResult[] playerResults = gameState.getPlayerResults();
-            for (int j = 0; j < gameState.getNPlayers(); j++) {
-                if (playerResults[j] == Utils.GameResult.WIN)
-                    System.out.println("Player " + j + " won");
-            }
-        }
-    }
-
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
      * @return - List of AbstractAction objects.
@@ -306,8 +287,8 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         ArrayList<AbstractAction> actions;
-        int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
-        if (gameState.getGamePhase().equals(AbstractGameState.DefaultGamePhase.Main)) {
+        int player = gameState.getCurrentPlayer();
+        if (gameState.getGamePhase().equals(DefaultGamePhase.Main)) {
             actions = playerActions(llgs, player);
         } else if (gameState.getGamePhase().equals(LoveLetterGameState.LoveLetterGamePhase.Draw)) {
             // In draw phase, the players can only draw cards.
@@ -318,11 +299,6 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
         }
 
         return actions;
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new LoveLetterForwardModel();
     }
 
     /**
@@ -348,7 +324,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
                 switch (playerDeck.getComponents().get(card).cardType) {
                     case Priest:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
                                 continue;
                             actions.add(new PriestAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
@@ -357,7 +333,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
                     case Guard:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
                                 continue;
                             for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values())
                                 if (type != LoveLetterCard.CardType.Guard) {
@@ -369,7 +345,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
                     case Baron:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
                                 continue;
                             actions.add(new BaronAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
@@ -383,7 +359,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
                     case Prince:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
                                 continue;
                             actions.add(new PrinceAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
@@ -392,7 +368,7 @@ public class LoveLetterForwardModel extends AbstractForwardModel {
 
                     case King:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == Utils.GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
                                 continue;
                             actions.add(new KingAction(playerDeck.getComponentID(),
                                     playerDiscardPile.getComponentID(), card, targetPlayer));
