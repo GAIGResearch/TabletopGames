@@ -27,6 +27,7 @@ public class FavourForCartel extends AbstractAction {
         for (int i = 0; i < hand.getSize(); i++) {
             if (hand.get(i).cardType == FAVOUR) {
                 hand.remove(i);
+                state.setActionTaken("Favour", player);
                 return true;
             }
         }

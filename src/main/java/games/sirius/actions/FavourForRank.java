@@ -3,10 +3,7 @@ package games.sirius.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
-import games.sirius.SiriusCard;
-import games.sirius.SiriusConstants;
-import games.sirius.SiriusGameState;
-import games.sirius.SiriusTurnOrder;
+import games.sirius.*;
 
 import static games.sirius.SiriusConstants.SiriusCardType.FAVOUR;
 
@@ -28,6 +25,7 @@ public class FavourForRank extends AbstractAction {
         for (int i = 0; i < hand.getSize(); i++) {
             if (hand.get(i).cardType == FAVOUR) {
                 hand.remove(i);
+                state.setActionTaken("Favour", player);
                 return true;
             }
         }

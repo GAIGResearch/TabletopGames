@@ -7,18 +7,17 @@ import core.turnorders.TurnOrder;
 import games.sirius.SiriusConstants.SiriusPhase;
 import utilities.Pair;
 
-import java.util.Arrays;
+import java.util.*;
 import java.util.function.IntPredicate;
 
-import static games.sirius.SiriusConstants.MoonType.*;
-import static games.sirius.SiriusConstants.SiriusCardType.FAVOUR;
+import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static games.sirius.SiriusConstants.SiriusPhase.*;
 
 public class SiriusTurnOrder extends TurnOrder {
 
     int[] playerByRank; // this is indexed by rank and holds the current player at that rank
     int[] nextPlayer; // this is indexed by player and indicates the next player in rank. It is updated at the start of each round.
-    boolean[] playedInThisPhase;
+    Map<String, List<Boolean>> actionsTakenByPlayers; // used to track is certain action types have been taken (when these are only usable once)
 
     // We have different rules for different phases
     // During move selection we are formally simultaneous  (moveSelected)
@@ -29,8 +28,17 @@ public class SiriusTurnOrder extends TurnOrder {
         nextPlayer = new int[nPlayers];
         playerByRank = new int[nPlayers + 1];
         Arrays.setAll(playerByRank, i -> i - 1);
-        playedInThisPhase = new boolean[nPlayers];
+        initialiseActions();
         updatePlayerOrder();
+    }
+
+    private void initialiseActions() {
+        actionsTakenByPlayers = new HashMap<>();
+        List<Boolean> allFalse = new ArrayList<>(nPlayers);
+        for (int i = 0; i < nPlayers; i++) allFalse.add(Boolean.FALSE);
+        actionsTakenByPlayers.put("Favour", allFalse);
+        actionsTakenByPlayers.put("Sold", new ArrayList<>(allFalse));
+        actionsTakenByPlayers.put("Betrayed", new ArrayList<>(allFalse));
     }
 
     @Override
@@ -54,9 +62,12 @@ public class SiriusTurnOrder extends TurnOrder {
                     Moon moon = state.getMoon(state.getLocationIndex(i));
                     switch (moon.moonType) {
                         case TRADING:
+                            boolean canSell = !actionsTakenByPlayers.get("Sold").get(i) && state.getPlayerHand(i).stream().anyMatch(c -> c.cardType == AMMONIA || c.cardType == CONTRABAND);
+                            boolean canBetray = !actionsTakenByPlayers.get("Betrayed").get(i) && state.getPlayerHand(i).stream().anyMatch(c -> c.cardType == SMUGGLER);
+                            return canSell || canBetray;
                         case METROPOLIS:
                             // need to have not yet acted - in these locations we just get one action
-                            return !playedInThisPhase[i];
+                            return !actionsTakenByPlayers.get("Favour").get(i);
                         default:
                             // needs to have cards available to take
                             return moon.getDeck().getSize() > 0;
@@ -73,7 +84,7 @@ public class SiriusTurnOrder extends TurnOrder {
                 return new Pair<>(0, Move);
             case Favour:
                 // if there is no next player (i.e. -1), then the next is 0 for Move
-                nextPlayerInPhase = getFirstMatchingPlayerFrom(nextPlayer[turnOwner], i -> !playedInThisPhase[i] && state.getPlayerHand(i).stream().anyMatch(c -> c.cardType == FAVOUR));
+                nextPlayerInPhase = getFirstMatchingPlayerFrom(nextPlayer[turnOwner], i -> !actionsTakenByPlayers.get("Favour").get(i) && state.getPlayerHand(i).stream().anyMatch(c -> c.cardType == FAVOUR));
                 if (nextPlayerInPhase > -1)
                     return new Pair<>(nextPlayerInPhase, Favour);
                 return new Pair<>(0, Move);
@@ -92,6 +103,13 @@ public class SiriusTurnOrder extends TurnOrder {
         return -1;
     }
 
+    public void setActionTaken(String ref, int player) {
+        actionsTakenByPlayers.get(ref).set(player, true);
+    }
+    public boolean getActionTaken(String ref, int player) {
+        return actionsTakenByPlayers.get(ref).get(player);
+    }
+
     @Override
     public void endPlayerTurn(AbstractGameState gs) {
         SiriusGameState state = (SiriusGameState) gs;
@@ -99,7 +117,6 @@ public class SiriusTurnOrder extends TurnOrder {
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, state, null));
         state.getPlayerTimer()[getCurrentPlayer(state)].incrementTurn();
 
-        playedInThisPhase[turnOwner] = true;
         turnCounter++;
 
         Pair<Integer, SiriusPhase> nextPlayerAndPhase = nextPlayerAndPhase(state); // record this before we change the phase
@@ -108,7 +125,7 @@ public class SiriusTurnOrder extends TurnOrder {
 
         if (nextPlayerAndPhase.b != phase) {
             // we end the phase here
-            playedInThisPhase = new boolean[nPlayers];
+            initialiseActions();
             switch (phase) {
                 case Move:
                     if (nextPhase != Draw) {
@@ -216,14 +233,16 @@ public class SiriusTurnOrder extends TurnOrder {
     protected TurnOrder _copy() {
         SiriusTurnOrder retValue = new SiriusTurnOrder(nPlayers);
         retValue.nextPlayer = nextPlayer.clone();
-        retValue.playedInThisPhase = playedInThisPhase.clone();
+        for (String key : actionsTakenByPlayers.keySet()) {
+            retValue.actionsTakenByPlayers.put(key, new ArrayList<>(actionsTakenByPlayers.get(key)));
+        }
         retValue.playerByRank = playerByRank.clone();
         return retValue;
     }
 
     @Override
     public int hashCode() {
-        return super.hashCode() + 31 * Arrays.hashCode(nextPlayer) + 31 * 31 * Arrays.hashCode(playerByRank) + 31 * 31 * 31 * Arrays.hashCode(playedInThisPhase);
+        return super.hashCode() + actionsTakenByPlayers.hashCode() + 31 * Arrays.hashCode(nextPlayer) + 31 * 31 * Arrays.hashCode(playerByRank);
     }
 
     @Override
@@ -231,7 +250,7 @@ public class SiriusTurnOrder extends TurnOrder {
         if (obj instanceof SiriusTurnOrder) {
             SiriusTurnOrder other = (SiriusTurnOrder) obj;
             return Arrays.equals(nextPlayer, other.nextPlayer) && Arrays.equals(playerByRank, other.playerByRank) &&
-                    Arrays.equals(playedInThisPhase, other.playedInThisPhase) &&
+                    actionsTakenByPlayers.equals(actionsTakenByPlayers) &&
                     super.equals(obj);
         }
         return false;

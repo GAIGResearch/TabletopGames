@@ -327,6 +327,13 @@ public class SiriusGameState extends AbstractGameState {
         }
     }
 
+    public void setActionTaken(String ref, int player) {
+        ((SiriusTurnOrder)turnOrder).setActionTaken(ref, player);
+    }
+    public boolean getActionTaken(String ref, int player) {
+        return ((SiriusTurnOrder)turnOrder).getActionTaken(ref, player);
+    }
+
     @Override
     protected boolean _equals(Object o) {
         if (o instanceof SiriusGameState) {

@@ -1,6 +1,5 @@
 package test.games.sirius;
 
-
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
@@ -13,7 +12,7 @@ import players.simple.RandomPlayer;
 import java.util.*;
 
 import static games.sirius.SiriusConstants.MoonType.*;
-import static games.sirius.SiriusConstants.SiriusCardType.SMUGGLER;
+import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static games.sirius.SiriusConstants.SiriusPhase.Draw;
 import static org.junit.Assert.*;
 
@@ -56,17 +55,43 @@ public class TestBetrayalPhase {
         assertTrue(actions.contains(new SellCards(Arrays.asList(card1, card2))));
         assertTrue(actions.contains(new SellCards(Collections.singletonList(card1), true)));
         assertTrue(actions.contains(new SellCards(Arrays.asList(card1, card2), true)));
-
     }
 
     @Test
     public void afterSellingOneCanStillBetray() {
-        fail("Not yet implemented");
+        state.setGamePhase(Draw);
+        state.movePlayerTo(0, 0);
+        SiriusCard card1 =  new SiriusCard("Smuggler1", SMUGGLER, 1);
+        SiriusCard card2 =  new SiriusCard("Ammonia1", AMMONIA, 1);
+        state.addCardToHand(0, card1);
+        state.addCardToHand(0, card2);
+        fm.next(state, new SellCards(Collections.singletonList(card2)));
+        while (!(state.getCurrentPlayer() == 0)) {
+            fm.next(state, fm.computeAvailableActions(state).get(0));
+        }
+        assertEquals(Draw, state.getGamePhase());
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(3, actions.size());
+        assertTrue(actions.contains(new SellCards(Collections.singletonList(card1))));
+        assertTrue(actions.contains(new SellCards(Collections.singletonList(card1), true)));
     }
 
     @Test
     public void afterBetrayingOneCanStillSell() {
-        fail("Not yet implemented");
+        state.setGamePhase(Draw);
+        state.movePlayerTo(0, 0);
+        SiriusCard card1 =  new SiriusCard("Smuggler1", SMUGGLER, 1);
+        SiriusCard card2 =  new SiriusCard("Ammonia1", AMMONIA, 1);
+        state.addCardToHand(0, card1);
+        state.addCardToHand(0, card2);
+        fm.next(state, new SellCards(Collections.singletonList(card1)));
+        while (!(state.getCurrentPlayer() == 0)) {
+            fm.next(state, fm.computeAvailableActions(state).get(0));
+        }
+        assertEquals(Draw, state.getGamePhase());
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        assertEquals(2, actions.size());
+        assertTrue(actions.contains(new SellCards(Collections.singletonList(card2))));
     }
     @Test
     public void movingCorruptionTrackToMarkerTriggersPolicePhase() {

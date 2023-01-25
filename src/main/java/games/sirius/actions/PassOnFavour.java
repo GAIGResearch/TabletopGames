@@ -2,11 +2,13 @@ package games.sirius.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import games.sirius.SiriusGameState;
 
 public class PassOnFavour extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
-        // does nothing
+        SiriusGameState state = (SiriusGameState)gs;
+        state.setActionTaken("Favour", gs.getCurrentPlayer());
         return true;
     }
 

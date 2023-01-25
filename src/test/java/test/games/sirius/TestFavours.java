@@ -15,7 +15,7 @@ import java.util.*;
 import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static games.sirius.SiriusConstants.SiriusPhase.*;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 
 public class TestFavours {
@@ -150,7 +150,9 @@ public class TestFavours {
         assertEquals(2, state.getCurrentPlayer());
         FavourForRank action = new FavourForRank(3);
         assertEquals(2, state.getCurrentPlayer());
+        assertFalse(state.getActionTaken("Favour", 2));
         fm.next(state, action);
+        assertTrue(state.getActionTaken("Favour", 2));
         assertEquals(1, sto.getRank(1));
         assertEquals(3, sto.getRank(2));
         assertEquals(2, sto.getRank(0));

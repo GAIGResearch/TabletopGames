@@ -20,6 +20,8 @@ public class TakeCard extends AbstractAction {
         }
         SiriusCard card = currentLocation.drawCard();
         state.addCardToHand(player, card);
+        if (currentLocation.getMoonType() == SiriusConstants.MoonType.METROPOLIS)
+            state.setActionTaken("Favour", player);
         return true;
     }
 

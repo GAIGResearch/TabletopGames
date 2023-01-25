@@ -14,7 +14,7 @@ public class SellCards extends AbstractAction {
 
     public final SiriusConstants.SiriusCardType salesType;
     int[] saleValues;
-    boolean decreaseTrack = false;
+    boolean decreaseTrack;
 
     private SellCards(SellCards toCopy) {
         this.salesType = toCopy.salesType;
@@ -77,6 +77,10 @@ public class SellCards extends AbstractAction {
 
             cardToSell.ifPresent(c -> state.sellCard(c, saleValue));
         }
+        if (salesType == SMUGGLER)
+            state.setActionTaken("Betrayed", gs.getCurrentPlayer());
+        else
+            state.setActionTaken("Sold", gs.getCurrentPlayer());
         return true;
     }
 
@@ -84,7 +88,9 @@ public class SellCards extends AbstractAction {
         return Arrays.stream(saleValues).sum();
     }
 
-    public int getTotalCards() {return saleValues.length;}
+    public int getTotalCards() {
+        return saleValues.length;
+    }
 
     private Optional<SiriusCard> getMatchingCard(Deck<SiriusCard> hand, int v) {
         int val = v == 10 ? 0 : v; // to cater for Glowing Contraband

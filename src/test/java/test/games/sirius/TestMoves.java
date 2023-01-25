@@ -8,9 +8,9 @@ import core.components.PartialObservableDeck;
 import games.GameType;
 import games.sirius.*;
 import games.sirius.actions.*;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
 import players.simple.RandomPlayer;
-import scala.concurrent.impl.FutureConvertersImpl;
 import utilities.Utils;
 
 import java.util.*;
@@ -135,7 +135,7 @@ public class TestMoves {
             count++;
         } while (state.getGamePhase() == Draw);
         assertEquals(Favour, state.getGamePhase());
-        assertEquals(4, count); // three cards from the moon, plus a DoNothing on Sirius
+        assertEquals(3, count); // three cards from the moon
         // this means that I need to skip turn order in the Draw phase if at a Moon with no cards to be drawn
         assertEquals(1, state.getPlayerHand(1).getSize());
         assertEquals(2, state.getPlayerHand(0).getSize());
@@ -147,6 +147,7 @@ public class TestMoves {
         state.setGamePhase(Draw);
         state.movePlayerTo(0, 1);
         state.movePlayerTo(1, 2);
+        state.addCardToHand(2, new SiriusCard("Ammonia", AMMONIA, 1));
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size());
         assertEquals(new TakeCard(), actions.get(0));
@@ -169,7 +170,7 @@ public class TestMoves {
             fm.next(state, action);
             count++;
         } while (state.getGamePhase() == Draw);
-        assertEquals(Move, state.getGamePhase()); // skip Favaour phase as no-one has any cards
+        assertEquals(Move, state.getGamePhase()); // skip Favour phase as no-one has any cards
         assertEquals(3, count); // one more card from each moon, plus a DoNothing on Sirius
         assertEquals(2, state.getPlayerHand(1).getSize());
         assertEquals(2, state.getPlayerHand(0).getSize());
@@ -366,9 +367,9 @@ public class TestMoves {
 
     @Test
     public void testEndGameOnAmmoniaTrack() {
-        testMedalGainedOnSale();
-        assertEquals(1, state.getCurrentPlayer());
         state.addCardToHand(1, new SiriusCard("test", AMMONIA, 19));
+        testMedalGainedOnSale(); // p0 sells
+        assertEquals(1, state.getCurrentPlayer());
         SellCards action = new SellCards(Collections.singletonList(
                 new SiriusCard("a", AMMONIA, 19)
         ));
