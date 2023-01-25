@@ -43,8 +43,8 @@ public class TestFavours {
     @Test
     public void testFavourCardDrawnAtMetropolis() {
         state.setGamePhase(Draw);
-        state.movePlayerTo(0, 3);
-        SiriusCard topCard = state.getMoon(3).getDeck().peek();
+        state.movePlayerTo(0, 4);
+        SiriusCard topCard = state.getMoon(4).getDeck().peek();
         assertEquals(FAVOUR, topCard.cardType);
         assertEquals(1, topCard.value);
         TakeCard action = new TakeCard();
@@ -59,13 +59,14 @@ public class TestFavours {
         moveToPhase(Favour);
         assertEquals(1, state.getCurrentPlayer());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(6, actions.size());
+        assertEquals(7, actions.size());
         assertEquals(new PassOnFavour(), actions.get(0));
         assertEquals(new FavourForRank(2), actions.get(1));
         assertEquals(new FavourForRank(3), actions.get(2));
         assertEquals(new FavourForCartel(1), actions.get(3));
         assertEquals(new FavourForCartel(2), actions.get(4));
         assertEquals(new FavourForCartel(3), actions.get(5));
+        assertEquals(new FavourForCartel(4), actions.get(6));
         fm.next(state, new PassOnFavour());
     }
 
@@ -84,12 +85,13 @@ public class TestFavours {
         moveToPhase(Favour);
         assertEquals(0, state.getCurrentPlayer());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(5, actions.size());
+        assertEquals(6, actions.size());
         assertEquals(new PassOnFavour(), actions.get(0));
         assertEquals(new FavourForRank(1), actions.get(1));
         assertEquals(new FavourForRank(2), actions.get(2));
         assertEquals(new FavourForCartel(2), actions.get(3));
         assertEquals(new FavourForCartel(3), actions.get(4));
+        assertEquals(new FavourForCartel(4), actions.get(5));
     }
 
     @Test
@@ -177,13 +179,15 @@ public class TestFavours {
     public void testCartelGivesExtraCardAtEndRound() {
         state.getMoon(1).setCartelOwner(0);
         state.getMoon(2).setCartelOwner(1);
-        state.getMoon(3).setCartelOwner(0);
+        state.getMoon(3).setCartelOwner(2);
+        state.getMoon(4).setCartelOwner(0);
         state.getTurnOrder().endRound(state);
         assertEquals(2, state.getPlayerHand(0).getSize());
         assertEquals(1, state.getPlayerHand(1).getSize());
-        assertEquals(0, state.getPlayerHand(2).getSize());
+        assertEquals(1, state.getPlayerHand(2).getSize());
         assertEquals(1, state.getPlayerHand(0).stream().filter(c -> c.cardType == AMMONIA).count());
         assertEquals(1, state.getPlayerHand(0).stream().filter(c -> c.cardType == FAVOUR).count());
         assertEquals(1, state.getPlayerHand(1).stream().filter(c -> c.cardType == CONTRABAND).count());
+        assertEquals(1, state.getPlayerHand(2).stream().filter(c -> c.cardType == SMUGGLER).count());
     }
 }

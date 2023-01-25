@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Deck;
 import games.sirius.SiriusConstants.SiriusPhase;
+import games.sirius.SiriusParameters.SmugglerType;
 import games.sirius.actions.*;
 import utilities.Utils;
 
@@ -25,6 +26,9 @@ public class SiriusForwardModel extends AbstractForwardModel {
     protected void _setup(AbstractGameState firstState) {
         SiriusGameState state = (SiriusGameState) firstState;
         SiriusParameters params = (SiriusParameters) state.getGameParameters();
+        for (int i = 0; i < params.favour; i++) {
+            state.favourDeck.add(new SiriusCard("Favour", FAVOUR, 1));
+        }
         for (int i = 0; i < params.ammonia; i++) {
             state.ammoniaDeck.add(new SiriusCard("Ammonia", AMMONIA, 1));
         }
@@ -45,9 +49,17 @@ public class SiriusForwardModel extends AbstractForwardModel {
             state.contrabandDeck.add(new SiriusCard("Glowing Contraband", CONTRABAND, 0));
         }
         state.contrabandDeck.shuffle(state.rnd);
+
+        for (SmugglerType st : SmugglerType.values()) {
+            for (int i = 0; i < params.cardsPerSmugglerType; i++)
+                state.smugglerDeck.add(new SiriusCard(st.name(), SMUGGLER, 1));
+        }
+        state.smugglerDeck.shuffle(state.rnd);
+
         state.moons.add(new Moon("Sirius", TRADING, state.getNPlayers()));
-        state.moons.add(new Moon("Mining Outpost", MINING, state.getNPlayers()));
+        state.moons.add(new Moon("Mining Colony", MINING, state.getNPlayers()));
         state.moons.add(new Moon("Processing Station", PROCESSING, state.getNPlayers()));
+        state.moons.add(new Moon("Outpost", OUTPOST, state.getNPlayers()));
         state.moons.add(new Moon("Metropolis", METROPOLIS, state.getNPlayers()));
         for (Moon moon : state.getAllMoons()) {
             switch (moon.moonType) {
@@ -69,7 +81,10 @@ public class SiriusForwardModel extends AbstractForwardModel {
                     }
                     break;
                 case OUTPOST:
-                    throw new AssertionError("Not yet implemented");
+                    for (int i = 0; i < params.cardsPerEmptyMoon; i++) {
+                        moon.addCard(state.smugglerDeck.draw());
+                    }
+                    break;
             }
         }
 
@@ -120,6 +135,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
                     case METROPOLIS:
                     case MINING:
                     case PROCESSING:
+                    case OUTPOST:
                         if (currentMoon.getDeck().getSize() > 0)
                             retValue.add(takeCard);
                         break;

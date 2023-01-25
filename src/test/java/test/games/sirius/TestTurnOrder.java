@@ -137,7 +137,7 @@ public class TestTurnOrder {
 
         assertEquals(SiriusConstants.SiriusPhase.Move, state.getGamePhase());
         assertEquals(0, state.getCurrentPlayer());
-        fm.next(state, new MoveToMoon(3)); // p0 Move to Metropolis
+        fm.next(state, new MoveToMoon(4)); // p0 Move to Metropolis
         assertEquals(1, state.getCurrentPlayer());
 
         assertEquals(1, sto.getTurnOwner());

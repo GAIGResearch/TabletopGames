@@ -11,12 +11,17 @@ public class SiriusParameters extends TunableParameters {
     public int maxRounds = 25;
     public int superAmmonia = 5;
     public int ammonia = 22;
+    public int favour = 16;
     public int brokenContraband = 9;
     public int contraband = 9;
     public int glowingContraband = 9;
     public int cardsPerEmptyMoon = 2;
     public int cardsPerNonEmptyMoon = 1;
     public int pointsPerCartel = 3;
+    public int cardsPerSmugglerType = 4;
+    public enum SmugglerType {
+            POLICE_RAID, THUG, CARGO_RUNNER, INFORMANT, MOLE, HIRED_GUN, SAFE_HOUSE_CLERK, NEGOTIATOR;
+    }
     public int[] medalValues = new int[]{2, 2, 3, 3, 4, 4, 5, 5, 6, 6};
     public int[] ammoniaTrack = new int[] {
             0,

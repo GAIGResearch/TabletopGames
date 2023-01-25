@@ -15,6 +15,8 @@ import static java.util.stream.Collectors.toList;
 public class SiriusGameState extends AbstractGameState {
     Deck<SiriusCard> ammoniaDeck;
     Deck<SiriusCard> contrabandDeck;
+    Deck<SiriusCard> smugglerDeck;
+    Deck<SiriusCard> favourDeck;
     List<PlayerArea> playerAreas;
     List<Moon> moons;
     Random rnd;
@@ -34,7 +36,9 @@ public class SiriusGameState extends AbstractGameState {
         List<Component> retValue = new ArrayList<>();
         retValue.add(ammoniaDeck);
         retValue.add(contrabandDeck);
+        retValue.add(favourDeck);
         retValue.addAll(moons);
+        retValue.add(smugglerDeck);
         for (PlayerArea pa : playerAreas) {
             retValue.add(pa.deck);
             retValue.add(pa.soldCards);
@@ -47,6 +51,8 @@ public class SiriusGameState extends AbstractGameState {
         SiriusGameState retValue = new SiriusGameState(gameParameters.copy(), getNPlayers());
         retValue.ammoniaDeck = ammoniaDeck.copy();
         retValue.contrabandDeck = contrabandDeck.copy();
+        retValue.smugglerDeck = smugglerDeck.copy();
+        retValue.favourDeck = favourDeck.copy();
         retValue.playerAreas = playerAreas.stream().map(PlayerArea::copy).collect(toList());
         retValue.moons = new ArrayList<>();
         for (Moon m : moons) {
@@ -187,6 +193,8 @@ public class SiriusGameState extends AbstractGameState {
     protected void _reset() {
         ammoniaDeck = new Deck<>("ammoniaDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         contrabandDeck = new Deck<>("contrabandDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        smugglerDeck = new Deck<>("smugglerDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        favourDeck = new Deck<>("favourDeck", -1, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         moons = new ArrayList<>();
         playerAreas = new ArrayList<>();
         ammoniaTrack = 0;
@@ -271,8 +279,10 @@ public class SiriusGameState extends AbstractGameState {
                 return ammoniaDeck;
             case CONTRABAND:
                 return contrabandDeck;
-            case SMUGGLER:
             case FAVOUR:
+                return favourDeck;
+            case SMUGGLER:
+                return smugglerDeck;
         }
         throw new AssertionError("Not yet implemented");
     }
@@ -312,7 +322,7 @@ public class SiriusGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         int retValue = Objects.hash(playerAreas, turnOrder, gamePhase, moons, ammoniaDeck, gameParameters, gameStatus,
-                ammoniaTrack, contrabandTrack, medalCount);
+                ammoniaTrack, contrabandTrack, medalCount, smugglerDeck, favourDeck);
         return retValue + 31 * Arrays.hashCode(playerResults)
                 - 255 * Arrays.hashCode(playerLocations)
                 - 31 * 255 * Arrays.hashCode(moveSelected);
@@ -340,6 +350,10 @@ public class SiriusGameState extends AbstractGameState {
         result = Objects.hash(ammoniaTrack);
         sb.append(result).append("|");
         result = Objects.hash(contrabandDeck);
+        sb.append(result).append("|");
+        result = Objects.hash(smugglerDeck);
+        sb.append(result).append("|");
+        result = Objects.hash(favourDeck);
         sb.append(result).append("|2|");
         result = Objects.hash(contrabandTrack);
         sb.append(result).append("|3|");

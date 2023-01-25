@@ -2,9 +2,9 @@ package games.sirius;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.components.Deck;
 import core.turnorders.TurnOrder;
 import games.sirius.SiriusConstants.SiriusPhase;
-import org.apache.commons.lang.NotImplementedException;
 import utilities.Pair;
 
 import java.util.Arrays;
@@ -187,33 +187,20 @@ public class SiriusTurnOrder extends TurnOrder {
         state.getPlayerTimer()[getCurrentPlayer(state)].incrementRound();
         listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, state, null));
 
-        // add cards
+        // add cards - for all Moons with a linked Card Type
         for (Moon moon : state.getAllMoons()) {
-            if (moon.getMoonType() == MINING) {
-                int drawLimit = moon.getDeckSize() == 0 ? params.cardsPerEmptyMoon : params.cardsPerNonEmptyMoon;
-                for (int i = 0; i < drawLimit; i++) {
-                    if (state.ammoniaDeck.getSize() > 0)
-                        moon.addCard(state.ammoniaDeck.draw());
+            int drawLimit = moon.getDeckSize() == 0 ? params.cardsPerEmptyMoon : params.cardsPerNonEmptyMoon;
+            if (moon.getMoonType().linkedCardType != null) {
+                Deck<SiriusCard> drawDeck = state.getDeck(moon.moonType.linkedCardType);
+                if (moon.moonType.linkedCardType != FAVOUR) {
+                    // Except for Favour cards, which are always taken direct from the draw pile
+                    for (int i = 0; i < drawLimit; i++) {
+                        if (drawDeck.getSize() > 0)
+                            moon.addCard(drawDeck.draw());
+                    }
                 }
-                if (moon.getCartelOwner() > -1 && state.ammoniaDeck.getSize() > 0)
-                    state.addCardToHand(moon.getCartelOwner(), state.ammoniaDeck.draw());
-            }
-            if (moon.getMoonType() == PROCESSING) {
-                int drawLimit = moon.getDeckSize() == 0 ? params.cardsPerEmptyMoon : params.cardsPerNonEmptyMoon;
-                for (int i = 0; i < drawLimit; i++) {
-                    if (state.contrabandDeck.getSize() > 0)
-                        moon.addCard(state.contrabandDeck.draw());
-                }
-                if (moon.getCartelOwner() > -1 && state.contrabandDeck.getSize() > 0)
-                    state.addCardToHand(moon.getCartelOwner(), state.contrabandDeck.draw());
-            }
-            if (moon.getMoonType() == METROPOLIS) {
-                int drawLimit = state.getNPlayers() - moon.getDeckSize();
-                for (int i = 0; i < drawLimit; i++) {
-                    moon.addCard(new SiriusCard("Favour", FAVOUR, 1));
-                }
-                if (moon.getCartelOwner() > -1)
-                    state.addCardToHand(moon.getCartelOwner(), new SiriusCard("Favour", FAVOUR, 1));
+                if (moon.getCartelOwner() > -1 && drawDeck.getSize() > 0)
+                    state.addCardToHand(moon.getCartelOwner(), drawDeck.draw());
             }
         }
         roundCounter++;
