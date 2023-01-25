@@ -79,7 +79,7 @@ public class PandemicBoardView extends JComponent {
     public PandemicBoardView(AbstractGameState gs) {
         gameState = (PandemicGameState) gs;
         this.graphBoard = ((PandemicGameState) gs).getWorld();
-        String dataPath = ((PandemicParameters)gs.getGameParameters()).getDataPath() + "img/";
+        String dataPath = ((PandemicParameters)gs.getGameParameters()).getDataPath() + "/img/";
 
         // Background and card backs
         this.background = ImageIO.GetInstance().getImage(dataPath + ((PropertyString) graphBoard.getProperty(imgHash)).value);

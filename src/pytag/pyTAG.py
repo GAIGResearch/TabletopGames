@@ -11,7 +11,7 @@ import numpy as np
 
 
 class PyTAG():
-    def __init__(self, agents, seed=42, game="Diamant", jar_path="ModernBoardGame_jar.jar"):
+    def __init__(self, agents, seed=42, game="Diamant", jar_path="jars/ModernBoardGame.jar"):
         # JPYPE setup
         self.root_path = os.getcwd()
         # jpype.addClassPath(os.path.join(self.root_path, jar_path))
@@ -25,6 +25,8 @@ class PyTAG():
         # todo it sees the packages, but not the classes
         import core
         import games.catan
+        # jpype.JClass("core.Game").main([]) # execute the main method in Game - runs a pandmic game by default - just an example
+
         # from utilities import Utils
         # jpype.JException
 
