@@ -143,6 +143,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
                         Deck<SiriusCard> hand = state.getPlayerHand(player);
                         retValue.addAll(saleOptionsFrom(hand, AMMONIA));
                         retValue.addAll(saleOptionsFrom(hand, CONTRABAND));
+                        retValue.addAll(saleOptionsFrom(hand, SMUGGLER));
                         retValue.add(new DoNothing()); // it is permissible to decide not to sell
                         break;
                 }
@@ -201,6 +202,12 @@ public class SiriusForwardModel extends AbstractForwardModel {
             if (so.size() >= 1)
                 so.sort(Comparator.comparingInt(sc -> -sc.getTotalCards())); //reverse order
             retValue.add(so.get(0));
+        }
+        if (type == SMUGGLER) {
+            // in this case we can Sell in two ways - to move the Corruption Track up or down
+            // TODO: possibly move this to an ExtendedActionSequence
+            List<SellCards> decreaseTrackOptions = retValue.stream().map(SellCards::reverseDirection).collect(toList());
+            retValue.addAll(decreaseTrackOptions);
         }
         return retValue;
     }

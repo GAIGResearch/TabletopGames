@@ -6,21 +6,35 @@ import core.components.Deck;
 import games.sirius.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static games.sirius.SiriusConstants.SiriusCardType.CONTRABAND;
+import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static java.util.stream.Collectors.toList;
 
 public class SellCards extends AbstractAction {
 
     public final SiriusConstants.SiriusCardType salesType;
     int[] saleValues;
+    boolean decreaseTrack = false;
+
+    private SellCards(SellCards toCopy) {
+        this.salesType = toCopy.salesType;
+        this.decreaseTrack = toCopy.decreaseTrack;
+        this.saleValues = toCopy.saleValues.clone();
+    }
 
     public SellCards(List<SiriusCard> cardsToSell) {
+        this(cardsToSell, false);
+    }
+
+    public SellCards(List<SiriusCard> cardsToSell, boolean negative) {
         // we check that all cards are of the same type
         if (cardsToSell.isEmpty())
             throw new IllegalArgumentException("Must specify at least one card to sell");
+        decreaseTrack = negative;
         salesType = cardsToSell.get(0).cardType;
+        if (decreaseTrack && salesType != SMUGGLER)
+            throw new IllegalArgumentException("Only Smugglers can be used to decrease a track");
+
         if (cardsToSell.stream().anyMatch(c -> c.cardType != salesType))
             throw new IllegalArgumentException("All cards must have the same type to sell");
         int glowingContrabandCards = (int) cardsToSell.stream().filter(c -> c.cardType == CONTRABAND && c.value == 0).count();
@@ -43,6 +57,12 @@ public class SellCards extends AbstractAction {
                     break;
                 }
         }
+    }
+
+    public static SellCards reverseDirection(SellCards base) {
+        SellCards retValue = new SellCards(base);
+        retValue.decreaseTrack = !base.decreaseTrack;
+        return retValue;
     }
 
     @Override
@@ -80,14 +100,14 @@ public class SellCards extends AbstractAction {
     public boolean equals(Object obj) {
         if (obj instanceof SellCards) {
             SellCards other = (SellCards) obj;
-            return other.salesType == salesType && Arrays.equals(other.saleValues, saleValues);
+            return other.salesType == salesType && other.decreaseTrack == decreaseTrack && Arrays.equals(other.saleValues, saleValues);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(salesType.ordinal()) + 31 * Arrays.hashCode(saleValues) + 82;
+        return Objects.hash(salesType.ordinal(), decreaseTrack) + 31 * Arrays.hashCode(saleValues) + 82;
     }
 
     @Override

@@ -42,6 +42,13 @@ public class SiriusParameters extends TunableParameters {
             0, 0, 0, 0, 0,
             1
     };
+    public int[] corruptionTrack = new int[] {
+            0,
+            0, 0, 0, 1,
+            0, 0, 0, 1,
+            0, 0, 0, 1,
+            0, 0, 0, 1
+    };
 
     public SiriusParameters() {
         super();

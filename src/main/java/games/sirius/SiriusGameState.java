@@ -25,6 +25,7 @@ public class SiriusGameState extends AbstractGameState {
     int medalCount;
     int ammoniaTrack;
     int contrabandTrack;
+    int corruptionTrack;
 
     public SiriusGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, new SiriusTurnOrder(nPlayers), GameType.Sirius);
@@ -80,6 +81,7 @@ public class SiriusGameState extends AbstractGameState {
         }
         retValue.ammoniaTrack = ammoniaTrack;
         retValue.contrabandTrack = contrabandTrack;
+        retValue.corruptionTrack = corruptionTrack;
         retValue.medalCount = medalCount;
         return retValue;
     }
@@ -199,6 +201,7 @@ public class SiriusGameState extends AbstractGameState {
         playerAreas = new ArrayList<>();
         ammoniaTrack = 0;
         contrabandTrack = 0;
+        corruptionTrack = 0;
     }
 
     // This marks a decision as having been made, but does not yet implement this decision
@@ -260,6 +263,8 @@ public class SiriusGameState extends AbstractGameState {
                 return ammoniaTrack;
             case CONTRABAND:
                 return contrabandTrack;
+            case SMUGGLER:
+                return corruptionTrack;
             default:
                 throw new IllegalArgumentException("No track for " + track);
         }
@@ -306,6 +311,17 @@ public class SiriusGameState extends AbstractGameState {
                 if (contrabandTrack < params.contrabandTrack.length && params.contrabandTrack[contrabandTrack] == 1) {
                     pa.medals.add(new Medal(CONTRABAND, params.medalValues[medalCount]));
                     medalCount++;
+                }
+            }
+        } else if (card.cardType == SMUGGLER) {
+            for (int i = 0; i < amount; i++) {
+                corruptionTrack++;
+                // TODO: Also need to cater for the ability to move the Corruption Track down (player decision as part of Betrayal)
+                if (corruptionTrack < params.corruptionTrack.length && params.corruptionTrack[corruptionTrack] == 1) {
+                    // TODO: This triggers movement of the police pawn, stealing and confiscation of cards
+                    // We can implement this by moving to a POLICE phase - we know who the current player is, and hence
+                    // who gets to make the decisions.
+                    // Once they're done we shift the phase back to Draw
                 }
             }
         }
