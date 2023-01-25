@@ -19,6 +19,7 @@ import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.*;
 import games.explodingkittens.*;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
+import games.jaipurskeleton.*;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.*;
@@ -165,7 +166,9 @@ public enum GameType {
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class
-    );
+    ),
+    Jaipur(2,2, null, null,
+            JaipurGameState.class, JaipurForwardModel.class, JaipurParameters.class, JaipurGUIManager.class);
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;

@@ -4,8 +4,8 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
-import evaluation.listeners.GameListener;
 import evaluation.metrics.Event;
+import evaluation.listeners.GameListener;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import gui.AbstractGUIManager;
@@ -30,8 +30,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import evaluation.metrics.*;
 import static utilities.Utils.componentToImage;
 
 public class Game {
@@ -901,8 +899,6 @@ public class Game {
         }
     }
 
-
-
     /**
      * The recommended way to run a game is via evaluations.Frontend, however that may not work on
      * some games for some screen sizes due to the vagaries of Java Swing...
@@ -916,19 +912,16 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "GameTemplate");
+        String gameType = Utils.getArg(args, "game", "Jaipur");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int playerCount = Utils.getArg(args, "nPlayers", 2);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
+        ActionController ac = new ActionController();
 
-        ActionController ac = new ActionController(); //null;
-
-        /* Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
-
-        players.add(new RandomPlayer());
+        // 1. Set up the players for the game.
+        ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
@@ -937,14 +930,14 @@ public class Game {
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
-//        players.add(new HumanConsolePlayer());
 
-        /* 4. Game parameter configuration. Set to null to ignore and use default parameters */
+        // 2. Game parameter configuration. Set to null to ignore and use default parameters
         String gameParams = null;
 
-        /* 5. Run! */
+        // 3. Run!
         runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
+        // 4. Run several games
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
 //        games.remove(Pandemic);
