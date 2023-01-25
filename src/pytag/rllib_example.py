@@ -60,14 +60,14 @@ if __name__ == "__main__":
         "simpleFC", TorchCustomModel
     )
 
-    algo = ppo.PPO(env=Diamant, config={
-        "framework": "torch",
-        "model": {
-            "custom_model": "simpleFC",
-            # Extra kwargs to be passed to your model's c'tor.
-            "custom_model_config": {},
-        },
-    })
+    # algo = ppo.PPO(env=Diamant, config={
+    #     "framework": "torch",
+    #     "model": {
+    #         "custom_model": "simpleFC",
+    #         # Extra kwargs to be passed to your model's c'tor.
+    #         "custom_model_config": {},
+    #     },
+    # })
 
     config = {
         "framework": "torch",
@@ -100,10 +100,21 @@ if __name__ == "__main__":
     }
 
     tuner = tune.Tuner(
-        algo,
-        param_space=config,
-        run_config=air.RunConfig(stop=stop),
+        "PPO",
+        tune_config=tune.TuneConfig(
+            metric="episode_reward_mean",
+            mode="max",
+            num_samples=1,
+        ),
+        param_space= {
+            "env": Diamant,
+            "num_workers": 1,
+            "framework": "torch",
+            "model": {"custom_model": "simpleFC",
+                      "vf_share_layers": True},
+            "environment": Diamant,},
     )
+    results = tuner.fit()
     ray.shutdown()
 
 

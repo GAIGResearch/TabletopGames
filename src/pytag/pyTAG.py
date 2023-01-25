@@ -58,11 +58,13 @@ class PyTAG():
         self.observation_space = 9 #self.env.getObservationSpace()
         self.action_space = 3 #self.env.getActionSpace()
         self.gs = None
+        self.prev_reward = 0
 
     def getObs(self):
         return self.env.getFeatures()
 
     def reset(self):
+        self.prev_reward = 0
         self.gs = self.env.reset()
         obs = np.asarray(self.env.getObservationVector())
         return obs
@@ -74,10 +76,22 @@ class PyTAG():
         java_json = self.env.getObservationJson()
         return json.loads(str(java_json))
 
+    def has_won(self):
+        if str(self.env.getPlayerResults()[0]) == "WIN":
+            # print(f"Player won with reward {reward}")
+            return True
+        return False
+
     def step(self, action):
+        playerID = self.env.getPlayerID()
         self.env.step(action)
         obs = np.asarray(self.env.getObservationVector())
-        reward = self.env.getReward()
+        # reward = self.env.getReward()
+        # reward = self.prev_reward - reward
+        # self.prev_reward = reward
+        reward = 0.0
+        if str(self.env.getPlayerResults()[0]) == "WIN":
+            reward = 1.0
         done = self.env.isDone()
         return obs, reward, done, {}
 
