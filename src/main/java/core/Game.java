@@ -916,19 +916,15 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "GameTemplate");
+        String gameType = Utils.getArg(args, "game", "TerraformingMars");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int playerCount = Utils.getArg(args, "nPlayers", 2);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
-
-        ActionController ac = new ActionController(); //null;
+        ActionController ac = new ActionController();
 
         /* Set up players for the game */
-        ArrayList<AbstractPlayer> players = new ArrayList<>(playerCount);
-
+        ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
@@ -937,14 +933,14 @@ public class Game {
         players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
-//        players.add(new HumanConsolePlayer());
 
-        /* 4. Game parameter configuration. Set to null to ignore and use default parameters */
+        /* Game parameter configuration. Set to null to ignore and use default parameters */
         String gameParams = null;
 
-        /* 5. Run! */
+        /* Run! */
         runOne(GameType.valueOf(gameType), gameParams, players, seed, false, null, useGUI ? ac : null, turnPause);
 
+        /* Run multiple games */
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
 //        games.remove(LoveLetter);
 //        games.remove(Pandemic);

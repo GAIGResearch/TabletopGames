@@ -280,6 +280,17 @@ public abstract class Utils {
             combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
         }
     }
+    public static void combinationUtil(Object[] arr, Object[] data, int start, int end, int index, int r, HashSet<Object[]> allData) {
+        if (index == r) {
+            allData.add(data.clone());
+            return;
+        }
+
+        for (int i = start; i <= end && end - i + 1 >= r - index; i++) {
+            data[index] = arr[i];
+            combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
+        }
+    }
 
     /**
      * Auxiliary function shortcut to generate combinations of numbers in an array, each of size r.
@@ -295,6 +306,23 @@ public abstract class Utils {
         return allData;
     }
 
+    /**
+     * Generate all combinations of objects in the given array, in sizes from min to max (capped 1 - array length)
+     * @param arr - input array of objects, e.g. (Apple, Pear, Apple)
+     * @param minSizeOutput - minimum size of output array, e.g. 1
+     * @param maxSizeOutput - maximum size of output array, e.g. 2
+     * @return - All combinations of objects in arrays of different sizes, e.g. (Apple), (Pear), (Apple, Pear), (Pear, Apple)
+     */
+    public static HashSet<Object[]> generateCombinations(Object[] arr, int minSizeOutput, int maxSizeOutput) {
+        HashSet<Object[]> allData = new HashSet<>();
+        if (minSizeOutput < 1) minSizeOutput = 1;
+        if (maxSizeOutput > arr.length) maxSizeOutput = arr.length;
+        for (int r = minSizeOutput; r <= maxSizeOutput; r++) {
+            Object[] data = new Object[r];
+            combinationUtil(arr, data, 0, arr.length - 1, 0, r, allData);
+        }
+        return allData;
+    }
 
     /**
      * Returns a list of objects arrays, each one a combination of elements from the param
