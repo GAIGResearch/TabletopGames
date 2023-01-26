@@ -4,16 +4,19 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import games.GameType;
+import games.dicemonastery.actions.Sell;
 import games.sirius.*;
 import games.sirius.actions.SellCards;
 import org.junit.*;
 import players.simple.RandomPlayer;
+import utilities.Utils;
 
 import java.util.*;
 
+import static core.CoreConstants.GameEvents.GAME_OVER;
 import static games.sirius.SiriusConstants.MoonType.*;
 import static games.sirius.SiriusConstants.SiriusCardType.*;
-import static games.sirius.SiriusConstants.SiriusPhase.Draw;
+import static games.sirius.SiriusConstants.SiriusPhase.*;
 import static org.junit.Assert.*;
 
 
@@ -93,26 +96,103 @@ public class TestBetrayalPhase {
         assertEquals(2, actions.size());
         assertTrue(actions.contains(new SellCards(Collections.singletonList(card2))));
     }
+
+
     @Test
-    public void movingCorruptionTrackToMarkerTriggersPolicePhase() {
-        fail("Not yet implemented");
+    public void sellingSmugglerCardsMovesCorruptionTrackUp() {
+        state.setGamePhase(Draw);
+        state.movePlayerTo(1, 1);
+        state.movePlayerTo(2, 4);
+        for (int i = 0; i < 2; i++)
+            state.addCardToHand(0, state.getDeck(SMUGGLER).draw());
+        assertEquals(params.startingCorruption, state.getTrackPosition(SMUGGLER));
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        AbstractAction sellOne = actions.stream().
+                filter(a -> a instanceof SellCards &&
+                        ((SellCards) a).salesType == SMUGGLER &&
+                        ((SellCards) a).getTotalValue() == 1).findFirst().orElseThrow(() -> new AssertionError("No matching action"));
+        fm.next(state, sellOne);
+        assertEquals(params.startingCorruption + 1, state.getTrackPosition(SMUGGLER));
+        assertEquals(Draw, state.getGamePhase());
+        assertEquals(1, state.getCurrentPlayer());
     }
 
     @Test
-    public void sellingSmugglerCardsMovesCorruptionTrack() {
-        fail("Not yet implemented");
+    public void sellingSmugglerCardsMovesCorruptionTrackDown() {
+        state.setGamePhase(Draw);
+        state.movePlayerTo(1, 1);
+        state.movePlayerTo(2, 4);
+        for (int i = 0; i < 2; i++)
+            state.addCardToHand(0, state.getDeck(SMUGGLER).draw());
+        assertEquals(params.startingCorruption, state.getTrackPosition(SMUGGLER));
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        AbstractAction sellOne = actions.stream().
+                filter(a -> a instanceof SellCards &&
+                        ((SellCards) a).salesType == SMUGGLER &&
+                        ((SellCards) a).getTotalValue() == -1).findFirst().orElseThrow(() -> new AssertionError("No matching action"));
+        fm.next(state, sellOne);
+        assertEquals(params.startingCorruption - 1, state.getTrackPosition(SMUGGLER));
+        assertEquals(Draw, state.getGamePhase());
+        assertEquals(1, state.getCurrentPlayer());
+    }
+
+    @Test
+    public void corruptionTrackHasCeilingAtMaximum() {
+        state.setGamePhase(Draw);
+        state.movePlayerTo(1, 1);
+        state.movePlayerTo(2, 4);
+        for (int i = 0; i < 4; i++)
+            state.addCardToHand(0, state.getDeck(SMUGGLER).draw());
+        assertEquals(params.startingCorruption, state.getTrackPosition(SMUGGLER));
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        AbstractAction sellFour = actions.stream().
+                filter(a -> a instanceof SellCards &&
+                        ((SellCards) a).salesType == SMUGGLER &&
+                        ((SellCards) a).getTotalValue() == 4).findFirst().orElseThrow(() -> new AssertionError("No matching action"));
+        fm.next(state, sellFour);
+        assertEquals(params.corruptionTrack.length - 1, state.getTrackPosition(SMUGGLER));
+        assertEquals(Draw, state.getGamePhase());
+        assertEquals(1, state.getCurrentPlayer());
+    }
+
+
+    @Test
+    public void movingCorruptionTrackToMarkerTriggersPolicePhase() {
+        state.setGamePhase(Draw);
+        state.movePlayerTo(1, 1);
+        state.movePlayerTo(2, 4);
+        for (int i = 0; i < 4; i++)
+            state.addCardToHand(0, state.getDeck(SMUGGLER).draw());
+        assertEquals(14, state.getTrackPosition(SMUGGLER));
+        List<AbstractAction> actions = fm.computeAvailableActions(state);
+        AbstractAction sellTwo = actions.stream().
+                filter(a -> a instanceof SellCards &&
+                        ((SellCards) a).salesType == SMUGGLER &&
+                        ((SellCards) a).getTotalValue() == -2).findFirst().orElseThrow(() -> new AssertionError("No matching action"));
+        fm.next(state, sellTwo);
+        assertEquals(12, state.getTrackPosition(SMUGGLER));
+        assertEquals(Police, state.getGamePhase());
+        assertEquals(0, state.getCurrentPlayer());
     }
 
     @Test
     public void corruptionTrackEndsGame() {
-        fail("Not yet implemented");
-
+        state.setGamePhase(Draw);
+        state.movePlayerTo(1, 1);
+        state.movePlayerTo(2, 4);
+        SiriusCard superSmuggler = new SiriusCard("SuperSmuggler", SMUGGLER, params.startingCorruption);
+        state.addCardToHand(0, superSmuggler);
+        SellCards endGameAction = new SellCards(Collections.singletonList(superSmuggler), true);
+        assertEquals(params.startingCorruption, state.getTrackPosition(SMUGGLER));
+        fm.next(state, endGameAction);
+        assertEquals(0, state.getTrackPosition(SMUGGLER));
+        assertFalse(state.isNotTerminal());
+        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[0]);
     }
 
     @Test
     public void policePhaseActions() {
         fail("Not yet implemented");
-
     }
 
 }

@@ -3,23 +3,29 @@ package games.sirius.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Deck;
+import core.interfaces.IExtendedSequence;
 import games.sirius.*;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static games.sirius.SiriusConstants.SiriusCardType.*;
 import static java.util.stream.Collectors.toList;
 
-public class SellCards extends AbstractAction {
+public class SellCards extends AbstractAction implements IExtendedSequence {
 
     public final SiriusConstants.SiriusCardType salesType;
     int[] saleValues;
     boolean decreaseTrack;
+    int decidingPlayer = -1;
+    int policeTriggers = 0;
 
     private SellCards(SellCards toCopy) {
         this.salesType = toCopy.salesType;
         this.decreaseTrack = toCopy.decreaseTrack;
         this.saleValues = toCopy.saleValues.clone();
+        this.policeTriggers = toCopy.policeTriggers;
+        this.decidingPlayer = toCopy.decidingPlayer;
     }
 
     public SellCards(List<SiriusCard> cardsToSell) {
@@ -72,20 +78,29 @@ public class SellCards extends AbstractAction {
         Deck<SiriusCard> hand = state.getPlayerHand(gs.getCurrentPlayer());
         for (int saleValue : saleValues) {
             Optional<SiriusCard> cardToSell = getMatchingCard(hand, saleValue);
-            if (!cardToSell.isPresent())
+            if (cardToSell.isPresent()) {
+                SiriusCard card = cardToSell.get();
+                policeTriggers += state.sellCard(card, saleValue * (decreaseTrack ? -1 : 1)) ? 1 : 0;
+            } else
                 throw new AssertionError("Card not found : " + salesType + " " + saleValue);
-
-            cardToSell.ifPresent(c -> state.sellCard(c, saleValue));
         }
         if (salesType == SMUGGLER)
             state.setActionTaken("Betrayed", gs.getCurrentPlayer());
         else
             state.setActionTaken("Sold", gs.getCurrentPlayer());
+
+        if (policeTriggers > 0) {
+            // we only branch actions from SellCards if we have to undertake a police action
+            state.setActionInProgress(this);
+            decidingPlayer = state.getCurrentPlayer();  // and store this
+            // this will trigger the next action to pick a moon, and then a card from each player
+        }
+
         return true;
     }
 
     public int getTotalValue() {
-        return Arrays.stream(saleValues).sum();
+        return Arrays.stream(saleValues).sum() * (decreaseTrack ? -1 : +1);
     }
 
     public int getTotalCards() {
@@ -98,22 +113,47 @@ public class SellCards extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return this; //immutable
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
+        SiriusGameState state = (SiriusGameState) gs;
+        // we pick a moon to move to
+        return IntStream.range(0, state.getAllMoons().size()).mapToObj(MovePolice::new).collect(toList());
+    }
+
+    @Override
+    public int getCurrentPlayer(AbstractGameState state) {
+        return decidingPlayer;
+    }
+
+    @Override
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+        if (action instanceof MovePolice) {
+            policeTriggers--;
+        }
+    }
+
+    @Override
+    public boolean executionComplete(AbstractGameState state) {
+        return policeTriggers == 0;  // none remaining
+    }
+
+    @Override
+    public SellCards copy() {
+        return new SellCards(this);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof SellCards) {
             SellCards other = (SellCards) obj;
-            return other.salesType == salesType && other.decreaseTrack == decreaseTrack && Arrays.equals(other.saleValues, saleValues);
+            return other.salesType == salesType && other.decreaseTrack == decreaseTrack && other.policeTriggers == policeTriggers &&
+                    other.decidingPlayer == decidingPlayer && Arrays.equals(other.saleValues, saleValues);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(salesType.ordinal(), decreaseTrack) + 31 * Arrays.hashCode(saleValues) + 82;
+        return Objects.hash(salesType.ordinal(), decreaseTrack, decidingPlayer, policeTriggers) + 31 * Arrays.hashCode(saleValues) + 82;
     }
 
     @Override

@@ -20,7 +20,7 @@ public class SiriusParameters extends TunableParameters {
     public int pointsPerCartel = 3;
     public int cardsPerSmugglerType = 4;
     public enum SmugglerType {
-            POLICE_RAID, THUG, CARGO_RUNNER, INFORMANT, MOLE, HIRED_GUN, SAFE_HOUSE_CLERK, NEGOTIATOR;
+            POLICE_RAID, THUG, CARGO_RUNNER, INFORMANT, MOLE, HIRED_GUN, SAFE_HOUSE_CLERK, NEGOTIATOR
     }
     public int[] medalValues = new int[]{2, 2, 3, 3, 4, 4, 5, 5, 6, 6};
     public int[] ammoniaTrack = new int[] {
@@ -42,6 +42,7 @@ public class SiriusParameters extends TunableParameters {
             0, 0, 0, 0, 0,
             1
     };
+    public int startingCorruption = 14;
     public int[] corruptionTrack = new int[] {
             0,
             0, 0, 0, 1,

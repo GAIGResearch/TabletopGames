@@ -16,6 +16,9 @@ public class SiriusGameState extends AbstractGameState {
     Deck<SiriusCard> ammoniaDeck;
     Deck<SiriusCard> contrabandDeck;
     Deck<SiriusCard> smugglerDeck;
+    Deck<SiriusCard> ammoniaDiscardDeck;
+    Deck<SiriusCard> contrabandDiscardDeck;
+    Deck<SiriusCard> smugglerDiscardDeck;
     Deck<SiriusCard> favourDeck;
     List<PlayerArea> playerAreas;
     List<Moon> moons;
@@ -37,9 +40,12 @@ public class SiriusGameState extends AbstractGameState {
         List<Component> retValue = new ArrayList<>();
         retValue.add(ammoniaDeck);
         retValue.add(contrabandDeck);
+        retValue.add(smugglerDeck);
         retValue.add(favourDeck);
         retValue.addAll(moons);
-        retValue.add(smugglerDeck);
+        retValue.add(ammoniaDiscardDeck);
+        retValue.add(contrabandDiscardDeck);
+        retValue.add(smugglerDiscardDeck);
         for (PlayerArea pa : playerAreas) {
             retValue.add(pa.deck);
             retValue.add(pa.soldCards);
@@ -53,6 +59,9 @@ public class SiriusGameState extends AbstractGameState {
         retValue.ammoniaDeck = ammoniaDeck.copy();
         retValue.contrabandDeck = contrabandDeck.copy();
         retValue.smugglerDeck = smugglerDeck.copy();
+        retValue.ammoniaDiscardDeck = ammoniaDiscardDeck.copy();
+        retValue.contrabandDiscardDeck = contrabandDiscardDeck.copy();
+        retValue.smugglerDiscardDeck = smugglerDiscardDeck.copy();
         retValue.favourDeck = favourDeck.copy();
         retValue.playerAreas = playerAreas.stream().map(PlayerArea::copy).collect(toList());
         retValue.moons = new ArrayList<>();
@@ -196,6 +205,9 @@ public class SiriusGameState extends AbstractGameState {
         ammoniaDeck = new Deck<>("ammoniaDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         contrabandDeck = new Deck<>("contrabandDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         smugglerDeck = new Deck<>("smugglerDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        ammoniaDiscardDeck = new Deck<>("ammoniaDiscards", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        contrabandDiscardDeck = new Deck<>("contrabandDiscards", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        smugglerDiscardDeck = new Deck<>("smugglerDiscards", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         favourDeck = new Deck<>("favourDeck", -1, CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         moons = new ArrayList<>();
         playerAreas = new ArrayList<>();
@@ -292,7 +304,24 @@ public class SiriusGameState extends AbstractGameState {
         throw new AssertionError("Not yet implemented");
     }
 
-    public void sellCard(SiriusCard card, int amount) {
+    public Deck<SiriusCard> getDiscardDeck(SiriusConstants.SiriusCardType type) {
+        switch (type) {
+            case AMMONIA:
+                return ammoniaDiscardDeck;
+            case CONTRABAND:
+                return contrabandDiscardDeck;
+            case FAVOUR:
+                return favourDeck;
+            case SMUGGLER:
+                return smugglerDiscardDeck;
+        }
+        throw new AssertionError("Not yet implemented");
+    }
+
+
+    public boolean sellCard(SiriusCard card, int value) {
+        int amount = Math.abs(value);
+        boolean triggersPolice = false; // returned
         PlayerArea pa = playerAreas.get(getCurrentPlayer());
         pa.soldCards.add(card);
         pa.deck.remove(card);
@@ -315,23 +344,27 @@ public class SiriusGameState extends AbstractGameState {
             }
         } else if (card.cardType == SMUGGLER) {
             for (int i = 0; i < amount; i++) {
-                corruptionTrack++;
-                // TODO: Also need to cater for the ability to move the Corruption Track down (player decision as part of Betrayal)
+                if (value < 0)
+                    corruptionTrack--;
+                else
+                    corruptionTrack++;
                 if (corruptionTrack < params.corruptionTrack.length && params.corruptionTrack[corruptionTrack] == 1) {
-                    // TODO: This triggers movement of the police pawn, stealing and confiscation of cards
-                    // We can implement this by moving to a POLICE phase - we know who the current player is, and hence
-                    // who gets to make the decisions.
-                    // Once they're done we shift the phase back to Draw
+                    triggersPolice = true;
                 }
+                // And make sure we cannot move beyond the limit
+                if (corruptionTrack > params.corruptionTrack.length - 1)
+                    corruptionTrack = params.corruptionTrack.length - 1;
             }
         }
+        return triggersPolice;
     }
 
     public void setActionTaken(String ref, int player) {
-        ((SiriusTurnOrder)turnOrder).setActionTaken(ref, player);
+        ((SiriusTurnOrder) turnOrder).setActionTaken(ref, player);
     }
+
     public boolean getActionTaken(String ref, int player) {
-        return ((SiriusTurnOrder)turnOrder).getActionTaken(ref, player);
+        return ((SiriusTurnOrder) turnOrder).getActionTaken(ref, player);
     }
 
     @Override
@@ -345,6 +378,7 @@ public class SiriusGameState extends AbstractGameState {
     @Override
     public int hashCode() {
         int retValue = Objects.hash(playerAreas, turnOrder, gamePhase, moons, ammoniaDeck, gameParameters, gameStatus,
+                ammoniaDiscardDeck, contrabandDiscardDeck, smugglerDiscardDeck,
                 ammoniaTrack, contrabandTrack, medalCount, smugglerDeck, favourDeck);
         return retValue + 31 * Arrays.hashCode(playerResults)
                 - 255 * Arrays.hashCode(playerLocations)
@@ -388,7 +422,8 @@ public class SiriusGameState extends AbstractGameState {
         sb.append(result).append("|6|");
         result = Arrays.hashCode(playerLocations);
         sb.append(result).append("|6|");
-        sb.append(result);
+        result = Objects.hash(ammoniaDiscardDeck, contrabandDiscardDeck, smugglerDiscardDeck);
+        sb.append(result).append("|");
         return sb.toString();
     }
 

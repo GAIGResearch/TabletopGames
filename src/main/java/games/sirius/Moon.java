@@ -8,7 +8,6 @@ import utilities.Utils;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 import java.util.function.Predicate;
 
 
@@ -17,6 +16,7 @@ public class Moon extends Component {
     PartialObservableDeck<SiriusCard> deck;
     MoonType moonType;
     int cartelPlayer = -1;
+    boolean policePresent = false;
 
     public Moon(String name, MoonType type, int nPlayers) {
         super(Utils.ComponentType.AREA, name);
@@ -65,6 +65,15 @@ public class Moon extends Component {
         }
     }
 
+    public void setPolicePresent() {
+        policePresent = true;
+        cartelPlayer = -1;  // removes cartel
+    }
+
+    public boolean getPolicePresent() {
+        return policePresent;
+    }
+
     public PartialObservableDeck<SiriusCard> getDeck() {
         return deck;
     }
@@ -83,8 +92,18 @@ public class Moon extends Component {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Moon) {
+            Moon moon = (Moon) obj;
+            return super.equals(moon) && deck.equals(moon.deck) && moonType == moon.moonType &&
+                    cartelPlayer == moon.cartelPlayer && policePresent == moon.policePresent;
+        }
+        return false;
+    }
+
+    @Override
     public int hashCode() {
-        return Objects.hash(deck, moonType, cartelPlayer, componentID);
+        return Objects.hash(deck, moonType, cartelPlayer, componentID, policePresent);
     }
 
     @Override

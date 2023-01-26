@@ -56,6 +56,8 @@ public class SiriusForwardModel extends AbstractForwardModel {
         }
         state.smugglerDeck.shuffle(state.rnd);
 
+        state.corruptionTrack = params.startingCorruption;
+
         state.moons.add(new Moon("Sirius", TRADING, state.getNPlayers()));
         state.moons.add(new Moon("Mining Colony", MINING, state.getNPlayers()));
         state.moons.add(new Moon("Processing Station", PROCESSING, state.getNPlayers()));
@@ -105,10 +107,15 @@ public class SiriusForwardModel extends AbstractForwardModel {
         action.execute(state);
 
         SiriusTurnOrder turnOrder = (SiriusTurnOrder) state.getTurnOrder();
+
+        // before we end the turn we need to check if we have triggered a police phase
+        // or...do as an extended action sequence...?
+
         turnOrder.endPlayerTurn(state);
         // check game end
         if (state.ammoniaTrack >= params.ammoniaTrack.length - 1 ||
                 state.contrabandTrack >= params.contrabandTrack.length - 1 ||
+                state.corruptionTrack <= 0 ||
                 turnOrder.getRoundCounter() >= params.maxRounds) {
             state.setGameStatus(Utils.GameResult.GAME_END);
             for (int p = 0; p < state.getNPlayers(); p++) {
