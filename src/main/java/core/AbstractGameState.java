@@ -14,6 +14,8 @@ import games.GameType;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
@@ -392,7 +394,14 @@ public abstract class AbstractGameState {
      * @param playerId
      * @return
      */
-    public double getTiebreak(int playerId) {
+    public Double getTiebreak(int playerId) {
+        return getTiebreak(playerId, 1);
+    }
+
+    /**
+     * @param tier - if multiple tiebreaks available in the game, this parameter can be used to specify what each one does, applied in the order 1,2,3 ...
+     */
+    public Double getTiebreak(int playerId, int tier) {
         return 0.0;
     }
 
@@ -406,21 +415,39 @@ public abstract class AbstractGameState {
      * @param playerId player ID
      * @return The ordinal position of the player; 1 is 1st, 2 is 2nd and so on.
      */
-    public int getOrdinalPosition(int playerId) {
-        double playerScore = getGameScore(playerId);
+    public int getOrdinalPosition(int playerId, Function<Integer, Double> scoreFunction, BiFunction<Integer, Integer, Double> tiebreakFunction) {
         int ordinal = 1;
+        double playerScore = scoreFunction.apply(playerId);
         for (int i = 0, n = getNPlayers(); i < n; i++) {
-            double otherScore = getGameScore(i);
+            double otherScore = scoreFunction.apply(i);
             if (otherScore > playerScore)
                 ordinal++;
-            else if (otherScore == playerScore) {
-                if (getTiebreak(i) > getTiebreak(playerId))
+            else if (otherScore == playerScore && tiebreakFunction != null) {
+                if (getOrdinalPositionTiebreak(i, tiebreakFunction, 1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, 1))
                     ordinal++;
             }
         }
         return ordinal;
     }
+    public int getOrdinalPositionTiebreak(int playerId, BiFunction<Integer, Integer, Double> tiebreakFunction, int tier) {
+        int ordinal = 1;
+        Double playerScore = tiebreakFunction.apply(playerId, tier);
+        if (playerScore == null) return ordinal;
 
+        for (int i = 0, n = getNPlayers(); i < n; i++) {
+            double otherScore = tiebreakFunction.apply(i, tier);
+            if (otherScore > playerScore)
+                ordinal++;
+            else if (otherScore == playerScore) {
+                if (getOrdinalPositionTiebreak(i, tiebreakFunction, tier+1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, tier+1))
+                    ordinal++;
+            }
+        }
+        return ordinal;
+    }
+    public int getOrdinalPosition(int playerId) {
+        return getOrdinalPosition(playerId, this::getGameScore, this::getTiebreak);
+    }
 
     /**
      * Provide a list of component IDs which are hidden in partially observable copies of games.
