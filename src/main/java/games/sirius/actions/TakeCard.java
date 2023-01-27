@@ -15,10 +15,10 @@ public class TakeCard extends AbstractAction {
         SiriusGameState state = (SiriusGameState) gs;
         int player = state.getCurrentPlayer();
         Moon currentLocation = state.getMoon(state.getLocationIndex(player));
-        if (currentLocation.getDeck().getSize() == 0) {
+        SiriusCard card = currentLocation.drawCard();
+        if (card == null) {
             throw new AssertionError("No cards available at " + currentLocation);
         }
-        SiriusCard card = currentLocation.drawCard();
         state.addCardToHand(player, card);
         if (currentLocation.getMoonType() == SiriusConstants.MoonType.METROPOLIS)
             state.setActionTaken("Favour", player);

@@ -44,13 +44,10 @@ public class TestFavours {
     public void testFavourCardDrawnAtMetropolis() {
         state.setGamePhase(Draw);
         state.movePlayerTo(0, 4);
-        SiriusCard topCard = state.getMoon(4).getDeck().peek();
-        assertEquals(FAVOUR, topCard.cardType);
-        assertEquals(1, topCard.value);
         TakeCard action = new TakeCard();
         fm.next(state, action);
         assertEquals(1, state.getPlayerHand(0).getSize());
-        assertEquals(topCard, state.getPlayerHand(0).get(0));
+        assertEquals(FAVOUR, state.getPlayerHand(0).get(0).cardType);
     }
 
     @Test

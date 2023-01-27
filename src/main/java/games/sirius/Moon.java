@@ -7,9 +7,6 @@ import games.sirius.SiriusConstants.MoonType;
 import utilities.Utils;
 
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Predicate;
-
 
 public class Moon extends Component {
 
@@ -34,13 +31,10 @@ public class Moon extends Component {
     }
 
     public SiriusCard drawCard() {
+        // if police are present then the last card in the deck is locked
+        if (policePresent && deck.getSize() == 1)
+            return null;
         return deck.draw();
-    }
-
-    public Optional<SiriusCard> drawCard(Predicate<SiriusCard> predicate) {
-        Optional<SiriusCard> retValue = deck.stream().filter(predicate).findFirst();
-        retValue.ifPresent(c -> deck.remove(c));
-        return retValue;
     }
 
     public int getCartelOwner() {
@@ -56,6 +50,8 @@ public class Moon extends Component {
     }
 
     public int getDeckSize() {
+        if (policePresent)
+            return deck.getSize() -1;
         return deck.getSize();
     }
 
@@ -65,12 +61,16 @@ public class Moon extends Component {
         }
     }
 
-    public void setPolicePresent() {
+    public void setPolicePresence() {
         policePresent = true;
         cartelPlayer = -1;  // removes cartel
     }
 
-    public boolean getPolicePresent() {
+    public void removePolicePresence() {
+        policePresent = false;
+    }
+
+    public boolean getPolicePresence() {
         return policePresent;
     }
 

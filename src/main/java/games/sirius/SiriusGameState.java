@@ -290,32 +290,42 @@ public class SiriusGameState extends AbstractGameState {
         return playerAreas.get(player);
     }
 
-    public Deck<SiriusCard> getDeck(SiriusConstants.SiriusCardType type) {
+    public void addToDeck(SiriusConstants.SiriusCardType type, boolean discard, List<SiriusCard> cards) {
+        Deck<SiriusCard> deck = getDeck(type, discard);
+        deck.add(cards);
+    }
+
+    public SiriusCard drawFromDeck(SiriusConstants.SiriusCardType type, boolean discardDeck) {
+        Deck<SiriusCard> deck = getDeck(type, discardDeck);
+        SiriusCard retValue = deck.draw();
+        if (!discardDeck && deck.getSize() == 0) {
+            if (type == FAVOUR)
+                throw new AssertionError("This shouldn't happen- Favour has an unlimited supply");
+            // we shuffle the discard deck into this
+            Deck<SiriusCard> discards = getDeck(type, true);
+            deck.add(discards);
+            discards.clear();
+            deck.shuffle(rnd);
+        }
+        return retValue;
+    }
+
+    Deck<SiriusCard> getDeck(SiriusConstants.SiriusCardType type, boolean discard) {
         switch (type) {
             case AMMONIA:
-                return ammoniaDeck;
+                return discard ? ammoniaDiscardDeck : ammoniaDeck;
             case CONTRABAND:
-                return contrabandDeck;
+                return discard ? contrabandDiscardDeck : contrabandDeck;
             case FAVOUR:
                 return favourDeck;
             case SMUGGLER:
-                return smugglerDeck;
+                return discard ? smugglerDiscardDeck : smugglerDeck;
         }
         throw new AssertionError("Not yet implemented");
     }
 
-    public Deck<SiriusCard> getDiscardDeck(SiriusConstants.SiriusCardType type) {
-        switch (type) {
-            case AMMONIA:
-                return ammoniaDiscardDeck;
-            case CONTRABAND:
-                return contrabandDiscardDeck;
-            case FAVOUR:
-                return favourDeck;
-            case SMUGGLER:
-                return smugglerDiscardDeck;
-        }
-        throw new AssertionError("Not yet implemented");
+    public int getDeckSize(SiriusConstants.SiriusCardType type, boolean discard) {
+        return getDeck(type, discard).getSize();
     }
 
 

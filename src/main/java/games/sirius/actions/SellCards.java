@@ -80,7 +80,8 @@ public class SellCards extends AbstractAction implements IExtendedSequence {
             Optional<SiriusCard> cardToSell = getMatchingCard(hand, saleValue);
             if (cardToSell.isPresent()) {
                 SiriusCard card = cardToSell.get();
-                policeTriggers += state.sellCard(card, saleValue * (decreaseTrack ? -1 : 1)) ? 1 : 0;
+                if (state.sellCard(card, saleValue * (decreaseTrack ? -1 : 1)))
+                    policeTriggers = 1;  // cannot collect more than one Trigger
             } else
                 throw new AssertionError("Card not found : " + salesType + " " + saleValue);
         }
@@ -91,8 +92,8 @@ public class SellCards extends AbstractAction implements IExtendedSequence {
 
         if (policeTriggers > 0) {
             // we only branch actions from SellCards if we have to undertake a police action
-            state.setActionInProgress(this);
             decidingPlayer = state.getCurrentPlayer();  // and store this
+            state.setActionInProgress(this);
             // this will trigger the next action to pick a moon, and then a card from each player
         }
 
@@ -116,7 +117,9 @@ public class SellCards extends AbstractAction implements IExtendedSequence {
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gs) {
         SiriusGameState state = (SiriusGameState) gs;
         // we pick a moon to move to
-        return IntStream.range(0, state.getAllMoons().size()).mapToObj(MovePolice::new).collect(toList());
+        return IntStream.range(1, state.getAllMoons().size())
+                .filter(i -> !state.getMoon(i).getPolicePresence())
+                .mapToObj(MovePolice::new).collect(toList());
     }
 
     @Override

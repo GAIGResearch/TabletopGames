@@ -62,7 +62,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
         state.moons.add(new Moon("Mining Colony", MINING, state.getNPlayers()));
         state.moons.add(new Moon("Processing Station", PROCESSING, state.getNPlayers()));
         state.moons.add(new Moon("Outpost", OUTPOST, state.getNPlayers()));
-        state.moons.add(new Moon("Metropolis", METROPOLIS, state.getNPlayers()));
+        state.moons.add(new Metropolis("Metropolis", state.getNPlayers()));
         for (Moon moon : state.getAllMoons()) {
             switch (moon.moonType) {
                 case MINING:
@@ -76,12 +76,8 @@ public class SiriusForwardModel extends AbstractForwardModel {
                     }
                     break;
                 case TRADING:
-                    break; // no deck
                 case METROPOLIS:
-                    for (int i = 0; i < state.getNPlayers(); i++) {
-                        moon.addCard(new SiriusCard("Favour", FAVOUR, 1));
-                    }
-                    break;
+                    break; // no deck
                 case OUTPOST:
                     for (int i = 0; i < params.cardsPerEmptyMoon; i++) {
                         moon.addCard(state.smugglerDeck.draw());
@@ -107,11 +103,6 @@ public class SiriusForwardModel extends AbstractForwardModel {
         action.execute(state);
 
         SiriusTurnOrder turnOrder = (SiriusTurnOrder) state.getTurnOrder();
-
-        // before we end the turn we need to check if we have triggered a police phase
-        // or...do as an extended action sequence...?
-
-        turnOrder.endPlayerTurn(state);
         // check game end
         if (state.ammoniaTrack >= params.ammoniaTrack.length - 1 ||
                 state.contrabandTrack >= params.contrabandTrack.length - 1 ||
@@ -122,6 +113,15 @@ public class SiriusForwardModel extends AbstractForwardModel {
                 state.setPlayerResult(state.getOrdinalPosition(p) == 1 ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
             }
         }
+
+        if (state.isActionInProgress())
+            return;
+
+        // before we end the turn we need to check if we have triggered a police phase
+        // or...do as an extended action sequence...?
+
+        turnOrder.endPlayerTurn(state);
+
     }
 
     @Override
@@ -140,6 +140,8 @@ public class SiriusForwardModel extends AbstractForwardModel {
                 Moon currentMoon = state.getMoon(currentLocation);
                 switch (currentMoon.moonType) {
                     case METROPOLIS:
+                        retValue.add(takeCard);
+                        break;
                     case MINING:
                     case PROCESSING:
                     case OUTPOST:

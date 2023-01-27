@@ -7,7 +7,7 @@ import static games.sirius.SiriusConstants.SiriusCardType.*;
 public class SiriusConstants {
 
     public enum SiriusPhase implements IGamePhase {
-        Move, Draw, Favour, Police
+        Move, Draw, Favour
     }
 
     public enum MoonType {

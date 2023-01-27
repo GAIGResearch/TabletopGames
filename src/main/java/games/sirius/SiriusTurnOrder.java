@@ -208,7 +208,7 @@ public class SiriusTurnOrder extends TurnOrder {
         for (Moon moon : state.getAllMoons()) {
             int drawLimit = moon.getDeckSize() == 0 ? params.cardsPerEmptyMoon : params.cardsPerNonEmptyMoon;
             if (moon.getMoonType().linkedCardType != null) {
-                Deck<SiriusCard> drawDeck = state.getDeck(moon.moonType.linkedCardType);
+                Deck<SiriusCard> drawDeck = state.getDeck(moon.moonType.linkedCardType, false);
                 if (moon.moonType.linkedCardType != FAVOUR) {
                     // Except for Favour cards, which are always taken direct from the draw pile
                     for (int i = 0; i < drawLimit; i++) {

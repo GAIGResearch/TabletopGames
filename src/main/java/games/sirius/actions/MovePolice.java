@@ -4,8 +4,7 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
-import games.sirius.SiriusConstants;
-import games.sirius.SiriusGameState;
+import games.sirius.*;
 
 import java.util.*;
 
@@ -25,7 +24,9 @@ public class MovePolice extends AbstractAction implements IExtendedSequence {
     public boolean execute(AbstractGameState gs) {
         SiriusGameState state = (SiriusGameState) gs;
         decidingPlayer = gs.getCurrentPlayer();
-        state.getMoon(destinationMoon).setPolicePresent();
+        for (Moon m : state.getAllMoons())
+            m.removePolicePresence();
+        state.getMoon(destinationMoon).setPolicePresence();
         playersToStealFrom = state.getPlayersAt(destinationMoon);
         if (playersToStealFrom.length > 0)
             state.setActionInProgress(this);  // only if there is anyone to steal from

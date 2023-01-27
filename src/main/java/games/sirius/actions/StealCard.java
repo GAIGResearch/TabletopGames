@@ -36,7 +36,7 @@ public class StealCard extends AbstractAction {
         hand.removeAll(partitionedHand.get(true));
 
         // and add them to the relevant discard pile
-        state.getDiscardDeck(targetCard.cardType).add(partitionedHand.get(true));
+        state.addToDeck(targetCard.cardType, true, partitionedHand.get(true));
 
         return true;
     }
@@ -50,14 +50,15 @@ public class StealCard extends AbstractAction {
     public boolean equals(Object obj) {
         if (obj instanceof StealCard) {
             StealCard other = (StealCard) obj;
-            return other.targetCard.equals(targetCard) && other.targetPlayer == targetPlayer;
+            return other.targetCard.cardType == targetCard.cardType && other.targetCard.value == targetCard.value && other.targetPlayer == targetPlayer;
+            // deliberately exclude the full Card comparison to avoid componentID
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(targetPlayer, targetCard) + 283;
+        return Objects.hash(targetPlayer, targetCard.cardType, targetCard.value) + 283;
     }
 
     @Override
