@@ -1,17 +1,17 @@
 package games.explodingkittens;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Objects;
 
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class ExplodingKittensTurnOrder extends ReactiveTurnOrder {
     // Number of cards the player is required to draw
@@ -37,7 +37,7 @@ public class ExplodingKittensTurnOrder extends ReactiveTurnOrder {
 
         ArrayList<Integer> deadPlayers = new ArrayList<>();
         for (int i: reactivePlayers) {
-            if (gameState.getPlayerResults()[i] != Utils.GameResult.GAME_ONGOING) {
+            if (gameState.getPlayerResults()[i] != CoreConstants.GameResult.GAME_ONGOING) {
                 deadPlayers.add(i);
             }
         }
@@ -45,7 +45,7 @@ public class ExplodingKittensTurnOrder extends ReactiveTurnOrder {
         if (reactivePlayers.size() > 0) reactivePlayers.poll();
         else {
             requiredDraws -= 1;
-            if (requiredDraws == 0 || gameState.getPlayerResults()[turnOwner] != Utils.GameResult.GAME_ONGOING) {
+            if (requiredDraws == 0 || gameState.getPlayerResults()[turnOwner] != CoreConstants.GameResult.GAME_ONGOING) {
                 requiredDraws = 1;
                 endPlayerTurn(gameState);
             }

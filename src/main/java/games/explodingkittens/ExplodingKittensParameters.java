@@ -5,7 +5,6 @@ import core.Game;
 import evaluation.TunableParameters;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import games.loveletter.cards.LoveLetterCard;
 
 import java.util.Arrays;
 import java.util.HashMap;

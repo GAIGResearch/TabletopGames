@@ -1,12 +1,12 @@
 package test.players.mcts;
 
-import com.sun.xml.bind.v2.runtime.unmarshaller.XsiNilLoader;
 import core.AbstractForwardModel;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.Token;
+import games.GameType;
 import games.loveletter.*;
 import games.tictactoe.*;
 import org.junit.Before;
@@ -53,7 +53,9 @@ public class OMATests {
         players.add(new RandomPlayer(new Random(3023)));
         TicTacToeGameParameters gameParams = new TicTacToeGameParameters(3812);
         gameParams.gridSize = gridSize;
-        return new TicTacToeGame(players, gameParams);
+        Game game = GameType.TicTacToe.createGameInstance(2, gameParams);
+        game.reset(players);
+        return game;
     }
 
     public Game createLoveLetter(MCTSParams params) {
@@ -63,7 +65,9 @@ public class OMATests {
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(-36572)));
-        return new LoveLetterGame(players, new LoveLetterParameters(68274));
+        Game game = GameType.LoveLetter.createGameInstance(players.size(), new LoveLetterParameters(68274));
+        game.reset(players);
+        return game;
     }
 
 
@@ -73,7 +77,7 @@ public class OMATests {
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
+                ._getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
 
         TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
         System.out.println(stats);
@@ -96,7 +100,7 @@ public class OMATests {
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
+                ._getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
 
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> {
             OMATreeNode n = (OMATreeNode) node;
@@ -114,7 +118,7 @@ public class OMATests {
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
+                ._getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
 
 
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> {
@@ -149,7 +153,7 @@ public class OMATests {
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
+                ._getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
 
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node instanceof OMATreeNode);
         assertEquals(0, problemNodes.size());
@@ -171,7 +175,7 @@ public class OMATests {
         LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, loveLetterForwardModel.computeAvailableActions(state));
+                ._getAction(state, loveLetterForwardModel.computeAvailableActions(state));
 
         List<SingleTreeNode> problemNodes = mctsPlayer.getRoot(0).nonMatchingNodes(node -> node instanceof OMATreeNode);
         assertEquals(0, problemNodes.size());
@@ -203,7 +207,7 @@ public class OMATests {
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
+                ._getAction(state, ticTacToeForwardModel.computeAvailableActions(state));
 
 
         List<SingleTreeNode> problemNodes = checkOMAStats();
@@ -250,7 +254,7 @@ public class OMATests {
         LoveLetterGameState state = (LoveLetterGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, loveLetterForwardModel.computeAvailableActions(state));
+                ._getAction(state, loveLetterForwardModel.computeAvailableActions(state));
 
         List<SingleTreeNode> problemNodes = checkOMAStats();
         assertEquals(0, problemNodes.size());

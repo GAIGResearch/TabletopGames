@@ -1,6 +1,7 @@
 package games.catan;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IGamePhase;
 import core.turnorders.ReactiveTurnOrder;
 import core.turnorders.TurnOrder;
@@ -8,7 +9,7 @@ import core.turnorders.TurnOrder;
 import java.util.LinkedList;
 
 import static games.catan.CatanGameState.CatanGamePhase.*;
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class CatanTurnOrder extends ReactiveTurnOrder {
     protected int turnStep;
@@ -27,7 +28,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         super._reset();
         turnStep = 0;
         actionsTakenInCurrentStage = 0;
-        nextGamePhase = AbstractGameState.DefaultGamePhase.Main;
+        nextGamePhase = CoreConstants.DefaultGamePhase.Main;
         developmentCardPlayed = false;
     }
 
@@ -101,7 +102,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         if (gamePhase == Build) {
             if (actionsTakenInCurrentStage >= ((CatanParameters) gameState.getGameParameters()).max_build_actions_allowed) {
                 endPlayerTurn(gameState);
-                setGamePhase(AbstractGameState.DefaultGamePhase.Main, gameState);
+                setGamePhase(CoreConstants.DefaultGamePhase.Main, gameState);
             }
             return;
         }
@@ -120,7 +121,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
             endPlayerTurn(gameState);
             if (getRoundCounter() >= 2) {
                 // After 2 rounds of setup the main game phase starts
-                setGamePhase(AbstractGameState.DefaultGamePhase.Main, gameState);
+                setGamePhase(CoreConstants.DefaultGamePhase.Main, gameState);
             }
         }
     }
@@ -154,10 +155,7 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
      *
      * @param gameState - current game state.
      */
-    public void endRound(AbstractGameState gameState) {
-        roundCounter++;
+    public void _endRound(AbstractGameState gameState) {
         turnStep = 0;
-        turnCounter = 0;
-        moveToNextPlayer(gameState, nextPlayer(gameState));
     }
 }

@@ -44,8 +44,6 @@ public class EndCardPickPocket extends RoundEvent {
                 }
             }
         }
-
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
         return true;
     }
 

@@ -130,9 +130,9 @@ public class SingleTreeNode {
         this.opponentModels = root.opponentModels;
         this.forwardModel = root.forwardModel;
         this.rnd = root.rnd;
-        this.round = state.getTurnOrder().getRoundCounter();
-        this.turn = state.getTurnOrder().getTurnCounter();
-        this.turnOwner = state.getTurnOrder().getTurnOwner();
+        this.round = state.getRoundCounter();
+        this.turn = state.getTurnCounter();
+        this.turnOwner = state.getTurnOwner();
         this.terminalNode = !state.isNotTerminal();
 
         decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
@@ -193,6 +193,8 @@ public class SingleTreeNode {
                 if (!children.containsKey(action)) {
                     children.put(action, null); // mark a new node to be expanded
                     // This *does* rely on a good equals method being implemented for Actions
+                    if (!children.containsKey(action))
+                        throw new AssertionError("We have an action that does not obey the equals/hashcode contract" + action);
                 }
             }
         }
@@ -551,7 +553,7 @@ public class SingleTreeNode {
             List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs);
             if (availableActions.isEmpty())
                 throw new AssertionError("Should always have at least one action possible...");
-            AbstractAction action = oppModel.getAction(gs, availableActions);
+            AbstractAction action = oppModel._getAction(gs, availableActions);
             lastActor = gs.getCurrentPlayer();
             forwardModel.next(gs, action);
             root.fmCallsCount++;
@@ -813,7 +815,7 @@ public class SingleTreeNode {
     protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int decisionPlayer, int lastActor) {
         int rolloutDepth = 0; // counting from end of tree
 
-        int roundAtStartOfRollout = openLoopState.getTurnOrder().getRoundCounter();
+        int roundAtStartOfRollout = openLoopState.getRoundCounter();
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
@@ -831,8 +833,7 @@ public class SingleTreeNode {
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState);
                 if (availableActions.isEmpty())
                     break;
-                AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
-             //   lastActor = rolloutState.getCurrentPlayer();
+                AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()]._getAction(rolloutState, availableActions);
                 rolloutActions.add(new Pair<>(lastActor, next));
                 int startingFMCalls = root.fmCallsCount;
                 lastActor = advance(rolloutState, next);
@@ -877,7 +878,7 @@ public class SingleTreeNode {
                 case START_TURN:
                     return lastActor != decisionPlayer && currentActor == decisionPlayer;
                 case END_ROUND:
-                    return rollerState.getTurnOrder().getRoundCounter() != roundAtStartOfRollout;
+                    return rollerState.getRoundCounter() != roundAtStartOfRollout;
             }
         }
         return false;
@@ -981,6 +982,7 @@ public class SingleTreeNode {
                 Arrays.stream(actionVisits()).boxed().collect(toSet()).size() == 1) {
             policy = SIMPLE;
         }
+        if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
 
         if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
             // the check on unexpanded actions is to catch the rare case that we have not explored all actions at the root
@@ -989,6 +991,9 @@ public class SingleTreeNode {
             bestAction = treePolicyAction(false);
         } else {
             for (AbstractAction action : children.keySet()) {
+                if (!children.containsKey(action)) {
+                    throw new AssertionError("Hashcode / equals contract issue for " + action);
+                }
                 if (children.get(action) != null) {
                     double childValue = actionVisits(action); // if ROBUST
                     if (policy == SIMPLE)
@@ -997,7 +1002,7 @@ public class SingleTreeNode {
                     // Apply small noise to break ties randomly
                     childValue = noise(childValue, params.epsilon, rnd.nextDouble());
 
-                    // Save best value (highest visit count)
+                    // Save best value
                     if (childValue > bestValue) {
                         bestValue = childValue;
                         bestAction = action;

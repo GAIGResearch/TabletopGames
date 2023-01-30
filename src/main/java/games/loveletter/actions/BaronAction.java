@@ -1,12 +1,12 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
-import utilities.Utils;
 
 import java.util.Objects;
 
@@ -25,13 +25,13 @@ public class BaronAction extends core.actions.DrawCard implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
-        int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
+        int playerID = gs.getCurrentPlayer();
         Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
 
         // compares the value of the player's hand card with another player's hand card
         // the player with the lesser valued card will be removed from the game
-        if (llgs.isNotProtected(opponentID) && gs.getPlayerResults()[playerID] != Utils.GameResult.LOSE){
+        if (llgs.isNotProtected(opponentID) && gs.getPlayerResults()[playerID] != CoreConstants.GameResult.LOSE){
             LoveLetterCard opponentCard = opponentDeck.peek();
             LoveLetterCard playerCard = playerDeck.peek();
             if (opponentCard != null && playerCard != null) {

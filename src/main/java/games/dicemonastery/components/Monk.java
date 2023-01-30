@@ -1,8 +1,8 @@
 package games.dicemonastery.components;
 
+import core.CoreConstants;
 import core.components.Component;
 import games.dicemonastery.DiceMonasteryGameState;
-import utilities.Utils;
 
 import java.util.Objects;
 
@@ -13,13 +13,13 @@ public class Monk extends Component {
     int piety;
 
     public Monk(int value, int ownerId) {
-        super(Utils.ComponentType.TOKEN, "Monk");
+        super(CoreConstants.ComponentType.TOKEN, "Monk");
         this.ownerId = ownerId;
         piety = value;
     }
 
     private Monk(int value, int ownerId, int componentId) {
-        super(Utils.ComponentType.TOKEN, "Monk", componentId);
+        super(CoreConstants.ComponentType.TOKEN, "Monk", componentId);
         this.ownerId = ownerId;
         piety = value;
     }

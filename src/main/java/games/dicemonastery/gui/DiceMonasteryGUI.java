@@ -6,7 +6,7 @@ import core.Game;
 import games.dicemonastery.DiceMonasteryGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -37,7 +37,7 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
     MainBoard mainBoard;
 
     public DiceMonasteryGUI(GamePanel p, Game game, ActionController ac, int humanID) {
-        super(p, ac, 20);
+        super(p, game, ac, humanID);
         this.humanId = humanID;
 
         if (game != null && game.getGameState() != null) {
@@ -89,7 +89,7 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
             // Top area will show state information
             JPanel infoPanel = createGameStateInfoPanel("Dice Monastery", gameState, width, defaultInfoPanelHeight);
             // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false);
+            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
 
             // Add all views to frame
             parent.add(mainGameArea, BorderLayout.CENTER);
@@ -102,6 +102,11 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
             parent.repaint();
         }
 
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 20;
     }
 
 

@@ -27,7 +27,7 @@ public class KingAction extends core.actions.DrawCard implements IPrintable {
         super.execute(gs);
 
         LoveLetterGameState llgs = (LoveLetterGameState)gs;
-        int playerID = gs.getTurnOrder().getCurrentPlayer(gs);
+        int playerID = gs.getCurrentPlayer();
         Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
 

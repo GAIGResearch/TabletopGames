@@ -2,8 +2,9 @@ package gui;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.interfaces.IGameListener;
+import evaluation.listeners.GameListener;
 import evaluation.TunableParameters;
+import evaluation.metrics.Event;
 import games.GameType;
 import gui.models.AITableModel;
 import players.PlayerParameters;
@@ -50,7 +51,7 @@ public class Frontend extends GUI {
         gameParameterEditWindow = new JFrame[GameType.values().length];
         for (int i = 0; i < gameNames.length; i++) {
             gameNames[i] = GameType.values()[i].name();
-            AbstractParameters params = ParameterFactory.getDefaultParams(GameType.values()[i], 0);
+            AbstractParameters params = GameType.values()[i].createParameters(0);
             if (params instanceof TunableParameters) {
                 gameParameters[i] = (TunableParameters) params;
                 gameParameterEditWindow[i] = new JFrame();
@@ -486,19 +487,15 @@ public class Frontend extends GUI {
 
     private void listenForDecisions() {
         // add a listener to detect every time an action has been taken
-        gameRunning.addListener(new IGameListener() {
+        gameRunning.addListener(new GameListener() {
             @Override
-            public void onGameEvent(CoreConstants.GameEvents type, Game game) {
-                // Do nothing
-            }
-
-            @Override
-            public void onEvent(CoreConstants.GameEvents type, AbstractGameState state, AbstractAction action) {
-                if (type == CoreConstants.GameEvents.ACTION_TAKEN) {
-                    updateSampleActions(state);
-                }
+            public void onEvent(evaluation.metrics.Event event)
+            {
+                if(event.type == Event.GameEvent.ACTION_TAKEN)
+                    updateSampleActions(event.state.copy());
             }
         });
+
         // and then do this at the start of the game
         updateSampleActions(gameRunning.getGameState());
     }
@@ -507,14 +504,14 @@ public class Frontend extends GUI {
         if (showAIWindow && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
             int nextPlayerID = state.getCurrentPlayer();
             AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
-            nextPlayer.getAction(state, gameRunning.getForwardModel().computeAvailableActions(state));
+            nextPlayer._getAction(state, gameRunning.getForwardModel().computeAvailableActions(state));
 
             JFrame AI_debug = new JFrame();
             AI_debug.setTitle(String.format("Player %d, Tick %d, Round %d, Turn %d",
                     nextPlayerID,
                     gameRunning.getTick(),
-                    state.getTurnOrder().getRoundCounter(),
-                    state.getTurnOrder().getTurnCounter()));
+                    state.getRoundCounter(),
+                    state.getTurnCounter()));
             Map<AbstractAction, Map<String, Object>> decisionStats = nextPlayer.getDecisionStats();
             if (decisionStats.size() > 1) {
                 AITableModel AIDecisions = new AITableModel(nextPlayer.getDecisionStats());

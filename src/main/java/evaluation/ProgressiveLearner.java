@@ -1,13 +1,21 @@
 package evaluation;
 
-import core.*;
-import core.interfaces.*;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.interfaces.ILearner;
+import core.interfaces.IStateFeatureVector;
+import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
+import evaluation.listeners.GameListener;
+import evaluation.tournaments.RandomRRTournament;
+import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
-import org.apache.commons.io.FileUtils;
 import players.PlayerFactory;
 import players.learners.AbstractLearner;
-import utilities.*;
-
+import evaluation.loggers.FileStatsLogger;
+import evaluation.listeners.StateFeatureListener;
+import utilities.Utils;
+import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -30,7 +38,7 @@ public class ProgressiveLearner {
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
     IStateFeatureVector phi;
-    CoreConstants.GameEvents frequency;
+    Event.GameEvent frequency;
     boolean currentPlayerOnly;
     String phiClass, prefix;
     boolean useOnlyLast;
@@ -67,7 +75,7 @@ public class ProgressiveLearner {
         String gameParams = getArg(args, "gameParams", "");
         dataDir = getArg(args, "dir", "");
 
-        params = ParameterFactory.createFromFile(gameToPlay, gameParams);
+        params = AbstractParameters.createFromFile(gameToPlay, gameParams);
 
         phiClass = getArg(args, "statePhi", "");
         if (phiClass.equals(""))
@@ -77,7 +85,7 @@ public class ProgressiveLearner {
         defaultHeuristic = getArg(args, "defaultHeuristic", "players.heuristics.NullHeuristic");
         heuristic = getArg(args, "heuristic", "players.heuristics.LinearStateHeuristic");
         currentPlayerOnly = getArg(args, "stateCPO", false);
-        frequency = CoreConstants.GameEvents.valueOf(getArg(args, "stateFreq", "ACTION_TAKEN"));
+        frequency = Event.GameEvent.valueOf(getArg(args, "stateFreq", "ACTION_TAKEN"));
     }
 
     public static void main(String[] args) {
@@ -154,13 +162,13 @@ public class ProgressiveLearner {
         // Now we can run a tournament of everyone
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers, true, finalMatchups,
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
                 finalMatchups, System.currentTimeMillis(), params);
 
-        tournament.listeners = new ArrayList<>();
+        tournament.setListeners(new ArrayList<>());
         IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
-        IGameListener gameTracker = IGameListener.createListener("utilities.GameResultListener", logger);
-        tournament.listeners.add(gameTracker);
+        GameListener gameTracker = GameListener.createListener("evaluation.metrics.GameListener", logger, null);
+        tournament.getListeners().add(gameTracker);
         tournament.runTournament();
         int winnerIndex = tournament.getWinnerIndex();
         if (winnerIndex != finalAgents.size() - 1) {
@@ -194,7 +202,7 @@ public class ProgressiveLearner {
     }
 
     private String injectAgentAttributes(String raw) {
-        String fileName = learnedFilesByIteration[iter] == null ? "" : learnedFilesByIteration[iter];
+        String fileName = learnedFilesByIteration[iter] == null ? "" : learnedFilesByIteration[iter] ;
         return raw.replaceAll(Pattern.quote("*FILE*"), fileName)
                 .replaceAll(Pattern.quote("*PHI*"), phiClass)
                 .replaceAll(Pattern.quote("*HEURISTIC*"), heuristic)
@@ -203,14 +211,17 @@ public class ProgressiveLearner {
 
     private void runGamesWithAgents() {
         // Run!
-        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers, true, matchups,
+        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
                 matchups, System.currentTimeMillis(), params);
-        tournament.setExploration(maxExplore * (iterations - iter - 1) / (iterations - 1));
+        tournament.verbose = false;
+        double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
+        System.out.println("Explore = " + exploreEpsilon);
+        agents.forEach(p -> p.setExploration(exploreEpsilon));
 
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
         StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi, frequency, currentPlayerOnly);
-        tournament.listeners = Collections.singletonList(dataTracker);
+        tournament.setListeners(Collections.singletonList(dataTracker));
         tournament.runTournament();
     }
 

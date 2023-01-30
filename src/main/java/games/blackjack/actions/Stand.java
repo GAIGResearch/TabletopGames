@@ -3,6 +3,7 @@ package games.blackjack.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
+import games.blackjack.BlackjackGameState;
 
 import java.util.Objects;
 
@@ -10,7 +11,7 @@ public class Stand extends AbstractAction implements IPrintable {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        gs.getTurnOrder().endPlayerTurn(gs);
+        // Nothing to do
         return true;
     }
 
@@ -36,6 +37,6 @@ public class Stand extends AbstractAction implements IPrintable {
 
     @Override
     public String toString() {
-        return "Hit";
+        return "Stand";
     }
 }

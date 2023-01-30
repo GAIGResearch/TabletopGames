@@ -1,11 +1,12 @@
 package test.games.dominion;
 
 import core.AbstractPlayer;
+import core.Game;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import games.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
-import games.dominion.DominionGame;
 import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;
 import games.dominion.actions.*;
@@ -29,8 +30,8 @@ public class TestBaseActionCardsWithCopy {
             new TestPlayer(),
             new TestPlayer());
 
-    DominionGame game = new DominionGame(players, DominionParameters.firstGame(System.currentTimeMillis()));
-    DominionGame gameImprovements = new DominionGame(players, DominionParameters.improvements(System.currentTimeMillis()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.firstGame(System.currentTimeMillis()), players.size()));
+    Game gameImprovements = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.improvements(System.currentTimeMillis()), players.size()));
     DominionForwardModel fm = new DominionForwardModel();
 
     @Test
@@ -141,8 +142,8 @@ public class TestBaseActionCardsWithCopy {
         DominionGameState state = (DominionGameState) game.getGameState();
         int startHash = state.hashCode();
         DominionGameState copy = (DominionGameState) state.copy();
-        state.endOfTurn(0);
-        state.endOfTurn(1);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
         DominionAction militia = new Militia(2);
         state.addCard(CardType.MILITIA, 2, DeckType.HAND);
         fm.next(state, militia);
@@ -157,9 +158,9 @@ public class TestBaseActionCardsWithCopy {
     @Test
     public void militiaSkipsPlayersWithThreeOrFewerCards() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.endOfTurn(0);
-        state.endOfTurn(1);
-        state.endOfTurn(2);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
         int startHash = state.hashCode();
         DominionGameState copy = (DominionGameState) state.copy();
         DominionAction militia = new Militia(3);
@@ -212,9 +213,9 @@ public class TestBaseActionCardsWithCopy {
     @Test
     public void moatDefendsAgainstMilitia() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.endOfTurn(0);
-        state.endOfTurn(1);
-        state.endOfTurn(2);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
         state.addCard(CardType.MOAT, 0, DeckType.HAND);
         state.addCard(CardType.MILITIA, 3, DeckType.HAND);
         DominionAction militia = new Militia(3);
@@ -230,9 +231,9 @@ public class TestBaseActionCardsWithCopy {
     @Test
     public void notRevealingMoatDoesNotDefendAgainstMilitia() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.endOfTurn(0);
-        state.endOfTurn(1);
-        state.endOfTurn(2);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
         state.addCard(CardType.MOAT, 0, DeckType.HAND);
         state.addCard(CardType.MILITIA, 3, DeckType.HAND);
         DominionAction militia = new Militia(3);
@@ -249,8 +250,8 @@ public class TestBaseActionCardsWithCopy {
     @Test
     public void moatDefendsAgainstMilitiaII() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.endOfTurn(0);
-        state.endOfTurn(1);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
         DominionAction militia = new Militia(2);
         state.addCard(CardType.MILITIA, 2, DeckType.HAND);
         state.addCard(CardType.MOAT, 1, DeckType.HAND);
@@ -270,6 +271,11 @@ public class TestBaseActionCardsWithCopy {
             assertFalse(startHash == state.hashCode());
         } while (state.getCurrentPlayer() != 2);
     }
+    private void moveForwardToNextPlayer(DominionGameState state) {
+        int startingPlayer = state.getCurrentPlayer();
+        while (state.getCurrentPlayer() == startingPlayer)
+            fm.next(state, new EndPhase());
+    }
 
     @Test
     public void moatDefenceStatusEndsWithTurn() {
@@ -278,7 +284,7 @@ public class TestBaseActionCardsWithCopy {
         int startHash = state.hashCode();
         DominionGameState copy = (DominionGameState) state.copy();
         assertEquals(startHash, copy.hashCode());
-        state.endOfTurn(0);
+        moveForwardToNextPlayer(state);
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
     }

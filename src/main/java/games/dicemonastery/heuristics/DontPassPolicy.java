@@ -19,7 +19,7 @@ public class DontPassPolicy extends AbstractPlayer {
     Random rnd = new Random(System.currentTimeMillis());
 
     @Override
-    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
 
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
         int player = state.getCurrentPlayer();

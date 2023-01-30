@@ -1,8 +1,7 @@
 package core.interfaces;
 
-import utilities.TAGStatSummary;
-import utilities.SummaryLogger;
-import utilities.TAGStringStatSummary;
+import evaluation.loggers.SummaryLogger;
+import evaluation.summarisers.TAGStatSummary;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -39,8 +38,7 @@ public interface IStatisticLogger {
      * @return A summary of the data
      */
     Map<String, TAGStatSummary> summary();
-    default Map<String, TAGStringStatSummary> summaryStringData() {return null;}
-
+    IStatisticLogger emptyCopy(String id);
 
     static IStatisticLogger createLogger(String loggerClass, String logFile) {
         if (logFile.isEmpty())

@@ -1,6 +1,6 @@
 package games.pandemic.rules.rules;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.rules.Node;
 import core.rules.rulenodes.EndPlayerTurn;
 import games.pandemic.PandemicGameState;
@@ -19,7 +19,7 @@ public class NextPlayer extends EndPlayerTurn {
     }
 
     @Override
-    protected boolean run(AbstractGameState gs) {
+    protected boolean run(AbstractGameStateWithTurnOrder gs) {
         ((PandemicGameState)gs).setNCardsDrawn(0);
         return super.run(gs);
     }

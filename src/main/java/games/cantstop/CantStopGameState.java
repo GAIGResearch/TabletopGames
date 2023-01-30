@@ -5,12 +5,12 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Dice;
 import core.interfaces.IPrintable;
-import core.turnorders.StandardTurnOrder;
 import games.GameType;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class CantStopGameState extends AbstractGameState implements IPrintable {
 
@@ -18,20 +18,19 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
     // and the temporary markers if in the middle of someone's turn
 
     protected boolean[] completedColumns;
-    protected List<int[]> playerMarkerPositions;
+    protected int[][] playerMarkerPositions;
     protected Map<Integer, Integer> temporaryMarkerPositions;
     protected List<Dice> dice;
     protected Random rnd;
 
     private CantStopGameState(CantStopGameState copyFrom) {
         // used by copy method only
-        super(copyFrom.gameParameters, GameType.CantStop);
+        super(copyFrom.gameParameters, copyFrom.getNPlayers());
         // TurnOrder will be copied later
         completedColumns = copyFrom.completedColumns.clone();
-        playerMarkerPositions = new ArrayList<>();
-        for (int[] playerMarkers : copyFrom.playerMarkerPositions) {
-            playerMarkerPositions.add(playerMarkers.clone());
-        }
+        playerMarkerPositions = new int[copyFrom.getNPlayers()][];
+        for (int p = 0; p < copyFrom.getNPlayers(); p++)
+            playerMarkerPositions[p] = copyFrom.playerMarkerPositions[p].clone();
         temporaryMarkerPositions = new HashMap<>();
         temporaryMarkerPositions.putAll(copyFrom.temporaryMarkerPositions);
         dice = copyFrom.dice.stream().map(Dice::copy).collect(toList());
@@ -40,6 +39,15 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
         } else {
             rnd = new Random(rnd.nextLong());
         }
+    }
+
+    public CantStopGameState(AbstractParameters gameParameters, int nPlayers) {
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.CantStop;
     }
 
     public void rollDice() {
@@ -52,9 +60,13 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     public void moveMarker(int n) {
         if (!trackComplete(n)) {
-            int currentPosition = temporaryMarkerPositions.getOrDefault(n, playerMarkerPositions.get(getCurrentPlayer())[n]);
+            int currentPosition = temporaryMarkerPositions.getOrDefault(n, playerMarkerPositions[getCurrentPlayer()][n]);
             temporaryMarkerPositions.put(n, currentPosition + 1);
         }
+    }
+
+    public int[] getDice() {
+        return dice.stream().mapToInt(Dice::getValue).toArray();
     }
 
     public void setDice(int[] numbers) {
@@ -65,12 +77,8 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
         }
     }
 
-    public int[] getDice() {
-        return dice.stream().mapToInt(Dice::getValue).toArray();
-    }
-
     public int getMarkerPosition(int number, int player) {
-        return playerMarkerPositions.get(player)[number];
+        return playerMarkerPositions[player][number];
     }
 
     public int getTemporaryMarkerPosition(int number) {
@@ -79,10 +87,6 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     public List<Integer> getMarkersMoved() {
         return new ArrayList<>(temporaryMarkerPositions.keySet());
-    }
-
-    public CantStopGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.CantStop);
     }
 
     @Override
@@ -112,32 +116,11 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
         CantStopParameters params = (CantStopParameters) getGameParameters();
         for (int n = 2; n <= 12; n++) {
             if (completedColumns[n]) {
-                if (playerMarkerPositions.get(playerId)[n] >= params.maxValue(n))
+                if (playerMarkerPositions[playerId][n] >= params.maxValue(n))
                     score++;
             }
         }
         return score;
-    }
-
-    @Override
-    protected void _reset() {
-        CantStopParameters params = (CantStopParameters) getGameParameters();
-        completedColumns = new boolean[13];
-        playerMarkerPositions = new ArrayList<>();
-        temporaryMarkerPositions = new HashMap<>();
-        for (int p = 0; p < getNPlayers(); p++) {
-            playerMarkerPositions.add(new int[13]);
-        }
-        dice = new ArrayList<>();
-        for (int i = 0; i < params.DICE_NUMBER; i++) {
-            dice.add(new Dice(params.DICE_SIDES));
-        }
-        if (rnd == null) {
-            rnd = new Random(System.currentTimeMillis());
-        } else {
-            rnd = new Random(rnd.nextLong());
-        }
-        gamePhase = CantStopGamePhase.Decision;
     }
 
     @Override
@@ -147,7 +130,7 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
             return Arrays.equals(completedColumns, other.completedColumns) &&
                     temporaryMarkerPositions.equals(other.temporaryMarkerPositions) &&
                     dice.equals(other.dice) &&
-                    playerMarkerPositions.equals(other.playerMarkerPositions);
+                    Arrays.deepEquals(playerMarkerPositions, other.playerMarkerPositions);
         }
         // rnd is deliberately excluded
         return false;
@@ -155,12 +138,37 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        int hash = Objects.hash(gameStatus, gamePhase, turnOrder, gameParameters, playerMarkerPositions,
-                temporaryMarkerPositions, dice);
-        hash = hash * 31 + Arrays.hashCode(playerResults);
+        int hash = Objects.hash(temporaryMarkerPositions, dice);
+        hash = hash * 31 + super.hashCode();
         hash = hash * 31 + Arrays.hashCode(completedColumns);
+        hash = hash * 31 + Arrays.deepHashCode(playerMarkerPositions);
         // rnd is deliberately excluded
         return hash;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        int result = Objects.hash(gameParameters);
+        sb.append(result).append("|");
+        result = Objects.hash(getAllComponents());
+        sb.append(result).append("|");
+        result = Objects.hash(gameStatus);
+        sb.append(result).append("|");
+        result = Objects.hash(gamePhase);
+        sb.append(result).append("|");
+        result = Arrays.hashCode(playerResults);
+        sb.append(result).append("|*|");
+        result = Arrays.hashCode(completedColumns);
+        sb.append(result).append("|");
+        result = Objects.hashCode(playerMarkerPositions);
+        sb.append(result).append("|");
+        result = Objects.hashCode(temporaryMarkerPositions);
+        sb.append(result).append("|");
+        result = Objects.hashCode(dice);
+        sb.append(result).append("|");
+
+        return sb.toString();
     }
 
     @Override
@@ -187,9 +195,9 @@ public class CantStopGameState extends AbstractGameState implements IPrintable {
             else {
                 for (int p = 0; p < getNPlayers(); p++) {
                     if (p == getCurrentPlayer() && temporaryMarkerPositions.containsKey(n))
-                        sb.append(String.format("%2d/%d\t\t", playerMarkerPositions.get(p)[n], temporaryMarkerPositions.get(n)));
+                        sb.append(String.format("%2d/%d\t\t", playerMarkerPositions[p][n], temporaryMarkerPositions.get(n)));
                     else
-                        sb.append(String.format("%2d\t\t", playerMarkerPositions.get(p)[n]));
+                        sb.append(String.format("%2d\t\t", playerMarkerPositions[p][n]));
                 }
                 sb.append(params.maxValue(n));
             }

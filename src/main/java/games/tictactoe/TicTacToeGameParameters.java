@@ -2,16 +2,13 @@ package games.tictactoe;
 
 import core.AbstractParameters;
 import evaluation.TunableParameters;
+import games.GameType;
 
 import java.util.*;
 
 public class TicTacToeGameParameters extends TunableParameters {
 
     public int gridSize = 3;
-
-    public TicTacToeGameParameters() {
-        this(0);
-    }
 
     public TicTacToeGameParameters(long seed) {
         super(seed);
@@ -46,8 +43,8 @@ public class TicTacToeGameParameters extends TunableParameters {
     }
 
     @Override
-    public TicTacToeGame instantiate() {
-        return new TicTacToeGame(this);
+    public Object instantiate() {
+        return GameType.TicTacToe.createGameInstance(2, this);
     }
 
 }

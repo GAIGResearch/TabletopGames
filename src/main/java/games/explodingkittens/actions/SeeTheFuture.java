@@ -25,7 +25,7 @@ public class SeeTheFuture extends DrawCard implements IsNopeable, IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
         gs.setGamePhase(SeeTheFuture);
-        gs.getTurnOrder().setTurnOwner(playerID);
+        gs.setTurnOwner(playerID);
 
         ExplodingKittensGameState ekgs = ((ExplodingKittensGameState)gs);
         PartialObservableDeck<ExplodingKittensCard> drawPile = ekgs.getDrawPile();

@@ -1,6 +1,6 @@
 package core.rules;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.actions.AbstractAction;
 
 /**
@@ -45,7 +45,7 @@ public abstract class Node {
      * @param gs - game state to apply functionality in.
      * @return - Node, the next node to execute afterwards.
      */
-    public abstract Node execute(AbstractGameState gs);
+    public abstract Node execute(AbstractGameStateWithTurnOrder gs);
 
     /**
      * Retrieves the next node to execute after this.

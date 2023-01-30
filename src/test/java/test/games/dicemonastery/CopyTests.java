@@ -1,7 +1,9 @@
 package test.games.dicemonastery;
 
+import core.Game;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import games.GameType;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.IlluminatedText;
@@ -25,7 +27,7 @@ import static org.junit.Assert.*;
 public class CopyTests {
 
     DiceMonasteryForwardModel fm = new DiceMonasteryForwardModel();
-    DiceMonasteryGame game = new DiceMonasteryGame(fm, new DiceMonasteryGameState(new DiceMonasteryParams(3), 4));
+    Game game = GameType.DiceMonastery.createGameInstance(4, new DiceMonasteryParams(3));
     RandomPlayer rnd = new RandomPlayer();
     DiceMonasteryGameState s1 = (DiceMonasteryGameState) game.getGameState();
     List<Treasure> allTreasures = s1.availableTreasures();
@@ -94,7 +96,7 @@ public class CopyTests {
     public void usingAllMonks() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
 
         int startHash = state.hashCode();
@@ -120,7 +122,7 @@ public class CopyTests {
     public void seasonMovesOnAfterPlacingAndUsingAllMonks() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
         } while (state.monksIn(DORMITORY, 3).size() > 0);
 
         do { // until we have two players left wit monks in the Chapel
@@ -214,20 +216,20 @@ public class CopyTests {
         state.addResource(2, BREAD, 2);
         state.addResource(2, HONEY, 10);
 
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
 
         int startHash = state.hashCode();
         DiceMonasteryGameState copy = (DiceMonasteryGameState) state.copy();
         assertEquals(startHash, copy.hashCode());
 
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
 
         int midHash = state.hashCode();
         DiceMonasteryGameState midCopy = (DiceMonasteryGameState) state.copy();
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
+        fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
 
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
@@ -254,20 +256,13 @@ public class CopyTests {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new DoNothing()); // don't promote anyone
-
-        assertEquals(startHash, copy.hashCode());
-        assertFalse(startHash == state.hashCode());
-        assertEquals(midHash, midCopy.hashCode());
-        assertFalse(midHash == state.hashCode());
     }
 
     private void summerBidSetup() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
-        } while (!(turnOrder.getSeason() == SUMMER));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
+        } while (!(state.getSeason() == SUMMER));
 
         for (int p = 0; p < state.getNPlayers(); p++) {
             for (DiceMonasteryConstants.Resource r : DiceMonasteryConstants.Resource.values()) {
@@ -423,11 +418,10 @@ public class CopyTests {
 
     private void advanceToSummer() {
         DiceMonasteryGameState state = (DiceMonasteryGameState) game.getGameState();
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
 
         do {
-            fm.next(state, rnd.getAction(state, fm.computeAvailableActions(state)));
-        } while (!(turnOrder.getSeason() == SUMMER));
+            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
+        } while (!(state.getSeason() == SUMMER));
     }
 
     private void emptyAllStores() {

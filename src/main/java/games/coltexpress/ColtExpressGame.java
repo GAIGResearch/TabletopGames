@@ -1,14 +1,10 @@
 package games.coltexpress;
 
-import core.AbstractForwardModel;
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.Game;
+import core.*;
 import games.GameType;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import players.simple.RandomPlayer;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,9 +40,9 @@ public class ColtExpressGame extends Game {
             // ((IPrintable) gameState.getObservation(null)).PrintToConsole();
             //System.out.println(Arrays.toString(gameState.getPlayerResults()));
 
-            Utils.GameResult[] playerResults = gameState.getPlayerResults();
+            CoreConstants.GameResult[] playerResults = gameState.getPlayerResults();
             for (int j = 0; j < gameState.getNPlayers(); j++){
-                if (playerResults[j] == Utils.GameResult.WIN)
+                if (playerResults[j] == CoreConstants.GameResult.WIN)
                     System.out.println("Player " + j + " won");
             }
         }

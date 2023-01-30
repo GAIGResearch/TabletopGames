@@ -3,12 +3,14 @@ package games.diamant.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
+import games.diamant.DiamantGameState;
 
 // This action is used when the player is out of the Cave
 public class OutOfCave extends AbstractAction implements IPrintable {
     @Override
     public boolean execute(AbstractGameState gs) {
-        // Nothing to be executed. The actions are executed in the ForwardModel
+        DiamantGameState state = (DiamantGameState) gs;
+        state.setActionPlayed(state.getCurrentPlayer(), this);
         return true;
     }
 

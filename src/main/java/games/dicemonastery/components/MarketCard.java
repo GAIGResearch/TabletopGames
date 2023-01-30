@@ -1,15 +1,12 @@
 package games.dicemonastery.components;
 
+import core.CoreConstants;
 import core.components.Component;
 import core.properties.PropertyInt;
-import core.properties.PropertyIntArray;
 import core.properties.PropertyString;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
 import utilities.Hash;
-import utilities.Utils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class MarketCard extends Component {
@@ -43,7 +40,7 @@ public class MarketCard extends Component {
     }
 
     private MarketCard(int calf, int grain, int beer, int mead, int candle, int inkPrice, Resource inkType) {
-        super(Utils.ComponentType.CARD, "Market Card");
+        super(CoreConstants.ComponentType.CARD, "Market Card");
         this.calf_skin = calf;
         this.grain = grain;
         this.beer = beer;

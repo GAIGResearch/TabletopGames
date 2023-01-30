@@ -3,17 +3,15 @@ package players.mcts;
 import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.interfaces.IActionHeuristic;
-import core.interfaces.IGameListener;
+import evaluation.listeners.GameListener;
 import core.interfaces.IStateHeuristic;
-import games.dicemonastery.DiceMonasteryStateAttributes;
+import evaluation.metrics.Event;
 import utilities.Pair;
 import utilities.Utils;
 
 import java.util.*;
-import java.util.function.ToDoubleBiFunction;
 import java.util.stream.Collectors;
 
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
@@ -68,7 +66,7 @@ public class MCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
         if (params.opponentTreePolicy == MultiTree || params.opponentTreePolicy == MultiTreeParanoid)
             root = new MultiTreeNode(this, gameState, rnd);
@@ -118,14 +116,12 @@ public class MCTSPlayer extends AbstractPlayer {
 
     @Override
     public void finalizePlayer(AbstractGameState state) {
-        if (rolloutStrategy instanceof IGameListener)
-            ((IGameListener) rolloutStrategy).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
-        if (opponentModel instanceof IGameListener)
-            ((IGameListener) opponentModel).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
-        if (heuristic instanceof IGameListener)
-            ((IGameListener) heuristic).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
-        if (advantageFunction instanceof IGameListener)
-            ((IGameListener) advantageFunction).onEvent(CoreConstants.GameEvents.GAME_OVER, state, null);
+        rolloutStrategy.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
+        opponentModel.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
+        if (heuristic instanceof GameListener)
+            ((GameListener) heuristic).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
+        if (advantageFunction instanceof GameListener)
+            ((GameListener) advantageFunction).onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, state));
 
     }
 

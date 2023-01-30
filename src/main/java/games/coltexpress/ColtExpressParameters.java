@@ -5,7 +5,6 @@ import core.Game;
 import evaluation.TunableParameters;
 import games.GameType;
 import games.coltexpress.cards.ColtExpressCard;
-import games.loveletter.cards.LoveLetterCard;
 import utilities.Group;
 
 import java.util.*;
@@ -40,7 +39,6 @@ public class ColtExpressParameters extends TunableParameters {
         put(ColtExpressCard.CardType.MoveMarshal, 1);
         put(ColtExpressCard.CardType.Shoot, 2);
         put(ColtExpressCard.CardType.CollectMoney, 2);
-        _reset();
     }};
 
     // Character types available for this game, minimum nPlayers

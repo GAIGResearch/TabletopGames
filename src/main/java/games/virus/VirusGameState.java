@@ -5,7 +5,6 @@ import core.AbstractGameState;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
@@ -21,7 +20,12 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     Deck<VirusCard>       discardDeck;    // The deck with already played cards. It is visible for all players
 
     public VirusGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Virus);
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Virus;
     }
 
     @Override
@@ -76,14 +80,6 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected void _reset() {
-        playerBodies = new ArrayList<>();
-        playerDecks = new ArrayList<>();
-        drawDeck = null;
-        discardDeck = null;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof VirusGameState)) return false;
@@ -96,9 +92,7 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase);
-        result = 31 * result + Arrays.hashCode(playerResults);
-        return result * 31 + Objects.hash(playerBodies, playerDecks, drawDeck, discardDeck);
+        return Objects.hash(super.hashCode(), playerBodies, playerDecks, drawDeck, discardDeck);
     }
 
     public Deck<VirusCard> getDiscardDeck() {
@@ -113,22 +107,15 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
         return playerDecks;
     }
 
-    public List<VirusBody> getPlayerBodies() {
-        return playerBodies;
-    }
-
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(gameParameters.hashCode()).append("|");
-        sb.append(turnOrder.hashCode()).append("|");
-        sb.append(gameStatus.hashCode()).append("|");
-        sb.append(gamePhase.hashCode()).append("|");
-        sb.append(Arrays.hashCode(playerResults)).append("|*|");
-        sb.append(playerBodies.hashCode()).append("|");
-        sb.append(playerDecks.hashCode()).append("|");
-        sb.append(drawDeck.hashCode()).append("|");
-        sb.append(discardDeck.hashCode()).append("|");
-        return sb.toString();
+        return gameParameters.hashCode() + "|" +
+                gameStatus.hashCode() + "|" +
+                gamePhase.hashCode() + "|" +
+                Arrays.hashCode(playerResults) + "|*|" +
+                playerBodies.hashCode() + "|" +
+                playerDecks.hashCode() + "|" +
+                drawDeck.hashCode() + "|" +
+                discardDeck.hashCode() + "|";
     }
     @Override
     public void printToConsole() {

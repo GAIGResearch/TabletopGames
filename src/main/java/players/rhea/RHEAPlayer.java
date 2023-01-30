@@ -50,7 +50,7 @@ public class RHEAPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         timer.setMaxTimeMillis(params.budget);
         numIters = 0;
@@ -291,9 +291,9 @@ public class RHEAPlayer extends AbstractPlayer {
 
     protected void logStatistics(AbstractGameState state) {
         Map<String, Object> stats = new LinkedHashMap<>();
-        stats.put("round", state.getTurnOrder().getRoundCounter());
-        stats.put("turn", state.getTurnOrder().getTurnCounter());
-        stats.put("turnOwner", state.getTurnOrder().getTurnOwner());
+        stats.put("round", state.getRoundCounter());
+        stats.put("turn", state.getTurnCounter());
+        stats.put("turnOwner", state.getTurnOwner());
         stats.put("iterations", numIters);
         stats.put("fmCalls", fmCalls);
         stats.put("copyCalls", copyCalls);

@@ -11,7 +11,7 @@ public class SVMValidator {
     // and here we are given phi directly in the validation data
 
 
-    SimpleSVMLearner learner;
+    SVMLearner learner;
     String trainingData, validationData;
 
     public SVMValidator(String training, String validation) {
@@ -51,7 +51,7 @@ public class SVMValidator {
     }
 
     public Pair<Double, Double> evaluate(double C, double gamma) {
-        learner = new SimpleSVMLearner();
+        learner = new SVMLearner();
         learner.params.C = C;
         learner.params.gamma = gamma;
         learner.learnFrom(trainingData);

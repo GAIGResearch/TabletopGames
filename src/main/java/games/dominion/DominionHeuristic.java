@@ -1,6 +1,7 @@
 package games.dominion;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import games.dominion.cards.CardType;
@@ -64,11 +65,11 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         DominionGameState state = (DominionGameState) gs;
-        Utils.GameResult playerResult = state.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = state.getPlayerResults()[playerId];
 
-        if (playerResult == Utils.GameResult.LOSE)
+        if (playerResult == CoreConstants.GameResult.LOSE)
             return -1;
-        if (playerResult == Utils.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN)
             return 1;
 
         // We have several factors to consider (all maxed to 1.0)

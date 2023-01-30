@@ -7,6 +7,7 @@ import java.util.Objects;
 
 public class CoreParameters extends TunableParameters {
     public boolean verbose = false;
+    public boolean recordEventHistory = true;  // include in history text game events
     public boolean partialObservable = true;
     public boolean competitionMode = false;
     public boolean disqualifyPlayerOnIllegalActionPlayed = false;
@@ -18,6 +19,7 @@ public class CoreParameters extends TunableParameters {
     public CoreParameters() {
         super(0);
         addTunableParameter("verbose", verbose, Arrays.asList(false, true));
+        addTunableParameter("recordEventHistory", recordEventHistory, Arrays.asList(false, true));
         addTunableParameter("partial observable", partialObservable, Arrays.asList(false, true));
         addTunableParameter("competition mode", competitionMode, Arrays.asList(false, true));
         addTunableParameter("disqualify player on illegal action played", disqualifyPlayerOnIllegalActionPlayed, Arrays.asList(false, true));
@@ -38,12 +40,12 @@ public class CoreParameters extends TunableParameters {
         if (!(o instanceof CoreParameters)) return false;
         if (!super.equals(o)) return false;
         CoreParameters that = (CoreParameters) o;
-        return verbose == that.verbose && partialObservable == that.partialObservable && competitionMode == that.competitionMode && disqualifyPlayerOnIllegalActionPlayed == that.disqualifyPlayerOnIllegalActionPlayed && disqualifyPlayerOnTimeout == that.disqualifyPlayerOnTimeout && alwaysDisplayFullObservable == that.alwaysDisplayFullObservable && alwaysDisplayCurrentPlayer == that.alwaysDisplayCurrentPlayer && frameSleepMS == that.frameSleepMS;
+        return verbose == that.verbose && recordEventHistory == that.recordEventHistory && partialObservable == that.partialObservable && competitionMode == that.competitionMode && disqualifyPlayerOnIllegalActionPlayed == that.disqualifyPlayerOnIllegalActionPlayed && disqualifyPlayerOnTimeout == that.disqualifyPlayerOnTimeout && alwaysDisplayFullObservable == that.alwaysDisplayFullObservable && alwaysDisplayCurrentPlayer == that.alwaysDisplayCurrentPlayer && frameSleepMS == that.frameSleepMS;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), verbose, partialObservable, competitionMode, disqualifyPlayerOnIllegalActionPlayed, disqualifyPlayerOnTimeout, alwaysDisplayFullObservable, alwaysDisplayCurrentPlayer, frameSleepMS);
+        return Objects.hash(super.hashCode(), verbose, recordEventHistory, partialObservable, competitionMode, disqualifyPlayerOnIllegalActionPlayed, disqualifyPlayerOnTimeout, alwaysDisplayFullObservable, alwaysDisplayCurrentPlayer, frameSleepMS);
     }
 
     @Override
@@ -54,6 +56,7 @@ public class CoreParameters extends TunableParameters {
     @Override
     public void _reset() {
         verbose = (boolean) getParameterValue("verbose");
+        recordEventHistory = (boolean) getParameterValue("recordEventHistory");
         partialObservable = (boolean) getParameterValue("partial observable");
         competitionMode = (boolean) getParameterValue("competition mode");
         disqualifyPlayerOnIllegalActionPlayed = (boolean) getParameterValue("disqualify player on illegal action played");

@@ -1,19 +1,19 @@
 package games.diamant.components;
 
+import core.CoreConstants;
 import core.components.Component;
-import utilities.Utils;
 
 // Gems on the treasure test of the player
 public class DiamantTreasureChest extends Component {
     private int nGems;
 
     public DiamantTreasureChest() {
-        super(Utils.ComponentType.TOKEN);
+        super(CoreConstants.ComponentType.TOKEN);
         nGems = 0;
     }
 
     public DiamantTreasureChest(int ID) {
-        super(Utils.ComponentType.TOKEN, ID);
+        super(CoreConstants.ComponentType.TOKEN, ID);
         nGems = 0;
     }
 

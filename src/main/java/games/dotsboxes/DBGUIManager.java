@@ -1,5 +1,7 @@
 package games.dotsboxes;
 
+import core.CoreConstants;
+import core.Game;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import core.AbstractGameState;
@@ -11,7 +13,6 @@ import javax.swing.*;
 import java.awt.*;
 
 import utilities.ImageIO;
-import utilities.Utils;
 
 import java.util.List;
 
@@ -19,13 +20,18 @@ public class DBGUIManager extends AbstractGUIManager {
     DBGridBoardView view;
     int gapRight = 30;
 
-    public DBGUIManager(GamePanel parent, AbstractGameState gameState, ActionController ac) {
-        this(parent, gameState, ac, defaultDisplayWidth, defaultDisplayHeight);
+    public DBGUIManager(GamePanel parent, Game game, ActionController ac, int humanId) {
+        this(parent, game, ac, humanId, defaultDisplayWidth, defaultDisplayHeight);
     }
 
-    public DBGUIManager(GamePanel parent, AbstractGameState gameState, ActionController ac,
+    @Override
+    public int getMaxActionSpace() {
+        return 100;
+    }
+
+    public DBGUIManager(GamePanel parent, Game game, ActionController ac, int humanId,
                         int displayWidth, int displayHeight) {
-        super(parent, ac, 100);
+        super(parent, game, ac, humanId);
 
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
@@ -46,8 +52,8 @@ public class DBGUIManager extends AbstractGUIManager {
         ruleText.setPreferredSize(new Dimension((int)(2/3.*displayWidth),displayHeight));
         rules.add(ruleText);
 
-        view = new DBGridBoardView(((DBGameState)gameState));
-        JPanel infoPanel = createGameStateInfoPanel("Dots and Boxes", gameState, displayWidth, defaultInfoPanelHeight);
+        view = new DBGridBoardView(((DBGameState)game.getGameState()));
+        JPanel infoPanel = createGameStateInfoPanel("Dots and Boxes", game.getGameState(), displayWidth, defaultInfoPanelHeight);
         JLabel label = new JLabel("Human player: click on 2 adjacent dots to place your edge.");
         label.setOpaque(false);
         main.add(infoPanel, BorderLayout.NORTH);
@@ -109,7 +115,7 @@ public class DBGUIManager extends AbstractGUIManager {
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         DBEdge db = view.getHighlight();
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && db != null) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && db != null) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             boolean found = false;
             for (AbstractAction a: actions) {

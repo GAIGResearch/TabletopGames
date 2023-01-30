@@ -3,8 +3,10 @@ package games.dicemonastery.heuristics;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.DiceMonasteryStateAttributes;
+import games.dicemonastery.stats.DiceMonasteryMetrics;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -21,7 +23,8 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
 
     double[][] coefficients = new double[300][20];
     Map<Integer, Integer> hashToRowIndex = new HashMap<>();
-    List<DiceMonasteryStateAttributes> features = new ArrayList<>();
+    List<AbstractMetric> features = new ArrayList<>();
+
     String name;
 
     Set<Integer> unknownHashCodes = new HashSet<>();
@@ -44,8 +47,10 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
             String weight = reader.readLine();
             RND_WEIGHT = Double.parseDouble(weight);
             List<String> header = Arrays.asList(reader.readLine().split(","));
+
+            Collections.addAll(features, new DiceMonasteryMetrics().getAllMetrics());
             // assume the first two columns are the Hash and Intercept
-            features = header.subList(2, header.size()).stream().map(DiceMonasteryStateAttributes::valueOf).collect(toList());
+//            features = header.subList(2, header.size()).stream().map().collect(toList());
 
             //   List<List<Double>> data = new ArrayList<>();
             String nextLine = reader.readLine();
@@ -70,7 +75,7 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
 
         if (possibleActions.size() == 1)
             return possibleActions.get(0);
@@ -79,8 +84,9 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
         int player = state.getCurrentPlayer();
 
         // first we calculate each feature for the state
+
         double[] featureVal = features.stream().mapToDouble(f -> {
-            Object obj = f.get(state, player);
+            Object obj = f.run(null, Event.createEvent(Event.GameEvent.GAME_EVENT, state, player));
             if (obj instanceof Number) return ((Number) obj).doubleValue();
             if (obj instanceof Boolean) return (Boolean) obj ? 1.0 : 0.0;
             return 0.0;
@@ -114,11 +120,12 @@ public class Advantage003 extends AbstractPlayer implements ToDoubleBiFunction<A
         int player = state.getCurrentPlayer();
 
         // first we calculate each feature for the state
-        double[] featureVal = features.stream().mapToDouble(f -> {
-            Object obj = f.get(state, player);
-            if (obj instanceof Number) return ((Number) obj).doubleValue();
-            return 0.0;
-        }).toArray();
+        double[] featureVal = new double[features.size()];
+//        double[] featureVal = features.stream().mapToDouble(f -> {
+//            Object obj = f.get(null, Event.createEvent(Event.GameEvent.GAME_EVENT, state, player));
+//            if (obj instanceof Number) return ((Number) obj).doubleValue();
+//            return 0.0;
+//        }).toArray();
 
         int hash = abstractAction.hashCode();
         double actionValue = 0.0;

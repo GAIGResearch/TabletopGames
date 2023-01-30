@@ -2,6 +2,7 @@ package players.simple;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
@@ -39,7 +40,7 @@ public class OSLAPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gs, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions) {
 
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
@@ -52,7 +53,7 @@ public class OSLAPlayer extends AbstractPlayer {
 
             getForwardModel().next(gsCopy, action);
 
-            if (gsCopy.getTurnOrder() instanceof StandardTurnOrder) {
+            if (gs instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder)gsCopy).getTurnOrder() instanceof StandardTurnOrder) {
                 advanceToEndOfRoundWithRandomActions(gsCopy, playerID);
             }
 
@@ -86,7 +87,7 @@ public class OSLAPlayer extends AbstractPlayer {
         if (gsCopy.getCurrentPlayer() == startingPlayer) {
             // first get to the end of our actions
             while (gsCopy.getCurrentPlayer() == startingPlayer && gsCopy.isNotTerminal()) {
-                AbstractAction action = rnd.getAction(gsCopy, fm.computeAvailableActions(gsCopy));
+                AbstractAction action = rnd._getAction(gsCopy, fm.computeAvailableActions(gsCopy));
                 fm.next(gsCopy, action);
             }
         }
@@ -98,7 +99,7 @@ public class OSLAPlayer extends AbstractPlayer {
                     throw new AssertionError("Not expecting to return to player " + getPlayerID());
                 }
                 while (gsCopy.getCurrentPlayer() == currentPlayer && gsCopy.isNotTerminal()) {
-                    AbstractAction action = rnd.getAction(gsCopy, fm.computeAvailableActions(gsCopy));
+                    AbstractAction action = rnd._getAction(gsCopy, fm.computeAvailableActions(gsCopy));
                     fm.next(gsCopy, action);
                 }
             }

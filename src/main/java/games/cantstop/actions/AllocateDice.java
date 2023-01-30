@@ -2,7 +2,9 @@ package games.cantstop.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import games.cantstop.*;
+import games.cantstop.CantStopGamePhase;
+import games.cantstop.CantStopGameState;
+import games.cantstop.CantStopParameters;
 
 import java.util.*;
 

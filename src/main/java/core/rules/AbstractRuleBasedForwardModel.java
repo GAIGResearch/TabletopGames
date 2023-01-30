@@ -2,11 +2,12 @@ package core.rules;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.rules.nodetypes.BranchingRuleNode;
 import core.rules.nodetypes.ConditionNode;
 import core.rules.nodetypes.RuleNode;
-import utilities.Utils;
 
 import java.util.HashMap;
 
@@ -54,13 +55,16 @@ public abstract class AbstractRuleBasedForwardModel extends AbstractForwardModel
 
     /**
      * Applies the given action to the game state and executes any other game rules.
-     * @param currentState - current game state, to be modified by the action.
+     * @param state - current game state, to be modified by the action.
      * @param action - action requested to be played by a player.
      */
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.getGameStatus() != Utils.GameResult.GAME_ONGOING) return;
-        
+    protected void _next(AbstractGameState state, AbstractAction action) {
+        if (state.getGameStatus() != CoreConstants.GameResult.GAME_ONGOING) return;
+        if (!(state instanceof AbstractGameStateWithTurnOrder))
+            throw new AssertionError("Rules Based Forward Model is only usable with AbstractGameStateWithTurnOrder");
+
+        AbstractGameStateWithTurnOrder currentState = (AbstractGameStateWithTurnOrder) state;
         if (nextRule == null) {
             nextRule = lastRule.getNext();  // Go back to parent, skip it and go to next rule
             if (nextRule == null) nextRule = root;

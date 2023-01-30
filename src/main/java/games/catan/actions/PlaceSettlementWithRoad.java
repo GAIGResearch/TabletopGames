@@ -39,7 +39,7 @@ public class PlaceSettlementWithRoad extends AbstractAction {
 
         if (buildSettlement.execute(gs) && buildRoad.execute(gs)){
             // players get the resources in the second round after the settlements they placed
-            if (gs.getTurnOrder().getRoundCounter() == 1){
+            if (gs.getRoundCounter() == 1){
                 CatanGameState cgs = ((CatanGameState)gs);
                 CatanTile[][] board = cgs.getBoard();
                 // in the second round players get the resources from the the tiles around the settlement

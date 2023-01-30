@@ -1,19 +1,19 @@
 package games.diamant.components;
 
+import core.CoreConstants;
 import core.components.Component;
-import utilities.Utils;
 
 // Gems on the hand of the player
 public class DiamantHand extends Component {
     private int nGems;
 
     public DiamantHand() {
-        super(Utils.ComponentType.TOKEN);
+        super(CoreConstants.ComponentType.TOKEN);
         nGems = 0;
     }
 
     public DiamantHand(int ID) {
-        super(Utils.ComponentType.TOKEN, ID);
+        super(CoreConstants.ComponentType.TOKEN, ID);
         nGems = 0;
     }
 

@@ -1,14 +1,14 @@
 package games.dicemonastery.heuristics;
 
 import core.AbstractGameState;
-import games.dicemonastery.DiceMonasteryTurnOrder;
+import games.dicemonastery.DiceMonasteryGameState;
 
 import java.util.function.Function;
 
 public class YearSeasonBucket implements Function<AbstractGameState, String> {
     @Override
     public String apply(AbstractGameState gameState) {
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) gameState.getTurnOrder();
-        return String.format("%s-%d", turnOrder.getSeason(), turnOrder.getYear());
+        DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
+        return String.format("%s-%d", state.getSeason(), state.getYear());
     }
 }
