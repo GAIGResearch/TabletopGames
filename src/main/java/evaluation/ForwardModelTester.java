@@ -78,7 +78,7 @@ public class ForwardModelTester {
                 actionHistory.add(action);
                 decision++;
                 if (verbose)
-                    System.out.printf("Decision %d made by player %d in Round %d (%s)%n", decision, player, game.getGameState().getTurnOrder().getRoundCounter(), action);
+                    System.out.printf("Decision %d made by player %d in Round %d (%s)%n", decision, player, game.getGameState().getRoundCounter(), action);
 
             } while (allFine && game.getGameState().isNotTerminal());
         }

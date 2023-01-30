@@ -132,7 +132,7 @@ public class SingleTreeNode {
         this.rnd = root.rnd;
         this.round = state.getRoundCounter();
         this.turn = state.getTurnCounter();
-        this.turnOwner = state.getTurnOwner();
+        this.turnOwner = state.getCurrentPlayer();
         this.terminalNode = !state.isNotTerminal();
 
         decisionPlayer = terminalStateInSelfOnlyTree(state) ? parent.decisionPlayer : state.getCurrentPlayer();
@@ -522,7 +522,7 @@ public class SingleTreeNode {
      * <p>
      * In some case Action is mutable, and will change state when advance() is called - so this method always copies
      * first for safety
-     *Returns the last actor
+     * Returns the last actor
      *
      * @param gs  - current game state
      * @param act - action to apply
@@ -869,12 +869,8 @@ public class SingleTreeNode {
                 case DEFAULT:
                     return true;
                 case END_TURN:
-                    if (params.opponentTreePolicy == SelfOnly) {
-                        // We check this here, as the advance() method always takes us to the turn of the decisionPlayer
-                        int nextActor = rollerState.getTurnOrder().nextPlayer(rollerState);
-                        return nextActor != decisionPlayer;
-                    }
-                    return lastActor == decisionPlayer && currentActor != decisionPlayer ;
+                    // TODO: Need to make this work for Self_Only as well. In this case advance() always takes us to decisionPlayer
+                    return lastActor == decisionPlayer && currentActor != decisionPlayer;
                 case START_TURN:
                     return lastActor != decisionPlayer && currentActor == decisionPlayer;
                 case END_ROUND:
@@ -984,28 +980,29 @@ public class SingleTreeNode {
         }
         if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
 
-        if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
-            // the check on unexpanded actions is to catch the rare case that we have not explored all actions at the root
-            // this can then lead to problems as treePolicyAction assumes it is only called on a completely expanded node
-            // (and this is good, as it throws an error as a bug-check if this is not true).
-            bestAction = treePolicyAction(false);
-        } else {
-            for (AbstractAction action : children.keySet()) {
-                if (!children.containsKey(action)) {
-                    throw new AssertionError("Hashcode / equals contract issue for " + action);
-                }
-                if (children.get(action) != null) {
-                    double childValue = actionVisits(action); // if ROBUST
-                    if (policy == SIMPLE)
-                        childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.epsilon);
+            if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
+                // the check on unexpanded actions is to catch the rare case that we have not explored all actions at the root
+                // this can then lead to problems as treePolicyAction assumes it is only called on a completely expanded node
+                // (and this is good, as it throws an error as a bug-check if this is not true).
+                bestAction = treePolicyAction(false);
+            } else {
+                for (AbstractAction action : children.keySet()) {
+                    if (!children.containsKey(action)) {
+                        throw new AssertionError("Hashcode / equals contract issue for " + action);
+                    }
+                    if (children.get(action) != null) {
+                        double childValue = actionVisits(action); // if ROBUST
+                        if (policy == SIMPLE)
+                            childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.epsilon);
 
-                    // Apply small noise to break ties randomly
-                    childValue = noise(childValue, params.epsilon, rnd.nextDouble());
+                        // Apply small noise to break ties randomly
+                        childValue = noise(childValue, params.epsilon, rnd.nextDouble());
 
-                    // Save best value
-                    if (childValue > bestValue) {
-                        bestValue = childValue;
-                        bestAction = action;
+                        // Save best value
+                        if (childValue > bestValue) {
+                            bestValue = childValue;
+                            bestAction = action;
+                        }
                     }
                 }
             }

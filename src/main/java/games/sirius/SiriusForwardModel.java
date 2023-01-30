@@ -1,24 +1,23 @@
 package games.sirius;
 
-import core.AbstractForwardModel;
-import core.AbstractGameState;
+import core.*;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Deck;
 import games.sirius.SiriusConstants.SiriusPhase;
 import games.sirius.SiriusParameters.SmugglerType;
 import games.sirius.actions.*;
-import utilities.Utils;
+import utilities.Pair;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
 import static games.sirius.SiriusConstants.MoonType.*;
 import static games.sirius.SiriusConstants.SiriusCardType.*;
-import static games.sirius.SiriusConstants.SiriusPhase.Move;
+import static games.sirius.SiriusConstants.SiriusPhase.*;
 import static java.util.stream.Collectors.*;
 
-public class SiriusForwardModel extends AbstractForwardModel {
+public class SiriusForwardModel extends StandardForwardModel {
 
     public static TakeCard takeCard = new TakeCard();
 
@@ -26,6 +25,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
     protected void _setup(AbstractGameState firstState) {
         SiriusGameState state = (SiriusGameState) firstState;
         SiriusParameters params = (SiriusParameters) state.getGameParameters();
+        state._reset();
         for (int i = 0; i < params.favour; i++) {
             state.favourDeck.add(new SiriusCard("Favour", FAVOUR, 1));
         }
@@ -97,38 +97,144 @@ public class SiriusForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        SiriusGameState state = (SiriusGameState) currentState;
+    public void _afterAction(AbstractGameState gs, AbstractAction action) {
+        SiriusGameState state = (SiriusGameState) gs;
+        SiriusPhase phase = (SiriusPhase) state.getGamePhase();
         SiriusParameters params = (SiriusParameters) state.getGameParameters();
-        action.execute(state);
 
-        SiriusTurnOrder turnOrder = (SiriusTurnOrder) state.getTurnOrder();
         // check game end
         if (state.ammoniaTrack >= params.ammoniaTrack.length - 1 ||
                 state.contrabandTrack >= params.contrabandTrack.length - 1 ||
                 state.corruptionTrack <= 0 ||
-                turnOrder.getRoundCounter() >= params.maxRounds) {
-            state.setGameStatus(Utils.GameResult.GAME_END);
-            for (int p = 0; p < state.getNPlayers(); p++) {
-                state.setPlayerResult(state.getOrdinalPosition(p) == 1 ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
-            }
+                state.getRoundCounter() >= params.maxRounds) {
+            endGame(state);
         }
 
         if (state.isActionInProgress())
             return;
 
-        // before we end the turn we need to check if we have triggered a police phase
-        // or...do as an extended action sequence...?
+        Pair<Integer, SiriusPhase> nextPlayerAndPhase = nextPlayerAndPhase(state); // record this before we change the phase
+        SiriusPhase nextPhase = nextPlayerAndPhase.b;
+        int nextPlayer = nextPlayerAndPhase.a;
 
-        turnOrder.endPlayerTurn(state);
+        endPlayerTurn(state);
 
+        if (nextPlayerAndPhase.b != phase) {
+            // we end the phase here
+            state.initialiseActions();
+            switch (phase) {
+                case Move:
+                    if (nextPhase != Draw) {
+                        throw new AssertionError("Impossible Phase to follow Move : " + nextPhase);
+                    }
+                    state.applyChosenMoves();
+                    state.setGamePhase(SiriusPhase.Draw);
+                    break;
+                case Draw:
+                    if (nextPhase != Move && nextPhase != Favour) {
+                        throw new AssertionError("Impossible Phase to follow Draw : " + nextPhase);
+                    }
+                    // move first rank player to last, and shuffle the others
+                    state.setRank(state.playerByRank[1], state.getNPlayers());
+                    state.updatePlayerOrder();
+                    state.setGamePhase(nextPhase);
+                    if (nextPhase == Move) { // this could happen if no-one has a Favour card
+                        endRound(state);
+                        _endRound(state);
+                        Arrays.fill(state.moveSelected, -1);
+                    }
+                    break;
+                case Favour:
+                    if (nextPhase != Move) {
+                        throw new AssertionError("Impossible Phase to follow Favour : " + nextPhase);
+                    }
+                    state.updatePlayerOrder(); // after Favour cards played
+                    endRound(state);
+                    _endRound(state);
+                    Arrays.fill(state.moveSelected, -1);
+                    state.setGamePhase(Move);
+            }
+        }
+
+        state.setTurnOwner(nextPlayer);
     }
+
+
+    public void _endRound(AbstractGameState gs) {
+        SiriusGameState state = (SiriusGameState) gs;
+        SiriusParameters params = (SiriusParameters) state.getGameParameters();
+
+        // add cards - for all Moons with a linked Card Type
+        for (Moon moon : state.getAllMoons()) {
+            int drawLimit = moon.getDeckSize() == 0 ? params.cardsPerEmptyMoon : params.cardsPerNonEmptyMoon;
+            if (moon.getMoonType().linkedCardType != null) {
+                Deck<SiriusCard> drawDeck = state.getDeck(moon.moonType.linkedCardType, false);
+                if (moon.moonType.linkedCardType != FAVOUR) {
+                    // Except for Favour cards, which are always taken direct from the draw pile
+                    for (int i = 0; i < drawLimit; i++) {
+                        if (drawDeck.getSize() > 0)
+                            moon.addCard(drawDeck.draw());
+                    }
+                }
+                if (moon.getCartelOwner() > -1 && drawDeck.getSize() > 0)
+                    state.addCardToHand(moon.getCartelOwner(), drawDeck.draw());
+            }
+        }
+    }
+
+
+    public Pair<Integer, SiriusPhase> nextPlayerAndPhase(SiriusGameState state) {
+        SiriusPhase phase = (SiriusPhase) state.getGamePhase();
+        switch (phase) {
+            case Move:
+                // In this case move selection is simultaneous
+                // so the next player is the first one who has not selected a move (and is not us)
+                for (int i = 0; i < state.moveSelected.length; i++)
+                    if (i != state.getCurrentPlayer() && state.moveSelected[i] == -1) return new Pair<>(i, Move);
+                // else we change phase, and the next player is the firstPlayer (who will always have an action available)
+                return new Pair<>(state.getPlayerAtRank(1), Draw);
+            case Draw:
+                // The next player is whoever has a card to draw (or has not drawn one yet)
+                int nextPlayerInPhase = state.getFirstMatchingPlayerFrom(state.nextPlayer[state.getCurrentPlayer()], i -> {
+                    Moon moon = state.getMoon(state.getLocationIndex(i));
+                    switch (moon.moonType) {
+                        case TRADING:
+                            boolean canSell = !state.actionsTakenByPlayers.get("Sold").get(i) && state.getPlayerHand(i).stream().anyMatch(c -> c.cardType == AMMONIA || c.cardType == CONTRABAND);
+                            boolean canBetray = !state.actionsTakenByPlayers.get("Betrayed").get(i) && state.getPlayerHand(i).stream().anyMatch(c -> c.cardType == SMUGGLER);
+                            return canSell || canBetray;
+                        case METROPOLIS:
+                            // need to have not yet acted - in these locations we just get one action
+                            return !state.actionsTakenByPlayers.get("Favour").get(i);
+                        default:
+                            // needs to have cards available to take
+                            return moon.getDeck().getSize() > 0;
+                    }
+                });
+                // if -1, then we shift phase so the next player will be the first one with a Favour card
+                // but this takes place after roiling the rank, so that the current second player will go first
+                // this may be nobody...in which case we go back to Move
+                if (nextPlayerInPhase > -1)
+                    return new Pair<>(nextPlayerInPhase, Draw);
+                nextPlayerInPhase = state.getFirstMatchingPlayerFrom(state.getPlayerAtRank(2), i -> state.getPlayerHand(i).stream().anyMatch(c -> c.cardType == FAVOUR));
+                if (nextPlayerInPhase > -1)
+                    return new Pair<>(nextPlayerInPhase, Favour);
+                return new Pair<>(0, Move);
+            case Favour:
+                // if there is no next player (i.e. -1), then the next is 0 for Move
+                nextPlayerInPhase = state.getFirstMatchingPlayerFrom(state.nextPlayer[state.getCurrentPlayer()], i -> !state.actionsTakenByPlayers.get("Favour").get(i) && state.getPlayerHand(i).stream().anyMatch(c -> c.cardType == FAVOUR));
+                if (nextPlayerInPhase > -1)
+                    return new Pair<>(nextPlayerInPhase, Favour);
+                return new Pair<>(0, Move);
+            default:
+                throw new AssertionError("Unknown Phase " + phase);
+        }
+    }
+
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         SiriusGameState state = (SiriusGameState) gameState;
         SiriusPhase phase = (SiriusPhase) state.getGamePhase();
-        SiriusTurnOrder sto = (SiriusTurnOrder) state.getTurnOrder();
         List<AbstractAction> retValue = new ArrayList<>();
         int player = state.getCurrentPlayer();
         int currentLocation = state.getLocationIndex(player);
@@ -164,7 +270,7 @@ public class SiriusForwardModel extends AbstractForwardModel {
                 retValue.add(new PassOnFavour());
                 if (state.getPlayerHand(player).stream().anyMatch(c -> c.cardType == FAVOUR)) {
                     retValue.addAll(IntStream.rangeClosed(1, state.getNPlayers())
-                            .filter(r -> r != sto.getRank(player))
+                            .filter(r -> r != state.getRank(player))
                             .mapToObj(FavourForRank::new).collect(toList()));
                     List<Moon> moons = state.getAllMoons();
                     retValue.addAll(IntStream.range(0, moons.size())
@@ -215,15 +321,9 @@ public class SiriusForwardModel extends AbstractForwardModel {
         }
         if (type == SMUGGLER) {
             // in this case we can Sell in two ways - to move the Corruption Track up or down
-            // TODO: possibly move this to an ExtendedActionSequence
             List<SellCards> decreaseTrackOptions = retValue.stream().map(SellCards::reverseDirection).collect(toList());
             retValue.addAll(decreaseTrackOptions);
         }
         return retValue;
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return this; // immutable
     }
 }

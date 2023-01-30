@@ -1,58 +1,58 @@
 package games.sirius;
 
-import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IGameAttribute;
-import games.sirius.actions.*;
+import evaluation.listeners.GameListener;
+import evaluation.metrics.*;
+import games.sirius.actions.FavourForCartel;
+import games.sirius.actions.SellCards;
 
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
+import java.util.Collections;
+import java.util.Set;
 
-public class SiriusActionAttributes implements Supplier<IGameAttribute> {
+public class SiriusActionAttributes implements IMetricsCollection {
 
-    int count = -1;
+    public static class Location extends AbstractMetric {
 
-    @Override
-    public IGameAttribute get() {
-        if (count == SAA.values().length - 1)
-            return null;
-        count++;
-        return SAA.values()[count];
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+        @Override
+        public Object run(GameListener listener, Event e) {
+            SiriusGameState s = (SiriusGameState) e.state;
+            return s.getMoon(s.getLocationIndex(s.getCurrentPlayer())).getComponentName();
+        }
     }
 
-    public enum SAA implements IGameAttribute {
+    public static class Thing extends AbstractMetric {
 
-        GAME_ID((s, a) -> s.getGameID()),
-        ROUND((s, a) -> s.getTurnOrder().getRoundCounter()),
-        TURN((s, a) -> s.getTurnOrder().getTurnCounter()),
-        PHASE((s, a) -> s.getGamePhase()),
-        PLAYER((s, a) -> s.getCurrentPlayer()),
-        ACTION_TYPE((s, a) -> a == null ? "NONE" : a.getClass().getSimpleName()),
-        ACTION_DESCRIPTION((s, a) -> a == null ? "NONE" : a.getString(s)),
-        LOCATION((s, a) -> s.getMoon(s.getLocationIndex(s.getCurrentPlayer())).getComponentName()),
-        THING((s, a) -> {
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+        @Override
+        public Object run(GameListener listener, Event e) {
+            SiriusGameState s = (SiriusGameState) e.state;
+            AbstractAction a = e.action;
             if (a == null) return "";
             if (a instanceof SellCards) return ((SellCards) a).salesType;
             if (a instanceof FavourForCartel) return s.getMoon(((FavourForCartel) a).cartelLocation).getComponentName();
             return "";
-        }),
-        VALUE((s, a) -> {
-            if (a == null) return 0;
-            if (a instanceof SellCards) return ((SellCards) a).getTotalValue();
-            if (a instanceof FavourForCartel) return ((FavourForCartel) a).cartelLocation;
-            if (a instanceof FavourForRank) return ((FavourForRank) a).newRank;
-            return 0;
-        });
-
-        private final BiFunction<SiriusGameState, AbstractAction, Object> lambda;
-
-        SAA(BiFunction<SiriusGameState, AbstractAction, Object> lambda) {
-            this.lambda = lambda;
-        }
-
-        @Override
-        public Object get(AbstractGameState state, AbstractAction action) {
-            return lambda.apply((SiriusGameState) state, action);
         }
     }
+
+    public static class Value extends AbstractMetric {
+
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+        @Override
+        public Object run(GameListener listener, Event e) {
+            SiriusGameState s = (SiriusGameState) e.state;
+            AbstractAction a = e.action;
+            if (a == null) return "";
+            if (a instanceof SellCards) return ((SellCards) a).salesType;
+            if (a instanceof FavourForCartel) return s.getMoon(((FavourForCartel) a).cartelLocation).getComponentName();
+            return "";
+        }
+    }
+
 }

@@ -1,8 +1,8 @@
 package games.sirius;
 
-import core.components.*;
+import core.components.Component;
 
-import static utilities.Utils.ComponentType.TOKEN;
+import static core.CoreConstants.ComponentType.TOKEN;
 
 public class Medal extends Component {
 

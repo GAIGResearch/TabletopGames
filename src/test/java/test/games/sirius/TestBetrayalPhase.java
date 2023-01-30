@@ -1,7 +1,6 @@
 package test.games.sirius;
 
-import core.AbstractPlayer;
-import core.Game;
+import core.*;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.GameType;
@@ -10,7 +9,6 @@ import games.sirius.actions.*;
 import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -26,7 +24,6 @@ public class TestBetrayalPhase {
     Game game;
     SiriusGameState state;
     SiriusForwardModel fm = new SiriusForwardModel();
-    SiriusTurnOrder sto;
     SiriusParameters params;
     List<AbstractPlayer> players = new ArrayList<>();
 
@@ -39,7 +36,6 @@ public class TestBetrayalPhase {
         game.reset(players);
         state = (SiriusGameState) game.getGameState();
         params = (SiriusParameters) state.getGameParameters();
-        sto = (SiriusTurnOrder) state.getTurnOrder();
     }
 
     @Test
@@ -186,7 +182,7 @@ public class TestBetrayalPhase {
         fm.next(state, endGameAction);
         assertEquals(0, state.getTrackPosition(SMUGGLER));
         assertFalse(state.isNotTerminal());
-        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[0]);
+        assertEquals(CoreConstants.GameResult.WIN, state.getPlayerResults()[0]);
     }
 
     @Test

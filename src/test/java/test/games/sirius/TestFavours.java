@@ -24,7 +24,6 @@ public class TestFavours {
     Game game;
     SiriusGameState state;
     SiriusForwardModel fm = new SiriusForwardModel();
-    SiriusTurnOrder sto;
     SiriusParameters params;
     List<AbstractPlayer> players = new ArrayList<>();
 
@@ -37,7 +36,6 @@ public class TestFavours {
         game.reset(players);
         state = (SiriusGameState) game.getGameState();
         params = (SiriusParameters) state.getGameParameters();
-        sto = (SiriusTurnOrder) state.getTurnOrder();
     }
 
     @Test
@@ -112,26 +110,26 @@ public class TestFavours {
         state.addCardToHand(0, new SiriusCard("Favour", FAVOUR, 1));
         moveToPhase(Favour);
         // we have now shifted rank
-        assertEquals(1, sto.getRank(1));
-        assertEquals(2, sto.getRank(2));
-        assertEquals(3, sto.getRank(0));
+        assertEquals(1, state.getRank(1));
+        assertEquals(2, state.getRank(2));
+        assertEquals(3, state.getRank(0));
         assertEquals(2, state.getCurrentPlayer());
         FavourForRank action = new FavourForRank(1);
         assertEquals(2, state.getCurrentPlayer());
         assertEquals(1, state.getPlayerHand(2).getSize());
-        assertEquals(0, sto.nextPlayerAndPhase(state).a.intValue());
+        assertEquals(0, fm.nextPlayerAndPhase(state).a.intValue());
         fm.next(state, action);
         assertEquals(0, state.getPlayerHand(2).getSize());
-        assertEquals(2, sto.getRank(1));
-        assertEquals(1, sto.getRank(2));
-        assertEquals(3, sto.getRank(0));
+        assertEquals(2, state.getRank(1));
+        assertEquals(1, state.getRank(2));
+        assertEquals(3, state.getRank(0));
         assertEquals(0, state.getCurrentPlayer());
 
         action = new FavourForRank(2);
         fm.next(state, action);
-        assertEquals(3, sto.getRank(1));
-        assertEquals(1, sto.getRank(2));
-        assertEquals(2, sto.getRank(0));
+        assertEquals(3, state.getRank(1));
+        assertEquals(1, state.getRank(2));
+        assertEquals(2, state.getRank(0));
         assertEquals(0, state.getCurrentPlayer());
     }
 
@@ -150,16 +148,16 @@ public class TestFavours {
         assertFalse(state.getActionTaken("Favour", 2));
         fm.next(state, action);
         assertTrue(state.getActionTaken("Favour", 2));
-        assertEquals(1, sto.getRank(1));
-        assertEquals(3, sto.getRank(2));
-        assertEquals(2, sto.getRank(0));
+        assertEquals(1, state.getRank(1));
+        assertEquals(3, state.getRank(2));
+        assertEquals(2, state.getRank(0));
         assertEquals(0, state.getCurrentPlayer());
         fm.next(state, new PassOnFavour());
         assertEquals(0, state.getCurrentPlayer());
         assertEquals(Move, state.getGamePhase());
-        assertEquals(1, sto.getRank(1));
-        assertEquals(3, sto.getRank(2));
-        assertEquals(2, sto.getRank(0));
+        assertEquals(1, state.getRank(1));
+        assertEquals(3, state.getRank(2));
+        assertEquals(2, state.getRank(0));
     }
 
     @Test
@@ -180,7 +178,8 @@ public class TestFavours {
         state.getMoon(2).setCartelOwner(1);
         state.getMoon(3).setCartelOwner(2);
         state.getMoon(4).setCartelOwner(0);
-        state.getTurnOrder().endRound(state);
+        fm.endRound(state);
+        fm._endRound(state);
         assertEquals(2, state.getPlayerHand(0).getSize());
         assertEquals(1, state.getPlayerHand(1).getSize());
         assertEquals(1, state.getPlayerHand(2).getSize());

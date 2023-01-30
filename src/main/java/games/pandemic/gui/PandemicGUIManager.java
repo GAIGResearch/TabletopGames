@@ -278,7 +278,6 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
 
         gameInfo.add(gameStatus);
         gameInfo.add(gamePhase);
-        gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
         gameInfo.add(gameTurnStep);

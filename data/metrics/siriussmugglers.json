@@ -1,0 +1,19 @@
+{
+  "class": "evaluation.listeners.GameListener",
+  "args": [
+    {
+      "class" : "evaluation.loggers.FileStatsLogger"
+    },
+    [
+      {"class": "evaluation.metrics.MiscGameMetrics$ActionSample" },
+      {"class": "evaluation.metrics.GameMetrics$PlayerType" },
+      {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
+      {"class": "evaluation.metrics.MiscGameMetrics$ActionSample" },
+      {"class": "evaluation.metrics.GameMetrics$ActionSpace" },
+      {"class": "evaluation.metrics.GameMetrics$ActionTypes" },
+      {"class": "games.sirius.SiriusActionAttributes$Location" },
+      {"class": "games.sirius.SiriusActionAttributes$Thing" },
+      {"class": "games.sirius.SiriusActionAttributes$Value" }
+    ]
+  ]
+}

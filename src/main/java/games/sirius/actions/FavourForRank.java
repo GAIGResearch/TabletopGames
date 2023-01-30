@@ -18,9 +18,8 @@ public class FavourForRank extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         SiriusGameState state = (SiriusGameState) gs;
-        SiriusTurnOrder sto = (SiriusTurnOrder) state.getTurnOrder();
         int player = state.getCurrentPlayer();
-        sto.setRank(player, newRank);
+        state.setRank(player, newRank);
         Deck<SiriusCard> hand = state.getPlayerHand(player);
         for (int i = 0; i < hand.getSize(); i++) {
             if (hand.get(i).cardType == FAVOUR) {

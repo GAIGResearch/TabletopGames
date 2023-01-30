@@ -47,8 +47,6 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
     @Override
     public int getTurnCounter() {return turnOrder.getTurnCounter();}
     @Override
-    public int getTurnOwner() {return turnOrder.getTurnOwner();}
-    @Override
     public int getFirstPlayer() {return turnOrder.getFirstPlayer();}
     @Override
     public int getNPlayers() {return turnOrder.nPlayers();}

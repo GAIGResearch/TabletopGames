@@ -1,17 +1,12 @@
 package games.coltexpress;
 
-import core.AbstractGameState;
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
-import core.components.Component;
-import core.components.Deck;
-import core.components.PartialObservableDeck;
+import core.components.*;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import core.turnorders.TurnOrder;
 import games.GameType;
-import games.catan.CatanParameters;
-import games.catan.CatanTurnOrder;
 import games.coltexpress.ColtExpressTypes.CharacterType;
 import games.coltexpress.actions.roundcardevents.RoundEvent;
 import games.coltexpress.cards.ColtExpressCard;
@@ -238,7 +233,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     }
 
     @Override
-    public Double getTiebreak(int playerId) {
+    public double getTiebreak(int playerId) {
         // we use the number of bullet cards
         // in the players own deck and hands
         // fewer is better - so we return a negative number

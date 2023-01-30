@@ -1,7 +1,6 @@
 package test.games.sirius;
 
-import core.AbstractPlayer;
-import core.Game;
+import core.*;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.PartialObservableDeck;
@@ -11,7 +10,6 @@ import games.sirius.actions.*;
 import org.junit.Before;
 import org.junit.Test;
 import players.simple.RandomPlayer;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -213,7 +211,7 @@ public class TestMoves {
             assertFalse(deck.getVisibilityForPlayer(i, 1));
             assertFalse(deck.getVisibilityForPlayer(i, 2));
         }
-        state.getTurnOrder().endPlayerTurn(state);
+        fm.endPlayerTurn(state);
         // ending the previous player's turn will ensure that the next player looks at all the cards at their current location
         deck = state.getMoon(1).getDeck();
         for (int i = 0; i < 2; i++) {
@@ -399,7 +397,7 @@ public class TestMoves {
         assertEquals(1 + 2 + 3 + 3 + 4, state.getGameScore(1), 0.01);
         assertEquals(25, state.getTrackPosition(AMMONIA));
         assertFalse(state.isNotTerminal());
-        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[1]);
+        assertEquals(CoreConstants.GameResult.WIN, state.getPlayerResults()[1]);
     }
 
     @Test
@@ -415,9 +413,9 @@ public class TestMoves {
         assertEquals(params.contrabandTrack.length, state.getTrackPosition(CONTRABAND));
         assertEquals(1 + 2 + 2 + 3 + 3 + 4, state.getGameScore(0), 0.01);
         assertFalse(state.isNotTerminal());
-        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[0]);
-        assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[1]);
-        assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[2]);
+        assertEquals(CoreConstants.GameResult.WIN, state.getPlayerResults()[0]);
+        assertEquals(CoreConstants.GameResult.LOSE, state.getPlayerResults()[1]);
+        assertEquals(CoreConstants.GameResult.LOSE, state.getPlayerResults()[2]);
     }
 
     @Test

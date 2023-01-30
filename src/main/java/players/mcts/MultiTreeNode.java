@@ -223,7 +223,7 @@ public class MultiTreeNode extends SingleTreeNode {
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("round", state.getRoundCounter());
         stats.put("turn", state.getTurnCounter());
-        stats.put("turnOwner", state.getTurnOwner());
+        stats.put("turnOwner", state.getCurrentPlayer());
         stats.put("iterations", numIters);
         stats.put("rolloutActions", rolloutActionsTaken / numIters);
         stats.put("time", timeTaken);

@@ -6,6 +6,7 @@ import core.interfaces.IComponentContainer;
 import games.GameType;
 
 import java.util.*;
+import java.util.function.IntPredicate;
 import java.util.function.Predicate;
 
 import static games.sirius.SiriusConstants.MoonType.*;
@@ -30,8 +31,18 @@ public class SiriusGameState extends AbstractGameState {
     int contrabandTrack;
     int corruptionTrack;
 
+    int[] playerByRank; // this is indexed by rank and holds the current player at that rank
+    int[] nextPlayer; // this is indexed by player and indicates the next player in rank. It is updated at the start of each round.
+    Map<String, List<Boolean>> actionsTakenByPlayers; // used to track is certain action types have been taken (when these are only usable once)
+
+
+    @Override
+    public GameType _getGameType() {
+        return GameType.Sirius;
+    }
+
     public SiriusGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new SiriusTurnOrder(nPlayers), GameType.Sirius);
+        super(gameParameters, nPlayers);
         rnd = new Random(gameParameters.getRandomSeed());
     }
 
@@ -92,6 +103,12 @@ public class SiriusGameState extends AbstractGameState {
         retValue.contrabandTrack = contrabandTrack;
         retValue.corruptionTrack = corruptionTrack;
         retValue.medalCount = medalCount;
+        retValue.nextPlayer = nextPlayer.clone();
+        retValue.actionsTakenByPlayers = new HashMap<>();
+        for (String key : actionsTakenByPlayers.keySet()) {
+            retValue.actionsTakenByPlayers.put(key, new ArrayList<>(actionsTakenByPlayers.get(key)));
+        }
+        retValue.playerByRank = playerByRank.clone();
         return retValue;
     }
 
@@ -196,11 +213,10 @@ public class SiriusGameState extends AbstractGameState {
         PlayerArea pa = playerAreas.get(player);
         int medals = pa.medals.size();
         int soldCards = pa.soldCards.getSize();
-        int rank = ((SiriusTurnOrder) turnOrder).getRank(player);
+        int rank = getRank(player);
         return medals * 10000 + soldCards * 100 - rank;
     }
 
-    @Override
     protected void _reset() {
         ammoniaDeck = new Deck<>("ammoniaDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         contrabandDeck = new Deck<>("contrabandDeck", -1, CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
@@ -214,6 +230,74 @@ public class SiriusGameState extends AbstractGameState {
         ammoniaTrack = 0;
         contrabandTrack = 0;
         corruptionTrack = 0;
+        nextPlayer = new int[nPlayers];
+        playerByRank = new int[nPlayers + 1];
+        Arrays.setAll(playerByRank, i -> i - 1);
+        initialiseActions();
+        updatePlayerOrder();
+    }
+
+
+    protected void initialiseActions() {
+        actionsTakenByPlayers = new HashMap<>();
+        List<Boolean> allFalse = new ArrayList<>(nPlayers);
+        for (int i = 0; i < nPlayers; i++) allFalse.add(Boolean.FALSE);
+        actionsTakenByPlayers.put("Favour", allFalse);
+        actionsTakenByPlayers.put("Sold", new ArrayList<>(allFalse));
+        actionsTakenByPlayers.put("Betrayed", new ArrayList<>(allFalse));
+    }
+
+    public void updatePlayerOrder() {
+        // we set up nextPlayer to point to the next player
+        for (int r = 1; r < nPlayers; r++) {
+            nextPlayer[playerByRank[r]] = playerByRank[r + 1];
+        }
+        nextPlayer[playerByRank[nPlayers]] = playerByRank[1];  // we loop back to the start
+    }
+
+    // returns the current rank of the player for determining move order (1 is first, and so on)
+    public int getRank(int player) {
+        for (int r = 1; r <= nPlayers; r++) {
+            if (playerByRank[r] == player)
+                return r;
+        }
+        throw new AssertionError("Should be unreachable");
+    }
+
+    public void setRank(int player, int rank) {
+        int oldRank = getRank(player);
+        int inc = oldRank < rank ? 1 : -1;
+        int diff = Math.abs(oldRank - rank);
+        // we shuffle all the ranks up and move player to rank
+        // We have to do this step last so that we have already shuffled out the previous occupant
+        for (int i = 0; i <= diff; i++) {
+            if (i == diff) {
+                playerByRank[rank] = player;
+            } else {
+                playerByRank[i * inc + oldRank] = playerByRank[(i + 1) * inc + oldRank];
+            }
+        }
+    }
+
+    public int getPlayerAtRank(int rank) {
+        return playerByRank[rank];
+    }
+
+    protected int getFirstMatchingPlayerFrom(int startFrom, IntPredicate test) {
+        // we go through in nextPlayer order from startFrom
+        int player = startFrom;
+        for (int i = 0; i < nPlayers; i++) {
+            if (test.test(player)) return player;
+            player = nextPlayer[player];
+        }
+        return -1;
+    }
+
+    public void setActionTaken(String ref, int player) {
+        actionsTakenByPlayers.get(ref).set(player, true);
+    }
+    public boolean getActionTaken(String ref, int player) {
+        return actionsTakenByPlayers.get(ref).get(player);
     }
 
     // This marks a decision as having been made, but does not yet implement this decision
@@ -370,14 +454,6 @@ public class SiriusGameState extends AbstractGameState {
         return triggersPolice;
     }
 
-    public void setActionTaken(String ref, int player) {
-        ((SiriusTurnOrder) turnOrder).setActionTaken(ref, player);
-    }
-
-    public boolean getActionTaken(String ref, int player) {
-        return ((SiriusTurnOrder) turnOrder).getActionTaken(ref, player);
-    }
-
     @Override
     protected boolean _equals(Object o) {
         if (o instanceof SiriusGameState) {
@@ -388,20 +464,19 @@ public class SiriusGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        int retValue = Objects.hash(playerAreas, turnOrder, gamePhase, moons, ammoniaDeck, gameParameters, gameStatus,
-                ammoniaDiscardDeck, contrabandDiscardDeck, smugglerDiscardDeck,
+        int retValue = super.hashCode() + 31 * Objects.hash(playerAreas, moons, ammoniaDeck,
+                ammoniaDiscardDeck, contrabandDiscardDeck, smugglerDiscardDeck, actionsTakenByPlayers,
                 ammoniaTrack, contrabandTrack, medalCount, smugglerDeck, favourDeck);
-        return retValue + 31 * Arrays.hashCode(playerResults)
+        return retValue + 31 * Arrays.hashCode(nextPlayer) +  31 * 31 * Arrays.hashCode(playerByRank)
                 - 255 * Arrays.hashCode(playerLocations)
                 - 31 * 255 * Arrays.hashCode(moveSelected);
     }
+
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         int result = Objects.hash(gameParameters);
-        sb.append(result).append("|");
-        result = Objects.hash(turnOrder);
         sb.append(result).append("|");
         result = Objects.hash(gameStatus);
         sb.append(result).append("|");
@@ -430,8 +505,14 @@ public class SiriusGameState extends AbstractGameState {
         result = Arrays.hashCode(moveSelected);
         sb.append(result).append("|6|");
         result = Arrays.hashCode(playerLocations);
-        sb.append(result).append("|6|");
+        sb.append(result).append("|7|");
         result = Objects.hash(ammoniaDiscardDeck, contrabandDiscardDeck, smugglerDiscardDeck);
+        sb.append(result).append("|");
+        result =  actionsTakenByPlayers.hashCode();
+        sb.append(result).append("|");
+        result = Arrays.hashCode(nextPlayer);
+        sb.append(result).append("|");
+        result = Arrays.hashCode(playerByRank);
         sb.append(result).append("|");
         return sb.toString();
     }

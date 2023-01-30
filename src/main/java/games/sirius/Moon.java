@@ -1,10 +1,10 @@
 package games.sirius;
 
 
+import core.CoreConstants;
 import core.components.Component;
 import core.components.PartialObservableDeck;
 import games.sirius.SiriusConstants.MoonType;
-import utilities.Utils;
 
 import java.util.Objects;
 
@@ -16,12 +16,12 @@ public class Moon extends Component {
     boolean policePresent = false;
 
     public Moon(String name, MoonType type, int nPlayers) {
-        super(Utils.ComponentType.AREA, name);
+        super(CoreConstants.ComponentType.AREA, name);
         init(type, nPlayers);
     }
 
     protected Moon(String name, MoonType type, int componentID, int nPlayers) {
-        super(Utils.ComponentType.AREA, name, componentID);
+        super(CoreConstants.ComponentType.AREA, name, componentID);
         init(type, nPlayers);
     }
 

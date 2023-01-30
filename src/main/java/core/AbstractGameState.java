@@ -143,7 +143,6 @@ public abstract class AbstractGameState {
     }
     public int getRoundCounter() {return roundCounter;}
     public int getTurnCounter() {return turnCounter;}
-    public int getTurnOwner() {return turnOwner;}
     public int getFirstPlayer() {return firstPlayer;}
 
     // Setters
@@ -394,8 +393,11 @@ public abstract class AbstractGameState {
      * @param playerId - the player observed
      * @return null by default - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score
      */
-    public Double getTiebreak(int playerId) {
+    public double getTiebreak(int playerId) {
         return getTiebreak(playerId, 1);
+    }
+    public double getTiebreakMaxTier() {
+        return 1;
     }
 
     /**
@@ -403,8 +405,8 @@ public abstract class AbstractGameState {
      * @param tier - if multiple tiebreaks available in the game, this parameter can be used to specify what each one does, applied in the order 1,2,3 ...
      * @return null - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score, given tier
      */
-    public Double getTiebreak(int playerId, int tier) {
-        return null;
+    public double getTiebreak(int playerId, int tier) {
+        return Double.MAX_VALUE;
     }
 
     /**
@@ -440,7 +442,7 @@ public abstract class AbstractGameState {
             double otherScore = tiebreakFunction.apply(i, tier);
             if (otherScore > playerScore)
                 ordinal++;
-            else if (otherScore == playerScore && tiebreakFunction.apply(i, tier+1) != null) {
+            else if (otherScore == playerScore && tier <= getTiebreakMaxTier() && tiebreakFunction.apply(i, tier+1) != Double.MAX_VALUE ) {
                 if (getOrdinalPositionTiebreak(i, tiebreakFunction, tier+1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, tier+1))
                     ordinal++;
             }
