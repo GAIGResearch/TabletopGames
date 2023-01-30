@@ -13,12 +13,26 @@ public class Metropolis extends Moon {
         super(name, MoonType.METROPOLIS, nPlayers);
     }
 
+    protected Metropolis(String name, MoonType type, int componentID, int nPlayers) {
+        super(name, type, componentID, nPlayers);
+    }
+
     @Override
     public SiriusCard drawCard() {
         // A Metropolis is different in that there is an infinite supply of FAVOUR cards
         if (policePresent)
             return null;
         return new SiriusCard("Favour", SiriusConstants.SiriusCardType.FAVOUR, 1);
+    }
+
+    @Override
+    public Metropolis copy() {
+        Metropolis retValue = new Metropolis(this.componentName, this.moonType, componentID, deck.getDeckVisibility().length);
+        retValue.cartelPlayer = cartelPlayer;
+        retValue.policePresent = policePresent;
+        retValue.deck = deck; // this is immutable for a Metropolis
+        copyComponentTo(retValue);
+        return retValue;
     }
 
     @Override

@@ -113,6 +113,18 @@ public class TestMoves {
     }
 
     @Test
+    public void takeFavourCard() {
+        state.setGamePhase(Draw);
+        state.movePlayerTo(0, 4);
+        TakeCard tc = new TakeCard();
+        assertEquals(0, state.getMoon(4).getDeckSize());
+        assertEquals(0, state.getPlayerHand(0).getSize());
+        fm.next(state, tc);
+        assertEquals(1, state.getPlayerHand(0).getSize());
+        assertEquals(FAVOUR, state.getPlayerHand(0).get(0).cardType);
+    }
+
+    @Test
     public void testTakeCardActionsInDrawPhaseWithMultiplePlayersPresent() {
         state.setGamePhase(Draw);
         state.addCardToHand(2, new SiriusCard("Favour", FAVOUR, 1));
@@ -209,6 +221,15 @@ public class TestMoves {
             assertFalse(deck.getVisibilityForPlayer(i, 1));
             assertFalse(deck.getVisibilityForPlayer(i, 2));
         }
+    }
+
+    @Test
+    public void testNoTakeCardIfPolicePresentAndMetropolis() {
+        state.setGamePhase(Draw);
+        state.movePlayerTo(0, 4);
+        assertEquals(new TakeCard(), fm.computeAvailableActions(state).get(0));
+        state.getMoon(4).setPolicePresence();
+        assertEquals(new DoNothing(), fm.computeAvailableActions(state).get(0));
     }
 
     @Test
@@ -408,7 +429,7 @@ public class TestMoves {
 
         do {
             state.getMoon(1).drawCard();
-        } while (state.getMoon(1).getDeck().getSize() > 0);
+        } while (state.getMoon(1).getDeckSize() > 0);
 
         assertEquals(1, fm.computeAvailableActions(state).size());
         assertEquals(new DoNothing(), fm.computeAvailableActions(state).get(0));

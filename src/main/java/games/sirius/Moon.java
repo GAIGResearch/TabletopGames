@@ -20,7 +20,7 @@ public class Moon extends Component {
         init(type, nPlayers);
     }
 
-    private Moon(String name, MoonType type, int componentID, int nPlayers) {
+    protected Moon(String name, MoonType type, int componentID, int nPlayers) {
         super(Utils.ComponentType.AREA, name, componentID);
         init(type, nPlayers);
     }
@@ -84,9 +84,10 @@ public class Moon extends Component {
 
     @Override
     public Moon copy() {
-        Moon retValue = new Moon(this.componentName, this.moonType, componentID, getDeckSize());
+        Moon retValue = new Moon(this.componentName, this.moonType, componentID, deck.getDeckVisibility().length);
         retValue.deck = deck.copy();
         retValue.cartelPlayer = cartelPlayer;
+        retValue.policePresent = policePresent;
         copyComponentTo(retValue);
         return retValue;
     }

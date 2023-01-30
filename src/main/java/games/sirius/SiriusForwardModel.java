@@ -140,12 +140,13 @@ public class SiriusForwardModel extends AbstractForwardModel {
                 Moon currentMoon = state.getMoon(currentLocation);
                 switch (currentMoon.moonType) {
                     case METROPOLIS:
-                        retValue.add(takeCard);
+                        if (!currentMoon.policePresent)
+                            retValue.add(takeCard);
                         break;
                     case MINING:
                     case PROCESSING:
                     case OUTPOST:
-                        if (currentMoon.getDeck().getSize() > 0)
+                        if (currentMoon.getDeckSize() > 0)
                             retValue.add(takeCard);
                         break;
                     case TRADING:

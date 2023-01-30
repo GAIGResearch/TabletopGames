@@ -358,12 +358,13 @@ public class SiriusGameState extends AbstractGameState {
                     corruptionTrack--;
                 else
                     corruptionTrack++;
-                if (corruptionTrack < params.corruptionTrack.length && params.corruptionTrack[corruptionTrack] == 1) {
+                if (corruptionTrack < params.corruptionTrack.length && corruptionTrack >= 0 && params.corruptionTrack[corruptionTrack] == 1) {
                     triggersPolice = true;
                 }
                 // And make sure we cannot move beyond the limit
                 if (corruptionTrack > params.corruptionTrack.length - 1)
                     corruptionTrack = params.corruptionTrack.length - 1;
+                if (corruptionTrack < 0) corruptionTrack = 0;
             }
         }
         return triggersPolice;
@@ -401,8 +402,6 @@ public class SiriusGameState extends AbstractGameState {
         int result = Objects.hash(gameParameters);
         sb.append(result).append("|");
         result = Objects.hash(turnOrder);
-        sb.append(result).append("|");
-        result = Objects.hash(getAllComponents());
         sb.append(result).append("|");
         result = Objects.hash(gameStatus);
         sb.append(result).append("|");
