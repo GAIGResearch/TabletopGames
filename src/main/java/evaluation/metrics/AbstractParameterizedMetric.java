@@ -17,7 +17,7 @@ public abstract class AbstractParameterizedMetric extends AbstractMetric
         super();
         List<Group<String, List<?>, ?>> parameters = getAllowedParameters();
         IntStream.range(0, parameters.size()).filter(i -> !parameters.get(i).b.contains(parameters.get(i).c)).forEach(i -> {
-            throw new RuntimeException("Declared default parameter " + i + " value (" + parameters.get(i).c + " is not one of the possible values for this parameter: " + parameters.get(i).b);
+            throw new RuntimeException(this.getClass().getSimpleName() + ": Declared default parameter " + i + " value (" + parameters.get(i).c + " is not one of the possible values for this parameter: " + parameters.get(i).b);
         });
         parameters.forEach(p -> parameterValues.put(p.a, p.c));  // Use default value for this parameter
     }
@@ -25,21 +25,21 @@ public abstract class AbstractParameterizedMetric extends AbstractMetric
         super();
         List<Group<String, List<?>, ?>> parameters = getAllowedParameters();
         IntStream.range(0, parameters.size()).filter(i -> !parameters.get(i).b.contains(parameters.get(i).c)).forEach(i -> {
-            throw new RuntimeException("Declared default parameter " + i + " value (" + parameters.get(i).c + " is not one of the possible values for this parameter: " + parameters.get(i).b);
+            throw new RuntimeException(this.getClass().getSimpleName() + ": Declared default parameter " + i + " value (" + parameters.get(i).c + " is not one of the possible values for this parameter: " + parameters.get(i).b);
         });
-        if (parameters.size() != 1) throw new RuntimeException("Number of parameters supplied doesn't match number of parameters recorded");
-        if (!parameters.get(0).b.contains(arg)) throw new RuntimeException("Given argument (" + arg + ") is not one of the possible values: " + parameters.get(0).b.toString());
+        if (parameters.size() != 1) throw new RuntimeException(this.getClass().getSimpleName() + ": Number of parameters supplied doesn't match number of parameters recorded");
+        if (!parameters.get(0).b.contains(arg)) throw new RuntimeException(this.getClass().getSimpleName() + ": Given argument (" + arg + ") is not one of the possible values: " + parameters.get(0).b.toString());
         parameterValues.put(parameters.get(0).a, arg);
     }
     public AbstractParameterizedMetric(Object... args) {
         super();
         List<Group<String, List<?>, ?>> parameters = getAllowedParameters();
         IntStream.range(0, parameters.size()).filter(i -> !parameters.get(i).b.contains(parameters.get(i).c)).forEach(i -> {
-            throw new RuntimeException("Declared default parameter " + i + " value (" + parameters.get(i).c + " is not one of the possible values for this parameter: " + parameters.get(i).b);
+            throw new RuntimeException(this.getClass().getSimpleName() + ": Declared default parameter " + i + " value (" + parameters.get(i).c + " is not one of the possible values for this parameter: " + parameters.get(i).b);
         });
-        if (args.length != parameters.size()) throw new RuntimeException("Number of parameters supplied doesn't match number of parameters recorded");
+        if (args.length != parameters.size()) throw new RuntimeException(this.getClass().getSimpleName() + ": Number of parameters supplied doesn't match number of parameters recorded");
         IntStream.range(0, args.length).forEach(i -> {
-            if (!parameters.get(i).b.contains(args[i]) || parameters.get(i).c.getClass() != args[i].getClass()) throw new RuntimeException("Given argument " + i + " (" + args[i] + ") is not one of the possible values: " + parameters.get(i).b.toString());
+            if (!parameters.get(i).b.contains(args[i]) || parameters.get(i).c.getClass() != args[i].getClass()) throw new RuntimeException(this.getClass().getSimpleName() + ": Given argument " + i + " (" + args[i] + ") is not one of the possible values: " + parameters.get(i).b.toString());
             parameterValues.put(parameters.get(i).a, args[i]);});
     }
 
