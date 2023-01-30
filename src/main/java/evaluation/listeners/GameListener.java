@@ -153,7 +153,17 @@ public class GameListener {
      */
     protected void processMetricGameOver(AbstractMetric metric, Event event, TAGStatSummary dataLogged, IStatisticLogger gameOverLogger) {
 //        gameOverLogger.record(dataLogged.getSummary());
-        Map<String, Object> toRecord = metric.postProcessingGameOver(event, dataLogged);
+        Map<String, Object> toRecord;
+        if (metric != null) {
+            toRecord = metric.postProcessingGameOver(event, dataLogged);
+        } else {
+            // Default post-processing
+            toRecord = new HashMap<>();
+            Map<String, Object> summaryData = dataLogged.getSummary();
+            for (String k: summaryData.keySet()) {
+                toRecord.put(getClass().getSimpleName() + "(" + k + ")" + ":" + event.type, summaryData.get(k));
+            }
+        }
         gameOverLogger.record(toRecord);
     }
 
@@ -215,7 +225,7 @@ public class GameListener {
     public static GameListener createListener(String listenerClass, IStatisticLogger logger, String metricsClass) {
         // first we check to see if listenerClass is a file or not
         GameListener listener = null;
-        AbstractMetric[] metrics = null;
+        ArrayList<AbstractMetric> metrics = new ArrayList<>();
         File listenerDetails = new File(listenerClass);
         if (listenerDetails.exists()) {
             // in this case we construct from file
@@ -223,14 +233,17 @@ public class GameListener {
         } else {
             if (!metricsClass.equals("")) {
                 try {
-                    Class<?> clazz = Class.forName(metricsClass);
-                    Constructor<?> constructor;
-                    try {
-                        constructor = clazz.getConstructor();
-                        IMetricsCollection metricsInstance = (IMetricsCollection) constructor.newInstance();
-                        metrics = metricsInstance.getAllMetrics();
-                    } catch (NoSuchMethodException e) {
-                        return createListener(listenerClass);
+                    String[] classPaths = metricsClass.split(",");
+                    for (String c: classPaths) {
+                        Class<?> clazz = Class.forName(c);
+                        Constructor<?> constructor;
+                        try {
+                            constructor = clazz.getConstructor();
+                            IMetricsCollection metricsInstance = (IMetricsCollection) constructor.newInstance();
+                            metrics.addAll(Arrays.asList(metricsInstance.getAllMetrics()));
+                        } catch (NoSuchMethodException e) {
+                            return createListener(listenerClass);
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -242,7 +255,7 @@ public class GameListener {
                     Constructor<?> constructor;
                     try {
                         constructor = clazz.getConstructor(IStatisticLogger.class, AbstractMetric[].class);
-                        listener = (GameListener) constructor.newInstance(logger, metrics);
+                        listener = (GameListener) constructor.newInstance(logger, metrics.toArray(new AbstractMetric[0]));
                     } catch (NoSuchMethodException e) {
                         return createListener(listenerClass);
                     }
@@ -253,8 +266,8 @@ public class GameListener {
         }
         if(listener == null) {
             // default
-            metrics = new GameMetrics().getAllMetrics();
-            return new GameListener(logger, metrics);
+            AbstractMetric[] ms = new GameMetrics().getAllMetrics();
+            return new GameListener(logger, ms);
         }
 
         return listener;

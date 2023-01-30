@@ -391,18 +391,20 @@ public abstract class AbstractGameState {
      * For example in ColtExpress, the tie break is the number of bullet cards in hand - and this only affects the outcome
      * if the score is a tie.
      *
-     * @param playerId
-     * @return
+     * @param playerId - the player observed
+     * @return null by default - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score
      */
     public Double getTiebreak(int playerId) {
         return getTiebreak(playerId, 1);
     }
 
     /**
+     * @param playerId - the player observed
      * @param tier - if multiple tiebreaks available in the game, this parameter can be used to specify what each one does, applied in the order 1,2,3 ...
+     * @return null - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score, given tier
      */
     public Double getTiebreak(int playerId, int tier) {
-        return 0.0;
+        return null;
     }
 
     /**
@@ -422,7 +424,7 @@ public abstract class AbstractGameState {
             double otherScore = scoreFunction.apply(i);
             if (otherScore > playerScore)
                 ordinal++;
-            else if (otherScore == playerScore && tiebreakFunction != null) {
+            else if (otherScore == playerScore && tiebreakFunction != null && tiebreakFunction.apply(i, 1) != null) {
                 if (getOrdinalPositionTiebreak(i, tiebreakFunction, 1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, 1))
                     ordinal++;
             }
@@ -438,7 +440,7 @@ public abstract class AbstractGameState {
             double otherScore = tiebreakFunction.apply(i, tier);
             if (otherScore > playerScore)
                 ordinal++;
-            else if (otherScore == playerScore) {
+            else if (otherScore == playerScore && tiebreakFunction.apply(i, tier+1) != null) {
                 if (getOrdinalPositionTiebreak(i, tiebreakFunction, tier+1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, tier+1))
                     ordinal++;
             }

@@ -1,5 +1,5 @@
 {
-  "class": "evaluation.metrics.GameListener",
+  "class": "evaluation.listeners.GameListener",
   "args": [
     {
       "class" : "evaluation.loggers.SummaryLogger"

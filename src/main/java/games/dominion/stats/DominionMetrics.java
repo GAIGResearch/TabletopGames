@@ -27,7 +27,7 @@ public class DominionMetrics implements IMetricsCollection {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            return Collections.singletonList(new Group<>("type", Arrays.asList(CardType.values()), CardType.LIBRARY.name()));
+            return Collections.singletonList(new Group<>("type", Arrays.asList(CardType.values()), CardType.LIBRARY));
         }
     }
 
