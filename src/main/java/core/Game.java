@@ -126,6 +126,7 @@ public class Game {
             if (randomizeParameters) {
                 AbstractParameters gameParameters = game.getGameState().getGameParameters();
                 gameParameters.randomize();
+                System.out.println("Parameters: " + gameParameters);
             }
 
             // Reset game instance, passing the players for this game
