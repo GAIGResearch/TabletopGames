@@ -31,6 +31,7 @@ public class RoundRobinTournament extends AbstractTournament {
     protected LinkedHashMap<Integer, Double> finalRanking; // contains index of agent in agents
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
+    private boolean randomGameParams;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -100,7 +101,8 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               Defaults to the end of the tournament\n" +
                             "\tstatsLog=      The file to use for logging agent-specific statistics (e.g. MCTS iterations/depth)\n" +
                             "\t               A single line will be generated as the average for each agent, implicitly assuming they are\n" +
-                            "\t               all of the same type. If not supplied, then no logging will take place.\n"
+                            "\t               all of the same type. If not supplied, then no logging will take place.\n" +
+                            "\trandomGameParams= (Optional) If specified, parameters for the game will be randomized for each game, and printed before the run"
             );
             return;
         }
@@ -115,6 +117,7 @@ public class RoundRobinTournament extends AbstractTournament {
         String statsLogPrefix = getArg(args, "statsLog", "");
         String resultsFile = getArg(args, "resultsFile", "");
         int reportPeriod = getArg(args, "reportPeriod", matchups); //matchups
+        boolean randomGameParams = getArg(args, "randomGameParams", false);
 
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.GameListener").split("\\|")));
         List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
@@ -258,6 +261,11 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int i = 0; i < this.gamesPerMatchUp; i++) {
 
             games.get(gameIdx).reset(matchUpPlayers, currentSeed + i + 1);
+            // Randomize parameters
+            if (randomGameParams) {
+                games.get(gameIdx).getGameState().getGameParameters().randomize();
+                System.out.println("Game parameters: " + games.get(gameIdx).getGameState().getGameParameters());
+            }
             games.get(gameIdx).run();  // Always running tournaments without visuals
             GameResult[] results = games.get(gameIdx).getGameState().getPlayerResults();
 
