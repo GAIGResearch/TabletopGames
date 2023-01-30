@@ -50,7 +50,7 @@ public abstract class AbstractMetric
         Map<String, Object> toRecord = new HashMap<>();
         Map<String, Object> summaryData = recordedData.getSummary();
         for (String k: summaryData.keySet()) {
-            toRecord.put(getClass().getSimpleName() + "(" + k + ")" + ":" + e.type, summaryData.get(k));
+            toRecord.put(getName() + "(" + k + ")" + ":" + e.type, summaryData.get(k));
         }
         return toRecord;
     }
