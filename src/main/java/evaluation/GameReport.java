@@ -29,7 +29,7 @@ public class GameReport {
     public static void main(String[] args) {
         long timeStart = System.currentTimeMillis();
         List<String> argsList = Arrays.asList(args);
-        if (argsList.contains("--help") || argsList.contains("-h") || argsList.size() == 0) {
+        if (argsList.contains("--help") || argsList.contains("-h")) {
             System.out.println(
                     "To run this class, you can supply a number of possible arguments:\n" +
                             "\tgames=         A list of the games to be played. If there is more than one, then use a \n" +
