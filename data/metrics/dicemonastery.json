@@ -21,10 +21,25 @@
       {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$VictoryPoints"},
       {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$TreasureSum"},
 
-      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$IsSeason", "args": [ "SUMMER" ]},
-      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$MonksIn", "args": [ "MEADOW" ]},
-      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$APIn", "args": [ "KITCHEN" ]},
-      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$ResourceInArea", "args": [ "PALE_BLUE_PIGMENT", "STOREROOM" ]},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$IsSeason", "args": [ {
+        "enum": "games.dicemonastery.DiceMonasteryConstants$Season",
+        "value": "SUMMER"
+      } ]},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$MonksIn", "args": [ {
+        "enum": "games.dicemonastery.DiceMonasteryConstants$ActionArea",
+        "value": "MEADOW"
+      } ]},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$APIn", "args": [ {
+        "enum": "games.dicemonastery.DiceMonasteryConstants$ActionArea",
+        "value": "KITCHEN"
+      } ]},
+      {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$ResourceInArea", "args": [ {
+        "enum": "games.dicemonastery.DiceMonasteryConstants$Resource",
+        "value": "PALE_BLUE_PIGMENT"
+      }, {
+        "enum": "games.dicemonastery.DiceMonasteryConstants$ActionArea",
+        "value": "STOREROOM"
+      } ]},
       {"class": "games.dicemonastery.stats.DiceMonasteryMetrics$MonkPiety", "args": [ "4" ]}
     ]
   ]

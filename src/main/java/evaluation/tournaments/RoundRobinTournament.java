@@ -116,7 +116,7 @@ public class RoundRobinTournament extends AbstractTournament {
         String resultsFile = getArg(args, "resultsFile", "");
         int reportPeriod = getArg(args, "reportPeriod", matchups); //matchups
 
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "utilities.GameResultListener").split("\\|")));
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.GameListener").split("\\|")));
         List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
         List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
 

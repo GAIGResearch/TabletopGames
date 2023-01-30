@@ -42,12 +42,30 @@
       { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$BoardPointsProgress" },
       { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$AwardsPointProgress" },
 
-      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$ParameterComplete", "args": [ "Temperature" ] },
-      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$ParameterIncrease", "args": [ "Oxygen" ] },
-      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerParameterContribution", "args": [ "OceanTiles" ] },
-      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerPlayedCardsPerType", "args": [ "Automated" ] },
-      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerProduction", "args": [ "MegaCredit" ] },
-      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerResource", "args": [ "Plant" ] }
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$ParameterComplete", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$GlobalParameter",
+        "value": "Temperature"
+      } ] },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$ParameterIncrease", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$GlobalParameter",
+        "value": "Oxygen"
+      } ] },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerParameterContribution", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$GlobalParameter",
+        "value": "OceanTiles"
+      } ] },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerPlayedCardsPerType", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$CardType",
+        "value": "Automated"
+      } ] },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerProduction", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$Resource",
+        "value": "MegaCredit"
+      } ] },
+      { "class": "games.terraformingmars.stats.TerraformingMarsMetrics$PlayerResource", "args": [ {
+        "enum": "games.terraformingmars.TMTypes$Resource",
+        "value": "Plant"
+      } ] }
     ]
   ]
 }
