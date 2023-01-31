@@ -16,10 +16,7 @@ def get_epsilon(steps, max_steps, final_epsilon=0.0):
   return lr
 
 def process_obs(obs, device="cpu"):
-    # todo these are diamant specific - need to fix it further
     x = torch.from_numpy(obs)
-    x[0] = x[0]/50
-    x[1] = x[1]/20
     x = x.unsqueeze(0).float().to(device)
 
     return x
@@ -44,6 +41,7 @@ if __name__ == "__main__":
     episodes = 0
     done = True
     invalid_action = False
+    ep_steps = 0
     for step in range(MAX_STEPS):
         if done:
             # logging
@@ -54,29 +52,32 @@ if __name__ == "__main__":
                 if env.has_won():
                     wins += 1
                 # todo count and log invalid actions as well
+                # todo these steps and rewards are not episodic
                 wandb.log({
-                    "train/steps": step,
+                    "train/steps": ep_steps,
                     "train/win_rate": wins / episodes,
                     "train/rewards": rewards,
 
                 })
             # reset
             rewards = 0
+            ep_steps = 0
             obs = process_obs(env.reset())
             done = False
 
         if step % replay_freq == 0 and step > 1000:
             agent.learn(step)
 
+        ep_steps += 1
         action, q = agent.act(obs, epsilon=epsilon)
         # todo this is not a nice fix, but it should work for now
         if action >= env.getActions().size():
             action = random.randint(0, env.getActions().size()-1)
             invalid_action = True
 
-        next_obs, reward, done, info = env.step(action) # todo reward should be the delta, not total
         playerID = env.getPlayerID()
-        reward = np.clip(reward, -1, max_reward) # value, min, max
+        next_obs, reward, done, info = env.step(action) # todo reward should be the delta, not total
+        # reward = np.clip(reward, -1, max_reward) # value, min, max
         if invalid_action:
             reward -= 0.1 # small penalty
             invalid_action = False

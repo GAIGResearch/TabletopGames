@@ -92,6 +92,8 @@ class PyTAG():
         # reward = self.env.getReward()
         # reward = self.prev_reward - reward
         # self.prev_reward = reward
+        # reward = self.env.getReward()/17
+        # todo win/loss reward
         reward = 0.0
         if str(self.env.getPlayerResults()[0]) == "WIN":
             reward = 1.0

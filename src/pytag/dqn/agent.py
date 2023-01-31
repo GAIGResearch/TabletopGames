@@ -9,12 +9,12 @@ import wandb
 class ReplayMemory():
     # this version stores all the data in torch tesnors and indexes the last position by a counter
     # The required space is blocked at the start by filling up the replay memory with torch.zeros, not dynamically allocated
-    def __init__(self, obs_space, batch_size=32, capacity=int(1e5), device="cpu"):
+    def __init__(self, obs_space, batch_size=128, capacity=int(5e4), device="cpu"):
         self.obs_space = obs_space
         self.batch_size = batch_size
         self.device = device
         self.capacity = capacity
-        self.obs = torch.zeros([self.capacity, obs_space], dtype=torch.uint8).to(device)
+        self.obs = torch.zeros([self.capacity, obs_space], dtype=torch.float32).to(device)
         self.actions = torch.zeros([self.capacity], dtype=torch.int64).to(device)
         self.rewards = torch.zeros([self.capacity], dtype=torch.float32).to(device)
         self.dones = torch.zeros([self.capacity], dtype=torch.uint8).to(device)
@@ -77,6 +77,7 @@ class DQNAgent():
         self.gamma = 0.99
         self.norm_clip = 3
         self.update_counter = 0
+        self.lr = 1e-3
 
         self.mem = ReplayMemory(self.input_dims, batch_size=self.batch_size)
 
@@ -91,7 +92,7 @@ class DQNAgent():
             else:  # Raise error if incorrect model path provided
                 raise FileNotFoundError(model)
         self.target_net = DQN(self.input_dims, self.n_actions).to(self.device)
-        self.optim = torch.optim.Adam(self.q_net.parameters(), lr=1e-4)
+        self.optim = torch.optim.Adam(self.q_net.parameters(), lr=self.lr)
 
 
 
@@ -137,6 +138,9 @@ class DQNAgent():
 
 
         self.update_counter += 1
+
+        if self.update_counter % 250 == 0:
+            self.update_target_net()
 
         return loss.cpu().detach().numpy()
 
