@@ -32,12 +32,15 @@ public class GYMEnv {
     private int lastPlayer; // used to track actions per 'turn'
     private List<AbstractAction> availableActions;
 
+    boolean isNormalized; // Bool for whether you want obersvations to be normalized
+
 
     // todo: set-up everything required to run an actual game in Pandemic
     //  - functions: init, getObs, step, finalise...
-    public GYMEnv(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed) throws Exception {
+    public GYMEnv(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, boolean isNormalized) throws Exception {
 
         //                              boolean randomizeParameters, List<IGameListener> listeners
+        this.isNormalized = isNormalized;
         this.players = players;
         // Creating game instance (null if not implemented)
         if (parameterConfigFile != null) {
@@ -83,7 +86,8 @@ public class GYMEnv {
 
     public double[] getObservationVector() throws Exception {
         if (gameState instanceof IVectorisable) {
-            return ((IVectorisable) gameState).getObservationVector();
+            if (isNormalized) return ((IVectorisable) gameState).getNormalizedObservationVector();
+            else return ((IVectorisable) gameState).getObservationVector();
         }
         else throw new Exception("Function is not implemented");
     }
@@ -221,68 +225,7 @@ public class GYMEnv {
         }
         AbstractGameState observation = gameState.copy(activePlayer);
         this.availableActions = forwardModel.computeAvailableActions(observation);
-
-        return;
     }
-
-
-//    public AbstractGameState step(int a){
-//        // execute action and loop until a PythonAgent is required to make a decision
-//        AbstractAction a_ = this.availableActions.get(a);
-//        forwardModel.next(gameState, a_);
-//
-//        int activePlayer = gameState.getCurrentPlayer();
-//        AbstractPlayer currentPlayer = players.get(activePlayer);
-//        while ( !(currentPlayer instanceof PythonAgent)){
-//            AbstractGameState observation = gameState.copy(activePlayer);
-//            List<core.actions.AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
-//
-//            if (isDone()){
-//                // game is over
-//                return observation;
-//            }
-//
-//            // Start the timer for this decision
-//            gameState.playerTimer[activePlayer].resume();
-//
-//            // Either ask player which action to use or, in case no actions are available, report the updated observation
-//            core.actions.AbstractAction action = null;
-//            if (observedActions.size() > 0) {
-//                if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
-//                    // Can only do 1 action, so do it.
-//                    action = observedActions.get(0);
-//                    currentPlayer.registerUpdatedObservation(observation);
-//                } else {
-//                    // Get action from player, and time it
-//                    action = currentPlayer.getAction(observation, observedActions);
-//                }
-//            } else {
-//                currentPlayer.registerUpdatedObservation(observation);
-//            }
-//
-//            // End the timer for this decision
-//            gameState.playerTimer[activePlayer].pause();
-//            gameState.playerTimer[activePlayer].incrementAction();
-//
-//            if (gameState.coreGameParameters.verbose && !(action == null)) {
-//                System.out.println(action);
-//            }
-//            if (action == null)
-//                throw new AssertionError("We have a NULL action in the Game loop");
-//
-//            // Check player timeout
-//            forwardModel.next(gameState, action);
-//            tick++;
-//
-//            lastPlayer = activePlayer;
-//            currentPlayer = players.get(gameState.getCurrentPlayer());
-//
-//        }
-//        AbstractGameState observation = gameState.copy(activePlayer);
-//        this.availableActions = forwardModel.computeAvailableActions(observation);
-//
-//        return observation;
-//    }
 
     public int getTick(){
         return this.tick;

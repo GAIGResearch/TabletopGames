@@ -11,7 +11,7 @@ import numpy as np
 
 
 class PyTAG():
-    def __init__(self, agents, seed=42, game="Diamant", jar_path="jars/ModernBoardGame.jar"):
+    def __init__(self, agents, seed=42, game="Diamant", jar_path="jars/ModernBoardGame.jar", isNormalized = True):
         # JPYPE setup
         self.root_path = os.getcwd()
         # jpype.addClassPath(os.path.join(self.root_path, jar_path))
@@ -53,7 +53,7 @@ class PyTAG():
         for agent in agents:
             agent_class = get_agent_class(agent)
             players.add(agent_class())
-        self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed))
+        self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed), isNormalized)
         # todo get obs and action spaces
         self.observation_space = 9 #self.env.getObservationSpace()
         self.action_space = 3 #self.env.getActionSpace()
