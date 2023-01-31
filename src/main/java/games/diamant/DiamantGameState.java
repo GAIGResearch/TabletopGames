@@ -63,8 +63,8 @@ public class DiamantGameState extends AbstractGameState implements IPrintable, I
     @Override
     public double[] getNormalizedObservationVector() {
         double[] retVal = new double[getObservationSpace()];
-        retVal[0] = getTreasureChests().get(getCurrentPlayer()).getValue() / 139d;
-        retVal[1] = nGemsOnPath / 139d;
+        retVal[0] = getTreasureChests().get(getCurrentPlayer()).getValue() / 100d;
+        retVal[1] = nGemsOnPath / 17d;
         retVal[2] = playerInCave.size() / (double) getNPlayers();
         retVal[3] = nCave / 5d;
         retVal[4] = nHazardExplosionsOnPath / 3d;
