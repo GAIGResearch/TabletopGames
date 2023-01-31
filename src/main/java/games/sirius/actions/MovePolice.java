@@ -2,7 +2,6 @@ package games.sirius.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.sirius.*;
 
@@ -42,7 +41,7 @@ public class MovePolice extends AbstractAction implements IExtendedSequence {
                 .map(c -> new StealCard(c, targetPlayer))
                 .distinct().collect(toList());
         if (retValue.isEmpty())
-            retValue.add(new DoNothing()); // in case they have no cards to steal
+            retValue.add(new StealCard(null, targetPlayer)); // in case they have no cards to steal
         return retValue;
     }
 
@@ -56,7 +55,7 @@ public class MovePolice extends AbstractAction implements IExtendedSequence {
         if (action instanceof StealCard) {
             StealCard theft = (StealCard) action;
             if (theft.targetPlayer != playersToStealFrom[0])
-                throw new AssertionError("We are expecting to process a StealCard action targetting " + playersToStealFrom[0] + ", not " + theft.targetPlayer);
+                throw new AssertionError("We are expecting to process a StealCard action targeting " + playersToStealFrom[0] + ", not " + theft.targetPlayer);
             // we have processed that player
             playersToStealFrom = Arrays.copyOfRange(playersToStealFrom, 1, playersToStealFrom.length);
         }

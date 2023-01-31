@@ -74,6 +74,7 @@ public class Moon extends Component {
         return policePresent;
     }
 
+    // For unit testing only!
     public PartialObservableDeck<SiriusCard> getDeck() {
         return deck;
     }

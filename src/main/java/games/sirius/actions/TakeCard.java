@@ -6,10 +6,6 @@ import games.sirius.*;
 
 public class TakeCard extends AbstractAction {
 
-    public TakeCard() {
-
-    }
-
     @Override
     public boolean execute(AbstractGameState gs) {
         SiriusGameState state = (SiriusGameState) gs;

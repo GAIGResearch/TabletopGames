@@ -10,11 +10,16 @@ import java.util.stream.Collectors;
 
 public class StealCard extends AbstractAction {
 
+    private static final SiriusCard dummyCard = new SiriusCard("Dummy", SiriusConstants.SiriusCardType.AMMONIA, 86);
+
     final int targetPlayer;
     final SiriusCard targetCard;
 
     public StealCard(SiriusCard cardToSteal, int fromPlayer) {
-        targetCard = cardToSteal; // SiriusCards are immutable
+        if (cardToSteal == null)
+            targetCard = dummyCard;
+        else
+            targetCard = cardToSteal; // SiriusCards are immutable
         targetPlayer = fromPlayer;
         if (targetCard.cardType == SiriusConstants.SiriusCardType.FAVOUR)
             throw new IllegalArgumentException("Not able to steal Favour cards");
@@ -26,18 +31,19 @@ public class StealCard extends AbstractAction {
         int thief = state.getCurrentPlayer();
         if (thief == targetPlayer)
             throw new AssertionError("Should not be able to steal from oneself");
-        Deck<SiriusCard> hand = state.getPlayerHand(targetPlayer);
-        boolean found = hand.remove(targetCard);
-        if (!found)
-            throw new AssertionError("Card not found in hand when trying to steal : " + targetCard + " in " + hand);
-        state.addCardToHand(thief, targetCard);
-        // now we remove all the cards of the same type
-        Map<Boolean, List<SiriusCard>> partitionedHand = hand.stream().collect(Collectors.partitioningBy(c -> c.cardType == targetCard.cardType));
-        hand.removeAll(partitionedHand.get(true));
+        if (!targetCard.equals(dummyCard)) {
+            Deck<SiriusCard> hand = state.getPlayerHand(targetPlayer);
+            boolean found = hand.remove(targetCard);
+            if (!found)
+                throw new AssertionError("Card not found in hand when trying to steal : " + targetCard + " in " + hand);
+            state.addCardToHand(thief, targetCard);
+            // now we remove all the cards of the same type
+            Map<Boolean, List<SiriusCard>> partitionedHand = hand.stream().collect(Collectors.partitioningBy(c -> c.cardType == targetCard.cardType));
+            hand.removeAll(partitionedHand.get(true));
 
-        // and add them to the relevant discard pile
-        state.addToDeck(targetCard.cardType, true, partitionedHand.get(true));
-
+            // and add them to the relevant discard pile
+            state.addToDeck(targetCard.cardType, true, partitionedHand.get(true));
+        }
         return true;
     }
 
@@ -50,7 +56,9 @@ public class StealCard extends AbstractAction {
     public boolean equals(Object obj) {
         if (obj instanceof StealCard) {
             StealCard other = (StealCard) obj;
-            return other.targetCard.cardType == targetCard.cardType && other.targetCard.value == targetCard.value && other.targetPlayer == targetPlayer;
+            return other.targetPlayer == targetPlayer &&
+                    targetCard.cardType == other.targetCard.cardType &&
+                    targetCard.value == other.targetCard.value;
             // deliberately exclude the full Card comparison to avoid componentID
         }
         return false;
@@ -63,6 +71,8 @@ public class StealCard extends AbstractAction {
 
     @Override
     public String toString() {
+        if (targetCard == dummyCard)
+            return "No Card to Steal from " + targetPlayer;
         return String.format("Steal card %s from player %d", targetCard, targetPlayer);
     }
 

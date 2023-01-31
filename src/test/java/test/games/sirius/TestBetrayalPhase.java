@@ -2,7 +2,6 @@ package test.games.sirius;
 
 import core.*;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import games.GameType;
 import games.sirius.*;
 import games.sirius.actions.*;
@@ -14,7 +13,7 @@ import java.util.*;
 
 import static games.sirius.SiriusConstants.MoonType.*;
 import static games.sirius.SiriusConstants.SiriusCardType.*;
-import static games.sirius.SiriusConstants.SiriusPhase.Draw;
+import static games.sirius.SiriusConstants.SiriusPhase.*;
 import static org.junit.Assert.*;
 
 
@@ -62,12 +61,18 @@ public class TestBetrayalPhase {
         state.movePlayerTo(0, 0);
         SiriusCard card1 = new SiriusCard("Smuggler1", SMUGGLER, 1);
         SiriusCard card2 = new SiriusCard("Ammonia1", AMMONIA, 1);
+        SiriusCard card3 = new SiriusCard("Ammonia2", AMMONIA, 1);
         state.addCardToHand(0, card1);
         state.addCardToHand(0, card2);
+        state.addCardToHand(0, card3);
         fm.next(state, new SellCards(Collections.singletonList(card2)));
+        assertFalse(state.getActionTaken("Betrayed", 0));
+        assertTrue(state.getActionTaken("Sold", 0));
         while (!(state.getCurrentPlayer() == 0)) {
             fm.next(state, fm.computeAvailableActions(state).get(0));
         }
+        assertFalse(state.getActionTaken("Betrayed", 0));
+        assertTrue(state.getActionTaken("Sold", 0));
         assertEquals(Draw, state.getGamePhase());
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(3, actions.size());
@@ -81,13 +86,19 @@ public class TestBetrayalPhase {
         state.movePlayerTo(0, 0);
         SiriusCard card1 = new SiriusCard("Smuggler1", SMUGGLER, 1);
         SiriusCard card2 = new SiriusCard("Ammonia1", AMMONIA, 1);
+        SiriusCard card3 = new SiriusCard("Smuggler2", SMUGGLER, 1);
         state.addCardToHand(0, card1);
         state.addCardToHand(0, card2);
+        state.addCardToHand(0, card3);
         fm.next(state, new SellCards(Collections.singletonList(card1)));
+        assertTrue(state.getActionTaken("Betrayed", 0));
+        assertFalse(state.getActionTaken("Sold", 0));
         while (!(state.getCurrentPlayer() == 0)) {
             fm.next(state, fm.computeAvailableActions(state).get(0));
         }
         assertEquals(Draw, state.getGamePhase());
+        assertTrue(state.getActionTaken("Betrayed", 0));
+        assertFalse(state.getActionTaken("Sold", 0));
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(2, actions.size());
         assertTrue(actions.contains(new SellCards(Collections.singletonList(card2))));
@@ -288,6 +299,8 @@ public class TestBetrayalPhase {
         assertTrue(actions.contains(new StealCard(new SiriusCard("Ammonia", AMMONIA, 1), 1)));
         assertTrue(actions.contains(new StealCard(new SiriusCard("Ammonia", AMMONIA, 2), 1)));
         assertTrue(actions.contains(new StealCard(new SiriusCard("Contraband", CONTRABAND, 1), 1)));
+        fm.next(state, actions.get(0));
+        assertFalse(state.isActionInProgress());
     }
 
     @Test
@@ -297,6 +310,8 @@ public class TestBetrayalPhase {
         List<AbstractAction> actions = fm.computeAvailableActions(state);
         assertEquals(1, actions.size()); // only two valid cards to steal
         assertEquals(new TakeCard(), actions.get(0));
+        fm.next(state, actions.get(0));
+        assertFalse(state.isActionInProgress());
     }
 
     @Test
@@ -304,8 +319,10 @@ public class TestBetrayalPhase {
         stealCardActionCommonSetup(4);
         assertEquals(0, state.getCurrentPlayer()); // nothing to do, so we have moved to next player
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        assertEquals(1, actions.size()); // only two valid cards to steal
-        assertEquals(new DoNothing(), actions.get(0));
+        assertEquals(1, actions.size()); // no valid cards to steal
+        assertEquals(new StealCard(null, 2), actions.get(0));
+        fm.next(state, actions.get(0));
+        assertFalse(state.isActionInProgress());
     }
 
     @Test
@@ -337,6 +354,20 @@ public class TestBetrayalPhase {
         assertEquals(0, metropolis.getDeckSize());
         card = metropolis.drawCard();
         assertNull(card);
+    }
+
+    @Test
+    public void policePresenceTakenAccountOfInNextPlayerDecision() {
+        state.setGamePhase(Draw);
+        state.movePlayerTo(0, 1);
+        state.getMoon(1).setPolicePresence();
+        assertEquals(1, state.getMoon(1).getDeckSize());
+
+        fm.next(state, fm.computeAvailableActions(state).get(0));  // should be TakeCard; and no other actions possible
+        assertEquals(Move, state.getGamePhase());
+        assertEquals(1, state.getRoundCounter());
+        assertEquals(0, state.getCurrentPlayer());
+
     }
 
     @Test

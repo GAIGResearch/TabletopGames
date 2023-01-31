@@ -234,7 +234,7 @@ public class TestMoves {
     public void testSellAmmoniaActionsAtSirius() {
         state.setGamePhase(Draw);
         assertEquals(1, fm.computeAvailableActions(state).size());
-        assertEquals(new DoNothing(), fm.computeAvailableActions(state).get(0));
+        assertEquals(new NoSale(), fm.computeAvailableActions(state).get(0));
 
         state.addCardToHand(0, new SiriusCard("test", AMMONIA, 1));
         state.addCardToHand(0, new SiriusCard("test", AMMONIA, 2));
@@ -255,7 +255,7 @@ public class TestMoves {
                 new SiriusCard("test", AMMONIA, 1)))));
         assertTrue(actions.contains(new SellCards(Collections.singletonList(
                 new SiriusCard("test", AMMONIA, 1)))));
-        assertTrue(actions.contains(new DoNothing()));
+        assertTrue(actions.contains(new NoSale()));
     }
 
     @Test
@@ -285,7 +285,7 @@ public class TestMoves {
                 new SiriusCard("test", CONTRABAND, 3)))));
         assertTrue(actions.contains(new SellCards(Collections.singletonList(
                 new SiriusCard("test", AMMONIA, 1)))));
-        assertTrue(actions.contains(new DoNothing()));
+        assertTrue(actions.contains(new NoSale()));
     }
 
     @Test
@@ -340,7 +340,7 @@ public class TestMoves {
                 new SiriusCard("test", CONTRABAND, 3)))));
         assertTrue(actions.contains(new SellCards(Collections.singletonList(
                 new SiriusCard("test", AMMONIA, 1)))));
-        assertTrue(actions.contains(new DoNothing()));
+        assertTrue(actions.contains(new NoSale()));
 
     }
 
@@ -431,6 +431,33 @@ public class TestMoves {
 
         assertEquals(1, fm.computeAvailableActions(state).size());
         assertEquals(new DoNothing(), fm.computeAvailableActions(state).get(0));
+    }
+
+    @Test
+    public void afterTakingNoSaleActionWeDoNotReturnToPlayer() {
+        // if we have Ammonia/Smuggler cards but select NoSale, then we do not get another attempt
+        // may not be exactly as planned...but reduces work on tracking who has a turn left.
+        state.setGamePhase(Draw);
+        state.movePlayerTo(0, 0);
+        state.movePlayerTo(1, 1);
+        SiriusCard card1 = new SiriusCard("Smuggler1", SMUGGLER, 1);
+        SiriusCard card2 = new SiriusCard("Ammonia1", AMMONIA, 1);
+        SiriusCard card3 = new SiriusCard("Ammonia2", AMMONIA, 1);
+        state.addCardToHand(0, card1);
+        state.addCardToHand(0, card2);
+        state.addCardToHand(0, card3);
+        assertFalse(state.getActionTaken("Betrayed", 0));
+        assertFalse(state.getActionTaken("Sold", 0));
+        fm.next(state, new NoSale());
+        assertTrue(state.getActionTaken("Betrayed", 0));
+        assertTrue(state.getActionTaken("Sold", 0));
+        while (!(state.getCurrentPlayer() == 0)) {
+            fm.next(state, fm.computeAvailableActions(state).get(0));
+        }
+        assertEquals(Move, state.getGamePhase());
+        assertEquals(1, state.getRoundCounter());
+        assertFalse(state.getActionTaken("Betrayed", 0));
+        assertFalse(state.getActionTaken("Sold", 0));
     }
 
 

@@ -207,7 +207,7 @@ public class SiriusForwardModel extends StandardForwardModel {
                             return !state.actionsTakenByPlayers.get("Favour").get(i);
                         default:
                             // needs to have cards available to take
-                            return moon.getDeck().getSize() > 0;
+                            return moon.getDeckSize() > 0;
                     }
                 });
                 // if -1, then we shift phase so the next player will be the first one with a Favour card
@@ -257,10 +257,13 @@ public class SiriusForwardModel extends StandardForwardModel {
                         break;
                     case TRADING:
                         Deck<SiriusCard> hand = state.getPlayerHand(player);
-                        retValue.addAll(saleOptionsFrom(hand, AMMONIA));
-                        retValue.addAll(saleOptionsFrom(hand, CONTRABAND));
-                        retValue.addAll(saleOptionsFrom(hand, SMUGGLER));
-                        retValue.add(new DoNothing()); // it is permissible to decide not to sell
+                        if (!state.getActionTaken("Sold", player)) {
+                            retValue.addAll(saleOptionsFrom(hand, AMMONIA));
+                            retValue.addAll(saleOptionsFrom(hand, CONTRABAND));
+                        }
+                        if (!state.getActionTaken("Betrayed", player))
+                            retValue.addAll(saleOptionsFrom(hand, SMUGGLER));
+                        retValue.add(new NoSale()); // it is permissible to decide not to sell
                         break;
                 }
                 if (retValue.isEmpty())
