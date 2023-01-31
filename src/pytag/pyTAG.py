@@ -63,6 +63,9 @@ class PyTAG():
     def getObs(self):
         return self.env.getFeatures()
 
+    def getPlayerID(self):
+        return self.env.getPlayerID()
+
     def reset(self):
         self.prev_reward = 0
         self.gs = self.env.reset()

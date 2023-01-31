@@ -75,6 +75,7 @@ if __name__ == "__main__":
             invalid_action = True
 
         next_obs, reward, done, info = env.step(action) # todo reward should be the delta, not total
+        playerID = env.getPlayerID()
         reward = np.clip(reward, -1, max_reward) # value, min, max
         if invalid_action:
             reward -= 0.1 # small penalty
