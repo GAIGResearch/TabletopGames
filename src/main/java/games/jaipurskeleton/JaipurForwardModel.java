@@ -263,10 +263,10 @@ public class JaipurForwardModel extends StandardForwardModel {
         if (nCardsInHand < 7) {
             // Option B: Take a single (non-camel) card from the market
             // TODO 2: For each good type in the market, if there is at least 1 of that type (which is not a Camel), construct one TakeCards action object to take 1 of that type from the market, and add it to the `actions` ArrayList. (The `howManyPerTypeGiveFromHand` argument should be null)
-
-            // Option A: Take several (non-camel) cards and replenish with cards of different types from hand
-            // TODO (Advanced, bonus, optional): Calculate legal option A variations
         }
+
+        // Option A: Take several (non-camel) cards and replenish with cards of different types from hand (or with camels)
+        // TODO (Advanced, bonus, optional): Calculate legal option A variations
 
         return actions;
     }

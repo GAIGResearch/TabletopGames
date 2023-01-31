@@ -70,8 +70,13 @@ public class TakeCards extends AbstractAction {
             jgs.getMarket().get(gt).decrement(howManyPerTypeTakeFromMarket.get(gt));
         }
         for(JaipurCard.GoodType gt: howManyPerTypeGiveFromHand.keySet()) {
-            jgs.getPlayerHands().get(playerID).get(gt).decrement(howManyPerTypeGiveFromHand.get(gt));
-            jgs.getMarket().get(gt).increment(howManyPerTypeGiveFromHand.get(gt));
+            if (gt == JaipurCard.GoodType.Camel) {
+                jgs.getPlayerHerds().get(playerID).decrement(howManyPerTypeGiveFromHand.get(gt));
+                jgs.getMarket().get(gt).increment(howManyPerTypeGiveFromHand.get(gt));
+            } else {
+                jgs.getPlayerHands().get(playerID).get(gt).decrement(howManyPerTypeGiveFromHand.get(gt));
+                jgs.getMarket().get(gt).increment(howManyPerTypeGiveFromHand.get(gt));
+            }
         }
 
         return true;
