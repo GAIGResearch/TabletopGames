@@ -204,7 +204,7 @@ public class SiriusForwardModel extends StandardForwardModel {
                             return canSell || canBetray;
                         case METROPOLIS:
                             // need to have not yet acted - in these locations we just get one action
-                            return !state.actionsTakenByPlayers.get("Favour").get(i);
+                            return !state.actionsTakenByPlayers.get("Favour").get(i) && !moon.policePresent;
                         default:
                             // needs to have cards available to take
                             return moon.getDeckSize() > 0;

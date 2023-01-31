@@ -357,7 +357,7 @@ public class TestBetrayalPhase {
     }
 
     @Test
-    public void policePresenceTakenAccountOfInNextPlayerDecision() {
+    public void policePresenceTakenAccountOfInNextPlayerDecisionOnMiningMoon() {
         state.setGamePhase(Draw);
         state.movePlayerTo(0, 1);
         state.getMoon(1).setPolicePresence();
@@ -367,7 +367,21 @@ public class TestBetrayalPhase {
         assertEquals(Move, state.getGamePhase());
         assertEquals(1, state.getRoundCounter());
         assertEquals(0, state.getCurrentPlayer());
+    }
 
+    @Test
+    public void policePresenceTakenAccountOfInNextPlayerDecisionOnMetropolis() {
+        state.setGamePhase(Draw);
+        state.movePlayerTo(0, 1);
+        state.movePlayerTo(1, 4);
+        state.getMoon(4).setPolicePresence();
+
+        fm.next(state, fm.computeAvailableActions(state).get(0));  // should be Take Card; and no other actions possible
+        assertEquals(Draw, state.getGamePhase());
+        assertEquals(0, state.getCurrentPlayer());  // we skip player 1 as they cannot draw a card
+        fm.next(state, fm.computeAvailableActions(state).get(0));  // should be Take Card; and no other actions possible
+        assertEquals(Move, state.getGamePhase());
+        assertEquals(0, state.getCurrentPlayer());  // we skip player 1 as they cannot draw a card
     }
 
     @Test
