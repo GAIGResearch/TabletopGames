@@ -9,7 +9,7 @@ import wandb
 class ReplayMemory():
     # this version stores all the data in torch tesnors and indexes the last position by a counter
     # The required space is blocked at the start by filling up the replay memory with torch.zeros, not dynamically allocated
-    def __init__(self, obs_space, batch_size=128, capacity=int(5e4), device="cpu"):
+    def __init__(self, obs_space, batch_size=32, capacity=int(5e4), device="cpu"):
         self.obs_space = obs_space
         self.batch_size = batch_size
         self.device = device
@@ -54,15 +54,12 @@ class DQN(nn.Module):
         self.input_dims = input_dims
         self.hidden_units = hidden_units
 
-        self.network = nn.Sequential(nn.Linear(self.input_dims, self.hidden_units), nn.ReLU(), nn.Linear(self.hidden_units, self.hidden_units))
-        out_size = self.hidden_units
+        self.network = nn.Sequential(nn.Linear(self.input_dims, self.hidden_units), nn.ReLU(), nn.Linear(self.hidden_units, self.hidden_units), nn.ReLU())
 
-        self.fc1 = nn.Linear(out_size, self.hidden_units)
         self.out = nn.Linear(self.hidden_units, self.n_actions)
 
     def forward(self, x):
         x = self.network(x)
-        x = F.relu(self.fc1(x))
         q = self.out(x)
         return q
 class DQNAgent():
@@ -74,10 +71,10 @@ class DQNAgent():
         self.input_dims = env.observation_space
 
         self.batch_size = 32
-        self.gamma = 0.99
+        self.gamma = 0.95
         self.norm_clip = 3
         self.update_counter = 0
-        self.lr = 1e-3
+        self.lr = 1e-1
 
         self.mem = ReplayMemory(self.input_dims, batch_size=self.batch_size)
 
@@ -93,6 +90,7 @@ class DQNAgent():
                 raise FileNotFoundError(model)
         self.target_net = DQN(self.input_dims, self.n_actions).to(self.device)
         self.optim = torch.optim.Adam(self.q_net.parameters(), lr=self.lr)
+        wandb.watch(self.q_net)
 
 
 
@@ -107,9 +105,9 @@ class DQNAgent():
                 q.detach().cpu().numpy()
         return action, q
 
-    def get_q(self, state, w=None):
+    def get_q(self, state):
         with torch.no_grad():
-            return self.q_net(state, w)
+            return self.q_net(state)
 
     def td_loss(self, transitions):
         q_values = self.q_net(transitions[0])

@@ -1,5 +1,6 @@
 import time
 import random
+from collections import deque
 
 import torch
 import wandb
@@ -42,6 +43,7 @@ if __name__ == "__main__":
     done = True
     invalid_action = False
     ep_steps = 0
+    running_wins = deque(maxlen=20)
     for step in range(MAX_STEPS):
         if done:
             # logging
@@ -49,13 +51,16 @@ if __name__ == "__main__":
             epsilon = get_epsilon(step, MAX_STEPS, 0.1)
 
             if step > 0:
+                running_wins.append(env.has_won())
                 if env.has_won():
                     wins += 1
+
                 # todo count and log invalid actions as well
                 # todo these steps and rewards are not episodic
+
                 wandb.log({
                     "train/steps": ep_steps,
-                    "train/win_rate": wins / episodes,
+                    "train/win_rate": np.mean(running_wins),
                     "train/rewards": rewards,
 
                 })
