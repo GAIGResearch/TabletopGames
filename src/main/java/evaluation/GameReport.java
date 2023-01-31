@@ -54,9 +54,9 @@ public class GameReport {
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tmetrics=       The full class name of an IMetricsCollection implementation. " +
-                            "                 A comma-delimited string can be provided to gather several classes of metrics." +
-                            "                 If different listeners included, then a pipe-delimited string can be provided" +
-                            "                 to specify different metrics per listener.\n" +
+                            "\t               A comma-delimited string can be provided to gather several classes of metrics." +
+                            "\t               If different listeners included, then a pipe-delimited string can be provided" +
+                            "\t               to specify different metrics per listener.\n" +
                             "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
                             "\t               This is ignored if a json file is provided for the listener.\n" +
                             "\t               Defaults to utilities.SummaryLogger. \n" +

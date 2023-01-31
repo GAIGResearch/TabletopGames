@@ -979,37 +979,38 @@ public class SingleTreeNode {
             policy = SIMPLE;
         }
         if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
+            // the check on unexpanded actions is to catch the rare case that we have not explored all actions at the root
+            // this can then lead to problems as treePolicyAction assumes it is only called on a completely expanded node
+            // (and this is good, as it throws an error as a bug-check if this is not true).
+            bestAction = treePolicyAction(false);
+        } else {
+            for (AbstractAction action : children.keySet()) {
+                if (!children.containsKey(action)) {
+                    throw new AssertionError("Hashcode / equals contract issue for " + action);
+                }
+                if (children.get(action) != null) {
+                    double childValue = actionVisits(action); // if ROBUST
+                    if (policy == SIMPLE)
+                        childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.epsilon);
 
-            if (params.selectionPolicy == TREE && unexpandedActions().isEmpty()) {
-                // the check on unexpanded actions is to catch the rare case that we have not explored all actions at the root
-                // this can then lead to problems as treePolicyAction assumes it is only called on a completely expanded node
-                // (and this is good, as it throws an error as a bug-check if this is not true).
-                bestAction = treePolicyAction(false);
-            } else {
-                for (AbstractAction action : children.keySet()) {
-                    if (!children.containsKey(action)) {
-                        throw new AssertionError("Hashcode / equals contract issue for " + action);
-                    }
-                    if (children.get(action) != null) {
-                        double childValue = actionVisits(action); // if ROBUST
-                        if (policy == SIMPLE)
-                            childValue = actionTotValue(action, decisionPlayer) / (actionVisits(action) + params.epsilon);
+                    // Apply small noise to break ties randomly
+                    childValue = noise(childValue, params.epsilon, rnd.nextDouble());
 
-                        // Apply small noise to break ties randomly
-                        childValue = noise(childValue, params.epsilon, rnd.nextDouble());
-
-                        // Save best value
-                        if (childValue > bestValue) {
-                            bestValue = childValue;
-                            bestAction = action;
-                        }
+                    // Save best value
+                    if (childValue > bestValue) {
+                        bestValue = childValue;
+                        bestAction = action;
                     }
                 }
             }
         }
 
         if (bestAction == null) {
-            throw new AssertionError("Unexpected - no selection made.");
+            if (nVisits == 1) {
+                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
+                bestAction = children.keySet().stream().findFirst().orElseThrow(() -> new AssertionError("No children"));
+            } else
+                throw new AssertionError("Unexpected - no selection made.");
         }
 
         return bestAction;

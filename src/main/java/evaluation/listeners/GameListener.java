@@ -34,27 +34,22 @@ public class GameListener {
     // List of metrics we are going to extract.
     protected HashMap<String, AbstractMetric> metrics;
 
+    protected Set<Event.GameEvent> eventsOfInterest = new HashSet<>();
+
     // Game this listener listens to
     protected Game game;
 
     public GameListener() {}
     public GameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
-        setup(logger);
+        this.metrics = new HashMap<>();
+        this.loggers = new HashMap<>();
         for (AbstractMetric m : metrics) {
             this.metrics.put(m.getName(), m);
+            eventsOfInterest.addAll(m.getEventTypes());
         }
-    }
-
-    /**
-     * Initializes loggers based on the type provided. Initializes metrics hashmap.
-     * @param logger - instance of logger class to be used for this listener.
-     */
-    private void setup(IStatisticLogger logger) {
-        this.loggers = new HashMap<>();
-        for (Event.GameEvent event: Event.GameEvent.values()) {
+        for (Event.GameEvent event: eventsOfInterest) {
             this.loggers.put(event, logger.emptyCopy(event.name()));
         }
-        this.metrics = new HashMap<>();
     }
 
     /**
@@ -63,6 +58,9 @@ public class GameListener {
      *               It's not guaranteed that the data fields are different to null, so a check is necessary.
      */
     public void onEvent(Event event) {
+        if (!eventsOfInterest.contains(event.type))
+            return;
+
         Map<String, Object> data = new TreeMap<>();
         Map<String, TAGStatSummary> aggregators = new HashMap<>();
 

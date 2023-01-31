@@ -441,6 +441,9 @@ public abstract class Utils {
 
             Class<?> clazz = Class.forName(cl);
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
+            if (constructor == null)
+                throw new AssertionError("No matching Constructor found for " + clazz);
+    //        System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
 

@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toList;
 
@@ -141,6 +142,10 @@ public class FileStatsLogger implements IStatisticLogger {
 
     @Override
     public FileStatsLogger emptyCopy(String id) {
-        return new FileStatsLogger(fileName, delimiter, append);
-    }  // todo include id in filename
+        String[] fileParts = fileName.split(Pattern.quote("."));
+        if (fileParts.length != 2)
+            throw new AssertionError("Filename does not conform to expected <stem>.<type>");
+        String newFileName = fileParts[0] + "_" + id + "." + fileParts[1];
+        return new FileStatsLogger(newFileName, delimiter, append);
+    }
 }
