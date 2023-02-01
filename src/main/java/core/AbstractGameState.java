@@ -2,24 +2,18 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
-import core.components.Area;
-import core.components.Component;
-import core.components.PartialObservableDeck;
-import core.interfaces.IComponentContainer;
-import core.interfaces.IExtendedSequence;
-import core.interfaces.IGamePhase;
-import evaluation.listeners.GameListener;
+import core.components.*;
+import core.interfaces.*;
+import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import games.GameType;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 import static java.util.stream.Collectors.toList;
-import static core.CoreConstants.GameResult.*;
 
 /**
  * Contains all game state information.
@@ -45,7 +39,7 @@ public abstract class AbstractGameState {
     // Migrated from TurnOrder...may move later
     protected int roundCounter, turnCounter, turnOwner, firstPlayer;
     protected int nPlayers;
-    protected List<GameListener> listeners = new ArrayList<>();
+    protected List<IGameListener> listeners = new ArrayList<>();
 
     // Timers for all players
     protected ElapsedCpuChessTimer[] playerTimer;
@@ -169,7 +163,7 @@ public abstract class AbstractGameState {
         turnOwner = newFirstPlayer;
     }
 
-    public void addListener(GameListener listener) {
+    public void addListener(IGameListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
     }

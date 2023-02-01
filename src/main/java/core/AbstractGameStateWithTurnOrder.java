@@ -1,7 +1,7 @@
 package core;
 
 import core.turnorders.TurnOrder;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.IGameListener;
 
 /**
  * Contains all game state information.
@@ -62,7 +62,7 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
     }
 
 
-    public void addListener(GameListener listener) {
+    public void addListener(IGameListener listener) {
         turnOrder.addListener(listener);
     }
 

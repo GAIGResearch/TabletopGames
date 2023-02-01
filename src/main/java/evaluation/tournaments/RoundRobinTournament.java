@@ -3,7 +3,8 @@ package evaluation.tournaments;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IStatisticLogger;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.IGameListener;
+import evaluation.loggers.FileStatsLogger;
 import games.GameType;
 import players.PlayerFactory;
 import players.mcts.BasicMCTSPlayer;
@@ -11,7 +12,6 @@ import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
-import evaluation.loggers.FileStatsLogger;
 
 import java.io.FileWriter;
 import java.util.*;
@@ -25,7 +25,7 @@ public class RoundRobinTournament extends AbstractTournament {
     private static boolean debug = false;
     public final boolean selfPlay;
     private final int gamesPerMatchUp;
-    protected List<GameListener> listeners;
+    protected List<IGameListener> listeners;
     public boolean verbose = true;
     double[] pointsPerPlayer;
     protected LinkedHashMap<Integer, Double> finalRanking; // contains index of agent in agents
@@ -160,7 +160,7 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int l = 0; l < listenerClasses.size(); l++) {
             IStatisticLogger logger = new FileStatsLogger(listenerFiles.get(l));
             String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(l);
-            GameListener gameTracker = GameListener.createListener(listenerClasses.get(l), logger, metricsClass);
+            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), logger, metricsClass);
             tournament.listeners.add(gameTracker);
         }
         tournament.runTournament();
@@ -188,7 +188,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
             reportResults(g);
         }
-        for (GameListener listener : listeners)
+        for (IGameListener listener : listeners)
             listener.allGamesFinished();
     }
 
@@ -252,7 +252,7 @@ public class RoundRobinTournament extends AbstractTournament {
         }
 
 
-        for (GameListener listener : listeners) {
+        for (IGameListener listener : listeners) {
             games.get(gameIdx).addListener(listener);
         }
 
@@ -354,10 +354,10 @@ public class RoundRobinTournament extends AbstractTournament {
         }
     }
 
-    public List<GameListener> getListeners() {
+    public List<IGameListener> getListeners() {
         return listeners;
     }
-    public void setListeners(List<GameListener> listeners) {
+    public void setListeners(List<IGameListener> listeners) {
         this.listeners = listeners;
     }
 }

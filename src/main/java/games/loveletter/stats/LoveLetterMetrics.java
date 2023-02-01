@@ -5,7 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Deck;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.IMetricsCollection;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.BaronAction;
@@ -22,7 +22,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
     public static class ActionsPlayed extends AbstractMetric
     {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             Deck<LoveLetterCard> played = ((LoveLetterGameState)e.state).getPlayerDiscardCards().get(e.playerID);
             StringBuilder ss = new StringBuilder();
             for (LoveLetterCard card : played.getComponents()) {
@@ -37,7 +37,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             return true;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
         }
     }
@@ -45,7 +45,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
     public static class ActionsPlayedWin extends AbstractMetric
     {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             StringBuilder ss = new StringBuilder();
             if (e.state.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN) {
                 Deck<LoveLetterCard> played = ((LoveLetterGameState)e.state).getPlayerDiscardCards().get(e.playerID);
@@ -62,7 +62,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             return true;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
         }
     }
@@ -70,7 +70,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
     public static class DiscardedCards extends AbstractMetric
     {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int nCards = 0;
             LoveLetterGameState llgs = (LoveLetterGameState) e.state;
             for (int i = 0; i < e.state.getNPlayers(); i++) {
@@ -83,7 +83,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             return true;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
@@ -100,11 +100,11 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return new HashSet<>(Arrays.asList(Event.GameEvent.ACTION_TAKEN, Event.GameEvent.GAME_OVER));
         }
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             if(e.type == Event.GameEvent.ACTION_TAKEN){
                 processAction(e.state, e.action);
             }else if(e.type == Event.GameEvent.GAME_OVER) {

@@ -3,9 +3,7 @@ package evaluation.loggers;
 import core.interfaces.IStatisticLogger;
 import evaluation.summarisers.TAGStatSummary;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -37,6 +35,9 @@ public class FileStatsLogger implements IStatisticLogger {
         this.delimiter = delimiter;
         this.fileName = fileName;
         this.append = append;
+    }
+
+    private void initialise() {
         try {
             File file = new File(fileName);
             if (file.exists() && append)
@@ -56,16 +57,30 @@ public class FileStatsLogger implements IStatisticLogger {
      * Use to register a set of data in one go. It is not possible to add new keys after the first call
      * of record(Map). Data linked to new, previously unseen keys will be ignored (and logged to console)
      *
-     * @param data A map of name -> value pairs
+     * @param rawData A map of name -> value pairs
      */
     @Override
-    public void record(Map<String, ?> data) {
+    public void record(Map<String, ?> rawData) {
+        if (writer == null) initialise();
+        // first we preprocess data to remove nesting
+        // Use a LinkedHashMap to preserve order
+        Map<String, Object> data = new LinkedHashMap<>();
+        for (String key : rawData.keySet()) {
+            Object thing = rawData.get(key);
+            if (thing instanceof Map) {
+                data.putAll((Map<? extends String, ?>) thing);
+            } else {
+                data.put(key, rawData.get(key));
+            }
+        }
         try {
             if (allKeys.isEmpty()) {
                 allKeys = data.keySet();
                 // then write a header line to the file
                 if (headerNeeded) {
                     String outputLine = String.join(delimiter, allKeys) + "\n";
+                    outputLine = outputLine.replaceAll(":.*?"  + delimiter, delimiter);
+                    outputLine = outputLine.replaceAll(":.*?\\n", "\n");
                     writer.write(outputLine);
                 }
             } else {

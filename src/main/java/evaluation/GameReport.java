@@ -1,10 +1,9 @@
 package evaluation;
 
-import core.AbstractParameters;
-import core.AbstractPlayer;
-import core.Game;
+import core.*;
 import core.interfaces.IStatisticLogger;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.IGameListener;
+import evaluation.listeners.MetricsGameListener;
 import games.GameType;
 import players.PlayerFactory;
 import utilities.Pair;
@@ -114,13 +113,13 @@ public class GameReport {
         if (nPlayers.size() > 1 && nPlayers.size() != games.size())
             throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list");
 
-        List<GameListener> gameTrackers = new ArrayList<>();
+        List<IGameListener> gameTrackers = new ArrayList<>();
         for (int i = 0; i < listenerClasses.size(); i++) {
             String logFile = logFiles.size() == 1 ? logFiles.get(0) : logFiles.get(i);
             String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(i);
             String listenerClass = listenerClasses.get(i);
             IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
-            GameListener gameTracker = GameListener.createListener(listenerClass, logger, metricsClass);
+            IGameListener gameTracker = IGameListener.createListener(listenerClass, logger, metricsClass);
             gameTrackers.add(gameTracker);
         }
 
@@ -148,7 +147,7 @@ public class GameReport {
                 Game game = params == null ?
                         gameType.createGameInstance(playerCount) :
                         gameType.createGameInstance(playerCount, params);
-                for (GameListener gameTracker : gameTrackers)
+                for (IGameListener gameTracker : gameTrackers)
                     game.addListener(gameTracker);
 
                 if (playerDescriptor.isEmpty() && opponentDescriptor.isEmpty()) {
@@ -187,7 +186,11 @@ public class GameReport {
             }
 
             // Visualise data for this game, if visualiser available
-            StatsVisualiser vis = StatsVisualiser.getVisualiserForGame(gameType, gameTrackers);
+            List<MetricsGameListener> metricListeners = gameTrackers.stream()
+                    .filter(gt -> gt instanceof MetricsGameListener)
+                    .map(gt -> ((MetricsGameListener)gt))
+                    .collect(toList());
+            StatsVisualiser vis = StatsVisualiser.getVisualiserForGame(gameType, metricListeners);
             if (vis != null) {
                 while (true) {
                     vis.repaint();
@@ -202,7 +205,7 @@ public class GameReport {
         }
 
         // Once all games are complete, let the gameTracker know
-        for (GameListener gameTracker : gameTrackers) {
+        for (IGameListener gameTracker : gameTrackers) {
             gameTracker.allGamesFinished();
         }
         if (statsLogger != null)

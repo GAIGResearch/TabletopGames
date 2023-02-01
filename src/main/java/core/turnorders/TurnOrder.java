@@ -4,18 +4,14 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameResult.*;
-import static core.CoreConstants.GameResult.LOSE;
 
 /**
  * This is purely for old-style game implementations from before January 2023
@@ -39,7 +35,7 @@ public abstract class TurnOrder {
     protected int turnCounter;  // Number of turns in this round
     protected int roundCounter;  // 1 round = (1 turn) x nPlayers(alive)
 
-    protected List<GameListener> listeners = new ArrayList<>();
+    protected List<IGameListener> listeners = new ArrayList<>();
 
     public TurnOrder(int nPlayers, int nMaxRounds) {
         reset();
@@ -295,7 +291,7 @@ public abstract class TurnOrder {
         return Objects.hash(nPlayers, turnOwner, turnCounter, roundCounter, firstPlayer, nMaxRounds);
     }
 
-    public void addListener(GameListener listener) {
+    public void addListener(IGameListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
     }

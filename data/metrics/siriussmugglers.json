@@ -5,12 +5,10 @@
       "class" : "evaluation.loggers.FileStatsLogger"
     },
     [
-      {"class": "evaluation.metrics.MiscGameMetrics$ActionSample" },
-      {"class": "evaluation.metrics.GameMetrics$PlayerType" },
-      {"class": "evaluation.metrics.GameMetrics$OrdinalPosition" },
-      {"class": "evaluation.metrics.MiscGameMetrics$ActionSample" },
-      {"class": "evaluation.metrics.GameMetrics$ActionSpace" },
-      {"class": "evaluation.metrics.GameMetrics$ActionTypes" },
+      {"class": "evaluation.metrics.GameMetrics$GameID", "args": [ [{"enum" : "evaluation.metrics.Event$GameEvent", "value" : "ACTION_CHOSEN"}]]},
+      {"class": "evaluation.metrics.GameMetrics$CurrentPlayer", "args":[ [{"enum" : "evaluation.metrics.Event$GameEvent", "value" : "ACTION_CHOSEN"}]]},
+      {"class": "evaluation.metrics.GameMetrics$GameDuration", "args": [ [{"enum" : "evaluation.metrics.Event$GameEvent", "value" : "ACTION_CHOSEN"}]]},
+      {"class": "evaluation.metrics.GameMetrics$ActionTypes", "args": [ [{"enum" : "evaluation.metrics.Event$GameEvent", "value" : "ACTION_CHOSEN"}]]},
       {"class": "games.sirius.SiriusActionAttributes$Location" },
       {"class": "games.sirius.SiriusActionAttributes$Thing" },
       {"class": "games.sirius.SiriusActionAttributes$Value" }

@@ -3,7 +3,7 @@ package test.games.coltexpress;
 import core.AbstractPlayer;
 import evaluation.loggers.SummaryLogger;
 import evaluation.metrics.AbstractMetric;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.MetricsGameListener;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
 import games.coltexpress.ColtExpressForwardModel;
@@ -41,7 +41,7 @@ public class TestRoundCardVisibilityAndShuffling {
         game.run();
     }
 
-    static class TestRoundEndListener extends GameListener {
+    static class TestRoundEndListener extends MetricsGameListener {
 
         public TestRoundEndListener(IStatisticLogger logger, AbstractMetric[] metrics) {
             super(logger, metrics);

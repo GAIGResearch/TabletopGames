@@ -1,7 +1,7 @@
 package games.sirius;
 
 import core.actions.AbstractAction;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.*;
 import games.sirius.actions.FavourForCartel;
 import games.sirius.actions.SellCards;
@@ -13,11 +13,11 @@ public class SiriusActionAttributes implements IMetricsCollection {
 
     public static class Location extends AbstractMetric {
 
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             SiriusGameState s = (SiriusGameState) e.state;
             return s.getMoon(s.getLocationIndex(s.getCurrentPlayer())).getComponentName();
         }
@@ -25,11 +25,11 @@ public class SiriusActionAttributes implements IMetricsCollection {
 
     public static class Thing extends AbstractMetric {
 
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             SiriusGameState s = (SiriusGameState) e.state;
             AbstractAction a = e.action;
             if (a == null) return "";
@@ -41,11 +41,11 @@ public class SiriusActionAttributes implements IMetricsCollection {
 
     public static class Value extends AbstractMetric {
 
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             SiriusGameState s = (SiriusGameState) e.state;
             AbstractAction a = e.action;
             if (a == null) return "";
