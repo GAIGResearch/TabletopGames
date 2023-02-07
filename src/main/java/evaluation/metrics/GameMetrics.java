@@ -14,6 +14,7 @@ import java.util.*;
 public class GameMetrics implements IMetricsCollection
 {
     public static class GameID extends AbstractMetric{
+        public GameID(){super();}
         public GameID(Event.GameEvent... args ){super(args);}
         @Override
         public Object run(MetricsGameListener listener, Event e) {
@@ -59,6 +60,7 @@ public class GameMetrics implements IMetricsCollection
     }
 
     public static class GameScore extends AbstractMetric{
+        public GameScore(){super();}
         public GameScore(Event.GameEvent... args ){super(args);}
         @Override
         public Object run(MetricsGameListener listener, Event e) {
@@ -97,6 +99,7 @@ public class GameMetrics implements IMetricsCollection
     }
 
     public static class CurrentPlayer extends AbstractMetric{
+        public CurrentPlayer(){super();}
         public CurrentPlayer(Event.GameEvent... args ){super(args);}
         @Override
         public Object run(MetricsGameListener listener, Event e) {
@@ -139,6 +142,7 @@ public class GameMetrics implements IMetricsCollection
     }
 
     public static class GameDuration extends AbstractMetric{
+        public GameDuration(){super();}
         public GameDuration(Event.GameEvent... args ){super(args);}
         @Override
         public Object run(MetricsGameListener listener, Event e) {
@@ -209,6 +213,7 @@ public class GameMetrics implements IMetricsCollection
     }
 
     public static class ActionTypes extends AbstractMetric {
+        public ActionTypes(){super();}
         public ActionTypes(Event.GameEvent... args ){super(args);}
         @Override
         public Object run(MetricsGameListener listener, Event e) {

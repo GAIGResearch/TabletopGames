@@ -35,7 +35,7 @@ public interface IGameListener {
 
     /**
      * Create listener based on given class, logger and metrics class. TODO: more than 1 metrics class
-     * @param listenerClass - class of listener, full path (e.g. evaluation.metrics.GameListener)
+     * @param listenerClass - class of listener, full path (e.g. evaluation.metrics.MetricsGameListener)
      * @param logger - class of logger (e.g. evaluation.loggers.SummaryLogger)
      * @param metricsClass - class of metrics, full path (e.g. evaluation.metrics.GameMetrics)
      * @return - GameListener instance to be attached to a game

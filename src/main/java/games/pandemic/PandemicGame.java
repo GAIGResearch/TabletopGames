@@ -1,6 +1,7 @@
 package games.pandemic;
 
 import core.*;
+import evaluation.listeners.IGameListener;
 import evaluation.listeners.MetricsGameListener;
 import games.GameType;
 import games.pandemic.stats.PandemicMetrics;
@@ -23,7 +24,7 @@ public class PandemicGame extends Game {
     }
 
     public static Game runCompetition(String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                                      boolean randomizeParameters, List<MetricsGameListener> listeners, int nRepetitions, ActionController ac){
+                                      boolean randomizeParameters, List<IGameListener> listeners, int nRepetitions, ActionController ac){
         boolean detailedStatistics = true;
         boolean printStatSummary = false;
 
@@ -67,7 +68,7 @@ public class PandemicGame extends Game {
         FileStatsLogger logger = new FileStatsLogger(logFile);
         MetricsGameListener pl = new MetricsGameListener(logger, new PandemicMetrics().getAllMetrics());
 
-        ArrayList<MetricsGameListener> listeners = new ArrayList<>();
+        List<IGameListener> listeners = new ArrayList<>();
         listeners.add((pl));
 
         List<AbstractPlayer> players = new ArrayList<>();
@@ -146,7 +147,7 @@ public class PandemicGame extends Game {
 
             // logging setup
             MetricsGameListener pl = new MetricsGameListener(new SummaryLogger(), new PandemicMetrics().getAllMetrics());
-            ArrayList<MetricsGameListener> listeners = new ArrayList<>();
+            List<IGameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 
             PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());

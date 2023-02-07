@@ -75,7 +75,7 @@ public class GameReport {
         String gameParams = getArg(args, "gameParam", "");
         String loggerClass = getArg(args, "logger", "evaluation.loggers.SummaryLogger");  // TODO: why is this separate, read all from json!
         String statsLog = getArg(args, "statsLog", "SummaryLogger.txt");
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.GameListener").split("\\|")));
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
         List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
         List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
         boolean randomGameParams = getArg(args, "randomGameParams", false);

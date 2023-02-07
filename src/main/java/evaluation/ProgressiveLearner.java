@@ -165,7 +165,7 @@ public class ProgressiveLearner {
 
         tournament.setListeners(new ArrayList<>());
         IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
-        IGameListener gameTracker = IGameListener.createListener("evaluation.metrics.GameListener", logger, null);
+        IGameListener gameTracker = IGameListener.createListener("evaluation.listeners.MetricsGameListener", logger, null);
         tournament.getListeners().add(gameTracker);
         tournament.runTournament();
         int winnerIndex = tournament.getWinnerIndex();
