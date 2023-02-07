@@ -84,7 +84,7 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\tmatchups=      The total number of matchups to run if mode=random...\n" +
                             "\t               ...or the number of matchups to run per combination of players if mode=exhaustive\n" +
                             "\tlistener=      (Optional) The full class name of an IGameListener implementation. \n" +
-                            "\t               Defaults to utilities.GameResultListener. \n" +
+                            "\t               Defaults to evaluation.metrics.MetricsGameListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tmetrics=       The full class name of an IMetricsCollection implementation. " +
@@ -131,7 +131,7 @@ public class RoundRobinTournament extends AbstractTournament {
             agents.addAll(PlayerFactory.createPlayers(playerDirectory));
             if (!statsLogPrefix.equals("")) {
                 for (AbstractPlayer agent : agents) {
-                    IStatisticLogger logger = IStatisticLogger.createLogger("utilities.SummaryLogger", statsLogPrefix + "_" + agent.toString() + ".txt");
+                    IStatisticLogger logger = IStatisticLogger.createLogger("evaluation.loggers.SummaryLogger", statsLogPrefix + "_" + agent.toString() + ".txt");
                     logger.record("Name", agent.toString());
                     agent.setStatsLogger(logger);
                 }
@@ -158,7 +158,8 @@ public class RoundRobinTournament extends AbstractTournament {
 
         tournament.listeners = new ArrayList<>();
         for (int l = 0; l < listenerClasses.size(); l++) {
-            IStatisticLogger logger = new FileStatsLogger(listenerFiles.get(l));
+            String logFile = listenerFiles.size() == 1 ? listenerFiles.get(0) : listenerFiles.get(l);
+            IStatisticLogger logger =  new FileStatsLogger(logFile);
             String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(l);
             IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), logger, metricsClass);
             tournament.listeners.add(gameTracker);
