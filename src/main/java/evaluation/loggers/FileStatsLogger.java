@@ -15,6 +15,7 @@ import static java.util.stream.Collectors.toList;
 public class FileStatsLogger implements IStatisticLogger {
 
     private String fileName;
+    private String actionName;
     private boolean append;
     private String delimiter;
     private FileWriter writer;
@@ -79,8 +80,8 @@ public class FileStatsLogger implements IStatisticLogger {
                 // then write a header line to the file
                 if (headerNeeded) {
                     String outputLine = String.join(delimiter, allKeys) + "\n";
-                    outputLine = outputLine.replaceAll(":.*?"  + delimiter, delimiter);
-                    outputLine = outputLine.replaceAll(":.*?\\n", "\n");
+                    outputLine = outputLine.replaceAll(":" + actionName  + delimiter, delimiter);
+                    outputLine = outputLine.replaceAll(":" + actionName + "\\n", "\n");
                     writer.write(outputLine);
                 }
             } else {
@@ -110,7 +111,7 @@ public class FileStatsLogger implements IStatisticLogger {
 
     @Override
     public void record(String key, Object datum) {
-        System.out.println("Datum ignored - FileStatsLogger only to be used with other record()");
+      //   System.out.println("Datum ignored - FileStatsLogger only to be used with other record() : " + key);
     }
 
     public void flush() {
@@ -161,6 +162,8 @@ public class FileStatsLogger implements IStatisticLogger {
         if (fileParts.length != 2)
             throw new AssertionError("Filename does not conform to expected <stem>.<type>");
         String newFileName = fileParts[0] + "_" + id + "." + fileParts[1];
-        return new FileStatsLogger(newFileName, delimiter, append);
+        FileStatsLogger retValue =  new FileStatsLogger(newFileName, delimiter, append);
+        retValue.actionName = id;
+        return retValue;
     }
 }

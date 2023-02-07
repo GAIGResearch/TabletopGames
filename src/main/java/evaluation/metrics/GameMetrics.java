@@ -27,9 +27,24 @@ public class GameMetrics implements IMetricsCollection
     }
 
     public static class GameName extends AbstractMetric{
+        public GameName(){super();}
+        public GameName(Event.GameEvent... args ){super(args);}
         @Override
         public Object run(MetricsGameListener listener, Event e) {
             return listener.getGame().getGameType().name();
+        }
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.ABOUT_TO_START);
+        }
+    }
+
+    public static class PlayerCount extends AbstractMetric{
+        public PlayerCount(){super();}
+        public PlayerCount(Event.GameEvent... args ){super(args);}
+        @Override
+        public Object run(MetricsGameListener listener, Event e) {
+            return e.state.getNPlayers();
         }
         @Override
         public Set<Event.GameEvent> getDefaultEventTypes() {
@@ -70,6 +85,24 @@ public class GameMetrics implements IMetricsCollection
         @Override
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+    }
+
+    public static class FinalScore extends AbstractMetric{
+        public FinalScore(){super();}
+        public FinalScore(Event.GameEvent... args ){super(args);}
+        @Override
+        public Object run(MetricsGameListener listener, Event e) {
+            int player = e.state.getCurrentPlayer();
+            return e.state.getGameScore(player);
+        }
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+        @Override
+        public boolean isRecordedPerPlayer() {
+            return true;
         }
     }
 
