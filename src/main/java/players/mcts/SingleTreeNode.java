@@ -55,6 +55,10 @@ public class SingleTreeNode {
     Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
     // Depth of this node
     int depth;
+    // three variables to track rollout - these were orginally local in rollout(); but
+    // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
+    // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
+    int rolloutDepth, roundAtStartOfRollout, turnAtStartOfRollout, lastActorInRollout;
     // the id of the player who makes the decision at this node
     int decisionPlayer;
     int round, turn, turnOwner;
@@ -282,7 +286,7 @@ public class SingleTreeNode {
         // Monte carlo rollout: return value of MC rollout from the newly added node
         List<Pair<Integer, AbstractAction>> rolloutActions = new ArrayList<>();
         int lastActorInTree = treeActions.isEmpty() ? decisionPlayer : treeActions.get(treeActions.size() - 1).a;
-        double[] delta = selected.rollOut(rolloutActions, startingValues, decisionPlayer, lastActorInTree);
+        double[] delta = selected.rollOut(rolloutActions, startingValues, lastActorInTree);
         // Back up the value of the rollout through the tree
         rolloutActionsTaken += rolloutActions.size();
         selected.backUp(delta);
@@ -427,7 +431,7 @@ public class SingleTreeNode {
                     // Because OLS = state in this case, so we need to copy it before updating it and
                     // using it to populate a new node.
                 }
-                cur.advance(nextState, chosen);
+                cur.advance(nextState, chosen, false);
                 // then create the new node
                 return cur.expandNode(chosen, nextState);
             } else {
@@ -437,7 +441,7 @@ public class SingleTreeNode {
                     // We do not need to copy the state, as we advance this as we descend the tree.
                     // In open loop we never re-use the state...the only purpose of storing it on the Node is
                     // to pick it up in the next uct() call as we descend the tree
-                    cur.advance(cur.openLoopState, chosen);
+                    cur.advance(cur.openLoopState, chosen, false);
                 }
                 cur = cur.nextNodeInTree(chosen);
                 // else we keep cur, but will exit immediately
@@ -526,12 +530,16 @@ public class SingleTreeNode {
      * @param gs  - current game state
      * @param act - action to apply
      */
-    protected void advance(AbstractGameState gs, AbstractAction act) {
+    protected void advance(AbstractGameState gs, AbstractAction act, boolean inRollout) {
         // we execute a copy(), because this can change the action, so we then don't find the node later!
+        if (inRollout){
+            rolloutDepth++;
+            lastActorInRollout = gs.getCurrentPlayer();
+        }
         forwardModel.next(gs, act.copy());
         root.fmCallsCount++;
         if (params.opponentTreePolicy == SelfOnly && gs.getCurrentPlayer() != decisionPlayer)
-            advanceToTurnOfPlayer(gs, decisionPlayer);
+            advanceToTurnOfPlayer(gs, decisionPlayer, inRollout);
     }
 
     /**
@@ -540,15 +548,19 @@ public class SingleTreeNode {
      *
      * @param id
      */
-    protected void advanceToTurnOfPlayer(AbstractGameState gs, int id) {
+    protected void advanceToTurnOfPlayer(AbstractGameState gs, int id, boolean inRollout) {
         // For the moment we only have one opponent model - that of a random player
-        while (gs.getCurrentPlayer() != id && gs.isNotTerminalForPlayer(id)) {
+        while (gs.getCurrentPlayer() != id && gs.isNotTerminalForPlayer(id) && !(inRollout && finishRollout(gs))) {
             //       AbstractGameState preGS = gs.copy();
             AbstractPlayer oppModel = opponentModels[gs.getCurrentPlayer()];
             List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs);
             if (availableActions.isEmpty())
                 throw new AssertionError("Should always have at least one action possible...");
             AbstractAction action = oppModel._getAction(gs, availableActions);
+            if (inRollout){
+                rolloutDepth++;
+                lastActorInRollout = gs.getCurrentPlayer();
+            }
             forwardModel.next(gs, action);
             root.fmCallsCount++;
         }
@@ -802,10 +814,11 @@ public class SingleTreeNode {
      *
      * @return - value of rollout.
      */
-    protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int decisionPlayer, int lastActor) {
-        int rolloutDepth = 0; // counting from end of tree
-
-        int roundAtStartOfRollout = openLoopState.getRoundCounter();
+    protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int lastActor) {
+        rolloutDepth = 0; // counting from end of tree
+        lastActorInRollout = lastActor;
+        roundAtStartOfRollout = openLoopState.getRoundCounter();
+        turnAtStartOfRollout = openLoopState.getTurnCounter();
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
         AbstractGameState rolloutState = openLoopState;
@@ -819,18 +832,14 @@ public class SingleTreeNode {
                 root.copyCount++;
             }
 
-            while (!finishRollout(rolloutState, rolloutDepth, decisionPlayer, lastActor, roundAtStartOfRollout)) {
+            while (!finishRollout(rolloutState)) {
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState);
                 if (availableActions.isEmpty())
                     break;
                 AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()]._getAction(rolloutState, availableActions);
-                lastActor = rolloutState.getCurrentPlayer();
-                rolloutActions.add(new Pair<>(lastActor, next));
-                int startingFMCalls = root.fmCallsCount;
-                advance(rolloutState, next);
-                // rollout moves can be tracked by total forward model calls
-                // as these may occur for opponent moves, which should count against our budget
-                rolloutDepth += (root.fmCallsCount - startingFMCalls);
+                lastActorInRollout = rolloutState.getCurrentPlayer();
+                rolloutActions.add(new Pair<>(lastActorInRollout, next));
+                advance(rolloutState, next, true);
             }
         }
         // Evaluate final state and return normalised score
@@ -848,21 +857,20 @@ public class SingleTreeNode {
      * Checks if rollout is finished. Rollouts end on maximum length, or if game ended.
      *
      * @param rollerState - current state
-     * @param depth       - current depth
      * @return - true if rollout finished, false otherwise
      */
-    private boolean finishRollout(AbstractGameState rollerState, int depth, int decisionPlayer, int lastActor, int roundAtStartOfRollout) {
+    private boolean finishRollout(AbstractGameState rollerState) {
         if (!rollerState.isNotTerminal())
             return true;
         int currentActor = rollerState.getCurrentPlayer();
-        if (depth >= params.rolloutLength) {
+        if (rolloutDepth >= params.rolloutLength) {
             switch (params.rolloutTermination) {
                 case DEFAULT:
                     return true;
                 case END_TURN:
-                    return lastActor == decisionPlayer && currentActor != decisionPlayer;
+                    return lastActorInRollout == decisionPlayer && currentActor != decisionPlayer;
                 case START_TURN:
-                    return lastActor != decisionPlayer && currentActor == decisionPlayer;
+                    return lastActorInRollout != decisionPlayer && currentActor == decisionPlayer;
                 case END_ROUND:
                     return rollerState.getRoundCounter() != roundAtStartOfRollout;
             }
