@@ -238,7 +238,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
     }
 
     @Override
-    public Double getTiebreak(int playerId) {
+    public double getTiebreak(int playerId) {
         // we use the number of bullet cards
         // in the players own deck and hands
         // fewer is better - so we return a negative number
@@ -249,7 +249,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         for (ColtExpressCard card : playerHandCards.get(playerId).getComponents())
             if (card.cardType == ColtExpressCard.CardType.Bullet)
                 bulletsTaken++;
-        return (double) -bulletsTaken;
+        return -bulletsTaken;
     }
 
     @Override
