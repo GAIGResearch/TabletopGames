@@ -6,32 +6,36 @@ import utilities.Pair;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class STNRollout extends SingleTreeNode {
 
-    static int lastActorInTree, staticRolloutDepth;
+    static int lastActorInTree, staticRolloutDepth, staticStartTurn, staticStartRound;
     List<Pair<Integer, AbstractAction>> rolloutActions;
 
     @Override
     protected void oneSearchIteration() {
         super.oneSearchIteration();
-        // convenience data for debugging
-//        lastRolloutData = new RolloutData(rolloutDepth, roundAtStartOfRollout, openLoopState.getRoundCounter(),
-//                turnAtStartOfRollout, openLoopState.getTurnCounter(),
-//                lastActorInTree, openLoopState.getCurrentPlayer(), rolloutActions);
 
         // Now we can run some tests on this
         if (openLoopState == null || !openLoopState.isNotTerminal())
             return; // don't test terminal states
         switch (params.rolloutTermination) {
             case DEFAULT:
+                // in this case we just check that we have 10 actions in the rollout
                 assertEquals(10, rolloutActions.size());
                 assertEquals(10, staticRolloutDepth);
                 break;
             case START_TURN:
                 break;
             case END_TURN:
+                // in this case we have at least 10 actions, and finish at the end of a player's Turn
+                // which means that the current player is not the same as the player who acted last
+                // and the last player who acted should be the decision player [hmm...or possibly not]
+                assertTrue(rolloutActions.size() >= 10);
+                assertTrue(staticRolloutDepth >= 10);
+                assertNotEquals(openLoopState.getTurnOwner(), rolloutActions.get(rolloutActions.size() - 1).a.intValue());
+      //          assertEquals(0, rolloutActions.get(rolloutActions.size() - 1).a.intValue());
                 break;
             case END_ROUND:
                 break;
@@ -48,6 +52,8 @@ public class STNRollout extends SingleTreeNode {
         lastActorInTree = lastActor;  // a bit of a hack to track the last Actor in tree search
         double[] retValue = super.rollout(rolloutActions, startingValues, lastActor);
         staticRolloutDepth = rolloutDepth;
+        staticStartRound = roundAtStartOfRollout;
+        staticStartTurn = turnAtStartOfRollout;
         return retValue;
 
     }

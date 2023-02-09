@@ -514,6 +514,9 @@ public class Game {
         // Get actions for the player
         s = System.nanoTime();
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+        if (observedActions.size() == 0) {
+            throw new AssertionError("No actions available for player " + activePlayer);
+        }
         actionComputeTime += (System.nanoTime() - s);
         actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
 

@@ -17,7 +17,18 @@ public class RolloutTerminationTests {
 
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;
-    GameType[] gamesToTest = {GameType.LoveLetter, GameType.Dominion, GameType.Virus, GameType.Poker};
+    GameType[] gamesToTest = {
+            GameType.LoveLetter,
+            GameType.Dominion,
+            GameType.Virus,
+            GameType.Poker,
+            GameType.DiceMonastery,
+            GameType.Catan,
+            GameType.ColtExpress,
+            GameType.CantStop,
+            GameType.Diamant,
+            GameType.SushiGo
+    };
 
 
     @Before
@@ -29,7 +40,7 @@ public class RolloutTerminationTests {
         params.maxTreeDepth = 10;
         params.rolloutLength = 10;
         params.budgetType = PlayerConstants.BUDGET_ITERATIONS;
-        params.budget = 100;
+        params.budget = 200;
         params.selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
         params.discardStateAfterEachIteration = false;
         params.K = 1.0;
@@ -37,7 +48,7 @@ public class RolloutTerminationTests {
 
     public Game createGame(MCTSParams params, GameType gameType) {
         mctsPlayer = new TestMCTSPlayer(params, STNRollout::new);
-        mctsPlayer.setDebug(true);
+        mctsPlayer.setDebug(false);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
@@ -48,7 +59,32 @@ public class RolloutTerminationTests {
     }
 
     @Test
-    public void testDEFAULT() {
+    public void test_MaxN_DEFAULT() {
+        params.rolloutTermination = MCTSEnums.RolloutTermination.DEFAULT;
+        for (GameType gt : gamesToTest) {
+            if (gt == GameType.GameTemplate) continue;
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
+
+
+    @Test
+    public void test_MaxN_END_TURN() {
+        params.rolloutTermination = MCTSEnums.RolloutTermination.END_TURN;
+        for (GameType gt : gamesToTest) {
+            if (gt == GameType.GameTemplate) continue;
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
+
+
+    @Test
+    public void test_MaxN_START_TURN() {
+        params.rolloutTermination = MCTSEnums.RolloutTermination.START_TURN;
         for (GameType gt : gamesToTest) {
             if (gt == GameType.GameTemplate) continue;
             Game game = createGame(params, gt);

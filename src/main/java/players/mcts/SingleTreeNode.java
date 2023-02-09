@@ -191,7 +191,7 @@ public class SingleTreeNode {
             }
             for (AbstractAction action : actionsFromOpenLoopState) {
                 if (!children.containsKey(action)) {
-                    children.put(action, null); // mark a new node to be expanded
+                    children.put(action.copy(), null); // mark a new node to be expanded
                     // This *does* rely on a good equals method being implemented for Actions
                     if (!children.containsKey(action))
                         throw new AssertionError("We have an action that does not obey the equals/hashcode contract" + action);
@@ -279,8 +279,8 @@ public class SingleTreeNode {
 
         List<Pair<Integer, AbstractAction>> treeActions = new ArrayList<>();
         SingleTreeNode selected = treePolicy(treeActions);
-        if (selected == this && nVisits > 50)
-            System.out.println("Hmm");
+        if (selected == this && nVisits > 3)
+            throw new AssertionError("We have not expanded or selected a new node");
         // Monte carlo rollout: return value of MC rollout from the newly added node
         List<Pair<Integer, AbstractAction>> rolloutActions = new ArrayList<>();
         int lastActorInTree = treeActions.isEmpty() ? decisionPlayer : treeActions.get(treeActions.size() - 1).a;
@@ -834,7 +834,7 @@ public class SingleTreeNode {
             while (!finishRollout(rolloutState)) {
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState);
                 if (availableActions.isEmpty())
-                    break;
+                    throw new AssertionError("No actions available in rollout!");
                 AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()]._getAction(rolloutState, availableActions);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
                 rolloutActions.add(new Pair<>(lastActorInRollout, next));
@@ -861,7 +861,7 @@ public class SingleTreeNode {
     private boolean finishRollout(AbstractGameState rollerState) {
         if (!rollerState.isNotTerminal())
             return true;
-        int currentActor = rollerState.getCurrentPlayer();
+        int currentActor = rollerState.getTurnOwner();
         if (rolloutDepth >= params.rolloutLength) {
             switch (params.rolloutTermination) {
                 case DEFAULT:
