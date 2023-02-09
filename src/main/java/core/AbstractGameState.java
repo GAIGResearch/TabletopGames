@@ -114,11 +114,7 @@ public abstract class AbstractGameState {
     }
     public int getNPlayers() { return nPlayers; }
     public int getCurrentPlayer() {
-        if (isActionInProgress()) {
-            return actionsInProgress.peek().getCurrentPlayer(this);
-        }
-        // else we have the data locally
-        return turnOwner;
+        return isActionInProgress() ? actionsInProgress.peek().getCurrentPlayer(this) : turnOwner;
     }
     public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
     public final IGamePhase getGamePhase() {
@@ -171,7 +167,9 @@ public abstract class AbstractGameState {
     } // package level deliberately
     void advanceGameTick() {tick++;}
 
-    public void setTurnOwner(int newTurnOwner) {turnOwner = newTurnOwner;}
+    public void setTurnOwner(int newTurnOwner) {
+        turnOwner = newTurnOwner;
+    }
     public void setFirstPlayer(int newFirstPlayer) {
         firstPlayer = newFirstPlayer;
         turnOwner = newFirstPlayer;

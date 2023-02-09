@@ -1,20 +1,14 @@
 package players.mcts;
 
-import core.AbstractForwardModel;
-import core.AbstractGameState;
-import core.AbstractPlayer;
+import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
 import players.PlayerConstants;
-import utilities.ElapsedCpuTimer;
-import utilities.Pair;
-import utilities.Utils;
+import utilities.*;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.ToDoubleBiFunction;
+import java.util.function.*;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.*;
@@ -24,8 +18,7 @@ import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.*;
 import static players.mcts.MCTSEnums.Strategies.MAST;
-import static utilities.Utils.entropyOf;
-import static utilities.Utils.noise;
+import static utilities.Utils.*;
 
 public class SingleTreeNode {
 
@@ -51,14 +44,14 @@ public class SingleTreeNode {
     // Number of visits to this node
     protected int nVisits;
     protected int rolloutActionsTaken;
+    // variables to track rollout - these were originally local in rollout(); but
+    // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
+    // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
+    protected int rolloutDepth, roundAtStartOfRollout, turnAtStartOfRollout, lastActorInRollout;
     List<AbstractAction> actionsFromOpenLoopState = new ArrayList<>();
     Map<AbstractAction, Double> advantagesOfActionsFromOLS = new HashMap<>();
     // Depth of this node
     int depth;
-    // three variables to track rollout - these were orginally local in rollout(); but
-    // having them on the node reduces verbiage in passing to advance() to check rollout termination in some edge cases
-    // (specifically when using SelfOnly trees, with START/END_TURN/ROUND rollout termination conditions
-    int rolloutDepth, roundAtStartOfRollout, turnAtStartOfRollout, lastActorInRollout;
     // the id of the player who makes the decision at this node
     int decisionPlayer;
     int round, turn, turnOwner;
@@ -79,6 +72,7 @@ public class SingleTreeNode {
     // The total value of all trajectories through this node (one element per player)
     private double[] totValue;
     private double[] totSquares;
+    private Supplier<? extends SingleTreeNode> factory;
     // Total value of this node
 
 
@@ -87,9 +81,9 @@ public class SingleTreeNode {
     }
 
     // Called in tree expansion
-    public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, Random rnd) {
-        SingleTreeNode retValue = (player.params.opponentTreePolicy == OMA || player.params.opponentTreePolicy == OMA_All)
-                ? new OMATreeNode() : new SingleTreeNode();
+    public static SingleTreeNode createRootNode(MCTSPlayer player, AbstractGameState state, Random rnd, Supplier<? extends SingleTreeNode> factory) {
+        SingleTreeNode retValue = factory.get();
+        retValue.factory = factory;
         retValue.decisionPlayer = state.getCurrentPlayer();
         retValue.params = player.params;
         retValue.forwardModel = player.getForwardModel();
@@ -119,8 +113,9 @@ public class SingleTreeNode {
         return retValue;
     }
 
-    public static SingleTreeNode createChildNode(SingleTreeNode parent, AbstractAction actionToReach, AbstractGameState state) {
-        SingleTreeNode retValue = (parent instanceof OMATreeNode) ? new OMATreeNode() : new SingleTreeNode();
+    public static SingleTreeNode createChildNode(SingleTreeNode parent, AbstractAction actionToReach, AbstractGameState state,
+                                                 Supplier<? extends SingleTreeNode> factory) {
+        SingleTreeNode retValue = factory.get();
         retValue.instantiate(parent, actionToReach, state);
         return retValue;
     }
@@ -144,6 +139,7 @@ public class SingleTreeNode {
 
         if (parent != null) {
             depth = parent.depth + 1;
+            factory = parent.factory;
         } else {
             depth = 0;
         }
@@ -283,12 +279,15 @@ public class SingleTreeNode {
 
         List<Pair<Integer, AbstractAction>> treeActions = new ArrayList<>();
         SingleTreeNode selected = treePolicy(treeActions);
+        if (selected == this && nVisits > 50)
+            System.out.println("Hmm");
         // Monte carlo rollout: return value of MC rollout from the newly added node
         List<Pair<Integer, AbstractAction>> rolloutActions = new ArrayList<>();
         int lastActorInTree = treeActions.isEmpty() ? decisionPlayer : treeActions.get(treeActions.size() - 1).a;
-        double[] delta = selected.rollOut(rolloutActions, startingValues, lastActorInTree);
+        double[] delta = selected.rollout(rolloutActions, startingValues, lastActorInTree);
         // Back up the value of the rollout through the tree
         rolloutActionsTaken += rolloutActions.size();
+
         selected.backUp(delta);
         updateMASTStatistics(treeActions, rolloutActions, delta);
     }
@@ -513,7 +512,7 @@ public class SingleTreeNode {
     protected SingleTreeNode expandNode(AbstractAction actionCopy, AbstractGameState nextState) {
         // then instantiate a new node
         int nextPlayer = params.opponentTreePolicy.selfOnlyTree ? decisionPlayer : nextState.getCurrentPlayer();
-        SingleTreeNode tn = SingleTreeNode.createChildNode(this, actionCopy, nextState);
+        SingleTreeNode tn = SingleTreeNode.createChildNode(this, actionCopy, nextState, factory);
         SingleTreeNode[] nodeArray = new SingleTreeNode[nextState.getNPlayers()];
         nodeArray[nextPlayer] = tn; // we store this by id of the player who will take their turn next
         children.put(actionCopy, nodeArray);
@@ -532,7 +531,7 @@ public class SingleTreeNode {
      */
     protected void advance(AbstractGameState gs, AbstractAction act, boolean inRollout) {
         // we execute a copy(), because this can change the action, so we then don't find the node later!
-        if (inRollout){
+        if (inRollout) {
             rolloutDepth++;
             lastActorInRollout = gs.getCurrentPlayer();
         }
@@ -557,7 +556,7 @@ public class SingleTreeNode {
             if (availableActions.isEmpty())
                 throw new AssertionError("Should always have at least one action possible...");
             AbstractAction action = oppModel._getAction(gs, availableActions);
-            if (inRollout){
+            if (inRollout) {
                 rolloutDepth++;
                 lastActorInRollout = gs.getCurrentPlayer();
             }
@@ -621,10 +620,10 @@ public class SingleTreeNode {
                 // need to create a new node - this is because we have a different player acting than expected
                 if (params.opponentTreePolicy.selfOnlyTree)
                     throw new AssertionError("Not sure this should be possible though");
-                nodeArray[nextPlayer] = SingleTreeNode.createChildNode(this, actionChosen.copy(), openLoopState);
+                nodeArray[nextPlayer] = SingleTreeNode.createChildNode(this, actionChosen.copy(), openLoopState, factory);
                 nextNode = nodeArray[nextPlayer];
             } else if (params.opponentTreePolicy.selfOnlyTree && nextNode.decisionPlayer != decisionPlayer) {
-                nodeArray[nextPlayer] = SingleTreeNode.createChildNode(this, actionChosen.copy(), openLoopState);
+                nodeArray[nextPlayer] = SingleTreeNode.createChildNode(this, actionChosen.copy(), openLoopState, factory);
                 nextNode = nodeArray[nextPlayer];
             } else {
                 // pick up the existing one, and set the state
@@ -814,7 +813,7 @@ public class SingleTreeNode {
      *
      * @return - value of rollout.
      */
-    protected double[] rollOut(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int lastActor) {
+    protected double[] rollout(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int lastActor) {
         rolloutDepth = 0; // counting from end of tree
         lastActorInRollout = lastActor;
         roundAtStartOfRollout = openLoopState.getRoundCounter();
@@ -1126,4 +1125,5 @@ public class SingleTreeNode {
             retValue.append(new TreeStatistics(root));
         return retValue.toString();
     }
+
 }
