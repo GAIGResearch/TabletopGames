@@ -93,4 +93,68 @@ public class RolloutTerminationTests {
         }
     }
 
+    @Test
+    public void test_MaxN_END_ROUND() {
+        params.rolloutTermination = MCTSEnums.RolloutTermination.END_ROUND;
+        for (GameType gt : gamesToTest) {
+            if (gt == GameType.GameTemplate) continue;
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
+
+
+    @Test
+    public void test_SelfOnly_DEFAULT() {
+        params.rolloutTermination = MCTSEnums.RolloutTermination.DEFAULT;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
+        for (GameType gt : gamesToTest) {
+            if (gt == GameType.GameTemplate) continue;
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
+
+
+    @Test
+    public void test_SelfOnly_END_TURN() {
+        params.rolloutTermination = MCTSEnums.RolloutTermination.END_TURN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
+        for (GameType gt : gamesToTest) {
+            if (gt == GameType.GameTemplate) continue;
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
+
+
+    @Test
+    public void test_SelfOnly_START_TURN() {
+        params.rolloutTermination = MCTSEnums.RolloutTermination.START_TURN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
+        for (GameType gt : gamesToTest) {
+            if (gt == GameType.GameTemplate) continue;
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
+
+    @Test
+    public void test_SelfOnly_END_ROUND() {
+        params.rolloutTermination = MCTSEnums.RolloutTermination.END_ROUND;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.SelfOnly;
+        for (GameType gt : gamesToTest) {
+            if (gt == GameType.GameTemplate) continue;
+            Game game = createGame(params, gt);
+            System.out.println("Running " + gt.name());
+            game.run();
+        }
+    }
+
+
+
 }

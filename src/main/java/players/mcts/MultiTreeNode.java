@@ -100,8 +100,8 @@ public class MultiTreeNode extends SingleTreeNode {
         for (int i = 0; i < currentLocation.length; i++)
             currentLocation[i] = roots[i];
 
-        List<Pair<Integer, AbstractAction>> actionsInTree = new ArrayList<>();
-        List<Pair<Integer, AbstractAction>> actionsInRollout = new ArrayList<>();
+        actionsInTree = new ArrayList<>();
+        actionsInRollout = new ArrayList<>();
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         do {

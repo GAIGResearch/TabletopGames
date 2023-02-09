@@ -20,24 +20,32 @@ public class STNRollout extends SingleTreeNode {
         // Now we can run some tests on this
         if (openLoopState == null || !openLoopState.isNotTerminal())
             return; // don't test terminal states
+
+        assertEquals(staticRolloutDepth, rolloutActions.size());
         switch (params.rolloutTermination) {
             case DEFAULT:
                 // in this case we just check that we have 10 actions in the rollout
-                assertEquals(10, rolloutActions.size());
                 assertEquals(10, staticRolloutDepth);
                 break;
             case START_TURN:
+                // in this case we have at least 10 actions, and finish at the end of a player's Turn
+                // which means that the current player should be the MCTS player, and
+                // the last player should be someone else
+                assertTrue(staticRolloutDepth >= 10);
+                assertEquals(0, openLoopState.getTurnOwner());
+                assertNotEquals(0, rolloutActions.get(rolloutActions.size() - 1).a.intValue());
                 break;
             case END_TURN:
                 // in this case we have at least 10 actions, and finish at the end of a player's Turn
                 // which means that the current player is not the same as the player who acted last
-                // and the last player who acted should be the decision player [hmm...or possibly not]
-                assertTrue(rolloutActions.size() >= 10);
+                // and the last player who acted should be the decision player
                 assertTrue(staticRolloutDepth >= 10);
                 assertNotEquals(openLoopState.getTurnOwner(), rolloutActions.get(rolloutActions.size() - 1).a.intValue());
-      //          assertEquals(0, rolloutActions.get(rolloutActions.size() - 1).a.intValue());
+                assertEquals(0, rolloutActions.get(rolloutActions.size() - 1).a.intValue());
                 break;
             case END_ROUND:
+                assertTrue(staticRolloutDepth >= 10);
+                assertNotEquals(openLoopState.getRoundCounter(), staticStartRound);
                 break;
         }
     }
@@ -48,9 +56,9 @@ public class STNRollout extends SingleTreeNode {
     }
 
     @Override
-    protected double[] rollout(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int lastActor) {
+    protected double[] rollout(double[] startingValues, int lastActor) {
         lastActorInTree = lastActor;  // a bit of a hack to track the last Actor in tree search
-        double[] retValue = super.rollout(rolloutActions, startingValues, lastActor);
+        double[] retValue = super.rollout(startingValues, lastActor);
         staticRolloutDepth = rolloutDepth;
         staticStartRound = roundAtStartOfRollout;
         staticStartTurn = turnAtStartOfRollout;

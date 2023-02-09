@@ -74,7 +74,8 @@ public class SingleTreeNode {
     private double[] totSquares;
     private Supplier<? extends SingleTreeNode> factory;
     // Total value of this node
-
+    List<Pair<Integer, AbstractAction>> actionsInTree;
+    List<Pair<Integer, AbstractAction>> actionsInRollout;
 
     protected SingleTreeNode() {
 
@@ -277,19 +278,20 @@ public class SingleTreeNode {
         double[] startingValues = IntStream.range(0, openLoopState.getNPlayers())
                 .mapToDouble(i -> heuristic.evaluateState(openLoopState, i)).toArray();
 
-        List<Pair<Integer, AbstractAction>> treeActions = new ArrayList<>();
-        SingleTreeNode selected = treePolicy(treeActions);
+        actionsInTree = new ArrayList<>();
+        actionsInRollout = new ArrayList<>();
+
+        SingleTreeNode selected = treePolicy(actionsInTree);
         if (selected == this && nVisits > 3)
             throw new AssertionError("We have not expanded or selected a new node");
         // Monte carlo rollout: return value of MC rollout from the newly added node
-        List<Pair<Integer, AbstractAction>> rolloutActions = new ArrayList<>();
-        int lastActorInTree = treeActions.isEmpty() ? decisionPlayer : treeActions.get(treeActions.size() - 1).a;
-        double[] delta = selected.rollout(rolloutActions, startingValues, lastActorInTree);
+        int lastActorInTree = actionsInTree.isEmpty() ? decisionPlayer : actionsInTree.get(actionsInTree.size() - 1).a;
+        double[] delta = selected.rollout(startingValues, lastActorInTree);
         // Back up the value of the rollout through the tree
-        rolloutActionsTaken += rolloutActions.size();
+        rolloutActionsTaken += actionsInRollout.size();
 
         selected.backUp(delta);
-        updateMASTStatistics(treeActions, rolloutActions, delta);
+        updateMASTStatistics(actionsInTree, actionsInRollout, delta);
     }
 
     protected void updateMASTStatistics(List<Pair<Integer, AbstractAction>> tree, List<Pair<Integer, AbstractAction>> rollout, double[] value) {
@@ -558,6 +560,7 @@ public class SingleTreeNode {
             AbstractAction action = oppModel._getAction(gs, availableActions);
             if (inRollout) {
                 rolloutDepth++;
+                root.actionsInRollout.add(new Pair<>(gs.getCurrentPlayer(), action));
                 lastActorInRollout = gs.getCurrentPlayer();
             }
             forwardModel.next(gs, action);
@@ -813,7 +816,7 @@ public class SingleTreeNode {
      *
      * @return - value of rollout.
      */
-    protected double[] rollout(List<Pair<Integer, AbstractAction>> rolloutActions, double[] startingValues, int lastActor) {
+    protected double[] rollout(double[] startingValues, int lastActor) {
         rolloutDepth = 0; // counting from end of tree
         lastActorInRollout = lastActor;
         roundAtStartOfRollout = openLoopState.getRoundCounter();
@@ -837,7 +840,7 @@ public class SingleTreeNode {
                     throw new AssertionError("No actions available in rollout!");
                 AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()]._getAction(rolloutState, availableActions);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
-                rolloutActions.add(new Pair<>(lastActorInRollout, next));
+                root.actionsInRollout.add(new Pair<>(lastActorInRollout, next));
                 advance(rolloutState, next, true);
             }
         }
@@ -867,9 +870,9 @@ public class SingleTreeNode {
                 case DEFAULT:
                     return true;
                 case END_TURN:
-                    return lastActorInRollout == decisionPlayer && currentActor != decisionPlayer;
+                    return lastActorInRollout == root.decisionPlayer && currentActor != root.decisionPlayer;
                 case START_TURN:
-                    return lastActorInRollout != decisionPlayer && currentActor == decisionPlayer;
+                    return lastActorInRollout != root.decisionPlayer && currentActor == root.decisionPlayer;
                 case END_ROUND:
                     return rollerState.getRoundCounter() != roundAtStartOfRollout;
             }
