@@ -133,7 +133,7 @@ public class MultiTreeNode extends SingleTreeNode {
                 if (debug)
                     System.out.printf("Rollout action chosen for P%d - %s %n", currentActor, chosen);
 
-                advance(currentState, chosen);
+                advance(currentState, chosen, true);
             } else {  // in the tree still for this player
                 // currentNode is the last node that this actor was at in their tree
                 currentNode = currentLocation[currentActor];
@@ -149,14 +149,14 @@ public class MultiTreeNode extends SingleTreeNode {
                     expansionActionTaken[currentActor] = true;
                     if (debug)
                         System.out.printf("Expansion action chosen for P%d - %s %n", currentActor, chosen);
-                    advance(currentState, chosen);
+                    advance(currentState, chosen, false);
                     // we will create the new node once we get back to a point when it is this player's action again
                 } else {
                     chosen = currentNode.treePolicyAction(true);
                     lastAction[currentActor] = chosen;
                     if (debug)
                         System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
-                    advance(currentState, chosen);
+                    advance(currentState, chosen, false);
                 }
                 actionsInTree.add(new Pair<>(currentActor, chosen));
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
