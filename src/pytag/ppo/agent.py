@@ -6,6 +6,62 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.categorical import Categorical
 
+class GPUReplayMemory():
+    # keeps everything on GPU instead of manually shifting them back and forth
+    def __init__(self, obs_space, action_space, batch_size=32, capacity=int(5e4), gamma=0.95, device="cpu"):
+        self.obs_space = obs_space
+        self.action_space = action_space
+        self.batch_size = batch_size
+        self.device = device
+        self.capacity = capacity
+        self.gamma = gamma
+        self.obs = torch.zeros([self.capacity, obs_space], dtype=torch.float32).to(device)
+        self.actions = torch.zeros([self.capacity], dtype=torch.int64).to(device)
+        self.logprobs = torch.zeros([self.capacity, self.action_space], dtype=torch.int64).to(device)
+        self.rewards = torch.zeros([self.capacity], dtype=torch.float32).to(device)
+        self.dones = torch.zeros([self.capacity], dtype=torch.uint8).to(device)
+        self.pos = 0
+
+    def append(self, obs, action, logprobs, reward, done):
+        pos = self.pos % self.capacity
+        self.obs[pos] = obs
+        self.actions[pos] = action
+        self.logprobs[pos] = logprobs
+        self.rewards[pos] = reward
+        self.dones[pos] = done
+        self.pos += 1
+    def get_buffer(self):
+        # PPO related processing and getting trajectories
+        obs = list(self.obs)
+        actions = torch.tensor(self.actions)
+        log_probs = list(self.log_probs)
+        rewards = torch.tensor(self.rewards)
+        dones = torch.tensor(self.dones)
+
+        # Monte Carlo estimate of returns
+        discounted_rewards = []
+        discounted_reward = 0
+        for reward, is_terminal in zip(reversed(rewards), reversed(dones)):
+            if is_terminal:
+                discounted_reward = 0
+            discounted_reward = reward + (self.gamma * discounted_reward)
+            discounted_rewards.insert(0, discounted_reward)
+
+        # Normalizing the rewards
+        discounted_rewards = torch.tensor(discounted_rewards, dtype=torch.float32).to(self.device)
+        discounted_rewards = (discounted_rewards - discounted_rewards.mean()) / (discounted_rewards.std() + 1e-7)
+        rewards = discounted_rewards
+
+        return (obs, actions, log_probs, rewards, dones)
+
+    def reset(self):
+        self.obs = torch.zeros([self.capacity, self.obs_space], dtype=torch.float32).to(self.device)
+        self.actions = torch.zeros([self.capacity], dtype=torch.int64).to(self.device)
+        self.logprobs = torch.zeros([self.capacity, self.action_space], dtype=torch.int64).to(self.device)
+        self.rewards = torch.zeros([self.capacity], dtype=torch.float32).to(self.device)
+        self.dones = torch.zeros([self.capacity], dtype=torch.uint8).to(self.device)
+        self.pos = 0
+
 class ActorCritic(nn.Module):
     def __init__(self, args, input_dims, n_actions):
         super(ActorCritic, self).__init__()
