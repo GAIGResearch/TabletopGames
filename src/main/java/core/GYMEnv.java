@@ -310,6 +310,9 @@ public class GYMEnv {
 //                int randomAction = rnd.nextInt(N_ACTIONS);
                 try{
 //                    System.out.println("playerID = " + env.getPlayerID());
+//                    if (env.gameState instanceof DiamantGameState){
+                        ((DiamantGameState) env.gameState).getNormalizedObservationVector();
+//                    }
                     env.step(randomAction);
                 } catch (Exception e){
                     System.out.println("Exception in GYMEnv main " + e.toString());

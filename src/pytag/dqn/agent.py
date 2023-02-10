@@ -74,7 +74,7 @@ class DQNAgent():
         self.gamma = 0.95
         self.norm_clip = 3
         self.update_counter = 0
-        self.lr = 1e-1
+        self.lr = 1e-3
 
         self.mem = ReplayMemory(self.input_dims, batch_size=self.batch_size)
 
@@ -94,13 +94,18 @@ class DQNAgent():
 
 
 
-    def act(self, state, epsilon=0.0):
-        q = None
+    def act(self, state, mask, epsilon=0.0):
+        mask = torch.tensor(mask, dtype=torch.float32).to(self.device)
         if self.random.uniform(0, 1) < epsilon:
-            action = self.random.randint(0, self.n_actions)
+            available_a_idx, = torch.where(mask == 1.0)
+            action = np.random.choice(available_a_idx)
+            # action = self.random.randint(0, self.n_actions)
+            q = torch.zeros(self.n_actions, dtype=torch.float32).to(self.device)
+            q[action] = 1.0
         else:
             with torch.no_grad():
                 q = self.q_net(state)
+                q = q * mask
                 action = q.argmax(1).item()
                 q.detach().cpu().numpy()
         return action, q

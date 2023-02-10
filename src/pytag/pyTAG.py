@@ -53,7 +53,7 @@ class PyTAG():
         for agent in agents:
             agent_class = get_agent_class(agent)
             players.add(agent_class())
-        self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed), isNormalized)
+        self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed))
         # todo get obs and action spaces
         self.observation_space = 9 #self.env.getObservationSpace()
         self.action_space = 3 #self.env.getActionSpace()
@@ -75,6 +75,9 @@ class PyTAG():
     def getActions(self):
         return self.env.getActions()
 
+    def getActionMask(self):
+        return self.env.getActionMask()
+
     def get_observation_as_json(self):
         java_json = self.env.getObservationJson()
         return json.loads(str(java_json))
@@ -92,7 +95,11 @@ class PyTAG():
         # reward = self.env.getReward()
         # reward = self.prev_reward - reward
         # self.prev_reward = reward
-        # reward = self.env.getReward()/17
+        # if action == 1:
+        #     reward = self.env.getReward()/17
+        # else:
+        #     reward = 0
+        # reward = obs[1]
         # todo win/loss reward
         reward = 0.0
         if str(self.env.getPlayerResults()[0]) == "WIN":
