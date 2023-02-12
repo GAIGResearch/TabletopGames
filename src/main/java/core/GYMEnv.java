@@ -55,7 +55,6 @@ public class GYMEnv {
         if (!(game.gameState instanceof IVectorisable && game.forwardModel instanceof IOrderedActionSpace)) {
             throw new Exception("Game has not implemented Reinforcement Learning Interface");
         }
-        System.out.println("finished init");
 //        if (game != null) {
 //            if (listeners != null)
 //                listeners.forEach(game::addListener);
@@ -228,8 +227,9 @@ public class GYMEnv {
         } else if (this.gameState == null){
             throw new Exception("Need to reset the environment before calling step");
         }
-        AbstractAction a_ = this.availableActions.get(a);
-        forwardModel.next(gameState, a_);
+//        AbstractAction a_ = this.availableActions.get(a);
+//        forwardModel.next(gameState, a_);
+        playAction(a);
 
         int activePlayer = gameState.getCurrentPlayer();
         AbstractPlayer currentPlayer = players.get(activePlayer);
