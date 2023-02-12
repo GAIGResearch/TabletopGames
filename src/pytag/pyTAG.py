@@ -53,7 +53,7 @@ class PyTAG():
         for agent in agents:
             agent_class = get_agent_class(agent)
             players.add(agent_class())
-        self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed))
+        self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed), True)
         # todo get obs and action spaces
         self.observation_space = 9 #self.env.getObservationSpace()
         self.action_space = 3 #self.env.getActionSpace()

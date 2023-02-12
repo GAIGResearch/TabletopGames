@@ -1,4 +1,5 @@
 import os
+import wandb
 
 import numpy as np
 import torch
@@ -17,7 +18,7 @@ class GPUReplayMemory():
         self.gamma = gamma
         self.obs = torch.zeros([self.capacity, obs_space], dtype=torch.float32).to(device)
         self.actions = torch.zeros([self.capacity], dtype=torch.int64).to(device)
-        self.logprobs = torch.zeros([self.capacity, self.action_space], dtype=torch.int64).to(device)
+        self.logprobs = torch.zeros([self.capacity], dtype=torch.int64).to(device)
         self.rewards = torch.zeros([self.capacity], dtype=torch.float32).to(device)
         self.dones = torch.zeros([self.capacity], dtype=torch.uint8).to(device)
         self.pos = 0
@@ -32,11 +33,11 @@ class GPUReplayMemory():
         self.pos += 1
     def get_buffer(self):
         # PPO related processing and getting trajectories
-        obs = list(self.obs)
-        actions = torch.tensor(self.actions)
-        log_probs = list(self.log_probs)
-        rewards = torch.tensor(self.rewards)
-        dones = torch.tensor(self.dones)
+        obs = self.obs
+        actions = self.actions
+        log_probs = self.logprobs
+        rewards = self.rewards
+        dones = self.dones
 
         # Monte Carlo estimate of returns
         discounted_rewards = []
@@ -57,7 +58,7 @@ class GPUReplayMemory():
     def reset(self):
         self.obs = torch.zeros([self.capacity, self.obs_space], dtype=torch.float32).to(self.device)
         self.actions = torch.zeros([self.capacity], dtype=torch.int64).to(self.device)
-        self.logprobs = torch.zeros([self.capacity, self.action_space], dtype=torch.int64).to(self.device)
+        self.logprobs = torch.zeros([self.capacity], dtype=torch.int64).to(self.device)
         self.rewards = torch.zeros([self.capacity], dtype=torch.float32).to(self.device)
         self.dones = torch.zeros([self.capacity], dtype=torch.uint8).to(self.device)
         self.pos = 0
@@ -69,22 +70,28 @@ class ActorCritic(nn.Module):
         self.input_dims = input_dims
         self.n_actions = n_actions
         self.hidden_units = args.hidden_size
+        self.device = args.device
 
-        self.network = nn.Sequential(nn.Linear(input_dims, self.hidden_units), nn.ReLU(), nn.Linear(self.hidden_units, self.hidden_units), nn.ReLU())
+        self.network = nn.Sequential(nn.Linear(input_dims, self.hidden_units), nn.ReLU(), nn.Linear(self.hidden_units, self.hidden_units), nn.ReLU()).to(self.device)
 
-        self.actor = nn.Linear(self.hidden_units, self.n_actions)
-        self.critic = nn.Linear(self.hidden_units, 1)
+        self.actor = nn.Linear(self.hidden_units, self.n_actions).to(self.device)
+        self.critic = nn.Linear(self.hidden_units, 1).to(self.device)
 
     def forward(self, x):
         x_ = self.network(x)
         return x_
 
-    def act(self, obs):
+    def act(self, obs, mask=None):
         x_ = self(obs)
 
         action_probs = self.actor(x_)
         action_probs = F.softmax(action_probs, dim=-1)
+        if mask is not None:
+            # todo could also multiply 0s/Falses by a large negative value
+            mask = torch.tensor(mask, dtype=torch.float32).to(self.device)
+            action_probs *= mask
         dist = Categorical(action_probs)
+
 
         action = dist.sample()
         action_logprob = dist.log_prob(action)
@@ -121,15 +128,17 @@ class PPO:
         self.args = args
         self.gamma = args.gamma
 
-        self.lr = args.learning_rate
+        # self.lr = args.learning_rate
         self.lr_actor = args.lr_actor
         self.lr_critic = args.lr_critic
 
         self.eps_clip = args.eps_clip
         self.K_epochs = args.k_epochs
 
-        self.n_actions = env.action_space()
-        self.input_dims = env.observation_space()
+        self.n_actions = env.action_space
+        self.input_dims = env.observation_space
+
+        self.mem = GPUReplayMemory(env.observation_space, env.action_space, gamma=args.gamma, capacity=self.args.replay_frequency, device=self.device)
 
         self.policy = ActorCritic(args, self.input_dims, self.n_actions).to(args.device)
         if model is None:
@@ -149,14 +158,14 @@ class PPO:
         ])
         # self.optim = torch.optim.Adam(self.policy.parameters(), lr=args.learning_rate)
 
-        self.policy_old = ActorCritic(args, self.input_dims, self.n_actions, self.scalar_dims).to(self.args.device)
+        self.policy_old = ActorCritic(args, self.input_dims, self.n_actions).to(self.args.device)
         self.policy_old.load_state_dict(self.policy.state_dict())
 
         self.MseLoss = nn.MSELoss()
 
-    def act(self, state):
+    def act(self, state, mask=None):
         with torch.no_grad():
-            action, action_logprob = self.policy_old.act(state)
+            action, action_logprob = self.policy_old.act(state, mask)
 
         return action.item(), action_logprob.detach()
 
@@ -165,8 +174,8 @@ class PPO:
             logprobs = self.policy.get_logprobs(state)
         return logprobs
 
-    def learn(self, memory):
-        transitions = memory.get_buffer()
+    def learn(self, steps):
+        transitions = self.mem.get_buffer()
 
         # Optimize policy for K epochs
         for _ in range(self.K_epochs):
@@ -195,10 +204,17 @@ class PPO:
         # Copy new weights into old policy
         self.policy_old.load_state_dict(self.policy.state_dict())
 
-        # reset buffer
-        memory.reset()
+        total_loss = loss.mean().cpu().detach().numpy()
 
-        return loss.mean().cpu().detach().numpy()
+        # reset buffer
+        self.mem.reset()
+        # todo total loss is only the final loss
+        wandb.log({
+            "train/total_steps": steps,
+            "train/loss": total_loss,
+        })
+
+        return total_loss
 
     def save_model(self, path, name="checkpoint.pth"):
         state = {

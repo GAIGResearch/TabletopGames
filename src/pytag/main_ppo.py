@@ -1,4 +1,5 @@
 import time
+import argparse
 import random
 from collections import deque
 
@@ -21,6 +22,40 @@ def mask_logits(logits, mask):
     return logits
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='PyTAG')
+    parser.add_argument('--seed', type=int, default=-1, help='Random seed')
+    parser.add_argument('--max-steps', type=int, default=int(5e5), metavar='STEPS', help='Number of agent-env interactions')
+
+    # RL args
+    parser.add_argument('--gamma', type=float, default=0.9, help='Discount rate')
+    parser.add_argument('--replay-frequency', type=int, default=4, metavar='k',
+                        help='Frequency of sampling from memory')
+    parser.add_argument('--hidden-size', type=int, default=64, metavar='SIZE', help='Network hidden size')
+    parser.add_argument('--model', type=str, metavar='PARAMS', help='Pretrained model (state dict)')
+
+    # PPO args
+    parser.add_argument('--k-epochs', type=int, default=5,
+                        help='Number of epochs to train on collected data per update')
+    parser.add_argument('--lr-actor', type=float, default=0.0003, help='learning rate for actor network')
+    parser.add_argument('--lr-critic', type=float, default=0.001, help='learning rate for critic network')
+    parser.add_argument('--eps-clip', type=float, default=0.2, help='clip parameter for PPO')
+
+    parser.add_argument('--gpu-id', type=int, default=0,
+                        help='Specify a GPU ID, -1 refers to CPU')
+    args = parser.parse_args()
+    if args.seed == -1:
+        args.seed = np.random.randint(1, 10000)
+        print(f"chosen seed = {args.seed}")
+
+    np.random.seed(args.seed)
+    torch.manual_seed(np.random.randint(1, 10000))
+    if torch.cuda.is_available() and args.gpu_id != -1:
+        args.device = torch.device(f'cuda:{args.gpu_id}')
+        torch.cuda.manual_seed(np.random.randint(1, 10000))
+        # torch.backends.cudnn.enabled = args.enable_cudnn
+    else:
+        args.device = torch.device('cpu')
+
     max_reward = 1.0 # reward clipping
     disable_wandb = False
     project_name = "TAG-PPO"
@@ -28,11 +63,10 @@ if __name__ == "__main__":
         wandb.init(project=project_name, mode="disabled")
     else:
         wandb.init(project=project_name)
-    MAX_STEPS = 500000
-    replay_freq = 4000 # number of steps
+
     agents = ["python", "random"]
     env = PyTAG(agents=agents, game="Diamant")
-    agent = PPO(env)
+    agent = PPO(args, env)
 
     start_time = time.time()
     wins = 0
@@ -40,7 +74,7 @@ if __name__ == "__main__":
     done = True
     ep_steps = 0
     running_wins = deque(maxlen=20)
-    for step in range(MAX_STEPS):
+    for step in range(args.max_steps):
         if done:
             # logging
             episodes += 1
@@ -59,21 +93,20 @@ if __name__ == "__main__":
             # reset
             rewards = 0
             ep_steps = 0
-            obs = process_obs(env.reset())
+            obs = process_obs(env.reset(), device=args.device)
             done = False
 
-        if step % replay_freq == 0 and step > 1000:
+        if step % args.replay_frequency == 0 and step > 1000:
             agent.learn(step)
 
         ep_steps += 1
-        action, log_probs = agent.act(obs)
+        action, log_probs = agent.act(obs, env.getActionMask())
 
-        playerID = env.getPlayerID()
         next_obs, reward, done, info = env.step(action)
         # reward = np.clip(reward, -1, max_reward) # value, min, max
 
-        next_obs = process_obs(next_obs)
-        agent.mem.append(obs, action, reward, done)
+        next_obs = process_obs(next_obs, device=args.device)
+        agent.mem.append(obs, action, log_probs, reward, done)
         obs = next_obs
         rewards+=reward
 

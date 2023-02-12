@@ -79,7 +79,7 @@ if __name__ == "__main__":
         action, q = agent.act(obs, env.getActionMask(), epsilon=epsilon)
 
         playerID = env.getPlayerID()
-        next_obs, reward, done, info = env.step(action) # todo reward should be the delta, not total
+        next_obs, reward, done, info = env.step(action)
         # reward = np.clip(reward, -1, max_reward) # value, min, max
 
         next_obs = process_obs(next_obs)
