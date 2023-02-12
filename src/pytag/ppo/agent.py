@@ -85,13 +85,11 @@ class ActorCritic(nn.Module):
         x_ = self(obs)
 
         action_probs = self.actor(x_)
-        action_probs = F.softmax(action_probs, dim=-1)
         if mask is not None:
-            # todo could also multiply 0s/Falses by a large negative value
-            mask = torch.tensor(mask, dtype=torch.float32).to(self.device)
-            action_probs *= mask
+            mask_ = torch.tensor(mask, device=self.device)
+            action_probs = torch.where(mask_, action_probs, torch.tensor(-1e+8, device=self.device))
+        action_probs = F.softmax(action_probs, dim=-1)
         dist = Categorical(action_probs)
-
 
         action = dist.sample()
         action_logprob = dist.log_prob(action)

@@ -27,17 +27,17 @@ if __name__ == "__main__":
     parser.add_argument('--max-steps', type=int, default=int(5e5), metavar='STEPS', help='Number of agent-env interactions')
 
     # RL args
-    parser.add_argument('--gamma', type=float, default=0.9, help='Discount rate')
-    parser.add_argument('--replay-frequency', type=int, default=1024, metavar='k',
+    parser.add_argument('--gamma', type=float, default=0.95, help='Discount rate')
+    parser.add_argument('--replay-frequency', type=int, default=512, metavar='k',
                         help='Frequency of sampling from memory')
     parser.add_argument('--hidden-size', type=int, default=64, metavar='SIZE', help='Network hidden size')
     parser.add_argument('--model', type=str, metavar='PARAMS', help='Pretrained model (state dict)')
 
     # PPO args
-    parser.add_argument('--k-epochs', type=int, default=5,
+    parser.add_argument('--k-epochs', type=int, default=10,
                         help='Number of epochs to train on collected data per update')
-    parser.add_argument('--lr-actor', type=float, default=0.0003, help='learning rate for actor network')
-    parser.add_argument('--lr-critic', type=float, default=0.001, help='learning rate for critic network')
+    parser.add_argument('--lr-actor', type=float, default=0.003, help='learning rate for actor network')
+    parser.add_argument('--lr-critic', type=float, default=0.05, help='learning rate for critic network')
     parser.add_argument('--eps-clip', type=float, default=0.2, help='clip parameter for PPO')
 
     parser.add_argument('--gpu-id', type=int, default=0,
@@ -56,7 +56,6 @@ if __name__ == "__main__":
     else:
         args.device = torch.device('cpu')
 
-    max_reward = 1.0 # reward clipping
     disable_wandb = False
     project_name = "TAG-PPO"
     if disable_wandb:
@@ -88,22 +87,21 @@ if __name__ == "__main__":
                     "train/steps": ep_steps,
                     "train/win_rate": np.mean(running_wins),
                     "train/rewards": rewards,
-
                 })
+
             # reset
             rewards = 0
             ep_steps = 0
             obs = process_obs(env.reset(), device=args.device)
             done = False
 
-        if step % args.replay_frequency == 0 and step > 1000:
+        if step % args.replay_frequency == 0 and step > 0:
             agent.learn(step)
 
         ep_steps += 1
         action, log_probs = agent.act(obs, env.getActionMask())
 
         next_obs, reward, done, info = env.step(action)
-        # reward = np.clip(reward, -1, max_reward) # value, min, max
 
         next_obs = process_obs(next_obs, device=args.device)
         agent.mem.append(obs, action, log_probs, reward, done)
