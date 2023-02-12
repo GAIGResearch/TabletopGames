@@ -28,7 +28,7 @@ if __name__ == "__main__":
 
     # RL args
     parser.add_argument('--gamma', type=float, default=0.9, help='Discount rate')
-    parser.add_argument('--replay-frequency', type=int, default=4, metavar='k',
+    parser.add_argument('--replay-frequency', type=int, default=1024, metavar='k',
                         help='Frequency of sampling from memory')
     parser.add_argument('--hidden-size', type=int, default=64, metavar='SIZE', help='Network hidden size')
     parser.add_argument('--model', type=str, metavar='PARAMS', help='Pretrained model (state dict)')

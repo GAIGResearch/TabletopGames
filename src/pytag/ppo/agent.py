@@ -9,18 +9,18 @@ from torch.distributions.categorical import Categorical
 
 class GPUReplayMemory():
     # keeps everything on GPU instead of manually shifting them back and forth
-    def __init__(self, obs_space, action_space, batch_size=32, capacity=int(5e4), gamma=0.95, device="cpu"):
+    def __init__(self, args, obs_space, action_space):
         self.obs_space = obs_space
         self.action_space = action_space
-        self.batch_size = batch_size
-        self.device = device
-        self.capacity = capacity
-        self.gamma = gamma
-        self.obs = torch.zeros([self.capacity, obs_space], dtype=torch.float32).to(device)
-        self.actions = torch.zeros([self.capacity], dtype=torch.int64).to(device)
-        self.logprobs = torch.zeros([self.capacity], dtype=torch.int64).to(device)
-        self.rewards = torch.zeros([self.capacity], dtype=torch.float32).to(device)
-        self.dones = torch.zeros([self.capacity], dtype=torch.uint8).to(device)
+        # self.batch_size = args.batch_size
+        self.device = args.device
+        self.capacity = args.replay_frequency
+        self.gamma = args.gamma
+        self.obs = torch.zeros([self.capacity, obs_space], dtype=torch.float32).to(self.device)
+        self.actions = torch.zeros([self.capacity], dtype=torch.int64).to(self.device)
+        self.logprobs = torch.zeros([self.capacity], dtype=torch.int64).to(self.device)
+        self.rewards = torch.zeros([self.capacity], dtype=torch.float32).to(self.device)
+        self.dones = torch.zeros([self.capacity], dtype=torch.uint8).to(self.device)
         self.pos = 0
 
     def append(self, obs, action, logprobs, reward, done):
@@ -138,7 +138,7 @@ class PPO:
         self.n_actions = env.action_space
         self.input_dims = env.observation_space
 
-        self.mem = GPUReplayMemory(env.observation_space, env.action_space, gamma=args.gamma, capacity=self.args.replay_frequency, device=self.device)
+        self.mem = GPUReplayMemory(args, env.observation_space, env.action_space)
 
         self.policy = ActorCritic(args, self.input_dims, self.n_actions).to(args.device)
         if model is None:
@@ -177,6 +177,11 @@ class PPO:
     def learn(self, steps):
         transitions = self.mem.get_buffer()
 
+        actor_loss = 0
+        critic_loss = 0
+        entropy_loss = 0
+        total_loss = 0
+
         # Optimize policy for K epochs
         for _ in range(self.K_epochs):
             # Evaluating old actions and values
@@ -194,24 +199,31 @@ class PPO:
             surr2 = torch.clamp(ratios, 1 - self.eps_clip, 1 + self.eps_clip) * advantages
 
             # final loss of clipped objective PPO
-            loss = -torch.min(surr1, surr2) + 0.5 * self.MseLoss(state_values, transitions[3]) - 0.01 * dist_entropy
+            a_loss = -torch.min(surr1, surr2)
+            c_loss = self.MseLoss(state_values, transitions[3])
+            loss = a_loss + 0.5 * c_loss - 0.01 * dist_entropy
 
             # take gradient step
             self.optim.zero_grad()
             loss.mean().backward()
             self.optim.step()
 
+            actor_loss += a_loss.mean().detach().cpu().numpy()
+            critic_loss += c_loss.detach().cpu().numpy()
+            entropy_loss += dist_entropy.mean().detach().cpu().numpy()
+            total_loss += loss.detach().mean().cpu().numpy()
+
         # Copy new weights into old policy
         self.policy_old.load_state_dict(self.policy.state_dict())
 
-        total_loss = loss.mean().cpu().detach().numpy()
-
         # reset buffer
         self.mem.reset()
-        # todo total loss is only the final loss
         wandb.log({
-            "train/total_steps": steps,
-            "train/loss": total_loss,
+            "train/total-steps": steps,
+            "train/total-loss": total_loss/self.K_epochs,
+            "train/actor-loss": actor_loss/self.K_epochs,
+            "train/critic-loss": critic_loss/self.K_epochs,
+            "train/entropy-loss": entropy_loss/self.K_epochs,
         })
 
         return total_loss
