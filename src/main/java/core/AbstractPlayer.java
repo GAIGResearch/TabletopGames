@@ -140,14 +140,5 @@ public abstract class AbstractPlayer {
     public Map<AbstractAction, Map<String, Object>> getDecisionStats() {
         return Collections.emptyMap();
     }
-    /**
-     * Sets the epsilon to be used for exploration in all games in the tournament
-     * This is when we want to add noise at the environmental level (e.g. for exploration during learning)
-     * independently of any exploration at the individual agent level
-     *
-     * @param epsilon
-     */
-    public void setExploration(double epsilon) {
-        exploreEpsilon = epsilon;
-    }
+
 }

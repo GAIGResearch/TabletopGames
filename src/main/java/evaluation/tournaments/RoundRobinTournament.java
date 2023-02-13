@@ -42,7 +42,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param gamesPerMatchUp - number of games for each combination of players.
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
-    public RoundRobinTournament(List<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
+    public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                                 int gamesPerMatchUp, boolean selfPlay, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, gameParams);
         if (!selfPlay && playersPerGame > this.agents.size()) {
