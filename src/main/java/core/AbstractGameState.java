@@ -114,11 +114,7 @@ public abstract class AbstractGameState {
     }
     public int getNPlayers() { return nPlayers; }
     public int getCurrentPlayer() {
-        if (isActionInProgress()) {
-            return actionsInProgress.peek().getCurrentPlayer(this);
-        }
-        // else we have the data locally
-        return turnOwner;
+        return isActionInProgress() ? actionsInProgress.peek().getCurrentPlayer(this) : turnOwner;
     }
     public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
     public final IGamePhase getGamePhase() {
@@ -171,7 +167,9 @@ public abstract class AbstractGameState {
     } // package level deliberately
     void advanceGameTick() {tick++;}
 
-    public void setTurnOwner(int newTurnOwner) {turnOwner = newTurnOwner;}
+    public void setTurnOwner(int newTurnOwner) {
+        turnOwner = newTurnOwner;
+    }
     public void setFirstPlayer(int newFirstPlayer) {
         firstPlayer = newFirstPlayer;
         turnOwner = newFirstPlayer;
@@ -408,11 +406,18 @@ public abstract class AbstractGameState {
     /**
      * @param playerId - the player observed
      * @param tier - if multiple tiebreaks available in the game, this parameter can be used to specify what each one does, applied in the order 1,2,3 ...
-     * @return null - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score, given tier
+     * @return Double.MAX_VALUE - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score, given tier
      */
     public double getTiebreak(int playerId, int tier) {
         return Double.MAX_VALUE;
     }
+
+    /**
+     * This sets the number of tieBreak levels in a game.
+     * If we reach this level then we stop recursing.
+     * @return
+     */
+    public int getTiebreakLevels() {return 5;}
 
     /**
      * Returns the ordinal position of a player using getGameScore().
@@ -431,13 +436,15 @@ public abstract class AbstractGameState {
             double otherScore = scoreFunction.apply(i);
             if (otherScore > playerScore)
                 ordinal++;
-            else if (otherScore == playerScore && tiebreakFunction != null && tiebreakFunction.apply(i, 1) != null) {
+            else if (otherScore == playerScore && tiebreakFunction != null && tiebreakFunction.apply(i, 1) != Double.MAX_VALUE) {
                 if (getOrdinalPositionTiebreak(i, tiebreakFunction, 1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, 1))
                     ordinal++;
             }
         }
         return ordinal;
     }
+
+
     public int getOrdinalPositionTiebreak(int playerId, BiFunction<Integer, Integer, Double> tiebreakFunction, int tier) {
         int ordinal = 1;
         Double playerScore = tiebreakFunction.apply(playerId, tier);
@@ -447,7 +454,7 @@ public abstract class AbstractGameState {
             double otherScore = tiebreakFunction.apply(i, tier);
             if (otherScore > playerScore)
                 ordinal++;
-            else if (otherScore == playerScore && tiebreakFunction.apply(i, tier+1) != null) {
+            else if (otherScore == playerScore && tier < getTiebreakLevels() && tiebreakFunction.apply(i, tier+1) != null) {
                 if (getOrdinalPositionTiebreak(i, tiebreakFunction, tier+1) > getOrdinalPositionTiebreak(playerId, tiebreakFunction, tier+1))
                     ordinal++;
             }

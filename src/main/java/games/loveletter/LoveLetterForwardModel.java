@@ -145,7 +145,12 @@ public class LoveLetterForwardModel extends StandardForwardModel {
             llgs.setGamePhase(DefaultGamePhase.Main);
         } else if (gamePhase == DefaultGamePhase.Main) {
             llgs.setGamePhase(Draw);
-            endPlayerTurn(llgs);
+            // set nextPlayer to be the first player after the current one for whom the state is not terminal
+            int nextPlayer = (llgs.getCurrentPlayer() + 1) % llgs.getNPlayers();
+            while (!llgs.isNotTerminalForPlayer(nextPlayer)) {
+                nextPlayer = (nextPlayer + 1) % llgs.getNPlayers();
+            }
+            endPlayerTurn(llgs, nextPlayer);
             checkEndOfRound(llgs);
         } else {
             throw new IllegalArgumentException("The game phase " + llgs.getGamePhase() +
