@@ -2,13 +2,12 @@ import gymnasium as gym
 import jpype
 
 # Setup jpype
-jpype.addClassPath("ModernBoardGame.jar")
+jpype.addClassPath("./jars/ModernBoardGame.jar")
 if not jpype.isJVMStarted():
-    jpype.startJVM()
+    jpype.startJVM(convertStrings=False)
 
-# Register gym environments
 gym.envs.register(
-     id='TAG/TicTacToe-v0',
-     entry_point='tag_gym:TAGSinglePlayerGym',
-     kwargs={"game_id": "TicTacToe"}
+     id='TAG/Diamant-v0',
+     entry_point='gym_.envs:TagSingleplayerGym',
+     kwargs={"game_id": "Diamant", "agent_ids": ["random", "python"]}
 )
