@@ -5,35 +5,34 @@ import core.actions.AbstractAction;
 
 import java.util.*;
 
-public class EpsilonRandomPlayer extends AbstractPlayerDecorator {
+public class EpsilonRandom implements AbstractPlayerDecorator {
 
     private double epsilon;
     private final Random rnd;
 
-
-    public EpsilonRandomPlayer(AbstractPlayer player, long seed) {
-        super(player);
+    public EpsilonRandom(long seed) {
         rnd = new Random(seed);
     }
 
-    public EpsilonRandomPlayer(AbstractPlayer player, long seed, double epsilon) {
-        this(player, seed);
+    public EpsilonRandom(long seed, double epsilon) {
+        this(seed);
         this.epsilon = epsilon;
     }
 
-    public EpsilonRandomPlayer(AbstractPlayer player, double epsilon) {
-        this(player, System.currentTimeMillis(), epsilon);
+    public EpsilonRandom(double epsilon) {
+        this(System.currentTimeMillis(), epsilon);
     }
-    public EpsilonRandomPlayer(AbstractPlayer player) {
-        this(player, System.currentTimeMillis());
+    public EpsilonRandom() {
+        this(System.currentTimeMillis());
     }
 
     public void setEpsilon(double epsilon) {
         this.epsilon = epsilon;
     }
-    @Override
-    public EpsilonRandomPlayer copy() {
-        return new EpsilonRandomPlayer(player.copy(), rnd.nextInt(), epsilon);
+
+
+    public EpsilonRandom copy() {
+        return new EpsilonRandom(rnd.nextInt(), epsilon);
     }
 
     @Override
@@ -43,5 +42,10 @@ public class EpsilonRandomPlayer extends AbstractPlayerDecorator {
         } else {
             return Collections.singletonList(possibleActions.get(rnd.nextInt(possibleActions.size())));
         }
+    }
+
+    @Override
+    public void recordDecision(AbstractGameState state, AbstractAction action) {
+        // Do nothing
     }
 }

@@ -4,13 +4,7 @@ import core.actions.AbstractAction;
 
 import java.util.List;
 
-public abstract class AbstractPlayerDecorator extends AbstractPlayer {
-
-    protected AbstractPlayer player;
-
-    public AbstractPlayerDecorator(AbstractPlayer player) {
-        this.player = player;
-    }
+public interface AbstractPlayerDecorator {
 
     /**
      * This is the core method to be implemented by all player decorators.
@@ -24,18 +18,11 @@ public abstract class AbstractPlayerDecorator extends AbstractPlayer {
     public abstract List<AbstractAction> actionFilter(AbstractGameState state, List<AbstractAction> possibleActions);
 
     /**
-     * This method may optionally be overridden id the decorator needs to apply logic after the decision is made.
+     * This method needs to apply logic after the decision is made.
      * It provides the actual decision selected by the underlying AbstractPlayer.
      * @param state
      * @param action
      */
-    public void recordDecision(AbstractGameState state, AbstractAction action) {
-        // do nothing
-    }
-
-    @Override
-    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
-        return player._getAction(gameState, actionFilter(gameState, possibleActions));
-    }
+    public void recordDecision(AbstractGameState state, AbstractAction action);
 
 }

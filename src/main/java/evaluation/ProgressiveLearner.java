@@ -11,7 +11,7 @@ import evaluation.tournaments.RandomRRTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import players.PlayerFactory;
-import players.decorators.EpsilonRandomPlayer;
+import players.decorators.EpsilonRandom;
 import players.learners.AbstractLearner;
 import evaluation.loggers.FileStatsLogger;
 import evaluation.listeners.StateFeatureListener;
@@ -30,12 +30,13 @@ public class ProgressiveLearner {
     GameType gameToPlay;
     String dataDir, player, defaultHeuristic, heuristic;
     AbstractParameters params;
-    List<EpsilonRandomPlayer> agents;
+    List<AbstractPlayer> agents;
+    EpsilonRandom randomExplorer;
     ILearner learner;
     int nPlayers, matchups, iterations, iter, finalMatchups;
     double maxExplore;
-    EpsilonRandomPlayer basePlayer;
-    EpsilonRandomPlayer[] agentsPerGeneration;
+    AbstractPlayer basePlayer;
+    AbstractPlayer[] agentsPerGeneration;
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
     IStateFeatureVector phi;
@@ -60,7 +61,7 @@ public class ProgressiveLearner {
         iterations = getArg(args, "iterations", 100);
         useOnlyLast = getArg(args, "useOnlyLast", false);
         maxExplore = getArg(args, "explore", 0.0);
-        agentsPerGeneration = new EpsilonRandomPlayer[iterations];
+        agentsPerGeneration = new AbstractPlayer[iterations];
         dataFilesByIteration = new String[iterations];
         String learnerClass = getArg(args, "learner", "");
         if (learnerClass.equals(""))
@@ -163,6 +164,7 @@ public class ProgressiveLearner {
         // Now we can run a tournament of everyone
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
+        finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
         RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
                 finalMatchups, System.currentTimeMillis(), params);
 
@@ -187,11 +189,14 @@ public class ProgressiveLearner {
     private void loadAgents() {
         agents = new LinkedList<>();
         File playerLoc = new File(player);
+        if (player.isEmpty())
+            throw new IllegalArgumentException("No player file specified");
         if (playerLoc.isDirectory()) {
             throw new IllegalArgumentException("Not yet implemented for a directory of players");
         }
         if (iter == 0 || useOnlyLast) {
-            agents.add(new EpsilonRandomPlayer(PlayerFactory.createPlayer(player, this::injectAgentAttributes)));
+            String fileName = learnedFilesByIteration[iter] == null ? "" : learnedFilesByIteration[iter] ;
+            agents.add(PlayerFactory.createPlayer(player, rawJSON -> injectAgentAttributes(rawJSON, fileName)));
             if (iter == 0) {
                 basePlayer = agents.get(0);
                 basePlayer.setName("Default Agent");
@@ -200,11 +205,12 @@ public class ProgressiveLearner {
             agents.add(basePlayer);
             agents.addAll(Arrays.asList(agentsPerGeneration).subList(0, iter));
         }
+        randomExplorer = new EpsilonRandom();
+        agents.forEach(a -> a.addDecorator(randomExplorer));
     }
 
-    private String injectAgentAttributes(String raw) {
-        String fileName = learnedFilesByIteration[iter] == null ? "" : learnedFilesByIteration[iter] ;
-        return raw.replaceAll(Pattern.quote("*FILE*"), fileName)
+    private String injectAgentAttributes(String raw, String file) {
+        return raw.replaceAll(Pattern.quote("*FILE*"), file)
                 .replaceAll(Pattern.quote("*PHI*"), phiClass)
                 .replaceAll(Pattern.quote("*HEURISTIC*"), heuristic)
                 .replaceAll(Pattern.quote("*DEFAULT*"), defaultHeuristic);
@@ -217,7 +223,7 @@ public class ProgressiveLearner {
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);
-        agents.forEach(p -> p.setEpsilon(exploreEpsilon));
+        randomExplorer.setEpsilon(exploreEpsilon);
 
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
@@ -235,8 +241,8 @@ public class ProgressiveLearner {
         learner.writeToFile(fileName);
 
         // if we only have one agent type, then we can create one agent as the result of this round
-        agentsPerGeneration[iter] = new EpsilonRandomPlayer(PlayerFactory.createPlayer(player, this::injectAgentAttributes));
+        agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, rawJSON -> injectAgentAttributes(rawJSON, fileName));
         agentsPerGeneration[iter].setName(String.format("Iteration %2d", iter + 1));
-
+        agentsPerGeneration[iter].addDecorator(randomExplorer);
     }
 }

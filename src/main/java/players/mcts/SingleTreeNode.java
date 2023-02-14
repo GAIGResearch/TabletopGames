@@ -284,6 +284,9 @@ public class SingleTreeNode {
         SingleTreeNode selected = treePolicy(actionsInTree);
         if (selected == this && nVisits > 3)
             throw new AssertionError("We have not expanded or selected a new node");
+        // by this point (and really earlier) we should have expanded a new node.
+        // selected == this is a clear sign that we have a problem in the expansion phase
+
         // Monte carlo rollout: return value of MC rollout from the newly added node
         int lastActorInTree = actionsInTree.isEmpty() ? decisionPlayer : actionsInTree.get(actionsInTree.size() - 1).a;
         double[] delta = selected.rollout(startingValues, lastActorInTree);
@@ -557,7 +560,7 @@ public class SingleTreeNode {
             List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs);
             if (availableActions.isEmpty())
                 throw new AssertionError("Should always have at least one action possible...");
-            AbstractAction action = oppModel._getAction(gs, availableActions);
+            AbstractAction action = oppModel.getAction(gs, availableActions);
             if (inRollout) {
                 rolloutDepth++;
                 root.actionsInRollout.add(new Pair<>(gs.getCurrentPlayer(), action));
@@ -838,7 +841,7 @@ public class SingleTreeNode {
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState);
                 if (availableActions.isEmpty())
                     throw new AssertionError("No actions available in rollout!");
-                AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()]._getAction(rolloutState, availableActions);
+                AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
                 root.actionsInRollout.add(new Pair<>(lastActorInRollout, next));
                 advance(rolloutState, next, true);
