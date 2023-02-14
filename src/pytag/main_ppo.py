@@ -7,14 +7,19 @@ import torch
 import wandb
 import numpy as np
 
-from pyTAG import PyTAG
+# from pyTAG import PyTAG
+from gym_.envs import TagSingleplayerGym
+from gym_.wrappers import MergeActionMaskWrapper
+import gymnasium as gym
+from gymnasium.vector import AsyncVectorEnv, SyncVectorEnv
 from ppo.agent import PPO
 
 
 def process_obs(obs, device="cpu"):
     x = torch.from_numpy(obs)
-    x = x.unsqueeze(0).float().to(device)
+    x = x.float().to(device)
 
+    # mask = torch.from_numpy(obs[1]["action_mask"])
     return x
 
 def mask_logits(logits, mask):
@@ -64,24 +69,34 @@ if __name__ == "__main__":
         wandb.init(project=project_name)
 
     agents = ["python", "random"]
-    env = PyTAG(agents=agents, game="Diamant")
+    # env = PyTAG(agents=agents, game="Diamant")
+    env = AsyncVectorEnv([
+        lambda: gym.make("TAG/Diamant")
+        for i in range(2)
+    ])
+    env = MergeActionMaskWrapper(env)
+
     agent = PPO(args, env)
 
     start_time = time.time()
     wins = 0
     episodes = 0
-    done = True
+    done = [True] * env.num_envs
     ep_steps = 0
     running_wins = deque(maxlen=20)
+    obs, info = env.reset()
+    obs = process_obs(obs)
+    mask = torch.from_numpy(info["action_mask"])
     for step in range(args.max_steps):
-        if done:
+
+        if done[0]:
             # logging
             episodes += 1
 
             if step > 0:
-                running_wins.append(env.has_won())
-                if env.has_won():
-                    wins += 1
+                running_wins.append(info["has_won"][0])
+                # if env.has_won():
+                #     wins += 1
 
                 wandb.log({
                     "train/steps": ep_steps,
@@ -92,21 +107,26 @@ if __name__ == "__main__":
             # reset
             rewards = 0
             ep_steps = 0
-            obs = process_obs(env.reset(), device=args.device)
-            done = False
+            # obs, info = env.reset()
+            # obs = process_obs(obs, device=args.device)
+            # mask = torch.from_numpy(info["action_mask"])
+            # done = False
 
         if step % args.replay_frequency == 0 and step > 0:
             agent.learn(step)
 
         ep_steps += 1
-        action, log_probs = agent.act(obs, env.getActionMask())
+        action, log_probs = agent.act(obs, mask)
 
-        next_obs, reward, done, info = env.step(action)
+        next_obs, reward, done, truncation, next_info = env.step(action)
 
         next_obs = process_obs(next_obs, device=args.device)
-        agent.mem.append(obs, action, log_probs, reward, done)
+        next_mask = torch.from_numpy(next_info["action_mask"])
+        agent.mem.append(obs, action, mask, log_probs, reward, done)
         obs = next_obs
-        rewards+=reward
+        mask = next_mask
+        info = next_info
+        rewards+=reward[0]
 
     env.close()
 

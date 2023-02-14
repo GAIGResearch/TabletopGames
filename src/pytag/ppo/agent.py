@@ -9,35 +9,40 @@ from torch.distributions.categorical import Categorical
 
 class GPUReplayMemory():
     # keeps everything on GPU instead of manually shifting them back and forth
-    def __init__(self, args, obs_space, action_space):
+    def __init__(self, args, obs_space, action_space, n_envs=1):
         self.obs_space = obs_space
         self.action_space = action_space
         # self.batch_size = args.batch_size
         self.device = args.device
         self.capacity = args.replay_frequency
         self.gamma = args.gamma
-        self.obs = torch.zeros([self.capacity, obs_space], dtype=torch.float32).to(self.device)
-        self.actions = torch.zeros([self.capacity], dtype=torch.int64).to(self.device)
-        self.logprobs = torch.zeros([self.capacity], dtype=torch.int64).to(self.device)
-        self.rewards = torch.zeros([self.capacity], dtype=torch.float32).to(self.device)
-        self.dones = torch.zeros([self.capacity], dtype=torch.uint8).to(self.device)
+        self.n_envs = n_envs
+        self.obs = torch.zeros([self.capacity, self.n_envs, obs_space], dtype=torch.float32).to(self.device)
+        self.actions = torch.zeros([self.capacity, self.n_envs], dtype=torch.int64).to(self.device)
+        self.masks = torch.zeros([self.capacity, self.n_envs, self.action_space], dtype=torch.int64).to(self.device)
+        self.logprobs = torch.zeros([self.capacity, self.n_envs], dtype=torch.int64).to(self.device)
+        self.rewards = torch.zeros([self.capacity, self.n_envs], dtype=torch.float32).to(self.device)
+        self.dones = torch.zeros([self.capacity, self.n_envs], dtype=torch.uint8).to(self.device)
         self.pos = 0
 
-    def append(self, obs, action, logprobs, reward, done):
+    def append(self, obs, action, mask, logprobs, reward, done):
         pos = self.pos % self.capacity
         self.obs[pos] = obs
         self.actions[pos] = action
+        self.masks[pos] = mask
         self.logprobs[pos] = logprobs
-        self.rewards[pos] = reward
-        self.dones[pos] = done
+        self.rewards[pos] = torch.from_numpy(reward).float()
+        self.dones[pos] = torch.from_numpy(done)
         self.pos += 1
     def get_buffer(self):
         # PPO related processing and getting trajectories
-        obs = self.obs
-        actions = self.actions
-        log_probs = self.logprobs
-        rewards = self.rewards
-        dones = self.dones
+        # todo at the merging point done should not be carried over
+        obs = self.obs.view(self.capacity * self.n_envs, -1)
+        actions = self.actions.view(self.capacity * self.n_envs, -1)
+        masks = self.masks.view(self.capacity * self.n_envs, -1)
+        log_probs = self.logprobs.view(self.capacity * self.n_envs, -1)
+        rewards = self.rewards.view(self.capacity * self.n_envs, -1)
+        dones = self.dones.view(self.capacity * self.n_envs, -1)
 
         # Monte Carlo estimate of returns
         discounted_rewards = []
@@ -53,14 +58,15 @@ class GPUReplayMemory():
         discounted_rewards = (discounted_rewards - discounted_rewards.mean()) / (discounted_rewards.std() + 1e-7)
         rewards = discounted_rewards
 
-        return (obs, actions, log_probs, rewards, dones)
+        return (obs, actions, log_probs, rewards, dones, masks)
 
     def reset(self):
-        self.obs = torch.zeros([self.capacity, self.obs_space], dtype=torch.float32).to(self.device)
-        self.actions = torch.zeros([self.capacity], dtype=torch.int64).to(self.device)
-        self.logprobs = torch.zeros([self.capacity], dtype=torch.int64).to(self.device)
-        self.rewards = torch.zeros([self.capacity], dtype=torch.float32).to(self.device)
-        self.dones = torch.zeros([self.capacity], dtype=torch.uint8).to(self.device)
+        self.obs = torch.zeros([self.capacity, self.n_envs, self.obs_space], dtype=torch.float32).to(self.device)
+        self.actions = torch.zeros([self.capacity, self.n_envs], dtype=torch.int64).to(self.device)
+        self.masks = torch.zeros([self.capacity, self.n_envs, self.action_space], dtype=torch.int64).to(self.device)
+        self.logprobs = torch.zeros([self.capacity, self.n_envs], dtype=torch.int64).to(self.device)
+        self.rewards = torch.zeros([self.capacity, self.n_envs], dtype=torch.float32).to(self.device)
+        self.dones = torch.zeros([self.capacity, self.n_envs], dtype=torch.uint8).to(self.device)
         self.pos = 0
 
 class ActorCritic(nn.Module):
@@ -133,10 +139,11 @@ class PPO:
         self.eps_clip = args.eps_clip
         self.K_epochs = args.k_epochs
 
-        self.n_actions = env.action_space
-        self.input_dims = env.observation_space
+        self.n_actions = env.action_space[0].n
+        self.input_dims = env.observation_space.shape[1]
 
-        self.mem = GPUReplayMemory(args, env.observation_space, env.action_space)
+        self.n_envs = env.observation_space.shape[0]
+        self.mem = GPUReplayMemory(args, env.observation_space.shape[1], env.action_space[0].n, n_envs=self.n_envs)
 
         self.policy = ActorCritic(args, self.input_dims, self.n_actions).to(args.device)
         if model is None:
@@ -165,7 +172,7 @@ class PPO:
         with torch.no_grad():
             action, action_logprob = self.policy_old.act(state, mask)
 
-        return action.item(), action_logprob.detach()
+        return action, action_logprob.detach()
 
     def get_logprobs(self, state):
         with torch.no_grad():
@@ -173,6 +180,7 @@ class PPO:
         return logprobs
 
     def learn(self, steps):
+        # transitions -1 contains the masks
         transitions = self.mem.get_buffer()
 
         actor_loss = 0

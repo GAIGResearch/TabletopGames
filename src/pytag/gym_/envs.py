@@ -18,7 +18,7 @@ class TagSingleplayerGym(gym.Env):
         # ToDo throw exception if player is incorrect
         agents = [get_agent_class(agent_id)() for agent_id in agent_ids]
         # ToDo accept the List interface in GymEnv, this allows us to pass agents directly instead of converting it first
-        self._java_env = GymEnv(gameType, None, jpype.java.util.ArrayList(agents), seed, True)
+        self._java_env = GymEnv(gameType, None, jpype.java.util.ArrayList(agents), seed)
         
         # Construct action/observation space
         self._java_env.reset()
@@ -33,7 +33,7 @@ class TagSingleplayerGym(gym.Env):
         self._java_env.reset()
         self._update_data()
         
-        return self._last_obs_vector, {"action_mask": self._last_action_mask}
+        return self._last_obs_vector, {"action_mask": self._last_action_mask, "has_won": int(str(self._java_env.getPlayerResults()[0]) == "WIN")}
     
     def step(self, action):
         # Verify
@@ -50,7 +50,8 @@ class TagSingleplayerGym(gym.Env):
         self._update_data()
         done = self._java_env.isDone()
         truncated = False
-        info = {"action_mask": self._last_action_mask}
+        info = {"action_mask": self._last_action_mask,
+                "has_won": int(str(self._java_env.getPlayerResults()[0]) == "WIN")}
         return self._last_obs_vector, reward, done, truncated, info
     
     def close(self):
