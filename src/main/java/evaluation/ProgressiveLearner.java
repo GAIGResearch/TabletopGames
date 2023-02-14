@@ -108,7 +108,7 @@ public class ProgressiveLearner {
                             "\tlearner=       The full class name of an ILearner implementation.\n" +
                             "\t               This learner must be compatible with the heuristic - in that it must \n" +
                             "\t               generate a file that the heuristic can read.\n" +
-                            "\ttarget=        The target to use (WIN, ORDINAL, SCORE, WIN_MEAN, ORD_MEAN)\n" +
+                            "\ttarget=        The target to use (WIN, ORDINAL, SCORE, WIN_MEAN, ORD_MEAN, ORD_MEAN_SCALE, ORD_SCALE, SCORE_DELTA)\n" +
                             "\tgamma=         The discount factor to use - this is applied per round, not per action\n" +
                             "\texplore=       The starting exploration rate - at which random actions are taken by agents.\n" +
                             "\t               This will reduce linearly to zero for the final iteration.\n" +

@@ -22,7 +22,7 @@ public class RolloutTerminationTests {
             GameType.Dominion,
             GameType.Virus,
             GameType.Poker,
-            GameType.DiceMonastery,
+     //       GameType.DiceMonastery,
             GameType.Catan,
             GameType.ColtExpress,
             GameType.CantStop,

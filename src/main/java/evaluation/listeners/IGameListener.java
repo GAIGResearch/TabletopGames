@@ -49,7 +49,7 @@ public interface IGameListener {
             // in this case we construct from file
             listener = Utils.loadClassFromFile(listenerClass);
         } else {
-            if (!metricsClass.equals("")) {
+            if (metricsClass != null && !metricsClass.equals("")) {
                 try {
                     String[] classPaths = metricsClass.split(",");
                     for (String c: classPaths) {

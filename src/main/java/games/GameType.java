@@ -23,7 +23,6 @@ import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
-import games.sirius.*;
 import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
@@ -165,11 +164,7 @@ public enum GameType {
     CantStop(2, 4,
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
-            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
-    Sirius(2, 5,
-            Arrays.asList(Strategy, Cards),
-            Arrays.asList(HandManagement, SimultaneousActionSelection),
-            SiriusGameState.class, SiriusForwardModel.class, SiriusParameters.class, null);
+            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class);
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;

@@ -31,11 +31,13 @@ public abstract class FeatureListener implements IGameListener {
 
     @Override
     public void onEvent(Event event) {
-        if (event.type == Event.GameEvent.GAME_OVER) {
+        if (event.type == frequency) {
+            processState(event.state, event.action);
+        }
 
+        if (event.type == Event.GameEvent.GAME_OVER) {
             // first we record a final state for each player
-            if (event.type == frequency)
-                processFinalState(event.state, null);
+            processState(event.state, null);
 
             // now we can update the result
             int totP = event.state.getNPlayers();
@@ -96,8 +98,8 @@ public abstract class FeatureListener implements IGameListener {
 
     public abstract double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
-    public void processFinalState(AbstractGameState state, AbstractAction action) {
-        // we record one state for each player after every action is taken
+    public void processState(AbstractGameState state, AbstractAction action) {
+        // we record one state for each player after each relevant event occurs
         if (currentPlayerOnly && state.isNotTerminal()) {
             int p = state.getCurrentPlayer();
             double[] phi = extractFeatureVector(action, state, p);
