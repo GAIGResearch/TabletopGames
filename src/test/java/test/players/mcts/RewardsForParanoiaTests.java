@@ -37,7 +37,7 @@ public class RewardsForParanoiaTests {
     }
 
     public Game createGame(MCTSParams params, GameType gameType) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);

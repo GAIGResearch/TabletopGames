@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractTournament {
     // List of players taking part in the tournament
-    protected List<AbstractPlayer> agents;
+    protected List<? extends AbstractPlayer> agents;
     // Games to play
     protected List<Game> games;
     // Number of players in the games, index matches the games list
@@ -25,7 +25,7 @@ public abstract class AbstractTournament {
      * @param gameToPlay - game to play in this tournament.
      * @param nPlayerPerGame - number of players per game.
      */
-    public AbstractTournament(List<AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame, AbstractParameters gameParams){
+    public AbstractTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame, AbstractParameters gameParams){
         this.agents = agents;
         this.games = new ArrayList<>();
         this.playersPerGame = new ArrayList<>();

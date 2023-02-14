@@ -87,7 +87,7 @@ public class OSLAPlayer extends AbstractPlayer {
         if (gsCopy.getCurrentPlayer() == startingPlayer) {
             // first get to the end of our actions
             while (gsCopy.getCurrentPlayer() == startingPlayer && gsCopy.isNotTerminal()) {
-                AbstractAction action = rnd._getAction(gsCopy, fm.computeAvailableActions(gsCopy));
+                AbstractAction action = rnd.getAction(gsCopy, fm.computeAvailableActions(gsCopy));
                 fm.next(gsCopy, action);
             }
         }
@@ -99,7 +99,7 @@ public class OSLAPlayer extends AbstractPlayer {
                     throw new AssertionError("Not expecting to return to player " + getPlayerID());
                 }
                 while (gsCopy.getCurrentPlayer() == currentPlayer && gsCopy.isNotTerminal()) {
-                    AbstractAction action = rnd._getAction(gsCopy, fm.computeAvailableActions(gsCopy));
+                    AbstractAction action = rnd.getAction(gsCopy, fm.computeAvailableActions(gsCopy));
                     fm.next(gsCopy, action);
                 }
             }

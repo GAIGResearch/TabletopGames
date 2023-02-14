@@ -46,7 +46,7 @@ public class OMATests {
     }
 
     public Game createTicTacToe(MCTSParams params, int gridSize) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
@@ -59,7 +59,7 @@ public class OMATests {
     }
 
     public Game createLoveLetter(MCTSParams params) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);

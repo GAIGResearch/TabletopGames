@@ -244,7 +244,7 @@ public class ColtExpressGameState extends AbstractGameStateWithTurnOrder impleme
         for (ColtExpressCard card : playerHandCards.get(playerId).getComponents())
             if (card.cardType == ColtExpressCard.CardType.Bullet)
                 bulletsTaken++;
-        return (double) -bulletsTaken;
+        return -bulletsTaken;
     }
 
     @Override

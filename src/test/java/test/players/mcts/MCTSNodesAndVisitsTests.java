@@ -38,7 +38,7 @@ public class MCTSNodesAndVisitsTests {
     }
 
     public Game createGame(MCTSParams params) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
