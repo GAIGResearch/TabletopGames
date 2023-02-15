@@ -18,7 +18,7 @@ class TagSingleplayerGym(gym.Env):
         # ToDo throw exception if player is incorrect
         agents = [get_agent_class(agent_id)() for agent_id in agent_ids]
         # ToDo accept the List interface in GymEnv, this allows us to pass agents directly instead of converting it first
-        self._java_env = GymEnv(gameType, None, jpype.java.util.ArrayList(agents), seed)
+        self._java_env = GymEnv(gameType, None, jpype.java.util.ArrayList(agents), seed, True)
         
         # Construct action/observation space
         self._java_env.reset()
@@ -45,6 +45,7 @@ class TagSingleplayerGym(gym.Env):
             reward = -1
         else:
             self._java_env.step(action)
+            # todo [0] below is hard coded to playerID 0 -> should cache the python player's ID and use that
             reward = int(str(self._java_env.getPlayerResults()[0]) == "WIN")
         
         self._update_data()

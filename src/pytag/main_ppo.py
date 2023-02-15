@@ -30,6 +30,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='PyTAG')
     parser.add_argument('--seed', type=int, default=-1, help='Random seed')
     parser.add_argument('--max-steps', type=int, default=int(5e5), metavar='STEPS', help='Number of agent-env interactions')
+    parser.add_argument('--n-envs', type=int, default=1, metavar='STEPS', help='Number of agent-env interactions')
 
     # RL args
     parser.add_argument('--gamma', type=float, default=0.95, help='Discount rate')
@@ -70,9 +71,9 @@ if __name__ == "__main__":
 
     agents = ["python", "random"]
     # env = PyTAG(agents=agents, game="Diamant")
-    env = AsyncVectorEnv([
+    env = SyncVectorEnv([
         lambda: gym.make("TAG/Diamant")
-        for i in range(2)
+        for i in range(args.n_envs)
     ])
     env = MergeActionMaskWrapper(env)
 
@@ -85,8 +86,8 @@ if __name__ == "__main__":
     ep_steps = 0
     running_wins = deque(maxlen=20)
     obs, info = env.reset()
-    obs = process_obs(obs)
-    mask = torch.from_numpy(info["action_mask"])
+    obs = process_obs(obs, device=args.device)
+    mask = torch.from_numpy(info["action_mask"]).to(args.device)
     for step in range(args.max_steps):
 
         if done[0]:
@@ -94,12 +95,13 @@ if __name__ == "__main__":
             episodes += 1
 
             if step > 0:
-                running_wins.append(info["has_won"][0])
+                running_wins.append(info["final_info"][0]["has_won"])
+                # running_wins.append(info["has_won"][0])
                 # if env.has_won():
                 #     wins += 1
 
                 wandb.log({
-                    "train/steps": ep_steps,
+                    "train/steps": ep_steps*args.n_envs,
                     "train/win_rate": np.mean(running_wins),
                     "train/rewards": rewards,
                 })
@@ -121,7 +123,7 @@ if __name__ == "__main__":
         next_obs, reward, done, truncation, next_info = env.step(action)
 
         next_obs = process_obs(next_obs, device=args.device)
-        next_mask = torch.from_numpy(next_info["action_mask"])
+        next_mask = torch.from_numpy(next_info["action_mask"]).to(args.device)
         agent.mem.append(obs, action, mask, log_probs, reward, done)
         obs = next_obs
         mask = next_mask
