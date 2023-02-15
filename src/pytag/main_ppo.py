@@ -82,7 +82,7 @@ if __name__ == "__main__":
     start_time = time.time()
     wins = 0
     episodes = 0
-    done = [False] * env.num_envs
+    done = [True] * env.num_envs
     ep_steps = 0
     running_wins = deque(maxlen=20)
     obs, info = env.reset()

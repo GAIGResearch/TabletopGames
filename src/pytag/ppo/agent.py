@@ -36,7 +36,6 @@ class GPUReplayMemory():
         self.pos += 1
     def get_buffer(self):
         # PPO related processing and getting trajectories
-        # todo at the merging point done should not be carried over
         obs = self.obs.view(self.capacity * self.n_envs, -1)
         actions = self.actions.view(self.capacity * self.n_envs)
         masks = self.masks.view(self.capacity * self.n_envs, -1)
@@ -47,8 +46,9 @@ class GPUReplayMemory():
         # Monte Carlo estimate of returns
         discounted_rewards = []
         discounted_reward = 0
-        for reward, is_terminal in zip(reversed(rewards), reversed(dones)):
-            if is_terminal:
+        for reward, is_terminal, id in zip(reversed(rewards), reversed(dones), reversed(range(self.capacity*self.n_envs))):
+            # due to concatenating data from different workers we set disc_rews to 0 at the points where they are connected
+            if is_terminal or ((id + 1) % self.capacity) == 0:
                 discounted_reward = 0
             discounted_reward = reward + (self.gamma * discounted_reward)
             discounted_rewards.insert(0, discounted_reward)
