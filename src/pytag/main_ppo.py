@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     # RL args
     parser.add_argument('--gamma', type=float, default=0.95, help='Discount rate')
-    parser.add_argument('--replay-frequency', type=int, default=512, metavar='k',
+    parser.add_argument('--replay-frequency', type=int, default=128, metavar='k',
                         help='Frequency of sampling from memory')
     parser.add_argument('--hidden-size', type=int, default=64, metavar='SIZE', help='Network hidden size')
     parser.add_argument('--model', type=str, metavar='PARAMS', help='Pretrained model (state dict)')
@@ -71,10 +71,10 @@ if __name__ == "__main__":
 
     agents = ["python", "random"]
     # env = PyTAG(agents=agents, game="Diamant")
-    env = SyncVectorEnv([
+    env = AsyncVectorEnv([
         lambda: gym.make("TAG/Diamant")
         for i in range(args.n_envs)
-    ])
+    ], context="spawn")
     env = MergeActionMaskWrapper(env)
 
     agent = PPO(args, env)

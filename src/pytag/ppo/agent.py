@@ -20,7 +20,7 @@ class GPUReplayMemory():
         self.obs = torch.zeros([self.capacity, self.n_envs, obs_space], dtype=torch.float32).to(self.device)
         self.actions = torch.zeros([self.capacity, self.n_envs], dtype=torch.int64).to(self.device)
         self.masks = torch.zeros([self.capacity, self.n_envs, self.action_space], dtype=torch.int64).to(self.device)
-        self.logprobs = torch.zeros([self.capacity, self.n_envs], dtype=torch.int64).to(self.device)
+        self.logprobs = torch.zeros([self.capacity, self.n_envs], dtype=torch.float32).to(self.device)
         self.rewards = torch.zeros([self.capacity, self.n_envs], dtype=torch.float32).to(self.device)
         self.dones = torch.zeros([self.capacity, self.n_envs], dtype=torch.uint8).to(self.device)
         self.pos = 0
