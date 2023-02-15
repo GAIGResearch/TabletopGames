@@ -38,11 +38,11 @@ class GPUReplayMemory():
         # PPO related processing and getting trajectories
         # todo at the merging point done should not be carried over
         obs = self.obs.view(self.capacity * self.n_envs, -1)
-        actions = self.actions.view(self.capacity * self.n_envs, -1)
+        actions = self.actions.view(self.capacity * self.n_envs)
         masks = self.masks.view(self.capacity * self.n_envs, -1)
-        log_probs = self.logprobs.view(self.capacity * self.n_envs, -1)
-        rewards = self.rewards.view(self.capacity * self.n_envs, -1)
-        dones = self.dones.view(self.capacity * self.n_envs, -1)
+        log_probs = self.logprobs.view(self.capacity * self.n_envs)
+        rewards = self.rewards.view(self.capacity * self.n_envs)
+        dones = self.dones.view(self.capacity * self.n_envs)
 
         # Monte Carlo estimate of returns
         discounted_rewards = []
@@ -225,7 +225,7 @@ class PPO:
         # reset buffer
         self.mem.reset()
         wandb.log({
-            "train/total-steps": steps,
+            # "train/total-steps": steps,
             "train/total-loss": total_loss/self.K_epochs,
             "train/actor-loss": actor_loss/self.K_epochs,
             "train/critic-loss": critic_loss/self.K_epochs,

@@ -82,13 +82,13 @@ if __name__ == "__main__":
     start_time = time.time()
     wins = 0
     episodes = 0
-    done = [True] * env.num_envs
+    done = [False] * env.num_envs
     ep_steps = 0
     running_wins = deque(maxlen=20)
     obs, info = env.reset()
     obs = process_obs(obs, device=args.device)
     mask = torch.from_numpy(info["action_mask"]).to(args.device)
-    for step in range(args.max_steps):
+    for step in range(args.max_steps//args.n_envs):
 
         if done[0]:
             # logging
@@ -101,7 +101,8 @@ if __name__ == "__main__":
                 #     wins += 1
 
                 wandb.log({
-                    "train/steps": ep_steps*args.n_envs,
+                    "train/total_steps": step * args.n_envs,
+                    "train/steps": ep_steps,
                     "train/win_rate": np.mean(running_wins),
                     "train/rewards": rewards,
                 })
@@ -120,7 +121,7 @@ if __name__ == "__main__":
         ep_steps += 1
         action, log_probs = agent.act(obs, mask)
 
-        next_obs, reward, done, truncation, next_info = env.step(action)
+        next_obs, reward, done, truncation, next_info = env.step(action.detach().cpu().numpy())
 
         next_obs = process_obs(next_obs, device=args.device)
         next_mask = torch.from_numpy(next_info["action_mask"]).to(args.device)
