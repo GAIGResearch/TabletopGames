@@ -6,6 +6,7 @@ import core.CoreConstants.VisibilityMode;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.interfaces.IOrderedActionSpace;
 import games.explodingkittens.actions.*;
 import games.explodingkittens.actions.reactions.ChooseSeeTheFutureOrder;
 import games.explodingkittens.actions.reactions.GiveCard;
@@ -16,10 +17,11 @@ import utilities.Utils;
 
 import java.util.*;
 
+import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse;
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 import static utilities.Utils.generatePermutations;
 
-public class ExplodingKittensForwardModel extends AbstractForwardModel {
+public class ExplodingKittensForwardModel extends AbstractForwardModel implements IOrderedActionSpace {
 
     /**
      * Performs initial game setup according to game rules.
@@ -349,5 +351,148 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
         }
 
         return actions;
+    }
+
+    @Override
+    public int getActionSpace() {
+        return 13; // pass (draw) or play any of the card types
+    }
+
+    @Override
+    public int[] getFixedActionSpace() {
+        return new int[13];
+    }
+
+    @Override
+    public boolean[] getActionMask(AbstractGameState gameState) {
+        //  loop over the vectorised observation (show card counts)
+        boolean[] mask = new boolean[13];
+        double[] obs = ((ExplodingKittensGameState)gameState).getObservationVector();
+
+        // we don't allow to place a defuse card without explosion (so we skip over it)
+        // player has to defuse the bomb, no other option (this is after drawing an exploding kitten)
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState)gameState;
+        if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals((gameState).getGamePhase())) {
+            mask[1] = true;
+            return mask;
+        }  else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Nope.equals(ekgs.getGamePhase())) {
+            mask[0] = true; // pass
+            mask[2] = true; // use nope
+            return mask;
+        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Favor.equals(ekgs.getGamePhase())) {
+            // when doing a favor - player picks a card to give to the other player; this can be any available card in hand
+            for (int i = 2; i < 14; i++){
+                if (obs[i] > 0){
+                    mask[i] = true;
+                }
+            }
+            return mask;
+        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.SeeTheFuture.equals(ekgs.getGamePhase())){
+            // todo - player should observe the cards, but in this implementation it can also change the order
+        }
+
+        mask[0] = true; // player can pass
+        for (int i = 4; i < 13; i++){
+            if (obs[i] > 0){
+                mask[i] = true;
+            }
+        }
+        return mask;
+    }
+
+    @Override
+    public void nextPython(AbstractGameState state, int actionID) {
+        // todo chooses some actions randomly - could fix this with the multi-level trees
+        // TODO the 2 of a kind cards are seemingly not implemented
+        // TODO these could be saved somewhere, this is useful for reference
+//        ArrayList<String> cardTypes = new ArrayList<>(Arrays.asList("EXPLODING_KITTEN", "DEFUSE", "NOPE", "ATTACK", "SKIP", "FAVOR",
+//                "SHUFFLE", "SEETHEFUTURE", "TACOCAT", "MELONCAT", "FURRYCAT", "BEARDCAT", "RAINBOWCAT"));
+        Random rand = new Random();
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState)state;
+        int player = ekgs.getCurrentPlayer();
+        Deck<ExplodingKittensCard> playerDeck = ekgs.playerHandCards.get(player);
+
+        ArrayList<AbstractAction> actions = playerActions(ekgs, player);
+
+        // todo check if we need all this or if we even need to compute all these?
+        // todo depending on the gamephase we may have different actions, these may be handled using the mask
+        if (AbstractGameState.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
+            actions = playerActions(ekgs, player);
+        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals(ekgs.getGamePhase())) {
+            // here the player just picks an index ,which may be any of the other action IDs
+            actions = placeKittenActions(ekgs, player);
+            _next(state, actions.get(rand.nextInt(actions.size())));
+            return;
+        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Nope.equals(ekgs.getGamePhase())) {
+            actions = nopeActions(ekgs, player);
+        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Favor.equals(ekgs.getGamePhase())) {
+            actions = favorActions(ekgs, player);
+        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.SeeTheFuture.equals(ekgs.getGamePhase())) {
+            actions = seeTheFutureActions(ekgs, player);
+            _next(state, actions.get(rand.nextInt(actions.size())));
+            return;
+        }
+
+        Class actionClass;
+        switch (actionID){
+            case 0:
+                actionClass = DrawExplodingKittenCard.class; // pass/draw
+                break;
+            case 1:
+                actionClass = PlaceExplodingKitten.class; // defuse
+                break;
+            case 2:
+                actionClass = NopeAction.class;
+                break;
+            case 3:
+                actionClass = AttackAction.class;
+                break;
+            case 4:
+                actionClass = SkipAction.class;
+                break;
+            case 5:
+                actionClass = FavorAction.class;
+                break;
+            case 6:
+                actionClass = ShuffleAction.class;
+                break;
+            case 7:
+                actionClass = SeeTheFuture.class;
+                break;
+            default:
+                actionClass = DrawExplodingKittenCard.class;
+        }
+        switch (actionID) {
+            case 0:
+                if (!AbstractGameState.DefaultGamePhase.Main.equals(ekgs.getGamePhase())){
+                    // pass (situational, i.e: pass using nope)
+                    _next(state, new PassAction());
+                    break;
+                } else {
+                    // draw card
+                    _next(state, new DrawExplodingKittenCard(ekgs.drawPile.getComponentID(), playerDeck.getComponentID()));
+                    break;
+                }
+            case 1: // defuse
+                actions = placeKittenActions(ekgs, player);
+                _next(state, actions.get(rand.nextInt(actions.size())));
+                break;
+            case 2: // nope
+                actions = nopeActions(ekgs, player);
+                _next(state, actions.get(rand.nextInt(actions.size())));
+                break;
+            default:
+//                ArrayList<AbstractAction> actions = new ArrayList<>();
+//                for (AbstractAction action: computeAvailableActions(state)){
+                // rest of the actions are more straightforward
+                for (AbstractAction action: actions){
+                    if (action.getClass().equals(actionClass)){
+                        actions.add(action);
+                    }
+                }
+                _next(state, actions.get(rand.nextInt(actions.size())));
+                break;
+        }
+
     }
 }

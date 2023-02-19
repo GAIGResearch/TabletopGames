@@ -7,6 +7,7 @@ import core.interfaces.IOrderedActionSpace;
 import core.interfaces.IVectorisable;
 import games.GameType;
 import games.diamant.DiamantGameState;
+import games.explodingkittens.ExplodingKittensGameState;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
 import games.tictactoe.TicTacToeStateVector;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 
 public class GYMEnv {
@@ -297,7 +299,7 @@ public class GYMEnv {
         players.add(new PythonAgent());
         players.add(new RandomPlayer());
         try {
-            GYMEnv env = new GYMEnv(GameType.valueOf("Diamant"), null, players, 343, true);
+            GYMEnv env = new GYMEnv(GameType.valueOf("ExplodingKittens"), null, players, 343, true);
             boolean done = false;
             int episodes = 0;
             int MAX_EPISODES = 100;
@@ -306,13 +308,19 @@ public class GYMEnv {
             env.reset();
             int N_ACTIONS  = env.getActionSpace();
             while (!done){
-                int randomAction = rnd.nextInt(env.availableActions.size());
+//                int randomAction = rnd.nextInt(env.availableActions.size());
+                boolean[] mask = env.getActionMask();
+                int[] trueIdx = IntStream.range(0, mask.length)
+                        .filter(i -> !mask[i])
+                        .toArray();
+                int randomAction = trueIdx[rnd.nextInt(trueIdx.length)];
 //                int randomAction = rnd.nextInt(N_ACTIONS);
                 try{
 //                    System.out.println("playerID = " + env.getPlayerID());
 //                    if (env.gameState instanceof DiamantGameState){
-                        ((DiamantGameState) env.gameState).getNormalizedObservationVector();
+                        ((ExplodingKittensGameState) env.gameState).getNormalizedObservationVector();
 //                    }
+
                     env.step(randomAction);
                 } catch (Exception e){
                     System.out.println("Exception in GYMEnv main " + e.toString());
