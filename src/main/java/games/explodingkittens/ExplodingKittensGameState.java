@@ -195,7 +195,14 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
         if (nPlayersActive == 1) {
             this.gameStatus = Utils.GameResult.GAME_END;
+            for (int i = 0; i < getNPlayers(); i++) {
+                // set winner
+                if (playerResults[i] == Utils.GameResult.GAME_ONGOING) {
+                    playerResults[i] = Utils.GameResult.WIN;
+                }
+            }
         }
+
         ((ExplodingKittensTurnOrder) getTurnOrder()).endPlayerTurnStep(this);
 
     }
