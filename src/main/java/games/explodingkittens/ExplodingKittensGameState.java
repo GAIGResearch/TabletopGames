@@ -257,6 +257,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     @Override
     public double[] getObservationVector() {
         // TODO: see the future is not actually encoded here - could leave a placeholder for 3 cards?
+        // todo other gamephases are not represented here either: such as favor/nope/see the future...
         ArrayList<String> cardTypes = new ArrayList<>(Arrays.asList("EXPLODING_KITTEN", "DEFUSE", "NOPE", "ATTACK", "SKIP", "FAVOR",
                 "SHUFFLE", "SEETHEFUTURE", "TACOCAT", "MELONCAT", "FURRYCAT", "BEARDCAT", "RAINBOWCAT"));
         double[] obs = new double[getObservationSpace()];

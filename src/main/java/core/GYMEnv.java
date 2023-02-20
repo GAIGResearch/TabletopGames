@@ -311,7 +311,7 @@ public class GYMEnv {
 //                int randomAction = rnd.nextInt(env.availableActions.size());
                 boolean[] mask = env.getActionMask();
                 int[] trueIdx = IntStream.range(0, mask.length)
-                        .filter(i -> !mask[i])
+                        .filter(i -> mask[i])
                         .toArray();
                 int randomAction = trueIdx[rnd.nextInt(trueIdx.length)];
 //                int randomAction = rnd.nextInt(N_ACTIONS);
