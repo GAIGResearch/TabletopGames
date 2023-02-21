@@ -91,7 +91,7 @@ public class LLStateFeatures extends AbstractStateFeature {
         for (int i = 2; i <= 5; i++)
             retValue[i + discardOffset] /= 2.0;
 
-        retValue[0] = state.isNotProtected(playerID) ? 0.0 : 1.0;
+        retValue[0] = state.isProtected(playerID) ? 1.0 : 0.0;
         retValue[1] = visibleCards / (state.getNPlayers() - 1.0);
         retValue[2] = cardValues / maxCardValue;
         retValue[3] = state.getDrawPile().getSize() / 16.0;

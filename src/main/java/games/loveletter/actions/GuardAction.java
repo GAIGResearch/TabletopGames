@@ -13,13 +13,13 @@ import java.util.Objects;
  * The guard allows to attempt guessing another player's card. If the guess is correct, the targeted opponent
  * is removed from the game.
  */
-public class GuardAction extends core.actions.DrawCard implements IPrintable {
+public class GuardAction extends PlayCard implements IPrintable {
 
     private final int opponentID;
     private final LoveLetterCard.CardType cardType;
 
-    public GuardAction(int deckFrom, int deckTo, int fromIndex, int opponentID, LoveLetterCard.CardType cardtype) {
-        super(deckFrom, deckTo, fromIndex);
+    public GuardAction(int fromIndex, int playerID, int opponentID, LoveLetterCard.CardType cardtype) {
+        super(fromIndex, playerID);
         this.opponentID = opponentID;
         this.cardType = cardtype;
     }
@@ -30,10 +30,11 @@ public class GuardAction extends core.actions.DrawCard implements IPrintable {
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
 
         // guess the opponent's card and remove the opponent from play if the guess was correct
-        if (llgs.isNotProtected(opponentID)){
-            LoveLetterCard card = opponentDeck.peek();
-            if (card.cardType == this.cardType) {
-                llgs.killPlayer(opponentID);
+        LoveLetterCard card = opponentDeck.peek();
+        if (card.cardType == this.cardType) {
+            llgs.killPlayer(opponentID);
+            if (llgs.getCoreGameParameters().recordEventHistory) {
+                llgs.recordHistory("Guard guess correct!");
             }
         }
         return super.execute(gs);
@@ -41,12 +42,12 @@ public class GuardAction extends core.actions.DrawCard implements IPrintable {
 
     @Override
     public String toString(){
-        return "Guard - guess if player " + opponentID + " holds card " + cardType.name();
+        return "Guard (" + playerID + " guess " + opponentID + " holds card " + cardType.name() + ")";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Guard (guess player " + opponentID + " holds " + cardType.name() + ")";
+        return toString();
     }
 
     @Override
@@ -60,18 +61,17 @@ public class GuardAction extends core.actions.DrawCard implements IPrintable {
         if (!(o instanceof GuardAction)) return false;
         if (!super.equals(o)) return false;
         GuardAction that = (GuardAction) o;
-        return opponentID == that.opponentID &&
-                cardType == that.cardType;
+        return opponentID == that.opponentID && playerID == that.playerID && cardType == that.cardType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), opponentID, cardType);
+        return Objects.hash(super.hashCode(), opponentID, playerID, cardType);
     }
 
     @Override
     public AbstractAction copy() {
-        return new GuardAction(deckFrom, deckTo, fromIndex, opponentID, cardType);
+        return new GuardAction(fromIndex, playerID, opponentID, cardType);
     }
 
     public int getOpponentID() {

@@ -5,7 +5,6 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.interfaces.IGamePhase;
 import games.GameType;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
@@ -13,7 +12,6 @@ import games.loveletter.cards.LoveLetterCard;
 import java.util.*;
 
 import static core.CoreConstants.*;
-import static games.loveletter.LoveLetterGameState.LoveLetterGamePhase.Draw;
 
 
 public class LoveLetterForwardModel extends StandardForwardModel {
@@ -33,8 +31,6 @@ public class LoveLetterForwardModel extends StandardForwardModel {
         llgs.affectionTokens = new int[llgs.getNPlayers()];
         llgs.playerHandCards = new ArrayList<>(llgs.getNPlayers());
         llgs.playerDiscardCards = new ArrayList<>(llgs.getNPlayers());
-
-        llgs.setGamePhase(Draw);
 
         // Set up first round
         setupRound(llgs, null);
@@ -113,9 +109,6 @@ public class LoveLetterForwardModel extends StandardForwardModel {
             }
         }
 
-        // Game starts with drawing cards
-        llgs.setGamePhase(Draw);
-
         if (previousWinners != null) {
             // Random winner starts next round
             int nextPlayer = r.nextInt(previousWinners.size());
@@ -128,6 +121,10 @@ public class LoveLetterForwardModel extends StandardForwardModel {
             }
         }
 
+        // Game starts with drawing cards
+        LoveLetterCard cardDrawn = llgs.getDrawPile().draw();
+        llgs.getPlayerHandCards().get(llgs.getCurrentPlayer()).add(cardDrawn);
+
         // Update components in the game state
         llgs.updateComponents();
     }
@@ -135,21 +132,17 @@ public class LoveLetterForwardModel extends StandardForwardModel {
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
         // each turn begins with the player drawing a card after which one card will be played
-        // switch the phase after each executed action
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
 
-        if (llgs.playerHandCards.get(llgs.getCurrentPlayer()).getSize() > 2)
+        if (llgs.playerHandCards.get(llgs.getCurrentPlayer()).getSize() >= 2)
             throw new AssertionError("Hand should not get this big");
-        IGamePhase gamePhase = llgs.getGamePhase();
-        if (gamePhase == Draw) {
-            llgs.setGamePhase(DefaultGamePhase.Main);
-        } else if (gamePhase == DefaultGamePhase.Main) {
-            llgs.setGamePhase(Draw);
-            endPlayerTurn(llgs);
-            checkEndOfRound(llgs);
-        } else {
-            throw new IllegalArgumentException("The game phase " + llgs.getGamePhase() +
-                    " is not know by LoveLetterForwardModel");
+
+        endPlayerTurn(llgs);
+        if (!checkEndOfRound(llgs, action)) {
+            // Next turn starts with drawing card and removing protection
+            llgs.setProtection(llgs.getCurrentPlayer(), false);
+            LoveLetterCard cardDrawn = llgs.getDrawPile().draw();
+            llgs.getPlayerHandCards().get(llgs.getCurrentPlayer()).add(cardDrawn);
         }
     }
 
@@ -157,7 +150,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
      * Checks all game end conditions for the game.
      * @param llgs - game state to check if terminal.
      */
-    public void checkEndOfRound(LoveLetterGameState llgs) {
+    public boolean checkEndOfRound(LoveLetterGameState llgs, AbstractAction actionPlayed) {
         // Count the number of active players
         int playersAlive = 0;
         int soleWinner = -1;
@@ -173,14 +166,24 @@ public class LoveLetterForwardModel extends StandardForwardModel {
             // End the round and add up points
             HashSet<Integer> winners = roundEnd(llgs, playersAlive, soleWinner);
 
+            if (playersAlive == 1 && llgs.getCoreGameParameters().recordEventHistory) {
+                llgs.recordHistory("Winner only player left: " + soleWinner + " (" + actionPlayed.toString() + ")");
+            } else if (llgs.getRemainingCards() == 0 && llgs.getCoreGameParameters().recordEventHistory) {
+                llgs.recordHistory("No more cards remaining. Winners: " + winners.toString());
+            }
+
             if (checkEndOfGame(llgs)) {
-                return;  // Game is over
+                return true;  // Game is over
             }
 
             // Otherwise, end the round and set up the next
             endRound(llgs);
             setupRound(llgs, winners);
+
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -195,7 +198,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
         // Required tokens from parameters; if more players in the game, use the last value in the array
         double nRequiredTokens = (llgs.getNPlayers() == 2? llp.nTokensWin2 : llgs.getNPlayers() == 3? llp.nTokensWin3 : llp.nTokensWin4);
 
-        // Find players with highest number of tokens above the required number
+        // Find players with the highest number of tokens above the required number
         HashSet<Integer> bestPlayers = new HashSet<>();
         int bestValue = 0;
         for (int i = 0; i < llgs.getNPlayers(); i++) {
@@ -288,16 +291,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         ArrayList<AbstractAction> actions;
         int player = gameState.getCurrentPlayer();
-        if (gameState.getGamePhase().equals(DefaultGamePhase.Main)) {
-            actions = playerActions(llgs, player);
-        } else if (gameState.getGamePhase().equals(LoveLetterGameState.LoveLetterGamePhase.Draw)) {
-            // In draw phase, the players can only draw cards.
-            actions = new ArrayList<>();
-            actions.add(new DrawCard());
-        } else {
-            throw new IllegalArgumentException(gameState.getGamePhase() + " is unknown to LoveLetterGameState");
-        }
-
+        actions = playerActions(llgs, player);
         return actions;
     }
 
@@ -309,90 +303,87 @@ public class LoveLetterForwardModel extends StandardForwardModel {
     private ArrayList<AbstractAction> playerActions(LoveLetterGameState llgs, int playerID) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Deck<LoveLetterCard> playerDeck = llgs.playerHandCards.get(playerID);
-        Deck<LoveLetterCard> playerDiscardPile = llgs.playerDiscardCards.get(playerID);
 
         // in case a player holds the countess and either the king or the prince, the countess needs to be played
-        if (llgs.needToForceCountess(playerDeck)){
+        LoveLetterCard.CardType cardTypeForceCountess = llgs.needToForceCountess(playerDeck);
+        if (cardTypeForceCountess != null){
             for (int c = 0; c < playerDeck.getSize(); c++) {
                 if (playerDeck.getComponents().get(c).cardType == LoveLetterCard.CardType.Countess)
-                    actions.add(new CountessAction(playerDeck.getComponentID(), playerDiscardPile.getComponentID(), c));
+                    actions.add(new CountessAction(c, playerID, cardTypeForceCountess));
             }
         }
         // else: we create the respective actions for each card on the player's hand
         else {
             for (int card = 0; card < playerDeck.getSize(); card++) {
+                List<AbstractAction> cardActions = new ArrayList<>();
                 switch (playerDeck.getComponents().get(card).cardType) {
                     case Priest:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE || llgs.isProtected(targetPlayer))
                                 continue;
-                            actions.add(new PriestAction(playerDeck.getComponentID(),
-                                    playerDiscardPile.getComponentID(), card, targetPlayer));
+                            cardActions.add(new PriestAction(card, playerID, targetPlayer));
                         }
                         break;
 
                     case Guard:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE || llgs.isProtected(targetPlayer))
                                 continue;
                             for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values())
                                 if (type != LoveLetterCard.CardType.Guard) {
-                                    actions.add(new GuardAction(playerDeck.getComponentID(),
-                                            playerDiscardPile.getComponentID(), card, targetPlayer, type));
+                                    cardActions.add(new GuardAction(card, playerID, targetPlayer, type));
                                 }
                         }
                         break;
 
                     case Baron:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE || llgs.isProtected(targetPlayer))
                                 continue;
-                            actions.add(new BaronAction(playerDeck.getComponentID(),
-                                    playerDiscardPile.getComponentID(), card, targetPlayer));
+                            cardActions.add(new BaronAction(card, playerID, targetPlayer));
                         }
                         break;
 
                     case Handmaid:
-                        actions.add(new HandmaidAction(playerDeck.getComponentID(),
-                                playerDiscardPile.getComponentID(), card));
+                        cardActions.add(new HandmaidAction(card, playerID));
                         break;
 
                     case Prince:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
+                            if (llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE || llgs.isProtected(targetPlayer))
                                 continue;
-                            actions.add(new PrinceAction(playerDeck.getComponentID(),
-                                    playerDiscardPile.getComponentID(), card, targetPlayer));
+                            cardActions.add(new PrinceAction(card, playerID, targetPlayer));
                         }
                         break;
 
                     case King:
                         for (int targetPlayer = 0; targetPlayer < llgs.getNPlayers(); targetPlayer++) {
-                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE)
+                            if (targetPlayer == playerID || llgs.getPlayerResults()[targetPlayer] == GameResult.LOSE || llgs.isProtected(targetPlayer))
                                 continue;
-                            actions.add(new KingAction(playerDeck.getComponentID(),
-                                    playerDiscardPile.getComponentID(), card, targetPlayer));
+                            cardActions.add(new KingAction(card, playerID, targetPlayer));
                         }
                         break;
 
                     case Countess:
-                        actions.add(new CountessAction(playerDeck.getComponentID(),
-                                playerDiscardPile.getComponentID(), card));
+                        cardActions.add(new CountessAction(card, playerID, null));
                         break;
 
                     case Princess:
-                        actions.add(new PrincessAction(playerDeck.getComponentID(),
-                                playerDiscardPile.getComponentID(), card));
+                        cardActions.add(new PrincessAction(card, playerID));
                         break;
 
                     default:
                         throw new IllegalArgumentException("No core actions known for cardtype: " +
                                 playerDeck.getComponents().get(card).cardType.toString());
                 }
+                if (cardActions.size() == 0) {
+                    actions.add(new DiscardCard(card, playerID));
+                } else {
+                    actions.addAll(cardActions);
+                }
             }
         }
 
-        // add end turn by drawing a card
         return actions;
     }
 }

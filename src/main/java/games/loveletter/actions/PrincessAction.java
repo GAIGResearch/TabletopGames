@@ -1,17 +1,18 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
+
+import java.util.Objects;
 
 /**
  * In case the princess is discarded or played the player is immediately removed from the game.
  */
-public class PrincessAction extends core.actions.DrawCard implements IPrintable {
+public class PrincessAction extends PlayCard implements IPrintable {
 
-    public PrincessAction(int deckFrom, int deckTo, int fromIndex) {
-        super(deckFrom, deckTo, fromIndex);
+    public PrincessAction(int fromIndex, int playerID) {
+        super(fromIndex, playerID);
     }
 
     @Override
@@ -23,28 +24,35 @@ public class PrincessAction extends core.actions.DrawCard implements IPrintable 
 
     @Override
     public String toString(){
-        return "Princess - discard this card and lose the game";
+        return "Princess (" + playerID + " loses the game)";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Princess (lose game)";
+        return toString();
     }
 
     @Override
     public void printToConsole(AbstractGameState gameState) {
-        System.out.println(toString());
+        System.out.println(this);
     }
 
     @Override
-    public AbstractAction copy() {
-        return new PrincessAction(deckFrom, deckTo, fromIndex);
+    public PrincessAction copy() {
+        return new PrincessAction(fromIndex, playerID);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PrincessAction)) return false;
-        return super.equals(o);
+        if (!super.equals(o)) return false;
+        PrincessAction that = (PrincessAction) o;
+        return playerID == that.playerID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), playerID);
     }
 }

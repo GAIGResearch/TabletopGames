@@ -1,50 +1,58 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
+
+import java.util.Objects;
 
 /**
  * The handmaid protects the player from any targeted effects until the next turn.
  */
-public class HandmaidAction extends core.actions.DrawCard implements IPrintable {
+public class HandmaidAction extends PlayCard implements IPrintable {
 
-    public HandmaidAction(int deckFrom, int deckTo, int fromIndex) {
-        super(deckFrom, deckTo, fromIndex);
+    public HandmaidAction(int fromIndex, int playerID) {
+        super(fromIndex, playerID);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         // set the player's protection status
-        ((LoveLetterGameState) gs).setProtection(gs.getCurrentPlayer(), true);
+        ((LoveLetterGameState) gs).setProtection(playerID, true);
         return super.execute(gs);
     }
 
     @Override
     public String toString() {
-        return "Handmaid - get protection status";
+        return "Handmaid (" + playerID + " is protected until their next turn)";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Handmaid (protect)";
+        return toString();
     }
 
     @Override
     public void printToConsole(AbstractGameState gameState) {
-        System.out.println(toString());
+        System.out.println(this);
     }
 
     @Override
-    public AbstractAction copy() {
-        return new HandmaidAction(deckFrom, deckTo, fromIndex);
+    public HandmaidAction copy() {
+        return new HandmaidAction(fromIndex, playerID);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof HandmaidAction)) return false;
-        return super.equals(o);
+        if (!super.equals(o)) return false;
+        HandmaidAction that = (HandmaidAction) o;
+        return playerID == that.playerID;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), playerID);
     }
 }

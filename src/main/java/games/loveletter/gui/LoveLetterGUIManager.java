@@ -274,17 +274,17 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
 
                 int k = 0;
                 for (AbstractAction action : actions) {
-                    if (gameState.getGamePhase() == LoveLetterGameState.LoveLetterGamePhase.Draw ||
-                            action.getClass().equals(hCard.cardType.getActionClass()) &&
+                    if (action.getClass().equals(hCard.cardType.getActionClass()) &&
                                     (action instanceof GuardAction && ((GuardAction) action).getOpponentID() == highlightPlayerIdx ||
                                             action instanceof PriestAction && ((PriestAction) action).getOpponentID() == highlightPlayerIdx ||
                                             action instanceof BaronAction && ((BaronAction) action).getOpponentID() == highlightPlayerIdx ||
                                             action instanceof PrinceAction && ((PrinceAction) action).getOpponentID() == highlightPlayerIdx ||
                                             action instanceof KingAction && ((KingAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof HandmaidAction || action instanceof CountessAction || action instanceof PrincessAction)) {
+                                            action instanceof HandmaidAction || action instanceof CountessAction || action instanceof PrincessAction ||
+                                            action instanceof DiscardCard)) {
 
                         actionButtons[k].setVisible(true);
-                        actionButtons[k].setButtonAction(action, gameState);
+                        actionButtons[k].setButtonAction(action, action.toString());
                         k++;
                     }
                 }
