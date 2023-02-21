@@ -264,7 +264,6 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     @Override
     public double[] getObservationVector() {
         // TODO: see the future is not actually encoded here - could leave a placeholder for 3 cards?
-        // todo other gamephases are not represented here either: such as favor/nope/see the future...
         ArrayList<String> cardTypes = new ArrayList<>(Arrays.asList("EXPLODING_KITTEN", "DEFUSE", "NOPE", "ATTACK", "SKIP", "FAVOR",
                 "SHUFFLE", "SEETHEFUTURE", "TACOCAT", "MELONCAT", "FURRYCAT", "BEARDCAT", "RAINBOWCAT"));
         double[] obs = new double[getObservationSpace()];
@@ -279,6 +278,18 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
             obs[15+i] = this.playerHandCards.get(i).getComponents().size();
         }
         obs[14] = nPlayersActive;
+        // gamephases are represented here: main/favor/nope/see the future...
+        if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
+            obs[20] = 1.0;
+        } else{
+            // find id of gamephase
+            for (int i = 0; i < ExplodingKittensGamePhase.values().length; i++) {
+                if (ExplodingKittensGamePhase.values()[i].equals(gamePhase)){
+                    obs[21+i] = 1.0;
+                    break;
+                }
+            }
+        }
         return obs;
     }
 
@@ -298,8 +309,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
 
     @Override
     public int getObservationSpace() {
-        // todo could fix this by using max players
-        return 15 + this.getNPlayers();
+        return 25;
     }
 
     @Override
