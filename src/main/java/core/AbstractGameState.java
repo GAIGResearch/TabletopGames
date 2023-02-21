@@ -86,7 +86,7 @@ public abstract class AbstractGameState {
         turnCounter = 0;
         roundCounter = 0;
         firstPlayer = 0;
-        actionsInProgress.empty();
+        actionsInProgress.clear();
     }
 
     /**
