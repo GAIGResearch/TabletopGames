@@ -62,6 +62,18 @@ public class ActionTreeNode {
         return names;
     }
 
+    public List<Integer> flattenBreadthFirst(){
+        List<Integer> values = new ArrayList<Integer>();
+        List<ActionTreeNode> nodes = new ArrayList<ActionTreeNode>();
+        nodes.add(this);
+        while(nodes.size() > 0){
+            ActionTreeNode node = nodes.remove(0);
+            values.add(node.value);
+            nodes.addAll(node.children);
+        }
+        return values;
+    }
+
     public String toJsonString() {
         return this.toJson().toJSONString();
     }
