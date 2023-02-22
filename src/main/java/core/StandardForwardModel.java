@@ -5,6 +5,7 @@ import core.interfaces.IExtendedSequence;
 import evaluation.metrics.Event;
 
 import java.util.Arrays;
+import java.util.Stack;
 
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 import static core.CoreConstants.GameResult.TIMEOUT;

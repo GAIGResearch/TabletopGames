@@ -14,6 +14,9 @@ public class Witch extends DominionAttackAction {
     public Witch( int playerId) {
         super(CardType.WITCH, playerId);
     }
+    public Witch(int playerId, boolean dummy) {
+        super(CardType.WITCH, playerId, dummy);
+    }
 
     @Override
     boolean _execute(DominionGameState state) {
@@ -29,7 +32,7 @@ public class Witch extends DominionAttackAction {
      */
     @Override
     public DominionAttackAction _copy() {
-        return new Witch(player);
+        return new Witch(player, dummyAction);
     }
 
     @Override

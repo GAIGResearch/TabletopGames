@@ -21,6 +21,9 @@ public class Bandit extends DominionAttackAction {
     public Bandit(int playerId) {
         super(CardType.BANDIT, playerId);
     }
+    public Bandit(int playerId, boolean dummy) {
+        super(CardType.BANDIT, playerId, dummy);
+    }
 
     @Override
     boolean _execute(DominionGameState state) {
@@ -82,7 +85,7 @@ public class Bandit extends DominionAttackAction {
 
     @Override
     public Bandit _copy() {
-        Bandit retValue = new Bandit(player);
+        Bandit retValue = new Bandit(player, dummyAction);
         System.arraycopy(topCards, 0, retValue.topCards, 0, CARDS_AFFECTED);
         retValue.cardTrashed = cardTrashed;
         return retValue;

@@ -10,7 +10,6 @@ import core.actions.DoNothing;
  */
 public class EndPhase extends AbstractAction {
 
-
     @Override
     public boolean execute(AbstractGameState gs) {
         return true;
