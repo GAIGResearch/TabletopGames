@@ -1,28 +1,23 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.loveletter.cards.LoveLetterCard;
-
-import java.util.Objects;
 
 /**
  * The Countess needs to be discarded in case the player also hold a King or a Prince card.
  * Despite its high value, the Countess has no other effect.
  */
 public class CountessAction extends PlayCard implements IPrintable {
-    final LoveLetterCard.CardType cardTypeForce;
 
-    public CountessAction(int fromIndex, int playerID, LoveLetterCard.CardType cardType) {
-        super(fromIndex, playerID);
-        this.cardTypeForce = cardType;
+    public CountessAction(int playerID, LoveLetterCard.CardType cardType) {
+        super(LoveLetterCard.CardType.Countess, playerID, -1, null, cardType);
     }
 
     @Override
     public String toString(){
-        if (cardTypeForce == null) return "Countess (no effect)";
-        return "Countess (auto discard with " + cardTypeForce + ")";
+        if (forcedCountessCardType == null) return "Countess (no effect)";
+        return "Countess (auto discard with " + forcedCountessCardType + ")";
     }
 
     @Override
@@ -36,21 +31,12 @@ public class CountessAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new CountessAction(fromIndex, playerID, cardTypeForce);
+    public CountessAction copy() {
+        return new CountessAction(playerID, forcedCountessCardType);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CountessAction)) return false;
-        if (!super.equals(o)) return false;
-        CountessAction that = (CountessAction) o;
-        return playerID == that.playerID && cardTypeForce == that.cardTypeForce;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), playerID, cardTypeForce);
+        return o instanceof CountessAction && super.equals(o);
     }
 }

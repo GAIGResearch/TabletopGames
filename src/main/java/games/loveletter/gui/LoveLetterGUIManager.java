@@ -24,8 +24,8 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class LoveLetterGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -136,7 +136,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                 if (gameState.getNPlayers() == 2) {
                     // Add reserve
                     JLabel label = new JLabel("Reserve cards:");
-                    reserve = new LoveLetterDeckView(-1, llgs.getReserveCards(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, llp.getDataPath(),
+                    reserve = new LoveLetterDeckView(-1, llgs.getReserveCards(), true, llp.getDataPath(),
                             new Rectangle(0, 0, playerAreaWidth, llCardHeight));
                     JPanel wrap = new JPanel();
                     wrap.setOpaque(false);
@@ -274,15 +274,8 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
 
                 int k = 0;
                 for (AbstractAction action : actions) {
-                    if (action.getClass().equals(hCard.cardType.getActionClass()) &&
-                                    (action instanceof GuardAction && ((GuardAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof PriestAction && ((PriestAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof BaronAction && ((BaronAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof PrinceAction && ((PrinceAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof KingAction && ((KingAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof HandmaidAction || action instanceof CountessAction || action instanceof PrincessAction ||
-                                            action instanceof DiscardCard)) {
-
+                    PlayCard pc = (PlayCard) action;
+                    if (pc.getCardType() == hCard.cardType  && (pc.getTargetPlayer() == -1 || pc.getTargetPlayer() == highlightPlayerIdx)) {
                         actionButtons[k].setVisible(true);
                         actionButtons[k].setButtonAction(action, action.toString());
                         k++;
@@ -325,7 +318,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                         soleWinner = i;
                     }
                 }
-                HashSet<Integer> winners = fm.getWinners(llgs, playersAlive, soleWinner);
+                Set<Integer> winners = fm.getWinners(llgs, playersAlive, soleWinner);
 
                 // Show all hands
                 for (int i = 0; i < llgs.getNPlayers(); i++) {
@@ -361,11 +354,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
             if (reserve != null)
                 reserve.updateComponent(llgs.getReserveCards());
             drawPile.updateComponent(llgs.getDrawPile());
-            if (gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
-                drawPile.setFront(true);
-                if (reserve != null)
-                    reserve.setFront(true);
-            }
+            drawPile.setFront(gameState.getCoreGameParameters().alwaysDisplayFullObservable);
 
         }
     }

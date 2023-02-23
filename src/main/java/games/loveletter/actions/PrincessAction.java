@@ -3,16 +3,15 @@ package games.loveletter.actions;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
-
-import java.util.Objects;
+import games.loveletter.cards.LoveLetterCard;
 
 /**
  * In case the princess is discarded or played the player is immediately removed from the game.
  */
 public class PrincessAction extends PlayCard implements IPrintable {
 
-    public PrincessAction(int fromIndex, int playerID) {
-        super(fromIndex, playerID);
+    public PrincessAction(int playerID) {
+        super(LoveLetterCard.CardType.Princess, playerID, -1, null, null);
     }
 
     @Override
@@ -39,20 +38,11 @@ public class PrincessAction extends PlayCard implements IPrintable {
 
     @Override
     public PrincessAction copy() {
-        return new PrincessAction(fromIndex, playerID);
+        return new PrincessAction(playerID);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PrincessAction)) return false;
-        if (!super.equals(o)) return false;
-        PrincessAction that = (PrincessAction) o;
-        return playerID == that.playerID;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), playerID);
+        return o instanceof PrincessAction && super.equals(o);
     }
 }

@@ -2,8 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
-
-import java.util.Objects;
+import games.loveletter.cards.LoveLetterCard;
 
 /**
  * The Countess needs to be discarded in case the player also hold a King or a Prince card.
@@ -11,18 +10,18 @@ import java.util.Objects;
  */
 public class DiscardCard extends PlayCard implements IPrintable {
 
-    public DiscardCard(int fromIndex, int playerId) {
-        super(fromIndex, playerId);
+    public DiscardCard(LoveLetterCard.CardType cardType, int playerID) {
+        super(cardType, playerID, -1, null, null);
     }
 
     @Override
     public String toString(){
-        return "Discard card - can't execute effect (" + playerID + ")";
+        return "Discard card - no effect (" + playerID + ")";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Discard card " + getCard(gameState).toString() + " - can't execute effect (" + playerID + ")";
+        return "Discard card " + cardType.name() + " - no effect (" + playerID + ")";
     }
 
     @Override
@@ -32,20 +31,11 @@ public class DiscardCard extends PlayCard implements IPrintable {
 
     @Override
     public DiscardCard copy() {
-        return new DiscardCard(fromIndex, playerID);
+        return new DiscardCard(cardType, playerID);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DiscardCard)) return false;
-        if (!super.equals(o)) return false;
-        DiscardCard that = (DiscardCard) o;
-        return playerID == that.playerID;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), playerID);
+        return o instanceof DiscardCard && super.equals(o);
     }
 }

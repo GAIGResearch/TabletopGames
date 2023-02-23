@@ -3,16 +3,15 @@ package games.loveletter.actions;
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
-
-import java.util.Objects;
+import games.loveletter.cards.LoveLetterCard;
 
 /**
  * The handmaid protects the player from any targeted effects until the next turn.
  */
 public class HandmaidAction extends PlayCard implements IPrintable {
 
-    public HandmaidAction(int fromIndex, int playerID) {
-        super(fromIndex, playerID);
+    public HandmaidAction(int playerID) {
+        super(LoveLetterCard.CardType.Handmaid, playerID, -1, null, null);
     }
 
     @Override
@@ -39,20 +38,11 @@ public class HandmaidAction extends PlayCard implements IPrintable {
 
     @Override
     public HandmaidAction copy() {
-        return new HandmaidAction(fromIndex, playerID);
+        return new HandmaidAction(playerID);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof HandmaidAction)) return false;
-        if (!super.equals(o)) return false;
-        HandmaidAction that = (HandmaidAction) o;
-        return playerID == that.playerID;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), playerID);
+        return o instanceof HandmaidAction && super.equals(o);
     }
 }

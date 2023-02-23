@@ -157,7 +157,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
                 }else if(drawPileEmpty)
                 {
                     if(action instanceof GuardAction) {
-                        int opponentID = ((GuardAction) action).getOpponentID();
+                        int opponentID = ((GuardAction) action).getTargetPlayer();
                         boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
                         if (wonByCard) {
                             winningCards  = "Guard";
@@ -166,7 +166,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
                             getShowdownWin(llgs, whoPlayedIt, action);
                         }
                     }else if(action instanceof BaronAction) {
-                        int opponentID = ((BaronAction) action).getOpponentID();
+                        int opponentID = ((BaronAction) action).getTargetPlayer();
                         boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
                         if (wonByCard) {
                             winningCards = ("Baron");

@@ -25,7 +25,8 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     PartialObservableDeck<LoveLetterCard> drawPile;
 
     // Cards in the reserve
-    PartialObservableDeck<LoveLetterCard> reserveCards;
+    Deck<LoveLetterCard> reserveCards;
+    LoveLetterCard removedCard;
 
     // If true: player cannot be effected by any card effects
     boolean[] effectProtection;
@@ -57,6 +58,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         components.addAll(playerDiscardCards);
         components.add(drawPile);
         components.add(reserveCards);
+        components.add(removedCard);
         return components;
     }
 
@@ -65,6 +67,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         LoveLetterGameState llgs = new LoveLetterGameState(gameParameters.copy(), getNPlayers());
         llgs.drawPile = drawPile.copy();
         llgs.reserveCards = reserveCards.copy();
+        llgs.removedCard = removedCard.copy();
         llgs.playerHandCards = new ArrayList<>();
         llgs.playerDiscardCards = new ArrayList<>();
         for (int i = 0; i < getNPlayers(); i++) {
@@ -87,12 +90,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                     }
                 }
             }
-            for (int i = 0; i < llgs.reserveCards.getSize(); i++) {
-                if (!llgs.reserveCards.isComponentVisible(i, playerId)) {
-                    // Hide!
-                    llgs.drawPile.add(llgs.reserveCards.get(i));
-                }
-            }
             Random r = new Random(llgs.getGameParameters().getRandomSeed());
             llgs.drawPile.shuffle(r);
             for (int i = 0; i < getNPlayers(); i++) {
@@ -107,13 +104,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                     deck.shuffle(r);
                 }
             }
-            for (int i = 0; i < llgs.reserveCards.getSize(); i++) {
-                if (!llgs.reserveCards.isComponentVisible(i, playerId)) {
-                    // New random card
-                    llgs.reserveCards.setComponent(i, llgs.drawPile.draw());
-                }
-            }
-            llgs.reserveCards.shuffle(r);
         }
         return llgs;
     }
@@ -160,9 +150,9 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     /**
      * Checks if the countess needs to be forced to play.
      * @param playerDeck - deck of player to check
-     * @return - true if countess should be forced, false otherwise.
+     * @return - card type of the card that forces the countess to be played, null if countess not forced
      */
-    LoveLetterCard.CardType needToForceCountess(Deck<LoveLetterCard> playerDeck){
+    public LoveLetterCard.CardType needToForceCountess(Deck<LoveLetterCard> playerDeck){
         boolean ownsCountess = false;
         for (LoveLetterCard card : playerDeck.getComponents()) {
             if (card.cardType == LoveLetterCard.CardType.Countess){
@@ -171,7 +161,6 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
             }
         }
 
-        boolean forceCountess = false;
         if (ownsCountess)
         {
             for (LoveLetterCard card: playerDeck.getComponents()) {
@@ -196,10 +185,10 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
     }
 
     // Getters, Setters
-    public LoveLetterCard getReserveCard(){
-        return reserveCards.draw();
+    public LoveLetterCard getRemovedCard() {
+        return removedCard;
     }
-    public PartialObservableDeck<LoveLetterCard> getReserveCards() {
+    public Deck<LoveLetterCard> getReserveCards() {
         return reserveCards;
     }
     public boolean isProtected(int playerID){
@@ -250,7 +239,9 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         }
 
         System.out.println("\nDrawPile" + ":" + drawPile.toString(this, getCurrentPlayer()));
-        System.out.println("ReserveCards" + ":" + reserveCards.toString(this, getCurrentPlayer()));
+        if (reserveCards != null && reserveCards.getSize() > 0) {
+            System.out.println("ReserveCards" + ":" + reserveCards);
+        }
 
         System.out.println("Current GamePhase: " + gamePhase);
         System.out.println("======================");
