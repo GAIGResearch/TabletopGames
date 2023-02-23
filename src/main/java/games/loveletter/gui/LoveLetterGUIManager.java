@@ -25,7 +25,6 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.Set;
 
 public class LoveLetterGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -64,6 +63,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
             fm = (LoveLetterForwardModel) game.getForwardModel();
+
             if (gameState != null) {
                 llgs = (LoveLetterGameState)gameState;
                 JTabbedPane pane = new JTabbedPane();
@@ -133,6 +133,10 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                         }
                     });
                 }
+
+                // Add GUI listener
+                game.addListener(new LLGUIListener(fm, parent, playerHands));
+
                 if (gameState.getNPlayers() == 2) {
                     // Add reserve
                     JLabel label = new JLabel("Reserve cards:");
@@ -301,36 +305,8 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
-            // Pause after round finished, full display
-            if (llgs.getRoundCounter() != gameState.getRoundCounter()) {
-                // New round
-                // Paint final state of previous round, showing all hands
 
-                // Execute last action in the previous game state without any end of round computations to get final state of round
-                gameState.getHistory().get(gameState.getHistory().size()-1).execute(llgs);
-
-                // Get winners
-                int playersAlive = 0;
-                int soleWinner = -1;
-                for (int i = 0; i < llgs.getNPlayers(); i++) {
-                    if (llgs.getPlayerResults()[i] != CoreConstants.GameResult.LOSE && llgs.getPlayerHandCards().get(i).getSize() > 0) {
-                        playersAlive += 1;
-                        soleWinner = i;
-                    }
-                }
-                Set<Integer> winners = fm.getWinners(llgs, playersAlive, soleWinner);
-
-                // Show all hands
-                for (int i = 0; i < llgs.getNPlayers(); i++) {
-                    playerHands[i].update(llgs, true);
-                }
-                // Repaint
-                parent.repaint();
-
-                // Message for pause and clarity
-                JOptionPane.showMessageDialog(parent, "Round over! Winners: " + winners.toString() + ". Next round begins!");
-            }
-            
+            // Update active player highlight
             if (gameState.getCurrentPlayer() != activePlayer) {
                 playerHands[activePlayer].handCards.setCardHighlight(-1);
                 activePlayer = gameState.getCurrentPlayer();
