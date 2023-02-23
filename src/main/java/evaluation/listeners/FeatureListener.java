@@ -43,7 +43,7 @@ public abstract class FeatureListener extends GameListener {
                 switch (r) {
                     case WIN_GAME:
                         return 1.0;
-                    case DRAW:
+                    case DRAW_GAME:
                         return 0.5;
                     default:
                         return 0.0;

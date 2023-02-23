@@ -35,9 +35,9 @@ public class BaronAction extends PlayCard implements IPrintable {
             this.playerCard = playerCard.cardType;
             this.opponentCard = opponentCard.cardType;
             if (opponentCard.cardType.getValue() < playerCard.cardType.getValue())
-                llgs.killPlayer(targetPlayer);
+                llgs.killPlayer(playerID, targetPlayer, cardType);
             else if (playerCard.cardType.getValue() < opponentCard.cardType.getValue())
-                llgs.killPlayer(playerID);
+                llgs.killPlayer(playerID, playerID, cardType);
         } else {
             throw new IllegalArgumentException("player with ID " + targetPlayer + " was targeted using a Baron card" +
                     " but one of the players has no cards left.");
@@ -53,18 +53,6 @@ public class BaronAction extends PlayCard implements IPrintable {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        if (playerCard == null) {
-            LoveLetterGameState llgs = (LoveLetterGameState)gameState;
-            Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
-            Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(targetPlayer);
-
-            LoveLetterCard opponentCard = opponentDeck.peek();
-            LoveLetterCard playerCard = playerDeck.peek();
-            if (opponentCard != null && playerCard != null) {
-                this.playerCard = playerCard.cardType;
-                this.opponentCard = opponentCard.cardType;
-            }
-        }
         return "Baron (" + playerID + " " + playerCard + " vs " + targetPlayer + " " + opponentCard + ")";
     }
 

@@ -32,7 +32,7 @@ public class LLGUIListener extends GameListener {
 
             // Show all hands
             for (int i = 0; i < llgs.getNPlayers(); i++) {
-                if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME || llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_ROUND)
+                if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME || llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_ROUND || llgs.getPlayerResults()[i] == CoreConstants.GameResult.DRAW_ROUND)
                     winners.add(i);
                 playerHands[i].update(llgs, true);
             }

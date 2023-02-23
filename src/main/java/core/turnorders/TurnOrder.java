@@ -265,7 +265,7 @@ public abstract class TurnOrder {
         for (int p = 0; p < gs.getNPlayers(); p++) {
             int o = gs.getOrdinalPosition(p);
             if (o == 1 && drawn)
-                gs.setPlayerResult(DRAW, p);
+                gs.setPlayerResult(DRAW_GAME, p);
             else if (o == 1)
                 gs.setPlayerResult(WIN_GAME, p);
             else

@@ -34,13 +34,12 @@ public class PrinceAction extends PlayCard implements IPrintable {
 
         // if the discarded card is a princess, the targeted player loses the game
         cardDiscarded = card.cardType;
-        if (card.cardType == LoveLetterCard.CardType.Princess) {
-            llgs.killPlayer(targetPlayer);
+        if (cardDiscarded == LoveLetterCard.CardType.Princess) {
+            llgs.killPlayer(playerID, targetPlayer, cardType);
             if (llgs.getCoreGameParameters().recordEventHistory) {
                 llgs.recordHistory("Player " + targetPlayer + " discards Princess and loses!");
             }
-        } else
-        {
+        } else {
             if (llgs.getCoreGameParameters().recordEventHistory) {
                 llgs.recordHistory("Player " + targetPlayer + " discards " + card.cardType);
             }

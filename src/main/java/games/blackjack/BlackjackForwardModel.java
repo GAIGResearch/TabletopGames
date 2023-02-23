@@ -124,7 +124,7 @@ public class BlackjackForwardModel extends StandardForwardModel {
                     } else if (score[bjgs.dealerPlayer] < score[i]) {
                         bjgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, i);
                     } else if (score[bjgs.dealerPlayer] == score[i]) {
-                        bjgs.setPlayerResult(CoreConstants.GameResult.DRAW, i);
+                        bjgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, i);
                     }
                 }
             }

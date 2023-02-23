@@ -27,7 +27,7 @@ public class GuardAction extends PlayCard implements IPrintable {
         // guess the opponent's card and remove the opponent from play if the guess was correct
         LoveLetterCard card = opponentDeck.peek();
         if (card.cardType == this.targetCardType) {
-            llgs.killPlayer(targetPlayer);
+            llgs.killPlayer(playerID, targetPlayer, cardType);
             if (llgs.getCoreGameParameters().recordEventHistory) {
                 llgs.recordHistory("Guard guess correct!");
             }

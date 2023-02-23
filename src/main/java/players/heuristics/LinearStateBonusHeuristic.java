@@ -28,7 +28,7 @@ public class LinearStateBonusHeuristic extends LinearStateHeuristic {
                 return 1.5 * super.evaluateState(state, playerId);
             case LOSE_GAME:
                 return 0.75 * super.evaluateState(state, playerId);
-            case DRAW:
+            case DRAW_GAME:
                 return super.evaluateState(state, playerId);
             default:
                 throw new AssertionError("Not reachable for " + state.getPlayerResults()[playerId]);

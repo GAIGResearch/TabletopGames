@@ -1,17 +1,14 @@
 package games.loveletter.stats;
-import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
+import core.actions.LogEvent;
 import core.components.Deck;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 import evaluation.listeners.GameListener;
 import evaluation.metrics.IMetricsCollection;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.actions.BaronAction;
-import games.loveletter.actions.GuardAction;
-import games.loveletter.actions.PrinceAction;
-import games.loveletter.actions.PrincessAction;
+import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.*;
@@ -47,7 +44,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         @Override
         public Object run(GameListener listener, Event e) {
             StringBuilder ss = new StringBuilder();
-            if (e.state.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN_GAME) {
+            if (e.state.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN_ROUND) {
                 Deck<LoveLetterCard> played = ((LoveLetterGameState)e.state).getPlayerDiscardCards().get(e.playerID);
                 for (LoveLetterCard card : played.getComponents()) {
                     ss.append(card.cardType).append(",");
@@ -63,7 +60,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
         @Override
         public Set<Event.GameEvent> getEventTypes() {
-            return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
     }
 
@@ -84,154 +81,91 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
         @Override
         public Set<Event.GameEvent> getEventTypes() {
-            return Collections.singleton(Event.GameEvent.GAME_OVER);
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
     }
 
-    public static class WinningCards extends AbstractMetric
-    {
-        String winningCards;
-        String losingCards;
+    public static class EliminatingCards extends AbstractMetric {
 
-        public WinningCards() {
-            super();
-            winningCards = null;
-            losingCards = null;
+        @Override
+        public Object run(GameListener listener, Event e) {
+            // This is spawned whenever a player is eliminated
+            String[] text = ((LogEvent)e.action).text.split(":")[1].split(",");
+            int killer = Integer.parseInt(text[0].trim());
+            int killed = Integer.parseInt(text[1].trim());
+            LoveLetterCard.CardType cardUsed = LoveLetterCard.CardType.valueOf(text[2].trim());
+            return cardUsed + (killed == killer? " (self)" : "");
         }
 
         @Override
         public Set<Event.GameEvent> getEventTypes() {
-            return new HashSet<>(Arrays.asList(Event.GameEvent.ACTION_TAKEN, Event.GameEvent.GAME_OVER));
+            return Collections.singleton(Event.GameEvent.GAME_EVENT);
         }
+    }
+
+    public static class WinningCards extends AbstractMetric {
+
+        @Override
+        public Set<Event.GameEvent> getEventTypes() {
+            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        }
+
         @Override
         public Object run(GameListener listener, Event e) {
-            if(e.type == Event.GameEvent.ACTION_TAKEN){
-                processAction(e.state, e.action);
-            }else if(e.type == Event.GameEvent.GAME_OVER) {
-                CoreConstants.GameResult[] results = e.state.getPlayerResults();
-                String winStr = null, loseStr = null;
-                for (int i = 0; i < results.length; i++) {
-                    if(results[i] == CoreConstants.GameResult.WIN_GAME)
-                        winStr = "Win: " + processCards(winningCards, i);
-                    else if (results[i] == CoreConstants.GameResult.LOSE_GAME)
-                        loseStr = "Lose: " + processCards(losingCards, i);
+            PlayCard action = (PlayCard) e.state.getHistory().get(e.state.getHistory().size()-1);  // Last action played
+            return processAction((LoveLetterGameState) e.state, action);
+        }
+
+        private String processAction(LoveLetterGameState llgs, PlayCard action) {
+            int currentPlayerID = llgs.getCurrentPlayer();
+            boolean drawPileEmpty = llgs.getDrawPile().getSize() == 0;
+            int whoPlayedIt = action.getPlayerID();
+
+            if (action instanceof PrincessAction) {
+                return "Princess (opp)";
+            } else if (action instanceof GuardAction) {
+                int opponentID = action.getTargetPlayer();
+                boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
+                if (wonByCard) {
+                    return "Guard";
+                } else {
+                    return getShowdownWin(llgs, whoPlayedIt, action);
                 }
-                return winStr + " " + loseStr;
-            }
-            return null;
-        }
-
-        private String processCards(String token, int playerID)
-        {
-            StringBuilder ss = new StringBuilder();
-
-            if(token != null)
-                ss.append(token).append(",");
-            else
-                ss.append("NA,");
-
-            return ss.toString();
-        }
-
-        private void processAction(AbstractGameState state, AbstractAction action) {
-
-            if((state.getGameStatus() == CoreConstants.GameResult.GAME_END))
-            {
-                winningCards = "NA";
-                losingCards = "NA";
-
-                LoveLetterGameState llgs = ((LoveLetterGameState) state);
-                int currentPlayerID = llgs.getCurrentPlayer();
-                boolean drawPileEmpty = llgs.getDrawPile().getSize() == 0;
-                String lastAction = llgs.getHistoryAsText().get(llgs.getHistoryAsText().size()-1);
-                String[] tokens = lastAction.split(" ");
-                int whoPlayedIt = Integer.parseInt(tokens[1]);
-
-                boolean playAndWin = llgs.getPlayerResults()[whoPlayedIt] == CoreConstants.GameResult.WIN_GAME;
-
-                if(action instanceof PrincessAction)
-                {
-                    losingCards = ("Princess");
-                    winningCards  = ("Princess (opp)");
-
-                }else if(drawPileEmpty)
-                {
-                    if(action instanceof GuardAction) {
-                        int opponentID = ((GuardAction) action).getTargetPlayer();
-                        boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
-                        if (wonByCard) {
-                            winningCards  = "Guard";
-                            losingCards = "Guard (opp)";
-                        }else{
-                            getShowdownWin(llgs, whoPlayedIt, action);
-                        }
-                    }else if(action instanceof BaronAction) {
-                        int opponentID = ((BaronAction) action).getTargetPlayer();
-                        boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
-                        if (wonByCard) {
-                            winningCards = ("Baron");
-                            losingCards  = ("Baron (opp)");
-                        }else{
-                            boolean lostByCard = llgs.getPlayerHandCards().get(whoPlayedIt).getSize() == 0;
-                            if(lostByCard)
-                            {
-                                losingCards = ("Baron");
-                                winningCards  = ("Baron (opp)");
-                            }else
-                            {
-                                getShowdownWin(llgs, whoPlayedIt, action);
-                            }
-                        }
-                    }else {
-                        getShowdownWin(llgs, whoPlayedIt, action);
+            } else if(action instanceof BaronAction) {
+                int opponentID = action.getTargetPlayer();
+                boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
+                if (wonByCard) {
+                    return "Baron";
+                } else {
+                    boolean lostByCard = llgs.getPlayerHandCards().get(whoPlayedIt).getSize() == 0;
+                    if (lostByCard) {
+                        return "Baron (opp)";
+                    } else {
+                        return getShowdownWin(llgs, whoPlayedIt, action);
                     }
-                }else if(action instanceof BaronAction)
-                {
-                    if(playAndWin)
-                    {
-                        winningCards  = ("Baron");
-                        losingCards  = ("Baron (opp)");
-                    }else
-                    {
-                        losingCards  = ("Baron");
-                        winningCards  = ("Baron (opp)");
-                    }
-
-                }else if(action instanceof GuardAction) {
-                    winningCards  = ("Guard");
-                    losingCards  = ("Guard (opp)");
-                }else if(action instanceof PrinceAction)
-                {
-                    if(llgs.getPlayerResults()[currentPlayerID] == CoreConstants.GameResult.WIN_GAME) { //made the opponent discard princess.
-                        winningCards = ("Prince");
-                        losingCards = "Prince (opp)";
-                    }else{
-                        losingCards =  "Prince";
-                        winningCards = "Prince (opp)";
-                    }
-                }else{
-                    winningCards  = (llgs.getHistoryAsText().get(llgs.getHistoryAsText().size()-1));
                 }
-            }
+            } else if (action instanceof PrinceAction) {
+                if (llgs.getPlayerResults()[currentPlayerID] == CoreConstants.GameResult.WIN_GAME) { //made the opponent discard princess.
+                    return "Prince";
+                } else {
+                    return "Prince (opp)";
+                }
+            } else if (drawPileEmpty) {
+                return getShowdownWin(llgs, whoPlayedIt, action);
+            } else return action.getCardType().name();
         }
 
-        private void getShowdownWin(LoveLetterGameState llgs, int whoPlayedLast, AbstractAction action)
+        private String getShowdownWin(LoveLetterGameState llgs, int whoPlayedLast, AbstractAction action)
         {
-            for(int i = 0; i < llgs.getPlayerResults().length; ++i)
-            {
+            for (int i = 0; i < llgs.getNPlayers(); ++i) {
                 int numCardsPlayerHand = llgs.getPlayerHandCards().get(i).getSize();
-                if(llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME && numCardsPlayerHand>0)
-                    winningCards = (llgs.getPlayerHandCards().get(i).get(0).cardType + " (end)");
-                else if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.LOSE_GAME && numCardsPlayerHand>0)
-                    losingCards = (llgs.getPlayerHandCards().get(i).get(0).cardType + " (end)");
-                else{
-                    //This is a draw in the showdown.
-                    winningCards = "Tie-breaker";
-                    losingCards = "Tie-breaker";
-                    return;
+                if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_ROUND)
+                    return llgs.getPlayerHandCards().get(i).get(0).cardType + " (end)";
+                else if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.DRAW_ROUND) {
+                    return llgs.getPlayerHandCards().get(i).get(0).cardType + " (tie)";
                 }
             }
-
+            return "";
         }
     }
 }

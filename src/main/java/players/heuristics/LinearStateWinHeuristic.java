@@ -30,7 +30,7 @@ public class LinearStateWinHeuristic extends LinearStateHeuristic {
                 return 1.0;
             case LOSE_GAME:
                 return 0.0;
-            case DRAW:
+            case DRAW_GAME:
                 return 0.5;
             default:
                 throw new AssertionError("Not reachable for " + state.getPlayerResults()[playerId]);

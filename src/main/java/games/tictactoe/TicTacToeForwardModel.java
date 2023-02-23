@@ -128,8 +128,8 @@ public class TicTacToeForwardModel extends StandardForwardModel {
         boolean tie = gridBoard.getComponents().stream().noneMatch(t -> t.getTokenType().equals(TicTacToeConstants.emptyCell));
 
         if (tie) {
-            gameState.setGameStatus(CoreConstants.GameResult.DRAW);
-            Arrays.fill(gameState.getPlayerResults(), CoreConstants.GameResult.DRAW);
+            gameState.setGameStatus(CoreConstants.GameResult.DRAW_GAME);
+            Arrays.fill(gameState.getPlayerResults(), CoreConstants.GameResult.DRAW_GAME);
         }
 
         return tie;

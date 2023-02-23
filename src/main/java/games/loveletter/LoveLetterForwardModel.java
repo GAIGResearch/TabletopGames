@@ -170,16 +170,18 @@ public class LoveLetterForwardModel extends StandardForwardModel {
                 llgs.recordHistory("No more cards remaining. Winners: " + winners.toString());
             }
 
+            GameResult result = GameResult.WIN_ROUND;
+            if (winners.size() > 1) result = GameResult.DRAW_ROUND;
+            for (int i: winners) {
+                llgs.setPlayerResult(result, i);
+            }
+            endRound(llgs);
+
             if (checkEndOfGame(llgs)) {
                 return true;  // Game is over
             }
 
-            for (int i: winners) {
-                llgs.setPlayerResult(GameResult.WIN_ROUND, i);
-            }
-
-            // Otherwise, end the round and set up the next
-            endRound(llgs);
+            // Otherwise, set up the next roubd
             setupRound(llgs, winners);
 
             return true;

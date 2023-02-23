@@ -60,6 +60,10 @@ public abstract class PlayCard extends AbstractAction {
         return Objects.hash(playerID, targetPlayer, cardType, targetCardType, forcedCountessCardType);
     }
 
+    public int getPlayerID() {
+        return playerID;
+    }
+
     public int getTargetPlayer() {
         return targetPlayer;
     }

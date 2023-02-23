@@ -155,8 +155,8 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         }
 
         if (!gap) { //tie
-            gameState.setGameStatus(CoreConstants.GameResult.DRAW);
-            Arrays.fill(gameState.getPlayerResults(), CoreConstants.GameResult.DRAW);
+            gameState.setGameStatus(CoreConstants.GameResult.DRAW_GAME);
+            Arrays.fill(gameState.getPlayerResults(), CoreConstants.GameResult.DRAW_GAME);
             return true;
         }
 

@@ -85,8 +85,8 @@ public class StrategoForwardModel extends StandardForwardModel {
             if (sgs.getRoundCounter() >= ((StrategoParams)sgs.getGameParameters()).maxRounds) {
                 // Max rounds reached, draw
                 sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
-                sgs.setPlayerResult(CoreConstants.GameResult.DRAW, sgs.getCurrentPlayer());
-                sgs.setPlayerResult(CoreConstants.GameResult.DRAW, 1-sgs.getCurrentPlayer());
+                sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, sgs.getCurrentPlayer());
+                sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, 1-sgs.getCurrentPlayer());
             }
         }
     }

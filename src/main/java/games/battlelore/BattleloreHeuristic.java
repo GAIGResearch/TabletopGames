@@ -40,7 +40,7 @@ public class BattleloreHeuristic extends TunableParameters implements IStateHeur
         else if (playerResult == CoreConstants.GameResult.WIN_GAME) {
             return 1;
         }
-        else if (playerResult == CoreConstants.GameResult.DRAW) {
+        else if (playerResult == CoreConstants.GameResult.DRAW_GAME) {
             return 0;
         }
 
