@@ -57,9 +57,11 @@ public class CoreConstants {
     }
 
     public enum GameResult {
-        WIN(1),
+        WIN_GAME(1),
+        WIN_ROUND(0.5),
         DRAW(0),
-        LOSE(-1),
+        LOSE_ROUND(-0.5),
+        LOSE_GAME(-1),
         DISQUALIFY(-2),
         TIMEOUT(-3),
         GAME_ONGOING(0),

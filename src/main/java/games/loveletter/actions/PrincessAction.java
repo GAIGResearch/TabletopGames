@@ -15,10 +15,10 @@ public class PrincessAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(LoveLetterGameState gs) {
         // remove the player from the game
-        ((LoveLetterGameState)gs).killPlayer(gs.getCurrentPlayer());
-        return super.execute(gs);
+        gs.killPlayer(playerID);
+        return true;
     }
 
     @Override

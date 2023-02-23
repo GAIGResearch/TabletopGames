@@ -231,7 +231,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
 
     @Override
     public int getOrdinalPosition(int playerId) {
-        if (playerResults[playerId] == CoreConstants.GameResult.WIN)
+        if (playerResults[playerId] == CoreConstants.GameResult.WIN_GAME)
             return 1;
         UnoGameParameters ugp = (UnoGameParameters) gameParameters;
         if (ugp.scoringMethod == CHALLENGE) {

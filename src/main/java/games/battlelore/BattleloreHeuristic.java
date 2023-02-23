@@ -34,10 +34,10 @@ public class BattleloreHeuristic extends TunableParameters implements IStateHeur
         int orderableUnitCount = 0;
         int enemyUnitPower = 0;
 
-        if (playerResult == CoreConstants.GameResult.LOSE) {
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME) {
             return -1;
         }
-        else if (playerResult == CoreConstants.GameResult.WIN) {
+        else if (playerResult == CoreConstants.GameResult.WIN_GAME) {
             return 1;
         }
         else if (playerResult == CoreConstants.GameResult.DRAW) {

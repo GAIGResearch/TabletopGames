@@ -153,7 +153,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
         int playersAlive = 0;
         int soleWinner = -1;
         for (int i = 0; i < llgs.getNPlayers(); i++) {
-            if (llgs.getPlayerResults()[i] != GameResult.LOSE && llgs.playerHandCards.get(i).getSize() > 0) {
+            if (llgs.getPlayerResults()[i] != GameResult.LOSE_ROUND && llgs.playerHandCards.get(i).getSize() > 0) {
                 playersAlive += 1;
                 soleWinner = i;
             }
@@ -172,6 +172,10 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
             if (checkEndOfGame(llgs)) {
                 return true;  // Game is over
+            }
+
+            for (int i: winners) {
+                llgs.setPlayerResult(GameResult.WIN_ROUND, i);
             }
 
             // Otherwise, end the round and set up the next
@@ -240,7 +244,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
             HashSet<Integer> bestPlayers = new HashSet<>();
             int bestValue = 0;
             for (int i = 0; i < llgs.getNPlayers(); i++) {
-                if (llgs.getPlayerResults()[i] != GameResult.LOSE) {
+                if (llgs.getPlayerResults()[i] != GameResult.LOSE_ROUND) {
                     int points = llgs.playerHandCards.get(i).peek().cardType.getValue();
                     if (points > bestValue){
                         bestValue = points;

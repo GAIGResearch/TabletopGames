@@ -143,7 +143,7 @@ public class TicTacToeForwardModel extends StandardForwardModel {
     private void registerWinner(TicTacToeGameState gameState, Token winnerSymbol) {
         gameState.setGameStatus(CoreConstants.GameResult.GAME_END);
         int winningPlayer = TicTacToeConstants.playerMapping.indexOf(winnerSymbol);
-        gameState.setPlayerResult(CoreConstants.GameResult.WIN, winningPlayer);
-        gameState.setPlayerResult(CoreConstants.GameResult.LOSE, 1 - winningPlayer);
+        gameState.setPlayerResult(CoreConstants.GameResult.WIN_GAME, winningPlayer);
+        gameState.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 1 - winningPlayer);
     }
 }

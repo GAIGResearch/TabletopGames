@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameResult.*;
-import static core.CoreConstants.GameResult.LOSE;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 
 /**
  * This is purely for old-style game implementations from before January 2023
@@ -267,9 +267,9 @@ public abstract class TurnOrder {
             if (o == 1 && drawn)
                 gs.setPlayerResult(DRAW, p);
             else if (o == 1)
-                gs.setPlayerResult(WIN, p);
+                gs.setPlayerResult(WIN_GAME, p);
             else
-                gs.setPlayerResult(LOSE, p);
+                gs.setPlayerResult(LOSE_GAME, p);
         }
         if (gs.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gs.getPlayerResults()));

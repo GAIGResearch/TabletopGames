@@ -2,7 +2,6 @@ package games.catan;
 
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
-import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.Area;
 import core.components.Card;
@@ -559,9 +558,9 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (getPlayerResults()[playerId] == GameResult.LOSE)
+        if (getPlayerResults()[playerId] == GameResult.LOSE_GAME)
             return -1.0;
-        if (getPlayerResults()[playerId] == GameResult.WIN)
+        if (getPlayerResults()[playerId] == GameResult.WIN_GAME)
             return 1.0;
         return (double) (scores[playerId]) / 10.0;
     }

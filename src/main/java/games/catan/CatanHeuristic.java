@@ -50,9 +50,9 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
         CatanGameState state = (CatanGameState) gs;
         CoreConstants.GameResult playerResult = state.getPlayerResults()[playerId];
 
-        if (playerResult == CoreConstants.GameResult.LOSE)
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
             return -1;
-        if (playerResult == CoreConstants.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
             return 1;
 
         double stateValue = 0.0;

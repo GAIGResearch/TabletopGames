@@ -24,8 +24,7 @@ public class PriestAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        LoveLetterGameState llgs = (LoveLetterGameState)gs;
+    protected boolean _execute(LoveLetterGameState llgs) {
         PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(targetPlayer);
 
         // Set all cards to be visible by the current player
@@ -36,8 +35,7 @@ public class PriestAction extends PlayCard implements IPrintable {
         if (llgs.getCoreGameParameters().recordEventHistory) {
             llgs.recordHistory("Priest sees " + opponentCard);
         }
-
-        return super.execute(gs);
+        return true;
     }
 
     @Override
@@ -79,7 +77,7 @@ public class PriestAction extends PlayCard implements IPrintable {
     public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
         List<PlayCard> cardActions = new ArrayList<>();
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE || gs.isProtected(targetPlayer))
+            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
             cardActions.add(new PriestAction(playerID, targetPlayer));
         }

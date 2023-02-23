@@ -8,6 +8,7 @@ import games.loveletter.LoveLetterGameState;
 import gui.GamePanel;
 
 import javax.swing.*;
+import java.util.HashSet;
 import java.util.Set;
 
 public class LLGUIListener extends GameListener {
@@ -27,19 +28,12 @@ public class LLGUIListener extends GameListener {
             // Paint final state of previous round, showing all hands
             LoveLetterGameState llgs = (LoveLetterGameState) event.state;
 
-            // Get winners
-            int playersAlive = 0;
-            int soleWinner = -1;
-            for (int i = 0; i < event.state.getNPlayers(); i++) {
-                if (llgs.getPlayerResults()[i] != CoreConstants.GameResult.LOSE && llgs.getPlayerHandCards().get(i).getSize() > 0) {
-                    playersAlive += 1;
-                    soleWinner = i;
-                }
-            }
-            Set<Integer> winners = fm.getWinners(llgs, playersAlive, soleWinner);
+            Set<Integer> winners = new HashSet<>();
 
             // Show all hands
             for (int i = 0; i < llgs.getNPlayers(); i++) {
+                if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME || llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_ROUND)
+                    winners.add(i);
                 playerHands[i].update(llgs, true);
             }
             // Repaint

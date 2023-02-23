@@ -23,30 +23,27 @@ public class BaronAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        LoveLetterGameState llgs = (LoveLetterGameState)gs;
+    protected boolean _execute(LoveLetterGameState llgs) {
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(targetPlayer);
         PartialObservableDeck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
 
         // compares the value of the player's hand card with another player's hand card
         // the player with the lesser valued card will be removed from the game
-        if (gs.getPlayerResults()[playerID] != CoreConstants.GameResult.LOSE){
-            LoveLetterCard opponentCard = opponentDeck.peek();
-            LoveLetterCard playerCard = playerDeck.peek();
-            if (opponentCard != null && playerCard != null) {
-                this.playerCard = playerCard.cardType;
-                this.opponentCard = opponentCard.cardType;
-                if (opponentCard.cardType.getValue() < playerCard.cardType.getValue())
-                    llgs.killPlayer(targetPlayer);
-                else if (playerCard.cardType.getValue() < opponentCard.cardType.getValue())
-                    llgs.killPlayer(playerID);
-            } else {
-                throw new IllegalArgumentException("player with ID " + targetPlayer + " was targeted using a Baron card" +
-                        " but one of the players has no cards left.");
-            }
+        LoveLetterCard opponentCard = opponentDeck.peek();
+        LoveLetterCard playerCard = playerDeck.peek();
+        if (opponentCard != null && playerCard != null) {
+            this.playerCard = playerCard.cardType;
+            this.opponentCard = opponentCard.cardType;
+            if (opponentCard.cardType.getValue() < playerCard.cardType.getValue())
+                llgs.killPlayer(targetPlayer);
+            else if (playerCard.cardType.getValue() < opponentCard.cardType.getValue())
+                llgs.killPlayer(playerID);
+        } else {
+            throw new IllegalArgumentException("player with ID " + targetPlayer + " was targeted using a Baron card" +
+                    " but one of the players has no cards left.");
         }
 
-        return super.execute(gs);
+        return true;
     }
 
     @Override
@@ -93,7 +90,7 @@ public class BaronAction extends PlayCard implements IPrintable {
     public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
         List<PlayCard> cardActions = new ArrayList<>();
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE || gs.isProtected(targetPlayer))
+            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
             cardActions.add(new BaronAction(playerID, targetPlayer));
         }

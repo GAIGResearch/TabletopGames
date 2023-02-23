@@ -169,9 +169,9 @@ public abstract class AbstractForwardModel {
             if (o == 1 && drawn)
                 gs.setPlayerResult(DRAW, p);
             else if (o == 1)
-                gs.setPlayerResult(WIN, p);
+                gs.setPlayerResult(WIN_GAME, p);
             else
-                gs.setPlayerResult(LOSE, p);
+                gs.setPlayerResult(LOSE_GAME, p);
         }
         if (gs.getCoreGameParameters().verbose) {
             System.out.println(Arrays.toString(gs.getPlayerResults()));

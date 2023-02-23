@@ -30,9 +30,9 @@ public class UnoHeuristic extends TunableParameters implements IStateHeuristic {
         UnoGameParameters ugp = ((UnoGameParameters) ugs.getGameParameters());
         CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if (playerResult == CoreConstants.GameResult.LOSE)
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
             return -1;
-        if (playerResult == CoreConstants.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
             return 1;
 
         int nColors = ugp.colors.length;

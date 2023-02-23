@@ -9,7 +9,7 @@ import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.infectionHash;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
-import static core.CoreConstants.GameResult.LOSE;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 
 @SuppressWarnings("unchecked")
 public class GameOverDrawInfectionCards extends GameOverCondition {
@@ -23,7 +23,7 @@ public class GameOverDrawInfectionCards extends GameOverCondition {
             if (gs.getCoreGameParameters().verbose) {
                 System.out.println("No more cards to draw");
             }
-            return LOSE;
+            return LOSE_GAME;
         }
         return GAME_ONGOING;
     }

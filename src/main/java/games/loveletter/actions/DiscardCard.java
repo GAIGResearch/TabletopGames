@@ -2,6 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
+import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
 /**
@@ -32,6 +33,11 @@ public class DiscardCard extends PlayCard implements IPrintable {
     @Override
     public DiscardCard copy() {
         return new DiscardCard(cardType, playerID);
+    }
+
+    @Override
+    protected boolean _execute(LoveLetterGameState llgs) {
+        return true;
     }
 
     @Override

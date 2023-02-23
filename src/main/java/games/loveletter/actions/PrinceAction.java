@@ -24,8 +24,7 @@ public class PrinceAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        LoveLetterGameState llgs = (LoveLetterGameState)gs;
+    protected boolean _execute(LoveLetterGameState llgs) {
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(targetPlayer);
         Deck<LoveLetterCard> opponentDiscardPile = llgs.getPlayerDiscardCards().get(targetPlayer);
         Deck<LoveLetterCard> drawPile = llgs.getDrawPile();
@@ -36,7 +35,7 @@ public class PrinceAction extends PlayCard implements IPrintable {
         // if the discarded card is a princess, the targeted player loses the game
         cardDiscarded = card.cardType;
         if (card.cardType == LoveLetterCard.CardType.Princess) {
-            ((LoveLetterGameState) gs).killPlayer(targetPlayer);
+            llgs.killPlayer(targetPlayer);
             if (llgs.getCoreGameParameters().recordEventHistory) {
                 llgs.recordHistory("Player " + targetPlayer + " discards Princess and loses!");
             }
@@ -50,11 +49,11 @@ public class PrinceAction extends PlayCard implements IPrintable {
             // in case the draw pile is empty the targeted player receives the reserve card
             LoveLetterCard cardDrawn = drawPile.draw();
             if (cardDrawn == null)
-                cardDrawn = ((LoveLetterGameState)gs).getRemovedCard();
+                cardDrawn = llgs.getRemovedCard();
             opponentDeck.add(cardDrawn);
         }
 
-        return super.execute(gs);
+        return true;
     }
 
     @Override
@@ -96,7 +95,7 @@ public class PrinceAction extends PlayCard implements IPrintable {
     public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
         List<PlayCard> cardActions = new ArrayList<>();
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-            if (gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE || gs.isProtected(targetPlayer))
+            if (gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
             cardActions.add(new PrinceAction(playerID, targetPlayer));
         }

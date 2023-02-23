@@ -21,10 +21,7 @@ public class KingAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        super.execute(gs);
-
-        LoveLetterGameState llgs = (LoveLetterGameState)gs;
+    protected boolean _execute(LoveLetterGameState llgs) {
         Deck<LoveLetterCard> playerDeck = llgs.getPlayerHandCards().get(playerID);
         Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(targetPlayer);
 
@@ -68,7 +65,7 @@ public class KingAction extends PlayCard implements IPrintable {
     public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
         List<PlayCard> cardActions = new ArrayList<>();
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE || gs.isProtected(targetPlayer))
+            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
             cardActions.add(new KingAction(playerID, targetPlayer));
         }

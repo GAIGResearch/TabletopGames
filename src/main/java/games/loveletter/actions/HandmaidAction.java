@@ -15,10 +15,10 @@ public class HandmaidAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    protected boolean _execute(LoveLetterGameState gs) {
         // set the player's protection status
-        ((LoveLetterGameState) gs).setProtection(playerID, true);
-        return super.execute(gs);
+        gs.setProtection(playerID, true);
+        return true;
     }
 
     @Override

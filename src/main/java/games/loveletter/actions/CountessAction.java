@@ -2,6 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.interfaces.IPrintable;
+import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
 /**
@@ -33,6 +34,11 @@ public class CountessAction extends PlayCard implements IPrintable {
     @Override
     public CountessAction copy() {
         return new CountessAction(playerID, forcedCountessCardType);
+    }
+
+    @Override
+    protected boolean _execute(LoveLetterGameState llgs) {
+        return true;
     }
 
     @Override

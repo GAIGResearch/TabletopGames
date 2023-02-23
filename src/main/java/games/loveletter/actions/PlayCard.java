@@ -28,6 +28,7 @@ public abstract class PlayCard extends AbstractAction {
         PartialObservableDeck<LoveLetterCard> from = llgs.getPlayerHandCards().get(playerID);
         Deck<LoveLetterCard> to = llgs.getPlayerDiscardCards().get(playerID);
         LoveLetterCard card = null;
+        // Find card by type
         for (LoveLetterCard c: from.getComponents()) {
             if (c.cardType == cardType) {
                 card = c;
@@ -35,12 +36,16 @@ public abstract class PlayCard extends AbstractAction {
             }
         }
         if (card != null) {
+            // Discard card
             from.remove(card);
             to.add(card);
-            return true;
+            // Execute card effect
+            return _execute(llgs);
         }
-        return false;
+        throw new AssertionError("No card in hand matching the required type");
     }
+
+    protected abstract boolean _execute(LoveLetterGameState llgs);
 
     @Override
     public boolean equals(Object o) {

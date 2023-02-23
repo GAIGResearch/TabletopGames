@@ -3,7 +3,6 @@ package players.heuristics;
 import core.AbstractGameState;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
-import utilities.Utils;
 
 
 public class LogisticStateWinHeuristic extends LogisticStateHeuristic {
@@ -25,9 +24,9 @@ public class LogisticStateWinHeuristic extends LogisticStateHeuristic {
         }
 
         switch (state.getPlayerResults()[playerId]) {
-            case WIN:
+            case WIN_GAME:
                 return 1.0;
-            case LOSE:
+            case LOSE_GAME:
                 return 0.0;
             case DRAW:
                 return 0.5;

@@ -8,7 +8,7 @@ import games.pandemic.PandemicGameState;
 import utilities.Hash;
 
 import static games.pandemic.PandemicConstants.*;
-import static core.CoreConstants.GameResult.LOSE;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class GameOverInfection extends GameOverCondition {
@@ -16,7 +16,7 @@ public class GameOverInfection extends GameOverCondition {
     public CoreConstants.GameResult test(AbstractGameState gs) {
         for (String c: colors) {
             if (((Counter)((PandemicGameState)gs).getComponent(Hash.GetInstance().hash("Disease Cube " + c))).getValue() < 0) {
-                return LOSE;
+                return LOSE_GAME;
             }
         }
         return GAME_ONGOING;
