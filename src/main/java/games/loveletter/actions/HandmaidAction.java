@@ -38,7 +38,7 @@ public class HandmaidAction extends PlayCard implements IPrintable {
 
     @Override
     public HandmaidAction copy() {
-        return new HandmaidAction(playerID);
+        return this;
     }
 
     @Override

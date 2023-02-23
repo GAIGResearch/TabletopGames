@@ -59,7 +59,7 @@ public class KingAction extends PlayCard implements IPrintable {
 
     @Override
     public KingAction copy() {
-        return new KingAction(playerID, targetPlayer);
+        return this;
     }
 
     public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {

@@ -33,7 +33,7 @@ public class CountessAction extends PlayCard implements IPrintable {
 
     @Override
     public CountessAction copy() {
-        return new CountessAction(playerID, forcedCountessCardType);
+        return this;
     }
 
     @Override

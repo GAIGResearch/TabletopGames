@@ -38,7 +38,7 @@ public class PrincessAction extends PlayCard implements IPrintable {
 
     @Override
     public PrincessAction copy() {
-        return new PrincessAction(playerID);
+        return this;
     }
 
     @Override

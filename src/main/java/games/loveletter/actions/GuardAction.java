@@ -70,6 +70,6 @@ public class GuardAction extends PlayCard implements IPrintable {
 
     @Override
     public GuardAction copy() {
-        return new GuardAction(playerID, targetPlayer, targetCardType);
+        return this;
     }
 }

@@ -32,7 +32,7 @@ public class DiscardCard extends PlayCard implements IPrintable {
 
     @Override
     public DiscardCard copy() {
-        return new DiscardCard(cardType, playerID);
+        return this;
     }
 
     @Override
