@@ -44,6 +44,19 @@ public class ActionTreeNode {
         return nodes;
     }
 
+    public int[] getActionMask() {
+        List<Integer> vals = this.flattenValues();
+        vals.remove(0);
+        int[] valsArray = vals.stream().mapToInt(i -> i).toArray();
+        return valsArray;
+    }
+
+    public List<String> getActionMaskNames() {
+        List<String> vals = this.flattenNames();
+        vals.remove(0);
+        return vals;
+    }
+
     public List<Integer> flattenValues(){
         List<Integer> values = new ArrayList<Integer>();
         values.add(this.value);

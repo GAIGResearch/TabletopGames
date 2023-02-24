@@ -33,3 +33,5 @@ out/production/ModernBoardGame/META-INF/
 javadoc/
 
 src/main/java/META-INF/MANIFEST.MF
+
+src/pytag/env/

@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import utilities.ActionTreeNode;
 import utilities.ElapsedCpuChessTimer;
 import utilities.Utils;
 
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Random;
 
 public abstract class AbstractForwardModel {
+
+    public ActionTreeNode root;
 
     /* Limited access/Final methods */
 

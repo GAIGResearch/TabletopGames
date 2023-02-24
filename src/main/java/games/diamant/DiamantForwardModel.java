@@ -309,16 +309,16 @@ public class DiamantForwardModel extends AbstractForwardModel implements IOrdere
     }
 
     @Override
-    public boolean[] getActionMask(AbstractGameState gameState) {
-        boolean[] actionMask;
+    public int[] getActionMask(AbstractGameState gameState) {
+        int[] actionMask;
         DiamantGameState dgs = (DiamantGameState) gameState;
         List<AbstractAction> actionsList = computeAvailableActions(dgs);
 
         //Player out of cave
-        if (actionsList.size() == 1) return new boolean[]{false, false, true};
+        if (actionsList.size() == 1) return new int[]{0, 0, 1};
 
         //Player in cave
-        else return new boolean[]{true, true, false};
+        else return new int[]{1, 1, 0};
     }
 
     @Override
