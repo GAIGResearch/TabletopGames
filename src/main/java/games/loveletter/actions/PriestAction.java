@@ -19,8 +19,8 @@ public class PriestAction extends PlayCard implements IPrintable {
 
     private LoveLetterCard.CardType opponentCard;
 
-    public PriestAction(int playerID, int opponentID) {
-        super(LoveLetterCard.CardType.Priest, playerID, opponentID, null, null);
+    public PriestAction(int playerID, int opponentID, boolean canExecuteEffect) {
+        super(LoveLetterCard.CardType.Priest, playerID, opponentID, null, null, canExecuteEffect);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class PriestAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public String toString(){
+    public String _toString(){
         return "Priest (" + playerID + " sees " + (opponentCard != null? opponentCard : "card") + " of " + targetPlayer + ")";
     }
 
@@ -69,7 +69,7 @@ public class PriestAction extends PlayCard implements IPrintable {
 
     @Override
     public PriestAction copy() {
-        PriestAction copy = new PriestAction(playerID, targetPlayer);
+        PriestAction copy = new PriestAction(playerID, targetPlayer, canExecuteEffect);
         copy.opponentCard = opponentCard;
         return copy;
     }
@@ -79,8 +79,9 @@ public class PriestAction extends PlayCard implements IPrintable {
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
             if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
-            cardActions.add(new PriestAction(playerID, targetPlayer));
+            cardActions.add(new PriestAction(playerID, targetPlayer, true));
         }
+        if (cardActions.size() == 0) cardActions.add(new PriestAction(playerID, -1, false));
         return cardActions;
     }
 }

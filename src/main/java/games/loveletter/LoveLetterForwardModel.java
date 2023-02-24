@@ -341,11 +341,8 @@ public class LoveLetterForwardModel extends StandardForwardModel {
                     throw new IllegalArgumentException("No core actions known for cardtype: " +
                             playerDeck.getComponents().get(card).cardType.toString());
             }
-            if (cardActions.size() == 0) {
-                actions.add(new DiscardCard(cardType, playerID));
-            } else {
-                actions.addAll(cardActions);
-            }
+
+            actions.addAll(cardActions);
         }
 
         return actions;

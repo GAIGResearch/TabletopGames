@@ -16,8 +16,8 @@ import java.util.List;
  */
 public class KingAction extends PlayCard implements IPrintable {
 
-    public KingAction(int playerID, int opponentID) {
-        super(LoveLetterCard.CardType.King, playerID, opponentID, null, null);
+    public KingAction(int playerID, int opponentID, boolean canExecuteEffect) {
+        super(LoveLetterCard.CardType.King, playerID, opponentID, null, null, canExecuteEffect);
     }
 
     @Override
@@ -38,7 +38,7 @@ public class KingAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public String toString(){
+    public String _toString(){
         return "King (" + playerID + " trades hands with " + targetPlayer + ")";
     }
 
@@ -67,8 +67,9 @@ public class KingAction extends PlayCard implements IPrintable {
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
             if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
-            cardActions.add(new KingAction(playerID, targetPlayer));
+            cardActions.add(new KingAction(playerID, targetPlayer, true));
         }
+        if (cardActions.size() == 0) cardActions.add(new KingAction(playerID, -1, false));
         return cardActions;
     }
 }

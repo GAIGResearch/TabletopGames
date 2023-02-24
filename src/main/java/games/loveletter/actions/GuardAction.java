@@ -16,8 +16,8 @@ import java.util.List;
  */
 public class GuardAction extends PlayCard implements IPrintable {
 
-    public GuardAction(int playerID, int opponentID, LoveLetterCard.CardType cardtype) {
-        super(LoveLetterCard.CardType.Guard, playerID, opponentID, cardtype, null);
+    public GuardAction(int playerID, int opponentID, LoveLetterCard.CardType cardtype, boolean canExecuteEffect) {
+        super(LoveLetterCard.CardType.Guard, playerID, opponentID, cardtype, null, canExecuteEffect);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class GuardAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public String toString(){
+    public String _toString(){
         return "Guard (" + playerID + " guess " + targetPlayer + " holds card " + targetCardType.name() + ")";
     }
 
@@ -62,9 +62,10 @@ public class GuardAction extends PlayCard implements IPrintable {
                 continue;
             for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values())
                 if (type != LoveLetterCard.CardType.Guard) {
-                    cardActions.add(new GuardAction(playerID, targetPlayer, type));
+                    cardActions.add(new GuardAction(playerID, targetPlayer, type, true));
                 }
         }
+        if (cardActions.size() == 0) cardActions.add(new GuardAction(playerID, -1, null, false));
         return cardActions;
     }
 

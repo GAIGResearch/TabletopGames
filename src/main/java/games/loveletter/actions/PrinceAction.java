@@ -19,8 +19,8 @@ public class PrinceAction extends PlayCard implements IPrintable {
 
     private LoveLetterCard.CardType cardDiscarded;
 
-    public PrinceAction(int playerID, int opponentID) {
-        super(LoveLetterCard.CardType.Prince, playerID, opponentID, null, null);
+    public PrinceAction(int playerID, int opponentID, boolean canExecuteEffect) {
+        super(LoveLetterCard.CardType.Prince, playerID, opponentID, null, null, canExecuteEffect);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class PrinceAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public String toString(){
+    public String _toString(){
         return "Prince (" + targetPlayer + " discards " + (cardDiscarded != null? cardDiscarded : "card") + " and draws a new card)";
     }
 
@@ -86,7 +86,7 @@ public class PrinceAction extends PlayCard implements IPrintable {
 
     @Override
     public PrinceAction copy() {
-        PrinceAction pa = new PrinceAction(playerID, targetPlayer);
+        PrinceAction pa = new PrinceAction(playerID, targetPlayer, canExecuteEffect);
         pa.cardDiscarded = cardDiscarded;
         return pa;
     }
@@ -96,8 +96,9 @@ public class PrinceAction extends PlayCard implements IPrintable {
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
             if (gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
-            cardActions.add(new PrinceAction(playerID, targetPlayer));
+            cardActions.add(new PrinceAction(playerID, targetPlayer, true));
         }
+        if (cardActions.size() == 0) cardActions.add(new PrinceAction(playerID, -1, false));
         return cardActions;
     }
 }

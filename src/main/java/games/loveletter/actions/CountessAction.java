@@ -12,11 +12,11 @@ import games.loveletter.cards.LoveLetterCard;
 public class CountessAction extends PlayCard implements IPrintable {
 
     public CountessAction(int playerID, LoveLetterCard.CardType cardType) {
-        super(LoveLetterCard.CardType.Countess, playerID, -1, null, cardType);
+        super(LoveLetterCard.CardType.Countess, playerID, -1, null, cardType, false);
     }
 
     @Override
-    public String toString(){
+    public String _toString(){
         if (forcedCountessCardType == null) return "Countess (no effect)";
         return "Countess (auto discard with " + forcedCountessCardType + ")";
     }

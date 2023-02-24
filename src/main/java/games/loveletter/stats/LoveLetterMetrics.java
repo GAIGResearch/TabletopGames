@@ -125,24 +125,32 @@ public class LoveLetterMetrics implements IMetricsCollection {
                 return "Princess.opp";
             } else if (action instanceof GuardAction) {
                 int opponentID = action.getTargetPlayer();
-                boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
-                if (wonByCard) {
-                    return "Guard";
+                if (opponentID != -1) {
+                    boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
+                    if (wonByCard) {
+                        return "Guard";
+                    } else {
+                        return getShowdownWin(llgs, whoPlayedIt, action);
+                    }
                 } else {
                     return getShowdownWin(llgs, whoPlayedIt, action);
                 }
             } else if(action instanceof BaronAction) {
                 int opponentID = action.getTargetPlayer();
-                boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
-                if (wonByCard) {
-                    return "Baron";
-                } else {
-                    boolean lostByCard = llgs.getPlayerHandCards().get(whoPlayedIt).getSize() == 0;
-                    if (lostByCard) {
-                        return "Baron.opp";
+                if (opponentID != -1) {
+                    boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
+                    if (wonByCard) {
+                        return "Baron";
                     } else {
-                        return getShowdownWin(llgs, whoPlayedIt, action);
+                        boolean lostByCard = llgs.getPlayerHandCards().get(whoPlayedIt).getSize() == 0;
+                        if (lostByCard) {
+                            return "Baron.opp";
+                        } else {
+                            return getShowdownWin(llgs, whoPlayedIt, action);
+                        }
                     }
+                } else {
+                    return getShowdownWin(llgs, whoPlayedIt, action);
                 }
             } else if (action instanceof PrinceAction) {
                 if (llgs.getPlayerResults()[currentPlayerID] == CoreConstants.GameResult.WIN_GAME) { //made the opponent discard princess.

@@ -18,8 +18,8 @@ import java.util.Objects;
 public class BaronAction extends PlayCard implements IPrintable {
     private LoveLetterCard.CardType playerCard, opponentCard;
 
-    public BaronAction(int playerID, int opponentID) {
-        super(LoveLetterCard.CardType.Baron, playerID, opponentID, null, null);
+    public BaronAction(int playerID, int opponentID, boolean canExecuteEffect) {
+        super(LoveLetterCard.CardType.Baron, playerID, opponentID, null, null, canExecuteEffect);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class BaronAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public String toString(){
+    public String _toString(){
         return "Baron (" + playerID + " compares cards with " + targetPlayer + ")";
     }
 
@@ -80,14 +80,15 @@ public class BaronAction extends PlayCard implements IPrintable {
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
             if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
-            cardActions.add(new BaronAction(playerID, targetPlayer));
+            cardActions.add(new BaronAction(playerID, targetPlayer, true));
         }
+        if (cardActions.size() == 0) cardActions.add(new BaronAction(playerID, -1, false));
         return cardActions;
     }
 
     @Override
     public BaronAction copy() {
-        BaronAction copy = new BaronAction(playerID, targetPlayer);
+        BaronAction copy = new BaronAction(playerID, targetPlayer, canExecuteEffect);
         copy.playerCard = playerCard;
         copy.opponentCard = opponentCard;
         return copy;

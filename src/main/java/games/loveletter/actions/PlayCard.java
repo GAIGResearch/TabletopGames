@@ -12,13 +12,15 @@ import java.util.Objects;
 public abstract class PlayCard extends AbstractAction {
     final int playerID, targetPlayer;
     final LoveLetterCard.CardType cardType, targetCardType, forcedCountessCardType;
+    final boolean canExecuteEffect;
 
-    public PlayCard(LoveLetterCard.CardType cardType, int playerID, int targetPlayer, LoveLetterCard.CardType targetCardType, LoveLetterCard.CardType forcedCountessCardType) {
+    public PlayCard(LoveLetterCard.CardType cardType, int playerID, int targetPlayer, LoveLetterCard.CardType targetCardType, LoveLetterCard.CardType forcedCountessCardType, boolean canExecuteEffect) {
         this.cardType = cardType;
         this.playerID = playerID;
         this.targetPlayer = targetPlayer;
         this.targetCardType = targetCardType;
         this.forcedCountessCardType = forcedCountessCardType;
+        this.canExecuteEffect = canExecuteEffect;
     }
 
     @Override
@@ -40,24 +42,33 @@ public abstract class PlayCard extends AbstractAction {
             from.remove(card);
             to.add(card);
             // Execute card effect
-            return _execute(llgs);
+            if (canExecuteEffect) // If not, just discard the card, it's ok
+                return _execute(llgs);
+            return true;
         }
         throw new AssertionError("No card in hand matching the required type");
     }
 
     protected abstract boolean _execute(LoveLetterGameState llgs);
+    protected abstract String _toString();
+
+    @Override
+    public String toString() {
+        if (!canExecuteEffect) return cardType + " - no effect";
+        else return _toString();
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PlayCard)) return false;
         PlayCard playCard = (PlayCard) o;
-        return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer && cardType == playCard.cardType && targetCardType == playCard.targetCardType && forcedCountessCardType == playCard.forcedCountessCardType;
+        return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer && canExecuteEffect == playCard.canExecuteEffect && cardType == playCard.cardType && targetCardType == playCard.targetCardType && forcedCountessCardType == playCard.forcedCountessCardType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, targetPlayer, cardType, targetCardType, forcedCountessCardType);
+        return Objects.hash(playerID, targetPlayer, cardType, targetCardType, forcedCountessCardType, canExecuteEffect);
     }
 
     public int getPlayerID() {
@@ -70,5 +81,17 @@ public abstract class PlayCard extends AbstractAction {
 
     public LoveLetterCard.CardType getCardType() {
         return cardType;
+    }
+
+    public LoveLetterCard.CardType getForcedCountessCardType() {
+        return forcedCountessCardType;
+    }
+
+    public LoveLetterCard.CardType getTargetCardType() {
+        return targetCardType;
+    }
+
+    public boolean canExecuteEffect() {
+        return canExecuteEffect;
     }
 }
