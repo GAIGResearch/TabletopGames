@@ -94,7 +94,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             int killer = Integer.parseInt(text[0].trim());
             int killed = Integer.parseInt(text[1].trim());
             LoveLetterCard.CardType cardUsed = LoveLetterCard.CardType.valueOf(text[2].trim());
-            return cardUsed + (killed == killer? " (self)" : "");
+            return cardUsed + (killed == killer? ".self" : "");
         }
 
         @Override
@@ -122,7 +122,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             int whoPlayedIt = action.getPlayerID();
 
             if (action instanceof PrincessAction) {
-                return "Princess (opp)";
+                return "Princess.opp";
             } else if (action instanceof GuardAction) {
                 int opponentID = action.getTargetPlayer();
                 boolean wonByCard = llgs.getPlayerHandCards().get(opponentID).getSize() == 0;
@@ -139,7 +139,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
                 } else {
                     boolean lostByCard = llgs.getPlayerHandCards().get(whoPlayedIt).getSize() == 0;
                     if (lostByCard) {
-                        return "Baron (opp)";
+                        return "Baron.opp";
                     } else {
                         return getShowdownWin(llgs, whoPlayedIt, action);
                     }
@@ -148,7 +148,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
                 if (llgs.getPlayerResults()[currentPlayerID] == CoreConstants.GameResult.WIN_GAME) { //made the opponent discard princess.
                     return "Prince";
                 } else {
-                    return "Prince (opp)";
+                    return "Prince.opp";
                 }
             } else if (drawPileEmpty) {
                 return getShowdownWin(llgs, whoPlayedIt, action);
@@ -160,9 +160,9 @@ public class LoveLetterMetrics implements IMetricsCollection {
             for (int i = 0; i < llgs.getNPlayers(); ++i) {
                 int numCardsPlayerHand = llgs.getPlayerHandCards().get(i).getSize();
                 if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_ROUND)
-                    return llgs.getPlayerHandCards().get(i).get(0).cardType + " (end)";
+                    return llgs.getPlayerHandCards().get(i).get(0).cardType + ".end";
                 else if (llgs.getPlayerResults()[i] == CoreConstants.GameResult.DRAW_ROUND) {
-                    return llgs.getPlayerHandCards().get(i).get(0).cardType + " (tie)";
+                    return llgs.getPlayerHandCards().get(i).get(0).cardType + ".tie";
                 }
             }
             return "";
