@@ -13,6 +13,8 @@ public interface IVectorisable {
 
     double[] getObservationVector();
 
+    double[] getNormalizedObservationVector();
+
     // Gets the size of the observation vector
     int getObservationSpace();
 }

@@ -9,5 +9,5 @@ if not jpype.isJVMStarted():
 gym.envs.register(
      id='TAG/Diamant-v0',
      entry_point='gym_.envs:TagSingleplayerGym',
-     kwargs={"game_id": "Diamant", "agent_ids": ["random", "python"]}
+     kwargs={"game_id": "Diamant", "agent_ids": ["python", "random"]}
 )
