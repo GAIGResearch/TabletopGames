@@ -1,22 +1,49 @@
+import os.path
 import random
 import time
 import json
 import jpype
-from jpype import *
+from jpype import java
 import jpype.imports
+from jpype.types import *
 from utils.common import get_agent_class
+import numpy as np
 
 
 class PyTAG():
-    def __init__(self, agents, seed=42, game="Diamant", jar_path="ModernBoardGame.jar"):
+    def __init__(self, agents, seed=42, game="Diamant", jar_path="jars/ModernBoardGame.jar", isNormalized = True):
         # JPYPE setup
+        self.root_path = os.getcwd()
+        # jpype.addClassPath(os.path.join(self.root_path, jar_path))
+        jpype.addClassPath(jpype.getDefaultJVMPath())
         jpype.addClassPath(jar_path)
         if not jpype.isJVMStarted():
-            jpype.startJVM()
+            # jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=' + jar_path)
+            jpype.startJVM(convertStrings=False) #classpath=[jpype.getDefaultJVMPath(), jar_path]) #classpath=os.path.join(self.root_path, jar_path))
 
-        Utils = jpype.JClass("utilities.Utils")
+        print(jpype.java.lang.System.getProperty("java.class.path"))
+        # todo it sees the packages, but not the classes
+        import core
+        import games.catan
+        # jpype.JClass("core.Game").main([]) # execute the main method in Game - runs a pandmic game by default - just an example
+
+        # from utilities import Utils
+        # jpype.JException
+
         GYMEnv = jpype.JClass("core.GYMEnv")
+        Utils = jpype.JClass("utilities.Utils")
         GameType = jpype.JClass("games.GameType")
+
+        try:
+            # it does see the package structure as PyCharm makes recommendations in the debugger
+            GYMEnv = jpype.JClass("<core.GYMEnv>")
+            Utils = jpype.JClass("utilities.Utils")
+            GameType = jpype.JClass("games.GameType")
+        except jpype.JException as ex:
+            print("Caught base exception : ", str(ex))
+            print(ex.stacktrace())
+        except Exception as e:
+            print(e)
 
         null = jpype.java.lang.String @ None
         null_list = jpype.java.util.List @ None
@@ -28,31 +55,57 @@ class PyTAG():
             players.add(agent_class())
         self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed))
         # todo get obs and action spaces
-        # self.observation_space = self.env.ObservationSpace()
-        # self.action_space = gym.spaces.Discrete(self.env.ActionSpace())
+        self.observation_space = 9 #self.env.getObservationSpace()
+        self.action_space = 3 #self.env.getActionSpace()
         self.gs = None
+        self.prev_reward = 0
 
     def getObs(self):
         return self.env.getFeatures()
 
+    def getPlayerID(self):
+        return self.env.getPlayerID()
+
     def reset(self):
+        self.prev_reward = 0
         self.gs = self.env.reset()
-        obs = self.gs.getFeatureVector()
+        obs = np.asarray(self.env.getObservationVector())
         return obs
 
     def getActions(self):
         return self.env.getActions()
 
+    def getActionMask(self):
+        return self.env.getActionMask()
+
     def get_observation_as_json(self):
         java_json = self.env.getObservationJson()
         return json.loads(str(java_json))
 
+    def has_won(self):
+        if str(self.env.getPlayerResults()[0]) == "WIN":
+            # print(f"Player won with reward {reward}")
+            return True
+        return False
+
     def step(self, action):
+        playerID = self.env.getPlayerID()
         self.env.step(action)
-        obs = self.env.getObservationVector()
-        reward = self.env.getReward()
+        obs = np.asarray(self.env.getObservationVector())
+        # reward = self.env.getReward()
+        # reward = self.prev_reward - reward
+        # self.prev_reward = reward
+        # if action == 1:
+        #     reward = self.env.getReward()/17
+        # else:
+        #     reward = 0
+        # reward = obs[1]
+        # todo win/loss reward
+        reward = 0.0
+        if str(self.env.getPlayerResults()[0]) == "WIN":
+            reward = 1.0
         done = self.env.isDone()
-        return obs, reward, done, ""
+        return obs, reward, done, {}
 
     def close(self):
         jpype.shutdownJVM()

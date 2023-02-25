@@ -8,6 +8,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import core.interfaces.IVectorisable;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
 import utilities.Utils;
@@ -17,7 +18,7 @@ import java.util.*;
 import static core.CoreConstants.VisibilityMode;
 import static utilities.Utils.GameResult.*;
 
-public class ExplodingKittensGameState extends AbstractGameState implements IPrintable {
+public class ExplodingKittensGameState extends AbstractGameState implements IPrintable, IVectorisable {
 
     // Exploding kittens adds 4 phases on top of default ones.
     public enum ExplodingKittensGamePhase implements IGamePhase {
@@ -194,7 +195,14 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
         if (nPlayersActive == 1) {
             this.gameStatus = Utils.GameResult.GAME_END;
+            for (int i = 0; i < getNPlayers(); i++) {
+                // set winner
+                if (playerResults[i] == Utils.GameResult.GAME_ONGOING) {
+                    playerResults[i] = Utils.GameResult.WIN;
+                }
+            }
         }
+
         ((ExplodingKittensTurnOrder) getTurnOrder()).endPlayerTurnStep(this);
 
     }
@@ -245,6 +253,63 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
 
     public void printToConsole() {
         System.out.println(toString());
+    }
+
+    @Override
+    public String getObservationJson() {
+        // todo
+        return null;
+    }
+
+    @Override
+    public double[] getObservationVector() {
+        // TODO: see the future is not actually encoded here - could leave a placeholder for 3 cards?
+        ArrayList<String> cardTypes = new ArrayList<>(Arrays.asList("EXPLODING_KITTEN", "DEFUSE", "NOPE", "ATTACK", "SKIP", "FAVOR",
+                "SHUFFLE", "SEETHEFUTURE", "TACOCAT", "MELONCAT", "FURRYCAT", "BEARDCAT", "RAINBOWCAT"));
+        double[] obs = new double[getObservationSpace()];
+        // player's hand : 12 card types, cards in drawpile, n players alive, n_cards per player
+        for (ExplodingKittensCard cardType : this.playerHandCards.get(getCurrentPlayer()).getComponents()){
+            obs[cardTypes.indexOf(cardType.toString())] += 1;
+        }
+        obs[13] = drawPile.getSize();
+        int nPlayersActive = 0;
+        for (int i = 0; i < getNPlayers(); i++) {
+            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
+            obs[15+i] = this.playerHandCards.get(i).getComponents().size();
+        }
+        obs[14] = nPlayersActive;
+        // gamephases are represented here: main/favor/nope/see the future...
+        if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
+            obs[20] = 1.0;
+        } else{
+            // find id of gamephase
+            for (int i = 0; i < ExplodingKittensGamePhase.values().length; i++) {
+                if (ExplodingKittensGamePhase.values()[i].equals(gamePhase)){
+                    obs[21+i] = 1.0;
+                    break;
+                }
+            }
+        }
+        return obs;
+    }
+
+    @Override
+    public double[] getNormalizedObservationVector() {
+        double[] normalized = getObservationVector();
+        for (int i = 0; i < 13; i++) {
+            normalized[i] = normalized[i] / 4;
+        }
+        normalized[13] = normalized[13] / (56 - ((ExplodingKittensParameters)getGameParameters()).nCardsPerPlayer * this.getNPlayers());
+        normalized[14] = normalized[14] / this.getNPlayers();
+        for (int i = 15; i < 15 + getNPlayers(); i++){
+            normalized[i] = normalized[i] / (56 / getNPlayers());
+        }
+        return normalized;
+    }
+
+    @Override
+    public int getObservationSpace() {
+        return 25;
     }
 
     @Override
