@@ -7,7 +7,6 @@ import core.Game;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 
 import javax.swing.*;
@@ -15,7 +14,6 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Collection;
 
 public class BlackjackGUIManager extends AbstractGUIManager {
     final static int playerWidth = 300;
@@ -27,14 +25,12 @@ public class BlackjackGUIManager extends AbstractGUIManager {
     BlackjackPlayerView[] playerHands;
 
     int activePlayer = -1;
-    int humanID;
 
     Border highlightActive = BorderFactory.createLineBorder(new Color(47,132,220), 3);
     Border[] playerViewBorders;
 
     public BlackjackGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, ac, 15);
-        this.humanID = humanID;
+        super(parent, game, ac, humanID);
 
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
@@ -112,7 +108,7 @@ public class BlackjackGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Blackjack", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
 
                 // Add all views to frame
                 main.add(mainGameArea, BorderLayout.CENTER);
@@ -132,9 +128,14 @@ public class BlackjackGUIManager extends AbstractGUIManager {
         }
     }
 
+    @Override
+    public int getMaxActionSpace() {
+        return 15;
+    }
+
 
     @Override
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
         JPanel actionPanel = new JPanel();
         actionPanel.setOpaque(false);
         if (boxLayout) {

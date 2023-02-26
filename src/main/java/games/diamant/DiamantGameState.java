@@ -1,13 +1,17 @@
 package games.diamant;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
+import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import core.interfaces.IVectorisable;
+import core.turnorders.AlternatingTurnOrder;
 import core.turnorders.StandardTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
@@ -115,7 +119,12 @@ public class DiamantGameState extends AbstractGameState implements IPrintable, I
      * @param nPlayers      - number of players for this game.
      */
     public DiamantGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.Diamant);
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Diamant;
     }
 
     @Override
@@ -215,7 +224,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable, I
         return ids;
     }
 
-    @Override
     protected void _reset() {
         mainDeck       = null;
         discardDeck    = null;
@@ -329,4 +337,7 @@ public class DiamantGameState extends AbstractGameState implements IPrintable, I
     public List<Counter>     getTreasureChests() { return treasureChests; }
     public Deck<DiamantCard> getPath()           { return path;           }
     public ActionsPlayed     getActionsPlayed()  { return actionsPlayed;  }
+    public void setActionPlayed(int player, AbstractAction action) {
+        actionsPlayed.put(player, action);
+    }
 }

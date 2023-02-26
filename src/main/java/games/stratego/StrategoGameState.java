@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
-import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
 import games.stratego.components.Piece;
 
@@ -21,11 +20,12 @@ public class StrategoGameState extends AbstractGameState {
      * @param gameParameters - game parameters.
      */
     public StrategoGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Stratego);
+        super(gameParameters, nPlayers);
     }
 
-    protected StrategoGameState(AbstractParameters gameParameters) {
-        super(gameParameters, GameType.Stratego);
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Stratego;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class StrategoGameState extends AbstractGameState {
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        StrategoGameState s = new StrategoGameState(gameParameters);
+        StrategoGameState s = new StrategoGameState(gameParameters, 2);
         s.gridBoard = gridBoard.emptyCopy();
         Piece.Alliance playerAlliance = null;
 
@@ -82,11 +82,6 @@ public class StrategoGameState extends AbstractGameState {
     }
 
     @Override
-    protected void _reset() {
-        gridBoard = null;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (o instanceof StrategoGameState) {
             StrategoGameState other = (StrategoGameState) o;
@@ -95,6 +90,10 @@ public class StrategoGameState extends AbstractGameState {
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        return gridBoard.hashCode();
+    }
 
     public GridBoard<Piece> getGridBoard() {
         return gridBoard;

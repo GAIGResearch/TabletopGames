@@ -2,6 +2,7 @@ package games.explodingkittens;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.CoreConstants.VisibilityMode;
 import core.actions.AbstractAction;
 import core.components.Deck;
@@ -13,7 +14,6 @@ import games.explodingkittens.actions.reactions.GiveCard;
 import games.explodingkittens.actions.reactions.PassAction;
 import games.explodingkittens.actions.reactions.PlaceExplodingKitten;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -32,7 +32,9 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
 
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)firstState;
         ExplodingKittensParameters ekp = (ExplodingKittensParameters)firstState.getGameParameters();
-
+        ekgs.playerHandCards = new ArrayList<>();
+        ekgs.playerGettingAFavor = -1;
+        ekgs.actionStack = null;
         // Set up draw pile deck
         PartialObservableDeck<ExplodingKittensCard> drawPile = new PartialObservableDeck<>("Draw Pile", firstState.getNPlayers());
         ekgs.setDrawPile(drawPile);
@@ -84,7 +86,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
 
         ekgs.setActionStack(new Stack<>());
         ekgs.orderOfPlayerDeath = new int[ekgs.getNPlayers()];
-        ekgs.setGamePhase(AbstractGameState.DefaultGamePhase.Main);
+        ekgs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
     }
 
     /**
@@ -94,8 +96,8 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
      */
     @Override
     protected void _next(AbstractGameState gameState, AbstractAction action) {
-        ExplodingKittensTurnOrder ekTurnOrder = (ExplodingKittensTurnOrder) gameState.getTurnOrder();
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
+        ExplodingKittensTurnOrder ekTurnOrder = (ExplodingKittensTurnOrder) ekgs.getTurnOrder();
         Stack<AbstractAction> actionStack = ekgs.getActionStack();
 
         if (action instanceof IsNopeable) {
@@ -142,33 +144,11 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
                 }
                 actionStack.clear();
                 if (ekgs.getGamePhase() == Nope) {
-                    ekgs.setMainGamePhase();
+                    ekgs.setGamePhase(CoreConstants.DefaultGamePhase.Main);
                 }
             }
         } else {
             action.execute(gameState);
-        }
-    }
-
-
-    /**
-     * Performs any end of game computations, as needed. Not necessary to be implemented in the subclass, but can be.
-     * The last thing to be called in the game loop, after the game is finished.
-     * Exploding kittens updates the status of players still alive as winners.
-     */
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        for (int i = 0; i < gameState.getNPlayers(); i++){
-            if (gameState.getPlayerResults()[i] == Utils.GameResult.GAME_ONGOING)
-                gameState.setPlayerResult(Utils.GameResult.WIN, i);
-        }
-
-        // Print end game result
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
-            for (int j = 0; j < gameState.getNPlayers(); j++) {
-                System.out.println("Player " + j + ": " + gameState.getPlayerResults()[j]);
-            }
         }
     }
 
@@ -186,7 +166,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
 
         // Find actions for the player depending on current game phase
         int player = ekgs.getCurrentPlayer();
-        if (AbstractGameState.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
+        if (CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
             actions = playerActions(ekgs, player);
         } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals(ekgs.getGamePhase())) {
             actions = placeKittenActions(ekgs, player);
@@ -206,6 +186,12 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
     @Override
     protected AbstractForwardModel _copy() {
         return new ExplodingKittensForwardModel();
+    }
+
+    @Override
+    protected void endPlayerTurn(AbstractGameState state) {
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) state;
+        ekgs.getTurnOrder().endPlayerTurn(ekgs);
     }
 
     private ArrayList<AbstractAction> playerActions(ExplodingKittensGameState ekgs, int playerID){
@@ -242,7 +228,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
                 case ATTACK:
                     for (int targetPlayer = 0; targetPlayer < ekgs.getNPlayers(); targetPlayer++) {
 
-                        if (targetPlayer == playerID || ekgs.getPlayerResults()[targetPlayer] != Utils.GameResult.GAME_ONGOING)
+                        if (targetPlayer == playerID || ekgs.getPlayerResults()[targetPlayer] != CoreConstants.GameResult.GAME_ONGOING)
                             continue;
 
                         actions.add(new AttackAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, targetPlayer));
@@ -330,7 +316,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         }
 
         if (cardIdx != -1) {
-            List<ExplodingKittensCard> cards = ekgs.drawPile.getComponents();
             int numberOfCards = ekgs.drawPile.getSize();
             int n = Math.min(((ExplodingKittensParameters) ekgs.getGameParameters()).nSeeFutureCards, numberOfCards);
             if (n > 0) {

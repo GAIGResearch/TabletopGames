@@ -2,12 +2,16 @@ package games.catan.components;
 
 import games.catan.CatanParameters;
 
+import java.util.Objects;
+
+import static games.catan.CatanParameters.HarborTypes.*;
+
 public class Settlement implements Copiable {
     private int type; // settlement = 1, city = 2
     private int owner;
     private static int counter = 0;
     private int id;
-    private CatanParameters.HarborTypes harbour = null;
+    private CatanParameters.HarborTypes harbour = NONE;
 
     public Settlement(int owner){
         this.owner = owner;
@@ -66,6 +70,9 @@ public class Settlement implements Copiable {
             Settlement otherAction = (Settlement)obj;
             return id == otherAction.id;
         }
+        // exclude owner and type as Settlement is used as a Key in the Graph<Settlement, Road> in Game state, and
+        // changing equality messes this map up. Yes, this is a bit of a hack, but fixing it will require
+        // some significant rewriting of the Catan code, and in the absence of unit tests, I'm wary. JG
         return false;
     }
 
@@ -74,8 +81,12 @@ public class Settlement implements Copiable {
         return id;
     }
 
+    public int extendedHashCode() {
+        return Objects.hash(id, type, harbour, owner);
+    }
+
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    protected Settlement clone() throws CloneNotSupportedException {
         return this.copy();
     }
 }

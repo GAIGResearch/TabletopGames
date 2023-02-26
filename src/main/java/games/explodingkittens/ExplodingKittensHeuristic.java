@@ -1,13 +1,11 @@
 package games.explodingkittens;
 
 import core.AbstractGameState;
-import core.AbstractParameters;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import games.explodingkittens.actions.IsNopeable;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import org.apache.commons.math3.analysis.function.Exp;
-import utilities.Utils;
 
 public class ExplodingKittensHeuristic extends TunableParameters implements IStateHeuristic {
 
@@ -49,11 +47,11 @@ public class ExplodingKittensHeuristic extends TunableParameters implements ISta
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)gs;
-        Utils.GameResult playerResult = ekgs.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = ekgs.getPlayerResults()[playerId];
 
-        if (playerResult == Utils.GameResult.LOSE)
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
             return -1;
-        if (playerResult == Utils.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
             return 1;
 
         double cardValues = 0.0;

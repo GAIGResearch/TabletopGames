@@ -1,11 +1,10 @@
 package games.tictactoe;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.Token;
-import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import utilities.Pair;
-import utilities.Utils;
 
 public class TicTacToeHeuristic extends TunableParameters implements IStateHeuristic {
 
@@ -25,12 +24,12 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         TicTacToeGameState ttgs = (TicTacToeGameState) gs;
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if(playerResult == Utils.GameResult.LOSE) {
+        if(playerResult == CoreConstants.GameResult.LOSE_GAME) {
             return -1;
         }
-        if(playerResult == Utils.GameResult.WIN) {
+        if(playerResult == CoreConstants.GameResult.WIN_GAME) {
             return 1;
         }
 

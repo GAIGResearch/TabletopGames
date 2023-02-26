@@ -27,8 +27,6 @@ public class Call extends AbstractAction implements IPrintable {
 
         pgs.placeBet(diff, playerId);
         pgs.getPlayerNeedsToCall()[playerId] = false;
-        pgs.getTurnOrder().endPlayerTurn(pgs);
-
         return true;
     }
 

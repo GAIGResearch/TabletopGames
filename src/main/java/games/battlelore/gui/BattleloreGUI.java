@@ -6,16 +6,16 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import games.battlelore.BattleloreGameState;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collection;
 
 public class BattleloreGUI extends AbstractGUIManager {
     BattleloreBoardView view;
 
-    public BattleloreGUI(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 25);
+    public BattleloreGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
+        super(parent, game, ac, humanId);
 
         if (game == null) {
             return;
@@ -30,7 +30,7 @@ public class BattleloreGUI extends AbstractGUIManager {
 
 
         JPanel infoPanel = createGameStateInfoPanel("Battlelore", gameState, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
 
         parent.setLayout(new BorderLayout());
         parent.add(view, BorderLayout.CENTER);
@@ -41,6 +41,11 @@ public class BattleloreGUI extends AbstractGUIManager {
         parent.setVisible(true);
         parent.repaint();
 
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 25;
     }
 
     @Override

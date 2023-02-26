@@ -5,7 +5,6 @@ import core.Game;
 import evaluation.TunableParameters;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import games.loveletter.cards.LoveLetterCard;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,6 +44,7 @@ public class ExplodingKittensParameters extends TunableParameters {
             if (c == ExplodingKittensCard.CardType.EXPLODING_KITTEN) addTunableParameter(c.name() + " count", -1);
             else addTunableParameter(c.name() + " count", cardCounts.get(c), Arrays.asList(1,2,3,4,5));
         }
+        _reset();
     }
 
     @Override

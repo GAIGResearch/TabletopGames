@@ -1,11 +1,11 @@
 package test.games.coltexpress;
 
-import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.CoreConstants;
-import core.Game;
-import core.actions.AbstractAction;
-import core.interfaces.IGameListener;
+import evaluation.loggers.SummaryLogger;
+import evaluation.metrics.AbstractMetric;
+import evaluation.listeners.GameListener;
+import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
 import games.coltexpress.ColtExpressForwardModel;
 import games.coltexpress.ColtExpressGame;
 import games.coltexpress.ColtExpressGameState;
@@ -14,17 +14,16 @@ import games.coltexpress.cards.RoundCard;
 import org.junit.Test;
 import players.simple.RandomPlayer;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
-import static core.CoreConstants.GameEvents.ROUND_OVER;
+import static evaluation.metrics.Event.GameEvent.ROUND_OVER;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
 public class TestRoundCardVisibilityAndShuffling {
 
-    List<AbstractPlayer> players = Arrays.asList(new RandomPlayer(),
+    List<AbstractPlayer> players = Arrays.asList(
+            new RandomPlayer(),
             new RandomPlayer(),
             new RandomPlayer());
 
@@ -38,25 +37,27 @@ public class TestRoundCardVisibilityAndShuffling {
         // check shuffling. The work is done in TestRoundEndListener()
 
         // This checks the counts of
-        game.addListener(new TestRoundEndListener());
+        game.addListener(new TestRoundEndListener(new SummaryLogger(), new AbstractMetric[0]));
         game.run();
     }
 
-    static class TestRoundEndListener implements IGameListener {
-        @Override
-        public void onGameEvent(CoreConstants.GameEvents type, Game game) {
+    static class TestRoundEndListener extends GameListener {
 
+        public TestRoundEndListener(IStatisticLogger logger, AbstractMetric[] metrics) {
+            super(logger, metrics);
         }
 
+
         @Override
-        public void onEvent(CoreConstants.GameEvents type, AbstractGameState gameState, AbstractAction action) {
-            if (type == ROUND_OVER) {
-                ColtExpressGameState state = (ColtExpressGameState) gameState;
+        public void onEvent(Event event) {
+            if (event.type == ROUND_OVER) {
+                ColtExpressGameState state = (ColtExpressGameState) event.state;
                 long visibleRoundCards = state.getRounds().getVisibleComponents(0).stream().filter(Objects::nonNull).count();
-                System.out.printf("End of Round: %d, Visible Cards: %d%n", state.getTurnOrder().getRoundCounter(), visibleRoundCards);
+                System.out.printf("End of Round: %d, Turn %d, Visible Cards: %d%n", state.getTurnOrder().getRoundCounter(), state.getTurnOrder().getTurnCounter(), visibleRoundCards);
                 for (int i = 0; i < state.getTurnOrder().getRoundCounter(); i++)
                     assertTrue(state.getRounds().getVisibilityForPlayer(i, 0));
                 assertEquals(visibleRoundCards, state.getTurnOrder().getRoundCounter() + 1);
+                // Added knowledge of 'hack' that for Colt Express the Round counter is one less than it shoudl be at ROUND_OVER
 
                 // 1 card visible at end of Round 0, and so on.
 

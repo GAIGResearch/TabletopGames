@@ -2,19 +2,18 @@ package games.dominion;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import core.turnorders.StandardTurnOrder;
 import games.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.actions.IDelayedAction;
 import games.dominion.cards.CardType;
 import games.dominion.cards.DominionCard;
-import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -53,12 +52,17 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers       - number of players
      */
     public DominionGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.Dominion);
+        super(gameParameters, nPlayers);
         rnd = new Random(gameParameters.getRandomSeed());
         playerCount = nPlayers;
         defenceStatus = new boolean[nPlayers];  // defaults to false
         params = (DominionParameters) gameParameters;
         this._reset();
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Dominion;
     }
 
     public boolean removeCardFromTable(CardType type) {
@@ -75,34 +79,6 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
         deck.add(newCard);
     }
 
-    public void endOfTurn(int playerID) {
-        if (playerID != getCurrentPlayer()) {
-            System.out.println(this);
-            throw new AssertionError("Cannot end turn if it is not your turn currently");
-        }
-        // 1) put hand and cards played into discard
-        // 2) draw 5 new cards
-        // 3) shuffle and move discard if we run out
-        Deck<DominionCard> hand = playerHands[playerID];
-        Deck<DominionCard> discard = playerDiscards[playerID];
-        Deck<DominionCard> table = playerTableaux[playerID];
-
-        discard.add(hand);
-        discard.add(table);
-        table.clear();
-        hand.clear();
-        for (int i = 0; i < params.HAND_SIZE; i++)
-            drawCard(playerID);
-
-        defenceStatus = new boolean[playerCount];  // resets to false
-
-        actionsLeftForCurrentPlayer = 1;
-        spentSoFar = 0;
-        additionalSpendAvailable = 0;
-        buysLeftForCurrentPlayer = 1;
-        setGamePhase(DominionGameState.DominionGamePhase.Play);
-        getTurnOrder().endPlayerTurn(this);
-    }
 
     public boolean gameOver() {
         return cardsIncludedInGame.get(CardType.PROVINCE) == 0 ||
@@ -178,7 +154,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
     }
 
     public int availableSpend(int playerID) {
-        if (playerID != turnOrder.getTurnOwner()) {
+        if (playerID != turnOwner) {
             System.out.println(this);
             throw new AssertionError(String.format("Not yet supported : Player %d trying to spend in turn of player %d", playerID, getCurrentPlayer()));
         }
@@ -263,6 +239,10 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
                 .collect(toList());
     }
 
+    public Map<CardType, Integer> getCardsIncludedInGame() {
+        return cardsIncludedInGame;
+    }
+
     public void setDefended(int playerId) {
         defenceStatus[playerId] = true;
     }
@@ -343,9 +323,9 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (getPlayerResults()[playerId] == Utils.GameResult.LOSE)
+        if (getPlayerResults()[playerId] == CoreConstants.GameResult.LOSE_GAME)
             return -1.0;
-        if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
+        if (getPlayerResults()[playerId] == CoreConstants.GameResult.WIN_GAME)
             return 1.0;
 
         int score = getTotal(playerId, c -> c.victoryPoints(playerId, this));
@@ -397,7 +377,6 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
     /**
      * Resets variables initialised for this game state.
      */
-    @Override
     protected void _reset() {
         playerHands = new PartialObservableDeck[playerCount];
         playerDrawPiles = new PartialObservableDeck[playerCount];
@@ -452,7 +431,7 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
     @Override
     public String toString() {
         StringBuilder retValue = new StringBuilder();
-        retValue.append(String.format("Turn: %d, Current Player: %d, Phase: %s%n", turnOrder.getRoundCounter(), getCurrentPlayer(), gamePhase));
+        retValue.append(String.format("Turn: %d, Current Player: %d, Phase: %s%n", getRoundCounter(), getCurrentPlayer(), gamePhase));
         for (Map.Entry<CardType, Integer> s : cardsIncludedInGame.entrySet()) {
             retValue.append(String.format("\t%2d %s%n", s.getValue(), s.getKey()));
         }

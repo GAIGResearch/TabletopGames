@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class HumanConsolePlayer extends AbstractPlayer {
 
     @Override
-    public AbstractAction getAction(AbstractGameState observation, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
 
         if (observation instanceof IPrintable)
             ((IPrintable) observation).printToConsole();

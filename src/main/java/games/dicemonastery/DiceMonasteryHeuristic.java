@@ -1,10 +1,10 @@
 package games.dicemonastery;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import games.dicemonastery.components.Monk;
-import utilities.Utils;
 
 import java.util.Arrays;
 
@@ -66,8 +66,7 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
-        DiceMonasteryTurnOrder turnOrder = (DiceMonasteryTurnOrder) state.getTurnOrder();
-        Utils.GameResult playerResult = state.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = state.getPlayerResults()[playerId];
 
         if (!gs.isNotTerminal()) {
             if (scoreOnly) {
@@ -76,11 +75,11 @@ public class DiceMonasteryHeuristic extends TunableParameters implements IStateH
                 return gs.getPlayerResults()[playerId].value;
             }
         }
-        int year = turnOrder.getYear() - 1;
+        int year = state.getYear() - 1;
         int season = 2; // AUTUMN or WINTER
-        if (turnOrder.getSeason() == SPRING)
+        if (state.getSeason() == SPRING)
             season = 0;
-        if (turnOrder.getSeason() == SUMMER)
+        if (state.getSeason() == SUMMER)
             season = 1;
 
         double totalCoeff = Math.abs(MONKS[year]) + Math.abs(PIETY[year]) + Math.abs(SCORE[year])

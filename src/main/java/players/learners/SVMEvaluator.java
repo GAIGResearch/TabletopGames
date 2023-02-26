@@ -82,7 +82,7 @@ public class SVMEvaluator implements SolutionEvaluator {
         // we instantiate the SVM
         long startTime = System.currentTimeMillis();
         svm_parameter params = (svm_parameter) searchSpace.getAgent(solution);
-        SimpleSVMLearner learner = new SimpleSVMLearner(params);
+        SVMLearner learner = new SVMLearner(params);
 
         // train it on the available data
         learner.learnFrom(trainingData);
@@ -211,7 +211,7 @@ public class SVMEvaluator implements SolutionEvaluator {
         long seed = getArg(args, "seed", System.currentTimeMillis());
         String logfile = getArg(args, "logFile", "");
         String paramFile = getArg(args, "gameParam", "");
-        AbstractParameters gameParams = ParameterFactory.createFromFile(game, paramFile);
+        AbstractParameters gameParams = AbstractParameters.createFromFile(game, paramFile);
         int gamePerEval = getArg(args, "gamesPerEval", 10);
         int hood = getArg(args, "hood", Math.min(50, searchSpaceSize / 100));
         String trainingData = getArg(args, "trainingData", "");
@@ -242,13 +242,13 @@ public class SVMEvaluator implements SolutionEvaluator {
             landscapeModel.reset();
             Pair<Double, Double> r = ParameterSearch.runNTBEA(evaluator, null, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
-            ParameterSearch.printDetailsOfRun(retValue, searchSpace, logfile);
+            ParameterSearch.printDetailsOfRun(retValue, searchSpace, logfile, false, null);
             if (retValue.a.a > bestResult.a.a)
                 bestResult = retValue;
 
         }
         System.out.println("\nFinal Recommendation: ");
         // we don't log the final run to file to avoid duplication
-        ParameterSearch.printDetailsOfRun(bestResult, searchSpace, "");
+        ParameterSearch.printDetailsOfRun(bestResult, searchSpace, "", false, null);
     }
 }

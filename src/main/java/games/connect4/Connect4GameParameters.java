@@ -2,6 +2,7 @@ package games.connect4;
 
 import core.AbstractParameters;
 import evaluation.TunableParameters;
+import games.GameType;
 
 import java.util.*;
 
@@ -19,6 +20,7 @@ public class Connect4GameParameters extends TunableParameters {
         super(seed);
         addTunableParameter("gridSize", 8, Arrays.asList(6, 8, 10, 12));
         addTunableParameter("winCount", 4, Arrays.asList(3, 4, 5, 6));
+        _reset();
     }
 
     @Override
@@ -50,8 +52,8 @@ public class Connect4GameParameters extends TunableParameters {
     }
 
     @Override
-    public Connect4Game instantiate() {
-        return new Connect4Game(this);
+    public Object instantiate() {
+        return GameType.Connect4.createGameInstance(2, this);
     }
 
 

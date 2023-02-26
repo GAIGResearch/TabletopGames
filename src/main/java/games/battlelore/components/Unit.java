@@ -1,14 +1,13 @@
 package games.battlelore.components;
 
+ import core.CoreConstants;
  import core.components.Component;
-import games.coltexpress.components.Loot;
-import org.json.simple.JSONArray;
+ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utilities.Utils;
 
-import java.io.FileReader;
+ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +33,7 @@ public class Unit extends Component {
     }
 
     public Unit() {
-        super(Utils.ComponentType.TOKEN, "");
+        super(CoreConstants.ComponentType.TOKEN, "");
         this.name = "";
         this.id = "";
         this.moveRange = 0;
@@ -47,7 +46,7 @@ public class Unit extends Component {
         this.isMelee = true;
     }
 
-    public Unit (Utils.ComponentType type, String id, String name, int moveRange,
+    public Unit (CoreConstants.ComponentType type, String id, String name, int moveRange,
                  int strength, int health, Faction faction, String shortName, boolean isMelee) {
         super(type, name);
         this.name = name;
@@ -61,8 +60,8 @@ public class Unit extends Component {
     }
 
     //Used by copy constructor only
-    private Unit (int componentID, Utils.ComponentType type, String id, String name, int moveRange,
-                 int strength, int health, Faction faction, String shortName, boolean isMelee) {
+    private Unit (int componentID, CoreConstants.ComponentType type, String id, String name, int moveRange,
+                  int strength, int health, Faction faction, String shortName, boolean isMelee) {
         super(type, name, componentID);
         this.name = name;
         this.id = id;
@@ -102,16 +101,8 @@ public class Unit extends Component {
     @Override
     public Component copy() {
         Unit newUnit = new Unit(componentID, type, id, name, moveRange, strength, health, faction, shortName, isMelee);
-        newUnit.id = id;
-        newUnit.name = name;
-        newUnit.shortName = shortName;
-        newUnit.faction = faction;
-        newUnit.moveRange = moveRange;
-        newUnit.strength = strength;
-        newUnit.health = health;
         newUnit.canMove = canMove;
         newUnit.canAttack = canAttack;
-        newUnit.isMelee = isMelee;
         return newUnit;
     }
 
@@ -207,6 +198,6 @@ public class Unit extends Component {
 
     @Override
     public final int hashCode() {
-        return componentID;
+        return Objects.hash(componentID, id, name, shortName, faction, moveRange, strength, health, canMove, canAttack, isMelee);
     }
 }

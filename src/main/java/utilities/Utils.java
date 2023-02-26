@@ -9,6 +9,7 @@ import org.json.simple.parser.ParseException;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.*;
@@ -39,6 +40,8 @@ public abstract class Utils {
                 return Color.ORANGE;
             case "light green":
                 return Color.GREEN;
+            case "purple":
+                return new Color(143, 77, 175);
             default:
                 return null;
         }
@@ -187,7 +190,7 @@ public abstract class Utils {
         return input.keySet().stream().collect(toMap(key -> key, key -> input.get(key).doubleValue() / sum));
     }
 
-    public static double range(double value, double min, double max) {
+    public static double clamp(double value, double min, double max) {
         if (value > max) return max;
         if (value < min) return min;
         return value;
@@ -220,7 +223,10 @@ public abstract class Utils {
     public static <T> T getArg(String[] args, String name, T defaultValue) {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
         if (raw.isPresent()) {
-            String rawString = raw.get().split("=")[1];
+            String[] temp = raw.get().split("=");
+            if (temp.length < 2)
+                throw new IllegalArgumentException("No value provided for argument " + temp[0]);
+            String rawString = temp[1];
             if (defaultValue instanceof Enum) {
                 T[] constants = (T[]) defaultValue.getClass().getEnumConstants();
                 for (T o : constants) {
@@ -274,6 +280,17 @@ public abstract class Utils {
             combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
         }
     }
+    public static void combinationUtil(Object[] arr, Object[] data, int start, int end, int index, int r, HashSet<Object[]> allData) {
+        if (index == r) {
+            allData.add(data.clone());
+            return;
+        }
+
+        for (int i = start; i <= end && end - i + 1 >= r - index; i++) {
+            data[index] = arr[i];
+            combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
+        }
+    }
 
     /**
      * Auxiliary function shortcut to generate combinations of numbers in an array, each of size r.
@@ -288,6 +305,70 @@ public abstract class Utils {
         combinationUtil(arr, data, 0, arr.length - 1, 0, r, allData);
         return allData;
     }
+
+    /**
+     * Generate all combinations of objects in the given array, in sizes from min to max (capped 1 - array length)
+     * @param arr - input array of objects, e.g. (Apple, Pear, Apple)
+     * @param minSizeOutput - minimum size of output array, e.g. 1
+     * @param maxSizeOutput - maximum size of output array, e.g. 2
+     * @return - All combinations of objects in arrays of different sizes, e.g. (Apple), (Pear), (Apple, Pear), (Pear, Apple)
+     */
+    public static HashSet<Object[]> generateCombinations(Object[] arr, int minSizeOutput, int maxSizeOutput) {
+        HashSet<Object[]> allData = new HashSet<>();
+        if (minSizeOutput < 1) minSizeOutput = 1;
+        if (maxSizeOutput > arr.length) maxSizeOutput = arr.length;
+        for (int r = minSizeOutput; r <= maxSizeOutput; r++) {
+            Object[] data = new Object[r];
+            combinationUtil(arr, data, 0, arr.length - 1, 0, r, allData);
+        }
+        return allData;
+    }
+
+    /**
+     * Returns a list of objects arrays, each one a combination of elements from the param
+     *  Example: input [[1, 2] [3] [4, 5]] ===> output [[1, 3, 4], [2, 3, 4], [1, 3, 5], [2, 3, 5]]
+     * Algorithm from <a href="https://www.geeksforgeeks.org/combinations-from-n-arrays-picking-one-element-from-each-array/">here</a>
+     * @param arr A list of array objects to combine/
+     * @return the combination of elements.
+     */
+    public static List<Object[]> generateCombinations(List<Object[]> arr)
+    {
+        ArrayList<Object[]> combinations = new ArrayList<>();
+
+        // Number of arrays
+        int n = arr.size();
+
+        // To keep track of next element in each of the n arrays
+        int[] indices = new int[n];
+
+        // Initialize with first element's index
+        for(int i = 0; i < n; i++) indices[i] = 0;
+
+        while (true)
+        {
+            // Add current combination
+            Object[] objs = new Object[n];
+            for(int i = 0; i < n; i++) objs[i] = arr.get(i)[indices[i]];
+            combinations.add(objs);
+
+            // Find the rightmost array that has more elements left after the current element in that array
+            int next = n - 1;
+            while (next >= 0 && (indices[next] + 1 >= arr.get(next).length))
+                next--;
+
+            // No such array is found so no more combinations left
+            if (next < 0)
+                return combinations;
+
+            // If found move to next element in that array
+            indices[next]++;
+
+            // For all arrays to the right of this array current index again points to first element
+            for(int i = next + 1; i < n; i++)
+                indices[i] = 0;
+        }
+    }
+
 
     /**
      * Given a JSONObject, this will load the instance of the class.
@@ -330,15 +411,39 @@ public abstract class Utils {
                     argClasses[i] = boolean.class;
                 } else if (arg instanceof String) {
                     argClasses[i] = String.class;
+                } else if (arg instanceof JSONArray) {
+                    Object first = ((JSONArray) arg).get(0);
+                    if (first instanceof JSONObject) {
+                        Class<?> arrayClass = determineArrayClass((JSONArray) arg);
+
+                        T[] arr = (T[]) Array.newInstance(arrayClass, ((JSONArray) arg).size());
+                        argClasses[i] = arr.getClass();
+                        for (int j = 0; j < ((JSONArray) arg).size(); j++) {
+                            arr[j] = loadClassFromJSON((JSONObject) ((JSONArray) arg).get(j));
+                        }
+                        arg = arr;
+
+                    } else if (first instanceof Long) {
+                        argClasses[i] = int[].class;
+                        args[i] = ((Long) first).intValue();
+                    } else if (first instanceof Double) {
+                        argClasses[i] = double[].class;
+                    } else if (first instanceof Boolean) {
+                        argClasses[i] = boolean[].class;
+                    } else if (first instanceof String) {
+                        argClasses[i] = String[].class;
+                    }
                 } else {
                     throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
                 }
                 args[i] = arg;
             }
+
             Class<?> clazz = Class.forName(cl);
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
+
         } catch (ClassNotFoundException e) {
             throw new AssertionError("Unknown class in " + json.toJSONString() + " : " + e.getMessage());
         } catch (ReflectiveOperationException e) {
@@ -348,6 +453,47 @@ public abstract class Utils {
             e.printStackTrace();
             throw new AssertionError("Unknown argument in " + json.toJSONString() + " : " + e.getMessage());
         }
+    }
+
+    public static Class<?> determineArrayClass(JSONArray array)
+    {
+        if(array.size() > 1)
+        {
+            JSONObject first = (JSONObject) array.get(0);
+            String firstCl = (String) first.getOrDefault("class", "");
+            for (int i = 1; i < array.size(); ++i) {
+                JSONObject second = (JSONObject) array.get(i);
+                String secondCl = (String) second.getOrDefault("class", "");
+                if (firstCl.equalsIgnoreCase(secondCl)) continue;
+                // We have an array of two different classes.
+                // Either the array class is a common superclass or it's wrong.
+                // We return the superclass of the first one.
+                Object firstClass = loadClassFromJSON(first);
+                return firstClass.getClass().getSuperclass();
+            }
+        }
+
+        //Either one single class or multiple repetitions of the same class.
+        JSONObject first = (JSONObject) array.get(0);
+        return loadClassFromJSON(first).getClass();
+    }
+
+    public static Object searchEnum(Object[] enumConstants, String search) {
+        for (Object obj : enumConstants) {
+            if (obj.toString().compareToIgnoreCase(search) == 0) {
+                return obj;
+            }
+        }
+        return null;
+    }
+
+    public static <T extends Enum<?>> T searchEnum(Class<T> enumeration, String search) {
+        for (T each : enumeration.getEnumConstants()) {
+            if (each.name().compareToIgnoreCase(search) == 0) {
+                return each;
+            }
+        }
+        return null;
     }
 
     /**
@@ -369,7 +515,7 @@ public abstract class Utils {
             return Utils.loadClassFromJSON(rawData);
 
         } catch (FileNotFoundException e) {
-            throw new AssertionError("File not found to load IGameHeuristic : " + filename);
+            throw new AssertionError("File not found to load : " + filename);
         } catch (IOException e) {
             throw new AssertionError("Problem reading file " + filename + " : " + e);
         } catch (ParseException e) {
@@ -437,30 +583,17 @@ public abstract class Utils {
         return img;
     }
 
-    public enum ComponentType {
-        DECK,
-        AREA,
-        BOARD,
-        BOARD_NODE,
-        CARD,
-        COUNTER,
-        DICE,
-        TOKEN
-    }
-
-    public enum GameResult {
-        WIN(1),
-        DRAW(0),
-        LOSE(-1),
-        DISQUALIFY(-2),
-        GAME_ONGOING(0),
-        GAME_END(3);
-
-        public final double value;
-
-        GameResult(double value) {
-            this.value = value;
+    /**
+     * Accept a string, like aCamelString
+     * @param s - input string in camel case
+     * @return string with each word separated by a space
+     */
+    public static String splitCamelCaseString(String s){
+        StringBuilder r = new StringBuilder();
+        for (String w : s.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])")) {
+            r.append(w).append(" ");
         }
+        return r.toString().trim();
     }
 
 }

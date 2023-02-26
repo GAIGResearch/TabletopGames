@@ -1,11 +1,11 @@
 package core.rules.rulenodes;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 import core.turnorders.ReactiveTurnOrder;
 
-import static core.AbstractGameState.DefaultGamePhase.PlayerReaction;
+import static core.CoreConstants.DefaultGamePhase.PlayerReaction;
 
 /**
  * Forces all players to play a reaction, in games where a ReactiveTurnOrder is used.
@@ -26,7 +26,7 @@ public class ForceAllPlayerReaction extends RuleNode {
     }
 
     @Override
-    protected boolean run(AbstractGameState gs) {
+    protected boolean run(AbstractGameStateWithTurnOrder gs) {
         ((ReactiveTurnOrder)gs.getTurnOrder()).addAllReactivePlayers(gs);
         gs.setGamePhase(PlayerReaction);
         return false;

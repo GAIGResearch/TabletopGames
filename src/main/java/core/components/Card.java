@@ -1,21 +1,21 @@
 package core.components;
 
+import core.CoreConstants;
 import core.properties.PropertyString;
-import utilities.Utils.ComponentType;
 
 import static core.CoreConstants.nameHash;
 
 public class Card extends Component {
 
     public Card() {
-        super(ComponentType.CARD);
+        super(CoreConstants.ComponentType.CARD);
     }
     public Card(String name){
-        super(ComponentType.CARD, name);
+        super(CoreConstants.ComponentType.CARD, name);
     }
 
     protected Card(String name, int ID){
-        super(ComponentType.CARD, name, ID);
+        super(CoreConstants.ComponentType.CARD, name, ID);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class Card extends Component {
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return super.hashCode();
     }
 }

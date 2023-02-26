@@ -36,18 +36,18 @@ public class Road implements Copiable {
         if (this == obj) return true;
         if (obj instanceof Road){
             Road otherAction = (Road)obj;
-            return id == otherAction.id;
+            return id == otherAction.id && owner == otherAction.owner;
         }
         return false;
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
+    protected Road clone() throws CloneNotSupportedException {
         return this.copy();
     }
 
     @Override
     public int hashCode() {
-        return id;
+        return id + owner * 31 + 27482;
     }
 }

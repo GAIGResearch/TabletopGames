@@ -1,6 +1,7 @@
 package games.loveletter;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.PartialObservableDeck;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
@@ -62,7 +63,7 @@ public class LoveLetterHeuristic extends TunableParameters implements IStateHeur
     public double evaluateState(AbstractGameState gs, int playerId) {
         LoveLetterGameState llgs = (LoveLetterGameState) gs;
         LoveLetterParameters llp = (LoveLetterParameters) gs.getGameParameters();
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
         if (!gs.isNotTerminal()) {
             return playerResult.value;
@@ -108,7 +109,7 @@ public class LoveLetterHeuristic extends TunableParameters implements IStateHeur
         if (cardTypes.contains(Prince)) retValue += FACTOR_PRINCE;
         if (cardTypes.contains(Princess)) retValue += FACTOR_PRINCESS;
 
-        return Utils.range(retValue, -1.0, 1.0);
+        return Utils.clamp(retValue, -1.0, 1.0);
     }
 
     /**

@@ -27,7 +27,10 @@ public class DiceMonasteryParams extends TunableParameters {
         addTunableParameter("prepareVellumCost", 2);
         addTunableParameter("hireNoviceCost", 3);
         addTunableParameter("waxPerCandle", 1);
+        _reset();
     }
+
+    static final int seasonsPerYear = 4;
 
     public String dataPath = "data/dicemonastery/";
     public int YEARS = 4;
@@ -42,6 +45,7 @@ public class DiceMonasteryParams extends TunableParameters {
     @Override
     public void _reset() {
         YEARS = (int) getParameterValue("YEARS");
+      //  setMaxRounds(YEARS * seasonsPerYear - 1);
         dataPath = (String) getParameterValue("dataPath");
         mandateTreasureLoss = (boolean) getParameterValue("mandateTreasureLoss");
         calfSkinsRotInWinter = (boolean) getParameterValue("calfSkinsRotInWinter");

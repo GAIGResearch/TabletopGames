@@ -1,17 +1,20 @@
 package games.dotsboxes;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.interfaces.IStateHeuristic;
 import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.StandardTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
 
 import java.util.*;
 
 public class DBGameState extends AbstractGameState {
 
-    IStateHeuristic heuristic = new DotsAndBoxesHeuristic();
+    IStateHeuristic heuristic;
 
     // List of all edges possible
     HashSet<DBEdge> edges;
@@ -26,6 +29,7 @@ public class DBGameState extends AbstractGameState {
     int[] nCellsPerPlayer;
     HashMap<DBCell, Integer> cellToOwnerMap;  // Mapping from each cell to its owner, if complete
     HashMap<DBEdge, Integer> edgeToOwnerMap;  // Mapping from each edge to its owner, if placed
+    boolean lastActionScored;
 
     /**
      * Constructor. Initialises some generic game state variables.
@@ -34,7 +38,12 @@ public class DBGameState extends AbstractGameState {
      * @param nPlayers      - number of players.
      */
     public DBGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.DotsAndBoxes);
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.DotsAndBoxes;
     }
 
     @Override
@@ -49,15 +58,20 @@ public class DBGameState extends AbstractGameState {
         dbgs.cells = cells;
         dbgs.edgeToCellMap = edgeToCellMap;
         dbgs.cellToEdgesMap = cellToEdgesMap;
+        dbgs.lastActionScored = lastActionScored;
 
         dbgs.nCellsPerPlayer = nCellsPerPlayer.clone();
         dbgs.cellToOwnerMap = (HashMap<DBCell, Integer>) cellToOwnerMap.clone();
         dbgs.edgeToOwnerMap = (HashMap<DBEdge, Integer>) edgeToOwnerMap.clone();
+        dbgs.heuristic = heuristic;
         return dbgs;
     }
 
     @Override
     protected double _getHeuristicScore(int playerId) {
+        if (heuristic == null) { // lazy initialization
+            heuristic = new DotsAndBoxesHeuristic();
+        }
         return heuristic.evaluateState(this, playerId);
     }
 
@@ -75,29 +89,46 @@ public class DBGameState extends AbstractGameState {
     }
 
     @Override
-    protected void _reset() {
-        nCellsPerPlayer = null;
-        cellToOwnerMap = null;
-        edgeToOwnerMap = null;
-    }
-
-    @Override
-    protected boolean _equals(Object o) {
+    public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DBGameState)) return false;
         if (!super.equals(o)) return false;
         DBGameState that = (DBGameState) o;
-        return Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) &&
-                Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap) &&
-                Objects.equals(cellToOwnerMap, that.cellToOwnerMap);
+        return lastActionScored == that.lastActionScored && Objects.equals(heuristic, that.heuristic) && Objects.equals(edges, that.edges) && Objects.equals(cells, that.cells) && Objects.equals(edgeToCellMap, that.edgeToCellMap) && Objects.equals(cellToEdgesMap, that.cellToEdgesMap) && Arrays.equals(nCellsPerPlayer, that.nCellsPerPlayer) && Objects.equals(cellToOwnerMap, that.cellToOwnerMap) && Objects.equals(edgeToOwnerMap, that.edgeToOwnerMap);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), cellToOwnerMap, edgeToOwnerMap);
+        int result = Objects.hash(super.hashCode(), heuristic, edges, cells, edgeToCellMap, cellToEdgesMap, cellToOwnerMap, edgeToOwnerMap, lastActionScored);
         result = 31 * result + Arrays.hashCode(nCellsPerPlayer);
         return result;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        int result = Objects.hash(gameParameters);
+        sb.append(result).append("|");
+        result = Objects.hash(getAllComponents());
+        sb.append(result).append("|");
+        result = Objects.hash(gameStatus);
+        sb.append(result).append("|");
+        result = Objects.hash(gamePhase);
+        sb.append(result).append("|");
+        result = Arrays.hashCode(playerResults);
+        sb.append(result).append("|*|");
+        result = Arrays.hashCode(nCellsPerPlayer);
+        sb.append(result).append("|");
+        result = Objects.hashCode(cellToOwnerMap);
+        sb.append(result).append("|");
+        result = Objects.hashCode(edgeToOwnerMap);
+        sb.append(result).append("|");
+        result = Objects.hashCode(lastActionScored);
+        sb.append(result).append("|");
+
+        return sb.toString();
+    }
+
 
     public int countCompleteEdges(DBCell c) {
         int retValue = 0;
@@ -108,4 +139,6 @@ public class DBGameState extends AbstractGameState {
         }
         return retValue;
     }
+    public boolean getLastActionScored(){return lastActionScored;}
+    public void setLastActionScored(boolean value){lastActionScored = value;}
 }

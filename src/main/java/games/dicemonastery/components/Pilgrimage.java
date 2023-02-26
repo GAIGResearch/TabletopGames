@@ -1,14 +1,13 @@
 package games.dicemonastery.components;
 
+import core.CoreConstants;
 import core.components.Component;
 import core.properties.PropertyInt;
 import core.properties.PropertyIntArray;
 import core.properties.PropertyString;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
 import games.dicemonastery.DiceMonasteryGameState;
-import games.dicemonastery.DiceMonasteryTurnOrder;
 import utilities.Hash;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +39,7 @@ public class Pilgrimage extends Component {
 
 
     public Pilgrimage(String destination, int minPiety, int cost, String reward, int[] duration) {
-        super(Utils.ComponentType.CARD, "Pilgrimage to " + destination);
+        super(CoreConstants.ComponentType.CARD, "Pilgrimage to " + destination);
         this.destination = destination;
         this.minPiety = minPiety;
         this.cost = cost;
@@ -53,7 +52,7 @@ public class Pilgrimage extends Component {
     }
 
     private Pilgrimage(Pilgrimage copy) {
-        super(Utils.ComponentType.CARD, copy.componentName, copy.componentID);
+        super(CoreConstants.ComponentType.CARD, copy.componentName, copy.componentID);
         this.destination = copy.destination;
         this.minPiety = copy.minPiety;
         this.cost = copy.cost;
@@ -87,12 +86,11 @@ public class Pilgrimage extends Component {
         progress++;
         state.addVP(vpPerStep[progress], player);
         if (progress == vpPerStep.length - 1) {
-            DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) state.getTurnOrder();
-            dmto.logEvent(() -> String.format("Monk reaches %s and gains %s", destination, finalReward), state);
+            state.logEvent(() -> String.format("Monk reaches %s and gains %s", destination, finalReward));
 
             state.addResource(player, finalReward, 1);
 
-            dmto.logEvent(() -> String.format("Monk returns from %s and is promoted", destination), state);
+            state.logEvent(() -> String.format("Monk returns from %s and is promoted", destination));
             Monk pilgrim = state.getMonkById(pilgrimId);
             state.moveMonk(pilgrimId, PILGRIMAGE, DORMITORY);
             pilgrim.promote(state);

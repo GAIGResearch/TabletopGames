@@ -1,12 +1,21 @@
 package core;
 
 import core.interfaces.ITunableParameters;
+import evaluation.TunableParameters;
+import games.GameType;
+
 import java.util.*;
 
 public abstract class AbstractParameters {
 
     // Random seed for this game
     long randomSeed;
+    // Maximum number of rounds in the game - according to the rules
+    // Once this is reached we end the game - and determine winners/losers in the normal way
+    int maxRounds = -1;
+    // Maximum number of rounds in the game before we timeout from boredom
+    // If this is reached then we set the GameResult (and player results) to be TIMEOUT
+    int timeoutRounds = -1;
 
     // Player thinking time for the entire game, in minutes. Default max value.
     long thinkingTimeMins = 90;
@@ -14,6 +23,7 @@ public abstract class AbstractParameters {
     long incrementActionS = 0, incrementTurnS = 0, incrementRoundS = 0;
     // Increment in seconds, added after a custom milestone (to be added manually in game implementation). Default 0.
     long incrementMilestoneS = 0;
+
 
     public AbstractParameters(long seed) {
         randomSeed = seed;
@@ -50,11 +60,20 @@ public abstract class AbstractParameters {
         this.randomSeed = randomSeed;
     }
 
-    public void setThinkingTimeMins(long thinkingTimeMins){ this.thinkingTimeMins = thinkingTimeMins; }
+    public void setThinkingTimeMins(long thinkingTimeMins) {
+        this.thinkingTimeMins = thinkingTimeMins;
+    }
 
+    public void setMaxRounds(int max) {
+        maxRounds = max;
+    }
+    public void setTimeoutRounds(int max) {
+        timeoutRounds = max;
+    }
 
     /**
      * Retrieve total thinking time for the game, in minutes
+     *
      * @return - thinking time.
      */
     public long getThinkingTimeMins() {
@@ -63,6 +82,7 @@ public abstract class AbstractParameters {
 
     /**
      * Retrieve the number of seconds added to a player's timer after an action is taken
+     *
      * @return - action increment
      */
     public long getIncrementActionS() {
@@ -71,6 +91,7 @@ public abstract class AbstractParameters {
 
     /**
      * Retrieve the number of seconds added to a player's timer after a turn is finished
+     *
      * @return - turn increment
      */
     public long getIncrementTurnS() {
@@ -79,6 +100,7 @@ public abstract class AbstractParameters {
 
     /**
      * Retrieve the number of seconds added to a player's timer after a round is finished
+     *
      * @return - round increment
      */
     public long getIncrementRoundS() {
@@ -87,10 +109,31 @@ public abstract class AbstractParameters {
 
     /**
      * Retrieve the number of seconds added to a player's timer after a game-specific defined milestone
+     *
      * @return - milestone increment
      */
     public long getIncrementMilestoneS() {
         return incrementMilestoneS;
+    }
+
+    /**
+     * Retrieve the  maximum number of rounds before a game is terminated (According to the rules)
+     * This is a valid end to a game, so winners/losers are determined as normal.
+     *
+     * @return - milestone increment
+     */
+    public int getMaxRounds() {
+        return maxRounds;
+    }
+    /**
+     * Retrieve the  maximum number of rounds before a game is terminated due to a 'timeout'
+     * This is treated as an invalid end to the game, and the Game and all Player Results will
+     * be set to TIMEOUT
+     *
+     * @return - milestone increment
+     */
+    public int getTimeoutRounds() {
+        return timeoutRounds;
     }
 
     /**
@@ -140,16 +183,29 @@ public abstract class AbstractParameters {
         if (this == o) return true;
         if (!(o instanceof AbstractParameters)) return false;
         AbstractParameters that = (AbstractParameters) o;
-        return randomSeed == that.randomSeed &&
-                thinkingTimeMins == that.thinkingTimeMins &&
+        return thinkingTimeMins == that.thinkingTimeMins &&
                 incrementActionS == that.incrementActionS &&
                 incrementTurnS == that.incrementTurnS &&
                 incrementRoundS == that.incrementRoundS &&
+                maxRounds == that.maxRounds && timeoutRounds == that.timeoutRounds &&
                 incrementMilestoneS == that.incrementMilestoneS;
+        // equals and hashcode deliberately excludes the random seed
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(randomSeed, thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS);
+        return Objects.hash(thinkingTimeMins, incrementActionS, incrementTurnS, incrementRoundS, incrementMilestoneS, maxRounds, timeoutRounds);
+    }
+
+    static public AbstractParameters createFromFile(GameType game, String fileName) {
+        AbstractParameters params = game.createParameters(System.currentTimeMillis());
+        if (fileName.isEmpty())
+            return params;
+        if (params instanceof TunableParameters) {
+            TunableParameters.loadFromJSONFile((TunableParameters) params, fileName);
+            return params;
+        } else {
+            throw new AssertionError("JSON parameter initialisation not supported for " + game);
+        }
     }
 }

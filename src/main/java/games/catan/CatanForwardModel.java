@@ -1,8 +1,8 @@
 package games.catan;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.Area;
@@ -14,7 +14,6 @@ import games.catan.actions.*;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -22,23 +21,14 @@ import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.*;
 import static games.catan.CatanGameState.CatanGamePhase.*;
 
-public class CatanForwardModel extends AbstractForwardModel {
-    CatanParameters params;
-    int nPlayers;
-
-    public CatanForwardModel() {
-    }
-
-    public CatanForwardModel(CatanParameters pp, int nPlayers) {
-        this.params = pp;
-        this.nPlayers = nPlayers;
-    }
+public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
 
         CatanGameState state = (CatanGameState) firstState;
-        params = (CatanParameters) state.getGameParameters();
+        state._reset();
+        CatanParameters params = (CatanParameters) state.getGameParameters();
 
         state.setBoard(generateBoard(params));
         state.setGraph(extractGraphFromBoard(state.getBoard()));
@@ -99,14 +89,11 @@ public class CatanForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         CatanGameState gs = (CatanGameState) currentState;
         CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
-        if (action != null) {
-            action.execute(gs);
-        } else {
-            throw new AssertionError("No action selected by current player");
-        }
+        CatanParameters params = (CatanParameters) gs.getGameParameters();
+
         // handle scoring
         if (action instanceof BuildRoad) {
             BuildRoad br = (BuildRoad) action;
@@ -139,24 +126,11 @@ public class CatanForwardModel extends AbstractForwardModel {
 
         // win condition
         if (gs.getGameScore(gs.getCurrentPlayer()) + gs.getVictoryPoints()[gs.getCurrentPlayer()] >= params.points_to_win) {
-            for (int i = 0; i < gs.getNPlayers(); i++) {
-                if (i == gs.getCurrentPlayer()) {
-                    gs.setPlayerResult(Utils.GameResult.WIN, i);
-                } else {
-                    gs.setPlayerResult(Utils.GameResult.LOSE, i);
-                }
-            }
-            gs.setGameStatus(Utils.GameResult.GAME_END);
+            endGame(currentState);
             if (gs.getCoreGameParameters().verbose) {
                 System.out.println("Game over! winner = " + gs.getCurrentPlayer());
             }
-        } else if (params.max_round_count != -1 && gs.getTurnOrder().getRoundCounter() > params.max_round_count) { // end in tie if round limit exceeded
-            for (int i = 0; i < gs.getNPlayers(); i++) {
-                gs.setPlayerResult(Utils.GameResult.DRAW, i);
-            }
-            gs.setGameStatus(Utils.GameResult.GAME_END);
         }
-
         // prevents multiple DoNothing actions with multi-action turn stages
         if (action instanceof DoNothing && (gs.getGamePhase() == Build || gs.getGamePhase() == Trade)) {
             cto.skipTurnStage(gs);
@@ -173,7 +147,7 @@ public class CatanForwardModel extends AbstractForwardModel {
             cto.endTurnStage(gs);
         }
 
-        if (gs.getGamePhase() == AbstractGameState.DefaultGamePhase.Main) {
+        if (gs.getGamePhase() == CoreConstants.DefaultGamePhase.Main) {
             // reset recently bought dev card to null
             gs.boughtDevCard = null;
             rollDiceAndAllocateResources(gs);
@@ -255,12 +229,6 @@ public class CatanForwardModel extends AbstractForwardModel {
             return CatanActionFactory.getBuildStageActions(cgs);
         }
         throw new AssertionError("GamePhase is not in the defined set of options");
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        CatanForwardModel copy = new CatanForwardModel(params, nPlayers);
-        return copy;
     }
 
     private CatanTile[][] generateBoard(CatanParameters params) {

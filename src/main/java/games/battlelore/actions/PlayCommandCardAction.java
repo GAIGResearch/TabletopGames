@@ -56,7 +56,6 @@ public class PlayCommandCardAction extends AbstractAction {
                     }
                 }
             }
-            state.IncrementTurn(playerID);
             return true;
         }
     }

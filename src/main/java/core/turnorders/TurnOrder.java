@@ -4,18 +4,29 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
-import core.interfaces.IGameListener;
-import games.dicemonastery.DiceMonasteryGameState;
+import evaluation.listeners.GameListener;
+import evaluation.metrics.Event;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
-import static utilities.Utils.GameResult.GAME_END;
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.*;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 
+/**
+ * This is purely for old-style game implementations from before January 2023
+ *
+ * This has been deprecated because it all too often led to a mixture of logic and state, and ambiguity over where any individual piece
+ * of game logic should be implemented.
+ * The new standard (See StandardForwardModel) is to have a clean separation of:
+ *  - state within something that extends AbstractGameState
+ *  - game logic within something that extends AbstractForwardModel (and this has new method hooks to help)
+ */
+@Deprecated
 public abstract class TurnOrder {
 
     // Fixed
@@ -28,7 +39,7 @@ public abstract class TurnOrder {
     protected int turnCounter;  // Number of turns in this round
     protected int roundCounter;  // 1 round = (1 turn) x nPlayers(alive)
 
-    protected List<IGameListener> listeners = new ArrayList<>();
+    protected List<GameListener> listeners = new ArrayList<>();
 
     public TurnOrder(int nPlayers, int nMaxRounds) {
         reset();
@@ -40,7 +51,6 @@ public abstract class TurnOrder {
         reset();
         this.nPlayers = nPlayers;
     }
-
     public TurnOrder() {}
 
     public final void setStartingPlayer(int player) {
@@ -129,7 +139,7 @@ public abstract class TurnOrder {
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementTurn();
 
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.TURN_OVER, gameState, null));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState)));
 
         turnCounter++;
         if (turnCounter >= nPlayers) endRound(gameState);
@@ -138,16 +148,19 @@ public abstract class TurnOrder {
         }
     }
 
-    // helper function to avoid time-consuming string manipulations is the message is not actually
+    // helper function to avoid time-consuming string manipulations if the message is not actually
     // going to be logged anywhere
     public void logEvent(Supplier<String> eventText, AbstractGameState state) {
-        if (listeners.isEmpty())
+        if (listeners.isEmpty() && !state.getCoreGameParameters().recordEventHistory)
             return; // to avoid expensive string manipulations
         logEvent(eventText.get(), state);
     }
     public void logEvent(String eventText, AbstractGameState state) {
         AbstractAction logAction = new LogEvent(eventText);
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.GAME_EVENT, state, logAction));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_EVENT, state, logAction)));
+        if (state.getCoreGameParameters().recordEventHistory) {
+            state.recordHistory(eventText);
+        }
     }
 
     /**
@@ -157,22 +170,37 @@ public abstract class TurnOrder {
      * If there are no players still playing, game ends and method returns.
      * @param gameState - current game state.
      */
-    public void endRound(AbstractGameState gameState) {
+    public final void endRound(AbstractGameState gameState) {
+        _endRound(gameState);
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
         gameState.getPlayerTimer()[getCurrentPlayer(gameState)].incrementRound();
 
-        listeners.forEach(l -> l.onEvent(CoreConstants.GameEvents.ROUND_OVER, gameState, null));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ROUND_OVER, gameState)));
+        if (gameState.getCoreGameParameters().recordEventHistory) {
+            gameState.recordHistory(Event.GameEvent.ROUND_OVER.name());
+        }
 
         roundCounter++;
         if (nMaxRounds != -1 && roundCounter == nMaxRounds) {
-            gameState.setGameStatus(GAME_END);
+            endGame(gameState);
         }
         else {
             turnCounter = 0;
             moveToNextPlayer(gameState, firstPlayer);
+            _startRound(gameState);
         }
     }
+
+    /**
+     * This needs to be implemented with any game-specific end of round processing
+     * The main turnOrder.endRound() will deal with listeners, timers, incrementing the round counter
+     * and moving to the next player
+     * @param gameState
+     */
+    public abstract void _endRound(AbstractGameState gameState);
+
+    public abstract void _startRound(AbstractGameState gameState);
 
     /**
      * Returns the current player acting in a given game state.
@@ -217,11 +245,37 @@ public abstract class TurnOrder {
             turnOwner = nextPlayer(gameState);
             n++;
             if (n >= nPlayers) {
-                gameState.setGameStatus(GAME_END);
+                endGame(gameState);
                 break;
             }
         }
     }
+
+
+    /**
+     * Performs any end of game computations, as needed.
+     * The last thing to be called in the game loop, after the game is finished.
+     *
+     * This is a copy of the method on AbstractForwardModel for backwards compatibility
+     */
+    public final void endGame(AbstractGameState gs) {
+        gs.setGameStatus(CoreConstants.GameResult.GAME_END);
+        // If we have more than one person in Ordinal position of 1, then this is a draw
+        boolean drawn = IntStream.range(0, gs.getNPlayers()).map(gs::getOrdinalPosition).filter(i -> i == 1).count() > 1;
+        for (int p = 0; p < gs.getNPlayers(); p++) {
+            int o = gs.getOrdinalPosition(p);
+            if (o == 1 && drawn)
+                gs.setPlayerResult(DRAW_GAME, p);
+            else if (o == 1)
+                gs.setPlayerResult(WIN_GAME, p);
+            else
+                gs.setPlayerResult(LOSE_GAME, p);
+        }
+        if (gs.getCoreGameParameters().verbose) {
+            System.out.println(Arrays.toString(gs.getPlayerResults()));
+        }
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -241,7 +295,7 @@ public abstract class TurnOrder {
         return Objects.hash(nPlayers, turnOwner, turnCounter, roundCounter, firstPlayer, nMaxRounds);
     }
 
-    public void addListener(IGameListener listener) {
+    public void addListener(GameListener listener) {
         if (!listeners.contains(listener))
             listeners.add(listener);
     }

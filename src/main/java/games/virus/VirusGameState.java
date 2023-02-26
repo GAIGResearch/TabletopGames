@@ -5,16 +5,12 @@ import core.AbstractGameState;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
 import games.virus.cards.*;
 import games.virus.components.VirusBody;
 import games.virus.components.VirusOrgan;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 
 public class VirusGameState extends AbstractGameState implements IPrintable {
@@ -24,7 +20,12 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     Deck<VirusCard>       discardDeck;    // The deck with already played cards. It is visible for all players
 
     public VirusGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Virus);
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Virus;
     }
 
     @Override
@@ -79,18 +80,9 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected void _reset() {
-        playerBodies = new ArrayList<>();
-        playerDecks = new ArrayList<>();
-        drawDeck = null;
-        discardDeck = null;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof VirusGameState)) return false;
-        if (!super.equals(o)) return false;
         VirusGameState that = (VirusGameState) o;
         return Objects.equals(playerBodies, that.playerBodies) &&
                 Objects.equals(playerDecks, that.playerDecks) &&
@@ -115,10 +107,16 @@ public class VirusGameState extends AbstractGameState implements IPrintable {
         return playerDecks;
     }
 
-    public List<VirusBody> getPlayerBodies() {
-        return playerBodies;
+    public String toString() {
+        return gameParameters.hashCode() + "|" +
+                gameStatus.hashCode() + "|" +
+                gamePhase.hashCode() + "|" +
+                Arrays.hashCode(playerResults) + "|*|" +
+                playerBodies.hashCode() + "|" +
+                playerDecks.hashCode() + "|" +
+                drawDeck.hashCode() + "|" +
+                discardDeck.hashCode() + "|";
     }
-
     @Override
     public void printToConsole() {
         int nPlayers = getNPlayers();

@@ -20,9 +20,10 @@ public class LinearStateOrdHeuristic extends LinearStateHeuristic {
 
     @Override
     public double evaluateState(AbstractGameState state, int playerId) {
+        minValue = -state.getNPlayers();
+        maxValue = -1.0;
         if (state.isNotTerminalForPlayer(playerId)) {
-            double retValue = super.evaluateState(state, playerId);
-            return Utils.range(retValue, -state.getNPlayers(), -1.0);
+            return super.evaluateState(state, playerId);
         }
 
         return -state.getOrdinalPosition(playerId);

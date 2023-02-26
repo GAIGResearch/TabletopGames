@@ -1,5 +1,6 @@
 package games.dicemonastery.components;
 
+import core.CoreConstants;
 import core.components.Component;
 import core.properties.PropertyInt;
 import core.properties.PropertyIntArray;
@@ -7,7 +8,6 @@ import core.properties.PropertyString;
 import core.properties.PropertyStringArray;
 import games.dicemonastery.DiceMonasteryConstants.Resource;
 import utilities.Hash;
-import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -42,7 +42,7 @@ public class IlluminatedText extends Component {
     }
 
     private IlluminatedText(String name, int[] rewards, int minPiety, int vellum, int candles, int inks, Resource[] specialInks) {
-        super(Utils.ComponentType.CARD, name);
+        super(CoreConstants.ComponentType.CARD, name);
         this.rewards = rewards;
         this.minPiety = minPiety;
         this.vellum = vellum;

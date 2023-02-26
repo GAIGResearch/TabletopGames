@@ -1,11 +1,11 @@
 package core.components;
 
+import core.CoreConstants;
 import core.interfaces.IComponentContainer;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utilities.Utils.ComponentType;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import static core.CoreConstants.VisibilityMode;
 public class Deck<T extends Component> extends Component implements IComponentContainer<T> {
 
     protected int capacity;  // Capacity of the deck (maximum number of elements)
-    protected ArrayList<T> components;  // List of components in this deck
+    protected List<T> components;  // List of components in this deck
     protected VisibilityMode visibility;
 
     public Deck(String name, VisibilityMode visibility) {
@@ -32,7 +32,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
     public Deck(String name, int ownerId, VisibilityMode visibility) {
-        super(ComponentType.DECK, name);
+        super(CoreConstants.ComponentType.DECK, name);
         this.components = new ArrayList<>();
         this.ownerId = ownerId;
         this.capacity = -1;
@@ -40,7 +40,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
     protected Deck(String name, int ownerId, int ID, VisibilityMode visibility) {
-        super(ComponentType.DECK, name, ID);
+        super(CoreConstants.ComponentType.DECK, name, ID);
         this.components = new ArrayList<>();
         this.capacity = -1;
         this.ownerId = ownerId;
@@ -329,7 +329,7 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
     protected void copyTo(Deck<T> deck) {
-        ArrayList<T> newComponents = new ArrayList<>();
+        List<T> newComponents = new ArrayList<>();
         for (T c : components)
         {
             newComponents.add((T)c.copy());

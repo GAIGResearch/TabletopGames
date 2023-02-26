@@ -1,20 +1,16 @@
 package games.poker.gui;
 
-import core.CoreParameters;
+import core.*;
 import gui.AbstractGUIManager;
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.Game;
 import games.poker.PokerForwardModel;
 import games.poker.PokerGameParameters;
 import games.poker.PokerGameState;
 import games.poker.components.MoneyPot;
 import gui.GamePanel;
+import gui.IScreenHighlight;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
 import utilities.Pair;
-import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -22,7 +18,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -42,8 +37,6 @@ public class PokerGUIManager extends AbstractGUIManager {
 
     // Currently active player
     int activePlayer = -1;
-    // ID of human player
-    int humanID;
 
     // Border highlight of active player
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
@@ -65,8 +58,7 @@ public class PokerGUIManager extends AbstractGUIManager {
     CoreParameters coreParameters;
 
     public PokerGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, ac, 15);
-        this.humanID = humanID;
+        super(parent, game, ac, humanID);
         UIManager.put("TabbedPane.contentOpaque", false);
         UIManager.put("TabbedPane.opaque", false);
         UIManager.put("TabbedPane.tabsOpaque", false);
@@ -178,7 +170,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Poker", gameState, width, defaultInfoPanelHeight +15);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false);
 
                 // Add all views to frame
                 main.add(mainGameArea, BorderLayout.CENTER);
@@ -196,6 +188,11 @@ public class PokerGUIManager extends AbstractGUIManager {
                 parent.repaint();
             }
         }
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 15;
     }
 
     @Override
@@ -249,7 +246,7 @@ public class PokerGUIManager extends AbstractGUIManager {
 
 
     @Override
-    protected JComponent createActionPanel(Collection[] highlights, int width, int height, boolean boxLayout) {
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
         JPanel actionPanel = new JPanel();
         actionPanel.setOpaque(false);
         if (boxLayout) {
@@ -280,13 +277,13 @@ public class PokerGUIManager extends AbstractGUIManager {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
-            if (pgs.getTurnOrder().getRoundCounter() != gameState.getTurnOrder().getRoundCounter()) {
+            if (pgs.getRoundCounter() != gameState.getRoundCounter()) {
                 // New round
                 // Paint final state of previous round, showing all hands
                 for (int i = 0; i < pgs.getNPlayers(); i++) {
                     playerHands[i].setFront(true);
                     // Highlight fold and eliminated players
-                    if (pgs.getPlayerResults()[i] == Utils.GameResult.LOSE) {
+                    if (pgs.getPlayerResults()[i] == CoreConstants.GameResult.LOSE_GAME) {
                         playerHands[i].setBorder(playerViewCompoundBordersEliminated[i]);
                     } else if (pgs.getPlayerFold()[i]) {
                         playerHands[i].setBorder(playerViewCompoundBordersFold[i]);
@@ -328,7 +325,7 @@ public class PokerGUIManager extends AbstractGUIManager {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(pgs);
                 if (i == gameState.getCurrentPlayer() && coreParameters.alwaysDisplayCurrentPlayer
-                        || i == humanID
+                        || i == humanPlayerId
                         || coreParameters.alwaysDisplayFullObservable) {
                     playerHands[i].setFront(true);
                     playerHands[i].setFocusable(true);
@@ -337,9 +334,9 @@ public class PokerGUIManager extends AbstractGUIManager {
                 }
 
                 // Highlight active, first and fold players
-                if (gameState.getPlayerResults()[i] == Utils.GameResult.LOSE) {
+                if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.LOSE_GAME) {
                     playerHands[i].setBorder(playerViewCompoundBordersEliminated[i]);
-                } else if (i == gameState.getTurnOrder().getFirstPlayer()) {
+                } else if (i == gameState.getFirstPlayer()) {
                     playerHands[i].setBorder(playerViewCompoundBordersFirst[i]);
                 } else if (pgs.getPlayerFold()[i]) {
                     playerHands[i].setBorder(playerViewCompoundBordersFold[i]);

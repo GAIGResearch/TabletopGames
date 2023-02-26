@@ -1,18 +1,22 @@
 package core.components;
 
+import core.CoreConstants;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utilities.Utils.ComponentType;
 
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Counter extends Component {
-    protected int value;  // Current value of this counter
+    protected int[] values;
+
+    protected int valueIdx;  // Current value of this counter
     protected int minimum;  // Minimum value (inclusive)
     protected int maximum;  // Maximum value (inclusive)
 
@@ -20,46 +24,68 @@ public class Counter extends Component {
         this(0, 0, 0, "");
     }
 
-    public Counter(int value, int minimum, int maximum, String name) {
-        super(ComponentType.COUNTER, name);
-        this.value = value;
+    public Counter(int valueIdx, int minimum, int maximum, String name) {
+        super(CoreConstants.ComponentType.COUNTER, name);
+        this.valueIdx = valueIdx;
         this.minimum = minimum;
         this.maximum = maximum;
     }
 
-    protected Counter(int value, int minimum, int maximum, String name, int ID) {
-        super(ComponentType.COUNTER, name, ID);
-        this.value = value;
+    public Counter(int[] values, String name) {
+        this(0, 0, values.length-1, name);
+        this.values = values;
+    }
+
+    protected Counter(int[] values, int valueIdx, int minimum, int maximum, String name, int ID) {
+        super(CoreConstants.ComponentType.COUNTER, name, ID);
+        this.values = values;
+        this.valueIdx = valueIdx;
         this.minimum = minimum;
         this.maximum = maximum;
     }
 
     public Counter copy() {
-        Counter copy = new Counter(value, minimum, maximum, componentName, componentID);
+        Counter copy = new Counter(values != null? values.clone() : null, valueIdx, minimum, maximum, componentName, componentID);
         copyComponentTo(copy);
         return copy;
     }
 
     /**
      * Increment the value of this counter by the specified value.
-     * @param value - how much to add to this counter.
+     * @param amount - how much to add to this counter.
+     * @return - true if succeeded, false if capped at max
      */
-    public void increment(int value) {
-        this.value += value;
-        if (this.value > this.maximum) {
-            this.value = this.maximum;
-        }
+    public boolean increment(int amount) {
+        this.valueIdx += amount;
+        return clamp();
+    }
+    public boolean increment() {
+        return increment(1);
     }
 
-    /**
-     * Decrement the value of this counter.
-     * @param value - how much to decrease this counter by.
-     */
-    public void decrement(int value) {
-        this.value -= value;
-        if (this.value < this.minimum) {
-            this.value = this.minimum;
+        /**
+         * Decrement the value of this counter.
+         * @param amount - how much to decrease this counter by.
+         * @return - true if succeeded, false if capped at min
+         */
+    public boolean decrement(int amount) {
+        this.valueIdx -= amount;
+        return clamp();
+    }
+    public boolean decrement() {
+        return decrement(1);
+    }
+
+    private boolean clamp() {
+        if (this.valueIdx > this.maximum) {
+            this.valueIdx = this.maximum;
+            return false;
         }
+        if (this.valueIdx < this.minimum) {
+            this.valueIdx = this.minimum;
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -67,7 +93,7 @@ public class Counter extends Component {
      * @return true if minimum value, false otherwise.
      */
     public Boolean isMinimum()  {
-        return this.value == this.minimum;
+        return this.valueIdx <= this.minimum;
     }
 
     /**
@@ -75,7 +101,7 @@ public class Counter extends Component {
      * @return true if maximum value, false otherwise.
      */
     public Boolean isMaximum()  {
-        return this.value == this.maximum;
+        return this.valueIdx >= this.maximum;
     }
 
     /**
@@ -93,10 +119,25 @@ public class Counter extends Component {
     }
 
     /**
+     * @return the value index of this counter.
+     */
+    public int getValueIdx() {
+        return this.valueIdx;
+    }
+
+    /**
      * @return the value of this counter.
      */
     public int getValue() {
-        return this.value;
+        if (values != null) return values[valueIdx];
+        return valueIdx;
+    }
+
+    /**
+     * @return the value array of this counter.
+     */
+    public int[] getValues() {
+        return values;
     }
 
     /**
@@ -120,7 +161,7 @@ public class Counter extends Component {
      * @param i - new value for the counter.
      */
     public void setValue(int i) {
-        this.value = i;
+        this.valueIdx = i;
     }
 
     /**
@@ -161,15 +202,31 @@ public class Counter extends Component {
 
         // By default, counters go from min to max, and are initialized at min.
         if (counter.get("count") == null)
-            this.value = this.minimum;
+            this.valueIdx = this.minimum;
         else
-            this.value = ((Long) ( (JSONArray) counter.get("count")).get(1)).intValue();
+            this.valueIdx = ((Long) ( (JSONArray) counter.get("count")).get(1)).intValue();
 
         parseComponent(this, counter);
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Counter)) return false;
+        if (!super.equals(o)) return false;
+        Counter counter = (Counter) o;
+        return valueIdx == counter.valueIdx && minimum == counter.minimum && maximum == counter.maximum && Arrays.equals(values, counter.values);
+    }
+
+    @Override
     public int hashCode() {
-        return componentID;
+        int result = Objects.hash(super.hashCode(), valueIdx, minimum, maximum);
+        result = 31 * result + Arrays.hashCode(values);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "" + getValue();
     }
 }

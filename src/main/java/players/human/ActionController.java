@@ -51,6 +51,10 @@ public class ActionController {
         return lastActionPlayed;
     }
 
+    public Queue<AbstractAction> getActionsQueue() {
+        return actionsQueue;
+    }
+
     public void setLastActionPlayed(AbstractAction a) {
         lastActionPlayed = a;
     }

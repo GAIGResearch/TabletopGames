@@ -1,7 +1,7 @@
 package games.diamant;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
@@ -11,7 +11,6 @@ import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +20,12 @@ import java.util.stream.IntStream;
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
-public class DiamantForwardModel extends AbstractForwardModel implements IOrderedActionSpace {
+public class DiamantForwardModel extends StandardForwardModel implements IOrderedActionSpace {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;
         Random r = new Random(dgs.getGameParameters().getRandomSeed());
-
-        dgs.hands = new ArrayList<>();
-        dgs.treasureChests = new ArrayList<>();
+        dgs._reset();
 
         for (int i = 0; i < dgs.getNPlayers(); i++) {
             String counter_hand_name = "CounterHand" + i;
@@ -49,7 +46,7 @@ public class DiamantForwardModel extends AbstractForwardModel implements IOrdere
         // Draw first card and play it
         drawAndPlayCard(dgs);
 
-        dgs.getTurnOrder().setStartingPlayer(0);
+        dgs.setFirstPlayer(0);
     }
 
     /**
@@ -87,20 +84,18 @@ public class DiamantForwardModel extends AbstractForwardModel implements IOrdere
      * @param action:       action to be executed
      */
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DiamantGameState dgs = (DiamantGameState) currentState;
-        dgs.actionsPlayed.put(dgs.getCurrentPlayer(), action);
-
-        // If all players has an action, execute them
+        // If all players have an action, execute them
         if (dgs.actionsPlayed.size() == dgs.getNPlayers()) {
             playActions(dgs);
             dgs.actionsPlayed.clear();
         }
-        dgs.getTurnOrder().endPlayerTurn(dgs);
+        endPlayerTurn(dgs);
     }
 
 
-    private void playActions(DiamantGameState dgs) {
+    public void playActions(DiamantGameState dgs) {
         // How many players play ExitFromCave?
         int nPlayersExit = 0;
         for (int p : dgs.actionsPlayed.keySet())
@@ -158,7 +153,7 @@ public class DiamantForwardModel extends AbstractForwardModel implements IOrdere
 
         // No more caves ?
         if (dgs.nCave == dp.nCaves)
-            EndGame(dgs);
+            endGame(dgs);
         else {
             Random r = new Random(dgs.getGameParameters().getRandomSeed());
 
@@ -182,41 +177,6 @@ public class DiamantForwardModel extends AbstractForwardModel implements IOrdere
         }
     }
 
-    /**
-     * Finishes the game and obtains who is the winner
-     *
-     * @param dgs: current game state
-     */
-    private void EndGame(DiamantGameState dgs) {
-        int maxGems = 0;
-        List<Integer> bestPlayers = new ArrayList<>();
-
-        for (int p = 0; p < dgs.getNPlayers(); p++) {
-            int nGems = dgs.treasureChests.get(p).getValue();
-            if (nGems > maxGems) {
-                bestPlayers.clear();
-                bestPlayers.add(p);
-                maxGems = nGems;
-            } else if (nGems == maxGems) {
-                bestPlayers.add(p);
-            }
-        }
-
-        boolean moreThanOneWinner = bestPlayers.size() > 1;
-
-        for (int p = 0; p < dgs.getNPlayers(); p++) {
-            if (bestPlayers.contains(p)) {
-                if (moreThanOneWinner)
-                    dgs.setPlayerResult(Utils.GameResult.DRAW, p);
-                else
-                    dgs.setPlayerResult(Utils.GameResult.WIN, p);
-            } else
-                dgs.setPlayerResult(Utils.GameResult.LOSE, p);
-        }
-
-        dgs.setGameStatus(Utils.GameResult.GAME_END);
-    }
-
 
     /**
      * Gets the possible actions to be played
@@ -238,11 +198,6 @@ public class DiamantForwardModel extends AbstractForwardModel implements IOrdere
             actions.add(new OutOfCave());
 
         return actions;
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new DiamantForwardModel();
     }
 
     /**

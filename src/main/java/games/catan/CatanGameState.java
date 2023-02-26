@@ -1,34 +1,34 @@
 package games.catan;
 
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
-import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.Area;
 import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.catan.actions.OfferPlayerTrade;
 import games.catan.components.Edge;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
-import utilities.Utils;
 
 import java.util.*;
 
 import static core.CoreConstants.*;
 import static games.catan.CatanConstants.*;
 
-public class CatanGameState extends AbstractGameState {
+public class CatanGameState extends AbstractGameStateWithTurnOrder {
     protected CatanTile[][] board;
     protected Graph<Settlement, Road> catanGraph;
     protected Card boughtDevCard; // used to keep a reference to a dev card bought in the current turn to avoid playing it
-    protected int scores[]; // score for each player
-    protected int victoryPoints[]; // secret points from victory cards
-    protected int knights[]; // knight count for each player
-    protected int exchangeRates[][]; // exchange rate with bank for each resource
+    protected int[] scores; // score for each player
+    protected int[] victoryPoints; // secret points from victory cards
+    protected int[] knights; // knight count for each player
+    protected int[][] exchangeRates; // exchange rate with bank for each resource
     protected int largestArmy; // playerID of the player currently holding the largest army
     protected int longestRoad; // playerID of the player currently holding the longest road
     protected int longestRoadLength;
@@ -50,14 +50,23 @@ public class CatanGameState extends AbstractGameState {
     HashMap<Integer, Area> areas;
 
     public CatanGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters) pp).n_actions_per_turn), GameType.Catan);
+        super(pp, nPlayers);
         _reset();
     }
 
     @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new CatanTurnOrder(nPlayers, getGameParameters().getMaxRounds());
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Catan;
+    }
+
+    @Override
     protected List<Component> _getAllComponents() {
-        List<Component> components = new ArrayList<>(areas.values());
-        return components;
+        return new ArrayList<>(areas.values());
     }
 
     // Getters & setters
@@ -77,7 +86,6 @@ public class CatanGameState extends AbstractGameState {
         return areas.get(playerId);
     }
 
-    @Override
     protected void _reset() {
         // set everything to null (except for Random number generator)
         this.areas = null;
@@ -90,8 +98,7 @@ public class CatanGameState extends AbstractGameState {
         scores = new int[getNPlayers()];
         knights = new int[getNPlayers()];
         exchangeRates = new int[getNPlayers()][CatanParameters.Resources.values().length];
-        for (int i = 0; i < exchangeRates.length; i++)
-            Arrays.fill(exchangeRates[i], pp.default_exchange_rate);
+        for (int[] exchangeRate : exchangeRates) Arrays.fill(exchangeRate, pp.default_exchange_rate);
         victoryPoints = new int[getNPlayers()];
         longestRoadLength = pp.min_longest_road;
         largestArmy = -1;
@@ -101,8 +108,51 @@ public class CatanGameState extends AbstractGameState {
     }
 
     @Override
-    protected boolean _equals(Object o) {
+    protected boolean _equals(Object obj) {
+        if (obj instanceof CatanGameState) {
+            CatanGameState o = (CatanGameState) obj;
+            return boughtDevCard.equals(o.boughtDevCard) && catanGraph.equals(o.catanGraph) &&
+                    largestArmy == o.largestArmy && longestRoad == o.longestRoad &&
+                    longestRoadLength == o.longestRoadLength && o.currentTradeOffer.equals(currentTradeOffer) &&
+                    rollValue == o.rollValue && Arrays.equals(scores, o.scores) &&
+                    Arrays.equals(victoryPoints, o.victoryPoints) && Arrays.equals(knights, o.knights) &&
+                    Arrays.deepEquals(exchangeRates, o.exchangeRates) && Arrays.deepEquals(board, o.board);
+        }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase, catanGraph, boughtDevCard,
+                largestArmy, longestRoad, longestRoadLength, currentTradeOffer, rollValue);
+        result = 31 * result + Arrays.hashCode(playerResults);
+        result = 31 * result + Arrays.hashCode(scores);
+        result = 31 * result + Arrays.hashCode(victoryPoints);
+        result = 31 * result + Arrays.hashCode(knights);
+        result = 31 * result + Arrays.deepHashCode(exchangeRates);
+        result = 31 * result + Arrays.deepHashCode(board);
+        return result;
+    }
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(gameParameters.hashCode()).append("|");
+        sb.append(turnOrder.hashCode()).append("|");
+        sb.append(gameStatus.hashCode()).append("|");
+        sb.append(Arrays.hashCode(playerResults)).append("|*|");
+        sb.append(catanGraph.hashCode()).append("|");
+        sb.append(boughtDevCard == null ? 0 : boughtDevCard.hashCode()).append("|");
+        sb.append(largestArmy).append("|");
+        sb.append(longestRoad).append("|");
+        sb.append(longestRoadLength).append("|");
+        sb.append(rollValue).append("|");
+        sb.append(currentTradeOffer == null ? 0 : currentTradeOffer.hashCode()).append("|");
+        sb.append(Arrays.hashCode(scores)).append("|");
+        sb.append(Arrays.hashCode(victoryPoints)).append("|");
+        sb.append(Arrays.hashCode(knights)).append("|");
+        sb.append(Arrays.deepHashCode(exchangeRates)).append("|");
+        sb.append(Arrays.deepHashCode(board)).append("|");
+        return sb.toString();
     }
 
     public void setBoard(CatanTile[][] board) {
@@ -113,11 +163,11 @@ public class CatanGameState extends AbstractGameState {
         return board;
     }
 
-    public void setGraph(Graph graph) {
+    public void setGraph(Graph<Settlement, Road> graph) {
         this.catanGraph = graph;
     }
 
-    public Graph getGraph() {
+    public Graph<Settlement, Road> getGraph() {
         return catanGraph;
     }
 
@@ -473,7 +523,7 @@ public class CatanGameState extends AbstractGameState {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         CatanGameState copy = new CatanGameState(getGameParameters(), getNPlayers());
         copy.gamePhase = gamePhase;
         copy.board = copyBoard();
@@ -508,9 +558,9 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (getPlayerResults()[playerId] == Utils.GameResult.LOSE)
+        if (getPlayerResults()[playerId] == GameResult.LOSE_GAME)
             return -1.0;
-        if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
+        if (getPlayerResults()[playerId] == GameResult.WIN_GAME)
             return 1.0;
         return (double) (scores[playerId]) / 10.0;
     }

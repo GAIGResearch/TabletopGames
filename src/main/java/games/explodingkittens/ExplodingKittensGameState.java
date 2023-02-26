@@ -1,7 +1,8 @@
 package games.explodingkittens;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Deck;
@@ -9,24 +10,15 @@ import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
 import core.interfaces.IVectorisable;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
-import utilities.Utils;
 
 import java.util.*;
 
 import static core.CoreConstants.VisibilityMode;
-import static utilities.Utils.GameResult.*;
 
-public class ExplodingKittensGameState extends AbstractGameState implements IPrintable, IVectorisable {
-
-    // Exploding kittens adds 4 phases on top of default ones.
-    public enum ExplodingKittensGamePhase implements IGamePhase {
-        Nope,
-        Defuse,
-        Favor,
-        SeeTheFuture
-    }
+public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder implements IPrintable, IVectorisable  {
 
     // Cards in each player's hand, index corresponds to player ID
     List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards;
@@ -39,10 +31,19 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     // Current stack of actions
     Stack<AbstractAction> actionStack;
     int[] orderOfPlayerDeath;
-
     public ExplodingKittensGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new ExplodingKittensTurnOrder(nPlayers), GameType.ExplodingKittens);
+        super(gameParameters, nPlayers);
         playerGettingAFavor = -1;
+        playerHandCards = new ArrayList<>();
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new ExplodingKittensTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.ExplodingKittens;
     }
 
     @Override
@@ -55,7 +56,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         ExplodingKittensGameState ekgs = new ExplodingKittensGameState(gameParameters.copy(), getNPlayers());
         ekgs.discardPile = discardPile.copy();
         ekgs.playerGettingAFavor = playerGettingAFavor;
@@ -123,10 +124,6 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         return ekgs;
     }
 
-    private void moveHiddenCards(PartialObservableDeck<?> from, PartialObservableDeck<?> to) {
-
-    }
-
     @Override
     protected double _getHeuristicScore(int playerId) {
         return new ExplodingKittensHeuristic().evaluateState(this, playerId);
@@ -142,25 +139,20 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
      */
     @Override
     public double getGameScore(int playerId) {
-        return playerResults[playerId].value;
+        if (playerResults[playerId] == CoreConstants.GameResult.LOSE_GAME)
+            // knocked out
+            return orderOfPlayerDeath[playerId];
+        // otherwise our current score is the number knocked out + 1
+        return Arrays.stream(playerResults).filter(status -> status == CoreConstants.GameResult.LOSE_GAME).count() + 1;
     }
 
     @Override
     public int getOrdinalPosition(int playerId) {
-        if (playerResults[playerId] == Utils.GameResult.WIN)
+        if (playerResults[playerId] == CoreConstants.GameResult.WIN_GAME)
             return 1;
-        if (playerResults[playerId] == Utils.GameResult.LOSE)
+        if (playerResults[playerId] == CoreConstants.GameResult.LOSE_GAME)
             return getNPlayers() - orderOfPlayerDeath[playerId] + 1;
         return 1;  // anyone still alive is jointly winning
-    }
-
-    @Override
-    protected void _reset() {
-        playerHandCards = new ArrayList<>();
-        drawPile = null;
-        discardPile = null;
-        playerGettingAFavor = -1;
-        actionStack = null;
     }
 
     @Override
@@ -187,10 +179,10 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
      * @param playerID - player who was killed in a kitten explosion.
      */
     public void killPlayer(int playerID) {
-        setPlayerResult(Utils.GameResult.LOSE, playerID);
+        setPlayerResult(CoreConstants.GameResult.LOSE_GAME, playerID);
         int nPlayersActive = 0;
         for (int i = 0; i < getNPlayers(); i++) {
-            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
+            if (playerResults[i] == CoreConstants.GameResult.GAME_ONGOING) nPlayersActive++;
         }
         orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
         if (nPlayersActive == 1) {
@@ -201,6 +193,7 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
                     playerResults[i] = Utils.GameResult.WIN;
                 }
             }
+            turnOrder.endGame(this);
         }
 
         ((ExplodingKittensTurnOrder) getTurnOrder()).endPlayerTurnStep(this);
@@ -212,24 +205,20 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         return playerGettingAFavor;
     }
 
-    public PartialObservableDeck<ExplodingKittensCard> getDrawPile() {
-        return drawPile;
-    }
-
     public void setPlayerGettingAFavor(int playerGettingAFavor) {
         this.playerGettingAFavor = playerGettingAFavor;
     }
 
+    public PartialObservableDeck<ExplodingKittensCard> getDrawPile() {
+        return drawPile;
+    }
+
+    protected void setDrawPile(PartialObservableDeck<ExplodingKittensCard> drawPile) {
+        this.drawPile = drawPile;
+    }
+
     public Deck<ExplodingKittensCard> getDiscardPile() {
         return discardPile;
-    }
-
-    public Stack<AbstractAction> getActionStack() {
-        return actionStack;
-    }
-
-    public List<PartialObservableDeck<ExplodingKittensCard>> getPlayerHandCards() {
-        return playerHandCards;
     }
 
     // Protected, only accessible in this package and subclasses
@@ -237,19 +226,21 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         this.discardPile = discardPile;
     }
 
-    protected void setDrawPile(PartialObservableDeck<ExplodingKittensCard> drawPile) {
-        this.drawPile = drawPile;
-    }
-
-    protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards) {
-        this.playerHandCards = playerHandCards;
+    public Stack<AbstractAction> getActionStack() {
+        return actionStack;
     }
 
     protected void setActionStack(Stack<AbstractAction> actionStack) {
         this.actionStack = actionStack;
     }
 
-    // Printing functions for the game state and decks.
+    public List<PartialObservableDeck<ExplodingKittensCard>> getPlayerHandCards() {
+        return playerHandCards;
+    }
+
+    protected void setPlayerHandCards(List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards) {
+        this.playerHandCards = playerHandCards;
+    }
 
     public void printToConsole() {
         System.out.println(toString());
@@ -312,6 +303,8 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         return 25;
     }
 
+    // Printing functions for the game state and decks.
+
     @Override
     public String toString() {
         String s = "============================\n";
@@ -343,5 +336,13 @@ public class ExplodingKittensGameState extends AbstractGameState implements IPri
         s += "Missing Draws: " + ((ExplodingKittensTurnOrder) turnOrder).requiredDraws + "\n";
         s += "============================\n";
         return s;
+    }
+
+    // Exploding kittens adds 4 phases on top of default ones.
+    public enum ExplodingKittensGamePhase implements IGamePhase {
+        Nope,
+        Defuse,
+        Favor,
+        SeeTheFuture
     }
 }

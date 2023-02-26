@@ -1,6 +1,6 @@
 package games.pandemic.rules.rules;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.components.Card;
 import core.components.Deck;
 import core.rules.Node;
@@ -31,7 +31,7 @@ public class EpidemicIntensify extends RuleNode {
     }
 
     @Override
-    protected boolean run(AbstractGameState gs) {
+    protected boolean run(AbstractGameStateWithTurnOrder gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
         Deck<Card> infectionDiscard = (Deck<Card>) pgs.getComponent(infectionDiscardHash);
         Deck<Card> infectionDeck = (Deck<Card>) pgs.getComponent(infectionHash);

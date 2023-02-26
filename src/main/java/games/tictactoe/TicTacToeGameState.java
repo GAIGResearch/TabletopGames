@@ -7,7 +7,6 @@ import core.components.GridBoard;
 import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
 
 import java.util.ArrayList;
@@ -20,7 +19,12 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     GridBoard<Token> gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.TicTacToe);
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.TicTacToe;
     }
 
     @Override
@@ -31,7 +35,7 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected TicTacToeGameState _copy(int playerId) {
         TicTacToeGameState s = new TicTacToeGameState(gameParameters.copy(), getNPlayers());
         s.gridBoard = gridBoard.copy();
         return s;
@@ -56,15 +60,9 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     }
 
     @Override
-    protected void _reset() {
-        gridBoard = null;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof TicTacToeGameState)) return false;
-        if (!super.equals(o)) return false;
         TicTacToeGameState that = (TicTacToeGameState) o;
         return Objects.equals(gridBoard, that.gridBoard);
     }
@@ -72,6 +70,14 @@ public class TicTacToeGameState extends AbstractGameState implements IPrintable,
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), gridBoard);
+    }
+    @Override
+    public String toString() {
+        return Objects.hash(gameParameters) + "|" +
+                Objects.hash(getAllComponents()) + "|" +
+                Objects.hash(gameStatus) + "|" +
+                Objects.hash(gamePhase) + "|*|" +
+                Objects.hash(gridBoard);
     }
 
     @Override

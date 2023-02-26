@@ -1,11 +1,9 @@
 package evaluation;
 
-import core.AbstractGameState;
-import core.AbstractParameters;
-import core.AbstractPlayer;
-import core.ParameterFactory;
+import core.*;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
+import core.interfaces.IStatisticLogger;
 import core.interfaces.ITunableParameters;
 import evodef.EvoAlg;
 import evodef.SearchSpace;
@@ -18,7 +16,6 @@ import org.json.simple.JSONObject;
 import players.PlayerFactory;
 import utilities.Pair;
 import utilities.StatSummary;
-import utilities.SummaryLogger;
 import utilities.Utils;
 
 import java.io.File;
@@ -161,7 +158,7 @@ public class ParameterSearch {
         String logfile = getArg(args, "logFile", "");
         String evalMethod = getArg(args, "eval", "Win");
         String paramFile = getArg(args, "gameParam", "");
-        AbstractParameters gameParams = ParameterFactory.createFromFile(game, paramFile);
+        AbstractParameters gameParams = AbstractParameters.createFromFile(game, paramFile);
 
         ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
@@ -201,7 +198,7 @@ public class ParameterSearch {
 
         } else {
             if (evalMethod.equals("Win"))
-                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == Utils.GameResult.WIN ? 1.0 : 0.0;
+                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN_GAME ? 1.0 : 0.0;
             if (evalMethod.equals("Score"))
                 stateHeuristic = AbstractGameState::getGameScore;
             if (evalMethod.equals("Heuristic"))
@@ -231,21 +228,17 @@ public class ParameterSearch {
         Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
             landscapeModel.reset();
+            evaluator.statsLogger = IStatisticLogger.createLogger("utilities.SummaryLogger", "Agent_" + String.format("%2d", repeats+1) + "_" + logfile);
             Pair<Double, Double> r = runNTBEA(evaluator, null, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
-            printDetailsOfRun(retValue, searchSpace, logfile);
-            if (verbose) {
-                System.out.println("MCTS Statistics: ");
-                System.out.println(evaluator.statsLogger.toString());
-            }
-            evaluator.statsLogger = new SummaryLogger();
+            printDetailsOfRun(retValue, searchSpace, logfile, verbose, evaluator.statsLogger);
             if (retValue.a.a > bestResult.a.a)
                 bestResult = retValue;
 
         }
         System.out.println("\nFinal Recommendation: ");
         // we don't log the final run to file to avoid duplication
-        printDetailsOfRun(bestResult, searchSpace, "");
+        printDetailsOfRun(bestResult, searchSpace, "", false, null);
     }
 
     public static void runMultiNTBEA(NTupleSystem landscapeModel, String[] args) {
@@ -263,7 +256,7 @@ public class ParameterSearch {
         String evalMethod = getArg(args, "eval", "Win");
         IStateHeuristic stateHeuristic = null;
         if (evalMethod.equals("Win"))
-            stateHeuristic = (s, p) -> s.getPlayerResults()[p] == Utils.GameResult.WIN ? 1.0 : 0.0;
+            stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN_GAME ? 1.0 : 0.0;
         if (evalMethod.equals("Score"))
             stateHeuristic = AbstractGameState::getGameScore;
         if (evalMethod.equals("Heuristic"))
@@ -297,7 +290,7 @@ public class ParameterSearch {
             landscapeModel.reset();
             Pair<Double, Double> r = runNTBEA(null, evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
             Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
-            printDetailsOfRun(retValue, searchSpace, logfile);
+            printDetailsOfRun(retValue, searchSpace, logfile, verbose, null);
             printDiversityResults(landscapeModel, kExplore);
 
             if (retValue.a.a > bestResult.a.a)
@@ -306,7 +299,7 @@ public class ParameterSearch {
         }
         System.out.println("\nFinal Recommendation: ");
         // we don't log the final run to file to avoid duplication
-        printDetailsOfRun(bestResult, searchSpace, "");
+        printDetailsOfRun(bestResult, searchSpace, "", false, null);
     }
 
 
@@ -315,19 +308,24 @@ public class ParameterSearch {
      * parameter settings, and the estimated mean score of these (with std error).
      *
      * @param data        The results of the NTBEA trials.
-     *                    The Pair<Double, Double> is the mean and std error on the mean for the final recommendation,
+     *                    The {@code Pair<Double, Double>} is the mean and std error on the mean for the final recommendation,
      *                    as calculated from the post-NTBEA evaluation trials.
      *                    The double[] is the best sampled settings from the main NTBEA trials (that are then evaluated to get
      *                    a more accurate estimate of their utility).
      * @param searchSpace The relevant searchSpace
      */
-    public static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace, String logFile) {
+    public static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace, String logFile, boolean verbose, IStatisticLogger statsLogger) {
         System.out.printf("Recommended settings have score %.3g +/- %.3g:\t%s\n %s%n",
                 data.a.a, data.a.b,
                 Arrays.stream(data.b).mapToObj(it -> String.format("%.0f", it)).collect(joining(", ")),
                 IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
                         .map(p -> String.format("\t%s:\t%s\n", searchSpace.name(p.a), valueToString(p.a, p.b.intValue(), searchSpace)))
                         .collect(joining(" ")));
+
+        if (verbose && statsLogger != null && logFile.isEmpty()) {
+            System.out.println("Agent Statistics: ");
+            System.out.println(statsLogger);
+        }
 
         if (!logFile.isEmpty()) {
             try {
@@ -349,6 +347,16 @@ public class ParameterSearch {
                 writer.write(firstPart + values + "\n");
                 writer.flush();
                 writer.close();
+
+                if (statsLogger != null) {
+                    statsLogger.record("estimated value", data.a.a);
+                    for (int index = 0; index < data.b.length; index++) {
+                        String key = searchSpace.name(index);
+                        String value = valueToString(index, (int) data.b[index], searchSpace);
+                        statsLogger.record(key, value);
+                    }
+                    statsLogger.processDataAndFinish();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println(e.getMessage() + " : Error accessing file " + logFile);
@@ -472,7 +480,7 @@ public class ParameterSearch {
      *                        and the Top 10 Tuples by trials.) This can be useful to visualise the parameter
      *                        landscape beyond the simple final recommendation and get a feel for which dimensions
      *                        really matter.
-     * @return This returns Pair<Mean, Std Error on Mean> as calculated from the evaluation games
+     * @return This returns {@code Pair<Mean, Std Error on Mean>} as calculated from the evaluation games
      */
     public static Pair<Double, Double> runNTBEA(SolutionEvaluator evaluator,
                                                 GameMultiPlayerEvaluator multiPlayerEvaluator,

@@ -6,8 +6,7 @@ import java.util.HashMap;
 
 public class CatanParameters extends AbstractParameters {
     private String dataPath;
-    public final int n_actions_per_turn = 1;
-    
+
     public final int n_settlements = 5;
     public final int n_cities = 4;
     public final int n_roads = 15;
@@ -15,7 +14,6 @@ public class CatanParameters extends AbstractParameters {
     public final int n_tiles_per_row = 7;
 
     // rules
-    public final int max_round_count = 300; // stops play after this number of rounds, ends with tie, set to -1 for infinite
     public final int max_negotiation_count = 2; // max number of attempts to renegotiate player trade
     public final int default_exchange_rate = 4; // trading with the bank 1:4 ratio by default
     public final int max_cards_without_discard = 7; // max number of resources a player may hold in hand without risking discarding
@@ -36,6 +34,7 @@ public class CatanParameters extends AbstractParameters {
 
     public CatanParameters(long seed){
         super(seed);
+        setMaxRounds(100);
     }
 
     public CatanParameters(String dataPath, long seed){
@@ -102,6 +101,7 @@ public class CatanParameters extends AbstractParameters {
     }
 
     public enum HarborTypes {
+        NONE,
         BRICK,
         LUMBER,
         ORE,

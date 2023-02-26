@@ -2,20 +2,22 @@ package evaluation;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.CoreConstants;
-import core.ParameterFactory;
-import core.interfaces.IGameListener;
 import core.interfaces.ILearner;
 import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStatisticLogger;
+import evaluation.metrics.Event;
+import evaluation.listeners.GameListener;
+import evaluation.tournaments.RandomRRTournament;
+import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import players.PlayerFactory;
 import players.learners.AbstractLearner;
-import utilities.FileStatsLogger;
-import utilities.StateFeatureListener;
+import evaluation.loggers.FileStatsLogger;
+import evaluation.listeners.StateFeatureListener;
 import utilities.Utils;
-
+import org.apache.commons.io.FileUtils;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,12 +32,13 @@ public class ProgressiveLearner {
     List<AbstractPlayer> agents;
     ILearner learner;
     int nPlayers, matchups, iterations, iter, finalMatchups;
+    double maxExplore;
     AbstractPlayer basePlayer;
     AbstractPlayer[] agentsPerGeneration;
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
     IStateFeatureVector phi;
-    CoreConstants.GameEvents frequency;
+    Event.GameEvent frequency;
     boolean currentPlayerOnly;
     String phiClass, prefix;
     boolean useOnlyLast;
@@ -55,6 +58,7 @@ public class ProgressiveLearner {
         finalMatchups = getArg(args, "finalMatchups", 1000);
         iterations = getArg(args, "iterations", 100);
         useOnlyLast = getArg(args, "useOnlyLast", false);
+        maxExplore = getArg(args, "explore", 0.0);
         agentsPerGeneration = new AbstractPlayer[iterations];
         dataFilesByIteration = new String[iterations];
         String learnerClass = getArg(args, "learner", "");
@@ -71,7 +75,7 @@ public class ProgressiveLearner {
         String gameParams = getArg(args, "gameParams", "");
         dataDir = getArg(args, "dir", "");
 
-        params = ParameterFactory.createFromFile(gameToPlay, gameParams);
+        params = AbstractParameters.createFromFile(gameToPlay, gameParams);
 
         phiClass = getArg(args, "statePhi", "");
         if (phiClass.equals(""))
@@ -81,7 +85,7 @@ public class ProgressiveLearner {
         defaultHeuristic = getArg(args, "defaultHeuristic", "players.heuristics.NullHeuristic");
         heuristic = getArg(args, "heuristic", "players.heuristics.LinearStateHeuristic");
         currentPlayerOnly = getArg(args, "stateCPO", false);
-        frequency = CoreConstants.GameEvents.valueOf(getArg(args, "stateFreq", "ACTION_TAKEN"));
+        frequency = Event.GameEvent.valueOf(getArg(args, "stateFreq", "ACTION_TAKEN"));
     }
 
     public static void main(String[] args) {
@@ -96,7 +100,7 @@ public class ProgressiveLearner {
                             "\t               This location(s) for this injection in the JSON file must be marked with '*FILE*'\n" +
                             "\t               The content of the 'heuristic' argument will be injected to replace *HEURISTIC* in the file.\n" +
                             "\t               It can also optionally have the class to be used as FeatureVector marked with '*PHI*'\n" +
-                            "\t               in which case the value specifies in the statePhi argument will be injected.\n" +
+                            "\t               in which case the value specified in the statePhi argument will be injected.\n" +
                             "\t               A default heuristic can be specified for the initial iteration with '*DEFAULT*'\n" +
                             "\t               in which case the defaultHeuristic argument will be used.\n" +
                             "\tfileName=      The prefix to use on the files generate on each learning iteration.\n" +
@@ -106,6 +110,8 @@ public class ProgressiveLearner {
                             "\t               generate a file that the heuristic can read.\n" +
                             "\ttarget=        The target to use (WIN, ORDINAL, SCORE, WIN_MEAN, ORD_MEAN)\n" +
                             "\tgamma=         The discount factor to use - this is applied per round, not per action\n" +
+                            "\texplore=       The starting exploration rate - at which random actions are taken by agents.\n" +
+                            "\t               This will reduce linearly to zero for the final iteration.\n" +
                             "\tdir=           The directory containing agent JSON files for learned heuristics and raw data\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tmatchups=      Defaults to 1. The number of games to play before the learning process is called.\n" +
@@ -114,12 +120,12 @@ public class ProgressiveLearner {
                             "\tstateFreq=     How frequently to record a value to regress against (ROUND_OVER, TURN_OVER, ACTION_CHOSEN, ACTION_TAKEN)\n" +
                             "\t               Defaults to ACTION_TAKEN.\n" +
                             "\tstateCPO=      Whether to only record states for the current player (defaults to all players)\n" +
-                            "\theuristic=     A class name for a heuristic to inject into the Agent JSON defintition (see 'player')\n" +
+                            "\theuristic=     A class name for a heuristic to inject into the Agent JSON definition (see 'player')\n" +
                             "\t               Defaults to players.heuristics.LinearStateHeuristic\n" +
                             "\tdefaultHeuristic=Defaults to a null heuristic (random play). This is only used in the first iteration\n" +
                             "\t               when we have no data.  \n" +
                             "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n" +
-                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000."
+                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000.\n"
             );
             return;
         }
@@ -156,15 +162,25 @@ public class ProgressiveLearner {
         // Now we can run a tournament of everyone
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers, 1, true, finalMatchups,
-                System.currentTimeMillis(), params);
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
+                finalMatchups, System.currentTimeMillis(), params);
 
-        tournament.listeners = new ArrayList<>();
+        tournament.setListeners(new ArrayList<>());
         IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
-        IGameListener gameTracker = IGameListener.createListener("utilities.GameResultListener", logger);
-        tournament.listeners.add(gameTracker);
+        GameListener gameTracker = GameListener.createListener("evaluation.metrics.GameListener", logger, null);
+        tournament.getListeners().add(gameTracker);
         tournament.runTournament();
-      // gameTracker.allGamesFinished(); // This is done in tournament
+        int winnerIndex = tournament.getWinnerIndex();
+        if (winnerIndex != finalAgents.size() - 1) {
+            // if the basePlayer won, then meh!
+            String fileName = String.format("%s_Winner.txt", prefix);
+            try {
+                FileUtils.copyFile(new File(learnedFilesByIteration[winnerIndex]), new File(fileName));
+            } catch (IOException e) {
+                System.out.println("Error copying the final winning heuristic");
+                e.printStackTrace();
+            }
+        }
     }
 
     private void loadAgents() {
@@ -195,14 +211,17 @@ public class ProgressiveLearner {
 
     private void runGamesWithAgents() {
         // Run!
-        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers, 1, true, matchups,
-                System.currentTimeMillis(), params);
+        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
+                matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
+        double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
+        System.out.println("Explore = " + exploreEpsilon);
+        agents.forEach(p -> p.setExploration(exploreEpsilon));
 
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
         StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi, frequency, currentPlayerOnly);
-        tournament.listeners = Collections.singletonList(dataTracker);
+        tournament.setListeners(Collections.singletonList(dataTracker));
         tournament.runTournament();
     }
 

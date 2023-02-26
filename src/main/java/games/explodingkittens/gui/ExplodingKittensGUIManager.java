@@ -7,15 +7,14 @@ import core.AbstractPlayer;
 import core.Game;
 import games.explodingkittens.ExplodingKittensParameters;
 import games.explodingkittens.ExplodingKittensGameState;
+import gui.IScreenHighlight;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Collection;
 
 
 public class ExplodingKittensGUIManager extends AbstractGUIManager {
@@ -34,15 +33,12 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
 
     // Currently active player
     int activePlayer = -1;
-    // ID of human player
-    int humanID;
     // Border highlight of active player
     Border highlightActive = BorderFactory.createLineBorder(new Color(220, 169, 11), 3);
     Border[] playerViewBorders;
 
     public ExplodingKittensGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, ac, 25);
-        this.humanID = humanID;
+        super(parent, game, ac, humanID);
 
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
@@ -107,7 +103,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
                 // Top area will show state information
                 JPanel infoPanel = createGameStateInfoPanel("Exploding Kittens", gameState, width, defaultInfoPanelHeight);
                 // Bottom area will show actions available
-                JComponent actionPanel = createActionPanel(new Collection[0], width, defaultActionPanelHeight, false);
+                JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
 
                 // Add all views to frame
                 parent.setLayout(new BorderLayout());
@@ -124,6 +120,11 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
     }
 
     @Override
+    public int getMaxActionSpace() {
+        return 25;
+    }
+
+    @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (gameState.getCurrentPlayer() != activePlayer) {
@@ -136,7 +137,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].updateComponent(ekgs.getPlayerHandCards().get(i));
                 if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || i == humanID
+                        || i == humanPlayerId
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                     playerHands[i].setFront(true);
                     playerHands[i].setFocusable(true);
@@ -156,7 +157,7 @@ public class ExplodingKittensGUIManager extends AbstractGUIManager {
             discardPile.updateComponent(ekgs.getDiscardPile());
             discardPile.setFocusable(true);
             drawPile.updateComponent(ekgs.getDrawPile());
-            if (activePlayer == humanID || gameState.getCoreGameParameters().alwaysDisplayFullObservable)
+            if (activePlayer == humanPlayerId || gameState.getCoreGameParameters().alwaysDisplayFullObservable)
                 drawPile.setFront(true);
 
         }

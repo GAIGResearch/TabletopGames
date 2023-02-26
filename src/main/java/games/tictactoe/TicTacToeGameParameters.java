@@ -2,6 +2,7 @@ package games.tictactoe;
 
 import core.AbstractParameters;
 import evaluation.TunableParameters;
+import games.GameType;
 
 import java.util.*;
 
@@ -9,13 +10,10 @@ public class TicTacToeGameParameters extends TunableParameters {
 
     public int gridSize = 3;
 
-    public TicTacToeGameParameters() {
-        this(System.currentTimeMillis());
-    }
-
     public TicTacToeGameParameters(long seed) {
         super(seed);
         addTunableParameter("gridSize", 3, Arrays.asList(3, 4, 5, 6));
+        _reset();
     }
 
     @Override
@@ -25,7 +23,7 @@ public class TicTacToeGameParameters extends TunableParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        TicTacToeGameParameters gp = new TicTacToeGameParameters(System.currentTimeMillis());
+        TicTacToeGameParameters gp = new TicTacToeGameParameters(getRandomSeed());
         gp.gridSize = gridSize;
         return gp;
     }
@@ -45,8 +43,8 @@ public class TicTacToeGameParameters extends TunableParameters {
     }
 
     @Override
-    public TicTacToeGame instantiate() {
-        return new TicTacToeGame(this);
+    public Object instantiate() {
+        return GameType.TicTacToe.createGameInstance(2, this);
     }
 
 }

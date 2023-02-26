@@ -1,7 +1,7 @@
 package core.interfaces;
 
-import utilities.TAGStatSummary;
-import utilities.SummaryLogger;
+import evaluation.loggers.SummaryLogger;
+import evaluation.summarisers.TAGStatSummary;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -38,11 +38,11 @@ public interface IStatisticLogger {
      * @return A summary of the data
      */
     Map<String, TAGStatSummary> summary();
-
+    IStatisticLogger emptyCopy(String id);
 
     static IStatisticLogger createLogger(String loggerClass, String logFile) {
         if (logFile.isEmpty())
-            return null;
+            throw new IllegalArgumentException("Must specify logFile");
         IStatisticLogger logger = new SummaryLogger();
         try {
             Class<?> clazz = Class.forName(loggerClass);

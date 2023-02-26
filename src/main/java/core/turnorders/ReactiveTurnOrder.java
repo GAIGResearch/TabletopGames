@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
 
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class ReactiveTurnOrder extends TurnOrder {
 
@@ -36,6 +36,14 @@ public class ReactiveTurnOrder extends TurnOrder {
         ReactiveTurnOrder to = new ReactiveTurnOrder();
         to.reactivePlayers = new LinkedList<>(reactivePlayers);
         return to;
+    }
+
+    @Override
+    public void _endRound(AbstractGameState gameState) {
+    }
+
+    @Override
+    public void _startRound(AbstractGameState gameState) {
     }
 
     @Override

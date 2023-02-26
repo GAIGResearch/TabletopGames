@@ -1,21 +1,20 @@
 package games.pandemic.rules.gameOver;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.Card;
 import core.components.Deck;
 import core.rules.GameOverCondition;
 import games.pandemic.PandemicGameState;
-import utilities.Utils;
 
 import static games.pandemic.PandemicConstants.infectionHash;
-import static games.pandemic.PandemicConstants.playerDeckHash;
-import static utilities.Utils.GameResult.GAME_ONGOING;
-import static utilities.Utils.GameResult.LOSE;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 
 @SuppressWarnings("unchecked")
 public class GameOverDrawInfectionCards extends GameOverCondition {
     @Override
-    public Utils.GameResult test(AbstractGameState gs) {
+    public CoreConstants.GameResult test(AbstractGameState gs) {
         Deck<Card> deck = (Deck<Card>) ((PandemicGameState)gs).getComponent(infectionHash);
         boolean canDraw = deck.getSize() > 0;
 
@@ -24,7 +23,7 @@ public class GameOverDrawInfectionCards extends GameOverCondition {
             if (gs.getCoreGameParameters().verbose) {
                 System.out.println("No more cards to draw");
             }
-            return LOSE;
+            return LOSE_GAME;
         }
         return GAME_ONGOING;
     }

@@ -3,6 +3,7 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import core.interfaces.IStateHeuristic;
 
 import java.util.List;
 import java.util.Random;
@@ -53,7 +54,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> allActions) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> allActions) {
         // Search for best action from the root
         BasicTreeNode root = new BasicTreeNode(this, null, gameState, rnd);
 
@@ -63,6 +64,11 @@ public class BasicMCTSPlayer extends AbstractPlayer {
         // Return best action
         return root.bestAction();
     }
+
+    public void setStateHeuristic(IStateHeuristic heuristic) {
+        this.params.heuristic = heuristic;
+    }
+
 
     @Override
     public String toString() {

@@ -8,7 +8,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import utilities.Hash;
-import utilities.Utils.ComponentType;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -24,25 +23,25 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
 
     public GraphBoard(String name)
     {
-        super(ComponentType.BOARD, name);
+        super(CoreConstants.ComponentType.BOARD, name);
         boardNodes = new ArrayList<>();
     }
 
     public GraphBoard()
     {
-        super(ComponentType.BOARD);
+        super(CoreConstants.ComponentType.BOARD);
         boardNodes = new ArrayList<>();
     }
 
     GraphBoard(String name, int ID)
     {
-        super(ComponentType.BOARD, name, ID);
+        super(CoreConstants.ComponentType.BOARD, name, ID);
         boardNodes = new ArrayList<>();
     }
 
     GraphBoard(int ID)
     {
-        super(ComponentType.BOARD, ID);
+        super(CoreConstants.ComponentType.BOARD, ID);
         boardNodes = new ArrayList<>();
     }
 

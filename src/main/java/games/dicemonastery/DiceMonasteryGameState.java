@@ -7,7 +7,6 @@ import core.components.Deck;
 import core.components.Token;
 import games.GameType;
 import games.dicemonastery.components.*;
-import utilities.Utils;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -17,12 +16,13 @@ import static core.CoreConstants.VisibilityMode.FIRST_VISIBLE_TO_ALL;
 import static games.dicemonastery.DiceMonasteryConstants.*;
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.*;
 import static games.dicemonastery.DiceMonasteryConstants.Resource.*;
-import static games.dicemonastery.DiceMonasteryConstants.Season.SUMMER;
+import static games.dicemonastery.DiceMonasteryConstants.Season.*;
 import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.summingInt;
 
 public class DiceMonasteryGameState extends AbstractGameState {
+
 
     Map<ActionArea, DMArea> actionAreas = new HashMap<>();
     Map<Integer, Monk> allMonks = new HashMap<>();
@@ -38,14 +38,27 @@ public class DiceMonasteryGameState extends AbstractGameState {
     Deck<ForageCard> forageCards = new Deck<>("Forage Deck", FIRST_VISIBLE_TO_ALL);
     Map<IlluminatedText, Integer> writtenTexts = new HashMap<>();
     int[] victoryPoints;
+    Season season = SPRING;
+    int year = 1;
     Random rnd;
 
+    ActionArea currentAreaBeingExecuted = null;
+    List<Integer> playerOrderForCurrentArea;
+    boolean turnOwnerTakenReward, turnOwnerPrayed;
+    int actionPointsLeftForCurrentPlayer = 0;
+    List<Integer> playersToMakeVikingDecisions = new ArrayList<>();
+
+
     public DiceMonasteryGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new DiceMonasteryTurnOrder(nPlayers, (DiceMonasteryParams) gameParameters), GameType.DiceMonastery);
+        super(gameParameters, nPlayers);
         rnd = new Random(gameParameters.getRandomSeed());
     }
 
     @Override
+    protected GameType _getGameType() {
+        return GameType.DiceMonastery;
+    }
+
     protected void _reset() {
         actionAreas = new HashMap<>();
         Arrays.stream(ActionArea.values()).forEach(a ->
@@ -146,9 +159,8 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public List<Integer> executeBids() {
-        DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
-        if (dmto.season != SUMMER)
-            throw new AssertionError(String.format("Wrong season (%s) for Viking raids!", ((DiceMonasteryTurnOrder) turnOrder).season));
+        if (season != SUMMER)
+            throw new AssertionError(String.format("Wrong season (%s) for Viking raids!", season));
 
         List<Integer> bidPerPlayer = IntStream.range(0, getNPlayers()).map(player -> {
                     Map<Resource, Integer> bid = playerBids.get(player);
@@ -208,7 +220,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public void retireMonk(Monk monk) {
-        DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
         if (getMonkLocation(monk.getComponentID()) == RETIRED)
             throw new AssertionError("Already retired!");
         moveMonk(monk.getComponentID(), getMonkLocation(monk.getComponentID()), RETIRED);
@@ -217,7 +228,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             vp = RETIREMENT_REWARDS[nextRetirementReward];
         }
         int finalVp = vp;
-        dmto.logEvent(() -> "Monk retired for " + finalVp + " VP", this);
+        logEvent(() -> "Monk retired for " + finalVp + " VP");
         addVP(vp, monk.getOwnerId());
         nextRetirementReward++;
     }
@@ -276,15 +287,14 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public void useAP(int actionPointsSpent) {
-        DiceMonasteryTurnOrder dto = (DiceMonasteryTurnOrder) turnOrder;
-        if (dto.actionPointsLeftForCurrentPlayer < actionPointsSpent) {
+        if (actionPointsLeftForCurrentPlayer < actionPointsSpent) {
             throw new IllegalArgumentException("Not enough action points available");
         }
-        dto.actionPointsLeftForCurrentPlayer -= actionPointsSpent;
+        actionPointsLeftForCurrentPlayer -= actionPointsSpent;
     }
 
-    public int getAPLeft() {
-        return ((DiceMonasteryTurnOrder) turnOrder).getActionPointsLeft();
+    public int getActionPointsLeft() {
+        return actionPointsLeftForCurrentPlayer;
     }
 
     public int getResource(int player, Resource resource, ActionArea location) {
@@ -333,7 +343,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
     void springAutumnHousekeeping() {
         // We move PROTO_ stuff on its merry way
-        for (int player = 0; player < turnOrder.nPlayers(); player++) {
+        for (int player = 0; player < nPlayers; player++) {
             int almostBeer = getResource(player, PROTO_BEER_2, STOREROOM);
             addResource(player, BEER, almostBeer);
             int notBeer = getResource(player, PROTO_BEER_1, STOREROOM);
@@ -358,7 +368,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             if (monksIn(null, player).isEmpty()) {
                 // Hire a free novice!
                 int finalPlayer = player;
-                ((DiceMonasteryTurnOrder) turnOrder).logEvent(() -> String.format("Player %d gets new Novice due to lack of monks", finalPlayer), this);
+                logEvent(() -> String.format("Player %d gets new Novice due to lack of monks", finalPlayer));
                 createMonk(1, player);
             }
         }
@@ -380,6 +390,16 @@ public class DiceMonasteryGameState extends AbstractGameState {
         return forageCards.peek();
     }
 
+    public Season getSeason() {
+        return season;
+    }
+    public int getYear() {
+        return year;
+    }
+
+    public ActionArea getCurrentArea() {
+        return currentAreaBeingExecuted;
+    }
     public Pilgrimage startPilgrimage(Pilgrimage destination, Monk monk) {
         // find card on a deck
         Pilgrimage retValue = null;
@@ -468,19 +488,95 @@ public class DiceMonasteryGameState extends AbstractGameState {
     }
 
     public void addActionPoints(int number) {
-        ((DiceMonasteryTurnOrder) turnOrder).addActionPoints(number);
+        actionPointsLeftForCurrentPlayer += number;
+    }
+
+    public int actionPoints(ActionArea region, int player) {
+        return monksIn(region, player).stream().mapToInt(Monk::getPiety).sum();
     }
 
     public void putToken(ActionArea area, BONUS_TOKEN token, int position) {
         actionAreas.get(area).setToken(position, token);
     }
 
+    public int nextPlayer() {
+        if (season == WINTER || season == SUMMER) {
+            // one decision each in Summer/Winter (how much to bid / which monk to promote)
+            return (turnOwner + 1 + nPlayers) % nPlayers;
+        } else {
+            switch ((Phase) getGamePhase()) {
+                case PLACE_MONKS:
+                    Collection<Component> monksInDormitory = actionAreas.get(ActionArea.DORMITORY).getAll(c -> c instanceof Monk);
+                    if (monksInDormitory.size() == 0)
+                        return playerOrderFor(MEADOW).get(0); // we move on to the MEADOW next
+                    int nextPlayer = turnOwner;
+                    do {
+                        nextPlayer = (nPlayers + nextPlayer + 1) % nPlayers;
+                    } while (monksIn(ActionArea.DORMITORY, nextPlayer).size() == 0);
+                    return nextPlayer;
+                // still monks left; so get the next player as usual, but skip any who have no monks left to place
+                // (we have already moved the turn on once with super.endPlayerTurn(), so we just need to check
+                // the current player has Monks to place.)
+                case USE_MONKS:
+                    if (actionPointsLeftForCurrentPlayer > 0)
+                        return turnOwner;  // we still have monks for the current player to finish using
+                    int currentIndex = playerOrderForCurrentArea.indexOf(turnOwner);
+                    if (currentIndex + 1 == playerOrderForCurrentArea.size())
+                        return firstPlayer; // we have now finished this area, and we always start placing with the Abbot (firstPlayer)
+                    return playerOrderForCurrentArea.get(currentIndex + 1);
+            }
+        }
+        throw new AssertionError(String.format("Unexpected situation for Season %s and Phase %s", season, getGamePhase()));
+    }
+
+
+    boolean setUpPlayerOrderForCurrentArea() {
+        // calculate piety order - player order by sum of the piety of all their monks in the space
+        while (monksIn(currentAreaBeingExecuted, -1).size() == 0) {
+            currentAreaBeingExecuted = currentAreaBeingExecuted.next();
+            if (currentAreaBeingExecuted == ActionArea.MEADOW) {
+                return false;
+            }
+        }
+
+        playerOrderForCurrentArea = playerOrderFor(currentAreaBeingExecuted);
+        return true;
+    }
+
+
+    private List<Integer> playerOrderFor(ActionArea area) {
+        Map<Integer, Integer> pietyPerPlayer = monksIn(area, -1).stream()
+                .collect(groupingBy(Monk::getOwnerId, summingInt(Monk::getPiety)));
+        return pietyPerPlayer.entrySet().stream()
+                .sorted((e1, e2) -> {
+                            // based on different in piety, with ties broken by turn order wrt to the abbot
+                            int pietyDiff = e2.getValue() - e1.getValue();
+                            if (pietyDiff == 0)
+                                return (e1.getKey() + nPlayers - firstPlayer) % nPlayers - (e2.getKey() + nPlayers - firstPlayer) % nPlayers;
+                            return pietyDiff;
+                        }
+                )
+                .map(Map.Entry::getKey)
+                .collect(toList());
+    }
+
+
+    private int firstPlayerWithMonks() {
+        for (int p = 0; p < nPlayers; p++) {
+            int player = (firstPlayer + p + nPlayers) % nPlayers;
+            if (!monksIn(DORMITORY, player).isEmpty())
+                return player;
+        }
+        // should only reach here if NO player has any monks left! So we skip the entire season!
+        // infinite recursion should not be possible due to finite number of turns
+        return -1;
+    }
+
     void winterHousekeeping() {
-        for (int player = 0; player < turnOrder.nPlayers(); player++) {
+        for (int player = 0; player < nPlayers; player++) {
             // for each player feed monks, and then discard perishables
             List<Monk> monks = monksIn(DORMITORY, player);
             int requiredFood = monks.size();
-            DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
             requiredFood -= getResource(player, BREAD, STOREROOM);
             if (requiredFood > 0) {
                 int honeyEaten = Math.min(requiredFood, getResource(player, HONEY, STOREROOM));
@@ -491,7 +587,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 // monks starve
                 int finalRequiredFood = requiredFood;
                 int finalPlayer = player;
-                dmto.logEvent(() -> String.format("Player %d fails to feed %d of %d monks", finalPlayer, finalRequiredFood, monks.size()), this);
+                logEvent(() -> String.format("Player %d fails to feed %d of %d monks", finalPlayer, finalRequiredFood, monks.size()));
                 addVP(-requiredFood, player);
                 // we also need to down-pip monks; let's assume we start at the lower value ones...excluding 1
                 // TODO: Make this a player decision
@@ -512,18 +608,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
         // Deliberately do not check monks here...that is done afterwards...Winter housekeeping is done before winter actions
     }
 
-    void endGame() {
-        setGameStatus(Utils.GameResult.GAME_END);
-        int[] finalScores = new int[getNPlayers()];
-        for (int p = 0; p < getNPlayers(); p++) {
-            finalScores[p] = (int) getGameScore(p);
-        }
-        int winningScore = Arrays.stream(finalScores).max().orElseThrow(() -> new AssertionError("No MAX score found"));
-        for (int p = 0; p < getNPlayers(); p++) {
-            setPlayerResult(finalScores[p] == winningScore ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
-        }
-    }
-
     @Override
     protected List<Component> _getAllComponents() {
         List<Component> retValue = new ArrayList<>(allMonks.values());
@@ -539,7 +623,6 @@ public class DiceMonasteryGameState extends AbstractGameState {
     @Override
     protected DiceMonasteryGameState _copy(int playerId) {
         DiceMonasteryGameState retValue = new DiceMonasteryGameState(gameParameters.copy(), getNPlayers());
-        DiceMonasteryTurnOrder dmto = (DiceMonasteryTurnOrder) turnOrder;
         rnd = new Random(System.currentTimeMillis());
         for (ActionArea a : actionAreas.keySet()) {
             retValue.actionAreas.put(a, actionAreas.get(a).copy());
@@ -592,11 +675,21 @@ public class DiceMonasteryGameState extends AbstractGameState {
 
         retValue.victoryPoints = Arrays.copyOf(victoryPoints, getNPlayers());
 
-        if (playerId != -1 && dmto.getSeason() == SUMMER && !allBidsIn()) {
+        if (playerId != -1 && season == SUMMER && !allBidsIn()) {
             // we are in the middle of obtaining all Bids. This is hidden information.
             // So we blank out all current bids (which will force Turn Order to go through them all)
             retValue.playerBids = new HashMap<>();
         }
+
+        retValue.season = season;
+        retValue.roundCounter = roundCounter;
+        retValue.year = year;
+        retValue.currentAreaBeingExecuted = currentAreaBeingExecuted;
+        retValue.playerOrderForCurrentArea = playerOrderForCurrentArea != null ? new ArrayList<>(playerOrderForCurrentArea) : null;
+        retValue.turnOwnerTakenReward = turnOwnerTakenReward;
+        retValue.turnOwnerPrayed = turnOwnerPrayed;
+        retValue.actionPointsLeftForCurrentPlayer = actionPointsLeftForCurrentPlayer;
+        retValue.playersToMakeVikingDecisions = new ArrayList<>(playersToMakeVikingDecisions);
         return retValue;
     }
 
@@ -626,14 +719,21 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 other.writtenTexts.equals(writtenTexts) && other.treasuresCommissioned.equals(treasuresCommissioned) &&
                 other.pilgrimagesStarted.equals(pilgrimagesStarted) && other.pilgrimageDecks.equals(pilgrimageDecks) &&
                 other.marketCards == marketCards && other.forageCards == forageCards &&
+                other.season == season && other.year == year && other.currentAreaBeingExecuted == currentAreaBeingExecuted &&
+                other.turnOwnerTakenReward == turnOwnerTakenReward && other.turnOwnerPrayed == turnOwnerPrayed &&
+                other.actionPointsLeftForCurrentPlayer == actionPointsLeftForCurrentPlayer &&
+                other.playerOrderForCurrentArea.equals(playerOrderForCurrentArea) &&
+                other.playersToMakeVikingDecisions.equals(playersToMakeVikingDecisions) &&
                 Arrays.equals(other.victoryPoints, victoryPoints) && Arrays.equals(other.playerResults, playerResults);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(actionAreas, allMonks, monkLocations, playerTreasuries, actionsInProgress, gameStatus, gamePhase,
-                gameParameters, turnOrder, nextRetirementReward, playerBids, writtenTexts, treasuresCommissioned,
-                pilgrimageDecks, pilgrimagesStarted, treasuresOwnedPerPlayer, marketCards, forageCards) +
+                gameParameters, season, year, nextRetirementReward, playerBids, writtenTexts, treasuresCommissioned,
+                pilgrimageDecks, pilgrimagesStarted, treasuresOwnedPerPlayer, marketCards, forageCards,
+                currentAreaBeingExecuted, playerOrderForCurrentArea, turnOwnerPrayed, turnOwnerTakenReward, actionPointsLeftForCurrentPlayer,
+                playersToMakeVikingDecisions) +
                 31 * Arrays.hashCode(playerResults) + 871 * Arrays.hashCode(victoryPoints);
     }
 

@@ -48,6 +48,7 @@ public class LoveLetterParameters extends TunableParameters {
         for (LoveLetterCard.CardType c: cardCounts.keySet()) {
             addTunableParameter(c.name() + " count", cardCounts.get(c), Arrays.asList(1,2,3,4,5));
         }
+        _reset();
     }
 
     @Override

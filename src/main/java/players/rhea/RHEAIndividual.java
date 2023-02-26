@@ -108,6 +108,8 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
         for (int i = 0; i < startIndex; i++) {
             double score;
             score = heuristic.evaluateState(gameStates[i + 1], playerID);
+            if (Double.isNaN(score))
+                throw new AssertionError("Illegal heuristic value - should be a number");
             delta += Math.pow(discountFactor, i) * (score - previousScore);
             previousScore = score;
         }
@@ -123,7 +125,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                 List<AbstractAction> currentActions = fm.computeAvailableActions(gsCopy);
                 boolean illegalAction = !currentActions.contains(actions[i]);
                 if (illegalAction || actions[i] == null) {
-                    action = rolloutPolicy.getAction(gsCopy, currentActions);
+                    action = rolloutPolicy._getAction(gsCopy, currentActions);
                     if (repair || actions[i] == null) // if we are repairing then we override an illegal action with a random legitimate one
                         actions[i] = action;
                     if (repair && illegalAction)
@@ -155,6 +157,8 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                 // Add value of state, discounted
                 double score;
                 score = heuristic.evaluateState(gameStates[i + 1], playerID);
+                if (Double.isNaN(score))
+                    throw new AssertionError("Illegal heuristic value - should be a number");
                 delta += Math.pow(discountFactor, i) * (score - previousScore);
                 previousScore = score;
 

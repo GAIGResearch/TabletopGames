@@ -1,4 +1,4 @@
-# TAG: [Tabletop Games Framework](https://hopshackle.github.io/tagsite/)
+# TAG: [Tabletop Games Framework](http://www.tabletopgames.ai/)
 
 [![license](https://img.shields.io/github/license/GAIGResearch/TabletopGames)](LICENSE)
 ![top-language](https://img.shields.io/github/languages/top/GAIGResearch/TabletopGames)
@@ -12,23 +12,29 @@ The [Tabletop Games Framework (TAG)](http://tabletopgames.ai) is a Java-based be
 
 ## Games
 Currently implemented games:
-- [x] Tic-Tac-Toe
-- [x] Dots and Boxes
-- [x] Love Letter (Seiji Kanai 2012)
-- [x] Uno (Merle Robbins 1971)
-- [x] Virus! (Cabrero and others 2015)
-- [x] Exploding Kittens (Inman and others 2015)
-- [x] Colt Express (Christophe Raimbault 2014)
-- [x] Pandemic (Matt Leacock 2008)
-- [x] Diamant (Bruno Faidutti and Alan R. Moon 2005)
-- [x] Dominion (Donald X. Vaccarino 2008)
-- [x] Poker Texas Hold'em 
-- [x] Blackjack
+- [x] Battlelore: Second Edition (Richard Borg and Robert A Kouba, 2013)
+- [x] Blackjack (Uncredited, circa 1700)
+- [x] Can't Stop (Sid Sackson, 1980)
+- [x] Colt Express (Christophe Raimbault, 2014)
+- [x] Connect 4 (Ned Strongin and Howard Wexler, 1974)
+- [x] Diamant (Bruno Faidutti and Alan R. Moon, 2005)
+- [x] Dominion (Donald X. Vaccarino, 2008)
+- [x] Dots and Boxes (Edouard Lucas, 1889)
+- [x] Exploding Kittens (Inman and others, 2015)
+- [x] Love Letter (Seiji Kanai, 2012)
+- [x] Pandemic (Matt Leacock, 2008)
+- [x] Poker Texas Hold'em (Uncredited, 1810)
+- [x] Settlers of Catan (Klaus Teuber, 2008)
+- [x] Stratego (Jacques Johan Mogendorff, 1946)
+- [x] Terraforming Mars (Jacob Fryxelius, 2016)
+- [x] Tic-Tac-Toe (Uncredited, Unknown)
+- [x] Uno (Merle Robbins, 1971)
+- [x] Virus! (Cabrero and others, 2015)
 
 Games in progress:
-- [ ] Settlers of Catan (Klaus Teuber 1995)
 - [ ] Descent (Jesper Ejsing, John Goodenough, Frank Walls 2005)
-- [ ] Santorini (Lina Cossette, David Forest 2016)
+- [ ] Hanabi (Antoine Bauza 2010)
+- [ ] 7 Wonders (Antoine Bauza 2010)
 
 ## Setting up
 The project requires Java with minimum version 8. In order to run the code, you must either download the repository, or clone it. If you are looking for a particular release, you can find all listed [here](https://github.com/GAIGResearch/TabletopGames/releases). 

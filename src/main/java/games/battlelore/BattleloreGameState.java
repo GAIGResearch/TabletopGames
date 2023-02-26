@@ -5,7 +5,6 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.interfaces.IGamePhase;
-import core.turnorders.StandardTurnOrder;
 import games.GameType;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
@@ -25,7 +24,7 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public enum UnitType {
-        Decoy, BloodHarvester, ViperLegion, CitadelGuard, YeomanArcher;
+        Decoy, BloodHarvester, ViperLegion, CitadelGuard, YeomanArcher
     }
 
     int[] playerScores;
@@ -33,8 +32,13 @@ public class BattleloreGameState extends AbstractGameState {
     List<Unit> unitTypes;
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.Battlelore);
+        super(gameParameters, nPlayers);
         playerScores = new int[nPlayers];
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Battlelore;
     }
 
     public Unit GetUnitFromType(UnitType type) {
@@ -52,12 +56,8 @@ public class BattleloreGameState extends AbstractGameState {
             case YeomanArcher:
                 unitType = 4;
                 break;
-            default:
-                unitType = 0;
-                break;
         }
-        Unit unit = (Unit)unitTypes.get(unitType).copy();
-        return unit;
+        return (Unit)unitTypes.get(unitType).copy();
     }
 
     public void AddUnit(int locX, int locY, Unit unit) {
@@ -69,10 +69,6 @@ public class BattleloreGameState extends AbstractGameState {
 
     public void AddScore(int playerId, int score) {
         playerScores[playerId] += score;
-    }
-
-    public void IncrementTurn(int playerId) {
-        turnOrder.moveToNextPlayer(this, playerId);
     }
 
     public void SetUnitsAsOrderable(int locX, int locY) {
@@ -120,14 +116,14 @@ public class BattleloreGameState extends AbstractGameState {
 
     public int[][] GetPossibleLocationsForUnits(MapTile tile) {
         int[][] possibleLocations = new int[gameBoard.getWidth()][2];
-        possibleLocations = GetPossibleLocations(tile, possibleLocations, false);
+        GetPossibleLocations(tile, possibleLocations, false);
         if (possibleLocations.length == 0) {
-            possibleLocations = GetPossibleLocations(tile, possibleLocations, true);
+            GetPossibleLocations(tile, possibleLocations, true);
         }
         return possibleLocations;
     }
 
-    private int[][] GetPossibleLocations(MapTile tile, int[][] possibleLocations, boolean isMovementFlexible) {
+    private void GetPossibleLocations(MapTile tile, int[][] possibleLocations, boolean isMovementFlexible) {
         int moveRange = tile.GetUnits().get(0).moveRange;
         int counter = 0;
         for (int x = 0; x < gameBoard.getWidth(); x++) {
@@ -147,11 +143,10 @@ public class BattleloreGameState extends AbstractGameState {
                 }
             }
         }
-        return possibleLocations;
     }
 
     public int[][] GetPossibleTargetUnits(MapTile attackUnit) {
-        int[][] possibleLocations = new int[gameBoard.getWidth()][turnOrder.nPlayers()];
+        int[][] possibleLocations = new int[gameBoard.getWidth()][nPlayers];
         boolean isMelee = attackUnit.GetUnits().get(0).isMelee;
         BattleloreGameParameters parameters = (BattleloreGameParameters) gameParameters;
         int range = parameters.getTroopRange(isMelee);
@@ -189,16 +184,18 @@ public class BattleloreGameState extends AbstractGameState {
     @Override
     protected AbstractGameState _copy(int playerId) {
         BattleloreGameState state = new BattleloreGameState(gameParameters.copy(), getNPlayers());
-        GridBoard<MapTile> clonedBoard = new GridBoard<MapTile>(gameBoard.getWidth(), gameBoard.getHeight());
+
+
+        state.gameBoard = gameBoard.copy();
 
         for (int x = 0; x < gameBoard.getWidth(); x++) {
             for(int y = 0; y < gameBoard.getHeight(); y++) {
-                clonedBoard.setElement(x, y, gameBoard.getElement(x,y).copy());
+                state.gameBoard.setElement(x, y, gameBoard.getElement(x,y).copy());
             }
         }
-
-        state.gameBoard = clonedBoard;
         state.unitTypes = unitTypes; // immutable
+        System.arraycopy(playerScores, 0, state.playerScores, 0, playerScores.length);
+
         return state;
     }
 
@@ -220,27 +217,31 @@ public class BattleloreGameState extends AbstractGameState {
         return playerScores[playerId];
     }
 
+
     @Override
-    protected void _reset() {
-        gameBoard = null;
-        playerScores = new int[getNPlayers()];
+    public boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BattleloreGameState)) return false;
+        if (!super.equals(o)) return false;
+        BattleloreGameState that = (BattleloreGameState) o;
+        return Arrays.equals(playerScores, that.playerScores) && Objects.equals(gameBoard, that.gameBoard) && Objects.equals(unitTypes, that.unitTypes);
     }
 
     @Override
-    protected boolean _equals(Object o) {
-        if (this == o) {
-            return true;
-        }
+    public int hashCode() {
+        int result = Objects.hash(super.hashCode(), gameBoard, unitTypes);
+        result = 31 * result + Arrays.hashCode(playerScores);
+        return result;
+    }
 
-        if (!(o instanceof BattleloreGameState)) {
-            return false;
-        }
-
-        if (!super.equals(o)) {
-            return false;
-        }
-
-        BattleloreGameState other = (BattleloreGameState) o;
-        return Objects.equals(gameBoard, other.gameBoard);
+    @Override
+    public String toString() {
+        return gameParameters.hashCode() + "|" +
+                gameStatus.hashCode() + "|" +
+                gamePhase.hashCode() + "|" +
+                Arrays.hashCode(playerResults) + "|*|" +
+                unitTypes.hashCode() + "|" +
+                gameBoard.hashCode() + "|" +
+                Arrays.hashCode(playerScores) + "|";
     }
 }

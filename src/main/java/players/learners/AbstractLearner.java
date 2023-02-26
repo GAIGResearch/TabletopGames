@@ -1,9 +1,6 @@
 package players.learners;
 
 import core.interfaces.ILearner;
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instances;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -11,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 public abstract class AbstractLearner implements ILearner {
 
@@ -19,17 +15,20 @@ public abstract class AbstractLearner implements ILearner {
     protected String[] header;
     protected double[][] target;
     protected double[][] currentScore;
-    protected ArrayList<Attribute> attributes;
-    protected boolean addNoise = false;
-    protected double noiseLevel = 0.01;
     String[] descriptions;
-    private final Random rnd = new Random(System.currentTimeMillis());
     double gamma;
     Target targetType;
 
     public enum Target {
-        WIN(3, false), ORDINAL(2, false), SCORE(1, false), SCORE_DELTA(1, false),
-        WIN_MEAN(3, true), ORD_MEAN(2, true);
+        WIN(3, false),  // 0 or 1 for loss/win
+        ORDINAL(2, false), // -1 for first to -n for nth place
+        SCORE(1, false),  // raw score
+        SCORE_DELTA(1, false),  // targets the change in score between now and end of the game
+        WIN_MEAN(3, true), // 0 or 1 for loss/win, with discount to 0.5 average (dicount over the rounds in a game,
+                                // so that at the start (with little information), we reduce noise
+        ORD_MEAN(2, true),  // as ORDINAL, but discounted to middle of the range based on rounds to final result
+        ORD_SCALE(2, false), // as ORDINAL, but scaled to 0 to 1 (for Logistic regression targeting)
+        ORD_MEAN_SCALE(2, true); // as ORD_MEAN, but scaled to 0 to 1 ( for Logistic regression targeting)
         public final int indexOffset;
         public final boolean discountToMean;
 
@@ -87,10 +86,7 @@ public abstract class AbstractLearner implements ILearner {
                 || !header[header.length - 5].equals("PlayerCount")) {
             throw new AssertionError("Unexpected final header entries " + String.join("", header));
         }
-        attributes = new ArrayList<>();
-        attributes.add(new Attribute("BIAS"));
-        for (int i = 5; i < header.length - 5; i++)
-            attributes.add(new Attribute(header[i]));
+
         dataArray = new double[data.size()][];
         target = new double[data.size()][1];
         currentScore = new double[data.size()][1];
@@ -98,18 +94,21 @@ public abstract class AbstractLearner implements ILearner {
             double[] allData = data.get(i);
             // calculate the number of turns from this point until the end of the game
             double turns = allData[header.length - 4] - allData[2];
+            double playerCount = allData[header.length - 5];
             // discount target (towards expected result where relevant)
             double expectedAverage = 0.0;
             if (targetType == Target.WIN_MEAN)
-                expectedAverage = 1.0 / allData[header.length - 5];
-            if (targetType == Target.ORD_MEAN)
-                expectedAverage = (1.0 + allData[header.length - 5]) / 2.0;
+                expectedAverage = 1.0 / playerCount;
+            if (targetType == Target.ORD_MEAN || targetType == Target.ORD_MEAN_SCALE)
+                expectedAverage = (1.0 + playerCount) / 2.0;
             if (targetType == Target.SCORE_DELTA)
                 target[i][0] = (allData[header.length - targetType.indexOffset] - allData[4]) * Math.pow(gamma, turns);
             else
                 target[i][0] = (allData[header.length - targetType.indexOffset] - expectedAverage) * Math.pow(gamma, turns) + expectedAverage;
             if (targetType == Target.ORDINAL || targetType == Target.ORD_MEAN)
                 target[i][0] = -target[i][0];  // if we are targeting the Ordinal position, then high is bad!
+            if (targetType == Target.ORD_MEAN_SCALE || targetType == Target.ORD_SCALE)
+                target[i][0] = (playerCount - target[i][0]) / (playerCount - 1.0);  // scale to [0, 1]
             currentScore[i][0] = allData[4];
             double[] regressionData = new double[header.length - 9];
             regressionData[0] = 1.0; // the bias term
@@ -118,28 +117,4 @@ public abstract class AbstractLearner implements ILearner {
         }
     }
 
-    protected Instances createInstances(boolean includeBias) {
-        List<String> values = new ArrayList<>();
-        values.add("0");
-        values.add("1");
-        attributes.add(new Attribute("Win", values));
-        Instances dataInstances = new Instances("data", attributes, dataArray.length - 1);
-        if (!includeBias)
-            attributes.remove(0);
-        for (int i = 0; i < dataArray.length; i++) {
-            double[] record = new double[dataArray[i].length - 1];
-            System.arraycopy(dataArray[i], includeBias ? 0 : 1, record, 0, record.length);
-            // we may skip the bias term in dataArray at position 0
-            if (addNoise)
-                for (int j = 1; j < record.length; j++)  // we do not add noise to the BIAS term
-                    record[j] += rnd.nextDouble() * noiseLevel; // to avoid WEKA removing
-            double[] XandY = new double[record.length + 1];
-            System.arraycopy(record, 0, XandY, 0, record.length);
-            XandY[record.length] = 1.0 - target[i][0]; // this puts the first category (0) for a win, and the second (1) as a loss.
-            // this means that we learn a classifier to identify wins, and the coefficients are more naturally interpretable
-            dataInstances.add(new DenseInstance(1.0, XandY));
-        }
-        dataInstances.setClassIndex(attributes.size() - 1);
-        return dataInstances;
-    }
 }

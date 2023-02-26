@@ -5,7 +5,6 @@ import core.Game;
 import evaluation.TunableParameters;
 import games.GameType;
 import games.coltexpress.cards.ColtExpressCard;
-import games.loveletter.cards.LoveLetterCard;
 import utilities.Group;
 
 import java.util.*;

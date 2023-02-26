@@ -1,10 +1,10 @@
 package games.stratego.actions;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.GridBoard;
 import games.stratego.StrategoGameState;
 import games.stratego.components.Piece;
-import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -33,9 +33,9 @@ public class AttackMove extends Move {
         attackedPiece.setPieceKnown(true);
 
         if (attackedPiece.getPieceType() == Piece.PieceType.FLAG){
-            gs.setGameStatus(Utils.GameResult.GAME_END);
-            gs.setPlayerResult(Utils.GameResult.WIN, gs.getCurrentPlayer());
-            gs.setPlayerResult(Utils.GameResult.LOSE, 1-gs.getCurrentPlayer());
+            gs.setGameStatus(CoreConstants.GameResult.GAME_END);
+            gs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, gs.getCurrentPlayer());
+            gs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 1-gs.getCurrentPlayer());
 
         } else if (attackedPiece.getPieceType() == Piece.PieceType.BOMB){
             if (movedPiece.getPieceType() == Piece.PieceType.MINER){

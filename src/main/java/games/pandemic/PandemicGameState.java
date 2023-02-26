@@ -1,15 +1,15 @@
 package games.pandemic;
 
+import core.AbstractGameStateWithTurnOrder;
 import core.interfaces.IFeatureRepresentation;
 import core.interfaces.IGamePhase;
 import core.components.*;
 import core.properties.*;
-import core.AbstractGameState;
 import core.components.Area;
 import core.AbstractParameters;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import utilities.Hash;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -18,7 +18,7 @@ import static core.CoreConstants.*;
 import static games.pandemic.PandemicGameState.PandemicGamePhase.Forecast;
 
 
-public class PandemicGameState extends AbstractGameState implements IFeatureRepresentation {
+public class PandemicGameState extends AbstractGameStateWithTurnOrder implements IFeatureRepresentation {
 
     // The Pandemic game phase enum distinguishes 3 more phases on top of the default ones for players forced to
     // discard cards, a player wishing to play a "Forecast" event card
@@ -84,16 +84,16 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     }
 
     @Override
-    public HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId) {
-        HashMap<HashMap<Integer, Double>, Utils.GameResult> terminals = new HashMap<>();
-        terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, Utils.GameResult.WIN);
-        terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, Utils.GameResult.LOSE);
+    public HashMap<HashMap<Integer, Double>, GameResult> getTerminalFeatures(int playerId) {
+        HashMap<HashMap<Integer, Double>, GameResult> terminals = new HashMap<>();
+        terminals.put(new HashMap<Integer, Double>() {{ put(0, (double) colors.length); }}, GameResult.WIN_GAME);
+        terminals.put(new HashMap<Integer, Double>() {{ put(1, 0.0); }}, GameResult.LOSE_GAME);
         terminals.put(new HashMap<Integer, Double>() {{ put(2, (double) ((PandemicParameters)gameParameters).loseMaxOutbreak); }},
-                Utils.GameResult.LOSE);
+                GameResult.LOSE_GAME);
         int i = 3;
         for (String color: colors) {
             int id = i;
-            terminals.put(new HashMap<Integer, Double>() {{ put(id, 0.0); }}, Utils.GameResult.LOSE);
+            terminals.put(new HashMap<Integer, Double>() {{ put(id, 0.0); }}, GameResult.LOSE_GAME);
             i++;
         }
         return terminals;
@@ -118,7 +118,6 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
         return 0;
     }
 
-    @Override
     protected void _reset() {
         areas = null;
         tempDeck = null;
@@ -155,7 +154,16 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
      * @param nPlayers - number of players.
      */
     public PandemicGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new PandemicTurnOrder(nPlayers, ((PandemicParameters)pp).nActionsPerTurn), GameType.Pandemic);
+        super(pp, nPlayers);
+    }
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new PandemicTurnOrder(nPlayers, ((PandemicParameters)gameParameters).nActionsPerTurn);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Pandemic;
     }
 
     // Getters & setters
@@ -213,7 +221,7 @@ public class PandemicGameState extends AbstractGameState implements IFeatureRepr
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         PandemicGameState gs = new PandemicGameState(gameParameters.copy(), getNPlayers());
 
         gs.areas = new HashMap<>();

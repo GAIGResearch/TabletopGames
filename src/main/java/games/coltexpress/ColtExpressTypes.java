@@ -40,7 +40,7 @@ public class ColtExpressTypes {
     // a - turn type sequence
     // b - end card event
     public enum EndRoundCard {
-        MarshallsRevenge("Marhsalls Revenge",  new Pair(
+        MarshallsRevenge("Marshall's Revenge",  new Pair(
                 new RoundCard.TurnType[] {RoundCard.TurnType.NormalTurn, RoundCard.TurnType.NormalTurn,
                         RoundCard.TurnType.HiddenTurn, RoundCard.TurnType.NormalTurn},
                 new EndCardMarshallsRevenge())),

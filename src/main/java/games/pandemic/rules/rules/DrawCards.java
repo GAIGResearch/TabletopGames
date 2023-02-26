@@ -1,6 +1,6 @@
 package games.pandemic.rules.rules;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.actions.DrawCard;
 import core.components.Card;
 import core.components.Deck;
@@ -28,7 +28,7 @@ public class DrawCards extends RuleNode {
     }
 
     @Override
-    public boolean run(AbstractGameState gs) {
+    public boolean run(AbstractGameStateWithTurnOrder gs) {
         PandemicGameState pgs = (PandemicGameState)gs;
 
         boolean epidemic = false;

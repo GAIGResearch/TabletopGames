@@ -1,50 +1,48 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
+import games.loveletter.cards.LoveLetterCard;
 
 /**
  * In case the princess is discarded or played the player is immediately removed from the game.
  */
-public class PrincessAction extends core.actions.DrawCard implements IPrintable {
+public class PrincessAction extends PlayCard implements IPrintable {
 
-    public PrincessAction(int deckFrom, int deckTo, int fromIndex) {
-        super(deckFrom, deckTo, fromIndex);
+    public PrincessAction(int playerID) {
+        super(LoveLetterCard.CardType.Princess, playerID, -1, null, null, true);
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
+    public boolean _execute(LoveLetterGameState gs) {
         // remove the player from the game
-        ((LoveLetterGameState)gs).killPlayer(gs.getTurnOrder().getCurrentPlayer(gs));
-        return super.execute(gs);
+        gs.killPlayer(playerID, playerID, cardType);
+        return true;
     }
 
     @Override
-    public String toString(){
-        return "Princess - discard this card and lose the game";
+    public String _toString(){
+        return "Princess (" + playerID + " loses the game)";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Princess (lose game)";
+        return toString();
     }
 
     @Override
     public void printToConsole(AbstractGameState gameState) {
-        System.out.println(toString());
+        System.out.println(this);
     }
 
     @Override
-    public AbstractAction copy() {
-        return new PrincessAction(deckFrom, deckTo, fromIndex);
+    public PrincessAction copy() {
+        return this;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PrincessAction)) return false;
-        return super.equals(o);
+        return o instanceof PrincessAction && super.equals(o);
     }
 }
