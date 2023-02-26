@@ -404,7 +404,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
 
         // todo check if we need all this or if we even need to compute all these?
         // todo depending on the gamephase we may have different actions, these may be handled using the mask
-        if (AbstractGameState.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
+        if (CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
             actions = playerActions(ekgs, player);
         } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals(ekgs.getGamePhase())) {
             // here the player just picks an index ,which may be any of the other action IDs
@@ -465,7 +465,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         try{
         switch (actionID) {
             case 0:
-                if (!AbstractGameState.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
+                if (!CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
                     // pass (situational, i.e: pass using nope)
                     _next(state, new PassAction());
                     return;

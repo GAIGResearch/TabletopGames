@@ -49,7 +49,7 @@ public class GYMEnv {
         this.players = players;
         // Creating game instance (null if not implemented)
         if (parameterConfigFile != null) {
-            AbstractParameters params = ParameterFactory.createFromFile(gameToPlay, parameterConfigFile);
+            AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, parameterConfigFile);
             this.game = gameToPlay.createGameInstance(players.size(), seed, params);
         } else game = gameToPlay.createGameInstance(players.size(), seed);
 
@@ -290,7 +290,7 @@ public class GYMEnv {
         return this.tick;
     }
 
-    public Utils.GameResult[] getPlayerResults(){
+    public CoreConstants.GameResult[] getPlayerResults(){
         return this.gameState.getPlayerResults();
     }
 

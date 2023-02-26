@@ -186,11 +186,11 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
         }
         orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
         if (nPlayersActive == 1) {
-            this.gameStatus = Utils.GameResult.GAME_END;
+            this.gameStatus = CoreConstants.GameResult.GAME_END;
             for (int i = 0; i < getNPlayers(); i++) {
                 // set winner
-                if (playerResults[i] == Utils.GameResult.GAME_ONGOING) {
-                    playerResults[i] = Utils.GameResult.WIN;
+                if (playerResults[i] == CoreConstants.GameResult.GAME_ONGOING) {
+                    playerResults[i] = CoreConstants.GameResult.WIN_GAME;
                 }
             }
             turnOrder.endGame(this);
@@ -265,12 +265,12 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
         obs[13] = drawPile.getSize();
         int nPlayersActive = 0;
         for (int i = 0; i < getNPlayers(); i++) {
-            if (playerResults[i] == Utils.GameResult.GAME_ONGOING) nPlayersActive++;
+            if (playerResults[i] == CoreConstants.GameResult.GAME_ONGOING) nPlayersActive++;
             obs[15+i] = this.playerHandCards.get(i).getComponents().size();
         }
         obs[14] = nPlayersActive;
         // gamephases are represented here: main/favor/nope/see the future...
-        if (gamePhase.equals(AbstractGameState.DefaultGamePhase.Main)){
+        if (gamePhase.equals(CoreConstants.DefaultGamePhase.Main)){
             obs[20] = 1.0;
         } else{
             // find id of gamephase

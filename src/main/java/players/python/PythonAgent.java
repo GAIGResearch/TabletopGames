@@ -8,9 +8,8 @@ import core.actions.AbstractAction;
 import java.util.List;
 
 public class PythonAgent extends AbstractPlayer {
-
     @Override
-    public AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         return null;
     }
 
