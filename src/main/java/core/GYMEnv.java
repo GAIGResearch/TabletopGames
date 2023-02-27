@@ -15,6 +15,7 @@ import org.json.simple.JSONObject;
 import players.human.HumanGUIPlayer;
 import players.python.PythonAgent;
 import players.simple.RandomPlayer;
+import utilities.ActionTreeNode;
 import utilities.Utils;
 
 
@@ -119,6 +120,20 @@ public class GYMEnv {
             return ((IOrderedActionSpace) forwardModel).getActionMask(gameState);
         }
         else throw new Exception("Function is not implemented");
+    }
+
+    public String getActionMaskJson() throws Exception {
+        if (forwardModel.root != null) {
+            return forwardModel.root.toJsonString();
+        }
+        else throw new Exception("Game does not implement action trees");
+    }
+
+    public List<ActionTreeNode> getFlattenedTree() throws Exception {
+        if (forwardModel.root != null) {
+            return forwardModel.root.flattenTree();
+        }
+        else throw new Exception("Game does not implement action trees");
     }
 
     // Plays an action given an actionID
