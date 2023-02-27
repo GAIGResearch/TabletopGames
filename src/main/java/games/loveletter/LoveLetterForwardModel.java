@@ -1,7 +1,6 @@
 package games.loveletter;
 
-import core.AbstractGameState;
-import core.StandardForwardModel;
+import core.*;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
@@ -135,8 +134,14 @@ public class LoveLetterForwardModel extends StandardForwardModel {
         if (llgs.playerHandCards.get(llgs.getCurrentPlayer()).getSize() >= 2)
             throw new AssertionError("Hand should not get this big");
 
-        endPlayerTurn(llgs);
         if (!checkEndOfRound(llgs, action)) {
+            // move turn to the next player who has not already lost the round
+            int nextPlayer = gameState.getCurrentPlayer();
+            do {
+                nextPlayer = (nextPlayer + 1) % llgs.getNPlayers();
+            } while (llgs.getPlayerResults()[nextPlayer] == GameResult.LOSE_ROUND);
+            endPlayerTurn(llgs, nextPlayer);
+
             // Next turn starts with drawing card and removing protection
             llgs.setProtection(llgs.getCurrentPlayer(), false);
             LoveLetterCard cardDrawn = llgs.getDrawPile().draw();
@@ -181,7 +186,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
                 return true;  // Game is over
             }
 
-            // Otherwise, set up the next roubd
+            // Otherwise, set up the next round
             setupRound(llgs, winners);
 
             return true;
@@ -291,6 +296,9 @@ public class LoveLetterForwardModel extends StandardForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
+        if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
+            throw new AssertionError("???.");
+
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int playerID = gameState.getCurrentPlayer();
         Deck<LoveLetterCard> playerDeck = llgs.playerHandCards.get(playerID);
