@@ -70,7 +70,7 @@ public class AllocateDice extends AbstractAction {
                 } else if (numberSplit.length == 2) {
                     return (numberSplit[0] == other.numberSplit[0] && numberSplit[1] == other.numberSplit[1]) ||
                             (numberSplit[0] == other.numberSplit[1] && numberSplit[1] == other.numberSplit[0]);
-                    // for equals and hashcode, we only are about the two numbers - not the precise permutation
+                    // for equals and hashcode, we only care about the two numbers - not the precise permutation
                 } else {
                     throw new AssertionError("Not yet implemented for variants with three or more dice!");
                 }
