@@ -324,6 +324,7 @@ public class GYMEnv {
             int N_ACTIONS  = env.getActionSpace();
             while (!done){
 //                int randomAction = rnd.nextInt(env.availableActions.size());
+                // todo we get the action mask, but how do we know how we should index it?
                 int[] mask = env.getActionMask();
                 int[] trueIdx = IntStream.range(0, mask.length)
                         .filter(i -> mask[i] == 1)

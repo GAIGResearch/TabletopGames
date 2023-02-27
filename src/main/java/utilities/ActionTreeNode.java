@@ -1,5 +1,6 @@
 package utilities;
 
+import core.actions.AbstractAction;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 public class ActionTreeNode {
 
     int value;
+    AbstractAction action;
     String name;
     List<ActionTreeNode> children;
     int SubNodes;
@@ -17,18 +19,21 @@ public class ActionTreeNode {
     public ActionTreeNode() {
         this.children = new ArrayList<ActionTreeNode>();
         this.value = 0;
+        this.action = null;
         this.name = "";
         this.SubNodes = 0;
     }
     public ActionTreeNode(int value) {
         this.children = new ArrayList<ActionTreeNode>();
         this.value = value;
+        this.action = null;
         this.name = "";
         this.SubNodes = 0;
     }
     public ActionTreeNode(int value, String name) {
         this.children = new ArrayList<ActionTreeNode>();
         this.value = value;
+        this.action = null;
         this.name = name;
         this.SubNodes = 0;
     }
@@ -87,6 +92,38 @@ public class ActionTreeNode {
         return values;
     }
 
+    // Reset all the nodes in the tree, keeps structure only sets value and action to 0/null
+    public void resetTree(){
+        List<ActionTreeNode> nodes = new ArrayList<ActionTreeNode>();
+        nodes.add(this);
+        while(nodes.size() > 0){
+            ActionTreeNode node = nodes.remove(0);
+            node.value = 0;
+            node.action = null;
+            nodes.addAll(node.children);
+        }
+    }
+
+    public ActionTreeNode findChildrenByName(String name){
+        return findChildrenByName(name, false);
+    }
+    // sets the value of the node to 1 if it is found
+    public ActionTreeNode findChildrenByName(String name, boolean setAvailable){
+        List<ActionTreeNode> nodes = new ArrayList<ActionTreeNode>();
+        nodes.add(this);
+        while(nodes.size() > 0){
+            ActionTreeNode node = nodes.remove(0);
+            nodes.addAll(node.children);
+            if (node.name.equals(name)){
+                if(setAvailable){
+                    node.value = 1;
+                }
+                return node;
+            }
+        }
+        return null;
+    }
+
     public String toJsonString() {
         return this.toJson().toJSONString();
     }
@@ -137,6 +174,19 @@ public class ActionTreeNode {
     }
 
     // Getters and Setters
+
+    public AbstractAction getAction() {return action;}
+    public void setAction(AbstractAction action) {
+        this.value = 1;
+        this.action = action;
+    }
+    public AbstractAction getActionByVector(int[] vector){
+        ActionTreeNode node = this;
+        for (int i = 0; i < vector.length; i++) {
+            node = node.children.get(i);
+        }
+        return node.action;
+    }
     public int getValue() {
         return value;
     }
