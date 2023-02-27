@@ -349,26 +349,26 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
     }
 
     @Override
-    public boolean[] getActionMask(AbstractGameState gameState) {
+    public int[] getActionMask(AbstractGameState gameState) {
         //  loop over the vectorised observation (show card counts)
-        boolean[] mask = new boolean[13];
+        int[] mask = new int[13];
         double[] obs = ((ExplodingKittensGameState)gameState).getObservationVector();
 
         // we don't allow to place a defuse card without explosion (so we skip over it)
         // player has to defuse the bomb, no other option (this is after drawing an exploding kitten)
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)gameState;
         if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals((gameState).getGamePhase())) {
-            mask[1] = true;
+            mask[1] = 1;
             return mask;
         }  else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Nope.equals(ekgs.getGamePhase())) {
-            mask[0] = true; // pass
-            mask[2] = true; // use nope
+            mask[0] = 1; // pass
+            mask[2] = 1; // use nope
             return mask;
         } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Favor.equals(ekgs.getGamePhase())) {
             // when doing a favor - player picks a card to give to the other player; this can be any available card in hand
             for (int i = 1; i < 13; i++){
                 if (obs[i] > 0){
-                    mask[i] = true;
+                    mask[i] = 1;
                 }
             }
             return mask;
@@ -376,13 +376,13 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
             // todo - player should observe the cards, but in this implementation it can also change the order
         }
 
-        mask[0] = true; // player can draw card
+        mask[0] = 1; // player can draw card
         // obs start from exploding kitten then 12 cards
         // mask starts from pass and then 12 cards, so indexes match from id 1
         // skipping over some cards: exploding_kitten, defuse, nope
         for (int i = 4; i < 13; i++){
             if (obs[i] > 0){
-                mask[i] = true;
+                mask[i] = 1;
             }
         }
         return mask;

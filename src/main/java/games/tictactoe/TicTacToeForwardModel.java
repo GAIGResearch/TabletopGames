@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class TicTacToeForwardModel extends StandardForwardModel {
+public class TicTacToeForwardModel extends StandardForwardModel implements IOrderedActionSpace {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -161,7 +161,7 @@ public class TicTacToeForwardModel extends StandardForwardModel {
 
     @Override
     public int getActionSpace() {
-        return 12;
+        return root.getSubNodes();
     }
 
     @Override
