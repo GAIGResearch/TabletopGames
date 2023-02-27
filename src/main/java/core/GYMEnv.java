@@ -114,7 +114,7 @@ public class GYMEnv {
     }
 
     // Gets the action mask as a boolean array
-    public boolean[] getActionMask() throws Exception {
+    public int[] getActionMask() throws Exception {
         if (forwardModel instanceof IOrderedActionSpace) {
             return ((IOrderedActionSpace) forwardModel).getActionMask(gameState);
         }

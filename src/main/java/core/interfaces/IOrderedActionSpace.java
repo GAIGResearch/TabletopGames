@@ -13,7 +13,7 @@ public interface IOrderedActionSpace {
     public int[] getFixedActionSpace();
 
     //Returns an action mask of valid and invalid actions
-    public boolean[] getActionMask(AbstractGameState gameState);
+    public int[] getActionMask(AbstractGameState gameState);
 
     //Given an ID, plays an action
     void nextPython(AbstractGameState state, int actionID);

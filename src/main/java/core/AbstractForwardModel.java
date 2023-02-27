@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import utilities.ActionTreeNode;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.Arrays;
@@ -11,6 +12,8 @@ import java.util.stream.IntStream;
 import static core.CoreConstants.GameResult.*;
 
 public abstract class AbstractForwardModel {
+
+    public ActionTreeNode root;
 
     /* Limited access/Final methods */
 

@@ -7,6 +7,9 @@ import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.components.Token;
+import core.interfaces.IOrderedActionSpace;
+import utilities.ActionTreeNode;
+import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +20,7 @@ public class TicTacToeForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
+        root = new ActionTreeNode(0, "root");
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
         int gridSize = tttgp.gridSize;
         TicTacToeGameState state = (TicTacToeGameState) firstState;
@@ -25,17 +29,25 @@ public class TicTacToeForwardModel extends StandardForwardModel {
 
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        root = new ActionTreeNode(0, "root");
         TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getCurrentPlayer();
 
         if (gameState.isNotTerminal())
             for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
+                ActionTreeNode xNode = root.addChild(0, String.valueOf((x+1)));
                 for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                    if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell))
+                    ActionTreeNode yNode = xNode.addChild(0, String.valueOf((y+1)));
+                    if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
                         actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+                        xNode.setValue(1);
+                        yNode.setValue(1);
+                    }
                 }
             }
+        System.out.println(Arrays.toString(root.getActionMask()));
+        //System.out.println(root.getActionMaskNames());
         return actions;
     }
 
@@ -145,5 +157,25 @@ public class TicTacToeForwardModel extends StandardForwardModel {
         int winningPlayer = TicTacToeConstants.playerMapping.indexOf(winnerSymbol);
         gameState.setPlayerResult(CoreConstants.GameResult.WIN_GAME, winningPlayer);
         gameState.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 1 - winningPlayer);
+    }
+
+    @Override
+    public int getActionSpace() {
+        return 12;
+    }
+
+    @Override
+    public int[] getFixedActionSpace() {
+        return new int[0];
+    }
+
+    @Override
+    public int[] getActionMask(AbstractGameState gameState) {
+        return root.getActionMask();
+    }
+
+    @Override
+    public void nextPython(AbstractGameState state, int actionID) {
+
     }
 }
