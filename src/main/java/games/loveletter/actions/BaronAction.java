@@ -2,6 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
@@ -75,8 +76,8 @@ public class BaronAction extends PlayCard implements IPrintable {
         return Objects.hash(super.hashCode(), playerCard, opponentCard);
     }
 
-    public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
-        List<PlayCard> cardActions = new ArrayList<>();
+    public static List<AbstractAction> generateActions(LoveLetterGameState gs, int playerID) {
+        List<AbstractAction> cardActions = new ArrayList<>();
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
             if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;

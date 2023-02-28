@@ -2,6 +2,7 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
@@ -91,8 +92,8 @@ public class PrinceAction extends PlayCard implements IPrintable {
         return pa;
     }
 
-    public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
-        List<PlayCard> cardActions = new ArrayList<>();
+    public static List<AbstractAction> generateActions(LoveLetterGameState gs, int playerID) {
+        List<AbstractAction> cardActions = new ArrayList<>();
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
             if (gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;

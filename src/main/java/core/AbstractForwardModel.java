@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.interfaces.actionSpaces.IActionSpace;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.Arrays;
@@ -150,6 +151,17 @@ public abstract class AbstractForwardModel {
         // If there is an action in progress (see IExtendedSequence), then delegate to that
         if (gameState.isActionInProgress()) {
             return gameState.actionsInProgress.peek()._computeAvailableActions(gameState);
+        }
+        return _computeAvailableActions(gameState);
+    }
+
+    public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, IActionSpace actionSpace) {
+        // If there is an action in progress (see IExtendedSequence), then delegate to that
+        if (gameState.isActionInProgress()) {
+            return gameState.actionsInProgress.peek()._computeAvailableActions(gameState);
+        }
+        if (actionSpace != null) {
+            return actionSpace._computeAvailableActions(gameState);
         }
         return _computeAvailableActions(gameState);
     }

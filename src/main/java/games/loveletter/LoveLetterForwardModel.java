@@ -4,8 +4,11 @@ import core.*;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.interfaces.actionSpaces.IFlatActionSpace;
+import core.interfaces.actionSpaces.IDeepActionSpace;
 import games.GameType;
 import games.loveletter.actions.*;
+import games.loveletter.actions.deep.*;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.*;
@@ -13,7 +16,7 @@ import java.util.*;
 import static core.CoreConstants.*;
 
 
-public class LoveLetterForwardModel extends StandardForwardModel {
+public class LoveLetterForwardModel extends StandardForwardModel implements IFlatActionSpace, IDeepActionSpace {
 
     /**
      * Creates the initial game-state of Love Letter.
@@ -289,12 +292,79 @@ public class LoveLetterForwardModel extends StandardForwardModel {
         }
     }
 
+    @Override
+    public List<AbstractAction> computeAvailableHighLevelActions(AbstractGameState gameState) {LoveLetterGameState llgs = (LoveLetterGameState)gameState;
+        if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
+            throw new AssertionError("???.");
+
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        int playerID = gameState.getCurrentPlayer();
+        Deck<LoveLetterCard> playerDeck = llgs.playerHandCards.get(playerID);
+
+        // in case a player holds the countess and either the king or the prince, the countess needs to be played
+        LoveLetterCard.CardType cardTypeForceCountess = llgs.needToForceCountess(playerDeck);
+
+        // We create the respective actions for each card in the player's hand
+        for (int card = 0; card < playerDeck.getSize(); card++) {
+            List<AbstractAction> cardActions = new ArrayList<>();
+            LoveLetterCard.CardType cardType = playerDeck.getComponents().get(card).cardType;
+            if (cardType != LoveLetterCard.CardType.Countess && cardTypeForceCountess != null) continue;
+
+            switch (cardType) {
+                case Priest:
+                    cardActions.add(new DeepPriestAction(playerID));
+                    break;
+
+                case Guard:
+                    cardActions.add(new DeepGuardAction(playerID));
+                    break;
+
+                case Baron:
+                    cardActions.add(new DeepBaronAction(playerID));
+                    break;
+
+                case Handmaid:
+                    cardActions.add(new HandmaidAction(playerID));
+                    break;
+
+                case Prince:
+                    cardActions.add(new DeepPrinceAction(playerID));
+                    break;
+
+                case King:
+                    cardActions.add(new DeepKingAction(playerID));
+                    break;
+
+                case Countess:
+                    cardActions.add(new CountessAction(playerID, cardTypeForceCountess));
+                    break;
+
+                case Princess:
+                    cardActions.add(new PrincessAction(playerID));
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("No core actions known for cardtype: " +
+                            playerDeck.getComponents().get(card).cardType.toString());
+            }
+
+            actions.addAll(cardActions);
+        }
+
+        return actions;
+    }
+
+    @Override
+    public List<AbstractAction> computeAvailableFlatActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState); // Default is this
+    }
+
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
      * @return - List of AbstractAction objects.
      */
     @Override
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
             throw new AssertionError("???.");
