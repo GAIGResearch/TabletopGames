@@ -36,20 +36,18 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
 
         if (gameState.isNotTerminal())
             for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
-                ActionTreeNode xNode = root.findChildrenByName("X" + (x+1));
+                ActionTreeNode xNode = root.findChildrenByName("X" + x);
                 for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                    ActionTreeNode yNode = xNode.findChildrenByName("Y" + (y+1));
+                    ActionTreeNode yNode = xNode.findChildrenByName("Y" + y);
                     if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
                         actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
-                        xNode.setValue(1);
-                        yNode.setValue(1);
+                        xNode.setValue(1); // make sure that we set parent available
                         yNode.setAction(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
-                        System.out.println("action set for " + x + "," + y + " action = " + yNode.getAction());
                     }
                 }
             }
-        System.out.println(Arrays.toString(root.getActionMask()));
-        //System.out.println(root.getActionMaskNames());
+//        System.out.println(Arrays.toString(root.getActionMask()));
+//        System.out.println(root.getActionMaskNames());
         return actions;
     }
 
@@ -169,9 +167,9 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
     public ActionTreeNode generateActionTree(int gridSize){
         root = new ActionTreeNode(0, "root");
         for (int x = 0; x < gridSize; x++) {
-            ActionTreeNode xNode = root.addChild(0, "X" + (x+1));
+            ActionTreeNode xNode = root.addChild(0, "X" + x);
             for (int y = 0; y < gridSize; y++) {
-                xNode.addChild(0, "Y" + (y+1));
+                xNode.addChild(0, "Y" + y);
             }
         }
         return root;
@@ -190,9 +188,10 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
     @Override
     public void nextPython(AbstractGameState state, int actionID) {
         // Manual conversion from actionID to actionVector
-        int[] actionVector = new int[2];
-        actionVector[0] = (actionID-3)/3;
-        actionVector[1] = (actionID-3)%3;
+        int gridSize = ((TicTacToeGameParameters) state.getGameParameters()).gridSize;
+        int[] actionVector = new int[2]; // we have 2 levels in the tree
+        actionVector[0] = (actionID-gridSize)/gridSize;
+        actionVector[1] = (actionID-gridSize)%gridSize;
         nextPython(state, actionVector);
     }
 
@@ -202,8 +201,7 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
             node = node.getChildren().get(actionVector[i]);
         }
         AbstractAction action = node.getAction();
-        System.out.println("nextPython selected action " + action);
-        _next(state, action);
+        next(state, action);
 
     }
 }

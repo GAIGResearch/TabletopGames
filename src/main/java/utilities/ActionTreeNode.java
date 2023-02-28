@@ -50,7 +50,8 @@ public class ActionTreeNode {
     }
 
     public int[] getActionMask() {
-        List<Integer> vals = this.flattenValues();
+//        List<Integer> vals = this.flattenValues();
+        List<Integer> vals = this.flattenBreadthFirst();
         vals.remove(0);
         int[] valsArray = vals.stream().mapToInt(i -> i).toArray();
         return valsArray;
