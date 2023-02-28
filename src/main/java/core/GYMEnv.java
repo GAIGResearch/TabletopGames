@@ -314,7 +314,7 @@ public class GYMEnv {
         players.add(new PythonAgent());
         players.add(new RandomPlayer());
         try {
-            GYMEnv env = new GYMEnv(GameType.valueOf("ExplodingKittens"), null, players, 343, true);
+            GYMEnv env = new GYMEnv(GameType.valueOf("TicTacToe"), null, players, 343, true);
             boolean done = false;
             int episodes = 0;
             int MAX_EPISODES = 100;
@@ -326,15 +326,15 @@ public class GYMEnv {
 //                int randomAction = rnd.nextInt(env.availableActions.size());
                 // todo we get the action mask, but how do we know how we should index it?
                 int[] mask = env.getActionMask();
-                int[] trueIdx = IntStream.range(0, mask.length)
+                mask[0] = 0; mask[1] = 0; mask[2] = 0;
+                int[] trueIdx = IntStream.range(0, mask.length) // todo TTT valid actions (leaf nodes) start from 3
                         .filter(i -> mask[i] == 1)
                         .toArray();
                 int randomAction = trueIdx[rnd.nextInt(trueIdx.length)];
 //                int randomAction = rnd.nextInt(N_ACTIONS);
                 try{
 //                    System.out.println("playerID = " + env.getPlayerID());
-//                    if (env.gameState instanceof DiamantGameState){
-                        ((ExplodingKittensGameState) env.gameState).getNormalizedObservationVector();
+                        ((IVectorisable)env.gameState).getNormalizedObservationVector();
 //                    }
 
                     env.step(randomAction);
