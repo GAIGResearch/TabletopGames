@@ -1,7 +1,6 @@
 package games.connect4;
 import core.AbstractGameState;
 import core.CoreConstants;
-import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
@@ -156,8 +155,8 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
         }
 
         if (!gap) { //tie
-            gameState.setGameStatus(CoreConstants.GameResult.DRAW);
-            Arrays.fill(gameState.getPlayerResults(), CoreConstants.GameResult.DRAW);
+            gameState.setGameStatus(CoreConstants.GameResult.DRAW_GAME);
+            Arrays.fill(gameState.getPlayerResults(), CoreConstants.GameResult.DRAW_GAME);
             return true;
         }
 
@@ -239,8 +238,8 @@ public class Connect4ForwardModel extends SequentialActionForwardModel {
     private void registerWinner(Connect4GameState gameState, Token winnerSymbol, LinkedList<Pair<Integer, Integer>> winPos) {
         gameState.setGameStatus(CoreConstants.GameResult.GAME_END);
         int winningPlayer = Connect4Constants.playerMapping.indexOf(winnerSymbol);
-        gameState.setPlayerResult(CoreConstants.GameResult.WIN, winningPlayer);
-        gameState.setPlayerResult(CoreConstants.GameResult.LOSE, 1 - winningPlayer);
+        gameState.setPlayerResult(CoreConstants.GameResult.WIN_GAME, winningPlayer);
+        gameState.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 1 - winningPlayer);
         gameState.registerWinningCells(winPos);
     }
 }

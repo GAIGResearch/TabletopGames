@@ -1,7 +1,6 @@
 package games.dominion;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Card;
@@ -324,9 +323,9 @@ public class DominionGameState extends AbstractGameState implements IPrintable {
      */
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (getPlayerResults()[playerId] == CoreConstants.GameResult.LOSE)
+        if (getPlayerResults()[playerId] == CoreConstants.GameResult.LOSE_GAME)
             return -1.0;
-        if (getPlayerResults()[playerId] == CoreConstants.GameResult.WIN)
+        if (getPlayerResults()[playerId] == CoreConstants.GameResult.WIN_GAME)
             return 1.0;
 
         int score = getTotal(playerId, c -> c.victoryPoints(playerId, this));

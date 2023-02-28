@@ -126,9 +126,9 @@ public class PartialObservableDeck<T extends Component> extends Deck<T> {
             if (playerID >= 0 && playerID < deckVisibility.length)
                 this.elementVisibility.get(index)[playerID] = visibility;
             else
-                throw new IllegalArgumentException("playerID " + playerID + "needs to be in range [0," + deckVisibility.length + "]");
+                throw new IllegalArgumentException("playerID " + playerID + "needs to be in range [0," + (deckVisibility.length-1) + "]");
         } else {
-            throw new IllegalArgumentException("component index " + index + " needs to be in range [0," + components.size() + "]");
+            throw new IllegalArgumentException("component index " + index + " needs to be in range [0," + (components.size()-1) + "]");
         }
     }
 

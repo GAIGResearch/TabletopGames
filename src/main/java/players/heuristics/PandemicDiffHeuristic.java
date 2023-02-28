@@ -23,10 +23,10 @@ public class PandemicDiffHeuristic implements IStateHeuristic {
         BoardStats lastBoardState = new BoardStats((PandemicGameState)gs);
         double rawScore = rootBoardStats.score(lastBoardState);
 
-        if(gamestatus == CoreConstants.GameResult.LOSE)
+        if(gamestatus == CoreConstants.GameResult.LOSE_GAME)
             rawScore = -1;
 
-        if(gamestatus == CoreConstants.GameResult.WIN)
+        if(gamestatus == CoreConstants.GameResult.WIN_GAME)
             rawScore = 1;
 
         return rawScore;

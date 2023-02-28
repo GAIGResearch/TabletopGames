@@ -41,9 +41,9 @@ public abstract class FeatureListener extends GameListener {
             double[] finalScores = IntStream.range(0, totP).mapToDouble(event.state::getGameScore).toArray();
             double[] winLoss = Arrays.stream(event.state.getPlayerResults()).mapToDouble(r -> {
                 switch (r) {
-                    case WIN:
+                    case WIN_GAME:
                         return 1.0;
-                    case DRAW:
+                    case DRAW_GAME:
                         return 0.5;
                     default:
                         return 0.0;

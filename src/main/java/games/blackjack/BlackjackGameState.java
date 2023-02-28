@@ -123,9 +123,9 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
     @Override
     protected double _getHeuristicScore(int playerId) {
         CoreConstants.GameResult playerResult = getPlayerResults()[playerId];
-        if (playerResult == CoreConstants.GameResult.LOSE)
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
             return -1;
-        if (playerResult == CoreConstants.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
             return 1;
 
         // if game not over, return the score scaled by the maximum score possible

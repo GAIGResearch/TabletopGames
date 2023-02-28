@@ -67,9 +67,9 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
         DominionGameState state = (DominionGameState) gs;
         CoreConstants.GameResult playerResult = state.getPlayerResults()[playerId];
 
-        if (playerResult == CoreConstants.GameResult.LOSE)
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
             return -1;
-        if (playerResult == CoreConstants.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
             return 1;
 
         // We have several factors to consider (all maxed to 1.0)
@@ -118,7 +118,7 @@ public class DominionHeuristic extends TunableParameters implements IStateHeuris
         if (totalCards != 0.0)
             retValue += totalCards * state.getTotalCards(playerId) / 40.0;
 
-        return Utils.range(retValue, -1.0, 1.0);
+        return Utils.clamp(retValue, -1.0, 1.0);
     }
 
 

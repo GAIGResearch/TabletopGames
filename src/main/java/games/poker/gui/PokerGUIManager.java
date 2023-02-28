@@ -283,7 +283,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 for (int i = 0; i < pgs.getNPlayers(); i++) {
                     playerHands[i].setFront(true);
                     // Highlight fold and eliminated players
-                    if (pgs.getPlayerResults()[i] == CoreConstants.GameResult.LOSE) {
+                    if (pgs.getPlayerResults()[i] == CoreConstants.GameResult.LOSE_GAME) {
                         playerHands[i].setBorder(playerViewCompoundBordersEliminated[i]);
                     } else if (pgs.getPlayerFold()[i]) {
                         playerHands[i].setBorder(playerViewCompoundBordersFold[i]);
@@ -334,7 +334,7 @@ public class PokerGUIManager extends AbstractGUIManager {
                 }
 
                 // Highlight active, first and fold players
-                if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.LOSE) {
+                if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.LOSE_GAME) {
                     playerHands[i].setBorder(playerViewCompoundBordersEliminated[i]);
                 } else if (i == gameState.getFirstPlayer()) {
                     playerHands[i].setBorder(playerViewCompoundBordersFirst[i]);

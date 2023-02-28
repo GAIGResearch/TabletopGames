@@ -1,55 +1,56 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
+import core.CoreConstants;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import core.components.PartialObservableDeck;
 import games.loveletter.cards.LoveLetterCard;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * The Priest allows a player to see another player's hand cards.
  * This has no effect in case the game is fully observable.
  */
-public class PriestAction extends core.actions.DrawCard implements IPrintable {
+public class PriestAction extends PlayCard implements IPrintable {
 
-    private final int opponentID;
+    private LoveLetterCard.CardType opponentCard;
 
-    public PriestAction(int deckFrom, int deckTo, int fromIndex, int opponentID) {
-        super(deckFrom, deckTo, fromIndex);
-        this.opponentID = opponentID;
+    public PriestAction(int playerID, int opponentID, boolean canExecuteEffect) {
+        super(LoveLetterCard.CardType.Priest, playerID, opponentID, null, null, canExecuteEffect);
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        LoveLetterGameState llgs = (LoveLetterGameState)gs;
-        int playerID = gs.getCurrentPlayer();
-        PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
+    protected boolean _execute(LoveLetterGameState llgs) {
+        PartialObservableDeck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(targetPlayer);
 
         // Set all cards to be visible by the current player
-        if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
-            for (int i = 0; i < opponentDeck.getComponents().size(); i++)
-                opponentDeck.setVisibilityOfComponent(i, playerID, true);
-        }
+        for (int i = 0; i < opponentDeck.getComponents().size(); i++)
+            opponentDeck.setVisibilityOfComponent(i, playerID, true);
 
-        return super.execute(gs);
+        opponentCard = opponentDeck.get(0).cardType;
+        if (llgs.getCoreGameParameters().recordEventHistory) {
+            llgs.recordHistory("Priest sees " + opponentCard);
+        }
+        return true;
     }
 
     @Override
-    public String toString(){
-        return "Priest - see the cards of player "+ opponentID;
+    public String _toString(){
+        return "Priest (" + playerID + " sees " + (opponentCard != null? opponentCard : "card") + " of " + targetPlayer + ")";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Priest (see cards of player " + opponentID + ")";
+        return toString();
     }
 
     @Override
     public void printToConsole(AbstractGameState gameState) {
-        System.out.println(toString());
+        System.out.println(this);
     }
 
     @Override
@@ -58,20 +59,29 @@ public class PriestAction extends core.actions.DrawCard implements IPrintable {
         if (!(o instanceof PriestAction)) return false;
         if (!super.equals(o)) return false;
         PriestAction that = (PriestAction) o;
-        return opponentID == that.opponentID;
+        return opponentCard == that.opponentCard;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), opponentID);
+        return Objects.hash(super.hashCode(), opponentCard);
     }
 
     @Override
-    public AbstractAction copy() {
-        return new PriestAction(deckFrom, deckTo, fromIndex, opponentID);
+    public PriestAction copy() {
+        PriestAction copy = new PriestAction(playerID, targetPlayer, canExecuteEffect);
+        copy.opponentCard = opponentCard;
+        return copy;
     }
 
-    public int getOpponentID() {
-        return opponentID;
+    public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
+        List<PlayCard> cardActions = new ArrayList<>();
+        for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
+            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
+                continue;
+            cardActions.add(new PriestAction(playerID, targetPlayer, true));
+        }
+        if (cardActions.size() == 0) cardActions.add(new PriestAction(playerID, -1, false));
+        return cardActions;
     }
 }

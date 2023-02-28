@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import evaluation.metrics.*;
 import static utilities.Utils.componentToImage;
 
 public class Game {
@@ -318,7 +317,7 @@ public class Game {
         int nPlayers = statSummaries.length;
         CoreConstants.GameResult[] results = game.getGameState().getPlayerResults();
         for (int p = 0; p < nPlayers; p++) {
-            if (results[p] == CoreConstants.GameResult.WIN || results[p] == CoreConstants.GameResult.LOSE || results[p] == CoreConstants.GameResult.DRAW) {
+            if (results[p] == CoreConstants.GameResult.WIN_GAME || results[p] == CoreConstants.GameResult.LOSE_GAME || results[p] == CoreConstants.GameResult.DRAW_GAME) {
                 statSummaries[p].add(results[p].value);
             }
         }
@@ -917,7 +916,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "TerraformingMars");
+        String gameType = Utils.getArg(args, "game", "LoveLetter");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -926,12 +925,13 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
-        players.add(new HumanGUIPlayer(ac));
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 

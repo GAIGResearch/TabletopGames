@@ -14,7 +14,7 @@ import utilities.Pair;
 import java.util.*;
 
 import static games.poker.PokerGameState.PokerGamePhase.*;
-import static core.CoreConstants.GameResult.LOSE;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 
 
 public class PokerForwardModel extends StandardForwardModel {
@@ -78,7 +78,7 @@ public class PokerForwardModel extends StandardForwardModel {
         // Blinds
         int smallId = pgs.getFirstPlayer();
         int bigId = (pgs.getNPlayers() + smallId + 1) % pgs.getNPlayers();
-        while ((pgs.playerFold[bigId] || pgs.getPlayerResults()[bigId] == LOSE)) {
+        while ((pgs.playerFold[bigId] || pgs.getPlayerResults()[bigId] == LOSE_GAME)) {
             bigId = (pgs.getNPlayers() + bigId + 1) % pgs.getNPlayers();
         }
         new Bet(smallId, params.smallBlind).execute(pgs);
@@ -112,7 +112,7 @@ public class PokerForwardModel extends StandardForwardModel {
             boolean remainingDecisions = false;
             int stillAlive = 0;
             for (int i = 0; i < pgs.getNPlayers(); i++) {
-                if (pgs.getPlayerResults()[i] != LOSE && !pgs.playerFold[i]) {
+                if (pgs.getPlayerResults()[i] != LOSE_GAME && !pgs.playerFold[i]) {
                     stillAlive++;
                     if (pgs.playerNeedsToCall[i] || !pgs.playerActStreet[i]){
                         remainingDecisions = true;
@@ -177,7 +177,7 @@ public class PokerForwardModel extends StandardForwardModel {
         for (int i = 0; i < pgs.getNPlayers(); i++) {
             if (pgs.playerMoney[i].isMinimum()) {
                 // Player is out of the game
-                pgs.setPlayerResult(LOSE, i);
+                pgs.setPlayerResult(LOSE_GAME, i);
             }
         }
 
@@ -196,7 +196,7 @@ public class PokerForwardModel extends StandardForwardModel {
         HashMap<Integer, Integer> ranks = new HashMap<>();
         HashMap<Integer, HashSet<Integer>> hands = new HashMap<>();
         for (int i = 0; i < pgs.getNPlayers(); i++) {
-            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE_GAME) {
                 pgs.playerDecks.get(i).add(pgs.communityCards.copy());
                 Pair<PokerGameState.PokerHand, HashSet<Integer>> hand = PokerGameState.PokerHand.translateHand(pgs.playerDecks.get(i));
                 if (hand != null) {
@@ -216,13 +216,13 @@ public class PokerForwardModel extends StandardForwardModel {
 
         int smallestRank = 11;
         for (int i: playersInPot) {
-            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE && ranks.containsKey(i) && ranks.get(i) < smallestRank) {
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE_GAME && ranks.containsKey(i) && ranks.get(i) < smallestRank) {
                 smallestRank = ranks.get(i);
             }
         }
         HashSet<Integer> winners = new HashSet<>();
         for (int i: playersInPot) {
-            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE) {
+            if (!pgs.playerFold[i] && pgs.getPlayerResults()[i] != LOSE_GAME) {
                 if (ranks.get(i) == smallestRank) winners.add(i);
             }
         }
@@ -300,7 +300,7 @@ public class PokerForwardModel extends StandardForwardModel {
             // Move first player to next one
             pgs.setFirstPlayer((pgs.getNPlayers() + pgs.getFirstPlayer() + 1) % pgs.getNPlayers());
             int nTries = 1;
-            while ((pgs.playerFold[pgs.getFirstPlayer()] || pgs.getPlayerResults()[pgs.getFirstPlayer()] == LOSE) && nTries <= pgs.getNPlayers()) {
+            while ((pgs.playerFold[pgs.getFirstPlayer()] || pgs.getPlayerResults()[pgs.getFirstPlayer()] == LOSE_GAME) && nTries <= pgs.getNPlayers()) {
                 pgs.setFirstPlayer((pgs.getNPlayers() + pgs.getFirstPlayer() + 1) % pgs.getNPlayers());
                 nTries++;
             }
@@ -324,7 +324,7 @@ public class PokerForwardModel extends StandardForwardModel {
         boolean othersAllIn = true;  // True if all others are all in / out of the game, false otherwise
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             if (pgs.getPlayerBet()[i].getValue() > biggestBet) biggestBet = pgs.getPlayerBet()[i].getValue();
-            if (i != player && pgs.getPlayerResults()[i] != LOSE && !pgs.playerFold[i] && !pgs.playerMoney[i].isMinimum()) othersAllIn = false;
+            if (i != player && pgs.getPlayerResults()[i] != LOSE_GAME && !pgs.playerFold[i] && !pgs.playerMoney[i].isMinimum()) othersAllIn = false;
         }
 
         if (pgs.playerNeedsToCall[player] && !pgs.getPlayerMoney()[player].isMinimum()) {

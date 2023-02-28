@@ -517,7 +517,7 @@ public class TMGUI extends AbstractGUIManager {
                 int win = -1;
                 String displayText = "<html><table><tr><td>Player</td><td>TR</td><td>Milestones</td><td>Awards</td><td>Board</td><td>Cards</td><td>Total</td></tr>";
                 for (int i = 0; i < gameState.getNPlayers(); i++) {
-                    if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.WIN) win = i;
+                    if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME) win = i;
 
                     int tr = gs.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue();
                     int milestones = gs.countPointsMilestones(i);

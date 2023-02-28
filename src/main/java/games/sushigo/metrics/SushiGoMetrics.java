@@ -109,7 +109,7 @@ public class SushiGoMetrics implements IMetricsCollection {
             SGCard.SGCardType type = (SGCard.SGCardType) getParameterValue("type");
             SGGameState gs = (SGGameState) e.state;
             for (int i = 0; i < gs.getNPlayers(); i++) {
-                if (gs.getPlayerResults()[i] == CoreConstants.GameResult.WIN) {
+                if (gs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME) {
                     return gs.getPlayedCardTypesAllGame()[i].get(type).getValue();
                 }
             }

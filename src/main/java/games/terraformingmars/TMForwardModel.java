@@ -289,10 +289,10 @@ public class TMForwardModel extends StandardForwardModelWithTurnOrder {
 
                     if (gs.getNPlayers() == 1) {
                         // If solo, game goes for 14 generations regardless of global parameters
-                        CoreConstants.GameResult won = CoreConstants.GameResult.WIN;
+                        CoreConstants.GameResult won = CoreConstants.GameResult.WIN_GAME;
                         for (TMTypes.GlobalParameter p : gs.globalParameters.keySet()) {
                             if (p != null && p.countsForEndGame() && !gs.globalParameters.get(p).isMaximum())
-                                won = CoreConstants.GameResult.LOSE;
+                                won = CoreConstants.GameResult.LOSE_GAME;
                         }
                         gs.setGameStatus(CoreConstants.GameResult.GAME_END);
                         gs.setPlayerResult(won, 0);
