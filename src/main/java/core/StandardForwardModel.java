@@ -117,7 +117,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
 
     /**
      * End a round, with no change to the firstPlayer
-     * @param gs
+     * @param gs - game state
      */
     public final void endRound(AbstractGameState gs) {
         endRound(gs, gs.firstPlayer);
