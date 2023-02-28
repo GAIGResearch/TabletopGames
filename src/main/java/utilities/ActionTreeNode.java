@@ -176,6 +176,22 @@ public class ActionTreeNode {
 
     // Getters and Setters
 
+    public List<Object> getTreeShape(){
+        // calculate how many leaf nodes the current node has recursively
+        List<Object> values = new ArrayList<>();
+        for(ActionTreeNode child : this.children){
+            //  if has children than add a new list to values
+            if (child.children.size() > 0) {
+                ArrayList subList = new ArrayList();
+                subList.addAll(child.getTreeShape());
+                values.add(subList);
+            } else {
+                values.add(1);
+            }
+        }
+        return values;
+    }
+
     public AbstractAction getAction() {return action;}
     public void setAction(AbstractAction action) {
         this.value = 1;

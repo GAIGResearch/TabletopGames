@@ -41,8 +41,6 @@ public class GYMEnv {
     boolean isNormalized; // Bool for whether you want obersvations to be normalized
 
 
-    // todo: set-up everything required to run an actual game in Pandemic
-    //  - functions: init, getObs, step, finalise...
     public GYMEnv(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, boolean isNormalized) throws Exception {
 
         //                              boolean randomizeParameters, List<IGameListener> listeners
@@ -305,6 +303,10 @@ public class GYMEnv {
         return this.tick;
     }
 
+    public List getTreeShape(){
+        return this.forwardModel.root.getTreeShape();
+    }
+
     public CoreConstants.GameResult[] getPlayerResults(){
         return this.gameState.getPlayerResults();
     }
@@ -321,6 +323,7 @@ public class GYMEnv {
             int steps = 0;
             Random rnd = new Random();
             env.reset();
+            List<Object> treeShape = env.forwardModel.root.getTreeShape();
             int N_ACTIONS  = env.getActionSpace();
             while (!done){
 //                int randomAction = rnd.nextInt(env.availableActions.size());

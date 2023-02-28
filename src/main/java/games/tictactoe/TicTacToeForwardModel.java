@@ -175,6 +175,10 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
         return root;
     }
 
+    public List<Object> getTreeShape() {
+        return root.getTreeShape();
+    }
+
     @Override
     public int[] getFixedActionSpace() {
         return new int[0];

@@ -393,6 +393,10 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         return tree;
     }
 
+    public List<Object> getTreeShape() {
+        return root.getTreeShape();
+    }
+
     @Override
     public int getActionSpace() {
         return root.getSubNodes(); // pass (draw) or play any of the card types

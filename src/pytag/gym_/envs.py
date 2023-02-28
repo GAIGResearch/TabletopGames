@@ -20,7 +20,7 @@ class TagSingleplayerGym(gym.Env):
         self._playerID = agent_ids.index("python")
         # ToDo accept the List interface in GymEnv, this allows us to pass agents directly instead of converting it first
         self._java_env = GymEnv(gameType, None, jpype.java.util.ArrayList(agents), seed, True)
-        
+
         # Construct action/observation space
         self._java_env.reset()
         action_mask = self._java_env.getActionMask()
@@ -29,12 +29,16 @@ class TagSingleplayerGym(gym.Env):
         # ToDo better low and high values
         obs_size = int(self._java_env.getObservationSpace())
         self.observation_space = gym.spaces.Box(shape=(obs_size,), low=float("-inf"), high=float("inf"))
+        self._action_tree_shape = np.array(self._java_env.getTreeShape())
+
+    def get_action_tree_shape(self):
+        return self._action_tree_shape
     
     def reset(self):
         self._java_env.reset()
         self._update_data()
         
-        return self._last_obs_vector, {"action_mask": self._last_action_mask, "has_won": int(str(self._java_env.getPlayerResults()[self._playerID]) == "WIN")}
+        return self._last_obs_vector, {"action_tree": self._action_tree_shape, "action_mask": self._last_action_mask, "has_won": int(str(self._java_env.getPlayerResults()[self._playerID]) == "WIN_GAME")}
     
     def step(self, action):
         # Verify
@@ -46,14 +50,14 @@ class TagSingleplayerGym(gym.Env):
             reward = -1
         else:
             self._java_env.step(action)
-            reward = int(str(self._java_env.getPlayerResults()[self._playerID]) == "WIN")
-            if str(self._java_env.getPlayerResults()[self._playerID]) == "LOSE": reward = -1
+            reward = int(str(self._java_env.getPlayerResults()[self._playerID]) == "WIN_GAME")
+            if str(self._java_env.getPlayerResults()[self._playerID]) == "LOSE_GAME": reward = -1
 
         self._update_data()
         done = self._java_env.isDone()
         truncated = False
         info = {"action_mask": self._last_action_mask,
-                "has_won": int(str(self._java_env.getPlayerResults()[self._playerID]) == "WIN")}
+                "has_won": int(str(self._java_env.getPlayerResults()[self._playerID]) == "WIN_GAME")}
         return self._last_obs_vector, reward, done, truncated, info
     
     def close(self):
