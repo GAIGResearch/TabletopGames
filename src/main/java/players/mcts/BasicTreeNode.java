@@ -2,6 +2,8 @@ package players.mcts;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.MacroAction;
+import core.interfaces.ISubGoal;
 import players.PlayerConstants;
 import players.simple.RandomPlayer;
 import utilities.ElapsedCpuTimer;
@@ -14,11 +16,12 @@ import static utilities.Utils.noise;
 
 class BasicTreeNode {
     // Root node of tree
-    BasicTreeNode root;
+    BasicTreeNode root, rootSubGoal;
     // Parent of this node
     BasicTreeNode parent;
     // Children of this node
     Map<AbstractAction, BasicTreeNode> children = new HashMap<>();
+    Map<MacroAction, BasicTreeNode> subGoalChildren = new HashMap<>();
     // Depth of this node
     final int depth;
 
@@ -41,6 +44,7 @@ class BasicTreeNode {
         this.fmCallsCount = 0;
         this.parent = parent;
         this.root = parent == null ? this : parent.root;
+        this.rootSubGoal = parent == null? this : parent.rootSubGoal == null? root : parent.rootSubGoal;
         totValue = 0.0;
         setState(state);
         if (parent != null) {
@@ -112,17 +116,21 @@ class BasicTreeNode {
     private BasicTreeNode treePolicy() {
 
         BasicTreeNode cur = this;
+        List<AbstractAction> sequence = new ArrayList<>();
+        List<Integer> hashCodes = new ArrayList<>();
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         while (cur.state.isNotTerminal() && cur.depth < player.params.maxTreeDepth) {
             if (!cur.unexpandedActions().isEmpty()) {
                 // We have an unexpanded action
-                cur = cur.expand();
+                cur = cur.expand(sequence, hashCodes);
                 return cur;
             } else {
                 // Move to next child given by UCT function
                 AbstractAction actionChosen = cur.ucb();
-                cur = cur.children.get(actionChosen);
+                sequence.add(actionChosen);
+                hashCodes.add(cur.state.hashCode());
+                cur = cur.children.get(actionChosen);  // TODO consider subgoal children too
             }
         }
 
@@ -149,12 +157,14 @@ class BasicTreeNode {
      *
      * @return - new child node.
      */
-    private BasicTreeNode expand() {
+    private BasicTreeNode expand(List<AbstractAction> sequence, List<Integer> hashCodes) {
         // Find random child not already created
         Random r = new Random(player.params.getRandomSeed());
         // pick a random unchosen action
         List<AbstractAction> notChosen = unexpandedActions();
         AbstractAction chosen = notChosen.get(r.nextInt(notChosen.size()));
+        sequence.add(chosen);
+        hashCodes.add(state.hashCode());
 
         // copy the current state and advance it using the chosen action
         // we first copy the action so that the one stored in the node will not have any state changes
@@ -164,6 +174,12 @@ class BasicTreeNode {
         // then instantiate a new node
         BasicTreeNode tn = new BasicTreeNode(player, this, nextState, rnd);
         children.put(chosen, tn);
+        if (nextState instanceof ISubGoal && ((ISubGoal)nextState).isSubGoal()) { // TODO add subgoal predicate to whatever game
+            MacroAction macroAction = new MacroAction(state.getCurrentPlayer(), sequence, hashCodes);
+            // Create link from root or previous subgoal in this branch
+            // TODO check if not already exist, check rewards?
+            rootSubGoal.subGoalChildren.put(macroAction, tn);
+        }
         return tn;
     }
 
@@ -228,6 +244,7 @@ class BasicTreeNode {
      * @return - value of rollout.
      */
     private double rollOut() {
+        // TODO subgoals could be here too
         int rolloutDepth = 0; // counting from end of tree
 
         // If rollouts are enabled, select actions for the rollout in line with the rollout policy
@@ -268,6 +285,7 @@ class BasicTreeNode {
      * @param result - value of rollout to backup
      */
     private void backUp(double result) {
+        // TODO: if we found subgoals, there would be multiple branches to backup through
         BasicTreeNode n = this;
         while (n != null) {
             n.nVisits++;
