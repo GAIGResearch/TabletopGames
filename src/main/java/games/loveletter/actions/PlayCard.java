@@ -63,7 +63,9 @@ public abstract class PlayCard extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof PlayCard)) return false;
         PlayCard playCard = (PlayCard) o;
-        return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer && canExecuteEffect == playCard.canExecuteEffect && cardType == playCard.cardType && targetCardType == playCard.targetCardType && forcedCountessCardType == playCard.forcedCountessCardType;
+        return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer &&
+                canExecuteEffect == playCard.canExecuteEffect && cardType == playCard.cardType &&
+                targetCardType == playCard.targetCardType && forcedCountessCardType == playCard.forcedCountessCardType;
     }
 
     @Override
