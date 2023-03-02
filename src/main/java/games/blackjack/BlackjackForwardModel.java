@@ -3,7 +3,6 @@ package games.blackjack;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
-import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.*;
 
 import static core.CoreConstants.GameResult.*;
-import static core.CoreConstants.GameResult.LOSE;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 
 
 public class BlackjackForwardModel extends StandardForwardModel {
@@ -56,12 +55,12 @@ public class BlackjackForwardModel extends StandardForwardModel {
             // Check if bust or win score
             int points = bjgs.calculatePoints(hit.playerID);
             if (points > ((BlackjackParameters)gameState.getGameParameters()).winScore) {
-                gameState.setPlayerResult(CoreConstants.GameResult.LOSE, hit.playerID);
+                gameState.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, hit.playerID);
                 if (hit.advanceTurnOrder) {
                     _endTurn((BlackjackGameState) gameState);
                 }
             } else if (points == ((BlackjackParameters)gameState.getGameParameters()).winScore) {
-                gameState.setPlayerResult(CoreConstants.GameResult.WIN, hit.playerID);
+                gameState.setPlayerResult(CoreConstants.GameResult.WIN_GAME, hit.playerID);
                 if (hit.advanceTurnOrder) {
                     _endTurn((BlackjackGameState) gameState);
                 }
@@ -105,34 +104,34 @@ public class BlackjackForwardModel extends StandardForwardModel {
 
             int[] score = new int[bjgs.getNPlayers()];
             for (int j = 0; j < bjgs.getNPlayers(); j++){
-                if (bjgs.getPlayerResults()[j] != LOSE) {
+                if (bjgs.getPlayerResults()[j] != LOSE_GAME) {
                     score[j] = bjgs.calculatePoints(j);
                 }
             }
             bjgs.setPlayerResult(GAME_END, bjgs.dealerPlayer);
             if (score[bjgs.dealerPlayer] > params.winScore) {
                 // Dealer went bust, everyone else wins
-                bjgs.setPlayerResult(CoreConstants.GameResult.LOSE, bjgs.dealerPlayer);
+                bjgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, bjgs.dealerPlayer);
             }
 
             for (int i = 0; i < bjgs.getNPlayers()-1; i++) {  // Check all players and compare to dealer
-                if (bjgs.getPlayerResults()[i] != LOSE) {
+                if (bjgs.getPlayerResults()[i] != LOSE_GAME) {
                     if (score[bjgs.dealerPlayer] > params.winScore) {
                         // Dealer went bust, everyone else wins
-                        bjgs.setPlayerResult(CoreConstants.GameResult.WIN, i);
+                        bjgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, i);
                     } else if (score[bjgs.dealerPlayer] > score[i]) {
-                        bjgs.setPlayerResult(CoreConstants.GameResult.LOSE, i);
+                        bjgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, i);
                     } else if (score[bjgs.dealerPlayer] < score[i]) {
-                        bjgs.setPlayerResult(CoreConstants.GameResult.WIN, i);
+                        bjgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, i);
                     } else if (score[bjgs.dealerPlayer] == score[i]) {
-                        bjgs.setPlayerResult(CoreConstants.GameResult.DRAW, i);
+                        bjgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, i);
                     }
                 }
             }
 
             for (int i = 0; i < bjgs.getNPlayers(); i++) {
                 if (bjgs.getPlayerResults()[i] == GAME_ONGOING) {
-                    bjgs.setPlayerResult(LOSE, i);
+                    bjgs.setPlayerResult(LOSE_GAME, i);
                 }
             }
         }

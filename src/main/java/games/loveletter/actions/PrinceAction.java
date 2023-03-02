@@ -1,58 +1,58 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
+import core.CoreConstants;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
  * The targeted player discards its current and draws a new one.
  * In case the discarded card is a princess, the targeted player is removed from the game.
  */
-public class PrinceAction extends core.actions.DrawCard implements IPrintable {
+public class PrinceAction extends PlayCard implements IPrintable {
 
-    private final int opponentID;
-    private boolean playerDiscardedPrincess;
+    private LoveLetterCard.CardType cardDiscarded;
 
-    public PrinceAction(int deckFrom, int deckTo, int fromIndex, int opponentID) {
-        super(deckFrom, deckTo, fromIndex);
-        this.opponentID = opponentID;
-        this.playerDiscardedPrincess = false;
+    public PrinceAction(int playerID, int opponentID, boolean canExecuteEffect) {
+        super(LoveLetterCard.CardType.Prince, playerID, opponentID, null, null, canExecuteEffect);
     }
 
     @Override
-    public boolean execute(AbstractGameState gs) {
-        LoveLetterGameState llgs = (LoveLetterGameState)gs;
-        Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(opponentID);
-        Deck<LoveLetterCard> opponentDiscardPile = llgs.getPlayerDiscardCards().get(opponentID);
+    protected boolean _execute(LoveLetterGameState llgs) {
+        Deck<LoveLetterCard> opponentDeck = llgs.getPlayerHandCards().get(targetPlayer);
+        Deck<LoveLetterCard> opponentDiscardPile = llgs.getPlayerDiscardCards().get(targetPlayer);
         Deck<LoveLetterCard> drawPile = llgs.getDrawPile();
-        playerDiscardedPrincess = false;
 
-        if (((LoveLetterGameState) gs).isNotProtected(opponentID)){
-            LoveLetterCard card = opponentDeck.draw();
+        LoveLetterCard card = opponentDeck.draw();
+        opponentDiscardPile.add(card);
 
-            // if the discarded card is a princess, the targeted player loses the game
-            if (card.cardType == LoveLetterCard.CardType.Princess) {
-                ((LoveLetterGameState) gs).killPlayer(opponentID);
-                playerDiscardedPrincess = true;
-            }else
-            {
-                // draw a new card from the draw pile.
-                // in case the draw pile is empty the targeted player receives the reserve card
-                opponentDiscardPile.add(card);
-                LoveLetterCard cardDrawn = drawPile.draw();
-                if (cardDrawn == null)
-                    cardDrawn = ((LoveLetterGameState)gs).getReserveCard();
-                opponentDeck.add(cardDrawn);
+        // if the discarded card is a princess, the targeted player loses the game
+        cardDiscarded = card.cardType;
+        if (cardDiscarded == LoveLetterCard.CardType.Princess) {
+            llgs.killPlayer(playerID, targetPlayer, cardType);
+            if (llgs.getCoreGameParameters().recordEventHistory) {
+                llgs.recordHistory("Player " + targetPlayer + " discards Princess and loses!");
+            }
+        } else {
+            if (llgs.getCoreGameParameters().recordEventHistory) {
+                llgs.recordHistory("Player " + targetPlayer + " discards " + card.cardType);
             }
 
+            // draw a new card from the draw pile.
+            // in case the draw pile is empty the targeted player receives the reserve card
+            LoveLetterCard cardDrawn = drawPile.draw();
+            if (cardDrawn == null)
+                cardDrawn = llgs.getRemovedCard();
+            opponentDeck.add(cardDrawn);
         }
 
-        return super.execute(gs);
+        return true;
     }
 
     @Override
@@ -61,47 +61,44 @@ public class PrinceAction extends core.actions.DrawCard implements IPrintable {
         if (!(o instanceof PrinceAction)) return false;
         if (!super.equals(o)) return false;
         PrinceAction that = (PrinceAction) o;
-        return opponentID == that.opponentID;
+        return cardDiscarded == that.cardDiscarded;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), opponentID);
+        return Objects.hash(super.hashCode(), cardDiscarded);
     }
 
     @Override
-    public String toString(){
-        String str = "Prince - player "+ opponentID + " discards its card and draws a new one.";
-        if (playerDiscardedPrincess) str += " Player "+ opponentID + " discarded Princess. ";
-        return str;
+    public String _toString(){
+        return "Prince (" + targetPlayer + " discards " + (cardDiscarded != null? cardDiscarded : "card") + " and draws a new card)";
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        String str = "Prince (player " + opponentID + " discards card, draws card).";
-        if (playerDiscardedPrincess) str += " Player "+ opponentID + " discarded Princess. ";
-        //return "Prince (player " + opponentID + " discards card, draws card)";
-        return str;
+        return toString();
     }
 
     @Override
     public void printToConsole(AbstractGameState gameState) {
-        System.out.println(toString());
+        System.out.println(this);
     }
 
     @Override
-    public AbstractAction copy() {
-        PrinceAction pa = new PrinceAction(deckFrom, deckTo, fromIndex, opponentID);
-        pa.setDiscardedPrincess(playerDiscardedPrincess);
+    public PrinceAction copy() {
+        PrinceAction pa = new PrinceAction(playerID, targetPlayer, canExecuteEffect);
+        pa.cardDiscarded = cardDiscarded;
         return pa;
     }
 
-    public void setDiscardedPrincess(boolean discPrincess)
-    {
-        this.playerDiscardedPrincess = discPrincess;
-    }
-
-    public int getOpponentID() {
-        return opponentID;
+    public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
+        List<PlayCard> cardActions = new ArrayList<>();
+        for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
+            if (gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
+                continue;
+            cardActions.add(new PrinceAction(playerID, targetPlayer, true));
+        }
+        if (cardActions.size() == 0) cardActions.add(new PrinceAction(playerID, -1, false));
+        return cardActions;
     }
 }

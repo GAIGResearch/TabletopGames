@@ -198,7 +198,7 @@ public class ParameterSearch {
 
         } else {
             if (evalMethod.equals("Win"))
-                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN ? 1.0 : 0.0;
+                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN_GAME ? 1.0 : 0.0;
             if (evalMethod.equals("Score"))
                 stateHeuristic = AbstractGameState::getGameScore;
             if (evalMethod.equals("Heuristic"))
@@ -256,7 +256,7 @@ public class ParameterSearch {
         String evalMethod = getArg(args, "eval", "Win");
         IStateHeuristic stateHeuristic = null;
         if (evalMethod.equals("Win"))
-            stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN ? 1.0 : 0.0;
+            stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN_GAME ? 1.0 : 0.0;
         if (evalMethod.equals("Score"))
             stateHeuristic = AbstractGameState::getGameScore;
         if (evalMethod.equals("Heuristic"))

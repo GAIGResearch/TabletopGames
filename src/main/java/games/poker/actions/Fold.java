@@ -5,8 +5,6 @@ import core.actions.AbstractAction;
 import core.interfaces.IPrintable;
 import games.poker.PokerGameState;
 
-import static core.CoreConstants.GameResult.LOSE;
-
 public class Fold extends AbstractAction implements IPrintable {
 
     public final int playerId;

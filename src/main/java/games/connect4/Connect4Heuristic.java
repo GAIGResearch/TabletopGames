@@ -19,10 +19,10 @@ public class Connect4Heuristic extends TunableParameters implements IStateHeuris
 
         CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if(playerResult == CoreConstants.GameResult.LOSE) {
+        if(playerResult == CoreConstants.GameResult.LOSE_GAME) {
             return -1;
         }
-        if(playerResult == CoreConstants.GameResult.WIN) {
+        if(playerResult == CoreConstants.GameResult.WIN_GAME) {
             return 1;
         }
 

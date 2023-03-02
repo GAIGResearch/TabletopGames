@@ -326,9 +326,9 @@ public class TestCantStop {
         fm.makeTemporaryMarkersPermanentAndClear(state);
         assertEquals(0, state.getCurrentPlayer());
         assertFalse(state.isNotTerminal());
-        assertEquals(CoreConstants.GameResult.WIN, state.getPlayerResults()[0]);
-        assertEquals(CoreConstants.GameResult.LOSE, state.getPlayerResults()[1]);
-        assertEquals(CoreConstants.GameResult.LOSE, state.getPlayerResults()[2]);
+        assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[0]);
+        assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[1]);
+        assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[2]);
         assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
     }
 

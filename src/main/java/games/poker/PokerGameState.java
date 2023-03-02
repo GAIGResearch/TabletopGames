@@ -17,7 +17,7 @@ import games.GameType;
 import games.poker.components.MoneyPot;
 import utilities.Pair;
 
-import static core.CoreConstants.GameResult.LOSE;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 import static utilities.Utils.generateCombinations;
 
 
@@ -73,7 +73,7 @@ public class PokerGameState extends AbstractGameState implements IPrintable {
     public int getNextPlayer() {
         int next = (nPlayers + turnOwner + 1) % nPlayers;
         int nTries = 1;
-        while ((playerFold[next] || getPlayerResults()[next] == LOSE) && nTries <= getNPlayers()) {
+        while ((playerFold[next] || getPlayerResults()[next] == LOSE_GAME) && nTries <= getNPlayers()) {
             next = (nPlayers + next + 1) % nPlayers;
             nTries++;
         }

@@ -8,7 +8,7 @@ import core.rules.GameOverCondition;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.playerDeckHash;
-import static core.CoreConstants.GameResult.LOSE;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 @SuppressWarnings("unchecked")
@@ -23,7 +23,7 @@ public class GameOverDrawCards extends GameOverCondition {
             if (gs.getCoreGameParameters().verbose) {
                 System.out.println("No more cards to draw");
             }
-            return LOSE;
+            return LOSE_GAME;
         }
         return GAME_ONGOING;
     }
