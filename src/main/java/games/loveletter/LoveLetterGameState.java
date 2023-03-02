@@ -128,13 +128,14 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
                 Objects.equals(playerDiscardCards, that.playerDiscardCards) &&
                 Objects.equals(drawPile, that.drawPile) &&
                 Objects.equals(reserveCards, that.reserveCards) &&
+                Objects.equals(removedCard, that.removedCard) &&
                 Arrays.equals(effectProtection, that.effectProtection) &&
                 Arrays.equals(affectionTokens, that.affectionTokens);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), playerHandCards, playerDiscardCards, drawPile, reserveCards);
+        int result = Objects.hash(super.hashCode(), playerHandCards, playerDiscardCards, drawPile, reserveCards, removedCard);
         result = 31 * result + Arrays.hashCode(effectProtection);
         result = 31 * result + Arrays.hashCode(affectionTokens);
         return result;
