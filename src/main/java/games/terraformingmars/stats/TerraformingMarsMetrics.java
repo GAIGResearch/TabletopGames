@@ -462,7 +462,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(MetricsGameListener listener, Event e) {
             TMGameState s = ((TMGameState)e.state);
-            if (s.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN) return s.getPlayerCorporations()[e.playerID].getComponentName();
+            if (s.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN_GAME) return s.getPlayerCorporations()[e.playerID].getComponentName();
             else return "";
         }
         @Override
@@ -522,7 +522,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         @Override
         public Object run(MetricsGameListener listener, Event e) {
             TMGameState s = ((TMGameState)e.state);
-            if (s.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN) {
+            if (s.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN_GAME) {
                 StringBuilder ss = new StringBuilder();
                 return getCards(e, ss, s);
             }

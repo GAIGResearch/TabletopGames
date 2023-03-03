@@ -49,9 +49,9 @@ public class ExplodingKittensHeuristic extends TunableParameters implements ISta
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)gs;
         CoreConstants.GameResult playerResult = ekgs.getPlayerResults()[playerId];
 
-        if (playerResult == CoreConstants.GameResult.LOSE)
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
             return -1;
-        if (playerResult == CoreConstants.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
             return 1;
 
         double cardValues = 0.0;

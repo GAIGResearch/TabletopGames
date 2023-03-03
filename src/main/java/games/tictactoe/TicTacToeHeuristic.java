@@ -26,10 +26,10 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
         TicTacToeGameState ttgs = (TicTacToeGameState) gs;
         CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if(playerResult == CoreConstants.GameResult.LOSE) {
+        if(playerResult == CoreConstants.GameResult.LOSE_GAME) {
             return -1;
         }
-        if(playerResult == CoreConstants.GameResult.WIN) {
+        if(playerResult == CoreConstants.GameResult.WIN_GAME) {
             return 1;
         }
 

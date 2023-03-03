@@ -180,8 +180,9 @@ public class SingleTreeNode {
         openLoopState = actionState;
         if (actionState.getCurrentPlayer() == this.decisionPlayer) {
             actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState);
-            //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
-//                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
+            if (actionsFromOpenLoopState.size() != actionsFromOpenLoopState.stream().distinct().count())
+                throw new AssertionError("Duplicate actions found in action list: " +
+                        actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
             if (params.expansionPolicy == MAST) {
                 advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
                         .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));

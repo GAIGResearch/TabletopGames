@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static games.pandemic.PandemicConstants.*;
-import static core.CoreConstants.GameResult.WIN;
+import static core.CoreConstants.GameResult.WIN_GAME;
 
 @SuppressWarnings("unused")
 public class PandemicCompetitionMetrics implements IMetricsCollection {
@@ -37,7 +37,7 @@ public class PandemicCompetitionMetrics implements IMetricsCollection {
         }
         @Override
         public Object run(MetricsGameListener listener, Event e) {
-            return e.state.getGameStatus()==WIN? e.state.getGameTick() : -e.state.getGameTick();
+            return e.state.getGameStatus()==WIN_GAME? e.state.getGameTick() : -e.state.getGameTick();
         }
     }
 

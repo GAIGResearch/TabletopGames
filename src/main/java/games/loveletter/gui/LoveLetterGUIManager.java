@@ -24,7 +24,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashSet;
 import java.util.List;
 
 public class LoveLetterGUIManager extends AbstractGUIManager {
@@ -64,6 +63,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
         if (game != null) {
             AbstractGameState gameState = game.getGameState();
             fm = (LoveLetterForwardModel) game.getForwardModel();
+
             if (gameState != null) {
                 llgs = (LoveLetterGameState)gameState;
                 JTabbedPane pane = new JTabbedPane();
@@ -133,10 +133,14 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
                         }
                     });
                 }
+
+                // Add GUI listener
+                game.addListener(new LLGUIListener(fm, parent, playerHands));
+
                 if (gameState.getNPlayers() == 2) {
                     // Add reserve
                     JLabel label = new JLabel("Reserve cards:");
-                    reserve = new LoveLetterDeckView(-1, llgs.getReserveCards(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, llp.getDataPath(),
+                    reserve = new LoveLetterDeckView(-1, llgs.getReserveCards(), true, llp.getDataPath(),
                             new Rectangle(0, 0, playerAreaWidth, llCardHeight));
                     JPanel wrap = new JPanel();
                     wrap.setOpaque(false);
@@ -273,17 +277,10 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
 
                 int k = 0;
                 for (AbstractAction action : actions) {
-                    if (gameState.getGamePhase() == LoveLetterGameState.LoveLetterGamePhase.Draw ||
-                            action.getClass().equals(hCard.cardType.getActionClass()) &&
-                                    (action instanceof GuardAction && ((GuardAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof PriestAction && ((PriestAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof BaronAction && ((BaronAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof PrinceAction && ((PrinceAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof KingAction && ((KingAction) action).getOpponentID() == highlightPlayerIdx ||
-                                            action instanceof HandmaidAction || action instanceof CountessAction || action instanceof PrincessAction)) {
-
+                    PlayCard pc = (PlayCard) action;
+                    if (pc.getCardType() == hCard.cardType  && (pc.getTargetPlayer() == -1 || pc.getTargetPlayer() == highlightPlayerIdx)) {
                         actionButtons[k].setVisible(true);
-                        actionButtons[k].setButtonAction(action, gameState);
+                        actionButtons[k].setButtonAction(action, action.toString());
                         k++;
                     }
                 }
@@ -307,36 +304,8 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
-            // Pause after round finished, full display
-            if (llgs.getRoundCounter() != gameState.getRoundCounter()) {
-                // New round
-                // Paint final state of previous round, showing all hands
 
-                // Execute last action in the previous game state without any end of round computations to get final state of round
-                gameState.getHistory().get(gameState.getHistory().size()-1).execute(llgs);
-
-                // Get winners
-                int playersAlive = 0;
-                int soleWinner = -1;
-                for (int i = 0; i < llgs.getNPlayers(); i++) {
-                    if (llgs.getPlayerResults()[i] != CoreConstants.GameResult.LOSE && llgs.getPlayerHandCards().get(i).getSize() > 0) {
-                        playersAlive += 1;
-                        soleWinner = i;
-                    }
-                }
-                HashSet<Integer> winners = fm.getWinners(llgs, playersAlive, soleWinner);
-
-                // Show all hands
-                for (int i = 0; i < llgs.getNPlayers(); i++) {
-                    playerHands[i].update(llgs, true);
-                }
-                // Repaint
-                parent.repaint();
-
-                // Message for pause and clarity
-                JOptionPane.showMessageDialog(parent, "Round over! Winners: " + winners.toString() + ". Next round begins!");
-            }
-            
+            // Update active player highlight
             if (gameState.getCurrentPlayer() != activePlayer) {
                 playerHands[activePlayer].handCards.setCardHighlight(-1);
                 activePlayer = gameState.getCurrentPlayer();
@@ -360,11 +329,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
             if (reserve != null)
                 reserve.updateComponent(llgs.getReserveCards());
             drawPile.updateComponent(llgs.getDrawPile());
-            if (gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
-                drawPile.setFront(true);
-                if (reserve != null)
-                    reserve.setFront(true);
-            }
+            drawPile.setFront(gameState.getCoreGameParameters().alwaysDisplayFullObservable);
 
         }
     }

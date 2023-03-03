@@ -34,8 +34,8 @@ public class AttackMove extends Move {
 
         if (attackedPiece.getPieceType() == Piece.PieceType.FLAG){
             gs.setGameStatus(CoreConstants.GameResult.GAME_END);
-            gs.setPlayerResult(CoreConstants.GameResult.WIN, gs.getCurrentPlayer());
-            gs.setPlayerResult(CoreConstants.GameResult.LOSE, 1-gs.getCurrentPlayer());
+            gs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, gs.getCurrentPlayer());
+            gs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 1-gs.getCurrentPlayer());
 
         } else if (attackedPiece.getPieceType() == Piece.PieceType.BOMB){
             if (movedPiece.getPieceType() == Piece.PieceType.MINER){

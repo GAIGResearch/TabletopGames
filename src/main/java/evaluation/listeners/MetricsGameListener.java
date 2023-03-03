@@ -65,7 +65,7 @@ public class MetricsGameListener implements IGameListener {
                     for (int i = 0; i < event.state.getNPlayers(); i++) {
                         event.playerID = i;
                         Object metricResult = metric.run(this, event);
-                        if(metricResult != null){
+                        if(metricResult != null && (!(metricResult instanceof String) || !((String) metricResult).trim().equals(""))){
                             metricResults.add(metricResult);
                             data.put(attrStr + ":" + i + ":" + event.type, metricResult);
                         }
@@ -77,7 +77,7 @@ public class MetricsGameListener implements IGameListener {
                 else
                 {
                     Object metricResult = metric.run(this, event);
-                    if(metricResult != null) data.put(attrStr + ":" + event.type, metricResult);
+                    if(metricResult != null && (!(metricResult instanceof String) || !((String) metricResult).trim().equals(""))) data.put(attrStr + ":" + event.type, metricResult);
                 }
             }
         }
@@ -91,6 +91,7 @@ public class MetricsGameListener implements IGameListener {
             for(String k : aggregators.keySet())
             {
                 TAGStatSummary ss = aggregators.get(k);
+                if (ss == null) continue;
                 if(ss.type == TAGStatSummary.StatType.Numeric)
                 {
                     ArrayList<Double> aggData = ((TAGNumericStatSummary) ss).getElements();

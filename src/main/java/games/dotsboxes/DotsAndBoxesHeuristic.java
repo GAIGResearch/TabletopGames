@@ -66,7 +66,7 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
                 TWO_BOXES * featureVector[2] +
                 THREE_BOXES * featureVector[3] +
                 ORDINAL * featureVector[4];
-        return Utils.range(retValue, -1.0, 1.0);
+        return Utils.clamp(retValue, -1.0, 1.0);
     }
 
     /**

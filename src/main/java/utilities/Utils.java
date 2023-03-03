@@ -190,7 +190,7 @@ public abstract class Utils {
         return input.keySet().stream().collect(toMap(key -> key, key -> input.get(key).doubleValue() / sum));
     }
 
-    public static double range(double value, double min, double max) {
+    public static double clamp(double value, double min, double max) {
         if (value > max) return max;
         if (value < min) return min;
         return value;

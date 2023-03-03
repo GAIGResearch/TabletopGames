@@ -7,7 +7,7 @@ import core.rules.GameOverCondition;
 import games.pandemic.PandemicGameState;
 
 import static games.pandemic.PandemicConstants.outbreaksHash;
-import static core.CoreConstants.GameResult.LOSE;
+import static core.CoreConstants.GameResult.LOSE_GAME;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 public class GameOverOutbreak extends GameOverCondition {
@@ -23,7 +23,7 @@ public class GameOverOutbreak extends GameOverCondition {
             if (gs.getCoreGameParameters().verbose) {
                 System.out.println("Too many outbreaks");
             }
-            return LOSE;
+            return LOSE_GAME;
         }
         return GAME_ONGOING;
     }
