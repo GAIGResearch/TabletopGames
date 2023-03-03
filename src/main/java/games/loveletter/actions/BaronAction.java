@@ -19,8 +19,8 @@ import java.util.Objects;
 public class BaronAction extends PlayCard implements IPrintable {
     private LoveLetterCard.CardType playerCard, opponentCard;
 
-    public BaronAction(int playerID, int opponentID, boolean canExecuteEffect) {
-        super(LoveLetterCard.CardType.Baron, playerID, opponentID, null, null, canExecuteEffect);
+    public BaronAction(int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
+        super(LoveLetterCard.CardType.Baron, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
 
     @Override
@@ -76,20 +76,20 @@ public class BaronAction extends PlayCard implements IPrintable {
         return Objects.hash(super.hashCode(), playerCard, opponentCard);
     }
 
-    public static List<AbstractAction> generateActions(LoveLetterGameState gs, int playerID) {
+    public static List<AbstractAction> generateActions(LoveLetterGameState gs, int playerID, boolean discard) {
         List<AbstractAction> cardActions = new ArrayList<>();
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
             if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
-            cardActions.add(new BaronAction(playerID, targetPlayer, true));
+            cardActions.add(new BaronAction(playerID, targetPlayer, true, discard));
         }
-        if (cardActions.size() == 0) cardActions.add(new BaronAction(playerID, -1, false));
+        if (cardActions.size() == 0) cardActions.add(new BaronAction(playerID, -1, false, discard));
         return cardActions;
     }
 
     @Override
     public BaronAction copy() {
-        BaronAction copy = new BaronAction(playerID, targetPlayer, canExecuteEffect);
+        BaronAction copy = new BaronAction(playerID, targetPlayer, canExecuteEffect, discard);
         copy.playerCard = playerCard;
         copy.opponentCard = opponentCard;
         return copy;

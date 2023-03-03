@@ -131,6 +131,8 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IFla
 
     @Override
     protected void _afterAction(AbstractGameState gameState, AbstractAction action) {
+        if (gameState.isActionInProgress()) return;
+
         // each turn begins with the player drawing a card after which one card will be played
         LoveLetterGameState llgs = (LoveLetterGameState) gameState;
 
@@ -293,7 +295,8 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IFla
     }
 
     @Override
-    public List<AbstractAction> computeAvailableHighLevelActions(AbstractGameState gameState) {LoveLetterGameState llgs = (LoveLetterGameState)gameState;
+    public List<AbstractAction> computeAvailableDeepActions(AbstractGameState gameState) {
+        LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
             throw new AssertionError("???.");
 
@@ -384,15 +387,15 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IFla
 
             switch (cardType) {
                 case Priest:
-                    cardActions.addAll(PriestAction.generateActions(llgs, playerID));
+                    cardActions.addAll(PriestAction.generateActions(llgs, playerID, true));
                     break;
 
                 case Guard:
-                    cardActions.addAll(GuardAction.generateActions(llgs, playerID));
+                    cardActions.addAll(GuardAction.generateActions(llgs, playerID, true));
                     break;
 
                 case Baron:
-                    cardActions.addAll(BaronAction.generateActions(llgs, playerID));
+                    cardActions.addAll(BaronAction.generateActions(llgs, playerID, true));
                     break;
 
                 case Handmaid:
@@ -400,11 +403,11 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IFla
                     break;
 
                 case Prince:
-                    cardActions.addAll(PrinceAction.generateActions(llgs, playerID));
+                    cardActions.addAll(PrinceAction.generateActions(llgs, playerID, true));
                     break;
 
                 case King:
-                    cardActions.addAll(KingAction.generateActions(llgs, playerID));
+                    cardActions.addAll(KingAction.generateActions(llgs, playerID, true));
                     break;
 
                 case Countess:

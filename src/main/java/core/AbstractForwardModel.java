@@ -1,7 +1,9 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.interfaces.actionSpaces.IActionSpace;
+import core.actions.ActionSpaceType;
+import core.interfaces.actionSpaces.IDeepActionSpace;
+import core.interfaces.actionSpaces.IFlatActionSpace;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.Arrays;
@@ -148,20 +150,21 @@ public abstract class AbstractForwardModel {
      * @return - the list of actions available.
      */
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
-        // If there is an action in progress (see IExtendedSequence), then delegate to that
-        if (gameState.isActionInProgress()) {
-            return gameState.actionsInProgress.peek()._computeAvailableActions(gameState);
-        }
-        return _computeAvailableActions(gameState);
+        return computeAvailableActions(gameState, gameState.coreGameParameters.actionSpaceType);
     }
 
-    public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, IActionSpace actionSpace) {
+    public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, ActionSpaceType actionSpaceType) {
         // If there is an action in progress (see IExtendedSequence), then delegate to that
         if (gameState.isActionInProgress()) {
             return gameState.actionsInProgress.peek()._computeAvailableActions(gameState);
         }
-        if (actionSpace != null) {
-            return actionSpace._computeAvailableActions(gameState);
+        if (actionSpaceType != null) {
+            if (actionSpaceType == ActionSpaceType.Flat) {
+                return ((IFlatActionSpace)this).computeAvailableFlatActions(gameState);
+            } else if (actionSpaceType == ActionSpaceType.Deep) {
+                return ((IDeepActionSpace)this).computeAvailableDeepActions(gameState);
+            }
+            return _computeAvailableActions(gameState);
         }
         return _computeAvailableActions(gameState);
     }

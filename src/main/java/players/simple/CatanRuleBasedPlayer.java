@@ -4,7 +4,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
-import core.components.Card;
 import games.catan.*;
 import games.catan.actions.*;
 import games.catan.components.Settlement;
@@ -61,7 +60,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
     public CatanRuleBasedPlayer() {this(new Random());}
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+    public AbstractAction _getAction(AbstractGameState gameState) {
         CatanGameState cgs = (CatanGameState) gameState;
         roadBlocked = checkIfRoadBlocked(cgs);
         this.currentResources = cgs.getPlayerResources(getPlayerID());
@@ -75,6 +74,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         for (int i = 0; i < 11; i++){
             actionPriorityLists.add(new ArrayList<>());
         }
+        List<AbstractAction> possibleActions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpaceType);
 
         switch (gamePhase){
             case Setup:

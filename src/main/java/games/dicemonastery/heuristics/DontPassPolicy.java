@@ -19,7 +19,7 @@ public class DontPassPolicy extends AbstractPlayer {
     Random rnd = new Random(System.currentTimeMillis());
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+    public AbstractAction _getAction(AbstractGameState gameState) {
 
         DiceMonasteryGameState state = (DiceMonasteryGameState) gameState;
         int player = state.getCurrentPlayer();
@@ -27,6 +27,8 @@ public class DontPassPolicy extends AbstractPlayer {
 
         AbstractAction vellum = new PrepareVellum(state.getParams().prepareVellumCost);
         AbstractAction bakeBread = new BakeBread(state.getParams().bakeBreadCost);
+
+        List<AbstractAction> possibleActions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpaceType);
 
         // We first check a few priorities
         if (possibleActions.contains(vellum))

@@ -118,7 +118,7 @@ public class MCTSNodesAndVisitsTests {
             mctsPlayer.setStatsLogger(logger);
 
             AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                    ._getAction(state, forwardModel.computeAvailableActions(state));
+                    ._getAction(state);
 
             if (state.getCurrentPlayer() == 0) {
                 logger.processDataAndFinish();

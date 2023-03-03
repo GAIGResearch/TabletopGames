@@ -40,13 +40,13 @@ public class ActionTests {
         do {
             // first take random action until we get to the point required
             while (state.getGamePhase() == USE_MONKS)
-                fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
+                fm.next(state, rnd._getAction(state));
 
             // then place all monks randomly
             do {
                 int player = state.getCurrentPlayer();
                 List<AbstractAction> availableActions = fm.computeAvailableActions(state);
-                AbstractAction chosen = rnd._getAction(state, availableActions);
+                AbstractAction chosen = rnd._getAction(state);
                 if (overrides.containsKey(player) && availableActions.contains(new PlaceMonk(player, overrides.get(player)))) {
                     chosen = new PlaceMonk(player, overrides.get(player));
                 }
@@ -55,7 +55,7 @@ public class ActionTests {
 
             // then act randomly until we get to the point required
             while (state.getCurrentArea() != region) {
-                fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
+                fm.next(state, rnd._getAction(state));
             }
         } while (state.getSeason() != season);
     }
@@ -1014,7 +1014,7 @@ public class ActionTests {
                 assertTrue(availableActions.stream().noneMatch(a -> a instanceof TakeToken));
             }
             // and take action at random
-            fm.next(state, rnd._getAction(state, availableActions));
+            fm.next(state, rnd._getAction(state));
         }
     }
 
@@ -1048,7 +1048,7 @@ public class ActionTests {
     public void endOfYearPromotion() {
         state.setFirstPlayer(1);
         do {
-            fm.next(state, rnd._getAction(state, fm.computeAvailableActions(state)));
+            fm.next(state, rnd._getAction(state));
         } while (state.getSeason() != WINTER);
 
         // We have now moved to Winter

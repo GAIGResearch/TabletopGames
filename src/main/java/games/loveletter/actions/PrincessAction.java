@@ -11,7 +11,7 @@ import games.loveletter.cards.LoveLetterCard;
 public class PrincessAction extends PlayCard implements IPrintable {
 
     public PrincessAction(int playerID) {
-        super(LoveLetterCard.CardType.Princess, playerID, -1, null, null, true);
+        super(LoveLetterCard.CardType.Princess, playerID, -1, null, null, true, true);
     }
 
     @Override

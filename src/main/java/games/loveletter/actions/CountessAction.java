@@ -12,7 +12,7 @@ import games.loveletter.cards.LoveLetterCard;
 public class CountessAction extends PlayCard implements IPrintable {
 
     public CountessAction(int playerID, LoveLetterCard.CardType cardType) {
-        super(LoveLetterCard.CardType.Countess, playerID, -1, null, cardType, false);
+        super(LoveLetterCard.CardType.Countess, playerID, -1, null, cardType, false, true);
     }
 
     @Override

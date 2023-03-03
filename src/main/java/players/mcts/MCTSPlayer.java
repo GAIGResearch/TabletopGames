@@ -66,7 +66,7 @@ public class MCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState gameState) {
         // Search for best action from the root
         if (params.opponentTreePolicy == MultiTree || params.opponentTreePolicy == MultiTreeParanoid)
             root = new MultiTreeNode(this, gameState, rnd);
@@ -104,6 +104,7 @@ public class MCTSPlayer extends AbstractPlayer {
 
         MASTStats = root.MASTStatistics;
         // Return best action
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(gameState, params.actionSpaceType);
         if (root.children.size() > 2 * actions.size())
             throw new AssertionError(String.format("Unexpectedly large number of children: %d with action size of %d", root.children.size(), actions.size()) );
         return root.bestAction();

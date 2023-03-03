@@ -1,11 +1,14 @@
 package players;
 
+import core.actions.ActionSpaceType;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 
 import java.util.*;
 
-public abstract class PlayerParameters extends TunableParameters {
+public class PlayerParameters extends TunableParameters {
+
+    public double exploreEpsilon;
 
     // Budget settings
     public PlayerConstants budgetType = PlayerConstants.BUDGET_FM_CALLS;
@@ -15,11 +18,26 @@ public abstract class PlayerParameters extends TunableParameters {
     // Heuristic
     public IStateHeuristic gameHeuristic;
 
+    // Action space type for this player
+    public ActionSpaceType actionSpaceType = ActionSpaceType.Default;
+
     public PlayerParameters(long seed) {
         super(seed);
         addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS, Arrays.asList(PlayerConstants.values()));
         addTunableParameter("budget", 4000, Arrays.asList(100, 300, 1000, 3000, 10000, 30000, 100000));
         addTunableParameter("breakMS", 10);
+    }
+
+    @Override
+    protected PlayerParameters _copy() {
+        PlayerParameters params = new PlayerParameters(getRandomSeed());
+        params.exploreEpsilon = exploreEpsilon;
+        params.budgetType = budgetType;
+        params.budget = budget;
+        params.breakMS = breakMS;
+        params.gameHeuristic = gameHeuristic;
+        params.actionSpaceType = actionSpaceType;
+        return null;
     }
 
     @Override
@@ -40,4 +58,8 @@ public abstract class PlayerParameters extends TunableParameters {
         return Objects.hash(super.hashCode(), budgetType, budget, gameHeuristic);
     }
 
+    @Override
+    public Object instantiate() {
+        return null;
+    }
 }

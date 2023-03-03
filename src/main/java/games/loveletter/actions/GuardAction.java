@@ -17,8 +17,8 @@ import java.util.List;
  */
 public class GuardAction extends PlayCard implements IPrintable {
 
-    public GuardAction(int playerID, int opponentID, LoveLetterCard.CardType cardtype, boolean canExecuteEffect) {
-        super(LoveLetterCard.CardType.Guard, playerID, opponentID, cardtype, null, canExecuteEffect);
+    public GuardAction(int playerID, int opponentID, LoveLetterCard.CardType cardtype, boolean canExecuteEffect, boolean discard) {
+        super(LoveLetterCard.CardType.Guard, playerID, opponentID, cardtype, null, canExecuteEffect, discard);
     }
 
     @Override
@@ -58,22 +58,22 @@ public class GuardAction extends PlayCard implements IPrintable {
         return o instanceof GuardAction && super.equals(o);
     }
 
-    public static List<AbstractAction> generateActions(LoveLetterGameState gs, int playerID) {
+    public static List<AbstractAction> generateActions(LoveLetterGameState gs, int playerID, boolean discard) {
         List<AbstractAction> cardActions = new ArrayList<>();
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
             if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
-            cardActions.addAll(generateActions(playerID, targetPlayer));
+            cardActions.addAll(generateActions(playerID, targetPlayer, discard));
         }
-        if (cardActions.size() == 0) cardActions.add(new GuardAction(playerID, -1, null, false));
+        if (cardActions.size() == 0) cardActions.add(new GuardAction(playerID, -1, null, false, discard));
         return cardActions;
     }
 
-    public static List<AbstractAction> generateActions(int playerID, int targetPlayer) {
+    public static List<AbstractAction> generateActions(int playerID, int targetPlayer, boolean discard) {
         List<AbstractAction> cardActions = new ArrayList<>();
         for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values()) {
             if (type != LoveLetterCard.CardType.Guard) {
-                cardActions.add(new GuardAction(playerID, targetPlayer, type, true));
+                cardActions.add(new GuardAction(playerID, targetPlayer, type, true, discard));
             }
         }
         return cardActions;

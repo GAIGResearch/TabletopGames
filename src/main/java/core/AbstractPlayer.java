@@ -3,6 +3,7 @@ package core;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
+import players.PlayerParameters;
 
 import java.util.Collections;
 import java.util.List;
@@ -15,11 +16,10 @@ public abstract class AbstractPlayer {
     // ID of this player, assigned by the game
     int playerID;
     String name;
-    Random rnd = new Random(System.currentTimeMillis());
+    protected Random rnd = new Random(System.currentTimeMillis());
     // Forward model for the game
     private AbstractForwardModel forwardModel;
-    private double exploreEpsilon;
-
+    private PlayerParameters parameters = new PlayerParameters(System.currentTimeMillis());
 
     /* Final methods */
 
@@ -66,12 +66,12 @@ public abstract class AbstractPlayer {
      * @return
      */
     public final AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
-        boolean explore = rnd.nextDouble() < exploreEpsilon;
+        boolean explore = rnd.nextDouble() < parameters.exploreEpsilon;
         if (explore) {
             int roll = rnd.nextInt(possibleActions.size());
             return possibleActions.get(roll);
         } else {
-            return _getAction(gameState, possibleActions);
+            return _getAction(gameState);
         }
     }
 
@@ -84,7 +84,7 @@ public abstract class AbstractPlayer {
      *
      * @param gameState observation of the current game state
      */
-    public abstract AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions);
+    public abstract AbstractAction _getAction(AbstractGameState gameState);
 
     /* Methods that can be implemented in subclass */
 
@@ -148,6 +148,10 @@ public abstract class AbstractPlayer {
      * @param epsilon
      */
     public void setExploration(double epsilon) {
-        exploreEpsilon = epsilon;
+        parameters.exploreEpsilon = epsilon;
+    }
+
+    public PlayerParameters getParameters() {
+        return parameters;
     }
 }

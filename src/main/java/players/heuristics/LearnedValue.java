@@ -81,8 +81,8 @@ public class LearnedValue extends AbstractPlayer implements ITreeProcessor {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
-        return valueHeuristic._getAction(gameState, possibleActions);
+    public AbstractAction _getAction(AbstractGameState gameState) {
+        return valueHeuristic._getAction(gameState);
     }
 
     private long initialiseFromFile() {

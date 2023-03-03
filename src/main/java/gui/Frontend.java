@@ -504,7 +504,7 @@ public class Frontend extends GUI {
         if (showAIWindow && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
             int nextPlayerID = state.getCurrentPlayer();
             AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
-            nextPlayer._getAction(state, gameRunning.getForwardModel().computeAvailableActions(state));
+            nextPlayer._getAction(state);
 
             JFrame AI_debug = new JFrame();
             AI_debug.setTitle(String.format("Player %d, Tick %d, Round %d, Turn %d",

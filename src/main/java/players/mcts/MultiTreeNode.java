@@ -124,11 +124,11 @@ public class MultiTreeNode extends SingleTreeNode {
                 // note that different players will enter rollout at different times, which is why
                 // we cannot have a simple rollout() method as in SingleTree search
                 AbstractPlayer agent = opponentModels[currentActor];
-                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(currentState);
+                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(currentState, mctsPlayer.params.actionSpaceType);
                 if (availableActions.isEmpty())
                     throw new AssertionError("We should always have something to choose from");
 
-                AbstractAction chosen = agent._getAction(currentState, availableActions);
+                AbstractAction chosen = agent._getAction(currentState);
                 actionsInRollout.add(new Pair<>(currentActor, chosen));
                 if (debug)
                     System.out.printf("Rollout action chosen for P%d - %s %n", currentActor, chosen);

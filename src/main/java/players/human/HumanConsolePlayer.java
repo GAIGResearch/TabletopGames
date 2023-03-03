@@ -12,11 +12,12 @@ import java.util.Scanner;
 public class HumanConsolePlayer extends AbstractPlayer {
 
     @Override
-    public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState observation) {
 
         if (observation instanceof IPrintable)
             ((IPrintable) observation).printToConsole();
 
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(observation, getParameters().actionSpaceType);
         for (int i = 0; i < actions.size(); i++)
             if (actions.get(i) != null) {
                 System.out.println("Action " + i + ": " + actions.get(i).getString(observation));

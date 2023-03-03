@@ -132,7 +132,7 @@ class BasicTreeNode {
 
     private void setState(AbstractGameState newState) {
         state = newState;
-        for (AbstractAction action : player.getForwardModel().computeAvailableActions(state)) {
+        for (AbstractAction action : player.getForwardModel().computeAvailableActions(state, player.params.actionSpaceType)) {
             children.put(action, null); // mark a new node to be expanded
         }
     }
@@ -234,8 +234,8 @@ class BasicTreeNode {
         AbstractGameState rolloutState = state.copy();
         if (player.params.rolloutLength > 0) {
             while (!finishRollout(rolloutState, rolloutDepth)) {
-                List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(rolloutState);
-                AbstractAction next = randomPlayer._getAction(rolloutState, availableActions);
+                List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(rolloutState, player.params.actionSpaceType);
+                AbstractAction next = randomPlayer._getAction(rolloutState);
                 advance(rolloutState, next);
                 rolloutDepth++;
             }

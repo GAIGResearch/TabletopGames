@@ -6,11 +6,11 @@ import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.battlelore.BattleloreGameState;
 import games.battlelore.actions.AttackUnitsAction;
-import games.battlelore.actions.MoveUnitsAction;
 import games.battlelore.actions.PlayCommandCardAction;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
+
 import java.util.List;
 import java.util.Random;
 
@@ -27,7 +27,7 @@ public class RuleBasedPlayer extends AbstractPlayer
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState observation) {
         BattleloreGameState state = (BattleloreGameState) observation;
         GridBoard<MapTile> board = state.getBoard();
         float playerUnitPower = 0.f;
@@ -65,6 +65,7 @@ public class RuleBasedPlayer extends AbstractPlayer
         }
 
         AbstractAction selectedAction;
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(observation, getParameters().actionSpaceType);
 
             for (AbstractAction action : actions) {
                 if (action instanceof AttackUnitsAction) {

@@ -7,6 +7,7 @@ import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.GuardAction;
+import games.loveletter.cards.LoveLetterCard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,52 +17,31 @@ import java.util.Objects;
  * The guard allows to attempt guessing another player's card. If the guess is correct, the targeted opponent
  * is removed from the game.
  */
-public class DeepGuardAction extends AbstractAction implements IExtendedSequence, IPrintable {
+public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, IPrintable {
     enum Step {
         TargetPlayer,
         CardType,
         Done
     }
-    private final int playerID;
     private int targetPlayer;
     private Step step;
 
     public DeepGuardAction(int playerID) {
-        this.playerID = playerID;
-        this.step = Step.TargetPlayer;
-    }
-
-    @Override
-    public boolean execute(AbstractGameState llgs) {
-        llgs.setActionInProgress(this);
-        return true;
-    }
-
-    public String toString(){
-        return "Guard (" + playerID + ")";
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
-    }
-
-    @Override
-    public void printToConsole(AbstractGameState gameState) {
-        System.out.println(this);
+        super(LoveLetterCard.CardType.Guard, playerID);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof DeepGuardAction)) return false;
+        if (!super.equals(o)) return false;
         DeepGuardAction that = (DeepGuardAction) o;
-        return playerID == that.playerID && step == that.step;
+        return targetPlayer == that.targetPlayer && step == that.step;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, step);
+        return Objects.hash(super.hashCode(), targetPlayer, step);
     }
 
     @Override
@@ -73,20 +53,15 @@ public class DeepGuardAction extends AbstractAction implements IExtendedSequence
             for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
                 if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                     continue;
-                cardActions.add(new GuardAction(playerID, targetPlayer, null, false));
+                cardActions.add(new GuardAction(playerID, targetPlayer, null, false, false));
             }
             // If no player can be targeted, create an effectively do-nothing action
-            if (cardActions.size() == 0) cardActions.add(new GuardAction(playerID, -1, null, false));
+            if (cardActions.size() == 0) cardActions.add(new GuardAction(playerID, -1, null, false, false));
         } else {
             // Complete actions
-            cardActions.addAll(GuardAction.generateActions(playerID, targetPlayer));
+            cardActions.addAll(GuardAction.generateActions(playerID, targetPlayer, false));
         }
         return cardActions;
-    }
-
-    @Override
-    public int getCurrentPlayer(AbstractGameState state) {
-        return playerID;
     }
 
     @Override
@@ -108,6 +83,7 @@ public class DeepGuardAction extends AbstractAction implements IExtendedSequence
     public DeepGuardAction copy() {
         DeepGuardAction copy = new DeepGuardAction(playerID);
         copy.step = step;
+        copy.targetPlayer = targetPlayer;
         return copy;
     }
 }

@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.ActionSpaceType;
 import core.actions.DoNothing;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
@@ -17,6 +18,8 @@ import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
+import players.mcts.MCTSParams;
+import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
@@ -917,18 +920,22 @@ public class Game {
      */
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "LoveLetter");
-        boolean useGUI = Utils.getArg(args, "gui", true);
+        boolean useGUI = Utils.getArg(args, "gui", false);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
-//        MCTSParams params1 = new MCTSParams();
-//        players.add(new MCTSPlayer(params1));
+        MCTSParams params1 = new MCTSParams();
+        params1.actionSpaceType = ActionSpaceType.Deep;
+        players.add(new MCTSPlayer(params1));
+        MCTSParams params2 = new MCTSParams();
+        params2.actionSpaceType = ActionSpaceType.Flat;
+        players.add(new MCTSPlayer(params2));
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
 //        players.add(new HumanGUIPlayer(ac));

@@ -1,5 +1,6 @@
 package core;
 
+import core.actions.ActionSpaceType;
 import evaluation.TunableParameters;
 
 import java.util.Arrays;
@@ -15,6 +16,9 @@ public class CoreParameters extends TunableParameters {
     public boolean alwaysDisplayFullObservable = false;
     public boolean alwaysDisplayCurrentPlayer = false;
     public long frameSleepMS = 100L;
+
+    // Action space type for this game
+    public ActionSpaceType actionSpaceType = ActionSpaceType.Deep;
 
     public CoreParameters() {
         super(0);

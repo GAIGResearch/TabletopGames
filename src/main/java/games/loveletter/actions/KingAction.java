@@ -17,8 +17,8 @@ import java.util.List;
  */
 public class KingAction extends PlayCard implements IPrintable {
 
-    public KingAction(int playerID, int opponentID, boolean canExecuteEffect) {
-        super(LoveLetterCard.CardType.King, playerID, opponentID, null, null, canExecuteEffect);
+    public KingAction(int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
+        super(LoveLetterCard.CardType.King, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
 
     @Override
@@ -63,14 +63,14 @@ public class KingAction extends PlayCard implements IPrintable {
         return this;
     }
 
-    public static List<AbstractAction> generateActions(LoveLetterGameState gs, int playerID) {
+    public static List<AbstractAction> generateActions(LoveLetterGameState gs, int playerID, boolean discard) {
         List<AbstractAction> cardActions = new ArrayList<>();
         for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
             if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                 continue;
-            cardActions.add(new KingAction(playerID, targetPlayer, true));
+            cardActions.add(new KingAction(playerID, targetPlayer, true, discard));
         }
-        if (cardActions.size() == 0) cardActions.add(new KingAction(playerID, -1, false));
+        if (cardActions.size() == 0) cardActions.add(new KingAction(playerID, -1, false, discard));
         return cardActions;
     }
 }

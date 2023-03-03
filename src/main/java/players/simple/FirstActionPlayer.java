@@ -3,13 +3,9 @@ package players.simple;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
-import core.AbstractForwardModel;
-import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.actions.AbstractAction;
 
 import java.util.List;
-import java.util.Random;
 
 public class FirstActionPlayer extends AbstractPlayer{
     /**
@@ -18,7 +14,8 @@ public class FirstActionPlayer extends AbstractPlayer{
      */
 
     @Override
-    public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState observation) {
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(observation, getParameters().actionSpaceType);
         return actions.get(0);
     }
 
