@@ -28,7 +28,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         // For example in Dominion where one can Throne Room a Throne Room, which then Thrones a Smithy
         if (currentState.actionsInProgress.size() > 0) {
             IExtendedSequence topOfStack = currentState.actionsInProgress.pop();
-            if (topOfStack != action) {
+            if (!topOfStack.equals(action)) {
                 topOfStack.registerActionTaken(currentState, action);
             } else {
                 if (currentState.actionsInProgress.size() > 0) {
