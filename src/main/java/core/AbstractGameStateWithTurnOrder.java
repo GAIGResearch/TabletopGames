@@ -1,7 +1,7 @@
 package core;
 
 import core.turnorders.TurnOrder;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.IGameListener;
 
 /**
  * Contains all game state information.
@@ -47,8 +47,6 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
     @Override
     public int getTurnCounter() {return turnOrder.getTurnCounter();}
     @Override
-    public int getTurnOwner() {return turnOrder.getTurnOwner();}
-    @Override
     public int getFirstPlayer() {return turnOrder.getFirstPlayer();}
     @Override
     public int getNPlayers() {return turnOrder.nPlayers();}
@@ -64,7 +62,7 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
     }
 
 
-    public void addListener(GameListener listener) {
+    public void addListener(IGameListener listener) {
         turnOrder.addListener(listener);
     }
 

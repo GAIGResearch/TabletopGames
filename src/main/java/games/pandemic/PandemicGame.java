@@ -1,7 +1,8 @@
 package games.pandemic;
 
 import core.*;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.IGameListener;
+import evaluation.listeners.MetricsGameListener;
 import games.GameType;
 import games.pandemic.stats.PandemicMetrics;
 import players.PlayerType;
@@ -23,7 +24,7 @@ public class PandemicGame extends Game {
     }
 
     public static Game runCompetition(String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                                      boolean randomizeParameters, List<GameListener> listeners, int nRepetitions, ActionController ac){
+                                      boolean randomizeParameters, List<IGameListener> listeners, int nRepetitions, ActionController ac){
         boolean detailedStatistics = true;
         boolean printStatSummary = false;
 
@@ -65,9 +66,9 @@ public class PandemicGame extends Game {
 
         // logging setup
         FileStatsLogger logger = new FileStatsLogger(logFile);
-        GameListener pl = new GameListener(logger, new PandemicMetrics().getAllMetrics());
+        MetricsGameListener pl = new MetricsGameListener(logger, new PandemicMetrics().getAllMetrics());
 
-        ArrayList<GameListener> listeners = new ArrayList<>();
+        List<IGameListener> listeners = new ArrayList<>();
         listeners.add((pl));
 
         List<AbstractPlayer> players = new ArrayList<>();
@@ -145,8 +146,8 @@ public class PandemicGame extends Game {
         for (PlayerType playerType : playersToTest) {
 
             // logging setup
-            GameListener pl = new GameListener(new SummaryLogger(), new PandemicMetrics().getAllMetrics());
-            ArrayList<GameListener> listeners = new ArrayList<>();
+            MetricsGameListener pl = new MetricsGameListener(new SummaryLogger(), new PandemicMetrics().getAllMetrics());
+            List<IGameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 
             PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());

@@ -2,19 +2,10 @@ package evaluation.listeners;
 
 import core.Game;
 import core.interfaces.IStatisticLogger;
-import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.Event;
-import evaluation.metrics.GameMetrics;
-import evaluation.metrics.IMetricsCollection;
-import evaluation.summarisers.TAGNumericStatSummary;
-import evaluation.summarisers.TAGOccurrenceStatSummary;
-import evaluation.summarisers.TAGTimeSeriesSummary;
+import evaluation.metrics.*;
+import evaluation.summarisers.*;
 import utilities.TimeStamp;
-import utilities.Utils;
-import evaluation.summarisers.TAGStatSummary;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
 import java.util.*;
 
 /**
@@ -26,35 +17,30 @@ import java.util.*;
  * See {@link games.sushigo.metrics.SushiGoMetrics} for an example of a metric collection.
  * See {@link games.terraformingmars.stats.TMStatsVisualiser} for an example of a visualiser of metrics.
  */
-public class GameListener {
+public class MetricsGameListener implements IGameListener {
 
     // One logger per event type for this listener
-    protected HashMap<Event.GameEvent, IStatisticLogger> loggers;
+    protected Map<Event.GameEvent, IStatisticLogger> loggers;
 
     // List of metrics we are going to extract.
-    protected HashMap<String, AbstractMetric> metrics;
+    protected Map<String, AbstractMetric> metrics;
+
+    protected Set<Event.GameEvent> eventsOfInterest = new HashSet<>();
 
     // Game this listener listens to
     protected Game game;
 
-    public GameListener() {}
-    public GameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
-        setup(logger);
+    public MetricsGameListener() {}
+    public MetricsGameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
+        this.metrics = new LinkedHashMap<>();
+        this.loggers = new HashMap<>();
         for (AbstractMetric m : metrics) {
             this.metrics.put(m.getName(), m);
+            eventsOfInterest.addAll(m.getEventTypes());
         }
-    }
-
-    /**
-     * Initializes loggers based on the type provided. Initializes metrics hashmap.
-     * @param logger - instance of logger class to be used for this listener.
-     */
-    private void setup(IStatisticLogger logger) {
-        this.loggers = new HashMap<>();
-        for (Event.GameEvent event: Event.GameEvent.values()) {
+        for (Event.GameEvent event: eventsOfInterest) {
             this.loggers.put(event, logger.emptyCopy(event.name()));
         }
-        this.metrics = new HashMap<>();
     }
 
     /**
@@ -63,8 +49,12 @@ public class GameListener {
      *               It's not guaranteed that the data fields are different to null, so a check is necessary.
      */
     public void onEvent(Event event) {
-        Map<String, Object> data = new TreeMap<>();
-        Map<String, TAGStatSummary> aggregators = new HashMap<>();
+        if (!eventsOfInterest.contains(event.type))
+            return;
+
+        // Use of LinkedHashMap so that data is stored in the same order it is listed in the json config file
+        Map<String, Object> data = new LinkedHashMap<>();
+        Map<String, TAGStatSummary> aggregators = new LinkedHashMap<>();
 
         for (String attrStr : metrics.keySet()) {
             AbstractMetric metric = metrics.get(attrStr);
@@ -210,91 +200,11 @@ public class GameListener {
     }
 
     /* Getters, setters */
-    public final HashMap<Event.GameEvent, IStatisticLogger> getLoggers() {
+    public final Map<Event.GameEvent, IStatisticLogger> getLoggers() {
         return loggers;
     }
     public final void setGame(Game game) { this.game = game; }
     public final Game getGame() { return game; }
 
-    /**
-     * Create listener based on given class, logger and metrics class. TODO: more than 1 metrics class
-     * @param listenerClass - class of listener, full path (e.g. evaluation.metrics.GameListener)
-     * @param logger - class of logger (e.g. evaluation.loggers.SummaryLogger)
-     * @param metricsClass - class of metrics, full path (e.g. evaluation.metrics.GameMetrics)
-     * @return - GameListener instance to be attached to a game
-     */
-    public static GameListener createListener(String listenerClass, IStatisticLogger logger, String metricsClass) {
-        // first we check to see if listenerClass is a file or not
-        GameListener listener = null;
-        ArrayList<AbstractMetric> metrics = new ArrayList<>();
-        File listenerDetails = new File(listenerClass);
-        if (listenerDetails.exists()) {
-            // in this case we construct from file
-            listener = Utils.loadClassFromFile(listenerClass);
-        } else {
-            if (!metricsClass.equals("")) {
-                try {
-                    String[] classPaths = metricsClass.split(",");
-                    for (String c: classPaths) {
-                        Class<?> clazz = Class.forName(c);
-                        Constructor<?> constructor;
-                        try {
-                            constructor = clazz.getConstructor();
-                            IMetricsCollection metricsInstance = (IMetricsCollection) constructor.newInstance();
-                            metrics.addAll(Arrays.asList(metricsInstance.getAllMetrics()));
-                        } catch (NoSuchMethodException e) {
-                            return createListener(listenerClass);
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            if (!listenerClass.equals("")) {
-                try {
-                    Class<?> clazz = Class.forName(listenerClass);
-                    Constructor<?> constructor;
-                    try {
-                        constructor = clazz.getConstructor(IStatisticLogger.class, AbstractMetric[].class);
-                        listener = (GameListener) constructor.newInstance(logger, metrics.toArray(new AbstractMetric[0]));
-                    } catch (NoSuchMethodException e) {
-                        return createListener(listenerClass);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        if(listener == null) {
-            // default
-            AbstractMetric[] ms = new GameMetrics().getAllMetrics();
-            return new GameListener(logger, ms);
-        }
 
-        return listener;
-    }
-
-    /**
-     * @return empty game listener given class, no logger, no metrics
-     */
-    static GameListener createListener(String listenerClass) {
-        GameListener listener = null;
-        try {
-            Class<?> clazz = Class.forName(listenerClass);
-            Constructor<?> constructor;
-            constructor = clazz.getConstructor();
-            listener = (GameListener) constructor.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if(listener == null)
-            return new GameListener(null, new AbstractMetric[0]);
-        return listener;
-    }
-
-    // Test main method
-//    public static void main(String args[])
-//    {
-//        Utils.loadClassFromFile("data/metrics/loveletter.json");
-//    }
 }

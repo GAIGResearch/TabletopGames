@@ -17,6 +17,9 @@ public class Bureaucrat extends DominionAttackAction {
     public Bureaucrat(int playerId) {
         super(CardType.BUREAUCRAT, playerId);
     }
+    public Bureaucrat(int playerId, boolean dummy) {
+        super(CardType.BUREAUCRAT, playerId, dummy);
+    }
 
     boolean victimHasResponded = false;
 
@@ -81,7 +84,7 @@ public class Bureaucrat extends DominionAttackAction {
      */
     @Override
     public Bureaucrat _copy() {
-        Bureaucrat retValue = new Bureaucrat(player);
+        Bureaucrat retValue = new Bureaucrat(player, dummyAction);
         retValue.victimHasResponded = victimHasResponded;
         return retValue;
     }

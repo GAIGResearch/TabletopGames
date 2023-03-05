@@ -4,19 +4,19 @@ import core.*;
 import games.GameType;
 import utilities.Pair;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class AbstractTournament {
     // List of players taking part in the tournament
-    protected List<AbstractPlayer> agents;
+    protected List<? extends AbstractPlayer> agents;
     // Games to play
     protected List<Game> games;
     // Number of players in the games, index matches the games list
     protected List<Integer> playersPerGame;
     // Filename to write the results of the tournament
     protected String resultsFileName;
+
 
     /**
      * Constructor, initialises the tournament given a list of players, a game to play and the number of players
@@ -25,7 +25,7 @@ public abstract class AbstractTournament {
      * @param gameToPlay - game to play in this tournament.
      * @param nPlayerPerGame - number of players per game.
      */
-    public AbstractTournament(List<AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame, AbstractParameters gameParams){
+    public AbstractTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame, AbstractParameters gameParams){
         this.agents = agents;
         this.games = new ArrayList<>();
         this.playersPerGame = new ArrayList<>();

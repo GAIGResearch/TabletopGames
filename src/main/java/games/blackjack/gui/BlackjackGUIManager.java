@@ -176,7 +176,6 @@ public class BlackjackGUIManager extends AbstractGUIManager {
         gameInfo.add(playerStatus);
         gameInfo.add(playerScores);
         gameInfo.add(gamePhase);
-        gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
 

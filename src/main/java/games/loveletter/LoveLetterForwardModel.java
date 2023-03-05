@@ -133,7 +133,6 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
         if (llgs.playerHandCards.get(llgs.getCurrentPlayer()).getSize() >= 2)
             throw new AssertionError("Hand should not get this big");
-
         if (!checkEndOfRound(llgs, action)) {
             // move turn to the next player who has not already lost the round
             int nextPlayer = gameState.getCurrentPlayer();

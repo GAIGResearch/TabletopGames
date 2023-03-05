@@ -1,8 +1,10 @@
 package evaluation.metrics;
-import evaluation.listeners.GameListener;
+
+import evaluation.listeners.MetricsGameListener;
 import evaluation.summarisers.TAGStatSummary;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public abstract class AbstractMetric
 {
@@ -10,7 +12,11 @@ public abstract class AbstractMetric
     private final Set<Event.GameEvent> eventTypes;
 
     public AbstractMetric() {
-        this.eventTypes = getEventTypes();
+        this.eventTypes = getDefaultEventTypes();
+    }
+
+    public AbstractMetric(Event.GameEvent... args) {
+        eventTypes = Arrays.stream(args).collect(Collectors.toSet());
     }
 
     /**
@@ -18,12 +24,16 @@ public abstract class AbstractMetric
      * @param listener - game listener object, with access to the game itself and loggers
      * @param e - event, including game event type, state, action and player ID (if these properties are relevant, they may not be set depending on event type)
      */
-    public abstract Object run(GameListener listener, Event e);
+    public abstract Object run(MetricsGameListener listener, Event e);
 
     /**
      * @return set of game events this metric should record information for.
      */
-    public abstract Set<Event.GameEvent> getEventTypes();
+    public abstract Set<Event.GameEvent> getDefaultEventTypes();
+
+    public Set<Event.GameEvent> getEventTypes() {
+        return eventTypes;
+    }
 
     /**
      * @return true if metric recorded for each player independently. Overwrite in subclass if true.

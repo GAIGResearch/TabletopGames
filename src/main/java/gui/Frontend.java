@@ -2,7 +2,7 @@ package gui;
 
 import core.*;
 import core.actions.AbstractAction;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.MetricsGameListener;
 import evaluation.TunableParameters;
 import evaluation.metrics.Event;
 import games.GameType;
@@ -487,7 +487,7 @@ public class Frontend extends GUI {
 
     private void listenForDecisions() {
         // add a listener to detect every time an action has been taken
-        gameRunning.addListener(new GameListener() {
+        gameRunning.addListener(new MetricsGameListener() {
             @Override
             public void onEvent(evaluation.metrics.Event event)
             {
@@ -504,7 +504,7 @@ public class Frontend extends GUI {
         if (showAIWindow && state.isNotTerminal() && !gameRunning.isHumanToMove()) {
             int nextPlayerID = state.getCurrentPlayer();
             AbstractPlayer nextPlayer = gameRunning.getPlayers().get(nextPlayerID);
-            nextPlayer._getAction(state, gameRunning.getForwardModel().computeAvailableActions(state));
+            nextPlayer.getAction(state, gameRunning.getForwardModel().computeAvailableActions(state));
 
             JFrame AI_debug = new JFrame();
             AI_debug.setTitle(String.format("Player %d, Tick %d, Round %d, Turn %d",

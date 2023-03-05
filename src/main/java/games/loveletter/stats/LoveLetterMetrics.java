@@ -5,7 +5,7 @@ import core.actions.LogEvent;
 import core.components.Deck;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.IMetricsCollection;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.*;
@@ -19,7 +19,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
     public static class ActionsPlayed extends AbstractMetric
     {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             Deck<LoveLetterCard> played = ((LoveLetterGameState)e.state).getPlayerDiscardCards().get(e.playerID);
             StringBuilder ss = new StringBuilder();
             for (LoveLetterCard card : played.getComponents()) {
@@ -34,7 +34,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             return true;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
         }
     }
@@ -42,7 +42,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
     public static class ActionsPlayedWin extends AbstractMetric
     {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             StringBuilder ss = new StringBuilder();
             if (e.state.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN_ROUND) {
                 Deck<LoveLetterCard> played = ((LoveLetterGameState)e.state).getPlayerDiscardCards().get(e.playerID);
@@ -59,7 +59,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             return true;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
     }
@@ -67,7 +67,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
     public static class DiscardedCards extends AbstractMetric
     {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int nCards = 0;
             LoveLetterGameState llgs = (LoveLetterGameState) e.state;
             for (int i = 0; i < e.state.getNPlayers(); i++) {
@@ -80,7 +80,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             return true;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
     }
@@ -88,7 +88,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
     public static class EliminatingCards extends AbstractMetric {
 
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             // This is spawned whenever a player is eliminated
             String[] text = ((LogEvent)e.action).text.split(":")[1].split(",");
             int killer = Integer.parseInt(text[0].trim());
@@ -98,7 +98,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_EVENT);
         }
     }
@@ -106,12 +106,12 @@ public class LoveLetterMetrics implements IMetricsCollection {
     public static class WinningCards extends AbstractMetric {
 
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
 
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             PlayCard action = (PlayCard) e.state.getHistory().get(e.state.getHistory().size()-1);  // Last action played
             return processAction((LoveLetterGameState) e.state, action);
         }

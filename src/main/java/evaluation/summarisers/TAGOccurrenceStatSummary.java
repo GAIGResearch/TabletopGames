@@ -126,8 +126,8 @@ public class TAGOccurrenceStatSummary extends TAGStatSummary {
         //header
 //        stb.append(name).append("\n");
         stb.append("\tCount - Measure\n");
-        for(Object k : elements.keySet())
-            sortedByVal.add(new DataMeasure(k.toString(), elements.get(k)));
+        for(Map.Entry<Object, Integer> k : elements.entrySet())
+            sortedByVal.add(new DataMeasure(k.getKey().toString(), k.getValue()));
 
         for(DataMeasure d : sortedByVal)
             stb.append("\t").append(d.toString()).append("\n");

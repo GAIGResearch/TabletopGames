@@ -15,6 +15,9 @@ public class Artisan extends DominionAction implements IExtendedSequence {
     public Artisan(int playerId) {
         super(CardType.ARTISAN, playerId);
     }
+    public Artisan(int playerId, boolean dummy) {
+        super(CardType.ARTISAN, playerId, dummy);
+    }
 
     public final int MAX_COST_OF_GAINED_CARD = 5;
 
@@ -63,7 +66,7 @@ public class Artisan extends DominionAction implements IExtendedSequence {
 
     @Override
     public Artisan copy() {
-        Artisan retValue = new Artisan(player);
+        Artisan retValue = new Artisan(player, dummyAction);
         retValue.putCardOnDeck = putCardOnDeck;
         retValue.gainedCard = gainedCard;
         return retValue;
@@ -73,13 +76,13 @@ public class Artisan extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof Artisan) {
             Artisan other = (Artisan) obj;
-            return other.gainedCard == gainedCard && other.putCardOnDeck == putCardOnDeck && other.player == player;
+            return other.gainedCard == gainedCard && other.putCardOnDeck == putCardOnDeck && super.equals(obj);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(gainedCard, putCardOnDeck, player, CardType.ARTISAN);
+        return Objects.hash(gainedCard, putCardOnDeck) + 31 * super.hashCode();
     }
 }
