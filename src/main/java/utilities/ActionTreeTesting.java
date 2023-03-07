@@ -116,8 +116,10 @@ public class ActionTreeTesting {
         ActionTreeNode y9 = x3.addChild(12, "y3-3");
 
         // Print flattend tree
-        System.out.println(root.flattenValues());
-        System.out.println(root.flattenBreadthFirst());
+        List<ActionTreeNode> leafs = root.getLeafNodes();
+        for (ActionTreeNode leaf : leafs) {
+            System.out.println(leaf.getName());
+        }
     }
 
     public static void main(String[] args) {

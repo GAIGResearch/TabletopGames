@@ -81,6 +81,22 @@ public class ActionTreeNode {
         return names;
     }
 
+    // Searches the tree breadth first for all leaf nodes and returns them
+    public List<ActionTreeNode> getLeafNodes(){
+        List<ActionTreeNode> nodes = new ArrayList<ActionTreeNode>();
+        List<ActionTreeNode> leafNodes = new ArrayList<ActionTreeNode>();
+        nodes.add(this);
+        while(nodes.size() > 0){
+            ActionTreeNode node = nodes.remove(0);
+            if(node.children.size() == 0){
+                leafNodes.add(node);
+            } else {
+                nodes.addAll(node.children);
+            }
+        }
+        return leafNodes;
+    }
+
     public List<Integer> flattenBreadthFirst(){
         List<Integer> values = new ArrayList<Integer>();
         List<ActionTreeNode> nodes = new ArrayList<ActionTreeNode>();
