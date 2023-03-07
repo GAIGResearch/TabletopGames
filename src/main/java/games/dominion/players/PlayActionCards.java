@@ -24,7 +24,7 @@ public class PlayActionCards extends BigMoney {
     @Override
     public AbstractAction _getAction(AbstractGameState gameState) {
         DominionGameState state = (DominionGameState) gameState;
-        List<AbstractAction> actions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpaceType);
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpace);
         if (state.getGamePhase() == DominionGameState.DominionGamePhase.Play) {
             return actions.get(rnd.nextInt(actions.size()));
         } else {

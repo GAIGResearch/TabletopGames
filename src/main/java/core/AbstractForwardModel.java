@@ -1,7 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.actions.ActionSpaceType;
+import core.actions.ActionSpace;
 import core.interfaces.actionSpaces.IDeepActionSpace;
 import core.interfaces.actionSpaces.IFlatActionSpace;
 import utilities.ElapsedCpuChessTimer;
@@ -150,18 +150,18 @@ public abstract class AbstractForwardModel {
      * @return - the list of actions available.
      */
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
-        return computeAvailableActions(gameState, gameState.coreGameParameters.actionSpaceType);
+        return computeAvailableActions(gameState, gameState.coreGameParameters.actionSpace);
     }
 
-    public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, ActionSpaceType actionSpaceType) {
+    public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         // If there is an action in progress (see IExtendedSequence), then delegate to that
         if (gameState.isActionInProgress()) {
             return gameState.actionsInProgress.peek()._computeAvailableActions(gameState);
         }
-        if (actionSpaceType != null) {
-            if (actionSpaceType == ActionSpaceType.Flat) {
+        if (actionSpace != null) {
+            if (actionSpace.structure == ActionSpace.Structure.Flat) {
                 return ((IFlatActionSpace)this).computeAvailableFlatActions(gameState);
-            } else if (actionSpaceType == ActionSpaceType.Deep) {
+            } else if (actionSpace.structure == ActionSpace.Structure.Deep) {
                 return ((IDeepActionSpace)this).computeAvailableDeepActions(gameState);
             }
             return _computeAvailableActions(gameState);

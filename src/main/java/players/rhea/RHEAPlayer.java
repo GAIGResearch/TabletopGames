@@ -108,7 +108,7 @@ public class RHEAPlayer extends AbstractPlayer {
             logStatistics(stateObs);
         // Return first action of best individual
         AbstractAction retValue = population.get(0).actions[0];
-        List<AbstractAction> actions = getForwardModel().computeAvailableActions(stateObs, params.actionSpaceType);
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(stateObs, params.actionSpace);
         if (!actions.contains(retValue))
             throw new AssertionError("Action chosen is not legitimate " + numIters + ", " + params.shiftLeft);
         return retValue;

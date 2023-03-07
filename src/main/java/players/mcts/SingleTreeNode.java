@@ -178,7 +178,7 @@ public class SingleTreeNode {
         // so check the MCTSParams as well
         openLoopState = actionState;
         if (actionState.getCurrentPlayer() == this.decisionPlayer) {
-            actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpaceType);
+            actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace);
             //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
 //                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
             if (params.expansionPolicy == MAST) {
@@ -545,7 +545,7 @@ public class SingleTreeNode {
         while (gs.getCurrentPlayer() != id && gs.isNotTerminalForPlayer(id)) {
             //       AbstractGameState preGS = gs.copy();
             AbstractPlayer oppModel = opponentModels[gs.getCurrentPlayer()];
-            List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs, params.actionSpaceType);
+            List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs, params.actionSpace);
             if (availableActions.isEmpty())
                 throw new AssertionError("Should always have at least one action possible...");
             AbstractAction action = oppModel._getAction(gs);
@@ -820,7 +820,7 @@ public class SingleTreeNode {
             }
 
             while (!finishRollout(rolloutState, rolloutDepth, decisionPlayer, lastActor, roundAtStartOfRollout)) {
-                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState, params.actionSpaceType);
+                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState, params.actionSpace);
                 if (availableActions.isEmpty())
                     break;
                 AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()]._getAction(rolloutState);

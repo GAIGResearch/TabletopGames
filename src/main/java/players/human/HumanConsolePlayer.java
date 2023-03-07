@@ -17,7 +17,7 @@ public class HumanConsolePlayer extends AbstractPlayer {
         if (observation instanceof IPrintable)
             ((IPrintable) observation).printToConsole();
 
-        List<AbstractAction> actions = getForwardModel().computeAvailableActions(observation, getParameters().actionSpaceType);
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(observation, getParameters().actionSpace);
         for (int i = 0; i < actions.size(); i++)
             if (actions.get(i) != null) {
                 System.out.println("Action " + i + ": " + actions.get(i).getString(observation));

@@ -43,7 +43,7 @@ public class OSLAPlayer extends AbstractPlayer {
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
         int playerID = gs.getCurrentPlayer();
-        List<AbstractAction> actions = getForwardModel().computeAvailableActions(gs, getParameters().actionSpaceType);
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(gs, getParameters().actionSpace);
 
         double[] valState = new double[actions.size()];
         for (int actionIndex = 0; actionIndex < actions.size(); actionIndex++) {

@@ -74,7 +74,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         for (int i = 0; i < 11; i++){
             actionPriorityLists.add(new ArrayList<>());
         }
-        List<AbstractAction> possibleActions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpaceType);
+        List<AbstractAction> possibleActions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpace);
 
         switch (gamePhase){
             case Setup:

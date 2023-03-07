@@ -65,7 +65,7 @@ public class RuleBasedPlayer extends AbstractPlayer
         }
 
         AbstractAction selectedAction;
-        List<AbstractAction> actions = getForwardModel().computeAvailableActions(observation, getParameters().actionSpaceType);
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(observation, getParameters().actionSpace);
 
             for (AbstractAction action : actions) {
                 if (action instanceof AttackUnitsAction) {

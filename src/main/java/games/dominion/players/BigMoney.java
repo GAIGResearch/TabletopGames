@@ -27,7 +27,7 @@ public class BigMoney extends AbstractPlayer {
 
         if (state.getGamePhase() != DominionGameState.DominionGamePhase.Buy)
             return new EndPhase();
-        List<AbstractAction> actions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpaceType);
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpace);
 
         switch (cash) {
             case 0:

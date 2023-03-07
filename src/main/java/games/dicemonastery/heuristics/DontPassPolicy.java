@@ -28,7 +28,7 @@ public class DontPassPolicy extends AbstractPlayer {
         AbstractAction vellum = new PrepareVellum(state.getParams().prepareVellumCost);
         AbstractAction bakeBread = new BakeBread(state.getParams().bakeBreadCost);
 
-        List<AbstractAction> possibleActions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpaceType);
+        List<AbstractAction> possibleActions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpace);
 
         // We first check a few priorities
         if (possibleActions.contains(vellum))

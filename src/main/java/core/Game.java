@@ -1,7 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.actions.ActionSpaceType;
+import core.actions.ActionSpace;
 import core.actions.DoNothing;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
@@ -20,7 +20,6 @@ import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
-import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -931,10 +930,10 @@ public class Game {
 //        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
         MCTSParams params1 = new MCTSParams();
-        params1.actionSpaceType = ActionSpaceType.Deep;
+        params1.actionSpace = new ActionSpace(ActionSpace.Structure.Deep);
         players.add(new MCTSPlayer(params1));
         MCTSParams params2 = new MCTSParams();
-        params2.actionSpaceType = ActionSpaceType.Flat;
+        params2.actionSpace = new ActionSpace(ActionSpace.Structure.Flat);
         players.add(new MCTSPlayer(params2));
 //        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());

@@ -1,6 +1,6 @@
 package players;
 
-import core.actions.ActionSpaceType;
+import core.actions.ActionSpace;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 
@@ -19,14 +19,16 @@ public class PlayerParameters extends TunableParameters {
     public IStateHeuristic gameHeuristic;
 
     // Action space type for this player
-    public ActionSpaceType actionSpaceType = ActionSpaceType.Default;
+    public ActionSpace actionSpace = new ActionSpace();
 
     public PlayerParameters(long seed) {
         super(seed);
         addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS, Arrays.asList(PlayerConstants.values()));
         addTunableParameter("budget", 4000, Arrays.asList(100, 300, 1000, 3000, 10000, 30000, 100000));
         addTunableParameter("breakMS", 10);
-        addTunableParameter("actionSpaceType", ActionSpaceType.Default, Arrays.asList(ActionSpaceType.values()));
+        addTunableParameter("actionSpaceStructure", ActionSpace.Structure.Default, Arrays.asList(ActionSpace.Structure.values()));
+        addTunableParameter("actionSpaceFlexibility", ActionSpace.Flexibility.Default, Arrays.asList(ActionSpace.Flexibility.values()));
+        addTunableParameter("actionSpaceContext", ActionSpace.Context.Default, Arrays.asList(ActionSpace.Context.values()));
     }
 
     @Override
@@ -37,7 +39,7 @@ public class PlayerParameters extends TunableParameters {
         params.budget = budget;
         params.breakMS = breakMS;
         params.gameHeuristic = gameHeuristic;
-        params.actionSpaceType = actionSpaceType;
+        params.actionSpace = actionSpace;
         return null;
     }
 
@@ -46,7 +48,9 @@ public class PlayerParameters extends TunableParameters {
         budget = (int) getParameterValue("budget");
         breakMS = (int) getParameterValue("breakMS");
         budgetType = (PlayerConstants) getParameterValue("budgetType");
-        actionSpaceType = (ActionSpaceType) getParameterValue("actionSpaceType");
+        actionSpace = new ActionSpace ((ActionSpace.Structure) getParameterValue("actionSpaceStructure"),
+                                        (ActionSpace.Flexibility) getParameterValue("actionSpaceFlexibility"),
+                                        (ActionSpace.Context) getParameterValue("actionSpaceContext"));
     }
 
     @Override
@@ -55,12 +59,12 @@ public class PlayerParameters extends TunableParameters {
         if (!(o instanceof PlayerParameters)) return false;
         if (!super.equals(o)) return false;
         PlayerParameters that = (PlayerParameters) o;
-        return Double.compare(that.exploreEpsilon, exploreEpsilon) == 0 && budget == that.budget && breakMS == that.breakMS && budgetType == that.budgetType && Objects.equals(gameHeuristic, that.gameHeuristic) && actionSpaceType == that.actionSpaceType;
+        return Double.compare(that.exploreEpsilon, exploreEpsilon) == 0 && budget == that.budget && breakMS == that.breakMS && budgetType == that.budgetType && Objects.equals(gameHeuristic, that.gameHeuristic) && Objects.equals(actionSpace, that.actionSpace);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), exploreEpsilon, budgetType, budget, breakMS, gameHeuristic, actionSpaceType);
+        return Objects.hash(super.hashCode(), exploreEpsilon, budgetType, budget, breakMS, gameHeuristic, actionSpace);
     }
 
     @Override
