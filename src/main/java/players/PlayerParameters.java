@@ -26,6 +26,7 @@ public class PlayerParameters extends TunableParameters {
         addTunableParameter("budgetType", PlayerConstants.BUDGET_FM_CALLS, Arrays.asList(PlayerConstants.values()));
         addTunableParameter("budget", 4000, Arrays.asList(100, 300, 1000, 3000, 10000, 30000, 100000));
         addTunableParameter("breakMS", 10);
+        addTunableParameter("actionSpaceType", ActionSpaceType.Default, Arrays.asList(ActionSpaceType.values()));
     }
 
     @Override
@@ -45,17 +46,21 @@ public class PlayerParameters extends TunableParameters {
         budget = (int) getParameterValue("budget");
         breakMS = (int) getParameterValue("breakMS");
         budgetType = (PlayerConstants) getParameterValue("budgetType");
+        actionSpaceType = (ActionSpaceType) getParameterValue("actionSpaceType");
     }
 
-    protected boolean _equals(Object o) {
+    @Override
+    public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PlayerParameters)) return false;
-        return super.equals(o);
+        if (!super.equals(o)) return false;
+        PlayerParameters that = (PlayerParameters) o;
+        return Double.compare(that.exploreEpsilon, exploreEpsilon) == 0 && budget == that.budget && breakMS == that.breakMS && budgetType == that.budgetType && Objects.equals(gameHeuristic, that.gameHeuristic) && actionSpaceType == that.actionSpaceType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), budgetType, budget, gameHeuristic);
+        return Objects.hash(super.hashCode(), exploreEpsilon, budgetType, budget, breakMS, gameHeuristic, actionSpaceType);
     }
 
     @Override
