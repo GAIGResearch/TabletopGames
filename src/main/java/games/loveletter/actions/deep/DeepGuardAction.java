@@ -28,6 +28,8 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
 
     public DeepGuardAction(int playerID) {
         super(LoveLetterCard.CardType.Guard, playerID);
+        step = Step.TargetPlayer;
+        targetPlayer = -1;
     }
 
     @Override
