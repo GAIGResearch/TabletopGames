@@ -1,0 +1,14 @@
+{
+  "class" : "players.mcts.MCTSParams",
+  "selectionPolicy" : "SIMPLE",
+  "rolloutLength" : 300,
+  "information" : "Open_Loop",
+  "opponentTreePolicy" : "SelfOnly",
+  "maxTreeDepth" : 30,
+  "treePolicy" : "EXP3",
+  "expansionPolicy" : "RANDOM",
+  "budgetType" : "BUDGET_TIME",
+  "budget" : 10000,
+  "breakMS" : 0,
+  "actionSpaceType" : "Flat"
+}
