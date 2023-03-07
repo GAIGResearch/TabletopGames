@@ -300,7 +300,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IFla
         if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
             throw new AssertionError("???.");
 
-        ArrayList<AbstractAction> actions = new ArrayList<>();
+        Set<AbstractAction> actions = new HashSet<>();
         int playerID = gameState.getCurrentPlayer();
         Deck<LoveLetterCard> playerDeck = llgs.playerHandCards.get(playerID);
 
@@ -354,7 +354,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IFla
             actions.addAll(cardActions);
         }
 
-        return actions;
+        return new ArrayList<>(actions);
     }
 
     @Override
@@ -372,7 +372,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IFla
         if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
             throw new AssertionError("???.");
 
-        ArrayList<AbstractAction> actions = new ArrayList<>();
+        Set<AbstractAction> actions = new HashSet<>();
         int playerID = gameState.getCurrentPlayer();
         Deck<LoveLetterCard> playerDeck = llgs.playerHandCards.get(playerID);
 
@@ -426,6 +426,6 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IFla
             actions.addAll(cardActions);
         }
 
-        return actions;
+        return new ArrayList<>(actions);
     }
 }
