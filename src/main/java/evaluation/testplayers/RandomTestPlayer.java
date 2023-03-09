@@ -34,11 +34,10 @@ public class RandomTestPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gs ) {
+    public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions) {
         // Iterate through all actions available to gather statistics
         HashSet<AbstractGameState> states = new HashSet<>();
         states.add(gs.copy());
-        List<AbstractAction> actions = getForwardModel().computeAvailableActions(gs, getParameters().actionSpace);
         for (AbstractAction action : actions) {
             AbstractGameState gsCopy = gs.copy();
             getForwardModel().next(gsCopy, action);

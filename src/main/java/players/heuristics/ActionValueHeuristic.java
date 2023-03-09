@@ -115,9 +115,7 @@ public class ActionValueHeuristic extends AbstractPlayer implements ToDoubleBiFu
 
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState) {
-        List<AbstractAction> possibleActions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpace);
-
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         if (possibleActions.size() == 1)
             return possibleActions.get(0);
 

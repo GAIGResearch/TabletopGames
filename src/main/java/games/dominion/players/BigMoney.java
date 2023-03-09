@@ -19,7 +19,7 @@ public class BigMoney extends AbstractPlayer {
      * @param gameState observation of the current game state
      */
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         DominionGameState state = (DominionGameState) gameState;
         int player = gameState.getCurrentPlayer();
         int cash = state.availableSpend(player);

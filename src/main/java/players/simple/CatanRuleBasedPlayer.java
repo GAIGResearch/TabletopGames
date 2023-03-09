@@ -60,7 +60,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
     public CatanRuleBasedPlayer() {this(new Random());}
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         CatanGameState cgs = (CatanGameState) gameState;
         roadBlocked = checkIfRoadBlocked(cgs);
         this.currentResources = cgs.getPlayerResources(getPlayerID());
@@ -74,7 +74,6 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
         for (int i = 0; i < 11; i++){
             actionPriorityLists.add(new ArrayList<>());
         }
-        List<AbstractAction> possibleActions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpace);
 
         switch (gamePhase){
             case Setup:

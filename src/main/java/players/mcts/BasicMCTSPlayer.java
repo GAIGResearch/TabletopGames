@@ -5,6 +5,7 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
 
+import java.util.List;
 import java.util.Random;
 
 import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
@@ -53,7 +54,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
         BasicTreeNode root = new BasicTreeNode(this, null, gameState, rnd);
 

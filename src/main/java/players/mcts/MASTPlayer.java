@@ -25,8 +25,7 @@ public class MASTPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState) {
-        List<AbstractAction> possibleActions = getForwardModel().computeAvailableActions(gameState, getParameters().actionSpace);
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         double[] pdf = new double[possibleActions.size()];
         for (int i = 0; i < possibleActions.size(); i++) {
             AbstractAction a = possibleActions.get(i);

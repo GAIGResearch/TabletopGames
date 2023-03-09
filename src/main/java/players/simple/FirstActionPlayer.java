@@ -14,9 +14,8 @@ public class FirstActionPlayer extends AbstractPlayer{
      */
 
     @Override
-    public AbstractAction _getAction(AbstractGameState observation) {
-        List<AbstractAction> actions = getForwardModel().computeAvailableActions(observation, getParameters().actionSpace);
-        return actions.get(0);
+    public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> possibleActions) {
+        return possibleActions.get(0);
     }
 
     @Override

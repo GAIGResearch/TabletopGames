@@ -5,6 +5,8 @@ import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 
+import java.util.List;
+
 
 public class HumanGUIPlayer extends AbstractPlayer {
     ActionController ac;
@@ -14,7 +16,7 @@ public class HumanGUIPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState observation) {
+    public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
         try {
             return ac.getAction();
         } catch (InterruptedException e) {

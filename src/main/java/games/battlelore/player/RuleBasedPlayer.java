@@ -27,7 +27,7 @@ public class RuleBasedPlayer extends AbstractPlayer
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState observation) {
+    public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
         BattleloreGameState state = (BattleloreGameState) observation;
         GridBoard<MapTile> board = state.getBoard();
         float playerUnitPower = 0.f;
@@ -65,8 +65,6 @@ public class RuleBasedPlayer extends AbstractPlayer
         }
 
         AbstractAction selectedAction;
-        List<AbstractAction> actions = getForwardModel().computeAvailableActions(observation, getParameters().actionSpace);
-
             for (AbstractAction action : actions) {
                 if (action instanceof AttackUnitsAction) {
                     //Aggressive Gameplay

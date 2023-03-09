@@ -81,7 +81,7 @@ public class MCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         // Search for best action from the root
         if (params.opponentTreePolicy == MultiTree || params.opponentTreePolicy == MultiTreeParanoid)
             root = new MultiTreeNode(this, gameState, rnd);
