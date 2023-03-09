@@ -2,10 +2,9 @@ package games.loveletter;
 
 import core.*;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.interfaces.actionSpaces.IFlatActionSpace;
-import core.interfaces.actionSpaces.IDeepActionSpace;
 import games.GameType;
 import games.loveletter.actions.*;
 import games.loveletter.actions.deep.*;
@@ -16,7 +15,7 @@ import java.util.*;
 import static core.CoreConstants.*;
 
 
-public class LoveLetterForwardModel extends StandardForwardModel implements IFlatActionSpace, IDeepActionSpace {
+public class LoveLetterForwardModel extends StandardForwardModel {
 
     /**
      * Creates the initial game-state of Love Letter.
@@ -294,7 +293,6 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IFla
         }
     }
 
-    @Override
     public List<AbstractAction> computeAvailableDeepActions(AbstractGameState gameState) {
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
@@ -357,9 +355,10 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IFla
         return new ArrayList<>(actions);
     }
 
-    @Override
-    public List<AbstractAction> computeAvailableFlatActions(AbstractGameState gameState) {
-        return _computeAvailableActions(gameState); // Default is this
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
+        if (actionSpace.structure == ActionSpace.Structure.Flat)
+            return _computeAvailableActions(gameState); // Default is this
+        else return computeAvailableDeepActions(gameState);
     }
 
     /**

@@ -2,8 +2,6 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
-import core.interfaces.actionSpaces.IDeepActionSpace;
-import core.interfaces.actionSpaces.IFlatActionSpace;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.Arrays;
@@ -70,6 +68,7 @@ public abstract class AbstractForwardModel {
      * @return - List of AbstractAction objects.
      */
     protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) { return _computeAvailableActions(gameState); }
 
     /**
      * Gets a copy of the FM with a new random number generator.
@@ -158,13 +157,8 @@ public abstract class AbstractForwardModel {
         if (gameState.isActionInProgress()) {
             return gameState.actionsInProgress.peek()._computeAvailableActions(gameState);
         }
-        if (actionSpace != null) {
-            if (actionSpace.structure == ActionSpace.Structure.Flat) {
-                return ((IFlatActionSpace)this).computeAvailableFlatActions(gameState);
-            } else if (actionSpace.structure == ActionSpace.Structure.Deep) {
-                return ((IDeepActionSpace)this).computeAvailableDeepActions(gameState);
-            }
-            return _computeAvailableActions(gameState);
+        if (actionSpace != null && !actionSpace.isDefault()) {
+            return _computeAvailableActions(gameState, actionSpace);
         }
         return _computeAvailableActions(gameState);
     }

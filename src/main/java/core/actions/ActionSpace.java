@@ -1,9 +1,16 @@
 package core.actions;
 
+import java.util.Objects;
+
 public class ActionSpace {
     public final Structure structure;
     public final Flexibility flexibility;
     public final Context context;
+
+    public static ActionSpace Default = new ActionSpace();
+    public final boolean isDefault() {
+        return this.equals(Default);
+    }
 
     public ActionSpace() {
         this.structure = Structure.Default;
@@ -45,5 +52,18 @@ public class ActionSpace {
         Default,
         Independent,
         Dependent
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ActionSpace)) return false;
+        ActionSpace that = (ActionSpace) o;
+        return structure == that.structure && flexibility == that.flexibility && context == that.context;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(structure, flexibility, context);
     }
 }
