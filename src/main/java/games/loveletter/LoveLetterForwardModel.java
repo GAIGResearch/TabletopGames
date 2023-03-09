@@ -137,7 +137,6 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
         if (llgs.playerHandCards.get(llgs.getCurrentPlayer()).getSize() >= 2)
             throw new AssertionError("Hand should not get this big");
-
         if (!checkEndOfRound(llgs, action)) {
             // move turn to the next player who has not already lost the round
             int nextPlayer = gameState.getCurrentPlayer();
@@ -307,6 +306,8 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
         // We create the respective actions for each card in the player's hand
         for (int card = 0; card < playerDeck.getSize(); card++) {
+            if (card == 1 && playerDeck.get(0).cardType == playerDeck.get(1).cardType)
+                continue; // if the player has two cards of the same type, they can only play one
             List<AbstractAction> cardActions = new ArrayList<>();
             LoveLetterCard.CardType cardType = playerDeck.getComponents().get(card).cardType;
             if (cardType != LoveLetterCard.CardType.Countess && cardTypeForceCountess != null) continue;

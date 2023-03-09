@@ -2,7 +2,7 @@ package games.sushigo.metrics;
 
 import core.CoreConstants;
 import core.components.Deck;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.*;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
 import evaluation.summarisers.TAGStatSummary;
@@ -24,14 +24,14 @@ public class SushiGoMetrics implements IMetricsCollection {
      */
     public static class CardPlayability extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             SGGameState gs = (SGGameState) e.state;
             ChooseCard action = (ChooseCard)e.action;
             SGCard c = gs.getPlayerHands().get(action.playerId).get(action.cardIdx);
             return c.toString();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
@@ -59,11 +59,11 @@ public class SushiGoMetrics implements IMetricsCollection {
         public CardChosenInFavourOf(){super();}
         public CardChosenInFavourOf(Object arg){super(arg);}
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             String typeCount = (String) getParameterValue("typeCount");
             SGCard.SGCardType type = SGCard.SGCardType.valueOf(typeCount.split("-")[0]);
             int count = Integer.parseInt(typeCount.split("-")[1]);
@@ -105,7 +105,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         public CardPlayedWin(){super();}
         public CardPlayedWin(Object arg){super(arg);}
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             SGCard.SGCardType type = (SGCard.SGCardType) getParameterValue("type");
             SGGameState gs = (SGGameState) e.state;
             for (int i = 0; i < gs.getNPlayers(); i++) {
@@ -116,7 +116,7 @@ public class SushiGoMetrics implements IMetricsCollection {
             return 0;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         public List<Group<String, List<?>, ?>> getAllowedParameters() {
@@ -131,7 +131,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         public CardPoints(){super();}
         public CardPoints(Object arg){super(arg);}
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             SGCard.SGCardType type = (SGCard.SGCardType) getParameterValue("type");
             SGGameState gs = (SGGameState) e.state;
             double sum = 0;
@@ -141,7 +141,7 @@ public class SushiGoMetrics implements IMetricsCollection {
             return sum/gs.getNPlayers();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         public List<Group<String, List<?>, ?>> getAllowedParameters() {
@@ -156,7 +156,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         public CardPointsPercentage(){super();}
         public CardPointsPercentage(Object arg){super(arg);}
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             SGCard.SGCardType type = (SGCard.SGCardType) getParameterValue("type");
             SGGameState gs = (SGGameState) e.state;
             double sum = 0;
@@ -166,7 +166,7 @@ public class SushiGoMetrics implements IMetricsCollection {
             return sum/gs.getNPlayers();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         public List<Group<String, List<?>, ?>> getAllowedParameters() {
@@ -181,7 +181,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         public CardPointsDifference(){super();}
         public CardPointsDifference(Object arg){super(arg);}
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             SGCard.SGCardType type = (SGCard.SGCardType) getParameterValue("type");
             SGGameState gs = (SGGameState) e.state;
             double sum = 0;
@@ -191,7 +191,7 @@ public class SushiGoMetrics implements IMetricsCollection {
             return sum/(gs.getNPlayers()-1);
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         public List<Group<String, List<?>, ?>> getAllowedParameters() {

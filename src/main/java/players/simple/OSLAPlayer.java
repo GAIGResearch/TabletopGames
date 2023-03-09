@@ -38,12 +38,10 @@ public class OSLAPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gs) {
-
+    public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions) {
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
         int playerID = gs.getCurrentPlayer();
-        List<AbstractAction> actions = getForwardModel().computeAvailableActions(gs, getParameters().actionSpace);
 
         double[] valState = new double[actions.size()];
         for (int actionIndex = 0; actionIndex < actions.size(); actionIndex++) {
@@ -86,7 +84,7 @@ public class OSLAPlayer extends AbstractPlayer {
         if (gsCopy.getCurrentPlayer() == startingPlayer) {
             // first get to the end of our actions
             while (gsCopy.getCurrentPlayer() == startingPlayer && gsCopy.isNotTerminal()) {
-                AbstractAction action = rnd._getAction(gsCopy);
+                AbstractAction action = rnd.getAction(gsCopy);
                 fm.next(gsCopy, action);
             }
         }
@@ -98,7 +96,7 @@ public class OSLAPlayer extends AbstractPlayer {
                     throw new AssertionError("Not expecting to return to player " + getPlayerID());
                 }
                 while (gsCopy.getCurrentPlayer() == currentPlayer && gsCopy.isNotTerminal()) {
-                    AbstractAction action = rnd._getAction(gsCopy);
+                    AbstractAction action = rnd.getAction(gsCopy);
                     fm.next(gsCopy, action);
                 }
             }

@@ -177,7 +177,6 @@ public class CatanGUI extends AbstractGUIManager {
         gameInfo.add(gameStatus);
 //        gameInfo.add(playerStatus);
         gameInfo.add(gamePhase);
-        gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
         gameInfo.add(diceRollLabel);

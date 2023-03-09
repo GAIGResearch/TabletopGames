@@ -3,10 +3,9 @@ package evaluation.loggers;
 import core.interfaces.IStatisticLogger;
 import evaluation.summarisers.TAGStatSummary;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toList;
 
@@ -16,6 +15,7 @@ import static java.util.stream.Collectors.toList;
 public class FileStatsLogger implements IStatisticLogger {
 
     private String fileName;
+    private String actionName;
     private boolean append;
     private String delimiter;
     private FileWriter writer;
@@ -36,6 +36,9 @@ public class FileStatsLogger implements IStatisticLogger {
         this.delimiter = delimiter;
         this.fileName = fileName;
         this.append = append;
+    }
+
+    private void initialise() {
         try {
             File file = new File(fileName);
             if (file.exists() && append)
@@ -55,16 +58,30 @@ public class FileStatsLogger implements IStatisticLogger {
      * Use to register a set of data in one go. It is not possible to add new keys after the first call
      * of record(Map). Data linked to new, previously unseen keys will be ignored (and logged to console)
      *
-     * @param data A map of name -> value pairs
+     * @param rawData A map of name -> value pairs
      */
     @Override
-    public void record(Map<String, ?> data) {
+    public void record(Map<String, ?> rawData) {
+        if (writer == null) initialise();
+        // first we preprocess data to remove nesting
+        // Use a LinkedHashMap to preserve order
+        Map<String, Object> data = new LinkedHashMap<>();
+        for (String key : rawData.keySet()) {
+            Object thing = rawData.get(key);
+            if (thing instanceof Map) {
+                data.putAll((Map<? extends String, ?>) thing);
+            } else {
+                data.put(key, rawData.get(key));
+            }
+        }
         try {
             if (allKeys.isEmpty()) {
                 allKeys = data.keySet();
                 // then write a header line to the file
                 if (headerNeeded) {
                     String outputLine = String.join(delimiter, allKeys) + "\n";
+                    outputLine = outputLine.replaceAll(":" + actionName  + delimiter, delimiter);
+                    outputLine = outputLine.replaceAll(":" + actionName + "\\n", "\n");
                     writer.write(outputLine);
                 }
             } else {
@@ -94,7 +111,7 @@ public class FileStatsLogger implements IStatisticLogger {
 
     @Override
     public void record(String key, Object datum) {
-        System.out.println("Datum ignored - FileStatsLogger only to be used with other record()");
+      //   System.out.println("Datum ignored - FileStatsLogger only to be used with other record() : " + key);
     }
 
     public void flush() {
@@ -141,6 +158,12 @@ public class FileStatsLogger implements IStatisticLogger {
 
     @Override
     public FileStatsLogger emptyCopy(String id) {
-        return new FileStatsLogger(fileName, delimiter, append);
-    }  // todo include id in filename
+        String[] fileParts = fileName.split(Pattern.quote("."));
+        if (fileParts.length != 2)
+            throw new AssertionError("Filename does not conform to expected <stem>.<type>");
+        String newFileName = fileParts[0] + "_" + id + "." + fileParts[1];
+        FileStatsLogger retValue =  new FileStatsLogger(newFileName, delimiter, append);
+        retValue.actionName = id;
+        return retValue;
+    }
 }

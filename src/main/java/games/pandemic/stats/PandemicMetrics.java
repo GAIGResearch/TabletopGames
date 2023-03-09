@@ -3,7 +3,7 @@ import core.components.Card;
 import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.*;
 import games.pandemic.PandemicGameState;
 import utilities.Group;
@@ -18,11 +18,11 @@ public class PandemicMetrics implements IMetricsCollection {
         public DeckSize(){super();}
         public DeckSize(Object arg){super(arg);}
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             //if(key == null) throw new AssertionError("Argument for Constructor in " + getClass().getName() + " can't be null");
             Component c = ((PandemicGameState)e.state).getComponent(Hash.GetInstance().hash((String) getParameterValue(("deckName"))));
             //if(c == null) throw new AssertionError("name '" + key + "' does not correspond to any component in this game.");
@@ -37,7 +37,7 @@ public class PandemicMetrics implements IMetricsCollection {
         public CounterValue(){super();}
         public CounterValue(Object arg){super(arg);}
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             String counterName = (String) getParameterValue("counterName");
             //if(key == null) throw new AssertionError("Argument for Constructor in " + getClass().getName() + " can't be null");
             Component c = ((PandemicGameState)e.state).getComponent(Hash.GetInstance().hash(counterName));
@@ -48,7 +48,7 @@ public class PandemicMetrics implements IMetricsCollection {
                 return ((Counter) c).getValue();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         public List<Group<String, List<?>, ?>> getAllowedParameters() {

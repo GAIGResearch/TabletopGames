@@ -5,13 +5,11 @@ import core.actions.ActionSpace;
 import core.actions.DoNothing;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
-import gui.AbstractGUIManager;
-import gui.GUI;
-import gui.GamePanel;
+import gui.*;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
@@ -23,14 +21,13 @@ import players.mcts.MCTSPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
-import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static utilities.Utils.componentToImage;
@@ -46,7 +43,7 @@ public class Game {
     // Real game state and forward model
     protected AbstractGameState gameState;
     protected AbstractForwardModel forwardModel;
-    private List<GameListener> listeners = new ArrayList<>();
+    private List<IGameListener> listeners = new ArrayList<>();
 
     /* Game Statistics */
     private int lastPlayer; // used to track actions per 'turn'
@@ -114,7 +111,7 @@ public class Game {
      * @return - game instance created for the run
      */
     public static Game runOne(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                              boolean randomizeParameters, List<GameListener> listeners, ActionController ac, int turnPause) {
+                              boolean randomizeParameters, List<IGameListener> listeners, ActionController ac, int turnPause) {
         // Creating game instance (null if not implemented)
         Game game;
         if (parameterConfigFile != null) {
@@ -187,7 +184,7 @@ public class Game {
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, Long seed,
                                int nRepetitions, boolean randomizeParameters,
-                               boolean detailedStatistics, List<GameListener> listeners, int turnPause) {
+                               boolean detailedStatistics, List<IGameListener> listeners, int turnPause) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -265,7 +262,7 @@ public class Game {
      * @param randomizeParameters - if true, game parameters are randomized for each run of each game (if possible).
      */
     public static void runMany(List<GameType> gamesToPlay, List<AbstractPlayer> players, int nRepetitions,
-                               long[] seeds, ActionController ac, boolean randomizeParameters, List<GameListener> listeners, int turnPause) {
+                               long[] seeds, ActionController ac, boolean randomizeParameters, List<IGameListener> listeners, int turnPause) {
         int nPlayers = players.size();
 
         // Save win rate statistics over all games
@@ -511,10 +508,14 @@ public class Game {
         // to reconstruct the starting hands etc.)
         AbstractGameState observation = gameState.copy(activePlayer);
         copyTime += (System.nanoTime() - s);
+  //      System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n", copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
 
         // Get actions for the player
         s = System.nanoTime();
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+        if (observedActions.size() == 0) {
+            throw new AssertionError("No actions available for player " + activePlayer);
+        }
         actionComputeTime += (System.nanoTime() - s);
         actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
 
@@ -540,7 +541,7 @@ public class Game {
                 // Get action from player, and time it
                 s = System.nanoTime();
                 if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
-                action = currentPlayer.getAction(observation, observedActions);
+                action = currentPlayer.getAction(observation);
                 agentTime += (System.nanoTime() - s);
                 nDecisions++;
             }
@@ -667,6 +668,7 @@ public class Game {
      * @return - copy time
      */
     public double getCopyTime() {
+      //  System.out.printf("Average copy time was %.3f microseconsds%n", copyTime / 1e3);
         return copyTime;
     }
 
@@ -734,14 +736,14 @@ public class Game {
         return gameType;
     }
 
-    public void addListener(GameListener listener) {
+    public void addListener(IGameListener listener) {
         if (!listeners.contains(listener)) {
             listeners.add(listener);
             gameState.addListener(listener);
             listener.setGame(this);
         }
     }
-    public List<GameListener> getListeners() {
+    public List<IGameListener> getListeners() {
         return listeners;
     }
 

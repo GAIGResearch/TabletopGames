@@ -2,20 +2,19 @@ package evaluation;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.interfaces.ILearner;
-import core.interfaces.IStateFeatureVector;
-import core.interfaces.IStatisticLogger;
+import core.interfaces.*;
+import evaluation.listeners.*;
+import evaluation.loggers.FileStatsLogger;
 import evaluation.metrics.Event;
-import evaluation.listeners.GameListener;
 import evaluation.tournaments.RandomRRTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
-import players.PlayerFactory;
-import players.learners.AbstractLearner;
-import evaluation.loggers.FileStatsLogger;
-import evaluation.listeners.StateFeatureListener;
-import utilities.Utils;
 import org.apache.commons.io.FileUtils;
+import players.PlayerFactory;
+import players.decorators.EpsilonRandom;
+import players.learners.AbstractLearner;
+import utilities.Utils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -30,6 +29,7 @@ public class ProgressiveLearner {
     String dataDir, player, defaultHeuristic, heuristic;
     AbstractParameters params;
     List<AbstractPlayer> agents;
+    EpsilonRandom randomExplorer;
     ILearner learner;
     int nPlayers, matchups, iterations, iter, finalMatchups;
     double maxExplore;
@@ -108,7 +108,7 @@ public class ProgressiveLearner {
                             "\tlearner=       The full class name of an ILearner implementation.\n" +
                             "\t               This learner must be compatible with the heuristic - in that it must \n" +
                             "\t               generate a file that the heuristic can read.\n" +
-                            "\ttarget=        The target to use (WIN, ORDINAL, SCORE, WIN_MEAN, ORD_MEAN)\n" +
+                            "\ttarget=        The target to use (WIN, ORDINAL, SCORE, WIN_MEAN, ORD_MEAN, ORD_MEAN_SCALE, ORD_SCALE, SCORE_DELTA)\n" +
                             "\tgamma=         The discount factor to use - this is applied per round, not per action\n" +
                             "\texplore=       The starting exploration rate - at which random actions are taken by agents.\n" +
                             "\t               This will reduce linearly to zero for the final iteration.\n" +
@@ -162,12 +162,13 @@ public class ProgressiveLearner {
         // Now we can run a tournament of everyone
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
+        finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
         RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
                 finalMatchups, System.currentTimeMillis(), params);
 
         tournament.setListeners(new ArrayList<>());
         IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
-        GameListener gameTracker = GameListener.createListener("evaluation.metrics.GameListener", logger, null);
+        IGameListener gameTracker = IGameListener.createListener("evaluation.listeners.MetricsGameListener", logger, null);
         tournament.getListeners().add(gameTracker);
         tournament.runTournament();
         int winnerIndex = tournament.getWinnerIndex();
@@ -186,11 +187,14 @@ public class ProgressiveLearner {
     private void loadAgents() {
         agents = new LinkedList<>();
         File playerLoc = new File(player);
+        if (player.isEmpty())
+            throw new IllegalArgumentException("No player file specified");
         if (playerLoc.isDirectory()) {
             throw new IllegalArgumentException("Not yet implemented for a directory of players");
         }
         if (iter == 0 || useOnlyLast) {
-            agents.add(PlayerFactory.createPlayer(player, this::injectAgentAttributes));
+            String fileName = learnedFilesByIteration[iter] == null ? "" : learnedFilesByIteration[iter] ;
+            agents.add(PlayerFactory.createPlayer(player, rawJSON -> injectAgentAttributes(rawJSON, fileName)));
             if (iter == 0) {
                 basePlayer = agents.get(0);
                 basePlayer.setName("Default Agent");
@@ -199,11 +203,12 @@ public class ProgressiveLearner {
             agents.add(basePlayer);
             agents.addAll(Arrays.asList(agentsPerGeneration).subList(0, iter));
         }
+        randomExplorer = new EpsilonRandom();
+        agents.forEach(a -> a.addDecorator(randomExplorer));
     }
 
-    private String injectAgentAttributes(String raw) {
-        String fileName = learnedFilesByIteration[iter] == null ? "" : learnedFilesByIteration[iter] ;
-        return raw.replaceAll(Pattern.quote("*FILE*"), fileName)
+    private String injectAgentAttributes(String raw, String file) {
+        return raw.replaceAll(Pattern.quote("*FILE*"), file)
                 .replaceAll(Pattern.quote("*PHI*"), phiClass)
                 .replaceAll(Pattern.quote("*HEURISTIC*"), heuristic)
                 .replaceAll(Pattern.quote("*DEFAULT*"), defaultHeuristic);
@@ -216,7 +221,7 @@ public class ProgressiveLearner {
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);
-        agents.forEach(p -> p.setExploration(exploreEpsilon));
+        randomExplorer.setEpsilon(exploreEpsilon);
 
         String fileName = String.format("%s_%d.data", prefix, iter);
         dataFilesByIteration[iter] = fileName;
@@ -234,8 +239,8 @@ public class ProgressiveLearner {
         learner.writeToFile(fileName);
 
         // if we only have one agent type, then we can create one agent as the result of this round
-        agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, this::injectAgentAttributes);
+        agentsPerGeneration[iter] = PlayerFactory.createPlayer(player, rawJSON -> injectAgentAttributes(rawJSON, fileName));
         agentsPerGeneration[iter].setName(String.format("Iteration %2d", iter + 1));
-
+        agentsPerGeneration[iter].addDecorator(randomExplorer);
     }
 }

@@ -1,6 +1,6 @@
 package games.terraformingmars.stats;
 import core.CoreConstants;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.*;
 import games.terraformingmars.TMGameParameters;
 import games.terraformingmars.TMGameState;
@@ -22,7 +22,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         public ParameterComplete(){super();}
         public ParameterComplete(Object arg){super(arg);}
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMTypes.GlobalParameter parameter = (TMTypes.GlobalParameter) getParameterValue("parameter");
             TMGameState tmgs = (TMGameState) e.state;
             if (tmgs.getGlobalParameters().containsKey(parameter)) {
@@ -32,7 +32,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return 0;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         public List<Group<String, List<?>, ?>> getAllowedParameters() {
@@ -44,7 +44,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         public ParameterIncrease(){super();}
         public ParameterIncrease(Object arg){super(arg);}
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMTypes.GlobalParameter parameter = (TMTypes.GlobalParameter) getParameterValue("parameter");
             TMGameState tmgs = (TMGameState) e.state;
             if (tmgs.getGlobalParameters().containsKey(parameter)) {
@@ -53,7 +53,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return "";
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         public List<Group<String, List<?>, ?>> getAllowedParameters() {
@@ -63,29 +63,29 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class Generation extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return ((TMGameState) e.state).getGeneration();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class Result extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return Arrays.toString(e.state.getPlayerResults());
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class AveragePoints extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int c = 0;
             TMGameState tmgs = (TMGameState) e.state;
             for (int i = 0; i < tmgs.getNPlayers(); i++) {
@@ -98,14 +98,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return c / tmgs.getNPlayers();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class CardsPlayed extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int nCards = 0;
             TMGameState tmgs = (TMGameState) e.state;
             for (int i = 0; i < tmgs.getNPlayers(); i++) {
@@ -114,7 +114,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return nCards;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
@@ -122,7 +122,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class CorporationCards extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMGameState tmgs = (TMGameState) e.state;
             StringBuilder ss = new StringBuilder("[");
             for(TMCard c: tmgs.getPlayerCorporations()) {
@@ -132,14 +132,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return ss.toString().replace(",]", "]");
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class PointDifference extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int c = 0;
             TMGameState tmgs = (TMGameState) e.state;
             for (int i = 0; i < tmgs.getNPlayers() - 1; i++) {
@@ -150,14 +150,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return c / (tmgs.getNPlayers() - 1);
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class Milestones extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             StringBuilder ss = new StringBuilder("[");
             TMGameState tmgs = (TMGameState) e.state;
             for(Milestone m: tmgs.getMilestones()) {
@@ -167,14 +167,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return ss.toString().replace(",]", "]");
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class Expansions extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             StringBuilder ss = new StringBuilder("[");
             TMGameState tmgs = (TMGameState) e.state;
             for(TMTypes.Expansion exp: ((TMGameParameters)tmgs.getGameParameters()).getExpansions()) {
@@ -184,14 +184,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return ss.toString().replace(",]", "]");
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class Map extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             String ss = "Tharsis";
             TMGameState tmgs = (TMGameState) e.state;
             HashSet<TMTypes.Expansion> exps = ((TMGameParameters)tmgs.getGameParameters()).getExpansions();
@@ -200,14 +200,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return ss;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class Awards extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMGameState tmgs = (TMGameState) e.state;
             StringBuilder ss = new StringBuilder("[");
             for(Award aa: tmgs.getAwards()) {
@@ -221,14 +221,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return ss.toString().replace(",]", "]");
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class MapCoverage extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int tilesPlaced = 0;
             int nTiles = 0;
             TMGameState tmgs = (TMGameState) e.state;
@@ -245,14 +245,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return tilesPlaced * 1.0 / nTiles;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class MapTiles extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             StringBuilder ss = new StringBuilder();
             TMGameState tmgs = (TMGameState) e.state;
             for (int i = 0; i < tmgs.getBoard().getHeight(); i++) {
@@ -271,14 +271,14 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return ss.toString().replace(",]", "");
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class PlayerResourceProduction extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             StringBuilder ss = new StringBuilder();
             TMGameState tmgs = (TMGameState) e.state;
             for (TMTypes.Resource r: tmgs.getPlayerProduction()[e.playerID].keySet()) {
@@ -287,20 +287,20 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return ss.toString();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
 
     public static class TRPointsProgress extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
             int x = e.state.getRoundCounter();
             return new TimeStamp(x, s.getPlayerResources()[e.playerID].get(TMTypes.Resource.TR).getValue());
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
         @Override
@@ -312,13 +312,13 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class AwardsPointProgress extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
             int x = e.state.getRoundCounter();
             return new TimeStamp(x, s.countPointsAwards(e.playerID));
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
         @Override
@@ -330,13 +330,13 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class MilestonesPointsProgress extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
             int x = e.state.getRoundCounter();
             return new TimeStamp(x, s.countPointsMilestones(e.playerID));
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
         @Override
@@ -348,13 +348,13 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class CardsPointsProgress extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
             int x = e.state.getRoundCounter();
             return new TimeStamp(x, s.countPointsCards(e.playerID));
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
         @Override
@@ -366,13 +366,13 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class BoardPointsProgress extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
             int x = e.state.getRoundCounter();
             return new TimeStamp(x, s.countPointsBoard(e.playerID));
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
         @Override
@@ -383,11 +383,11 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerCardsPlayed extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return ((TMGameState)e.state).getPlayedCards()[e.playerID].getSize();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
         @Override
@@ -400,7 +400,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         public PlayerParameterContribution(){super();}
         public PlayerParameterContribution(Object arg){super(arg);}
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMTypes.GlobalParameter parameter = (TMTypes.GlobalParameter) getParameterValue("parameter");
 
             int count = 0;
@@ -415,7 +415,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return 0;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         public List<Group<String, List<?>, ?>> getAllowedParameters() {
@@ -429,11 +429,11 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerResult extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return e.state.getPlayerResults()[e.playerID].value;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -444,11 +444,11 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerCorporationCard extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return ((TMGameState)e.state).getPlayerCorporations()[e.playerID].getComponentName();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -460,13 +460,13 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerCorporationCardWin extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMGameState s = ((TMGameState)e.state);
             if (s.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN_GAME) return s.getPlayerCorporations()[e.playerID].getComponentName();
             else return "";
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -479,7 +479,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         public PlayerPlayedCardsPerType(){super();}
         public PlayerPlayedCardsPerType(Object arg){super(arg);}
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -487,7 +487,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return true;
         }
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMTypes.CardType type = (TMTypes.CardType) getParameterValue("type");
             int c = 0;
             TMGameState s = ((TMGameState)e.state);
@@ -503,13 +503,13 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerAllCardsPlayed extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             StringBuilder ss = new StringBuilder();
             TMGameState s = ((TMGameState)e.state);
             return getCards(e, ss, s);
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -520,7 +520,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerCardsPlayedWin extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMGameState s = ((TMGameState)e.state);
             if (s.getPlayerResults()[e.playerID] == CoreConstants.GameResult.WIN_GAME) {
                 StringBuilder ss = new StringBuilder();
@@ -529,7 +529,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return "";
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -550,11 +550,11 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerPointsTotal extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return ((TMGameState)e.state).countPoints(e.playerID);
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -565,11 +565,11 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerPointsTR extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return ((TMGameState)e.state).getPlayerResources()[e.playerID].get(TMTypes.Resource.TR).getValue();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -580,11 +580,11 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerPointsMilestones extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return ((TMGameState)e.state).countPointsMilestones(e.playerID);
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -595,11 +595,11 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerPointsAwards extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return ((TMGameState)e.state).countPointsAwards(e.playerID);
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -610,11 +610,11 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerPointsBoard extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return ((TMGameState)e.state).countPointsBoard(e.playerID);
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -625,11 +625,11 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerPointsCards extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             return ((TMGameState)e.state).countPointsCards(e.playerID);
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -640,7 +640,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerMilestones extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             StringBuilder ms = new StringBuilder();
             TMGameState s = ((TMGameState)e.state);
             for(Milestone m: s.getMilestones()) {
@@ -653,7 +653,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return ms.toString().replace(",]", "");
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -664,7 +664,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerNumMilestones extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int c = 0;
             TMGameState s = ((TMGameState)e.state);
             for(Milestone m: s.getMilestones()) {
@@ -673,7 +673,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return c;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -685,7 +685,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerNumAwardsFunded extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int c = 0;
             TMGameState s = ((TMGameState)e.state);
             for(Award aa: s.getAwards()) {
@@ -696,7 +696,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return c;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -707,7 +707,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerNumAwardsWon extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int c = 0;
             TMGameState s = ((TMGameState)e.state);
             for(Award aa: s.getAwards()) {
@@ -721,7 +721,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return c;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -732,7 +732,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerAwardsFundedAndWon extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int c = 0;
             int p = e.playerID;
             TMGameState s = ((TMGameState)e.state);
@@ -747,7 +747,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return c;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -758,7 +758,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerAwardsWon extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             StringBuilder ss = new StringBuilder();
             int p = e.playerID;
             TMGameState s = ((TMGameState)e.state);
@@ -775,7 +775,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return ss.toString().replace(",]", "");
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -786,7 +786,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerAwardsFunded extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             StringBuilder ss = new StringBuilder();
             TMGameState s = ((TMGameState)e.state);
             for(Award aa: s.getAwards()) {
@@ -799,7 +799,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return ss.toString().replace(",]", "");
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -810,7 +810,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerMapCoverage extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             int tilesPlaced = 0;
             int nTiles = 0;
             TMGameState s = ((TMGameState)e.state);
@@ -827,7 +827,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             return tilesPlaced*1.0 / nTiles;
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -841,12 +841,12 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         public PlayerProduction(){super();}
         public PlayerProduction(Object arg){super(arg);}
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMTypes.Resource type = (TMTypes.Resource) getParameterValue("type");
             return ((TMGameState)e.state).getPlayerProduction()[e.playerID].get(type).getValue();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -862,12 +862,12 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
         public PlayerResource(){super();}
         public PlayerResource(Object arg){super(arg);}
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMTypes.Resource type = (TMTypes.Resource) getParameterValue("type");
             return ((TMGameState)e.state).getPlayerResources()[e.playerID].get(type).getValue();
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
@@ -881,13 +881,13 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
 
     public static class PlayerHandSize extends AbstractMetric {
         @Override
-        public Object run(GameListener listener, Event e) {
+        public Object run(MetricsGameListener listener, Event e) {
             TMGameState s = ((TMGameState) e.state);
             int x = e.state.getRoundCounter();
             return new TimeStamp(x, ((TMGameState)e.state).getPlayerHands()[e.playerID].getSize());
         }
         @Override
-        public Set<Event.GameEvent> getEventTypes() {
+        public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
         @Override

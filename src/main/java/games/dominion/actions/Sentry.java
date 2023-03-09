@@ -30,6 +30,12 @@ public class Sentry extends DominionAction implements IExtendedSequence {
             throw new AssertionError("Sentry not yet implemented for changing the number of cards drawn.");
         }
     }
+    public Sentry(int playerId, boolean dummy) {
+        super(CardType.SENTRY, playerId, dummy);
+        if (CARDS_AFFECTED != 2) {
+            throw new AssertionError("Sentry not yet implemented for changing the number of cards drawn.");
+        }
+    }
 
     @Override
     boolean _execute(DominionGameState state) {
@@ -137,7 +143,7 @@ public class Sentry extends DominionAction implements IExtendedSequence {
 
     @Override
     public Sentry copy() {
-        Sentry retValue = new Sentry(player);
+        Sentry retValue = new Sentry(player, dummyAction);
         retValue.completedStage = completedStage;
         for (int i = 0; i < 2; i++) {
             retValue.decisions[i] = decisions[i];
@@ -150,7 +156,7 @@ public class Sentry extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof Sentry) {
             Sentry other = (Sentry) obj;
-            return other.completedStage == completedStage && other.topCards[0] == topCards[0] && other.topCards[1] == topCards[1] &&
+            return super.equals(obj) && other.completedStage == completedStage && other.topCards[0] == topCards[0] && other.topCards[1] == topCards[1] &&
                     other.decisions[0] == decisions[0] && other.decisions[1] == decisions[1];
         }
         return false;

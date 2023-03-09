@@ -68,7 +68,7 @@ public enum GameType {
     /**
      * Game template example, see template in package {@link gametemplate}
      */
-    GameTemplate(1,8, null, null, GTGameState.class, GTForwardModel.class, GTParameters.class, GTGUIManager.class),
+    GameTemplate(1, 8, null, null, GTGameState.class, GTForwardModel.class, GTParameters.class, GTGUIManager.class),
     /**
      * Each game in the framework corresponds to a enum value here, giving minimum players, maximum players,
      * a list of categories the game belongs to, and a list of mechanics the game uses.
@@ -153,7 +153,7 @@ public enum GameType {
             Arrays.asList(Strategy, Cards),
             Arrays.asList(Memory, GridMovement, ModularBoard),
             CatanGameState.class, CatanForwardModel.class, CatanParameters.class, CatanGUI.class),
-    TerraformingMars (1, 5,
+    TerraformingMars(1, 5,
             Arrays.asList(Economic, Environmental, Manufacturing, TerritoryBuilding, Cards, Strategy, Exploration),
             Arrays.asList(Drafting, EndGameBonus, HandManagement, HexagonGrid, Income, SetCollection, TakeThat, TilePlacement, ProgressiveTurnOrder, VariablePlayerPowers, EngineBuilding, TableauBuilding),
             TMGameState.class, TMForwardModel.class, TMGameParameters.class, TMGUI.class),
@@ -164,8 +164,7 @@ public enum GameType {
     CantStop(2, 4,
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
-            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class
-    );
+            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class);
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
@@ -208,15 +207,19 @@ public enum GameType {
     public int getMinPlayers() {
         return minPlayers;
     }
+
     public int getMaxPlayers() {
         return maxPlayers;
     }
+
     public List<Category> getCategories() {
         return categories;
     }
+
     public List<Mechanic> getMechanics() {
         return mechanics;
     }
+
     public String getDataPath() {
         return dataPath;
     }
@@ -232,7 +235,8 @@ public enum GameType {
     }
 
     public AbstractForwardModel createForwardModel(AbstractParameters params, int nPlayers) {
-        if (forwardModelClass == null) throw new AssertionError("No forward model class declared for the game: " + this);
+        if (forwardModelClass == null)
+            throw new AssertionError("No forward model class declared for the game: " + this);
         try {
             if (forwardModelClass.getSuperclass() == AbstractRuleBasedForwardModel.class) {
                 Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(forwardModelClass, AbstractParameters.class, Integer.class);
@@ -254,6 +258,10 @@ public enum GameType {
                 return (AbstractParameters) constructorGS.newInstance(dataPath, seed);
             } else {
                 Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass, Long.class);
+                if (constructorGS == null) {
+                    constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(parameterClass);
+                    return (AbstractParameters) constructorGS.newInstance();
+                }
                 return (AbstractParameters) constructorGS.newInstance(seed);
             }
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
@@ -311,12 +319,15 @@ public enum GameType {
 
         return new Game(this, createForwardModel(params, nPlayers), createGameState(params, nPlayers));
     }
+
     public Game createGameInstance(int nPlayers) {
         return createGameInstance(nPlayers, System.currentTimeMillis(), createParameters(System.currentTimeMillis()));
     }
+
     public Game createGameInstance(int nPlayers, long seed) {
         return createGameInstance(nPlayers, seed, createParameters(seed));
     }
+
     public Game createGameInstance(int nPlayers, AbstractParameters gameParams) {
         if (gameParams == null) {
             return createGameInstance(nPlayers, System.currentTimeMillis(), null);

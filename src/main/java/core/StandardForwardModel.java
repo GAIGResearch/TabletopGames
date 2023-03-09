@@ -1,9 +1,11 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.interfaces.IExtendedSequence;
 import evaluation.metrics.Event;
 
 import java.util.Arrays;
+import java.util.Stack;
 
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 import static core.CoreConstants.GameResult.TIMEOUT;
@@ -19,6 +21,22 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
             action.execute(currentState);
         } else {
             throw new AssertionError("No action selected by current player");
+        }
+        // We then register the action with the top of the stack ... unless the top of the stack is this action
+        // in which case go to the next action
+        // We can't just register with all items in the Stack, as this may represent some complex dependency
+        // For example in Dominion where one can Throne Room a Throne Room, which then Thrones a Smithy
+        if (currentState.actionsInProgress.size() > 0) {
+            IExtendedSequence topOfStack = currentState.actionsInProgress.pop();
+            if (!topOfStack.equals(action)) {
+                topOfStack.registerActionTaken(currentState, action);
+            } else {
+                if (currentState.actionsInProgress.size() > 0) {
+                    IExtendedSequence nextOnStack = currentState.actionsInProgress.peek();
+                    nextOnStack.registerActionTaken(currentState, action);
+                }
+            }
+            currentState.actionsInProgress.push(topOfStack);
         }
         _afterAction(currentState, action);
     }

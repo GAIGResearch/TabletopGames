@@ -25,6 +25,7 @@ public class OMATreeNode extends SingleTreeNode {
     }
 
 
+
     protected Optional<OMATreeNode> OMAParent = Optional.empty(); // the most recent parent of this node when it was the node player action
     // this is the node that will have the OMA statistics on for the current action
 

@@ -20,6 +20,9 @@ public class Harbinger extends DominionAction implements IExtendedSequence {
     public Harbinger(int playerId) {
         super(CardType.HARBINGER, playerId);
     }
+    public Harbinger(int playerId, boolean dummy) {
+        super(CardType.HARBINGER, playerId, dummy);
+    }
 
     @Override
     boolean _execute(DominionGameState state) {
@@ -65,9 +68,22 @@ public class Harbinger extends DominionAction implements IExtendedSequence {
      */
     @Override
     public Harbinger copy() {
-        Harbinger retValue = new Harbinger(player);
+        Harbinger retValue = new Harbinger(player, dummyAction);
         retValue.executed = executed;
         return retValue;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Harbinger) {
+            Harbinger other = (Harbinger) obj;
+            return executed == other.executed && super.equals(obj);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() + (executed ? 1 : 0);
+    }
 }

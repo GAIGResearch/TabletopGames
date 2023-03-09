@@ -1,7 +1,7 @@
 package games.terraformingmars.stats;
 
 import evaluation.metrics.Event;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.MetricsGameListener;
 import evaluation.StatsVisualiser;
 import games.terraformingmars.TMForwardModel;
 import games.terraformingmars.TMGameParameters;
@@ -25,7 +25,7 @@ public class TMStatsVisualiser extends StatsVisualiser {
     public static Font defaultFont = new Font("Prototype", Font.BOLD, fontSize);
     public static Font defaultFontSmall = new Font("Prototype", Font.BOLD, fontSize-5);
 
-    public TMStatsVisualiser(List<GameListener> listeners) {
+    public TMStatsVisualiser(List<MetricsGameListener> listeners) {
         super(listeners);
 
         // Set background image

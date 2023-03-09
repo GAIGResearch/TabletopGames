@@ -234,8 +234,7 @@ class BasicTreeNode {
         AbstractGameState rolloutState = state.copy();
         if (player.params.rolloutLength > 0) {
             while (!finishRollout(rolloutState, rolloutDepth)) {
-                List<AbstractAction> availableActions = player.getForwardModel().computeAvailableActions(rolloutState, player.params.actionSpace);
-                AbstractAction next = randomPlayer._getAction(rolloutState);
+                AbstractAction next = randomPlayer.getAction(rolloutState);
                 advance(rolloutState, next);
                 rolloutDepth++;
             }

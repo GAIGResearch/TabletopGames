@@ -751,7 +751,7 @@ public class TestBaseActionCardsWithCopy {
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new EnthroneCard(CardType.MARKET, 0, 0));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
 
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
@@ -768,14 +768,14 @@ public class TestBaseActionCardsWithCopy {
         ThroneRoom throneRoom = new ThroneRoom(0);
         fm.next(state, throneRoom);
 
-        fm.next(state, new EnthroneCard(CardType.WORKSHOP, 0, 0));
+        fm.next(state, new Workshop(0));
         fm.next(state, new GainCard(CardType.SILVER, 0));
 
         int startHash = state.hashCode();
         DominionGameState copy = (DominionGameState) state.copy();
         assertEquals(startHash, copy.hashCode());
 
-        fm.next(state, new EnthroneCard(CardType.WORKSHOP, 0, 1));
+        fm.next(state, new Workshop(0, true));
 
         int midHash = state.hashCode();
         DominionGameState midCopy = (DominionGameState) state.copy();
@@ -803,14 +803,14 @@ public class TestBaseActionCardsWithCopy {
         DominionGameState copy = (DominionGameState) state.copy();
         assertEquals(startHash, copy.hashCode());
 
-        fm.next(state, new EnthroneCard(CardType.MERCHANT, 0, 0));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
 
         int midHash = state.hashCode();
         DominionGameState midCopy = (DominionGameState) state.copy();
         assertEquals(midHash, midCopy.hashCode());
         assertFalse(midHash == startHash);
 
-        fm.next(state, new EnthroneCard(CardType.MERCHANT, 0, 1));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
 
         assertEquals(startHash, copy.hashCode());
         assertFalse(startHash == state.hashCode());
@@ -827,7 +827,7 @@ public class TestBaseActionCardsWithCopy {
         ThroneRoom throneRoom = new ThroneRoom(0);
         fm.next(state, throneRoom);
 
-        fm.next(state, new EnthroneCard(CardType.THRONE_ROOM, 0, 0));
+        fm.next(state, fm.computeAvailableActions(state).get(0));
 
         // we now have the second throne room controlling the action flow
 
