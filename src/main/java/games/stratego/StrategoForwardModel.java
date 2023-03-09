@@ -7,6 +7,7 @@ import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.stratego.actions.Move;
 import games.stratego.components.Piece;
+import utilities.ActionTreeNode;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +29,8 @@ public class StrategoForwardModel extends StandardForwardModel {
 
         ArrayList<Piece> RedPieces = RedSetup.getRedSetup();
         ArrayList<Piece> BluePieces = BlueSetup.getBlueSetup();
+
+        root = generateActionTree(params.gridSize, RedPieces.size());
 
         for (Piece piece : RedPieces){
             piece.setOwnerId(0);
@@ -89,5 +92,46 @@ public class StrategoForwardModel extends StandardForwardModel {
                 sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, 1-sgs.getCurrentPlayer());
             }
         }
+    }
+
+    private ActionTreeNode generateActionTree(int gridSize, int noUnits) {
+        root = new ActionTreeNode(0, "root");
+
+        // Tree Structure
+        // 0 - Root
+        // 1 - Unit (0 - noUnits)
+        // 2 - Action (Move / Attack)
+        // 3 - Direction (North / South / East / West)
+        // 4 - Distance (1 - gridsize) (Only for scout)
+
+        for (int i = 0; i < noUnits; i++) {
+            root.addChild(0, "unit" + i);
+        }
+
+        for (ActionTreeNode unit : root.getChildren()) {
+
+            // Attack Sub Tree
+            ActionTreeNode attack = unit.addChild(0, "attack");
+            attack.addChild(0, "north");
+            attack.addChild(0, "south");
+            attack.addChild(0, "east");
+            attack.addChild(0, "west");
+
+            // Move Sub Tree
+            ActionTreeNode move = unit.addChild(0, "move");
+            move.addChild(0, "north");
+            move.addChild(0, "south");
+            move.addChild(0, "east");
+            move.addChild(0, "west");
+
+            // For scout (unlimited moves)
+            for (ActionTreeNode child : move.getChildren()) {
+                for (int i = 0; i < gridSize; i++) {
+                    child.addChild(0, Integer.toString(i+1));
+                }
+            }
+        }
+
+        return root;
     }
 }
