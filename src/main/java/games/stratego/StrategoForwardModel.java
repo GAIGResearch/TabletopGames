@@ -5,6 +5,7 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
+import core.interfaces.IOrderedActionSpace;
 import games.stratego.actions.Move;
 import games.stratego.components.Piece;
 import utilities.ActionTreeNode;
@@ -14,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class StrategoForwardModel extends StandardForwardModel {
+public class StrategoForwardModel extends StandardForwardModel implements IOrderedActionSpace {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -31,6 +32,7 @@ public class StrategoForwardModel extends StandardForwardModel {
         ArrayList<Piece> BluePieces = BlueSetup.getBlueSetup();
 
         root = generateActionTree(params.gridSize, RedPieces.size());
+        leaves = root.getLeafNodes();
 
         for (Piece piece : RedPieces){
             piece.setOwnerId(0);
@@ -51,6 +53,8 @@ public class StrategoForwardModel extends StandardForwardModel {
         int player = gameState.getCurrentPlayer();
         Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
         List<Piece> pieces = state.gridBoard.getComponents();
+        state.getObservationVector();
+
 
         if (pieces.isEmpty()){
             throw new AssertionError("Error: No Pieces Found");
@@ -133,5 +137,33 @@ public class StrategoForwardModel extends StandardForwardModel {
         }
 
         return root;
+    }
+
+    @Override
+    public int getActionSpace() {
+        return leaves.size();
+    }
+
+    @Override
+    public int[] getFixedActionSpace() {
+        return new int[0];
+    }
+
+    @Override
+    public int[] getActionMask(AbstractGameState gameState) {
+        return leaves.stream()
+                .mapToInt(ActionTreeNode::getValue)
+                .toArray();
+    }
+
+    @Override
+    public void nextPython(AbstractGameState state, int actionID) {
+        ActionTreeNode node = leaves.get(actionID);
+
+        int distance;
+        int direction;
+
+
+        //
     }
 }
