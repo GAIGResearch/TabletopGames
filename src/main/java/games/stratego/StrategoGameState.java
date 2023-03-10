@@ -128,7 +128,16 @@ public class StrategoGameState extends AbstractGameState implements IVectorisabl
 
     @Override
     // Gets the observartion vector
+    // Index = position on board
+    // Value = Piece Type
     public double[] getObservationVector() {
+
+        // Scheme
+        // 1 Unknown Player Piece (I don't think this ever happens)
+        // 2 - 13 Player Piece Type
+        // -1 Unknown Opponent Piece
+        // -2 - -13 Opponent Piece Type
+        // 0 Empty Space
         List<Piece> pieces = gridBoard.getComponents();
         List<Double> values = new ArrayList<>();
         int changeSignRed = getCurrentPlayer() == 0 ? 1 : -1;
@@ -136,13 +145,44 @@ public class StrategoGameState extends AbstractGameState implements IVectorisabl
 
         for (Piece piece : pieces) {
             if (piece != null) {
-                if (piece.getPieceAlliance() == Piece.Alliance.RED) {
-                    values.add((double) ((piece.getPieceType().ordinal() + 1) * changeSignRed));
+
+                // Player is Red
+                if (getCurrentPlayer() == 0) {
+
+                    // Player Pieces
+                    if (piece.getPieceAlliance() == Piece.Alliance.RED) {
+                        values.add((double) ((piece.getPieceType().ordinal() + 1)));
+                    }
+
+                    // Opponent Piece is known
+                    else if (piece.getPieceAlliance() == Piece.Alliance.BLUE && piece.isPieceKnown()) {
+                        values.add((double) ((piece.getPieceType().ordinal() + 1) * changeSignBlue));
+                    }
+
+                    // Enemy Unknown
+                    else {
+                        values.add(-1.0);
+                    }
                 }
-                else if (piece.getPieceAlliance() == Piece.Alliance.BLUE) {
-                    values.add((double) ((piece.getPieceType().ordinal() + 1) * changeSignBlue));
+
+                // Player is Blue
+                else if (getCurrentPlayer() == 1) {
+                    if (piece.getPieceAlliance() == Piece.Alliance.BLUE) {
+                        values.add((double) ((piece.getPieceType().ordinal() + 1)));
+                    }
+
+                    // Opponent Piece is known
+                    else if (piece.getPieceAlliance() == Piece.Alliance.RED && piece.isPieceKnown()) {
+                        values.add((double) ((piece.getPieceType().ordinal() + 1) * changeSignRed));
+                    }
+
+                    // Enemy Unknown
+                    else {
+                        values.add(-1.0);
+                    }
                 }
             }
+            // Empty Space
             else {
                 values.add(0.0);
             }
