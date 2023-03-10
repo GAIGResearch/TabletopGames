@@ -4,6 +4,53 @@ import gymnasium as gym
 from gymnasium.vector import AsyncVectorEnv, SyncVectorEnv
 import numpy as np
 
+class ActionTree():
+    def __init__(self, java_tree):
+        self.shape = java_tree.shape
+        # recursively extract the tree
+        self.tree = self.convert_to_numpy(java_tree)
+        self.subtree_idx = self._get_idx(self.tree)
+
+        # should work with batches
+        # for i in range(len(java_tree.shape)):
+        #     available_actions = mask[0][:java_tree.shape[i]]
+        #     action[i] = np.random.choice(available_actions)
+        # print(action[i])
+
+    def apply_mask(self, logits, mask):
+        # todo should recursively apply the mask to the logits
+        pass
+
+    def _get_idx(self, subtree):
+        # breadth first traversal of the subtree, idx is the index of the starting position of the child node
+        # todo we are not summing up the number of nodes in a level
+        counter = len(subtree)
+        idx = []
+        for i in range(len(subtree)):
+            if isinstance(subtree[i], np.integer) or isinstance(subtree[i], int):
+                # idx.append(counter)
+                counter += 1
+            else:
+                # todo somewhere we should add an actual value for idx
+                # isinstance(subtree[i], np.ndarray)
+                counter += len(subtree[i])
+                idx.append(counter)
+                idx.append(self._get_idx(subtree[i]))
+            # counter += 1
+        return idx
+
+    def convert_to_numpy(self, subtree):
+        # recursively convert the tree into a numpy array
+        if not isinstance(subtree, np.ndarray) and subtree == 1:
+            return int(subtree)
+        subtree = np.array(subtree)
+        for i in range(len(subtree)):
+            if not isinstance(subtree[i], np.ndarray):
+                # we get int, but subtree on left converts it back to int64
+                subtree[i] = self.convert_to_numpy(subtree[i])
+        return subtree
+
+
 def get_random_action(mask, action_tree):
     # todo should map the logits to the action tree
     action = np.zeros(len(action_tree.shape))
@@ -25,6 +72,7 @@ if __name__ == "__main__":
     env = gym.make("TAG/ExplodingKittens")
     obs, infos = env.reset()
     action_tree = infos["action_tree"]
+    action_tree = ActionTree(action_tree)
     process_action_tree(action_tree)
 
     env = AsyncVectorEnv([
