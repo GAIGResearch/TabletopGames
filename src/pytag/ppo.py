@@ -186,7 +186,7 @@ if __name__ == "__main__":
     #     [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)]
     # )
     envs = SyncVectorEnv([
-        lambda: gym.make("TAG/ExplodingKittens")
+        lambda: gym.make("TAG/Stratego")
         for i in range(args.num_envs)
     ])
     # For environments in which the action-masks align (aka same amount of actions)

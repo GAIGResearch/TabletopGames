@@ -29,7 +29,8 @@ class TagSingleplayerGym(gym.Env):
         # ToDo better low and high values
         obs_size = int(self._java_env.getObservationSpace())
         self.observation_space = gym.spaces.Box(shape=(obs_size,), low=float("-inf"), high=float("inf"))
-        self._action_tree_shape = np.array(self._java_env.getTreeShape())
+        self._action_tree_shape = 1
+        #self._action_tree_shape = np.array(self._java_env.getTreeShape())
 
     def get_action_tree_shape(self):
         return self._action_tree_shape
