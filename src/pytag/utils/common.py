@@ -1,4 +1,7 @@
 # various helper functions
+import numpy as np
+import torch
+
 import jpype
 from jpype import *
 import jpype.imports
@@ -17,10 +20,7 @@ def get_agent_class(agent_name):
         return jpype.JClass("players.python.PythonAgent")
     return None
 
-# # Import Calls
-# GYMEnv = jpype.JClass("core.GYMEnv")
-# Game = jpype.JClass("core.Game")
-# AbstractGameState = jpype.JClass("core.AbstractGameState")
-# GameType = jpype.JClass("games.GameType")
-# ActionController = jpype.JClass("players.human.ActionController")
-# Utils = jpype.JClass("utilities.Utils")
+def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
+    torch.nn.init.orthogonal_(layer.weight, std)
+    torch.nn.init.constant_(layer.bias, bias_const)
+    return layer
