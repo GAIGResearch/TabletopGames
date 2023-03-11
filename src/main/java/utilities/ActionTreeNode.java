@@ -239,4 +239,15 @@ public class ActionTreeNode {
         SubNodes = subNodes;
     }
 
+    // For testing purposes
+    public List<ActionTreeNode> getValidLeaves() {
+        List<ActionTreeNode> validLeaves = new ArrayList<ActionTreeNode>();
+        List<ActionTreeNode> leaves = getLeafNodes();
+        for (ActionTreeNode leaf : leaves) {
+            if (leaf.value == 1) {
+                validLeaves.add(leaf);
+            }
+        }
+        return validLeaves;
+    }
 }
