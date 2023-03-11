@@ -22,13 +22,13 @@ def process_action_tree(action_tree):
     [np.array(x) for x in action_tree]
 
 if __name__ == "__main__":
-    env = gym.make("TAG/ExplodingKittens")
+    env = gym.make("TAG/Stratego")
     obs, infos = env.reset()
     action_tree = infos["action_tree"]
     process_action_tree(action_tree)
 
     env = AsyncVectorEnv([
-        lambda: gym.make("TAG/ExplodingKittens")
+        lambda: gym.make("TAG/Stratego")
         # lambda: gym.make("TAG/TicTacToe")
         for i in range(1)
     ])

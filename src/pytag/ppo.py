@@ -20,6 +20,18 @@ from src.pytag.gym_.wrappers import MergeActionMaskWrapper
 
 from torch.utils.tensorboard import SummaryWriter
 
+class StrategoWrapper(gym.ObservationWrapper):
+    def __init__(self, env):
+        super().__init__(env)
+        self.observation_space = gym.spaces.Box(low=0, high=1, shape=(27, 10, 10), dtype=np.float32)
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        return self.observation(obs), info
+    def observation(self, observation):
+        observation_ = torch.from_numpy(observation.reshape(10, 10)).to(torch.int64)
+        observation_ = torch.nn.functional.one_hot(observation_+13, num_classes=27)
+        observation_ = observation_.permute(2, 0, 1).float()
+        return observation_
 
 def parse_args():
     # fmt: off
@@ -86,7 +98,9 @@ def parse_args():
 def make_env(env_id, seed, idx, capture_video, run_name):
     def thunk():
         env = gym.make(env_id)
-        env = gym.wrappers.RecordEpisodeStatistics(env)
+        if "Stratego" in env_id:
+            env = StrategoWrapper(env)
+        # env = gym.wrappers.RecordEpisodeStatistics(env)
         # if capture_video:
         #     if idx == 0:
         #         env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
@@ -105,24 +119,50 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
 
 
 class Agent(nn.Module):
-    def __init__(self, envs):
+    def __init__(self, args, envs):
         super().__init__()
-        self.hidden_units = 64
-        self.actor = nn.Sequential(
-            nn.Linear(np.array(envs.single_observation_space.shape).prod(), self.hidden_units),
-            nn.ReLU(),
-            nn.Linear(self.hidden_units, self.hidden_units),
-            nn.ReLU(),
-            layer_init(nn.Linear(self.hidden_units, envs.single_action_space.n), std=0.01)
-        )
+        self.args = args
+        if "Stratego" in args.env_id:
+            self.hidden_units = 256
+            self.conv_out_dims = 3200
+            self.actor = nn.Sequential(
+                nn.Conv2d(envs.single_observation_space.shape[0], 32, kernel_size=3, stride=1, padding=1),
+                nn.ReLU(),
+                nn.Flatten(),
+                nn.Linear(self.conv_out_dims, self.hidden_units),
+                nn.ReLU(),
+                nn.Linear(self.hidden_units, self.hidden_units),
+                nn.ReLU(),
+                layer_init(nn.Linear(self.hidden_units, envs.single_action_space.n), std=0.01)
+            )
 
-        self.critic = nn.Sequential(
-            nn.Linear(np.array(envs.single_observation_space.shape).prod(), self.hidden_units),
-            nn.ReLU(),
-            layer_init(nn.Linear(self.hidden_units, self.hidden_units)),
-            nn.ReLU(),
-            layer_init(nn.Linear(self.hidden_units, 1), std=1.0)
-        )
+            self.critic = nn.Sequential(
+                nn.Conv2d(envs.single_observation_space.shape[0], 32, kernel_size=3, stride=1, padding=1),
+                nn.ReLU(),
+                nn.Flatten(),
+                nn.Linear(self.conv_out_dims, self.hidden_units),
+                nn.ReLU(),
+                layer_init(nn.Linear(self.hidden_units, self.hidden_units)),
+                nn.ReLU(),
+                layer_init(nn.Linear(self.hidden_units, 1), std=1.0)
+            )
+        else:
+            self.hidden_units = 64
+            self.actor = nn.Sequential(
+                nn.Linear(np.array(envs.single_observation_space.shape).prod(), self.hidden_units),
+                nn.ReLU(),
+                nn.Linear(self.hidden_units, self.hidden_units),
+                nn.ReLU(),
+                layer_init(nn.Linear(self.hidden_units, envs.single_action_space.n), std=0.01)
+            )
+
+            self.critic = nn.Sequential(
+                nn.Linear(np.array(envs.single_observation_space.shape).prod(), self.hidden_units),
+                nn.ReLU(),
+                layer_init(nn.Linear(self.hidden_units, self.hidden_units)),
+                nn.ReLU(),
+                layer_init(nn.Linear(self.hidden_units, 1), std=1.0)
+            )
 
         # self.critic = nn.Sequential(
         #     layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod(), 64)),
@@ -182,19 +222,19 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
 
     # env setup
-    # envs = gym.vector.SyncVectorEnv(
-    #     [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)]
-    # )
-    envs = SyncVectorEnv([
-        lambda: gym.make("TAG/Stratego")
-        for i in range(args.num_envs)
-    ])
+    envs = gym.vector.SyncVectorEnv(
+        [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)]
+    )
+    # envs = SyncVectorEnv([
+    #     lambda: StrategoWrapper(gym.make(args.env_id))
+    #     for i in range(args.num_envs)
+    # ])
     # For environments in which the action-masks align (aka same amount of actions)
     # This wrapper will merge them all into one numpy array, instead of having an array of arrays
     envs = MergeActionMaskWrapper(envs)
     envs = gym.wrappers.RecordEpisodeStatistics(envs)
 
-    agent = Agent(envs).to(device)
+    agent = Agent(args, envs).to(device)
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
 
     # ALGO Logic: Storage setup
