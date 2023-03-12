@@ -10,7 +10,7 @@ class PPONet(nn.Module):
         if "Stratego" in args.env_id:
             self.hidden_units = 256
             self.conv_out_dims = 3200
-            self.actor = nn.Sequential(
+            self.network = nn.Sequential(
                 nn.Conv2d(envs.single_observation_space.shape[0], 32, kernel_size=3, stride=1, padding=1),
                 nn.ReLU(),
                 nn.Flatten(),
@@ -18,47 +18,31 @@ class PPONet(nn.Module):
                 nn.ReLU(),
                 nn.Linear(self.hidden_units, self.hidden_units),
                 nn.ReLU(),
-                layer_init(nn.Linear(self.hidden_units, envs.single_action_space.n), std=0.01)
-            )
-            self.critic = nn.Sequential(
-                nn.Conv2d(envs.single_observation_space.shape[0], 32, kernel_size=3, stride=1, padding=1),
-                nn.ReLU(),
-                nn.Flatten(),
-                nn.Linear(self.conv_out_dims, self.hidden_units),
-                nn.ReLU(),
-                layer_init(nn.Linear(self.hidden_units, self.hidden_units)),
-                nn.ReLU(),
-                layer_init(nn.Linear(self.hidden_units, 1), std=1.0)
             )
         else:
             self.hidden_units = 64
-            self.actor = nn.Sequential(
+            self.network = nn.Sequential(
                 nn.Linear(np.array(envs.single_observation_space.shape).prod(), self.hidden_units),
                 nn.ReLU(),
                 nn.Linear(self.hidden_units, self.hidden_units),
-                nn.ReLU(),
-                layer_init(nn.Linear(self.hidden_units, envs.single_action_space.n), std=0.01)
-            )
+                nn.ReLU(),)
 
-            self.critic = nn.Sequential(
-                nn.Linear(np.array(envs.single_observation_space.shape).prod(), self.hidden_units),
-                nn.ReLU(),
-                layer_init(nn.Linear(self.hidden_units, self.hidden_units)),
-                nn.ReLU(),
-                layer_init(nn.Linear(self.hidden_units, 1), std=1.0)
-            )
+        self.actor = layer_init(nn.Linear(self.hidden_units, envs.single_action_space.n), std=0.01)
+        self.critic = layer_init(nn.Linear(self.hidden_units, 1), std=1)
 
     def get_value(self, x):
-        return self.critic(x)
+        hidden = self.network(x)
+        return self.critic(hidden)
 
     def get_action_and_value(self, x, action=None, mask=None):
-        logits = self.actor(x)
+        hidden = self.network(x)
+        logits = self.actor(hidden)
         if mask is not None:
             logits = torch.where(mask, logits, torch.tensor(-1e+8, device=logits.device))
         probs = Categorical(logits=logits)
         if action is None:
             action = probs.sample()
-        return action, probs.log_prob(action), probs.entropy(), self.critic(x)
+        return action, probs.log_prob(action), probs.entropy(), self.critic(hidden)
 
 class PPOLSTM(nn.Module):
     def __init__(self, args, envs):
@@ -79,9 +63,9 @@ class PPOLSTM(nn.Module):
         else:
             self.hidden_units = 128
             self.network = nn.Sequential(
-                nn.Linear(np.array(envs.single_observation_space.shape).prod(), self.hidden_units),
+                layer_init(nn.Linear(np.array(envs.single_observation_space.shape).prod(), self.hidden_units)),
                 nn.ReLU(),
-                nn.Linear(self.hidden_units, self.hidden_units),
+                layer_init(nn.Linear(self.hidden_units, self.hidden_units)),
                 nn.ReLU(),
             )
 
