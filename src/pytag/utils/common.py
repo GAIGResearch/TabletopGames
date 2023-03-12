@@ -1,11 +1,28 @@
 # various helper functions
+import gymnasium as gym
 import numpy as np
 import torch
 
 import jpype
 from jpype import *
 import jpype.imports
+from gym_.wrappers import StrategoWrapper
 
+def make_env(env_id, seed, idx, capture_video, run_name):
+    def thunk():
+        env = gym.make(env_id)
+        if "Stratego" in env_id:
+            env = StrategoWrapper(env)
+        # env = gym.wrappers.RecordEpisodeStatistics(env)
+        # if capture_video:
+        #     if idx == 0:
+        #         env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
+        # env.seed(seed)
+        # env.action_space.seed(seed)
+        # env.observation_space.seed(seed)
+        return env
+
+    return thunk
 def get_agent_list():
     return ["random", "mcts", "osla", "python"]
 

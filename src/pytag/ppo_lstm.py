@@ -17,8 +17,9 @@ from torch.distributions.categorical import Categorical
 
 from torch.utils.tensorboard import SummaryWriter
 
-from src.pytag.gym_.wrappers import MergeActionMaskWrapper, StrategoWrapper
-from src.pytag.utils.networks import PPONet, PPOLSTM
+from gym_.wrappers import MergeActionMaskWrapper, StrategoWrapper
+from utils.common import make_env
+from utils.networks import PPONet, PPOLSTM
 
 def parse_args():
     # fmt: off
@@ -27,6 +28,8 @@ def parse_args():
         help="the name of this experiment")
     parser.add_argument("--seed", type=int, default=1,
         help="seed of the experiment")
+    parser.add_argument("--gpu-id", type=int, default=-1,
+        help="ID of the GPU to use: -1 for CPU")
     parser.add_argument("--torch-deterministic", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
         help="if toggled, `torch.backends.cudnn.deterministic=False`")
     parser.add_argument("--cuda", type=lambda x: bool(strtobool(x)), default=True, nargs="?", const=True,
@@ -83,23 +86,6 @@ def parse_args():
     # fmt: on
     return args
 
-
-def make_env(env_id, seed, idx, capture_video, run_name):
-    def thunk():
-        env = gym.make(env_id)
-        if "Stratego" in env_id:
-            env = StrategoWrapper(env)
-        # env = gym.wrappers.RecordEpisodeStatistics(env)
-        # if capture_video:
-        #     if idx == 0:
-        #         env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
-        # env.seed(seed)
-        # env.action_space.seed(seed)
-        # env.observation_space.seed(seed)
-        return env
-
-    return thunk
-
 if __name__ == "__main__":
     args = parse_args()
     run_name = f"{args.env_id}__{args.exp_name}__{args.seed}__{int(time.time())}"
@@ -127,7 +113,11 @@ if __name__ == "__main__":
     torch.manual_seed(args.seed)
     torch.backends.cudnn.deterministic = args.torch_deterministic
 
-    device = torch.device("cuda" if torch.cuda.is_available() and args.cuda else "cpu")
+    if torch.cuda.is_available() and args.gpu_id != -1:
+        device = torch.device(f'cuda:{args.gpu_id}')
+        torch.cuda.manual_seed(seed=args.seed)
+    else:
+        device = torch.device('cpu')
 
     # env setup
     envs = gym.vector.SyncVectorEnv(
