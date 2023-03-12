@@ -313,5 +313,8 @@ if __name__ == "__main__":
         # print("SPS:", int(global_step / (time.time() - start_time)))
         writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
 
+    # create checkpoint
+    torch.save(agent.state_dict(), f"{wandb.run.dir}/agent.pt")
+    wandb.save(f"{wandb.run.dir}/agent.pt", policy="now")
     envs.close()
     writer.close()
