@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torch import nn
 from torch.distributions import Categorical
-from src.pytag.utils.common import layer_init
+from utils.common import layer_init
 class PPONet(nn.Module):
     def __init__(self, args, envs):
         super().__init__()

@@ -17,8 +17,8 @@ from torch.distributions.categorical import Categorical
 
 from torch.utils.tensorboard import SummaryWriter
 
-from src.pytag.gym_.wrappers import MergeActionMaskWrapper, StrategoWrapper
-from src.pytag.utils.networks import PPONet
+from gym_.wrappers import MergeActionMaskWrapper, StrategoWrapper
+from utils.networks import PPONet
 
 def parse_args():
     # fmt: off
