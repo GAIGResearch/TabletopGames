@@ -10,7 +10,7 @@ from gym_.wrappers import StrategoWrapper
 
 def make_env(env_id, seed, idx, capture_video, run_name):
     def thunk():
-        env = gym.make(env_id)
+        env = gym.make(env_id, seed=seed)
         if "Stratego" in env_id:
             env = StrategoWrapper(env)
         # env = gym.wrappers.RecordEpisodeStatistics(env)

@@ -41,6 +41,7 @@ public class GYMEnv {
     boolean isNormalized; // Bool for whether you want obersvations to be normalized
 
     private Random seedRandom; // Random used for setting the seed for each episode
+    private long lastSeed;
 
 
     public GYMEnv(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, boolean isNormalized) throws Exception {
@@ -156,7 +157,8 @@ public class GYMEnv {
         this.tick = 0;
         this.game.setTurnPause(turnPause);
         this.gameState = game.getGameState();
-        gameState.gameParameters.setRandomSeed(seedRandom.nextLong());
+        this.lastSeed = seedRandom.nextLong();
+        gameState.gameParameters.setRandomSeed(this.lastSeed);
         this.forwardModel = game.getForwardModel();
         this.availableActions = forwardModel.computeAvailableActions(gameState);
         return this.gameState;
@@ -305,6 +307,10 @@ public class GYMEnv {
 
     public int getTick(){
         return this.tick;
+    }
+
+    public long getSeed(){
+        return this.lastSeed;
     }
 
     public List getTreeShape(){

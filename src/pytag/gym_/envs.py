@@ -20,6 +20,7 @@ class TagSingleplayerGym(gym.Env):
         self._playerID = agent_ids.index("python")
         # ToDo accept the List interface in GymEnv, this allows us to pass agents directly instead of converting it first
         self._java_env = GymEnv(gameType, None, jpype.java.util.ArrayList(agents), seed, True)
+        # print(f"initial seed = {self._java_env.getSeed()}")
 
         # Construct action/observation space
         self._java_env.reset()
