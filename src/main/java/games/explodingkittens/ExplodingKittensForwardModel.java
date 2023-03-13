@@ -33,6 +33,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
      */
     protected void _setup(AbstractGameState firstState) {
         root = generateActionTree();
+        leaves = root.getLeafNodes();
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)firstState;
@@ -254,9 +255,9 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
                     playNode.findChildrenByName("SHUFFLE").setAction(new ShuffleAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
                     break;
                 case SEETHEFUTURE:
-                    actions.add(new SeeTheFuture(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, playerID));
-                    playNode.setValue(1);
-                    playNode.findChildrenByName("SEETHEFUTURE").setAction(new SeeTheFuture(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, playerID));
+//                    actions.add(new SeeTheFuture(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, playerID));
+//                    playNode.setValue(1);
+//                    playNode.findChildrenByName("SEETHEFUTURE").setAction(new SeeTheFuture(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, playerID));
                     break;
                 default:
                     System.out.println("No actions known for cardtype: " + card.cardType);
@@ -293,7 +294,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
             for (int i = 0; i <= ekgs.drawPile.getSize(); i++) {
                 actions.add(new PlaceExplodingKitten(playerDeck.getComponentID(), ekgs.drawPile.getComponentID(), explodingKittenCard, i));
                 if (i < N_CARDS_TO_CHECK){
-                    root.findChildrenByName("defuse").findChildrenByName("put" + i, true).setAction(new PlaceExplodingKitten(playerDeck.getComponentID(), ekgs.drawPile.getComponentID(), explodingKittenCard, i));
+                    root.findChildrenByName("DEFUSE").findChildrenByName("PUT" + i, true).setAction(new PlaceExplodingKitten(playerDeck.getComponentID(), ekgs.drawPile.getComponentID(), explodingKittenCard, i));
                 }
             }
         }
@@ -306,10 +307,11 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         for (int c = 0; c < playerDeck.getSize(); c++) {
             if (playerDeck.getComponents().get(c).cardType == ExplodingKittensCard.CardType.NOPE) {
                 actions.add(new NopeAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
-                root.findChildrenByName("nope").setAction(new NopeAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
+                root.findChildrenByName("NOPE").findChildrenByName("NOPE").setAction(new NopeAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
                 break;
             }
         }
+        root.findChildrenByName("NOPE").findChildrenByName("PASS").setAction(new PassAction());
         actions.add(new PassAction());
         return actions;
     }
@@ -321,6 +323,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         // todo this requires mapping the card type to indices
         for (int card = 0; card < playerDeck.getSize(); card++) {
             actions.add(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), card));
+            root.findChildrenByName("FAVOR").findChildrenByName(playerDeck.get(card).toString()).setAction(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), card));
         }
         if (actions.isEmpty()) // the target has no cards.
             actions.add(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), -1));
@@ -399,7 +402,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
 
     @Override
     public int getActionSpace() {
-        return root.getSubNodes(); // pass (draw) or play any of the card types
+        return leaves.size(); // pass (draw) or play any of the card types
     }
 
     @Override
@@ -409,13 +412,19 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
 
     @Override
     public int[] getActionMask(AbstractGameState gameState) {
-        return root.getActionMask();
+        return leaves.stream()
+                .mapToInt(ActionTreeNode::getValue)
+                .toArray();
+//        return root.getActionMask();
     }
 
     @Override
     public void nextPython(AbstractGameState state, int actionID) {
-        AbstractAction action = root.getActionByVector(new int[]{actionID});
+        ActionTreeNode node = leaves.get(actionID);
+        AbstractAction action = node.getAction();
         _next(state, action);
+//        AbstractAction action = root.getActionByVector(new int[]{actionID});
+//        _next(state, action);
         // todo chooses some actions randomly - could fix this with the multi-level trees
         // TODO the 2 of a kind cards are seemingly not implemented
         // TODO these could be saved somewhere, this is useful for reference
