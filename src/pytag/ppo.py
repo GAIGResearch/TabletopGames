@@ -293,6 +293,6 @@ if __name__ == "__main__":
 
     # create checkpoint
     torch.save(agent.state_dict(), f"{results_dir}/agent.pt")
-    wandb.save(f"{results_dir}/agent.pt", policy="final")
+    wandb.save(f"{results_dir}/agent.pt", policy="end")
     envs.close()
     writer.close()
