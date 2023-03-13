@@ -3,7 +3,6 @@ package games.loveletter.actions.deep;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.actions.PrinceAction;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.List;
@@ -20,7 +19,7 @@ public class DeepPrinceAction extends PlayCardDeep {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        return PrinceAction.generateActions((LoveLetterGameState) state, playerID, false);
+        return cardType.getFlatActions((LoveLetterGameState) state, playerID, false);
     }
 
     @Override

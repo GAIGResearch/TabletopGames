@@ -7,6 +7,7 @@ import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.GuardAction;
+import games.loveletter.actions.PlayCard;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.ArrayList;
@@ -49,8 +50,8 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         List<AbstractAction> cardActions = new ArrayList<>();
+        LoveLetterGameState gs = (LoveLetterGameState) state;
         if (step == Step.TargetPlayer) {
-            LoveLetterGameState gs = (LoveLetterGameState) state;
             // Actions to select player
             for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
                 if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
@@ -61,7 +62,7 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
             if (cardActions.size() == 0) cardActions.add(new GuardAction(playerID, -1, null, false, false));
         } else {
             // Complete actions
-            cardActions.addAll(GuardAction.generateActions(playerID, targetPlayer, false));
+            cardActions.addAll(LoveLetterCard.CardType.Guard.getFlatActions(gs, new PlayCard(playerID, false, targetPlayer)));
         }
         return cardActions;
     }

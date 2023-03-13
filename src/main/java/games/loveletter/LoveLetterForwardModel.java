@@ -292,82 +292,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
         }
     }
 
-    public List<AbstractAction> computeAvailableDeepActions(AbstractGameState gameState) {
-        LoveLetterGameState llgs = (LoveLetterGameState)gameState;
-        if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
-            throw new AssertionError("???.");
-
-        Set<AbstractAction> actions = new HashSet<>();
-        int playerID = gameState.getCurrentPlayer();
-        Deck<LoveLetterCard> playerDeck = llgs.playerHandCards.get(playerID);
-
-        // in case a player holds the countess and either the king or the prince, the countess needs to be played
-        LoveLetterCard.CardType cardTypeForceCountess = llgs.needToForceCountess(playerDeck);
-
-        // We create the respective actions for each card in the player's hand
-        for (int card = 0; card < playerDeck.getSize(); card++) {
-            if (card == 1 && playerDeck.get(0).cardType == playerDeck.get(1).cardType)
-                continue; // if the player has two cards of the same type, they can only play one
-            List<AbstractAction> cardActions = new ArrayList<>();
-            LoveLetterCard.CardType cardType = playerDeck.getComponents().get(card).cardType;
-            if (cardType != LoveLetterCard.CardType.Countess && cardTypeForceCountess != null) continue;
-
-            switch (cardType) {
-                case Priest:
-                    cardActions.add(new DeepPriestAction(playerID));
-                    break;
-
-                case Guard:
-                    cardActions.add(new DeepGuardAction(playerID));
-                    break;
-
-                case Baron:
-                    cardActions.add(new DeepBaronAction(playerID));
-                    break;
-
-                case Handmaid:
-                    cardActions.add(new HandmaidAction(playerID));
-                    break;
-
-                case Prince:
-                    cardActions.add(new DeepPrinceAction(playerID));
-                    break;
-
-                case King:
-                    cardActions.add(new DeepKingAction(playerID));
-                    break;
-
-                case Countess:
-                    cardActions.add(new CountessAction(playerID, cardTypeForceCountess));
-                    break;
-
-                case Princess:
-                    cardActions.add(new PrincessAction(playerID));
-                    break;
-
-                default:
-                    throw new IllegalArgumentException("No core actions known for cardtype: " +
-                            playerDeck.getComponents().get(card).cardType.toString());
-            }
-
-            actions.addAll(cardActions);
-        }
-
-        return new ArrayList<>(actions);
-    }
-
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
-        if (actionSpace.structure == ActionSpace.Structure.Flat)
-            return _computeAvailableActions(gameState); // Default is this
-        else return computeAvailableDeepActions(gameState);
-    }
-
-    /**
-     * Calculates the list of currently available actions, possibly depending on the game phase.
-     * @return - List of AbstractAction objects.
-     */
-    @Override
-    public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
             throw new AssertionError("???.");
@@ -381,51 +306,24 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
         // We create the respective actions for each card on the player's hand
         for (int card = 0; card < playerDeck.getSize(); card++) {
-            List<AbstractAction> cardActions = new ArrayList<>();
             LoveLetterCard.CardType cardType = playerDeck.getComponents().get(card).cardType;
             if (cardType != LoveLetterCard.CardType.Countess && cardTypeForceCountess != null) continue;
-
-            switch (cardType) {
-                case Priest:
-                    cardActions.addAll(PriestAction.generateActions(llgs, playerID, true));
-                    break;
-
-                case Guard:
-                    cardActions.addAll(GuardAction.generateActions(llgs, playerID, true));
-                    break;
-
-                case Baron:
-                    cardActions.addAll(BaronAction.generateActions(llgs, playerID, true));
-                    break;
-
-                case Handmaid:
-                    cardActions.add(new HandmaidAction(playerID));
-                    break;
-
-                case Prince:
-                    cardActions.addAll(PrinceAction.generateActions(llgs, playerID, true));
-                    break;
-
-                case King:
-                    cardActions.addAll(KingAction.generateActions(llgs, playerID, true));
-                    break;
-
-                case Countess:
-                    cardActions.add(new CountessAction(playerID, cardTypeForceCountess));
-                    break;
-
-                case Princess:
-                    cardActions.add(new PrincessAction(playerID));
-                    break;
-
-                default:
-                    throw new IllegalArgumentException("No core actions known for cardtype: " +
-                            playerDeck.getComponents().get(card).cardType.toString());
+            if (actionSpace.structure == ActionSpace.Structure.Flat || actionSpace.structure == ActionSpace.Structure.Default) {
+                actions.addAll(cardType.getFlatActions(llgs, playerID, true));
+            } else {
+                actions.addAll(cardType.getDeepActions(llgs, playerID, true));
             }
-
-            actions.addAll(cardActions);
         }
 
         return new ArrayList<>(actions);
+    }
+
+    /**
+     * Calculates the list of currently available actions, possibly depending on the game phase.
+     * @return - List of AbstractAction objects.
+     */
+    @Override
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, ActionSpace.Default);
     }
 }

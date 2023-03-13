@@ -9,7 +9,7 @@ import games.loveletter.cards.LoveLetterCard;
 
 import java.util.Objects;
 
-public class PlayCard extends AbstractAction {
+public abstract class PlayCardIndex extends AbstractAction {
     protected final int playerID;
     final int targetPlayer;
     protected final LoveLetterCard.CardType cardType;
@@ -18,37 +18,7 @@ public class PlayCard extends AbstractAction {
     final boolean canExecuteEffect;
     final boolean discard;
 
-    public PlayCard(int playerID, boolean discard) {
-        this.cardType = null;
-        this.playerID = playerID;
-        this.targetPlayer = -1;
-        this.targetCardType = null;
-        this.forcedCountessCardType = null;
-        this.canExecuteEffect = false;
-        this.discard = discard;
-    }
-
-    public PlayCard(int playerID, boolean discard, int targetPlayer) {
-        this.cardType = null;
-        this.playerID = playerID;
-        this.targetPlayer = targetPlayer;
-        this.targetCardType = null;
-        this.forcedCountessCardType = null;
-        this.canExecuteEffect = false;
-        this.discard = discard;
-    }
-
-    public PlayCard(int playerID, boolean discard, LoveLetterCard.CardType targetCardType) {
-        this.cardType = null;
-        this.playerID = playerID;
-        this.targetPlayer = -1;
-        this.targetCardType = targetCardType;
-        this.forcedCountessCardType = null;
-        this.canExecuteEffect = false;
-        this.discard = discard;
-    }
-
-    public PlayCard(LoveLetterCard.CardType cardType, int playerID, int targetPlayer, LoveLetterCard.CardType targetCardType, LoveLetterCard.CardType forcedCountessCardType, boolean canExecuteEffect, boolean discard) {
+    public PlayCardIndex(LoveLetterCard.CardType cardType, int playerID, int targetPlayer, LoveLetterCard.CardType targetCardType, LoveLetterCard.CardType forcedCountessCardType, boolean canExecuteEffect, boolean discard) {
         this.cardType = cardType;
         this.playerID = playerID;
         this.targetPlayer = targetPlayer;
@@ -89,13 +59,8 @@ public class PlayCard extends AbstractAction {
         return true;
     }
 
-    @Override
-    public PlayCard copy() {
-        return this;
-    }
-
-    protected boolean _execute(LoveLetterGameState llgs) {return false;}
-    protected String _toString() {return "";}
+    protected abstract boolean _execute(LoveLetterGameState llgs);
+    protected abstract String _toString();
 
     @Override
     public String toString() {
@@ -106,19 +71,14 @@ public class PlayCard extends AbstractAction {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PlayCard)) return false;
-        PlayCard playCard = (PlayCard) o;
+        if (!(o instanceof PlayCardIndex)) return false;
+        PlayCardIndex playCard = (PlayCardIndex) o;
         return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer && canExecuteEffect == playCard.canExecuteEffect && discard == playCard.discard && cardType == playCard.cardType && targetCardType == playCard.targetCardType && forcedCountessCardType == playCard.forcedCountessCardType;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(playerID, targetPlayer, cardType, targetCardType, forcedCountessCardType, canExecuteEffect, discard);
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
     }
 
     public int getPlayerID() {
@@ -143,9 +103,5 @@ public class PlayCard extends AbstractAction {
 
     public boolean canExecuteEffect() {
         return canExecuteEffect;
-    }
-
-    public boolean isDiscard() {
-        return discard;
     }
 }

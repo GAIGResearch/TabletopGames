@@ -1,16 +1,12 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.CoreConstants;
-import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -74,17 +70,6 @@ public class BaronAction extends PlayCard implements IPrintable {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), playerCard, opponentCard);
-    }
-
-    public static List<AbstractAction> generateActions(LoveLetterGameState gs, int playerID, boolean discard) {
-        List<AbstractAction> cardActions = new ArrayList<>();
-        for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
-                continue;
-            cardActions.add(new BaronAction(playerID, targetPlayer, true, discard));
-        }
-        if (cardActions.size() == 0) cardActions.add(new BaronAction(playerID, -1, false, discard));
-        return cardActions;
     }
 
     @Override

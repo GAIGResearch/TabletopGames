@@ -1,15 +1,10 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.CoreConstants;
-import core.actions.AbstractAction;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The guard allows to attempt guessing another player's card. If the guess is correct, the targeted opponent
@@ -56,27 +51,6 @@ public class GuardAction extends PlayCard implements IPrintable {
     @Override
     public boolean equals(Object o) {
         return o instanceof GuardAction && super.equals(o);
-    }
-
-    public static List<AbstractAction> generateActions(LoveLetterGameState gs, int playerID, boolean discard) {
-        List<AbstractAction> cardActions = new ArrayList<>();
-        for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
-                continue;
-            cardActions.addAll(generateActions(playerID, targetPlayer, discard));
-        }
-        if (cardActions.size() == 0) cardActions.add(new GuardAction(playerID, -1, null, false, discard));
-        return cardActions;
-    }
-
-    public static List<AbstractAction> generateActions(int playerID, int targetPlayer, boolean discard) {
-        List<AbstractAction> cardActions = new ArrayList<>();
-        for (LoveLetterCard.CardType type : LoveLetterCard.CardType.values()) {
-            if (type != LoveLetterCard.CardType.Guard) {
-                cardActions.add(new GuardAction(playerID, targetPlayer, type, true, discard));
-            }
-        }
-        return cardActions;
     }
 
     @Override
