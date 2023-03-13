@@ -14,8 +14,6 @@ import java.util.Objects;
  */
 public class PrinceAction extends PlayCard implements IPrintable {
 
-    private LoveLetterCard.CardType cardDiscarded;
-
     public PrinceAction(int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
         super(LoveLetterCard.CardType.Prince, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
@@ -30,8 +28,8 @@ public class PrinceAction extends PlayCard implements IPrintable {
         opponentDiscardPile.add(card);
 
         // if the discarded card is a princess, the targeted player loses the game
-        cardDiscarded = card.cardType;
-        if (cardDiscarded == LoveLetterCard.CardType.Princess) {
+        targetCardType = card.cardType;
+        if (targetCardType == LoveLetterCard.CardType.Princess) {
             llgs.killPlayer(playerID, targetPlayer, cardType);
             if (llgs.getCoreGameParameters().recordEventHistory) {
                 llgs.recordHistory("Player " + targetPlayer + " discards Princess and loses!");
@@ -54,37 +52,13 @@ public class PrinceAction extends PlayCard implements IPrintable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PrinceAction)) return false;
-        if (!super.equals(o)) return false;
-        PrinceAction that = (PrinceAction) o;
-        return cardDiscarded == that.cardDiscarded;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), cardDiscarded);
-    }
-
-    @Override
-    public String _toString(){
-        return "Prince (" + targetPlayer + " discards " + (cardDiscarded != null? cardDiscarded : "card") + " and draws a new card)";
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
-    }
-
-    @Override
-    public void printToConsole(AbstractGameState gameState) {
-        System.out.println(this);
+        return super.equals(o) && o instanceof PrinceAction;
     }
 
     @Override
     public PrinceAction copy() {
         PrinceAction pa = new PrinceAction(playerID, targetPlayer, canExecuteEffect, discard);
-        pa.cardDiscarded = cardDiscarded;
+        pa.targetCardType = targetCardType;
         return pa;
     }
 

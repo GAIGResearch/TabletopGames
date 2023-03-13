@@ -22,21 +22,6 @@ public class HandmaidAction extends PlayCard implements IPrintable {
     }
 
     @Override
-    public String _toString() {
-        return "Handmaid (" + playerID + " is protected until their next turn)";
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
-    }
-
-    @Override
-    public void printToConsole(AbstractGameState gameState) {
-        System.out.println(this);
-    }
-
-    @Override
     public HandmaidAction copy() {
         return this;
     }

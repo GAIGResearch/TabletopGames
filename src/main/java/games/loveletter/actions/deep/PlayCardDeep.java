@@ -28,10 +28,6 @@ public abstract class PlayCardDeep extends PlayCard implements IExtendedSequence
     }
 
     @Override
-    protected String _toString() {
-        return "";
-    }
-    @Override
     protected boolean _execute(LoveLetterGameState llgs) {
         return true;
     }

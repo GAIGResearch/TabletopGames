@@ -1,6 +1,5 @@
 package games.loveletter.actions;
 
-import core.AbstractGameState;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
@@ -31,21 +30,6 @@ public class GuardAction extends PlayCard implements IPrintable {
             }
         }
         return true;
-    }
-
-    @Override
-    public String _toString(){
-        return "Guard (" + playerID + " guess " + targetPlayer + " holds card " + targetCardType.name() + ")";
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
-    }
-
-    @Override
-    public void printToConsole(AbstractGameState gameState) {
-        System.out.println(this);
     }
 
     @Override

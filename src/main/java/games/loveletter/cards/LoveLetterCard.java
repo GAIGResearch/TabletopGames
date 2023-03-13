@@ -11,7 +11,9 @@ import games.loveletter.actions.deep.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class LoveLetterCard extends Card {
 
@@ -38,11 +40,13 @@ public class LoveLetterCard extends Card {
             return this.name() + " (" + value + "; x" + params.cardCounts.get(this) + "): " + cardText;
         }
 
+        // Action factory
         private BiFunction<LoveLetterGameState, PlayCard, List<AbstractAction>> generateFlatActions, generateDeepActions;
         static {
-            Princess.generateFlatActions = (gs, play) -> Collections.singletonList(new PrincessAction(play.getPlayerID()));
+            Princess.generateFlatActions = (gs, play) -> Collections.singletonList(new PlayCard(LoveLetterCard.CardType.Princess, play.getPlayerID(), -1, null, null, true, true));
             Handmaid.generateFlatActions = (gs, play) -> Collections.singletonList(new HandmaidAction(play.getPlayerID()));
-            Countess.generateFlatActions = (gs, play) -> Collections.singletonList(new CountessAction(play.getPlayerID(), gs.needToForceCountess(gs.getPlayerHandCards().get(play.getPlayerID()))));
+            Countess.generateFlatActions = (gs, play) -> Collections.singletonList(
+                    new PlayCard(Countess, play.getPlayerID(), -1, null, gs.needToForceCountess(gs.getPlayerHandCards().get(play.getPlayerID())), true, play.isDiscard()));
             Priest.generateFlatActions = (gs, play) -> {
                 int p = play.getPlayerID();
                 boolean discard = play.isDiscard();
@@ -121,7 +125,6 @@ public class LoveLetterCard extends Card {
             };
             Guard.generateDeepActions = (gs, play) -> Collections.singletonList(new DeepGuardAction(play.getPlayerID()));
         }
-
         public List<AbstractAction> getFlatActions(LoveLetterGameState gs, PlayCard play) {
             if (generateFlatActions != null) return generateFlatActions.apply(gs, play);
             return new ArrayList<>();
@@ -130,13 +133,49 @@ public class LoveLetterCard extends Card {
             if (generateFlatActions != null) return generateFlatActions.apply(gs, new PlayCard(playerId, discard));
             return new ArrayList<>();
         }
-        public List<AbstractAction> getDeepActions(LoveLetterGameState gs, PlayCard play) {
-            if (generateDeepActions != null) return generateDeepActions.apply(gs, play);
-            return new ArrayList<>();
-        }
         public List<AbstractAction> getDeepActions(LoveLetterGameState gs, int playerId, boolean discard) {
-            if (generateDeepActions != null) return generateDeepActions.apply(gs, new PlayCard(playerId, discard));
-            return new ArrayList<>();
+            PlayCard play = new PlayCard(playerId, discard);
+            if (generateDeepActions != null) return generateDeepActions.apply(gs, play);
+            return getFlatActions(gs, play);
+        }
+
+        // To string
+        private Function<PlayCard, String> generateString;
+        static {
+            Princess.generateString = play -> "Princess (" + play.getPlayerID() + " loses the game)";
+            Countess.generateString = play -> {
+                if (play.getForcedCountessCardType() == null) return "Countess (no effect)";
+                return "Countess (auto discard with " + play.getForcedCountessCardType() + ")";
+            };
+            King.generateString = play -> "King (" + play.getPlayerID() + " trades hands with " + play.getTargetPlayer() + ")";
+            Prince.generateString = play -> "Prince (" + play.getTargetPlayer() + " discards " + (play.getTargetCardType() != null? play.getTargetCardType() : "card") + " and draws a new card)";
+            Handmaid.generateString = play -> "Handmaid (" + play.getPlayerID() + " is protected until their next turn)";
+            Baron.generateString = play -> {
+                if (play.getTargetCardType() == null) {
+                    return "Baron (" + play.getPlayerID() + " compares cards with " + play.getTargetPlayer() + ")";
+                } else {
+                    return "Baron (" + play.getPlayerID() + " " + play.getOtherCardInHand() + " vs " + play.getTargetPlayer() + " " + play.getTargetCardType() + ")";
+                }
+            };
+            Priest.generateString = play -> "Priest (" + play.getPlayerID() + " sees " + (play.getTargetCardType() != null? play.getTargetCardType() : "card") + " of " + play.getTargetPlayer() + ")";
+            Guard.generateString = play -> "Guard (" + play.getPlayerID() + " guess " + play.getTargetPlayer() + " holds card " + play.getTargetCardType().name() + ")";
+        }
+        public String getString(PlayCard play) {
+            if (generateString != null) {
+                return generateString.apply(play);
+            } else return "";
+        }
+
+        // Execute
+        private BiConsumer<LoveLetterGameState, PlayCard> execute;
+        public void execute(LoveLetterGameState gs, PlayCard play) {
+            if (execute != null) {
+                execute.accept(gs, play);
+            }
+        }
+        static {
+            Princess.execute = (gs, play) -> gs.killPlayer(play.getPlayerID(), play.getPlayerID(), Princess);
+
         }
     }
 

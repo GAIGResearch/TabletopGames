@@ -1,6 +1,5 @@
 package games.loveletter.actions;
 
-import core.AbstractGameState;
 import core.CoreConstants.VisibilityMode;
 import core.components.Deck;
 import core.interfaces.IPrintable;
@@ -32,21 +31,6 @@ public class KingAction extends PlayCard implements IPrintable {
             playerDeck.add(tmpDeck.draw());
 
         return true;
-    }
-
-    @Override
-    public String _toString(){
-        return "King (" + playerID + " trades hands with " + targetPlayer + ")";
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
-    }
-
-    @Override
-    public void printToConsole(AbstractGameState gameState) {
-        System.out.println(this);
     }
 
     @Override
