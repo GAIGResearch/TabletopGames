@@ -23,6 +23,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--exp-name", type=str, default=os.path.basename(__file__).rstrip(".py"),
         help="the name of this experiment")
+    parser.add_argument("--logdir", type=str, default="~/data/pyTAG/",
+        help="the name of this experiment")
     parser.add_argument("--seed", type=int, default=1,
         help="seed of the experiment")
     parser.add_argument("--gpu-id", type=int, default=-1,
@@ -101,7 +103,11 @@ if __name__ == "__main__":
             monitor_gym=True,
             save_code=True,
         )
-    writer = SummaryWriter(f"runs/{run_name}")
+    args.logdir = os.path.expanduser(args.logdir)
+    results_dir = os.path.join(args.logdir, run_name)
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+    writer = SummaryWriter(f"{results_dir}")
     writer.add_text(
         "hyperparameters",
         "|param|value|\n|-|-|\n%s" % ("\n".join([f"|{key}|{value}|" for key, value in vars(args).items()])),
@@ -286,7 +292,7 @@ if __name__ == "__main__":
         writer.add_scalar("charts/SPS", int(global_step / (time.time() - start_time)), global_step)
 
     # create checkpoint
-    torch.save(agent.state_dict(), f"{wandb.run.dir}/agent.pt")
-    wandb.save(f"{wandb.run.dir}/agent.pt", policy="now")
+    torch.save(agent.state_dict(), f"{results_dir}/agent.pt")
+    wandb.save(f"{results_dir}/agent.pt", policy="final")
     envs.close()
     writer.close()
