@@ -5,19 +5,16 @@ import random
 import time
 from distutils.util import strtobool
 
-from gymnasium.vector import AsyncVectorEnv, SyncVectorEnv
-
 import gym_
 import gymnasium as gym
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.distributions.categorical import Categorical
 
 from torch.utils.tensorboard import SummaryWriter
 
-from gym_.wrappers import MergeActionMaskWrapper, StrategoWrapper
+from gym_.wrappers import MergeActionMaskWrapper, RecordEpisodeStatistics
 from utils.common import make_env
 from utils.networks import PPONet, PPOLSTM
 
@@ -130,7 +127,7 @@ if __name__ == "__main__":
     # For environments in which the action-masks align (aka same amount of actions)
     # This wrapper will merge them all into one numpy array, instead of having an array of arrays
     envs = MergeActionMaskWrapper(envs)
-    envs = gym.wrappers.RecordEpisodeStatistics(envs)
+    envs = RecordEpisodeStatistics(envs)
 
     agent = PPOLSTM(args, envs).to(device)
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
@@ -191,6 +188,7 @@ if __name__ == "__main__":
                         # print(f"global_step={global_step}, episodic_return={info['episode']['r'][i]}")
                         writer.add_scalar("charts/episodic_return", info["episode"]["r"][i], global_step)
                         writer.add_scalar("charts/episodic_length", info["episode"]["l"][i], global_step)
+                        writer.add_scalar("charts/episodic_wins", info["episode"]["w"][i], global_step)
 
         # bootstrap value if not done
         with torch.no_grad():
