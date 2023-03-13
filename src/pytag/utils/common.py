@@ -8,20 +8,16 @@ from jpype import *
 import jpype.imports
 from gym_.wrappers import StrategoWrapper
 
-def make_env(env_id, seed, idx, capture_video, run_name):
+def make_env(env_id, seed, opponent, n_players):
     def thunk():
-        env = gym.make(env_id, seed=seed)
+        # always have a python agent first (at least in our experiments)
+        agent_ids = ["python"]
+        for i in range(n_players - 1):
+            agent_ids.append(opponent)
+        env = gym.make(env_id, seed=seed, agent_ids=agent_ids)
         if "Stratego" in env_id:
             env = StrategoWrapper(env)
-        # env = gym.wrappers.RecordEpisodeStatistics(env)
-        # if capture_video:
-        #     if idx == 0:
-        #         env = gym.wrappers.RecordVideo(env, f"videos/{run_name}")
-        # env.seed(seed)
-        # env.action_space.seed(seed)
-        # env.observation_space.seed(seed)
         return env
-
     return thunk
 def get_agent_list():
     return ["random", "mcts", "osla", "python"]

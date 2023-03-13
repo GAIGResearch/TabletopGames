@@ -75,6 +75,10 @@ def parse_args():
         help="the maximum norm for the gradient clipping")
     parser.add_argument("--target-kl", type=float, default=None,
         help="the target KL divergence threshold")
+    # game related args
+    parser.add_argument('--opponent', type=str, default='random', choices=["random", "osla", "mcts"])
+    parser.add_argument("--n-players", type=int, default=2,
+        help="the number of players in the env (note some games only support certain number of players)")
     args = parser.parse_args()
     args.batch_size = int(args.num_envs * args.num_steps)
     args.minibatch_size = int(args.batch_size // args.num_minibatches)
@@ -117,7 +121,7 @@ if __name__ == "__main__":
 
     # env setup
     envs = gym.vector.SyncVectorEnv(
-        [make_env(args.env_id, args.seed + i, i, args.capture_video, run_name) for i in range(args.num_envs)]
+        [make_env(args.env_id, args.seed + i, args.opponent, args.n_players) for i in range(args.num_envs)]
     )
     # envs = SyncVectorEnv([
     #     lambda: StrategoWrapper(gym.make(args.env_id))
