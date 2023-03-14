@@ -131,7 +131,7 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
             }
             c++;
         }
-        //assert actions.size() == root.getValidLeaves().size();
+        assert actions.size() == root.getValidLeaves().size();
         return actions;
     }
 
