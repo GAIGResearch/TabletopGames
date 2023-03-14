@@ -251,6 +251,11 @@ public class GYMEnv {
 //        AbstractAction a_ = this.availableActions.get(a);
 //        forwardModel.next(gameState, a_);
         playAction(a);
+        if (isDone()){
+            // check if the game has just ended
+            // game is over
+            return gameState.copy(gameState.getCurrentPlayer());
+        }
 
         int activePlayer = gameState.getCurrentPlayer();
         AbstractPlayer currentPlayer = players.get(activePlayer);
@@ -296,6 +301,7 @@ public class GYMEnv {
             tick++;
 
             lastPlayer = activePlayer;
+            activePlayer = gameState.getCurrentPlayer();
             currentPlayer = players.get(gameState.getCurrentPlayer());
 
         }
@@ -324,6 +330,8 @@ public class GYMEnv {
     public static void main(String[] args) {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new PythonAgent());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
         players.add(new RandomPlayer());
         try {
             GYMEnv env = new GYMEnv(GameType.valueOf("ExplodingKittens"), null, players, 343, true);
