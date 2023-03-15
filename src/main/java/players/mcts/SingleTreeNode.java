@@ -929,26 +929,26 @@ public class SingleTreeNode {
                         n.totSquares[j] += squaredResults[root.decisionPlayer];
                     }
                     break;
-                case Paranoid:
-                case MultiTreeParanoid:
-                    int paranoid = root.paranoidPlayer == -1 ? root.decisionPlayer : root.paranoidPlayer;
-                    for (int j = 0; j < result.length; j++) {
-                        if (j == paranoid) {
-                            n.totValue[j] += result[paranoid];
-                            n.totSquares[j] += squaredResults[paranoid];
-                        } else {
-                            n.totValue[j] -= result[paranoid];
-                            n.totSquares[j] += squaredResults[paranoid];
-                        }
-                    }
-                    break;
-                case MaxN:
+                case OneTree:
                 case MultiTree:
                 case OMA_All:
                 case OMA:
-                    for (int j = 0; j < result.length; j++) {
-                        n.totValue[j] += result[j];
-                        n.totSquares[j] += squaredResults[j];
+                    if (params.paranoid) {
+                        int paranoid = root.paranoidPlayer == -1 ? root.decisionPlayer : root.paranoidPlayer;
+                        for (int j = 0; j < result.length; j++) {
+                            if (j == paranoid) {
+                                n.totValue[j] += result[paranoid];
+                                n.totSquares[j] += squaredResults[paranoid];
+                            } else {
+                                n.totValue[j] -= result[paranoid];
+                                n.totSquares[j] += squaredResults[paranoid];
+                            }
+                        }
+                    } else {
+                        for (int j = 0; j < result.length; j++) {
+                            n.totValue[j] += result[j];
+                            n.totSquares[j] += squaredResults[j];
+                        }
                     }
                     break;
             }
@@ -1111,7 +1111,7 @@ public class SingleTreeNode {
         // visits and values for each
         StringBuilder retValue = new StringBuilder();
         String valueString = String.format("%.2f", totValue[decisionPlayer] / nVisits);
-        if (params.opponentTreePolicy == MaxN) {
+        if (params.opponentTreePolicy == OneTree) {
             valueString = Arrays.stream(totValue)
                     .mapToObj(v -> String.format("%.2f", v / nVisits))
                     .collect(joining(", "));
@@ -1131,7 +1131,7 @@ public class SingleTreeNode {
             if (actionName.length() > 50)
                 actionName = actionName.substring(0, 50);
             valueString = String.format("%.2f", actionTotValue(action, decisionPlayer) / actionVisits);
-            if (params.opponentTreePolicy == MaxN) {
+            if (params.opponentTreePolicy == OneTree) {
                 valueString = IntStream.range(0, totValue.length)
                         .mapToObj(p -> String.format("%.2f", actionTotValue(action, p) / actionVisits))
                         .collect(joining(", "));

@@ -1,9 +1,7 @@
 package players.mcts;
 
 import core.AbstractGameState;
-import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.actions.AbstractAction;
 import core.interfaces.*;
 import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
@@ -13,13 +11,11 @@ import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.function.ToDoubleBiFunction;
 
 import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.Information.Open_Loop;
 import static players.mcts.MCTSEnums.MASTType.Rollout;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
 import static players.mcts.MCTSEnums.Strategies.PARAMS;
@@ -40,7 +36,8 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
-    public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
+    public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
+    public boolean paranoid = false;
     public MCTSEnums.Strategies rolloutType = RANDOM;
     public MCTSEnums.Strategies oppModelType = RANDOM;
     public String rolloutClass, oppModelClass = "";
@@ -90,7 +87,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("information", Open_Loop, Arrays.asList(MCTSEnums.Information.values()));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
-        addTunableParameter("opponentTreePolicy", MaxN, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
+        addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
@@ -111,6 +108,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("discardStateAfterEachIteration", true);
         addTunableParameter("advantageFunction", IActionHeuristic.nullReturn);
         addTunableParameter("omaVisits", 0);
+        addTunableParameter("paranoid", false);
     }
 
     @Override
@@ -162,6 +160,7 @@ public class MCTSParams extends PlayerParameters {
         normaliseRewards = (boolean) getParameterValue("normaliseRewards");
         nodesStoreScoreDelta = (boolean) getParameterValue("nodesStoreScoreDelta");
         maintainMasterState = (boolean) getParameterValue("maintainMasterState");
+        paranoid = (boolean) getParameterValue("paranoid");
         discardStateAfterEachIteration = (boolean) getParameterValue("discardStateAfterEachIteration");
         if (information == Closed_Loop)
             discardStateAfterEachIteration = false;
@@ -267,6 +266,7 @@ public class MCTSParams extends PlayerParameters {
         retValue.heuristic = heuristic;
         retValue.opponentHeuristic = opponentHeuristic;
         retValue.discardStateAfterEachIteration = discardStateAfterEachIteration;
+        retValue.paranoid = paranoid;
         return retValue;
     }
 
