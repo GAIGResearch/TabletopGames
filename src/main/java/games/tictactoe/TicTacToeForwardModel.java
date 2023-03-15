@@ -30,6 +30,7 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         root.resetTree();
+        leaves = root.getLeafNodes();
         TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getCurrentPlayer();
@@ -181,31 +182,37 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
 
     @Override
     public int[] getFixedActionSpace() {
-        return new int[0];
+        return new int[getActionSpace()];
     }
 
     @Override
     public int[] getActionMask(AbstractGameState gameState) {
-        return root.getActionMask();
+//        return root.getActionMask();
+        return leaves.stream()
+                .mapToInt(ActionTreeNode::getValue)
+                .toArray();
     }
 
     @Override
     public void nextPython(AbstractGameState state, int actionID) {
         // Manual conversion from actionID to actionVector
-        int gridSize = ((TicTacToeGameParameters) state.getGameParameters()).gridSize;
-        int[] actionVector = new int[2]; // we have 2 levels in the tree
-        actionVector[0] = (actionID-gridSize)/gridSize;
-        actionVector[1] = (actionID-gridSize)%gridSize;
-        nextPython(state, actionVector);
-    }
-
-    public void nextPython(AbstractGameState state, int[] actionVector) {
-        ActionTreeNode node = root;
-        for (int i = 0; i < actionVector.length; i++) {
-            node = node.getChildren().get(actionVector[i]);
-        }
+        ActionTreeNode node = leaves.get(actionID);
         AbstractAction action = node.getAction();
-        next(state, action);
-
+        _next(state, action);
+//        int gridSize = ((TicTacToeGameParameters) state.getGameParameters()).gridSize;
+//        int[] actionVector = new int[2]; // we have 2 levels in the tree
+//        actionVector[0] = (actionID-gridSize)/gridSize;
+//        actionVector[1] = (actionID-gridSize)%gridSize;
+//        nextPython(state, actionVector);
     }
+
+//    public void nextPython(AbstractGameState state, int[] actionVector) {
+//        ActionTreeNode node = root;
+//        for (int i = 0; i < actionVector.length; i++) {
+//            node = node.getChildren().get(actionVector[i]);
+//        }
+//        AbstractAction action = node.getAction();
+//        next(state, action);
+//
+//    }
 }

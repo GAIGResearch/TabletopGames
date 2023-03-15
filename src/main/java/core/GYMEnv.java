@@ -40,10 +40,14 @@ public class GYMEnv {
 
     boolean isNormalized; // Bool for whether you want obersvations to be normalized
 
+    private Random seedRandom; // Random used for setting the seed for each episode
+    private long lastSeed;
+
 
     public GYMEnv(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, boolean isNormalized) throws Exception {
 
         //                              boolean randomizeParameters, List<IGameListener> listeners
+        this.seedRandom = new Random(seed);
         this.isNormalized = isNormalized;
         this.players = players;
         // Creating game instance (null if not implemented)
@@ -153,6 +157,8 @@ public class GYMEnv {
         this.tick = 0;
         this.game.setTurnPause(turnPause);
         this.gameState = game.getGameState();
+        this.lastSeed = seedRandom.nextLong();
+        gameState.gameParameters.setRandomSeed(this.lastSeed);
         this.forwardModel = game.getForwardModel();
         this.availableActions = forwardModel.computeAvailableActions(gameState);
         return this.gameState;
@@ -245,6 +251,11 @@ public class GYMEnv {
 //        AbstractAction a_ = this.availableActions.get(a);
 //        forwardModel.next(gameState, a_);
         playAction(a);
+        if (isDone()){
+            // check if the game has just ended
+            // game is over
+            return gameState.copy(gameState.getCurrentPlayer());
+        }
 
         int activePlayer = gameState.getCurrentPlayer();
         AbstractPlayer currentPlayer = players.get(activePlayer);
@@ -290,6 +301,7 @@ public class GYMEnv {
             tick++;
 
             lastPlayer = activePlayer;
+            activePlayer = gameState.getCurrentPlayer();
             currentPlayer = players.get(gameState.getCurrentPlayer());
 
         }
@@ -301,6 +313,10 @@ public class GYMEnv {
 
     public int getTick(){
         return this.tick;
+    }
+
+    public long getSeed(){
+        return this.lastSeed;
     }
 
     public List getTreeShape(){
@@ -315,8 +331,10 @@ public class GYMEnv {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new PythonAgent());
         players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
         try {
-            GYMEnv env = new GYMEnv(GameType.valueOf("TicTacToe"), null, players, 343, true);
+            GYMEnv env = new GYMEnv(GameType.valueOf("ExplodingKittens"), null, players, 343, true);
             boolean done = false;
             int episodes = 0;
             int MAX_EPISODES = 100;
@@ -329,7 +347,7 @@ public class GYMEnv {
 //                int randomAction = rnd.nextInt(env.availableActions.size());
                 // todo we get the action mask, but how do we know how we should index it?
                 int[] mask = env.getActionMask();
-                mask[0] = 0; mask[1] = 0; mask[2] = 0;
+//                mask[0] = 0; mask[1] = 0; mask[2] = 0;
                 int[] trueIdx = IntStream.range(0, mask.length) // todo TTT valid actions (leaf nodes) start from 3
                         .filter(i -> mask[i] == 1)
                         .toArray();

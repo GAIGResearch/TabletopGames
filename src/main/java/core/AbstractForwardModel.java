@@ -14,6 +14,7 @@ import static core.CoreConstants.GameResult.*;
 public abstract class AbstractForwardModel {
 
     public ActionTreeNode root;
+    public List<ActionTreeNode> leaves;
 
     /* Limited access/Final methods */
 

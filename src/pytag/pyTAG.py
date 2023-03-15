@@ -6,7 +6,7 @@ import jpype
 from jpype import java
 import jpype.imports
 from jpype.types import *
-from utils.common import get_agent_class
+from gym_.core import get_agent_class
 import numpy as np
 
 
@@ -22,13 +22,6 @@ class PyTAG():
             jpype.startJVM(convertStrings=False) #classpath=[jpype.getDefaultJVMPath(), jar_path]) #classpath=os.path.join(self.root_path, jar_path))
 
         print(jpype.java.lang.System.getProperty("java.class.path"))
-        # todo it sees the packages, but not the classes
-        import core
-        import games.catan
-        # jpype.JClass("core.Game").main([]) # execute the main method in Game - runs a pandmic game by default - just an example
-
-        # from utilities import Utils
-        # jpype.JException
 
         GYMEnv = jpype.JClass("core.GYMEnv")
         Utils = jpype.JClass("utilities.Utils")

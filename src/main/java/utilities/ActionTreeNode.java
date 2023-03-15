@@ -38,47 +38,18 @@ public class ActionTreeNode {
         this.SubNodes = 0;
     }
 
-    // Methods
-
-    public List<ActionTreeNode> flattenTree(){
-        List<ActionTreeNode> nodes = new ArrayList<ActionTreeNode>();
-        nodes.add(this);
-        for(ActionTreeNode child : this.children){
-            nodes.addAll(child.flattenTree());
-        }
-        return nodes;
-    }
+    // Methods for Flattening
 
     public int[] getActionMask() {
-//        List<Integer> vals = this.flattenValues();
-        List<Integer> vals = this.flattenBreadthFirst();
+        List<Integer> vals = this.flattenValues();
         vals.remove(0);
-        int[] valsArray = vals.stream().mapToInt(i -> i).toArray();
-        return valsArray;
+        return vals.stream().mapToInt(i -> i).toArray();
     }
 
     public List<String> getActionMaskNames() {
         List<String> vals = this.flattenNames();
         vals.remove(0);
         return vals;
-    }
-
-    public List<Integer> flattenValues(){
-        List<Integer> values = new ArrayList<Integer>();
-        values.add(this.value);
-        for(ActionTreeNode child : this.children){
-            values.addAll(child.flattenValues());
-        }
-        return values;
-    }
-
-    public List<String> flattenNames(){
-        List<String> names = new ArrayList<String>();
-        names.add(this.name);
-        for(ActionTreeNode child : this.children){
-            names.addAll(child.flattenNames());
-        }
-        return names;
     }
 
     // Searches the tree breadth first for all leaf nodes and returns them
@@ -97,7 +68,32 @@ public class ActionTreeNode {
         return leafNodes;
     }
 
-    public List<Integer> flattenBreadthFirst(){
+    public List<ActionTreeNode> flattenTree(){
+        List<ActionTreeNode> nodes = new ArrayList<ActionTreeNode>();
+        List<ActionTreeNode> nodes1 = new ArrayList<ActionTreeNode>();
+        nodes.add(this);
+        nodes1.add(this);
+        while (nodes1.size() > 0) {
+            ActionTreeNode node = nodes1.remove(0);
+            nodes.add(node);
+            nodes1.addAll(node.children);
+        }
+        return nodes;
+    }
+
+    public List<String> flattenNames(){
+        List<String> names = new ArrayList<String>();
+        List<ActionTreeNode> nodes = new ArrayList<ActionTreeNode>();
+        nodes.add(this);
+        while (nodes.size() > 0){
+            ActionTreeNode node = nodes.remove(0);
+            names.add(node.name);
+            nodes.addAll(node.children);
+        }
+        return names;
+    }
+
+    public List<Integer> flattenValues(){
         List<Integer> values = new ArrayList<Integer>();
         List<ActionTreeNode> nodes = new ArrayList<ActionTreeNode>();
         nodes.add(this);
@@ -243,4 +239,15 @@ public class ActionTreeNode {
         SubNodes = subNodes;
     }
 
+    // For testing purposes
+    public List<ActionTreeNode> getValidLeaves() {
+        List<ActionTreeNode> validLeaves = new ArrayList<ActionTreeNode>();
+        List<ActionTreeNode> leaves = getLeafNodes();
+        for (ActionTreeNode leaf : leaves) {
+            if (leaf.value == 1) {
+                validLeaves.add(leaf);
+            }
+        }
+        return validLeaves;
+    }
 }

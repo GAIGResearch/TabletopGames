@@ -23,3 +23,9 @@ gym.envs.register(
      entry_point='gym_.envs:TagSingleplayerGym',
      kwargs={"game_id": "TicTacToe", "agent_ids": ["python", "random"]}
 )
+
+gym.envs.register(
+     id='TAG/Stratego-v0',
+     entry_point='gym_.envs:TagSingleplayerGym',
+     kwargs={"game_id": "Stratego", "agent_ids": ["python", "random"]}
+)
