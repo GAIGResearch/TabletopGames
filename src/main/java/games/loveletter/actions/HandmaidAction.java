@@ -10,8 +10,8 @@ import games.loveletter.cards.LoveLetterCard;
  */
 public class HandmaidAction extends PlayCard implements IPrintable {
 
-    public HandmaidAction(int playerID) {
-        super(LoveLetterCard.CardType.Handmaid, playerID, -1, null, null, true, true);
+    public HandmaidAction(int cardIdx, int playerID) {
+        super(LoveLetterCard.CardType.Handmaid, cardIdx, playerID, -1, null, null, true, true);
     }
 
     @Override

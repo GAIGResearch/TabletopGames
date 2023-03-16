@@ -1,10 +1,16 @@
 package core.actions;
 
+import core.AbstractGameState;
+
 import java.util.Objects;
 
+/**
+ * See {@link games.loveletter.LoveLetterForwardModel#_computeAvailableActions(AbstractGameState, ActionSpace)}
+ * for example implementations of structured action spaces.
+ */
 public class ActionSpace {
     public final Structure structure;
-    public final Flexibility flexibility;
+    public final Flexibility flexibility;  // TODO: no agents to take advantage of this yet, not supported in any games
     public final Context context;
 
     public static ActionSpace Default = new ActionSpace();

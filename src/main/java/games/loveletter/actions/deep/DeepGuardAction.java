@@ -27,8 +27,8 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
     private int targetPlayer;
     private Step step;
 
-    public DeepGuardAction(int playerID) {
-        super(LoveLetterCard.CardType.Guard, playerID);
+    public DeepGuardAction(int cardIdx, int playerID) {
+        super(LoveLetterCard.CardType.Guard, cardIdx, playerID);
         step = Step.TargetPlayer;
         targetPlayer = -1;
     }
@@ -56,13 +56,13 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
             for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
                 if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                     continue;
-                cardActions.add(new GuardAction(playerID, targetPlayer, null, false, false));
+                cardActions.add(new GuardAction(cardIdx, playerID, targetPlayer, null, false, false));
             }
             // If no player can be targeted, create an effectively do-nothing action
-            if (cardActions.size() == 0) cardActions.add(new GuardAction(playerID, -1, null, false, false));
+            if (cardActions.size() == 0) cardActions.add(new GuardAction(cardIdx, playerID, -1, null, false, false));
         } else {
             // Complete actions
-            cardActions.addAll(LoveLetterCard.CardType.Guard.getFlatActions(gs, new PlayCard(playerID, false, targetPlayer)));
+            cardActions.addAll(LoveLetterCard.CardType.Guard.getFlatActions(gs, new PlayCard(cardIdx, playerID, false, targetPlayer)));
         }
         return cardActions;
     }
@@ -84,7 +84,7 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
 
     @Override
     public DeepGuardAction copy() {
-        DeepGuardAction copy = new DeepGuardAction(playerID);
+        DeepGuardAction copy = new DeepGuardAction(cardIdx, playerID);
         copy.step = step;
         copy.targetPlayer = targetPlayer;
         return copy;

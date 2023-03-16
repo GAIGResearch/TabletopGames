@@ -16,38 +16,11 @@ public class PlayCard extends AbstractAction {
     final LoveLetterCard.CardType forcedCountessCardType;
     final boolean canExecuteEffect;
     final boolean discard;
+    protected final int cardIdx;
 
     LoveLetterCard.CardType targetCardType, otherCardInHand;
 
-    public PlayCard(int playerID, boolean discard) {
-        this.cardType = null;
-        this.playerID = playerID;
-        this.targetPlayer = -1;
-        this.forcedCountessCardType = null;
-        this.canExecuteEffect = false;
-        this.discard = discard;
-    }
-
-    public PlayCard(int playerID, boolean discard, int targetPlayer) {
-        this.cardType = null;
-        this.playerID = playerID;
-        this.targetPlayer = targetPlayer;
-        this.forcedCountessCardType = null;
-        this.canExecuteEffect = false;
-        this.discard = discard;
-    }
-
-    public PlayCard(int playerID, boolean discard, LoveLetterCard.CardType targetCardType) {
-        this.cardType = null;
-        this.playerID = playerID;
-        this.targetPlayer = -1;
-        this.targetCardType = targetCardType;
-        this.forcedCountessCardType = null;
-        this.canExecuteEffect = false;
-        this.discard = discard;
-    }
-
-    public PlayCard(LoveLetterCard.CardType cardType, int playerID, int targetPlayer, LoveLetterCard.CardType targetCardType, LoveLetterCard.CardType forcedCountessCardType, boolean canExecuteEffect, boolean discard) {
+    public PlayCard(LoveLetterCard.CardType cardType, int cardIdx, int playerID, int targetPlayer, LoveLetterCard.CardType targetCardType, LoveLetterCard.CardType forcedCountessCardType, boolean canExecuteEffect, boolean discard) {
         this.cardType = cardType;
         this.playerID = playerID;
         this.targetPlayer = targetPlayer;
@@ -55,6 +28,35 @@ public class PlayCard extends AbstractAction {
         this.forcedCountessCardType = forcedCountessCardType;
         this.canExecuteEffect = canExecuteEffect;
         this.discard = discard;
+        this.cardIdx = cardIdx;
+    }
+    public PlayCard(int cardIdx, int playerID, boolean discard, LoveLetterCard.CardType targetCardType) {
+        this.cardType = null;
+        this.playerID = playerID;
+        this.targetPlayer = -1;
+        this.targetCardType = targetCardType;
+        this.forcedCountessCardType = null;
+        this.canExecuteEffect = false;
+        this.discard = discard;
+        this.cardIdx = cardIdx;
+    }
+    public PlayCard(int cardIdx, int playerID, boolean discard) {
+        this.cardType = null;
+        this.playerID = playerID;
+        this.targetPlayer = -1;
+        this.forcedCountessCardType = null;
+        this.canExecuteEffect = false;
+        this.discard = discard;
+        this.cardIdx = cardIdx;
+    }
+    public PlayCard(int cardIdx, int playerID, boolean discard, int targetPlayer) {
+        this.cardType = null;
+        this.playerID = playerID;
+        this.targetPlayer = targetPlayer;
+        this.forcedCountessCardType = null;
+        this.canExecuteEffect = false;
+        this.discard = discard;
+        this.cardIdx = cardIdx;
     }
 
     @Override
@@ -65,11 +67,15 @@ public class PlayCard extends AbstractAction {
             PartialObservableDeck<LoveLetterCard> from = llgs.getPlayerHandCards().get(playerID);
             Deck<LoveLetterCard> to = llgs.getPlayerDiscardCards().get(playerID);
             LoveLetterCard card = null;
-            // Find card by type
-            for (LoveLetterCard c : from.getComponents()) {
-                if (c.cardType == cardType) {
-                    card = c;
-                    break;
+            if (cardIdx != -1) {
+                card = from.get(cardIdx);
+            } else {
+                // Find card by type
+                for (LoveLetterCard c : from.getComponents()) {
+                    if (c.cardType == cardType) {
+                        card = c;
+                        break;
+                    }
                 }
             }
             if (card != null) {
@@ -107,12 +113,12 @@ public class PlayCard extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof PlayCard)) return false;
         PlayCard playCard = (PlayCard) o;
-        return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer && canExecuteEffect == playCard.canExecuteEffect && discard == playCard.discard && cardType == playCard.cardType && forcedCountessCardType == playCard.forcedCountessCardType && targetCardType == playCard.targetCardType && otherCardInHand == playCard.otherCardInHand;
+        return playerID == playCard.playerID && targetPlayer == playCard.targetPlayer && canExecuteEffect == playCard.canExecuteEffect && discard == playCard.discard && cardIdx == playCard.cardIdx && cardType == playCard.cardType && forcedCountessCardType == playCard.forcedCountessCardType && targetCardType == playCard.targetCardType && otherCardInHand == playCard.otherCardInHand;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, targetPlayer, cardType, forcedCountessCardType, canExecuteEffect, discard, targetCardType, otherCardInHand);
+        return Objects.hash(playerID, targetPlayer, cardType, forcedCountessCardType, canExecuteEffect, discard, cardIdx, targetCardType, otherCardInHand);
     }
 
     @Override
@@ -150,5 +156,9 @@ public class PlayCard extends AbstractAction {
 
     public LoveLetterCard.CardType getOtherCardInHand() {
         return otherCardInHand;
+    }
+
+    public int getCardIdx() {
+        return cardIdx;
     }
 }

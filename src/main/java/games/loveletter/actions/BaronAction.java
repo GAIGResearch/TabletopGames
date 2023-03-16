@@ -11,8 +11,8 @@ import games.loveletter.cards.LoveLetterCard;
  */
 public class BaronAction extends PlayCard implements IPrintable {
 
-    public BaronAction(int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
-        super(LoveLetterCard.CardType.Baron, playerID, opponentID, null, null, canExecuteEffect, discard);
+    public BaronAction(int cardIdx, int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
+        super(LoveLetterCard.CardType.Baron, cardIdx, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class BaronAction extends PlayCard implements IPrintable {
 
     @Override
     public BaronAction copy() {
-        BaronAction copy = new BaronAction(playerID, targetPlayer, canExecuteEffect, discard);
+        BaronAction copy = new BaronAction(cardIdx, playerID, targetPlayer, canExecuteEffect, discard);
         copy.targetCardType = targetCardType;
         copy.otherCardInHand = otherCardInHand;
         return copy;

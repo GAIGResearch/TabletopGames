@@ -14,8 +14,8 @@ import java.util.Objects;
  */
 public class PrinceAction extends PlayCard implements IPrintable {
 
-    public PrinceAction(int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
-        super(LoveLetterCard.CardType.Prince, playerID, opponentID, null, null, canExecuteEffect, discard);
+    public PrinceAction(int cardIdx, int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
+        super(LoveLetterCard.CardType.Prince, cardIdx, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class PrinceAction extends PlayCard implements IPrintable {
 
     @Override
     public PrinceAction copy() {
-        PrinceAction pa = new PrinceAction(playerID, targetPlayer, canExecuteEffect, discard);
+        PrinceAction pa = new PrinceAction(cardIdx, playerID, targetPlayer, canExecuteEffect, discard);
         pa.targetCardType = targetCardType;
         return pa;
     }

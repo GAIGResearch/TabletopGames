@@ -13,13 +13,14 @@ import java.util.List;
  */
 public class DeepPrinceAction extends PlayCardDeep {
 
-    public DeepPrinceAction(int playerId) {
-        super(LoveLetterCard.CardType.Prince, playerId);
+    public DeepPrinceAction(int cardIdx, int playerId) {
+        super(LoveLetterCard.CardType.Prince, cardIdx, playerId);
     }
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        return cardType.getFlatActions((LoveLetterGameState) state, playerID, false);
+        assert cardType != null;
+        return cardType.getFlatActions((LoveLetterGameState) state, cardIdx, playerID, false);
     }
 
     @Override
@@ -29,7 +30,7 @@ public class DeepPrinceAction extends PlayCardDeep {
 
     @Override
     public DeepPrinceAction copy() {
-        DeepPrinceAction pa = new DeepPrinceAction(playerID);
+        DeepPrinceAction pa = new DeepPrinceAction(cardIdx, playerID);
         copyTo(pa);
         return pa;
     }

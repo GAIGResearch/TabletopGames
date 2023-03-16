@@ -121,7 +121,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             boolean drawPileEmpty = llgs.getDrawPile().getSize() == 0;
             int whoPlayedIt = action.getPlayerID();
 
-            if (action instanceof PrincessAction) {
+            if (action.getCardType() == LoveLetterCard.CardType.Princess) {
                 return "Princess.opp";
             } else if (action instanceof GuardAction) {
                 int opponentID = action.getTargetPlayer();

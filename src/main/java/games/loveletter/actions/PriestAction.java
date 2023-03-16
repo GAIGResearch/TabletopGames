@@ -11,8 +11,8 @@ import games.loveletter.cards.LoveLetterCard;
  */
 public class PriestAction extends PlayCard implements IPrintable {
 
-    public PriestAction(int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
-        super(LoveLetterCard.CardType.Priest, playerID, opponentID, null, null, canExecuteEffect, discard);
+    public PriestAction(int cardIdx, int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
+        super(LoveLetterCard.CardType.Priest, cardIdx, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class PriestAction extends PlayCard implements IPrintable {
 
     @Override
     public PriestAction copy() {
-        PriestAction copy = new PriestAction(playerID, targetPlayer, canExecuteEffect, discard);
+        PriestAction copy = new PriestAction(cardIdx, playerID, targetPlayer, canExecuteEffect, discard);
         copy.targetCardType = targetCardType;
         return copy;
     }

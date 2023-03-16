@@ -12,8 +12,8 @@ import java.util.List;
  */
 public class DeepBaronAction extends PlayCardDeep {
 
-    public DeepBaronAction(int playerID) {
-        super(LoveLetterCard.CardType.Baron, playerID);
+    public DeepBaronAction(int cardIdx, int playerID) {
+        super(LoveLetterCard.CardType.Baron, cardIdx, playerID);
     }
 
     @Override
@@ -23,12 +23,13 @@ public class DeepBaronAction extends PlayCardDeep {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        return cardType.getFlatActions((LoveLetterGameState) state, playerID, false);
+        assert cardType != null;
+        return cardType.getFlatActions((LoveLetterGameState) state, cardIdx, playerID, false);
     }
 
     @Override
     public DeepBaronAction copy() {
-        DeepBaronAction copy = new DeepBaronAction(playerID);
+        DeepBaronAction copy = new DeepBaronAction(cardIdx, playerID);
         copyTo(copy);
         return copy;
     }

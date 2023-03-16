@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class DeepPriestAction extends PlayCardDeep {
 
-    public DeepPriestAction(int playerID) {
-        super(LoveLetterCard.CardType.Priest, playerID);
+    public DeepPriestAction(int cardIdx, int playerID) {
+        super(LoveLetterCard.CardType.Priest, cardIdx, playerID);
     }
 
     @Override
@@ -24,12 +24,13 @@ public class DeepPriestAction extends PlayCardDeep {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        return cardType.getFlatActions((LoveLetterGameState) state, playerID, false);
+        assert cardType != null;
+        return cardType.getFlatActions((LoveLetterGameState) state, cardIdx, playerID, false);
     }
 
     @Override
     public DeepPriestAction copy() {
-        DeepPriestAction copy = new DeepPriestAction(playerID);
+        DeepPriestAction copy = new DeepPriestAction(cardIdx, playerID);
         copyTo(copy);
         return copy;
     }

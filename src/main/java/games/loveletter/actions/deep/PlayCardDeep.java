@@ -12,8 +12,8 @@ import java.util.Objects;
 public abstract class PlayCardDeep extends PlayCard implements IExtendedSequence {
     private boolean executed;
 
-    public PlayCardDeep(LoveLetterCard.CardType cardType, int playerID) {
-        super(cardType, playerID, -1, null, null, false, true);
+    public PlayCardDeep(LoveLetterCard.CardType cardType, int cardIdx, int playerID) {
+        super(cardType, cardIdx, playerID, -1, null, null, false, true);
     }
 
     @Override

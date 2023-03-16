@@ -308,10 +308,13 @@ public class LoveLetterForwardModel extends StandardForwardModel {
         for (int card = 0; card < playerDeck.getSize(); card++) {
             LoveLetterCard.CardType cardType = playerDeck.getComponents().get(card).cardType;
             if (cardType != LoveLetterCard.CardType.Countess && cardTypeForceCountess != null) continue;
+            int cardIdx;
+            if (actionSpace.context == ActionSpace.Context.Dependent) cardIdx = card;
+            else cardIdx = -1;  // Independent and default
             if (actionSpace.structure == ActionSpace.Structure.Flat || actionSpace.structure == ActionSpace.Structure.Default) {
-                actions.addAll(cardType.getFlatActions(llgs, playerID, true));
+                actions.addAll(cardType.getFlatActions(llgs, playerID, cardIdx, true));
             } else {
-                actions.addAll(cardType.getDeepActions(llgs, playerID, true));
+                actions.addAll(cardType.getDeepActions(llgs, playerID, cardIdx, true));
             }
         }
 

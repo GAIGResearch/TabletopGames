@@ -11,8 +11,8 @@ import games.loveletter.cards.LoveLetterCard;
  */
 public class GuardAction extends PlayCard implements IPrintable {
 
-    public GuardAction(int playerID, int opponentID, LoveLetterCard.CardType cardtype, boolean canExecuteEffect, boolean discard) {
-        super(LoveLetterCard.CardType.Guard, playerID, opponentID, cardtype, null, canExecuteEffect, discard);
+    public GuardAction(int cardIdx, int playerID, int opponentID, LoveLetterCard.CardType cardtype, boolean canExecuteEffect, boolean discard) {
+        super(LoveLetterCard.CardType.Guard, cardIdx, playerID, opponentID, cardtype, null, canExecuteEffect, discard);
     }
 
     @Override
