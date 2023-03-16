@@ -105,10 +105,12 @@ public class SGGameState extends AbstractGameState {
                 if (i == playerId) {
                     copy.cardChoices.add(new ArrayList<>(cardChoices.get(i)));
                 } else {
-                    // Replace others with hidden choices
+                    // Replace others with hidden choices (pick one card at random)
+                    // Note that this is slightly incorrect, and does not hide whether the player is using chopsticks
                     ArrayList<ChooseCard> hiddenChoice = new ArrayList<>();
+                    int cardsInHand = playerHands.get(i).getSize();
                     for (ChooseCard c : cardChoices.get(i)) {
-                        hiddenChoice.add(c.getHiddenChoice());
+                        hiddenChoice.add(c.getHiddenChoice(rnd.nextInt(cardsInHand)));
                     }
                     copy.cardChoices.add(hiddenChoice);
                 }
@@ -141,7 +143,7 @@ public class SGGameState extends AbstractGameState {
     }
 
     /**
-     * we do know the contents of the hands of players to our T to our left, where T is the number of player turns
+     * we do know the contents of the hands of players up to T to our left, where T is the number of player turns
      * so far, as we saw that hand on its way through our own
      *
      * @param playerId   - id of player whose vision we're checking

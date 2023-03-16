@@ -1,6 +1,7 @@
 package evaluation.loggers;
 
 import core.interfaces.IStatisticLogger;
+import evaluation.summarisers.TAGOccurrenceStatSummary;
 import evaluation.summarisers.TAGStatSummary;
 
 import java.io.*;
@@ -80,7 +81,7 @@ public class FileStatsLogger implements IStatisticLogger {
                 // then write a header line to the file
                 if (headerNeeded) {
                     String outputLine = String.join(delimiter, allKeys) + "\n";
-                    outputLine = outputLine.replaceAll(":" + actionName  + delimiter, delimiter);
+                    outputLine = outputLine.replaceAll(":" + actionName + delimiter, delimiter);
                     outputLine = outputLine.replaceAll(":" + actionName + "\\n", "\n");
                     writer.write(outputLine);
                 }
@@ -95,8 +96,21 @@ public class FileStatsLogger implements IStatisticLogger {
             List<String> outputData = allKeys.stream().map(key -> {
                 Object datum = data.get(key);
                 if (datum == null) return "";
+                // If this is a summary, then we return the single most common occurrence
+                if (datum instanceof TAGOccurrenceStatSummary) {
+                    TAGOccurrenceStatSummary summary = (TAGOccurrenceStatSummary) datum;
+                    datum = summary.getHighestOccurrence().a;
+                }
                 if (datum instanceof Integer) return String.format(intFormat, datum);
                 if (datum instanceof Double) return String.format(doubleFormat, datum);
+                if (datum instanceof Map) {
+                    Map<String, ?> map = (Map<String, ?>) datum;
+                    if (map.size() == 1)
+                        return map.values().iterator().next().toString();
+                    else
+                        return map.toString();
+                }
+
                 return datum.toString();
             }).collect(toList());
 
@@ -111,7 +125,7 @@ public class FileStatsLogger implements IStatisticLogger {
 
     @Override
     public void record(String key, Object datum) {
-      //   System.out.println("Datum ignored - FileStatsLogger only to be used with other record() : " + key);
+        //   System.out.println("Datum ignored - FileStatsLogger only to be used with other record() : " + key);
     }
 
     public void flush() {
@@ -162,7 +176,7 @@ public class FileStatsLogger implements IStatisticLogger {
         if (fileParts.length != 2)
             throw new AssertionError("Filename does not conform to expected <stem>.<type>");
         String newFileName = fileParts[0] + "_" + id + "." + fileParts[1];
-        FileStatsLogger retValue =  new FileStatsLogger(newFileName, delimiter, append);
+        FileStatsLogger retValue = new FileStatsLogger(newFileName, delimiter, append);
         retValue.actionName = id;
         return retValue;
     }

@@ -600,6 +600,8 @@ public class SingleTreeNode {
                     break;
                 case EXP3:
                 case RegretMatching:
+                case RM_Plus:
+                case Hedge:
                     // These construct a distribution over possible actions and then sample from it
                     actionChosen = sampleFromDistribution(availableActions, explore ? params.exploreEpsilon : 0.0);
                     break;
@@ -783,6 +785,15 @@ public class SingleTreeNode {
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = actionValue * nVisits / actionVisits;
         double regret = potentialValue - totValue[decisionPlayer];
+        if (regret < 0.0 && params.treePolicy == MCTSEnums.TreePolicy.RM_Plus) {
+            // in this case we set our regret to zero if it is negative
+            // by updating the node statistics
+            totValue[decisionPlayer] = potentialValue;
+        }
+        if (params.treePolicy == MCTSEnums.TreePolicy.Hedge) {
+            // in this case we exponentiate the regret to get the probability of taking this action
+            return Math.exp(regret / params.hedgeBoltzmann);
+        }
         return Math.max(0.0, regret);
     }
 
@@ -794,6 +805,8 @@ public class SingleTreeNode {
                 valueFn = this::exp3Value;
                 break;
             case RegretMatching:
+            case RM_Plus:
+            case Hedge:
                 valueFn = this::rmValue;
                 break;
             default:
@@ -968,7 +981,6 @@ public class SingleTreeNode {
             MASTStatistics.get(player).put(action.copy(), stats);
         }
     }
-
 
     /**
      * Calculates the best action from the root according to the selection policy

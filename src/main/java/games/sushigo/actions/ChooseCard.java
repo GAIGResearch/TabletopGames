@@ -9,7 +9,6 @@ import games.sushigo.SGGameState;
 import games.sushigo.cards.SGCard;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ChooseCard extends AbstractAction implements IExtendedSequence {
     public final int playerId;
@@ -24,8 +23,8 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         this.useChopsticks = useChopsticks;
     }
 
-    public ChooseCard getHiddenChoice() {
-        return new ChooseCard(playerId, -1, useChopsticks);
+    public ChooseCard getHiddenChoice(int index) {
+        return new ChooseCard(playerId, index, useChopsticks);
     }
 
     @Override

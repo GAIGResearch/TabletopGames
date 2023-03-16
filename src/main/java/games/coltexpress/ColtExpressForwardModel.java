@@ -202,9 +202,9 @@ public class ColtExpressForwardModel extends StandardForwardModelWithTurnOrder {
         int player = cegs.getCurrentPlayer();
         ArrayList<AbstractAction> actions = new ArrayList<>();
         if (cegs.plannedActions.getSize() == 0) {
-            // actions.add(new DoNothing());
-            //  return actions;
-            throw new AssertionError("Error - no actions available");
+            // this can happen if all players use all their actions to draw cards, and never play any
+            actions.add(new DoNothing());
+            return actions;
         }
 
         int cardIdx = cegs.plannedActions.getSize() - 1;

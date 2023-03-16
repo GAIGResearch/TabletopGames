@@ -20,7 +20,7 @@ import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
 import static players.mcts.MCTSEnums.Strategies.PARAMS;
 import static players.mcts.MCTSEnums.Strategies.RANDOM;
-import static players.mcts.MCTSEnums.TreePolicy.UCB;
+import static players.mcts.MCTSEnums.TreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
 
@@ -34,6 +34,7 @@ public class MCTSParams extends PlayerParameters {
     public double MASTGamma = 0.5;
     public double MASTBoltzmann = 0.1;
     public double exp3Boltzmann = 0.1;
+    public double hedgeBoltzmann = 0.1;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
@@ -75,6 +76,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
         addTunableParameter("MASTBoltzmann", 0.1);
         addTunableParameter("exp3Boltzmann", 0.1);
+        addTunableParameter("hedgeBoltzmann", 0.1);
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
         addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30, 100));
         addTunableParameter("epsilon", 1e-6);
@@ -125,15 +127,21 @@ public class MCTSParams extends PlayerParameters {
         rolloutTermination = (MCTSEnums.RolloutTermination) getParameterValue("rolloutTermination");
         oppModelType = (MCTSEnums.Strategies) getParameterValue("oppModelType");
         information = (MCTSEnums.Information) getParameterValue("information");
-        selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
-        expansionPolicy = (MCTSEnums.Strategies) getParameterValue("expansionPolicy");
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
+        selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
+        if (selectionPolicy == MCTSEnums.SelectionPolicy.TREE &&
+                (treePolicy == UCB || treePolicy == UCB_Tuned || treePolicy == AlphaGo)) {
+            // in this case TREE is equivalent to SIMPLE
+            selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
+        }
+        expansionPolicy = (MCTSEnums.Strategies) getParameterValue("expansionPolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
         MASTBoltzmann = (double) getParameterValue("MASTBoltzmann");
         MAST = (MCTSEnums.MASTType) getParameterValue("MAST");
         MASTGamma = (double) getParameterValue("MASTGamma");
         exp3Boltzmann = (double) getParameterValue("exp3Boltzmann");
+        hedgeBoltzmann = (double) getParameterValue("hedgeBoltzmann");
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
@@ -239,6 +247,7 @@ public class MCTSParams extends PlayerParameters {
         retValue.MASTGamma = MASTGamma;
         retValue.MASTBoltzmann = MASTBoltzmann;
         retValue.exp3Boltzmann = exp3Boltzmann;
+        retValue.hedgeBoltzmann = hedgeBoltzmann;
         retValue.expansionPolicy = expansionPolicy;
         retValue.selectionPolicy = selectionPolicy;
         retValue.treePolicy = treePolicy;
