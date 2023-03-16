@@ -248,6 +248,27 @@ public abstract class Utils {
         return defaultValue;
     }
 
+    public static <T> T getArg(JSONObject args, String name, T defaultValue) {
+        if (args.containsKey(name)) {
+            Object rawObject = args.get(name);
+            if (defaultValue instanceof Enum) {
+                T[] constants = (T[]) defaultValue.getClass().getEnumConstants();
+                for (T o : constants) {
+                    if (o.toString().equals(rawObject))
+                        return o;
+                }
+            } else if (defaultValue instanceof Integer) {
+                Integer number = (int)(long) rawObject;
+                return (T) number;
+            } else if (defaultValue instanceof Double || defaultValue instanceof Boolean || defaultValue instanceof String) {
+                return (T) rawObject;
+            } else {
+                throw new AssertionError("Unexpected type of defaultValue : " + defaultValue.getClass());
+            }
+        }
+        return defaultValue;
+    }
+
     public static JSONObject loadJSONFile(String fileName) {
         try {
             FileReader reader = new FileReader(fileName);

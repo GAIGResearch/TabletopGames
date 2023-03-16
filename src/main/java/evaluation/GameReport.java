@@ -5,9 +5,15 @@ import core.interfaces.IStatisticLogger;
 import evaluation.listeners.IGameListener;
 import evaluation.listeners.MetricsGameListener;
 import games.GameType;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import players.PlayerFactory;
 import utilities.Pair;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -26,7 +32,6 @@ public class GameReport {
      * @param args
      */
     public static void main(String[] args) {
-        long timeStart = System.currentTimeMillis();
         List<String> argsList = Arrays.asList(args);
         if (argsList.contains("--help") || argsList.contains("-h")) {
             System.out.println(
@@ -69,22 +74,57 @@ public class GameReport {
             return;
         }
 
-        // Get Player to be used
-        String playerDescriptor = getArg(args, "player", "");
-        String opponentDescriptor = getArg(args, "opponent", "random");
-        String gameParams = getArg(args, "gameParam", "");
-        String loggerClass = getArg(args, "logger", "evaluation.loggers.SummaryLogger");  // TODO: why is this separate, read all from json!
-        String statsLog = getArg(args, "statsLog", "SummaryLogger.txt");
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
-        List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
-        List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
-        boolean randomGameParams = getArg(args, "randomGameParams", false);
+        String setupFile = getArg(args, "setupFile", "");
+        if (!setupFile.equals("")) {
+            // Read from file instead
+            try {
+                FileReader reader = new FileReader(setupFile);
+                JSONParser parser = new JSONParser();
+                JSONObject json = (JSONObject) parser.parse(reader);
+                String playerDescriptor = getArg(json, "player", "");
+                String opponentDescriptor = getArg(json, "opponent", "random");
+                String gameParams = getArg(json, "gameParam", "");
+                String loggerClass = getArg(json, "logger", "evaluation.loggers.SummaryLogger");  // TODO: why is this separate, read all from json!
+                String statsLog = getArg(json, "statsLog", "SummaryLogger.txt");
+                List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(json, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
+                List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(json, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
+                List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(json, "logFile", "GameReport.txt").split("\\|")));
+                boolean randomGameParams = getArg(json, "randomGameParams", false);
+                String nPlayersStr = getArg(json, "nPlayers", "all");
+                int nGames = getArg(json, "nGames", 1000);
+                String gamesStr = getArg(json, "games", "all");
+                setup(playerDescriptor, opponentDescriptor, gameParams, loggerClass, statsLog, listenerClasses, metricsClasses, logFiles, randomGameParams, nPlayersStr, nGames, gamesStr);
+            } catch (FileNotFoundException ignored) {
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            String playerDescriptor = getArg(args, "player", "");
+            String opponentDescriptor = getArg(args, "opponent", "random");
+            String gameParams = getArg(args, "gameParam", "");
+            String loggerClass = getArg(args, "logger", "evaluation.loggers.SummaryLogger");  // TODO: why is this separate, read all from json!
+            String statsLog = getArg(args, "statsLog", "SummaryLogger.txt");
+            List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
+            List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
+            List<String> logFiles = new ArrayList<>(Arrays.asList(getArg(args, "logFile", "GameReport.txt").split("\\|")));
+            boolean randomGameParams = getArg(args, "randomGameParams", false);
+            String nPlayersStr = getArg(args, "nPlayers", "all");
+            int nGames = getArg(args, "nGames", 1000);
+            String gamesStr = getArg(args, "games", "all");
+            setup(playerDescriptor, opponentDescriptor, gameParams, loggerClass, statsLog, listenerClasses, metricsClasses, logFiles, randomGameParams, nPlayersStr, nGames, gamesStr);
+        }
+    }
+
+    public static void setup(String playerDescriptor, String opponentDescriptor, String gameParams, String loggerClass,
+                             String statsLog, List<String> listenerClasses, List<String> metricsClasses,
+                             List<String> logFiles, boolean randomGameParams, String nPlayersStr, int nGames, String gamesStr) {
 
         if (listenerClasses.size() > 1 && logFiles.size() > 1 && listenerClasses.size() != logFiles.size())
             throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
 
-        int nGames = getArg(args, "nGames", 1000);
-        List<String> tempGames = new ArrayList<>(Arrays.asList(getArg(args, "games", "all").split("\\|")));
+        long timeStart = System.currentTimeMillis();
+
+        List<String> tempGames = new ArrayList<>(Arrays.asList(gamesStr.split("\\|")));
         List<String> games = tempGames;
         if (tempGames.get(0).equals("all")) {
             games = Arrays.stream(GameType.values()).map(Enum::name).filter(name -> !tempGames.contains("-" + name)).collect(toList());
@@ -94,7 +134,7 @@ public class GameReport {
             throw new IllegalArgumentException("Cannot yet provide a gameParams argument if running multiple games");
 
         // This creates a <MinPlayer, MaxPlayer> Pair for each game#
-        List<Pair<Integer, Integer>> nPlayers = Arrays.stream(getArg(args, "nPlayers", "all").split("\\|"))
+        List<Pair<Integer, Integer>> nPlayers = Arrays.stream(nPlayersStr.split("\\|"))
                 .map(str -> {
                     if (str.contains("-")) {
                         int hyphenIndex = str.indexOf("-");

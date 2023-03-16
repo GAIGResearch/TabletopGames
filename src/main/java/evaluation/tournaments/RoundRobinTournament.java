@@ -6,6 +6,9 @@ import core.interfaces.IStatisticLogger;
 import evaluation.listeners.IGameListener;
 import evaluation.loggers.FileStatsLogger;
 import games.GameType;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import players.PlayerFactory;
 import players.mcts.BasicMCTSPlayer;
 import players.mcts.MCTSPlayer;
@@ -13,7 +16,10 @@ import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -68,6 +74,7 @@ public class RoundRobinTournament extends AbstractTournament {
         if (argsList.contains("--help") || argsList.contains("-h")) {
             System.out.println(
                     "There are a number of possible arguments:\n" +
+                            "\tsetupFile=     (Optional) A JSON file with all of these parameters specified\n" +
                             "\tgame=          The name of the game to play. Defaults to Uno.\n" +
                             "\tnPlayers=      The number of players in each game. Defaults to 2.\n" +
                             "\tplayers=       The directory containing agent JSON files for the competing Players\n" +
@@ -107,21 +114,63 @@ public class RoundRobinTournament extends AbstractTournament {
             return;
         }
         /* 1. Settings for the tournament */
-        GameType gameToPlay = GameType.valueOf(getArg(args, "game", "SushiGo"));
-        int nPlayersPerGame = getArg(args, "nPlayers", 4);
-        boolean selfPlay = getArg(args, "selfPlay", false);
-        String mode = getArg(args, "mode", "random");
-        int matchups = getArg(args, "matchups", 1);
-        String playerDirectory = getArg(args, "players", "");
-        String gameParams = getArg(args, "gameParams", "");
-        String statsLogPrefix = getArg(args, "statsLog", "");
-        String resultsFile = getArg(args, "resultsFile", "");
-        int reportPeriod = getArg(args, "reportPeriod", matchups); //matchups
-        boolean randomGameParams = getArg(args, "randomGameParams", false);
+        String setupFile = getArg(args, "setupFile", "");
+        if (!setupFile.equals("")) {
+            // Read from file instead
 
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
-        List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
-        List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
+            try {
+                FileReader reader = new FileReader(setupFile);
+                JSONParser parser = new JSONParser();
+                JSONObject json = (JSONObject) parser.parse(reader);
+                GameType gameToPlay = GameType.valueOf(getArg(json, "game", "SushiGo"));
+                int nPlayersPerGame = getArg(json, "nPlayers", 4);
+                boolean selfPlay = getArg(json, "selfPlay", false);
+                String mode = getArg(json, "mode", "random");
+                int matchups = getArg(json, "matchups", 1);
+                String playerDirectory = getArg(json, "players", "");
+                String gameParams = getArg(json, "gameParams", "");
+                String statsLogPrefix = getArg(json, "statsLog", "");
+                String resultsFile = getArg(json, "resultsFile", "");
+                int reportPeriod = getArg(json, "reportPeriod", matchups); //matchups
+                boolean randomGameParams = getArg(json, "randomGameParams", false);
+
+                List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(json, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
+                List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(json, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
+                List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(json, "listenerFile", "RoundRobinReport.txt").split("\\|")));
+
+                setup(gameToPlay, nPlayersPerGame, selfPlay, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
+                        listenerClasses, metricsClasses, listenerFiles);
+
+            } catch (FileNotFoundException ignored) {
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            GameType gameToPlay = GameType.valueOf(getArg(args, "game", "SushiGo"));
+            int nPlayersPerGame = getArg(args, "nPlayers", 4);
+            boolean selfPlay = getArg(args, "selfPlay", false);
+            String mode = getArg(args, "mode", "random");
+            int matchups = getArg(args, "matchups", 1);
+            String playerDirectory = getArg(args, "players", "");
+            String gameParams = getArg(args, "gameParams", "");
+            String statsLogPrefix = getArg(args, "statsLog", "");
+            String resultsFile = getArg(args, "resultsFile", "");
+            int reportPeriod = getArg(args, "reportPeriod", matchups); //matchups
+            boolean randomGameParams = getArg(args, "randomGameParams", false);
+
+            List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
+            List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
+            List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
+
+            setup(gameToPlay, nPlayersPerGame, selfPlay, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
+                    listenerClasses, metricsClasses, listenerFiles);
+        }
+    }
+
+    public static void setup(GameType gameToPlay, int nPlayersPerGame, boolean selfPlay, String mode, int matchups,
+                             String playerDirectory, String gameParams, String statsLogPrefix, String resultsFile,
+                             int reportPeriod, boolean randomGameParams, List<String> listenerClasses,
+                             List<String> metricsClasses, List<String> listenerFiles) {
 
         if (listenerClasses.size() > 1 && listenerFiles.size() > 1 && listenerClasses.size() != listenerFiles.size())
             throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
