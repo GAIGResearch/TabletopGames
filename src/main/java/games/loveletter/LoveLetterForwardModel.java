@@ -6,8 +6,6 @@ import core.actions.ActionSpace;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.GameType;
-import games.loveletter.actions.*;
-import games.loveletter.actions.deep.*;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.*;
@@ -312,9 +310,9 @@ public class LoveLetterForwardModel extends StandardForwardModel {
             if (actionSpace.context == ActionSpace.Context.Dependent) cardIdx = card;
             else cardIdx = -1;  // Independent and default
             if (actionSpace.structure == ActionSpace.Structure.Flat || actionSpace.structure == ActionSpace.Structure.Default) {
-                actions.addAll(cardType.getFlatActions(llgs, playerID, cardIdx, true));
+                actions.addAll(cardType.getFlatActions(llgs, cardIdx, playerID, true));
             } else {
-                actions.addAll(cardType.getDeepActions(llgs, playerID, cardIdx, true));
+                actions.addAll(cardType.getDeepActions(llgs, cardIdx, playerID, true));
             }
         }
 
