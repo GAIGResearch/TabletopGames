@@ -1,8 +1,11 @@
 import jpype
+import json
+import os
 
 GymEnv = jpype.JClass("core.GYMEnv")
 Utils = jpype.JClass("utilities.Utils")
 GameType = jpype.JClass("games.GameType")
+PlayerFactory = jpype.JClass("players.PlayerFactory")
 
 def get_agent_class(agent_name):
     if agent_name == "random":
@@ -14,3 +17,9 @@ def get_agent_class(agent_name):
     if agent_name == "python":
         return jpype.JClass("players.python.PythonAgent")
     return None
+
+def get_mcts_with_params(json_path):
+    with open(os.path.expanduser(json_path)) as json_file:
+        json_string = json.load(json_file)
+    json_string = str(json_string).replace('\'', '\"') # JAVA only uses " for string
+    return jpype.JClass("players.mcts.MCTSPlayer")(PlayerFactory.fromJSONString(json_string))

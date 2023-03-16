@@ -2,7 +2,7 @@ import gymnasium as gym
 import numpy as np
 import jpype
 
-from .core import GymEnv, GameType, Utils, get_agent_class
+from .core import GymEnv, GameType, Utils, get_agent_class, get_mcts_with_params
 
 from abc import abstractmethod
 from typing import Dict, List, Union
@@ -16,7 +16,10 @@ class TagSingleplayerGym(gym.Env):
         # Initialize the java environment
         gameType = GameType.valueOf(Utils.getArg([""], "game", game_id))
         # ToDo throw exception if player is incorrect
-        agents = [get_agent_class(agent_id)() for agent_id in agent_ids]
+        if agent_ids[0] == "mcts":
+            agents = [get_mcts_with_params(f"~/data/pyTAG/MCTS_for_{game_id}.json")() for agent_id in agent_ids]
+        else:
+            agents = [get_agent_class(agent_id)() for agent_id in agent_ids]
         self._playerID = agent_ids.index("python")
         # ToDo accept the List interface in GymEnv, this allows us to pass agents directly instead of converting it first
         self._java_env = GymEnv(gameType, None, jpype.java.util.ArrayList(agents), seed, True)
