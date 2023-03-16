@@ -495,6 +495,8 @@ public class Game {
 
         // This is the next player to be asked for a decision
         int activePlayer = gameState.getCurrentPlayer();
+        if (!gameState.isNotTerminalForPlayer(activePlayer))
+            throw new AssertionError("Player " + activePlayer + " is not allowed to move");
         AbstractPlayer currentPlayer = players.get(activePlayer);
         if (debug) System.out.printf("Starting oneAction for player %s%n", activePlayer);
 

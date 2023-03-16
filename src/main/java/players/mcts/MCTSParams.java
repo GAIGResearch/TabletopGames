@@ -33,6 +33,7 @@ public class MCTSParams extends PlayerParameters {
     public boolean useMAST = false;
     public double MASTGamma = 0.5;
     public double MASTBoltzmann = 0.1;
+    public double exp3Boltzmann = 0.1;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
@@ -72,7 +73,8 @@ public class MCTSParams extends PlayerParameters {
     public MCTSParams(long seed) {
         super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
-        addTunableParameter("boltzmannTemp", 0.1);
+        addTunableParameter("MASTBoltzmann", 0.1);
+        addTunableParameter("exp3Boltzmann", 0.1);
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
         addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30, 100));
         addTunableParameter("epsilon", 1e-6);
@@ -128,9 +130,10 @@ public class MCTSParams extends PlayerParameters {
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
-        MASTBoltzmann = (double) getParameterValue("boltzmannTemp");
+        MASTBoltzmann = (double) getParameterValue("MASTBoltzmann");
         MAST = (MCTSEnums.MASTType) getParameterValue("MAST");
         MASTGamma = (double) getParameterValue("MASTGamma");
+        exp3Boltzmann = (double) getParameterValue("exp3Boltzmann");
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
@@ -235,6 +238,7 @@ public class MCTSParams extends PlayerParameters {
         retValue.useMAST = useMAST;
         retValue.MASTGamma = MASTGamma;
         retValue.MASTBoltzmann = MASTBoltzmann;
+        retValue.exp3Boltzmann = exp3Boltzmann;
         retValue.expansionPolicy = expansionPolicy;
         retValue.selectionPolicy = selectionPolicy;
         retValue.treePolicy = treePolicy;

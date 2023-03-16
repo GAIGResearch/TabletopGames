@@ -283,10 +283,11 @@ public class SingleTreeNode {
         actionsInRollout = new ArrayList<>();
 
         SingleTreeNode selected = treePolicy(actionsInTree);
-        if (selected == this && nVisits > 3)
+        if (selected == this && openLoopState.isNotTerminalForPlayer(decisionPlayer) && nVisits > 3)
             throw new AssertionError("We have not expanded or selected a new node");
         // by this point (and really earlier) we should have expanded a new node.
         // selected == this is a clear sign that we have a problem in the expansion phase
+        // although if we have no decisions to make - this is fine
 
         // Monte carlo rollout: return value of MC rollout from the newly added node
         int lastActorInTree = actionsInTree.isEmpty() ? decisionPlayer : actionsInTree.get(actionsInTree.size() - 1).a;
@@ -764,7 +765,7 @@ public class SingleTreeNode {
             meanActionValue = Utils.normalise(meanActionValue, root.lowReward, root.highReward);
         else
             meanActionValue = meanActionValue - (totValue[decisionPlayer] / nVisits);
-        double retValue = Math.exp(meanActionValue);
+        double retValue = Math.exp(meanActionValue / params.exp3Boltzmann);
         if (Double.isNaN(retValue))
             throw new AssertionError("We have a non-number in EXP3 somewhere");
         return retValue;
