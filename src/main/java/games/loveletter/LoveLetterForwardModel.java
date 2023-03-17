@@ -4,16 +4,19 @@ import core.*;
 import core.actions.AbstractAction;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.interfaces.IOrderedActionSpace;
 import games.GameType;
 import games.loveletter.actions.*;
 import games.loveletter.cards.LoveLetterCard;
+import utilities.ActionTreeNode;
 
+import javax.swing.*;
 import java.util.*;
 
 import static core.CoreConstants.*;
 
 
-public class LoveLetterForwardModel extends StandardForwardModel {
+public class LoveLetterForwardModel extends StandardForwardModel implements IOrderedActionSpace {
 
     /**
      * Creates the initial game-state of Love Letter.
@@ -33,6 +36,9 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
         // Set up first round
         setupRound(llgs, null);
+
+        root = generateActionTree();
+        leaves = root.getLeafNodes();
     }
 
     /**
@@ -295,6 +301,7 @@ public class LoveLetterForwardModel extends StandardForwardModel {
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        root.resetTree();
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
             throw new AssertionError("???.");
@@ -308,6 +315,8 @@ public class LoveLetterForwardModel extends StandardForwardModel {
 
         // We create the respective actions for each card on the player's hand
         for (int card = 0; card < playerDeck.getSize(); card++) {
+            if (card == 1 && playerDeck.get(0).cardType == playerDeck.get(1).cardType)
+                continue; // if the player has two cards of the same type, they can only play one
             List<AbstractAction> cardActions = new ArrayList<>();
             LoveLetterCard.CardType cardType = playerDeck.getComponents().get(card).cardType;
             if (cardType != LoveLetterCard.CardType.Countess && cardTypeForceCountess != null) continue;
@@ -351,8 +360,103 @@ public class LoveLetterForwardModel extends StandardForwardModel {
             }
 
             actions.addAll(cardActions);
+
+            // Action Tree
+            for (AbstractAction action : cardActions) {
+                PlayCard llAction = (PlayCard) action;
+
+                // TODO - Probaly a better way to get the card names
+                LoveLetterCard.CardType[] soloCards = new LoveLetterCard.CardType[]{
+                    LoveLetterCard.CardType.Handmaid,
+                    LoveLetterCard.CardType.Countess,
+                    LoveLetterCard.CardType.Princess
+                };
+
+                // Actions stored in the card type layer (Layer 1)
+                if (Arrays.asList(soloCards).contains(llAction.getCardType())) {
+                    root.findChildrenByName(llAction.getCardType().toString().toLowerCase()).setAction(action);
+                }
+
+                // Actions where you target a player (Layer 2)
+                else {
+                    ActionTreeNode cardNode = root.findChildrenByName(llAction.getCardType().toString().toLowerCase());
+                    ActionTreeNode playerNode = cardNode.findChildrenByName("player" + llAction.getTargetPlayer());
+                    if (llAction.getCardType() == LoveLetterCard.CardType.Guard) {
+                        if (llAction.getTargetCardType() == null){
+                            playerNode.getChildren().get(0).setAction(action);
+                        }
+                        else {
+                            playerNode.findChildrenByName(llAction.getTargetCardType().toString().toLowerCase()).setAction(action);
+                        }
+                    }
+                    else {
+                        playerNode.setAction(action);
+                    }
+                }
+            }
         }
 
+        assert actions.size() == root.getValidLeaves().size();
         return actions;
+    }
+
+    ActionTreeNode generateActionTree() {
+        // Schema
+        // 0 Actions for each card type (0-7)
+        // 1 Player action being used on (0 - 3)
+
+        root = new ActionTreeNode(0, "root");
+
+        // TODO - Probaly a better way to get the card names
+        String[] cardNames = new String[]{"guard", "priest", "baron", "handmaid", "prince", "king", "countess", "princess"};
+        String[] selfCards = new String[]{"handmaid", "countess", "princess"};
+
+        for (String name : cardNames) {
+
+            // Add each card type
+            ActionTreeNode action = root.addChild(0, name);
+
+            if (!Arrays.asList(selfCards).contains(name)) {
+
+                // Player -1 is for when card will have no effect (e.g. opp using handmaid)
+                for (int i = -1; i < 4; i++) {
+                    ActionTreeNode player = action.addChild(0, "player" + i);
+
+                    // If card is guard, add each card type as a child for each player
+                    if (name.equals("guard")) {
+                        player.addChild(0, "none");
+                        for (String guardGuess : cardNames) {
+                            player.addChild(0, guardGuess);
+                        }
+                    }
+                }
+            }
+        }
+
+        return root;
+    }
+
+    @Override
+    public int getActionSpace() {
+        return leaves.size();
+    }
+
+    @Override
+    public int[] getFixedActionSpace() {
+        return new int[0];
+    }
+
+    @Override
+    public int[] getActionMask(AbstractGameState gameState) {
+        return leaves.stream()
+                .mapToInt(ActionTreeNode::getValue)
+                .toArray();
+    }
+
+    @Override
+    public void nextPython(AbstractGameState state, int actionID) {
+        ActionTreeNode node = leaves.get(actionID);
+        AbstractAction action = node.getAction();
+        next(state, action);
     }
 }
