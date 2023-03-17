@@ -164,6 +164,9 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        if (root == null){
+            root = generateActionTree();
+        }
         root.resetTree();
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
         ArrayList<AbstractAction> actions;

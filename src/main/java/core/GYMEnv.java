@@ -13,6 +13,7 @@ import games.tictactoe.TicTacToeGameState;
 import games.tictactoe.TicTacToeStateVector;
 import org.json.simple.JSONObject;
 import players.human.HumanGUIPlayer;
+import players.mcts.MCTSPlayer;
 import players.python.PythonAgent;
 import players.simple.RandomPlayer;
 import utilities.ActionTreeNode;
@@ -330,9 +331,10 @@ public class GYMEnv {
     public static void main(String[] args) {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         players.add(new PythonAgent());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
+        players.add(new MCTSPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
         try {
             GYMEnv env = new GYMEnv(GameType.valueOf("ExplodingKittens"), null, players, 343, true);
             boolean done = false;
