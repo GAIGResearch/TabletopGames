@@ -7,13 +7,14 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
+import core.interfaces.IVectorisable;
 import games.GameType;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.*;
 
 
-public class LoveLetterGameState extends AbstractGameState implements IPrintable {
+public class LoveLetterGameState extends AbstractGameState implements IPrintable, IVectorisable {
 
     // List of cards in player hands
     List<PartialObservableDeck<LoveLetterCard>> playerHandCards;
@@ -250,5 +251,92 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
         System.out.println("Current GamePhase: " + gamePhase);
         System.out.println("======================");
+    }
+
+    @Override
+    public String getObservationJson() {
+        return null;
+    }
+
+    @Override
+    public double[] getObservationVector() {
+
+        // Schema
+        // [0-7]: Player hand cards (per card type)
+        // [8]: Number of cards in draw pile
+        // [9-12]: Number of cards in each player discard pile
+        // [13-16]: Affection tokens per player
+
+        int playerID = getCurrentPlayer();
+        double[] observationSpace = new double[18];
+        PartialObservableDeck<LoveLetterCard> playerHandCards = getPlayerHandCards().get(playerID);
+
+        // Player Hand Cards
+        for (LoveLetterCard card : playerHandCards.getComponents()) {
+            observationSpace[card.cardType.getValue() - 1] = 1;
+        }
+
+        // Draw Pile
+
+        observationSpace[8] = drawPile.getSize();
+
+        // Discard Piles
+        int i = 9;
+        for (PartialObservableDeck<LoveLetterCard> deck : getPlayerHandCards()) {
+            observationSpace[i] += deck.getSize();
+            i++;
+        }
+
+        // Affection Tokens
+        for (int j = 0; j < affectionTokens.length; j++) {
+            observationSpace[13 + j] = affectionTokens[j];
+        }
+
+        return observationSpace;
+
+    }
+
+    @Override
+    public double[] getNormalizedObservationVector() {
+        // Schema
+        // [0-7]: Player hand cards (per card type)
+        // [8]: Number of cards in draw pile
+        // [9-12]: Number of cards in each player discard pile
+        // [13-16]: Affection tokens per player
+
+        LoveLetterParameters params = (LoveLetterParameters) getGameParameters();
+        int playerID = getCurrentPlayer();
+        double[] observationSpace = new double[18];
+        PartialObservableDeck<LoveLetterCard> playerHandCards = getPlayerHandCards().get(playerID);
+
+        // Player Hand Cards
+        for (LoveLetterCard card : playerHandCards.getComponents()) {
+            observationSpace[card.cardType.getValue() - 1] = 1;
+        }
+
+        // Draw Pile
+
+        double noCards = params.cardCounts.values().size();
+        observationSpace[8] = drawPile.getSize() / noCards;
+
+        // Discard Piles
+        int i = 9;
+        for (PartialObservableDeck<LoveLetterCard> deck : getPlayerHandCards()) {
+            observationSpace[i] += deck.getSize() / noCards;
+            i++;
+        }
+
+        // Affection Tokens
+        double nTokensWin = params.nTokensWin2;
+        for (int j = 0; j < affectionTokens.length; j++) {
+            observationSpace[13 + j] = affectionTokens[j] / nTokensWin;
+        }
+
+        return observationSpace;
+    }
+
+    @Override
+    public int getObservationSpace() {
+        return 16;
     }
 }
