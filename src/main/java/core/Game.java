@@ -921,7 +921,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Catan");
+        String gameType = Utils.getArg(args, "game", "LoveLetter");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -929,7 +929,7 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        players.add(new RandomPlayer());
+//        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
         MCTSParams params1 = new MCTSParams();
