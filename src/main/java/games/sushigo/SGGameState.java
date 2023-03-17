@@ -96,26 +96,14 @@ public class SGGameState extends AbstractGameState {
 
         if (playerId == -1) {
             for (int i = 0; i < getNPlayers(); i++) {
-                copy.cardChoices.add(new ArrayList<>(cardChoices.get(i)));
+                List<ChooseCard> copiedItems = new ArrayList<>();
+                for (ChooseCard cc : cardChoices.get(i)) {
+                    copiedItems.add(cc.copy());
+                }
+                copy.cardChoices.add(copiedItems);
             }
         } else {
             // Now we need to redeterminise
-            // We don't know what other players have chosen for this round, hide card choices
-            for (int i = 0; i < getNPlayers(); i++) {
-                if (i == playerId) {
-                    copy.cardChoices.add(new ArrayList<>(cardChoices.get(i)));
-                } else {
-                    // Replace others with hidden choices (pick one card at random)
-                    // Note that this is slightly incorrect, and does not hide whether the player is using chopsticks
-                    ArrayList<ChooseCard> hiddenChoice = new ArrayList<>();
-                    int cardsInHand = playerHands.get(i).getSize();
-                    for (ChooseCard c : cardChoices.get(i)) {
-                        hiddenChoice.add(c.getHiddenChoice(rnd.nextInt(cardsInHand)));
-                    }
-                    copy.cardChoices.add(hiddenChoice);
-                }
-            }
-
             // We need to shuffle the hands of other players with the draw deck and then redraw
 
             // Add player hands unseen back to the draw pile
@@ -134,6 +122,17 @@ public class SGGameState extends AbstractGameState {
                     hand.clear();
                     for (int i = 0; i < handSize; i++) {
                         hand.add(copy.drawPile.draw());
+                    }
+                }
+            }
+
+            // We don't know what other players have chosen for this round, hide card choices
+            turnOwner = playerId;
+            for (int i = 0; i < getNPlayers(); i++) {
+                copy.cardChoices.add(new ArrayList<>());
+                if (i == playerId) {
+                    for (ChooseCard cc : cardChoices.get(i)) {
+                        copy.cardChoices.get(i).add(cc.copy());
                     }
                 }
             }

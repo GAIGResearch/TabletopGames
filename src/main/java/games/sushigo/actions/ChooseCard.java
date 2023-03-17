@@ -23,10 +23,6 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         this.useChopsticks = useChopsticks;
     }
 
-    public ChooseCard getHiddenChoice(int index) {
-        return new ChooseCard(playerId, index, useChopsticks);
-    }
-
     @Override
     public boolean execute(AbstractGameState gs) {
         ((SGGameState) gs).addCardChoice(this, gs.getCurrentPlayer());
