@@ -306,7 +306,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
         LoveLetterParameters params = (LoveLetterParameters) getGameParameters();
         int playerID = getCurrentPlayer();
-        double[] observationSpace = new double[18];
+        double[] observationSpace = new double[16];
         PartialObservableDeck<LoveLetterCard> playerHandCards = getPlayerHandCards().get(playerID);
 
         // Player Hand Cards
@@ -316,7 +316,10 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
         // Draw Pile
 
-        double noCards = params.cardCounts.values().size();
+        double noCards = 0;
+        for (Integer cardAmount : params.cardCounts.values()){
+            noCards += cardAmount;
+        }
         observationSpace[8] = drawPile.getSize() / noCards;
 
         // Discard Piles

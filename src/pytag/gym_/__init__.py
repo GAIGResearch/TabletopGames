@@ -29,3 +29,9 @@ gym.envs.register(
      entry_point='gym_.envs:TagSingleplayerGym',
      kwargs={"game_id": "Stratego", "agent_ids": ["python", "random"]}
 )
+
+gym.envs.register(
+     id='TAG/LoveLetter-v0',
+     entry_point='gym_.envs:TagSingleplayerGym',
+     kwargs={"game_id": "LoveLetter", "agent_ids": ["python", "random"]}
+)
