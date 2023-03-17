@@ -18,7 +18,7 @@ public class CoreParameters extends TunableParameters {
     public long frameSleepMS = 100L;
 
     // Action space type for this game
-    public ActionSpace actionSpace = new ActionSpace();
+    public ActionSpace actionSpace = new ActionSpace(ActionSpace.Structure.Flat, ActionSpace.Flexibility.Default, ActionSpace.Context.Dependent);
 
     public CoreParameters() {
         super(0);
