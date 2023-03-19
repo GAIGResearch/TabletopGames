@@ -264,11 +264,11 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         // Schema
         // [0-7]: Player hand cards (per card type)
         // [8]: Number of cards in draw pile
-        // [9-12]: Number of cards in each player discard pile
-        // [13-16]: Affection tokens per player
+        // [9-16]: discarded card types
+        // [16-20]: Affection tokens per player
 
         int playerID = getCurrentPlayer();
-        double[] observationSpace = new double[18];
+        double[] observationSpace = new double[getObservationSpace()];
         PartialObservableDeck<LoveLetterCard> playerHandCards = getPlayerHandCards().get(playerID);
 
         // Player Hand Cards
@@ -282,14 +282,17 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
         // Discard Piles
         int i = 9;
-        for (PartialObservableDeck<LoveLetterCard> deck : getPlayerHandCards()) {
-            observationSpace[i] += deck.getSize();
+        for (Deck<LoveLetterCard> deck : getPlayerDiscardCards()) {
+            for (LoveLetterCard card : deck.getComponents()) {
+                observationSpace[i + card.cardType.getValue() - 1] += 1;
+            }
+//            observationSpace[i] += deck.getSize();
             i++;
         }
 
         // Affection Tokens
         for (int j = 0; j < affectionTokens.length; j++) {
-            observationSpace[13 + j] = affectionTokens[j];
+            observationSpace[16 + j] = affectionTokens[j];
         }
 
         return observationSpace;
@@ -298,48 +301,32 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
 
     @Override
     public double[] getNormalizedObservationVector() {
-        // Schema
-        // [0-7]: Player hand cards (per card type)
-        // [8]: Number of cards in draw pile
-        // [9-12]: Number of cards in each player discard pile
-        // [13-16]: Affection tokens per player
-
-        LoveLetterParameters params = (LoveLetterParameters) getGameParameters();
-        int playerID = getCurrentPlayer();
-        double[] observationSpace = new double[16];
-        PartialObservableDeck<LoveLetterCard> playerHandCards = getPlayerHandCards().get(playerID);
-
-        // Player Hand Cards
-        for (LoveLetterCard card : playerHandCards.getComponents()) {
-            observationSpace[card.cardType.getValue() - 1] = 1;
+        final double maxCards = 16;
+        double[] results = getObservationVector();
+        results[8] = results[8] / maxCards;
+        for (int i = 0; i < LoveLetterCard.CardType.values().length; i++) {
+            // todo 5 is the max, which is guard other cards only have 1 each - should get it somehow
+            results[9+i] = results[9+i] / 5; // ((LoveLetterParameters) gameParameters).cardCounts.get(LoveLetterCard.CardType.values()[i]);
+//            results[i] = LoveLetterCard.CardType.values()[i]
+        }
+        int nTokensWin = ((LoveLetterParameters) gameParameters).nTokensWin2;
+        switch (nPlayers) {
+            case 3:
+                nTokensWin = ((LoveLetterParameters) gameParameters).nTokensWin3;
+                break;
+            case 4:
+                nTokensWin = ((LoveLetterParameters) gameParameters).nTokensWin4;
+                break;
+        }
+        for (int i = 0; i < 4; i++) {
+            results[16+i] = results[16+i] / nTokensWin;
         }
 
-        // Draw Pile
-
-        double noCards = 0;
-        for (Integer cardAmount : params.cardCounts.values()){
-            noCards += cardAmount;
-        }
-        observationSpace[8] = drawPile.getSize() / noCards;
-
-        // Discard Piles
-        int i = 9;
-        for (PartialObservableDeck<LoveLetterCard> deck : getPlayerHandCards()) {
-            observationSpace[i] += deck.getSize() / noCards;
-            i++;
-        }
-
-        // Affection Tokens
-        double nTokensWin = params.nTokensWin2;
-        for (int j = 0; j < affectionTokens.length; j++) {
-            observationSpace[13 + j] = affectionTokens[j] / nTokensWin;
-        }
-
-        return observationSpace;
+        return results;
     }
 
     @Override
     public int getObservationSpace() {
-        return 16;
+        return 20;
     }
 }

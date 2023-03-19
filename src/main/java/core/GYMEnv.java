@@ -94,9 +94,10 @@ public class GYMEnv {
     }
 
     public double[] getObservationVector() throws Exception {
-        if (gameState instanceof IVectorisable) {
-            if (isNormalized) return ((IVectorisable) gameState).getNormalizedObservationVector();
-            else return ((IVectorisable) gameState).getObservationVector();
+        AbstractGameState gs = gameState.copy(gameState.getCurrentPlayer());
+        if (gs instanceof IVectorisable) {
+            if (isNormalized) return ((IVectorisable) gs).getNormalizedObservationVector();
+            else return ((IVectorisable) gs).getObservationVector();
         }
         else throw new Exception("Function is not implemented");
     }
@@ -151,8 +152,8 @@ public class GYMEnv {
     // --End of Wrapper Functions--
 
 
-    public AbstractGameState reset(){
-        // Reset game instance, passing the players for this game
+    public void reset(){
+        // Reset game instance, run built-in agents until a python agent is required to make a decision
         this.game.reset(players);
         this.turnPause = 0;
         this.tick = 0;
@@ -162,7 +163,57 @@ public class GYMEnv {
         gameState.gameParameters.setRandomSeed(this.lastSeed);
         this.forwardModel = game.getForwardModel();
         this.availableActions = forwardModel.computeAvailableActions(gameState);
-        return this.gameState;
+
+        // execute the game if needed until Python agent is required to make a decision
+        int activePlayer = gameState.getCurrentPlayer();
+        AbstractPlayer currentPlayer = players.get(activePlayer);
+        while ( !(currentPlayer instanceof PythonAgent)){
+            AbstractGameState observation = gameState.copy(activePlayer);
+            List<core.actions.AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+
+            if (isDone()){
+                // game is over
+                return;
+            }
+
+            // Start the timer for this decision
+            gameState.playerTimer[activePlayer].resume();
+
+            // Either ask player which action to use or, in case no actions are available, report the updated observation
+            core.actions.AbstractAction action = null;
+            if (observedActions.size() > 0) {
+                if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
+                    // Can only do 1 action, so do it.
+                    action = observedActions.get(0);
+                    currentPlayer.registerUpdatedObservation(observation);
+                } else {
+                    // Get action from player, and time it
+                    action = currentPlayer.getAction(observation, observedActions);
+                }
+            } else {
+                currentPlayer.registerUpdatedObservation(observation);
+            }
+
+            // End the timer for this decision
+            gameState.playerTimer[activePlayer].pause();
+            gameState.playerTimer[activePlayer].incrementAction();
+
+            if (gameState.coreGameParameters.verbose && !(action == null)) {
+                System.out.println(action);
+            }
+            if (action == null)
+                throw new AssertionError("We have a NULL action in the Game loop");
+
+            // Check player timeout
+            forwardModel.next(gameState, action);
+            tick++;
+
+            lastPlayer = activePlayer;
+            activePlayer = gameState.getCurrentPlayer();
+            currentPlayer = players.get(gameState.getCurrentPlayer());
+        }
+        AbstractGameState observation = gameState.copy(activePlayer);
+        this.availableActions = forwardModel.computeAvailableActions(observation);
     }
 
     public int getPlayerID(){
@@ -180,66 +231,6 @@ public class GYMEnv {
     public List<AbstractAction> getActions(){
         return availableActions;
     }
-
-//    public void step(int a) throws Exception {
-//        // execute action and loop until a PythonAgent is required to make a decision
-//        if (isDone()){
-//            throw new Exception("Need to reset the environment after each finished episode");
-//        } else if (this.gameState == null){
-//            throw new Exception("Need to reset the environment before calling step");
-//        }
-//        playAction(a);
-//
-//        int activePlayer = gameState.getCurrentPlayer();
-//        AbstractPlayer currentPlayer = players.get(activePlayer);
-//
-//        while ( !(currentPlayer instanceof PythonAgent)){
-//            AbstractGameState observation = gameState.copy(activePlayer);
-//            this.availableActions = forwardModel.computeAvailableActions(observation);
-//
-//            if (isDone()){
-//                // game is over
-//                return;
-//            }
-//
-//            // Start the timer for this decision
-//            gameState.playerTimer[activePlayer].resume();
-//
-//            // Either ask player which action to use or, in case no actions are available, report the updated observation
-//            core.actions.AbstractAction action = null;
-//            if (this.availableActions.size() > 0) {
-//                if (this.availableActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || this.availableActions.get(0) instanceof DoNothing)) {
-//                    // Can only do 1 action, so do it.
-//                    action = this.availableActions.get(0);
-//                    currentPlayer.registerUpdatedObservation(observation);
-//                } else {
-//                    // Get action from player, and time it
-//                    action = currentPlayer.getAction(observation, this.availableActions);
-//                }
-//            } else {
-//                currentPlayer.registerUpdatedObservation(observation);
-//            }
-//
-//            // End the timer for this decision
-//            gameState.playerTimer[activePlayer].pause();
-//            gameState.playerTimer[activePlayer].incrementAction();
-//
-//            if (gameState.coreGameParameters.verbose && !(action == null)) {
-//                System.out.println(action);
-//            }
-//            if (action == null)
-//                throw new AssertionError("We have a NULL action in the Game loop");
-//
-//            // Check player timeout
-//            forwardModel.next(gameState, action);
-//            tick++;
-//
-//            lastPlayer = activePlayer;
-//            currentPlayer = players.get(gameState.getCurrentPlayer());
-//
-//        }
-//        return;
-//    }
 
 
     public AbstractGameState step(int a) throws Exception{
@@ -329,19 +320,21 @@ public class GYMEnv {
     }
 
     public static void main(String[] args) {
+        Long seed = new Long(2466);
+        Random rnd = new Random(seed);
         ArrayList<AbstractPlayer> players = new ArrayList<>();
+//        players.add(new MCTSPlayer());
         players.add(new PythonAgent());
-        players.add(new MCTSPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+        players.add(new RandomPlayer(rnd));
+        players.add(new RandomPlayer(rnd));
+        players.add(new RandomPlayer(rnd));
+
         try {
-            GYMEnv env = new GYMEnv(GameType.valueOf("ExplodingKittens"), null, players, 343, true);
+            GYMEnv env = new GYMEnv(GameType.valueOf("LoveLetter"), null, players, 343, true);
             boolean done = false;
             int episodes = 0;
             int MAX_EPISODES = 100;
             int steps = 0;
-            Random rnd = new Random();
             env.reset();
             List<Object> treeShape = env.forwardModel.root.getTreeShape();
             int N_ACTIONS  = env.getActionSpace();
@@ -357,7 +350,7 @@ public class GYMEnv {
 //                int randomAction = rnd.nextInt(N_ACTIONS);
                 try{
 //                    System.out.println("playerID = " + env.getPlayerID());
-                        ((IVectorisable)env.gameState).getNormalizedObservationVector();
+                        double[] obs = env.getObservationVector();
 //                    }
 
                     env.step(randomAction);

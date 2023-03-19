@@ -1,5 +1,6 @@
 # various helper functions
 import gymnasium as gym
+from gymnasium.wrappers.frame_stack import FrameStack
 import numpy as np
 import torch
 
@@ -8,7 +9,7 @@ from jpype import *
 import jpype.imports
 from gym_.wrappers import StrategoWrapper
 
-def make_env(env_id, seed, opponent, n_players):
+def make_env(env_id, seed, opponent, n_players, framestack=1):
     def thunk():
         # always have a python agent first (at least in our experiments)
         agent_ids = ["python"]
@@ -17,6 +18,8 @@ def make_env(env_id, seed, opponent, n_players):
         env = gym.make(env_id, seed=seed, agent_ids=agent_ids)
         if "Stratego" in env_id:
             env = StrategoWrapper(env)
+        if framestack > 1:
+            env = FrameStack(env, framestack)
         return env
     return thunk
 def get_agent_list():

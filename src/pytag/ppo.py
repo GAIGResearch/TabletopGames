@@ -81,6 +81,7 @@ def parse_args():
     parser.add_argument('--opponent', type=str, default='random', choices=["random", "osla", "mcts"])
     parser.add_argument("--n-players", type=int, default=2,
         help="the number of players in the env (note some games only support certain number of players)")
+    parser.add_argument("--framestack", type=int, default=1)
     args = parser.parse_args()
     args.batch_size = int(args.num_envs * args.num_steps)
     args.minibatch_size = int(args.batch_size // args.num_minibatches)
@@ -127,7 +128,7 @@ if __name__ == "__main__":
 
     # env setup
     envs = gym.vector.SyncVectorEnv(
-        [make_env(args.env_id, args.seed + i, args.opponent, args.n_players) for i in range(args.num_envs)]
+        [make_env(args.env_id, args.seed + i, args.opponent, args.n_players, framestack=args.framestack) for i in range(args.num_envs)]
     )
     # envs = SyncVectorEnv([
     #     lambda: StrategoWrapper(gym.make(args.env_id))
@@ -143,7 +144,10 @@ if __name__ == "__main__":
     optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
 
     # ALGO Logic: Storage setup
-    obs = torch.zeros((args.num_steps, args.num_envs) + envs.single_observation_space.shape).to(device)
+    if args.framestack > 1:
+        obs = torch.zeros((args.num_steps, args.num_envs) + (np.array(envs.single_observation_space.shape).prod(),)).to(device)
+    else:
+        obs = torch.zeros((args.num_steps, args.num_envs) + envs.single_observation_space.shape).to(device)
     masks = torch.zeros((args.num_steps, args.num_envs, envs.single_action_space.n), dtype=torch.bool).to(device)
     actions = torch.zeros((args.num_steps, args.num_envs) + envs.single_action_space.shape).to(device)
     logprobs = torch.zeros((args.num_steps, args.num_envs)).to(device)
@@ -156,6 +160,8 @@ if __name__ == "__main__":
     start_time = time.time()
     next_obs, next_info = envs.reset()
     next_obs = torch.tensor(next_obs).to(device)
+    if args.framestack > 1:
+        next_obs = next_obs.view(next_obs.shape[0], -1)
     next_masks = torch.from_numpy(next_info["action_mask"]).to(device)
     next_done = torch.zeros(args.num_envs).to(device)
     num_updates = args.total_timesteps // args.batch_size
@@ -185,6 +191,8 @@ if __name__ == "__main__":
             next_masks = torch.from_numpy(info["action_mask"]).to(device)
             rewards[step] = torch.tensor(reward).to(device).view(-1)
             next_obs, next_done = torch.Tensor(next_obs).to(device), torch.Tensor(done).to(device)
+            if args.framestack > 1:
+                next_obs = next_obs.view(next_obs.shape[0], -1)
 
             if "episode" in info: # todo not sure if it's faster than just iterationg over _episode
                 for i in range(args.num_envs):
@@ -211,7 +219,10 @@ if __name__ == "__main__":
             returns = advantages + values
 
         # flatten the batch
-        b_obs = obs.reshape((-1,) + envs.single_observation_space.shape)
+        if args.framestack > 1:
+            b_obs = obs.reshape((-1,) + ((np.array(envs.single_observation_space.shape)).prod(),))
+        else:
+            b_obs = obs.reshape((-1,) + envs.single_observation_space.shape)
         b_logprobs = logprobs.reshape(-1)
         b_actions = actions.reshape((-1,) + envs.single_action_space.shape)
         b_masks = masks.reshape((-1,) + (envs.single_action_space.n, ))
