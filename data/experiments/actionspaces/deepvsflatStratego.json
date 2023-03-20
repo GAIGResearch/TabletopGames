@@ -1,0 +1,8 @@
+{
+  "class" : "evaluation.tournaments.RoundRobinTournament",
+  "game": "Stratego",
+  "selfPlay": false,
+  "players": "data/experiments/actionspaces/deepvsflat",
+  "nPlayers": 2,
+  "matchups": 1000
+}

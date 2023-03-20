@@ -81,7 +81,7 @@ public class Piece extends Token {
         if (pieceType == PieceType.SCOUT){
             for (Vector2D dir: Vector2D.Directions4()) {
                 Vector2D newPos = position.copy();
-                newPos.add(dir);
+                newPos = newPos.add(dir);
                 if (params.isTileValid(newPos.getX(), newPos.getY())) {
                     addMove(board, params, moves, newPos, dir, actionSpace);
                 }
@@ -91,7 +91,7 @@ public class Piece extends Token {
                 for (int j = 1; j <= params.moveSpeed; j++) {  // according to movement speed
                     Vector2D dirCustom = dir.mult(j);
                     Vector2D newPos = position.copy();
-                    newPos.add(dirCustom);
+                    newPos = newPos.add(dirCustom);
 
                     if (params.isTileValid(newPos.getX(), newPos.getY())) {
                         if (addMove(board, params, moves, newPos, dirCustom, actionSpace)) break;

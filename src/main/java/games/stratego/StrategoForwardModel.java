@@ -60,14 +60,17 @@ public class StrategoForwardModel extends StandardForwardModel {
         for (Piece piece : pieces){
             if (piece != null){
                 if (piece.getPieceAlliance() == playerAlliance) {
+                    List<AbstractAction> pieceActions = piece.calculateMoves(state, actionSpace);
+                    if (pieceActions.size() == 0) continue;
                     if (actionSpace.structure == ActionSpace.Structure.Deep) {
+                        // Single action to choose the piece, then move for piece is selected sequentially
                         if (actionSpace.context == ActionSpace.Context.Dependent) {
                             actions.add(new DeepMove(player, piece.getPiecePosition(), actionSpace));
                         } else {
                             actions.add(new DeepMove(player, piece.getComponentID(), actionSpace));
                         }
                     } else {
-                        actions.addAll(piece.calculateMoves(state, actionSpace));
+                        actions.addAll(pieceActions);
                     }
                 }
             }
@@ -89,14 +92,14 @@ public class StrategoForwardModel extends StandardForwardModel {
 
         endPlayerTurn(sgs);
 
-        List<AbstractAction> actions = _computeAvailableActions(sgs);
+        List<AbstractAction> actions = _computeAvailableActions(sgs, currentState.getCoreGameParameters().actionSpace);
         if (actions.isEmpty()){
             // If the player can't take any actions, they lose
             sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
             sgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, sgs.getCurrentPlayer());
             sgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, 1-sgs.getCurrentPlayer());
         } else {
-            if (sgs.getRoundCounter() >= ((StrategoParams)sgs.getGameParameters()).maxRounds) {
+            if (sgs.getTurnCounter() >= ((StrategoParams)sgs.getGameParameters()).maxRounds) {
                 // Max rounds reached, draw
                 sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
                 sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, sgs.getCurrentPlayer());
