@@ -1,9 +1,9 @@
 {
   "class" : "evaluation.tournaments.RoundRobinTournament",
   "game": "LoveLetter",
-  "selfPlay": true,
+  "selfPlay": false,
   "players": "data/experiments/actionspaces/deepvsflat",
   "nPlayers": 2,
-  "matchups": 20,
+  "matchups": 1000,
   "metrics": "games.loveletter.stats.LoveLetterMetrics"
 }

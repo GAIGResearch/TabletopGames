@@ -4,7 +4,9 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.components.GridBoard;
+import games.stratego.actions.DeepMove;
 import games.stratego.actions.Move;
 import games.stratego.components.Piece;
 
@@ -31,18 +33,18 @@ public class StrategoForwardModel extends StandardForwardModel {
 
         for (Piece piece : RedPieces){
             piece.setOwnerId(0);
-            state.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
+            state.gridBoard.setElement(piece.getPiecePosition().getX(), piece.getPiecePosition().getY(), piece.copy());
         }
         for (Piece piece : BluePieces){
             piece.setOwnerId(1);
-            state.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
+            state.gridBoard.setElement(piece.getPiecePosition().getX(), piece.getPiecePosition().getY(), piece.copy());
         }
 
         state.setFirstPlayer(0);
     }
 
     @Override
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         StrategoGameState state = (StrategoGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getCurrentPlayer();
@@ -52,18 +54,30 @@ public class StrategoForwardModel extends StandardForwardModel {
         if (pieces.isEmpty()){
             throw new AssertionError("Error: No Pieces Found");
 //            state.setGameStatus(Utils.GameResult.GAME_END);
- //           return actions;
+            //           return actions;
         }
 
         for (Piece piece : pieces){
             if (piece != null){
                 if (piece.getPieceAlliance() == playerAlliance) {
-                    Collection<Move> moves = piece.calculateMoves(state);
-                    actions.addAll(moves);
+                    if (actionSpace.structure == ActionSpace.Structure.Deep) {
+                        if (actionSpace.context == ActionSpace.Context.Dependent) {
+                            actions.add(new DeepMove(player, piece.getPiecePosition(), actionSpace));
+                        } else {
+                            actions.add(new DeepMove(player, piece.getComponentID(), actionSpace));
+                        }
+                    } else {
+                        actions.addAll(piece.calculateMoves(state, actionSpace));
+                    }
                 }
             }
         }
         return actions;
+    }
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, ActionSpace.Default);
     }
 
     @Override

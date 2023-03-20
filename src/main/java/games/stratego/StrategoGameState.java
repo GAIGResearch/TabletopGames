@@ -59,9 +59,9 @@ public class StrategoGameState extends AbstractGameState {
                     int typeIdx = random.nextInt(pieceTypesHidden.size());
                     Piece.PieceType hiddenPieceType = pieceTypesHidden.get(typeIdx);
                     pieceTypesHidden.remove(typeIdx);
-                    s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.partialCopy(hiddenPieceType));
+                    s.gridBoard.setElement(piece.getPiecePosition(), piece.partialCopy(hiddenPieceType));
                 } else{
-                    s.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
+                    s.gridBoard.setElement(piece.getPiecePosition(), piece.copy());
                 }
             }
         }
