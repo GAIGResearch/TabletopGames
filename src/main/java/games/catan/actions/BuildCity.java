@@ -6,7 +6,7 @@ import core.components.Counter;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
-import games.catan.CatanTile;
+import games.catan.components.CatanTile;
 import games.catan.components.Settlement;
 
 import java.util.Objects;
@@ -38,7 +38,7 @@ public class BuildCity extends AbstractAction {
                 ((Counter)cgs.getComponentActingPlayer(CatanConstants.cityCounterHash)).increment(1);
                 // if player builds a city it gets back the settlement token
                 ((Counter)cgs.getComponentActingPlayer(CatanConstants.settlementCounterHash)).decrement(1);
-                if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("city"))) {
+                if (!CatanGameState.spendResourcesIfPossible(cgs, CatanParameters.costMapping.get("city"))) {
                     throw new AssertionError("Player cannot afford city");
                 }
                 settlement.upgrade();

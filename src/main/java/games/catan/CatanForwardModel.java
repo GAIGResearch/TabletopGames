@@ -4,20 +4,15 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.actions.DoNothing;
-import core.components.Area;
-import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
-import core.properties.PropertyString;
 import games.catan.actions.*;
-import games.catan.components.Graph;
-import games.catan.components.Road;
-import games.catan.components.Settlement;
+import games.catan.components.*;
 
 import java.util.*;
 
-import static core.CoreConstants.playerHandHash;
 import static games.catan.CatanConstants.*;
 import static games.catan.CatanGameState.CatanGamePhase.*;
 
@@ -29,63 +24,42 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
         CatanGameState state = (CatanGameState) firstState;
         state._reset();
         CatanParameters params = (CatanParameters) state.getGameParameters();
+        state.rnd = new Random(params.getRandomSeed());
 
         state.setBoard(generateBoard(params));
         state.setGraph(extractGraphFromBoard(state.getBoard()));
-        state.areas = new HashMap<>();
 
         // Setup areas
         for (int i = 0; i < state.getNPlayers(); i++) {
-            Area playerArea = new Area(i, "Player Area");
-            Deck<Card> playerHand = new Deck<>("Player Resource Deck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
-            playerHand.setOwnerId(i);
-            playerArea.putComponent(playerHandHash, playerHand);
+            state.playerDevCards[i] = new Deck<>("Player Development Deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
+            state.playerTokens[i] = new HashMap<>();
+            for (Map.Entry<CatanParameters.ActionType, Integer> type: params.tokenCounts.entrySet()) {
+                state.playerTokens[i].put(type.getKey(), new Counter(type.getValue(), type.getKey().name() + " Counter " + i));
+            }
 
-            Deck<Card> playerDevDeck = new Deck<>("Player Development Deck", CoreConstants.VisibilityMode.VISIBLE_TO_OWNER);
-            playerDevDeck.setOwnerId(i);
-            playerArea.putComponent(developmentDeckHash, playerDevDeck);
-
-            // counter value, min, max, name
-            playerArea.putComponent(roadCounterHash, new Counter(0, 0, params.n_roads, "Road Counter"));
-            playerArea.putComponent(settlementCounterHash, new Counter(0, 0, params.n_settlements, "Settlement Counter"));
-            playerArea.putComponent(cityCounterHash, new Counter(0, 0, params.n_cities, "City Counter"));
-
-            state.areas.put(i, playerArea);
-
+            state.playerResources[i] = new HashMap<>();
+            for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
+                state.playerResources[i].put(res, new Counter(res + " " + i));
+            }
         }
 
-        // Initialize the game area
-        Area gameArea = new Area(-1, "Game Area");
-        state.areas.put(-1, gameArea);
-
-        // create resource deck
-        Deck<Card> resourceDeck = new Deck("resourceDeck", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
-        for (CatanParameters.Resources res : CatanParameters.Resources.values()) {
-            for (int i = 0; i < params.n_resource_cards; i++) {
-                Card c = new Card();
-                c.setProperty(new PropertyString("cardType", res.name()));
-                resourceDeck.add(c);
-            }
+        // create resource pool
+        state.resourcePool = new HashMap<>();
+        for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
+            state.resourcePool.put(res, new Counter(res.name()));
+            state.resourcePool.get(res).increment(params.n_resource_cards);
         }
 
         // create and shuffle developmentDeck
-        Deck<Card> developmentDeck = new Deck("developmentDeck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
-        for (Map.Entry<CatanParameters.CardTypes, Integer> entry : params.developmentCardCount.entrySet()) {
+        state.devCards = new Deck<>("Development Deck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
+        for (Map.Entry<CatanCard.CardType, Integer> entry : params.developmentCardCount.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++) {
-                Card card = new Card();
-                card.setProperty(new PropertyString("cardType", entry.getKey().toString()));
-                developmentDeck.add(card);
+                CatanCard card = new CatanCard(entry.getKey());
+                state.devCards.add(card);
             }
         }
-        developmentDeck.shuffle(state.rnd);
-
-        gameArea.putComponent(resourceDeckHash, resourceDeck);
-        gameArea.putComponent(developmentDeckHash, developmentDeck);
-        gameArea.putComponent(developmentDiscardDeck, new Deck("DevelopmentDiscardDeck", CoreConstants.VisibilityMode.VISIBLE_TO_ALL));
-
-        state.addComponents();
+        state.devCards.shuffle(state.rnd);
         state.setGamePhase(Setup);
-
     }
 
     @Override
@@ -149,13 +123,12 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
 
         if (gs.getGamePhase() == CoreConstants.DefaultGamePhase.Main) {
             // reset recently bought dev card to null
-            gs.boughtDevCard = null;
-            rollDiceAndAllocateResources(gs);
+            rollDiceAndAllocateResources(gs, params);
         }
 
     }
 
-    private void rollDiceAndAllocateResources(CatanGameState gs) {
+    private void rollDiceAndAllocateResources(CatanGameState gs, CatanParameters cp) {
         /* Gives players the resources depending on the current rollValue stored in the game state */
         // roll dice
         gs.rollDice();
@@ -169,34 +142,20 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
             cto.setGamePhase(Robber, gs);
         } else {
             cto.setGamePhase(Trade, gs);
-            for (int x = 0; x < board.length; x++) {
-                for (int y = 0; y < board[x].length; y++) {
-                    CatanTile tile = board[x][y];
+            for (CatanTile[] catanTiles : board) {
+                for (CatanTile tile : catanTiles) {
                     if (tile.getNumber() == value && !tile.hasRobber()) {
                         // allocate resource for each settlement/city
                         for (Settlement settl : tile.getSettlements()) {
                             if (settl.getOwner() != -1) {
                                 // Move the card from the resource deck and give it to the player
-                                List<Card> resourceDeck = ((Deck<Card>) gs.getComponent(resourceDeckHash)).getComponents();
-                                int counter = 0;
-                                for (int i = 0; i < resourceDeck.size(); i++) {
-                                    Card card = resourceDeck.get(i);
-                                    if (card.getProperty(cardType).toString().equals(CatanParameters.Resources.values()[CatanParameters.productMapping.get(tile.getType()).ordinal()].toString())) {
-                                        // remove from deck and give it to player
-                                        if (gs.getCoreGameParameters().verbose) {
-                                            System.out.println("With Roll value " + gs.rollValue + " Player " + settl.getOwner() + " got " + card.getProperty(cardType));
-                                        }
-                                        cto.logEvent(() -> " Player " + settl.getOwner() + " got " + card.getProperty(cardType), gs);
-                                        ((Deck<Card>) gs.getComponent(resourceDeckHash)).remove(card);
-                                        ((Deck) gs.getComponent(playerHandHash, settl.getOwner())).add(card);
-                                        counter++;
-                                    }
-                                    // getType is 1 for settlement; 2 for city
-                                    if (counter >= settl.getType()) {
-                                        break;
-                                    }
+                                CatanParameters.Resource res = cp.productMapping.get(tile.getTileType());
+                                gs.resourcePool.get(res).decrement(settl.getType());
+                                gs.playerResources[gs.getCurrentPlayer()].get(res).increment(settl.getType());
+                                if (gs.getCoreGameParameters().verbose) {
+                                    System.out.println("With Roll value " + gs.rollValue + " Player " + settl.getOwner() + " got " + res);
                                 }
-
+                                cto.logEvent(() -> " Player " + settl.getOwner() + " got " + res, gs);
                             }
                         }
                     }
@@ -204,12 +163,15 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
     }
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, ActionSpace.Default);
+    }
 
     @Override
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         CatanGameState cgs = (CatanGameState) gameState;
         if (cgs.getGamePhase() == Setup) {
-            return CatanActionFactory.getSetupActions(cgs);
+            return CatanActionFactory.getSetupActions(cgs, actionSpace);
         }
         if (cgs.getGamePhase() == Robber) {
             return CatanActionFactory.getRobberActions(cgs);
@@ -233,17 +195,17 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
 
     private CatanTile[][] generateBoard(CatanParameters params) {
         // Shuffle the tile types
-        ArrayList<CatanParameters.TileType> tileList = new ArrayList<>();
-        for (Map.Entry tileCount : params.tileCounts.entrySet()) {
-            for (int i = 0; i < (int) tileCount.getValue(); i++) {
-                tileList.add((CatanParameters.TileType) tileCount.getKey());
+        ArrayList<CatanTile.TileType> tileList = new ArrayList<>();
+        for (Map.Entry<CatanTile.TileType, Integer> tileCount : params.tileCounts.entrySet()) {
+            for (int i = 0; i < tileCount.getValue(); i++) {
+                tileList.add(tileCount.getKey());
             }
         }
         // Shuffle number tokens
         ArrayList<Integer> numberList = new ArrayList<>();
-        for (Map.Entry numberCount : params.numberTokens.entrySet()) {
-            for (int i = 0; i < (int) numberCount.getValue(); i++) {
-                numberList.add((Integer) numberCount.getKey());
+        for (Map.Entry<Integer, Integer> numberCount : params.numberTokens.entrySet()) {
+            for (int i = 0; i < numberCount.getValue(); i++) {
+                numberList.add(numberCount.getKey());
             }
         }
         // shuffle collections so we get randomized tiles and tokens on them
@@ -261,11 +223,11 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
                 CatanTile tile = new CatanTile(x, y);
                 // mid_x should be the same as the distance
                 if (midTile.getDistanceToTile(tile) >= midX) {
-                    tile.setTileType(CatanParameters.TileType.SEA);
+                    tile.setTileType(CatanTile.TileType.SEA);
                 } else if (tileList.size() > 0) {
                     tile.setTileType(tileList.remove(0));
                     // desert has no number and has to place the robber there
-                    if (tile.getType().equals(CatanParameters.TileType.DESERT)) {
+                    if (tile.getTileType().equals(CatanTile.TileType.DESERT)) {
                         tile.placeRobber();
                     } else {
                         tile.setNumber(numberList.remove(0));
@@ -276,10 +238,8 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
 
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
-
+        for (CatanTile[] catanTiles : board) {
+            for (CatanTile tile : catanTiles) {
                 // --------- Road ------------
                 for (int edge = 0; edge < HEX_SIDES; edge++) {
                     // Road has already been set
@@ -329,20 +289,19 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
         return board;
     }
 
-    private Graph extractGraphFromBoard(CatanTile[][] board) {
+    private Graph<Settlement, Road> extractGraphFromBoard(CatanTile[][] board) {
         Graph<Settlement, Road> graph = new Graph<>();
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
+        for (CatanTile[] catanTiles : board) {
+            for (CatanTile tile : catanTiles) {
                 // logic to generate the graph from the board representation
                 // We are not interested in references to DESERT or SEA tiles
-                if (!(tile.getType() == CatanParameters.TileType.DESERT || tile.getType() == CatanParameters.TileType.SEA)) {
+                if (!(tile.getTileType() == CatanTile.TileType.DESERT || tile.getTileType() == CatanTile.TileType.SEA)) {
                     Settlement[] settlements = tile.getSettlements();
                     Road[] roads = tile.getRoads();
                     for (int i = 0; i < settlements.length; i++) {
                         //  2 roads are along the same HEX
-                        graph.addEdge(tile.settlements[i], tile.settlements[(i + 5) % HEX_SIDES], roads[(i + 5) % HEX_SIDES]);
-                        graph.addEdge(tile.settlements[i], tile.settlements[(i + 1) % HEX_SIDES], roads[i]);
+                        graph.addEdge(tile.getSettlements()[i], tile.getSettlements()[(i + 5) % HEX_SIDES], roads[(i + 5) % HEX_SIDES]);
+                        graph.addEdge(tile.getSettlements()[i], tile.getSettlements()[(i + 1) % HEX_SIDES], roads[i]);
 
                         // last one requires a road and a settlement from a neighbour
                         int[] otherCoords = CatanTile.getNeighbourOnEdge(tile, i);
@@ -350,7 +309,7 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
                                 Arrays.stream(otherCoords).min().getAsInt() >= 0) {
                             CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
                             Road[] neighbourRoads = neighbour.getRoads();
-                            graph.addEdge(tile.settlements[i], neighbour.settlements[(i + 5) % HEX_SIDES], neighbourRoads[(i + 4) % HEX_SIDES]);
+                            graph.addEdge(tile.getSettlements()[i], neighbour.getSettlements()[(i + 5) % HEX_SIDES], neighbourRoads[(i + 4) % HEX_SIDES]);
                         }
                     }
                 }
@@ -362,9 +321,9 @@ public class CatanForwardModel extends StandardForwardModelWithTurnOrder {
     private void setHarbors(CatanTile[][] board) {
         // set harbors along the tiles where the SEA borders the land
         ArrayList<Integer> harbors = new ArrayList<>();
-        for (Map.Entry<CatanParameters.HarborTypes, Integer> entry : CatanParameters.harborCount.entrySet()) {
+        for (Map.Entry<CatanParameters.HarborType, Integer> entry : CatanParameters.harborCount.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++)
-                harbors.add(CatanParameters.HarborTypes.valueOf(entry.getKey().toString()).ordinal());
+                harbors.add(CatanParameters.HarborType.valueOf(entry.getKey().toString()).ordinal());
         }
         Collections.shuffle(harbors);
 

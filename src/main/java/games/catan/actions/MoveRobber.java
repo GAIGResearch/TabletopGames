@@ -3,7 +3,7 @@ package games.catan.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.catan.CatanGameState;
-import games.catan.CatanTile;
+import games.catan.components.CatanTile;
 
 import java.util.Objects;
 

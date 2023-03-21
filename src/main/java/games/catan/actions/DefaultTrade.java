@@ -8,7 +8,7 @@ import core.components.Deck;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
-import games.catan.CatanParameters.Resources;
+import games.catan.CatanParameters.Resource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,11 +17,11 @@ import java.util.Objects;
 /* Player may trade any 4 resources of the same type of 1 resource of choice with the bank
 * This action also includes the Harbor trades using the exchangeRate*/
 public class DefaultTrade extends AbstractAction {
-    public final Resources resourceOffer;
-    public final Resources resourceToGet;
+    public final Resource resourceOffer;
+    public final Resource resourceToGet;
     public final int exchangeRate;
 
-    public DefaultTrade(Resources resourceOffer, Resources resourceToGet, int exchangeRate){
+    public DefaultTrade(Resource resourceOffer, Resource resourceToGet, int exchangeRate){
         this.resourceOffer = resourceOffer;
         this.resourceToGet = resourceToGet;
         this.exchangeRate = exchangeRate;

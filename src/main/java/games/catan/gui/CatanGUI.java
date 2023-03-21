@@ -5,7 +5,7 @@ import core.AbstractPlayer;
 import core.Game;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
-import games.catan.CatanTile;
+import games.catan.components.CatanTile;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;

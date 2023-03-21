@@ -3,7 +3,7 @@ package games.catan.gui;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
-import games.catan.CatanTile;
+import games.catan.components.CatanTile;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
 
@@ -64,7 +64,7 @@ public class CatanBoardView extends JComponent {
                     drawRobber(g, centreCoords);
                 }
 
-                String type = "" + tile.getType();
+                String type = "" + tile.getTileType();
                 String number = "" + tile.getNumber();
                 g.drawString(type, (int) centreCoords.x- 20, centreCoords.y);
                 if (!number.equals("0"))
@@ -129,19 +129,19 @@ public class CatanBoardView extends JComponent {
     }
 
     private Color tileColourLookup(CatanTile tile){
-        if (tile.getType() == CatanParameters.TileType.DESERT){
+        if (tile.getTileType() == CatanTile.TileType.DESERT){
             return Color.YELLOW;
-        } else if (tile.getType() == CatanParameters.TileType.SEA){
+        } else if (tile.getTileType() == CatanTile.TileType.SEA){
             return new Color(51, 204, 255);//Color.BLUE;
-        }else if (tile.getType() == CatanParameters.TileType.FIELDS){
+        }else if (tile.getTileType() == CatanTile.TileType.FIELDS){
             return new Color(255, 255, 153); //Color.LIGHT_GRAY;
-        }else if (tile.getType() == CatanParameters.TileType.FOREST){
+        }else if (tile.getTileType() == CatanTile.TileType.FOREST){
             return new Color(0, 102, 0); //Color.RED;
-        }else if (tile.getType() == CatanParameters.TileType.MOUNTAINS){
+        }else if (tile.getTileType() == CatanTile.TileType.MOUNTAINS){
             return Color.DARK_GRAY;
-        }else if (tile.getType() == CatanParameters.TileType.PASTURE){
+        }else if (tile.getTileType() == CatanTile.TileType.PASTURE){
             return new Color(102, 255, 102); //Color.GREEN;
-        } else if (tile.getType() == CatanParameters.TileType.HILLS){
+        } else if (tile.getTileType() == CatanTile.TileType.HILLS){
             return new Color(102, 102, 102); //Color.ORANGE;
         } else{
             return Color.WHITE;
@@ -170,7 +170,7 @@ public class CatanBoardView extends JComponent {
                 g.setStroke(stroke);
 //                AffineTransform original = g.getTransform();
 //                g.rotate(Math.toRadians(-60));
-                String type = CatanParameters.HarborTypes.values()[harbors[i]].toString();
+                String type = CatanParameters.HarborType.values()[harbors[i]].toString();
                 Point centreCoords = tile.getCentreCoords(tileRadius);
                 g.drawString((type + harbors[i]), centreCoords.x, centreCoords.y+10);
 //                g.setTransform(original);

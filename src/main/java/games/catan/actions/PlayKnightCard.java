@@ -6,10 +6,9 @@ import core.components.Card;
 import core.components.Deck;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
-import games.catan.CatanParameters;
 import games.catan.CatanTurnOrder;
+import games.catan.components.CatanCard;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public class PlayKnightCard extends AbstractAction {
@@ -22,7 +21,7 @@ public class PlayKnightCard extends AbstractAction {
         Deck<Card> developmentDiscardDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDiscardDeck);
 
         Optional<Card> knight = playerDevDeck.stream()
-                .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.CardTypes.KNIGHT_CARD.toString()))
+                .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(CatanCard.CardType.KNIGHT_CARD.toString()))
                 .findFirst();
         if(knight.isPresent()){
             Card card = knight.get();

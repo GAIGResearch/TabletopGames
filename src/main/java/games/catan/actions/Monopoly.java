@@ -8,16 +8,16 @@ import core.components.Deck;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
-import games.catan.CatanTurnOrder;
+import games.catan.components.CatanCard;
 
 import java.util.*;
 
 import static core.CoreConstants.playerHandHash;
 
 public class Monopoly extends AbstractAction {
-    public final CatanParameters.Resources resource;
+    public final CatanParameters.Resource resource;
 
-    public Monopoly(CatanParameters.Resources resource){
+    public Monopoly(CatanParameters.Resource resource){
         this.resource = resource;
     }
     @Override
@@ -28,7 +28,7 @@ public class Monopoly extends AbstractAction {
         Deck<Card> developmentDiscardDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDiscardDeck);
 
         Optional<Card> monopoly = playerDevDeck.stream()
-                .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.CardTypes.MONOPOLY.toString()))
+                .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(CatanCard.CardType.MONOPOLY.toString()))
                 .findFirst();
         if(monopoly.isPresent()){
             Card monopolyCard = monopoly.get();

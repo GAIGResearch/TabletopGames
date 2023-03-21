@@ -6,6 +6,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import games.catan.*;
 import games.catan.actions.*;
+import games.catan.components.CatanTile;
 import games.catan.components.Settlement;
 
 
@@ -209,7 +210,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                 for(AbstractAction action : possibleActions){
                     MoveRobber moveRobber = (MoveRobber) action;
                     CatanTile tile = board[moveRobber.getXY()[0]][moveRobber.getXY()[1]];
-                    if(tile.getType()==CatanParameters.TileType.DESERT){
+                    if(tile.getTileType()== CatanTile.TileType.DESERT){
                         actionPriorityLists.get(actionPriorityLists.size()-2).add(action);
                     } else {
                         int tileRank = 5;
@@ -234,18 +235,18 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                     }
                     tempResources = currentResources.clone();
                     DiscardCards discardCards = (DiscardCards) action;
-                    CatanParameters.Resources[] cardsToDiscard = discardCards.getToBeDiscarded();
+                    CatanParameters.Resource[] cardsToDiscard = discardCards.getToBeDiscarded();
                     int[] discardValues = new int[5];
-                    for(CatanParameters.Resources card : cardsToDiscard){
-                        if (card.equals(CatanParameters.Resources.BRICK)){
+                    for(CatanParameters.Resource card : cardsToDiscard){
+                        if (card.equals(CatanParameters.Resource.BRICK)){
                             discardValues[0]+=1;
-                        } else if (card.equals(CatanParameters.Resources.LUMBER)){
+                        } else if (card.equals(CatanParameters.Resource.LUMBER)){
                             discardValues[1]+=1;
-                        } else if (card.toString().equals(CatanParameters.Resources.ORE)){
+                        } else if (card.toString().equals(CatanParameters.Resource.ORE)){
                             discardValues[2]+=1;
-                        } else if (card.equals(CatanParameters.Resources.GRAIN)){
+                        } else if (card.equals(CatanParameters.Resource.GRAIN)){
                             discardValues[3]+=1;
-                        } else if (card.equals(CatanParameters.Resources.WOOL)){
+                        } else if (card.equals(CatanParameters.Resource.WOOL)){
                             discardValues[4]+=1;
                         }
                     }
@@ -315,7 +316,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                 for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
                     Settlement settlement = tile.getSettlements()[i];
                     // where it is legal to place tile then it can be placed from there
-                    if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
+                    if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
                             && cgs.checkSettlementPlacement(settlement, getPlayerID())) {
                         return false;
                     }

@@ -6,7 +6,7 @@ import core.components.Counter;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
-import games.catan.CatanTile;
+import games.catan.components.CatanTile;
 import games.catan.components.Edge;
 import games.catan.components.Graph;
 import games.catan.components.Road;
@@ -40,7 +40,7 @@ public class BuildRoad extends AbstractAction {
             ((Counter) cgs.getComponentActingPlayer(CatanConstants.roadCounterHash)).increment(1);
             // only take resources after set up and not with road building card
             if (!free) {
-                if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("road"))) {
+                if (!CatanGameState.spendResourcesIfPossible(cgs, CatanParameters.costMapping.get("road"))) {
                     throw new AssertionError("Player " + gs.getCurrentPlayer() + " cannot afford this road");
                 }
             }

@@ -2,19 +2,12 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
 import core.components.Counter;
-import core.components.Deck;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
-import games.catan.CatanTile;
+import games.catan.components.CatanTile;
 
-import java.util.Arrays;
 import java.util.Objects;
-
-import static core.CoreConstants.playerHandHash;
-import static games.catan.CatanConstants.resourceDeckHash;
 
 public class BuildSettlement extends AbstractAction {
     public final int x;
@@ -30,19 +23,22 @@ public class BuildSettlement extends AbstractAction {
         this.playerID = playerID;
         this.free = free;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
         CatanTile[][] board = cgs.getBoard();
+        CatanParameters cp = (CatanParameters) gs.getGameParameters();
 
         if (board[x][y].getSettlements()[vertex].getOwner() == -1) {
-            if (((Counter)cgs.getComponentActingPlayer(CatanConstants.settlementCounterHash)).isMaximum()){
+            Counter c = cgs.getPlayerTokens()[playerID].get(CatanParameters.ActionType.Settlement);
+            if (c.isMaximum()){
                 throw new AssertionError("No more settlements to build for player " + gs.getCurrentPlayer());
             }
-            ((Counter)cgs.getComponentActingPlayer(CatanConstants.settlementCounterHash)).increment(1);
+            c.increment();
             // take resources after set up
             if (!free){
-                if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("settlement"))) {
+                if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.Settlement), playerID)) {
                     throw new AssertionError("Player " + gs.getCurrentPlayer() + " cannot afford this settlement");
                 }
             }

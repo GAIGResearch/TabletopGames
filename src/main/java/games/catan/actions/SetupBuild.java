@@ -5,8 +5,7 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
-import games.catan.CatanParameters;
-import games.catan.CatanTile;
+import games.catan.components.CatanTile;
 import games.catan.components.Settlement;
 
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ public class SetupBuild extends AbstractAction implements IExtendedSequence {
 
                         // where it is legal to place tile then it can be placed from there
                         if (settlement.getOwner() == -1 &&
-                                !(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT)))
+                                !(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT)))
                         {
                             if (state.checkSettlementPlacement(settlement, player)) {
                                 actions.add(new BuildSettlement(x, y, i, getCurrentPlayer(state), true));

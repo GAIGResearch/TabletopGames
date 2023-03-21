@@ -8,7 +8,6 @@ import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,15 +17,15 @@ import static games.catan.CatanConstants.resourceDeckHash;
 
 /* Takes in a list of cards to be discarded from the player's hand*/
 public class DiscardCards extends AbstractAction {
-    public final CatanParameters.Resources[] cardsToDiscard;
+    public final CatanParameters.Resource[] cardsToDiscard;
     public final int playerID;
 
-    public DiscardCards(CatanParameters.Resources[] cardsToDiscard, int playerID){
+    public DiscardCards(CatanParameters.Resource[] cardsToDiscard, int playerID){
         this.cardsToDiscard = cardsToDiscard;
         this.playerID = playerID;
     }
 
-    public CatanParameters.Resources[] getToBeDiscarded() {
+    public CatanParameters.Resource[] getToBeDiscarded() {
         return cardsToDiscard;
     }
 
@@ -36,7 +35,7 @@ public class DiscardCards extends AbstractAction {
         Deck<Card> playerResourceDeck = (Deck<Card>)cgs.getComponentActingPlayer(playerHandHash);
         Deck<Card> commonResourceDeck = (Deck<Card>)cgs.getComponent(resourceDeckHash);
 
-        for (CatanParameters.Resources cardType: cardsToDiscard){
+        for (CatanParameters.Resource cardType: cardsToDiscard){
 
             Optional<Card> resource = playerResourceDeck.stream()
                     .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(cardType.toString()))

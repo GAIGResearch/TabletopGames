@@ -5,13 +5,8 @@ import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.Card;
 import core.components.Deck;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
-import games.catan.CatanParameters;
-import games.catan.CatanParameters.Resources;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 

@@ -3,17 +3,20 @@ package games.catan.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class AcceptTrade extends AbstractAction {
     public final int offeringPlayer;
     public final int receivingPlayer;
-    public final int[] resourcesRequested;
-    public final int[] resourcesOffered;
+    public final HashMap<CatanParameters.Resource, Integer> resourcesRequested;
+    public final HashMap<CatanParameters.Resource, Integer> resourcesOffered;
 
-    public AcceptTrade(int offeringPlayer, int receivingPlayer, int[] resourcesRequested, int[] resourcesOffered) {
+    public AcceptTrade(int offeringPlayer, int receivingPlayer,
+                       HashMap<CatanParameters.Resource, Integer> resourcesRequested,
+                       HashMap<CatanParameters.Resource, Integer> resourcesOffered) {
         this.offeringPlayer = offeringPlayer;
         this.receivingPlayer = receivingPlayer;
         this.resourcesRequested = resourcesRequested;
@@ -22,7 +25,8 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        if (CatanGameState.swapResources((CatanGameState) gs, receivingPlayer, offeringPlayer, resourcesRequested, resourcesOffered)) {
+        if (((CatanGameState)gs).swapResources(receivingPlayer, offeringPlayer, resourcesOffered) &&
+                ((CatanGameState)gs).swapResources(offeringPlayer, receivingPlayer, resourcesRequested)) {
             return true;
         } else {
             throw new AssertionError("A partner did not have sufficient resources");
@@ -30,27 +34,21 @@ public class AcceptTrade extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public AcceptTrade copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj instanceof AcceptTrade) {
-            AcceptTrade otherAction = (AcceptTrade) obj;
-            return otherAction.offeringPlayer == offeringPlayer
-                    && otherAction.receivingPlayer == receivingPlayer
-                    && Arrays.equals(otherAction.resourcesRequested, resourcesRequested)
-                    && Arrays.equals(otherAction.resourcesOffered, resourcesOffered);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AcceptTrade)) return false;
+        AcceptTrade that = (AcceptTrade) o;
+        return offeringPlayer == that.offeringPlayer && receivingPlayer == that.receivingPlayer && Objects.equals(resourcesRequested, that.resourcesRequested) && Objects.equals(resourcesOffered, that.resourcesOffered);
     }
 
     @Override
     public int hashCode() {
-        int retValue = Objects.hash(offeringPlayer, receivingPlayer);
-        return retValue + 41 * Arrays.hashCode(resourcesOffered) + 163 * Arrays.hashCode(resourcesRequested);
+        return Objects.hash(offeringPlayer, receivingPlayer, resourcesRequested, resourcesOffered);
     }
 
     @Override

@@ -2,23 +2,21 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
-import games.catan.CatanParameters;
-import games.catan.CatanParameters.Resources;
+import games.catan.CatanParameters.Resource;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class OfferPlayerTrade extends AbstractAction {
-    public final int[] resourcesOffered;
-    public final int[] resourcesRequested;
+    public final HashMap<Resource, Integer> resourcesOffered;
+    public final HashMap<Resource, Integer> resourcesRequested;
     public final int offeringPlayerID;
     public final int otherPlayerID;
     public final int negotiationCount;
 
-    public OfferPlayerTrade(int[] resourcesOffered, int[] resourcesRequested, int offeringPlayerID, int otherPlayerID, int negotiationCount){
+    public OfferPlayerTrade(HashMap<Resource, Integer> resourcesOffered, HashMap<Resource, Integer> resourcesRequested, int offeringPlayerID, int otherPlayerID, int negotiationCount){
         this.resourcesOffered = resourcesOffered;
         this.resourcesRequested = resourcesRequested;
         this.offeringPlayerID = offeringPlayerID;
@@ -40,22 +38,16 @@ public class OfferPlayerTrade extends AbstractAction {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other instanceof OfferPlayerTrade){
-            OfferPlayerTrade otherAction = (OfferPlayerTrade)other;
-            return Arrays.equals(otherAction.resourcesRequested, resourcesRequested)
-                    && Arrays.equals(otherAction.resourcesOffered, resourcesOffered)
-                    && offeringPlayerID == otherAction.offeringPlayerID
-                    && otherPlayerID == otherAction.otherPlayerID
-                    && negotiationCount == otherAction.negotiationCount;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OfferPlayerTrade)) return false;
+        OfferPlayerTrade that = (OfferPlayerTrade) o;
+        return offeringPlayerID == that.offeringPlayerID && otherPlayerID == that.otherPlayerID && negotiationCount == that.negotiationCount && Objects.equals(resourcesOffered, that.resourcesOffered) && Objects.equals(resourcesRequested, that.resourcesRequested);
     }
 
     @Override
     public int hashCode() {
-        int retValue = Objects.hash(offeringPlayerID,otherPlayerID,negotiationCount);
-        return retValue + 17 * Arrays.hashCode(resourcesOffered) + 73 * Arrays.hashCode(resourcesRequested);
+        return Objects.hash(resourcesOffered, resourcesRequested, offeringPlayerID, otherPlayerID, negotiationCount);
     }
 
     @Override
@@ -64,13 +56,13 @@ public class OfferPlayerTrade extends AbstractAction {
                 resourceArrayToString(resourcesOffered), resourceArrayToString(resourcesRequested));
     }
 
-    public static String resourceArrayToString(int[] resources) {
+    public static String resourceArrayToString(HashMap<Resource, Integer> resources) {
         StringBuilder retValue = new StringBuilder();
-        for (int i = 0; i < resources.length; i++) {
-            if (resources[i] > 0) {
+        for (Map.Entry<Resource, Integer> e: resources.entrySet()) {
+            if (e.getValue() > 0) {
                 if (retValue.length() > 0)
                     retValue.append(", ");
-                retValue.append(resources[i]).append(" ").append(Resources.values()[i]);
+                retValue.append(e.getValue()).append(" ").append(e.getKey());
             }
         }
         return retValue.toString();
@@ -93,13 +85,11 @@ public class OfferPlayerTrade extends AbstractAction {
         return otherPlayerID;
     }
 
-    public int[] getResourcesOffered() {
+    public HashMap<Resource, Integer> getResourcesOffered() {
         return resourcesOffered;
     }
 
-    public int[] getResourcesRequested() {
+    public HashMap<Resource, Integer> getResourcesRequested() {
         return resourcesRequested;
     }
-
-
 }

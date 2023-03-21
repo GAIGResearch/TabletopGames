@@ -1,15 +1,17 @@
 package games.catan;
 
 import core.AbstractParameters;
+import games.catan.components.CatanCard;
+import games.catan.components.CatanTile;
 
 import java.util.HashMap;
+
+import static games.catan.CatanParameters.ActionType.*;
+import static games.catan.CatanParameters.Resource.*;
 
 public class CatanParameters extends AbstractParameters {
     private String dataPath;
 
-    public final int n_settlements = 5;
-    public final int n_cities = 4;
-    public final int n_roads = 15;
     public final int n_resource_cards = 19;
     public final int n_tiles_per_row = 7;
 
@@ -56,13 +58,13 @@ public class CatanParameters extends AbstractParameters {
         return false;
     }
 
-    HashMap<TileType, Integer> tileCounts = new HashMap<CatanParameters.TileType, Integer>() {{
-        put(CatanParameters.TileType.HILLS, 3);
-        put(CatanParameters.TileType.FOREST, 4);
-        put(CatanParameters.TileType.MOUNTAINS, 3);
-        put(CatanParameters.TileType.FIELDS, 4);
-        put(CatanParameters.TileType.PASTURE, 4);
-        put(CatanParameters.TileType.DESERT, 1);
+    HashMap<CatanTile.TileType, Integer> tileCounts = new HashMap<CatanTile.TileType, Integer>() {{
+        put(CatanTile.TileType.HILLS, 3);
+        put(CatanTile.TileType.FOREST, 4);
+        put(CatanTile.TileType.MOUNTAINS, 3);
+        put(CatanTile.TileType.FIELDS, 4);
+        put(CatanTile.TileType.PASTURE, 4);
+        put(CatanTile.TileType.DESERT, 1);
     }};
 
 
@@ -82,17 +84,7 @@ public class CatanParameters extends AbstractParameters {
         put(12, 1);
     }};
 
-    public enum TileType {
-        HILLS,
-        FOREST,
-        MOUNTAINS,
-        FIELDS,
-        PASTURE,
-        DESERT,
-        SEA
-    }
-
-    public enum Resources {
+    public enum Resource {
         BRICK,
         LUMBER,
         ORE,
@@ -100,7 +92,7 @@ public class CatanParameters extends AbstractParameters {
         WOOL
     }
 
-    public enum HarborTypes {
+    public enum HarborType {
         NONE,
         BRICK,
         LUMBER,
@@ -110,55 +102,69 @@ public class CatanParameters extends AbstractParameters {
         GENERIC
     }
 
-    public enum CardTypes{
-        KNIGHT_CARD,
-        MONOPOLY,
-        YEAR_OF_PLENTY,
-        ROAD_BUILDING,
-        VICTORY_POINT_CARD
+    /* Mapping of which field produces what*/
+    public HashMap<CatanTile.TileType, Resource> productMapping = new HashMap<CatanTile.TileType, Resource>(){{
+        put(CatanTile.TileType.HILLS, BRICK);
+        put(CatanTile.TileType.FOREST, Resource.LUMBER);
+        put(CatanTile.TileType.MOUNTAINS, Resource.ORE);
+        put(CatanTile.TileType.FIELDS, Resource.GRAIN);
+        put(CatanTile.TileType.PASTURE, Resource.WOOL);
+        put(CatanTile.TileType.DESERT, null);
+        put(CatanTile.TileType.SEA, null);
+    }};
+
+    public enum ActionType {
+        Settlement,
+        City,
+        Road,
+        DevCard
     }
 
-    /* Mapping of which field produces what*/
-    public static HashMap<TileType, Resources> productMapping = new HashMap<TileType, Resources>(){{
-        put(TileType.HILLS, Resources.BRICK);
-        put(TileType.FOREST, Resources.LUMBER);
-        put(TileType.MOUNTAINS, Resources.ORE);
-        put(TileType.FIELDS, Resources.GRAIN);
-        put(TileType.PASTURE, Resources.WOOL);
-        put(TileType.DESERT, null);
-        put(TileType.SEA, null);
-    }};
-
     /* Mapping from name to price of item (cost is in the same order as Resources) */
-    public static HashMap<String, int[]> costMapping = new HashMap<String, int[]>(){{
+    public HashMap<ActionType, HashMap<Resource, Integer>> costMapping = new HashMap<ActionType, HashMap<Resource, Integer>>(){{
         // cost order: Brick, lumber, ore, grain, wool
-        put("settlement", new int[]{1, 1, 0, 1, 1});
-        put("city", new int[]{0, 0, 3, 0, 2});
-        put("road", new int[]{1, 1, 0, 0, 0});
-        put("developmentCard", new int[]{0, 0, 1, 1, 1});
+        put(Settlement, new HashMap<Resource, Integer>() {{
+            put(BRICK, 1);
+            put(LUMBER, 1);
+            put(GRAIN, 1);
+            put(WOOL, 1);
+        }});
+        put(City, new HashMap<Resource, Integer>() {{
+            put(ORE, 3);
+            put(GRAIN, 2);
+        }});
+        put(Road, new HashMap<Resource, Integer>() {{
+            put(BRICK, 1);
+            put(LUMBER, 1);
+        }});
+        put(DevCard, new HashMap<Resource, Integer>() {{
+            put(ORE, 1);
+            put(GRAIN, 1);
+            put(WOOL, 1);
+        }});
     }};
 
-    HashMap<String, Integer> tokenCounts = new HashMap<String, Integer>() {{
-        put("settlement", 5);
-        put("city", 4);
-        put("road", 15);
+    HashMap<ActionType, Integer> tokenCounts = new HashMap<ActionType, Integer>() {{
+        put(Settlement, 5);
+        put(City, 4);
+        put(Road, 15);
     }};
 
-    HashMap<CardTypes, Integer> developmentCardCount = new HashMap<CardTypes, Integer>() {{
-        put(CardTypes.KNIGHT_CARD, 14);
-        put(CardTypes.MONOPOLY, 2);
-        put(CardTypes.YEAR_OF_PLENTY, 2);
-        put(CardTypes.ROAD_BUILDING, 2);
-        put(CardTypes.VICTORY_POINT_CARD, 5);
+    HashMap<CatanCard.CardType, Integer> developmentCardCount = new HashMap<CatanCard.CardType, Integer>() {{
+        put(CatanCard.CardType.KNIGHT_CARD, 14);
+        put(CatanCard.CardType.MONOPOLY, 2);
+        put(CatanCard.CardType.YEAR_OF_PLENTY, 2);
+        put(CatanCard.CardType.ROAD_BUILDING, 2);
+        put(CatanCard.CardType.VICTORY_POINT_CARD, 5);
     }};
 
-    public static HashMap<HarborTypes, Integer> harborCount = new HashMap<HarborTypes, Integer>() {{
-        put(HarborTypes.BRICK, 1);
-        put(HarborTypes.LUMBER, 1);
-        put(HarborTypes.ORE, 1);
-        put(HarborTypes.GRAIN, 1);
-        put(HarborTypes.WOOL, 1);
-        put(HarborTypes.GENERIC, 4);
+    public static HashMap<HarborType, Integer> harborCount = new HashMap<HarborType, Integer>() {{
+        put(HarborType.BRICK, 1);
+        put(HarborType.LUMBER, 1);
+        put(HarborType.ORE, 1);
+        put(HarborType.GRAIN, 1);
+        put(HarborType.WOOL, 1);
+        put(HarborType.GENERIC, 4);
     }};
 
     @Override

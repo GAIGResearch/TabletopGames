@@ -7,13 +7,14 @@ import core.components.Deck;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
+import games.catan.components.CatanCard;
 
 public class BuyDevelopmentCard extends AbstractAction {
 
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        if (!CatanGameState.spendResources(cgs, CatanParameters.costMapping.get("developmentCard"))) return false;
+        if (!CatanGameState.spendResourcesIfPossible(cgs, CatanParameters.costMapping.get("developmentCard"))) return false;
         // give a dev card to the player
         Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
         Deck<Card> devDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDeckHash);
@@ -23,7 +24,7 @@ public class BuyDevelopmentCard extends AbstractAction {
             playerDevDeck.add(card);
             //  if card is a Victory Point card and player already has 9 points then use it
             String cardType = card.getProperty(CatanConstants.cardType).toString();
-            if (cardType.equals(CatanParameters.CardTypes.VICTORY_POINT_CARD.toString())){
+            if (cardType.equals(CatanCard.CardType.VICTORY_POINT_CARD.toString())){
                 cgs.addVictoryPoint(cgs.getCurrentPlayer());
             }
             return true;

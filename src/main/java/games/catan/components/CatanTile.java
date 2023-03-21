@@ -1,7 +1,7 @@
-package games.catan;
+package games.catan.components;
 
-import games.catan.components.Road;
-import games.catan.components.Settlement;
+import core.components.BoardNode;
+import games.catan.CatanParameters;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import java.util.Objects;
 
 import static games.catan.CatanConstants.HEX_SIDES;
 
-public class CatanTile {
+public class CatanTile extends BoardNode {
     /*
     Implementation of a Hexagon structure using "even-r" representation, meaning that the hexagons are oriented with
     having their "pointy" side facing up and every odd row is offset by 0.5 * width.
@@ -23,12 +23,23 @@ public class CatanTile {
     Settlement[] settlements;
     int[] harbors;
 
-    CatanParameters.TileType tileType;
+    TileType tileType;
     private boolean hasHarbor;
     int number;
     boolean robber;
 
     public CatanTile(int x, int y) {
+        super(HEX_SIDES, "");
+        this.x = x;
+        this.y = y;
+        roads = new Road[HEX_SIDES];
+        harbors = new int[HEX_SIDES];
+        settlements = new Settlement[HEX_SIDES];
+        robber = false;
+    }
+
+    public CatanTile(int x, int y, int componentId) {
+        super(HEX_SIDES, "", componentId);
         this.x = x;
         this.y = y;
         roads = new Road[HEX_SIDES];
@@ -38,6 +49,7 @@ public class CatanTile {
     }
 
     public CatanTile(int x, int y, Road[] edges, Settlement[] vertices) {
+        super(HEX_SIDES, "");
         this.x = x;
         this.y = y;
         this.roads = edges;
@@ -45,11 +57,11 @@ public class CatanTile {
         robber = false;
     }
 
-    public void setTileType(CatanParameters.TileType type) {
+    public void setTileType(TileType type) {
         this.tileType = type;
     }
 
-    public CatanParameters.TileType getType() {
+    public TileType getTileType() {
         return this.tileType;
     }
 
@@ -118,8 +130,8 @@ public class CatanTile {
         if (!hasHarbor) {
             this.harbors[edge] = type;
             this.hasHarbor = true;
-            this.settlements[edge].setHarbour(CatanParameters.HarborTypes.values()[type]);
-            this.settlements[(edge + 1) % 6].setHarbour(CatanParameters.HarborTypes.values()[type]);
+            this.settlements[edge].setHarbour(CatanParameters.HarborType.values()[type]);
+            this.settlements[(edge + 1) % 6].setHarbour(CatanParameters.HarborType.values()[type]);
             return true;
         }
         throw new AssertionError("Cannot add harbour: edge: " + edge);
@@ -251,7 +263,7 @@ public class CatanTile {
     }
 
     public CatanTile copy() {
-        CatanTile copy = new CatanTile(x, y);
+        CatanTile copy = new CatanTile(x, y, componentID);
         copy.roads = new Road[HEX_SIDES];
         for (int i = 0; i < roads.length; i++) {
             copy.roads[i] = roads[i].copy();
@@ -300,5 +312,15 @@ public class CatanTile {
     @Override
     public String toString() {
         return "CatanTile at x " + x + " y " + y + " robber = " + robber;
+    }
+
+    public enum TileType {
+        HILLS,
+        FOREST,
+        MOUNTAINS,
+        FIELDS,
+        PASTURE,
+        DESERT,
+        SEA
     }
 }

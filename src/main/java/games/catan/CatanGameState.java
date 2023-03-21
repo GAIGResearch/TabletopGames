@@ -2,19 +2,12 @@ package games.catan;
 
 import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
-import core.CoreConstants;
-import core.components.Area;
-import core.components.Card;
-import core.components.Component;
-import core.components.Deck;
+import core.components.*;
 import core.interfaces.IGamePhase;
 import core.turnorders.TurnOrder;
 import games.GameType;
 import games.catan.actions.OfferPlayerTrade;
-import games.catan.components.Edge;
-import games.catan.components.Graph;
-import games.catan.components.Road;
-import games.catan.components.Settlement;
+import games.catan.components.*;
 
 import java.util.*;
 
@@ -24,17 +17,27 @@ import static games.catan.CatanConstants.*;
 public class CatanGameState extends AbstractGameStateWithTurnOrder {
     protected CatanTile[][] board;
     protected Graph<Settlement, Road> catanGraph;
-    protected Card boughtDevCard; // used to keep a reference to a dev card bought in the current turn to avoid playing it
     protected int[] scores; // score for each player
     protected int[] victoryPoints; // secret points from victory cards
     protected int[] knights; // knight count for each player
-    protected int[][] exchangeRates; // exchange rate with bank for each resource
+    protected HashMap<CatanParameters.Resource, Counter>[] exchangeRates; // exchange rate with bank for each resource
     protected int largestArmy; // playerID of the player currently holding the largest army
     protected int longestRoad; // playerID of the player currently holding the longest road
-    protected int longestRoadLength;
+    protected int longestRoadLength;  // TODO but not largest army size?
     protected OfferPlayerTrade currentTradeOffer; // Holds the current trade offer to allow access between players TODO make primitive
     int rollValue;
     protected Random rnd;
+
+    // TODO: copy and stuff
+    HashMap<CatanParameters.Resource, Counter>[] playerResources;
+    HashMap<CatanParameters.ActionType, Counter>[] playerTokens;
+    Deck<CatanCard>[] playerDevCards;
+    HashMap<CatanParameters.Resource, Counter> resourcePool;
+    Deck<CatanCard> devCards;
+
+    public HashMap<CatanParameters.ActionType, Counter>[] getPlayerTokens() {
+        return playerTokens;
+    }
 
     // GamePhases that may occur in Catan
     public enum CatanGamePhase implements IGamePhase {
@@ -45,9 +48,6 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
         Discard,
         Steal
     }
-
-    // Collection of areas, mapped to player ID, -1 is the general game area containing the board, counters and several decks.
-    HashMap<Integer, Area> areas;
 
     public CatanGameState(AbstractParameters pp, int nPlayers) {
         super(pp, nPlayers);
@@ -69,27 +69,8 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
         return new ArrayList<>(areas.values());
     }
 
-    // Getters & setters
-    public Component getComponent(int componentId, int playerId) {
-        return areas.get(playerId).getComponent(componentId);
-    }
-
-    public Component getComponentActingPlayer(int componentId) {
-        return areas.get(turnOrder.getCurrentPlayer(this)).getComponent(componentId);
-    }
-
-    public Component getComponent(int componentId) {
-        return getComponent(componentId, -1);
-    }
-
-    Area getArea(int playerId) {
-        return areas.get(playerId);
-    }
-
     protected void _reset() {
         // set everything to null (except for Random number generator)
-        this.areas = null;
-        boughtDevCard = null;
         board = null;
         currentTradeOffer = null;
         catanGraph = null;
@@ -97,21 +78,20 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
         CatanParameters pp = (CatanParameters) gameParameters;
         scores = new int[getNPlayers()];
         knights = new int[getNPlayers()];
-        exchangeRates = new int[getNPlayers()][CatanParameters.Resources.values().length];
+        exchangeRates = new int[getNPlayers()][CatanParameters.Resource.values().length];
         for (int[] exchangeRate : exchangeRates) Arrays.fill(exchangeRate, pp.default_exchange_rate);
         victoryPoints = new int[getNPlayers()];
         longestRoadLength = pp.min_longest_road;
         largestArmy = -1;
         longestRoad = -1;
-        if (rnd == null)
-            rnd = new Random(pp.getRandomSeed());
+        rnd = null;
     }
 
     @Override
     protected boolean _equals(Object obj) {
         if (obj instanceof CatanGameState) {
             CatanGameState o = (CatanGameState) obj;
-            return boughtDevCard.equals(o.boughtDevCard) && catanGraph.equals(o.catanGraph) &&
+            return catanGraph.equals(o.catanGraph) &&
                     largestArmy == o.largestArmy && longestRoad == o.longestRoad &&
                     longestRoadLength == o.longestRoadLength && o.currentTradeOffer.equals(currentTradeOffer) &&
                     rollValue == o.rollValue && Arrays.equals(scores, o.scores) &&
@@ -123,7 +103,7 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase, catanGraph, boughtDevCard,
+        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase, catanGraph,
                 largestArmy, longestRoad, longestRoadLength, currentTradeOffer, rollValue);
         result = 31 * result + Arrays.hashCode(playerResults);
         result = 31 * result + Arrays.hashCode(scores);
@@ -141,7 +121,6 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
         sb.append(gameStatus.hashCode()).append("|");
         sb.append(Arrays.hashCode(playerResults)).append("|*|");
         sb.append(catanGraph.hashCode()).append("|");
-        sb.append(boughtDevCard == null ? 0 : boughtDevCard.hashCode()).append("|");
         sb.append(largestArmy).append("|");
         sb.append(longestRoad).append("|");
         sb.append(longestRoadLength).append("|");
@@ -184,9 +163,8 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
     }
 
     public CatanTile getRobber(CatanTile[][] board) {
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
+        for (CatanTile[] catanTiles : board) {
+            for (CatanTile tile : catanTiles) {
                 if (tile.hasRobber()) {
                     return tile;
                 }
@@ -218,7 +196,7 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
     }
 
     public void addVictoryPoint(int playerID) {
-        if (playerID < knights.length) {
+        if (playerID < nPlayers) {
             victoryPoints[playerID] += 1;
         }
     }
@@ -227,24 +205,12 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
         return victoryPoints.clone();
     }
 
-    public int[] getPlayerResources(int playerID) {
-        Deck<Card> playerHand = (Deck<Card>) this.getComponent(CoreConstants.playerHandHash, playerID);
-        int[] resources = new int[CatanParameters.Resources.values().length];
-
-        for (Card card : playerHand.getComponents()) {
-            resources[CatanParameters.Resources.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
-        }
-        return resources;
+    public HashMap<CatanParameters.Resource, Counter> getPlayerResources(int playerID) {
+        return playerResources[playerID];
     }
 
-    public int[] getPLayerDevCards(int playerID) {
-        Deck<Card> playerDevCards = (Deck<Card>) this.getComponent(developmentDeckHash, playerID);
-        int[] devCards = new int[CatanParameters.CardTypes.values().length];
-
-        for (Card card : playerDevCards.getComponents()) {
-            devCards[CatanParameters.CardTypes.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1;
-        }
-        return devCards;
+    public Deck<CatanCard> getPLayerDevCards(int playerID) {
+        return playerDevCards[playerID];
     }
 
     public void updateLargestArmy(CatanParameters params) {
@@ -277,16 +243,8 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
         return scores;
     }
 
-    public int[] getExchangeRates(int playerID) {
+    public HashMap<CatanParameters.Resource, Counter> getExchangeRates(int playerID) {
         return exchangeRates[playerID];
-    }
-
-    public void setBoughtDevCard(Card card) {
-        this.boughtDevCard = card;
-    }
-
-    public Card getBoughtDevCard() {
-        return boughtDevCard;
     }
 
     public int getRoadDistance(int x, int y, int edge) {
@@ -427,97 +385,30 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
     }
 
     /* checks if given resources cover the price or not */
-    public static boolean checkCost(int[] resources, int[] price) {
-        for (int i = 0; i < resources.length; i++) {
-            if (resources[i] - price[i] < 0) return false;
+    public boolean checkCost(HashMap<CatanParameters.Resource, Integer> cost, int playerId) {
+        for (Map.Entry<CatanParameters.Resource, Integer> e: cost.entrySet()) {
+            if (playerResources[playerId].get(e.getKey()).getValue() < cost.get(e.getKey())) return false;
         }
         return true;
     }
 
     /**
      * Swaps cards between players
-     *
-     * @param gs
-     * @param playerID
-     * @param otherPlayerID
-     * @param playerResourcesToTrade
-     * @param otherPlayerResourcesToTrade
      * @return
      */
-    public static boolean swapResources(CatanGameState gs, int playerID, int otherPlayerID, int[] playerResourcesToTrade, int[] otherPlayerResourcesToTrade) {
-        int[] playerResourcesToTradeCopy = playerResourcesToTrade.clone();
-        int[] otherPlayerResourcesToTradeCopy = otherPlayerResourcesToTrade.clone();
-        List<Card> playerHand = ((Deck<Card>) gs.getComponent(playerHandHash, playerID)).getComponents();
-        List<Card> otherPlayerHand = ((Deck<Card>) gs.getComponent(playerHandHash, otherPlayerID)).getComponents();
-        ArrayList<Card> cardsToGiveToPlayer = new ArrayList<>();
-        ArrayList<Card> cardsToGiveToOtherPlayer = new ArrayList<>();
-
-        for (Card card : playerHand) {
-            int index = CatanParameters.Resources.valueOf(card.getProperty(CatanConstants.cardType).toString()).ordinal();
-            if (playerResourcesToTradeCopy[index] > 0) {
-                cardsToGiveToOtherPlayer.add(card);
-                playerResourcesToTradeCopy[index] -= 1;
-            }
+    public boolean swapResources(int fromPlayer, int toPlayer, HashMap<CatanParameters.Resource, Integer> resourcesToTrade) {
+        for (Map.Entry<CatanParameters.Resource, Integer> e: resourcesToTrade.entrySet()) {
+            playerResources[fromPlayer].get(e.getKey()).decrement(e.getValue());
+            playerResources[toPlayer].get(e.getKey()).increment(e.getValue());
         }
-
-        for (Card card : otherPlayerHand) {
-            int index = CatanParameters.Resources.valueOf(card.getProperty(CatanConstants.cardType).toString()).ordinal();
-            if (otherPlayerResourcesToTradeCopy[index] > 0) {
-                cardsToGiveToPlayer.add(card);
-                otherPlayerResourcesToTradeCopy[index] -= 1;
-            }
-        }
-
-        for (int i = 0; i < playerResourcesToTradeCopy.length; i++) {
-            if (playerResourcesToTradeCopy[i] > 0) {
-                throw new AssertionError("Player does not have enough resources in hand");
-            }
-            if (otherPlayerResourcesToTradeCopy[i] > 0) {
-                throw new AssertionError("Other player does not have enough resources in hand");
-            }
-        }
-
-        for (int i = 0; i < cardsToGiveToOtherPlayer.size(); i++) {
-            Card card = cardsToGiveToOtherPlayer.get(i);
-            playerHand.remove(card);
-            otherPlayerHand.add(card);
-        }
-        for (int i = 0; i < cardsToGiveToPlayer.size(); i++) {
-            Card card = cardsToGiveToPlayer.get(i);
-            otherPlayerHand.remove(card);
-            playerHand.add(card);
-        }
-
         return true;
     }
 
     /* Takes the resource cards specified in the cost array from the current player, returns true if successful */
-    public static boolean spendResources(CatanGameState gs, int[] cost) {
-        int[] costCopy = cost.clone();
-        List<Card> playerHand = ((Deck<Card>) gs.getComponentActingPlayer(playerHandHash)).getComponents();
-        ArrayList<Card> cardsToReturn = new ArrayList<>();
-        // reduce entries in cost until all of them are 0
-        for (int i = 0; i < playerHand.size(); i++) {
-            Card card = playerHand.get(i);
-            int index = CatanParameters.Resources.valueOf(card.getProperty(CatanConstants.cardType).toString()).ordinal();
-            if (costCopy[index] > 0) {
-                cardsToReturn.add(card);
-                costCopy[index] -= 1;
-            }
-        }
-        // if we got all 0s -> return true; remove them from player and put them back to resourceDeck
-        for (int i = 0; i < costCopy.length; i++) {
-            if (costCopy[i] > 0) {
-                if (gs.getCoreGameParameters().verbose)
-                    System.out.println("Player does not have enough resources in hand");
-                return false;
-            }
-        }
-
-        for (int i = 0; i < cardsToReturn.size(); i++) {
-            Card card = cardsToReturn.get(i);
-            ((Deck<Card>) gs.getComponentActingPlayer(playerHandHash)).remove(card);
-            ((Deck<Card>) gs.getComponent(resourceDeckHash)).add(card);
+    public boolean spendResourcesIfPossible(HashMap<CatanParameters.Resource, Integer> cost, int playerId) {
+        if (!checkCost(cost, playerId)) return false;
+        for (Map.Entry<CatanParameters.Resource, Integer> e: cost.entrySet()) {
+            playerResources[playerId].get(e.getKey()).decrement(e.getValue());
         }
         return true;
     }
@@ -527,9 +418,7 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
         CatanGameState copy = new CatanGameState(getGameParameters(), getNPlayers());
         copy.gamePhase = gamePhase;
         copy.board = copyBoard();
-        copy.boughtDevCard = boughtDevCard == null ? null : boughtDevCard.copy();
         copy.catanGraph = catanGraph.copy();
-        copy.areas = copyAreas();
         if (playerId != -1) {
             copy.shuffleDevelopmentCards(playerId);
         }
@@ -538,7 +427,7 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
         copy.playerResults = playerResults.clone();
         copy.scores = scores.clone();
         copy.knights = knights.clone();
-        copy.exchangeRates = new int[getNPlayers()][CatanParameters.Resources.values().length];
+        copy.exchangeRates = new int[getNPlayers()][CatanParameters.Resource.values().length];
         for (int i = 0; i < exchangeRates.length; i++) {
             copy.exchangeRates[i] = exchangeRates[i].clone();
         }
@@ -570,52 +459,31 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
         return scores[playerId];
     }
 
-    private HashMap<Integer, Area> copyAreas() {
-        HashMap<Integer, Area> copy = new HashMap<>();
-        for (int key : areas.keySet()) {
-            Area a = areas.get(key);
-            if (key != -1) {
-                List<Component> oldComponents = areas.get(key).getComponents();
-                // TODO: Partial Observability of Resource cards is not currently supported
-                // Most Resource cards are countable - except as a result of the Steal action
-                // (And, depending on one's interpretation, of Discard.)
-                for (Component comp : oldComponents) {
-                    a.putComponent(comp.copy());
-                }
-            }
-            copy.put(key, a.copy());
-        }
-        return copy;
-    }
-
     private void shuffleDevelopmentCards(int playerId) {
-        Deck<Card> developmentDeck = (Deck<Card>) getComponent(developmentDeckHash, -1);
-        int startingCardsInDeck = developmentDeck.getSize();
-        if (getCurrentPlayer() != playerId && boughtDevCard != null) {
-            developmentDeck.add(boughtDevCard);
-        }
+        int[] nCards = new int[nPlayers];
         for (int p = 0; p < getNPlayers(); p++) {
             if (p == playerId)
                 continue;
-            developmentDeck.add((Deck<Card>) getComponent(developmentDeckHash, p));
+            nCards[p] = playerDevCards[p].getSize();
+            for (CatanCard c: playerDevCards[p].getComponents()) {
+                devCards.add(c);
+            }
+            playerDevCards[p].clear();
         }
-        developmentDeck.shuffle(rnd);
-        if (getCurrentPlayer() != playerId && boughtDevCard != null) {
-            boughtDevCard = developmentDeck.draw();
-        }
+        devCards.shuffle(rnd);
         for (int p = 0; p < getNPlayers(); p++) {
             if (p == playerId)
                 continue;
-            Deck<Card> playerDevDeck = (Deck<Card>) getComponent(developmentDeckHash, p);
-            int cardsToDraw = playerDevDeck.getSize();
-            playerDevDeck.clear();
-            for (int i = 0; i < cardsToDraw; i++)
-                playerDevDeck.add(developmentDeck.draw());
+            for (int i = 0; i < nCards[p]; i++) {
+                CatanCard c = devCards.draw();
+                playerDevCards[p].add(c);
+            }
         }
-        if (developmentDeck.getSize() != startingCardsInDeck)
-            throw new AssertionError("We should have the same number of cards before as after");
     }
 
+    public HashMap<CatanParameters.Resource, Counter> getResourcePool() {
+        return resourcePool;
+    }
 
     public boolean checkRoadPlacement(int roadId, CatanTile tile, int player) {
         /*
@@ -699,14 +567,8 @@ public class CatanGameState extends AbstractGameStateWithTurnOrder {
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         return new ArrayList<Integer>() {{
-            Deck<Card> resourceDeck = (Deck<Card>) getComponent(resourceDeckHash);
-            Deck<Card> devDeck = (Deck<Card>) getComponent(developmentDeckHash);
-            add(resourceDeck.getComponentID());
-            add(devDeck.getComponentID());
-            for (Component c : resourceDeck.getComponents()) {
-                add(c.getComponentID());
-            }
-            for (Component c : devDeck.getComponents()) {
+            add(devCards.getComponentID());
+            for (Component c : devCards.getComponents()) {
                 add(c.getComponentID());
             }
         }};

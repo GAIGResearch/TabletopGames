@@ -7,8 +7,7 @@ import core.components.Deck;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
-import games.dominion.DominionConstants;
-import games.dominion.cards.DominionCard;
+import games.catan.components.CatanCard;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,10 +18,10 @@ import static games.catan.CatanConstants.cardType;
 import static games.catan.CatanConstants.resourceDeckHash;
 
 public class YearOfPlenty extends AbstractAction {
-    public final CatanParameters.Resources resource1;
-    public final CatanParameters.Resources resource2;
+    public final CatanParameters.Resource resource1;
+    public final CatanParameters.Resource resource2;
 
-    public YearOfPlenty(CatanParameters.Resources resource1, CatanParameters.Resources resource2) {
+    public YearOfPlenty(CatanParameters.Resource resource1, CatanParameters.Resource resource2) {
         this.resource1 = resource1;
         this.resource2 = resource2;
     }
@@ -36,7 +35,7 @@ public class YearOfPlenty extends AbstractAction {
         Deck<Card> developmentDiscardDeck = (Deck<Card>) cgs.getComponent(CatanConstants.developmentDiscardDeck);
 
         Optional<Card> yearOfPlenty = playerDevDeck.stream()
-                .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(CatanParameters.CardTypes.YEAR_OF_PLENTY.toString()))
+                .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(CatanCard.CardType.YEAR_OF_PLENTY.toString()))
                 .findFirst();
         if(yearOfPlenty.isPresent()){
             Card yearOfPlentyCard = yearOfPlenty.get();

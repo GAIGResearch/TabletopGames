@@ -4,14 +4,14 @@ import games.catan.CatanParameters;
 
 import java.util.Objects;
 
-import static games.catan.CatanParameters.HarborTypes.*;
+import static games.catan.CatanParameters.HarborType.*;
 
 public class Settlement implements Copiable {
     private int type; // settlement = 1, city = 2
     private int owner;
     private static int counter = 0;
     private int id;
-    private CatanParameters.HarborTypes harbour = NONE;
+    private CatanParameters.HarborType harbour = NONE;
 
     public Settlement(int owner){
         this.owner = owner;
@@ -48,11 +48,11 @@ public class Settlement implements Copiable {
         return id;
     }
 
-    public CatanParameters.HarborTypes getHarbour() {
+    public CatanParameters.HarborType getHarbour() {
         return harbour;
     }
 
-    public void setHarbour(CatanParameters.HarborTypes harbour) {
+    public void setHarbour(CatanParameters.HarborType harbour) {
         this.harbour = harbour;
     }
 
