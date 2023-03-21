@@ -15,8 +15,8 @@
   },
   "actionSpaceStructure" : "Flat",
   "actionSpaceContext": "Independent",
-  "expertIterationStateFeatures": "games.loveletter.LLStateFeatures",
+  "expertIterationStateFeatures": "games.stratego.StrategoStateFeatures",
   "maintainMasterState": true,
   "gatherTreeRecorder": true,
-  "treeRecorderFolder": "test_01"
+  "treeRecorderFolder": "test_03"
 }

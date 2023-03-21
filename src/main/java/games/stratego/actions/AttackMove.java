@@ -111,8 +111,20 @@ public class AttackMove extends Move {
     public String getString(AbstractGameState gameState) {
         Piece movedPiece = getPiece((StrategoGameState) gameState);
         Piece attackedPiece = getAttackedPiece((StrategoGameState) gameState);
-        return "Attack (" + movedPiece.getPiecePosition().toString() + " [" + movedPiece.getPieceRank() + "]" + " -> " +
-                attackedPiece.getPiecePosition().toString() + " [" + attackedPiece.getPieceRank() + "])";
+        if (attackedPosition != null) {
+            return "Attack " + position.toString() + " [" + movedPiece.getPieceRank() + "]" + " -> " +
+                    attackedPosition + " [" + attackedPiece.getPieceRank() + "]";
+        }
+        return "Attack (" + movedPieceID + " [" + movedPiece.getPieceRank() + "]" + " -> " +
+                attackedPieceID + " [" + attackedPiece.getPieceRank() + "])";
+    }
+
+    @Override
+    public String toString() {
+        if (attackedPosition != null) {
+            return "Attack " + position.toString() + " -> " + attackedPosition;
+        }
+        return "Attack " + movedPieceID + " -> " + attackedPieceID;
     }
 
     @Override

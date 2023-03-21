@@ -1017,7 +1017,7 @@ public class SingleTreeNode {
 
         if (bestAction == null) {
             if (nVisits == 1) {
-                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
+//                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
                 bestAction = children.keySet().stream().findFirst().orElseThrow(() -> new AssertionError("No children"));
             } else
                 throw new AssertionError("Unexpected - no selection made.");

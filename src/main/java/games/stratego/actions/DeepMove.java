@@ -102,6 +102,8 @@ public class DeepMove extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return "DeepMove(" + pieceID + ")";
+        if (pieceID != -1)
+            return "DeepMove (" + pieceID + ")";
+        else return "DeepMove from (" + position + ")";
     }
 }

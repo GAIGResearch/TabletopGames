@@ -6,36 +6,36 @@ import games.stratego.StrategoGameState;
 import games.stratego.StrategoParams;
 import games.stratego.components.Piece;
 import utilities.Distance;
+import utilities.Pair;
 import utilities.Vector2D;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 // TODO: can't move back and forth between the same 2 squares in 3 consecutive turns
 public class NormalMove extends Move{
 
     // Dependent
-    public final Vector2D direction;
+    public final Vector2D displacement;
 
     // Independent
     public final Vector2D destinationCoordinate;
 
-    public NormalMove(Vector2D position, Vector2D direction) {
+    public NormalMove(Vector2D position, Vector2D displacement) {
         super(position);
-        this.direction = direction.copy();
+        this.displacement = displacement.copy();
         this.destinationCoordinate = null;
     }
 
     public NormalMove(int movedPieceID, Vector2D destinationCoordinate) {
         super(movedPieceID);
         this.destinationCoordinate = destinationCoordinate.copy();
-        this.direction = null;
+        this.displacement = null;
     }
 
-    private NormalMove(Vector2D position, int movePieceID, Vector2D destinationCoordinate, Vector2D direction) {
+    private NormalMove(Vector2D position, int movePieceID, Vector2D destinationCoordinate, Vector2D displacement) {
         super(position, movePieceID);
         this.destinationCoordinate = destinationCoordinate != null? destinationCoordinate.copy() : null;
-        this.direction = direction != null? direction.copy() : null;
+        this.displacement = displacement != null? displacement.copy() : null;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class NormalMove extends Move{
         if (destinationCoordinate != null) {
             destination = destinationCoordinate;
         } else {
-            destination = position.add(direction);
+            destination = position.add(displacement);
         }
         board.setElement(destination.getX(), destination.getY(), movedPiece);
 
@@ -65,14 +65,24 @@ public class NormalMove extends Move{
 
     @Override
     public NormalMove copy() {
-        return new NormalMove(position, movedPieceID, destinationCoordinate, direction);
+        return new NormalMove(position, movedPieceID, destinationCoordinate, displacement);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        Piece movedPiece = getPiece((StrategoGameState) gameState);
-        return "Move (" + movedPieceID + ": " + movedPiece.getPiecePosition().toString() + " -> " +
-                destinationCoordinate.toString() + ")";
+        return toString();
+    }
+
+    @Override
+    public String toString() {
+        if (position == null) {
+            return "Move " + movedPieceID + " -> " + destinationCoordinate.toString();
+        } else {
+            Pair<Vector2D.Direction, Integer> direction = Vector2D.Direction.approxVecToDir(displacement);
+            if (direction != null) {
+                return "Move from " + position + " " + direction;
+            } else return "Move from " + position + " " + displacement;
+        }
     }
 
     @Override
@@ -88,12 +98,12 @@ public class NormalMove extends Move{
         if (!(o instanceof NormalMove)) return false;
         if (!super.equals(o)) return false;
         NormalMove that = (NormalMove) o;
-        return Objects.equals(direction, that.direction) && Objects.equals(destinationCoordinate, that.destinationCoordinate);
+        return Objects.equals(displacement, that.displacement) && Objects.equals(destinationCoordinate, that.destinationCoordinate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), direction, destinationCoordinate);
+        return Objects.hash(super.hashCode(), displacement, destinationCoordinate);
     }
 
     @Override
@@ -101,6 +111,6 @@ public class NormalMove extends Move{
         if (destinationCoordinate != null) {
             return destinationCoordinate;
         }
-        return position.add(direction);
+        return position.add(displacement);
     }
 }

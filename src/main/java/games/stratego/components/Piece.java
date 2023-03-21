@@ -79,17 +79,17 @@ public class Piece extends Token {
         }
 
         if (pieceType == PieceType.SCOUT){
-            for (Vector2D dir: Vector2D.Directions4()) {
+            for (Vector2D.Direction dir: Vector2D.Direction.values4()) {
                 Vector2D newPos = position.copy();
-                newPos = newPos.add(dir);
+                newPos = newPos.add(dir.vector2D);
                 if (params.isTileValid(newPos.getX(), newPos.getY())) {
-                    addMove(board, params, moves, newPos, dir, actionSpace);
+                    addMove(board, params, moves, newPos, dir.vector2D, actionSpace);
                 }
             }
         } else {
-            for(Vector2D dir: Vector2D.Directions4()){  // horizontal or vertical
+            for(Vector2D.Direction dir: Vector2D.Direction.values4()){  // horizontal or vertical
                 for (int j = 1; j <= params.moveSpeed; j++) {  // according to movement speed
-                    Vector2D dirCustom = dir.mult(j);
+                    Vector2D dirCustom = dir.vector2D.mult(j);
                     Vector2D newPos = position.copy();
                     newPos = newPos.add(dirCustom);
 
@@ -102,7 +102,8 @@ public class Piece extends Token {
         return moves;
     }
 
-    private boolean addMove(GridBoard<Piece> board, StrategoParams params, List<AbstractAction> moves, Vector2D newPos, Vector2D dir, ActionSpace actionSpace) {
+    private boolean addMove(GridBoard<Piece> board, StrategoParams params, List<AbstractAction> moves, Vector2D newPos,
+                            Vector2D dir, ActionSpace actionSpace) {
         Piece pieceAtTile = board.getElement(newPos.getX(), newPos.getY());
         if (pieceAtTile == null) {
             if (actionSpace.context == ActionSpace.Context.Dependent) {

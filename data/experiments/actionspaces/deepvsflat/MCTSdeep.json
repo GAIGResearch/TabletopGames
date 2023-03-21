@@ -10,6 +10,13 @@
   "budgetType" : "BUDGET_ITERATIONS",
   "budget" : 100,
   "breakMS" : 0,
+  "heuristic" : {
+    "class" : "players.heuristics.ScoreHeuristic"
+  },
   "actionSpaceStructure" : "Deep",
-  "actionSpaceContext": "Independent"
+  "actionSpaceContext": "Independent",
+  "expertIterationStateFeatures": "games.loveletter.LLStateFeatures",
+  "maintainMasterState": true,
+  "gatherTreeRecorder": true,
+  "treeRecorderFolder": "test_01"
 }
