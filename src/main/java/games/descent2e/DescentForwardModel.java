@@ -287,6 +287,14 @@ public class DescentForwardModel extends AbstractForwardModel {
             actions.addAll(moveActions(dgs, actingFigure));
         }
 
+        // If a hero has fatigue to spare, add move actions that cost fatigue
+        if (actingFigure instanceof Hero) {
+            if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
+                GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
+                if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
+            }
+        }
+
         // Add actions that cost action points
         if (!actingFigure.getNActionsExecuted().isMaximum()) {
             // Get movement points action

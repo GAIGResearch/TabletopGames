@@ -5,20 +5,20 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
 
-public class GetMovementPoints extends DescentAction {
-    public GetMovementPoints() {
+public class GetFatiguedMovementPoints extends DescentAction {
+    public GetFatiguedMovementPoints() {
         super(Triggers.ACTION_POINT_SPEND);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Get Movement Points";
+        return "Get Fatigued Movement Points";
     }
 
     @Override
     public boolean execute(DescentGameState gs) {
-        gs.getActingFigure().setAttributeToMax(Figure.Attribute.MovePoints);
-        gs.getActingFigure().getNActionsExecuted().increment();
+        gs.getActingFigure().getAttribute(Figure.Attribute.MovePoints).increment();
+        gs.getActingFigure().getAttribute(Figure.Attribute.Fatigue).increment();
         return true;
     }
 
@@ -30,7 +30,6 @@ public class GetMovementPoints extends DescentAction {
     @Override
     public boolean canExecute(DescentGameState dgs) {
         Figure f = dgs.getActingFigure();
-
-        return !f.hasCondition(DescentTypes.DescentCondition.Immobilize) && !f.getNActionsExecuted().isMaximum() && f.getAttribute(Figure.Attribute.MovePoints).isMinimum();
+        return !f.hasCondition(DescentTypes.DescentCondition.Immobilize) && !f.getAttribute(Figure.Attribute.Fatigue).isMaximum();
     }
 }
