@@ -17,9 +17,4 @@ public class DescentConstants {
     public final static int abilityHash = Hash.GetInstance().hash("ability");
     public final static int setupHash = Hash.GetInstance().hash("setup");
 
-    // TODO: move to DescentTypes
-    public enum AttackType {
-        NONE, MELEE, RANGED, BLAST;
-    }
-
 }

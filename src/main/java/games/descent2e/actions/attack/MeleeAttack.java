@@ -52,8 +52,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     final int attackingFigure;
     int attackingPlayer;
+    String attackerName;
     final int defendingFigure;
     int defendingPlayer;
+    String defenderName;
     AttackPhase phase = NOT_STARTED;
     int interruptPlayer;
     int surgesToSpend;
@@ -272,7 +274,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        attackerName = gameState.getComponentById(attackingFigure).getComponentName();
+        defenderName = gameState.getComponentById(defendingFigure).getComponentName();
+        attackerName = attackerName.replace("Hero: ", "");
+        defenderName = defenderName.replace("Hero: ", "");
+        return String.format("Melee Attack by " + attackerName + " on " + defenderName);
+        //return toString();
         // TODO: Extend this to pull in details of card and figures involved
     }
 

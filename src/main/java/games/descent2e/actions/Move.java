@@ -9,6 +9,7 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
 import games.descent2e.components.Monster;
+import org.jetbrains.annotations.NotNull;
 import utilities.Pair;
 import utilities.Utils;
 import utilities.Vector2D;
@@ -205,16 +206,16 @@ public class Move extends AbstractAction {
         Figure f = ((DescentGameState) gameState).getActingFigure();
         List<Vector2D> move = positionsTraveled;
 
-        String movement = "Move: " + getNextDirection(f.getPosition(), move.get(0));
+        String movement = "Move: " + getDirection(f.getPosition(), move.get(0));
         for(int i = 1; i < move.size(); i++) {
-            movement = movement + ", " + getNextDirection(move.get(i-1), move.get(i));
+            movement = movement + ", " + getDirection(move.get(i-1), move.get(i));
         }
 
         movement = movement + (f.getSize().a > 1 || f.getSize().b > 1 ? "; Orientation: " + orientation : "");
         return movement;
     }
 
-    public String getNextDirection(Vector2D currentPosition, Vector2D newPosition) {
+    public String getDirection(Vector2D currentPosition, Vector2D newPosition) {
         // Returns the movement as compass directions instead of coordinates
         String northSouth;
         String eastWest;

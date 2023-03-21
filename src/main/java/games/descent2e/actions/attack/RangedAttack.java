@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.components.Figure;
 import utilities.Distance;
+import utilities.Vector2D;
 
 /**
  *   This works in exactly the same way as a Melee Attack
@@ -20,15 +21,29 @@ public class RangedAttack extends MeleeAttack {
             return true; // due to no damage done
         Figure attacker = (Figure) state.getComponentById(attackingFigure);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
-        // TODO: Chebyshev distance is not actually right, as it does not allow diagonal moves
-        double distance = Distance.chebyshev_distance(attacker.getPosition(), defender.getPosition());
+        double distance = getDistanceFromFigures(attacker, defender);
         return (state.getAttackDicePool().getRange() + extraRange < distance);
+    }
+
+    public double getDistanceFromFigures(Figure attacker, Figure defender) {
+        // TODO: Chebyshev distance is not actually right, as it does not allow diagonal moves
+        return Distance.chebyshev_distance(attacker.getPosition(), defender.getPosition());
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
-        // TODO: Extend this to pull in details of card and figures involved
+        attackerName = gameState.getComponentById(attackingFigure).getComponentName();
+        defenderName = gameState.getComponentById(defendingFigure).getComponentName();
+        attackerName = attackerName.replace("Hero: ", "");
+        defenderName = defenderName.replace("Hero: ", "");
+
+        Figure attacker = (Figure) gameState.getComponentById(attackingFigure);
+        Figure defender = (Figure) gameState.getComponentById(defendingFigure);
+        String distance = Double.toString(getDistanceFromFigures(attacker, defender));
+
+        return String.format("Ranged Attack by " + attackerName + " on " + defenderName + " (Range: " + distance + ")");
+        //return toString();
+        // TODO: Extend this to pull in details of card and figures involved, including distance
     }
 
     @Override
