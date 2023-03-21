@@ -12,7 +12,7 @@ public class GetFatiguedMovementPoints extends DescentAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Get Fatigued Movement Points";
+        return "Spent 1 Stamina For 1 Movement Point";
     }
 
     @Override

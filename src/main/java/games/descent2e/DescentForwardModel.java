@@ -218,7 +218,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
         // TODO: may still be able to play cards/skills/free effects
         // Turn ends for figure if they executed the number of actions available and have no more movement points available
-        if (!(action instanceof EndTurn) && actingFigure.getNActionsExecuted().isMaximum() && actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum()) {
+        if (!(action instanceof EndTurn) && actingFigure.getNActionsExecuted().isMaximum() && actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum() && actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
             dgs.getTurnOrder().endPlayerTurn(dgs);
         }
 
@@ -287,7 +287,8 @@ public class DescentForwardModel extends AbstractForwardModel {
             actions.addAll(moveActions(dgs, actingFigure));
         }
 
-        // If a hero has fatigue to spare, add move actions that cost fatigue
+        // TODO: stamina move, not an "action", but same rules for move apply [DONE - Toby]
+        // If a hero has stamina to spare, add move actions that cost fatigue
         if (actingFigure instanceof Hero) {
             if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
                 GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
@@ -318,7 +319,7 @@ public class DescentForwardModel extends AbstractForwardModel {
 
             // - Search
             if (actingFigure instanceof Hero) {
-                // Only heroes can search for adjacent Search tokens (or ones they're sitting on top of
+                // Only heroes can search for adjacent Search tokens (or ones they're sitting on top of)
                 Vector2D loc = actingFigure.getPosition();
                 GridBoard board = dgs.getMasterBoard();
                 List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
@@ -346,7 +347,6 @@ public class DescentForwardModel extends AbstractForwardModel {
             }
         }
 
-        // TODO: stamina move, not an "action", but same rules for move apply
         // TODO: exhaust a card for an action/modifier/effect "free" action
 
         return actions;
