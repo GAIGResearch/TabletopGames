@@ -18,5 +18,9 @@
 	},
 	"opponentHeuristic" : {
 		"class" : "players.heuristics.ScoreHeuristic"
-	}
+	},
+	"expertIterationStateFeatures": "games.connect4.Connect4StateFeatures",
+	"maintainMasterState": true,
+	"gatherTreeRecorder": true,
+	"treeRecorderFolder": "test_01"
 }
