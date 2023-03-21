@@ -203,7 +203,48 @@ public class Move extends AbstractAction {
     @Override
     public String getString(AbstractGameState gameState) {
         Figure f = ((DescentGameState) gameState).getActingFigure();
-        return "Move to " + positionsTraveled.toString() + (f.getSize().a > 1 || f.getSize().b > 1 ? " orientation:" + orientation : "");
+        List<Vector2D> move = positionsTraveled;
+
+        String movement = "Move: " + getNextDirection(f.getPosition(), move.get(0));
+        for(int i = 1; i < move.size(); i++) {
+            movement = movement + ", " + getNextDirection(move.get(i-1), move.get(i));
+        }
+
+        movement = movement + (f.getSize().a > 1 || f.getSize().b > 1 ? "; Orientation: " + orientation : "");
+        return movement;
+    }
+
+    public String getNextDirection(Vector2D currentPosition, Vector2D newPosition) {
+        // Returns the movement as compass directions instead of coordinates
+        String northSouth;
+        String eastWest;
+        int xDif = currentPosition.getX() - newPosition.getX();
+        int yDif = currentPosition.getY() - newPosition.getY();
+
+        switch (yDif) {
+            case -1:
+                northSouth = "S";
+                break;
+            case 1:
+                northSouth = "N";
+                break;
+            default:
+                northSouth = "";
+                break;
+        }
+
+        switch (xDif) {
+            case -1:
+                eastWest = "E";
+                break;
+            case 1:
+                eastWest = "W";
+                break;
+            default:
+                eastWest = "";
+                break;
+        }
+        return northSouth + eastWest;
     }
 
     public List<Vector2D> getPositionsTraveled() {
