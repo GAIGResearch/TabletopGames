@@ -245,7 +245,11 @@ public class Move extends AbstractAction {
                 eastWest = "";
                 break;
         }
-        return northSouth + eastWest;
+        String direction = northSouth + eastWest;
+        if (direction.isEmpty()) {
+            direction = "Nowhere";
+        }
+        return direction;
     }
 
     public List<Vector2D> getPositionsTraveled() {

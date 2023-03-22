@@ -217,8 +217,19 @@ public class DescentForwardModel extends AbstractForwardModel {
         if (checkEndOfGame(dgs)) return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
 
         // TODO: may still be able to play cards/skills/free effects
-        // Turn ends for figure if they executed the number of actions available and have no more movement points available
-        if (!(action instanceof EndTurn) && actingFigure.getNActionsExecuted().isMaximum() && actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum() && actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
+        // Turn ends for figure if they executed the number of actions available,
+        Boolean noMoreActions = actingFigure.getNActionsExecuted().isMaximum();
+        // have no more movement points available,
+        Boolean noMoreMovement = actingFigure.getAttribute(Figure.Attribute.MovePoints).isMinimum();
+        // and, for Heroes only, cannot spend any more Fatigue for movement points
+        Boolean noMoreFatigueMovement = true;
+        if (actingFigure instanceof Hero) {
+            if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
+                noMoreFatigueMovement = false;
+            }
+        }
+
+        if (!(action instanceof EndTurn) && noMoreActions && noMoreMovement && noMoreFatigueMovement) {
             dgs.getTurnOrder().endPlayerTurn(dgs);
         }
 
