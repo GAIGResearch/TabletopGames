@@ -5,6 +5,7 @@ import core.actions.AbstractAction;
 import core.components.Counter;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
+import games.catan.components.Building;
 import games.catan.components.CatanTile;
 
 import java.util.HashMap;
@@ -31,29 +32,29 @@ public class BuildSettlement extends AbstractAction {
         CatanTile[][] board = cgs.getBoard();
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
 
-        if (board[x][y].getSettlements()[vertex].getOwnerId() == -1) {
-            Counter c = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Settlement);
-            if (c.isMaximum()){
-                throw new AssertionError("No more settlements to build for player " + gs.getCurrentPlayer());
-            }
-            c.increment();
-            // take resources after set up
-            if (!free){
+        Building settlement = board[x][y].getSettlements()[vertex];
+        if (settlement != null && settlement.getOwnerId() == -1) {
+            if (!free) {
                 if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.Settlement), playerID)) {
                     throw new AssertionError("Player " + gs.getCurrentPlayer() + " cannot afford this settlement");
                 }
             }
+
+            Counter settleTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Settlement);
+            if (settleTokens.isMaximum()){
+                throw new AssertionError("No more settlements to build for player " + gs.getCurrentPlayer());
+            }
+            settleTokens.increment();
+
             board[x][y].addSettlement(vertex, playerID);
-            if(board[x][y].getSettlements()[vertex].getHarbour()!=null){
+            if(board[x][y].getSettlements()[vertex].getHarbour() != null){
                 HashMap<CatanParameters.Resource, Counter> exchangeRates = cgs.getExchangeRates(playerID);
                 CatanParameters.Resource harbour = board[x][y].getSettlements()[vertex].getHarbour();
                 int newRate = cp.harbour_exchange_rate;
                 if (harbour == CatanParameters.Resource.WILD) newRate = cp.harbour_wild_exchange_rate;
                 exchangeRates.get(harbour).setValue(Math.min(exchangeRates.get(harbour).getValue(), newRate));
             }
-
-            // As player always places a settlement in the setup phase it is awarded the score for it
-            cgs.addScore(playerID, cp.settlement_value);
+            cgs.addScore(playerID, cp.buildingValue.get(Building.Type.Settlement));
 
             return true;
         } else {
@@ -62,7 +63,7 @@ public class BuildSettlement extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public BuildSettlement copy() {
         return this;
     }
 

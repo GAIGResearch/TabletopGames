@@ -2,92 +2,75 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
+import core.components.Counter;
 import core.components.Deck;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanCard;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 
-import static core.CoreConstants.playerHandHash;
-import static games.catan.CatanConstants.cardType;
-import static games.catan.CatanConstants.resourceDeckHash;
-
 public class YearOfPlenty extends AbstractAction {
-    public final CatanParameters.Resource resource1;
-    public final CatanParameters.Resource resource2;
+    public final CatanParameters.Resource[] resources;
+    public final int player;
 
-    public YearOfPlenty(CatanParameters.Resource resource1, CatanParameters.Resource resource2) {
-        this.resource1 = resource1;
-        this.resource2 = resource2;
+    public YearOfPlenty(CatanParameters.Resource[] resources, int player) {
+        this.resources = resources;
+        this.player = player;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState) gs;
-        List<Card> playerResourceDeck = ((Deck<Card>) cgs.getComponentActingPlayer(playerHandHash)).getComponents();
-        List<Card> commonResourceDeck = ((Deck<Card>) cgs.getComponent(resourceDeckHash)).getComponents();
-        Deck<Card> playerDevDeck = (Deck<Card>) cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
-        Deck<Card> developmentDiscardDeck = (Deck<Card>) cgs.getComponent(CatanConstants.developmentDiscardDeck);
+        Deck<CatanCard> playerDevDeck = cgs.getPlayerDevCards(player);
+        HashMap<CatanParameters.Resource, Counter> playerResources = cgs.getPlayerResources(player);
 
-        Optional<Card> yearOfPlenty = playerDevDeck.stream()
-                .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(CatanCard.CardType.YEAR_OF_PLENTY.toString()))
+        Optional<CatanCard> yearOfPlenty = playerDevDeck.stream()
+                .filter(card -> card.cardType == CatanCard.CardType.YEAR_OF_PLENTY)
                 .findFirst();
-        if(yearOfPlenty.isPresent()){
-            Card yearOfPlentyCard = yearOfPlenty.get();
-            Optional<Card> firstResource = commonResourceDeck.stream()
-                    .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(resource1.toString()))
-                    .findFirst();
-            Optional<Card> secondResource = commonResourceDeck.stream()
-                    .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(resource2.toString()))
-                    .findFirst();
-            if(firstResource.isPresent() && secondResource.isPresent()){
-                Card firstResourceCard = firstResource.get();
-                Card secondResourceCard = secondResource.get();
-                // removes dev card and adds it to discard dev deck
-                playerDevDeck.remove(yearOfPlentyCard);
-                developmentDiscardDeck.add(yearOfPlentyCard);
+        if (yearOfPlenty.isPresent()) {
+            CatanCard yearOfPlentyCard = yearOfPlenty.get();
+            playerDevDeck.remove(yearOfPlentyCard);
+            for (CatanParameters.Resource r: resources) {
+                if (cgs.getResourcePool().get(r).getValue() <= 0) {
+                    throw new AssertionError("Cannot use a Year of Plenty Card for resources that are not in deck: " + Arrays.toString(resources));
+                }
+            }
+            for (CatanParameters.Resource r: resources) {
                 // swaps resources from common to player deck
-                playerResourceDeck.add(firstResourceCard);
-                commonResourceDeck.remove(firstResourceCard);
-                playerResourceDeck.add(secondResourceCard);
-                commonResourceDeck.remove(secondResourceCard);
-            } else {
-                commonResourceDeck.stream().forEach(card -> System.out.println(card.getProperty(cardType)));
-                throw new AssertionError("Cannot use a Year of Plenty Card for resources that are not in deck: " + resource1.toString() + " " + resource2.toString());
+                playerResources.get(r).increment();
+                cgs.getResourcePool().get(r).decrement();
             }
         } else {
             throw new AssertionError("Cannot use a Year of Plenty Card that is not in hand.");
         }
-
         return true;
     }
 
     @Override
-    public AbstractAction copy() {return this;}
+    public YearOfPlenty copy() {return this;}
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other instanceof YearOfPlenty) {
-            YearOfPlenty otherAction = (YearOfPlenty) other;
-            return resource1.equals(otherAction.resource1) && resource2.equals(otherAction.resource2);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof YearOfPlenty)) return false;
+        YearOfPlenty that = (YearOfPlenty) o;
+        return player == that.player && Arrays.equals(resources, that.resources);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(resource1, resource2);
+        int result = Objects.hash(player);
+        result = 31 * result + Arrays.hashCode(resources);
+        return result;
     }
 
     @Override
     public String toString() {
-        return "Year of Plenty with resource1 = " + resource1.toString() + " and resource 2 = " + resource2.toString();
+        return player + " Year of Plenty for " + Arrays.toString(resources);
     }
     @Override
     public String getString(AbstractGameState gameState) {

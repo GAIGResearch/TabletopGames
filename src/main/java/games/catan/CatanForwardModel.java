@@ -94,12 +94,12 @@ public class CatanForwardModel extends StandardForwardModel {
         int player = gs.getCurrentPlayer();
 
         if (gs.getGamePhase() == Setup) {
-            if (gs.scores[player] >= params.n_settlements_setup * params.settlement_value) endPlayerTurn(gs);
+            if (gs.scores[player] >= params.n_settlements_setup * params.buildingValue.get(Building.Type.Settlement)) endPlayerTurn(gs);
 
             // Check setup finished
             boolean finishedSetup = true;
             for (int p = 0; p < gs.getNPlayers(); p++) {
-                if (gs.scores[p] < params.n_settlements_setup * params.settlement_value) {
+                if (gs.scores[p] < params.n_settlements_setup * params.buildingValue.get(Building.Type.Settlement)) {
                     finishedSetup = false;
                     break;
                 }
@@ -143,13 +143,14 @@ public class CatanForwardModel extends StandardForwardModel {
             // Dice roll was 7, so we change the phase
             // Check if anyone needs to discard cards
             for (int p = 0; p < gs.getNPlayers(); p++) {
-                if (gs.getNResourcesInHand(p) > cp.max_cards_without_discard) {
-                    new DiscardCardsPhase(p).execute(gs);
+                int nResInHand = gs.getNResourcesInHand(p);
+                if (nResInHand > cp.max_cards_without_discard) {
+                    int r = nResInHand / 2; // remove half of the resources
+//                    new DiscardCardsPhase(p, actionSpace, r).execute(gs); // TODO access action space?
                 }
             }
             gs.setGamePhase(Robber);
         } else {
-            gs.setGamePhase(Trade);
             for (CatanTile[] catanTiles : board) {
                 for (CatanTile tile : catanTiles) {
                     if (tile.getNumber() == rollValue && !tile.hasRobber()) {
@@ -158,8 +159,8 @@ public class CatanForwardModel extends StandardForwardModel {
                             if (settl.getOwnerId() != -1) {
                                 // Move the card from the resource deck and give it to the player
                                 CatanParameters.Resource res = cp.productMapping.get(tile.getTileType());
-                                gs.resourcePool.get(res).decrement(settl.getBuildingType().nProduction);
-                                gs.playerResources.get(gs.getCurrentPlayer()).get(res).increment(settl.getBuildingType().nProduction);
+                                gs.resourcePool.get(res).decrement(cp.nProduction.get(settl.getBuildingType()));
+                                gs.playerResources.get(gs.getCurrentPlayer()).get(res).increment(cp.nProduction.get(settl.getBuildingType()));
                                 if (gs.getCoreGameParameters().verbose) {
                                     System.out.println("With Roll value " + gs.rollValue + " Player " + settl.getOwnerId() + " got " + res);
                                 }
@@ -247,7 +248,7 @@ public class CatanForwardModel extends StandardForwardModel {
                         Road road = new Road(-1);
                         tile.setRoad(edge, road);
 
-                        int[] neighbourCoord = CatanTile.getNeighbourOnEdge(tile, edge);
+                        int[] neighbourCoord = tile.getNeighbourOnEdge(edge);
                         // need to check if neighbour is on the board
                         if (Arrays.stream(neighbourCoord).max().getAsInt() < board.length &&
                                 Arrays.stream(neighbourCoord).min().getAsInt() >= 0) {
@@ -266,7 +267,7 @@ public class CatanForwardModel extends StandardForwardModel {
 
                         // Get the other 2 settlements along that vertex and set both of them separately
                         // has to do it in 2 steps as there could be cases with only 2 tiles on along a vertex
-                        int[][] neighbourCoords = CatanTile.getNeighboursOnVertex(tile, vertex);
+                        int[][] neighbourCoords = tile.getNeighboursOnVertex(vertex);
                         // check neighbour #1
                         if (Arrays.stream(neighbourCoords[0]).max().getAsInt() < board.length &&
                                 Arrays.stream(neighbourCoords[0]).min().getAsInt() >= 0) {
@@ -301,7 +302,7 @@ public class CatanForwardModel extends StandardForwardModel {
                         graph.addEdge(tile.getSettlements()[i], tile.getSettlements()[(i + 1) % HEX_SIDES], roads[i]);
 
                         // last one requires a road and a settlement from a neighbour
-                        int[] otherCoords = CatanTile.getNeighbourOnEdge(tile, i);
+                        int[] otherCoords = tile.getNeighbourOnEdge(i);
                         if (Arrays.stream(otherCoords).max().getAsInt() < board.length &&
                                 Arrays.stream(otherCoords).min().getAsInt() >= 0) {
                             CatanTile neighbour = board[otherCoords[0]][otherCoords[1]];
@@ -332,14 +333,14 @@ public class CatanForwardModel extends StandardForwardModel {
         CatanTile tile = board[radius][radius];
         // move along a certain edge to reach SEA tiles
         for (int i = 0; i < radius; i++) {
-            int[] tileLocation = CatanTile.getNeighbourOnEdge(tile, edge);
+            int[] tileLocation = tile.getNeighbourOnEdge(edge);
             tile = board[tileLocation[0]][tileLocation[1]];
         }
         // go around in a circle
         int counter = 0;
         for (int i = 0; i < HEX_SIDES; i++) {
             for (int j = 0; j < board.length / 2; j++) {
-                int[] tileLocation = CatanTile.getNeighbourOnEdge(tile, i);
+                int[] tileLocation = tile.getNeighbourOnEdge(i);
                 tile = board[tileLocation[0]][tileLocation[1]];
                 if (counter % 2 == 0 && harbors.size() > 0) {
                     tile.addHarbor((i + 2) % HEX_SIDES, harbors.remove(0));

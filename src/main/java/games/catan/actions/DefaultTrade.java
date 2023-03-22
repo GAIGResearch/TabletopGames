@@ -1,17 +1,10 @@
 package games.catan.actions;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.actions.AbstractAction;
-import core.components.Card;
-import core.components.Deck;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
-import games.catan.CatanParameters;
 import games.catan.CatanParameters.Resource;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /* Player may trade any 4 resources of the same type of 1 resource of choice with the bank
@@ -20,57 +13,45 @@ public class DefaultTrade extends AbstractAction {
     public final Resource resourceOffer;
     public final Resource resourceToGet;
     public final int exchangeRate;
+    public final int player;
 
-    public DefaultTrade(Resource resourceOffer, Resource resourceToGet, int exchangeRate){
+    public DefaultTrade(Resource resourceOffer, Resource resourceToGet, int exchangeRate, int player){
         this.resourceOffer = resourceOffer;
         this.resourceToGet = resourceToGet;
         this.exchangeRate = exchangeRate;
+        this.player = player;
     }
-
 
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        CatanParameters params = (CatanParameters) cgs.getGameParameters();
-        Deck<Card> playerResources = (Deck<Card>)cgs.getComponentActingPlayer(CoreConstants.playerHandHash);
-        Deck<Card> resourceDeck = (Deck<Card>)cgs.getComponent(CatanConstants.resourceDeckHash);
-        List<Card> cardsToReturn = new ArrayList<>();
-        for (Card card: playerResources.getComponents()){
-            if (card.getProperty(CatanConstants.cardType).toString().equals(resourceOffer.toString())){
-                cardsToReturn.add(card);
-            }
-        }
-        if (cardsToReturn.size() < exchangeRate) throw new AssertionError("Player does not have enough cards for this trade");
-        for (int i = 0; i < exchangeRate; i++){
-            Card card = cardsToReturn.get(i);
-            playerResources.remove(card);
-            resourceDeck.add(card);
-        }
+        if (cgs.getPlayerResources(player).get(resourceOffer).getValue() < exchangeRate) throw new AssertionError("Player does not have enough cards for this trade");
+        cgs.getPlayerResources(player).get(resourceOffer).decrement(exchangeRate);
+        cgs.getPlayerResources(player).get(resourceToGet).increment();
         return true;
     }
 
     @Override
-    public AbstractAction copy() {
+    public DefaultTrade copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other instanceof DefaultTrade){
-            DefaultTrade otherAction = (DefaultTrade)other;
-            return resourceOffer == otherAction.resourceOffer && resourceToGet == otherAction.resourceToGet && exchangeRate == otherAction.exchangeRate;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DefaultTrade)) return false;
+        DefaultTrade that = (DefaultTrade) o;
+        return exchangeRate == that.exchangeRate && player == that.player && resourceOffer == that.resourceOffer && resourceToGet == that.resourceToGet;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(resourceToGet,resourceOffer,exchangeRate);
+        return Objects.hash(resourceOffer, resourceToGet, exchangeRate, player);
     }
 
     @Override
     public String toString() {
-        return "Trade getting 1 " + resourceToGet + " in exchange for " +  exchangeRate + " " + resourceOffer;
+        return player + " Trades " + exchangeRate + " " + resourceOffer + " for 1 " + resourceToGet;
     }
 
     @Override

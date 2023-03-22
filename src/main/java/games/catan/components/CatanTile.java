@@ -104,20 +104,20 @@ public class CatanTile extends BoardNode {
         this.number = number;
     }
 
-    public boolean setRoad(int edge, Road road) {
+    public void setRoad(int edge, Road road) {
         // if null -> uninitialized
         if (this.roads[edge] == null || this.roads[edge].getOwnerId() == -1) {
             this.roads[edge] = road;
-            return true;
+            return;
         }
         throw new AssertionError("Cannot set road: edge: " + edge);
     }
 
-    public boolean addRoad(int edge, int playerID) {
+    public void addRoad(int edge, int playerID) {
         // if null -> uninitialized
         if (this.roads[edge].getOwnerId() == -1) {
             this.roads[edge].setOwnerId(playerID);
-            return true;
+            return;
         }
         throw new AssertionError("Cannot add road: edge: " + edge);
     }
@@ -126,13 +126,13 @@ public class CatanTile extends BoardNode {
         return roads;
     }
 
-    public boolean addHarbor(int edge, int type) {
+    public void addHarbor(int edge, int type) {
         if (!hasHarbor) {
             this.harbors[edge] = type;
             this.hasHarbor = true;
-            this.settlements[edge].setHarbour(CatanParameters.HarborType.values()[type]);
-            this.settlements[(edge + 1) % 6].setHarbour(CatanParameters.HarborType.values()[type]);
-            return true;
+            this.settlements[edge].setHarbour(CatanParameters.Resource.values()[type]);
+            this.settlements[(edge + 1) % 6].setHarbour(CatanParameters.Resource.values()[type]);
+            return;
         }
         throw new AssertionError("Cannot add harbour: edge: " + edge);
     }
@@ -145,19 +145,19 @@ public class CatanTile extends BoardNode {
         return hasHarbor;
     }
 
-    public boolean addSettlement(int vertex, int playerID) {
+    public void addSettlement(int vertex, int playerID) {
         if (this.settlements[vertex].getOwnerId() == -1) {
             this.settlements[vertex].setOwnerId(playerID);
-            return true;
+            return;
         }
         throw new AssertionError("Cannot add settlement: vertex: " + vertex);
     }
 
-    public boolean setSettlement(int vertex, Building settlement) {
+    public void setSettlement(int vertex, Building settlement) {
         // if null -> uninitialized
         if (this.settlements[vertex] == null || this.settlements[vertex].getOwnerId() == -1) {
             this.settlements[vertex] = settlement;
-            return true;
+            return;
         }
         throw new AssertionError("Cannot set settlement: vertex: " + vertex);
     }
@@ -175,11 +175,10 @@ public class CatanTile extends BoardNode {
     }
 
     public int getDistanceToTile(CatanTile tile) {
-        int[] this_coord = toCube(this);
-        int[] other_coord = toCube(tile);
-        int dist = (Math.abs(this_coord[0] - other_coord[0]) +
+        int[] this_coord = toCube();
+        int[] other_coord = toCube();
+        return (Math.abs(this_coord[0] - other_coord[0]) +
                 Math.abs(this_coord[1] - other_coord[1]) + Math.abs(this_coord[2] - other_coord[2])) / 2;
-        return dist;
     }
 
     public Point getCentreCoords(double radius) {
@@ -219,15 +218,15 @@ public class CatanTile extends BoardNode {
     }
 
     // Static methods
-    public static int[] toCube(CatanTile tile) {
+    public int[] toCube() {
         int[] cube = new int[3];
-        cube[0] = tile.x - (tile.y + (tile.y % 2)) / 2;
-        cube[2] = tile.y;
+        cube[0] = x - (y + (y % 2)) / 2;
+        cube[2] = y;
         cube[1] = -cube[0] - cube[2];
         return cube;
     }
 
-    public static int[] getNeighbourOnEdge(CatanTile tile, int edge) {
+    public int[] getNeighbourOnEdge(int edge) {
         // returns coordinates to the other tile in the given direction
         // Even-r offset mapping; Different layouts require different values
         int[][][] evenr_directions = {
@@ -236,12 +235,12 @@ public class CatanTile extends BoardNode {
                 {{1, 0}, {0, 1}, {-1, 1},
                         {-1, 0}, {-1, -1}, {0, -1}}
         };
-        int parity = tile.y & 1;
+        int parity = y & 1;
         int[] direction = evenr_directions[parity][edge];
-        return new int[]{tile.x + direction[0], tile.y + direction[1]};
+        return new int[]{x + direction[0], y + direction[1]};
     }
 
-    public static int[][] getNeighboursOnVertex(CatanTile tile, int vertex) {
+    public int[][] getNeighboursOnVertex(int vertex) {
         // returns coordinates to the 2 other tiles on a vertex in a clockwise direction
         // Even-r offset mapping; Different layouts require different values
         int[][][] evenr_directions = {
@@ -250,16 +249,15 @@ public class CatanTile extends BoardNode {
                 {{1, 0}, {0, 1}, {-1, 1},
                         {-1, 0}, {-1, -1}, {0, -1}}
         };
-        int parity = tile.y & 1;
+        int parity = y & 1;
 
         // to get the previous element we go back to the previous index (-1) but to go around has to add 6 and check % 6
         // i.e: in case of vertex 0 it should go to 5
         int[] direction_first = evenr_directions[parity][(vertex + 5) % HEX_SIDES];
         int[] direction_second = evenr_directions[parity][vertex];
         // Add both coordinates to the tiles
-        int[][] coords = {{tile.x + direction_first[0], tile.y + direction_first[1]},
-                {tile.x + direction_second[0], tile.y + direction_second[1]}};
-        return coords;
+        return new int[][]{{x + direction_first[0], y + direction_first[1]},
+                {x + direction_second[0], y + direction_second[1]}};
     }
 
     public CatanTile copy() {

@@ -1,52 +1,44 @@
 package games.catan.actions;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.actions.AbstractAction;
-import core.components.Card;
+import core.components.Counter;
 import core.components.Deck;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanCard;
 
 import java.util.*;
 
-import static core.CoreConstants.playerHandHash;
-
 public class Monopoly extends AbstractAction {
     public final CatanParameters.Resource resource;
+    public final int player;
 
-    public Monopoly(CatanParameters.Resource resource){
+    public Monopoly(CatanParameters.Resource resource, int player){
         this.resource = resource;
+        this.player = player;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        List<Card> playerResourceDeck = ((Deck<Card>)cgs.getComponentActingPlayer(playerHandHash)).getComponents();
-        Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
-        Deck<Card> developmentDiscardDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDiscardDeck);
 
-        Optional<Card> monopoly = playerDevDeck.stream()
-                .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(CatanCard.CardType.MONOPOLY.toString()))
+        Deck<CatanCard> playerDevDeck = cgs.getPlayerDevCards(player);
+        Optional<CatanCard> monopoly = playerDevDeck.stream()
+                .filter(card -> card.cardType == CatanCard.CardType.MONOPOLY)
                 .findFirst();
-        if(monopoly.isPresent()){
-            Card monopolyCard = monopoly.get();
+        if (monopoly.isPresent()) {
+            CatanCard monopolyCard = monopoly.get();
             playerDevDeck.remove(monopolyCard);
-            List<Card> targetResourceDeck = new ArrayList<>();
 
+            int nCollected = 0;
             for (int targetPlayerID = 0; targetPlayerID < gs.getNPlayers(); targetPlayerID++){
                 if (targetPlayerID != gs.getCurrentPlayer()) {
-                    targetResourceDeck = ((Deck<Card>)cgs.getComponent(CoreConstants.playerHandHash, targetPlayerID)).getComponents();
-                    for (int j = 0; j < targetResourceDeck.size(); j++){
-                        if (targetResourceDeck.get(j).getProperty(CatanConstants.cardType).toString().equals(resource.toString())){
-                            Card card = targetResourceDeck.remove(j);
-                            playerResourceDeck.add(card);
-                            developmentDiscardDeck.add(card);
-                        }
-                    }
+                    Counter c = cgs.getPlayerResources(targetPlayerID).get(resource);
+                    nCollected += c.getValue();
+                    c.setValue(0);
                 }
             }
+            cgs.getPlayerResources(player).get(resource).increment(nCollected);
         } else {
             throw new AssertionError("Cannot use a Monopoly Card that is not in hand.");
         }
@@ -55,27 +47,26 @@ public class Monopoly extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public Monopoly copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other instanceof Monopoly){
-            Monopoly otherAction = (Monopoly)other;
-            return resource.equals(otherAction.resource);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Monopoly)) return false;
+        Monopoly monopoly = (Monopoly) o;
+        return player == monopoly.player && resource == monopoly.resource;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(resource);
+        return Objects.hash(resource, player);
     }
 
     @Override
     public String toString() {
-        return "Monopoly with resource = " + resource.toString();
+        return player + " Monopoly for " + resource.toString();
     }
     @Override
     public String getString(AbstractGameState gameState) {

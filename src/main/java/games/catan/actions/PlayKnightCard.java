@@ -2,37 +2,37 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
 import core.components.Deck;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
-import games.catan.CatanTurnOrder;
 import games.catan.components.CatanCard;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class PlayKnightCard extends AbstractAction {
+    public final int player;
 
-    public PlayKnightCard(){}
+    public PlayKnightCard(int player){
+        this.player = player;
+    }
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
-        Deck<Card> developmentDiscardDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDiscardDeck);
+        Deck<CatanCard> playerDevDeck = cgs.getPlayerDevCards(player);
 
-        Optional<Card> knight = playerDevDeck.stream()
-                .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(CatanCard.CardType.KNIGHT_CARD.toString()))
+        Optional<CatanCard> knight = playerDevDeck.stream()
+                .filter(card -> card.cardType == CatanCard.CardType.KNIGHT_CARD)
                 .findFirst();
-        if(knight.isPresent()){
-            Card card = knight.get();
+        if (knight.isPresent()){
+            CatanCard card = knight.get();
 
-            cgs.addKnight(cgs.getCurrentPlayer());
+            cgs.addKnight(player);
             cgs.setGamePhase(CatanGameState.CatanGamePhase.Robber);
 
             playerDevDeck.remove(card);
-            developmentDiscardDeck.add(card);
+            cgs.setDevelopmentCardPlayed(true);
 
-            ((CatanTurnOrder)cgs.getTurnOrder()).setDevelopmentCardPlayed(true);
+            // TODO largest army
         } else {
             throw new AssertionError("Cannot use a Knight card that is not in hand.");
         }
@@ -41,26 +41,26 @@ public class PlayKnightCard extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public PlayKnightCard copy() {
         return this;
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other instanceof PlayKnightCard){
-            return true;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PlayKnightCard)) return false;
+        PlayKnightCard that = (PlayKnightCard) o;
+        return player == that.player;
     }
 
     @Override
     public int hashCode() {
-        return 1;
+        return Objects.hash(player);
     }
 
     @Override
     public String toString() {
-        return "Play Knight Card";
+        return player + " plays Knight Card";
     }
     @Override
     public String getString(AbstractGameState gameState) {

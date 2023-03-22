@@ -39,6 +39,10 @@ public class CatanGameState extends AbstractGameState {
         return playerTokens;
     }
 
+    public Deck<CatanCard> getDevCards() {
+        return devCards;
+    }
+
     public boolean noDevelopmentCardPlayed() {
         return !developmentCardPlayed;
     }
@@ -128,6 +132,10 @@ public class CatanGameState extends AbstractGameState {
         this.rollValue = rollValue;
     }
 
+    public int getRollValue() {
+        return rollValue;
+    }
+
     public void setLongestRoadLength(int longestRoadLength) {
         this.longestRoadLength = longestRoadLength;
     }
@@ -179,7 +187,7 @@ public class CatanGameState extends AbstractGameState {
         return playerResources.get(playerID);
     }
 
-    public Deck<CatanCard> getPLayerDevCards(int playerID) {
+    public Deck<CatanCard> getPlayerDevCards(int playerID) {
         return playerDevCards.get(playerID);
     }
 
@@ -433,10 +441,10 @@ public class CatanGameState extends AbstractGameState {
         copy.playerResults = playerResults.clone();
         copy.scores = scores.clone();
         copy.knights = knights.clone();
-        copy.exchangeRates = new int[getNPlayers()][CatanParameters.Resource.values().length];
-        for (int i = 0; i < exchangeRates.length; i++) {
-            copy.exchangeRates[i] = exchangeRates[i].clone();
-        }
+//        copy.exchangeRates = new int[getNPlayers()][CatanParameters.Resource.values().length];
+//        for (int i = 0; i < exchangeRates.length; i++) {
+//            copy.exchangeRates[i] = exchangeRates[i].clone();
+//        }
         copy.victoryPoints = victoryPoints.clone();
         copy.longestRoadLength = longestRoadLength;
         copy.largestArmyOwner = largestArmyOwner;

@@ -2,18 +2,11 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
-import core.components.Deck;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
-
-import static core.CoreConstants.playerHandHash;
-import static games.catan.CatanConstants.resourceDeckHash;
 
 /* Takes in a list of cards to be discarded from the player's hand*/
 public class DiscardCards extends AbstractAction {
@@ -32,28 +25,15 @@ public class DiscardCards extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        Deck<Card> playerResourceDeck = (Deck<Card>)cgs.getComponentActingPlayer(playerHandHash);
-        Deck<Card> commonResourceDeck = (Deck<Card>)cgs.getComponent(resourceDeckHash);
-
         for (CatanParameters.Resource cardType: cardsToDiscard){
-
-            Optional<Card> resource = playerResourceDeck.stream()
-                    .filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(cardType.toString()))
-                    .findFirst();
-            if(resource.isPresent()){
-                Card resourceCard = resource.get();
-                playerResourceDeck.remove(resourceCard);
-                commonResourceDeck.add(resourceCard);
-            } else {
-                throw new AssertionError(String.format("Player cannot dispose of a card they do not possess: %s ",cardType.toString()));
-            }
+            cgs.getPlayerResources(playerID).get(cardType).decrement();
+            cgs.getResourcePool().get(cardType).increment();
         }
-
         return true;
     }
 
     @Override
-    public AbstractAction copy() {
+    public DiscardCards copy() {
         return this;
     }
 
@@ -76,7 +56,7 @@ public class DiscardCards extends AbstractAction {
 
     @Override
     public String toString() {
-        return "DiscardCards cards= " + Arrays.toString(cardsToDiscard);
+        return "Discard Cards: " + Arrays.toString(cardsToDiscard);
     }
 
     @Override

@@ -1,10 +1,7 @@
 package games.catan.actions;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.actions.AbstractAction;
-import core.components.Card;
-import core.components.Deck;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 
@@ -38,7 +35,7 @@ public class StealResource extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public StealResource copy() {
         return this;
     }
 

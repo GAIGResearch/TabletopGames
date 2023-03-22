@@ -33,7 +33,7 @@ public class OfferPlayerTrade extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public OfferPlayerTrade copy() {
         return this;
     }
 

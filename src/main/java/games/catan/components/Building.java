@@ -9,12 +9,8 @@ import static games.catan.CatanConstants.HEX_SIDES;
 
 public class Building extends BoardNode {
     public enum Type {
-        Settlement (1),
-        City (2);
-        public final int nProduction;
-        Type(int nProduction) {
-            this.nProduction = nProduction;
-        }
+        Settlement,
+        City
     }
     private Type type;
     private CatanParameters.Resource harbour;

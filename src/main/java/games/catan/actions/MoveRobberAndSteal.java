@@ -51,12 +51,8 @@ public class MoveRobberAndSteal extends AbstractAction {
         }
     }
 
-    public int[] getXY(){
-        return new int[]{x,y};
-    }
-
     @Override
-    public AbstractAction copy() {
+    public MoveRobberAndSteal copy() {
         return this;
     }
 

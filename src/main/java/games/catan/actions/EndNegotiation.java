@@ -2,8 +2,6 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
-import games.catan.CatanGameState;
 
 public class EndNegotiation extends AbstractAction {
     // This is used as an indication that we are stopping this round of negotiation
@@ -19,7 +17,7 @@ public class EndNegotiation extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public EndNegotiation copy() {
         return this;
     }
 

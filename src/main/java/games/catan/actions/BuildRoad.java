@@ -88,7 +88,7 @@ public class BuildRoad extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public BuildRoad copy() {
         return this;
     }
 

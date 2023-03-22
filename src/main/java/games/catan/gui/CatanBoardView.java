@@ -74,19 +74,17 @@ public class CatanBoardView extends JComponent {
         }
 
         // Draw roads top of board
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
-
-                if (tile.hasHarbor()){
+        for (CatanTile[] catanTiles : board) {
+            for (CatanTile tile : catanTiles) {
+                if (tile.hasHarbor()) {
                     drawHarbor(g, tile);
                 }
 
                 // draw roads
                 Road[] roads = tile.getRoads();
                 for (int i = 0; i < roads.length; i++) {
-                    if (roads[i] != null && roads[i].getOwner() != -1)
-                        drawRoad(g, tile.getEdgeCoords(i, tileRadius), CatanConstants.PlayerColors[roads[i].getOwner()]);
+                    if (roads[i] != null && roads[i].getOwnerId() != -1)
+                        drawRoad(g, tile.getEdgeCoords(i, tileRadius), CatanConstants.PlayerColors[roads[i].getOwnerId()]);
                     // todo useful for showing road IDs on the GUI
 //                        g.setFont(new Font("TimeRoman", Font.PLAIN, 10));
 //                        g.setColor(Color.BLACK);
@@ -105,8 +103,8 @@ public class CatanBoardView extends JComponent {
                 Building[] settlements = tile.getSettlements();
                 for (int i = 0; i < settlements.length; i++){
 //                    g.drawString("" + settlements[i].hashCode(), tile.getVerticesCoords(i).x, tile.getVerticesCoords(i).y);
-                    if (settlements[i] != null && settlements[i].getOwner() != -1) {
-                        drawSettlement(g, tile.getVerticesCoords(i, tileRadius), CatanConstants.PlayerColors[settlements[i].getOwner()], settlements[i].getType());
+                    if (settlements[i] != null && settlements[i].getOwnerId() != -1) {
+                        drawSettlement(g, tile.getVerticesCoords(i, tileRadius), CatanConstants.PlayerColors[settlements[i].getOwnerId()], settlements[i].getBuildingType());
                     }
                     // todo lines below are useful for debugging as they display settlement IDs
 //                    g.setFont(new Font("TimeRoman", Font.PLAIN, 20));
@@ -170,7 +168,7 @@ public class CatanBoardView extends JComponent {
                 g.setStroke(stroke);
 //                AffineTransform original = g.getTransform();
 //                g.rotate(Math.toRadians(-60));
-                String type = CatanParameters.HarborType.values()[harbors[i]].toString();
+                String type = CatanParameters.Resource.values()[harbors[i]].toString();
                 Point centreCoords = tile.getCentreCoords(tileRadius);
                 g.drawString((type + harbors[i]), centreCoords.x, centreCoords.y+10);
 //                g.setTransform(original);
@@ -188,7 +186,7 @@ public class CatanBoardView extends JComponent {
 
     }
 
-    public void drawSettlement(Graphics2D g, Point point, Color color, int city){
+    public void drawSettlement(Graphics2D g, Point point, Color color, Building.Type type){
 
         /* point is the centre of the hexagon
         *  / \  settl.  / \___  city
@@ -201,7 +199,7 @@ public class CatanBoardView extends JComponent {
         settlement.addPoint(point.x - RADIUS/2, point.y-RADIUS/2);
         settlement.addPoint(point.x, point.y - RADIUS);
         settlement.addPoint(point.x + RADIUS/2, point.y-RADIUS/2);
-        if (city == 2){
+        if (type == Building.Type.City){
             settlement.addPoint(point.x + RADIUS, point.y - RADIUS/2);
             settlement.addPoint(point.x + RADIUS, point.y + RADIUS/2);
         }

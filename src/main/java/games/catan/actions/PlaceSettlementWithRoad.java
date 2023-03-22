@@ -26,7 +26,6 @@ public class PlaceSettlementWithRoad extends AbstractAction {
         this.player = player;
     }
 
-
     @Override
     public boolean execute(AbstractGameState gs) {
         BuildSettlement buildSettlement  = new BuildSettlement(x,y,vertex,player,true);
@@ -42,7 +41,7 @@ public class PlaceSettlementWithRoad extends AbstractAction {
                 ArrayList<CatanTile> tiles = new ArrayList<CatanTile>();
                 CatanTile tile = cgs.getBoard()[buildSettlement.x][buildSettlement.y];
                 // next step is to find the tiles around the settlement
-                int[][] neighbourCoords =  CatanTile.getNeighboursOnVertex(tile, buildSettlement.vertex);
+                int[][] neighbourCoords =  tile.getNeighboursOnVertex(buildSettlement.vertex);
                 tiles.add(tile);
                 tiles.add(board[neighbourCoords[0][0]][neighbourCoords[0][1]]);
                 tiles.add(board[neighbourCoords[1][0]][neighbourCoords[1][1]]);

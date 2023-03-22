@@ -2,29 +2,33 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.components.Card;
 import core.components.Deck;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanCard;
 
+import java.util.Objects;
+
 public class BuyDevelopmentCard extends AbstractAction {
+    public final int player;
+
+    public BuyDevelopmentCard(int player) {
+        this.player = player;
+    }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        if (!CatanGameState.spendResourcesIfPossible(cgs, CatanParameters.costMapping.get("developmentCard"))) return false;
+        CatanParameters cp = (CatanParameters) gs.getGameParameters();
+        if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.DevCard), player)) return false;
         // give a dev card to the player
-        Deck<Card> playerDevDeck = (Deck<Card>)cgs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
-        Deck<Card> devDeck = (Deck<Card>)cgs.getComponent(CatanConstants.developmentDeckHash);
-        Card card = devDeck.pick(0);
-        cgs.setBoughtDevCard(card);
+        Deck<CatanCard> playerDevDeck = cgs.getPlayerDevCards(player);
+        Deck<CatanCard> devDeck = cgs.getDevCards();
+        CatanCard card = devDeck.draw();
         if (card != null) {
+            card.turnCardWasBought = cgs.getTurnCounter();
             playerDevDeck.add(card);
-            //  if card is a Victory Point card and player already has 9 points then use it
-            String cardType = card.getProperty(CatanConstants.cardType).toString();
-            if (cardType.equals(CatanCard.CardType.VICTORY_POINT_CARD.toString())){
+            if (card.cardType == CatanCard.CardType.VICTORY_POINT_CARD){
                 cgs.addVictoryPoint(cgs.getCurrentPlayer());
             }
             return true;
@@ -34,22 +38,21 @@ public class BuyDevelopmentCard extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
-        return new BuyDevelopmentCard();
+    public BuyDevelopmentCard copy() {
+        return this;
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other instanceof BuyDevelopmentCard){
-            return true;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BuyDevelopmentCard)) return false;
+        BuyDevelopmentCard that = (BuyDevelopmentCard) o;
+        return player == that.player;
     }
 
     @Override
     public int hashCode() {
-        return 2;
+        return Objects.hash(player);
     }
 
     @Override

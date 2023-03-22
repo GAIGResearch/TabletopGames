@@ -26,39 +26,36 @@ public class BuildCity extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        CatanParameters cp = (CatanParameters) gs.getGameParameters();
         CatanTile[][] board = cgs.getBoard();
+        CatanParameters cp = (CatanParameters) gs.getGameParameters();
 
         Building settlement = board[row][col].getSettlements()[vertex];
-        if (settlement != null) {
-            if (settlement.getOwnerId() == playerID) {
-                Counter cityTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.City);
-                Counter settleTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Settlement);
-                if (cityTokens.isMaximum()){
-                    throw new AssertionError("Player cannot build anymore cities");
-                }
-                cityTokens.increment();
-                // if player builds a city it gets back the settlement token
-                settleTokens.decrement();
-                if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.City), playerID)) {
-                    throw new AssertionError("Player cannot afford city");
-                }
-                settlement.upgrade();
-
-                cgs.addScore(playerID, -cp.settlement_value);
-                cgs.addScore(playerID, cp.city_value);
-
-                return true;
-            } else {
-                throw new AssertionError("Player does not own this settlement");
+        if (settlement != null && settlement.getOwnerId() == playerID) {
+            if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.City), playerID)) {
+                throw new AssertionError("Player cannot afford city");
             }
+
+            Counter cityTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.City);
+            if (cityTokens.isMaximum()){
+                throw new AssertionError("Player cannot build anymore cities");
+            }
+            cityTokens.increment();
+
+            // if player builds a city it gets back the settlement token
+            Counter settleTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Settlement);
+            settleTokens.decrement();
+            settlement.upgrade();
+            cgs.addScore(playerID, cp.buildingValue.get(Building.Type.City));
+            cgs.addScore(playerID, -cp.buildingValue.get(Building.Type.Settlement));
+
+            return true;
         } else {
             throw new AssertionError("No settlement here");
         }
     }
 
     @Override
-    public AbstractAction copy() {
+    public BuildCity copy() {
         return this;
     }
 

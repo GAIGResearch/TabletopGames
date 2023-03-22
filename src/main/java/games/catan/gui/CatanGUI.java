@@ -17,7 +17,6 @@ import java.util.Arrays;
 
 public class CatanGUI extends AbstractGUIManager {
     CatanGameState gs;
-    CatanTile[][] board;
     CatanBoardView boardView;
     PlayerPanel[] playerPanels;
 
@@ -164,13 +163,13 @@ public class CatanGUI extends AbstractGUIManager {
         playerResources = new JLabel("<html>Resources: ");
         playerResources.setText(playerResources.getText() + "<br/>K : [B, L, O, G, W]");
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            playerResources.setText(playerResources.getText() + "<br/>" + i + " : " + Arrays.toString(gs.getPlayerResources(i)));
+            playerResources.setText(playerResources.getText() + "<br/>" + i + " : " + gs.getPlayerResources(i).toString());
         }
         playerResources.setText(playerResources.getText() + "</html>");
 
         devCards = new JLabel("<html>Dev. Cards: ");
         for (int i = 0; i < gameState.getNPlayers(); i++) {
-            devCards.setText(devCards.getText() + "<br/>" + i + " : " + Arrays.toString(gs.getPLayerDevCards(i)));
+            devCards.setText(devCards.getText() + "<br/>" + i + " : " + gs.getPlayerDevCards(i).toString());
         }
         devCards.setText(devCards.getText() + "</html>");
 
@@ -234,11 +233,11 @@ public class CatanGUI extends AbstractGUIManager {
 
             playerResources.setText("<html>Resources: ");
             playerResources.setText(playerResources.getText() + "<br/>K : [B, L, O, G, W]");
-            playerResources.setText(playerResources.getText() + "<br/>" + playerID + " : " + Arrays.toString(gs.getPlayerResources(playerID)));
+            playerResources.setText(playerResources.getText() + "<br/>" + playerID + " : " + gs.getPlayerResources(playerID).toString());
             playerResources.setText(playerResources.getText() + "</html>");
 
             devCards.setText("<html>Dev. Cards: ");
-            devCards.setText(devCards.getText() + "<br/>" + playerID + " : " + Arrays.toString(gs.getPLayerDevCards(playerID)));
+            devCards.setText(devCards.getText() + "<br/>" + playerID + " : " + gs.getPlayerDevCards(playerID).toString());
             devCards.setText(devCards.getText() + "<br/></html>");
 
         }

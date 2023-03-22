@@ -36,7 +36,7 @@ public class MoveRobber extends AbstractAction {
     }
 
     @Override
-    public AbstractAction copy() {
+    public MoveRobber copy() {
         return this;
     }
 

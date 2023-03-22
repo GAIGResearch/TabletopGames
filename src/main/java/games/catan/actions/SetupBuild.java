@@ -43,7 +43,7 @@ public class SetupBuild extends AbstractAction implements IExtendedSequence {
                         Building settlement = tile.getSettlements()[i];
 
                         // where it is legal to place tile then it can be placed from there
-                        if (settlement.getOwner() == -1 &&
+                        if (settlement.getOwnerId() == -1 &&
                                 !(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT)))
                         {
                             if (state.checkSettlementPlacement(settlement, player)) {

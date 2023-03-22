@@ -2,6 +2,7 @@ package games.catan;
 
 import core.AbstractParameters;
 import core.components.Dice;
+import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
 
@@ -25,14 +26,11 @@ public class CatanParameters extends AbstractParameters {
 
     // the minimum number of knights required to take the largest army
     public int min_army_size = 3;
-    public int min_longest_road = 4; // only changes when road_length > min
+    public int min_longest_road = 4;
 
     // points
-    public int settlement_value = 1;
-    public int city_value = 2;
     public int longest_road_value = 2;
     public int largest_army_value = 2;
-    public int victory_point_value = 1;
     public int points_to_win = 10;
     public Dice.Type dieType = Dice.Type.d6;
     public int robber_die_roll = 7;
@@ -40,30 +38,16 @@ public class CatanParameters extends AbstractParameters {
     public int harbour_exchange_rate = 2;
     public int harbour_wild_exchange_rate = 3;
     public int n_settlements_setup = 2;
+    public int nResourcesYoP = 2;
 
-    public CatanParameters(long seed){
-        super(seed);
-        setMaxRounds(100);
-    }
-
-    public CatanParameters(String dataPath, long seed){
-        super(seed);
-        this.dataPath = dataPath;
-    }
-
-    public String getDataPath(){
-        return dataPath;
-    }
-
-    @Override
-    protected AbstractParameters _copy() {
-        return null;
-    }
-
-    @Override
-    protected boolean _equals(Object o) {
-        return false;
-    }
+    public HashMap<Building.Type, Integer> buildingValue = new HashMap<Building.Type, Integer>() {{
+        put(Building.Type.Settlement, 1);
+        put(Building.Type.City, 2);
+    }};
+    public HashMap<Building.Type, Integer> nProduction = new HashMap<Building.Type, Integer>() {{
+        put(Building.Type.Settlement, 1);
+        put(Building.Type.City, 2);
+    }};
 
     HashMap<CatanTile.TileType, Integer> tileCounts = new HashMap<CatanTile.TileType, Integer>() {{
         put(CatanTile.TileType.HILLS, 3);
@@ -164,6 +148,30 @@ public class CatanParameters extends AbstractParameters {
         put(Resource.WOOL, 1);
         put(Resource.WILD, 4);
     }};
+
+    public CatanParameters(long seed){
+        super(seed);
+        setMaxRounds(1000);
+    }
+
+    public CatanParameters(String dataPath, long seed){
+        super(seed);
+        this.dataPath = dataPath;
+    }
+
+    public String getDataPath(){
+        return dataPath;
+    }
+
+    @Override
+    protected AbstractParameters _copy() {
+        return null;
+    }
+
+    @Override
+    protected boolean _equals(Object o) {
+        return false;
+    }
 
     @Override
     public AbstractParameters copy() {

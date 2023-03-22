@@ -9,6 +9,7 @@ import games.catan.actions.*;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
 import games.catan.components.Building;
+import utilities.Utils;
 
 import java.util.*;
 
@@ -40,8 +41,10 @@ public class CatanActionFactory {
                                 if (settlement.getOwnerId() == -1) {
                                     if (gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
                                         if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
-                                            for (int edge = 0; edge < HEX_SIDES; edge++) {
-                                                actions.add(new PlaceSettlementWithRoad(x, y, i, edge, player));
+                                            int[][] coords = tile.getNeighboursOnVertex(i);
+                                            actions.add(new BuildRoad(x, y, i, player, true));
+                                            for (int[] neighbour: coords) {
+                                                actions.add(new PlaceSettlementWithRoad(neighbour[0], neighbour[1], i, (i+2)%HEX_SIDES, player));
                                             }
                                         } else {
                                             actions.add(new DeepPlaceSettlementThenRoad(x, y, i, player));
@@ -221,127 +224,18 @@ public class CatanActionFactory {
         return actions;
     }
 
-    public static List<AbstractAction> getDiscardActions(CatanGameState gs, ActionSpace actionSpace, int player) {
-        final int DISCARD_COMBINATION_LIMIT = 20;
+    public static List<AbstractAction> getDiscardActions(CatanGameState gs, ActionSpace actionSpace, int player, int nToDiscard) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
-
-        int deckSize = gs.getNResourcesInHand(gs.getCurrentPlayer());
-        if (deckSize <= ((CatanParameters) gs.getGameParameters()).max_cards_without_discard) {
-            actions.add(new DoNothing());
-            return actions;
-        } else {
-            int r = deckSize / 2; // remove half of the resources
-            if (deckSize < DISCARD_COMBINATION_LIMIT) {
-                int[] resources = new int[5];  // todo put how many in order
-                List<int[]> combinations = new ArrayList<>();
-                //TODO identify which combinations method is faster
-//                for( int brickIndex = 0; brickIndex <= resources[0]; brickIndex++){
-//                    if(brickIndex == r){
-//                        combinations.add(new int[]{brickIndex, 0, 0, 0, 0});
-//                    } else if(brickIndex > r){
-//                        break;
-//                    }
-//                    for( int lumberIndex = 0; lumberIndex <= resources[1]; lumberIndex++){
-//                        if(brickIndex + lumberIndex == r){
-//                            combinations.add(new int[]{brickIndex, lumberIndex, 0, 0, 0});
-//                        } else if(brickIndex + lumberIndex > r){
-//                            break;
-//                        }
-//                        for( int oreIndex = 0; oreIndex <= resources[2]; oreIndex++){
-//                            if(brickIndex + lumberIndex + oreIndex == r){
-//                                combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, 0, 0});
-//                            } else if(brickIndex + lumberIndex + oreIndex > r){
-//                                break;
-//                            }
-//                            for( int grainIndex = 0; grainIndex <= resources[3]; grainIndex++){
-//                                if(brickIndex + lumberIndex + oreIndex + grainIndex == r){
-//                                    combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, grainIndex, 0});
-//                                } else if(brickIndex + lumberIndex + oreIndex + grainIndex > r){
-//                                    break;
-//                                }
-//                                for( int woolIndex = 0; woolIndex <= resources[4]; woolIndex++){
-//                                    if(brickIndex + lumberIndex + oreIndex + grainIndex + woolIndex == r){
-//                                        combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, grainIndex, woolIndex});
-//                                    } else if(brickIndex + lumberIndex + oreIndex + grainIndex + woolIndex > r){
-//                                        break;
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-
-                for (int brickIndex = resources[0]; brickIndex >= 0; brickIndex--) {
-                    if (brickIndex == r) {
-                        combinations.add(new int[]{brickIndex, 0, 0, 0, 0});
-                    }
-                    if (brickIndex >= r) {
-                        continue;
-                    }
-                    for (int lumberIndex = resources[1]; lumberIndex >= 0; lumberIndex--) {
-                        if (brickIndex + lumberIndex == r) {
-                            combinations.add(new int[]{brickIndex, lumberIndex, 0, 0, 0});
-                        }
-                        if (brickIndex + lumberIndex >= r) {
-                            continue;
-                        }
-                        for (int oreIndex = resources[2]; oreIndex >= 0; oreIndex--) {
-                            if (brickIndex + lumberIndex + oreIndex == r) {
-                                combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, 0, 0});
-                            }
-                            if (brickIndex + lumberIndex + oreIndex >= r) {
-                                continue;
-                            }
-                            for (int grainIndex = resources[3]; grainIndex >= 0; grainIndex--) {
-                                if (brickIndex + lumberIndex + oreIndex + grainIndex == r) {
-                                    combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, grainIndex, 0});
-                                }
-                                if (brickIndex + lumberIndex + oreIndex + grainIndex >= r) {
-                                    continue;
-                                }
-                                for (int woolIndex = resources[4]; woolIndex >= 0; woolIndex--) {
-                                    if (brickIndex + lumberIndex + oreIndex + grainIndex + woolIndex == r) {
-                                        combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, grainIndex, woolIndex});
-                                    } else if (brickIndex + lumberIndex + oreIndex + grainIndex + woolIndex < r) {
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                CatanParameters.Resource[] values = CatanParameters.Resource.values();
-                for (int[] combination : combinations) {
-                    CatanParameters.Resource[] cardsToDiscard = new CatanParameters.Resource[r];
-                    int counter = 0;
-                    for (int i = 0; i < combination.length; i++) {
-                        for (int k = 0; k < combination[i]; k++) {
-                            cardsToDiscard[counter] = values[i];
-                            counter++;
-                        }
-                    }
-                    actions.add(new DiscardCards(cardsToDiscard, gs.getCurrentPlayer()));
-                }
-            } else {
-                // Current solution to memory issue, random picks cards to discard if player has over DISCARD_COMBINATION_LIMIT
-                Random rnd = new Random();
-                CatanParameters.Resource[] cardsToDiscard = new CatanParameters.Resource[r];
-                int[] combination = new int[r];
-                for (int i = 0; i < combination.length; i++) {
-                    boolean comb_not_set = true;
-                    while (comb_not_set) {
-                        int temp = rnd.nextInt(deckSize);
-                        if (Arrays.stream(combination).sequential().noneMatch(value -> value == temp)) {
-                            combination[i] = temp;
-                            comb_not_set = false;
-                        }
-                    }
-                }
-                for (int i = 0; i < r; i++) {
-                    cardsToDiscard[i] = CatanParameters.Resource.valueOf(playerResourceDeck.get(combination[i]).getProperty(CatanConstants.cardType).toString());
-                }
-                actions.add(new DiscardCards(cardsToDiscard, gs.getCurrentPlayer()));
+        int nResources = gs.getNResourcesInHand(player);
+        int[] resIdx = new int[nResources];
+        for (int i = 0; i < nResources; i++) resIdx[i] = i;
+        List<int[]> combinations = Utils.generateCombinations(resIdx, nResources);
+        for (int[] combination : combinations) {
+            CatanParameters.Resource[] cardsToDiscard = new CatanParameters.Resource[nToDiscard];
+            for (int i = 0; i < nToDiscard; i++) {
+                cardsToDiscard[i] = gs.pickResourceFromHand(player, combination[i]);
             }
+            actions.add(new DiscardCards(cardsToDiscard, player));
         }
         return actions;
     }
@@ -444,7 +338,7 @@ public class CatanActionFactory {
         }
         if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.DevCard), player)
                 && gs.devCards.getSize() > 0) {
-            actions.add(new BuyDevelopmentCard());
+            actions.add(new BuyDevelopmentCard(player));
         }
         return actions;
     }
@@ -471,7 +365,7 @@ public class CatanActionFactory {
                     continue;
                 } else {
                     knightCard = true;
-                    actions.add(new PlayKnightCard());
+                    actions.add(new PlayKnightCard(player));
                 }
             }
             if (c.cardType == CatanCard.CardType.MONOPOLY) {
@@ -480,7 +374,7 @@ public class CatanActionFactory {
                 } else {
                     monopolyCard = true;
                     for (CatanParameters.Resource resource : CatanParameters.Resource.values()) {
-                        actions.add(new Monopoly(resource));
+                        actions.add(new Monopoly(resource, player));
                     }
                 }
             }
@@ -493,13 +387,22 @@ public class CatanActionFactory {
 
                     for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
                         if (gs.resourcePool.get(res).getValue() > 0)
-                            resourcesAvailable.add(res);
+                            for (int i = 0; i < ((CatanParameters)gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
+                                resourcesAvailable.add(res);
+                            }
                     }
 
-                    for (CatanParameters.Resource resource1 : resourcesAvailable) {
-                        for (CatanParameters.Resource resource2 : resourcesAvailable) {
-                            actions.add(new YearOfPlenty(resource1, resource2));
+                    int[] resIdx = new int[resourcesAvailable.size()];
+                    for (int i = 0; i < resourcesAvailable.size(); i++) {
+                        resIdx[i] = i;
+                    }
+                    List<int[]> combinations = Utils.generateCombinations(resIdx, ((CatanParameters)gs.getGameParameters()).nResourcesYoP);
+                    for (int[] combo: combinations) {
+                        CatanParameters.Resource[] resources = new CatanParameters.Resource[combo.length];
+                        for (int i = 0; i < combo.length; i++) {
+                            resources[i] = resourcesAvailable.get(combo[i]);
                         }
+                        actions.add(new YearOfPlenty(resources, player));
                     }
                 }
             }
@@ -540,7 +443,7 @@ public class CatanActionFactory {
                 for (CatanParameters.Resource res2: CatanParameters.Resource.values()) {
                     if (res.getKey() != res2) {
                         // list all possible trades with the bank / harbours
-                        actions.add(new DefaultTrade(res.getKey(), res2, playerExchangeRate.get(res.getKey()).getValue()));
+                        actions.add(new DefaultTrade(res.getKey(), res2, playerExchangeRate.get(res.getKey()).getValue(), player));
                     }
                 }
             }
