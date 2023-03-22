@@ -9,7 +9,7 @@ sns.set_theme()
 from collections import defaultdict, OrderedDict
 
 agent = ["PPO", "PPO_LSTM"]
-games = ["TAG/TicTacToe", "TAG/Stratego", "TAG/Diamant", "TAG/ExplodingKittens"] #, "TAG/LoveLetter"]
+games = ["TAG/Diamant", "TAG/ExplodingKittens", "TAG/LoveLetter"] # "TAG/TicTacToe", "TAG/Stratego",
 opponents = ["random", "osla"]
 n_players = [2, 4]
 for game in games:
@@ -21,7 +21,7 @@ for game in games:
                 continue
             ENTITY = "martinballa" # '<entity>'
             project = "pyTAG"  # '<project>'
-            METRIC_NAME = "charts/episodic_return" # '<metric>'
+            METRIC_NAME = "charts/episodic_return" #"charts/episodic_wins" # '<metric>'
             Y_RANGES = [-1, 1]
             filename = os.path.expanduser(f"~/data/pyTAG/plots/{game}_n_players{n_player}_{opponent}_results.png")
             window = 100
@@ -61,7 +61,7 @@ for game in games:
 
                 # todo update to: scan_history to get all the data
                 # data = run.scan_history(keys=["global_step", "charts/episodic_return"])
-                data = run.history(keys=["global_step", "charts/episodic_return"], samples=5000)
+                data = run.history(keys=["global_step", METRIC_NAME], samples=5000)
                 data["name"] = str(values)
                 summaries.append(data)
 
