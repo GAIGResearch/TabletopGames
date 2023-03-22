@@ -7,7 +7,7 @@ import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
-import games.catan.components.Settlement;
+import games.catan.components.Building;
 
 import java.util.ArrayList;
 
@@ -86,8 +86,8 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
         if(playerCities != 0.0 || playerSettlements != 0.0){
             int settlementCount = 0, cityCount = 0;
             boolean[] harbours = new boolean[6]; // 0: brick, 1: lumber, 2: ore, 3: grain, 4: wool, 5: generic
-            ArrayList<Settlement> settlements = state.getPlayersSettlements(playerId);
-            for (Settlement settlement : settlements) {
+            ArrayList<Building> settlements = state.getPlayersSettlements(playerId);
+            for (Building settlement : settlements) {
                 if(settlement.getType()==1)
                     settlementCount++;
                 else

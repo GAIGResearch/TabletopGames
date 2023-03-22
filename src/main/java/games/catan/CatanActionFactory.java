@@ -3,15 +3,17 @@ package games.catan;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
-import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
 import games.catan.actions.*;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
-import games.catan.components.Settlement;
+import games.catan.components.Building;
 
 import java.util.*;
+
+import static games.catan.CatanConstants.HEX_SIDES;
+import static games.catan.components.Building.Type.Settlement;
 
 public class CatanActionFactory {
     /**
@@ -19,10 +21,8 @@ public class CatanActionFactory {
      *
      * @return - ArrayList, various action types (unique).
      */
-    static List<AbstractAction> getSetupActions(CatanGameState gs, ActionSpace actionSpace) {
-        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
-        int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
-        int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
+    static List<AbstractAction> getSetupActions(CatanGameState gs, ActionSpace actionSpace, int player) {
+        int turnStep = gs.getTurnCounter();
         ArrayList<AbstractAction> actions = new ArrayList<>();
         // find possible settlement locations and propose them as actions
         CatanTile[][] board = gs.getBoard();
@@ -33,20 +33,22 @@ public class CatanActionFactory {
                     // where it is legal to place tile then it can be placed from there
                     if (!(tile.getTileType().equals(CatanTile.TileType.SEA) ||
                             tile.getTileType().equals(CatanTile.TileType.DESERT))) {
-//                            actions.add(new BuildSettlement_v2(settlement, activePlayer));
-//                            actions.add(new BuildSettlement(x, y, i, activePlayer));
-                        if (actionSpace.structure == ActionSpace.Structure.Flat) {
-                            for (int i = 0; i < 6; i++) {
-                                Settlement settlement = tile.getSettlements()[i];
-                                if (settlement.getOwner() == -1) {
+//                        actions.add(new BuildSettlement_v2(settlement, activePlayer));
+//                        actions.add(new BuildSettlement(x, y, i, activePlayer));
+                            for (int i = 0; i < HEX_SIDES; i++) {
+                                Building settlement = tile.getSettlements()[i];
+                                if (settlement.getOwnerId() == -1) {
                                     if (gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
-                                        actions.add(new PlaceSettlementWithRoad(x, y, i, activePlayer));
+                                        if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+                                            for (int edge = 0; edge < HEX_SIDES; edge++) {
+                                                actions.add(new PlaceSettlementWithRoad(x, y, i, edge, player));
+                                            }
+                                        } else {
+                                            actions.add(new DeepPlaceSettlementThenRoad(x, y, i, player));
+                                        }
                                     }
                                 }
                             }
-                        } else {
-
-                        }
                     }
                 }
             }
@@ -60,15 +62,13 @@ public class CatanActionFactory {
      *
      * @return - ArrayList, various action types (unique).
      */
-    static List<AbstractAction> getTradeStageActions(CatanGameState gs) {
-        CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
-
+    static List<AbstractAction> getTradeStageActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         actions.add(new DoNothing());
-        actions.addAll(getTradeActions(gs));
+        actions.addAll(getTradeActions(gs, actionSpace, player));
         actions.addAll(getPlayerTradeOfferActions(gs));
-        if (!cto.isDevelopmentCardPlayed()) {
-            actions.addAll(getDevCardActions(gs));
+        if (gs.noDevelopmentCardPlayed()) {
+            actions.addAll(getDevCardActions(gs, actionSpace, player));
         }
 
         return actions;
@@ -78,7 +78,7 @@ public class CatanActionFactory {
      * Generates PlayerTradeOffers relating to single type trades
      * i.e Lumber for Grain, Brick for Stone
      *
-     * @param gs
+     * @param gs - current state
      * @return - ArrayList, PlayerTradeOffer type (unique).
      */
     static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs) {
@@ -146,44 +146,33 @@ public class CatanActionFactory {
      * This function only generates actions that involve changing the quantities of the offered/requested resources for
      * single resource type trades
      *
-     * @param gs
-     * @return
+     * @param gs - current game state
+     * @return - actions as counter-offer for trade
      */
     static List<AbstractAction> getResponsePlayerTradeOfferActions(CatanGameState gs) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
         if (offeredPlayerTrade.otherPlayerID != gs.getCurrentPlayer())
             throw new AssertionError("We should always be alternating Offer and Counter-Offer");
-        int exchangeRate = ((CatanParameters) gs.getGameParameters()).default_exchange_rate;
-        int[] playerResources = gs.getPlayerResources(gs.getCurrentPlayer());
-        int[] resourcesOffered = offeredPlayerTrade.getResourcesOffered();
-        int[] resourcesRequested = offeredPlayerTrade.getResourcesRequested();
-        int[] resourcesToOffer = new int[5];
-        int[] resourcesToRequest = new int[5];
-        int resourceRequestedIndex = 0;
-        int resourceOfferedIndex = 0;
+        HashMap<CatanParameters.Resource, Counter> playerResources = gs.getPlayerResources(gs.getCurrentPlayer());
+        HashMap<CatanParameters.Resource, Integer> resourcesOffered = offeredPlayerTrade.getResourcesOffered();
+        HashMap<CatanParameters.Resource, Integer> resourcesRequested = offeredPlayerTrade.getResourcesRequested();
 
-        for (int i = 0; i < resourcesOffered.length; i++) { // Sets the index of which resources are involved in the trade
-            if (resourcesOffered[i] > 0) {
-                resourceOfferedIndex = i;
-            }
-            if (resourcesRequested[i] > 0) {
-                resourceRequestedIndex = i;
-            }
-        }
+        CatanParameters.Resource resourceOffered = resourcesOffered.keySet().iterator().next();
+        CatanParameters.Resource resourceRequested = resourcesRequested.keySet().iterator().next();
 
-        int maxRequest = gs.getPlayerResources(offeredPlayerTrade.offeringPlayerID)[resourceOfferedIndex];
+        int maxRequest = gs.getPlayerResources(offeredPlayerTrade.offeringPlayerID).get(resourceRequested).getValue();
         // TODO: Once we have partial observability of player hands, we need to modify this to take account of uncertainty (add new type of UNKNOWN in result)
-        for (int quantityAvailableToOffer = 1; quantityAvailableToOffer < playerResources[resourceRequestedIndex] + 1; quantityAvailableToOffer++) { // loop through the quantity of resources to offer
+        for (int quantityAvailableToOffer = 1; quantityAvailableToOffer < playerResources.get(resourceRequested).getValue() + 1; quantityAvailableToOffer++) { // loop through the quantity of resources to offer
             for (int quantityAvailableToRequest = 1; quantityAvailableToRequest <= maxRequest; quantityAvailableToRequest++) { // loop to generate all possible combinations of offer for the current resource pair
-                if (!(quantityAvailableToOffer == resourcesRequested[resourceRequestedIndex] && quantityAvailableToRequest == resourcesOffered[resourceOfferedIndex])) {
-                    resourcesToOffer[resourceRequestedIndex] = quantityAvailableToOffer;
-                    resourcesToRequest[resourceOfferedIndex] = quantityAvailableToRequest;
-                    if (!(Arrays.equals(resourcesToOffer, resourcesRequested) && Arrays.equals(resourcesToRequest, resourcesOffered))) { // ensures the trade offer is not the same as the existing trade offer
-                        actions.add(new OfferPlayerTrade(resourcesToOffer.clone(), resourcesToRequest.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount() + 1)); // create the action
+                if (!(quantityAvailableToOffer == resourcesRequested.get(resourceRequested) && quantityAvailableToRequest == resourcesOffered.get(resourceOffered))) {
+                    HashMap<CatanParameters.Resource, Integer> resourcesToOffer = new HashMap<>();
+                    HashMap<CatanParameters.Resource, Integer> resourcesToRequest = new HashMap<>();
+                    resourcesToOffer.put(resourceRequested, quantityAvailableToOffer);
+                    resourcesToRequest.put(resourceOffered, quantityAvailableToRequest);
+                    if (!resourcesToOffer.equals(resourcesRequested) && !resourcesToRequest.equals(resourcesOffered)) { // ensures the trade offer is not the same as the existing trade offer
+                        actions.add(new OfferPlayerTrade(resourcesToOffer, resourcesToRequest, offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount() + 1)); // create the action
                     }
-                    Arrays.fill(resourcesToOffer, 0);
-                    Arrays.fill(resourcesToRequest, 0);
                 }
             }
         }
@@ -199,11 +188,11 @@ public class CatanActionFactory {
         for (CatanTile[] catanTiles : board) {
             for (CatanTile tile : catanTiles) {
                 if (tile.hasRobber()) {
-                    Settlement[] settlements = tile.getSettlements();
-                    for (Settlement settlement : settlements) {
-                        if (settlement.getOwner() != -1 && settlement.getOwner() != gs.getCurrentPlayer() && stealingFrom[settlement.getOwner()] == 0) {
-                            stealingFrom[settlement.getOwner()] = 1;
-                            actions.add(new StealResource(settlement.getOwner()));
+                    Building[] settlements = tile.getSettlements();
+                    for (Building settlement : settlements) {
+                        if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer() && stealingFrom[settlement.getOwnerId()] == 0) {
+                            stealingFrom[settlement.getOwnerId()] = 1;
+                            actions.add(new StealResource(settlement.getOwnerId()));
                         }
                     }
                 }
@@ -220,28 +209,23 @@ public class CatanActionFactory {
      *
      * @return - ArrayList, various action types (unique).
      */
-    static List<AbstractAction> getBuildStageActions(CatanGameState gs) {
-        CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
-
+    static List<AbstractAction> getBuildStageActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         actions.add(new DoNothing());
-        actions.addAll(getBuyActions(gs));
+        actions.addAll(getBuyActions(gs, actionSpace, player));
 
-        if (!cto.isDevelopmentCardPlayed()) {
-            actions.addAll(getDevCardActions(gs));
+        if (gs.noDevelopmentCardPlayed()) {
+            actions.addAll(getDevCardActions(gs, actionSpace, player));
         }
 
         return actions;
     }
 
-    static List<AbstractAction> getDiscardActions(CatanGameState gs) {
+    public static List<AbstractAction> getDiscardActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         final int DISCARD_COMBINATION_LIMIT = 20;
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
-        int deckSize = 0;
-        for (Map.Entry<CatanParameters.Resource, Counter> e: gs.playerResources[gs.getCurrentPlayer()].entrySet()) {
-            deckSize += e.getValue().getValue();
-        }
+        int deckSize = gs.getNResourcesInHand(gs.getCurrentPlayer());
         if (deckSize <= ((CatanParameters) gs.getGameParameters()).max_cards_without_discard) {
             actions.add(new DoNothing());
             return actions;
@@ -372,7 +356,7 @@ public class CatanActionFactory {
      * @param dataLength  - length of the original data array
      * @param r           - number of entries to return per array
      */
-    static void getCombination(List<int[]> data, int buffer[], int bufferIndex, int dataIndex, int dataLength, int r) {
+    static void getCombination(List<int[]> data, int[] buffer, int bufferIndex, int dataIndex, int dataLength, int r) {
         // buffer is ready to be added to data
         if (bufferIndex == r) {
             data.add(buffer.clone());
@@ -394,27 +378,34 @@ public class CatanActionFactory {
      *
      * @return - ArrayList, various action types (unique).
      */
-    static List<AbstractAction> getRobberActions(CatanGameState gs) {
+    static List<AbstractAction> getRobberActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         CatanTile[][] board = gs.getBoard();
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
-                if (!(tile.getTileType().equals(CatanTile.TileType.SEA)))
-                    actions.add(new MoveRobber(x, y));
+                if (!(tile.getTileType().equals(CatanTile.TileType.SEA))) {
+                    HashSet<Integer> targets = new HashSet<>();
+                    Building[] settlements = tile.getSettlements();
+                    for (Building settlement : settlements) {
+                        if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer()) {
+                            targets.add(settlement.getOwnerId());
+                        }
+                    }
+                    for (int target: targets) {
+                        actions.add(new MoveRobberAndSteal(x, y, player, target));  // TODO: deep move, then steal
+                    }
+                }
             }
         }
-
         return actions;
     }
 
     // --------------- Helper functions to keep main functions simpler -----------------
 
     /* Function that lists all buy actions to the player; building road, settlement or city or buying a development card */
-    public static List<AbstractAction> getBuyActions(CatanGameState gs) {
+    public static List<AbstractAction> getBuyActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
-        int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
-        int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
         // find possible roads, settlements and city upgrades and propose them as actions
@@ -422,43 +413,43 @@ public class CatanActionFactory {
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
-                for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
-                    Settlement settlement = tile.getSettlements()[i];
+                for (int i = 0; i < HEX_SIDES; i++) {
+                    Building settlement = tile.getSettlements()[i];
 
                     // where it is legal to place tile then it can be placed from there
                     if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
                             && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
-                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.Settlement), activePlayer)
-                                && !gs.playerTokens[activePlayer].get(CatanParameters.ActionType.Settlement).isMaximum()) {
-                            actions.add(new BuildSettlement(x, y, i, activePlayer, false));
+                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.Settlement), player)
+                                && !gs.playerTokens.get(player).get(CatanParameters.ActionType.Settlement).isMaximum()) {
+                            actions.add(new BuildSettlement(x, y, i, player, false));
                         }
                     }
 
                     if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
                             && gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())) {
-                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.Road), activePlayer)
-                                && !gs.playerTokens[activePlayer].get(CatanParameters.ActionType.Road).isMaximum()) {
-                            actions.add(new BuildRoad(x, y, i, activePlayer, false));
+                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.Road), player)
+                                && !gs.playerTokens.get(player).get(CatanParameters.ActionType.Road).isMaximum()) {
+                            actions.add(new BuildRoad(x, y, i, player, false));
                         }
                     }
 
-                    if (settlement.getOwner() == activePlayer && settlement.getType() == 1) {
-                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.City), activePlayer)
-                                && !gs.playerTokens[activePlayer].get(CatanParameters.ActionType.City).isMaximum()) {
-                            actions.add(new BuildCity(x, y, i, activePlayer));
+                    if (settlement.getOwnerId() == player && settlement.getBuildingType() == Settlement) {
+                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.City), player)
+                                && !gs.playerTokens.get(player).get(CatanParameters.ActionType.City).isMaximum()) {
+                            actions.add(new BuildCity(x, y, i, player));
                         }
                     }
                 }
             }
         }
-        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.DevCard), activePlayer)
+        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.DevCard), player)
                 && gs.devCards.getSize() > 0) {
             actions.add(new BuyDevelopmentCard());
         }
         return actions;
     }
 
-    public static List<AbstractAction> getDevCardActions(CatanGameState gs) {
+    public static List<AbstractAction> getDevCardActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         // Player can buy dev card and play one
         ArrayList<AbstractAction> actions = new ArrayList<>();
         boolean knightCard = false;
@@ -467,11 +458,11 @@ public class CatanActionFactory {
         boolean roadBuildingCard = false;
 
         // get playerHand; for each card add a new action
-        Deck<CatanCard> playerDevDeck = gs.playerDevCards[gs.getCurrentPlayer()];
+        Deck<CatanCard> playerDevDeck = gs.playerDevCards.get(player);
 
         for (CatanCard c : playerDevDeck.getComponents()) {
             // avoid playing a card that has been bought in the same turn
-            if (c.turnCardWasBought == gs.getTurnOrder().getTurnCounter()) {
+            if (c.turnCardWasBought == gs.getTurnCounter()) {
                 continue;
             }
             // victory points are automatically revealed once a player has 10+ points
@@ -498,14 +489,11 @@ public class CatanActionFactory {
                     continue;
                 } else {
                     yearOfPlentyCard = true;
-                    Deck<Card> resourceDeck = (Deck<Card>) gs.getComponent(CatanConstants.resourceDeckHash);
-                    CatanParameters.Resource[] resources = CatanParameters.Resource.values();
-                    ArrayList<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
+                    List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
 
-                    for (int i = 0; i < resources.length; i++) {
-                        int index = i;
-                        Optional<Card> resource = resourceDeck.stream().filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(resources[index].toString())).findFirst();
-                        if (resource.isPresent()) resourcesAvailable.add(resources[i]);
+                    for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
+                        if (gs.resourcePool.get(res).getValue() > 0)
+                            resourcesAvailable.add(res);
                     }
 
                     for (CatanParameters.Resource resource1 : resourcesAvailable) {
@@ -525,11 +513,11 @@ public class CatanActionFactory {
                     for (int x = 0; x < board.length; x++) {
                         for (int y = 0; y < board[x].length; y++) {
                             CatanTile tile = board[x][y];
-                            for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
+                            for (int i = 0; i < HEX_SIDES; i++) {
                                 if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-                                        && gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())
-                                        && !gs.playerTokens[gs.getCurrentPlayer()].get(CatanParameters.ActionType.Road).isMaximum()) {
-                                    actions.add(new BuildRoad(x, y, i, gs.getCurrentPlayer(), true));
+                                        && gs.checkRoadPlacement(i, tile, player)
+                                        && !gs.playerTokens.get(player).get(CatanParameters.ActionType.Road).isMaximum()) {
+                                    actions.add(new BuildRoad(x, y, i, player, true));
                                 }
                             }
                         }
@@ -541,14 +529,13 @@ public class CatanActionFactory {
         return actions;
     }
 
-    public static List<AbstractAction> getTradeActions(CatanGameState gs) {
+    public static List<AbstractAction> getTradeActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         // Player can buy dev card and play one
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = gs.getCurrentPlayer();
 
         // default trade
         HashMap<CatanParameters.Resource, Counter> playerExchangeRate = gs.getExchangeRates(player);
-        for (Map.Entry<CatanParameters.Resource, Counter> res: gs.playerResources[player].entrySet()) {
+        for (Map.Entry<CatanParameters.Resource, Counter> res: gs.playerResources.get(player).entrySet()) {
             if (res.getValue().getValue() >= playerExchangeRate.get(res.getKey()).getValue()) {
                 for (CatanParameters.Resource res2: CatanParameters.Resource.values()) {
                     if (res.getKey() != res2) {

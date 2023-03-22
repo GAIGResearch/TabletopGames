@@ -15,27 +15,28 @@ import java.util.Objects;
 public class PlaceSettlementWithRoad extends AbstractAction {
     public final int x;
     public final int y;
-    public final int i;
+    public final int vertex, edge;
     public final int player;
 
-    public PlaceSettlementWithRoad(int x, int y, int i, int player) {
+    public PlaceSettlementWithRoad(int x, int y, int vertex, int edge, int player) {
         this.x = x;
         this.y = y;
-        this.i = i;
+        this.vertex = vertex;
+        this.edge = edge;
         this.player = player;
     }
 
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        BuildSettlement buildSettlement  = new BuildSettlement(x,y,i,player,true);
-        BuildRoad buildRoad = new BuildRoad(x,y,i,player,true);
+        BuildSettlement buildSettlement  = new BuildSettlement(x,y,vertex,player,true);
+        BuildRoad buildRoad = new BuildRoad(x,y,edge,player,true);
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
+        CatanGameState cgs = ((CatanGameState)gs);
 
         if (buildSettlement.execute(gs) && buildRoad.execute(gs)){
             // players get the resources in the second round after the settlements they placed
             if (gs.getRoundCounter() == 1){
-                CatanGameState cgs = ((CatanGameState)gs);
                 CatanTile[][] board = cgs.getBoard();
                 // in the second round players get the resources from the tiles around the settlement
                 ArrayList<CatanTile> tiles = new ArrayList<CatanTile>();
@@ -73,17 +74,17 @@ public class PlaceSettlementWithRoad extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof PlaceSettlementWithRoad)) return false;
         PlaceSettlementWithRoad that = (PlaceSettlementWithRoad) o;
-        return x == that.x && y == that.y && i == that.i && player == that.player;
+        return x == that.x && y == that.y && vertex == that.vertex && edge == that.edge && player == that.player;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, y, i, player);
+        return Objects.hash(x, y, vertex, edge, player);
     }
 
     @Override
     public String toString() {
-        return String.format("PlaceSettlementWithRoad: x=%d y=%d i=%d player=%d",x,y,i,player);
+        return String.format("PlaceSettlementWithRoad: x=%d y=%d vertex=%d edge=%d player=%d",x,y,vertex,edge,player);
     }
     @Override
     public String getString(AbstractGameState gameState) {

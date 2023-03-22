@@ -14,13 +14,11 @@ import static core.CoreConstants.GameResult.GAME_ONGOING;
 public class CatanTurnOrder extends ReactiveTurnOrder {
     protected int turnStep;
     protected int actionsTakenInCurrentStage;
-    protected boolean developmentCardPlayed; // Tracks whether a player has played a development card this turn
     private IGamePhase nextGamePhase; // tracks the game phase where it should be reset after a reaction
 
     CatanTurnOrder(int nPlayers, int nMaxRounds) {
         super(nPlayers, nMaxRounds);
         turnStep = 0;
-        developmentCardPlayed = false;
     }
 
     @Override
@@ -29,14 +27,12 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         turnStep = 0;
         actionsTakenInCurrentStage = 0;
         nextGamePhase = CoreConstants.DefaultGamePhase.Main;
-        developmentCardPlayed = false;
     }
 
     @Override
     protected TurnOrder _copy() {
         CatanTurnOrder copy = new CatanTurnOrder(nPlayers, nMaxRounds);
         copy.turnStep = turnStep;
-        copy.developmentCardPlayed = developmentCardPlayed;
         copy.reactivePlayers = new LinkedList<>(reactivePlayers);
         copy.nextGamePhase = nextGamePhase;
         copy.actionsTakenInCurrentStage = actionsTakenInCurrentStage;
@@ -140,13 +136,6 @@ public class CatanTurnOrder extends ReactiveTurnOrder {
         }
     }
 
-    public boolean isDevelopmentCardPlayed() {
-        return developmentCardPlayed;
-    }
-
-    public void setDevelopmentCardPlayed(boolean developmentCardPlayed) {
-        this.developmentCardPlayed = developmentCardPlayed;
-    }
 
     /**
      * Method executed after all player turns.

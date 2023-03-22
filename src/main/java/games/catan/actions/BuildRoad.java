@@ -3,14 +3,12 @@ package games.catan.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
 import games.catan.components.Edge;
 import games.catan.components.Graph;
-import games.catan.components.Road;
-import games.catan.components.Settlement;
+import games.catan.components.Building;
 
 import java.util.Objects;
 
@@ -32,38 +30,60 @@ public class BuildRoad extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState) gs;
+        CatanParameters cp = (CatanParameters) gs.getGameParameters();
         CatanTile[][] board = cgs.getBoard();
-        if (board[x][y].getRoads()[edge].getOwner() == -1) {
-            if (((Counter) cgs.getComponentActingPlayer(CatanConstants.roadCounterHash)).isMaximum()) {
+        if (board[x][y].getRoads()[edge].getOwnerId() == -1) {
+            Counter roadTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Road);
+            if (roadTokens.isMaximum()) {
                 throw new AssertionError("No more roads to build for player " + gs.getCurrentPlayer());
             }
-            ((Counter) cgs.getComponentActingPlayer(CatanConstants.roadCounterHash)).increment(1);
+            roadTokens.increment();
             // only take resources after set up and not with road building card
             if (!free) {
-                if (!CatanGameState.spendResourcesIfPossible(cgs, CatanParameters.costMapping.get("road"))) {
-                    throw new AssertionError("Player " + gs.getCurrentPlayer() + " cannot afford this road");
+                if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.Road), playerID)) {
+                    throw new AssertionError("Player " + playerID + " cannot afford this road");
                 }
             }
-            board[this.x][this.y].addRoad(edge, playerID);
+            board[x][y].addRoad(edge, playerID);
 
             // find the road in the graph and set the owner to playerID
-            Graph<Settlement, Road> graph = cgs.getGraph();
-            Settlement settl1 = board[x][y].getSettlements()[edge];
-            Settlement settl2 = board[x][y].getSettlements()[(edge+1)%6];
+            Graph graph = cgs.getGraph();
+            Building settl1 = board[x][y].getSettlements()[edge];
+            Building settl2 = board[x][y].getSettlements()[(edge+1)%6];
             // update the placed road in the graph in both directions not just on the board
-            for (Edge<Settlement, Road> e: graph.getEdges(settl1)){
+            for (Edge e: graph.getEdges(settl1)){
                 if (e.getDest().equals(settl2)){
-                    e.getValue().setOwner(playerID);
+                    e.getRoad().setOwnerId(playerID);
                 }
             }
-            for (Edge<Settlement, Road> e: graph.getEdges(settl2)){
+            for (Edge e: graph.getEdges(settl2)){
                 if (e.getDest().equals(settl1)){
-                    e.getValue().setOwner(playerID);
+                    e.getRoad().setOwnerId(playerID);
                 }
+            }
+
+            // Check longest road
+            int new_length = cgs.getRoadDistance(x, y, edge);
+            cgs.getRoadLengths()[playerID] = new_length;
+            if (new_length > cgs.getLongestRoadLength()) {
+                cgs.setLongestRoadLength(new_length);
+                // add points for longest road and set the new road in gamestate
+                if (cgs.getLongestRoadOwner() >= 0) {
+                    // in this case the longest road was already claimed
+                    cgs.addScore(cgs.getLongestRoadOwner(), -cp.longest_road_value);
+                }
+                cgs.addScore(playerID, cp.longest_road_value);
+                cgs.setLongestRoadOwner(playerID);
+                if (gs.getCoreGameParameters().verbose) {
+                    System.out.println("Player " + playerID + " has the longest road with length " + new_length);
+                }
+            }
+            if (gs.getCoreGameParameters().verbose) {
+                System.out.println("Calculated road length: " + new_length);
             }
             return true;
         } else {
-            throw new AssertionError("Road already owned: " + this.toString());
+            throw new AssertionError("Road already owned: " + this);
         }
     }
 
@@ -93,10 +113,8 @@ public class BuildRoad extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Buildroad in x=" + x + " y=" + y + " edge=" + edge + " free = " + free;
+        return "Build Road at x=" + x + " y=" + y + " edge=" + edge + " free = " + free;
     }
-
-
 
     public int getX() {
         return x;

@@ -33,7 +33,7 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
         boardNodes = new ArrayList<>();
     }
 
-    GraphBoard(String name, int ID)
+    protected GraphBoard(String name, int ID)
     {
         super(CoreConstants.ComponentType.BOARD, name, ID);
         boardNodes = new ArrayList<>();
@@ -258,7 +258,7 @@ public class GraphBoard extends Component implements IComponentContainer<BoardNo
     }
 
     @Override
-    public final int hashCode() {
+    public int hashCode() {
         return Objects.hash(componentID, boardNodes);
     }
 

@@ -6,7 +6,7 @@ import core.interfaces.IExtendedSequence;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.components.CatanTile;
-import games.catan.components.Settlement;
+import games.catan.components.Building;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class SetupBuild extends AbstractAction implements IExtendedSequence {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
                     for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
-                        Settlement settlement = tile.getSettlements()[i];
+                        Building settlement = tile.getSettlements()[i];
 
                         // where it is legal to place tile then it can be placed from there
                         if (settlement.getOwner() == -1 &&

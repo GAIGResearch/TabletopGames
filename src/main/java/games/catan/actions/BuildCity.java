@@ -3,11 +3,10 @@ package games.catan.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Counter;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
-import games.catan.components.Settlement;
+import games.catan.components.Building;
 
 import java.util.Objects;
 
@@ -27,21 +26,28 @@ public class BuildCity extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
+        CatanParameters cp = (CatanParameters) gs.getGameParameters();
         CatanTile[][] board = cgs.getBoard();
 
-        Settlement settlement = board[row][col].getSettlements()[vertex];
+        Building settlement = board[row][col].getSettlements()[vertex];
         if (settlement != null) {
-            if (settlement.getOwner() == playerID) {
-                if (((Counter)cgs.getComponentActingPlayer(CatanConstants.cityCounterHash)).isMaximum()){
+            if (settlement.getOwnerId() == playerID) {
+                Counter cityTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.City);
+                Counter settleTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Settlement);
+                if (cityTokens.isMaximum()){
                     throw new AssertionError("Player cannot build anymore cities");
                 }
-                ((Counter)cgs.getComponentActingPlayer(CatanConstants.cityCounterHash)).increment(1);
+                cityTokens.increment();
                 // if player builds a city it gets back the settlement token
-                ((Counter)cgs.getComponentActingPlayer(CatanConstants.settlementCounterHash)).decrement(1);
-                if (!CatanGameState.spendResourcesIfPossible(cgs, CatanParameters.costMapping.get("city"))) {
+                settleTokens.decrement();
+                if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.City), playerID)) {
                     throw new AssertionError("Player cannot afford city");
                 }
                 settlement.upgrade();
+
+                cgs.addScore(playerID, -cp.settlement_value);
+                cgs.addScore(playerID, cp.city_value);
+
                 return true;
             } else {
                 throw new AssertionError("Player does not own this settlement");
@@ -77,6 +83,6 @@ public class BuildCity extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("BuildCity: row=%d col=%d vertex=%d player=%d",row,col,vertex,playerID);
+        return String.format("Build City: row=%d col=%d vertex=%d player=%d",row,col,vertex,playerID);
     }
 }

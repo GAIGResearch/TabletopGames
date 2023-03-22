@@ -7,6 +7,7 @@ import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 public class BuildSettlement extends AbstractAction {
@@ -30,8 +31,8 @@ public class BuildSettlement extends AbstractAction {
         CatanTile[][] board = cgs.getBoard();
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
 
-        if (board[x][y].getSettlements()[vertex].getOwner() == -1) {
-            Counter c = cgs.getPlayerTokens()[playerID].get(CatanParameters.ActionType.Settlement);
+        if (board[x][y].getSettlements()[vertex].getOwnerId() == -1) {
+            Counter c = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Settlement);
             if (c.isMaximum()){
                 throw new AssertionError("No more settlements to build for player " + gs.getCurrentPlayer());
             }
@@ -44,36 +45,19 @@ public class BuildSettlement extends AbstractAction {
             }
             board[x][y].addSettlement(vertex, playerID);
             if(board[x][y].getSettlements()[vertex].getHarbour()!=null){
-                int defaultExchangeRate = ((CatanParameters)cgs.getGameParameters()).default_exchange_rate;
-                int[] exchangeRates = cgs.getExchangeRates(playerID);
-                switch (board[x][y].getSettlements()[vertex].getHarbour()){
-                    case BRICK:
-                        exchangeRates[0] = defaultExchangeRate - 2;
-                        break;
-                    case LUMBER:
-                        exchangeRates[1] = defaultExchangeRate - 2;
-                        break;
-                    case ORE:
-                        exchangeRates[2] = defaultExchangeRate - 2;
-                        break;
-                    case GRAIN:
-                        exchangeRates[3] = defaultExchangeRate - 2;
-                        break;
-                    case WOOL:
-                        exchangeRates[4] = defaultExchangeRate - 2;
-                        break;
-                    case GENERIC:
-                        for (int i = 0; i < exchangeRates.length; i++){
-                            if(exchangeRates[i] > defaultExchangeRate - 1){
-                                exchangeRates[i] = defaultExchangeRate - 1;
-                            }
-                        }
-                }
-                cgs.updateExchangeRates(playerID,exchangeRates);
+                HashMap<CatanParameters.Resource, Counter> exchangeRates = cgs.getExchangeRates(playerID);
+                CatanParameters.Resource harbour = board[x][y].getSettlements()[vertex].getHarbour();
+                int newRate = cp.harbour_exchange_rate;
+                if (harbour == CatanParameters.Resource.WILD) newRate = cp.harbour_wild_exchange_rate;
+                exchangeRates.get(harbour).setValue(Math.min(exchangeRates.get(harbour).getValue(), newRate));
             }
+
+            // As player always places a settlement in the setup phase it is awarded the score for it
+            cgs.addScore(playerID, cp.settlement_value);
+
             return true;
         } else {
-            throw new AssertionError("Settlement already owned: " + this.toString());
+            throw new AssertionError("Settlement already owned: " + this);
         }
     }
 

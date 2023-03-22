@@ -7,7 +7,7 @@ import core.actions.DoNothing;
 import games.catan.*;
 import games.catan.actions.*;
 import games.catan.components.CatanTile;
-import games.catan.components.Settlement;
+import games.catan.components.Building;
 
 
 import java.util.*;
@@ -214,8 +214,8 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
                         actionPriorityLists.get(actionPriorityLists.size()-2).add(action);
                     } else {
                         int tileRank = 5;
-                        Settlement[] settlements = tile.getSettlements();
-                        for (Settlement settlement : settlements) {
+                        Building[] settlements = tile.getSettlements();
+                        for (Building settlement : settlements) {
                             if (settlement.getOwner() == getPlayerID()) {
                                 actionPriorityLists.get(actionPriorityLists.size() - 1).add(action);
                                 break;
@@ -314,7 +314,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
                 for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
-                    Settlement settlement = tile.getSettlements()[i];
+                    Building settlement = tile.getSettlements()[i];
                     // where it is legal to place tile then it can be placed from there
                     if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
                             && cgs.checkSettlementPlacement(settlement, getPlayerID())) {
@@ -330,7 +330,7 @@ public class CatanRuleBasedPlayer extends AbstractPlayer {
 
     private boolean KnightCardCheck(CatanGameState cgs, AbstractAction action){
         CatanTile robberTile = cgs.getRobber(cgs.getBoard());
-        for(Settlement settlement : robberTile.getSettlements()){
+        for(Building settlement : robberTile.getSettlements()){
             if (settlement.getOwner()==getPlayerID()){
                 return true;
             }

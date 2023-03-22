@@ -1,5 +1,6 @@
 package games.catan.components;
 
+import core.CoreConstants;
 import core.components.Component;
 
 import java.util.Objects;
@@ -8,12 +9,19 @@ import java.util.Objects;
  * Generic implementation of an edge between 2 nodes of the same type
  * Edge encapsulates another object
  * */
-public class Edge<N extends Copiable, E extends Copiable> {
-    N src;
-    N dest;
-    E value;
+public class Edge extends Component {
+    Building src;
+    Building dest;
+    Road value;
 
-    public Edge(N srcNode, N destNode, E edgeValue) {
+    public Edge(Building srcNode, Building destNode, Road edgeValue) {
+        super(CoreConstants.ComponentType.BOARD_NODE, "Edge");
+        this.src = srcNode;
+        this.dest = destNode;
+        this.value = edgeValue;
+    }
+    public Edge(Building srcNode, Building destNode, Road edgeValue, int id) {
+        super(CoreConstants.ComponentType.BOARD_NODE, "Edge", id);
         this.src = srcNode;
         this.dest = destNode;
         this.value = edgeValue;
@@ -21,14 +29,10 @@ public class Edge<N extends Copiable, E extends Copiable> {
 
     @Override
     public boolean equals(Object o) {
-        // todo (mb) probably road setting is wrong - should look into it -> they never have the same refs
-        // compare by reference
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Edge<?, ?> edge = (Edge<?, ?>) o;
-        return src == (edge.src) &&
-                dest == (edge.dest); // &&
-//                value == (edge.value);
+        if (!(o instanceof Edge)) return false;
+        Edge edge = (Edge) o;
+        return Objects.equals(src, edge.src) && Objects.equals(dest, edge.dest) && Objects.equals(value, edge.value);
     }
 
     @Override
@@ -46,20 +50,19 @@ public class Edge<N extends Copiable, E extends Copiable> {
                 '}';
     }
 
-    public N getSrc() {
-        return src;
-    }
-
-    public N getDest() {
+    public Building getDest() {
         return dest;
     }
 
-    public E getValue() {
+    public Building getSrc() {
+        return src;
+    }
+
+    public Road getRoad() {
         return value;
     }
 
-    public Edge<N, E> copy(){
-        Edge<N, E> copy = new Edge(src.copy(), dest.copy(), value.copy());
-        return copy;
+    public Edge copy(){
+        return new Edge(src.copy(), dest.copy(), value.copy(), componentID);
     }
 }

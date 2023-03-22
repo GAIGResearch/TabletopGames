@@ -6,7 +6,7 @@ import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
-import games.catan.components.Settlement;
+import games.catan.components.Building;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +20,13 @@ import static games.catan.CatanConstants.HEX_SIDES;
 public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad implements IExtendedSequence {
     boolean executed;
 
-    public DeepPlaceSettlementThenRoad(int x, int y, int player) {
-        super(x, y, -1, player);
+    public DeepPlaceSettlementThenRoad(int x, int y, int vertex, int player) {
+        super(x, y, vertex, -1, player);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        BuildSettlement buildSettlement = new BuildSettlement(x,y,i,player,true);
+        BuildSettlement buildSettlement = new BuildSettlement(x,y,vertex,player,true);
         buildSettlement.execute(gs);
         gs.setActionInProgress(this);
         return true;
@@ -39,8 +39,8 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
         CatanTile[][] board = gs.getBoard();
         CatanTile tile = board[x][y];
         for (int k = 0; k < HEX_SIDES; k++) {
-            Settlement settlement = tile.getSettlements()[k];
-            if (settlement.getOwner() == -1) {
+            Building settlement = tile.getSettlements()[k];
+            if (settlement.getOwnerId() == -1) {
                 if (gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
                     actions.add(new BuildRoad(x, y, k, player, true));
                 }
@@ -63,7 +63,7 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
         if (state.getRoundCounter() == 1){
             CatanGameState cgs = ((CatanGameState)state);
             CatanTile[][] board = cgs.getBoard();
-            // in the second round players get the resources from the the tiles around the settlement
+            // in the second round players get the resources from the tiles around the settlement
             ArrayList<CatanTile> tiles = new ArrayList<>();
             CatanTile tile = cgs.getBoard()[x][y];
             // next step is to find the tiles around the settlement
@@ -92,7 +92,7 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
 
     @Override
     public DeepPlaceSettlementThenRoad copy() {
-        DeepPlaceSettlementThenRoad copy = new DeepPlaceSettlementThenRoad(x, y, player);
+        DeepPlaceSettlementThenRoad copy = new DeepPlaceSettlementThenRoad(x, y, vertex, player);
         copy.executed = executed;
         return copy;
     }

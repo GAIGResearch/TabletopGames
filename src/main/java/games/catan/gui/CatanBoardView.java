@@ -5,7 +5,7 @@ import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
 import games.catan.components.Road;
-import games.catan.components.Settlement;
+import games.catan.components.Building;
 
 import javax.swing.*;
 import java.awt.*;
@@ -102,7 +102,7 @@ public class CatanBoardView extends JComponent {
                 CatanTile tile = board[x][y];
 
                 // draw settlements
-                Settlement[] settlements = tile.getSettlements();
+                Building[] settlements = tile.getSettlements();
                 for (int i = 0; i < settlements.length; i++){
 //                    g.drawString("" + settlements[i].hashCode(), tile.getVerticesCoords(i).x, tile.getVerticesCoords(i).y);
                     if (settlements[i] != null && settlements[i].getOwner() != -1) {

@@ -20,7 +20,7 @@ public class CatanTile extends BoardNode {
     public final int y;
 
     Road[] roads;
-    Settlement[] settlements;
+    Building[] settlements;
     int[] harbors;
 
     TileType tileType;
@@ -34,7 +34,7 @@ public class CatanTile extends BoardNode {
         this.y = y;
         roads = new Road[HEX_SIDES];
         harbors = new int[HEX_SIDES];
-        settlements = new Settlement[HEX_SIDES];
+        settlements = new Building[HEX_SIDES];
         robber = false;
     }
 
@@ -44,11 +44,11 @@ public class CatanTile extends BoardNode {
         this.y = y;
         roads = new Road[HEX_SIDES];
         harbors = new int[HEX_SIDES];
-        settlements = new Settlement[HEX_SIDES];
+        settlements = new Building[HEX_SIDES];
         robber = false;
     }
 
-    public CatanTile(int x, int y, Road[] edges, Settlement[] vertices) {
+    public CatanTile(int x, int y, Road[] edges, Building[] vertices) {
         super(HEX_SIDES, "");
         this.x = x;
         this.y = y;
@@ -106,7 +106,7 @@ public class CatanTile extends BoardNode {
 
     public boolean setRoad(int edge, Road road) {
         // if null -> uninitialized
-        if (this.roads[edge] == null || this.roads[edge].getOwner() == -1) {
+        if (this.roads[edge] == null || this.roads[edge].getOwnerId() == -1) {
             this.roads[edge] = road;
             return true;
         }
@@ -115,8 +115,8 @@ public class CatanTile extends BoardNode {
 
     public boolean addRoad(int edge, int playerID) {
         // if null -> uninitialized
-        if (this.roads[edge].getOwner() == -1) {
-            this.roads[edge].setOwner(playerID);
+        if (this.roads[edge].getOwnerId() == -1) {
+            this.roads[edge].setOwnerId(playerID);
             return true;
         }
         throw new AssertionError("Cannot add road: edge: " + edge);
@@ -146,23 +146,23 @@ public class CatanTile extends BoardNode {
     }
 
     public boolean addSettlement(int vertex, int playerID) {
-        if (this.settlements[vertex].getOwner() == -1) {
-            this.settlements[vertex].setOwner(playerID);
+        if (this.settlements[vertex].getOwnerId() == -1) {
+            this.settlements[vertex].setOwnerId(playerID);
             return true;
         }
         throw new AssertionError("Cannot add settlement: vertex: " + vertex);
     }
 
-    public boolean setSettlement(int vertex, Settlement settlement) {
+    public boolean setSettlement(int vertex, Building settlement) {
         // if null -> uninitialized
-        if (this.settlements[vertex] == null || this.settlements[vertex].getOwner() == -1) {
+        if (this.settlements[vertex] == null || this.settlements[vertex].getOwnerId() == -1) {
             this.settlements[vertex] = settlement;
             return true;
         }
         throw new AssertionError("Cannot set settlement: vertex: " + vertex);
     }
 
-    public Settlement[] getSettlements() {
+    public Building[] getSettlements() {
         return this.settlements;
     }
 
@@ -270,7 +270,7 @@ public class CatanTile extends BoardNode {
         }
         copy.hasHarbor = this.hasHarbor;
         copy.harbors = Arrays.copyOf(harbors, harbors.length);
-        copy.settlements = new Settlement[HEX_SIDES];
+        copy.settlements = new Building[HEX_SIDES];
         for (int i = 0; i < settlements.length; i++) {
             copy.settlements[i] = settlements[i].copy();
         }
@@ -282,30 +282,20 @@ public class CatanTile extends BoardNode {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj instanceof CatanTile) {
-            CatanTile other = (CatanTile) obj;
-            return x == other.x && y == other.y && robber == other.robber && hasHarbor == other.hasHarbor && other.number == number &&
-                    Arrays.equals(roads, other.roads) && Arrays.equals(settlements, other.settlements) &&
-                    Arrays.equals(harbors, other.harbors);
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CatanTile)) return false;
+        if (!super.equals(o)) return false;
+        CatanTile catanTile = (CatanTile) o;
+        return x == catanTile.x && y == catanTile.y && hasHarbor == catanTile.hasHarbor && number == catanTile.number && robber == catanTile.robber && Arrays.equals(roads, catanTile.roads) && Arrays.equals(settlements, catanTile.settlements) && Arrays.equals(harbors, catanTile.harbors) && tileType == catanTile.tileType;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(x, y, tileType, number, hasHarbor, robber);
-        result = result * 31 + Arrays.hashCode(roads);
-        // The direct settlements hashcode does not include the possible state changes
-        // because it is used as the key in the Graph of board nodes (not the ideal design choice)
-        // which means that its hashcode is restricted to just the id (so that the key value does not change)
-        int settlementHashCode = 0;
-        for (Settlement settlement : settlements) {
-            settlementHashCode = settlementHashCode + 3 * settlement.extendedHashCode();
-        }
-        result = result * 31 + settlementHashCode;
-        result = result * 31 + Arrays.hashCode(harbors);
+        int result = Objects.hash(super.hashCode(), x, y, tileType, hasHarbor, number, robber);
+        result = 31 * result + Arrays.hashCode(roads);
+        result = 31 * result + Arrays.hashCode(settlements);
+        result = 31 * result + Arrays.hashCode(harbors);
         return result;
     }
 

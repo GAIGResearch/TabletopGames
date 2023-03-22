@@ -1,6 +1,7 @@
 package games.catan;
 
 import core.AbstractParameters;
+import core.components.Dice;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
 
@@ -12,27 +13,33 @@ import static games.catan.CatanParameters.Resource.*;
 public class CatanParameters extends AbstractParameters {
     private String dataPath;
 
-    public final int n_resource_cards = 19;
-    public final int n_tiles_per_row = 7;
+    public int n_resource_cards = 19;
+    public int n_tiles_per_row = 7;
 
     // rules
-    public final int max_negotiation_count = 2; // max number of attempts to renegotiate player trade
-    public final int default_exchange_rate = 4; // trading with the bank 1:4 ratio by default
-    public final int max_cards_without_discard = 7; // max number of resources a player may hold in hand without risking discarding
-    public final int max_trade_actions_allowed = 2; // max number of trade actions per turn
-    public final int max_build_actions_allowed = 3; // max number of build actions per turn
+    public int max_negotiation_count = 2; // max number of attempts to renegotiate player trade
+    public int default_exchange_rate = 4; // trading with the bank 1:4 ratio by default
+    public int max_cards_without_discard = 7; // max number of resources a player may hold in hand without risking discarding
+    public int max_trade_actions_allowed = 2; // max number of trade actions per turn
+    public int max_build_actions_allowed = 3; // max number of build actions per turn
 
     // the minimum number of knights required to take the largest army
-    public final int min_army_size = 3;
-    public final int min_longest_road = 4; // only changes when road_length > min
+    public int min_army_size = 3;
+    public int min_longest_road = 4; // only changes when road_length > min
 
     // points
-    public final int settlement_value = 1;
-    public final int city_value = 2;
-    public final int longest_road_value = 2;
-    public final int largest_army_value = 2;
-    public final int victory_point_value = 1;
-    public final int points_to_win = 10;
+    public int settlement_value = 1;
+    public int city_value = 2;
+    public int longest_road_value = 2;
+    public int largest_army_value = 2;
+    public int victory_point_value = 1;
+    public int points_to_win = 10;
+    public Dice.Type dieType = Dice.Type.d6;
+    public int robber_die_roll = 7;
+
+    public int harbour_exchange_rate = 2;
+    public int harbour_wild_exchange_rate = 3;
+    public int n_settlements_setup = 2;
 
     public CatanParameters(long seed){
         super(seed);
@@ -89,17 +96,8 @@ public class CatanParameters extends AbstractParameters {
         LUMBER,
         ORE,
         GRAIN,
-        WOOL
-    }
-
-    public enum HarborType {
-        NONE,
-        BRICK,
-        LUMBER,
-        ORE,
-        GRAIN,
         WOOL,
-        GENERIC
+        WILD
     }
 
     /* Mapping of which field produces what*/
@@ -158,13 +156,13 @@ public class CatanParameters extends AbstractParameters {
         put(CatanCard.CardType.VICTORY_POINT_CARD, 5);
     }};
 
-    public static HashMap<HarborType, Integer> harborCount = new HashMap<HarborType, Integer>() {{
-        put(HarborType.BRICK, 1);
-        put(HarborType.LUMBER, 1);
-        put(HarborType.ORE, 1);
-        put(HarborType.GRAIN, 1);
-        put(HarborType.WOOL, 1);
-        put(HarborType.GENERIC, 4);
+    public static HashMap<Resource, Integer> harborCount = new HashMap<Resource, Integer>() {{
+        put(Resource.BRICK, 1);
+        put(Resource.LUMBER, 1);
+        put(Resource.ORE, 1);
+        put(Resource.GRAIN, 1);
+        put(Resource.WOOL, 1);
+        put(Resource.WILD, 4);
     }};
 
     @Override

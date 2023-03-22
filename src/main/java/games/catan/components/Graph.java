@@ -1,24 +1,31 @@
 package games.catan.components;
 
+import core.components.GraphBoard;
+
 import java.util.*;
 
 /* Implementation of a generic Graph using generic edges */
-public class Graph<N extends Copiable, E extends Copiable> {
-    private final Map<N, List<Edge<N, E>>> map;
+public class Graph extends GraphBoard {
+    private final Map<Building, List<Edge>> map;
 
     public Graph(){
+        super("Graph");
+        map = new HashMap<>();
+    }
+    public Graph(int id){
+        super("Graph", id);
         map = new HashMap<>();
     }
 
-    public void addEdge(N src, N dest, E value){
-        Edge<N, E> edge = new Edge<>(src, dest, value);
+    public void addEdge(Building src, Building dest, Road value){
+        Edge edge = new Edge(src, dest, value);
         if (map.get(src) == null){
-            ArrayList<Edge<N, E>> list = new ArrayList<>();
+            ArrayList<Edge> list = new ArrayList<>();
             list.add(edge);
             map.put(src, list);
         }
         else{
-            List<Edge<N, E>> edges = map.get(src);
+            List<Edge> edges = map.get(src);
             if (!edges.contains(edge)){
                 edges.add(edge);
             }
@@ -27,89 +34,68 @@ public class Graph<N extends Copiable, E extends Copiable> {
 
     /* Returns the connected nodes from a node
     *  */
-    public List<N> getNeighbourNodes(N src){
+    public List<Building> getNeighbourNodes(Building src){
 //        for (Map.EntrySet entry: map.entrySet){System.out.println((List<Settlement>)entry.getValue()))}
 //        for (Map.EntrySet entry: map.entrySet) {
 //            System.out.println(((Settlement) entry.getKey()).id);
 //        }
-        List<Edge<N, E>> edges = map.get(src);
-        ArrayList<N> destinations = new ArrayList<>();
-        for (Edge<N, E> edge: edges){
+        List<Edge> edges = map.get(src);
+        ArrayList<Building> destinations = new ArrayList<>();
+        for (Edge edge: edges){
             destinations.add(edge.dest);
         }
         return destinations;
     }
 
-    /* Returns the edges starting from the current node
+    /* Returns the edges starting from the given node
      *  */
-    public List<E> getConnections(N src){
-        List<Edge<N, E>> edges = map.get(src);
-        ArrayList<E> nodes = new ArrayList<>();
-        for (Edge<N, E> edge: edges){
-            nodes.add(edge.value);
-        }
-        return nodes;
+    public List<Edge> getConnections(Building src){
+        return map.get(src);
     }
 
     /* Returns the edges [src, dest, edge]
     *  */
-    public List<Edge<N, E>> getEdges(N src){
+    public List<Edge> getEdges(Building src){
         return map.get(src);
     }
 
     /* Iterates over all entries and prints the result */
     public void printGraph(){
-        Set<N> set = map.keySet();
-        for (N vertex : set) {
+        Set<Building> set = map.keySet();
+        for (Building vertex : set) {
             System.out.println("Vertex " + vertex + " is connected to ");
-            List<Edge<N, E>> list = map.get(vertex);
-            for (Edge<N, E> neEdge : list) {
+            List<Edge> list = map.get(vertex);
+            for (Edge neEdge : list) {
                 System.out.print(neEdge + " ");
             }
             System.out.println();
         }
     }
 
-    public Graph<N, E> copy(){
+    public Graph copy(){
         // todo problem seem to be memory location vs ID
-        Graph<N, E> copy = new Graph<>();
-        for (Map.Entry<N, List<Edge<N, E>>> entry : map.entrySet()) {
-            List<Edge<N, E>> edgeList = new ArrayList<>();
-            for (Edge<N, E> edge: entry.getValue()){
+        Graph copy = new Graph(componentID);
+        for (Map.Entry<Building, List<Edge>> entry : map.entrySet()) {
+            List<Edge> edgeList = new ArrayList<>();
+            for (Edge edge: entry.getValue()){
                 edgeList.add(edge.copy());
             }
-            copy.map.put((N) entry.getKey().copy(), edgeList);
+            copy.map.put(entry.getKey().copy(), edgeList);
         }
         return copy;
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other instanceof Graph) {
-            Graph<N, E> o = (Graph<N, E>) other;
-            if (o.map.size() == ((Graph<?, ?>) other).map.size()) {
-                for (N key : map.keySet()) {
-                    List<Edge<N, E>> edges = map.get(key);
-                    List<Edge<N, E>> otherEdges = o.map.get(key);
-                    if (edges != null && otherEdges != null && edges.size() == otherEdges.size()) {
-                        if (!edges.equals(otherEdges)) return false;
-                    } else {
-                        return false;
-                    }
-                }
-                return true;
-            }
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Graph)) return false;
+        Graph graph = (Graph) o;
+        return Objects.equals(map, graph.map);
     }
 
     @Override
     public int hashCode() {
-        int result = 0;
-        for (Map.Entry<N, List<Edge<N, E>>> entry : map.entrySet()) {
-            result = result * 31 + entry.hashCode();
-        }
-        return result;
+        return Objects.hash(map);
     }
 }
 
