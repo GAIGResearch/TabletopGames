@@ -1,7 +1,6 @@
 package games.catan.actions;
 
 import core.AbstractGameState;
-import core.actions.AbstractAction;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
@@ -11,14 +10,11 @@ import java.util.Random;
 
 import static core.CoreConstants.DefaultGamePhase.Main;
 
-public class MoveRobberAndSteal extends AbstractAction {
-    public final int x;
-    public final int y;
+public class MoveRobberAndSteal extends MoveRobber {
     public final int player, targetPlayer;
 
     public MoveRobberAndSteal(int x, int y, int player, int targetPlayer){
-        this.x = x;
-        this.y = y;
+        super(x, y);
         this.player = player;
         this.targetPlayer = targetPlayer;
     }
@@ -74,7 +70,7 @@ public class MoveRobberAndSteal extends AbstractAction {
 
     @Override
     public String toString() {
-        return "MoveRobber to x=" + x + " y=" + y;
+        return player + " moves robber to (" + x + ";" + y + "). Steals from " + targetPlayer;
     }
     @Override
     public String getString(AbstractGameState gameState) {

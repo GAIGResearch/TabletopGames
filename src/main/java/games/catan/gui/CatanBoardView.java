@@ -4,8 +4,11 @@ import core.components.Edge;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
+import games.catan.actions.*;
 import games.catan.components.CatanTile;
 import games.catan.components.Building;
+import core.actions.AbstractAction;
+import utilities.Pair;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,7 +45,12 @@ public class CatanBoardView extends JComponent {
         put(CatanTile.TileType.HILLS, new Color(49, 29, 16));
     }};
     Color numberColor = new Color(227, 211, 169);
+    Color tileColorHighlight = new Color(89, 243, 138);
     Dimension size;
+
+    Point tileHighlight;
+    Pair<Point, Integer>  buildingHighlight;
+    Pair<Point, Integer> roadHighlight;
 
     public CatanBoardView(CatanGameState gs) {
         this.gs = gs;
@@ -78,7 +86,8 @@ public class CatanBoardView extends JComponent {
                 g.setColor(tileColourMap.get(tile.getTileType()));
                 Polygon tileHex = tile.getHexagon(tileRadius);
                 g.fillPolygon(tileHex);
-                g.setColor(Color.BLACK);
+                if (tileHighlight != null && tile.x == tileHighlight.x && tile.y == tileHighlight.y) g.setColor(tileColorHighlight);
+                else g.setColor(Color.BLACK);
                 g.drawPolygon(tileHex);
 
                 if (tile.hasRobber()) {
@@ -129,8 +138,9 @@ public class CatanBoardView extends JComponent {
                 Building[] settlements = gs.getBuildings(tile);
                 for (int i = 0; i < settlements.length; i++) {
 //                    g.drawString("" + settlements[i].hashCode(), tile.getVerticesCoords(i).x, tile.getVerticesCoords(i).y);
-                    if (!buildingsDrawn.contains(settlements[i].getComponentID()) && settlements[i].getOwnerId() != -1) {
-                        drawSettlement(g, i, tile.getVerticesCoords(i, tileRadius), CatanConstants.PlayerColors[settlements[i].getOwnerId()], settlements[i].getBuildingType());
+                    if (!buildingsDrawn.contains(settlements[i].getComponentID()) && settlements[i].getOwnerId() != -1 ||
+                        buildingHighlight != null && buildingHighlight.a.x == tile.x && buildingHighlight.a.y == tile.y && buildingHighlight.b == i) {
+                        drawSettlement(g, tile.x, tile.y, i, tile.getVerticesCoords(i, tileRadius), CatanConstants.getPlayerColor(settlements[i].getOwnerId()), settlements[i].getBuildingType());
                         buildingsDrawn.add(settlements[i].getComponentID());
                     }
 
@@ -185,7 +195,7 @@ public class CatanBoardView extends JComponent {
 //        g.drawString("" + edge, location[0].x + 5, location[0].y);
     }
 
-    public void drawSettlement(Graphics2D g, int vertex, Point point, Color color, Building.Type type){
+    public void drawSettlement(Graphics2D g, int x, int y, int vertex, Point point, Color color, Building.Type type){
 
         /* point is the centre of the hexagon
         *  / \  settl.  / \___  city
@@ -206,7 +216,8 @@ public class CatanBoardView extends JComponent {
 
         g.setColor(color);
         g.fillPolygon(settlement);
-        g.setColor(Color.BLACK);
+        if (buildingHighlight != null && buildingHighlight.a.x == x && buildingHighlight.a.y == y && buildingHighlight.b == vertex) g.setColor(tileColorHighlight);
+        else g.setColor(Color.BLACK);
         g.drawPolygon(settlement);
 
 //        g.drawString("" + vertex, point.x, point.y);
@@ -215,5 +226,37 @@ public class CatanBoardView extends JComponent {
     @Override
     public Dimension getPreferredSize() {
         return size;
+    }
+
+    public void highlight(AbstractAction action) {
+        if (action instanceof BuildCity) {
+            // Highlight board node
+        }
+        else if (action instanceof BuildRoad) {
+            // Highlight edge
+        }
+        else if (action instanceof BuildSettlement) {
+            // Highlight board node
+        }
+        else if (action instanceof DeepPlaceSettlementThenRoad) {
+            // settle
+        }
+        else if (action instanceof MoveRobber) {  // Includes MoveRobberAndSteal
+            // tile
+            MoveRobber mr = (MoveRobber) action;
+            tileHighlight = new Point(mr.x, mr.y);
+        }
+        else if (action instanceof PlaceSettlementWithRoad) {
+            // settle + road
+            PlaceSettlementWithRoad pswr = (PlaceSettlementWithRoad) action;
+            buildingHighlight = new Pair<>(new Point(pswr.x, pswr.y), pswr.vertex);
+            roadHighlight = new Pair<>(new Point(pswr.x, pswr.y), pswr.edge);
+        }
+    }
+
+    public void clearHighlight() {
+        tileHighlight = null;
+        buildingHighlight = null;
+        roadHighlight = null;
     }
 }
