@@ -48,7 +48,7 @@ public class BuildRoad extends AbstractAction {
             // Check longest road
             int new_length = cgs.getRoadDistance(x, y, edge);
             cgs.getRoadLengths()[playerID] = new_length;
-            if (new_length > cgs.getLongestRoadLength()) {
+            if (new_length > cgs.getLongestRoadLength() && new_length > cp.min_longest_road) {
                 cgs.setLongestRoadLength(new_length);
                 // add points for longest road and set the new road in gamestate
                 if (cgs.getLongestRoadOwner() >= 0) {

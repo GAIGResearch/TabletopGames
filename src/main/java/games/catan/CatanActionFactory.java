@@ -32,35 +32,36 @@ public class CatanActionFactory {
                 CatanTile tile = board[x][y];
                 // where it is legal to place tile then it can be placed from there
                 if (!(tile.getTileType().equals(CatanTile.TileType.SEA) ||
-                        tile.getTileType().equals(CatanTile.TileType.DESERT))) {
+                    tile.getTileType().equals(CatanTile.TileType.DESERT))) {
 //                        actions.add(new BuildSettlement_v2(settlement, activePlayer));
 //                        actions.add(new BuildSettlement(x, y, i, activePlayer));
-                        for (int i = 0; i < HEX_SIDES; i++) {
-                            Building settlement = gs.getBuilding(tile, i);
-                            if (settlement.getOwnerId() == -1) {
-                                if (gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
-                                    if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
-                                        int[][] coords = tile.getNeighboursOnVertex(i);
-                                        int edge = (HEX_SIDES+i-1)%HEX_SIDES;
-                                        Edge edgeObj = gs.getRoad(settlement, tile, edge);
-                                        if (edgeObj.getOwnerId() == -1) {
-                                            actions.add(new BuildRoad(x, y, edge, player, true));
-                                            for (int[] neighbour : coords) {
-                                                int vertex = (i + 2) % HEX_SIDES;
-                                                edge = (HEX_SIDES+vertex-1)%HEX_SIDES;
-                                                CatanTile nTile = board[neighbour[0]][neighbour[1]];
-                                                edgeObj = gs.getRoad(nTile, vertex, edge);
-                                                if (edgeObj != null && edgeObj.getOwnerId() == -1) {
-                                                    actions.add(new PlaceSettlementWithRoad(neighbour[0], neighbour[1], vertex, edge, player));
-                                                }
+                    for (int i = 0; i < HEX_SIDES; i++) {
+                        Building settlement = gs.getBuilding(tile, i);
+                        if (settlement.getOwnerId() == -1) {
+                            if (gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
+                                if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+                                    int[][] coords = tile.getNeighboursOnVertex(i);
+                                    int edge = (HEX_SIDES+i-1)%HEX_SIDES;
+                                    Edge edgeObj = gs.getRoad(settlement, tile, edge);
+                                    if (edgeObj.getOwnerId() == -1) {
+                                        actions.add(new PlaceSettlementWithRoad(x, y, i, edge, player));
+                                        for (int k = 0; k < coords.length; k++) {
+                                            int[] neighbour = coords[k];
+                                            int vertex = (i + 2*(k+1)) % HEX_SIDES;
+                                            edge = (HEX_SIDES+vertex-1)%HEX_SIDES;
+                                            CatanTile nTile = board[neighbour[0]][neighbour[1]];
+                                            edgeObj = gs.getRoad(nTile, vertex, edge);
+                                            if (edgeObj != null && edgeObj.getOwnerId() == -1) {
+                                                actions.add(new PlaceSettlementWithRoad(neighbour[0], neighbour[1], vertex, edge, player));
                                             }
                                         }
-                                    } else {
-                                        actions.add(new DeepPlaceSettlementThenRoad(x, y, i, player));
                                     }
+                                } else {
+                                    actions.add(new DeepPlaceSettlementThenRoad(x, y, i, player));
                                 }
                             }
                         }
+                    }
                 }
             }
         }

@@ -37,6 +37,7 @@ public class MoveRobberAndSteal extends AbstractAction {
             Random random = new Random(gs.getGameParameters().getRandomSeed());
             int nResTarget = cgs.getNResourcesInHand(targetPlayer);
             if (nResTarget == 0){
+                cgs.setGamePhase(Main);
                 return false;
             }
             int cardIndex = random.nextInt(nResTarget);

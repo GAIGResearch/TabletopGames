@@ -91,18 +91,23 @@ public class CatanForwardModel extends StandardForwardModel {
         int player = gs.getCurrentPlayer();
 
         if (gs.getGamePhase() == Setup) {
-            endPlayerTurn(gs);
-
-            // Check setup finished
-            boolean finishedSetup = true;
-            for (int p = 0; p < gs.getNPlayers(); p++) {
-                if (gs.scores[p] < params.n_settlements_setup * params.buildingValue.get(Building.Type.Settlement)) {
-                    finishedSetup = false;
-                    break;
+            if (gs.getRoundCounter() == 0) {
+                if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
+                    endRound(gs, gs.getCurrentPlayer());
+                } else {
+                    endPlayerTurn(gs);
                 }
-            }
-            if (finishedSetup) {
-                gs.setGamePhase(Main);
+            } else {
+                if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
+                    // Finished setup
+                    endRound(gs, 0);
+                    gs.setGamePhase(Main);
+                    rollDiceAndAllocateResources(gs, params);
+                } else {
+                    int nextPlayer = gs.getCurrentPlayer()-1;
+                    if (nextPlayer < 0) nextPlayer = 0;
+                    endPlayerTurn(gs, nextPlayer);
+                }
             }
         }
 
@@ -119,6 +124,9 @@ public class CatanForwardModel extends StandardForwardModel {
             if (action instanceof DoNothing) {
                 // end player's turn; roll dice and allocate resources
                 endPlayerTurn(gs);
+                if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
+                    endRound(gs, 0);
+                }
                 rollDiceAndAllocateResources(gs, params);
             }
         }

@@ -298,10 +298,13 @@ public class CatanGameState extends AbstractGameState {
 
     public CatanParameters.Resource pickResourceFromHand(int player, int index) {
         int i = 0;
+        CatanParameters.Resource res = null;
         for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(player).entrySet()) {
-            if (index < i) return e.getKey();
+            res = e.getKey();
+            if (index < i) return res;
             i += e.getValue().getValue();
         }
+        if (index < i) return res;
         return null;
     }
 
