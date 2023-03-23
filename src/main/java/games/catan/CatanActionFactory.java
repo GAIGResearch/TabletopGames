@@ -27,6 +27,7 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         // find possible settlement locations and propose them as actions
         CatanTile[][] board = gs.getBoard();
+        HashSet<Integer> settlementsAdded = new HashSet<>();
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
@@ -37,8 +38,9 @@ public class CatanActionFactory {
 //                        actions.add(new BuildSettlement(x, y, i, activePlayer));
                     for (int i = 0; i < HEX_SIDES; i++) {
                         Building settlement = gs.getBuilding(tile, i);
-                        if (settlement.getOwnerId() == -1) {
+                        if (!settlementsAdded.contains(settlement.getComponentID()) && settlement.getOwnerId() == -1) {
                             if (gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
+                                settlementsAdded.add(settlement.getComponentID());
                                 if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
                                     int[][] coords = tile.getNeighboursOnVertex(i);
                                     int edge = (HEX_SIDES+i-1)%HEX_SIDES;

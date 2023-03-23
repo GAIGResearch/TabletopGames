@@ -84,10 +84,11 @@ public class CatanGUI extends AbstractGUIManager {
 
         parent.add(mainPanel, BorderLayout.CENTER);
 
-        JScrollPane pane2 = new JScrollPane(actionPanel);
-        pane2.setPreferredSize(new Dimension(700, 100));
-        pane2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        parent.add(pane2, BorderLayout.SOUTH);
+//        JScrollPane pane2 = new JScrollPane(actionPanel);
+//        pane2.setPreferredSize(new Dimension(700, 100));
+//        pane2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+//        parent.add(pane2, BorderLayout.SOUTH);
+        parent.add(actionPanel, BorderLayout.SOUTH);
 
         parent.revalidate();
         parent.repaint();
@@ -110,17 +111,19 @@ public class CatanGUI extends AbstractGUIManager {
                                            Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {
-        JPanel actionPanel = new JPanel() {
-            @Override
-            public Dimension getMaximumSize() {
-                return new Dimension(width, super.getMaximumSize().height);
-            }
-
-            @Override
-            public Dimension getPreferredSize() {
-                return new Dimension(width, super.getPreferredSize().height);
-            }
-        };
+        JPanel actionPanel = new JPanel();
+//        JPanel actionPanel = new JPanel() {
+//            @Override
+//            public Dimension getMaximumSize() {
+//                return new Dimension(width, super.getMaximumSize().height);
+//            }
+//
+//            @Override
+//            public Dimension getPreferredSize() {
+//                return new Dimension(width, super.getPreferredSize().height);
+//            }
+//        };
+        actionPanel.setPreferredSize(new Dimension(width, height*10));
         actionPanel.setOpaque(false);
 
         actionButtons = new ActionButton[maxActionSpace];
@@ -139,6 +142,8 @@ public class CatanGUI extends AbstractGUIManager {
         pane.getViewport().setOpaque(false);
         pane.setPreferredSize(new Dimension(width, height));
         pane.setMaximumSize(new Dimension(width, height));
+        pane.getVerticalScrollBar().setUnitIncrement(16);
+        pane.getHorizontalScrollBar().setUnitIncrement(20);
         if (boxLayout) {
             pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         }

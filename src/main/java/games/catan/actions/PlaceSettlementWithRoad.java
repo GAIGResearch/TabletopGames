@@ -83,7 +83,7 @@ public class PlaceSettlementWithRoad extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("PlaceSettlementWithRoad: x=%d y=%d vertex=%d edge=%d player=%d",x,y,vertex,edge,player);
+        return String.format("%d settles (%d;%d;%d) road=%d",player,x,y,vertex,edge);
     }
     @Override
     public String getString(AbstractGameState gameState) {
