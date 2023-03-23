@@ -3,7 +3,6 @@ package games.catan.gui;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
-import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
@@ -32,40 +31,58 @@ public class CatanGUI extends AbstractGUIManager {
     public CatanGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
         super(parent, game, ac, humanId);
         if (game == null) return;
-
-        parent.setPreferredSize(new Dimension(1000, 600));
         this.gs = (CatanGameState) game.getGameState();
 
-        boardView = new CatanBoardView(gs, 500, 500);
+        boardView = new CatanBoardView(gs);
 
         // Bottom area will show actions available
         JComponent actionPanel = createActionPanel(new IScreenHighlight[0], 400, defaultActionPanelHeight, false);
 
-        parent.setLayout(new FlowLayout());
-        parent.add(createGameStateInfoPanel(gs), new FlowLayout(FlowLayout.LEADING));
+        parent.setLayout(new BorderLayout());
+        parent.setBackground(Color.white);
+        parent.add(createGameStateInfoPanel(gs), BorderLayout.NORTH);
 
+        JPanel mainPanel = new JPanel();
+        mainPanel.setOpaque(false);
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.X_AXIS));
         // each player have their own panel
         playerPanels = new PlayerPanel[gs.getNPlayers()];
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            playerPanels[i] = new PlayerPanel(i);
+            playerPanels[i] = new PlayerPanel(i, game.getPlayers().get(i).toString());
         }
 
-        JPanel leftPanel = new JPanel();
-        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        leftPanel.add(playerPanels[0]);
-        leftPanel.add(playerPanels[1]);
-        parent.add(leftPanel, new FlowLayout(FlowLayout.LEFT));
+        mainPanel.add(Box.createRigidArea(new Dimension(5,0)));
 
-        parent.add(boardView, new FlowLayout(FlowLayout.CENTER));
+        JPanel leftPanel = new JPanel();
+        leftPanel.setOpaque(false);
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
+        JScrollPane scrollPane0 = new JScrollPane(playerPanels[0]);
+        scrollPane0.setPreferredSize(new Dimension(400,500));
+        leftPanel.add(scrollPane0);
+        JScrollPane scrollPane1 = new JScrollPane(playerPanels[1]);
+        scrollPane1.setPreferredSize(new Dimension(400,500));
+        leftPanel.add(scrollPane1);
+        mainPanel.add(leftPanel);
+
+        mainPanel.add(boardView);
+        mainPanel.add(Box.createRigidArea(new Dimension(5,0)));
 
         JPanel rightPanel = new JPanel();
+        rightPanel.setOpaque(false);
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
-        rightPanel.add(playerPanels[2]);
-        if (playerPanels.length > 3)
-            rightPanel.add(playerPanels[3]);
-        parent.add(rightPanel, new FlowLayout(FlowLayout.RIGHT));
+        JScrollPane scrollPane2 = new JScrollPane(playerPanels[2]);
+        scrollPane2.setPreferredSize(new Dimension(400,500));
+        rightPanel.add(scrollPane2);
+        if (playerPanels.length > 3) {
+            JScrollPane scrollPane3 = new JScrollPane(playerPanels[3]);
+            scrollPane3.setPreferredSize(new Dimension(400,500));
+            rightPanel.add(scrollPane3);
+        }
+        mainPanel.add(rightPanel);
+        mainPanel.add(Box.createRigidArea(new Dimension(5,0)));
 
-        parent.add(actionPanel, new FlowLayout(FlowLayout.TRAILING));
+        parent.add(mainPanel, BorderLayout.CENTER);
+        parent.add(actionPanel, BorderLayout.SOUTH);
 
         parent.revalidate();
         parent.repaint();
@@ -184,58 +201,5 @@ public class CatanGUI extends AbstractGUIManager {
         return wrapper;
     }
 
-    static class PlayerPanel extends JPanel {
-        int playerID;
-        JLabel playerLabel;
-        JLabel scoreLabel;
-        JLabel victoryPointsLabel;
-        JLabel diceRollLabel;
-        JLabel knightCount;
-        JLabel longestRoad;
-        JLabel playerResources;
-        JLabel devCards;
-        JLabel playerColourLabel;
-
-        PlayerPanel(int playerID) {
-            this.playerID = playerID;
-            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-            playerLabel = new JLabel();
-            scoreLabel = new JLabel();
-            victoryPointsLabel = new JLabel();
-            diceRollLabel = new JLabel();
-            knightCount = new JLabel();
-            longestRoad = new JLabel();
-            playerResources = new JLabel();
-            devCards = new JLabel();
-            playerColourLabel = new JLabel();
-            add(playerLabel);
-            playerLabel.setForeground(CatanConstants.PlayerColors[playerID]);
-            add(scoreLabel);
-            add(victoryPointsLabel);
-            add(knightCount);
-            add(longestRoad);
-            add(playerResources);
-            add(devCards);
-            add(playerColourLabel);
-
-        }
-
-        void _update(CatanGameState gs) {
-            playerLabel.setText("Player " + playerID);
-
-            scoreLabel.setText("Scores: " + gs.getScores()[playerID]);
-            knightCount.setText("Knights: " + gs.getKnights()[playerID]);
-            victoryPointsLabel.setText("VictoryPoints: " + gs.getVictoryPoints()[playerID]);
-
-            playerResources.setText("<html>Resources: ");
-            playerResources.setText(playerResources.getText() + "<br/>" + playerID + " : " + gs.getPlayerResources(playerID).toString());
-            playerResources.setText(playerResources.getText() + "</html>");
-
-            devCards.setText("<html>Dev. Cards: ");
-            devCards.setText(devCards.getText() + "<br/>" + playerID + " : " + gs.getPlayerDevCards(playerID).toString());
-            devCards.setText(devCards.getText() + "<br/></html>");
-
-        }
-    }
 }
 

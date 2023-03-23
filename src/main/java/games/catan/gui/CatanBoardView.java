@@ -17,10 +17,11 @@ public class CatanBoardView extends JComponent {
     CatanGameState gs;
     CatanParameters params;
 
-    private double tileRadius;
+    private int tileRadius;
     private int robberRadius = 10;
     private int harbourRadius = 10;
     private int buildingRadius = 10;
+    private int numberRadius = 25;
 
     HashMap<CatanTile.TileType, Color> tileColourMap = new HashMap<CatanTile.TileType, Color>() {{
         put(CatanTile.TileType.DESERT, new Color(210, 203, 181));
@@ -40,19 +41,14 @@ public class CatanBoardView extends JComponent {
         put(CatanTile.TileType.PASTURE, new Color(30, 49, 28));
         put(CatanTile.TileType.HILLS, new Color(49, 29, 16));
     }};
+    Color numberColor = new Color(227, 211, 169);
+    Dimension size;
 
-    public CatanBoardView(CatanGameState gs, int width, int height){
+    public CatanBoardView(CatanGameState gs) {
         this.gs = gs;
         this.params = (CatanParameters) gs.getGameParameters();
         this.tileRadius = 40;
-        setPreferredSize(new Dimension(width, height));
-//        updateTileSize();
-    }
-
-    private void updateTileSize(){
-        // updates the tile width and height and keep it proportional
-        // todo work out the correct size here
-        this.tileRadius = 30; //(double)this.height / CatanConstants.BOARD_SIZE;
+        size = new Dimension((params.n_tiles_per_row-1) * tileRadius * 2 + 10, (params.n_tiles_per_row-1) * tileRadius * 2);
     }
 
     @Override
@@ -92,11 +88,16 @@ public class CatanBoardView extends JComponent {
                 if (tile.getTileType() != CatanTile.TileType.SEA && tile.getTileType() != CatanTile.TileType.DESERT) {
                     g.setColor(textColourMap.get(tile.getTileType()));
                     String type = "" + tile.getTileType();
-                    String number = "" + tile.getNumber();
+                    int number = tile.getNumber();
                     g.drawString(type, centreCoords.x - 20, centreCoords.y);
-                    if (!number.equals("0"))
+                    if (number != 0) {
 //                    g.drawString((tile.x + " " + tile.y), (int) tile.x_coord, (int) tile.y_coord + 20);
-                        g.drawString(number, centreCoords.x, centreCoords.y + 20);
+                        g.setColor(numberColor);
+                        g.fillOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
+                        g.setColor(Color.BLACK);
+                        g.drawOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
+                        g.drawString(""+number, centreCoords.x - (number < 10? 4: 8), centreCoords.y + 25);
+                    }
                 }
             }
         }
@@ -209,5 +210,10 @@ public class CatanBoardView extends JComponent {
         g.drawPolygon(settlement);
 
 //        g.drawString("" + vertex, point.x, point.y);
+    }
+
+    @Override
+    public Dimension getPreferredSize() {
+        return size;
     }
 }

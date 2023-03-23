@@ -123,9 +123,10 @@ public class CatanForwardModel extends StandardForwardModel {
 
             if (action instanceof DoNothing) {
                 // end player's turn; roll dice and allocate resources
-                endPlayerTurn(gs);
                 if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
                     endRound(gs, 0);
+                } else {
+                    endPlayerTurn(gs);
                 }
                 rollDiceAndAllocateResources(gs, params);
             }
