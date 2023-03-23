@@ -86,8 +86,7 @@ public class CatanBoardView extends JComponent {
                 g.setColor(tileColourMap.get(tile.getTileType()));
                 Polygon tileHex = tile.getHexagon(tileRadius);
                 g.fillPolygon(tileHex);
-                if (tileHighlight != null && tile.x == tileHighlight.x && tile.y == tileHighlight.y) g.setColor(tileColorHighlight);
-                else g.setColor(Color.BLACK);
+                g.setColor(Color.BLACK);
                 g.drawPolygon(tileHex);
 
                 if (tile.hasRobber()) {
@@ -117,15 +116,17 @@ public class CatanBoardView extends JComponent {
                 // draw roads
                 Edge[] roads = gs.getRoads(tile);
                 for (int i = 0; i < roads.length; i++) {
-                    if (roads[i] != null && roads[i].getOwnerId() != -1)
-                        drawRoad(g, i, tile.getEdgeCoords(i, tileRadius), CatanConstants.PlayerColors[roads[i].getOwnerId()]);
+                    if (roads[i] != null && roads[i].getOwnerId() != -1 ||
+                            roadHighlight != null && roadHighlight.a.x == tile.x && roadHighlight.a.y == tile.y && roadHighlight.b == i) {
+                        drawRoad(g, i, tile.getEdgeCoords(i, tileRadius), CatanConstants.getPlayerColor(roads[i].getOwnerId()));
 
-                    // Useful for showing road IDs on the GUI
+                        // Useful for showing road IDs on the GUI
 //                        g.setFont(new Font("TimeRoman", Font.PLAIN, 10));
 //                        g.setColor(Color.BLACK);
 //                        Point[] location = tile.getEdgeCoords(i, tileRadius);
 //                        g.drawLine(location[0].x, location[0].y, location[1].x, location[1].y);
 //                        g.drawString(i + "", ((location[0].x + location[1].x) / 2), ((location[0].y + location[1].y) / 2));
+                    }
                 }
             }
         }
@@ -169,6 +170,16 @@ public class CatanBoardView extends JComponent {
 
 
             }
+        }
+
+        if (tileHighlight != null) {
+            CatanTile tile = gs.getBoard()[tileHighlight.x][tileHighlight.y];
+            Polygon tileHex = tile.getHexagon(tileRadius);
+            g.setColor(tileColorHighlight);
+            Stroke s = g.getStroke();
+            g.setStroke(new BasicStroke(8));
+            g.drawPolygon(tileHex);
+            g.setStroke(s);
         }
     }
 
@@ -228,18 +239,36 @@ public class CatanBoardView extends JComponent {
         return size;
     }
 
+    @Override
+    public Dimension getMinimumSize() {
+        return size;
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return size;
+    }
+
     public void highlight(AbstractAction action) {
         if (action instanceof BuildCity) {
             // Highlight board node
+            BuildCity buildCity = (BuildCity)action;
+            buildingHighlight = new Pair<>(new Point(buildCity.row, buildCity.col), buildCity.vertex);
         }
         else if (action instanceof BuildRoad) {
             // Highlight edge
+            BuildRoad buildRoad = (BuildRoad) action;
+            roadHighlight = new Pair<>(new Point(buildRoad.x, buildRoad.y), buildRoad.edge);
         }
         else if (action instanceof BuildSettlement) {
             // Highlight board node
+            BuildSettlement buildCity = (BuildSettlement)action;
+            buildingHighlight = new Pair<>(new Point(buildCity.x, buildCity.y), buildCity.vertex);
         }
         else if (action instanceof DeepPlaceSettlementThenRoad) {
             // settle
+            DeepPlaceSettlementThenRoad buildCity = (DeepPlaceSettlementThenRoad)action;
+            buildingHighlight = new Pair<>(new Point(buildCity.x, buildCity.y), buildCity.vertex);
         }
         else if (action instanceof MoveRobber) {  // Includes MoveRobberAndSteal
             // tile

@@ -58,10 +58,10 @@ public class CatanGUI extends AbstractGUIManager {
         leftPanel.setOpaque(false);
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollPane0 = new JScrollPane(playerPanels[0]);
-        scrollPane0.setPreferredSize(new Dimension(400,300));
+        scrollPane0.setPreferredSize(new Dimension(400,200));
         leftPanel.add(scrollPane0);
         JScrollPane scrollPane1 = new JScrollPane(playerPanels[1]);
-        scrollPane1.setPreferredSize(new Dimension(400,300));
+        scrollPane1.setPreferredSize(new Dimension(400,200));
         leftPanel.add(scrollPane1);
         mainPanel.add(leftPanel);
 
@@ -72,11 +72,11 @@ public class CatanGUI extends AbstractGUIManager {
         rightPanel.setOpaque(false);
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollPane2 = new JScrollPane(playerPanels[2]);
-        scrollPane2.setPreferredSize(new Dimension(400,300));
+        scrollPane2.setPreferredSize(new Dimension(400,200));
         rightPanel.add(scrollPane2);
         if (playerPanels.length > 3) {
             JScrollPane scrollPane3 = new JScrollPane(playerPanels[3]);
-            scrollPane3.setPreferredSize(new Dimension(400,300));
+            scrollPane3.setPreferredSize(new Dimension(400,200));
             rightPanel.add(scrollPane3);
         }
         mainPanel.add(rightPanel);
@@ -85,7 +85,7 @@ public class CatanGUI extends AbstractGUIManager {
         parent.add(mainPanel, BorderLayout.CENTER);
 
         JScrollPane pane2 = new JScrollPane(actionPanel);
-        pane2.setPreferredSize(new Dimension(700, 50));
+        pane2.setPreferredSize(new Dimension(700, 100));
         pane2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         parent.add(pane2, BorderLayout.SOUTH);
 

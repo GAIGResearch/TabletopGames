@@ -47,13 +47,7 @@ class PlayerPanel extends JPanel {
         scoreLabel.setText("Score: " + gs.getScores()[playerID]);
         knightCount.setText("Knights: " + gs.getKnights()[playerID]);
         victoryPointsLabel.setText("VP: " + gs.getVictoryPoints()[playerID]);
-
-        playerResources.setText("<html>Resources: ");
-        playerResources.setText(playerResources.getText() + "<br/>" + playerID + " : " + gs.getPlayerResources(playerID).toString());
-        playerResources.setText(playerResources.getText() + "</html>");
-
-        devCards.setText("<html>Dev. Cards: ");
-        devCards.setText(devCards.getText() + "<br/>" + playerID + " : " + gs.getPlayerDevCards(playerID).toString());
-        devCards.setText(devCards.getText() + "<br/></html>");
+        playerResources.setText("<html>Resources: " + gs.getPlayerResources(playerID).toString() + "</html>");
+        devCards.setText("<html>Dev. Cards: " +  gs.getPlayerDevCards(playerID).toString() + "</html>");
     }
 }
