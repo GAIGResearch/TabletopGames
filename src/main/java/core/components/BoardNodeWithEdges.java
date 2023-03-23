@@ -24,10 +24,8 @@ public class BoardNodeWithEdges extends Component {
      * @param neighbour - new neighbour of this node.
      */
     public void addNeighbour(BoardNodeWithEdges neighbour, Edge edge) {
-        if (!neighbourEdgeMapping.containsValue(neighbour)) {
-            neighbourEdgeMapping.put(edge, neighbour);
-            neighbour.neighbourEdgeMapping.put(edge, this);
-        }
+        neighbourEdgeMapping.put(edge, neighbour);
+        neighbour.neighbourEdgeMapping.put(edge, this);
     }
 
     /**
@@ -35,13 +33,9 @@ public class BoardNodeWithEdges extends Component {
      * @param neighbour - neighbour to remove.
      * @return - true if removed successfully, false otherwise. may fail if neighbour didn't exist in the first place.
      */
-    public boolean removeNeighbour(BoardNodeWithEdges neighbour, Edge edge) {
-        if (neighbourEdgeMapping.containsValue(neighbour)) {
-            neighbourEdgeMapping.remove(edge);
-            neighbour.neighbourEdgeMapping.remove(edge);
-            return true;
-        }
-        return false;
+    public void removeNeighbour(BoardNodeWithEdges neighbour, Edge edge) {
+        neighbourEdgeMapping.remove(edge);
+        neighbour.neighbourEdgeMapping.remove(edge);
     }
 
     /**

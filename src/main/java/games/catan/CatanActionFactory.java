@@ -5,6 +5,7 @@ import core.actions.ActionSpace;
 import core.actions.DoNothing;
 import core.components.Counter;
 import core.components.Deck;
+import core.components.Edge;
 import games.catan.actions.*;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
@@ -41,13 +42,15 @@ public class CatanActionFactory {
                                     if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
                                         int[][] coords = tile.getNeighboursOnVertex(i);
                                         int edge = (HEX_SIDES+i-1)%HEX_SIDES;
-                                        if (gs.getRoad(settlement, tile, edge).getOwnerId() == -1) {
+                                        Edge edgeObj = gs.getRoad(settlement, tile, edge);
+                                        if (edgeObj.getOwnerId() == -1) {
                                             actions.add(new BuildRoad(x, y, edge, player, true));
                                             for (int[] neighbour : coords) {
                                                 int vertex = (i + 2) % HEX_SIDES;
                                                 edge = (HEX_SIDES+vertex-1)%HEX_SIDES;
                                                 CatanTile nTile = board[neighbour[0]][neighbour[1]];
-                                                if (gs.getRoad(nTile, vertex, edge).getOwnerId() == -1) {
+                                                edgeObj = gs.getRoad(nTile, vertex, edge);
+                                                if (edgeObj != null && edgeObj.getOwnerId() == -1) {
                                                     actions.add(new PlaceSettlementWithRoad(neighbour[0], neighbour[1], vertex, edge, player));
                                                 }
                                             }

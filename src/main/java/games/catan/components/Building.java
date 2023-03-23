@@ -71,6 +71,6 @@ public class Building extends BoardNodeWithEdges {
 
     @Override
     public String toString() {
-        return type + (harbour != null? " (H: " + harbour : "");
+        return type + (harbour != null? " (H: " + harbour + ")" : "") + " ns:" + neighbourEdgeMapping.size();
     }
 }

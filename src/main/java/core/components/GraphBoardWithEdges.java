@@ -49,11 +49,12 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
             if (bnCopy == null) bnCopy = new BoardNodeWithEdges(bn.ownerId, bn.getComponentID());
             bn.copyComponentTo(bnCopy);
             nodeCopies.put(bn.getComponentID(), bnCopy);
-            for (Map.Entry<Edge, BoardNodeWithEdges> e: bn.neighbourEdgeMapping.entrySet()) {
-                edgeCopies.put(e.getValue().componentID, e.getKey().copy());
+            // Copy edges
+            for (Edge e: bn.neighbourEdgeMapping.keySet()) {
+                edgeCopies.put(e.componentID, e.copy());
             }
         }
-        // Assign neighbours
+        // Assign neighbours and edges
         for (BoardNodeWithEdges bn: boardNodes.values()) {
             BoardNodeWithEdges bnCopy = nodeCopies.get(bn.getComponentID());
             for (Map.Entry<Edge, BoardNodeWithEdges> e: bn.neighbourEdgeMapping.entrySet()) {
@@ -147,12 +148,6 @@ public class GraphBoardWithEdges extends Component implements IComponentContaine
     public void addConnection(BoardNodeWithEdges bn1, BoardNodeWithEdges bn2, Edge edge) {
         bn1.addNeighbour(bn2, edge);
         bn2.addNeighbour(bn1, edge);
-        if (!boardNodes.containsKey(bn1.getComponentID())) {
-            boardNodes.put(bn1.getComponentID(), bn1);
-        }
-        if (!boardNodes.containsKey(bn2.getComponentID())) {
-            boardNodes.put(bn1.getComponentID(), bn2);
-        }
     }
 
     @Override

@@ -7,7 +7,6 @@ import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
 import core.components.Edge;
-import games.catan.components.Building;
 
 import java.util.Objects;
 
