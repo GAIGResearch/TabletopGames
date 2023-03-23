@@ -1,13 +1,11 @@
 package games.catan.components;
 
-import core.components.BoardNode;
+import core.components.BoardNodeWithEdges;
 import games.catan.CatanParameters;
 
 import java.util.Objects;
 
-import static games.catan.CatanConstants.HEX_SIDES;
-
-public class Building extends BoardNode {
+public class Building extends BoardNodeWithEdges {
     public enum Type {
         Settlement,
         City
@@ -15,14 +13,16 @@ public class Building extends BoardNode {
     private Type type;
     private CatanParameters.Resource harbour;
 
+    public Building(){
+        this(-1);
+    }
     public Building(int owner){
-        super(HEX_SIDES, "Settlement");
+        super();
         setOwnerId(owner);
         this.type = Type.Settlement;
     }
     public Building(int owner, int id){
-        super(HEX_SIDES, "Settlement", id);
-        setOwnerId(owner);
+        super(owner, id);
         this.type = Type.Settlement;
     }
 
@@ -37,6 +37,9 @@ public class Building extends BoardNode {
     public Type getBuildingType(){
         return type;
     }
+    public void setBuildingType(Type type) {
+        this.type = type;
+    }
 
     public CatanParameters.Resource getHarbour() {
         return harbour;
@@ -45,10 +48,10 @@ public class Building extends BoardNode {
         this.harbour = harbour;
     }
 
-    public Building copy(){
+    public Building copy(){  // TODO super copy of neighbour nodes outside
         Building copy = new Building(ownerId, componentID);
-        copy.type = this.type;
-        copy.harbour = this.harbour;
+        copy.harbour = harbour;
+        copy.type = type;
         return copy;
     }
 
@@ -64,5 +67,10 @@ public class Building extends BoardNode {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), type, harbour);
+    }
+
+    @Override
+    public String toString() {
+        return type + (harbour != null? " (H: " + harbour : "");
     }
 }

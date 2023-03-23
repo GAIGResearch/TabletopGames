@@ -32,7 +32,7 @@ public class BuildSettlement extends AbstractAction {
         CatanTile[][] board = cgs.getBoard();
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
 
-        Building settlement = board[x][y].getSettlements()[vertex];
+        Building settlement = cgs.getBuilding(board[x][y], vertex);
         if (settlement != null && settlement.getOwnerId() == -1) {
             if (!free) {
                 if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.Settlement), playerID)) {
@@ -46,10 +46,10 @@ public class BuildSettlement extends AbstractAction {
             }
             settleTokens.increment();
 
-            board[x][y].addSettlement(vertex, playerID);
-            if(board[x][y].getSettlements()[vertex].getHarbour() != null){
+            settlement.setOwnerId(playerID);
+            if(settlement.getHarbour() != null){
                 HashMap<CatanParameters.Resource, Counter> exchangeRates = cgs.getExchangeRates(playerID);
-                CatanParameters.Resource harbour = board[x][y].getSettlements()[vertex].getHarbour();
+                CatanParameters.Resource harbour = settlement.getHarbour();
                 int newRate = cp.harbour_exchange_rate;
                 if (harbour == CatanParameters.Resource.WILD) newRate = cp.harbour_wild_exchange_rate;
                 exchangeRates.get(harbour).setValue(Math.min(exchangeRates.get(harbour).getValue(), newRate));

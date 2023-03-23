@@ -921,7 +921,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Stratego");
+        String gameType = Utils.getArg(args, "game", "Catan");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -929,12 +929,12 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
         MCTSParams params1 = new MCTSParams();
         params1.actionSpace = new ActionSpace(ActionSpace.Structure.Deep);
-        players.add(new MCTSPlayer(params1));
+//        players.add(new MCTSPlayer(params1));
 //        MCTSParams params2 = new MCTSParams();
 //        params2.actionSpace = new ActionSpace(ActionSpace.Structure.Flat);
 //        players.add(new MCTSPlayer(params2));

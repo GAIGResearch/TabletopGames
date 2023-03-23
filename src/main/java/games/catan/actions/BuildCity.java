@@ -29,7 +29,7 @@ public class BuildCity extends AbstractAction {
         CatanTile[][] board = cgs.getBoard();
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
 
-        Building settlement = board[row][col].getSettlements()[vertex];
+        Building settlement = cgs.getBuilding(board[row][col], vertex);
         if (settlement != null && settlement.getOwnerId() == playerID) {
             if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.City), playerID)) {
                 throw new AssertionError("Player cannot afford city");

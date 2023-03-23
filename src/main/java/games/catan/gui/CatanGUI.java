@@ -5,7 +5,6 @@ import core.AbstractPlayer;
 import core.Game;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
-import games.catan.components.CatanTile;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -145,8 +144,6 @@ public class CatanGUI extends AbstractGUIManager {
 
 
     protected JPanel createGameStateInfoPanel(AbstractGameState gameState) {
-        System.out.println("info panel");
-
         gameInfo = new JPanel();
         gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
         gameInfo.add(new JLabel("<html><h1>Catan</h1></html>"));
@@ -161,7 +158,6 @@ public class CatanGUI extends AbstractGUIManager {
         diceRollLabel = new JLabel("Dice Roll: " + ((CatanGameState) gameState).getRollValue());
 
         playerResources = new JLabel("<html>Resources: ");
-        playerResources.setText(playerResources.getText() + "<br/>K : [B, L, O, G, W]");
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             playerResources.setText(playerResources.getText() + "<br/>" + i + " : " + gs.getPlayerResources(i).toString());
         }
@@ -232,7 +228,6 @@ public class CatanGUI extends AbstractGUIManager {
             victoryPointsLabel.setText("VictoryPoints: " + gs.getVictoryPoints()[playerID]);
 
             playerResources.setText("<html>Resources: ");
-            playerResources.setText(playerResources.getText() + "<br/>K : [B, L, O, G, W]");
             playerResources.setText(playerResources.getText() + "<br/>" + playerID + " : " + gs.getPlayerResources(playerID).toString());
             playerResources.setText(playerResources.getText() + "</html>");
 

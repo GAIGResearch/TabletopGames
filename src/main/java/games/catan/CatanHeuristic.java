@@ -3,6 +3,7 @@ package games.catan;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.CoreConstants;
+import core.components.BoardNodeWithEdges;
 import core.components.Counter;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
@@ -85,9 +86,9 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
         // value player cities and settlements
         if(playerCities != 0.0 || playerSettlements != 0.0){
             int settlementCount = 0, cityCount = 0;
-            ArrayList<Building> settlements = state.getPlayersSettlements(playerId);
-            for (Building settlement : settlements) {
-                if(settlement.getBuildingType() == Settlement)
+            ArrayList<BoardNodeWithEdges> settlements = state.getPlayersSettlements(playerId);
+            for (BoardNodeWithEdges settlement : settlements) {
+                if(((Building)settlement).getBuildingType() == Settlement)
                     settlementCount++;
                 else
                     cityCount++;

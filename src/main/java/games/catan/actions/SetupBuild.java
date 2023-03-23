@@ -40,7 +40,7 @@ public class SetupBuild extends AbstractAction implements IExtendedSequence {
                 for (int y = 0; y < board[x].length; y++) {
                     CatanTile tile = board[x][y];
                     for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
-                        Building settlement = tile.getSettlements()[i];
+                        Building settlement = state.getBuilding(tile, i);
 
                         // where it is legal to place tile then it can be placed from there
                         if (settlement.getOwnerId() == -1 &&
@@ -57,7 +57,7 @@ public class SetupBuild extends AbstractAction implements IExtendedSequence {
         } else {
             CatanTile tile = state.getBoard()[X][Y];
             for(int i = 0; i < CatanConstants.HEX_SIDES; i++){
-                if(state.checkRoadPlacement(i,tile, player)){
+                if(state.checkRoadPlacement(i, tile, player)){
                     actions.add(new BuildRoad(X, Y, i, getCurrentPlayer(state), true));
                 }
             }

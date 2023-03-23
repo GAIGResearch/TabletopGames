@@ -6,8 +6,7 @@ import core.components.Counter;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.components.CatanTile;
-import games.catan.components.Edge;
-import games.catan.components.Graph;
+import core.components.Edge;
 import games.catan.components.Building;
 
 import java.util.Objects;
@@ -32,35 +31,20 @@ public class BuildRoad extends AbstractAction {
         CatanGameState cgs = (CatanGameState) gs;
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
         CatanTile[][] board = cgs.getBoard();
-        if (board[x][y].getRoads()[edge].getOwnerId() == -1) {
-            Counter roadTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Road);
-            if (roadTokens.isMaximum()) {
-                throw new AssertionError("No more roads to build for player " + gs.getCurrentPlayer());
-            }
-            roadTokens.increment();
+        Edge edgeObj = cgs.getRoad(board[x][y], edge, edge);
+        if (edgeObj.getOwnerId() == -1) {
             // only take resources after set up and not with road building card
             if (!free) {
                 if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.Road), playerID)) {
                     throw new AssertionError("Player " + playerID + " cannot afford this road");
                 }
             }
-            board[x][y].addRoad(edge, playerID);
-
-            // find the road in the graph and set the owner to playerID
-            Graph graph = cgs.getGraph();
-            Building settl1 = board[x][y].getSettlements()[edge];
-            Building settl2 = board[x][y].getSettlements()[(edge+1)%6];
-            // update the placed road in the graph in both directions not just on the board
-            for (Edge e: graph.getEdges(settl1)){
-                if (e.getDest().equals(settl2)){
-                    e.getRoad().setOwnerId(playerID);
-                }
+            Counter roadTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Road);
+            if (roadTokens.isMaximum()) {
+                throw new AssertionError("No more roads to build for player " + gs.getCurrentPlayer());
             }
-            for (Edge e: graph.getEdges(settl2)){
-                if (e.getDest().equals(settl1)){
-                    e.getRoad().setOwnerId(playerID);
-                }
-            }
+            roadTokens.increment();
+            edgeObj.setOwnerId(playerID);
 
             // Check longest road
             int new_length = cgs.getRoadDistance(x, y, edge);

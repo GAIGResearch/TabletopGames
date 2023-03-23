@@ -1,7 +1,6 @@
 package games.catan.components;
 
 import core.components.BoardNode;
-import games.catan.CatanParameters;
 
 import java.awt.*;
 import java.util.Arrays;
@@ -10,6 +9,16 @@ import java.util.Objects;
 import static games.catan.CatanConstants.HEX_SIDES;
 
 public class CatanTile extends BoardNode {
+    public enum TileType {
+        HILLS,
+        FOREST,
+        MOUNTAINS,
+        FIELDS,
+        PASTURE,
+        DESERT,
+        SEA
+    }
+
     /*
     Implementation of a Hexagon structure using "even-r" representation, meaning that the hexagons are oriented with
     having their "pointy" side facing up and every odd row is offset by 0.5 * width.
@@ -19,12 +28,8 @@ public class CatanTile extends BoardNode {
     public final int x;
     public final int y;
 
-    Road[] roads;
-    Building[] settlements;
-    int[] harbors;
-
+    int[] verticesBoardNodeIDs, edgeIDs;  // ID of board node mapping to each vertex on this tile
     TileType tileType;
-    private boolean hasHarbor;
     int number;
     boolean robber;
 
@@ -32,28 +37,30 @@ public class CatanTile extends BoardNode {
         super(HEX_SIDES, "");
         this.x = x;
         this.y = y;
-        roads = new Road[HEX_SIDES];
-        harbors = new int[HEX_SIDES];
-        settlements = new Building[HEX_SIDES];
+        verticesBoardNodeIDs = new int[HEX_SIDES];
+        edgeIDs = new int[HEX_SIDES];
+        Arrays.fill(verticesBoardNodeIDs, -1);
+        Arrays.fill(edgeIDs, -1);
         robber = false;
     }
 
-    public CatanTile(int x, int y, int componentId) {
+    protected CatanTile(int x, int y, int componentId) {
         super(HEX_SIDES, "", componentId);
         this.x = x;
         this.y = y;
-        roads = new Road[HEX_SIDES];
-        harbors = new int[HEX_SIDES];
-        settlements = new Building[HEX_SIDES];
+        verticesBoardNodeIDs = new int[HEX_SIDES];
+        edgeIDs = new int[HEX_SIDES];
+        Arrays.fill(verticesBoardNodeIDs, -1);
+        Arrays.fill(edgeIDs, -1);
         robber = false;
     }
 
-    public CatanTile(int x, int y, Road[] edges, Building[] vertices) {
+    public CatanTile(int x, int y, int[] verticesBoardNodeIDs, int[] edgeIDs) {
         super(HEX_SIDES, "");
         this.x = x;
         this.y = y;
-        this.roads = edges;
-        this.settlements = vertices;
+        this.verticesBoardNodeIDs = verticesBoardNodeIDs;
+        this.edgeIDs = edgeIDs;
         robber = false;
     }
 
@@ -104,79 +111,25 @@ public class CatanTile extends BoardNode {
         this.number = number;
     }
 
-    public void setRoad(int edge, Road road) {
-        // if null -> uninitialized
-        if (this.roads[edge] == null || this.roads[edge].getOwnerId() == -1) {
-            this.roads[edge] = road;
-            return;
-        }
-        throw new AssertionError("Cannot set road: edge: " + edge);
+    public int[] getVerticesBoardNodeIDs() {
+        return verticesBoardNodeIDs;
     }
 
-    public void addRoad(int edge, int playerID) {
-        // if null -> uninitialized
-        if (this.roads[edge].getOwnerId() == -1) {
-            this.roads[edge].setOwnerId(playerID);
-            return;
-        }
-        throw new AssertionError("Cannot add road: edge: " + edge);
+    public void setVertexBoardNodeID(int vertex, int id) {
+        verticesBoardNodeIDs[vertex] = id;
     }
 
-    public Road[] getRoads() {
-        return roads;
+    public int[] getEdgeIDs() {
+        return edgeIDs;
     }
 
-    public void addHarbor(int edge, int type) {
-        if (!hasHarbor) {
-            this.harbors[edge] = type;
-            this.hasHarbor = true;
-            this.settlements[edge].setHarbour(CatanParameters.Resource.values()[type]);
-            this.settlements[(edge + 1) % 6].setHarbour(CatanParameters.Resource.values()[type]);
-            return;
-        }
-        throw new AssertionError("Cannot add harbour: edge: " + edge);
-    }
-
-    public int[] getHarbors() {
-        return harbors;
-    }
-
-    public boolean hasHarbor() {
-        return hasHarbor;
-    }
-
-    public void addSettlement(int vertex, int playerID) {
-        if (this.settlements[vertex].getOwnerId() == -1) {
-            this.settlements[vertex].setOwnerId(playerID);
-            return;
-        }
-        throw new AssertionError("Cannot add settlement: vertex: " + vertex);
-    }
-
-    public void setSettlement(int vertex, Building settlement) {
-        // if null -> uninitialized
-        if (this.settlements[vertex] == null || this.settlements[vertex].getOwnerId() == -1) {
-            this.settlements[vertex] = settlement;
-            return;
-        }
-        throw new AssertionError("Cannot set settlement: vertex: " + vertex);
-    }
-
-    public Building[] getSettlements() {
-        return this.settlements;
-    }
-
-    public boolean addCity(int vertex) {
-        if (this.settlements[vertex] == null) {
-            throw new AssertionError("Cannot add city: vertex: " + vertex);
-        } else {
-            return this.settlements[vertex].upgrade();
-        }
+    public void setEdgeID(int edge, int id) {
+        edgeIDs[edge] = id;
     }
 
     public int getDistanceToTile(CatanTile tile) {
         int[] this_coord = toCube();
-        int[] other_coord = toCube();
+        int[] other_coord = tile.toCube();
         return (Math.abs(this_coord[0] - other_coord[0]) +
                 Math.abs(this_coord[1] - other_coord[1]) + Math.abs(this_coord[2] - other_coord[2])) / 2;
     }
@@ -262,20 +215,11 @@ public class CatanTile extends BoardNode {
 
     public CatanTile copy() {
         CatanTile copy = new CatanTile(x, y, componentID);
-        copy.roads = new Road[HEX_SIDES];
-        for (int i = 0; i < roads.length; i++) {
-            copy.roads[i] = roads[i].copy();
-        }
-        copy.hasHarbor = this.hasHarbor;
-        copy.harbors = Arrays.copyOf(harbors, harbors.length);
-        copy.settlements = new Building[HEX_SIDES];
-        for (int i = 0; i < settlements.length; i++) {
-            copy.settlements[i] = settlements[i].copy();
-        }
+        copy.verticesBoardNodeIDs = verticesBoardNodeIDs.clone();
+        copy.edgeIDs = edgeIDs.clone();
         copy.robber = robber;
         copy.tileType = tileType;
         copy.number = number;
-
         return copy;
     }
 
@@ -285,30 +229,19 @@ public class CatanTile extends BoardNode {
         if (!(o instanceof CatanTile)) return false;
         if (!super.equals(o)) return false;
         CatanTile catanTile = (CatanTile) o;
-        return x == catanTile.x && y == catanTile.y && hasHarbor == catanTile.hasHarbor && number == catanTile.number && robber == catanTile.robber && Arrays.equals(roads, catanTile.roads) && Arrays.equals(settlements, catanTile.settlements) && Arrays.equals(harbors, catanTile.harbors) && tileType == catanTile.tileType;
+        return x == catanTile.x && y == catanTile.y && number == catanTile.number && robber == catanTile.robber && Arrays.equals(verticesBoardNodeIDs, catanTile.verticesBoardNodeIDs) && Arrays.equals(edgeIDs, catanTile.edgeIDs) && tileType == catanTile.tileType;
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), x, y, tileType, hasHarbor, number, robber);
-        result = 31 * result + Arrays.hashCode(roads);
-        result = 31 * result + Arrays.hashCode(settlements);
-        result = 31 * result + Arrays.hashCode(harbors);
+        int result = Objects.hash(super.hashCode(), x, y, tileType, number, robber);
+        result = 31 * result + Arrays.hashCode(verticesBoardNodeIDs);
+        result = 31 * result + Arrays.hashCode(edgeIDs);
         return result;
     }
 
     @Override
     public String toString() {
-        return "CatanTile at x " + x + " y " + y + " robber = " + robber;
-    }
-
-    public enum TileType {
-        HILLS,
-        FOREST,
-        MOUNTAINS,
-        FIELDS,
-        PASTURE,
-        DESERT,
-        SEA
+        return tileType + " " + number + " at (" + x + ";" + y + ")" + (robber? " [R]" : "");
     }
 }
