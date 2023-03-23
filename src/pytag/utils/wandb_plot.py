@@ -9,31 +9,41 @@ sns.set_theme()
 from collections import defaultdict, OrderedDict
 
 agent = ["PPO", "PPO_LSTM"]
-games = ["TAG/Diamant", "TAG/ExplodingKittens", "TAG/LoveLetter"] # "TAG/TicTacToe", "TAG/Stratego",
+games = [ "TAG/Stratego", "TAG/TicTacToe", "TAG/Diamant", "TAG/ExplodingKittens", "TAG/LoveLetter"] # "TAG/TicTacToe", "TAG/Stratego",
 opponents = ["random", "osla"]
-n_players = [2, 4]
+n_players = [2]
+metric = "length"  # wins, rewards, length
+ENTITY = "martinballa"  # '<entity>'
+project = "pyTAG"  # '<project>'
+api = wandb.Api()
+
+window = 100
+
+if metric == "wins":
+    Y_RANGES = [0, 1]
+    METRIC_NAME = "charts/episodic_wins"
+elif metric == "length":
+    Y_RANGES = [0, 1]
+    METRIC_NAME = "charts/episodic_length"
+else:
+    Y_RANGES = [-1, 1]
+    METRIC_NAME = "charts/episodic_return"
 for game in games:
-    for opponent in opponents:
+    # for opponent in opponents:
         for n_player in n_players:
             if "Stratego" in game and n_player == 4:
                 continue
             if "TicTacToe" in game and n_player == 4:
                 continue
-            ENTITY = "martinballa" # '<entity>'
-            project = "pyTAG"  # '<project>'
-            METRIC_NAME = "charts/episodic_return" #"charts/episodic_wins" # '<metric>'
-            Y_RANGES = [-1, 1]
-            filename = os.path.expanduser(f"~/data/pyTAG/plots/{game}_n_players{n_player}_{opponent}_results.png")
-            window = 100
 
-            api = wandb.Api()
+            filename = os.path.expanduser(f"~/data/pyTAG/plots/merged/{metric}_{game}_{n_player}_players.png")
             metrics = defaultdict(list)
-            title = f"{n_player}P {game[4:]} vs {opponent}"
-            ncols = 3
+            title = f"{n_player} Player {game[4:]}" # vs {opponent}"
+            ncols = 2
 
-            filters = ["lstm", "env_id", "n_players", "opponent"]
-            filter_values = ["", game, n_player, opponent]
-            labels = ["PPO", "PPO-LSTM"]
+            filters = ["opponent", "lstm", "env_id", "n_players"]
+            filter_values = ["", "", game, n_player]
+            labels = ["PPO vs OSLA", "PPO-LSTM vs OSLA", "PPO vs RND", "PPO-LSTM vs RND"]
             # labels = [""]
 
             groups = {}
@@ -44,6 +54,10 @@ for game in games:
 
             for run in runs:
                 if run.state != "finished":
+                    continue
+                if run.config["opponent"] == "mcts":
+                    continue
+                if "old" in run.tags:
                     continue
                 values = []
                 ignore = False
@@ -116,8 +130,9 @@ for game in games:
         ax.legend(ncol=ncols, frameon=False)  # bbox_to_anchor=(0.90, 0.1)) #, loc='lower right', frameon=False)
         plt.title(title)
         plt.xlabel("1e6 steps", labelpad=0)
-        plt.ylabel("rewards")
-        ax.set_ylim(Y_RANGES)
+        plt.ylabel(metric)
+        if metric != "length":
+            ax.set_ylim(Y_RANGES)
         ax.spines["top"].set_visible(False)
         # ax.spines["bottom"].set_visible(False)
         ax.spines["right"].set_visible(False)
