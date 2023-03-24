@@ -313,6 +313,8 @@ public class CatanActionFactory {
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
+        HashSet<Integer> settlementsAdded = new HashSet<>();
+        HashSet<Integer> roadsAdded = new HashSet<>();
         // find possible roads, settlements and city upgrades and propose them as actions
         CatanTile[][] board = gs.getBoard();
         for (int x = 0; x < board.length; x++) {
@@ -321,14 +323,10 @@ public class CatanActionFactory {
                 for (int i = 0; i < HEX_SIDES; i++) {
                     Building settlement = gs.getBuilding(tile, i);
 
-                    // where it is legal to place tile then it can be placed from there
-                    if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-                            && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
-                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.Settlement), player)
-                                && !gs.playerTokens.get(player).get(CatanParameters.ActionType.Settlement).isMaximum()) {
-                            actions.add(new BuildSettlement(x, y, i, player, false));
-                        }
-                    }
+                    // Roads
+                    Edge edge = gs.getRoad(settlement, tile, i);
+                    if (edge == null || roadsAdded.contains(edge.getComponentID())) continue;
+                    roadsAdded.add(edge.getComponentID());
 
                     if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
                             && gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())) {
@@ -338,6 +336,20 @@ public class CatanActionFactory {
                         }
                     }
 
+                    if (settlementsAdded.contains(settlement.getComponentID())) continue;
+                    settlementsAdded.add(settlement.getComponentID());
+
+                    // Settlements
+                    // where it is legal to place tile then it can be placed from there
+                    if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
+                            && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
+                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.Settlement), player)
+                                && !gs.playerTokens.get(player).get(CatanParameters.ActionType.Settlement).isMaximum()) {
+                            actions.add(new BuildSettlement(x, y, i, player, false));
+                        }
+                    }
+
+                    // Cities
                     if (settlement.getOwnerId() == player && settlement.getBuildingType() == Settlement) {
                         if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.City), player)
                                 && !gs.playerTokens.get(player).get(CatanParameters.ActionType.City).isMaximum()) {

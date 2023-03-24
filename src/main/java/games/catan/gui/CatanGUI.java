@@ -29,6 +29,8 @@ public class CatanGUI extends AbstractGUIManager {
     JLabel devCards;
     JLabel playerColourLabel;
 
+    JScrollPane actionScrollPane;
+
     public CatanGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
         super(parent, game, ac, humanId);
         if (game == null) return;
@@ -37,7 +39,7 @@ public class CatanGUI extends AbstractGUIManager {
         boardView = new CatanBoardView(gs);
 
         // Bottom area will show actions available
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], 400, defaultActionPanelHeight, false, false, null, this::highlightActionOnBoard, this::removeHighlightOnBoard);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], 400, defaultActionPanelHeight, false, false, this::scrollActionPanelToTop, this::highlightActionOnBoard, this::removeHighlightOnBoard);
 
         parent.setLayout(new BorderLayout());
         parent.setBackground(Color.white);
@@ -105,6 +107,9 @@ public class CatanGUI extends AbstractGUIManager {
     protected void removeHighlightOnBoard(ActionButton button) {
         boardView.clearHighlight();
     }
+    protected void scrollActionPanelToTop(ActionButton button) {
+        javax.swing.SwingUtilities.invokeLater(() -> actionScrollPane.getVerticalScrollBar().setValue(0));
+    }
 
     protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout,
                                            boolean opaque,
@@ -137,17 +142,17 @@ public class CatanGUI extends AbstractGUIManager {
             actionButton.informAllActionButtons(actionButtons);
         }
 
-        JScrollPane pane = new JScrollPane(actionPanel);
-        pane.setOpaque(false);
-        pane.getViewport().setOpaque(false);
-        pane.setPreferredSize(new Dimension(width, height));
-        pane.setMaximumSize(new Dimension(width, height));
-        pane.getVerticalScrollBar().setUnitIncrement(16);
-        pane.getHorizontalScrollBar().setUnitIncrement(20);
+        actionScrollPane = new JScrollPane(actionPanel);
+        actionScrollPane.setOpaque(false);
+        actionScrollPane.getViewport().setOpaque(false);
+        actionScrollPane.setPreferredSize(new Dimension(width, height));
+        actionScrollPane.setMaximumSize(new Dimension(width, height));
+        actionScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        actionScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
         if (boxLayout) {
-            pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            actionScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         }
-        return pane;
+        return actionScrollPane;
     }
 
 

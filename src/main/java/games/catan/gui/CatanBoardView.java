@@ -66,7 +66,7 @@ public class CatanBoardView extends JComponent {
         for (int i = params.nDice; i <= params.nDice*params.dieType.nSides; i++) {
             if (i <= params.robber_die_roll) {
                 nDots++;
-            } else if (i > params.robber_die_roll+1 && nDots > 0) {
+            } else if (nDots > 0) {
                 nDots--;
             }
             nDotsPerRoll.put(i, nDots);
@@ -113,7 +113,7 @@ public class CatanBoardView extends JComponent {
                     g.setColor(textColourMap.get(tile.getTileType()));
                     String type = "" + tile.getTileType();
                     int number = tile.getNumber();
-                    g.drawString(type, centreCoords.x - 20, centreCoords.y);
+                    g.drawString(type, centreCoords.x - fm.stringWidth(type)/2, centreCoords.y);
                     if (number != 0) {
 //                    g.drawString((tile.x + " " + tile.y), (int) tile.x_coord, (int) tile.y_coord + 20);
                         // TODO dot dot dot
