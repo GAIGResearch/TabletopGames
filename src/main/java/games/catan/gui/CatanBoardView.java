@@ -23,7 +23,7 @@ public class CatanBoardView extends JComponent {
     CatanParameters params;
 
     private int tileRadius;
-    private int robberRadius = 10;
+    private int robberRadius = 20;
     private int harbourRadius = 10;
     private int buildingRadius = 10;
     private int numberRadius = 25;
@@ -116,7 +116,6 @@ public class CatanBoardView extends JComponent {
                     g.drawString(type, centreCoords.x - fm.stringWidth(type)/2, centreCoords.y);
                     if (number != 0) {
 //                    g.drawString((tile.x + " " + tile.y), (int) tile.x_coord, (int) tile.y_coord + 20);
-                        // TODO dot dot dot
                         String nDots = "";
                         for (int i = 0; i < nDotsPerRoll.get(number); i++) {
                             nDots += ".";
@@ -127,8 +126,9 @@ public class CatanBoardView extends JComponent {
                         g.fillOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
                         g.setColor(Color.BLACK);
                         g.drawOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
-                        g.drawString(""+number, centreCoords.x - nSize2/2, centreCoords.y + 25);
+                        if (number-1 == params.robber_die_roll || number+1 == params.robber_die_roll) g.setColor(Color.red);
                         g.setFont(boldFont);
+                        g.drawString(""+number, centreCoords.x - nSize2/2, centreCoords.y + 25);
                         g.drawString(nDots, centreCoords.x - nSize/2, centreCoords.y + 28);
                         g.setFont(f);
                     }
@@ -225,7 +225,12 @@ public class CatanBoardView extends JComponent {
 
     public void drawRobber(Graphics2D g, Point point){
         g.setColor(Color.BLACK);
-        g.fillOval(point.x, point.y, robberRadius, robberRadius);
+        g.fillOval(point.x-robberRadius/2, point.y-robberRadius/2, robberRadius, robberRadius);
+        Stroke s = g.getStroke();
+        g.setColor(Color.red);
+        g.setStroke(new BasicStroke(3));
+        g.drawOval(point.x-robberRadius/2, point.y-robberRadius/2, robberRadius, robberRadius);
+        g.setStroke(s);
     }
 
     public void drawHarbour(Graphics2D g, CatanTile tile, int i, CatanParameters.Resource type) {
