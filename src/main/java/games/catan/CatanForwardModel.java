@@ -138,12 +138,15 @@ public class CatanForwardModel extends StandardForwardModel {
 
         /* Rolls 2 random dice given a single random seed */
         int n = cp.dieType.nSides;
-        int num1 = gs.rnd.nextInt(n);
-        int num2 = gs.rnd.nextInt(n);
-        int rollValue = num1 + num2 + 2;
+        int nDice = cp.nDice;
+        int rollValue = 0;
+        for (int i = 0; i < nDice; i++) {
+            rollValue += gs.rnd.nextInt(n) + 1;
+        }
         gs.setRollValue(rollValue);
 
-        gs.logEvent(() -> "Dice roll of " + rollValue);
+        int roll = rollValue;
+        gs.logEvent(() -> "Dice roll of " + roll);
         CatanTile[][] board = gs.getBoard();
         if (rollValue == cp.robber_die_roll) {
             // Dice roll was 7, so we change the phase

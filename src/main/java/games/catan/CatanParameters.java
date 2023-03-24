@@ -17,6 +17,11 @@ public class CatanParameters extends AbstractParameters {
     public int n_resource_cards = 19;
     public int n_tiles_per_row = 7;
 
+    // Dice
+    public Dice.Type dieType = Dice.Type.d6;
+    public int nDice = 2;
+    public int robber_die_roll = 7;
+
     // rules
     public int max_negotiation_count = 2; // max number of attempts to renegotiate player trade
     public int default_exchange_rate = 4; // trading with the bank 1:4 ratio by default
@@ -32,8 +37,6 @@ public class CatanParameters extends AbstractParameters {
     public int longest_road_value = 2;
     public int largest_army_value = 2;
     public int points_to_win = 10;
-    public Dice.Type dieType = Dice.Type.d6;
-    public int robber_die_roll = 7;
 
     public int harbour_exchange_rate = 2;
     public int harbour_wild_exchange_rate = 3;

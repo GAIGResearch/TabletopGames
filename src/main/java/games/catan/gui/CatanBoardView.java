@@ -54,11 +54,23 @@ public class CatanBoardView extends JComponent {
     Pair<Point, Integer>  buildingHighlight;
     Pair<Point, Integer> roadHighlight;
 
+    HashMap<Integer, Integer> nDotsPerRoll = new HashMap<>();
+
     public CatanBoardView(CatanGameState gs) {
         this.gs = gs;
         this.params = (CatanParameters) gs.getGameParameters();
         this.tileRadius = 40;
         size = new Dimension((params.n_tiles_per_row-1) * tileRadius * 2 + 10, (params.n_tiles_per_row-1) * tileRadius * 2);
+
+        int nDots = 0;
+        for (int i = params.nDice; i <= params.nDice*params.dieType.nSides; i++) {
+            if (i <= params.robber_die_roll) {
+                nDots++;
+            } else if (i > params.robber_die_roll+1 && nDots > 0) {
+                nDots--;
+            }
+            nDotsPerRoll.put(i, nDots);
+        }
     }
 
     @Override
@@ -76,7 +88,9 @@ public class CatanBoardView extends JComponent {
         int midY = board[0].length/2;
         CatanTile midTile = new CatanTile(midX, midY);
 
-
+        FontMetrics fm = g.getFontMetrics();
+        Font f = g.getFont();
+        Font boldFont = new Font(g.getFont().getName(), Font.BOLD, 12);
         for (CatanTile[] tiles : board) {
             for (CatanTile tile : tiles) {
                 // mid_x should be the same as the distance
@@ -103,11 +117,20 @@ public class CatanBoardView extends JComponent {
                     if (number != 0) {
 //                    g.drawString((tile.x + " " + tile.y), (int) tile.x_coord, (int) tile.y_coord + 20);
                         // TODO dot dot dot
+                        String nDots = "";
+                        for (int i = 0; i < nDotsPerRoll.get(number); i++) {
+                            nDots += ".";
+                        }
+                        int nSize = fm.stringWidth(nDots);
+                        int nSize2 = fm.stringWidth(""+number);
                         g.setColor(numberColor);
                         g.fillOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
                         g.setColor(Color.BLACK);
                         g.drawOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
-                        g.drawString(""+number, centreCoords.x - (number < 10? 4: 8), centreCoords.y + 25);
+                        g.drawString(""+number, centreCoords.x - nSize2/2, centreCoords.y + 25);
+                        g.setFont(boldFont);
+                        g.drawString(nDots, centreCoords.x - nSize/2, centreCoords.y + 28);
+                        g.setFont(f);
                     }
                 }
             }
