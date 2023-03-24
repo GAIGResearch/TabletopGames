@@ -26,7 +26,7 @@ public class CatanForwardModel extends StandardForwardModel {
         state.rnd = new Random(params.getRandomSeed());
 
         state.setBoard(generateBoard(params));
-        state.setGraph(extractGraphFromBoard(state.getBoard()));
+        state.setGraph(extractGraphFromBoard(state.getBoard(), params));
 
         state.scores = new int[state.getNPlayers()];
         state.victoryPoints = new int[state.getNPlayers()];
@@ -246,7 +246,7 @@ public class CatanForwardModel extends StandardForwardModel {
         return board;
     }
 
-    private GraphBoardWithEdges extractGraphFromBoard(CatanTile[][] board) {
+    private GraphBoardWithEdges extractGraphFromBoard(CatanTile[][] board, CatanParameters cp) {
         GraphBoardWithEdges graph = new GraphBoardWithEdges();
 
         // Create vertices and add references in tiles
@@ -300,15 +300,15 @@ public class CatanForwardModel extends StandardForwardModel {
         }
 
         // Finally set Harbors types
-        setHarbors(board, graph);
+        setHarbors(board, graph, cp);
 
         return graph;
     }
 
-    private void setHarbors(CatanTile[][] board, GraphBoardWithEdges graphBoard) {
+    private void setHarbors(CatanTile[][] board, GraphBoardWithEdges graphBoard, CatanParameters cp) {
         // set harbors along the tiles where the SEA borders the land
         ArrayList<CatanParameters.Resource> harbors = new ArrayList<>();
-        for (Map.Entry<CatanParameters.Resource, Integer> entry : CatanParameters.harborCount.entrySet()) {
+        for (Map.Entry<CatanParameters.Resource, Integer> entry : cp.harborCount.entrySet()) {
             for (int i = 0; i < entry.getValue(); i++)
                 harbors.add(entry.getKey());
         }
@@ -332,7 +332,9 @@ public class CatanForwardModel extends StandardForwardModel {
                 int[] tileLocation = tile.getNeighbourOnEdge(i);
                 tile = board[tileLocation[0]][tileLocation[1]];
                 if (counter % 2 == 0 && harbors.size() > 0) {
-                    ((Building)graphBoard.getNodeByID(tile.getVerticesBoardNodeIDs()[(i + 2) % HEX_SIDES])).setHarbour(harbors.remove(0));
+                    CatanParameters.Resource harbour = harbors.remove(0);
+                    ((Building)graphBoard.getNodeByID(tile.getVerticesBoardNodeIDs()[(i + 2) % HEX_SIDES])).setHarbour(harbour);
+                    ((Building)graphBoard.getNodeByID(tile.getVerticesBoardNodeIDs()[(i + 3) % HEX_SIDES])).setHarbour(harbour);
                 }
                 counter++;
             }

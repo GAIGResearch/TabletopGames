@@ -140,7 +140,7 @@ public class CatanParameters extends AbstractParameters {
         put(CatanCard.CardType.VICTORY_POINT_CARD, 5);
     }};
 
-    public static HashMap<Resource, Integer> harborCount = new HashMap<Resource, Integer>() {{
+    public HashMap<Resource, Integer> harborCount = new HashMap<Resource, Integer>() {{
         put(Resource.BRICK, 1);
         put(Resource.LUMBER, 1);
         put(Resource.ORE, 1);

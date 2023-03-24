@@ -15,6 +15,8 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import static games.catan.CatanConstants.HEX_SIDES;
+
 @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
 public class CatanBoardView extends JComponent {
     CatanGameState gs;
@@ -100,11 +102,32 @@ public class CatanBoardView extends JComponent {
                     g.drawString(type, centreCoords.x - 20, centreCoords.y);
                     if (number != 0) {
 //                    g.drawString((tile.x + " " + tile.y), (int) tile.x_coord, (int) tile.y_coord + 20);
+                        // TODO dot dot dot
                         g.setColor(numberColor);
                         g.fillOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
                         g.setColor(Color.BLACK);
                         g.drawOval(centreCoords.x - numberRadius / 2, centreCoords.y + 20 - numberRadius / 2, numberRadius, numberRadius);
                         g.drawString(""+number, centreCoords.x - (number < 10? 4: 8), centreCoords.y + 25);
+                    }
+                }
+            }
+        }
+
+        // Draw harbours
+        HashSet<Integer> harboursDrawn = new HashSet<>();  // avoid overlap
+        for (CatanTile[] catanTiles : board) {
+            for (CatanTile tile : catanTiles) {
+                // draw settlements
+                Building[] settlements = gs.getBuildings(tile);
+                for (int i = 0; i < settlements.length; i++) {
+                    if (settlements[i].getHarbour() != null && tile.getTileType() == CatanTile.TileType.SEA &&
+                            !harboursDrawn.contains(settlements[i].getComponentID()) &&
+                            settlements[(i+1)%HEX_SIDES].getHarbour() != null && !harboursDrawn.contains(settlements[(i+1)%HEX_SIDES].getComponentID())) {
+                        if (board[tile.getNeighbourOnEdge(i)[0]][tile.getNeighbourOnEdge(i)[1]].getTileType() == CatanTile.TileType.SEA) continue;
+                        CatanParameters.Resource type = settlements[i].getHarbour();
+                        drawHarbour(g, tile, i, type);
+                        harboursDrawn.add(settlements[i].getComponentID());
+                        harboursDrawn.add(settlements[(i + 1)%HEX_SIDES].getComponentID());
                     }
                 }
             }
@@ -147,16 +170,10 @@ public class CatanBoardView extends JComponent {
 
                     // Lines below are useful for debugging as they display settlement IDs
                     /*
-                        g.setFont(new Font("TimeRoman", Font.PLAIN, 20));
+                        g.setFont(new Font("TimeRoman", Font.PLAIN, 15));
                         g.setColor(Color.GRAY);
-                        g.drawString(settlements[i].getComponentID() + "", tile.getVerticesCoords(i, tileRadius).x, tile.getVerticesCoords(i, tileRadius).y);
+                        g.drawString(settlements[i].getHarbour() + "", tile.getVerticesCoords(i, tileRadius).x, tile.getVerticesCoords(i, tileRadius).y);
                      */
-
-                    if (settlements[i].getHarbour() != null && !buildingsDrawn.contains(settlements[i].getComponentID())) {
-                        CatanParameters.Resource type = settlements[i].getHarbour();
-                        drawHarbour(g, tile.getVerticesCoords(i, tileRadius), type);
-                        buildingsDrawn.add(settlements[i].getComponentID());
-                    }
                 }
 
                 // lines below render cube coordinates and distances from middle
@@ -188,12 +205,24 @@ public class CatanBoardView extends JComponent {
         g.fillOval(point.x, point.y, robberRadius, robberRadius);
     }
 
-    public void drawHarbour(Graphics2D g, Point point, CatanParameters.Resource type) {
-        g.setColor(Color.WHITE);
-        g.fillOval(point.x, point.y, harbourRadius, harbourRadius);
+    public void drawHarbour(Graphics2D g, CatanTile tile, int i, CatanParameters.Resource type) {
+        Point point1 = tile.getVerticesCoords(i, tileRadius);
+        Point point2 = tile.getVerticesCoords((i+1) % HEX_SIDES, tileRadius);
+        Point middle = tile.getCentreCoords(tileRadius);
+        FontMetrics fm = g.getFontMetrics();
         int exchangeRate = params.harbour_exchange_rate;
         if (type == CatanParameters.Resource.WILD) exchangeRate = params.harbour_wild_exchange_rate;
-        g.drawString(type.name() + " " + exchangeRate + ":1", point.x, point.y+10);
+        String text = type.name() + " " + exchangeRate + ":1";
+        int width = fm.stringWidth(text);
+
+        g.setColor(Color.WHITE);
+        Stroke s = g.getStroke();
+        g.setStroke(new BasicStroke(4));
+        g.drawLine(point1.x, point1.y, (middle.x + point1.x)/2, (middle.y+point1.y)/2);
+        g.drawLine(point2.x, point2.y, (middle.x + point2.x)/2, (middle.y+point2.y)/2);
+//        g.fillOval(point.x, point.y, harbourRadius, harbourRadius);
+        g.setStroke(s);
+        g.drawString(text, middle.x-width/2, middle.y+10);
     }
 
     public void drawRoad(Graphics2D g, int edge, Point[] location, Color color){
