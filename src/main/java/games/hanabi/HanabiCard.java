@@ -1,58 +1,82 @@
 package games.hanabi;
 
 import core.components.Card;
-import core.components.Deck;
-import games.hanabi.HanabiGameState;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
 public class HanabiCard extends Card {
 
-    public enum HanabiCardType {
-        Number
-//        SwapHands
-    }
-
-    public String color;
-    public final HanabiCardType type;
+    public CardType color;
     public int number;
-    public final int drawN;
     public boolean colorVisibility;
     public boolean numberVisibility;
     public List<Integer> possibleNumber;
-    public List<String>  possibleColour;
+    public List<CardType>  possibleColour;
 
+    public boolean ownerKnowsColor, ownerKnowsNumber;
 
-    public HanabiCard(HanabiCardType type, String color, int number){
-        super(type.toString());
+    public HanabiCard(CardType color, int number){
+        super(color.name() + number);
         this.color = color;
-        this.type = type;
         this.number = number;
-        this.drawN = -1;
-        this.colorVisibility = false;
-        this.numberVisibility = false;
-        this.possibleNumber = new ArrayList<Integer>();
+        this.colorVisibility = true;
+        this.numberVisibility = true;
+        this.possibleNumber = new ArrayList<>();
         for(int i=1; i<=5; i++){
             this.possibleNumber.add(i);
         }
-        this.possibleColour = new ArrayList<String>();
-        this.possibleColour.add("Yellow");
-        this.possibleColour.add("White");
-        this.possibleColour.add("Red");
-        this.possibleColour.add("Green");
-        this.possibleColour.add("Blue");
+        this.possibleColour = new ArrayList<>();
+        this.possibleColour.addAll(Arrays.asList(CardType.values()));
     }
 
+
+    protected HanabiCard(CardType color, int number, int componentID){
+        super(color.name() + number, componentID);
+        this.color = color;
+        this.number = number;
+    }
 
     @Override
-    public HanabiCard copy() {
-        return new HanabiCard(type, color, number);
+    public HanabiCard copy(int playerId) {
+        HanabiCard card = new HanabiCard(color, number, componentID);
+        card.colorVisibility = (ownerId == playerId ? ownerKnowsColor : colorVisibility);
+        card.numberVisibility = (ownerId == playerId ? ownerKnowsNumber : numberVisibility);
+        card.ownerKnowsColor = ownerKnowsColor;
+        card.ownerKnowsNumber = ownerKnowsNumber;
+        card.possibleColour = new ArrayList<>(possibleColour);
+        card.possibleNumber = new ArrayList<>(possibleNumber);
+        return card;
     }
 
+    public HanabiCard copy() {
+        HanabiCard card = new HanabiCard(color, number, componentID);
+        card.colorVisibility = colorVisibility;
+        card.numberVisibility = numberVisibility;
+        card.ownerKnowsColor = ownerKnowsColor;
+        card.ownerKnowsNumber = ownerKnowsNumber;
+        card.possibleColour = new ArrayList<>(possibleColour);
+        card.possibleNumber = new ArrayList<>(possibleNumber);
+        return card;
+    }
 
     @Override
     public String toString() {
-        return "{" + color + " " + number + "}";
+        return "{" + (colorVisibility? color : "UnknownColor") + " " + (numberVisibility? number : "UnknownNumber") + "}";
+    }
+
+    @Override
+    public String toString(int playerId) {
+        return "{" + getColorStr(playerId) + " " + getNumberStr(playerId) + "}";
+    }
+
+    public String getColorStr(int playerId) {
+        return (playerId == ownerId? (ownerKnowsColor? color.name() : "?Color?") : colorVisibility ? color.name(): "?Color?");
+    }
+
+    public String getNumberStr(int playerId) {
+        return (playerId == ownerId? (ownerKnowsNumber? ""+number : "?Number?") : numberVisibility ? ""+number : "?Number?");
     }
 
     // create setters
@@ -60,7 +84,7 @@ public class HanabiCard extends Card {
         this.number = n;
     }
 
-    public void setColor(String c){
+    public void setColor(CardType c){
         this.color = c;
     }
 }

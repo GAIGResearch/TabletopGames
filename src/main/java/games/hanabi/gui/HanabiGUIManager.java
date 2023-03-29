@@ -10,7 +10,6 @@ import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import gui.views.CardView;
-import gui.views.CounterView;
 import players.human.ActionController;
 
 import javax.swing.*;
@@ -18,7 +17,6 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.util.Collection;
 
 public class HanabiGUIManager extends AbstractGUIManager {
     final static int playerAreaWidth = 300;
@@ -29,12 +27,12 @@ public class HanabiGUIManager extends AbstractGUIManager {
     // List of player hand views
     HanabiPlayerView[] playerHands;
     // Discard pile view
-    HanabiDeckView discardPile;
-    // Draw pile view
-    HanabiDeckView drawPile;
-
-    CounterView failCounter;
-    CounterView hintCounter;
+//    HanabiDeckView discardPile;
+    JLabel cardsPlayed;
+    JLabel failCounter;
+    JLabel hintCounter;
+    JLabel drawDeck;
+    JLabel discardDeck;
 
     CardView[] currentCards;
 
@@ -77,7 +75,7 @@ public class HanabiGUIManager extends AbstractGUIManager {
                 JPanel[] sides = new JPanel[]{new JPanel(), new JPanel(), new JPanel(), new JPanel()};
                 int next = 0;
                 for (int i = 0; i < nPlayers; i++) {
-                    HanabiPlayerView playerHand = new HanabiPlayerView(hbgs.getPlayerDecks().get(i), i, humanID, hbp.getDataPath());
+                    HanabiPlayerView playerHand = new HanabiPlayerView(hbgs, hbgs.getPlayerDecks().get(i), i, humanID, hbp.getDataPath());
 
                     // Get agent name
                     String[] split = game.getPlayers().get(i).getClass().toString().split("\\.");
@@ -102,12 +100,10 @@ public class HanabiGUIManager extends AbstractGUIManager {
                 // Discard and draw piles go in the center
                 JPanel centerArea = new JPanel();
                 centerArea.setLayout(new BoxLayout(centerArea, BoxLayout.Y_AXIS));
-                discardPile = new HanabiDeckView(-1, hbgs.getDiscardDeck(), true, hbp.getDataPath(), new Rectangle(0, 0, hanabiCardWidth, hanabiCardHeight));
-                drawPile = new HanabiDeckView(-1, hbgs.getDrawDeck(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, hbp.getDataPath(), new Rectangle(0, 0, hanabiCardWidth, hanabiCardHeight));
-                failCounter = new CounterView(hbgs.getFailCounter());
-                hintCounter = new CounterView(hbgs.getHintCounter());
-                centerArea.add(drawPile);
-                centerArea.add(discardPile);
+//                discardPile = new HanabiDeckView(hbgs, -1, hbgs.getDiscardDeck(), true, hbp.getDataPath(), new Rectangle(0, 0, hanabiCardWidth, hanabiCardHeight));
+//                drawPile = new HanabiDeckView(hbgs,-1, hbgs.getDrawDeck(), gameState.getCoreGameParameters().alwaysDisplayFullObservable, hbp.getDataPath(), new Rectangle(0, 0, hanabiCardWidth, hanabiCardHeight));
+//                centerArea.add(drawPile);
+//                centerArea.add(discardPile);
 //                centerArea.add(failCounter);
 //                centerArea.add(hintCounter);
                 JPanel jp = new JPanel();
@@ -116,7 +112,7 @@ public class HanabiGUIManager extends AbstractGUIManager {
                 mainGameArea.add(jp, BorderLayout.CENTER);
 
                 // Top area will show state information
-                JPanel infoPanel = createGameStateInfoPanel("Hanabi", gameState, width, defaultInfoPanelHeight);
+                JPanel infoPanel = createGameStateInfoPanel("Hanabi", gameState, width, defaultInfoPanelHeight+50);
                 // Bottom area will show actions available
                 JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
 
@@ -134,7 +130,54 @@ public class HanabiGUIManager extends AbstractGUIManager {
 
     @Override
     public int getMaxActionSpace() {
-        return 20;
+        return 200;
+    }
+
+    @Override
+    protected JPanel createGameStateInfoPanel(String gameTitle, AbstractGameState gameState, int width, int height) {
+        JPanel gameInfo = new JPanel();
+        gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
+        gameInfo.add(new JLabel("<html><h1>" + gameTitle + "</h1></html>"));
+
+        cardsPlayed = new JLabel("Played: ");
+        failCounter = new JLabel("Fails: 0");
+        hintCounter = new JLabel("Hints: 0");
+        drawDeck = new JLabel("Cards in deck: 0");
+        discardDeck = new JLabel("Discards: ");
+
+        updateGameStateInfo(gameState);
+
+        gameInfo.add(gameStatus);
+        gameInfo.add(playerStatus);
+        gameInfo.add(playerScores);
+        gameInfo.add(gamePhase);
+        gameInfo.add(turn);
+        gameInfo.add(currentPlayer);
+        gameInfo.add(cardsPlayed);
+        gameInfo.add(failCounter);
+        gameInfo.add(hintCounter);
+        gameInfo.add(drawDeck);
+        gameInfo.add(discardDeck);
+
+        gameInfo.setPreferredSize(new Dimension(width / 2 - 10, height));
+
+        JPanel wrapper = new JPanel();
+        wrapper.setLayout(new FlowLayout());
+        wrapper.add(gameInfo);
+
+        createActionHistoryPanel(width/2 - 10, height);
+        wrapper.add(historyContainer);
+        return wrapper;
+    }
+
+    @Override
+    protected void updateGameStateInfo(AbstractGameState gameState) {
+        super.updateGameStateInfo(gameState);
+        cardsPlayed.setText("Played: " + ((HanabiGameState)gameState).getCurrentCard().toString());
+        hintCounter.setText("Hints: " + ((HanabiGameState)gameState).getHintCounter().getValue());
+        failCounter.setText("Fails: " + ((HanabiGameState)gameState).getFailCounter().getValue());
+        drawDeck.setText("Cards in deck: " + ((HanabiGameState)gameState).getDrawDeck().getSize());
+        discardDeck.setText("Discards: " + ((HanabiGameState)gameState).getDiscardDeck().toString());
     }
 
     @Override
@@ -167,14 +210,14 @@ public class HanabiGUIManager extends AbstractGUIManager {
                     playerHands[i].setBorder(playerViewBorders[i]);
                 }
             }
-            discardPile.updateComponent(ugs.getDiscardDeck());
-            discardPile.setFocusable(true);
-            drawPile.updateComponent(ugs.getDrawDeck());
+//            discardPile.updateComponent(ugs.getDiscardDeck());
+//            discardPile.setFocusable(true);
+//            drawPile.updateComponent(ugs.getDrawDeck());
 //            failCounter.updateComponent(ugs.getFailCounter());
 //            hintCounter.updateComponent(ugs.getHintCounter());
-            if (gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
-                drawPile.setFront(true);
-            }
+//            if (gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
+//                drawPile.setFront(true);
+//            }
 
         }
     }

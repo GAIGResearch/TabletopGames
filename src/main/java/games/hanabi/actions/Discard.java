@@ -52,13 +52,13 @@ public class Discard extends DrawCard implements IPrintable {
     }
 
     @Override
-    public int hashCode() {
-        return 0;
+    public String getString(AbstractGameState gameState) {
+        return "Discard card " + fromIndex + " and draw a card.";
     }
 
     @Override
-    public String getString(AbstractGameState gameState) {
-        return "Discarded card and draw a card.";
+    public String toString() {
+        return "Discard card " + fromIndex + " and draw a card.";
     }
 
     @Override

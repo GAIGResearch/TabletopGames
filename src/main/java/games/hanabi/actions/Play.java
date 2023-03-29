@@ -7,38 +7,35 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
+import games.hanabi.CardType;
 import games.hanabi.HanabiCard;
 import games.hanabi.HanabiGameState;
 import games.hanabi.HanabiParameters;
 import games.uno.actions.NoCards;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class Play extends AbstractAction implements IPrintable {
-    protected int deckFrom;
+    protected int playerId;
     protected int fromIndex;
 
-    final String color;
-    final int number;
-
-    public Play (int deckFrom, int fromIndex, String color, int number) {
-        this.deckFrom = deckFrom;
+    public Play (int playerId, int fromIndex) {
+        this.playerId = playerId;
         this.fromIndex = fromIndex;
-
-        this.color = color;
-        this.number = number;
     }
+
     @Override
     public boolean execute(AbstractGameState gameState) {
-        Deck<HanabiCard> from = (Deck<HanabiCard>) gameState.getComponentById(deckFrom);
-        HanabiCard playCard = from.pick(fromIndex);
         HanabiParameters hbp = (HanabiParameters) gameState.getGameParameters();
         HanabiGameState hbgs = (HanabiGameState) gameState;
+        Deck<HanabiCard> playerDeck = hbgs.getPlayerDecks().get(playerId);
+        HanabiCard playCard = playerDeck.pick(fromIndex);
+
         Deck<HanabiCard> drawDeck = hbgs.getDrawDeck();
         List<HanabiCard> currentCard = hbgs.getCurrentCard();
         Deck<HanabiCard> discardDeck = hbgs.getDiscardDeck();
-        PartialObservableDeck<HanabiCard> playerDeck = hbgs.getPlayerDecks().get(hbgs.getCurrentPlayer());
         Counter failCounter = hbgs.getFailCounter();
         int listIndex = 0;
         boolean color = false;
@@ -48,19 +45,18 @@ public class Play extends AbstractAction implements IPrintable {
         // set the card if correct;
 
         for(HanabiCard cd: currentCard){
+            Random random = new Random(hbgs.getGameParameters().getRandomSeed());
 
             if(!(playCard.numberVisibility)){
-                Random random = new Random(hbgs.getGameParameters().getRandomSeed());
                 int nnumber = cd.possibleNumber.get(random.nextInt(cd.possibleNumber.size())) ;
                 playCard.setNumber(nnumber);
             }
             if(!(playCard.colorVisibility)){
-                Random random2 = new Random(hbgs.getGameParameters().getRandomSeed());
-                String cnumber = cd.possibleColour.get(random2.nextInt(cd.possibleColour.size()));
+                CardType cnumber = cd.possibleColour.get(random.nextInt(cd.possibleColour.size()));
                 playCard.setColor(cnumber);
             }
-            if(cd.color.equals(playCard.color)){
 
+            if(cd.color.equals(playCard.color)){
                 if(cd.number + 1 == playCard.number){
                     currentCard.set(listIndex, playCard);
 //                    System.out.println("Played successfully + color: " + playCard.color + " number " + playCard.number);
@@ -97,22 +93,25 @@ public class Play extends AbstractAction implements IPrintable {
 
     @Override
     public AbstractAction copy() {
-        return new Play(deckFrom, fromIndex, color, number);
+        return new Play(playerId, fromIndex);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Play;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Play)) return false;
+        Play play = (Play) o;
+        return playerId == play.playerId && fromIndex == play.fromIndex;
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(playerId, fromIndex);
     }
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Played card and draw a card.";
+        return toString();
     }
 
     @Override
@@ -122,6 +121,6 @@ public class Play extends AbstractAction implements IPrintable {
 
     @Override
     public String toString() {
-        return "Play " + color + " " + number;
+        return "Play card idx " + fromIndex;
     }
 }

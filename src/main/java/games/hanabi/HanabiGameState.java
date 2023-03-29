@@ -2,6 +2,7 @@ package games.hanabi;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.components.Counter;
@@ -52,7 +53,7 @@ public class HanabiGameState extends AbstractGameState implements IPrintable {
         HanabiGameState copy = new HanabiGameState(gameParameters.copy(), getNPlayers());
         copy.playerDecks = new ArrayList<>();
         for (PartialObservableDeck<HanabiCard> d : playerDecks) {
-            copy.playerDecks.add(d.copy());
+            copy.playerDecks.add(d.copy(playerId));
         }
         copy.currentCard = new ArrayList<>();
         for (HanabiCard d : currentCard) {
@@ -87,13 +88,17 @@ public class HanabiGameState extends AbstractGameState implements IPrintable {
     }
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (isNotTerminal()) {
+        if (isNotTerminal() || playerResults[playerId] == CoreConstants.GameResult.WIN_GAME) {
+            double correctWeight = 0.3;
+            double hintWeight = 0.05;
+            double failWeight = 0.65;
             int total = 0;
             for (HanabiCard cd : currentCard) {
                 total += cd.number;
             }
-            return total*1.0 / 25;
-        } else return gameStatus.value;
+            return correctWeight * total*1.0 / 25 - hintWeight * (hintCounter.getValue()*1.0/hintCounter.getMaximum()) + failWeight * failCounter.getValue() * 1.0 / failCounter.getMaximum();
+        }
+        return playerResults[playerId].value;
     }
 
     @Override

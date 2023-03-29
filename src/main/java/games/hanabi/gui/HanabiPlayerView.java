@@ -15,18 +15,22 @@ public class HanabiPlayerView extends JComponent {
     // ID of player showing
     int playerId;
     // Number of points player has
-    int nPoints;
     HanabiDeckView playerHandView;
+    JLabel scoreLabel;
     // Border offsets
     int border = 5;
     int borderBottom = 20;
     int width, height;
 
-    public HanabiPlayerView(PartialObservableDeck<HanabiCard> d, int playerId, int humanId, String dataPath) {
+    public HanabiPlayerView(HanabiGameState hbgs, PartialObservableDeck<HanabiCard> d, int playerId, int humanId, String dataPath) {
         this.width = playerAreaWidth + border*2;
         this.height = playerAreaHeight + border + borderBottom;
         this.playerId = playerId;
-        this.playerHandView = new HanabiDeckView(humanId, d, true, dataPath, new Rectangle(border, border, playerAreaWidth, hanabiCardHeight));
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        playerHandView = new HanabiDeckView(hbgs, humanId, d, true, dataPath, new Rectangle(border, border, playerAreaWidth, hanabiCardHeight));
+        add(playerHandView);
+        scoreLabel = new JLabel("Points: 0");
+        add(scoreLabel);
     }
 
     /**
@@ -35,9 +39,9 @@ public class HanabiPlayerView extends JComponent {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        playerHandView.drawDeck((Graphics2D) g);
-        g.setColor(Color.black);
-        g.drawString(nPoints + " points", border+playerAreaWidth/2 - 20, border+hanabiCardHeight + 10);
+//        playerHandView.drawDeck((Graphics2D) g);
+//        g.setColor(Color.black);
+//        g.drawString(nPoints + " points", border+playerAreaWidth/2 - 20, border+hanabiCardHeight + 10);
     }
 
     @Override
@@ -51,5 +55,6 @@ public class HanabiPlayerView extends JComponent {
      */
     public void update(HanabiGameState gameState) {
         playerHandView.updateComponent(gameState.getPlayerDecks().get(playerId));
+        scoreLabel.setText("Points: " + gameState.getGameScore(0));
     }
 }

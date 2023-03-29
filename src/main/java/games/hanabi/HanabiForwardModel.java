@@ -4,13 +4,12 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.components.Card;
 import core.components.Deck;
 import core.components.Counter;
 import core.components.PartialObservableDeck;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import games.hanabi.actions.Discard;
 import games.hanabi.actions.Play;
@@ -44,32 +43,32 @@ public class HanabiForwardModel extends StandardForwardModel {
 
     private void createCards(HanabiGameState hbgs) {
         HanabiParameters hbp = (HanabiParameters) hbgs.getGameParameters();
-        for (String color : hbp.color) {
+        for (CardType color : CardType.values()) {
                 // Create the number cards
                 for (int number = 1; number <= hbp.nNumberCards; number++) {
                     if (number == 1){
                         for(int i = 0; i<hbp.nCards1; i++){
-                            hbgs.drawDeck.add(new HanabiCard(HanabiCard.HanabiCardType.Number, color, number));
+                            hbgs.drawDeck.add(new HanabiCard(color, number));
                         }
                     }
                     else if(number == 2) {
                         for (int i = 0; i<hbp.nCards2; i++) {
-                            hbgs.drawDeck.add(new HanabiCard(HanabiCard.HanabiCardType.Number, color, number));
+                            hbgs.drawDeck.add(new HanabiCard(color, number));
                         }
                     }
                     else if(number == 3) {
                         for (int i = 0; i<hbp.nCards3; i++) {
-                            hbgs.drawDeck.add(new HanabiCard(HanabiCard.HanabiCardType.Number, color, number));
+                            hbgs.drawDeck.add(new HanabiCard(color, number));
                         }
                     }
                     else if(number == 4) {
                         for (int i = 0; i<hbp.nCards4; i++) {
-                            hbgs.drawDeck.add(new HanabiCard(HanabiCard.HanabiCardType.Number, color, number));
+                            hbgs.drawDeck.add(new HanabiCard(color, number));
                         }
                     }
                     else if(number == 5){
                         for (int i = 0; i<hbp.nCards5; i++) {
-                            hbgs.drawDeck.add(new HanabiCard(HanabiCard.HanabiCardType.Number, color, number));
+                            hbgs.drawDeck.add(new HanabiCard(color, number));
                         }
                     }
                 }
@@ -103,7 +102,6 @@ public class HanabiForwardModel extends StandardForwardModel {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = hbgs.getCurrentPlayer();
         Deck<HanabiCard> playerHand = hbgs.playerDecks.get(player);
-        List<PartialObservableDeck<HanabiCard>> playerDecks = hbgs.playerDecks;
 
         for (HanabiCard card : playerHand.getComponents()) {
             int cardIdx = playerHand.getComponents().indexOf(card);
@@ -111,27 +109,20 @@ public class HanabiForwardModel extends StandardForwardModel {
                 actions.add(new Discard(playerHand.getComponentID(), hbgs.discardDeck.getComponentID(), cardIdx));
             }
 
-            actions.add(new Play(playerHand.getComponentID(), cardIdx, card.color, card.number));
-
+            actions.add(new Play(player, cardIdx));
         }
 
         if (hbgs.hintCounter.getValue() != hbgs.hintCounter.getMinimum()){
-            for (PartialObservableDeck<HanabiCard> d : playerDecks){
-                if (d.getComponentID() != playerHand.getComponentID()) {
-                    actions.add(new Hint(d,1));
-                    actions.add(new Hint(d,2));
-                    actions.add(new Hint(d,3));
-                    actions.add(new Hint(d,4));
-                    actions.add(new Hint(d,5));
-                    actions.add(new Hint(d,"Red"));
-                    actions.add(new Hint(d,"Yellow"));
-                    actions.add(new Hint(d,"Green"));
-                    actions.add(new Hint(d,"White"));
-                    actions.add(new Hint(d,"Blue"));
-
+            Set<AbstractAction> actionSet = new HashSet<>();
+            for (int i = 0; i < gameState.getNPlayers(); i++){
+                if (i != player) {
+                    for (HanabiCard card: hbgs.playerDecks.get(i).getComponents()) {
+                        actionSet.add(new Hint(i, card.number));
+                        actionSet.add(new Hint(i, card.color));
+                    }
                 }
             }
-
+            actions.addAll(actionSet);
         }
         return actions;
     }
@@ -191,7 +182,7 @@ public class HanabiForwardModel extends StandardForwardModel {
 //            System.out.println("run out of card and every player had one turn");
 //            System.out.println("Point was " + total);
             for (int i = 0; i < hbgs.getNPlayers(); i++) {
-                hbgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, i);
+                hbgs.setPlayerResult(WIN_GAME, i);
             }
             return true;
         }

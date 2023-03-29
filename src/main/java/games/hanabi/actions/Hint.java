@@ -7,24 +7,26 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
+import games.hanabi.CardType;
 import games.hanabi.HanabiCard;
 import games.hanabi.HanabiGameState;
 
 import java.util.List;
+import java.util.Objects;
 
-public class Hint extends DrawCard implements IPrintable {
-    protected PartialObservableDeck<HanabiCard> playerHand;
+public class Hint extends AbstractAction implements IPrintable {
+    protected int playerHand;
     protected int number = 0;
-    protected String color = "";
+    protected CardType color = null;
 
 
 
-    public Hint (PartialObservableDeck<HanabiCard> playerHand, int number) {
+    public Hint (int playerHand, int number) {
         this.playerHand = playerHand;
         this.number = number;
     }
 
-    public Hint (PartialObservableDeck<HanabiCard> playerHand, String color) {
+    public Hint (int playerHand, CardType color) {
         this.playerHand = playerHand;
         this.color = color;
     }
@@ -32,18 +34,18 @@ public class Hint extends DrawCard implements IPrintable {
     public boolean execute(AbstractGameState gameState) {
         HanabiGameState hbgs = (HanabiGameState) gameState;
         Counter HintCounter = hbgs.getHintCounter();
-        for (HanabiCard cd : playerHand.getComponents()) {
+        for (HanabiCard cd : hbgs.getPlayerDecks().get(playerHand).getComponents()) {
             if (number != 0) {
-                    if (cd.number == this.number) {
-                        cd.numberVisibility = true;
-                    }
-                    else{
-                        cd.possibleNumber.remove(Integer.valueOf(this.number));
-                    }
+                if (cd.number == this.number) {
+                    cd.ownerKnowsNumber = true;
+                }
+                else{
+                    cd.possibleNumber.remove(Integer.valueOf(this.number));
+                }
             }
-            else {
+            else if (color != null) {
                 if (cd.color.equals(this.color)) {
-                    cd.colorVisibility = true;
+                    cd.ownerKnowsColor = true;
                 }
                 else{
                     cd.possibleColour.remove(this.color);
@@ -69,13 +71,16 @@ public class Hint extends DrawCard implements IPrintable {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Play;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Hint)) return false;
+        Hint hint = (Hint) o;
+        return playerHand == hint.playerHand && number == hint.number && Objects.equals(color, hint.color);
     }
 
     @Override
     public int hashCode() {
-        return 0;
+        return Objects.hash(playerHand, number, color);
     }
 
     @Override

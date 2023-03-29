@@ -11,13 +11,6 @@ import java.util.Objects;
 
 public class HanabiParameters extends TunableParameters {
     public int nNumberCards = 5;
-    public String[] color = new String[]{
-            "Red",
-            "Blue",
-            "Green",
-            "Yellow",
-            "White"
-    };
 
     int hintCounter = 8;
     int failCounter = 3;
@@ -70,7 +63,6 @@ public class HanabiParameters extends TunableParameters {
     protected AbstractParameters _copy() {
         HanabiParameters copy = new HanabiParameters(System.currentTimeMillis());
         copy.dataPath = dataPath;
-        copy.color = color;
         copy.hintCounter = hintCounter;
         copy.failCounter = failCounter;
         copy.nHandCards = nHandCards;
@@ -99,12 +91,11 @@ public class HanabiParameters extends TunableParameters {
                 nCards3 == that.nCards3 &&
                 nCards4 == that.nCards4 &&
                 nCards5 == that.nCards5 &&
-                Arrays.equals(color, that.color) &&
                 Objects.equals(dataPath, that.dataPath);
     }
 
     public int hashCode() {
-        return Objects.hash(super.hashCode(), dataPath, color, nNumberCards, hintCounter, failCounter, nHandCards, nCards1, nCards2, nCards3, nCards4, nCards5);
+        return Objects.hash(super.hashCode(), dataPath, nNumberCards, hintCounter, failCounter, nHandCards, nCards1, nCards2, nCards3, nCards4, nCards5);
     }
 
     public String getDataPath() {

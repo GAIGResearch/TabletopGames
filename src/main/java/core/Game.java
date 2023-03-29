@@ -13,6 +13,7 @@ import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.*;
+import players.mcts.MCTSPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
@@ -918,7 +919,7 @@ public class Game {
      */
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "Hanabi");
-        boolean useGUI = Utils.getArg(args, "gui", false);
+        boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
@@ -927,12 +928,14 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new RandomPlayer());
 //        players.add(new RandomPlayer());
-//        players.add(new MCTSPlayer());
+        players.add(new MCTSPlayer());
+        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
-        players.add(new OSLAPlayer());
-        players.add(new OSLAPlayer());
+//        players.add(new OSLAPlayer());
+//        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
+//        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
