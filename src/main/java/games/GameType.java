@@ -19,6 +19,10 @@ import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.*;
 import games.explodingkittens.*;
 import games.explodingkittens.gui.ExplodingKittensGUIManager;
+import games.hanabi.HanabiForwardModel;
+import games.hanabi.HanabiGameState;
+import games.hanabi.HanabiParameters;
+import games.hanabi.gui.HanabiGUIManager;
 import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.*;
@@ -164,7 +168,8 @@ public enum GameType {
     CantStop(2, 4,
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
-            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class);
+            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
+    Hanabi(2,5, new ArrayList<>(), new ArrayList<>(), HanabiGameState.class, HanabiForwardModel.class, HanabiParameters.class, HanabiGUIManager.class);
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
