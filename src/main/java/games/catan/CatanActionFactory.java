@@ -366,14 +366,17 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Deck<CatanCard> playerDevDeck = gs.playerDevCards.get(player);
 
-        // Deep: all play dev card of type X
-
         for (CatanCard c : playerDevDeck.getComponents()) {
             // avoid playing a card that has been bought in the same turn
             if (c.turnCardWasBought == gs.getTurnCounter()) {
                 continue;
             }
-            actions.addAll(getDevCardActions(gs, actionSpace, player, c.cardType));
+            if (actionSpace.structure != ActionSpace.Structure.Deep) { // Flat is default
+                actions.addAll(getDevCardActions(gs, actionSpace, player, c.cardType));
+            } else {
+                // Deep: play dev card of type X. Then compute for the card type the variations possible, potentially in a deep way if available
+                actions.add(new PlayDevCard(player, c.cardType, c.cardType.nDeepSteps((CatanParameters) gs.getGameParameters())));
+            }
         }
 
         return actions;
@@ -387,54 +390,61 @@ public class CatanActionFactory {
         }
 
         else if (cardType == CatanCard.CardType.MONOPOLY) {
-            // TODO Deep: play monopoly, then choose resource
             for (CatanParameters.Resource resource : CatanParameters.Resource.values()) {
                 actions.add(new PlayMonopoly(resource, player));
             }
         }
 
         else if (cardType == CatanCard.CardType.YEAR_OF_PLENTY) {
-            // TODO deep: play card, then choose 1 resource, then choose 2 resource ...
-            List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
+            if (actionSpace.structure != ActionSpace.Structure.Deep) {
+                List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
 
-            for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
-                if (gs.resourcePool.get(res).getValue() > 0)
-                    for (int i = 0; i < ((CatanParameters)gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
-                        resourcesAvailable.add(res);
-                    }
-            }
-
-            int[] resIdx = new int[resourcesAvailable.size()];
-            for (int i = 0; i < resourcesAvailable.size(); i++) {
-                resIdx[i] = i;
-            }
-            List<int[]> combinations = Utils.generateCombinations(resIdx, ((CatanParameters)gs.getGameParameters()).nResourcesYoP);
-            for (int[] combo: combinations) {
-                CatanParameters.Resource[] resources = new CatanParameters.Resource[combo.length];
-                for (int i = 0; i < combo.length; i++) {
-                    resources[i] = resourcesAvailable.get(combo[i]);
+                for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
+                    if (gs.resourcePool.get(res).getValue() > 0)
+                        for (int i = 0; i < ((CatanParameters) gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
+                            resourcesAvailable.add(res);
+                        }
                 }
-                actions.add(new PlayYearOfPlenty(resources, player));
+
+                int[] resIdx = new int[resourcesAvailable.size()];
+                for (int i = 0; i < resourcesAvailable.size(); i++) {
+                    resIdx[i] = i;
+                }
+                List<int[]> combinations = Utils.generateCombinations(resIdx, ((CatanParameters) gs.getGameParameters()).nResourcesYoP);
+                for (int[] combo : combinations) {
+                    CatanParameters.Resource[] resources = new CatanParameters.Resource[combo.length];
+                    for (int i = 0; i < combo.length; i++) {
+                        resources[i] = resourcesAvailable.get(combo[i]);
+                    }
+                    actions.add(new PlayYearOfPlenty(resources, player));
+                }
+            } else {
+                // Deep: one resource at a time
+                for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
+                    if (gs.resourcePool.get(res).getValue() > 0)
+                        actions.add(new DeepYearOfPlenty(player, res, cardType.nDeepSteps((CatanParameters) gs.getGameParameters())));
+                }
             }
         }
 
         else if (cardType == CatanCard.CardType.ROAD_BUILDING) {
-            // TODO: Deep, play card first, then one road at a time
-
-            // Identify all combinations of possible roads to build
             List<AbstractAction> roads = getBuyRoadActions(gs, player, true);
-            int[] roadsIdx = new int[roads.size()];
-            for (int i = 0; i < roads.size(); i++) {
-                roadsIdx[i] = i;
-            }
-            List<int[]> combinations = Utils.generateCombinations(roadsIdx, ((CatanParameters)gs.getGameParameters()).nRoadsRB);
-            for (int[] combo: combinations) {
-                AbstractAction[] roadsToBuild = new BuildRoad[combo.length];
-                for (int i = 0; i < combo.length; i++) {
-                    roadsToBuild[i] = roads.get(combo[i]);
+
+            if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+
+                // Identify all combinations of possible roads to build
+                int[] roadsIdx = new int[roads.size()];
+                for (int i = 0; i < roads.size(); i++) {
+                    roadsIdx[i] = i;
                 }
-                actions.add(new PlayRoadBuilding(player, roadsToBuild));
-            }
+                List<int[]> combinations = Utils.generateCombinations(roadsIdx, ((CatanParameters) gs.getGameParameters()).nRoadsRB);
+                for (int[] combo : combinations) {
+                    AbstractAction[] roadsToBuild = new BuildRoad[combo.length];
+                    for (int i = 0; i < combo.length; i++) {
+                        roadsToBuild[i] = roads.get(combo[i]);
+                    }
+                    actions.add(new PlayRoadBuilding(player, roadsToBuild));
+                }
 
 //                CatanTile[][] board = gs.getBoard();
 //                for (int x = 0; x < board.length; x++) {
@@ -449,6 +459,12 @@ public class CatanActionFactory {
 //                        }
 //                    }
 //                }
+            } else {
+                // Deep: one road at a time
+                for (AbstractAction road: roads) {
+                    actions.add(new DeepRoadBuilding(player, road, cardType.nDeepSteps((CatanParameters) gs.getGameParameters())));
+                }
+            }
         }
         return actions;
     }
