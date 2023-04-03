@@ -479,18 +479,21 @@ public class CatanActionFactory {
     public static List<AbstractAction> getDefaultTradeActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         HashMap<CatanParameters.Resource, Counter> playerExchangeRate = gs.getExchangeRates(player);
-        // TODO: Deep: first choose resource to give, then resource to get
         for (Map.Entry<CatanParameters.Resource, Counter> res: gs.playerResources.get(player).entrySet()) {
             // give N resources (minimum exchange rate for this resource)
             CatanParameters.Resource resToGive = res.getKey();
             int nGive = playerExchangeRate.get(res.getKey()).getValue();
             int nOwned = res.getValue().getValue();
             if (nOwned >= nGive) {
-                // for 1 other resource
-                for (CatanParameters.Resource resToGet: CatanParameters.Resource.values()) {
-                    if (resToGive != resToGet) {
-                        actions.add(new DefaultTrade(resToGive, resToGet, nGive, player));
+                if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+                    // for 1 other resource
+                    for (CatanParameters.Resource resToGet : CatanParameters.Resource.values()) {
+                        if (resToGive != resToGet && gs.getResourcePool().get(resToGet).getValue() > 0) {
+                            actions.add(new DefaultTrade(resToGive, resToGet, nGive, player));
+                        }
                     }
+                } else {
+                    actions.add(new DeepDefaultTrade(resToGive, nGive, player));
                 }
             }
         }
