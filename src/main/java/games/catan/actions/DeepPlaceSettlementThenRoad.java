@@ -2,9 +2,11 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Edge;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
+import games.catan.components.Building;
 import games.catan.components.CatanTile;
 
 import java.util.ArrayList;
@@ -37,10 +39,23 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
         CatanGameState gs = (CatanGameState) state;
         CatanTile[][] board = gs.getBoard();
         CatanTile tile = board[x][y];
+
         int[][] coords = tile.getNeighboursOnVertex(vertex);
-        actions.add(new BuildRoad(x, y, vertex, player, true));
-        for (int[] neighbour: coords) {
-            actions.add(new BuildRoad(neighbour[0], neighbour[1], (vertex+2)%HEX_SIDES, player, true));
+        int edge = (HEX_SIDES+vertex-1)%HEX_SIDES;
+        Building settlement = gs.getBuilding(tile, vertex);
+        Edge edgeObj = gs.getRoad(settlement, tile, edge);
+        if (edgeObj.getOwnerId() == -1) {
+            actions.add(new BuildRoad(x, y, edge, player, true));
+            for (int k = 0; k < coords.length; k++) {
+                int[] neighbour = coords[k];
+                int v = (vertex + 2*(k+1)) % HEX_SIDES;
+                edge = (HEX_SIDES+v-1)%HEX_SIDES;
+                CatanTile nTile = board[neighbour[0]][neighbour[1]];
+                edgeObj = gs.getRoad(nTile, v, edge);
+                if (edgeObj != null && edgeObj.getOwnerId() == -1) {
+                    actions.add(new BuildRoad(neighbour[0], neighbour[1], edge, player, true));
+                }
+            }
         }
         return actions;
     }
