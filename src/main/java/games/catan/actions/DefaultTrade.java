@@ -7,8 +7,10 @@ import games.catan.CatanParameters.Resource;
 
 import java.util.Objects;
 
-/* Player may trade any 4 resources of the same type of 1 resource of choice with the bank
-* This action also includes the Harbor trades using the exchangeRate*/
+/**
+ *  Player may trade any 4 resources of the same type of 1 resource of choice with the bank
+ *  This action also includes the Harbor trades using the exchangeRate (2:1, 3:1 etc.)
+ */
 public class DefaultTrade extends AbstractAction {
     public final Resource resourceOffer;
     public final Resource resourceToGet;
@@ -25,7 +27,7 @@ public class DefaultTrade extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
-        if (cgs.getPlayerResources(player).get(resourceOffer).getValue() < exchangeRate) throw new AssertionError("Player does not have enough cards for this trade");
+        if (cgs.getPlayerResources(player).get(resourceOffer).getValue() < exchangeRate) throw new AssertionError("Player does not have enough resources for this trade");
         cgs.getPlayerResources(player).get(resourceOffer).decrement(exchangeRate);
         cgs.getPlayerResources(player).get(resourceToGet).increment();
         return true;

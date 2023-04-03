@@ -72,30 +72,13 @@ public class CatanActionFactory {
     }
 
     /**
-     * Calculates regular Player actions in the Trade stage
-     *
-     * @return - ArrayList, various action types (unique).
-     */
-    static List<AbstractAction> getTradeStageActions(CatanGameState gs, ActionSpace actionSpace, int player) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        actions.add(new DoNothing());
-        actions.addAll(getTradeActions(gs, actionSpace, player));
-        actions.addAll(getPlayerTradeOfferActions(gs));
-        if (gs.noDevelopmentCardPlayed()) {
-            actions.addAll(getDevCardActions(gs, actionSpace, player));
-        }
-
-        return actions;
-    }
-
-    /**
      * Generates PlayerTradeOffers relating to single type trades
      * i.e Lumber for Grain, Brick for Stone
      *
      * @param gs - current state
      * @return - ArrayList, PlayerTradeOffer type (unique).
      */
-    static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs) {
+    static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         HashMap<CatanParameters.Resource, Counter> resources = gs.getPlayerResources(gs.getCurrentPlayer());
         int exchangeRate = ((CatanParameters) gs.getGameParameters()).default_exchange_rate;
@@ -130,7 +113,7 @@ public class CatanActionFactory {
         return actions;
     }
 
-    static List<AbstractAction> getTradeReactionActions(CatanGameState gs) {
+    static List<AbstractAction> getTradeReactionActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
 
@@ -215,23 +198,6 @@ public class CatanActionFactory {
         if (actions.size() == 0) {
             actions.add(new DoNothing());
         }
-        return actions;
-    }
-
-    /**
-     * Calculates regular Player actions in Buy stage
-     *
-     * @return - ArrayList, various action types (unique).
-     */
-    static List<AbstractAction> getBuildStageActions(CatanGameState gs, ActionSpace actionSpace, int player) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        actions.add(new DoNothing());
-        actions.addAll(getBuyActions(gs, actionSpace, player));
-
-        if (gs.noDevelopmentCardPlayed()) {
-            actions.addAll(getDevCardActions(gs, actionSpace, player));
-        }
-
         return actions;
     }
 
@@ -359,6 +325,7 @@ public class CatanActionFactory {
                 }
             }
         }
+        // Dev cards
         if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.DevCard), player)
                 && gs.devCards.getSize() > 0) {
             actions.add(new BuyDevelopmentCard(player));
@@ -367,12 +334,8 @@ public class CatanActionFactory {
     }
 
     public static List<AbstractAction> getDevCardActions(CatanGameState gs, ActionSpace actionSpace, int player) {
-        // Player can buy dev card and play one
+        // Player can play one dev card
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        boolean knightCard = false;
-        boolean monopolyCard = false;
-        boolean yearOfPlentyCard = false;
-        boolean roadBuildingCard = false;
 
         // get playerHand; for each card add a new action
         Deck<CatanCard> playerDevDeck = gs.playerDevCards.get(player);
@@ -384,67 +347,47 @@ public class CatanActionFactory {
             }
             // victory points are automatically revealed once a player has 10+ points
             if (c.cardType == CatanCard.CardType.KNIGHT_CARD) {
-                if (knightCard) {
-                    continue;
-                } else {
-                    knightCard = true;
-                    actions.add(new PlayKnightCard(player));
-                }
+                actions.add(new PlayKnightCard(player));
             }
             if (c.cardType == CatanCard.CardType.MONOPOLY) {
-                if (monopolyCard) {
-                    continue;
-                } else {
-                    monopolyCard = true;
-                    for (CatanParameters.Resource resource : CatanParameters.Resource.values()) {
-                        actions.add(new Monopoly(resource, player));
-                    }
+                for (CatanParameters.Resource resource : CatanParameters.Resource.values()) {
+                    actions.add(new Monopoly(resource, player));
                 }
             }
             if (c.cardType == CatanCard.CardType.YEAR_OF_PLENTY) {
-                if (yearOfPlentyCard) {
-                    continue;
-                } else {
-                    yearOfPlentyCard = true;
-                    List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
+                List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
 
-                    for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
-                        if (gs.resourcePool.get(res).getValue() > 0)
-                            for (int i = 0; i < ((CatanParameters)gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
-                                resourcesAvailable.add(res);
-                            }
-                    }
-
-                    int[] resIdx = new int[resourcesAvailable.size()];
-                    for (int i = 0; i < resourcesAvailable.size(); i++) {
-                        resIdx[i] = i;
-                    }
-                    List<int[]> combinations = Utils.generateCombinations(resIdx, ((CatanParameters)gs.getGameParameters()).nResourcesYoP);
-                    for (int[] combo: combinations) {
-                        CatanParameters.Resource[] resources = new CatanParameters.Resource[combo.length];
-                        for (int i = 0; i < combo.length; i++) {
-                            resources[i] = resourcesAvailable.get(combo[i]);
+                for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
+                    if (gs.resourcePool.get(res).getValue() > 0)
+                        for (int i = 0; i < ((CatanParameters)gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
+                            resourcesAvailable.add(res);
                         }
-                        actions.add(new YearOfPlenty(resources, player));
+                }
+
+                int[] resIdx = new int[resourcesAvailable.size()];
+                for (int i = 0; i < resourcesAvailable.size(); i++) {
+                    resIdx[i] = i;
+                }
+                List<int[]> combinations = Utils.generateCombinations(resIdx, ((CatanParameters)gs.getGameParameters()).nResourcesYoP);
+                for (int[] combo: combinations) {
+                    CatanParameters.Resource[] resources = new CatanParameters.Resource[combo.length];
+                    for (int i = 0; i < combo.length; i++) {
+                        resources[i] = resourcesAvailable.get(combo[i]);
                     }
+                    actions.add(new YearOfPlenty(resources, player));
                 }
             }
             if (c.cardType == CatanCard.CardType.ROAD_BUILDING) {
-                if (roadBuildingCard) {
-                    continue;
-                } else {
-                    roadBuildingCard = true;
-                    // Identify all possible roads to build
-                    CatanTile[][] board = gs.getBoard();
-                    for (int x = 0; x < board.length; x++) {
-                        for (int y = 0; y < board[x].length; y++) {
-                            CatanTile tile = board[x][y];
-                            for (int i = 0; i < HEX_SIDES; i++) {
-                                if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-                                        && gs.checkRoadPlacement(i, tile, player)
-                                        && !gs.playerTokens.get(player).get(CatanParameters.ActionType.Road).isMaximum()) {
-                                    actions.add(new BuildRoad(x, y, i, player, true));
-                                }
+                // Identify all possible roads to build  // TODO multiples
+                CatanTile[][] board = gs.getBoard();
+                for (int x = 0; x < board.length; x++) {
+                    for (int y = 0; y < board[x].length; y++) {
+                        CatanTile tile = board[x][y];
+                        for (int i = 0; i < HEX_SIDES; i++) {
+                            if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
+                                    && gs.checkRoadPlacement(i, tile, player)
+                                    && !gs.playerTokens.get(player).get(CatanParameters.ActionType.Road).isMaximum()) {
+                                actions.add(new BuildRoad(x, y, i, player, true));
                             }
                         }
                     }
@@ -455,24 +398,31 @@ public class CatanActionFactory {
         return actions;
     }
 
+    /**
+     * @param gs - game state
+     * @param actionSpace - action space type
+     * @param player - player trading
+     * @return list all possible trades with the bank / harbours, using minimum exchange rate available for each resource
+     * type owned by the player
+     */
     public static List<AbstractAction> getTradeActions(CatanGameState gs, ActionSpace actionSpace, int player) {
-        // Player can buy dev card and play one
         ArrayList<AbstractAction> actions = new ArrayList<>();
-
-        // default trade
         HashMap<CatanParameters.Resource, Counter> playerExchangeRate = gs.getExchangeRates(player);
+        // TODO: Deep: first choose resource to give, then resource to get
         for (Map.Entry<CatanParameters.Resource, Counter> res: gs.playerResources.get(player).entrySet()) {
-            if (res.getValue().getValue() >= playerExchangeRate.get(res.getKey()).getValue()) {
-                for (CatanParameters.Resource res2: CatanParameters.Resource.values()) {
-                    if (res.getKey() != res2) {
-                        // list all possible trades with the bank / harbours
-                        actions.add(new DefaultTrade(res.getKey(), res2, playerExchangeRate.get(res.getKey()).getValue(), player));
+            // give N resources (minimum exchange rate for this resource)
+            CatanParameters.Resource resToGive = res.getKey();
+            int nGive = playerExchangeRate.get(res.getKey()).getValue();
+            int nOwned = res.getValue().getValue();
+            if (nOwned >= nGive) {
+                // for 1 other resource
+                for (CatanParameters.Resource resToGet: CatanParameters.Resource.values()) {
+                    if (resToGive != resToGet) {
+                        actions.add(new DefaultTrade(resToGive, resToGet, nGive, player));
                     }
                 }
             }
         }
-
-
         return actions;
     }
 }

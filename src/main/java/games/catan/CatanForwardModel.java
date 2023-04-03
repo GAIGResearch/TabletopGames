@@ -6,14 +6,21 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
-import core.components.*;
-import games.catan.components.*;
+import core.components.Counter;
+import core.components.Deck;
+import core.components.Edge;
+import core.components.GraphBoardWithEdges;
+import games.catan.actions.DiscardCardsPhase;
+import games.catan.components.Building;
+import games.catan.components.CatanCard;
+import games.catan.components.CatanTile;
 
 import java.util.*;
 
 import static core.CoreConstants.DefaultGamePhase.Main;
-import static games.catan.CatanConstants.*;
-import static games.catan.CatanGameState.CatanGamePhase.*;
+import static games.catan.CatanConstants.HEX_SIDES;
+import static games.catan.CatanGameState.CatanGamePhase.Robber;
+import static games.catan.CatanGameState.CatanGamePhase.Setup;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class CatanForwardModel extends StandardForwardModel {
@@ -157,7 +164,7 @@ public class CatanForwardModel extends StandardForwardModel {
                 int nResInHand = gs.getNResourcesInHand(p);
                 if (nResInHand > cp.max_cards_without_discard) {
                     int r = nResInHand / 2; // remove half of the resources
-//                    new DiscardCardsPhase(p, actionSpace, r).execute(gs); // TODO access action space?
+                    new DiscardCardsPhase(p, gs.getCoreGameParameters().actionSpace, r).execute(gs); 
                 }
             }
             gs.setGamePhase(Robber);
@@ -197,11 +204,26 @@ public class CatanForwardModel extends StandardForwardModel {
         if (cgs.getGamePhase() == Robber) {
             return CatanActionFactory.getRobberActions(cgs, actionSpace, player);
         }
-        // TODO: combine these together for main phase
-//        if (cgs.getCurrentTradeOffer() != null)
-//            return CatanActionFactory.getTradeReactionActions(cgs);
-//        return CatanActionFactory.getTradeStageActions(cgs);
-        return CatanActionFactory.getBuildStageActions(cgs, actionSpace, player);
+        // Main phase: trade, build (road, city, dev card), or play dev card
+        List<AbstractAction> mainActions = new ArrayList<>();
+        // Trade
+        if (cgs.getCurrentTradeOffer() != null)
+            mainActions.addAll(CatanActionFactory.getTradeReactionActions(cgs, actionSpace, player));
+        else {
+            // With the bank / ports
+            mainActions.addAll(CatanActionFactory.getTradeActions(cgs, actionSpace, player));
+            // With other players
+            mainActions.addAll(CatanActionFactory.getPlayerTradeOfferActions(cgs, actionSpace, player));
+        }
+
+        // Build
+        mainActions.addAll(CatanActionFactory.getBuyActions(cgs, actionSpace, player));
+
+        // Dev cards
+        if (cgs.noDevelopmentCardPlayed()) {
+            mainActions.addAll(CatanActionFactory.getDevCardActions(cgs, actionSpace, player));
+        }
+        return mainActions;
     }
 
     private CatanTile[][] generateBoard(CatanParameters params) {
