@@ -86,6 +86,8 @@ public class CatanForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
+        if (currentState.isActionInProgress()) return;
+        
         CatanGameState gs = (CatanGameState) currentState;
         CatanParameters params = (CatanParameters) gs.getGameParameters();
         int player = gs.getCurrentPlayer();
