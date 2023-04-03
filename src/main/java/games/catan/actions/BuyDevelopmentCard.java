@@ -20,7 +20,7 @@ public class BuyDevelopmentCard extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         CatanGameState cgs = (CatanGameState)gs;
         CatanParameters cp = (CatanParameters) gs.getGameParameters();
-        if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.DevCard), player)) return false;
+        if (!cgs.spendResourcesIfPossible(cp.costMapping.get(BuyAction.BuyType.DevCard), player)) return false;
         // give a dev card to the player
         Deck<CatanCard> playerDevDeck = cgs.getPlayerDevCards(player);
         Deck<CatanCard> devDeck = cgs.getDevCards();

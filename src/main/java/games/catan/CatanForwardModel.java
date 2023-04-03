@@ -10,6 +10,7 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.Edge;
 import core.components.GraphBoardWithEdges;
+import games.catan.actions.BuyAction;
 import games.catan.actions.DiscardResourcesPhase;
 import games.catan.components.Building;
 import games.catan.components.CatanCard;
@@ -55,8 +56,8 @@ public class CatanForwardModel extends StandardForwardModel {
         // Setup areas
         for (int i = 0; i < state.getNPlayers(); i++) {
             state.playerDevCards.add(new Deck<>("Player Development Deck", i, CoreConstants.VisibilityMode.VISIBLE_TO_OWNER));
-            HashMap<CatanParameters.ActionType, Counter> tokens = new HashMap<>();
-            for (Map.Entry<CatanParameters.ActionType, Integer> type: params.tokenCounts.entrySet()) {
+            HashMap<BuyAction.BuyType, Counter> tokens = new HashMap<>();
+            for (Map.Entry<BuyAction.BuyType, Integer> type: params.tokenCounts.entrySet()) {
                 tokens.put(type.getKey(), new Counter(type.getValue(), type.getKey().name() + " Counter " + i));
             }
             state.playerTokens.add(tokens);

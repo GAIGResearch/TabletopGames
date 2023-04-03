@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import games.GameType;
+import games.catan.actions.BuyAction;
 import games.catan.actions.OfferPlayerTrade;
 import games.catan.components.*;
 
@@ -28,13 +29,13 @@ public class CatanGameState extends AbstractGameState {
     protected Random rnd;
 
     List<HashMap<CatanParameters.Resource, Counter>> playerResources;
-    List<HashMap<CatanParameters.ActionType, Counter>> playerTokens;
+    List<HashMap<BuyAction.BuyType, Counter>> playerTokens;
     List<Deck<CatanCard>> playerDevCards;
     HashMap<CatanParameters.Resource, Counter> resourcePool;
     Deck<CatanCard> devCards;
     boolean developmentCardPlayed; // Tracks whether a player has played a development card this turn
 
-    public List<HashMap<CatanParameters.ActionType, Counter>> getPlayerTokens() {
+    public List<HashMap<BuyAction.BuyType, Counter>> getPlayerTokens() {
         return playerTokens;
     }
 
@@ -415,8 +416,8 @@ public class CatanGameState extends AbstractGameState {
 
             copy.playerDevCards.add(playerDevCards.get(i).copy());
 
-            HashMap<CatanParameters.ActionType, Counter> playerTok = new HashMap<>();
-            for (Map.Entry<CatanParameters.ActionType, Counter> e: playerTokens.get(i).entrySet()) {
+            HashMap<BuyAction.BuyType, Counter> playerTok = new HashMap<>();
+            for (Map.Entry<BuyAction.BuyType, Counter> e: playerTokens.get(i).entrySet()) {
                 playerTok.put(e.getKey(), e.getValue().copy());
             }
             copy.playerTokens.add(playerTok);

@@ -251,56 +251,105 @@ public class CatanActionFactory {
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
-        HashSet<Integer> settlementsAdded = new HashSet<>();
-        HashSet<Integer> roadsAdded = new HashSet<>();
-        // find possible roads, settlements and city upgrades and propose them as actions
-        CatanTile[][] board = gs.getBoard();
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
-                for (int i = 0; i < HEX_SIDES; i++) {
-                    Building settlement = gs.getBuilding(tile, i);
+        // Road, Settlement or City
+        if (actionSpace.structure != ActionSpace.Structure.Deep) {
+            actions.addAll(getBuyRoadActions(gs, player));
+            actions.addAll(getBuySettlementActions(gs, player));
+            actions.addAll(getBuyCityActions(gs, player));
+        } else {
+            // Deep: choose between buying road / city / settlement, then where to place them
+            for (BuyAction.BuyType type: BuyAction.BuyType.values()) {
+                if (type == BuyAction.BuyType.DevCard) continue;
+                if (gs.checkCost(catanParameters.costMapping.get(type), player)
+                        && !gs.playerTokens.get(player).get(type).isMaximum()) {
+                    actions.add(new BuyAction(player, type));
+                }
+            }
+        }
 
-                    // Roads
-                    Edge edge = gs.getRoad(settlement, tile, i);
-                    if (edge == null || roadsAdded.contains(edge.getComponentID())) continue;
-                    roadsAdded.add(edge.getComponentID());
+        // Dev card separate, always just 1 step, no choice
+        if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.DevCard), player) && gs.devCards.getSize() > 0) {
+            actions.add(new BuyDevelopmentCard(player));
+        }
 
-                    if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-                            && gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())) {
-                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.Road), player)
-                                && !gs.playerTokens.get(player).get(CatanParameters.ActionType.Road).isMaximum()) {
+        return actions;
+    }
+
+    public static List<AbstractAction> getBuyRoadActions(CatanGameState gs, int player) {
+        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Road), player)
+                && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
+            HashSet<Integer> roadsAdded = new HashSet<>();
+            CatanTile[][] board = gs.getBoard();
+            for (int x = 0; x < board.length; x++) {
+                for (int y = 0; y < board[x].length; y++) {
+                    CatanTile tile = board[x][y];
+                    for (int i = 0; i < HEX_SIDES; i++) {
+                        Building settlement = gs.getBuilding(tile, i);
+                        // Roads
+                        Edge edge = gs.getRoad(settlement, tile, i);
+                        if (edge == null || roadsAdded.contains(edge.getComponentID())) continue;
+                        roadsAdded.add(edge.getComponentID());
+
+                        if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
+                                && gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())) {
                             actions.add(new BuildRoad(x, y, i, player, false));
-                        }
-                    }
-
-                    if (settlementsAdded.contains(settlement.getComponentID())) continue;
-                    settlementsAdded.add(settlement.getComponentID());
-
-                    // Settlements
-                    // where it is legal to place tile then it can be placed from there
-                    if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-                            && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
-                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.Settlement), player)
-                                && !gs.playerTokens.get(player).get(CatanParameters.ActionType.Settlement).isMaximum()) {
-                            actions.add(new BuildSettlement(x, y, i, player, false));
-                        }
-                    }
-
-                    // Cities
-                    if (settlement.getOwnerId() == player && settlement.getBuildingType() == Settlement) {
-                        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.City), player)
-                                && !gs.playerTokens.get(player).get(CatanParameters.ActionType.City).isMaximum()) {
-                            actions.add(new BuildCity(x, y, i, player));
                         }
                     }
                 }
             }
         }
-        // Dev cards
-        if (gs.checkCost(catanParameters.costMapping.get(CatanParameters.ActionType.DevCard), player)
-                && gs.devCards.getSize() > 0) {
-            actions.add(new BuyDevelopmentCard(player));
+        return actions;
+    }
+
+    public static List<AbstractAction> getBuySettlementActions(CatanGameState gs, int player) {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
+        if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Settlement), player)
+                && !gs.playerTokens.get(player).get(BuyAction.BuyType.Settlement).isMaximum()) {
+            HashSet<Integer> settlementsAdded = new HashSet<>();
+            CatanTile[][] board = gs.getBoard();
+            for (int x = 0; x < board.length; x++) {
+                for (int y = 0; y < board[x].length; y++) {
+                    CatanTile tile = board[x][y];
+                    for (int i = 0; i < HEX_SIDES; i++) {
+                        Building settlement = gs.getBuilding(tile, i);
+                        if (settlementsAdded.contains(settlement.getComponentID())) continue;
+                        settlementsAdded.add(settlement.getComponentID());
+
+                        // legal to place?
+                        if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
+                                && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
+                            actions.add(new BuildSettlement(x, y, i, player, false));
+                        }
+                    }
+                }
+            }
+        }
+        return actions;
+    }
+
+    public static List<AbstractAction> getBuyCityActions(CatanGameState gs, int player) {
+        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.City), player)
+                && !gs.playerTokens.get(player).get(BuyAction.BuyType.City).isMaximum()) {
+            HashSet<Integer> settlementsAdded = new HashSet<>();
+            CatanTile[][] board = gs.getBoard();
+            for (int x = 0; x < board.length; x++) {
+                for (int y = 0; y < board[x].length; y++) {
+                    CatanTile tile = board[x][y];
+                    for (int i = 0; i < HEX_SIDES; i++) {
+                        Building settlement = gs.getBuilding(tile, i);
+                        if (settlementsAdded.contains(settlement.getComponentID())) continue;
+                        settlementsAdded.add(settlement.getComponentID());
+                        if (settlement.getOwnerId() == player && settlement.getBuildingType() == Settlement) {
+                            actions.add(new BuildCity(x, y, i, player));
+                        }
+                    }
+                }
+            }
         }
         return actions;
     }
@@ -358,7 +407,7 @@ public class CatanActionFactory {
                         for (int i = 0; i < HEX_SIDES; i++) {
                             if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
                                     && gs.checkRoadPlacement(i, tile, player)
-                                    && !gs.playerTokens.get(player).get(CatanParameters.ActionType.Road).isMaximum()) {
+                                    && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
                                 actions.add(new BuildRoad(x, y, i, player, true));
                             }
                         }

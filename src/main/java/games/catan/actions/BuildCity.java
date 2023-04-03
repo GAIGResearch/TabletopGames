@@ -31,18 +31,18 @@ public class BuildCity extends AbstractAction {
 
         Building settlement = cgs.getBuilding(board[row][col], vertex);
         if (settlement != null && settlement.getOwnerId() == playerID) {
-            if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.City), playerID)) {
+            if (!cgs.spendResourcesIfPossible(cp.costMapping.get(BuyAction.BuyType.City), playerID)) {
                 throw new AssertionError("Player cannot afford city");
             }
 
-            Counter cityTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.City);
+            Counter cityTokens = cgs.getPlayerTokens().get(playerID).get(BuyAction.BuyType.City);
             if (cityTokens.isMaximum()){
                 throw new AssertionError("Player cannot build anymore cities");
             }
             cityTokens.increment();
 
             // if player builds a city it gets back the settlement token
-            Counter settleTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Settlement);
+            Counter settleTokens = cgs.getPlayerTokens().get(playerID).get(BuyAction.BuyType.Settlement);
             settleTokens.decrement();
             settlement.upgrade();
             cgs.addScore(playerID, cp.buildingValue.get(Building.Type.City));

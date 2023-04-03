@@ -2,13 +2,14 @@ package games.catan;
 
 import core.AbstractParameters;
 import core.components.Dice;
+import games.catan.actions.BuyAction;
 import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
 
 import java.util.HashMap;
 
-import static games.catan.CatanParameters.ActionType.*;
+import static games.catan.actions.BuyAction.BuyType.*;
 import static games.catan.CatanParameters.Resource.*;
 
 public class CatanParameters extends AbstractParameters {
@@ -98,15 +99,8 @@ public class CatanParameters extends AbstractParameters {
         put(CatanTile.TileType.SEA, null);
     }};
 
-    public enum ActionType {
-        Settlement,
-        City,
-        Road,
-        DevCard
-    }
-
     /* Mapping from name to price of item (cost is in the same order as Resources) */
-    public HashMap<ActionType, HashMap<Resource, Integer>> costMapping = new HashMap<ActionType, HashMap<Resource, Integer>>(){{
+    public HashMap<BuyAction.BuyType, HashMap<Resource, Integer>> costMapping = new HashMap<BuyAction.BuyType, HashMap<Resource, Integer>>(){{
         // cost order: Brick, lumber, ore, grain, wool
         put(Settlement, new HashMap<Resource, Integer>() {{
             put(BRICK, 1);
@@ -129,7 +123,7 @@ public class CatanParameters extends AbstractParameters {
         }});
     }};
 
-    HashMap<ActionType, Integer> tokenCounts = new HashMap<ActionType, Integer>() {{
+    HashMap<BuyAction.BuyType, Integer> tokenCounts = new HashMap<BuyAction.BuyType, Integer>() {{
         put(Settlement, 5);
         put(City, 4);
         put(Road, 15);

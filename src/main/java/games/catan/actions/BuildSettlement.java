@@ -35,12 +35,12 @@ public class BuildSettlement extends AbstractAction {
         Building settlement = cgs.getBuilding(board[x][y], vertex);
         if (settlement != null && settlement.getOwnerId() == -1) {
             if (!free) {
-                if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.Settlement), playerID)) {
+                if (!cgs.spendResourcesIfPossible(cp.costMapping.get(BuyAction.BuyType.Settlement), playerID)) {
                     throw new AssertionError("Player " + gs.getCurrentPlayer() + " cannot afford this settlement");
                 }
             }
 
-            Counter settleTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Settlement);
+            Counter settleTokens = cgs.getPlayerTokens().get(playerID).get(BuyAction.BuyType.Settlement);
             if (settleTokens.isMaximum()){
                 throw new AssertionError("No more settlements to build for player " + gs.getCurrentPlayer());
             }

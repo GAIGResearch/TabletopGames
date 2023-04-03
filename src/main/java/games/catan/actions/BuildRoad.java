@@ -34,11 +34,11 @@ public class BuildRoad extends AbstractAction {
         if (edgeObj.getOwnerId() == -1) {
             // only take resources after set up and not with road building card
             if (!free) {
-                if (!cgs.spendResourcesIfPossible(cp.costMapping.get(CatanParameters.ActionType.Road), playerID)) {
+                if (!cgs.spendResourcesIfPossible(cp.costMapping.get(BuyAction.BuyType.Road), playerID)) {
                     throw new AssertionError("Player " + playerID + " cannot afford this road");
                 }
             }
-            Counter roadTokens = cgs.getPlayerTokens().get(playerID).get(CatanParameters.ActionType.Road);
+            Counter roadTokens = cgs.getPlayerTokens().get(playerID).get(BuyAction.BuyType.Road);
             if (roadTokens.isMaximum()) {
                 throw new AssertionError("No more roads to build for player " + gs.getCurrentPlayer());
             }
