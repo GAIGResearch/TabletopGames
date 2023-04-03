@@ -11,11 +11,10 @@ import java.util.Random;
 import static core.CoreConstants.DefaultGamePhase.Main;
 
 public class MoveRobberAndSteal extends MoveRobber {
-    public final int player, targetPlayer;
+    public final int targetPlayer;  // Player to steal from random resource
 
     public MoveRobberAndSteal(int x, int y, int player, int targetPlayer){
-        super(x, y);
-        this.player = player;
+        super(x, y, player);
         this.targetPlayer = targetPlayer;
     }
 
@@ -54,18 +53,17 @@ public class MoveRobberAndSteal extends MoveRobber {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other instanceof MoveRobberAndSteal){
-            MoveRobberAndSteal otherAction = (MoveRobberAndSteal)other;
-            return x == otherAction.x && y == otherAction.y;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MoveRobberAndSteal)) return false;
+        if (!super.equals(o)) return false;
+        MoveRobberAndSteal that = (MoveRobberAndSteal) o;
+        return targetPlayer == that.targetPlayer;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x,y);
+        return Objects.hash(super.hashCode(), targetPlayer);
     }
 
     @Override

@@ -2,18 +2,28 @@ package games.catan.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
+import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
+import games.catan.components.Building;
 import games.catan.components.CatanTile;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 
-public class MoveRobber extends AbstractAction {
+public class MoveRobber extends AbstractAction implements IExtendedSequence {
     public final int x;
     public final int y;
+    public final int player;
 
-    public MoveRobber(int x, int y){
+    boolean executed;
+
+    public MoveRobber(int x, int y, int player){
         this.x = x;
         this.y = y;
+        this.player = player;
     }
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -25,14 +35,51 @@ public class MoveRobber extends AbstractAction {
 
         if (robberTile.removeRobber()){
             cgs.getBoard()[x][y].placeRobber();
-            return true;
         } else {
             throw new AssertionError("Cannot move robber from " + robberTile + " to " + cgs.getBoard()[x][y].toString());
         }
+
+        gs.setActionInProgress(this);
+        return true;
     }
 
-    public int[] getXY(){
-        return new int[]{x,y};
+    @Override
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
+        return _computeAvailableActions(state, state.getCoreGameParameters().actionSpace);
+    }
+
+    @Override
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState state, ActionSpace actionSpace) {
+        List<AbstractAction> actions = new ArrayList<>();
+        CatanGameState gs = (CatanGameState) state;
+        CatanTile[][] board = gs.getBoard();
+        CatanTile tile = board[x][y];
+        HashSet<Integer> targets = new HashSet<>();
+        Building[] settlements = gs.getBuildings(tile);
+        for (Building settlement : settlements) {
+            if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer()) {
+                targets.add(settlement.getOwnerId());
+            }
+        }
+        for (int target : targets) {
+            actions.add(new StealResource(player, target));
+        }
+        return actions;
+    }
+
+    @Override
+    public int getCurrentPlayer(AbstractGameState state) {
+        return player;
+    }
+
+    @Override
+    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+        executed = true;
+    }
+
+    @Override
+    public boolean executionComplete(AbstractGameState state) {
+        return executed;
     }
 
     @Override
@@ -41,23 +88,21 @@ public class MoveRobber extends AbstractAction {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other instanceof MoveRobber){
-            MoveRobber otherAction = (MoveRobber)other;
-            return x == otherAction.x && y == otherAction.y;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MoveRobber)) return false;
+        MoveRobber that = (MoveRobber) o;
+        return x == that.x && y == that.y && player == that.player && executed == that.executed;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(x,y);
+        return Objects.hash(x, y, player, executed);
     }
 
     @Override
     public String toString() {
-        return "MoveRobber to x=" + x + " y=" + y;
+        return player + " moves robber to x=" + x + " y=" + y;
     }
     @Override
     public String getString(AbstractGameState gameState) {

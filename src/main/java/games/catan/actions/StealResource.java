@@ -12,12 +12,13 @@ import java.util.Random;
  * Player may steal a resource from a player when moving a robber or playing a knight card
  */
 public class StealResource extends AbstractAction {
+    public final int playerID;
     public final int targetPlayerID;
 
-    public StealResource(int targetPlayerID){
+    public StealResource(int playerID, int targetPlayerID){
+        this.playerID = playerID;
         this.targetPlayerID = targetPlayerID;
     }
-
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -29,7 +30,7 @@ public class StealResource extends AbstractAction {
         }
         int cardIndex = random.nextInt(nResTarget);
         CatanParameters.Resource resource = cgs.pickResourceFromHand(targetPlayerID, cardIndex);
-        cgs.getPlayerResources(gs.getCurrentPlayer()).get(resource).increment();
+        cgs.getPlayerResources(playerID).get(resource).increment();
         cgs.getPlayerResources(targetPlayerID).get(resource).decrement();
         return true;
     }
@@ -40,22 +41,21 @@ public class StealResource extends AbstractAction {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other instanceof StealResource){
-            StealResource otherAction = (StealResource)other;
-            return targetPlayerID == otherAction.targetPlayerID;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StealResource)) return false;
+        StealResource that = (StealResource) o;
+        return playerID == that.playerID && targetPlayerID == that.targetPlayerID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(targetPlayerID);
+        return Objects.hash(playerID, targetPlayerID);
     }
 
     @Override
     public String toString() {
-        return "Stealing a resource card from player " + targetPlayerID;
+        return playerID + "steals a resource from " + targetPlayerID;
     }
     @Override
     public String getString(AbstractGameState gameState) {

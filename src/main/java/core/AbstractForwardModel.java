@@ -151,7 +151,7 @@ public abstract class AbstractForwardModel {
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         // If there is an action in progress (see IExtendedSequence), then delegate to that
         if (gameState.isActionInProgress()) {
-            return gameState.actionsInProgress.peek()._computeAvailableActions(gameState);
+            return gameState.actionsInProgress.peek()._computeAvailableActions(gameState, actionSpace);
         }
         if (actionSpace != null && !actionSpace.isDefault()) {
             return _computeAvailableActions(gameState, actionSpace);

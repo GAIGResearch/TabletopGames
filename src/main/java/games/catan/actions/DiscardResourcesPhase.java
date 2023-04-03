@@ -10,16 +10,17 @@ import games.catan.CatanGameState;
 import java.util.List;
 import java.util.Objects;
 
-public class DiscardCardsPhase extends AbstractAction implements IExtendedSequence {
-    public final int playerID;
-    public final ActionSpace actionSpace;
-    public final int nDiscards;
+/**
+ * Combinations of resources in hand to discard.
+ */
+public class DiscardResourcesPhase extends AbstractAction implements IExtendedSequence {
+    public final int playerID;  // player discarding
+    public final int nDiscards;  // how many resources to discard
 
-    private int nDiscarded;
+    private int nDiscarded;  // how many discarded so far
 
-    public DiscardCardsPhase(int playerID, ActionSpace actionSpace, int nDiscards) {
+    public DiscardResourcesPhase(int playerID, int nDiscards) {
         this.playerID = playerID;
-        this.actionSpace = actionSpace;
         this.nDiscards = nDiscards;
     }
 
@@ -29,8 +30,12 @@ public class DiscardCardsPhase extends AbstractAction implements IExtendedSequen
         return true;
     }
 
-    @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
+        return CatanActionFactory.getDiscardActions((CatanGameState) state, state.getCoreGameParameters().actionSpace, playerID, nDiscards);
+    }
+
+    @Override
+    public List<AbstractAction> _computeAvailableActions(AbstractGameState state, ActionSpace actionSpace) {
         return CatanActionFactory.getDiscardActions((CatanGameState) state, actionSpace, playerID, nDiscards);
     }
 
@@ -41,17 +46,17 @@ public class DiscardCardsPhase extends AbstractAction implements IExtendedSequen
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-        nDiscarded++;
+        nDiscarded += ((DiscardResources) action).resourcesToDiscard.length;
     }
 
     @Override
     public boolean executionComplete(AbstractGameState state) {
-        return actionSpace.structure == ActionSpace.Structure.Flat || actionSpace.structure == ActionSpace.Structure.Default || nDiscarded == nDiscards;
+        return nDiscarded == nDiscards;
     }
 
     @Override
-    public DiscardCardsPhase copy() {
-        DiscardCardsPhase copy = new DiscardCardsPhase(playerID, actionSpace, nDiscards);
+    public DiscardResourcesPhase copy() {
+        DiscardResourcesPhase copy = new DiscardResourcesPhase(playerID, nDiscards);
         copy.nDiscarded = nDiscarded;
         return copy;
     }
@@ -59,14 +64,14 @@ public class DiscardCardsPhase extends AbstractAction implements IExtendedSequen
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DiscardCardsPhase)) return false;
-        DiscardCardsPhase that = (DiscardCardsPhase) o;
-        return playerID == that.playerID && nDiscards == that.nDiscards && nDiscarded == that.nDiscarded && Objects.equals(actionSpace, that.actionSpace);
+        if (!(o instanceof DiscardResourcesPhase)) return false;
+        DiscardResourcesPhase that = (DiscardResourcesPhase) o;
+        return playerID == that.playerID && nDiscards == that.nDiscards && nDiscarded == that.nDiscarded;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, actionSpace, nDiscards, nDiscarded);
+        return Objects.hash(playerID, nDiscards, nDiscarded);
     }
 
     @Override

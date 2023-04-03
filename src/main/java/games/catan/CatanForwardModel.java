@@ -10,7 +10,7 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.Edge;
 import core.components.GraphBoardWithEdges;
-import games.catan.actions.DiscardCardsPhase;
+import games.catan.actions.DiscardResourcesPhase;
 import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
@@ -164,7 +164,7 @@ public class CatanForwardModel extends StandardForwardModel {
                 int nResInHand = gs.getNResourcesInHand(p);
                 if (nResInHand > cp.max_cards_without_discard) {
                     int r = nResInHand / 2; // remove half of the resources
-                    new DiscardCardsPhase(p, gs.getCoreGameParameters().actionSpace, r).execute(gs); 
+                    new DiscardResourcesPhase(p, r).execute(gs);
                 }
             }
             gs.setGamePhase(Robber);
@@ -211,7 +211,7 @@ public class CatanForwardModel extends StandardForwardModel {
             mainActions.addAll(CatanActionFactory.getTradeReactionActions(cgs, actionSpace, player));
         else {
             // With the bank / ports
-            mainActions.addAll(CatanActionFactory.getTradeActions(cgs, actionSpace, player));
+            mainActions.addAll(CatanActionFactory.getDefaultTradeActions(cgs, actionSpace, player));
             // With other players
             mainActions.addAll(CatanActionFactory.getPlayerTradeOfferActions(cgs, actionSpace, player));
         }

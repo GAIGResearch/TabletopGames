@@ -2,14 +2,13 @@ package games.catan;
 
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
-import core.actions.DoNothing;
 import core.components.Counter;
 import core.components.Deck;
 import core.components.Edge;
 import games.catan.actions.*;
+import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
-import games.catan.components.Building;
 import utilities.Utils;
 
 import java.util.*;
@@ -178,29 +177,14 @@ public class CatanActionFactory {
         return actions;
     }
 
-    static List<AbstractAction> getStealActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        int[] stealingFrom = {0, 0, 0, 0};
-        CatanTile[][] board = gs.getBoard();
-        for (CatanTile[] catanTiles : board) {
-            for (CatanTile tile : catanTiles) {
-                if (tile.hasRobber()) {
-                    Building[] settlements = gs.getBuildings(tile);
-                    for (Building settlement : settlements) {
-                        if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer() && stealingFrom[settlement.getOwnerId()] == 0) {
-                            stealingFrom[settlement.getOwnerId()] = 1;
-                            actions.add(new StealResource(settlement.getOwnerId()));
-                        }
-                    }
-                }
-            }
-        }
-        if (actions.size() == 0) {
-            actions.add(new DoNothing());
-        }
-        return actions;
-    }
-
+    /**
+     * Combinations of resources in hand to discard.
+     * @param gs - game state
+     * @param actionSpace - action space type
+     * @param player - player to discard resources
+     * @param nToDiscard - how many to discard
+     * @return - list of actions discarding cards.
+     */
     public static List<AbstractAction> getDiscardActions(CatanGameState gs, ActionSpace actionSpace, int player, int nToDiscard) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int nResources = gs.getNResourcesInHand(player);
@@ -212,36 +196,9 @@ public class CatanActionFactory {
             for (int i = 0; i < nToDiscard; i++) {
                 cardsToDiscard[i] = gs.pickResourceFromHand(player, combination[i]);
             }
-            actions.add(new DiscardCards(cardsToDiscard, player));
+            actions.add(new DiscardResources(cardsToDiscard, player));
         }
         return actions;
-    }
-
-    /**
-     * Returns all the possible index combination of an array.
-     *
-     * @param data        - a list of arrays that gets overwritten and contains the indices
-     * @param buffer      - current buffer of indices
-     * @param bufferIndex - current index in buffer
-     * @param dataIndex   - current index in data
-     * @param dataLength  - length of the original data array
-     * @param r           - number of entries to return per array
-     */
-    static void getCombination(List<int[]> data, int[] buffer, int bufferIndex, int dataIndex, int dataLength, int r) {
-        // buffer is ready to be added to data
-        if (bufferIndex == r) {
-            data.add(buffer.clone());
-            return;
-        }
-        // no more elements to add to the buffer
-        if (dataIndex >= dataLength) {
-            return;
-        }
-        buffer[bufferIndex] = dataIndex;
-        // iterate with including current bufferIndex
-        getCombination(data, buffer, bufferIndex + 1, dataIndex + 1, dataLength, r);
-        // iterate with excluding current bufferIndex
-        getCombination(data, buffer, bufferIndex, dataIndex + 1, dataLength, r);
     }
 
     /**
@@ -256,15 +213,20 @@ public class CatanActionFactory {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
                 if (!(tile.getTileType().equals(CatanTile.TileType.SEA))) {
-                    HashSet<Integer> targets = new HashSet<>();
-                    Building[] settlements = gs.getBuildings(tile);
-                    for (Building settlement : settlements) {
-                        if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer()) {
-                            targets.add(settlement.getOwnerId());
+                    if (actionSpace.structure != ActionSpace.Structure.Deep) { // Flat is default
+                        HashSet<Integer> targets = new HashSet<>();
+                        Building[] settlements = gs.getBuildings(tile);
+                        for (Building settlement : settlements) {
+                            if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer()) {
+                                targets.add(settlement.getOwnerId());
+                            }
                         }
-                    }
-                    for (int target: targets) {
-                        actions.add(new MoveRobberAndSteal(x, y, player, target));  // TODO: deep move, then steal
+                        for (int target : targets) {
+                            actions.add(new MoveRobberAndSteal(x, y, player, target));
+                        }
+                    } else {
+                        // Deep: first move, then steal
+                        actions.add(new MoveRobber(x, y, player));
                     }
                 }
             }
@@ -272,9 +234,12 @@ public class CatanActionFactory {
         return actions;
     }
 
-    // --------------- Helper functions to keep main functions simpler -----------------
-
-    /* Function that lists all buy actions to the player; building road, settlement or city or buying a development card */
+    /**
+     * @param gs - game state
+     * @param actionSpace - action space type
+     * @param player - player buying
+     * @return lists all buy actions to the player; building road, settlement, city or buying a development card
+     */
     public static List<AbstractAction> getBuyActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         ArrayList<AbstractAction> actions = new ArrayList<>();
@@ -405,7 +370,7 @@ public class CatanActionFactory {
      * @return list all possible trades with the bank / harbours, using minimum exchange rate available for each resource
      * type owned by the player
      */
-    public static List<AbstractAction> getTradeActions(CatanGameState gs, ActionSpace actionSpace, int player) {
+    public static List<AbstractAction> getDefaultTradeActions(CatanGameState gs, ActionSpace actionSpace, int player) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         HashMap<CatanParameters.Resource, Counter> playerExchangeRate = gs.getExchangeRates(player);
         // TODO: Deep: first choose resource to give, then resource to get
