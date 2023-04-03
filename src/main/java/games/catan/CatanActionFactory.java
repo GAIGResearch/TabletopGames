@@ -187,16 +187,23 @@ public class CatanActionFactory {
      */
     public static List<AbstractAction> getDiscardActions(CatanGameState gs, ActionSpace actionSpace, int player, int nToDiscard) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        int nResources = gs.getNResourcesInHand(player);
-        int[] resIdx = new int[nResources];
-        for (int i = 0; i < nResources; i++) resIdx[i] = i;
-        List<int[]> combinations = Utils.generateCombinations(resIdx, nResources);
-        for (int[] combination : combinations) {
-            CatanParameters.Resource[] cardsToDiscard = new CatanParameters.Resource[nToDiscard];
-            for (int i = 0; i < nToDiscard; i++) {
-                cardsToDiscard[i] = gs.pickResourceFromHand(player, combination[i]);
+        if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+            int nResources = gs.getNResourcesInHand(player);
+            int[] resIdx = new int[nResources];
+            for (int i = 0; i < nResources; i++) resIdx[i] = i;
+            List<int[]> combinations = Utils.generateCombinations(resIdx, nResources);
+            for (int[] combination : combinations) {
+                CatanParameters.Resource[] cardsToDiscard = new CatanParameters.Resource[nToDiscard];
+                for (int i = 0; i < nToDiscard; i++) {
+                    cardsToDiscard[i] = gs.pickResourceFromHand(player, combination[i]);
+                }
+                actions.add(new DiscardResources(cardsToDiscard, player));
             }
-            actions.add(new DiscardResources(cardsToDiscard, player));
+        } else {
+            // Deep: Choose 1 resource at a time
+            for (CatanParameters.Resource resource: CatanParameters.Resource.values()) {
+                if (gs.getPlayerResources(player).get(resource).getValue() > 0) actions.add(new DiscardResources(new CatanParameters.Resource[]{resource}, player));
+            }
         }
         return actions;
     }
