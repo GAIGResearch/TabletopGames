@@ -2,8 +2,12 @@ package games.catan.gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.Game;
+import core.actions.AbstractAction;
 import games.catan.CatanGameState;
+import games.catan.actions.BuildRoad;
+import games.catan.actions.DeepPlaceSettlementThenRoad;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -12,6 +16,7 @@ import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class CatanGUI extends AbstractGUIManager {
@@ -30,6 +35,8 @@ public class CatanGUI extends AbstractGUIManager {
     JLabel playerColourLabel;
 
     JScrollPane actionScrollPane;
+
+    boolean filterActions = true;
 
     public CatanGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
         super(parent, game, ac, humanId);
@@ -168,7 +175,67 @@ public class CatanGUI extends AbstractGUIManager {
         return actionScrollPane;
     }
 
-
+    @Override
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+        if (filterActions) {
+            if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !(actionButtons == null)) {
+                List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState, gameState.getCoreGameParameters().actionSpace);
+                int i = 0;
+                boolean vertexNotification = false;
+                boolean edgeNotification = false;
+                for (AbstractAction aa : actions) {
+                    if (aa instanceof DeepPlaceSettlementThenRoad) {
+                        DeepPlaceSettlementThenRoad a = (DeepPlaceSettlementThenRoad) aa;
+                        if (boardView.vertexHighlight != null) {
+                            if (a.x == boardView.vertexHighlight.a.getX() && a.y == boardView.vertexHighlight.a.getY() && a.vertex == boardView.vertexHighlight.b) {
+                                actionButtons[i].setVisible(true);
+                                actionButtons[i].setEnabled(true);
+                                actionButtons[i].setButtonAction(a, gameState);
+                                actionButtons[i].setBackground(Color.white);
+                                i++;
+                            }
+                        } else if (!vertexNotification) {
+                            actionButtons[i].setVisible(true);
+                            actionButtons[i].setEnabled(false);
+                            actionButtons[i].setButtonAction(null, "Select vertex on map");
+                            actionButtons[i].setBackground(Color.gray);
+                            i++;
+                            vertexNotification = true;
+                        }
+                    } else if (aa instanceof BuildRoad) {
+                        BuildRoad a = (BuildRoad) aa;
+                        if (boardView.edgeHighlight != null) {
+                            if (a.x == boardView.edgeHighlight.a.getX() && a.y == boardView.edgeHighlight.a.getY() && a.edge == boardView.edgeHighlight.b) {
+                                actionButtons[i].setVisible(true);
+                                actionButtons[i].setEnabled(true);
+                                actionButtons[i].setButtonAction(actions.get(i), gameState);
+                                actionButtons[i].setBackground(Color.white);
+                                i++;
+                            }
+                        } else if (!edgeNotification) {
+                            actionButtons[i].setVisible(true);
+                            actionButtons[i].setEnabled(false);
+                            actionButtons[i].setButtonAction(null, "Select edge on map");
+                            actionButtons[i].setBackground(Color.gray);
+                            i++;
+                            edgeNotification = true;
+                        }
+                    } else {
+                        actionButtons[i].setVisible(true);
+                        actionButtons[i].setEnabled(true);
+                        actionButtons[i].setButtonAction(actions.get(i), gameState);
+                        actionButtons[i].setBackground(Color.white);
+                        i++;
+                    }
+                }
+                for (int j = i; j < actionButtons.length; j++) {
+                    actionButtons[j].setVisible(false);
+                    actionButtons[j].setButtonAction(null, "");
+                }
+            }
+        }
+        else super.updateActionButtons(player, gameState);
+    }
 
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {

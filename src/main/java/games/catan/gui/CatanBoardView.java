@@ -1,19 +1,23 @@
 package games.catan.gui;
 
+import core.actions.AbstractAction;
 import core.components.Edge;
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
 import games.catan.actions.*;
-import games.catan.components.CatanTile;
 import games.catan.components.Building;
-import core.actions.AbstractAction;
+import games.catan.components.CatanTile;
 import utilities.Pair;
+import utilities.Vector2D;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import static games.catan.CatanConstants.HEX_SIDES;
 
@@ -24,7 +28,6 @@ public class CatanBoardView extends JComponent {
 
     private int tileRadius;
     private int robberRadius = 20;
-    private int harbourRadius = 10;
     private int buildingRadius = 10;
     private int numberRadius = 25;
 
@@ -56,6 +59,12 @@ public class CatanBoardView extends JComponent {
 
     HashMap<Integer, Integer> nDotsPerRoll = new HashMap<>();
 
+    HashMap<Pair<Vector2D, Integer>, Rectangle> vertexToRectMap;
+    Pair<Vector2D, Integer> vertexHighlight;
+    HashMap<Pair<Vector2D, Integer>, Rectangle> edgeToRectMap;
+    Pair<Vector2D, Integer> edgeHighlight;
+    int minSize = 10;
+
     public CatanBoardView(CatanGameState gs) {
         this.gs = gs;
         this.params = (CatanParameters) gs.getGameParameters();
@@ -71,6 +80,31 @@ public class CatanBoardView extends JComponent {
             }
             nDotsPerRoll.put(i, nDots);
         }
+
+        edgeToRectMap = new HashMap<>();
+        vertexToRectMap = new HashMap<>();
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    // Left-click
+                    for (Map.Entry<Pair<Vector2D, Integer>, Rectangle> entry: vertexToRectMap.entrySet()) {
+                        if (entry.getValue().contains(e.getPoint())) {
+                            vertexHighlight = entry.getKey();
+                        }
+                    }
+                    for (Map.Entry<Pair<Vector2D, Integer>, Rectangle> entry: edgeToRectMap.entrySet()) {
+                        if (entry.getValue().contains(e.getPoint())) {
+                            edgeHighlight = entry.getKey();
+                        }
+                    }
+                } else {
+                    edgeHighlight = null;
+                    vertexHighlight = null;
+                }
+            }
+        });
     }
 
     @Override
@@ -140,7 +174,6 @@ public class CatanBoardView extends JComponent {
         HashSet<Integer> harboursDrawn = new HashSet<>();  // avoid overlap
         for (CatanTile[] catanTiles : board) {
             for (CatanTile tile : catanTiles) {
-                // draw settlements
                 Building[] settlements = gs.getBuildings(tile);
                 for (int i = 0; i < settlements.length; i++) {
                     if (settlements[i].getHarbour() != null && tile.getTileType() == CatanTile.TileType.SEA &&
@@ -162,9 +195,24 @@ public class CatanBoardView extends JComponent {
                 // draw roads
                 Edge[] roads = gs.getRoads(tile);
                 for (int i = 0; i < roads.length; i++) {
+                    Point[] p = tile.getEdgeCoords(i, tileRadius);
+
+                    // Save position of edge
+                    Rectangle r = new Rectangle(Math.min(p[0].x, p[1].x), Math.min(p[0].y, p[1].y), Math.abs(p[0].x-p[1].x), Math.abs(p[0].y-p[1].y));
+                    if (r.width == 0) {
+                        r.x -= minSize/2;
+                        r.width = minSize;
+                    }
+                    if (r.height == 0) {
+                        r.y -= minSize/2;
+                        r.height = minSize;
+                    }
+                    edgeToRectMap.put(new Pair<>(new Vector2D(tile.x, tile.y), i), r);
+
+                    // Draw road if it exists or if highlighted
                     if (roads[i] != null && roads[i].getOwnerId() != -1 ||
                             roadHighlight != null && roadHighlight.a.x == tile.x && roadHighlight.a.y == tile.y && roadHighlight.b == i) {
-                        drawRoad(g, i, tile.getEdgeCoords(i, tileRadius), CatanConstants.getPlayerColor(roads[i].getOwnerId()));
+                        drawRoad(g, i, p, CatanConstants.getPlayerColor(roads[i].getOwnerId()));
 
                         // Useful for showing road IDs on the GUI
 //                        g.setFont(new Font("TimeRoman", Font.PLAIN, 10));
@@ -184,10 +232,15 @@ public class CatanBoardView extends JComponent {
                 // draw settlements
                 Building[] settlements = gs.getBuildings(tile);
                 for (int i = 0; i < settlements.length; i++) {
+                    Point p = tile.getVerticesCoords(i, tileRadius);
+
+                    // Save position of settlement
+                    vertexToRectMap.put(new Pair<>(new Vector2D(tile.x, tile.y), i), new Rectangle(p.x-buildingRadius/2,p.y-buildingRadius/2, buildingRadius, buildingRadius));
+
 //                    g.drawString("" + settlements[i].hashCode(), tile.getVerticesCoords(i).x, tile.getVerticesCoords(i).y);
                     if (!buildingsDrawn.contains(settlements[i].getComponentID()) && settlements[i].getOwnerId() != -1 ||
                         buildingHighlight != null && buildingHighlight.a.x == tile.x && buildingHighlight.a.y == tile.y && buildingHighlight.b == i) {
-                        drawSettlement(g, tile.x, tile.y, i, tile.getVerticesCoords(i, tileRadius), CatanConstants.getPlayerColor(settlements[i].getOwnerId()), settlements[i].getBuildingType());
+                        drawSettlement(g, tile.x, tile.y, i, p, CatanConstants.getPlayerColor(settlements[i].getOwnerId()), settlements[i].getBuildingType());
                         buildingsDrawn.add(settlements[i].getComponentID());
                     }
 
@@ -220,6 +273,17 @@ public class CatanBoardView extends JComponent {
             g.setStroke(new BasicStroke(8));
             g.drawPolygon(tileHex);
             g.setStroke(s);
+        }
+
+        if (vertexHighlight != null) {
+            g.setColor(tileColorHighlight);
+            Rectangle r = vertexToRectMap.get(vertexHighlight);
+            g.drawRect(r.x, r.y, r.width, r.height);
+        }
+        if (edgeHighlight != null) {
+            g.setColor(tileColorHighlight);
+            Rectangle r = edgeToRectMap.get(edgeHighlight);
+            g.drawRect(r.x, r.y, r.width, r.height);
         }
     }
 
@@ -254,9 +318,13 @@ public class CatanBoardView extends JComponent {
     }
 
     public void drawRoad(Graphics2D g, int edge, Point[] location, Color color){
-        g.setColor(color);
         Stroke stroke = g.getStroke();
+        g.setColor(Color.black);
         g.setStroke(new BasicStroke(5));
+        g.drawLine(location[0].x, location[0].y, location[1].x, location[1].y);
+
+        g.setColor(color);
+        g.setStroke(new BasicStroke(3));
         g.drawLine(location[0].x, location[0].y, location[1].x, location[1].y);
         g.setStroke(stroke);
 
@@ -344,5 +412,23 @@ public class CatanBoardView extends JComponent {
         tileHighlight = null;
         buildingHighlight = null;
         roadHighlight = null;
+        edgeHighlight = null;
+        vertexHighlight  = null;
+    }
+
+    public Pair<Vector2D, Integer> getVertexHighlight() {
+        return vertexHighlight;
+    }
+
+    public Pair<Vector2D, Integer> getEdgeHighlight() {
+        return edgeHighlight;
+    }
+
+    public void setVertexHighlight(Pair<Vector2D, Integer> vertexHighlight) {
+        this.vertexHighlight = vertexHighlight;
+    }
+
+    public void setEdgeHighlight(Pair<Vector2D, Integer> edgeHighlight) {
+        this.edgeHighlight = edgeHighlight;
     }
 }
