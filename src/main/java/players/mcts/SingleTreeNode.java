@@ -283,10 +283,11 @@ public class SingleTreeNode {
         actionsInRollout = new ArrayList<>();
 
         SingleTreeNode selected = treePolicy(actionsInTree);
-        if (selected == this && nVisits > 3)
+        if (selected == this && openLoopState.isNotTerminalForPlayer(decisionPlayer) && nVisits > 3)
             throw new AssertionError("We have not expanded or selected a new node");
         // by this point (and really earlier) we should have expanded a new node.
         // selected == this is a clear sign that we have a problem in the expansion phase
+        // although if we have no decisions to make - this is fine
 
         // Monte carlo rollout: return value of MC rollout from the newly added node
         int lastActorInTree = actionsInTree.isEmpty() ? decisionPlayer : actionsInTree.get(actionsInTree.size() - 1).a;
@@ -599,6 +600,8 @@ public class SingleTreeNode {
                     break;
                 case EXP3:
                 case RegretMatching:
+                case RM_Plus:
+                case Hedge:
                     // These construct a distribution over possible actions and then sample from it
                     actionChosen = sampleFromDistribution(availableActions, explore ? params.exploreEpsilon : 0.0);
                     break;
@@ -764,7 +767,7 @@ public class SingleTreeNode {
             meanActionValue = Utils.normalise(meanActionValue, root.lowReward, root.highReward);
         else
             meanActionValue = meanActionValue - (totValue[decisionPlayer] / nVisits);
-        double retValue = Math.exp(meanActionValue);
+        double retValue = Math.exp(meanActionValue / params.exp3Boltzmann);
         if (Double.isNaN(retValue))
             throw new AssertionError("We have a non-number in EXP3 somewhere");
         return retValue;
@@ -782,6 +785,15 @@ public class SingleTreeNode {
         // potential value is our estimate of our accumulated reward if we had always taken this action
         double potentialValue = actionValue * nVisits / actionVisits;
         double regret = potentialValue - totValue[decisionPlayer];
+        if (regret < 0.0 && params.treePolicy == MCTSEnums.TreePolicy.RM_Plus) {
+            // in this case we set our regret to zero if it is negative
+            // by updating the node statistics
+            totValue[decisionPlayer] = potentialValue;
+        }
+        if (params.treePolicy == MCTSEnums.TreePolicy.Hedge) {
+            // in this case we exponentiate the regret to get the probability of taking this action
+            return Math.exp(regret / params.hedgeBoltzmann);
+        }
         return Math.max(0.0, regret);
     }
 
@@ -793,6 +805,8 @@ public class SingleTreeNode {
                 valueFn = this::exp3Value;
                 break;
             case RegretMatching:
+            case RM_Plus:
+            case Hedge:
                 valueFn = this::rmValue;
                 break;
             default:
@@ -929,26 +943,26 @@ public class SingleTreeNode {
                         n.totSquares[j] += squaredResults[root.decisionPlayer];
                     }
                     break;
-                case Paranoid:
-                case MultiTreeParanoid:
-                    int paranoid = root.paranoidPlayer == -1 ? root.decisionPlayer : root.paranoidPlayer;
-                    for (int j = 0; j < result.length; j++) {
-                        if (j == paranoid) {
-                            n.totValue[j] += result[paranoid];
-                            n.totSquares[j] += squaredResults[paranoid];
-                        } else {
-                            n.totValue[j] -= result[paranoid];
-                            n.totSquares[j] += squaredResults[paranoid];
-                        }
-                    }
-                    break;
-                case MaxN:
+                case OneTree:
                 case MultiTree:
                 case OMA_All:
                 case OMA:
-                    for (int j = 0; j < result.length; j++) {
-                        n.totValue[j] += result[j];
-                        n.totSquares[j] += squaredResults[j];
+                    if (params.paranoid) {
+                        int paranoid = root.paranoidPlayer == -1 ? root.decisionPlayer : root.paranoidPlayer;
+                        for (int j = 0; j < result.length; j++) {
+                            if (j == paranoid) {
+                                n.totValue[j] += result[paranoid];
+                                n.totSquares[j] += squaredResults[paranoid];
+                            } else {
+                                n.totValue[j] -= result[paranoid];
+                                n.totSquares[j] += squaredResults[paranoid];
+                            }
+                        }
+                    } else {
+                        for (int j = 0; j < result.length; j++) {
+                            n.totValue[j] += result[j];
+                            n.totSquares[j] += squaredResults[j];
+                        }
                     }
                     break;
             }
@@ -967,7 +981,6 @@ public class SingleTreeNode {
             MASTStatistics.get(player).put(action.copy(), stats);
         }
     }
-
 
     /**
      * Calculates the best action from the root according to the selection policy
@@ -1111,7 +1124,7 @@ public class SingleTreeNode {
         // visits and values for each
         StringBuilder retValue = new StringBuilder();
         String valueString = String.format("%.2f", totValue[decisionPlayer] / nVisits);
-        if (params.opponentTreePolicy == MaxN) {
+        if (params.opponentTreePolicy == OneTree) {
             valueString = Arrays.stream(totValue)
                     .mapToObj(v -> String.format("%.2f", v / nVisits))
                     .collect(joining(", "));
@@ -1131,7 +1144,7 @@ public class SingleTreeNode {
             if (actionName.length() > 50)
                 actionName = actionName.substring(0, 50);
             valueString = String.format("%.2f", actionTotValue(action, decisionPlayer) / actionVisits);
-            if (params.opponentTreePolicy == MaxN) {
+            if (params.opponentTreePolicy == OneTree) {
                 valueString = IntStream.range(0, totValue.length)
                         .mapToObj(p -> String.format("%.2f", actionTotValue(action, p) / actionVisits))
                         .collect(joining(", "));

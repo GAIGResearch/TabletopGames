@@ -9,8 +9,10 @@ import games.uno.UnoGameParameters.UnoScoring;
 import games.uno.actions.NoCards;
 import games.uno.actions.PlayCard;
 import games.uno.cards.UnoCard;
+import utilities.Pair;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.*;
 import static core.CoreConstants.GameResult.GAME_ONGOING;
@@ -183,6 +185,15 @@ public class UnoForwardModel extends StandardForwardModel {
                     roundWinner = playerID;
                     break;
                 }
+            }
+            UnoGameParameters params = (UnoGameParameters) ugs.getGameParameters();
+            if (ugs.getTurnCounter() > params.maxTurnsPerRound) {
+                roundEnd = true;
+                roundWinner = IntStream.range(0, ugs.getNPlayers())
+                        .mapToObj(i -> new Pair<>(i, ugs.playerDecks.get(i).getSize()))
+                        .min(Comparator.comparingInt(p -> p.b))
+                        .orElseThrow(() -> new AssertionError("No min card count found")).a;
+                break;
             }
         }
 

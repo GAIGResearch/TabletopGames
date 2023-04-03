@@ -8,7 +8,7 @@ import core.interfaces.IStateHeuristic;
 import java.util.List;
 import java.util.Random;
 
-import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
 import static players.mcts.MCTSEnums.TreePolicy.UCB;
 import static players.mcts.MCTSEnums.Strategies.RANDOM;
@@ -43,7 +43,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
         this.params.information = MCTSEnums.Information.Closed_Loop;
         this.params.rolloutType = RANDOM;
         this.params.selectionPolicy = ROBUST;
-        this.params.opponentTreePolicy = Paranoid;
+        this.params.opponentTreePolicy = OneTree;
         this.params.treePolicy = UCB;
     }
 

@@ -128,14 +128,15 @@ public class RewardsForParanoiaTests {
 
     @Test
     public void loveLetterParanoid() {
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.Paranoid;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
+        params.paranoid = true;
         Game game = createGame(params, GameType.LoveLetter);
         runGame(game, 4, paranoidNodeValues, atLeastOneSplitNode, checkNodesDistributedAcrossAllPlayers);
     }
 
     @Test
     public void loveLetterMaxN() {
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         Game game = createGame(params, GameType.LoveLetter);
         runGame(game, 4, maxNNodeValues, atLeastOneSplitNode, checkNodesDistributedAcrossAllPlayers);
     }
@@ -149,35 +150,36 @@ public class RewardsForParanoiaTests {
 
     @Test
     public void virusParanoid() {
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.Paranoid;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
+        params.paranoid = true;
         Game game = createGame(params, GameType.Virus);
         runGame(game, 4, paranoidNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
     }
 
     @Test
     public void virusMaxN() {
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         Game game = createGame(params, GameType.Virus);
         runGame(game, 4, maxNNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
     }
 
     @Test
     public void coltExpressMaxN() {
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         Game game = createGame(params, GameType.ColtExpress);
         runGame(game, 4, maxNNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
     }
 
     @Test
     public void explodingKittensMaxN() {
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         Game game = createGame(params, GameType.ExplodingKittens);
         runGame(game, 4, maxNNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
     }
 
     @Test
     public void unoMaxN() {
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         Game game = createGame(params, GameType.Uno);
         runGame(game, 4, maxNNodeValues, n -> true, checkNodesDistributedAcrossAllPlayers);
     }

@@ -21,7 +21,7 @@ public class MCTSEnums {
     }
 
     public enum TreePolicy {
-        UCB, EXP3, AlphaGo, RegretMatching, UCB_Tuned
+        UCB, UCB_Tuned, AlphaGo, EXP3, RegretMatching, RM_Plus, Hedge
     }
 
     public enum RolloutTermination {
@@ -29,8 +29,8 @@ public class MCTSEnums {
     }
 
     public enum OpponentTreePolicy {
-        SelfOnly(true), Paranoid(false), MaxN(false),
-        MultiTree(true), MultiTreeParanoid(true),
+        SelfOnly(true), OneTree(false),
+        MultiTree(true),
         OMA(false), OMA_All(false);
 
         boolean selfOnlyTree;
