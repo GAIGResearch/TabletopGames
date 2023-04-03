@@ -203,7 +203,7 @@ public class CatanForwardModel extends StandardForwardModel {
             return CatanActionFactory.getSetupActions(cgs, actionSpace, player);
         }
         if (cgs.getGamePhase() == Robber) {
-            return CatanActionFactory.getRobberActions(cgs, actionSpace, player);
+            return CatanActionFactory.getRobberActions(cgs, actionSpace, player, false);
         }
         // Main phase: trade, build (road, city, dev card), or play dev card
         List<AbstractAction> mainActions = new ArrayList<>();

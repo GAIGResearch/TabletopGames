@@ -213,7 +213,7 @@ public class CatanActionFactory {
      *
      * @return - ArrayList, various action types (unique).
      */
-    static List<AbstractAction> getRobberActions(CatanGameState gs, ActionSpace actionSpace, int player) {
+    static List<AbstractAction> getRobberActions(CatanGameState gs, ActionSpace actionSpace, int player, boolean knight) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         CatanTile[][] board = gs.getBoard();
         for (int x = 0; x < board.length; x++) {
@@ -229,11 +229,13 @@ public class CatanActionFactory {
                             }
                         }
                         for (int target : targets) {
-                            actions.add(new MoveRobberAndSteal(x, y, player, target));
+                            if (knight) actions.add(new PlayKnightCard(x, y, player, target));
+                            else actions.add(new MoveRobberAndSteal(x, y, player, target));
                         }
                     } else {
                         // Deep: first move, then steal
-                        actions.add(new MoveRobber(x, y, player));
+                        if (knight) actions.add(new PlayKnightCardDeep(x, y, player));
+                        else actions.add(new MoveRobber(x, y, player));
                     }
                 }
             }
@@ -253,7 +255,7 @@ public class CatanActionFactory {
 
         // Road, Settlement or City
         if (actionSpace.structure != ActionSpace.Structure.Deep) {
-            actions.addAll(getBuyRoadActions(gs, player));
+            actions.addAll(getBuyRoadActions(gs, player, false));
             actions.addAll(getBuySettlementActions(gs, player));
             actions.addAll(getBuyCityActions(gs, player));
         } else {
@@ -275,10 +277,10 @@ public class CatanActionFactory {
         return actions;
     }
 
-    public static List<AbstractAction> getBuyRoadActions(CatanGameState gs, int player) {
+    public static List<AbstractAction> getBuyRoadActions(CatanGameState gs, int player, boolean free) {
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Road), player)
+        if (free || gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Road), player)
                 && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
             HashSet<Integer> roadsAdded = new HashSet<>();
             CatanTile[][] board = gs.getBoard();
@@ -354,68 +356,100 @@ public class CatanActionFactory {
         return actions;
     }
 
+    /**
+     * @param gs - game state
+     * @param actionSpace - action space type
+     * @param player - player playing dev card
+     * @return list of actions to play a dev card in hand
+     */
     public static List<AbstractAction> getDevCardActions(CatanGameState gs, ActionSpace actionSpace, int player) {
-        // Player can play one dev card
         ArrayList<AbstractAction> actions = new ArrayList<>();
-
-        // get playerHand; for each card add a new action
         Deck<CatanCard> playerDevDeck = gs.playerDevCards.get(player);
+
+        // Deep: all play dev card of type X
 
         for (CatanCard c : playerDevDeck.getComponents()) {
             // avoid playing a card that has been bought in the same turn
             if (c.turnCardWasBought == gs.getTurnCounter()) {
                 continue;
             }
-            // victory points are automatically revealed once a player has 10+ points
-            if (c.cardType == CatanCard.CardType.KNIGHT_CARD) {
-                actions.add(new PlayKnightCard(player));
-            }
-            if (c.cardType == CatanCard.CardType.MONOPOLY) {
-                for (CatanParameters.Resource resource : CatanParameters.Resource.values()) {
-                    actions.add(new Monopoly(resource, player));
-                }
-            }
-            if (c.cardType == CatanCard.CardType.YEAR_OF_PLENTY) {
-                List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
+            actions.addAll(getDevCardActions(gs, actionSpace, player, c.cardType));
+        }
 
-                for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
-                    if (gs.resourcePool.get(res).getValue() > 0)
-                        for (int i = 0; i < ((CatanParameters)gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
-                            resourcesAvailable.add(res);
-                        }
-                }
+        return actions;
+    }
 
-                int[] resIdx = new int[resourcesAvailable.size()];
-                for (int i = 0; i < resourcesAvailable.size(); i++) {
-                    resIdx[i] = i;
-                }
-                List<int[]> combinations = Utils.generateCombinations(resIdx, ((CatanParameters)gs.getGameParameters()).nResourcesYoP);
-                for (int[] combo: combinations) {
-                    CatanParameters.Resource[] resources = new CatanParameters.Resource[combo.length];
-                    for (int i = 0; i < combo.length; i++) {
-                        resources[i] = resourcesAvailable.get(combo[i]);
-                    }
-                    actions.add(new YearOfPlenty(resources, player));
-                }
-            }
-            if (c.cardType == CatanCard.CardType.ROAD_BUILDING) {
-                // Identify all possible roads to build  // TODO multiples
-                CatanTile[][] board = gs.getBoard();
-                for (int x = 0; x < board.length; x++) {
-                    for (int y = 0; y < board[x].length; y++) {
-                        CatanTile tile = board[x][y];
-                        for (int i = 0; i < HEX_SIDES; i++) {
-                            if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-                                    && gs.checkRoadPlacement(i, tile, player)
-                                    && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
-                                actions.add(new BuildRoad(x, y, i, player, true));
-                            }
-                        }
-                    }
-                }
+    public static List<AbstractAction> getDevCardActions(CatanGameState gs, ActionSpace actionSpace, int player, CatanCard.CardType cardType) {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+
+        if (cardType == CatanCard.CardType.KNIGHT_CARD) {
+            actions.addAll(getRobberActions(gs, actionSpace, player, true));
+        }
+
+        else if (cardType == CatanCard.CardType.MONOPOLY) {
+            // TODO Deep: play monopoly, then choose resource
+            for (CatanParameters.Resource resource : CatanParameters.Resource.values()) {
+                actions.add(new PlayMonopoly(resource, player));
             }
         }
 
+        else if (cardType == CatanCard.CardType.YEAR_OF_PLENTY) {
+            // TODO deep: play card, then choose 1 resource, then choose 2 resource ...
+            List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
+
+            for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
+                if (gs.resourcePool.get(res).getValue() > 0)
+                    for (int i = 0; i < ((CatanParameters)gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
+                        resourcesAvailable.add(res);
+                    }
+            }
+
+            int[] resIdx = new int[resourcesAvailable.size()];
+            for (int i = 0; i < resourcesAvailable.size(); i++) {
+                resIdx[i] = i;
+            }
+            List<int[]> combinations = Utils.generateCombinations(resIdx, ((CatanParameters)gs.getGameParameters()).nResourcesYoP);
+            for (int[] combo: combinations) {
+                CatanParameters.Resource[] resources = new CatanParameters.Resource[combo.length];
+                for (int i = 0; i < combo.length; i++) {
+                    resources[i] = resourcesAvailable.get(combo[i]);
+                }
+                actions.add(new PlayYearOfPlenty(resources, player));
+            }
+        }
+
+        else if (cardType == CatanCard.CardType.ROAD_BUILDING) {
+            // TODO: Deep, play card first, then one road at a time
+
+            // Identify all combinations of possible roads to build
+            List<AbstractAction> roads = getBuyRoadActions(gs, player, true);
+            int[] roadsIdx = new int[roads.size()];
+            for (int i = 0; i < roads.size(); i++) {
+                roadsIdx[i] = i;
+            }
+            List<int[]> combinations = Utils.generateCombinations(roadsIdx, ((CatanParameters)gs.getGameParameters()).nRoadsRB);
+            for (int[] combo: combinations) {
+                AbstractAction[] roadsToBuild = new BuildRoad[combo.length];
+                for (int i = 0; i < combo.length; i++) {
+                    roadsToBuild[i] = roads.get(combo[i]);
+                }
+                actions.add(new PlayRoadBuilding(player, roadsToBuild));
+            }
+
+//                CatanTile[][] board = gs.getBoard();
+//                for (int x = 0; x < board.length; x++) {
+//                    for (int y = 0; y < board[x].length; y++) {
+//                        CatanTile tile = board[x][y];
+//                        for (int i = 0; i < HEX_SIDES; i++) {
+//                            if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
+//                                    && gs.checkRoadPlacement(i, tile, player)
+//                                    && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
+//                                actions.add(new BuildRoad(x, y, i, player, true));
+//                            }
+//                        }
+//                    }
+//                }
+        }
         return actions;
     }
 

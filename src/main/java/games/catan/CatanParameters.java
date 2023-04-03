@@ -43,6 +43,7 @@ public class CatanParameters extends AbstractParameters {
     public int harbour_wild_exchange_rate = 3;
     public int n_settlements_setup = 2;
     public int nResourcesYoP = 2;
+    public int nRoadsRB = 2;
 
     public HashMap<Building.Type, Integer> buildingValue = new HashMap<Building.Type, Integer>() {{
         put(Building.Type.Settlement, 1);

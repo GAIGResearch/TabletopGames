@@ -13,11 +13,11 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 
-public class YearOfPlenty extends AbstractAction {
+public class PlayYearOfPlenty extends AbstractAction {
     public final CatanParameters.Resource[] resources;
     public final int player;
 
-    public YearOfPlenty(CatanParameters.Resource[] resources, int player) {
+    public PlayYearOfPlenty(CatanParameters.Resource[] resources, int player) {
         this.resources = resources;
         this.player = player;
     }
@@ -51,13 +51,13 @@ public class YearOfPlenty extends AbstractAction {
     }
 
     @Override
-    public YearOfPlenty copy() {return this;}
+    public PlayYearOfPlenty copy() {return this;}
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof YearOfPlenty)) return false;
-        YearOfPlenty that = (YearOfPlenty) o;
+        if (!(o instanceof PlayYearOfPlenty)) return false;
+        PlayYearOfPlenty that = (PlayYearOfPlenty) o;
         return player == that.player && Arrays.equals(resources, that.resources);
     }
 

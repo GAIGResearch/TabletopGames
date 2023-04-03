@@ -3,31 +3,22 @@ package games.catan.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
-import games.catan.CatanActionFactory;
-import games.catan.CatanGameState;
+import games.catan.components.CatanCard;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class BuyAction extends AbstractAction implements IExtendedSequence {
-
-    public enum BuyType {
-        Settlement,
-        City,
-        Road,
-        DevCard
-    }
-
+public class PlayDevCard extends AbstractAction implements IExtendedSequence {
     public final int playerID;
-    public final BuyType type;
+    public final CatanCard.CardType type;
 
     boolean executed;
 
-    public BuyAction(int playerID, BuyType type) {
+    public PlayDevCard(int playerID, CatanCard.CardType type) {
         this.playerID = playerID;
         this.type = type;
     }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         return gs.setActionInProgress(this);
@@ -35,10 +26,7 @@ public class BuyAction extends AbstractAction implements IExtendedSequence {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
-        if (type == BuyType.Settlement) return CatanActionFactory.getBuySettlementActions((CatanGameState) state, playerID);
-        else if (type == BuyType.City) return CatanActionFactory.getBuyCityActions((CatanGameState) state, playerID);
-        else if (type == BuyType.Road) return CatanActionFactory.getBuyRoadActions((CatanGameState) state, playerID, false);
-        return new ArrayList<>();
+        return null;  // TODO
     }
 
     @Override
@@ -48,7 +36,7 @@ public class BuyAction extends AbstractAction implements IExtendedSequence {
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-        executed = true;
+        // TODO
     }
 
     @Override
@@ -57,21 +45,21 @@ public class BuyAction extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public BuyAction copy() {
+    public PlayDevCard copy() {
         return this;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof BuyAction)) return false;
-        BuyAction buyAction = (BuyAction) o;
-        return playerID == buyAction.playerID && executed == buyAction.executed && type == buyAction.type;
+        if (!(o instanceof PlayDevCard)) return false;
+        PlayDevCard that = (PlayDevCard) o;
+        return playerID == that.playerID && type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID, type, executed);
+        return Objects.hash(playerID, type);
     }
 
     @Override
@@ -81,6 +69,6 @@ public class BuyAction extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return playerID + " buys " + type;
+        return playerID + " plays dev card " + type;
     }
 }

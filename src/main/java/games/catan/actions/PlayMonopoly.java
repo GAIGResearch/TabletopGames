@@ -10,11 +10,11 @@ import games.catan.components.CatanCard;
 
 import java.util.*;
 
-public class Monopoly extends AbstractAction {
+public class PlayMonopoly extends AbstractAction {
     public final CatanParameters.Resource resource;
     public final int player;
 
-    public Monopoly(CatanParameters.Resource resource, int player){
+    public PlayMonopoly(CatanParameters.Resource resource, int player){
         this.resource = resource;
         this.player = player;
     }
@@ -47,15 +47,15 @@ public class Monopoly extends AbstractAction {
     }
 
     @Override
-    public Monopoly copy() {
+    public PlayMonopoly copy() {
         return this;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Monopoly)) return false;
-        Monopoly monopoly = (Monopoly) o;
+        if (!(o instanceof PlayMonopoly)) return false;
+        PlayMonopoly monopoly = (PlayMonopoly) o;
         return player == monopoly.player && resource == monopoly.resource;
     }
 
