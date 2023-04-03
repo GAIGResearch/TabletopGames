@@ -90,10 +90,10 @@ public class CatanParameters extends AbstractParameters {
     /* Mapping of which field produces what*/
     public HashMap<CatanTile.TileType, Resource> productMapping = new HashMap<CatanTile.TileType, Resource>(){{
         put(CatanTile.TileType.HILLS, BRICK);
-        put(CatanTile.TileType.FOREST, Resource.LUMBER);
-        put(CatanTile.TileType.MOUNTAINS, Resource.ORE);
-        put(CatanTile.TileType.FIELDS, Resource.GRAIN);
-        put(CatanTile.TileType.PASTURE, Resource.WOOL);
+        put(CatanTile.TileType.FOREST, LUMBER);
+        put(CatanTile.TileType.MOUNTAINS, ORE);
+        put(CatanTile.TileType.FIELDS, GRAIN);
+        put(CatanTile.TileType.PASTURE, WOOL);
         put(CatanTile.TileType.DESERT, null);
         put(CatanTile.TileType.SEA, null);
     }};

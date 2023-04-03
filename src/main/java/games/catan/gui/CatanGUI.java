@@ -40,10 +40,14 @@ public class CatanGUI extends AbstractGUIManager {
 
         // Bottom area will show actions available
         JComponent actionPanel = createActionPanel(new IScreenHighlight[0], 400, defaultActionPanelHeight, false, false, this::scrollActionPanelToTop, this::highlightActionOnBoard, this::removeHighlightOnBoard);
+        JPanel wrapper = new JPanel();
+        wrapper.setBackground(Color.white);
+        parent.setLayout(new FlowLayout());
+        parent.add(wrapper);
 
-        parent.setLayout(new BorderLayout());
-        parent.setBackground(Color.white);
-        parent.add(createGameStateInfoPanel(gs), BorderLayout.NORTH);
+        wrapper.setLayout(new BorderLayout());
+        wrapper.setBackground(Color.white);
+        wrapper.add(createGameStateInfoPanel(gs), BorderLayout.NORTH);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setOpaque(false);
@@ -52,6 +56,7 @@ public class CatanGUI extends AbstractGUIManager {
         playerPanels = new PlayerPanel[gs.getNPlayers()];
         for (int i = 0; i < gs.getNPlayers(); i++) {
             playerPanels[i] = new PlayerPanel(i, game.getPlayers().get(i).toString());
+            playerPanels[i].setOpaque(false);
         }
 
         mainPanel.add(Box.createRigidArea(new Dimension(5,0)));
@@ -60,9 +65,13 @@ public class CatanGUI extends AbstractGUIManager {
         leftPanel.setOpaque(false);
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollPane0 = new JScrollPane(playerPanels[0]);
+        scrollPane0.setOpaque(false);
+        scrollPane0.getViewport().setOpaque(false);
         scrollPane0.setPreferredSize(new Dimension(400,200));
         leftPanel.add(scrollPane0);
         JScrollPane scrollPane1 = new JScrollPane(playerPanels[1]);
+        scrollPane1.setOpaque(false);
+        scrollPane1.getViewport().setOpaque(false);
         scrollPane1.setPreferredSize(new Dimension(400,200));
         leftPanel.add(scrollPane1);
         mainPanel.add(leftPanel);
@@ -74,26 +83,30 @@ public class CatanGUI extends AbstractGUIManager {
         rightPanel.setOpaque(false);
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         JScrollPane scrollPane2 = new JScrollPane(playerPanels[2]);
+        scrollPane2.setOpaque(false);
+        scrollPane2.getViewport().setOpaque(false);
         scrollPane2.setPreferredSize(new Dimension(400,200));
         rightPanel.add(scrollPane2);
         if (playerPanels.length > 3) {
             JScrollPane scrollPane3 = new JScrollPane(playerPanels[3]);
+            scrollPane3.setOpaque(false);
+            scrollPane3.getViewport().setOpaque(false);
             scrollPane3.setPreferredSize(new Dimension(400,200));
             rightPanel.add(scrollPane3);
         }
         mainPanel.add(rightPanel);
         mainPanel.add(Box.createRigidArea(new Dimension(5,0)));
 
-        parent.add(mainPanel, BorderLayout.CENTER);
+        wrapper.add(mainPanel, BorderLayout.CENTER);
 
 //        JScrollPane pane2 = new JScrollPane(actionPanel);
 //        pane2.setPreferredSize(new Dimension(700, 100));
 //        pane2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 //        parent.add(pane2, BorderLayout.SOUTH);
-        parent.add(actionPanel, BorderLayout.SOUTH);
+        wrapper.add(actionPanel, BorderLayout.SOUTH);
 
-        parent.revalidate();
-        parent.repaint();
+        wrapper.revalidate();
+        wrapper.repaint();
     }
 
     @Override
@@ -174,6 +187,7 @@ public class CatanGUI extends AbstractGUIManager {
 
     protected JPanel createGameStateInfoPanel(AbstractGameState gameState) {
         gameInfo = new JPanel();
+        gameInfo.setOpaque(false);
         gameInfo.setLayout(new BoxLayout(gameInfo, BoxLayout.Y_AXIS));
         gameInfo.add(new JLabel("<html><h1>Catan</h1></html>"));
 
@@ -194,6 +208,7 @@ public class CatanGUI extends AbstractGUIManager {
         gameInfo.setPreferredSize(new Dimension(900, 150));
 
         JPanel wrapper = new JPanel();
+        wrapper.setOpaque(false);
         wrapper.add(gameInfo, BorderLayout.WEST);
 //        wrapper.setLayout(new GridBagLayout());
         return wrapper;

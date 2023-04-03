@@ -2,9 +2,9 @@ package games.catan.gui;
 
 import games.catan.CatanConstants;
 import games.catan.CatanGameState;
+import games.catan.CatanParameters;
 
 import javax.swing.*;
-import java.awt.*;
 
 class PlayerPanel extends JPanel {
     final int playerID;
@@ -16,7 +16,6 @@ class PlayerPanel extends JPanel {
     JLabel longestRoad;
     JLabel playerResources;
     JLabel devCards;
-    JLabel playerColourLabel;
 
     PlayerPanel(int playerID, String playerName) {
         this.playerID = playerID;
@@ -29,7 +28,6 @@ class PlayerPanel extends JPanel {
         longestRoad = new JLabel();
         playerResources = new JLabel();
         devCards = new JLabel();
-        playerColourLabel = new JLabel();
         add(playerLabel);
         playerLabel.setForeground(CatanConstants.PlayerColors[playerID]);
         add(scoreLabel);
@@ -38,16 +36,23 @@ class PlayerPanel extends JPanel {
         add(longestRoad);
         add(playerResources);
         add(devCards);
-        add(playerColourLabel);
 
         playerLabel.setText("Player " + playerID + ": " + playerName);
     }
 
     void _update(CatanGameState gs) {
         scoreLabel.setText("Score: " + gs.getScores()[playerID]);
-        knightCount.setText("Knights: " + gs.getKnights()[playerID]);
+        knightCount.setText("Knights: " + gs.getKnights()[playerID] + (gs.getLargestArmyOwner() == playerID? " [LARGEST ARMY]" : ""));
+        longestRoad.setText("Longest road: " + gs.getRoadLengths()[playerID] + (gs.getLongestRoadOwner() == playerID? " [LONGEST ROAD]" : ""));
         victoryPointsLabel.setText("VP: " + gs.getVictoryPoints()[playerID]);
-        playerResources.setText("<html>Resources: " + gs.getPlayerResources(playerID).toString() + "</html>");
-        devCards.setText("<html>Dev. Cards: " +  gs.getPlayerDevCards(playerID).toString() + "</html>");
+        String resText = "<html>Resources:<ul>";
+        for (CatanParameters.Resource r: CatanParameters.Resource.values()) {
+            if (r == CatanParameters.Resource.WILD) continue;
+            resText += "<li>" + r.name() + " = " + gs.getPlayerResources(playerID).get(r) + "</li>";
+        }
+        resText += "</ul></html>";
+        playerResources.setText(resText);
+//        playerResources.setText("<html>Resources: " + gs.getPlayerResources(playerID).toString() + "</html>");
+        devCards.setText("Dev. Cards: " +  gs.getPlayerDevCards(playerID).toString());
     }
 }
