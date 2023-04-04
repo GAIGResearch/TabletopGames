@@ -62,7 +62,7 @@ public class BuildRoad extends AbstractAction {
                 }
             }
             if (gs.getCoreGameParameters().verbose) {
-                System.out.println("Calculated road length: " + new_length);
+                System.out.println("Calculated road length p" + playerID + ": " + new_length);
             }
             return true;
         } else {
@@ -96,7 +96,7 @@ public class BuildRoad extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Build Road at x=" + x + " y=" + y + " edge=" + edge + " free = " + free;
+        return playerID + " builds road at x=" + x + " y=" + y + " edge=" + edge;
     }
 
     public int getX() {

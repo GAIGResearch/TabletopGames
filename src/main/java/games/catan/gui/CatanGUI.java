@@ -189,7 +189,7 @@ public class CatanGUI extends AbstractGUIManager {
                     if (aa instanceof DeepPlaceSettlementThenRoad) {
                         DeepPlaceSettlementThenRoad a = (DeepPlaceSettlementThenRoad) aa;
                         Pair<Vector2D, Integer> p = new Pair<>(new Vector2D(a.x, a.y), a.vertex);
-                        if (boardView.vertexHighlight != null) {
+                        if (!boardView.vertexHighlight.isEmpty()) {
                             if (boardView.vertexHighlight.contains(p)) {
                                 actionButtons[i].setVisible(true);
                                 actionButtons[i].setEnabled(true);
@@ -208,7 +208,7 @@ public class CatanGUI extends AbstractGUIManager {
                     } else if (aa instanceof BuildRoad) {
                         BuildRoad a = (BuildRoad) aa;
                         Pair<Vector2D, Integer> p = new Pair<>(new Vector2D(a.x, a.y), a.edge);
-                        if (boardView.edgeHighlight != null) {
+                        if (!boardView.edgeHighlight.isEmpty()) {
                             if (boardView.edgeHighlight.contains(p)) {
                                 actionButtons[i].setVisible(true);
                                 actionButtons[i].setEnabled(true);

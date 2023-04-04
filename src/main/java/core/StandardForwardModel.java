@@ -5,7 +5,6 @@ import core.interfaces.IExtendedSequence;
 import evaluation.metrics.Event;
 
 import java.util.Arrays;
-import java.util.Stack;
 
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 import static core.CoreConstants.GameResult.TIMEOUT;
@@ -70,7 +69,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      * @param gs         - game state to end current player's turn in.
      * @param nextPlayer - the player whose turn it is next.
      */
-    public final void endPlayerTurn(AbstractGameState gs, int nextPlayer) {
+    public void endPlayerTurn(AbstractGameState gs, int nextPlayer) {
         if (gs.getGameStatus() != GAME_ONGOING) return;
 
         gs.getPlayerTimer()[gs.getCurrentPlayer()].incrementTurn();
@@ -93,7 +92,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      * @param gs - game state to end current player's turn in.
      */
     @Override
-    public final void endPlayerTurn(AbstractGameState gs) {
+    public void endPlayerTurn(AbstractGameState gs) {
         endPlayerTurn(gs, (gs.turnOwner + 1) % gs.nPlayers);
     }
 

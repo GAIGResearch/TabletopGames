@@ -75,106 +75,103 @@ public class CatanActionFactory {
      * i.e Lumber for Grain, Brick for Stone
      *
      * @param gs - current state
+     * @param actionSpace - action space type
+     * @param player - active player actions are computed for (and has visibility of their own resources
      * @return - ArrayList, PlayerTradeOffer type (unique).
      */
     static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs, ActionSpace actionSpace, int player) {
+        return getPlayerTradeOfferActions(gs, actionSpace, player, -1, true, null, null, -1, -1, true, OfferPlayerTrade.Stage.Offer);
+    }
+
+    /**
+     * Generates PlayerTradeOffers relating to single type trades
+     * i.e Lumber for Grain, Brick for Stone
+     *
+     * @param gs - current state
+     * @param actionSpace - action space type
+     * @param player - active player actions are computed for (and has visibility of their own resources)
+     * @param otherPlayer - other player involved in the trade, -1 if not yet decided
+     * @param offer - if true, player is offering player in original trade. if false, player is the other player (that resources are requested from)
+     * @param resourceToOffer - resource offered previously, null if not yet decided
+     * @param resourceToRequest - resource requested previously, null if not yet decided
+     * @param nOffered - number of resources offered previously, -1 if not yet decided
+     * @param nRequested - number of resources requested previously, -1 if not yet decided
+     * @param execute - if the action should execute. false if response to current trade offers, if one of these is already in progress.
+     * @return - ArrayList of OfferPlayerTrade actions
+     */
+    public static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs, ActionSpace actionSpace, int player, int otherPlayer, boolean offer,
+                                                           CatanParameters.Resource resourceToOffer, CatanParameters.Resource resourceToRequest,
+                                                           int nOffered, int nRequested, boolean execute, OfferPlayerTrade.Stage stage) {
+        // TODO: deep
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        HashMap<CatanParameters.Resource, Counter> resources = gs.getPlayerResources(gs.getCurrentPlayer());
-        int exchangeRate = ((CatanParameters) gs.getGameParameters()).default_exchange_rate;
+        HashMap<CatanParameters.Resource, Counter> resources = gs.getPlayerResources(player);
         int n_players = gs.getNPlayers();
-        int currentPlayer = gs.getCurrentPlayer();
-
-        for (int playerIndex = 0; playerIndex < n_players; playerIndex++) { // loop through players
-            if (playerIndex != currentPlayer) { // exclude current player
-                HashMap<CatanParameters.Resource, Counter> otherPlayerInventory = gs.getPlayerResources(playerIndex);
-                for (Map.Entry<CatanParameters.Resource, Counter> e: resources.entrySet()) { // loop through current players resources to offer
-                    for (CatanParameters.Resource resourceToRequest: CatanParameters.Resource.values()) { // loop through current players resources to request
-                        if (resourceToRequest != e.getKey()) { // exclude the currently offered resource
-                            int maxToRequest = otherPlayerInventory.get(resourceToRequest).getValue();
-                            if (maxToRequest == 0)
-                                continue;
-
-                            HashMap<CatanParameters.Resource, Integer> resourcesOffered = new HashMap<>();
-                            HashMap<CatanParameters.Resource, Integer> resourcesRequested = new HashMap<>();
-
-                            // we simplify this to be aggressive in our initial bid, on the basis that we are open to a counter-offer.
-                            // Effectively this creates one bid per player and possible pair of resources (which slightly reduces the combinatorial explosion of actions here)
-                            int offerQuantity = Math.max(1, maxToRequest / exchangeRate); // offer at least one
-                            offerQuantity = Math.min(offerQuantity, e.getValue().getValue()); // do not offer more than we have
-                            resourcesOffered.put(e.getKey(), offerQuantity);
-                            resourcesRequested.put(resourceToRequest, Math.min(maxToRequest, offerQuantity * exchangeRate));
-                            actions.add(new OfferPlayerTrade(resourcesOffered, resourcesRequested, currentPlayer, playerIndex, 1)); // create the action
+        if (otherPlayer == -1 && resourceToOffer == null && resourceToRequest == null) {
+            for (int playerIndex = 0; playerIndex < n_players; playerIndex++) { // loop through players
+                if (playerIndex != player) { // exclude current player
+                    for (CatanParameters.Resource resToOffer : CatanParameters.Resource.values()) {
+                        int maxToOffer = (offer ? resources.get(resToOffer).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade);
+                        if (maxToOffer > 0) {
+                            for (CatanParameters.Resource resToRequest : CatanParameters.Resource.values()) {
+                                if (resToRequest != resToOffer) {
+                                    int maxToRequest = (!offer ? resources.get(resToRequest).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade);
+                                    if (maxToRequest > 0) { // exclude the currently offered resource
+                                        if (offer) {
+                                            createTradeOfferActions(player, playerIndex, resToOffer, resToRequest, actions, maxToOffer, maxToRequest, -1, -1, execute, stage);
+                                        } else {
+                                            createTradeOfferActions(playerIndex, player, resToOffer, resToRequest, actions, maxToOffer, maxToRequest, -1, -1, execute, stage);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
+        } else {
+            int maxToOffer = (offer ? resources.get(resourceToOffer).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade);
+            int maxToRequest = (!offer ? resources.get(resourceToOffer).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade);
+            if (maxToOffer > 0 && maxToRequest > 0) { // exclude the currently offered resource
+                if (offer) {
+                    createTradeOfferActions(player, otherPlayer, resourceToOffer, resourceToRequest, actions, maxToOffer, maxToRequest, nOffered, nRequested, execute, stage);
+                } else {
+                    createTradeOfferActions(otherPlayer, player, resourceToOffer, resourceToRequest, actions, maxToOffer, maxToRequest, nOffered, nRequested, execute, stage);
+                }
+            }
         }
-        return actions;
-    }
-
-    static List<AbstractAction> getTradeReactionActions(CatanGameState gs, ActionSpace actionSpace, int player) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
-
-        actions.add(new EndNegotiation()); // rejects the trade offer
-        if (offeredPlayerTrade.getNegotiationCount() < ((CatanParameters) gs.getGameParameters()).max_negotiation_count + 1) { // check that the maximum number of negotiations has not been exceeded to prevent AI looping
-            actions.addAll(getResponsePlayerTradeOfferActions(gs));
-        }
-        actions.addAll(getAcceptTradeActions(gs));
-
-        return actions;
-    }
-
-    static List<AbstractAction> getAcceptTradeActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
-
-        if (gs.checkCost(offeredPlayerTrade.getResourcesRequested(), offeredPlayerTrade.otherPlayerID)) {
-            actions.add(new AcceptTrade(offeredPlayerTrade.offeringPlayerID, offeredPlayerTrade.otherPlayerID,
-                    offeredPlayerTrade.resourcesRequested, offeredPlayerTrade.resourcesOffered));
-        }
-
         return actions;
     }
 
     /**
-     * Generates PlayerTradeOffer actions that act as renegotiation on an existing trade offer
-     * This function only generates actions that involve changing the quantities of the offered/requested resources for
-     * single resource type trades
-     *
-     * @param gs - current game state
-     * @return - actions as counter-offer for trade
+     * Helper function that lists all combinations of trade offers, from 1 to maxToOffer of resource offered, and from 1 to maxToRequest for resource requested
+     * @param player - player offering trade originally (may not be active player)
+     * @param otherPlayer - player involved in trade (that resources are requested from)
+     * @param resourceToOffer - resource to offer
+     * @param resourceToRequest - resource to request
+     * @param actions - list of actions we should add the combinations to
+     * @param maxToOffer - maximum number of resources that should be offered
+     * @param maxToRequest - maximum number of resources that should be requested
+     * @param nOffered - number of resources offered previously, -1 if not yet decided
+     * @param nRequested - number of resources requested previously, -1 if not yet decided
+     * @param execute - if the action should execute. false if response to current trade offers, if one of these is already in progress.
      */
-    static List<AbstractAction> getResponsePlayerTradeOfferActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
-        if (offeredPlayerTrade.otherPlayerID != gs.getCurrentPlayer())
-            throw new AssertionError("We should always be alternating Offer and Counter-Offer");
-        HashMap<CatanParameters.Resource, Counter> playerResources = gs.getPlayerResources(gs.getCurrentPlayer());
-        HashMap<CatanParameters.Resource, Integer> resourcesOffered = offeredPlayerTrade.getResourcesOffered();
-        HashMap<CatanParameters.Resource, Integer> resourcesRequested = offeredPlayerTrade.getResourcesRequested();
-
-        CatanParameters.Resource resourceOffered = resourcesOffered.keySet().iterator().next();
-        CatanParameters.Resource resourceRequested = resourcesRequested.keySet().iterator().next();
-
-        int maxRequest = gs.getPlayerResources(offeredPlayerTrade.offeringPlayerID).get(resourceRequested).getValue();
-        // TODO: Once we have partial observability of player hands, we need to modify this to take account of uncertainty (add new type of UNKNOWN in result)
-        for (int quantityAvailableToOffer = 1; quantityAvailableToOffer < playerResources.get(resourceRequested).getValue() + 1; quantityAvailableToOffer++) { // loop through the quantity of resources to offer
-            for (int quantityAvailableToRequest = 1; quantityAvailableToRequest <= maxRequest; quantityAvailableToRequest++) { // loop to generate all possible combinations of offer for the current resource pair
-                if (!(quantityAvailableToOffer == resourcesRequested.get(resourceRequested) && quantityAvailableToRequest == resourcesOffered.get(resourceOffered))) {
-                    HashMap<CatanParameters.Resource, Integer> resourcesToOffer = new HashMap<>();
-                    HashMap<CatanParameters.Resource, Integer> resourcesToRequest = new HashMap<>();
-                    resourcesToOffer.put(resourceRequested, quantityAvailableToOffer);
-                    resourcesToRequest.put(resourceOffered, quantityAvailableToRequest);
-                    if (!resourcesToOffer.equals(resourcesRequested) && !resourcesToRequest.equals(resourcesOffered)) { // ensures the trade offer is not the same as the existing trade offer
-                        actions.add(new OfferPlayerTrade(resourcesToOffer, resourcesToRequest, offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount() + 1)); // create the action
-                    }
+    private static void createTradeOfferActions(int player, int otherPlayer,
+                                                CatanParameters.Resource resourceToOffer,
+                                                CatanParameters.Resource resourceToRequest,
+                                                ArrayList<AbstractAction> actions,
+                                                int maxToOffer, int maxToRequest,
+                                                int nOffered, int nRequested, boolean execute, OfferPlayerTrade.Stage stage) {
+        for (int offerQuantity = 1; offerQuantity <= maxToOffer; offerQuantity++) {
+            HashMap<CatanParameters.Resource, Integer> resourcesOffered = new HashMap<>();
+            resourcesOffered.put(resourceToOffer, offerQuantity);
+            for (int requestQuantity = 1; requestQuantity <= maxToRequest; requestQuantity++) {
+                if (nOffered != offerQuantity && nRequested != requestQuantity) {
+                    HashMap<CatanParameters.Resource, Integer> resourcesRequested = new HashMap<>();
+                    resourcesRequested.put(resourceToRequest, requestQuantity);
+                    actions.add(new OfferPlayerTrade(stage, resourcesOffered, resourcesRequested, player, otherPlayer, execute)); // create the action
                 }
             }
         }
-
-
-        return actions;
     }
 
     /**

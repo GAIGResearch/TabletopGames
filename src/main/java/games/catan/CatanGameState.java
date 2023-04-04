@@ -6,12 +6,13 @@ import core.components.*;
 import core.interfaces.IGamePhase;
 import games.GameType;
 import games.catan.actions.BuyAction;
-import games.catan.actions.OfferPlayerTrade;
-import games.catan.components.*;
+import games.catan.components.Building;
+import games.catan.components.CatanCard;
+import games.catan.components.CatanTile;
 
 import java.util.*;
 
-import static core.CoreConstants.*;
+import static core.CoreConstants.GameResult;
 import static games.catan.CatanConstants.HEX_SIDES;
 
 public class CatanGameState extends AbstractGameState {
@@ -24,8 +25,8 @@ public class CatanGameState extends AbstractGameState {
     protected int largestArmyOwner; // playerID of the player currently holding the largest army
     protected int longestRoadOwner; // playerID of the player currently holding the longest road
     protected int longestRoadLength, largestArmySize;
-    protected OfferPlayerTrade currentTradeOffer; // Holds the current trade offer to allow access between players
     int rollValue;
+    public int nTradesThisTurn;
     protected Random rnd;
 
     List<HashMap<CatanParameters.Resource, Counter>> playerResources;
@@ -94,12 +95,12 @@ public class CatanGameState extends AbstractGameState {
         if (!(o instanceof CatanGameState)) return false;
         if (!super.equals(o)) return false;
         CatanGameState that = (CatanGameState) o;
-        return largestArmyOwner == that.largestArmyOwner && longestRoadOwner == that.longestRoadOwner && longestRoadLength == that.longestRoadLength && largestArmySize == that.largestArmySize && rollValue == that.rollValue && Arrays.deepEquals(board, that.board) && Objects.equals(catanGraph, that.catanGraph) && Arrays.equals(scores, that.scores) && Arrays.equals(victoryPoints, that.victoryPoints) && Arrays.equals(knights, that.knights) && Arrays.equals(roadLengths, that.roadLengths) && Objects.equals(exchangeRates, that.exchangeRates) && Objects.equals(currentTradeOffer, that.currentTradeOffer) && Objects.equals(rnd, that.rnd) && Objects.equals(playerResources, that.playerResources) && Objects.equals(playerTokens, that.playerTokens) && Objects.equals(playerDevCards, that.playerDevCards) && Objects.equals(resourcePool, that.resourcePool) && Objects.equals(devCards, that.devCards);
+        return largestArmyOwner == that.largestArmyOwner && longestRoadOwner == that.longestRoadOwner && longestRoadLength == that.longestRoadLength && largestArmySize == that.largestArmySize && rollValue == that.rollValue && nTradesThisTurn == that.nTradesThisTurn && developmentCardPlayed == that.developmentCardPlayed && Arrays.deepEquals(board, that.board) && Objects.equals(catanGraph, that.catanGraph) && Arrays.equals(scores, that.scores) && Arrays.equals(victoryPoints, that.victoryPoints) && Arrays.equals(knights, that.knights) && Arrays.equals(roadLengths, that.roadLengths) && Objects.equals(exchangeRates, that.exchangeRates) && Objects.equals(rnd, that.rnd) && Objects.equals(playerResources, that.playerResources) && Objects.equals(playerTokens, that.playerTokens) && Objects.equals(playerDevCards, that.playerDevCards) && Objects.equals(resourcePool, that.resourcePool) && Objects.equals(devCards, that.devCards);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), catanGraph, exchangeRates, largestArmyOwner, longestRoadOwner, longestRoadLength, largestArmySize, currentTradeOffer, rollValue, rnd, playerResources, playerTokens, playerDevCards, resourcePool, devCards);
+        int result = Objects.hash(super.hashCode(), catanGraph, exchangeRates, largestArmyOwner, longestRoadOwner, longestRoadLength, largestArmySize, rollValue, nTradesThisTurn, rnd, playerResources, playerTokens, playerDevCards, resourcePool, devCards, developmentCardPlayed);
         result = 31 * result + Arrays.deepHashCode(board);
         result = 31 * result + Arrays.hashCode(scores);
         result = 31 * result + Arrays.hashCode(victoryPoints);
@@ -334,14 +335,6 @@ public class CatanGameState extends AbstractGameState {
         return largestArmyOwner;
     }
 
-    public void setLargestArmyOwner(int largestArmyOwner) {
-        this.largestArmyOwner = largestArmyOwner;
-    }
-
-    public void setLargestArmySize(int largestArmySize) {
-        this.largestArmySize = largestArmySize;
-    }
-
     public ArrayList<BoardNodeWithEdges> getPlayersSettlements(int playerId) {
         ArrayList<BoardNodeWithEdges> playerSettlements = new ArrayList<>();
         ArrayList<BoardNodeWithEdges> allSettlements = getSettlements();
@@ -428,11 +421,7 @@ public class CatanGameState extends AbstractGameState {
         copy.largestArmyOwner = largestArmyOwner;
         copy.longestRoadOwner = longestRoadOwner;
         copy.rollValue = rollValue;
-        if (currentTradeOffer == null) {
-            copy.currentTradeOffer = null;
-        } else {
-            copy.currentTradeOffer = this.currentTradeOffer.copy();
-        }
+        copy.nTradesThisTurn = nTradesThisTurn;
         copy.rnd = new Random(copy.getGameParameters().getRandomSeed());
 
         copy.resourcePool = new HashMap<>();
@@ -513,12 +502,6 @@ public class CatanGameState extends AbstractGameState {
         }
         return roads;
     }
-    public boolean hasHarbour(CatanTile tile) {
-        for (Building b: getBuildings(tile)) {
-            if (b.getHarbour() != null) return true;
-        }
-        return false;
-    }
 
     /**
      * Check if can place road on edge of tile
@@ -595,7 +578,6 @@ public class CatanGameState extends AbstractGameState {
         return copy;
     }
 
-
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         return new ArrayList<Integer>() {{
@@ -604,13 +586,5 @@ public class CatanGameState extends AbstractGameState {
                 add(c.getComponentID());
             }
         }};
-    }
-
-    public OfferPlayerTrade getCurrentTradeOffer() {
-        return currentTradeOffer;
-    }
-
-    public void setCurrentTradeOffer(OfferPlayerTrade currentTradeOffer) {
-        this.currentTradeOffer = currentTradeOffer;
     }
 }

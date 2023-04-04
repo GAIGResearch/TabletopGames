@@ -44,7 +44,7 @@ public class CatanForwardModel extends StandardForwardModel {
         state.longestRoadOwner = -1;
         state.largestArmySize = 0;
         state.longestRoadLength = 0;
-        state.currentTradeOffer = null;
+        state.nTradesThisTurn = 0;
         state.rollValue = -1;
         state.developmentCardPlayed = false;
 
@@ -143,6 +143,12 @@ public class CatanForwardModel extends StandardForwardModel {
         }
     }
 
+    @Override
+    public void endPlayerTurn(AbstractGameState gs) {
+        super.endPlayerTurn(gs);
+        ((CatanGameState)gs).nTradesThisTurn = 0;
+    }
+
     private void rollDiceAndAllocateResources(CatanGameState gs, CatanParameters cp) {
         /* Gives players the resources depending on the current rollValue stored in the game state */
 
@@ -164,7 +170,7 @@ public class CatanForwardModel extends StandardForwardModel {
             for (int p = 0; p < gs.getNPlayers(); p++) {
                 int nResInHand = gs.getNResourcesInHand(p);
                 if (nResInHand > cp.max_cards_without_discard) {
-                    int r = nResInHand / 2; // remove half of the resources
+                    int r = (int)(nResInHand * cp.perc_discard_robber); // remove half of the resources
                     new DiscardResourcesPhase(p, r).execute(gs);
                 }
             }
@@ -173,17 +179,19 @@ public class CatanForwardModel extends StandardForwardModel {
             for (CatanTile[] catanTiles : board) {
                 for (CatanTile tile : catanTiles) {
                     if (tile.getNumber() == rollValue && !tile.hasRobber()) {
-                        // allocate resource for each settlement/city
+                        // Allocate resource for each settlement/city on this tile to their owner
                         for (Building settl : gs.getBuildings(tile)) {
-                            if (settl.getOwnerId() != -1) {
+                            int who = settl.getOwnerId();
+                            if (who != -1) {
                                 // Move the card from the resource deck and give it to the player
                                 CatanParameters.Resource res = cp.productMapping.get(tile.getTileType());
-                                gs.resourcePool.get(res).decrement(cp.nProduction.get(settl.getBuildingType()));
-                                gs.playerResources.get(gs.getCurrentPlayer()).get(res).increment(cp.nProduction.get(settl.getBuildingType()));
+                                int nGenerated = cp.nProduction.get(settl.getBuildingType());
+                                gs.resourcePool.get(res).decrement(nGenerated);
+                                gs.playerResources.get(who).get(res).increment(nGenerated);
                                 if (gs.getCoreGameParameters().verbose) {
-                                    System.out.println("With Roll value " + gs.rollValue + " Player " + settl.getOwnerId() + " got " + res);
+                                    System.out.println("With Roll value " + gs.rollValue + " p" + who + " got " + res);
                                 }
-                                gs.logEvent(() -> " Player " + settl.getOwnerId() + " got " + res);
+                                gs.logEvent(() -> " Player " + who + " got " + res);
                             }
                         }
                     }
@@ -191,14 +199,18 @@ public class CatanForwardModel extends StandardForwardModel {
             }
         }
     }
+
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         return _computeAvailableActions(gameState, ActionSpace.Default);
     }
 
+    @SuppressWarnings("CollectionAddAllCanBeReplacedWithConstructor")
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         CatanGameState cgs = (CatanGameState) gameState;
+        CatanParameters cp = (CatanParameters) gameState.getGameParameters();
         int player = cgs.getCurrentPlayer();
+
         if (cgs.getGamePhase() == Setup) {
             return CatanActionFactory.getSetupActions(cgs, actionSpace, player);
         }
@@ -207,13 +219,12 @@ public class CatanForwardModel extends StandardForwardModel {
         }
         // Main phase: trade, build (road, city, dev card), or play dev card
         List<AbstractAction> mainActions = new ArrayList<>();
-        // Trade
-        if (cgs.getCurrentTradeOffer() != null)
-            mainActions.addAll(CatanActionFactory.getTradeReactionActions(cgs, actionSpace, player));
-        else {
-            // With the bank / ports
-            mainActions.addAll(CatanActionFactory.getDefaultTradeActions(cgs, actionSpace, player));
-            // With other players
+
+        // Trade With the bank / ports
+        mainActions.addAll(CatanActionFactory.getDefaultTradeActions(cgs, actionSpace, player));
+
+        // Trade With other players, unless already too many trades this turn
+        if (cgs.nTradesThisTurn < cp.max_trade_actions_allowed) {
             mainActions.addAll(CatanActionFactory.getPlayerTradeOfferActions(cgs, actionSpace, player));
         }
 
@@ -224,6 +235,9 @@ public class CatanForwardModel extends StandardForwardModel {
         if (cgs.noDevelopmentCardPlayed()) {
             mainActions.addAll(CatanActionFactory.getDevCardActions(cgs, actionSpace, player));
         }
+
+        mainActions.add(new DoNothing());  // End turn
+
         return mainActions;
     }
 

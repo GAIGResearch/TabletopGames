@@ -10,23 +10,23 @@ import java.util.Objects;
 
 public class AcceptTrade extends AbstractAction {
     public final int offeringPlayer;
-    public final int receivingPlayer;
+    public final int otherPlayer;
     public final HashMap<CatanParameters.Resource, Integer> resourcesRequested;
     public final HashMap<CatanParameters.Resource, Integer> resourcesOffered;
 
-    public AcceptTrade(int offeringPlayer, int receivingPlayer,
+    public AcceptTrade(HashMap<CatanParameters.Resource, Integer> resourcesOffered,
                        HashMap<CatanParameters.Resource, Integer> resourcesRequested,
-                       HashMap<CatanParameters.Resource, Integer> resourcesOffered) {
-        this.offeringPlayer = offeringPlayer;
-        this.receivingPlayer = receivingPlayer;
+                       int offeringPlayerID, int otherPlayerID) {
+        this.offeringPlayer = offeringPlayerID;
+        this.otherPlayer = otherPlayerID;
         this.resourcesRequested = resourcesRequested;
         this.resourcesOffered = resourcesOffered;
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        if (((CatanGameState)gs).swapResources(receivingPlayer, offeringPlayer, resourcesOffered) &&
-                ((CatanGameState)gs).swapResources(offeringPlayer, receivingPlayer, resourcesRequested)) {
+        if (((CatanGameState)gs).swapResources(otherPlayer, offeringPlayer, resourcesRequested) &&
+                ((CatanGameState)gs).swapResources(offeringPlayer, otherPlayer, resourcesOffered)) {
             return true;
         } else {
             throw new AssertionError("A partner did not have sufficient resources");
@@ -43,12 +43,12 @@ public class AcceptTrade extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof AcceptTrade)) return false;
         AcceptTrade that = (AcceptTrade) o;
-        return offeringPlayer == that.offeringPlayer && receivingPlayer == that.receivingPlayer && Objects.equals(resourcesRequested, that.resourcesRequested) && Objects.equals(resourcesOffered, that.resourcesOffered);
+        return offeringPlayer == that.offeringPlayer && otherPlayer == that.otherPlayer && Objects.equals(resourcesRequested, that.resourcesRequested) && Objects.equals(resourcesOffered, that.resourcesOffered);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(offeringPlayer, receivingPlayer, resourcesRequested, resourcesOffered);
+        return Objects.hash(offeringPlayer, otherPlayer, resourcesRequested, resourcesOffered);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("Player %s accepts trade offered by %d : %s for %s ", receivingPlayer, offeringPlayer,
-                OfferPlayerTrade.resourceArrayToString(resourcesRequested), OfferPlayerTrade.resourceArrayToString(resourcesOffered));
+        return String.format("p%s accepts trade by p%d : %s for %s ", otherPlayer, offeringPlayer,
+                OfferPlayerTrade.resourceArrayToString(resourcesOffered), OfferPlayerTrade.resourceArrayToString(resourcesRequested));
     }
 }

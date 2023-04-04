@@ -267,16 +267,15 @@ public class CatanBoardView extends JComponent {
             }
         }
 
+        Stroke s = g.getStroke();
         if (tileHighlight != null) {
             CatanTile tile = gs.getBoard()[tileHighlight.x][tileHighlight.y];
             Polygon tileHex = tile.getHexagon(tileRadius);
             g.setColor(tileColorHighlight);
-            Stroke s = g.getStroke();
             g.setStroke(new BasicStroke(8));
             g.drawPolygon(tileHex);
-            g.setStroke(s);
         }
-
+        g.setStroke(new BasicStroke(3));
         if (!vertexHighlight.isEmpty()) {
             g.setColor(tileColorHighlight);
             Rectangle r = vertexToRectMap.get(vertexHighlight.iterator().next());
@@ -287,6 +286,7 @@ public class CatanBoardView extends JComponent {
             Rectangle r = edgeToRectMap.get(edgeHighlight.iterator().next());
             g.drawRect(r.x, r.y, r.width, r.height);
         }
+        g.setStroke(s);
     }
 
     public void drawRobber(Graphics2D g, Point point){
