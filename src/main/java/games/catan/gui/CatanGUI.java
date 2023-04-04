@@ -111,11 +111,6 @@ public class CatanGUI extends AbstractGUIManager {
         mainPanel.add(Box.createRigidArea(new Dimension(5,0)));
 
         wrapper.add(mainPanel, BorderLayout.CENTER);
-
-//        JScrollPane pane2 = new JScrollPane(actionPanel);
-//        pane2.setPreferredSize(new Dimension(700, 100));
-//        pane2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-//        parent.add(pane2, BorderLayout.SOUTH);
         wrapper.add(actionPanel, BorderLayout.SOUTH);
 
         wrapper.revalidate();
@@ -143,17 +138,6 @@ public class CatanGUI extends AbstractGUIManager {
                                            Consumer<ActionButton> onMouseEnter,
                                            Consumer<ActionButton> onMouseExit) {
         JPanel actionPanel = new JPanel();
-//        JPanel actionPanel = new JPanel() {
-//            @Override
-//            public Dimension getMaximumSize() {
-//                return new Dimension(width, super.getMaximumSize().height);
-//            }
-//
-//            @Override
-//            public Dimension getPreferredSize() {
-//                return new Dimension(width, super.getPreferredSize().height);
-//            }
-//        };
         actionPanel.setPreferredSize(new Dimension(width, height*10));
         actionPanel.setOpaque(false);
 
@@ -295,7 +279,6 @@ public class CatanGUI extends AbstractGUIManager {
         longestRoad.setText("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());
         currentOffer.setText("Trade offered: " + (gs.getTradeOffer() != null? gs.getTradeOffer().getString(gameState) : "(none)"));
         resourcePool = new JLabel("Resource pool: " + resourcePrint(gs.getResourcePool(), (CatanParameters) gs.getGameParameters()));
-//        victoryPointsLabel.setText("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
 
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             playerPanels[i]._update((CatanGameState) gameState);
@@ -316,7 +299,6 @@ public class CatanGUI extends AbstractGUIManager {
         playerColourLabel = new JLabel("Current Player Colour: Red");
         knightCount = new JLabel("Knights: " + Arrays.toString(gs.getKnights()));
         longestRoad = new JLabel("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());
-//        victoryPointsLabel = new JLabel("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
         diceRollLabel = new JLabel("Dice Roll: " + ((CatanGameState) gameState).getRollValue());
         currentOffer = new JLabel("Trade offered: (none)");
         resourcePool = new JLabel("Resource pool: " + resourcePrint(gs.getResourcePool(), (CatanParameters) gs.getGameParameters()));
