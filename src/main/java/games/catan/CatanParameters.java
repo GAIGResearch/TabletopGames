@@ -90,6 +90,23 @@ public class CatanParameters extends AbstractParameters {
         WILD
     }
 
+    public enum ResourceAmount {
+        Few("."),
+        Some("?"),
+        Many("??"),
+        Lots("???");
+        public final String po;
+        ResourceAmount(String po) {
+            this.po = po;
+        }
+        public static ResourceAmount translate(int amount, CatanParameters cp) {
+            double perc = amount*1.0 / cp.n_resource_cards;
+            int idx = (int)(values().length * perc);
+            if (idx == 4) idx--;
+            return values()[idx];
+        }
+    }
+
     /* Mapping of which field produces what*/
     public HashMap<CatanTile.TileType, Resource> productMapping = new HashMap<CatanTile.TileType, Resource>(){{
         put(CatanTile.TileType.HILLS, BRICK);

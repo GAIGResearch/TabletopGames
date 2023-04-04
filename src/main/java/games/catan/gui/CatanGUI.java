@@ -5,19 +5,25 @@ import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
+import core.components.Counter;
 import games.catan.CatanGameState;
+import games.catan.CatanParameters;
+import games.catan.actions.build.BuildCity;
 import games.catan.actions.build.BuildRoad;
+import games.catan.actions.build.BuildSettlement;
+import games.catan.actions.robber.MoveRobber;
 import games.catan.actions.setup.DeepPlaceSettlementThenRoad;
+import games.catan.actions.setup.PlaceSettlementWithRoad;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import players.human.ActionController;
 import utilities.Pair;
-import utilities.Vector2D;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -32,6 +38,7 @@ public class CatanGUI extends AbstractGUIManager {
     JLabel longestRoad;
     JLabel playerColourLabel;
     JLabel currentOffer;
+    JLabel resourcePool;
 
     JScrollPane actionScrollPane;
 
@@ -183,45 +190,70 @@ public class CatanGUI extends AbstractGUIManager {
                 boolean vertexNotification = false;
                 boolean edgeNotification = false;
                 for (AbstractAction aa : actions) {
+                    Pair<Point, Integer> vertex = null;
+                    Pair<Point, Integer> edge = null;
+                    Point tile = null;
+                    // TODO: resource highlight for players (Discard, Trade)
+                    // TODO: highlight players (MoveRobberAndSteal, StealResource)
+                    // TODO: combined filters (PlaceSettlementWithRoad)
                     if (aa instanceof DeepPlaceSettlementThenRoad) {
                         DeepPlaceSettlementThenRoad a = (DeepPlaceSettlementThenRoad) aa;
-                        Pair<Vector2D, Integer> p = new Pair<>(new Vector2D(a.x, a.y), a.vertex);
-                        if (!boardView.vertexHighlight.isEmpty()) {
-                            if (boardView.vertexHighlight.contains(p)) {
-                                actionButtons[i].setVisible(true);
-                                actionButtons[i].setEnabled(true);
-                                actionButtons[i].setButtonAction(a, gameState);
-                                actionButtons[i].setBackground(Color.white);
-                                i++;
-                            }
-                        } else if (!vertexNotification) {
-                            actionButtons[i].setVisible(true);
-                            actionButtons[i].setEnabled(false);
-                            actionButtons[i].setButtonAction(null, "Select vertex on map");
-                            actionButtons[i].setBackground(Color.gray);
-                            i++;
-                            vertexNotification = true;
-                        }
+                        vertex = new Pair<>(new Point(a.x, a.y), a.vertex);
                     } else if (aa instanceof BuildRoad) {
                         BuildRoad a = (BuildRoad) aa;
-                        Pair<Vector2D, Integer> p = new Pair<>(new Vector2D(a.x, a.y), a.edge);
-                        if (!boardView.edgeHighlight.isEmpty()) {
-                            if (boardView.edgeHighlight.contains(p)) {
-                                actionButtons[i].setVisible(true);
-                                actionButtons[i].setEnabled(true);
-                                actionButtons[i].setButtonAction(a, gameState);
-                                actionButtons[i].setBackground(Color.white);
-                                i++;
-                            }
-                        } else if (!edgeNotification) {
+                        edge = new Pair<>(new Point(a.x, a.y), a.edge);
+                    } else if (aa instanceof BuildCity) {
+                        BuildCity a = (BuildCity) aa;
+                        vertex = new Pair<>(new Point(a.col, a.row), a.vertex);
+                    } else if (aa instanceof BuildSettlement) {
+                        BuildSettlement a = (BuildSettlement) aa;
+                        vertex = new Pair<>(new Point(a.x, a.y), a.vertex);
+                    } else if (aa instanceof MoveRobber) {
+                        MoveRobber a = (MoveRobber) aa;
+                        tile = new Point(a.x, a.y);
+                    } else if (aa instanceof PlaceSettlementWithRoad) {
+                        PlaceSettlementWithRoad a = (PlaceSettlementWithRoad) aa;
+                        vertex = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        edge = new Pair<>(new Point(a.x, a.y), a.edge);
+                    }
+
+                    // Use vertex filter
+                    if (vertex != null && !boardView.vertexHighlight.isEmpty()) {
+                        if (boardView.vertexHighlight.contains(vertex)) {
                             actionButtons[i].setVisible(true);
-                            actionButtons[i].setEnabled(false);
-                            actionButtons[i].setButtonAction(null, "Select edge on map");
-                            actionButtons[i].setBackground(Color.gray);
+                            actionButtons[i].setEnabled(true);
+                            actionButtons[i].setButtonAction(aa, gameState);
+                            actionButtons[i].setBackground(Color.white);
                             i++;
-                            edgeNotification = true;
                         }
-                    } else {
+                    } else if (!vertexNotification) {
+                        actionButtons[i].setVisible(true);
+                        actionButtons[i].setEnabled(false);
+                        actionButtons[i].setButtonAction(null, "Select vertex on map");
+                        actionButtons[i].setBackground(Color.gray);
+                        i++;
+                        vertexNotification = true;
+                    }
+                    // Use edge filter
+                    if (edge != null && !boardView.edgeHighlight.isEmpty()) {
+                        if (boardView.edgeHighlight.contains(edge)) {
+                            actionButtons[i].setVisible(true);
+                            actionButtons[i].setEnabled(true);
+                            actionButtons[i].setButtonAction(aa, gameState);
+                            actionButtons[i].setBackground(Color.white);
+                            i++;
+                        }
+                    } else if (!edgeNotification) {
+                        actionButtons[i].setVisible(true);
+                        actionButtons[i].setEnabled(false);
+                        actionButtons[i].setButtonAction(null, "Select edge on map");
+                        actionButtons[i].setBackground(Color.gray);
+                        i++;
+                        edgeNotification = true;
+                    }
+
+                    // Non-filtered action
+                    if (vertex == null && edge == null && tile == null) {
                         actionButtons[i].setVisible(true);
                         actionButtons[i].setEnabled(true);
                         actionButtons[i].setButtonAction(aa, gameState);
@@ -244,6 +276,7 @@ public class CatanGUI extends AbstractGUIManager {
         knightCount.setText("Knights: " + gs.getLargestArmyOwner() + " with size " + gs.getLargestArmySize());
         longestRoad.setText("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());
         currentOffer.setText("Trade offered: " + (gs.getTradeOffer() != null? gs.getTradeOffer().getString(gameState) : "(none)"));
+        resourcePool = new JLabel("Resource pool: " + resourcePrint(gs.getResourcePool(), (CatanParameters) gs.getGameParameters()));
 //        victoryPointsLabel.setText("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
 
         for (int i = 0; i < gameState.getNPlayers(); i++) {
@@ -268,6 +301,7 @@ public class CatanGUI extends AbstractGUIManager {
 //        victoryPointsLabel = new JLabel("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
         diceRollLabel = new JLabel("Dice Roll: " + ((CatanGameState) gameState).getRollValue());
         currentOffer = new JLabel("Trade offered: (none)");
+        resourcePool = new JLabel("Resource pool: " + resourcePrint(gs.getResourcePool(), (CatanParameters) gs.getGameParameters()));
 
         gameInfo.add(gameStatus);
         gameInfo.add(gamePhase);
@@ -275,14 +309,29 @@ public class CatanGUI extends AbstractGUIManager {
         gameInfo.add(currentPlayer);
         gameInfo.add(diceRollLabel);
         gameInfo.add(currentOffer);
+        gameInfo.add(resourcePool);
 
-        gameInfo.setPreferredSize(new Dimension(900, 150));
+        gameInfo.setPreferredSize(new Dimension(900, 170));
 
         JPanel wrapper = new JPanel();
         wrapper.setOpaque(false);
         wrapper.add(gameInfo, BorderLayout.WEST);
 //        wrapper.setLayout(new GridBagLayout());
         return wrapper;
+    }
+
+    private String resourcePrint(HashMap<CatanParameters.Resource, Counter> resourcePool, CatanParameters cp) {
+        String s = "";
+        for (CatanParameters.Resource res: resourcePool.keySet()) {
+            if (res == CatanParameters.Resource.WILD) continue;
+            if (gs.getCoreGameParameters().alwaysDisplayFullObservable) {
+                s += res + "=" + resourcePool.get(res).getValue() + "/" + cp.n_resource_cards + ", ";
+            } else {
+                s += res + "=" + CatanParameters.ResourceAmount.translate(resourcePool.get(res).getValue(), cp).po + ", ";
+            }
+        }
+        s += "]";
+        return s.replace(", ]", "");
     }
 
 }
