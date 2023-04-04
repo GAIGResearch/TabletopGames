@@ -18,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static games.catan.CatanConstants.HEX_SIDES;
 
@@ -60,9 +61,9 @@ public class CatanBoardView extends JComponent {
     HashMap<Integer, Integer> nDotsPerRoll = new HashMap<>();
 
     HashMap<Pair<Vector2D, Integer>, Rectangle> vertexToRectMap;
-    Pair<Vector2D, Integer> vertexHighlight;
+    Set<Pair<Vector2D, Integer>> vertexHighlight;  // A set to represent one vertex highlighted, because it may be respective to any of the 3 adjacent tiles
     HashMap<Pair<Vector2D, Integer>, Rectangle> edgeToRectMap;
-    Pair<Vector2D, Integer> edgeHighlight;
+    Set<Pair<Vector2D, Integer>> edgeHighlight;  // A set to represent one edge highlighted, because it may be respective to any of the 2 adjacent tiles
     int minSize = 10;
 
     public CatanBoardView(CatanGameState gs) {
@@ -83,25 +84,26 @@ public class CatanBoardView extends JComponent {
 
         edgeToRectMap = new HashMap<>();
         vertexToRectMap = new HashMap<>();
+        vertexHighlight = new HashSet<>();
+        edgeHighlight = new HashSet<>();
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                vertexHighlight.clear();
+                edgeHighlight.clear();
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     // Left-click
                     for (Map.Entry<Pair<Vector2D, Integer>, Rectangle> entry: vertexToRectMap.entrySet()) {
                         if (entry.getValue().contains(e.getPoint())) {
-                            vertexHighlight = entry.getKey();
+                            vertexHighlight.add(entry.getKey());
                         }
                     }
                     for (Map.Entry<Pair<Vector2D, Integer>, Rectangle> entry: edgeToRectMap.entrySet()) {
                         if (entry.getValue().contains(e.getPoint())) {
-                            edgeHighlight = entry.getKey();
+                            edgeHighlight.add(entry.getKey());
                         }
                     }
-                } else {
-                    edgeHighlight = null;
-                    vertexHighlight = null;
                 }
             }
         });
@@ -275,14 +277,14 @@ public class CatanBoardView extends JComponent {
             g.setStroke(s);
         }
 
-        if (vertexHighlight != null) {
+        if (!vertexHighlight.isEmpty()) {
             g.setColor(tileColorHighlight);
-            Rectangle r = vertexToRectMap.get(vertexHighlight);
+            Rectangle r = vertexToRectMap.get(vertexHighlight.iterator().next());
             g.drawRect(r.x, r.y, r.width, r.height);
         }
-        if (edgeHighlight != null) {
+        if (!edgeHighlight.isEmpty()) {
             g.setColor(tileColorHighlight);
-            Rectangle r = edgeToRectMap.get(edgeHighlight);
+            Rectangle r = edgeToRectMap.get(edgeHighlight.iterator().next());
             g.drawRect(r.x, r.y, r.width, r.height);
         }
     }
@@ -412,23 +414,7 @@ public class CatanBoardView extends JComponent {
         tileHighlight = null;
         buildingHighlight = null;
         roadHighlight = null;
-        edgeHighlight = null;
-        vertexHighlight  = null;
-    }
-
-    public Pair<Vector2D, Integer> getVertexHighlight() {
-        return vertexHighlight;
-    }
-
-    public Pair<Vector2D, Integer> getEdgeHighlight() {
-        return edgeHighlight;
-    }
-
-    public void setVertexHighlight(Pair<Vector2D, Integer> vertexHighlight) {
-        this.vertexHighlight = vertexHighlight;
-    }
-
-    public void setEdgeHighlight(Pair<Vector2D, Integer> edgeHighlight) {
-        this.edgeHighlight = edgeHighlight;
+        edgeHighlight.clear();
+        vertexHighlight.clear();
     }
 }

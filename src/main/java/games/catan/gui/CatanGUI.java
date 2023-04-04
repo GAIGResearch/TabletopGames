@@ -12,6 +12,8 @@ import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
 import players.human.ActionController;
+import utilities.Pair;
+import utilities.Vector2D;
 
 import javax.swing.*;
 import java.awt.*;
@@ -186,8 +188,9 @@ public class CatanGUI extends AbstractGUIManager {
                 for (AbstractAction aa : actions) {
                     if (aa instanceof DeepPlaceSettlementThenRoad) {
                         DeepPlaceSettlementThenRoad a = (DeepPlaceSettlementThenRoad) aa;
+                        Pair<Vector2D, Integer> p = new Pair<>(new Vector2D(a.x, a.y), a.vertex);
                         if (boardView.vertexHighlight != null) {
-                            if (a.x == boardView.vertexHighlight.a.getX() && a.y == boardView.vertexHighlight.a.getY() && a.vertex == boardView.vertexHighlight.b) {
+                            if (boardView.vertexHighlight.contains(p)) {
                                 actionButtons[i].setVisible(true);
                                 actionButtons[i].setEnabled(true);
                                 actionButtons[i].setButtonAction(a, gameState);
@@ -204,8 +207,9 @@ public class CatanGUI extends AbstractGUIManager {
                         }
                     } else if (aa instanceof BuildRoad) {
                         BuildRoad a = (BuildRoad) aa;
+                        Pair<Vector2D, Integer> p = new Pair<>(new Vector2D(a.x, a.y), a.edge);
                         if (boardView.edgeHighlight != null) {
-                            if (a.x == boardView.edgeHighlight.a.getX() && a.y == boardView.edgeHighlight.a.getY() && a.edge == boardView.edgeHighlight.b) {
+                            if (boardView.edgeHighlight.contains(p)) {
                                 actionButtons[i].setVisible(true);
                                 actionButtons[i].setEnabled(true);
                                 actionButtons[i].setButtonAction(actions.get(i), gameState);
