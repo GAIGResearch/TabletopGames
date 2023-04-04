@@ -26,6 +26,7 @@ public class EndNegotiation extends AbstractAction {
         ((CatanGameState) gs).setTradeOffer(null);
         gs.setTurnOwner(offeringPlayerID);
         ((CatanGameState) gs).negotiationStepsCount = 0;
+        ((CatanGameState) gs).nTradesThisTurn++;
         return true;
     }
 

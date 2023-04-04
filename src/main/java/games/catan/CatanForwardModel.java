@@ -149,6 +149,9 @@ public class CatanForwardModel extends StandardForwardModel {
 
                 // Check if this should be rejected automatically
                 if (gs.negotiationStepsCount >= params.max_negotiation_count) {
+                    if (gs.getCoreGameParameters().verbose) {
+                        System.out.println("Trade rejected by default (too many attempts)");
+                    }
                     gs.negotiationStepsCount = 0;
                     gs.tradeOffer = null;
                     gs.setTurnOwner(opt.offeringPlayerID);

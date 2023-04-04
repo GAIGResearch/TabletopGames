@@ -27,14 +27,11 @@ public class CatanGUI extends AbstractGUIManager {
     PlayerPanel[] playerPanels;
 
     JPanel gameInfo;
-    JLabel scoreLabel;
-    JLabel victoryPointsLabel;
     JLabel diceRollLabel;
     JLabel knightCount;
     JLabel longestRoad;
-    JLabel playerResources;
-    JLabel devCards;
     JLabel playerColourLabel;
+    JLabel currentOffer;
 
     JScrollPane actionScrollPane;
 
@@ -246,6 +243,7 @@ public class CatanGUI extends AbstractGUIManager {
         diceRollLabel.setText("Dice Roll: " + ((CatanGameState) gameState).getRollValue());
         knightCount.setText("Knights: " + gs.getLargestArmyOwner() + " with size " + gs.getLargestArmySize());
         longestRoad.setText("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());
+        currentOffer.setText("Trade offered: " + (gs.getTradeOffer() != null? gs.getTradeOffer().getString(gameState) : "(none)"));
 //        victoryPointsLabel.setText("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
 
         for (int i = 0; i < gameState.getNPlayers(); i++) {
@@ -269,12 +267,14 @@ public class CatanGUI extends AbstractGUIManager {
         longestRoad = new JLabel("Longest Road: " + gs.getLongestRoadOwner() + " with length " + gs.getLongestRoadLength());
 //        victoryPointsLabel = new JLabel("VictoryPoints: " + Arrays.toString(gs.getVictoryPoints()));
         diceRollLabel = new JLabel("Dice Roll: " + ((CatanGameState) gameState).getRollValue());
+        currentOffer = new JLabel("Trade offered: (none)");
 
         gameInfo.add(gameStatus);
         gameInfo.add(gamePhase);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
         gameInfo.add(diceRollLabel);
+        gameInfo.add(currentOffer);
 
         gameInfo.setPreferredSize(new Dimension(900, 150));
 

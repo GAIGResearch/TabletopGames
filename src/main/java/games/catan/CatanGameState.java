@@ -396,7 +396,6 @@ public class CatanGameState extends AbstractGameState {
         return true;
     }
 
-
     @Override
     protected CatanGameState _copy(int playerId) { // TODO proper PO
         CatanGameState copy = new CatanGameState(getGameParameters().copy(), getNPlayers());

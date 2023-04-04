@@ -33,8 +33,6 @@ public class CatanActionFactory {
                 // where it is legal to place tile then it can be placed from there
                 if (!(tile.getTileType().equals(CatanTile.TileType.SEA) ||
                     tile.getTileType().equals(CatanTile.TileType.DESERT))) {
-//                        actions.add(new BuildSettlement_v2(settlement, activePlayer));
-//                        actions.add(new BuildSettlement(x, y, i, activePlayer));
                     for (int i = 0; i < HEX_SIDES; i++) {
                         Building settlement = gs.getBuilding(tile, i);
                         if (!settlementsAdded.contains(settlement.getComponentID()) && settlement.getOwnerId() == -1) {
@@ -83,8 +81,10 @@ public class CatanActionFactory {
                 actions.add(new AcceptTrade(player, opt.resourceOffered, opt.nOffered, opt.resourceRequested, opt.nRequested, opt.offeringPlayerID, opt.otherPlayerID));
             }
 
-            // Or counter-offer
-            actions.addAll(CatanActionFactory.getPlayerTradeOfferActions(gs, actionSpace, player, opt));
+            // Or counter-offer, if we've not already done too many steps
+            if (gs.nTradesThisTurn < ((CatanParameters)gs.getGameParameters()).max_trade_actions_allowed) {
+                actions.addAll(CatanActionFactory.getPlayerTradeOfferActions(gs, actionSpace, player, opt));
+            }
         } else {
             // Create a new offer
             actions.addAll(getPlayerTradeOfferActions(gs, actionSpace, player, null));
@@ -120,7 +120,7 @@ public class CatanActionFactory {
                                     if (resToRequest != resToOffer) {
                                         int maxToRequest = ((CatanParameters) gs.getGameParameters()).max_resources_request_trade;
                                         if (maxToRequest > 0) { // exclude the currently offered resource
-                                            createTradeOfferActions(playerID, playerIndex, resToOffer, resToRequest, actions, maxToOffer, maxToRequest, -1, -1, OfferPlayerTrade.Stage.Offer);
+                                            actions.addAll(createTradeOfferActions(playerID, playerIndex, resToOffer, resToRequest, maxToOffer, maxToRequest, -1, -1, OfferPlayerTrade.Stage.Offer));
                                         }
                                     }
                                 }
@@ -134,18 +134,22 @@ public class CatanActionFactory {
             }
         } else {
             // Adjust existing offer
-            if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Default is flat
-                int maxToOffer = tradeOffer.offeringPlayerID == playerID ? resources.get(tradeOffer.resourceOffered).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade;
-                int maxToRequest = tradeOffer.otherPlayerID == playerID ? resources.get(tradeOffer.resourceRequested).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade;
-                if (maxToOffer > 0 && maxToRequest > 0) {
-                    createTradeOfferActions(tradeOffer.offeringPlayerID, tradeOffer.otherPlayerID,
-                            tradeOffer.resourceOffered, tradeOffer.resourceRequested, actions, maxToOffer, maxToRequest,
-                            tradeOffer.nOffered, tradeOffer.nRequested,
-                            tradeOffer.stage == OfferPlayerTrade.Stage.Offer ? OfferPlayerTrade.Stage.CounterOffer : OfferPlayerTrade.Stage.Offer);
+            List<AbstractAction> allCounterOffers = new ArrayList<>();
+            int maxToOffer = tradeOffer.offeringPlayerID == playerID ? resources.get(tradeOffer.resourceOffered).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade;
+            int maxToRequest = tradeOffer.otherPlayerID == playerID ? resources.get(tradeOffer.resourceRequested).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade;
+            if (maxToOffer > 0 && maxToRequest > 0) {
+                allCounterOffers = createTradeOfferActions(tradeOffer.offeringPlayerID, tradeOffer.otherPlayerID,
+                        tradeOffer.resourceOffered, tradeOffer.resourceRequested, maxToOffer, maxToRequest,
+                        tradeOffer.nOffered, tradeOffer.nRequested,
+                        tradeOffer.stage == OfferPlayerTrade.Stage.Offer ? OfferPlayerTrade.Stage.CounterOffer : OfferPlayerTrade.Stage.Offer);
+            }
+            if (!allCounterOffers.isEmpty()) {
+                if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Default is flat
+                    actions.addAll(allCounterOffers);
+                } else {
+                    // Deep counter-offer construct. Only add if there exists a counter-offer, we still need to calculate all options
+                    actions.add(new DeepCounterOffer(tradeOffer.stage, playerID));
                 }
-            } else {
-                // Deep counter-offer construct
-                actions.add(new DeepCounterOffer(tradeOffer.stage, playerID));
             }
         }
         return actions;
@@ -157,18 +161,18 @@ public class CatanActionFactory {
      * @param otherPlayer - player involved in trade (that resources are requested from)
      * @param resourceToOffer - resource to offer
      * @param resourceToRequest - resource to request
-     * @param actions - list of actions we should add the combinations to
      * @param maxToOffer - maximum number of resources that should be offered
      * @param maxToRequest - maximum number of resources that should be requested
      * @param nOffered - number of resources offered previously, -1 if not yet decided
      * @param nRequested - number of resources requested previously, -1 if not yet decided
+     * @return actions - list of actions
      */
-    private static void createTradeOfferActions(int offeringPlayer, int otherPlayer,
+    private static List<AbstractAction> createTradeOfferActions(int offeringPlayer, int otherPlayer,
                                                 CatanParameters.Resource resourceToOffer,
                                                 CatanParameters.Resource resourceToRequest,
-                                                ArrayList<AbstractAction> actions,
                                                 int maxToOffer, int maxToRequest,
                                                 int nOffered, int nRequested, OfferPlayerTrade.Stage stage) {
+        List<AbstractAction> actions = new ArrayList<>();
         for (int offerQuantity = 1; offerQuantity <= maxToOffer; offerQuantity++) {
             for (int requestQuantity = 1; requestQuantity <= maxToRequest; requestQuantity++) {
                 if (nOffered != offerQuantity || nRequested != requestQuantity) {
@@ -176,6 +180,7 @@ public class CatanActionFactory {
                 }
             }
         }
+        return actions;
     }
 
     /**
@@ -449,20 +454,6 @@ public class CatanActionFactory {
                     }
                     actions.add(new PlayRoadBuilding(player, roadsToBuild));
                 }
-
-//                CatanTile[][] board = gs.getBoard();
-//                for (int x = 0; x < board.length; x++) {
-//                    for (int y = 0; y < board[x].length; y++) {
-//                        CatanTile tile = board[x][y];
-//                        for (int i = 0; i < HEX_SIDES; i++) {
-//                            if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
-//                                    && gs.checkRoadPlacement(i, tile, player)
-//                                    && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
-//                                actions.add(new BuildRoad(x, y, i, player, true));
-//                            }
-//                        }
-//                    }
-//                }
             } else {
                 // Deep: one road at a time
                 for (AbstractAction road: roads) {

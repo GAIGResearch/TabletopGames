@@ -33,6 +33,7 @@ public class AcceptTrade extends AbstractAction {
             ((CatanGameState) gs).setTradeOffer(null);
             gs.setTurnOwner(offeringPlayer);
             ((CatanGameState) gs).negotiationStepsCount = 0;
+            ((CatanGameState) gs).nTradesThisTurn++;
             return true;
         } else {
             throw new AssertionError("A partner did not have sufficient resources");

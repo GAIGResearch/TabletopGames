@@ -64,18 +64,25 @@ public class DeepCounterOffer extends AbstractAction implements IExtendedSequenc
         List<AbstractAction> actions = new ArrayList<>();
         CatanGameState gs = (CatanGameState) state;
         OfferPlayerTrade opt = (OfferPlayerTrade) gs.getTradeOffer();
+        int nAvailableOffer = opt.offeringPlayerID == player? gs.getPlayerResources(player).get(opt.resourceOffered).getValue() : ((CatanParameters)gs.getGameParameters()).max_resources_request_trade;
+        int nAvailableRequest = opt.otherPlayerID == player? gs.getPlayerResources(player).get(opt.resourceRequested).getValue() : ((CatanParameters)gs.getGameParameters()).max_resources_request_trade;
+
         // Fill in the respective choice
         switch(choice) {
             case ChooseNOffered:
-                int nAvailableOffer = opt.offeringPlayerID == player? gs.getPlayerResources(player).get(opt.resourceOffered).getValue() : ((CatanParameters)gs.getGameParameters()).max_resources_request_trade;
-                for (int i = 1; i < nAvailableOffer; i++) {
-                    actions.add(new DeepCounterOffer(stage, player, i));
+                for (int i = 1; i <= nAvailableOffer; i++) {
+                    // Only allow to be same as old if there exists a different option for the other parameter
+                    if (i != opt.nOffered || nAvailableRequest >= 2) {
+                        actions.add(new DeepCounterOffer(stage, player, i));
+                    }
                 }
                 break;
             case ChooseNRequested:
-                int nAvailableRequest = opt.otherPlayerID == player? gs.getPlayerResources(player).get(opt.resourceRequested).getValue() : ((CatanParameters)gs.getGameParameters()).max_resources_request_trade;
-                for (int i = 1; i < nAvailableRequest; i++) {
-                    actions.add(new DeepCounterOffer(stage, player, nOffered, i));
+                for (int i = 1; i <= nAvailableRequest; i++) {
+                    // Only allow variation where at least one difference to old offer is present
+                    if (i != opt.nRequested || nOffered != opt.nOffered) {
+                        actions.add(new DeepCounterOffer(stage, player, nOffered, i));
+                    }
                 }
                 break;
         }

@@ -129,7 +129,7 @@ public class DeepConstructNewOffer extends AbstractAction implements IExtendedSe
                 break;
             case ChooseNOffered:
                 int nAvailableOffer = stage == OfferPlayerTrade.Stage.Offer? gs.getPlayerResources(offeringPlayerID).get(resourceOffered).getValue() : ((CatanParameters)gs.getGameParameters()).max_resources_request_trade;
-                for (int i = 1; i < nAvailableOffer; i++) {
+                for (int i = 1; i <= nAvailableOffer; i++) {
                     actions.add(new DeepConstructNewOffer(player, otherPlayerID, resourceOffered, i));
                 }
                 break;
@@ -141,7 +141,7 @@ public class DeepConstructNewOffer extends AbstractAction implements IExtendedSe
                 break;
             case ChooseNRequested:
                 int nAvailableRequest = stage == OfferPlayerTrade.Stage.CounterOffer? gs.getPlayerResources(otherPlayerID).get(resourceRequested).getValue() : ((CatanParameters)gs.getGameParameters()).max_resources_request_trade;
-                for (int i = 1; i < nAvailableRequest; i++) {
+                for (int i = 1; i <= nAvailableRequest; i++) {
                     actions.add(new DeepConstructNewOffer(player, stage, offeringPlayerID, otherPlayerID, resourceOffered, nOffered, resourceRequested, i));
                 }
                 break;
