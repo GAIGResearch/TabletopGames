@@ -410,7 +410,7 @@ public class CatanGameState extends AbstractGameState {
         copy.knights = knights.clone();
         copy.roadLengths = roadLengths.clone();
 
-        copy.tradeOffer = tradeOffer.copy();
+        copy.tradeOffer = tradeOffer != null? tradeOffer.copy() : null;
         copy.negotiationStepsCount = negotiationStepsCount;
 
         copy.exchangeRates = new ArrayList<>();
