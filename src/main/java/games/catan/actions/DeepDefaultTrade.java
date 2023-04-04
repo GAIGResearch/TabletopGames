@@ -38,7 +38,7 @@ public class DeepDefaultTrade extends AbstractAction implements IExtendedSequenc
         ArrayList<AbstractAction> actions = new ArrayList<>();
         CatanGameState gs = (CatanGameState) state;
         for (CatanParameters.Resource resToGet: CatanParameters.Resource.values()) {
-            if (resourceOffer != resToGet && gs.getResourcePool().get(resToGet).getValue() > 0) {
+            if (resToGet != Resource.WILD && resourceOffer != resToGet && gs.getResourcePool().get(resToGet).getValue() > 0) {
                 actions.add(new DefaultTrade(resourceOffer, resToGet, exchangeRate, player));
             }
         }

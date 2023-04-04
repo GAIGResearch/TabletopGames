@@ -65,6 +65,7 @@ public class CatanForwardModel extends StandardForwardModel {
             HashMap<CatanParameters.Resource, Counter> resources = new HashMap<>();
             HashMap<CatanParameters.Resource, Counter> exchange = new HashMap<>();
             for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
+                if (res == CatanParameters.Resource.WILD) continue;
                 resources.put(res, new Counter(res + " " + i));
                 exchange.put(res, new Counter(params.default_exchange_rate,1, params.default_exchange_rate,res + " " + i));
             }
@@ -76,6 +77,7 @@ public class CatanForwardModel extends StandardForwardModel {
         // create resource pool
         state.resourcePool = new HashMap<>();
         for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
+            if (res == CatanParameters.Resource.WILD) continue;
             state.resourcePool.put(res, new Counter(res.name()));
             state.resourcePool.get(res).increment(params.n_resource_cards);
         }

@@ -40,7 +40,7 @@ public class DeepYearOfPlenty extends AbstractAction implements IExtendedSequenc
         ArrayList<AbstractAction> actions = new ArrayList<>();
         CatanGameState gs = (CatanGameState) state;
         for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
-            if (gs.getResourcePool().get(res).getValue() > 0)
+            if (res != CatanParameters.Resource.WILD && gs.getResourcePool().get(res).getValue() > 0)
                 actions.add(new PlayYearOfPlenty(new CatanParameters.Resource[]{res}, playerID));
         }
         return actions;
