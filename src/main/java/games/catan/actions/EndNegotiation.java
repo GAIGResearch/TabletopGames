@@ -25,6 +25,7 @@ public class EndNegotiation extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         ((CatanGameState) gs).setTradeOffer(null);
         gs.setTurnOwner(offeringPlayerID);
+        ((CatanGameState) gs).negotiationStepsCount = 0;
         return true;
     }
 

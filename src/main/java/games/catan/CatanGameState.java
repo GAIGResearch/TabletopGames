@@ -27,7 +27,6 @@ public class CatanGameState extends AbstractGameState {
     protected int longestRoadOwner; // playerID of the player currently holding the longest road
     protected int longestRoadLength, largestArmySize;
     int rollValue;
-    public int nTradesThisTurn;
     protected Random rnd;
 
     List<HashMap<CatanParameters.Resource, Counter>> playerResources;
@@ -37,9 +36,9 @@ public class CatanGameState extends AbstractGameState {
     Deck<CatanCard> devCards;
     boolean developmentCardPlayed; // Tracks whether a player has played a development card this turn
 
-    // TODO: init, update equals, hashcode, copy
     AbstractAction tradeOffer;
-    int negotiationStepsCount;  // TODO: reset on accept/reject
+    public int negotiationStepsCount;
+    public int nTradesThisTurn;
 
     public AbstractAction getTradeOffer() {
         return tradeOffer;
@@ -102,19 +101,18 @@ public class CatanGameState extends AbstractGameState {
         }};
     }
 
-
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof CatanGameState)) return false;
         if (!super.equals(o)) return false;
         CatanGameState that = (CatanGameState) o;
-        return largestArmyOwner == that.largestArmyOwner && longestRoadOwner == that.longestRoadOwner && longestRoadLength == that.longestRoadLength && largestArmySize == that.largestArmySize && rollValue == that.rollValue && nTradesThisTurn == that.nTradesThisTurn && developmentCardPlayed == that.developmentCardPlayed && Arrays.deepEquals(board, that.board) && Objects.equals(catanGraph, that.catanGraph) && Arrays.equals(scores, that.scores) && Arrays.equals(victoryPoints, that.victoryPoints) && Arrays.equals(knights, that.knights) && Arrays.equals(roadLengths, that.roadLengths) && Objects.equals(exchangeRates, that.exchangeRates) && Objects.equals(rnd, that.rnd) && Objects.equals(playerResources, that.playerResources) && Objects.equals(playerTokens, that.playerTokens) && Objects.equals(playerDevCards, that.playerDevCards) && Objects.equals(resourcePool, that.resourcePool) && Objects.equals(devCards, that.devCards) && Objects.equals(tradeOffer, that.tradeOffer);
+        return largestArmyOwner == that.largestArmyOwner && longestRoadOwner == that.longestRoadOwner && longestRoadLength == that.longestRoadLength && largestArmySize == that.largestArmySize && rollValue == that.rollValue && developmentCardPlayed == that.developmentCardPlayed && negotiationStepsCount == that.negotiationStepsCount && nTradesThisTurn == that.nTradesThisTurn && Arrays.deepEquals(board, that.board) && Objects.equals(catanGraph, that.catanGraph) && Arrays.equals(scores, that.scores) && Arrays.equals(victoryPoints, that.victoryPoints) && Arrays.equals(knights, that.knights) && Arrays.equals(roadLengths, that.roadLengths) && Objects.equals(exchangeRates, that.exchangeRates) && Objects.equals(rnd, that.rnd) && Objects.equals(playerResources, that.playerResources) && Objects.equals(playerTokens, that.playerTokens) && Objects.equals(playerDevCards, that.playerDevCards) && Objects.equals(resourcePool, that.resourcePool) && Objects.equals(devCards, that.devCards) && Objects.equals(tradeOffer, that.tradeOffer);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), catanGraph, exchangeRates, largestArmyOwner, longestRoadOwner, longestRoadLength, largestArmySize, rollValue, nTradesThisTurn, rnd, playerResources, playerTokens, playerDevCards, resourcePool, devCards, developmentCardPlayed, tradeOffer);
+        int result = Objects.hash(super.hashCode(), catanGraph, exchangeRates, largestArmyOwner, longestRoadOwner, longestRoadLength, largestArmySize, rollValue, rnd, playerResources, playerTokens, playerDevCards, resourcePool, devCards, developmentCardPlayed, tradeOffer, negotiationStepsCount, nTradesThisTurn);
         result = 31 * result + Arrays.deepHashCode(board);
         result = 31 * result + Arrays.hashCode(scores);
         result = 31 * result + Arrays.hashCode(victoryPoints);
@@ -380,6 +378,11 @@ public class CatanGameState extends AbstractGameState {
             playerResources.get(fromPlayer).get(e.getKey()).decrement(e.getValue());
             playerResources.get(toPlayer).get(e.getKey()).increment(e.getValue());
         }
+        return true;
+    }
+    public boolean swapResources(int fromPlayer, int toPlayer, CatanParameters.Resource resource, int nResources) {
+        playerResources.get(fromPlayer).get(resource).decrement(nResources);
+        playerResources.get(toPlayer).get(resource).increment(nResources);
         return true;
     }
 

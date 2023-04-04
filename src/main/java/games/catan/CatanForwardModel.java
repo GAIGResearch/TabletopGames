@@ -45,9 +45,12 @@ public class CatanForwardModel extends StandardForwardModel {
         state.longestRoadOwner = -1;
         state.largestArmySize = 0;
         state.longestRoadLength = 0;
-        state.nTradesThisTurn = 0;
         state.rollValue = -1;
         state.developmentCardPlayed = false;
+
+        state.tradeOffer = null;
+        state.negotiationStepsCount = 0;
+        state.nTradesThisTurn = 0;
 
         state.exchangeRates = new ArrayList<>();
         state.playerDevCards = new ArrayList<>();
@@ -228,7 +231,6 @@ public class CatanForwardModel extends StandardForwardModel {
         return _computeAvailableActions(gameState, ActionSpace.Default);
     }
 
-    @SuppressWarnings("CollectionAddAllCanBeReplacedWithConstructor")
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         CatanGameState cgs = (CatanGameState) gameState;
