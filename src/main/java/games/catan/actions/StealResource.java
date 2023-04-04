@@ -8,6 +8,8 @@ import games.catan.CatanParameters;
 import java.util.Objects;
 import java.util.Random;
 
+import static core.CoreConstants.DefaultGamePhase.Main;
+
 /**
  * Player may steal a resource from a player when moving a robber or playing a knight card
  */
@@ -32,6 +34,7 @@ public class StealResource extends AbstractAction {
         CatanParameters.Resource resource = cgs.pickResourceFromHand(targetPlayerID, cardIndex);
         cgs.getPlayerResources(playerID).get(resource).increment();
         cgs.getPlayerResources(targetPlayerID).get(resource).decrement();
+        cgs.setGamePhase(Main);
         return true;
     }
 
