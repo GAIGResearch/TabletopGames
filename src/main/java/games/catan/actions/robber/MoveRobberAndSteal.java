@@ -1,4 +1,4 @@
-package games.catan.actions;
+package games.catan.actions.robber;
 
 import core.AbstractGameState;
 import games.catan.CatanGameState;

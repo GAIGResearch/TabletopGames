@@ -2,14 +2,14 @@ package games.catan;
 
 import core.AbstractParameters;
 import core.components.Dice;
-import games.catan.actions.BuyAction;
+import games.catan.actions.build.BuyAction;
 import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
 
 import java.util.HashMap;
 
-import static games.catan.actions.BuyAction.BuyType.*;
+import static games.catan.actions.build.BuyAction.BuyType.*;
 import static games.catan.CatanParameters.Resource.*;
 
 public class CatanParameters extends AbstractParameters {

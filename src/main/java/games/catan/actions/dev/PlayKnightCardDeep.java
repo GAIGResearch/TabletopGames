@@ -1,16 +1,17 @@
-package games.catan.actions;
+package games.catan.actions.dev;
 
 import core.AbstractGameState;
 import core.components.Deck;
 import games.catan.CatanGameState;
+import games.catan.actions.robber.MoveRobber;
 import games.catan.components.CatanCard;
 
 import java.util.Optional;
 
-public class PlayKnightCard extends MoveRobberAndSteal {
+public class PlayKnightCardDeep extends MoveRobber {
 
-    public PlayKnightCard(int x, int y, int player, int targetPlayer) {
-        super(x, y, player, targetPlayer);
+    public PlayKnightCardDeep(int x, int y, int player) {
+        super(x, y, player);
     }
 
     @Override
@@ -34,13 +35,13 @@ public class PlayKnightCard extends MoveRobberAndSteal {
     }
 
     @Override
-    public PlayKnightCard copy() {
+    public PlayKnightCardDeep copy() {
         return this;
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof PlayKnightCard && super.equals(o);
+        return o instanceof PlayKnightCardDeep && super.equals(o);
     }
 
     @Override

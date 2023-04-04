@@ -6,7 +6,7 @@ import core.actions.AbstractAction;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import games.GameType;
-import games.catan.actions.BuyAction;
+import games.catan.actions.build.BuyAction;
 import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;

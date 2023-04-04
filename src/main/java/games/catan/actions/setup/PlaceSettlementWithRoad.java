@@ -1,9 +1,11 @@
-package games.catan.actions;
+package games.catan.actions.setup;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
+import games.catan.actions.build.BuildRoad;
+import games.catan.actions.build.BuildSettlement;
 import games.catan.components.CatanTile;
 
 import java.util.ArrayList;

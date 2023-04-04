@@ -1,4 +1,4 @@
-package games.catan.actions;
+package games.catan.actions.trade;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static games.catan.actions.DeepCounterOffer.Choice.*;
+import static games.catan.actions.trade.DeepCounterOffer.Choice.*;
 
 public class DeepCounterOffer extends AbstractAction implements IExtendedSequence {
     public enum Choice {

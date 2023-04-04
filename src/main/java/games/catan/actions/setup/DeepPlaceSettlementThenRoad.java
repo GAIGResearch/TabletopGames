@@ -1,4 +1,4 @@
-package games.catan.actions;
+package games.catan.actions.setup;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
@@ -6,6 +6,8 @@ import core.components.Edge;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
+import games.catan.actions.build.BuildRoad;
+import games.catan.actions.build.BuildSettlement;
 import games.catan.components.Building;
 import games.catan.components.CatanTile;
 

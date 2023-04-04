@@ -1,4 +1,4 @@
-package games.catan.actions;
+package games.catan.actions.build;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
