@@ -187,8 +187,10 @@ public class CatanGUI extends AbstractGUIManager {
             if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !(actionButtons == null)) {
                 List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState, gameState.getCoreGameParameters().actionSpace);
                 int i = 0;
+                // TODO: trim what the set of actions currently require
                 boolean vertexNotification = false;
                 boolean edgeNotification = false;
+                boolean tileNotification = false;
                 for (AbstractAction aa : actions) {
                     Pair<Point, Integer> vertex = null;
                     Pair<Point, Integer> edge = null;
@@ -251,7 +253,23 @@ public class CatanGUI extends AbstractGUIManager {
                         i++;
                         edgeNotification = true;
                     }
-
+                    // Use tile filter
+                    if (tile != null && boardView.hexHighlight != null) {
+                        if (boardView.hexHighlight.equals(tile)) {
+                            actionButtons[i].setVisible(true);
+                            actionButtons[i].setEnabled(true);
+                            actionButtons[i].setButtonAction(aa, gameState);
+                            actionButtons[i].setBackground(Color.white);
+                            i++;
+                        }
+                    } else if (!tileNotification) {
+                        actionButtons[i].setVisible(true);
+                        actionButtons[i].setEnabled(false);
+                        actionButtons[i].setButtonAction(null, "Select tile on map");
+                        actionButtons[i].setBackground(Color.gray);
+                        i++;
+                        tileNotification = true;
+                    }
                     // Non-filtered action
                     if (vertex == null && edge == null && tile == null) {
                         actionButtons[i].setVisible(true);
