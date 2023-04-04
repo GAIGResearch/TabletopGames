@@ -334,22 +334,21 @@ public class CatanGUI extends AbstractGUIManager {
         JPanel wrapper = new JPanel();
         wrapper.setOpaque(false);
         wrapper.add(gameInfo, BorderLayout.WEST);
-//        wrapper.setLayout(new GridBagLayout());
         return wrapper;
     }
 
     private String resourcePrint(HashMap<CatanParameters.Resource, Counter> resourcePool, CatanParameters cp) {
-        String s = "";
+        StringBuilder s = new StringBuilder();
         for (CatanParameters.Resource res: resourcePool.keySet()) {
             if (res == CatanParameters.Resource.WILD) continue;
             if (gs.getCoreGameParameters().alwaysDisplayFullObservable) {
-                s += res + "=" + resourcePool.get(res).getValue() + "/" + cp.n_resource_cards + ", ";
+                s.append(res).append("=").append(resourcePool.get(res).getValue()).append("/").append(cp.n_resource_cards).append(", ");
             } else {
-                s += res + "=" + CatanParameters.ResourceAmount.translate(resourcePool.get(res).getValue(), cp).po + ", ";
+                s.append(res).append("=").append(CatanParameters.ResourceAmount.translate(resourcePool.get(res).getValue(), cp).po).append(", ");
             }
         }
-        s += "]";
-        return s.replace(", ]", "");
+        s.append("]");
+        return s.toString().replace(", ]", "");
     }
 
 }
