@@ -110,9 +110,11 @@ public class CatanActionFactory {
             for (int playerIndex = 0; playerIndex < n_players; playerIndex++) { // loop through players
                 if (playerIndex != player) { // exclude current player
                     for (CatanParameters.Resource resToOffer : CatanParameters.Resource.values()) {
+                        if (resToOffer == CatanParameters.Resource.WILD) continue;
                         int maxToOffer = (offer ? resources.get(resToOffer).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade);
                         if (maxToOffer > 0) {
                             for (CatanParameters.Resource resToRequest : CatanParameters.Resource.values()) {
+                                if (resToRequest == CatanParameters.Resource.WILD) continue;
                                 if (resToRequest != resToOffer) {
                                     int maxToRequest = (!offer ? resources.get(resToRequest).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade);
                                     if (maxToRequest > 0) { // exclude the currently offered resource
@@ -130,7 +132,7 @@ public class CatanActionFactory {
             }
         } else {
             int maxToOffer = (offer ? resources.get(resourceToOffer).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade);
-            int maxToRequest = (!offer ? resources.get(resourceToOffer).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade);
+            int maxToRequest = (!offer ? resources.get(resourceToRequest).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade);
             if (maxToOffer > 0 && maxToRequest > 0) { // exclude the currently offered resource
                 if (offer) {
                     createTradeOfferActions(player, otherPlayer, resourceToOffer, resourceToRequest, actions, maxToOffer, maxToRequest, nOffered, nRequested, execute, stage);
@@ -165,7 +167,7 @@ public class CatanActionFactory {
             HashMap<CatanParameters.Resource, Integer> resourcesOffered = new HashMap<>();
             resourcesOffered.put(resourceToOffer, offerQuantity);
             for (int requestQuantity = 1; requestQuantity <= maxToRequest; requestQuantity++) {
-                if (nOffered != offerQuantity && nRequested != requestQuantity) {
+                if (nOffered != offerQuantity || nRequested != requestQuantity) {
                     HashMap<CatanParameters.Resource, Integer> resourcesRequested = new HashMap<>();
                     resourcesRequested.put(resourceToRequest, requestQuantity);
                     actions.add(new OfferPlayerTrade(stage, resourcesOffered, resourcesRequested, player, otherPlayer, execute)); // create the action
@@ -199,6 +201,7 @@ public class CatanActionFactory {
         } else {
             // Deep: Choose 1 resource at a time
             for (CatanParameters.Resource resource: CatanParameters.Resource.values()) {
+                if (resource == CatanParameters.Resource.WILD) continue;
                 if (gs.getPlayerResources(player).get(resource).getValue() > 0) actions.add(new DiscardResources(new CatanParameters.Resource[]{resource}, player));
             }
         }
@@ -388,6 +391,7 @@ public class CatanActionFactory {
 
         else if (cardType == CatanCard.CardType.MONOPOLY) {
             for (CatanParameters.Resource resource : CatanParameters.Resource.values()) {
+                if (resource == CatanParameters.Resource.WILD) continue;
                 actions.add(new PlayMonopoly(resource, player));
             }
         }
@@ -397,6 +401,7 @@ public class CatanActionFactory {
                 List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
 
                 for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
+                    if (res == CatanParameters.Resource.WILD) continue;
                     if (gs.resourcePool.get(res).getValue() > 0)
                         for (int i = 0; i < ((CatanParameters) gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
                             resourcesAvailable.add(res);
@@ -418,7 +423,7 @@ public class CatanActionFactory {
             } else {
                 // Deep: one resource at a time
                 for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
-                    if (gs.resourcePool.get(res).getValue() > 0)
+                    if (res != CatanParameters.Resource.WILD && gs.resourcePool.get(res).getValue() > 0)
                         actions.add(new DeepYearOfPlenty(player, res, cardType.nDeepSteps((CatanParameters) gs.getGameParameters())));
                 }
             }
@@ -477,6 +482,8 @@ public class CatanActionFactory {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         HashMap<CatanParameters.Resource, Counter> playerExchangeRate = gs.getExchangeRates(player);
         for (Map.Entry<CatanParameters.Resource, Counter> res: gs.playerResources.get(player).entrySet()) {
+            if (res.getKey() == CatanParameters.Resource.WILD) continue;
+
             // give N resources (minimum exchange rate for this resource)
             CatanParameters.Resource resToGive = res.getKey();
             int nGive = playerExchangeRate.get(res.getKey()).getValue();
@@ -485,7 +492,7 @@ public class CatanActionFactory {
                 if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
                     // for 1 other resource
                     for (CatanParameters.Resource resToGet : CatanParameters.Resource.values()) {
-                        if (resToGive != resToGet && gs.getResourcePool().get(resToGet).getValue() > 0) {
+                        if (resToGet != CatanParameters.Resource.WILD && resToGive != resToGet && gs.getResourcePool().get(resToGet).getValue() > 0) {
                             actions.add(new DefaultTrade(resToGive, resToGet, nGive, player));
                         }
                     }
