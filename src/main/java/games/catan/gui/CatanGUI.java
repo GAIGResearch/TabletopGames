@@ -212,7 +212,7 @@ public class CatanGUI extends AbstractGUIManager {
                             if (boardView.edgeHighlight.contains(p)) {
                                 actionButtons[i].setVisible(true);
                                 actionButtons[i].setEnabled(true);
-                                actionButtons[i].setButtonAction(actions.get(i), gameState);
+                                actionButtons[i].setButtonAction(a, gameState);
                                 actionButtons[i].setBackground(Color.white);
                                 i++;
                             }
@@ -227,7 +227,7 @@ public class CatanGUI extends AbstractGUIManager {
                     } else {
                         actionButtons[i].setVisible(true);
                         actionButtons[i].setEnabled(true);
-                        actionButtons[i].setButtonAction(actions.get(i), gameState);
+                        actionButtons[i].setButtonAction(aa, gameState);
                         actionButtons[i].setBackground(Color.white);
                         i++;
                     }

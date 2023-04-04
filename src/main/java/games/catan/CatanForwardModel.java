@@ -65,7 +65,6 @@ public class CatanForwardModel extends StandardForwardModel {
             HashMap<CatanParameters.Resource, Counter> resources = new HashMap<>();
             HashMap<CatanParameters.Resource, Counter> exchange = new HashMap<>();
             for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
-                if (res == CatanParameters.Resource.WILD) continue;
                 resources.put(res, new Counter(res + " " + i));
                 exchange.put(res, new Counter(params.default_exchange_rate,1, params.default_exchange_rate,res + " " + i));
             }
@@ -77,7 +76,6 @@ public class CatanForwardModel extends StandardForwardModel {
         // create resource pool
         state.resourcePool = new HashMap<>();
         for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
-            if (res == CatanParameters.Resource.WILD) continue;
             state.resourcePool.put(res, new Counter(res.name()));
             state.resourcePool.get(res).increment(params.n_resource_cards);
         }
@@ -165,6 +163,9 @@ public class CatanForwardModel extends StandardForwardModel {
 
         int roll = rollValue;
         gs.logEvent(() -> "Dice roll of " + roll);
+        if (gs.getCoreGameParameters().verbose) {
+            System.out.println("Dice roll: " + gs.rollValue);
+        }
         CatanTile[][] board = gs.getBoard();
         if (rollValue == cp.robber_die_roll) {
             // Dice roll was 7, so we change the phase
@@ -191,9 +192,9 @@ public class CatanForwardModel extends StandardForwardModel {
                                 gs.resourcePool.get(res).decrement(nGenerated);
                                 gs.playerResources.get(who).get(res).increment(nGenerated);
                                 if (gs.getCoreGameParameters().verbose) {
-                                    System.out.println("With Roll value " + gs.rollValue + " p" + who + " got " + res);
+                                    System.out.println("p" + who + " gets " + res);
                                 }
-                                gs.logEvent(() -> " Player " + who + " got " + res);
+                                gs.logEvent(() -> "Player " + who + " gets " + res);
                             }
                         }
                     }
