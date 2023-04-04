@@ -12,6 +12,7 @@ import core.components.Edge;
 import core.components.GraphBoardWithEdges;
 import games.catan.actions.BuyAction;
 import games.catan.actions.DiscardResourcesPhase;
+import games.catan.actions.OfferPlayerTrade;
 import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
@@ -139,6 +140,26 @@ public class CatanForwardModel extends StandardForwardModel {
                     endPlayerTurn(gs);
                 }
                 rollDiceAndAllocateResources(gs, params);
+            } else if (gs.tradeOffer != null) {
+                OfferPlayerTrade opt = (OfferPlayerTrade) gs.tradeOffer;
+                gs.negotiationStepsCount++;
+
+                // Check if this should be rejected automatically
+                if (gs.negotiationStepsCount >= params.max_negotiation_count) {
+                    gs.negotiationStepsCount = 0;
+                    gs.tradeOffer = null;
+                    gs.setTurnOwner(opt.offeringPlayerID);
+                    gs.nTradesThisTurn++;
+                } else {
+
+                    // Trade offer reply needed, swap player between offering and other in action
+                    switch (opt.stage) {
+                        case Offer:
+                            gs.setTurnOwner(opt.otherPlayerID);
+                        case CounterOffer:
+                            gs.setTurnOwner(opt.offeringPlayerID);
+                    }
+                }
             }
         }
     }
@@ -223,23 +244,30 @@ public class CatanForwardModel extends StandardForwardModel {
         // Main phase: trade, build (road, city, dev card), or play dev card
         List<AbstractAction> mainActions = new ArrayList<>();
 
-        // Trade With the bank / ports
-        mainActions.addAll(CatanActionFactory.getDefaultTradeActions(cgs, actionSpace, player));
+        if (cgs.tradeOffer != null) {
+            // Only replies allowed
+            mainActions.addAll(CatanActionFactory.getPlayerTradeActions(cgs, actionSpace, player));
 
-        // Trade With other players, unless already too many trades this turn
-        if (cgs.nTradesThisTurn < cp.max_trade_actions_allowed) {
-            mainActions.addAll(CatanActionFactory.getPlayerTradeOfferActions(cgs, actionSpace, player));
+        } else {
+
+            // Trade With the bank / ports
+            mainActions.addAll(CatanActionFactory.getDefaultTradeActions(cgs, actionSpace, player));
+
+            // Trade With other players, unless already too many trades this turn
+            if (cgs.nTradesThisTurn < cp.max_trade_actions_allowed) {
+                mainActions.addAll(CatanActionFactory.getPlayerTradeActions(cgs, actionSpace, player));
+            }
+
+            // Build
+            mainActions.addAll(CatanActionFactory.getBuyActions(cgs, actionSpace, player));
+
+            // Dev cards
+            if (cgs.noDevelopmentCardPlayed()) {
+                mainActions.addAll(CatanActionFactory.getDevCardActions(cgs, actionSpace, player));
+            }
+
+            mainActions.add(new DoNothing());  // End turn
         }
-
-        // Build
-        mainActions.addAll(CatanActionFactory.getBuyActions(cgs, actionSpace, player));
-
-        // Dev cards
-        if (cgs.noDevelopmentCardPlayed()) {
-            mainActions.addAll(CatanActionFactory.getDevCardActions(cgs, actionSpace, player));
-        }
-
-        mainActions.add(new DoNothing());  // End turn
 
         return mainActions;
     }
