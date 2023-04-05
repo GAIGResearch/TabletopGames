@@ -52,6 +52,15 @@ public class DeepCounterOffer extends AbstractAction implements IExtendedSequenc
         this.choice = Choice.CounterOfferComplete;
         this.stage = stage;
     }
+    // Copy constructor
+    public DeepCounterOffer(OfferPlayerTrade.Stage stage, int player, int nOffered, int nRequested, boolean execute, Choice choice) {
+        this.player = player;
+        this.nOffered = nOffered;
+        this.nRequested = nRequested;
+        this.execute = execute;
+        this.choice = choice;
+        this.stage = stage;
+    }
 
     @Override
     public boolean execute(AbstractGameState gs) {
@@ -115,7 +124,7 @@ public class DeepCounterOffer extends AbstractAction implements IExtendedSequenc
 
     @Override
     public DeepCounterOffer copy() {
-        return new DeepCounterOffer(stage, player, nOffered, nRequested);
+        return new DeepCounterOffer(stage, player, nOffered, nRequested, execute, choice);
     }
 
     @Override

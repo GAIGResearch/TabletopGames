@@ -267,18 +267,24 @@ public class CatanActionFactory {
         CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
+        List<AbstractAction> buyRoadActions = getBuyRoadActions(gs, player, false);
+        List<AbstractAction> buySettlementActions = getBuySettlementActions(gs, player);
+        List<AbstractAction> buyCityActions = getBuyCityActions(gs, player);
         // Road, Settlement or City
         if (actionSpace.structure != ActionSpace.Structure.Deep) {
-            actions.addAll(getBuyRoadActions(gs, player, false));
-            actions.addAll(getBuySettlementActions(gs, player));
-            actions.addAll(getBuyCityActions(gs, player));
+            actions.addAll(buyRoadActions);
+            actions.addAll(buySettlementActions);
+            actions.addAll(buyCityActions);
         } else {
             // Deep: choose between buying road / city / settlement, then where to place them
             for (BuyAction.BuyType type: BuyAction.BuyType.values()) {
                 if (type == BuyAction.BuyType.DevCard) continue;
                 if (gs.checkCost(catanParameters.costMapping.get(type), player)
                         && !gs.playerTokens.get(player).get(type).isMaximum()) {
-                    actions.add(new BuyAction(player, type));
+                    if (type == BuyAction.BuyType.Road && buyRoadActions.size() > 0 ||
+                    type == BuyAction.BuyType.Settlement && buySettlementActions.size() > 0 ||
+                    type == BuyAction.BuyType.City && buyCityActions.size() > 0)
+                        actions.add(new BuyAction(player, type));
                 }
             }
         }

@@ -3,6 +3,7 @@ package games.catan.actions.robber;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
+import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
 import games.catan.components.Building;
@@ -64,6 +65,7 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
         for (int target : targets) {
             actions.add(new StealResource(player, target));
         }
+        if (actions.size() == 0) actions.add(new DoNothing());  // No targets to steal from
         return actions;
     }
 

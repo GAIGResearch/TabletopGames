@@ -101,6 +101,20 @@ public class DeepConstructNewOffer extends AbstractAction implements IExtendedSe
         this.choice = OfferComplete;
     }
 
+    // Copy constructor
+    public DeepConstructNewOffer(int player, OfferPlayerTrade.Stage stage, int offeringPlayerID, int otherPlayerID, Resource resourceOffered, int nOffered, Resource resourceRequested, int nRequested, boolean execute, Choice choice) {
+        this.player = player;
+        this.offeringPlayerID = offeringPlayerID;
+        this.otherPlayerID = otherPlayerID;
+        this.resourceOffered = resourceOffered;
+        this.resourceRequested = resourceRequested;
+        this.nRequested = nRequested;
+        this.nOffered = nOffered;
+        this.execute = execute;
+        this.stage = stage;
+        this.choice = choice;
+    }
+
     @Override
     public boolean execute(AbstractGameState gs) {
         if (!execute) return true;
@@ -176,7 +190,7 @@ public class DeepConstructNewOffer extends AbstractAction implements IExtendedSe
 
     @Override
     public DeepConstructNewOffer copy() {
-        return new DeepConstructNewOffer(player, stage, offeringPlayerID, otherPlayerID, resourceOffered, nOffered, resourceRequested, nRequested);
+        return new DeepConstructNewOffer(player, stage, offeringPlayerID, otherPlayerID, resourceOffered, nOffered, resourceRequested, nRequested, execute, choice);
     }
 
     @Override

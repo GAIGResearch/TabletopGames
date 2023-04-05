@@ -97,6 +97,7 @@ public class SingleTreeNode {
                 retValue.opponentModels[p] = player.rolloutStrategy;
             else
                 retValue.opponentModels[p] = player.getOpponentModel(p);
+            retValue.opponentModels[p].getParameters().actionSpace = player.params.actionSpace;  // TODO makes sense?
         }
         // only root node maintains MAST statistics
         retValue.MASTStatistics = new ArrayList<>();
