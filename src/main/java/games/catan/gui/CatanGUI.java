@@ -11,9 +11,14 @@ import games.catan.CatanParameters;
 import games.catan.actions.build.BuildCity;
 import games.catan.actions.build.BuildRoad;
 import games.catan.actions.build.BuildSettlement;
+import games.catan.actions.discard.DiscardResources;
 import games.catan.actions.robber.MoveRobber;
+import games.catan.actions.robber.MoveRobberAndSteal;
+import games.catan.actions.robber.StealResource;
 import games.catan.actions.setup.DeepPlaceSettlementThenRoad;
 import games.catan.actions.setup.PlaceSettlementWithRoad;
+import games.catan.actions.trade.DefaultTrade;
+import games.catan.actions.trade.OfferPlayerTrade;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -22,10 +27,8 @@ import utilities.Pair;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
@@ -41,15 +44,22 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
     JLabel currentOffer;
     JLabel resourcePool;
 
+    JLabel actionFilterTooltips;
+
     JScrollPane actionScrollPane;
 
     boolean filterActions = true;
 
     List<CatanParameters.Resource> resourceHighlights = new ArrayList<>();
     int maxHighlights = 2;
-    void addHighlight(CatanParameters.Resource r) {
+    void addResourceHighlight(CatanParameters.Resource r) {
         if (resourceHighlights.size() == maxHighlights) resourceHighlights.remove(0);
         resourceHighlights.add(r);
+    }
+    Set<Integer> playerHighlight = new HashSet<>();
+    void addPlayerHighlight(int p) {
+        playerHighlight.clear();
+        playerHighlight.add(p);
     }
 
     public CatanGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
@@ -60,7 +70,14 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         boardView = new CatanBoardView(gs);
 
         // Bottom area will show actions available
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{boardView, this}, 400, defaultActionPanelHeight, false, false, this::scrollActionPanelToTop, this::highlightActionOnBoard, this::removeHighlightOnBoard);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{boardView, this}, 800, defaultActionPanelHeight, false, false, this::scrollActionPanelToTop, this::highlightActionOnBoard, null);
+        actionFilterTooltips = new JLabel("Filtering: " + filterActions);
+        JPanel bottomWrap = new JPanel();
+        bottomWrap.setLayout(new BoxLayout(bottomWrap, BoxLayout.X_AXIS));
+        bottomWrap.add(actionPanel);
+        bottomWrap.add(Box.createRigidArea(new Dimension(10, 0)));
+        bottomWrap.add(actionFilterTooltips);
+
         JPanel wrapper = new JPanel();
         wrapper.setBackground(Color.white);
         parent.setLayout(new FlowLayout());
@@ -119,7 +136,7 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         mainPanel.add(Box.createRigidArea(new Dimension(5,0)));
 
         wrapper.add(mainPanel, BorderLayout.CENTER);
-        wrapper.add(actionPanel, BorderLayout.SOUTH);
+        wrapper.add(bottomWrap, BorderLayout.SOUTH);
 
         wrapper.revalidate();
         wrapper.repaint();
@@ -173,86 +190,138 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         return actionScrollPane;
     }
 
+    public enum Filter {
+        Vertex(Pair.class, "Select vertex on map"), // <Point, Integer>
+        Edge(Pair.class, "Select edge on map"),  // <Point, Integer>
+        Tile(Point.class, "Select hex tile on map"),
+        Resource(CatanParameters.Resource[].class, "Select resource(s) in player panel"),
+        Player(Integer.class, "Select target player name in player panel");
+        final Class<?> type;
+        final String tooltip;
+        Collection<?> highlightRef;
+        public Object ref;
+        Filter(Class<?> type, String tooltip) {
+            this.type = type;
+            this.tooltip = tooltip;
+        }
+        boolean filter() {
+            if (this == Resource) {
+                boolean show = true;
+                for (Object r: highlightRef) {
+                    if (!contains((CatanParameters.Resource[]) ref, (CatanParameters.Resource) r)) {
+                        show = false;
+                        break;
+                    }
+                }
+                return show;
+            }
+            else return highlightRef.contains(ref);
+        }
+    }
+    Set<Filter> filtersAvailable = new HashSet<>();  // TODO: list these next to action panel with tooltip
+
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
         if (filterActions) {
+            Filter.Vertex.highlightRef = boardView.vertexHighlight;
+            Filter.Edge.highlightRef = boardView.edgeHighlight;
+            Filter.Tile.highlightRef = boardView.hexHighlight;
+            Filter.Resource.highlightRef = resourceHighlights;
+            Filter.Player.highlightRef = playerHighlight;
+
             if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !(actionButtons == null)) {
                 List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState, gameState.getCoreGameParameters().actionSpace);
                 int i = 0;
                 // Trim what the set of actions currently require
-                boolean vertexRequired = false;
-                boolean edgeRequired = false;
-                boolean tileRequired = false;
+                filtersAvailable.clear();
                 for (AbstractAction aa : actions) {
-                    Pair<Point, Integer> vertex = null;
-                    Pair<Point, Integer> edge = null;
-                    Point tile = null;
-                    // TODO: resource highlight for players (Discard, Trade)  Use: resourceHighlights
-                    // TODO: highlight players (MoveRobberAndSteal, StealResource)
-                    // TODO: combined filters (PlaceSettlementWithRoad)
                     if (aa instanceof DeepPlaceSettlementThenRoad) {
                         DeepPlaceSettlementThenRoad a = (DeepPlaceSettlementThenRoad) aa;
-                        vertex = new Pair<>(new Point(a.x, a.y), a.vertex);
-                        vertexRequired = true;
+                        Filter f = Filter.Vertex;
+                        f.ref = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        filtersAvailable.add(f);
                     } else if (aa instanceof BuildRoad) {
                         BuildRoad a = (BuildRoad) aa;
-                        edge = new Pair<>(new Point(a.x, a.y), a.edge);
-                        edgeRequired = true;
+                        Filter f = Filter.Edge;
+                        f.ref = new Pair<>(new Point(a.x, a.y), a.edge);
+                        filtersAvailable.add(f);
                     } else if (aa instanceof BuildCity) {
                         BuildCity a = (BuildCity) aa;
-                        vertex = new Pair<>(new Point(a.col, a.row), a.vertex);
-                        vertexRequired = true;
+                        Filter f = Filter.Vertex;
+                        f.ref = new Pair<>(new Point(a.col, a.row), a.vertex);
+                        filtersAvailable.add(f);
                     } else if (aa instanceof BuildSettlement) {
                         BuildSettlement a = (BuildSettlement) aa;
-                        vertex = new Pair<>(new Point(a.x, a.y), a.vertex);
-                        vertexRequired = true;
+                        Filter f = Filter.Vertex;
+                        f.ref = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        filtersAvailable.add(f);
+                    } else if (aa instanceof MoveRobberAndSteal) {
+                        MoveRobberAndSteal a = (MoveRobberAndSteal) aa;
+                        Filter f1 = Filter.Player;
+                        f1.ref = a.targetPlayer;
+                        filtersAvailable.add(f1);
+                        Filter f2 = Filter.Tile;
+                        f2.ref = new Point(a.x, a.y);
+                        filtersAvailable.add(f2);
                     } else if (aa instanceof MoveRobber) {
                         MoveRobber a = (MoveRobber) aa;
-                        tile = new Point(a.x, a.y);
-                        tileRequired = true;
+                        Filter f2 = Filter.Tile;
+                        f2.ref = new Point(a.x, a.y);
+                        filtersAvailable.add(f2);
                     } else if (aa instanceof PlaceSettlementWithRoad) {
                         PlaceSettlementWithRoad a = (PlaceSettlementWithRoad) aa;
-                        vertex = new Pair<>(new Point(a.x, a.y), a.vertex);
-                        edge = new Pair<>(new Point(a.x, a.y), a.edge);
-                        vertexRequired = true;
-                        edgeRequired = true;
+                        Filter f = Filter.Vertex;
+                        f.ref = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        filtersAvailable.add(f);
+                        Filter f2 = Filter.Edge;
+                        f2.ref = new Pair<>(new Point(a.x, a.y), a.edge);
+                        filtersAvailable.add(f2);
+                    } else if (aa instanceof DiscardResources) {
+                        DiscardResources a = (DiscardResources) aa;
+                        Filter f = Filter.Resource;
+                        f.ref = a.resourcesToDiscard;
+                        filtersAvailable.add(f);
+                    } else if (aa instanceof DefaultTrade) {
+                        DefaultTrade a = (DefaultTrade) aa;
+                        Filter f = Filter.Resource;
+                        f.ref = new CatanParameters.Resource[] {a.resourceOffer, a.resourceToGet};
+                        filtersAvailable.add(f);
+                    } else if (aa instanceof OfferPlayerTrade) {
+                        OfferPlayerTrade a = (OfferPlayerTrade) aa;
+                        Filter f = Filter.Resource;
+                        f.ref = new CatanParameters.Resource[] {a.resourceOffered, a.resourceRequested};
+                        filtersAvailable.add(f);
+                        Filter f1 = Filter.Player;
+                        f1.ref = a.otherPlayerID;
+                        filtersAvailable.add(f1);
+                    } else if (aa instanceof StealResource) {
+                        StealResource a = (StealResource) aa;
+                        Filter f1 = Filter.Player;
+                        f1.ref = a.targetPlayerID;
+                        filtersAvailable.add(f1);
+                    } else {
+                        // Non-filtered action
+                        actionButtons[i].setVisible(true);
+                        actionButtons[i].setEnabled(true);
+                        actionButtons[i].setButtonAction(aa, gameState);
+                        actionButtons[i].setBackground(Color.white);
+                        actionButtons[i].setForeground(Color.BLACK);
+                        i++;
+                        continue;
                     }
 
-                    // Use vertex filter
-                    if (vertex != null && !boardView.vertexHighlight.isEmpty()) {
-                        if (boardView.vertexHighlight.contains(vertex)) {
-                            actionButtons[i].setVisible(true);
-                            actionButtons[i].setEnabled(true);
-                            actionButtons[i].setButtonAction(aa, gameState);
-                            actionButtons[i].setBackground(Color.white);
-                            actionButtons[i].setForeground(Color.BLACK);
-                            i++;
+                    // Apply filters, considering multiple ones together
+                    boolean showAction = true;
+                    for (Filter f: filtersAvailable) {
+                        if (!f.highlightRef.isEmpty()) {
+                            // Apply filter
+                            if (!f.filter()) {
+                                showAction = false;
+                                break;
+                            }
                         }
                     }
-                    // Use edge filter
-                    if (edge != null && !boardView.edgeHighlight.isEmpty()) {
-                        if (boardView.edgeHighlight.contains(edge)) {
-                            actionButtons[i].setVisible(true);
-                            actionButtons[i].setEnabled(true);
-                            actionButtons[i].setButtonAction(aa, gameState);
-                            actionButtons[i].setBackground(Color.white);
-                            actionButtons[i].setForeground(Color.BLACK);
-                            i++;
-                        }
-                    }
-                    // Use tile filter
-                    if (tile != null && boardView.hexHighlight != null) {
-                        if (boardView.hexHighlight.equals(tile)) {
-                            actionButtons[i].setVisible(true);
-                            actionButtons[i].setEnabled(true);
-                            actionButtons[i].setButtonAction(aa, gameState);
-                            actionButtons[i].setBackground(Color.white);
-                            actionButtons[i].setForeground(Color.BLACK);
-                            i++;
-                        }
-                    }
-                    // Non-filtered action
-                    if (vertex == null && edge == null && tile == null) {
+                    if (showAction) {
                         actionButtons[i].setVisible(true);
                         actionButtons[i].setEnabled(true);
                         actionButtons[i].setButtonAction(aa, gameState);
@@ -261,31 +330,20 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
                         i++;
                     }
                 }
-                // If set of actions require a highlight that's not made, notify user of this.
-                if (vertexRequired && boardView.vertexHighlight.isEmpty()) {
-                    actionButtons[i].setVisible(true);
-                    actionButtons[i].setEnabled(false);
-                    actionButtons[i].setButtonAction(null, "Select vertex on map");
-                    actionButtons[i].setBackground(Color.darkGray);
-                    actionButtons[i].setForeground(Color.white);
-                    i++;
+
+                for (Filter f: filtersAvailable) {
+                    if (f.highlightRef.isEmpty()) {
+                        // Tooltip
+                        actionButtons[i].setVisible(true);
+                        actionButtons[i].setEnabled(false);
+                        actionButtons[i].setButtonAction(null, f.tooltip);
+                        actionButtons[i].setBackground(Color.darkGray);
+                        actionButtons[i].setForeground(Color.white);
+                        i++;
+                    }
                 }
-                if (tileRequired && boardView.hexHighlight == null) {
-                    actionButtons[i].setVisible(true);
-                    actionButtons[i].setEnabled(false);
-                    actionButtons[i].setButtonAction(null, "Select tile on map");
-                    actionButtons[i].setBackground(Color.darkGray);
-                    actionButtons[i].setForeground(Color.white);
-                    i++;
-                }
-                if (edgeRequired && boardView.edgeHighlight.isEmpty()) {
-                    actionButtons[i].setVisible(true);
-                    actionButtons[i].setEnabled(false);
-                    actionButtons[i].setButtonAction(null, "Select edge on map");
-                    actionButtons[i].setBackground(Color.darkGray);
-                    actionButtons[i].setForeground(Color.white);
-                    i++;
-                }
+
+                // Disable the rest of the actions
                 for (int j = i; j < actionButtons.length; j++) {
                     actionButtons[j].setVisible(false);
                     actionButtons[j].setButtonAction(null, "");
@@ -306,6 +364,17 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         for (int i = 0; i < gameState.getNPlayers(); i++) {
             playerPanels[i]._update((CatanGameState) gameState);
         }
+
+        String s = "<html><h3>Filtering actions? " + filterActions + "." + (filterActions? " Filters available:" : "") +"</h3><hr>";
+        if (filterActions) {
+            s += "<ul>";
+            for (Filter f : filtersAvailable) {
+                s += "<li>" + f.name() + ": " + f.tooltip + "</li>";
+            }
+            s += "</ul>";
+        }
+        s += "</html>";
+        actionFilterTooltips.setText(s);
 
         parent.repaint();
     }
@@ -359,6 +428,12 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
     @Override
     public void clearHighlights() {
         resourceHighlights.clear();
+        playerHighlight.clear();
+    }
+
+    static boolean contains(CatanParameters.Resource[] arr, CatanParameters.Resource r) {
+        for (CatanParameters.Resource res: arr) if (res == r) return true;
+        return false;
     }
 }
 

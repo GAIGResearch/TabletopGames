@@ -71,7 +71,7 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
     HashMap<Pair<Point, Integer>, Rectangle> edgeToRectMap;
     Set<Pair<Point, Integer>> edgeHighlight;  // A set to represent one edge highlighted, because it may be respective to any of the 2 adjacent tiles
     HashMap<Point, Rectangle> hexToRectMap;
-    Point hexHighlight;
+    Set<Point> hexHighlight;
     int minSize = 10;
 
     public CatanBoardView(CatanGameState gs) {
@@ -95,13 +95,14 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
         hexToRectMap = new HashMap<>();
         vertexHighlight = new HashSet<>();
         edgeHighlight = new HashSet<>();
+        hexHighlight = new HashSet<>();
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 vertexHighlight.clear();
                 edgeHighlight.clear();
-                hexHighlight = null;
+                hexHighlight.clear();
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     // Left-click
                     for (Map.Entry<Pair<Point, Integer>, Rectangle> entry: vertexToRectMap.entrySet()) {
@@ -116,7 +117,8 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
                     }
                     for (Map.Entry<Point, Rectangle> entry: hexToRectMap.entrySet()) {
                         if (entry.getValue().contains(e.getPoint())) {
-                            hexHighlight = entry.getKey();
+                            hexHighlight.add(entry.getKey());
+                            break;
                         }
                     }
                 }
@@ -302,9 +304,9 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
             Rectangle r = edgeToRectMap.get(edgeHighlight.iterator().next());
             g.drawRect(r.x, r.y, r.width, r.height);
         }
-        if (hexHighlight != null) {
+        if (!hexHighlight.isEmpty()) {
             g.setColor(tileColorHighlight);
-            Rectangle r = hexToRectMap.get(hexHighlight);
+            Rectangle r = hexToRectMap.get(hexHighlight.iterator().next());
             g.drawRect(r.x, r.y, r.width, r.height);
         }
         g.setStroke(s);
@@ -438,6 +440,6 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
         roadHighlight = null;
         edgeHighlight.clear();
         vertexHighlight.clear();
-        hexHighlight = null;
+        hexHighlight.clear();
     }
 }

@@ -497,6 +497,7 @@ public class CatanGameState extends AbstractGameState {
                 if (i != playerId) {
                     int nInHand = getNResourcesInHand(i);
                     for (int j = 0; j < nInHand; j++) {
+                        if (availableRes.size() == 0) break;
                         CatanParameters.Resource r = availableRes.remove(rnd.nextInt(availableRes.size()));
                         copy.playerResources.get(i).get(r).increment();
                     }

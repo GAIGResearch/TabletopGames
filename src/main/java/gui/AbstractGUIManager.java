@@ -269,15 +269,15 @@ public abstract class AbstractGUIManager {
                     }
                 }
                 resetActionButtons();
-                if (onActionSelected!= null)
+                if (onActionSelected != null)
                     onActionSelected.accept(this);
             });
             addMouseListener(new java.awt.event.MouseAdapter() {
                 public void mouseEntered(java.awt.event.MouseEvent evt) {
-                    onMouseEnter.accept(ActionButton.this);
+                    if (onMouseEnter != null) onMouseEnter.accept(ActionButton.this);
                 }
                 public void mouseExited(java.awt.event.MouseEvent evt) {
-                    onMouseExit.accept(ActionButton.this);
+                    if (onMouseExit != null) onMouseExit.accept(ActionButton.this);
                 }
             });
         }

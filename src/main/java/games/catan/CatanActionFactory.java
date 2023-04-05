@@ -310,7 +310,7 @@ public class CatanActionFactory {
 
                         if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
                                 && gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())) {
-                            actions.add(new BuildRoad(x, y, i, player, false));
+                            actions.add(new BuildRoad(x, y, i, player, free));
                         }
                     }
                 }
