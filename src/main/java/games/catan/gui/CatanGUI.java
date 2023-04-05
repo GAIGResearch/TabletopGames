@@ -22,12 +22,13 @@ import utilities.Pair;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class CatanGUI extends AbstractGUIManager {
+public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
     CatanGameState gs;
     CatanBoardView boardView;
     PlayerPanel[] playerPanels;
@@ -44,6 +45,13 @@ public class CatanGUI extends AbstractGUIManager {
 
     boolean filterActions = true;
 
+    List<CatanParameters.Resource> resourceHighlights = new ArrayList<>();
+    int maxHighlights = 2;
+    void addHighlight(CatanParameters.Resource r) {
+        if (resourceHighlights.size() == maxHighlights) resourceHighlights.remove(0);
+        resourceHighlights.add(r);
+    }
+
     public CatanGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
         super(parent, game, ac, humanId);
         if (game == null) return;
@@ -52,7 +60,7 @@ public class CatanGUI extends AbstractGUIManager {
         boardView = new CatanBoardView(gs);
 
         // Bottom area will show actions available
-        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], 400, defaultActionPanelHeight, false, false, this::scrollActionPanelToTop, this::highlightActionOnBoard, this::removeHighlightOnBoard);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{boardView, this}, 400, defaultActionPanelHeight, false, false, this::scrollActionPanelToTop, this::highlightActionOnBoard, this::removeHighlightOnBoard);
         JPanel wrapper = new JPanel();
         wrapper.setBackground(Color.white);
         parent.setLayout(new FlowLayout());
@@ -68,7 +76,7 @@ public class CatanGUI extends AbstractGUIManager {
         // each player have their own panel
         playerPanels = new PlayerPanel[gs.getNPlayers()];
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            playerPanels[i] = new PlayerPanel(i, game.getPlayers().get(i).toString());
+            playerPanels[i] = new PlayerPanel(this, i, game.getPlayers().get(i).toString());
             playerPanels[i].setOpaque(false);
         }
 
@@ -126,7 +134,7 @@ public class CatanGUI extends AbstractGUIManager {
         boardView.highlight(button.getButtonAction());
     }
     protected void removeHighlightOnBoard(ActionButton button) {
-        boardView.clearHighlight();
+        boardView.clearHighlights();
     }
     protected void scrollActionPanelToTop(ActionButton button) {
         javax.swing.SwingUtilities.invokeLater(() -> actionScrollPane.getVerticalScrollBar().setValue(0));
@@ -179,7 +187,7 @@ public class CatanGUI extends AbstractGUIManager {
                     Pair<Point, Integer> vertex = null;
                     Pair<Point, Integer> edge = null;
                     Point tile = null;
-                    // TODO: resource highlight for players (Discard, Trade)
+                    // TODO: resource highlight for players (Discard, Trade)  Use: resourceHighlights
                     // TODO: highlight players (MoveRobberAndSteal, StealResource)
                     // TODO: combined filters (PlaceSettlementWithRoad)
                     if (aa instanceof DeepPlaceSettlementThenRoad) {
@@ -348,5 +356,9 @@ public class CatanGUI extends AbstractGUIManager {
         return s.toString().replace(", ]", "");
     }
 
+    @Override
+    public void clearHighlights() {
+        resourceHighlights.clear();
+    }
 }
 

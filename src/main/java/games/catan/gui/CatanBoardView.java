@@ -13,6 +13,7 @@ import games.catan.actions.setup.DeepPlaceSettlementThenRoad;
 import games.catan.actions.setup.PlaceSettlementWithRoad;
 import games.catan.components.Building;
 import games.catan.components.CatanTile;
+import gui.IScreenHighlight;
 import utilities.Pair;
 
 import javax.swing.*;
@@ -27,7 +28,7 @@ import java.util.Set;
 import static games.catan.CatanConstants.HEX_SIDES;
 
 @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
-public class CatanBoardView extends JComponent {
+public class CatanBoardView extends JComponent implements IScreenHighlight {
     CatanGameState gs;
     CatanParameters params;
 
@@ -430,7 +431,8 @@ public class CatanBoardView extends JComponent {
         }
     }
 
-    public void clearHighlight() {
+    @Override
+    public void clearHighlights() {
         tileHighlight = null;
         buildingHighlight = null;
         roadHighlight = null;
