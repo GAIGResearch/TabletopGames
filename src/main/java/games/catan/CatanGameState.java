@@ -373,13 +373,6 @@ public class CatanGameState extends AbstractGameState {
      * Swaps cards between players
      * @return - true if successful, false otherwise
      */
-    public boolean swapResources(int fromPlayer, int toPlayer, HashMap<CatanParameters.Resource, Integer> resourcesToTrade) {
-        for (Map.Entry<CatanParameters.Resource, Integer> e: resourcesToTrade.entrySet()) {
-            playerResources.get(fromPlayer).get(e.getKey()).decrement(e.getValue());
-            playerResources.get(toPlayer).get(e.getKey()).increment(e.getValue());
-        }
-        return true;
-    }
     public boolean swapResources(int fromPlayer, int toPlayer, CatanParameters.Resource resource, int nResources) {
         playerResources.get(fromPlayer).get(resource).decrement(nResources);
         playerResources.get(toPlayer).get(resource).increment(nResources);
@@ -397,11 +390,11 @@ public class CatanGameState extends AbstractGameState {
     }
 
     @Override
-    protected CatanGameState _copy(int playerId) { // TODO proper PO
+    protected CatanGameState _copy(int playerId) {
         CatanGameState copy = new CatanGameState(getGameParameters().copy(), getNPlayers());
         copy.gamePhase = gamePhase;
         copy.board = copyBoard();
-        copy.catanGraph = catanGraph.copy(); // TODO this has wrong references
+        copy.catanGraph = catanGraph.copy();
 
         copy.gameStatus = gameStatus;
         copy.playerResults = playerResults.clone();
@@ -412,10 +405,29 @@ public class CatanGameState extends AbstractGameState {
         copy.tradeOffer = tradeOffer != null? tradeOffer.copy() : null;
         copy.negotiationStepsCount = negotiationStepsCount;
 
+        copy.devCards = devCards.copy();
+
         copy.exchangeRates = new ArrayList<>();
         copy.playerResources = new ArrayList<>();
         copy.playerDevCards = new ArrayList<>();
         copy.playerTokens = new ArrayList<>();
+        copy.victoryPoints = victoryPoints.clone();
+
+        // Resources in hand are shuffled if PO
+        List<CatanParameters.Resource> availableRes = new ArrayList<>();
+
+        // PO
+        if (playerId != -1 || !getCoreGameParameters().partialObservable) {
+            for (CatanParameters.Resource r : resourcePool.keySet()) {
+                int nAvailable = ((CatanParameters) gameParameters).n_resource_cards - resourcePool.get(r).getValue();
+                if (nAvailable > 0) {
+                    for (int j = 0; j < nAvailable; j++) {
+                        availableRes.add(r);
+                    }
+                }
+            }
+        }
+
         for (int i = 0; i < getNPlayers(); i++) {
             HashMap<CatanParameters.Resource, Counter> exchangeRate = new HashMap<>();
             for (Map.Entry<CatanParameters.Resource, Counter> e: exchangeRates.get(i).entrySet()) {
@@ -423,21 +435,43 @@ public class CatanGameState extends AbstractGameState {
             }
             copy.exchangeRates.add(exchangeRate);
 
+            // Resources in hand
             HashMap<CatanParameters.Resource, Counter> playerRes = new HashMap<>();
             for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(i).entrySet()) {
                 playerRes.put(e.getKey(), e.getValue().copy());
             }
             copy.playerResources.add(playerRes);
 
+            // Dev cards in hand
             copy.playerDevCards.add(playerDevCards.get(i).copy());
 
+            // PO
+            if (playerId != -1 || !getCoreGameParameters().partialObservable) {
+                if (i != playerId) {
+                    // Resources in hand are hidden
+                    for (CatanParameters.Resource r : playerResources.get(i).keySet()) {
+                        copy.playerResources.get(i).get(r).setValue(0);
+                    }
+
+                    // VP from dev cards hidden too
+                    copy.victoryPoints[i] = 0;
+                } else {
+                    // Remove from list of resources that may be in other player's hands the ones we know are in our hand
+                    for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(i).entrySet()) {
+                        for (int j = 0; j < e.getValue().getValue(); j++) {
+                            availableRes.remove(e.getKey());
+                        }
+                    }
+                }
+            }
+
+            // Player tokens
             HashMap<BuyAction.BuyType, Counter> playerTok = new HashMap<>();
             for (Map.Entry<BuyAction.BuyType, Counter> e: playerTokens.get(i).entrySet()) {
                 playerTok.put(e.getKey(), e.getValue().copy());
             }
             copy.playerTokens.add(playerTok);
         }
-        copy.victoryPoints = victoryPoints.clone();
         copy.longestRoadLength = longestRoadLength;
         copy.largestArmySize = largestArmySize;
         copy.largestArmyOwner = largestArmyOwner;
@@ -446,17 +480,30 @@ public class CatanGameState extends AbstractGameState {
         copy.nTradesThisTurn = nTradesThisTurn;
         copy.rnd = new Random(copy.getGameParameters().getRandomSeed());
 
+        copy.developmentCardPlayed = developmentCardPlayed;
+
         copy.resourcePool = new HashMap<>();
         for (Map.Entry<CatanParameters.Resource, Counter> e: resourcePool.entrySet()) {
             copy.resourcePool.put(e.getKey(), e.getValue().copy());
         }
 
-        copy.devCards = devCards.copy();
-        if (playerId != -1) {
+        // PO
+        if (playerId != -1 || !getCoreGameParameters().partialObservable) {
+            // Combine dev cards with those in hand of unknown players. Shuffle and re-deal to players.
             copy.shuffleDevelopmentCards(playerId);
-        }
 
-        copy.developmentCardPlayed = developmentCardPlayed;
+            // Resources in hand are hidden
+            for (int i = 0; i < nPlayers; i++) {
+                if (i != playerId) {
+                    int nInHand = getNResourcesInHand(i);
+                    for (int j = 0; j < nInHand; j++) {
+                        CatanParameters.Resource r = availableRes.remove(rnd.nextInt(availableRes.size()));
+                        copy.playerResources.get(i).get(r).increment();
+                    }
+                }
+
+            }
+        }
 
         return copy;
     }
@@ -476,13 +523,16 @@ public class CatanGameState extends AbstractGameState {
     }
 
     private void shuffleDevelopmentCards(int playerId) {
-        int[] nCards = new int[nPlayers];
+        // Dev cards in hand are hidden and shuffled with the main deck
+        int[][] turnCardsWereBoughtIn = new int[nPlayers][];
         for (int p = 0; p < getNPlayers(); p++) {
             if (p == playerId)
                 continue;
-            nCards[p] = playerDevCards.get(p).getSize();
-            for (CatanCard c: playerDevCards.get(p).getComponents()) {
-                devCards.add(c);
+            devCards.add(playerDevCards.get(p));
+            int nCards = playerDevCards.get(p).getSize();
+            turnCardsWereBoughtIn[p] = new int[nCards];
+            for (int i = 0; i < nCards; i++) {
+                turnCardsWereBoughtIn[p][i] = playerDevCards.get(p).get(i).roundCardWasBought;
             }
             playerDevCards.get(p).clear();
         }
@@ -490,9 +540,13 @@ public class CatanGameState extends AbstractGameState {
         for (int p = 0; p < getNPlayers(); p++) {
             if (p == playerId)
                 continue;
-            for (int i = 0; i < nCards[p]; i++) {
+            for (int i = 0; i < turnCardsWereBoughtIn[p].length; i++) {
                 CatanCard c = devCards.draw();
+                c.roundCardWasBought = turnCardsWereBoughtIn[p][i];  // Assign round when card was bought accurately, as this is known information
                 playerDevCards.get(p).add(c);
+                if (c.cardType == CatanCard.CardType.VICTORY_POINT_CARD){
+                    addVictoryPoint(p);
+                }
             }
         }
     }

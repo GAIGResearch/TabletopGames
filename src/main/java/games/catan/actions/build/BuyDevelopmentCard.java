@@ -26,7 +26,7 @@ public class BuyDevelopmentCard extends AbstractAction {
         Deck<CatanCard> devDeck = cgs.getDevCards();
         CatanCard card = devDeck.draw();
         if (card != null) {
-            card.turnCardWasBought = cgs.getTurnCounter();
+            card.roundCardWasBought = cgs.getRoundCounter();
             playerDevDeck.add(card);
             if (card.cardType == CatanCard.CardType.VICTORY_POINT_CARD){
                 cgs.addVictoryPoint(cgs.getCurrentPlayer());

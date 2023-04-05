@@ -48,7 +48,7 @@ public class Building extends BoardNodeWithEdges {
         this.harbour = harbour;
     }
 
-    public Building copy(){  // TODO super copy of neighbour nodes outside
+    public Building copy(){  // Super copies of neighbour nodes outside
         Building copy = new Building(ownerId, componentID);
         copy.harbour = harbour;
         copy.type = type;

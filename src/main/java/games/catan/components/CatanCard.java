@@ -5,7 +5,7 @@ import games.catan.CatanParameters;
 
 public class CatanCard extends Card {
     public final CardType cardType;
-    public int turnCardWasBought = -1;  // -1 is not bought
+    public int roundCardWasBought = -1;  // -1 is not bought
 
     public CatanCard(CardType cardType) {
         super(cardType.name());
@@ -19,7 +19,7 @@ public class CatanCard extends Card {
     @Override
     public CatanCard copy() {
         CatanCard card = new CatanCard(cardType, componentID);
-        card.turnCardWasBought = turnCardWasBought;
+        card.roundCardWasBought = -1;  // Assigned in game state copy of the deck
         return card;
     }
 

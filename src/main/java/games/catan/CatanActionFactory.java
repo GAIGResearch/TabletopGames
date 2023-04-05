@@ -382,7 +382,7 @@ public class CatanActionFactory {
 
         for (CatanCard c : playerDevDeck.getComponents()) {
             // avoid playing a card that has been bought in the same turn
-            if (c.turnCardWasBought == gs.getTurnCounter()) {
+            if (c.roundCardWasBought == gs.getTurnCounter()) {
                 continue;
             }
             if (actionSpace.structure != ActionSpace.Structure.Deep) { // Flat is default
