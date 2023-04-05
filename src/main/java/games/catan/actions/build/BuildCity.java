@@ -80,6 +80,6 @@ public class BuildCity extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("Build City: row=%d col=%d vertex=%d player=%d",row,col,vertex,playerID);
+        return String.format("p%d Buy:City (row=%d col=%d vertex=%d)",playerID,row,col,vertex);
     }
 }

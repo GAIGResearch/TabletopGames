@@ -81,6 +81,6 @@ public class DiscardResourcesPhase extends AbstractAction implements IExtendedSe
 
     @Override
     public String toString() {
-        return "Player " + playerID + " discards " + nDiscards;
+        return "p" + playerID + " discards " + nDiscards + " resources";
     }
 }

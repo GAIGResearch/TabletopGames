@@ -70,7 +70,7 @@ public class PlayYearOfPlenty extends AbstractAction {
 
     @Override
     public String toString() {
-        return player + " Year of Plenty for " + Arrays.toString(resources);
+        return "p" + player + " plays Dev:YearOfPlenty (" + Arrays.toString(resources) + ")";
     }
     @Override
     public String getString(AbstractGameState gameState) {

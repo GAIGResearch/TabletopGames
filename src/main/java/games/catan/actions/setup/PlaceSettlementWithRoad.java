@@ -54,7 +54,7 @@ public class PlaceSettlementWithRoad extends AbstractAction {
                         cgs.getPlayerResources(player).get(res).increment();
                         cgs.getResourcePool().get(res).decrement();
                         if (gs.getCoreGameParameters().verbose) {
-                            System.out.println("At setup Player " + player + " got " + res);
+                            System.out.println("Setup: p" + player + " got " + res + " (last settle)");
                         }
                     }
                 }
@@ -85,7 +85,7 @@ public class PlaceSettlementWithRoad extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("%d settles (%d;%d;%d) road=%d",player,x,y,vertex,edge);
+        return String.format("p%d settles (x=%d y=%d vertex=%d) and builds road (edge=%d)",player,x,y,vertex,edge);
     }
     @Override
     public String getString(AbstractGameState gameState) {

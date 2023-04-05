@@ -18,7 +18,7 @@ public class EndNegotiation extends AbstractAction {
 
     @Override
     public String toString() {
-        return "p" + playerID + " rejects trade by p" + offeringPlayerID;
+        return "p" + playerID + " rejects trade";
     }
 
     @Override

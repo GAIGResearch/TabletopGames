@@ -58,7 +58,7 @@ public class StealResource extends AbstractAction {
 
     @Override
     public String toString() {
-        return playerID + "steals a resource from " + targetPlayerID;
+        return "p" + playerID + " steals a resource from p" + targetPlayerID;
     }
     @Override
     public String getString(AbstractGameState gameState) {

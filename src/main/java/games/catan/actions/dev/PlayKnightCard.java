@@ -46,7 +46,7 @@ public class PlayKnightCard extends MoveRobberAndSteal {
 
     @Override
     public String toString() {
-        return player + " plays Knight Card";
+        return "p" + player + " plays Dev:KnightCard";
     }
     @Override
     public String getString(AbstractGameState gameState) {

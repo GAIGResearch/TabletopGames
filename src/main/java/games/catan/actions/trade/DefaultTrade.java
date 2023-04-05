@@ -53,7 +53,7 @@ public class DefaultTrade extends AbstractAction {
 
     @Override
     public String toString() {
-        return player + " Trades " + exchangeRate + " " + resourceOffer + " for 1 " + resourceToGet;
+        return "p" + player + " exchanges " + exchangeRate + " " + resourceOffer + " for 1 " + resourceToGet;
     }
 
     @Override

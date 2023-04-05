@@ -126,7 +126,7 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
 
     @Override
     public String toString() {
-        return String.format("settle at x=%d y=%d player=%d",x,y,player);
+        return String.format("p%d settles (x=%d y=%d vertex=%d)",player,x,y,vertex);
     }
     @Override
     public String getString(AbstractGameState gameState) {

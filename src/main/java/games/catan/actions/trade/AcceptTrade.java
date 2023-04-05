@@ -65,7 +65,7 @@ public class AcceptTrade extends AbstractAction {
 
     @Override
     public String toString() {
-        return String.format("p%s accepts trade by p%d to p%d : %d %s for %d %s ", playerID, offeringPlayer, otherPlayer,
+        return String.format("p%d accepts trade (p%d to p%d : %d %s for %d %s)", playerID, offeringPlayer, otherPlayer,
                 nOffered, resourceOffered, nRequested, resourceRequested);
     }
 }

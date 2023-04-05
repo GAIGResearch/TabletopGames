@@ -50,6 +50,6 @@ public class PlayRoadBuilding extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Dev Card: Road Building";
+        return "p" + playerID + " plays Dev:RoadBuilding (" + Arrays.toString(roadsToBuild) + ")";
     }
 }

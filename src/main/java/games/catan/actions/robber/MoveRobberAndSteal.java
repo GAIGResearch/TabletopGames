@@ -68,7 +68,7 @@ public class MoveRobberAndSteal extends MoveRobber {
 
     @Override
     public String toString() {
-        return player + " moves robber to (" + x + ";" + y + "). Steals from " + targetPlayer;
+        return "p" + player + " moves robber to (" + x + ";" + y + "). Steals from p" + targetPlayer;
     }
     @Override
     public String getString(AbstractGameState gameState) {

@@ -52,7 +52,7 @@ public class DiscardResources extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Discard resources: " + Arrays.toString(resourcesToDiscard);
+        return "p" + playerID + " discards: " + Arrays.toString(resourcesToDiscard);
     }
 
     @Override

@@ -57,7 +57,7 @@ public class BuyDevelopmentCard extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Buy Development Card";
+        return "p" + player + " Buy:DevelopmentCard";
     }
 
     @Override

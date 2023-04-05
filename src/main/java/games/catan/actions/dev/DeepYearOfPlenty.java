@@ -86,6 +86,6 @@ public class DeepYearOfPlenty extends AbstractAction implements IExtendedSequenc
 
     @Override
     public String toString() {
-        return playerID + " year of plenty (" + resource + ")";
+        return "p" + playerID + " Dev:YearOfPlenty (" + resource + ")";
     }
 }

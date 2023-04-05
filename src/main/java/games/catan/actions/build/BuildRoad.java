@@ -96,7 +96,7 @@ public class BuildRoad extends AbstractAction {
 
     @Override
     public String toString() {
-        return playerID + " builds road at x=" + x + " y=" + y + " edge=" + edge;
+        return "p" + playerID + " Buy:Road (x=" + x + " y=" + y + " edge=" + edge + ")";
     }
 
     public int getX() {

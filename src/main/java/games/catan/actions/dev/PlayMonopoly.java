@@ -66,7 +66,7 @@ public class PlayMonopoly extends AbstractAction {
 
     @Override
     public String toString() {
-        return player + " Monopoly for " + resource.toString();
+        return "p" + player + " plays Dev:Monopoly (" + resource.toString() + ")";
     }
     @Override
     public String getString(AbstractGameState gameState) {

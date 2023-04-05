@@ -102,7 +102,7 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return player + " moves robber to x=" + x + " y=" + y;
+        return "p" + player + " moves robber to x=" + x + " y=" + y;
     }
     @Override
     public String getString(AbstractGameState gameState) {

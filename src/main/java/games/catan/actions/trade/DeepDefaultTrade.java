@@ -80,7 +80,7 @@ public class DeepDefaultTrade extends AbstractAction implements IExtendedSequenc
 
     @Override
     public String toString() {
-        return player + " Trades " + exchangeRate + " " + resourceOffer;
+        return "p" + player + " exchanges " + exchangeRate + " " + resourceOffer + " for 1 ?";
     }
 
     @Override

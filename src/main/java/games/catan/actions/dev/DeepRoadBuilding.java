@@ -86,6 +86,6 @@ public class DeepRoadBuilding extends AbstractAction implements IExtendedSequenc
 
     @Override
     public String toString() {
-        return playerID + " road building (" + road.toString() + ")";
+        return "p" + playerID + " Dev:RoadBuilding (" + road.toString() + ")";
     }
 }

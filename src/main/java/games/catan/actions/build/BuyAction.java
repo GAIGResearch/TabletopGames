@@ -81,6 +81,6 @@ public class BuyAction extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return playerID + " buys " + type;
+        return "p" + playerID + " Buy:" + type;
     }
 }

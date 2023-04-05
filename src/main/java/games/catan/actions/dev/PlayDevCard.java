@@ -79,6 +79,6 @@ public class PlayDevCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String toString() {
-        return playerID + " plays dev card " + type;
+        return "p" + playerID + " plays Dev:" + type;
     }
 }
