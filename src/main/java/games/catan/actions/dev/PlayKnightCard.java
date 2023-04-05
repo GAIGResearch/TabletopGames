@@ -28,7 +28,7 @@ public class PlayKnightCard extends MoveRobberAndSteal {
             playerDevDeck.remove(card);
             cgs.setDevelopmentCardPlayed(true);
         } else {
-            throw new AssertionError("Cannot use a Knight card that is not in hand.");   // TODO this triggers with MCTS using Deep space
+            throw new AssertionError("Cannot use a Knight card that is not in hand.");
         }
 
         return super.execute(gs);
