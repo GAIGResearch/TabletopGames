@@ -171,10 +171,10 @@ public class CatanGUI extends AbstractGUIManager {
             if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !(actionButtons == null)) {
                 List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState, gameState.getCoreGameParameters().actionSpace);
                 int i = 0;
-                // TODO: trim what the set of actions currently require
-                boolean vertexNotification = false;
-                boolean edgeNotification = false;
-                boolean tileNotification = false;
+                // Trim what the set of actions currently require
+                boolean vertexRequired = false;
+                boolean edgeRequired = false;
+                boolean tileRequired = false;
                 for (AbstractAction aa : actions) {
                     Pair<Point, Integer> vertex = null;
                     Pair<Point, Integer> edge = null;
@@ -185,22 +185,29 @@ public class CatanGUI extends AbstractGUIManager {
                     if (aa instanceof DeepPlaceSettlementThenRoad) {
                         DeepPlaceSettlementThenRoad a = (DeepPlaceSettlementThenRoad) aa;
                         vertex = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        vertexRequired = true;
                     } else if (aa instanceof BuildRoad) {
                         BuildRoad a = (BuildRoad) aa;
                         edge = new Pair<>(new Point(a.x, a.y), a.edge);
+                        edgeRequired = true;
                     } else if (aa instanceof BuildCity) {
                         BuildCity a = (BuildCity) aa;
                         vertex = new Pair<>(new Point(a.col, a.row), a.vertex);
+                        vertexRequired = true;
                     } else if (aa instanceof BuildSettlement) {
                         BuildSettlement a = (BuildSettlement) aa;
                         vertex = new Pair<>(new Point(a.x, a.y), a.vertex);
+                        vertexRequired = true;
                     } else if (aa instanceof MoveRobber) {
                         MoveRobber a = (MoveRobber) aa;
                         tile = new Point(a.x, a.y);
+                        tileRequired = true;
                     } else if (aa instanceof PlaceSettlementWithRoad) {
                         PlaceSettlementWithRoad a = (PlaceSettlementWithRoad) aa;
                         vertex = new Pair<>(new Point(a.x, a.y), a.vertex);
                         edge = new Pair<>(new Point(a.x, a.y), a.edge);
+                        vertexRequired = true;
+                        edgeRequired = true;
                     }
 
                     // Use vertex filter
@@ -210,15 +217,9 @@ public class CatanGUI extends AbstractGUIManager {
                             actionButtons[i].setEnabled(true);
                             actionButtons[i].setButtonAction(aa, gameState);
                             actionButtons[i].setBackground(Color.white);
+                            actionButtons[i].setForeground(Color.BLACK);
                             i++;
                         }
-                    } else if (!vertexNotification) {
-                        actionButtons[i].setVisible(true);
-                        actionButtons[i].setEnabled(false);
-                        actionButtons[i].setButtonAction(null, "Select vertex on map");
-                        actionButtons[i].setBackground(Color.gray);
-                        i++;
-                        vertexNotification = true;
                     }
                     // Use edge filter
                     if (edge != null && !boardView.edgeHighlight.isEmpty()) {
@@ -227,15 +228,9 @@ public class CatanGUI extends AbstractGUIManager {
                             actionButtons[i].setEnabled(true);
                             actionButtons[i].setButtonAction(aa, gameState);
                             actionButtons[i].setBackground(Color.white);
+                            actionButtons[i].setForeground(Color.BLACK);
                             i++;
                         }
-                    } else if (!edgeNotification) {
-                        actionButtons[i].setVisible(true);
-                        actionButtons[i].setEnabled(false);
-                        actionButtons[i].setButtonAction(null, "Select edge on map");
-                        actionButtons[i].setBackground(Color.gray);
-                        i++;
-                        edgeNotification = true;
                     }
                     // Use tile filter
                     if (tile != null && boardView.hexHighlight != null) {
@@ -244,15 +239,9 @@ public class CatanGUI extends AbstractGUIManager {
                             actionButtons[i].setEnabled(true);
                             actionButtons[i].setButtonAction(aa, gameState);
                             actionButtons[i].setBackground(Color.white);
+                            actionButtons[i].setForeground(Color.BLACK);
                             i++;
                         }
-                    } else if (!tileNotification) {
-                        actionButtons[i].setVisible(true);
-                        actionButtons[i].setEnabled(false);
-                        actionButtons[i].setButtonAction(null, "Select tile on map");
-                        actionButtons[i].setBackground(Color.gray);
-                        i++;
-                        tileNotification = true;
                     }
                     // Non-filtered action
                     if (vertex == null && edge == null && tile == null) {
@@ -260,8 +249,34 @@ public class CatanGUI extends AbstractGUIManager {
                         actionButtons[i].setEnabled(true);
                         actionButtons[i].setButtonAction(aa, gameState);
                         actionButtons[i].setBackground(Color.white);
+                        actionButtons[i].setForeground(Color.BLACK);
                         i++;
                     }
+                }
+                // If set of actions require a highlight that's not made, notify user of this.
+                if (vertexRequired && boardView.vertexHighlight.isEmpty()) {
+                    actionButtons[i].setVisible(true);
+                    actionButtons[i].setEnabled(false);
+                    actionButtons[i].setButtonAction(null, "Select vertex on map");
+                    actionButtons[i].setBackground(Color.darkGray);
+                    actionButtons[i].setForeground(Color.white);
+                    i++;
+                }
+                if (tileRequired && boardView.hexHighlight == null) {
+                    actionButtons[i].setVisible(true);
+                    actionButtons[i].setEnabled(false);
+                    actionButtons[i].setButtonAction(null, "Select tile on map");
+                    actionButtons[i].setBackground(Color.darkGray);
+                    actionButtons[i].setForeground(Color.white);
+                    i++;
+                }
+                if (edgeRequired && boardView.edgeHighlight.isEmpty()) {
+                    actionButtons[i].setVisible(true);
+                    actionButtons[i].setEnabled(false);
+                    actionButtons[i].setButtonAction(null, "Select edge on map");
+                    actionButtons[i].setBackground(Color.darkGray);
+                    actionButtons[i].setForeground(Color.white);
+                    i++;
                 }
                 for (int j = i; j < actionButtons.length; j++) {
                     actionButtons[j].setVisible(false);
