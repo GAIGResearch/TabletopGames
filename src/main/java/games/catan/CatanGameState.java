@@ -305,6 +305,7 @@ public class CatanGameState extends AbstractGameState {
     public int getNResourcesInHand(int player) {
         int deckSize = 0;
         for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(player).entrySet()) {
+            if (e.getKey() == CatanParameters.Resource.WILD) continue;
             deckSize += e.getValue().getValue();
         }
         return deckSize;
@@ -314,6 +315,7 @@ public class CatanGameState extends AbstractGameState {
         int i = 0;
         CatanParameters.Resource res = null;
         for (Map.Entry<CatanParameters.Resource, Counter> e: playerResources.get(player).entrySet()) {
+            if (e.getKey() == CatanParameters.Resource.WILD) continue;
             res = e.getKey();
             if (index < i) return res;
             i += e.getValue().getValue();

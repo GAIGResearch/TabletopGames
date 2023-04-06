@@ -28,6 +28,7 @@ public class StealResource extends AbstractAction {
         Random random = new Random(gs.getGameParameters().getRandomSeed());
         int nResTarget = cgs.getNResourcesInHand(targetPlayerID);
         if (nResTarget == 0){
+            cgs.setGamePhase(Main);
             return false;
         }
         int cardIndex = random.nextInt(nResTarget);

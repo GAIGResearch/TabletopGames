@@ -450,27 +450,31 @@ public class CatanActionFactory {
         }
 
         else if (cardType == CatanCard.CardType.ROAD_BUILDING) {
-            List<AbstractAction> roads = getBuyRoadActions(gs, player, true);
+            if (!gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
 
-            if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+                List<AbstractAction> roads = getBuyRoadActions(gs, player, true);
+                int nRoads = Math.min(gs.playerTokens.get(player).get(BuyAction.BuyType.Road).getValue(), ((CatanParameters) gs.getGameParameters()).nRoadsRB);
 
-                // Identify all combinations of possible roads to build
-                int[] roadsIdx = new int[roads.size()];
-                for (int i = 0; i < roads.size(); i++) {
-                    roadsIdx[i] = i;
-                }
-                List<int[]> combinations = Utils.generateCombinations(roadsIdx, ((CatanParameters) gs.getGameParameters()).nRoadsRB);
-                for (int[] combo : combinations) {
-                    AbstractAction[] roadsToBuild = new BuildRoad[combo.length];
-                    for (int i = 0; i < combo.length; i++) {
-                        roadsToBuild[i] = roads.get(combo[i]);
+                if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+
+                    // Identify all combinations of possible roads to build
+                    int[] roadsIdx = new int[roads.size()];
+                    for (int i = 0; i < roads.size(); i++) {
+                        roadsIdx[i] = i;
                     }
-                    actions.add(new PlayRoadBuilding(player, roadsToBuild));
-                }
-            } else {
-                // Deep: one road at a time
-                for (AbstractAction road: roads) {
-                    actions.add(new DeepRoadBuilding(player, road, cardType.nDeepSteps((CatanParameters) gs.getGameParameters())));
+                    List<int[]> combinations = Utils.generateCombinations(roadsIdx, nRoads);
+                    for (int[] combo : combinations) {
+                        AbstractAction[] roadsToBuild = new BuildRoad[combo.length];
+                        for (int i = 0; i < combo.length; i++) {
+                            roadsToBuild[i] = roads.get(combo[i]);
+                        }
+                        actions.add(new PlayRoadBuilding(player, roadsToBuild));
+                    }
+                } else {
+                    // Deep: one road at a time
+                    for (AbstractAction road : roads) {
+                        actions.add(new DeepRoadBuilding(player, road, nRoads));
+                    }
                 }
             }
         }

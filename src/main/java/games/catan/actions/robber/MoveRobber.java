@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
+import static core.CoreConstants.DefaultGamePhase.Main;
+
 public class MoveRobber extends AbstractAction implements IExtendedSequence {
     public final int x;
     public final int y;
@@ -77,6 +79,7 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         executed = true;
+        state.setGamePhase(Main);  // If there were no targets to steal from, then this is not set in StealResource action, need it to stop looping
     }
 
     @Override
