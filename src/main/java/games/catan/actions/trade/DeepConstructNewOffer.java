@@ -174,12 +174,20 @@ public class DeepConstructNewOffer extends AbstractAction implements IExtendedSe
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+        CatanGameState gs = ((CatanGameState) state);
         if (choice == ChooseNRequested) {
             // Complete
-            ((CatanGameState) state).setTradeOffer(new OfferPlayerTrade(stage, resourceOffered, nOffered, resourceRequested, nRequested, offeringPlayerID, otherPlayerID));
+            gs.setTradeOffer(new OfferPlayerTrade(stage, resourceOffered, nOffered, resourceRequested, nRequested, offeringPlayerID, otherPlayerID));
         }
 
-        if (action instanceof DoNothing) choice = OfferComplete;
+        if (action instanceof DoNothing) {
+            // Trade was cancelled, something went wrong.
+            choice = OfferComplete;
+            gs.negotiationStepsCount = 0;
+            gs.setTradeOffer(null);
+            gs.setTurnOwner(offeringPlayerID);
+            gs.nTradesThisTurn++;
+        }
         else {
             if (choice == ChoosePlayerTradeWith) otherPlayerID = ((DeepConstructNewOffer) action).otherPlayerID;
             else if (choice == ChooseResourceOffer) resourceOffered = ((DeepConstructNewOffer) action).resourceOffered;
