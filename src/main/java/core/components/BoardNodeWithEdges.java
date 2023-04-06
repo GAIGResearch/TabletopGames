@@ -79,7 +79,7 @@ public class BoardNodeWithEdges extends Component {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), neighbourEdgeMapping, ownerId);
+        return Objects.hash(componentID, ownerId);
     }
 
     public Edge getEdgeByID(int edgeID) {
