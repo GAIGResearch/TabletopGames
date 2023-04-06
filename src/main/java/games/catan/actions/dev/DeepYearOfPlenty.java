@@ -2,6 +2,7 @@ package games.catan.actions.dev;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
@@ -43,6 +44,9 @@ public class DeepYearOfPlenty extends AbstractAction implements IExtendedSequenc
             if (res != CatanParameters.Resource.WILD && gs.getResourcePool().get(res).getValue() > 0)
                 actions.add(new PlayYearOfPlenty(new CatanParameters.Resource[]{res}, playerID, false));
         }
+        if (actions.size() == 0) {
+            actions.add(new DoNothing());  // No more resources available
+        }
         return actions;
     }
 
@@ -53,7 +57,8 @@ public class DeepYearOfPlenty extends AbstractAction implements IExtendedSequenc
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-        nStepsTaken ++;
+        if (action instanceof DoNothing) nStepsTaken = nSteps;
+        else nStepsTaken ++;
     }
 
     @Override
