@@ -14,6 +14,7 @@ import static games.catan.CatanParameters.Resource.*;
 
 public class CatanParameters extends AbstractParameters {
     private String dataPath;
+    public int maxRounds = 1000;
 
     public int n_resource_cards = 19;
     public int n_tiles_per_row = 7;

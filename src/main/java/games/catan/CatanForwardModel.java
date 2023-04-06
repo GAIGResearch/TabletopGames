@@ -32,6 +32,7 @@ public class CatanForwardModel extends StandardForwardModel {
 
         CatanGameState state = (CatanGameState) firstState;
         CatanParameters params = (CatanParameters) state.getGameParameters();
+        firstState.getCoreGameParameters().setMaxRounds(params.maxRounds);
         state.rnd = new Random(params.getRandomSeed());
 
         state.setBoard(generateBoard(params));
@@ -128,7 +129,7 @@ public class CatanForwardModel extends StandardForwardModel {
         else if (gs.getGamePhase() == Main) {
 
             // Win condition
-            if (gs.getGameScore(player) + gs.getVictoryPoints()[player] >= params.points_to_win) {
+            if (gs.getGameScore(player) + gs.getVictoryPoints()[player] >= params.points_to_win || gs.getRoundCounter() >= gs.getCoreGameParameters().getMaxRounds()) {
                 endGame(currentState);
                 if (gs.getCoreGameParameters().verbose) {
                     System.out.println("Game over! winner = " + player);
