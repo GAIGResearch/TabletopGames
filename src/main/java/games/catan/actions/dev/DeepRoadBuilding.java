@@ -2,6 +2,7 @@ package games.catan.actions.dev;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
 
@@ -43,6 +44,9 @@ public class DeepRoadBuilding extends AbstractAction implements IExtendedSequenc
         for (AbstractAction road: roads) {
             actions.add(new PlayRoadBuilding(playerID, new AbstractAction[]{road}));
         }
+        if (actions.size() == 0) {
+            actions.add(new DoNothing());  // No roads available to build
+        }
         return actions;
     }
 
@@ -53,7 +57,8 @@ public class DeepRoadBuilding extends AbstractAction implements IExtendedSequenc
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-        nStepsTaken ++;
+        if (action instanceof DoNothing) nStepsTaken = nSteps;
+        else nStepsTaken ++;
     }
 
     @Override
