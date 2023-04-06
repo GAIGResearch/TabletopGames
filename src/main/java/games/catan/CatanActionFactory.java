@@ -117,7 +117,7 @@ public class CatanActionFactory {
             // Construct new offer
             List<AbstractAction> offers = new ArrayList<>();
             for (int playerIndex = 0; playerIndex < n_players; playerIndex++) { // loop through players
-                if (playerIndex != playerID) { // exclude current player
+                if (playerIndex != playerID && gs.getNResourcesInHand(playerIndex) > 0) { // exclude current player and players with no resources in hand
                     for (CatanParameters.Resource resToOffer : CatanParameters.Resource.values()) {
                         if (resToOffer == CatanParameters.Resource.WILD) continue;
                         int maxToOffer = resources.get(resToOffer).getValue();
