@@ -30,7 +30,7 @@ public class DeepYearOfPlenty extends AbstractAction implements IExtendedSequenc
         new PlayYearOfPlenty(new CatanParameters.Resource[]{resource}, playerID, true).execute(gs);
 
         // Set in progress for the rest of the resources
-        if (nSteps != nStepsTaken) {
+        if (nSteps != nStepsTaken && _computeAvailableActions(gs).size() > 0) {
             return gs.setActionInProgress(this);
         }
         return true;
@@ -45,7 +45,8 @@ public class DeepYearOfPlenty extends AbstractAction implements IExtendedSequenc
                 actions.add(new PlayYearOfPlenty(new CatanParameters.Resource[]{res}, playerID, false));
         }
         if (actions.size() == 0) {
-            actions.add(new DoNothing());  // No more resources available
+            throw new AssertionError("DeepYoP: No more resources available, " + (nSteps-nStepsTaken) + " remaining to collect");
+//            actions.add(new DoNothing());  // No more resources available
         }
         return actions;
     }

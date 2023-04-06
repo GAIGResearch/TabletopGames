@@ -31,7 +31,7 @@ public class DeepRoadBuilding extends AbstractAction implements IExtendedSequenc
         new PlayRoadBuilding(playerID, new AbstractAction[]{road}).execute(gs);
 
         // Set in progress for the rest of the roads
-        if (nSteps != nStepsTaken) {
+        if (nSteps != nStepsTaken && _computeAvailableActions(gs).size() > 0) {
             return gs.setActionInProgress(this);
         }
         return true;
@@ -45,7 +45,8 @@ public class DeepRoadBuilding extends AbstractAction implements IExtendedSequenc
             actions.add(new PlayRoadBuilding(playerID, new AbstractAction[]{road}));
         }
         if (actions.size() == 0) {
-            actions.add(new DoNothing());  // No roads available to build
+            throw new AssertionError("DeepRoadBuilding: No roads available to build, " + (nSteps-nStepsTaken) + " remaining to build");
+//            actions.add(new DoNothing());  // No roads available to build
         }
         return actions;
     }

@@ -26,7 +26,9 @@ public class DiscardResourcesPhase extends AbstractAction implements IExtendedSe
 
     @Override
     public boolean execute(AbstractGameState gs) {
-        gs.setActionInProgress(this);
+        if (nDiscards > 0) {
+            gs.setActionInProgress(this);
+        }
         return true;
     }
 

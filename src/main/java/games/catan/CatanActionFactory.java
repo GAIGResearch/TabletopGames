@@ -115,27 +115,29 @@ public class CatanActionFactory {
         int n_players = gs.getNPlayers();
         if (tradeOffer == null) {
             // Construct new offer
-            if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Default is flat
-                for (int playerIndex = 0; playerIndex < n_players; playerIndex++) { // loop through players
-                    if (playerIndex != playerID) { // exclude current player
-                        for (CatanParameters.Resource resToOffer : CatanParameters.Resource.values()) {
-                            if (resToOffer == CatanParameters.Resource.WILD) continue;
-                            int maxToOffer = resources.get(resToOffer).getValue();
-                            if (maxToOffer > 0) {
-                                for (CatanParameters.Resource resToRequest : CatanParameters.Resource.values()) {
-                                    if (resToRequest == CatanParameters.Resource.WILD) continue;
-                                    if (resToRequest != resToOffer) {
-                                        int maxToRequest = ((CatanParameters) gs.getGameParameters()).max_resources_request_trade;
-                                        if (maxToRequest > 0) { // exclude the currently offered resource
-                                            actions.addAll(createTradeOfferActions(playerID, playerIndex, resToOffer, resToRequest, maxToOffer, maxToRequest, -1, -1, OfferPlayerTrade.Stage.Offer));
-                                        }
+            List<AbstractAction> offers = new ArrayList<>();
+            for (int playerIndex = 0; playerIndex < n_players; playerIndex++) { // loop through players
+                if (playerIndex != playerID) { // exclude current player
+                    for (CatanParameters.Resource resToOffer : CatanParameters.Resource.values()) {
+                        if (resToOffer == CatanParameters.Resource.WILD) continue;
+                        int maxToOffer = resources.get(resToOffer).getValue();
+                        if (maxToOffer > 0) {
+                            for (CatanParameters.Resource resToRequest : CatanParameters.Resource.values()) {
+                                if (resToRequest == CatanParameters.Resource.WILD) continue;
+                                if (resToRequest != resToOffer) {
+                                    int maxToRequest = ((CatanParameters) gs.getGameParameters()).max_resources_request_trade;
+                                    if (maxToRequest > 0) { // exclude the currently offered resource
+                                        offers.addAll(createTradeOfferActions(playerID, playerIndex, resToOffer, resToRequest, maxToOffer, maxToRequest, -1, -1, OfferPlayerTrade.Stage.Offer));
                                     }
                                 }
                             }
                         }
                     }
                 }
-            } else {
+            }
+            if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Default is flat
+                actions.addAll(offers);
+            } else if (offers.size() > 0) {
                 // Deep new offer construct
                 actions.add(new DeepConstructNewOffer(playerID));
             }
@@ -245,6 +247,10 @@ public class CatanActionFactory {
                         for (int target : targets) {
                             if (knight) actions.add(new PlayKnightCard(x, y, player, target));
                             else actions.add(new MoveRobberAndSteal(x, y, player, target));
+                        }
+                        if (targets.size() == 0) {
+                            if (knight) actions.add(new PlayKnightCard(x, y, player, -1));
+                            else actions.add(new MoveRobberAndSteal(x, y, player, -1));
                         }
                     } else {
                         // Deep: first move, then steal

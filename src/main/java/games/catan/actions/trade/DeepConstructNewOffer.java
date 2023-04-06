@@ -162,7 +162,8 @@ public class DeepConstructNewOffer extends AbstractAction implements IExtendedSe
                 break;
         }
         if (actions.size() == 0) {
-            actions.add(new DoNothing());  // Cancel trade, something went wrong
+            throw new AssertionError("DeepConstructNewOffer: Something went wrong in trade offer creation, at step: " + choice);
+//            actions.add(new DoNothing());  // Cancel trade, something went wrong
         }
         return actions;
     }

@@ -30,15 +30,18 @@ public class MoveRobberAndSteal extends MoveRobber {
             cgs.getBoard()[x][y].placeRobber();
 
             Random random = new Random(gs.getGameParameters().getRandomSeed());
-            int nResTarget = cgs.getNResourcesInHand(targetPlayer);
-            if (nResTarget == 0){
-                cgs.setGamePhase(Main);
-                return false;
+            if (targetPlayer != -1) {
+                // We might not have anyone to steal from, that's ok
+                int nResTarget = cgs.getNResourcesInHand(targetPlayer);
+                if (nResTarget == 0) {
+                    cgs.setGamePhase(Main);
+                    return false;
+                }
+                int cardIndex = random.nextInt(nResTarget);
+                CatanParameters.Resource resource = cgs.pickResourceFromHand(targetPlayer, cardIndex);
+                cgs.getPlayerResources(player).get(resource).increment();
+                cgs.getPlayerResources(targetPlayer).get(resource).decrement();
             }
-            int cardIndex = random.nextInt(nResTarget);
-            CatanParameters.Resource resource = cgs.pickResourceFromHand(targetPlayer, cardIndex);
-            cgs.getPlayerResources(player).get(resource).increment();
-            cgs.getPlayerResources(targetPlayer).get(resource).decrement();
 
             cgs.setGamePhase(Main);
             return true;

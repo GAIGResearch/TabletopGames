@@ -3,7 +3,6 @@ package games.catan.actions.robber;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
-import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
 import games.catan.components.Building;
@@ -42,7 +41,10 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
             throw new AssertionError("Cannot move robber from " + robberTile + " to " + cgs.getBoard()[x][y].toString());
         }
 
-        gs.setActionInProgress(this);
+        if (_computeAvailableActions(gs).size() > 0) {
+            // it may be that we have nobody to steal from, don't even try
+            gs.setActionInProgress(this);
+        }
         return true;
     }
 
@@ -67,7 +69,10 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
         for (int target : targets) {
             actions.add(new StealResource(player, target));
         }
-        if (actions.size() == 0) actions.add(new DoNothing());  // No targets to steal from
+        if (actions.size() == 0) {
+            throw new AssertionError("Deep MoveRobber: No one available to steal resource from");
+//            actions.add(new DoNothing());  // No targets to steal from
+        }
         return actions;
     }
 
