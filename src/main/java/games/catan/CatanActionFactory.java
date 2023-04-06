@@ -92,7 +92,7 @@ public class CatanActionFactory {
             if (gs.nTradesThisTurn < ((CatanParameters)gs.getGameParameters()).max_trade_actions_allowed) {
                 actions.addAll(CatanActionFactory.getPlayerTradeOfferActions(gs, actionSpace, player, opt));
             }
-        } else {
+        } else if (gs.getNResourcesInHand(player) > 0) {
             // Create a new offer
             actions.addAll(getPlayerTradeOfferActions(gs, actionSpace, player, null));
         }
@@ -388,7 +388,7 @@ public class CatanActionFactory {
 
         for (CatanCard c : playerDevDeck.getComponents()) {
             // avoid playing a card that has been bought in the same turn
-            if (c.roundCardWasBought == gs.getTurnCounter()) {
+            if (c.roundCardWasBought == gs.getTurnCounter() || c.cardType == CatanCard.CardType.VICTORY_POINT_CARD) {  // We don't play VP cards
                 continue;
             }
             if (actionSpace.structure != ActionSpace.Structure.Deep) { // Flat is default
@@ -438,7 +438,7 @@ public class CatanActionFactory {
                     for (int i = 0; i < combo.length; i++) {
                         resources[i] = resourcesAvailable.get(combo[i]);
                     }
-                    actions.add(new PlayYearOfPlenty(resources, player));
+                    actions.add(new PlayYearOfPlenty(resources, player, true));
                 }
             } else {
                 // Deep: one resource at a time

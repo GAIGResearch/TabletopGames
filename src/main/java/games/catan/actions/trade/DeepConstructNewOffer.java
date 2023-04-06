@@ -129,7 +129,7 @@ public class DeepConstructNewOffer extends AbstractAction implements IExtendedSe
         switch(choice) {
             case ChoosePlayerTradeWith:
                 for (int i = 0; i < gs.getNPlayers(); i++) {
-                    if (i != offeringPlayerID) {
+                    if (i != offeringPlayerID && gs.getNResourcesInHand(i) > 0) {
                         actions.add(new DeepConstructNewOffer(offeringPlayerID, i));
                     }
                 }
