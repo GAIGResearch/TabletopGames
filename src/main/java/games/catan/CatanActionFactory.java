@@ -383,7 +383,7 @@ public class CatanActionFactory {
      * @return list of actions to play a dev card in hand
      */
     public static List<AbstractAction> getDevCardActions(CatanGameState gs, ActionSpace actionSpace, int player) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
+        Set<AbstractAction> actions = new HashSet<>();
         Deck<CatanCard> playerDevDeck = gs.playerDevCards.get(player);
 
         for (CatanCard c : playerDevDeck.getComponents()) {
@@ -399,7 +399,7 @@ public class CatanActionFactory {
             }
         }
 
-        return actions;
+        return new ArrayList<>(actions);
     }
 
     public static List<AbstractAction> getDevCardActions(CatanGameState gs, ActionSpace actionSpace, int player, CatanCard.CardType cardType) {
