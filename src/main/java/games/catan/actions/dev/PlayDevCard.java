@@ -3,6 +3,7 @@ package games.catan.actions.dev;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
+import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanActionFactory;
 import games.catan.CatanGameState;
@@ -36,7 +37,12 @@ public class PlayDevCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state, ActionSpace actionSpace) {
-        return CatanActionFactory.getDevCardActions((CatanGameState) state, actionSpace, playerID, type);
+        List<AbstractAction> actions = CatanActionFactory.getDevCardActions((CatanGameState) state, actionSpace, playerID, type);
+        if (actions.size() == 0) {
+            // Can't actually do anything useful, just do nothing
+            actions.add(new DoNothing());
+        }
+        return actions;
     }
 
     @Override
@@ -46,7 +52,8 @@ public class PlayDevCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-        nStepsTaken++;
+        if (action instanceof DoNothing) nStepsTaken = nSteps;
+        else nStepsTaken++;
     }
 
     @Override

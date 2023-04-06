@@ -454,8 +454,7 @@ public class CatanActionFactory {
 
                 List<AbstractAction> roads = getBuyRoadActions(gs, player, true);
                 int nRoads = Math.min(gs.playerTokens.get(player).get(BuyAction.BuyType.Road).getValue(), ((CatanParameters) gs.getGameParameters()).nRoadsRB);
-
-                if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+                if (actionSpace.structure != ActionSpace.Structure.Deep && roads.size() >= nRoads) {  // Flat is default
 
                     // Identify all combinations of possible roads to build
                     int[] roadsIdx = new int[roads.size()];
