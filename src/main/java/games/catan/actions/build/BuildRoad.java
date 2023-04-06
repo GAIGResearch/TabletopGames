@@ -32,15 +32,17 @@ public class BuildRoad extends AbstractAction {
         CatanTile[][] board = cgs.getBoard();
         Edge edgeObj = cgs.getRoad(board[x][y], edge, edge);
         if (edgeObj.getOwnerId() == -1) {
+            Counter roadTokens = cgs.getPlayerTokens().get(playerID).get(BuyAction.BuyType.Road);
+            if (roadTokens.isMaximum()) {
+                return false;  // TODO investigate why this is reached
+//                throw new AssertionError("No more roads to build for player " + gs.getCurrentPlayer());
+            }
+
             // only take resources after set up and not with road building card
             if (!free) {
                 if (!cgs.spendResourcesIfPossible(cp.costMapping.get(BuyAction.BuyType.Road), playerID)) {
                     throw new AssertionError("Player " + playerID + " cannot afford this road");
                 }
-            }
-            Counter roadTokens = cgs.getPlayerTokens().get(playerID).get(BuyAction.BuyType.Road);
-            if (roadTokens.isMaximum()) {
-                throw new AssertionError("No more roads to build for player " + gs.getCurrentPlayer());
             }
             roadTokens.increment();
             edgeObj.setOwnerId(playerID);
