@@ -16,7 +16,7 @@ public class PlayDevCard extends AbstractAction implements IExtendedSequence {
     public final CatanCard.CardType type;
     public final int nSteps;  // Number of steps needed for the action to complete, depending on its type and game parameters settings
 
-    int nStepsTaken;
+    int nStepsTaken = 1;
 
     public PlayDevCard(int playerID, CatanCard.CardType type, int nSteps) {
         this.playerID = playerID;
