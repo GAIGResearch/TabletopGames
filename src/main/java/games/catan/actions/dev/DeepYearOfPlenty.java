@@ -26,7 +26,7 @@ public class DeepYearOfPlenty extends AbstractAction implements IExtendedSequenc
     @Override
     public boolean execute(AbstractGameState gs) {
         // Execute first step
-        new PlayYearOfPlenty(new CatanParameters.Resource[]{resource}, playerID).execute(gs);
+        new PlayYearOfPlenty(new CatanParameters.Resource[]{resource}, playerID, true).execute(gs);
 
         // Set in progress for the rest of the resources
         if (nSteps != nStepsTaken) {
@@ -41,7 +41,7 @@ public class DeepYearOfPlenty extends AbstractAction implements IExtendedSequenc
         CatanGameState gs = (CatanGameState) state;
         for (CatanParameters.Resource res: CatanParameters.Resource.values()) {
             if (res != CatanParameters.Resource.WILD && gs.getResourcePool().get(res).getValue() > 0)
-                actions.add(new PlayYearOfPlenty(new CatanParameters.Resource[]{res}, playerID));
+                actions.add(new PlayYearOfPlenty(new CatanParameters.Resource[]{res}, playerID, false));
         }
         return actions;
     }

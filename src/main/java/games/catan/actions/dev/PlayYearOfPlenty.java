@@ -16,10 +16,12 @@ import java.util.Optional;
 public class PlayYearOfPlenty extends AbstractAction {
     public final CatanParameters.Resource[] resources;
     public final int player;
+    public final boolean removeCard;
 
-    public PlayYearOfPlenty(CatanParameters.Resource[] resources, int player) {
+    public PlayYearOfPlenty(CatanParameters.Resource[] resources, int player, boolean removeCard) {
         this.resources = resources;
         this.player = player;
+        this.removeCard = removeCard;
     }
 
     @Override
@@ -31,9 +33,11 @@ public class PlayYearOfPlenty extends AbstractAction {
         Optional<CatanCard> yearOfPlenty = playerDevDeck.stream()
                 .filter(card -> card.cardType == CatanCard.CardType.YEAR_OF_PLENTY)
                 .findFirst();
-        if (yearOfPlenty.isPresent()) {
-            CatanCard yearOfPlentyCard = yearOfPlenty.get();
-            playerDevDeck.remove(yearOfPlentyCard);
+        if (!removeCard || yearOfPlenty.isPresent()) {
+            if (removeCard) {
+                CatanCard yearOfPlentyCard = yearOfPlenty.get();
+                playerDevDeck.remove(yearOfPlentyCard);
+            }
             for (CatanParameters.Resource r: resources) {
                 if (cgs.getResourcePool().get(r).getValue() <= 0) {
                     throw new AssertionError("Cannot use a Year of Plenty Card for resources that are not in deck: " + Arrays.toString(resources));
