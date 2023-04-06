@@ -35,18 +35,8 @@ public class PlayKnightCardDeep extends MoveRobber {
     }
 
     @Override
-    public PlayKnightCardDeep copy() {
-        return this;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof PlayKnightCardDeep && super.equals(o);
-    }
-
-    @Override
     public String toString() {
-        return "p" + player + " plays Dev:KnightCard";
+        return "p" + player + " plays Dev:KnightCard. Moves robber to x=" + x + " y=" + y;
     }
     @Override
     public String getString(AbstractGameState gameState) {

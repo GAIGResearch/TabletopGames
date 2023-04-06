@@ -33,17 +33,6 @@ public class PlayKnightCard extends MoveRobberAndSteal {
 
         return super.execute(gs);
     }
-
-    @Override
-    public PlayKnightCard copy() {
-        return this;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof PlayKnightCard && super.equals(o);
-    }
-
     @Override
     public String toString() {
         return "p" + player + " plays Dev:KnightCard";

@@ -25,7 +25,12 @@ public class PlayRoadBuilding extends AbstractAction {
 
     @Override
     public PlayRoadBuilding copy() {
-        return this;
+        AbstractAction[] cp = new AbstractAction[roadsToBuild.length];
+        for (int i = 0; i < roadsToBuild.length; i++) {
+            cp[i] = roadsToBuild[i].copy();
+        }
+        PlayRoadBuilding copy = new PlayRoadBuilding(playerID, cp);
+        return copy;
     }
 
     @Override

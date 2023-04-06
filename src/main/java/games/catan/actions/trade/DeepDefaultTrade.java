@@ -62,7 +62,9 @@ public class DeepDefaultTrade extends AbstractAction implements IExtendedSequenc
 
     @Override
     public DeepDefaultTrade copy() {
-        return this;
+        DeepDefaultTrade cp = new DeepDefaultTrade(resourceOffer, exchangeRate, player);
+        cp.executed = executed;
+        return cp;
     }
 
     @Override

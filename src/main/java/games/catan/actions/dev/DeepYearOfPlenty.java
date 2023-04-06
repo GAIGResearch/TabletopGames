@@ -63,7 +63,9 @@ public class DeepYearOfPlenty extends AbstractAction implements IExtendedSequenc
 
     @Override
     public DeepYearOfPlenty copy() {
-        return this;
+        DeepYearOfPlenty copy = new DeepYearOfPlenty(playerID, resource, nSteps);
+        copy.nStepsTaken = nStepsTaken;
+        return copy;
     }
 
     @Override

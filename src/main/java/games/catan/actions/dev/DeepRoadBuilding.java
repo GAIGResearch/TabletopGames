@@ -63,7 +63,9 @@ public class DeepRoadBuilding extends AbstractAction implements IExtendedSequenc
 
     @Override
     public DeepRoadBuilding copy() {
-        return this;
+        DeepRoadBuilding copy = new DeepRoadBuilding(playerID, road.copy(), nSteps);
+        copy.nStepsTaken = nStepsTaken;
+        return copy;
     }
 
     @Override

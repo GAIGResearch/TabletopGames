@@ -55,19 +55,21 @@ public class PlayYearOfPlenty extends AbstractAction {
     }
 
     @Override
-    public PlayYearOfPlenty copy() {return this;}
+    public PlayYearOfPlenty copy() {
+        return new PlayYearOfPlenty(resources.clone(), player, removeCard);
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PlayYearOfPlenty)) return false;
         PlayYearOfPlenty that = (PlayYearOfPlenty) o;
-        return player == that.player && Arrays.equals(resources, that.resources);
+        return player == that.player && removeCard == that.removeCard && Arrays.equals(resources, that.resources);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(player);
+        int result = Objects.hash(player, removeCard);
         result = 31 * result + Arrays.hashCode(resources);
         return result;
     }

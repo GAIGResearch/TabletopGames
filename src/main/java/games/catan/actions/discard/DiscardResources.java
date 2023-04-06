@@ -30,7 +30,7 @@ public class DiscardResources extends AbstractAction {
 
     @Override
     public DiscardResources copy() {
-        return this;
+        return new DiscardResources(resourcesToDiscard.clone(), playerID);
     }
 
     @Override

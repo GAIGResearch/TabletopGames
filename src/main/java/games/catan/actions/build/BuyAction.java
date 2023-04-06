@@ -58,7 +58,9 @@ public class BuyAction extends AbstractAction implements IExtendedSequence {
 
     @Override
     public BuyAction copy() {
-        return this;
+        BuyAction ba = new BuyAction(playerID, type);
+        ba.executed = executed;
+        return ba;
     }
 
     @Override

@@ -40,7 +40,7 @@ public class OfferPlayerTrade extends AbstractAction {
 
     @Override
     public OfferPlayerTrade copy() {
-        return new OfferPlayerTrade(stage, resourceOffered, nOffered, resourceRequested, nRequested, offeringPlayerID, otherPlayerID);
+        return this;
     }
 
     @Override

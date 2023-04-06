@@ -56,7 +56,9 @@ public class PlayDevCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public PlayDevCard copy() {
-        return this;
+        PlayDevCard copy = new PlayDevCard(playerID, type, nSteps);
+        copy.nStepsTaken = nStepsTaken;
+        return copy;
     }
 
     @Override

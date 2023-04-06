@@ -40,12 +40,12 @@ public class EndNegotiation extends AbstractAction {
         if (this == o) return true;
         if (!(o instanceof EndNegotiation)) return false;
         EndNegotiation that = (EndNegotiation) o;
-        return offeringPlayerID == that.offeringPlayerID;
+        return playerID == that.playerID && offeringPlayerID == that.offeringPlayerID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(offeringPlayerID);
+        return Objects.hash(playerID, offeringPlayerID);
     }
 
     @Override

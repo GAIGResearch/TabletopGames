@@ -86,7 +86,9 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
 
     @Override
     public MoveRobber copy() {
-        return this;
+        MoveRobber mr = new MoveRobber(x, y, player);
+        mr.executed = executed;
+        return mr;
     }
 
     @Override
