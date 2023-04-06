@@ -499,15 +499,19 @@ public class CatanActionFactory {
             int nGive = playerExchangeRate.get(res.getKey()).getValue();
             int nOwned = res.getValue().getValue();
             if (nOwned >= nGive) {
-                if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
-                    // for 1 other resource
-                    for (CatanParameters.Resource resToGet : CatanParameters.Resource.values()) {
-                        if (resToGet != CatanParameters.Resource.WILD && resToGive != resToGet && gs.getResourcePool().get(resToGet).getValue() > 0) {
-                            actions.add(new DefaultTrade(resToGive, resToGet, nGive, player));
-                        }
+                // for 1 other resource
+                List<AbstractAction> trades = new ArrayList<>();
+                for (CatanParameters.Resource resToGet : CatanParameters.Resource.values()) {
+                    if (resToGet != CatanParameters.Resource.WILD && resToGive != resToGet && gs.getResourcePool().get(resToGet).getValue() > 0) {
+                        trades.add(new DefaultTrade(resToGive, resToGet, nGive, player));
                     }
-                } else {
-                    actions.add(new DeepDefaultTrade(resToGive, nGive, player));
+                }
+                if (trades.size() > 0) {
+                    if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+                        actions.addAll(trades);
+                    } else {
+                        actions.add(new DeepDefaultTrade(resToGive, nGive, player));
+                    }
                 }
             }
         }
