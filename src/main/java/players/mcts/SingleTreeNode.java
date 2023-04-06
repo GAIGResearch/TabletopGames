@@ -559,13 +559,14 @@ public class SingleTreeNode {
      */
     protected void advanceToTurnOfPlayer(AbstractGameState gs, int id, boolean inRollout) {
         // For the moment we only have one opponent model - that of a random player
+        AbstractAction action = null;
         while (gs.getCurrentPlayer() != id && gs.isNotTerminalForPlayer(id) && !(inRollout && finishRollout(gs))) {
             //       AbstractGameState preGS = gs.copy();
             AbstractPlayer oppModel = opponentModels[gs.getCurrentPlayer()];
             List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs, params.actionSpace);
             if (availableActions.isEmpty())
-                throw new AssertionError("Should always have at least one action possible...");
-            AbstractAction action = oppModel.getAction(gs);
+                throw new AssertionError("Should always have at least one action possible..." + (action != null? " Last action: " + action : ""));
+            action = oppModel.getAction(gs);
             if (inRollout) {
                 rolloutDepth++;
                 root.actionsInRollout.add(new Pair<>(gs.getCurrentPlayer(), action));
