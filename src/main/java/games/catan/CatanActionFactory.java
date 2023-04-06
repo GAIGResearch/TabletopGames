@@ -417,34 +417,36 @@ public class CatanActionFactory {
         }
 
         else if (cardType == CatanCard.CardType.YEAR_OF_PLENTY) {
-            if (actionSpace.structure != ActionSpace.Structure.Deep) {
-                List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
-
-                for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
-                    if (res == CatanParameters.Resource.WILD) continue;
-                    if (gs.resourcePool.get(res).getValue() > 0)
-                        for (int i = 0; i < ((CatanParameters) gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
-                            resourcesAvailable.add(res);
-                        }
-                }
-
-                int[] resIdx = new int[resourcesAvailable.size()];
-                for (int i = 0; i < resourcesAvailable.size(); i++) {
-                    resIdx[i] = i;
-                }
-                List<int[]> combinations = Utils.generateCombinations(resIdx, ((CatanParameters) gs.getGameParameters()).nResourcesYoP);
-                for (int[] combo : combinations) {
-                    CatanParameters.Resource[] resources = new CatanParameters.Resource[combo.length];
-                    for (int i = 0; i < combo.length; i++) {
-                        resources[i] = resourcesAvailable.get(combo[i]);
+            List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
+            for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
+                if (res == CatanParameters.Resource.WILD) continue;
+                if (gs.resourcePool.get(res).getValue() > 0)
+                    for (int i = 0; i < ((CatanParameters) gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
+                        resourcesAvailable.add(res);
                     }
-                    actions.add(new PlayYearOfPlenty(resources, player, true));
-                }
-            } else {
-                // Deep: one resource at a time
-                for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
-                    if (res != CatanParameters.Resource.WILD && gs.resourcePool.get(res).getValue() > 0)
-                        actions.add(new DeepYearOfPlenty(player, res, cardType.nDeepSteps((CatanParameters) gs.getGameParameters())));
+            }
+
+            if (resourcesAvailable.size() >= ((CatanParameters) gs.getGameParameters()).nResourcesYoP) {
+                if (actionSpace.structure != ActionSpace.Structure.Deep) {
+
+                    int[] resIdx = new int[resourcesAvailable.size()];
+                    for (int i = 0; i < resourcesAvailable.size(); i++) {
+                        resIdx[i] = i;
+                    }
+                    List<int[]> combinations = Utils.generateCombinations(resIdx, ((CatanParameters) gs.getGameParameters()).nResourcesYoP);
+                    for (int[] combo : combinations) {
+                        CatanParameters.Resource[] resources = new CatanParameters.Resource[combo.length];
+                        for (int i = 0; i < combo.length; i++) {
+                            resources[i] = resourcesAvailable.get(combo[i]);
+                        }
+                        actions.add(new PlayYearOfPlenty(resources, player, true));
+                    }
+                } else {
+                    // Deep: one resource at a time
+                    for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
+                        if (res != CatanParameters.Resource.WILD && gs.resourcePool.get(res).getValue() > 0)
+                            actions.add(new DeepYearOfPlenty(player, res, cardType.nDeepSteps((CatanParameters) gs.getGameParameters())));
+                    }
                 }
             }
         }
