@@ -44,6 +44,8 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
         if (_computeAvailableActions(gs).size() > 0) {
             // it may be that we have nobody to steal from, don't even try
             gs.setActionInProgress(this);
+        } else {
+            executed = true;
         }
         return true;
     }
@@ -68,10 +70,6 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
         }
         for (int target : targets) {
             actions.add(new StealResource(player, target));
-        }
-        if (actions.size() == 0) {
-            throw new AssertionError("Deep MoveRobber: No one available to steal resource from");
-//            actions.add(new DoNothing());  // No targets to steal from
         }
         return actions;
     }
