@@ -2,6 +2,7 @@ package games.catan.actions.trade;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
@@ -160,6 +161,9 @@ public class DeepConstructNewOffer extends AbstractAction implements IExtendedSe
                 }
                 break;
         }
+        if (actions.size() == 0) {
+            actions.add(new DoNothing());  // Cancel trade, something went wrong
+        }
         return actions;
     }
 
@@ -175,12 +179,16 @@ public class DeepConstructNewOffer extends AbstractAction implements IExtendedSe
             ((CatanGameState) state).setTradeOffer(new OfferPlayerTrade(stage, resourceOffered, nOffered, resourceRequested, nRequested, offeringPlayerID, otherPlayerID));
         }
 
-        if (choice == ChoosePlayerTradeWith) otherPlayerID = ((DeepConstructNewOffer)action).otherPlayerID;
-        else if (choice == ChooseResourceOffer) resourceOffered = ((DeepConstructNewOffer)action).resourceOffered;
-        else if (choice == ChooseNOffered) nOffered = ((DeepConstructNewOffer)action).nOffered;
-        else if (choice == ChooseResourceRequested) resourceRequested = ((DeepConstructNewOffer)action).resourceRequested;
-        else if (choice == ChooseNRequested) nRequested = ((DeepConstructNewOffer)action).nRequested;
-        choice = Choice.values()[choice.ordinal()+1];
+        if (action instanceof DoNothing) choice = OfferComplete;
+        else {
+            if (choice == ChoosePlayerTradeWith) otherPlayerID = ((DeepConstructNewOffer) action).otherPlayerID;
+            else if (choice == ChooseResourceOffer) resourceOffered = ((DeepConstructNewOffer) action).resourceOffered;
+            else if (choice == ChooseNOffered) nOffered = ((DeepConstructNewOffer) action).nOffered;
+            else if (choice == ChooseResourceRequested)
+                resourceRequested = ((DeepConstructNewOffer) action).resourceRequested;
+            else if (choice == ChooseNRequested) nRequested = ((DeepConstructNewOffer) action).nRequested;
+            choice = Choice.values()[choice.ordinal() + 1];
+        }
     }
 
     @Override
