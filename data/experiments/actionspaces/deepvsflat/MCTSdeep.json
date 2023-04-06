@@ -15,7 +15,7 @@
   },
   "actionSpaceStructure" : "Deep",
   "actionSpaceContext": "Independent",
-  "expertIterationStateFeatures": "games.loveletter.LLStateFeatures",
+  "expertIterationStateFeatures": "games.catan.CatanStateFeatures",
   "maintainMasterState": true,
   "gatherTreeRecorder": true,
   "treeRecorderFolder": "test_01"
