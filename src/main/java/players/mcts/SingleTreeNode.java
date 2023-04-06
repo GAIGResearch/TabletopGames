@@ -845,11 +845,13 @@ public class SingleTreeNode {
                 root.copyCount++;
             }
 
+            AbstractAction next = null;
             while (!finishRollout(rolloutState)) {
                 List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState, params.actionSpace);
-                if (availableActions.isEmpty())
-                    throw new AssertionError("No actions available in rollout!");
-                AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState);
+                if (availableActions.isEmpty()) {
+                    throw new AssertionError("No actions available in rollout!" + (next != null? " Last action: " + next.toString() : ""));
+                }
+                next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
                 root.actionsInRollout.add(new Pair<>(lastActorInRollout, next));
                 advance(rolloutState, next, true);
