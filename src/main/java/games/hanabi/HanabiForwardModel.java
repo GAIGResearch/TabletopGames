@@ -4,19 +4,18 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
-import core.components.Card;
-import core.components.Deck;
 import core.components.Counter;
+import core.components.Deck;
 import core.components.PartialObservableDeck;
+import games.hanabi.actions.Discard;
+import games.hanabi.actions.Hint;
+import games.hanabi.actions.Play;
 
 import java.util.*;
 
-import games.hanabi.actions.Discard;
-import games.hanabi.actions.Play;
-import games.hanabi.actions.Hint;
-
-import static core.CoreConstants.VisibilityMode.*;
 import static core.CoreConstants.GameResult.*;
+import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
+import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
 public class HanabiForwardModel extends StandardForwardModel {
     @Override
@@ -37,6 +36,7 @@ public class HanabiForwardModel extends StandardForwardModel {
         hbgs.hintCounter = new Counter(hbp.hintCounter,0,hbp.hintCounter, "Hint Counter");
         hbgs.failCounter = new Counter(hbp.failCounter,0,hbp.failCounter, "Fail Counter");
         hbgs.currentCard = new ArrayList<>();
+        hbgs.endTurn = hbgs.getNPlayers() + 1;
 
         drawCardsToPlayers(hbgs);
     }

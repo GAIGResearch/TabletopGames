@@ -4,14 +4,11 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.CoreConstants;
 import core.components.Component;
-import core.components.Deck;
 import core.components.Counter;
+import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
-
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +21,7 @@ public class HanabiGameState extends AbstractGameState implements IPrintable {
     Counter failCounter;
     Counter hintCounter;
     List<HanabiCard> currentCard;
-    int endTurn = getNPlayers() + 1;
+    int endTurn;
 
 
     public HanabiGameState(AbstractParameters gameParameters, int nPlayers) {
