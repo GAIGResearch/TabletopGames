@@ -330,7 +330,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel {
                 }
             }
         } else {
-            System.out.println("ERROR: Player doesn't have see the future card");
+            throw new AssertionError("Player " + playerID + " does not have a SeeTheFuture card in hand.");
         }
 
         return actions;
