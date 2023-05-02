@@ -230,6 +230,8 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
 
         // Draw monsters
         for (List<Monster> monsterGroup: gameState.getMonsters()) {
+            // TODO: That one weird graphics error you keep getting? Yeah it shows up here
+            // if you kill the last monster in its group, does it not remove it from its list?
             String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
 
             for (Monster m: monsterGroup) {

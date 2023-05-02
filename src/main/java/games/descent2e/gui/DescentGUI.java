@@ -152,7 +152,7 @@ public class DescentGUI extends AbstractGUIManager {
         JPanel historyWrapper = new JPanel();
         historyWrapper.setOpaque(false);
         historyWrapper.setLayout(new BoxLayout(historyWrapper, BoxLayout.Y_AXIS));
-        JLabel historyTitle = new JLabel("Action history:");
+        JLabel historyTitle = new JLabel("Action History:");
         historyTitle.setForeground(foregroundColor);
         historyWrapper.add(historyTitle);
         historyInfo.setPreferredSize(new Dimension(width / 2 - 10, height - 10));

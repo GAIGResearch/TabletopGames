@@ -22,21 +22,24 @@ import java.util.Objects;
 public class Move extends AbstractAction {
     final List<Vector2D> positionsTraveled;
     final Monster.Direction orientation;
+    private Vector2D startPosition;
 
     public Move(List<Vector2D> whereTo) {
         this.positionsTraveled = whereTo;
         this.orientation = Monster.Direction.DOWN;
+        this.startPosition = new Vector2D(0,0);
     }
     public Move(List<Vector2D> whereTo, Monster.Direction finalOrientation) {
         this.positionsTraveled = whereTo;
         this.orientation = finalOrientation;
+        this.startPosition = new Vector2D(0,0);
     }
 
     @Override
     public boolean execute(AbstractGameState gs) {
         DescentGameState dgs = (DescentGameState) gs;
         Figure f = ((DescentGameState) gs).getActingFigure();
-
+        startPosition = f.getPosition();
         // Remove from old position
         remove(dgs, f);
 
@@ -206,9 +209,16 @@ public class Move extends AbstractAction {
         Figure f = ((DescentGameState) gameState).getActingFigure();
         List<Vector2D> move = positionsTraveled;
 
-        String movement = "Move: " + getDirection(f.getPosition(), move.get(0));
+        if (startPosition.equals(new Vector2D(0,0)))
+        {
+            startPosition = f.getPosition();
+        }
+
+        String movement = "Move: " + getDirection(startPosition, move.get(0));
+        //String movement = "Move: " + startPosition + " to " + move.get(0);
         for(int i = 1; i < move.size(); i++) {
             movement = movement + ", " + getDirection(move.get(i-1), move.get(i));
+            //movement = movement + ", then " + move.get(i-1) + " to " + move.get(i);
         }
 
         movement = movement + (f.getSize().a > 1 || f.getSize().b > 1 ? "; Orientation: " + orientation : "");
@@ -249,6 +259,7 @@ public class Move extends AbstractAction {
         if (direction.isEmpty()) {
             direction = "Nowhere";
         }
+
         return direction;
     }
 

@@ -216,7 +216,7 @@ public class DescentForwardModel extends AbstractForwardModel {
         action.execute(currentState);
         if (checkEndOfGame(dgs)) return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
 
-        // TODO: may still be able to play cards/skills/free effects
+        // TODO: may still be able to play cards/skills/free effects - just add more Booleans into the if check when more are added
         // Turn ends for figure if they executed the number of actions available,
         Boolean noMoreActions = actingFigure.getNActionsExecuted().isMaximum();
         // have no more movement points available,
