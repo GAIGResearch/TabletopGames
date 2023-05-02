@@ -199,6 +199,7 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         // TODO Undo for debugging purposes
         // damage = Math.max(damage - defence + 3, 0);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
+        defenderName = defender.getComponentName();
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
         if (startingHealth - damage <= 0) {
             // Death
@@ -277,7 +278,12 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     @Override
     public String getString(AbstractGameState gameState) {
         attackerName = gameState.getComponentById(attackingFigure).getComponentName();
-        defenderName = gameState.getComponentById(defendingFigure).getComponentName();
+
+        // Sometimes the game will remove the dead enemy off the board before
+        // it can state in the Action History the attack that killed them
+        if (gameState.getComponentById(defendingFigure) != null) {
+            defenderName = gameState.getComponentById(defendingFigure).getComponentName();
+        }
         attackerName = attackerName.replace("Hero: ", "");
         defenderName = defenderName.replace("Hero: ", "");
         return String.format("Melee Attack by " + attackerName + " on " + defenderName);
