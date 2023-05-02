@@ -196,6 +196,8 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         int defence = state.getDefenceDicePool().getShields() - pierce;
         if (defence < 0) defence = 0;
         damage = Math.max(damage - defence, 0);
+        // TODO Undo for debugging purposes
+        // damage = Math.max(damage - defence + 3, 0);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
         if (startingHealth - damage <= 0) {

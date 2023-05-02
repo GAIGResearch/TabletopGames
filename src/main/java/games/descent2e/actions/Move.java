@@ -211,6 +211,7 @@ public class Move extends AbstractAction {
 
         if (startPosition.equals(new Vector2D(0,0)))
         {
+            // If the Start Position has not been changed from initiation, we save it here
             startPosition = f.getPosition();
         }
 

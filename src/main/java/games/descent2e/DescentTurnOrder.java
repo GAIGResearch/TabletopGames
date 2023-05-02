@@ -44,8 +44,12 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
 
     public void nextMonster(DescentGameState dgs) {
         int groupSize = dgs.getMonsters().get(monsterGroupActingNext).size();
-        int next = (groupSize+monsterActingNext+1)%groupSize;
-        if (next == 0 && monsterActingNext == groupSize-1) {
+        int next = 0;
+        // Only looks for the next monster in the group as long as the group is not empty
+        if (groupSize != 0) {
+            next = (groupSize + monsterActingNext + 1) % groupSize;
+        }
+        if ((next == 0 && monsterActingNext == groupSize-1) || groupSize == 0) {
             // Next monster group
             nextMonsterGroup(dgs);
         } else {
@@ -54,9 +58,13 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
     }
     public void nextMonsterGroup(DescentGameState dgs) {
         int nMonsters = dgs.getMonsters().size();
-        int next = (nMonsters+monsterGroupActingNext+1)%nMonsters;
+        int next = 0;
+        // Only looks for the next monster group as long as there are still groups in play
+        if (nMonsters != 0) {
+            next = (nMonsters + monsterGroupActingNext + 1) % nMonsters;
+        }
         monsterActingNext = 0;
-        if (next == 0 && monsterGroupActingNext == nMonsters-1) {
+        if ((next == 0 && monsterGroupActingNext == nMonsters-1) || nMonsters == 0) {
             monsterGroupActingNext = 0;
             heroFigureActingNext = 0;
             turnOwner = dgs.heroes.get(heroFigureActingNext).getOwnerId();

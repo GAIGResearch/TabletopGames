@@ -226,7 +226,8 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
 
         // Find currently acting figure (hero or monster)
         Figure actingFigure;
-        if (getCurrentPlayer() != overlordPlayer) {
+        // TODO Ensure monsterGroup deletes itself when empty
+        if (getCurrentPlayer() != overlordPlayer || monsterGroup.isEmpty()) {
             // If hero player, get corresponding hero
             actingFigure = getHeroes().get(((DescentTurnOrder)getTurnOrder()).heroFigureActingNext);
         } else {

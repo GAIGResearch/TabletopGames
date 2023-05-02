@@ -177,12 +177,12 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
         // Draw background
         Graphics2D g = (Graphics2D) gg;
         g.setColor(Color.black);
-        g.fillRect(offset, offset, width-offset*10, height);
+        g.fillRect(offset, offset, width - offset * 10, height);
 
         if (prettyVersion) {
             // Draw map tile images
-            for (Map.Entry<Vector2D, Pair<Image, Pair<Integer, Integer>>> e: tileImageTopLeftCorners.entrySet()) {
-                g.drawImage(e.getValue().a, offset+panX + e.getKey().getX() * descentItemSize, offset+panY + e.getKey().getY() * descentItemSize,
+            for (Map.Entry<Vector2D, Pair<Image, Pair<Integer, Integer>>> e : tileImageTopLeftCorners.entrySet()) {
+                g.drawImage(e.getValue().a, offset + panX + e.getKey().getX() * descentItemSize, offset + panY + e.getKey().getY() * descentItemSize,
                         e.getValue().b.a * descentItemSize, e.getValue().b.b * descentItemSize, null);
             }
         } else {
@@ -190,11 +190,11 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
         }
 
         // Draw tokens
-        for (DToken dt: gameState.getTokens()) {
+        for (DToken dt : gameState.getTokens()) {
             if (dt.getPosition() != null) {
                 String imgPath = dataPath + dt.getDescentTokenType().getImgPath(new Random(gameState.getGameParameters().getRandomSeed()));
                 Image img = ImageIO.GetInstance().getImage(imgPath);
-                g.drawImage(img, offset+panX + dt.getPosition().getX() * descentItemSize, offset+panY + dt.getPosition().getY() * descentItemSize, descentItemSize, descentItemSize, null);
+                g.drawImage(img, offset + panX + dt.getPosition().getX() * descentItemSize, offset + panY + dt.getPosition().getY() * descentItemSize, descentItemSize, descentItemSize, null);
 
                 // TODO ugly version
             }
@@ -202,13 +202,13 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
         Stroke s = g.getStroke();
 
         // Draw heroes
-        for (Hero f: gameState.getHeroes()) {
+        for (Hero f : gameState.getHeroes()) {
             Vector2D loc = f.getPosition();
-            DescentTypes.Archetype archetype = DescentTypes.Archetype.valueOf(((PropertyString)f.getProperty("archetype")).value);
+            DescentTypes.Archetype archetype = DescentTypes.Archetype.valueOf(((PropertyString) f.getProperty("archetype")).value);
 
             // Color
             g.setColor(archetype.getColor());
-            g.fillOval(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
+            g.fillOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
 
             if (gameState.getActingFigure().equals(f)) {
                 g.setStroke(highlightStroke);
@@ -216,12 +216,12 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
             } else {
                 g.setColor(Color.black);
             }
-            g.drawOval(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
+            g.drawOval(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, descentItemSize, descentItemSize);
             g.setStroke(s);
 
             if (prettyVersion) {
                 // Image
-                int imgSize = descentItemSize*2/3;
+                int imgSize = descentItemSize * 2 / 3;
                 Image img = ImageIO.GetInstance().getImage(dataPath + "heroes/" + archetype.name().toLowerCase() + ".png");
                 g.drawImage(img, offset + panX + loc.getX() * descentItemSize + descentItemSize / 2 - imgSize / 2,
                         offset + panY + loc.getY() * descentItemSize + descentItemSize / 2 - imgSize / 2, imgSize, imgSize, null);
@@ -229,40 +229,43 @@ public class DescentGridBoardView extends ComponentView implements ScreenHighlig
         }
 
         // Draw monsters
-        for (List<Monster> monsterGroup: gameState.getMonsters()) {
-            // TODO: That one weird graphics error you keep getting? Yeah it shows up here
-            // if you kill the last monster in its group, does it not remove it from its list?
-            String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
+        for (List<Monster> monsterGroup : gameState.getMonsters()) {
 
-            for (Monster m: monsterGroup) {
+            // Only draws the monster group if there are monsters within it, to prevent out of index access attempts
+            if(!monsterGroup.isEmpty())
+            {
+                String path = ((PropertyString) monsterGroup.get(0).getProperty(imgHash)).value;
+
+                for (Monster m : monsterGroup) {
 //                Vector2D loc = m.getPosition();
-                Vector2D loc = m.applyAnchorModifier();
-                if (loc == null) continue;
-                int orientation = m.getOrientation().ordinal();
+                    Vector2D loc = m.applyAnchorModifier();
+                    if (loc == null) continue;
+                    int orientation = m.getOrientation().ordinal();
 
-                // Get the size of the monster, and scale according to item size
-                Pair<Integer, Integer> size = m.getSize().copy();
-                size.a *= descentItemSize;
-                size.b *= descentItemSize;
+                    // Get the size of the monster, and scale according to item size
+                    Pair<Integer, Integer> size = m.getSize().copy();
+                    size.a *= descentItemSize;
+                    size.b *= descentItemSize;
 
-                // TODO ugly version
+                    // TODO ugly version
 
-                String imagePath = dataPath;
-                if (((PropertyColor) m.getProperty(colorHash)).valueStr.equals("red")) {
-                    imagePath += path.replace(".png", "-master.png");
-                } else {
-                    imagePath += path;
+                    String imagePath = dataPath;
+                    if (((PropertyColor) m.getProperty(colorHash)).valueStr.equals("red")) {
+                        imagePath += path.replace(".png", "-master.png");
+                    } else {
+                        imagePath += path;
+                    }
+                    Image imgRaw = ImageIO.GetInstance().getImage(imagePath);
+                    BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
+                    g.drawImage(imgToDraw, offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, null);
+
+                    int health = m.getAttributeValue(Figure.Attribute.Health);
+                    int maxHealth = m.getAttributeMax(Figure.Attribute.Health);
+                    g.setColor(Color.red);
+                    g.fillRect(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, (int) (descentItemSize * health * 1.0 / maxHealth), 5);
+                    g.setColor(Color.black);
+                    g.drawRect(offset + panX + loc.getX() * descentItemSize, offset + panY + loc.getY() * descentItemSize, (int) (descentItemSize * health * 1.0 / maxHealth), 5);
                 }
-                Image imgRaw = ImageIO.GetInstance().getImage(imagePath);
-                BufferedImage imgToDraw = rotateImage((BufferedImage) imgRaw, size, orientation);
-                g.drawImage(imgToDraw, offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize,null);
-
-                int health = m.getAttributeValue(Figure.Attribute.Health);
-                int maxHealth = m.getAttributeMax(Figure.Attribute.Health);
-                g.setColor(Color.red);
-                g.fillRect(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, (int)(descentItemSize * health*1.0/maxHealth), 5);
-                g.setColor(Color.black);
-                g.drawRect(offset+panX + loc.getX() * descentItemSize, offset+panY + loc.getY() * descentItemSize, (int)(descentItemSize * health*1.0/maxHealth), 5);
             }
         }
 
