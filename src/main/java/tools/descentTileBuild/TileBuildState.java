@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
-import core.turnorders.AlternatingTurnOrder;
+import games.GameType;
 import utilities.Pathfinder;
 
 import java.util.ArrayList;
@@ -23,7 +23,12 @@ public class TileBuildState extends AbstractGameState {
      * @param gameParameters - game parameters.
      */
     public TileBuildState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), null);
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return null;
     }
 
     @Override
@@ -53,11 +58,6 @@ public class TileBuildState extends AbstractGameState {
     @Override
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         return new ArrayList<>();
-    }
-
-    @Override
-    protected void _reset() {
-        tile = null;
     }
 
     @Override

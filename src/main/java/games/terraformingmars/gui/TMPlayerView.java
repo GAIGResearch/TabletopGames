@@ -12,10 +12,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
-import static games.terraformingmars.gui.TMGUI.playerColors;
-import static gui.AbstractGUIManager.*;
+import static games.terraformingmars.gui.TMBoardView.playerColors;
 import static games.terraformingmars.gui.TMGUI.focusPlayer;
-import static utilities.GUIUtils.*;
+import static gui.AbstractGUIManager.defaultItemSize;
+import static utilities.GUIUtils.drawImage;
+import static utilities.GUIUtils.drawShadowStringCentered;
 
 public class TMPlayerView extends ComponentView {
 

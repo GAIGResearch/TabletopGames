@@ -236,7 +236,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
                 for (int j = 0; j < tmgs.getBoard().getWidth(); j++) {
                     if (tmgs.getBoard().getElement(j, i) != null) {
                         nTiles++;
-                        if (tmgs.getBoard().getElement(j, i).getTilePlaced() != null) {
+                        if (((TMMapTile)tmgs.getBoard().getElement(j, i)).getTilePlaced() != null) {
                             tilesPlaced++;
                         }
                     }
@@ -258,7 +258,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
             for (int i = 0; i < tmgs.getBoard().getHeight(); i++) {
                 for (int j = 0; j < tmgs.getBoard().getWidth(); j++) {
                     if (tmgs.getBoard().getElement(j, i) != null) {
-                        if (tmgs.getBoard().getElement(j, i).getTilePlaced() != null) {
+                        if (((TMMapTile)tmgs.getBoard().getElement(j, i)).getTilePlaced() != null) {
                             ss.append("(").append(j).append("-").append(i).append("),");
                         }
                     }
@@ -818,7 +818,7 @@ public class TerraformingMarsMetrics implements IMetricsCollection {
                 for (int j = 0; j < s.getBoard().getWidth(); j++) {
                     if (s.getBoard().getElement(j, i) != null) {
                         nTiles ++;
-                        if (s.getBoard().getElement(j, i).getTilePlaced() != null && s.getBoard().getElement(j, i).getOwnerId() == e.playerID) {
+                        if (((TMMapTile)s.getBoard().getElement(j, i)).getTilePlaced() != null && s.getBoard().getElement(j, i).getOwnerId() == e.playerID) {
                             tilesPlaced++;
                         }
                     }

@@ -25,8 +25,8 @@
         },
         "target": 0,
         "comparison-type": "Equal",
-        "result-heroes": "LOSE",
-        "result-overlord": "WIN"
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
       },
       {
         "id": "CountGameOver",
@@ -36,8 +36,8 @@
         },
         "target": 0,
         "comparison-type": "Equal",
-        "result-heroes": "WIN",
-        "result-overlord": "LOSE"
+        "result-heroes": "WIN_GAME",
+        "result-overlord": "LOSE_GAME"
       },
       {
         "id": "CountGameOver",
@@ -48,8 +48,8 @@
         },
         "target": 6,
         "comparison-type": "More",
-        "result-heroes": "LOSE",
-        "result-overlord": "WIN"
+        "result-heroes": "LOSE_GAME",
+        "result-overlord": "WIN_GAME"
       }
     ],
     "common-rewards": [{

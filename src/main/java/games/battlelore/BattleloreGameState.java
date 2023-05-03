@@ -42,7 +42,7 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public Unit GetUnitFromType(UnitType type) {
-        int unitType;
+        int unitType = 0;
         switch (type) {
             case BloodHarvester:
                 unitType = 1;
@@ -63,7 +63,7 @@ public class BattleloreGameState extends AbstractGameState {
     public void AddUnit(int locX, int locY, Unit unit) {
         MapTile tile = (MapTile) gameBoard.getElement(locX, locY);
         if (tile != null) {
-            tile.addUnit(unit);
+            tile.AddUnit(unit);
         }
     }
 

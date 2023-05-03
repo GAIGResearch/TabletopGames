@@ -2,6 +2,7 @@ package tools.descentTileBuild;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.BoardNode;
@@ -17,7 +18,7 @@ import java.util.List;
 import static games.descent2e.DescentTypes.*;
 import static utilities.Utils.getNeighbourhood;
 
-public class TileBuildFM extends AbstractForwardModel {
+public class TileBuildFM extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -85,8 +86,7 @@ public class TileBuildFM extends AbstractForwardModel {
 
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         currentState.addAllComponents();
 
         if(action instanceof SetGridValueAction)
@@ -169,10 +169,5 @@ public class TileBuildFM extends AbstractForwardModel {
             }
         }
         return insideTileNeighbours;
-    }
-
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new TileBuildFM();
     }
 }

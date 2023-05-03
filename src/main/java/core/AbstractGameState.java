@@ -2,19 +2,24 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
-import core.components.*;
-import core.interfaces.*;
+import core.components.Area;
+import core.components.Component;
+import core.components.PartialObservableDeck;
+import core.interfaces.IComponentContainer;
+import core.interfaces.IExtendedSequence;
+import core.interfaces.IGamePhase;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import games.GameType;
 import utilities.ElapsedCpuChessTimer;
 
 import java.util.*;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 import static java.util.stream.Collectors.toList;
-import static core.CoreConstants.GameResult.*;
 
 /**
  * Contains all game state information.
@@ -67,6 +72,11 @@ public abstract class AbstractGameState {
         this.gameParameters = gameParameters;
         this.coreGameParameters = new CoreParameters();
         reset();
+    }
+    protected AbstractGameState(AbstractParameters gameParameters, int nPlayers, boolean turnOrder) {
+        this.nPlayers = nPlayers;
+        this.gameParameters = gameParameters;
+        this.coreGameParameters = new CoreParameters();
     }
     protected abstract GameType _getGameType();
 

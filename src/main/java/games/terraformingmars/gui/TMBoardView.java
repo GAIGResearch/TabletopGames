@@ -20,7 +20,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static games.terraformingmars.gui.TMGUI.playerColors;
 import static gui.AbstractGUIManager.defaultItemSize;
 import static games.terraformingmars.gui.TMCardView.drawResource;
 import static utilities.GUIUtils.*;
@@ -28,6 +27,7 @@ import static utilities.GUIUtils.*;
 public class TMBoardView extends ComponentView implements IScreenHighlight {
 
     TMGameState gs;
+    public final static Color[] playerColors = new Color[]{Color.RED, Color.YELLOW, Color.BLUE, Color.GREEN};
 
     HashMap<Rectangle, String> rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;

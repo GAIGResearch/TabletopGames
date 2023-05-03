@@ -5,8 +5,8 @@ import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
+import core.components.BoardNode;
 import core.components.GridBoard;
-import core.components.Token;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +20,7 @@ public class TicTacToeForwardModel extends StandardForwardModel {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
         int gridSize = tttgp.gridSize;
         TicTacToeGameState state = (TicTacToeGameState) firstState;
-        state.gridBoard = new GridBoard<>(gridSize, gridSize, new Token(TicTacToeConstants.emptyCell));
+        state.gridBoard = new GridBoard(gridSize, gridSize, new BoardNode(-1,TicTacToeConstants.emptyCell));
     }
 
     @Override
@@ -32,8 +32,8 @@ public class TicTacToeForwardModel extends StandardForwardModel {
         if (gameState.isNotTerminal())
             for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
                 for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                    if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell))
-                        actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+                    if (tttgs.gridBoard.getElement(x, y).getComponentName().equals(TicTacToeConstants.emptyCell))
+                        actions.add(new SetGridValueAction(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
                 }
             }
         return actions;
@@ -53,16 +53,16 @@ public class TicTacToeForwardModel extends StandardForwardModel {
      * @param gameState - game state to check game end.
      */
     private boolean checkAndProcessGameEnd(TicTacToeGameState gameState) {
-        GridBoard<Token> gridBoard = gameState.getGridBoard();
+        GridBoard gridBoard = gameState.getGridBoard();
 
         // Check columns
         for (int x = 0; x < gridBoard.getWidth(); x++) {
-            Token c = gridBoard.getElement(x, 0);
-            if (!c.getTokenType().equals(TicTacToeConstants.emptyCell)) {
+            BoardNode c = gridBoard.getElement(x, 0);
+            if (!c.getComponentName().equals(TicTacToeConstants.emptyCell)) {
                 boolean win = true;
                 for (int y = 1; y < gridBoard.getHeight(); y++) {
-                    Token o = gridBoard.getElement(x, y);
-                    if (o.getTokenType().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
+                    BoardNode o = gridBoard.getElement(x, y);
+                    if (o.getComponentName().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
                         win = false;
                         break;
                     }
@@ -76,12 +76,12 @@ public class TicTacToeForwardModel extends StandardForwardModel {
 
         // Check rows
         for (int y = 0; y < gridBoard.getHeight(); y++) {
-            Token c = gridBoard.getElement(0, y);
-            if (!c.getTokenType().equals(TicTacToeConstants.emptyCell)) {
+            BoardNode c = gridBoard.getElement(0, y);
+            if (!c.getComponentName().equals(TicTacToeConstants.emptyCell)) {
                 boolean win = true;
                 for (int x = 1; x < gridBoard.getWidth(); x++) {
-                    Token o = gridBoard.getElement(x, y);
-                    if (o.getTokenType().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
+                    BoardNode o = gridBoard.getElement(x, y);
+                    if (o.getComponentName().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
                         win = false;
                         break;
                     }
@@ -95,12 +95,12 @@ public class TicTacToeForwardModel extends StandardForwardModel {
 
         // Check diagonals
         // Primary
-        Token c = gridBoard.getElement(0, 0);
-        if (!c.getTokenType().equals(TicTacToeConstants.emptyCell)) {
+        BoardNode c = gridBoard.getElement(0, 0);
+        if (!c.getComponentName().equals(TicTacToeConstants.emptyCell)) {
             boolean win = true;
             for (int i = 1; i < gridBoard.getWidth(); i++) {
-                Token o = gridBoard.getElement(i, i);
-                if (o.getTokenType().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
+                BoardNode o = gridBoard.getElement(i, i);
+                if (o.getComponentName().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
                     win = false;
                 }
             }
@@ -112,11 +112,11 @@ public class TicTacToeForwardModel extends StandardForwardModel {
 
         // Secondary
         c = gridBoard.getElement(gridBoard.getWidth() - 1, 0);
-        if (!c.getTokenType().equals(TicTacToeConstants.emptyCell)) {
+        if (!c.getComponentName().equals(TicTacToeConstants.emptyCell)) {
             boolean win = true;
             for (int i = 1; i < gridBoard.getWidth(); i++) {
-                Token o = gridBoard.getElement(gridBoard.getWidth() - 1 - i, i);
-                if (o.getTokenType().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
+                BoardNode o = gridBoard.getElement(gridBoard.getWidth() - 1 - i, i);
+                if (o.getComponentName().equals(TicTacToeConstants.emptyCell) || !o.equals(c)) {
                     win = false;
                 }
             }
@@ -125,7 +125,7 @@ public class TicTacToeForwardModel extends StandardForwardModel {
                 return true;
             }
         }
-        boolean tie = gridBoard.getComponents().stream().noneMatch(t -> t.getTokenType().equals(TicTacToeConstants.emptyCell));
+        boolean tie = gridBoard.getComponents().stream().noneMatch(t -> t.getComponentName().equals(TicTacToeConstants.emptyCell));
 
         if (tie) {
             gameState.setGameStatus(CoreConstants.GameResult.DRAW_GAME);
@@ -140,7 +140,7 @@ public class TicTacToeForwardModel extends StandardForwardModel {
      *
      * @param winnerSymbol - which player won.
      */
-    private void registerWinner(TicTacToeGameState gameState, Token winnerSymbol) {
+    private void registerWinner(TicTacToeGameState gameState, BoardNode winnerSymbol) {
         gameState.setGameStatus(CoreConstants.GameResult.GAME_END);
         int winningPlayer = TicTacToeConstants.playerMapping.indexOf(winnerSymbol);
         gameState.setPlayerResult(CoreConstants.GameResult.WIN_GAME, winningPlayer);

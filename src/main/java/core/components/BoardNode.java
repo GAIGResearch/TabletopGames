@@ -26,7 +26,7 @@ public class BoardNode extends Component {
         this(-1, "");
     }
 
-    BoardNode(int maxNeighbours, String name, int ID) {
+    protected BoardNode(int maxNeighbours, String name, int ID) {
         super(CoreConstants.ComponentType.BOARD_NODE, name, ID);
         this.maxNeighbours = maxNeighbours;
         this.neighbours = new HashMap<>();

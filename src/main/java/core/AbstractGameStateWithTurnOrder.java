@@ -25,8 +25,9 @@ public abstract class AbstractGameStateWithTurnOrder extends AbstractGameState {
      * @param nPlayers      - number of players in the game
      */
     public AbstractGameStateWithTurnOrder(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, nPlayers);
+        super(gameParameters, nPlayers, true);
         this.turnOrder = _createTurnOrder(nPlayers);
+        reset();
     }
 
     protected abstract TurnOrder _createTurnOrder(int nPlayers);

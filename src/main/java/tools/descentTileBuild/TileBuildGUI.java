@@ -16,16 +16,12 @@ import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Pair;
 import utilities.Path;
-import utilities.Pathfinder;
 import utilities.Vector2D;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collection;
 
 import static core.CoreConstants.coordinateHash;
 
@@ -38,8 +34,8 @@ public class TileBuildGUI extends AbstractGUIManager {
 
     int width, height;
 
-    public TileBuildGUI(GamePanel parent, Game game, ActionController ac) {
-        super(parent, game, ac, 1);
+    public TileBuildGUI(GamePanel parent, Game game, ActionController ac, int human) {
+        super(parent, game, ac, human);
 
         TileBuildState dgs = (TileBuildState) game.getGameState();
 

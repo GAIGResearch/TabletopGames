@@ -14,7 +14,6 @@ import org.jdesktop.swingx.border.DropShadowBorder;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
-import utilities.Utils;
 import utilities.Vector2D;
 
 import javax.swing.*;
@@ -24,7 +23,8 @@ import java.awt.*;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static games.descent2e.gui.DescentHeroView.*;
+import static games.descent2e.gui.DescentHeroView.labelFont;
+import static games.descent2e.gui.DescentHeroView.titleFont;
 
 public class DescentGUI extends AbstractGUIManager {
     DescentGridBoardView view;
@@ -38,8 +38,8 @@ public class DescentGUI extends AbstractGUIManager {
     static boolean prettyVersion = true;  // Turn off to not draw images
     static Color foregroundColor = Color.black;
 
-    public DescentGUI(GamePanel panel, Game game, ActionController ac) {
-        super(panel, game, ac, 1);  // TODO: calculate/approximate max action space
+    public DescentGUI(GamePanel panel, Game game, ActionController ac, int human) {
+        super(panel, game, ac, human);
 
         DescentGameState dgs = (DescentGameState) game.getGameState();
         if (prettyVersion) {
