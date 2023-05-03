@@ -14,6 +14,10 @@ import games.coltexpress.*;
 import games.coltexpress.gui.ColtExpressGUIManager;
 import games.connect4.*;
 import games.connect4.gui.Connect4GUIManager;
+import games.descent2e.DescentForwardModel;
+import games.descent2e.DescentGameState;
+import games.descent2e.DescentParameters;
+import games.descent2e.gui.DescentGUI;
 import games.diamant.*;
 import games.dominion.gui.DominionGUIManager;
 import games.dotsboxes.*;
@@ -164,7 +168,13 @@ public enum GameType {
     CantStop(2, 4,
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
-            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class);
+            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
+
+    Descent2e(2,4,
+            new ArrayList<>(),
+            new ArrayList<>(),
+                    DescentGameState.class, DescentForwardModel.class, DescentParameters.class, DescentGUI.class);
+
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
