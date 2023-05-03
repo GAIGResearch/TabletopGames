@@ -1,5 +1,6 @@
 package games.descent2e.concepts;
 
+import core.CoreConstants;
 import games.descent2e.DescentGameState;
 import org.json.simple.JSONObject;
 import utilities.Utils;
@@ -9,15 +10,15 @@ public class CountGameOver extends GameOverCondition {
     CountGameFeature countFeature;
     ComparisonType comparisonType;
     int target;
-    Utils.GameResult resultOverlord, resultHeroes;
+    CoreConstants.GameResult resultOverlord, resultHeroes;
 
     @Override
-    public Utils.GameResult test(DescentGameState gs) {
+    public CoreConstants.GameResult test(DescentGameState gs) {
         int count = countFeature.count(gs);
         if (comparisonType.compare(count, target)) {
             return endGame(gs);
         }
-        return Utils.GameResult.GAME_ONGOING;
+        return CoreConstants.GameResult.GAME_ONGOING;
     }
 
     @Override
@@ -25,8 +26,8 @@ public class CountGameOver extends GameOverCondition {
         countFeature = CountGameFeature.parse((JSONObject) jsonObject.get("count"));
         target = (int)(long)jsonObject.get("target");
         comparisonType = ComparisonType.valueOf((String) jsonObject.get("comparison-type"));
-        resultHeroes = Utils.GameResult.valueOf((String) jsonObject.get("result-heroes"));
-        resultOverlord = Utils.GameResult.valueOf((String) jsonObject.get("result-overlord"));
+        resultHeroes = CoreConstants.GameResult.valueOf((String) jsonObject.get("result-heroes"));
+        resultOverlord = CoreConstants.GameResult.valueOf((String) jsonObject.get("result-overlord"));
     }
 
     @Override
@@ -42,13 +43,13 @@ public class CountGameOver extends GameOverCondition {
                 + "? " + "Heroes: " + resultHeroes + "; Overlord: " + resultOverlord;
     }
 
-    private Utils.GameResult endGame(DescentGameState gs) {
-        gs.setGameStatus(Utils.GameResult.GAME_END);
+    private CoreConstants.GameResult endGame(DescentGameState gs) {
+        gs.setGameStatus(CoreConstants.GameResult.GAME_END);
         for (int i = 0; i < gs.getNPlayers(); i++) {
             if (gs.getOverlordPlayer() == i) gs.setPlayerResult(resultOverlord, i);
             else gs.setPlayerResult(resultHeroes, i);
         }
-        return Utils.GameResult.GAME_END;
+        return CoreConstants.GameResult.GAME_END;
     }
 
     enum ComparisonType {

@@ -51,12 +51,12 @@ public class DicePool extends Component implements IComponentContainer<DescentDi
     }
 
     public DicePool(List<DescentDice> dice) {
-        super(Utils.ComponentType.AREA, "DicePool");
+        super(CoreConstants.ComponentType.AREA, "DicePool");
         this.dice = dice.stream().map(DescentDice::copy).collect(Collectors.toList());
         rerolls = new int[dice.size()];
     }
     private DicePool(int componentID) {
-        super(Utils.ComponentType.AREA, componentID);
+        super(CoreConstants.ComponentType.AREA, componentID);
     }
 
     public void roll(Random r) {

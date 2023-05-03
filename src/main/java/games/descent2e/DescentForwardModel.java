@@ -2,6 +2,8 @@ package games.descent2e;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.CoreConstants;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.*;
 import core.properties.*;
@@ -30,7 +32,7 @@ import static games.descent2e.DescentConstants.*;
 import static games.descent2e.components.DicePool.constructDicePool;
 import static utilities.Utils.getNeighbourhood;
 
-public class DescentForwardModel extends AbstractForwardModel {
+public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -209,11 +211,10 @@ public class DescentForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DescentGameState dgs = (DescentGameState) currentState;
         Figure actingFigure = dgs.getActingFigure();
 
-        action.execute(currentState);
         if (checkEndOfGame(dgs)) return;  // TODO: this should be more efficient, and work with triggers so they're not checked after each small action, but only after actions that can actually trigger them
 
         // TODO: may still be able to play cards/skills/free effects - just add more Booleans into the if check when more are added
@@ -572,15 +573,17 @@ public class DescentForwardModel extends AbstractForwardModel {
         return actions;
     }
 
+    /*
     @Override
-    protected AbstractForwardModel _copy() {
+    protected AbstractForwardModel __copy() {
         return new DescentForwardModel();
     }
+    */
 
     private boolean checkEndOfGame(DescentGameState dgs) {
         // TODO end of campaign / other phases
         for (GameOverCondition condition: dgs.currentQuest.getGameOverConditions()) {
-            if (condition.test(dgs) == Utils.GameResult.GAME_END) {
+            if (condition.test(dgs) == CoreConstants.GameResult.GAME_END) {
                 // Quest is over, give rewards
                 System.out.println("Victory!");
                 List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();

@@ -1,5 +1,6 @@
 package games.descent2e.concepts;
 
+import core.CoreConstants;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
@@ -26,8 +27,8 @@ public class DescentReward {
     CountGameFeature countGameFeatureMultiplier;
 
     public void applyReward(DescentGameState gs, int playerIdx) {
-        if (mustWinToReceive && gs.getPlayerResults()[playerIdx] != Utils.GameResult.WIN ||
-            mustLoseToReceive && gs.getPlayerResults()[playerIdx] != Utils.GameResult.LOSE) return;
+        if (mustWinToReceive && gs.getPlayerResults()[playerIdx] != CoreConstants.GameResult.WIN_GAME ||
+            mustLoseToReceive && gs.getPlayerResults()[playerIdx] != CoreConstants.GameResult.LOSE_GAME) return;
 
         // Calculate modifier if needed
         if (countGameFeatureMultiplier != null) multiplier = countGameFeatureMultiplier.count(gs);

@@ -18,9 +18,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
+public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState {
 
-    GridBoard<Token> gridBoard;
+    GridBoard gridBoard;
     LinkedList<Pair<Integer, Integer>> winnerCells;
 
     public Connect4GameState(AbstractParameters gameParameters, int nPlayers) {
@@ -86,7 +86,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     }
 
     @Override
-    public GridBoard<Token> getGridBoard() {
+    public GridBoard getGridBoard() {
         return gridBoard;
     }
 

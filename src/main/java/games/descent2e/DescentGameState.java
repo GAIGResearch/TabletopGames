@@ -1,12 +1,14 @@
 package games.descent2e;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.*;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.components.*;
@@ -18,7 +20,9 @@ import utilities.Vector2D;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DescentGameState extends AbstractGameState implements IPrintable {
+import static games.GameType.Descent2e;
+
+public class DescentGameState extends AbstractGameStateWithTurnOrder implements IPrintable {
 
     public enum DescentPhase implements IGamePhase {
         ForceMove  // Used when a figure started a (possibly valid move action) and is currently overlapping a friendly figure
@@ -58,7 +62,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
      * @param nPlayers       - number of players for this game.
      */
     public DescentGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new DescentTurnOrder(nPlayers), GameType.Descent2e);
+        super(gameParameters, nPlayers);
         tiles = new HashMap<>();
         data = new DescentGameData();
         attackDicePool = new DicePool(Collections.emptyList());
@@ -68,6 +72,16 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
         heroes = new ArrayList<>();
         monsters = new ArrayList<>();
         rnd = new Random(gameParameters.getRandomSeed());
+    }
+
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new DescentTurnOrder(nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return Descent2e;
     }
 
     @Override
@@ -98,7 +112,7 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         DescentGameState copy = new DescentGameState(gameParameters, getNPlayers());
         copy.tiles = new HashMap<>(tiles);  // TODO: deep copy
         copy.masterBoard = masterBoard.copy();
@@ -148,11 +162,6 @@ public class DescentGameState extends AbstractGameState implements IPrintable {
     protected ArrayList<Integer> _getUnknownComponentsIds(int playerId) {
         // TODO
         return null;
-    }
-
-    @Override
-    protected void _reset() {
-        // TODO
     }
 
     @Override

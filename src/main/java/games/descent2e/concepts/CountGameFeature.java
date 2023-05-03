@@ -1,5 +1,6 @@
 package games.descent2e.concepts;
 
+import core.CoreConstants;
 import core.components.Component;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
@@ -36,7 +37,7 @@ public class CountGameFeature {
         } else if (countingWhat == CountType.Token) {
             int count = 0;
             for (Component c: gs.getAllComponents().getComponents()) {
-                if (c.getType() == Utils.ComponentType.TOKEN) {
+                if (c.getType() == CoreConstants.ComponentType.TOKEN) {
                     DToken d = (DToken) c;
                     if (d.getOwnerId() != -1 && d.getDescentTokenType() == countingWhat.tokenType) {
                         count++;

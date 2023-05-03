@@ -1,7 +1,6 @@
 package games.descent2e.gui;
 
-import core.AbstractGameState;
-import core.AbstractPlayer;
+import core.*;
 import core.actions.AbstractAction;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentParameters;
@@ -10,7 +9,7 @@ import games.descent2e.actions.Move;
 import games.descent2e.components.Hero;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
@@ -39,12 +38,12 @@ public class DescentGUI extends AbstractGUIManager {
     static boolean prettyVersion = true;  // Turn off to not draw images
     static Color foregroundColor = Color.black;
 
-    public DescentGUI(GamePanel panel, AbstractGameState gameState, ActionController ac) {
-        super(panel, ac, 100);  // TODO: calculate/approximate max action space
+    public DescentGUI(GamePanel panel, Game game, ActionController ac) {
+        super(panel, game, ac, 1);  // TODO: calculate/approximate max action space
 
-        DescentGameState dgs = (DescentGameState) gameState;
+        DescentGameState dgs = (DescentGameState) game.getGameState();
         if (prettyVersion) {
-            panel.setBackground(ImageIO.GetInstance().getImage(((DescentParameters) gameState.getGameParameters()).dataPath + "img/bg2.jpg"));
+            panel.setBackground(ImageIO.GetInstance().getImage(((DescentParameters) dgs.getGameParameters()).dataPath + "img/bg2.jpg"));
             panel.setAlpha(1f);
             foregroundColor = Color.white;
         }
@@ -71,8 +70,8 @@ public class DescentGUI extends AbstractGUIManager {
         eastWrapper.add(Box.createRigidArea(new Dimension(0, 20)));
         eastWrapper.add(east);
 
-        JPanel infoPanel = createGameStateInfoPanel("Descent2e", gameState, maxWidth/2, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view}, maxWidth/2, defaultActionPanelHeight, false, false, null, this::onMouseEnter, this::onMouseExit);
+        JPanel infoPanel = createGameStateInfoPanel("Descent2e", dgs, maxWidth/2, defaultInfoPanelHeight);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view}, maxWidth/2, defaultActionPanelHeight, false, false, null, this::onMouseEnter, this::onMouseExit);
 
         JPanel south = new JPanel();
         south.setOpaque(false);
@@ -128,13 +127,13 @@ public class DescentGUI extends AbstractGUIManager {
 //        gameInfo.add(playerStatus);
 //        gameInfo.add(playerScores);
         gameInfo.add(gamePhase);
-        gameInfo.add(turnOwner);
+//        gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
         gameInfo.add(actingFigureLabel);
         gameStatus.setForeground(foregroundColor);
         gamePhase.setForeground(foregroundColor);
-        turnOwner.setForeground(foregroundColor);
+//        turnOwner.setForeground(foregroundColor);
         turn.setForeground(foregroundColor);
         currentPlayer.setForeground(foregroundColor);
         actingFigureLabel.setForeground(foregroundColor);
@@ -187,7 +186,7 @@ public class DescentGUI extends AbstractGUIManager {
 
     protected void updateGameStateInfo(AbstractGameState gameState) {
         super.updateGameStateInfo(gameState);
-        DescentTurnOrder dto = (DescentTurnOrder)gameState.getTurnOrder();
+        DescentTurnOrder dto = (DescentTurnOrder)((AbstractGameStateWithTurnOrder)gameState).getTurnOrder();
         DescentGameState dgs = (DescentGameState)gameState;
         if (dgs.getCurrentPlayer() == dgs.getOverlordPlayer()) {
             actingFigureLabel.setText("Acting: " + dgs.getActingFigure().getComponentName());
@@ -198,7 +197,7 @@ public class DescentGUI extends AbstractGUIManager {
     }
 
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING && !(actionButtons == null)) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !(actionButtons == null)) {
             List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
             for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
                 AbstractAction action = actions.get(i);
@@ -226,6 +225,12 @@ public class DescentGUI extends AbstractGUIManager {
     }
 
     @Override
+    public int getMaxActionSpace() {
+        // TODO Confirm this maximum later
+        return 100;
+    }
+
+    @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {
         if (gameState != null) {
             if (player instanceof HumanGUIPlayer) {
@@ -240,7 +245,7 @@ public class DescentGUI extends AbstractGUIManager {
         parent.repaint();
     }
 
-    protected JComponent createActionPanel(ScreenHighlight[] highlights, int width, int height, boolean boxLayout,
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout,
                                            boolean opaque,
                                            Consumer<ActionButton> onActionSelected,
                                            Consumer<ActionButton> onMouseEnter,

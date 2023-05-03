@@ -33,7 +33,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
         this.height = displayHeight;
 
         if (game != null) {
-            view = new AreaView(game.getGameState().getAllComponents(), width, height);
+            view = new AreaView(game.getGameState(), game.getGameState().getAllComponents(), width, height);
         } else {
             view = new JPanel();
         }
@@ -98,7 +98,7 @@ public class PrototypeGUIManager extends AbstractGUIManager {
             if (view instanceof AreaView) {
                 ((AreaView) view).updateComponent(gameState.getAllComponents());
             } else {
-                view = new AreaView(gameState.getAllComponents(), width, height);
+                view = new AreaView(game.getGameState(), gameState.getAllComponents(), width, height);
             }
             if (player instanceof HumanGUIPlayer) {
                 updateActionButtons(player, gameState);

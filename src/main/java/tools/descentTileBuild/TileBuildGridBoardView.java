@@ -3,7 +3,7 @@ package tools.descentTileBuild;
 import core.components.BoardNode;
 import core.components.GridBoard;
 import games.descent2e.gui.DescentGridBoardView;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import gui.views.ComponentView;
 import utilities.Vector2D;
 
@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 import static gui.AbstractGUIManager.defaultItemSize;
 
-public class TileBuildGridBoardView extends ComponentView implements ScreenHighlight {
+public class TileBuildGridBoardView extends ComponentView implements IScreenHighlight {
 
     Vector2D highlight;
     Vector2D oldHighlight;

@@ -9,8 +9,8 @@ import games.descent2e.components.Monster;
 import java.util.LinkedList;
 import java.util.List;
 
-import static utilities.Utils.GameResult.GAME_END;
-import static utilities.Utils.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.GAME_END;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
 
 // Order is all heroes (controlled by their owner ID player), then all monsters by monster group (controlled by overlord)
 public class DescentTurnOrder extends ReactiveTurnOrder {
@@ -124,8 +124,7 @@ public class DescentTurnOrder extends ReactiveTurnOrder {
     }
 
     @Override
-    public void endRound(AbstractGameState gameState) {
-        super.endRound(gameState);
+    public void _endRound(AbstractGameState gameState) {
 
         // Reset figures for the next round
         DescentGameState dgs = (DescentGameState) gameState;

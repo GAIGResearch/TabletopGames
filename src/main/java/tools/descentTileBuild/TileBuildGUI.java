@@ -2,6 +2,7 @@ package tools.descentTileBuild;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
 import core.components.BoardNode;
@@ -10,7 +11,7 @@ import core.properties.PropertyVector2D;
 import games.descent2e.DescentTypes;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.Pair;
@@ -37,12 +38,10 @@ public class TileBuildGUI extends AbstractGUIManager {
 
     int width, height;
 
-    public TileBuildGUI(GamePanel parent, AbstractGameState gameState, ActionController ac) {
-        super(parent, ac, (DescentTypes.TerrainType.getWalkableTerrains().size()+2)
-                *((TileBuildParameters)gameState.getGameParameters()).maxGridSize
-                *((TileBuildParameters)gameState.getGameParameters()).maxGridSize);
+    public TileBuildGUI(GamePanel parent, Game game, ActionController ac) {
+        super(parent, game, ac, 1);
 
-        TileBuildState dgs = (TileBuildState) gameState;
+        TileBuildState dgs = (TileBuildState) game.getGameState();
 
 
         view = new TileBuildGridBoardView(dgs, dgs.tile);
@@ -58,7 +57,7 @@ public class TileBuildGUI extends AbstractGUIManager {
         updateGridSize.addActionListener(e -> {
             int w = Integer.parseInt(gridWidth.getText());
             int h = Integer.parseInt(gridHeight.getText());
-            int maxSize = ((TileBuildParameters)gameState.getGameParameters()).maxGridSize;
+            int maxSize = ((TileBuildParameters)dgs.getGameParameters()).maxGridSize;
             if (w <= maxSize && h <= maxSize) {
                 // Adjust grid in game state
                 dgs.tile.setWidthHeight(w, h);
@@ -76,7 +75,7 @@ public class TileBuildGUI extends AbstractGUIManager {
 
         JButton getjson = new JButton("Generate JSON");
         getjson.addActionListener(e -> {
-            GridBoard tile = ((TileBuildState) gameState).tile.copy();
+            GridBoard tile = ((TileBuildState) dgs).tile.copy();
 
             // Add edge tiles around the grid
             int minX = tile.getWidth()-1;
@@ -196,7 +195,7 @@ public class TileBuildGUI extends AbstractGUIManager {
 
         // Display terrain type, depending on selection of terrain + coordinates in grid, only some actions are available
         terrainOptionsView = new TerrainOptionsView();
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{terrainOptionsView, view}, width, defaultActionPanelHeight);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{terrainOptionsView, view}, width, defaultActionPanelHeight);
 
         JPanel east = new JPanel();
         east.add(actions);
@@ -243,6 +242,13 @@ public class TileBuildGUI extends AbstractGUIManager {
 
         this.cell = cell;
         this.terrainType = terrainType;
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return (DescentTypes.TerrainType.getWalkableTerrains().size()+2)
+                *((TileBuildParameters)game.getGameState().getGameParameters()).maxGridSize
+                *((TileBuildParameters)game.getGameState().getGameParameters()).maxGridSize;
     }
 
     @Override

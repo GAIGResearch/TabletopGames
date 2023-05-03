@@ -40,7 +40,7 @@ public class TileBuildGame {
         GamePanel gamePanel = new GamePanel();
         frame.setContentPane(gamePanel);
 
-        TileBuildGUI gui = new TileBuildGUI(gamePanel, game.getGameState(), ac);
+        TileBuildGUI gui = new TileBuildGUI(gamePanel, game, ac);
 
         frame.setFrameProperties();
         frame.validate();

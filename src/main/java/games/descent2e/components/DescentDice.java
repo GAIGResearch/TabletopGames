@@ -1,5 +1,6 @@
 package games.descent2e.components;
 
+import core.CoreConstants;
 import core.components.Component;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -23,12 +24,12 @@ public class DescentDice extends Component {
     public static List<DescentDice> masterDice;
 
     public DescentDice(){
-        super(Utils.ComponentType.DICE);
+        super(CoreConstants.ComponentType.DICE);
         this.sides = new HashMap<>();
     }
 
     private DescentDice(int ID){
-        super(Utils.ComponentType.DICE, ID);
+        super(CoreConstants.ComponentType.DICE, ID);
     }
 
     public int roll(Random r){
