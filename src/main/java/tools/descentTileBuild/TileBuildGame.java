@@ -2,8 +2,6 @@ package tools.descentTileBuild;
 
 import core.AbstractPlayer;
 import core.Game;
-import games.GameType;
-import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
 import players.human.ActionController;
@@ -40,7 +38,7 @@ public class TileBuildGame {
         GamePanel gamePanel = new GamePanel();
         frame.setContentPane(gamePanel);
 
-        TileBuildGUI gui = new TileBuildGUI(gamePanel, game, ac);
+        TileBuildGUI gui = new TileBuildGUI(gamePanel, game, ac, 0);
 
         frame.setFrameProperties();
         frame.validate();
