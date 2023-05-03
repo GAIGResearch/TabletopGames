@@ -45,7 +45,7 @@ public class DescentGUI extends AbstractGUIManager {
         DescentGameState dgs = (DescentGameState) gameState;
         if (prettyVersion) {
             panel.setBackground(ImageIO.GetInstance().getImage(((DescentParameters) gameState.getGameParameters()).dataPath + "img/bg2.jpg"));
-            panel.setOpacity(1f);
+            panel.setAlpha(1f);
             foregroundColor = Color.white;
         }
 
