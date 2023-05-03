@@ -582,16 +582,20 @@ public class DescentForwardModel extends AbstractForwardModel {
         for (GameOverCondition condition: dgs.currentQuest.getGameOverConditions()) {
             if (condition.test(dgs) == Utils.GameResult.GAME_END) {
                 // Quest is over, give rewards
+                System.out.println("Victory!");
                 List<DescentReward> commonRewards = dgs.currentQuest.getCommonRewards();
                 List<DescentReward> heroRewards = dgs.currentQuest.getCommonRewards();
                 List<DescentReward> overlordRewards = dgs.currentQuest.getCommonRewards();
                 for (int i = 0; i < dgs.getNPlayers(); i++) {
+                    // TODO Uncomment this when Rewards are fixed
+                    /*
                     for (DescentReward dr: commonRewards) dr.applyReward(dgs, i);
                     if (i == dgs.overlordPlayer) {
                         for (DescentReward dr: overlordRewards) dr.applyReward(dgs, i);
                     } else {
                         for (DescentReward dr: heroRewards) dr.applyReward(dgs, i);
                     }
+                    */
                 }
                 // Quest is over, return true
                 return true;
