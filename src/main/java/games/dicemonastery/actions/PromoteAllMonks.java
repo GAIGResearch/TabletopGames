@@ -19,7 +19,7 @@ public class PromoteAllMonks extends AbstractAction {
     public boolean execute(AbstractGameState gs) {
         DiceMonasteryGameState state = (DiceMonasteryGameState) gs;
         // we use all available AP
-        state.useAP(state.getAPLeft());
+        state.useAP(state.getActionPointsLeft());
         int player = state.getCurrentPlayer();
 
         for (Monk monk : state.monksIn(location, player)) {

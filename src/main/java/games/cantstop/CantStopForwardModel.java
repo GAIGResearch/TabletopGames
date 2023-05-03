@@ -1,18 +1,21 @@
 package games.cantstop;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
+import core.StandardForwardModelWithTurnOrder;
 import core.actions.AbstractAction;
 import core.components.Dice;
-import games.cantstop.actions.*;
-import utilities.Utils;
+import core.forwardModels.SequentialActionForwardModel;
+import games.cantstop.actions.Pass;
+import games.cantstop.actions.RollDice;
+import games.cantstop.actions.AllocateDice;
 
 import java.util.*;
 
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 
-public class CantStopForwardModel extends AbstractForwardModel {
+public class CantStopForwardModel extends StandardForwardModel {
 
     private final Pass passAction = new Pass(false);
     private final RollDice rollAction = new RollDice();
@@ -22,12 +25,25 @@ public class CantStopForwardModel extends AbstractForwardModel {
     protected void _setup(AbstractGameState firstState) {
         // everything is reset in CantStopGameState._reset();
         // nothing extra is required here - except to set the Phase
+        CantStopGameState state = (CantStopGameState) firstState;
+        CantStopParameters params = (CantStopParameters) state.getGameParameters();
+        state.completedColumns = new boolean[13];
+        state.playerMarkerPositions = new int[state.getNPlayers()][13];
+        state.temporaryMarkerPositions = new HashMap<>();
+        state.dice = new ArrayList<>();
+        for (int i = 0; i < params.DICE_NUMBER; i++) {
+            state.dice.add(new Dice(params.DICE_SIDES));
+        }
+        if (state.rnd == null) {
+            state.rnd = new Random(System.currentTimeMillis());
+        } else {
+            state.rnd = new Random(state.rnd.nextLong());
+        }
         firstState.setGamePhase(CantStopGamePhase.Decision);
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
-        action.execute(currentState);
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         if (action instanceof Pass) {
             Pass pass = (Pass) action;
             CantStopGameState state = (CantStopGameState) currentState;
@@ -39,10 +55,11 @@ public class CantStopForwardModel extends AbstractForwardModel {
             // then we clear temp markers and pass to the next player
 
             if (state.isNotTerminal()) {
-                state.getTurnOrder().endPlayerTurn(state);
+                endPlayerTurn(state);
                 state.setGamePhase(CantStopGamePhase.Decision);
             }
         }
+        // Until a player explicitly passes, it is still their turn
     }
 
     public void makeTemporaryMarkersPermanentAndClear(CantStopGameState state) {
@@ -52,14 +69,12 @@ public class CantStopForwardModel extends AbstractForwardModel {
         for (Integer trackNumber : state.temporaryMarkerPositions.keySet()) {
             int maxValue = params.maxValue(trackNumber);
             int newValue = state.temporaryMarkerPositions.get(trackNumber);
-            state.playerMarkerPositions.get(playerId)[trackNumber] = newValue;
+            state.playerMarkerPositions[playerId][trackNumber] = newValue;
             if (newValue == maxValue) {
                 state.completedColumns[trackNumber] = true;
                 // and then check game end condition
                 if (state.getGameScore(playerId) >= params.COLUMNS_TO_WIN) {
-                    state.setGameStatus(Utils.GameResult.GAME_END);
-                    for (int p = 0; p < state.getNPlayers(); p++)
-                        state.setPlayerResult(p == playerId ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
+                    endGame(state);
                 }
             }
         }
@@ -104,10 +119,5 @@ public class CantStopForwardModel extends AbstractForwardModel {
                 throw new AssertionError("Unknown phase " + phase);
         }
         return retValue;
-    }
-
-    @Override
-    protected CantStopForwardModel _copy() {
-        return this;
     }
 }

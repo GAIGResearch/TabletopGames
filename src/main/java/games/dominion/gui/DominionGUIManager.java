@@ -2,11 +2,10 @@ package games.dominion.gui;
 
 import core.*;
 import games.dominion.*;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import players.human.ActionController;
-import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -32,7 +31,7 @@ public class DominionGUIManager extends AbstractGUIManager {
     DominionMarketView marketView;
 
     public DominionGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
-        super(parent, ac, 20);
+        super(parent, game, ac, humanID);
         this.humanId = humanID;
         // Now we set up the GUI
 
@@ -98,7 +97,7 @@ public class DominionGUIManager extends AbstractGUIManager {
             // Top area will show state information
             JPanel infoPanel = createGameStateInfoPanel("Dominion", gameState, width, defaultInfoPanelHeight);
             // Bottom area will show actions available
-            JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight, false, true, null, null, null);
+            JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight, false, true, null);
 
             // Add all views to frame
             parent.setLayout(new BorderLayout());
@@ -112,11 +111,15 @@ public class DominionGUIManager extends AbstractGUIManager {
 
     }
 
+    @Override
+    public int getMaxActionSpace() {
+        return 20;
+    }
+
     /**
      * Updates all GUI elements. Must be implemented by subclass.
      *  @param player    - current player acting.
      * @param gameState - current game state to be used in updating visuals.
-     * @param actionTaken
      */
     @Override
     protected void _update(AbstractPlayer player, AbstractGameState gameState) {

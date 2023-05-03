@@ -5,7 +5,6 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
 import core.interfaces.IGamePhase;
-import core.turnorders.StandardTurnOrder;
 import games.GameType;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
@@ -25,7 +24,7 @@ public class BattleloreGameState extends AbstractGameState {
     }
 
     public enum UnitType {
-        Decoy, BloodHarvester, ViperLegion, CitadelGuard, YeomanArcher;
+        Decoy, BloodHarvester, ViperLegion, CitadelGuard, YeomanArcher
     }
 
     int[] playerScores;
@@ -33,8 +32,13 @@ public class BattleloreGameState extends AbstractGameState {
     List<Unit> unitTypes;
 
     public BattleloreGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new StandardTurnOrder(nPlayers), GameType.Battlelore);
+        super(gameParameters, nPlayers);
         playerScores = new int[nPlayers];
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Battlelore;
     }
 
     public Unit GetUnitFromType(UnitType type) {
@@ -52,9 +56,6 @@ public class BattleloreGameState extends AbstractGameState {
             case YeomanArcher:
                 unitType = 4;
                 break;
-            default:
-                unitType = 0;
-                break;
         }
         return (Unit)unitTypes.get(unitType).copy();
     }
@@ -68,10 +69,6 @@ public class BattleloreGameState extends AbstractGameState {
 
     public void AddScore(int playerId, int score) {
         playerScores[playerId] += score;
-    }
-
-    public void IncrementTurn(int playerId) {
-        turnOrder.moveToNextPlayer(this, playerId);
     }
 
     public void SetUnitsAsOrderable(int locX, int locY) {
@@ -119,14 +116,14 @@ public class BattleloreGameState extends AbstractGameState {
 
     public int[][] GetPossibleLocationsForUnits(MapTile tile) {
         int[][] possibleLocations = new int[gameBoard.getWidth()][2];
-        possibleLocations = GetPossibleLocations(tile, possibleLocations, false);
+        GetPossibleLocations(tile, possibleLocations, false);
         if (possibleLocations.length == 0) {
-            possibleLocations = GetPossibleLocations(tile, possibleLocations, true);
+            GetPossibleLocations(tile, possibleLocations, true);
         }
         return possibleLocations;
     }
 
-    private int[][] GetPossibleLocations(MapTile tile, int[][] possibleLocations, boolean isMovementFlexible) {
+    private void GetPossibleLocations(MapTile tile, int[][] possibleLocations, boolean isMovementFlexible) {
         int moveRange = tile.GetUnits().get(0).moveRange;
         int counter = 0;
         for (int x = 0; x < gameBoard.getWidth(); x++) {
@@ -146,11 +143,10 @@ public class BattleloreGameState extends AbstractGameState {
                 }
             }
         }
-        return possibleLocations;
     }
 
     public int[][] GetPossibleTargetUnits(MapTile attackUnit) {
-        int[][] possibleLocations = new int[gameBoard.getWidth()][turnOrder.nPlayers()];
+        int[][] possibleLocations = new int[gameBoard.getWidth()][nPlayers];
         boolean isMelee = attackUnit.GetUnits().get(0).isMelee;
         BattleloreGameParameters parameters = (BattleloreGameParameters) gameParameters;
         int range = parameters.getTroopRange(isMelee);
@@ -219,51 +215,31 @@ public class BattleloreGameState extends AbstractGameState {
         return playerScores[playerId];
     }
 
-    @Override
-    protected void _reset() {
-        gameBoard = null;
-        playerScores = new int[getNPlayers()];
-    }
 
     @Override
-    protected boolean _equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-
-        if (!(o instanceof BattleloreGameState)) {
-            return false;
-        }
-
-        if (!super.equals(o)) {
-            return false;
-        }
-
-        BattleloreGameState other = (BattleloreGameState) o;
-        return Objects.equals(gameBoard, other.gameBoard);
+    public boolean _equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BattleloreGameState)) return false;
+        if (!super.equals(o)) return false;
+        BattleloreGameState that = (BattleloreGameState) o;
+        return Arrays.equals(playerScores, that.playerScores) && Objects.equals(gameBoard, that.gameBoard) && Objects.equals(unitTypes, that.unitTypes);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, gameStatus, gamePhase);
-        result = 31 * result + Arrays.hashCode(playerResults);
-        result = 31 * result + Objects.hash(unitTypes);
-        result = 31 * result * Arrays.hashCode(playerScores);
-        result = 31 * result * gameBoard.hashCode();
+        int result = Objects.hash(super.hashCode(), gameBoard, unitTypes);
+        result = 31 * result + Arrays.hashCode(playerScores);
         return result;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(gameParameters.hashCode()).append("|");
-        sb.append(turnOrder.hashCode()).append("|");
-        sb.append(gameStatus.hashCode()).append("|");
-        sb.append(gamePhase.hashCode()).append("|");
-        sb.append(Arrays.hashCode(playerResults)).append("|*|");
-        sb.append(unitTypes.hashCode()).append("|");
-        sb.append(gameBoard.hashCode()).append("|");
-        sb.append(Arrays.hashCode(playerScores)).append("|");
-        return sb.toString();
+        return gameParameters.hashCode() + "|" +
+                gameStatus.hashCode() + "|" +
+                gamePhase.hashCode() + "|" +
+                Arrays.hashCode(playerResults) + "|*|" +
+                unitTypes.hashCode() + "|" +
+                gameBoard.hashCode() + "|" +
+                Arrays.hashCode(playerScores) + "|";
     }
 }

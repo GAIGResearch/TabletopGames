@@ -1,6 +1,6 @@
 package games.terraformingmars.components;
 
-import core.components.BoardNode;
+import core.components.Component;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.TMTypes;
 import games.terraformingmars.actions.ModifyGlobalParameter;
@@ -9,7 +9,9 @@ import utilities.Utils;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class TMMapTile extends BoardNode {
+import static core.CoreConstants.ComponentType.BOARD_NODE;
+
+public class TMMapTile extends Component {
     int x, y;
     TMTypes.Tile tilePlaced;
 
@@ -20,13 +22,13 @@ public class TMMapTile extends BoardNode {
     int reserved = -1;
 
     public TMMapTile(int x, int y) {
-        super(6, "Tile");
+        super(BOARD_NODE, "Tile");
         this.x = x;
         this.y = y;
     }
 
     protected TMMapTile(int x, int y, int componentID) {
-        super(6, "Tile", componentID);
+        super(BOARD_NODE, "Tile", componentID);
         this.x = x;
         this.y = y;
     }

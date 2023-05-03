@@ -1,11 +1,11 @@
 package games.coltexpress.components;
 
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IComponentContainer;
 import games.coltexpress.ColtExpressParameters;
 import games.coltexpress.ColtExpressTypes;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -27,7 +27,7 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
     private HashMap<ColtExpressTypes.LootType, ArrayList<Integer>> stillAvailableIdx;
 
     private Compartment(int nPlayers, int compartmentID, int ID){
-        super(Utils.ComponentType.BOARD_NODE, ID);
+        super(CoreConstants.ComponentType.BOARD_NODE, ID);
         // Technically loot is face-down, and hence not Visible. But...players know which ones are Jewels and StrongBoxes
         // So all that is actually hidden is which purses are 250 versus 500...on the whole this means that much more information
         // is known than unknown.
@@ -41,7 +41,7 @@ public class Compartment extends Component implements IComponentContainer<Deck<L
     }
 
     public Compartment(int nPlayers, int compartmentID, int which, ColtExpressParameters cep){
-        super(Utils.ComponentType.BOARD_NODE);
+        super(CoreConstants.ComponentType.BOARD_NODE);
         this.lootInside = new Deck<>("lootInside", VisibilityMode.HIDDEN_TO_ALL);
         this.lootOnTop = new Deck<>("lootOntop", VisibilityMode.HIDDEN_TO_ALL);
         this.nPlayers = nPlayers;

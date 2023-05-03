@@ -1,12 +1,10 @@
 package games.tictactoe;
 import core.AbstractGameState;
-import core.components.BoardNode;
+import core.CoreConstants;
 import core.components.Token;
-import core.interfaces.IStateFeatureVector;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import utilities.Pair;
-import utilities.Utils;
 
 public class TicTacToeHeuristic extends TunableParameters implements IStateHeuristic {
 
@@ -26,12 +24,12 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         TicTacToeGameState ttgs = (TicTacToeGameState) gs;
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if(playerResult == Utils.GameResult.LOSE) {
+        if(playerResult == CoreConstants.GameResult.LOSE_GAME) {
             return -1;
         }
-        if(playerResult == Utils.GameResult.WIN) {
+        if(playerResult == CoreConstants.GameResult.WIN_GAME) {
             return 1;
         }
 
@@ -41,7 +39,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
 
         double nTotalCount = nPlayer.length * 2 + 2;  // N rows + N columns + 2 diagonals
 
-        BoardNode playerChar = TicTacToeConstants.playerMapping.get(playerId);
+        Token playerChar = TicTacToeConstants.playerMapping.get(playerId);
 
         // Check columns
         for (int x = 0; x < ttgs.gridBoard.getWidth(); x++){
@@ -67,7 +65,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
         return pScore * FACTOR_PLAYER + oppScore * FACTOR_OPPONENT;
     }
 
-    private Pair<Integer, Integer> countColumns(TicTacToeGameState ttgs, int column, BoardNode playerChar) {
+    private Pair<Integer, Integer> countColumns(TicTacToeGameState ttgs, int column, Token playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int y = 0; y < ttgs.gridBoard.getHeight(); y++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(column, y));
@@ -75,7 +73,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
         return count;
     }
 
-    private Pair<Integer, Integer> countRows(TicTacToeGameState ttgs, int row, BoardNode playerChar) {
+    private Pair<Integer, Integer> countRows(TicTacToeGameState ttgs, int row, Token playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int x = 0; x < ttgs.gridBoard.getWidth(); x++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(x, row));
@@ -83,7 +81,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
         return count;
     }
 
-    private Pair<Integer, Integer> countPrimaryDiagonal(TicTacToeGameState ttgs, BoardNode playerChar) {
+    private Pair<Integer, Integer> countPrimaryDiagonal(TicTacToeGameState ttgs, Token playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int x = 0; x < ttgs.gridBoard.getWidth(); x++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(x, x));
@@ -91,7 +89,7 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
         return count;
     }
 
-    private Pair<Integer, Integer> countSecondaryDiagonal(TicTacToeGameState ttgs, BoardNode playerChar) {
+    private Pair<Integer, Integer> countSecondaryDiagonal(TicTacToeGameState ttgs, Token playerChar) {
         Pair<Integer, Integer> count = new Pair<>(0, 0);
         for (int x = 0; x < ttgs.gridBoard.getWidth(); x++) {
             checkChar(count, playerChar, ttgs.gridBoard.getElement(ttgs.gridBoard.getWidth()-1-x, x));
@@ -99,10 +97,10 @@ public class TicTacToeHeuristic extends TunableParameters implements IStateHeuri
         return count;
     }
 
-    private void checkChar(Pair<Integer, Integer> count, BoardNode playerChar, BoardNode c) {
+    private void checkChar(Pair<Integer, Integer> count, Token playerChar, Token c) {
         if (c.equals(playerChar)) {
             count.a ++;
-        } else if (!c.getComponentName().equals(" ")) {
+        } else if (!c.getTokenType().equals(" ")) {
             count.b ++;
         }
     }

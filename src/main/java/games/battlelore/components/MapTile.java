@@ -1,12 +1,12 @@
 package games.battlelore.components;
 
-import core.components.BoardNode;
+import core.CoreConstants;
 import core.components.Component;
-import utilities.Utils;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class MapTile extends BoardNode {
+public class MapTile extends Component {
 
     protected int locationX, locationY;
     private ArrayList<Unit> units;
@@ -24,7 +24,7 @@ public class MapTile extends BoardNode {
     }
 
     public MapTile(int locationX, int locationY, ArrayList<Unit> units) {
-        super(-1, "MapTile");
+        super(CoreConstants.ComponentType.BOARD_NODE, "MapTile");
         this.locationX = locationX;
         this.locationY = locationY;
         this.units = units;
@@ -32,7 +32,7 @@ public class MapTile extends BoardNode {
 
 
     public MapTile() {
-        super(-1, "MapTile");
+        super(CoreConstants.ComponentType.BOARD_NODE, "MapTile");
         this.locationX = -1;
         this.locationY = -1;
         this.units = new ArrayList<Unit>();
@@ -40,7 +40,7 @@ public class MapTile extends BoardNode {
 
     //Used by copy constructor only
     private MapTile(int componentID, int locationX, int locationY, ArrayList<Unit> units) {
-        super(-1, "MapTile", componentID);
+        super(CoreConstants.ComponentType.BOARD_NODE, "MapTile", componentID);
         this.locationX = locationX;
         this.locationY = locationY;
         this.units = units;
@@ -71,7 +71,7 @@ public class MapTile extends BoardNode {
         }
     }
 
-    public Boolean addUnit(Unit unit) {
+    public Boolean AddUnit(Unit unit) {
             units.add(unit);
             return true;
     }

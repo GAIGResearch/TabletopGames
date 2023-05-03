@@ -1,9 +1,9 @@
 package games.virus;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import games.virus.components.VirusOrgan;
-import utilities.Utils;
 
 public class VirusHeuristic implements IStateHeuristic {
 
@@ -12,7 +12,7 @@ public class VirusHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         VirusGameState vgs = (VirusGameState) gs;
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
         if (!vgs.isNotTerminal())
             return playerResult.value;

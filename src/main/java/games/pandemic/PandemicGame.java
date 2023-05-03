@@ -1,24 +1,18 @@
 package games.pandemic;
 
 import core.*;
-import core.interfaces.IGameListener;
+import evaluation.listeners.IGameListener;
+import evaluation.listeners.MetricsGameListener;
 import games.GameType;
-import games.pandemic.gui.PandemicGUIManager;
-import org.apache.commons.math3.stat.descriptive.summary.Sum;
+import games.pandemic.stats.PandemicMetrics;
 import players.PlayerType;
 import players.human.ActionController;
-import players.mcts.MCTSPlayer;
-import players.simple.OSLAPlayer;
+import evaluation.loggers.FileStatsLogger;
+import evaluation.loggers.SummaryLogger;
+import evaluation.summarisers.TAGNumericStatSummary;
 import players.simple.RandomPlayer;
-import utilities.FileStatsLogger;
-import utilities.SummaryLogger;
-import utilities.TAGStatSummary;
-import utilities.Utils;
 
 import java.util.*;
-
-import static games.pandemic.PandemicCompetitionRankingAttributes.GAME_WIN;
-
 public class PandemicGame extends Game {
 
     public PandemicGame(List<AbstractPlayer> agents, PandemicParameters params) {
@@ -30,12 +24,12 @@ public class PandemicGame extends Game {
     }
 
     public static Game runCompetition(String parameterConfigFile, List<AbstractPlayer> players, long seed,
-                          boolean randomizeParameters, List<IGameListener> listeners, int nRepetitions, ActionController ac){
+                                      boolean randomizeParameters, List<IGameListener> listeners, int nRepetitions, ActionController ac){
         boolean detailedStatistics = true;
         boolean printStatSummary = false;
 
         // Save win rate statistics over all games
-        TAGStatSummary statSummary = new TAGStatSummary(""+seed);
+        TAGNumericStatSummary statSummary = new TAGNumericStatSummary(""+seed);
 
         // Play n repetitions of this game and record player results
         Game game = null;
@@ -47,7 +41,7 @@ public class PandemicGame extends Game {
             game = runOne(GameType.Pandemic, parameterConfigFile, players, s, randomizeParameters, listeners, ac, 0);
             if (game != null) {
                 statSummary.add(game.getGameState().getGameStatus().value);
-                offset = game.getGameState().getTurnOrder().getRoundCounter() * game.getGameState().getNPlayers();
+                offset = game.getGameState().getRoundCounter() * game.getGameState().getNPlayers();
             } else {
                 break;
             }
@@ -72,15 +66,16 @@ public class PandemicGame extends Game {
 
         // logging setup
         FileStatsLogger logger = new FileStatsLogger(logFile);
-        PandemicListener pl = new PandemicListener(logger);
-        ArrayList<IGameListener> listeners = new ArrayList<>();
+        MetricsGameListener pl = new MetricsGameListener(logger, new PandemicMetrics().getAllMetrics());
+
+        List<IGameListener> listeners = new ArrayList<>();
         listeners.add((pl));
 
         List<AbstractPlayer> players = new ArrayList<>();
 
         for (int i = 0; i < nPlayers; i++){
-            players.add(new MCTSPlayer());
-//            players.add(new RandomPlayer());
+//            players.add(new MCTSPlayer());
+            players.add(new RandomPlayer());
         }
 
         PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
@@ -107,8 +102,8 @@ public class PandemicGame extends Game {
      * iterate through all tiebreaks before returning 0 (tied)
      */
     public static int compare(SummaryLogger[] statSummaries, int playerId, int otherId, TieBreak[] tieBreaks, int tieBreakTier) {
-        double player = statSummaries[playerId].summary().get(tieBreaks[tieBreakTier].name()).mean();
-        double other = statSummaries[otherId].summary().get(tieBreaks[tieBreakTier].name()).mean();
+        double player = ((TAGNumericStatSummary)statSummaries[playerId].summary().get(tieBreaks[tieBreakTier].name())).mean();
+        double other = ((TAGNumericStatSummary)statSummaries[otherId].summary().get(tieBreaks[tieBreakTier].name())).mean();
         if (player == other && tieBreakTier < tieBreaks.length-1) {
             return compare(statSummaries, playerId, otherId, tieBreaks, tieBreakTier + 1);
         }
@@ -148,23 +143,22 @@ public class PandemicGame extends Game {
 
         ActionController ac = null; // new ActionController();
         SummaryLogger[] sumLogs = new SummaryLogger[playersToTest.length];
-        for (int p = 0; p < playersToTest.length; p++) {
+        for (PlayerType playerType : playersToTest) {
 
             // logging setup
-            sumLogs[p] = new SummaryLogger();
-            PandemicCompetitionListener pl = new PandemicCompetitionListener(sumLogs[p]);
-            ArrayList<IGameListener> listeners = new ArrayList<>();
+            MetricsGameListener pl = new MetricsGameListener(new SummaryLogger(), new PandemicMetrics().getAllMetrics());
+            List<IGameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 
             PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
 
             List<AbstractPlayer> players = new ArrayList<>();
-            for (int i = 0; i < nPlayers; i++){
-                players.add(playersToTest[p].createPlayerInstance(params.getRandomSeed()));
+            for (int i = 0; i < nPlayers; i++) {
+                players.add(playerType.createPlayerInstance(params.getRandomSeed()));
             }
             runCompetition(configFile, players, params.getRandomSeed(), false, listeners, nRepetitions, ac);
 
-            System.out.println(playersToTest[p].name());
+            System.out.println(playerType.name());
             System.out.println("-----------------");
             pl.allGamesFinished();
         }

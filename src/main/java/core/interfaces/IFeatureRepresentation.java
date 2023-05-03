@@ -1,8 +1,8 @@
 package core.interfaces;
 
+import core.CoreConstants;
 import utilities.Distance;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +31,7 @@ public interface IFeatureRepresentation {
      * @param playerId - player observing the state.
      * @return - map from terminal feature vector to game result.
      */
-    HashMap<HashMap<Integer, Double>, Utils.GameResult> getTerminalFeatures(int playerId);
+    HashMap<HashMap<Integer, Double>, CoreConstants.GameResult> getTerminalFeatures(int playerId);
 
     /**
      * Provide a numerical assessment of the current game state's distance to the other game state provided.
@@ -60,12 +60,12 @@ public interface IFeatureRepresentation {
      * @param playerId - player observing the state.
      * @return - list of (distance, game result) pairs.
      */
-    default ArrayList<Pair<Double, Utils.GameResult>> getDistanceToTerminalStates(int playerId) {
-        ArrayList<Pair<Double, Utils.GameResult>> distances = new ArrayList<>();
+    default ArrayList<Pair<Double, CoreConstants.GameResult>> getDistanceToTerminalStates(int playerId) {
+        ArrayList<Pair<Double, CoreConstants.GameResult>> distances = new ArrayList<>();
         double[] features = getDistanceFeatures(playerId);
 
-        HashMap<HashMap<Integer, Double>, Utils.GameResult> terminalFeatures = getTerminalFeatures(playerId);
-        for (Map.Entry<HashMap<Integer, Double>, Utils.GameResult> e: terminalFeatures.entrySet()) {
+        HashMap<HashMap<Integer, Double>, CoreConstants.GameResult> terminalFeatures = getTerminalFeatures(playerId);
+        for (Map.Entry<HashMap<Integer, Double>, CoreConstants.GameResult> e: terminalFeatures.entrySet()) {
             double[] otherFeatures = new double[features.length];
             for (Map.Entry<Integer, Double> m : e.getKey().entrySet()) {
                 otherFeatures[m.getKey()] = m.getValue();

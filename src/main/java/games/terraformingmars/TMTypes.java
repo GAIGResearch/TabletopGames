@@ -162,6 +162,14 @@ public class TMTypes {
         public boolean canGoOnCard() {
             return canGoOnCard;
         }
+
+        public static Resource[] getPlayerBoardResources() {
+            ArrayList<Resource> res = new ArrayList<>();
+            for (Resource r: values()) {
+                if (r.isPlayerBoardRes()) res.add(r);
+            }
+            return res.toArray(new Resource[0]);
+        }
     }
 
     public enum Tag {

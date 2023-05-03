@@ -1,11 +1,11 @@
 package games.battlelore;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
-import utilities.Utils;
 
 public class BattleloreHeuristic extends TunableParameters implements IStateHeuristic {
     double FACTOR_PLAYER_POWER = 0.8;
@@ -28,19 +28,19 @@ public class BattleloreHeuristic extends TunableParameters implements IStateHeur
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         BattleloreGameState gameState = (BattleloreGameState) gs;
-        Utils.GameResult playerResult = gameState.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = gameState.getPlayerResults()[playerId];
 
         int playerUnitPower = 0;
         int orderableUnitCount = 0;
         int enemyUnitPower = 0;
 
-        if (playerResult == Utils.GameResult.LOSE) {
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME) {
             return -1;
         }
-        else if (playerResult == Utils.GameResult.WIN) {
+        else if (playerResult == CoreConstants.GameResult.WIN_GAME) {
             return 1;
         }
-        else if (playerResult == Utils.GameResult.DRAW) {
+        else if (playerResult == CoreConstants.GameResult.DRAW_GAME) {
             return 0;
         }
 

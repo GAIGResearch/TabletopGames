@@ -1,19 +1,19 @@
 package games.pandemic.rules.gameOver;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.components.Counter;
 import core.rules.GameOverCondition;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import utilities.Hash;
-import utilities.Utils;
 
-import static utilities.Utils.GameResult.GAME_ONGOING;
-import static utilities.Utils.GameResult.WIN;
+import static core.CoreConstants.GameResult.GAME_ONGOING;
+import static core.CoreConstants.GameResult.WIN_GAME;
 
 public class GameOverDiseasesCured extends GameOverCondition {
     @Override
-    public Utils.GameResult test(AbstractGameState gs) {
+    public CoreConstants.GameResult test(AbstractGameState gs) {
         boolean all_cured = true;
         for (String c : PandemicConstants.colors) {
             if (((Counter)((PandemicGameState)gs).getComponent(Hash.GetInstance().hash("Disease " + c))).getValue() < 1) all_cured = false;
@@ -22,7 +22,7 @@ public class GameOverDiseasesCured extends GameOverCondition {
             if (gs.getCoreGameParameters().verbose) {
                 System.out.println("WIN!");
             }
-            return WIN;
+            return WIN_GAME;
         }
         return GAME_ONGOING;
     }

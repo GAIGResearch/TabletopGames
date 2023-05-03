@@ -4,7 +4,7 @@ import core.properties.*;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import utilities.Hash;
-import utilities.Utils.ComponentType;
+import core.CoreConstants.ComponentType;
 
 import java.util.*;
 

@@ -40,7 +40,7 @@ public class PromoteMonk extends AbstractAction {
             throw new AssertionError(String.format("No monk with piety level %d for player %d in %s", pietyLevelToPromote, state.getCurrentPlayer(), location));
         }
         if (useAllAP)
-            state.addActionPoints(-state.getAPLeft());
+            state.addActionPoints(-state.getActionPointsLeft());
         return true;
     }
 

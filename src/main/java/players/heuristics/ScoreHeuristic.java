@@ -1,12 +1,8 @@
 package players.heuristics;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
-import core.interfaces.ITunableParameters;
-import utilities.Utils;
-
-import static utilities.Utils.GameResult.DRAW;
-import static utilities.Utils.GameResult.WIN;
 
 public class ScoreHeuristic implements IStateHeuristic {
 
@@ -21,9 +17,9 @@ public class ScoreHeuristic implements IStateHeuristic {
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         double score = gs.getGameScore(playerId);
-        if (gs.getPlayerResults()[playerId] == Utils.GameResult.WIN)
+        if (gs.getPlayerResults()[playerId] == CoreConstants.GameResult.WIN_GAME)
             return score * 1.5;
-        if (gs.getPlayerResults()[playerId] == Utils.GameResult.LOSE)
+        if (gs.getPlayerResults()[playerId] == CoreConstants.GameResult.LOSE_GAME)
             return score * 0.5;
         return score;
     }

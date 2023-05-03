@@ -1,6 +1,7 @@
 package games.connect4;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
@@ -8,6 +9,7 @@ import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
 import core.turnorders.AlternatingTurnOrder;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import utilities.Pair;
 
@@ -16,15 +18,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
 
-public class Connect4GameState extends AbstractGameState implements IPrintable, IGridGameState {
-
-    GridBoard gridBoard;
+    GridBoard<Token> gridBoard;
     LinkedList<Pair<Integer, Integer>> winnerCells;
 
     public Connect4GameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Connect4);
+        super(gameParameters, nPlayers);
         winnerCells = new LinkedList<>();
+        gridBoard = null;
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Connect4;
     }
 
     @Override
@@ -65,11 +72,6 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     }
 
     @Override
-    protected void _reset() {
-        gridBoard = null;
-    }
-
-    @Override
     protected boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Connect4GameState)) return false;
@@ -84,7 +86,7 @@ public class Connect4GameState extends AbstractGameState implements IPrintable, 
     }
 
     @Override
-    public GridBoard getGridBoard() {
+    public GridBoard<Token> getGridBoard() {
         return gridBoard;
     }
 

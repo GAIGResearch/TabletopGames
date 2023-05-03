@@ -1,7 +1,7 @@
 package games.battlelore;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.GridBoard;
 import games.battlelore.actions.AttackUnitsAction;
@@ -11,13 +11,11 @@ import games.battlelore.actions.SkipTurnAction;
 import games.battlelore.cards.CommandCard;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
-import utilities.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-public class BattleloreForwardModel extends AbstractForwardModel {
+public class BattleloreForwardModel extends StandardForwardModel {
 
     @Override
     protected void _setup(AbstractGameState initialState) {
@@ -38,6 +36,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         gameState.gameBoard = new GridBoard(hexWidth, hexHeight);
         gameState.unitTypes = new ArrayList<>();
         gameState.unitTypes = _data.getUnits();
+        gameState.playerScores = new int[gameState.getNPlayers()];
 
         for (int x = 0; x < gameState.gameBoard.getWidth(); x++) {
             for (int y = 0; y < gameState.gameBoard.getHeight(); y++) {
@@ -50,15 +49,14 @@ public class BattleloreForwardModel extends AbstractForwardModel {
     }
 
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         BattleloreGameState state = (BattleloreGameState) currentState;
-        action.execute(currentState);
 
         int playerId = state.getCurrentPlayer();
         Unit.Faction playerFaction = playerId == Unit.Faction.Dakhan_Lords.ordinal() ?
                 Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
-        int maxTurnsToPlay = ((BattleloreGameParameters)currentState.getGameParameters()).maxTurnsToPlay;
+        int maxRounds = currentState.getGameParameters().getMaxRounds();
         switch ((BattleloreGameState.BattleloreGamePhase) state.getGamePhase()) {
             case CommandAndOrderStep:
                 currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.MoveStep);
@@ -70,7 +68,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
                 break;
             case AttackStep:
                 if (state.GetReadyForAttackUnitsFromTile(playerFaction).isEmpty()) {
-                    state.getTurnOrder().endPlayerTurn(state);
+                    endPlayerTurn(state);
                     currentState.setGamePhase(BattleloreGameState.BattleloreGamePhase.CommandAndOrderStep);
                 }
                 break;
@@ -78,14 +76,13 @@ public class BattleloreForwardModel extends AbstractForwardModel {
                 break;
         }
 
-        if (checkGameEnd((BattleloreGameState) currentState, playerId)) {
-            registerWinner(state, playerId);
-        } else if (state.getTurnOrder().getRoundCounter() > maxTurnsToPlay) {
-            if (state.getGameScore(0) == state.getGameScore(1))
-                registerWinner(state, -1);
-            else
-                registerWinner(state, state.getGameScore(0) >= state.getGameScore(1) ? 0 : 1);
+        if (checkGameEnd((BattleloreGameState) currentState, playerId) || state.getRoundCounter() >= maxRounds) {
+            endGame(currentState);
         }
+
+        endPlayerTurn(currentState);
+        if (currentState.getCurrentPlayer() == 0)
+            endRound(currentState);
     }
 
     private void PutLearningScenarioUnits(BattleloreGameState gameState) {
@@ -113,7 +110,7 @@ public class BattleloreForwardModel extends AbstractForwardModel {
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
         BattleloreGameState state = (BattleloreGameState) gameState;
-        int player = gameState.getTurnOrder().getCurrentPlayer(gameState);
+        int player = gameState.getCurrentPlayer();
         Unit.Faction playerFaction = player == Unit.Faction.Dakhan_Lords.ordinal() ? Unit.Faction.Dakhan_Lords : Unit.Faction.Uthuk_Yllan;
 
         ArrayList<AbstractAction> actions = new ArrayList<>();
@@ -198,11 +195,6 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         return allyUnitsRemainInArea && enemyUnitsRemainInArea;
     }
 
-    @Override
-    protected AbstractForwardModel _copy() {
-        return new BattleloreForwardModel();
-    }
-
     /**
      * Checks if the game ended.
      *
@@ -213,23 +205,4 @@ public class BattleloreForwardModel extends AbstractForwardModel {
         return gameState.getGameScore(playerId) >= parameters.WIN_SCORE;
     }
 
-
-    @Override
-    protected void endGame(AbstractGameState gameState) {
-        if (gameState.getCoreGameParameters().verbose) {
-            System.out.println(Arrays.toString(gameState.getPlayerResults()));
-        }
-    }
-
-
-    private void registerWinner(BattleloreGameState gameState, int winnerID) {
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
-        if (winnerID != -1) {
-            gameState.setPlayerResult(Utils.GameResult.WIN, winnerID);
-            gameState.setPlayerResult(Utils.GameResult.LOSE, winnerID == 0 ? 1 : 0);
-        } else {
-            gameState.setPlayerResult(Utils.GameResult.DRAW, 0);
-            gameState.setPlayerResult(Utils.GameResult.DRAW, 1);
-        }
-    }
 }

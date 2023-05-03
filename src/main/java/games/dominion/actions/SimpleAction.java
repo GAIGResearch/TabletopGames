@@ -8,6 +8,9 @@ public class SimpleAction extends DominionAction {
     public SimpleAction(CardType type, int playerId) {
         super(type, playerId);
     }
+    public SimpleAction(CardType type, int playerId, boolean dummy) {
+        super(type, playerId, dummy);
+    }
 
     @Override
     public SimpleAction copy() {

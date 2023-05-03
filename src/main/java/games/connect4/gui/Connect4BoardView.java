@@ -3,8 +3,7 @@ import core.components.BoardNode;
 import core.components.GridBoard;
 import core.components.Token;
 import games.connect4.Connect4Constants;
-import games.connect4.Connect4GameState;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import gui.views.ComponentView;
 import utilities.Pair;
 
@@ -16,7 +15,7 @@ import java.util.LinkedList;
 
 import static gui.GUI.defaultItemSize;
 
-public class Connect4BoardView extends ComponentView implements ScreenHighlight {
+public class Connect4BoardView extends ComponentView implements IScreenHighlight {
 
     Rectangle[] rects;  // Used for highlights + action trimming
     ArrayList<Rectangle> highlight;

@@ -18,6 +18,7 @@ public class AddGridCellEdge extends AbstractAction {
         // Find neighbouring cells
         DBGameState dbgs = (DBGameState) gs;
 
+        int nCellsCompleteBefore = dbgs.cellToOwnerMap.size();
         // Mark this edge as complete by current player and check if connected cells are complete too
         dbgs.edgeToOwnerMap.put(edge, gs.getCurrentPlayer());
 
@@ -30,7 +31,8 @@ public class AddGridCellEdge extends AbstractAction {
                 dbgs.nCellsPerPlayer[gs.getCurrentPlayer()]++;
             }
         }
-
+        int nCellsCompleteAfter = dbgs.cellToOwnerMap.size();
+        dbgs.setLastActionScored(nCellsCompleteAfter == nCellsCompleteBefore);
         return true;  // Always able to execute
     }
 

@@ -3,7 +3,7 @@ package games.terraformingmars.gui;
 import core.components.Deck;
 import games.terraformingmars.TMGameState;
 import games.terraformingmars.components.TMCard;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import utilities.ImageIO;
 import utilities.Vector2D;
 
@@ -12,7 +12,7 @@ import java.awt.*;
 
 import static utilities.GUIUtils.*;
 
-public class TMDeckDisplay extends JComponent implements ScreenHighlight {
+public class TMDeckDisplay extends JComponent implements IScreenHighlight {
 
     private Deck<TMCard> deck;
     TMGameState gs;

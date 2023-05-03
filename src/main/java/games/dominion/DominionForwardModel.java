@@ -2,16 +2,16 @@ package games.dominion;
 
 import core.*;
 import core.actions.*;
+import core.components.Deck;
 import games.dominion.actions.*;
 import games.dominion.cards.*;
 import games.dominion.DominionConstants.*;
-import utilities.Utils;
 
 import java.util.*;
 
 import static java.util.stream.Collectors.*;
 
-public class DominionForwardModel extends AbstractForwardModel {
+public class DominionForwardModel extends StandardForwardModel {
     /**
      * Performs initial game setup according to game rules
      * - sets up decks and shuffles
@@ -24,6 +24,7 @@ public class DominionForwardModel extends AbstractForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DominionGameState state = (DominionGameState) firstState;
+        state._reset();
         DominionParameters params = state.params;
 
         for (int i = 0; i < state.playerCount; i++) {
@@ -67,10 +68,8 @@ public class DominionForwardModel extends AbstractForwardModel {
      * @param action       - action requested to be played by a player.
      */
     @Override
-    protected void _next(AbstractGameState currentState, AbstractAction action) {
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         DominionGameState state = (DominionGameState) currentState;
-
-        action.execute(state);
 
         int playerID = state.getCurrentPlayer();
 
@@ -89,9 +88,35 @@ public class DominionForwardModel extends AbstractForwardModel {
                 if (state.buysLeftForCurrentPlayer < 1 || action instanceof EndPhase) {
                     // change phase
                     if (state.gameOver()) {
-                        endOfGameProcessing(state);
+                        endGame(state);
                     } else {
-                        state.endOfTurn(playerID);
+
+                        // 1) put hand and cards played into discard
+                        // 2) draw 5 new cards
+                        // 3) shuffle and move discard if we run out
+                        Deck<DominionCard> hand = state.playerHands[playerID];
+                        Deck<DominionCard> discard = state.playerDiscards[playerID];
+                        Deck<DominionCard> table = state.playerTableaux[playerID];
+
+                        discard.add(hand);
+                        discard.add(table);
+                        table.clear();
+                        hand.clear();
+                        for (int i = 0; i < state.params.HAND_SIZE; i++)
+                            state.drawCard(playerID);
+
+                        state.defenceStatus = new boolean[state.playerCount];  // resets to false
+
+                        state.actionsLeftForCurrentPlayer = 1;
+                        state.spentSoFar = 0;
+                        state.additionalSpendAvailable = 0;
+                        state.buysLeftForCurrentPlayer = 1;
+                        state.setGamePhase(DominionGameState.DominionGamePhase.Play);
+
+                        endPlayerTurn(state);
+                        // and we end the round if we get back to the first player
+                        if (state.getCurrentPlayer() == currentState.getFirstPlayer())
+                            endRound(state, state.getFirstPlayer());
                     }
                 }
                 break;
@@ -101,18 +126,7 @@ public class DominionForwardModel extends AbstractForwardModel {
 
     }
 
-    private void endOfGameProcessing(DominionGameState state) {
-        state.setGameStatus(Utils.GameResult.GAME_END);
-        int[] finalScores = new int[state.playerCount];
-        for (int p = 0; p < state.playerCount; p++) {
-            int finalP = p;
-            finalScores[p] = state.getTotal(p, c -> c.victoryPoints(finalP, state));
-        }
-        int winningScore = Arrays.stream(finalScores).max().getAsInt();
-        for (int p = 0; p < state.playerCount; p++) {
-            state.setPlayerResult(finalScores[p] == winningScore ? Utils.GameResult.WIN : Utils.GameResult.LOSE, p);
-        }
-    }
+
 
     private void processDelayedActions(TriggerType trigger, DominionGameState state) {
         Map<Boolean, List<IDelayedAction>> partition = state.delayedActions.stream()
@@ -157,16 +171,5 @@ public class DominionForwardModel extends AbstractForwardModel {
             default:
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
         }
-    }
-
-    /**
-     * Gets a copy of the FM with a new random number generator.
-     *
-     * @return - new forward model with different random seed (keeping logic).
-     */
-    @Override
-    protected AbstractForwardModel _copy() {
-        // no internal state as yet
-        return this;
     }
 }

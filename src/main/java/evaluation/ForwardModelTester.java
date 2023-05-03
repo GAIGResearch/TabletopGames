@@ -2,9 +2,8 @@ package evaluation;
 
 import core.*;
 import core.actions.AbstractAction;
-import games.*;
-import org.apache.commons.math3.analysis.function.Abs;
-import players.*;
+import games.GameType;
+import players.PlayerFactory;
 import utilities.Utils;
 
 import java.util.*;
@@ -41,6 +40,7 @@ public class ForwardModelTester {
         int numberOfGames = Utils.getArg(args, "nGames", 1);
         String gameToRun = Utils.getArg(args, "game", "TicTacToe");
         int nPlayers = Utils.getArg(args, "nPlayers", 2);
+        boolean verbose = Arrays.asList(args).contains("verbose");
         GameType gt = GameType.valueOf(gameToRun);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         Game game = gt.createGameInstance(nPlayers, seed);
@@ -59,7 +59,7 @@ public class ForwardModelTester {
             game.reset(allPlayers, seed);
 
             decision = 0;
-            boolean allFine = true;
+            boolean allFine;
             do {
                 AbstractGameState stateCopy = game.getGameState().copy();
                 stateHistory.add(stateCopy);
@@ -69,13 +69,17 @@ public class ForwardModelTester {
                     String error = String.format("Problem on state copy - orig/copy hashcodes are %d/%d",
                              game.getGameState().hashCode(), stateCopy.hashCode());
                     System.out.println(error);
-                    System.out.printf("\tOrig: %s%n\tCopy: %s%n", game.getGameState().toString(), stateCopy.toString());
+                    System.out.printf("\tOrig: %s%n\tCopy: %s%n", game.getGameState().toString(), stateCopy);
                     throw new AssertionError("Copy of game state should have same hashcode as original");
                 }
                 allFine = checkHistory();
+                int player = game.getGameState().getCurrentPlayer();
+                int currentRound = game.getGameState().getRoundCounter();
                 AbstractAction action = game.oneAction();
                 actionHistory.add(action);
                 decision++;
+                if (verbose)
+                    System.out.printf("Decision %d made by player %d in Round %d (%s)%n", decision, player, currentRound, action);
 
             } while (allFine && game.getGameState().isNotTerminal());
         }

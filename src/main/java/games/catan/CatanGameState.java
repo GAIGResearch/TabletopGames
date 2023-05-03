@@ -1,27 +1,27 @@
 package games.catan;
 
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
-import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.Area;
 import core.components.Card;
 import core.components.Component;
 import core.components.Deck;
 import core.interfaces.IGamePhase;
+import core.turnorders.TurnOrder;
 import games.GameType;
 import games.catan.actions.OfferPlayerTrade;
 import games.catan.components.Edge;
 import games.catan.components.Graph;
 import games.catan.components.Road;
 import games.catan.components.Settlement;
-import utilities.Utils;
 
 import java.util.*;
 
 import static core.CoreConstants.*;
 import static games.catan.CatanConstants.*;
 
-public class CatanGameState extends AbstractGameState {
+public class CatanGameState extends AbstractGameStateWithTurnOrder {
     protected CatanTile[][] board;
     protected Graph<Settlement, Road> catanGraph;
     protected Card boughtDevCard; // used to keep a reference to a dev card bought in the current turn to avoid playing it
@@ -50,8 +50,18 @@ public class CatanGameState extends AbstractGameState {
     HashMap<Integer, Area> areas;
 
     public CatanGameState(AbstractParameters pp, int nPlayers) {
-        super(pp, new CatanTurnOrder(nPlayers, ((CatanParameters) pp).n_actions_per_turn), GameType.Catan);
+        super(pp, nPlayers);
         _reset();
+    }
+
+    @Override
+    protected TurnOrder _createTurnOrder(int nPlayers) {
+        return new CatanTurnOrder(nPlayers, getGameParameters().getMaxRounds());
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Catan;
     }
 
     @Override
@@ -76,7 +86,6 @@ public class CatanGameState extends AbstractGameState {
         return areas.get(playerId);
     }
 
-    @Override
     protected void _reset() {
         // set everything to null (except for Random number generator)
         this.areas = null;
@@ -89,8 +98,7 @@ public class CatanGameState extends AbstractGameState {
         scores = new int[getNPlayers()];
         knights = new int[getNPlayers()];
         exchangeRates = new int[getNPlayers()][CatanParameters.Resources.values().length];
-        for (int i = 0; i < exchangeRates.length; i++)
-            Arrays.fill(exchangeRates[i], pp.default_exchange_rate);
+        for (int[] exchangeRate : exchangeRates) Arrays.fill(exchangeRate, pp.default_exchange_rate);
         victoryPoints = new int[getNPlayers()];
         longestRoadLength = pp.min_longest_road;
         largestArmy = -1;
@@ -155,11 +163,11 @@ public class CatanGameState extends AbstractGameState {
         return board;
     }
 
-    public void setGraph(Graph graph) {
+    public void setGraph(Graph<Settlement, Road> graph) {
         this.catanGraph = graph;
     }
 
-    public Graph getGraph() {
+    public Graph<Settlement, Road> getGraph() {
         return catanGraph;
     }
 
@@ -515,7 +523,7 @@ public class CatanGameState extends AbstractGameState {
     }
 
     @Override
-    protected AbstractGameState _copy(int playerId) {
+    protected AbstractGameStateWithTurnOrder __copy(int playerId) {
         CatanGameState copy = new CatanGameState(getGameParameters(), getNPlayers());
         copy.gamePhase = gamePhase;
         copy.board = copyBoard();
@@ -550,9 +558,9 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        if (getPlayerResults()[playerId] == Utils.GameResult.LOSE)
+        if (getPlayerResults()[playerId] == GameResult.LOSE_GAME)
             return -1.0;
-        if (getPlayerResults()[playerId] == Utils.GameResult.WIN)
+        if (getPlayerResults()[playerId] == GameResult.WIN_GAME)
             return 1.0;
         return (double) (scores[playerId]) / 10.0;
     }

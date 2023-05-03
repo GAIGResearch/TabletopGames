@@ -2,13 +2,13 @@ package games.blackjack;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.GameType;
-import utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.*;
@@ -18,7 +18,6 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
     Deck<FrenchCard> drawDeck;
     int dealerPlayer;
 
-
     /**
      * Constructor. Initialises some generic game state variables.
      *
@@ -26,7 +25,12 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
      * @param nPlayers       - number of players for this game.
      */
     public BlackjackGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new BlackjackTurnOrder(nPlayers), GameType.Blackjack);
+        super(gameParameters, nPlayers);
+    }
+
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Blackjack;
     }
 
     @Override
@@ -118,10 +122,10 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
 
     @Override
     protected double _getHeuristicScore(int playerId) {
-        Utils.GameResult playerResult = getPlayerResults()[playerId];
-        if (playerResult == Utils.GameResult.LOSE)
+        CoreConstants.GameResult playerResult = getPlayerResults()[playerId];
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
             return -1;
-        if (playerResult == Utils.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
             return 1;
 
         // if game not over, return the score scaled by the maximum score possible
@@ -152,12 +156,6 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
     }
 
     @Override
-    protected void _reset() {
-        drawDeck = null;
-        playerDecks = null;
-    }
-
-    @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BlackjackGameState)) return false;
@@ -168,14 +166,11 @@ public class BlackjackGameState extends AbstractGameState implements IPrintable 
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(gameParameters, turnOrder, playerDecks, gameStatus, gamePhase, drawDeck, dealerPlayer);
-        result = 31 * result + Arrays.hashCode(playerResults);
-        return result;
+        return Objects.hash(super.hashCode(), playerDecks, drawDeck, dealerPlayer);
     }
 
     @Override
     public void printToConsole() {
-        // TODO fix
         String[] strings = new String[4];
 
         strings[0] = "Player      : " + getCurrentPlayer();

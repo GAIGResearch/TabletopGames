@@ -12,6 +12,9 @@ public class Moneylender extends DominionAction {
     public Moneylender(int playerId) {
         super(CardType.MONEYLENDER, playerId);
     }
+    public Moneylender(int playerId, boolean dummy) {
+        super(CardType.MONEYLENDER, playerId, dummy);
+    }
 
     public final int BONUS_MONEY_FOR_TRASHING = 3;
     public final CardType TRASHABLE_CARD_TYPE = CardType.COPPER;

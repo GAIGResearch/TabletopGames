@@ -1,6 +1,6 @@
 package games.pandemic.rules.rules;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
@@ -32,7 +32,7 @@ public class EpidemicInfect extends RuleNode {
     }
 
     @Override
-    protected boolean run(AbstractGameState gs) {
+    protected boolean run(AbstractGameStateWithTurnOrder gs) {
         // 1. infection counter idx ++
         PandemicGameState pgs = (PandemicGameState)gs;
         ((Counter)pgs.getComponent(infectionRateHash)).increment(1);

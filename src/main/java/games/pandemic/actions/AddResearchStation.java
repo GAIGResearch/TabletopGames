@@ -25,7 +25,7 @@ public class AddResearchStation extends AbstractAction {
         BoardNode bn = ((PandemicGameState)gs).getWorld().getNodeByStringProperty(nameHash, city);
         PandemicGameState pgs = (PandemicGameState)gs;
         if (bn != null) {
-            bn.setProperty(new PropertyBoolean("researchStation", true));
+            bn.setProperty(new PropertyBoolean("Research Stations", true));
             Counter rStationCounter = (Counter) pgs.getComponent(PandemicConstants.researchStationHash);
             rStationCounter.decrement(1); // We have one less research station
             pgs.addResearchStation(((PropertyString) bn.getProperty(nameHash)).value);

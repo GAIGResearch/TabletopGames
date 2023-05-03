@@ -2,11 +2,12 @@ package test.games.dominion;
 
 
 import core.AbstractPlayer;
+import core.Game;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import games.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
-import games.dominion.DominionGame;
 import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;
 import games.dominion.actions.MoatReaction;
@@ -33,7 +34,7 @@ public class TestPartialObservabilityCopy {
             new TestPlayer(),
             new TestPlayer());
 
-    DominionGame game = new DominionGame(players, DominionParameters.firstGame(System.currentTimeMillis()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.firstGame(System.currentTimeMillis()), players.size()));
     DominionGameState state = (DominionGameState) game.getGameState();
     DominionForwardModel fm = new DominionForwardModel();
 

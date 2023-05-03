@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.function.ToDoubleBiFunction;
 
+import static players.mcts.MCTSEnums.Information.Closed_Loop;
 import static players.mcts.MCTSEnums.Information.Open_Loop;
 import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
@@ -162,6 +163,8 @@ public class MCTSParams extends PlayerParameters {
         nodesStoreScoreDelta = (boolean) getParameterValue("nodesStoreScoreDelta");
         maintainMasterState = (boolean) getParameterValue("maintainMasterState");
         discardStateAfterEachIteration = (boolean) getParameterValue("discardStateAfterEachIteration");
+        if (information == Closed_Loop)
+            discardStateAfterEachIteration = false;
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST
                 || (biasVisits > 0 && advantageFunction == null)) {
             useMAST = true;

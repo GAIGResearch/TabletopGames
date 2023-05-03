@@ -1,7 +1,7 @@
 package games.cantstop.gui;
 
 import core.*;
-import games.cantstop.*;
+import games.cantstop.CantStopGameState;
 import gui.*;
 import players.human.ActionController;
 
@@ -14,8 +14,8 @@ public class CantStopGUIManager extends AbstractGUIManager {
     static int cantStopWidth = 600;
     static int cantStopHeight = 500;
 
-    public CantStopGUIManager(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 6);
+    public CantStopGUIManager(GamePanel parent, Game game, ActionController ac, int humanId) {
+        super(parent, game, ac, humanId);
         CantStopGameState state = (CantStopGameState) game.getGameState();
         view = new CantStopBoardView(state);
 
@@ -23,7 +23,7 @@ public class CantStopGUIManager extends AbstractGUIManager {
         height = cantStopHeight;
 
         JPanel infoPanel = createGameStateInfoPanel("Can't Stop", state, width, defaultInfoPanelHeight);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[0], width, defaultActionPanelHeight);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[0], width, defaultActionPanelHeight);
 
         parent.setLayout(new BorderLayout());
         parent.add(view, BorderLayout.CENTER);
@@ -33,6 +33,11 @@ public class CantStopGUIManager extends AbstractGUIManager {
         parent.revalidate();
         parent.setVisible(true);
         parent.repaint();
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 6;
     }
 
     @Override

@@ -1,4 +1,4 @@
-# TAG: [Tabletop Games Framework](https://hopshackle.github.io/tagsite/)
+# TAG: [Tabletop Games Framework](http://www.tabletopgames.ai/)
 
 [![license](https://img.shields.io/github/license/GAIGResearch/TabletopGames)](LICENSE)
 ![top-language](https://img.shields.io/github/languages/top/GAIGResearch/TabletopGames)
@@ -33,7 +33,8 @@ Currently implemented games:
 
 Games in progress:
 - [ ] Descent (Jesper Ejsing, John Goodenough, Frank Walls 2005)
-- [ ] Santorini (Lina Cossette, David Forest 2016)
+- [ ] Hanabi (Antoine Bauza 2010)
+- [ ] 7 Wonders (Antoine Bauza 2010)
 
 ## Setting up
 The project requires Java with minimum version 8. In order to run the code, you must either download the repository, or clone it. If you are looking for a particular release, you can find all listed [here](https://github.com/GAIGResearch/TabletopGames/releases). 

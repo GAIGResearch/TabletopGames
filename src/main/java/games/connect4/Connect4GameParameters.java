@@ -2,6 +2,7 @@ package games.connect4;
 
 import core.AbstractParameters;
 import evaluation.TunableParameters;
+import games.GameType;
 
 import java.util.*;
 
@@ -51,8 +52,8 @@ public class Connect4GameParameters extends TunableParameters {
     }
 
     @Override
-    public Connect4Game instantiate() {
-        return new Connect4Game(this);
+    public Object instantiate() {
+        return GameType.Connect4.createGameInstance(2, this);
     }
 
 

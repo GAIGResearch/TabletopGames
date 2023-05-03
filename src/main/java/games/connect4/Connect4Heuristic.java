@@ -1,8 +1,8 @@
 package games.connect4;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
-import utilities.Utils;
 
 public class Connect4Heuristic extends TunableParameters implements IStateHeuristic {
 
@@ -17,12 +17,12 @@ public class Connect4Heuristic extends TunableParameters implements IStateHeuris
     public double evaluateState(AbstractGameState gs, int playerId) {
         //This is a simple win-lose heuristic.
 
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if(playerResult == Utils.GameResult.LOSE) {
+        if(playerResult == CoreConstants.GameResult.LOSE_GAME) {
             return -1;
         }
-        if(playerResult == Utils.GameResult.WIN) {
+        if(playerResult == CoreConstants.GameResult.WIN_GAME) {
             return 1;
         }
 

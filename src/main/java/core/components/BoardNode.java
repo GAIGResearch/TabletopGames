@@ -1,9 +1,9 @@
 package core.components;
 
+import core.CoreConstants;
 import core.properties.Property;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import utilities.Utils;
 
 import java.util.HashMap;
 
@@ -16,7 +16,7 @@ public class BoardNode extends Component {
 
 
     public BoardNode(int maxNeighbours, String name) {
-        super(Utils.ComponentType.BOARD_NODE, name);
+        super(CoreConstants.ComponentType.BOARD_NODE, name);
         this.maxNeighbours = maxNeighbours;
         this.neighbours = new HashMap<>();
         this.neighbourSideMapping = new HashMap<>();
@@ -26,8 +26,8 @@ public class BoardNode extends Component {
         this(-1, "");
     }
 
-    protected BoardNode(int maxNeighbours, String name, int ID) {
-        super(Utils.ComponentType.BOARD_NODE, name, ID);
+    BoardNode(int maxNeighbours, String name, int ID) {
+        super(CoreConstants.ComponentType.BOARD_NODE, name, ID);
         this.maxNeighbours = maxNeighbours;
         this.neighbours = new HashMap<>();
         this.neighbourSideMapping = new HashMap<>();

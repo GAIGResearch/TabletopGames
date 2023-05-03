@@ -8,8 +8,7 @@ import org.junit.*;
 import players.PlayerConstants;
 import players.mcts.*;
 import players.simple.RandomPlayer;
-import utilities.SummaryLogger;
-import utilities.Utils;
+import evaluation.loggers.SummaryLogger;
 
 import java.util.*;
 import java.util.function.*;
@@ -38,7 +37,7 @@ public class RewardsForParanoiaTests {
     }
 
     public Game createGame(MCTSParams params, GameType gameType) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
@@ -62,7 +61,7 @@ public class RewardsForParanoiaTests {
             mctsPlayer.setStatsLogger(logger);
 
             AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                    .getAction(state, forwardModel.computeAvailableActions(state));
+                    ._getAction(state, forwardModel.computeAvailableActions(state));
 
             if (state.getCurrentPlayer() == 0) {
                 logger.processDataAndFinish();
@@ -85,13 +84,13 @@ public class RewardsForParanoiaTests {
                 .map(SingleTreeNode::getActor)
                 .collect(groupingBy(Function.identity(), counting()));
         // we then check that all players have som nodes in the tree
-        Utils.GameResult[] results = mctsPlayer.getRoot(0).getState().getPlayerResults();
+        CoreConstants.GameResult[] results = mctsPlayer.getRoot(0).getState().getPlayerResults();
         System.out.println("Nodes by player: " + nodeCountByDecisionMaker);
-        if (results[0] == Utils.GameResult.GAME_ONGOING)
+        if (results[0] == CoreConstants.GameResult.GAME_ONGOING)
             assertTrue(nodeCountByDecisionMaker.get(0) > 10);
-        if (results[1] == Utils.GameResult.GAME_ONGOING)
+        if (results[1] == CoreConstants.GameResult.GAME_ONGOING)
             assertTrue(nodeCountByDecisionMaker.get(1) > 10);
-        if (results[2] == Utils.GameResult.GAME_ONGOING)
+        if (results[2] == CoreConstants.GameResult.GAME_ONGOING)
             assertTrue(nodeCountByDecisionMaker.get(2) > 10);
         return true;
     };

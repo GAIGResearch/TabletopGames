@@ -2,12 +2,12 @@ package games.catan;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import games.catan.components.Settlement;
-import utilities.Utils;
 
 import java.util.ArrayList;
 
@@ -48,11 +48,11 @@ public class CatanHeuristic extends TunableParameters implements IStateHeuristic
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
         CatanGameState state = (CatanGameState) gs;
-        Utils.GameResult playerResult = state.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = state.getPlayerResults()[playerId];
 
-        if (playerResult == Utils.GameResult.LOSE)
+        if (playerResult == CoreConstants.GameResult.LOSE_GAME)
             return -1;
-        if (playerResult == Utils.GameResult.WIN)
+        if (playerResult == CoreConstants.GameResult.WIN_GAME)
             return 1;
 
         double stateValue = 0.0;

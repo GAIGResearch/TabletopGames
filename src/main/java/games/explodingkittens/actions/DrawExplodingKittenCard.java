@@ -47,10 +47,10 @@ public class DrawExplodingKittenCard extends DrawCard implements IPrintable {
             } else {
                 discardDeck.add(to);
                 to.clear();
-                ((ExplodingKittensGameState) gs).killPlayer(playerID);
+                ekgs.killPlayer(playerID);
             }
         } else {
-            ((ExplodingKittensTurnOrder)gs.getTurnOrder()).endPlayerTurnStep(gs);
+            ((ExplodingKittensTurnOrder)ekgs.getTurnOrder()).endPlayerTurnStep(gs);
         }
         return true;
     }

@@ -15,11 +15,10 @@ import games.terraformingmars.components.TMMapTile;
 import games.terraformingmars.rules.requirements.Requirement;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
 import players.human.HumanGUIPlayer;
 import utilities.ImageIO;
-import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -37,15 +36,12 @@ import static javax.swing.JOptionPane.OK_CANCEL_OPTION;
 
 public class TMGUI extends AbstractGUIManager {
 
-    public final static Color[] playerColors = new Color[]{new Color(203, 161, 26), Color.red, Color.pink, Color.green, Color.cyan};
-
     TMBoardView view;
     TMPlayerView playerView;
     TMDeckDisplay playerHand, playerCardChoice;
     TMCardView playerCorporation, lastCardPlayed;
     TMDeckDisplay playerCardsPlayed;
     JScrollPane paneHand, paneCardChoice, paneCardsPlayed;
-    JPanel infoPanel;
     JLabel generationCount;
 
     static int fontSize = 16;
@@ -61,15 +57,14 @@ public class TMGUI extends AbstractGUIManager {
     boolean focusCurrentPlayer;
     JButton focusPlayerButton;
 
-    boolean firstUpdate = true;
     boolean updateButtons = false;
     HashMap<TMTypes.ActionType, JMenu> actionMenus;
 
     TMAction lastAction;
     TMTurnOrder turnOrder;
 
-    public TMGUI(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 500);
+    public TMGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
+        super(parent, game, ac, humanId);
         if (game == null) return;
 
         // Make backgroundImage the content pane.
@@ -232,7 +227,7 @@ public class TMGUI extends AbstractGUIManager {
         actionLabel.setFont(defaultFont);
         actionLabel.setForeground(fontColor);
         actionLabel.setOpaque(false);
-        JComponent actionPanel = createActionPanel(new ScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false, null, null, null);
+        JComponent actionPanel = createActionPanel(new IScreenHighlight[]{view, playerHand, playerCardChoice}, defaultDisplayWidth*2, defaultActionPanelHeight/2, false,false, null);
         JPanel actionWrapper = new JPanel();
         actionWrapper.add(actionLabel);
         actionWrapper.add(actionPanel);
@@ -330,8 +325,13 @@ public class TMGUI extends AbstractGUIManager {
         // TODO: display end of game scoring and winner (separate window?)
     }
 
+    @Override
+    public int getMaxActionSpace() {
+        return 500;
+    }
+
     private void createActionMenu(AbstractPlayer player, TMGameState gs) {
-        if (gs.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+        if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
             TMForwardModel fm = (TMForwardModel) player.getForwardModel();
             List<AbstractAction> actions = fm.getAllActions(gs);
             List<AbstractAction> legalActions = fm.computeAvailableActions(gs);
@@ -371,7 +371,7 @@ public class TMGUI extends AbstractGUIManager {
 
     @Override
     protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
-        if (gameState.getGameStatus() == Utils.GameResult.GAME_ONGOING) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
 
             // Reset buttons
             for (ActionButton actionButton : actionButtons) {
@@ -513,11 +513,11 @@ public class TMGUI extends AbstractGUIManager {
 
             TMGameState gs = ((TMGameState) gameState);
 
-            if (gameState.getGameStatus() == Utils.GameResult.GAME_END) {
+            if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_END) {
                 int win = -1;
                 String displayText = "<html><table><tr><td>Player</td><td>TR</td><td>Milestones</td><td>Awards</td><td>Board</td><td>Cards</td><td>Total</td></tr>";
                 for (int i = 0; i < gameState.getNPlayers(); i++) {
-                    if (gameState.getPlayerResults()[i] == Utils.GameResult.WIN) win = i;
+                    if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME) win = i;
 
                     int tr = gs.getPlayerResources()[i].get(TMTypes.Resource.TR).getValue();
                     int milestones = gs.countPointsMilestones(i);
@@ -535,7 +535,7 @@ public class TMGUI extends AbstractGUIManager {
 
             if (player instanceof HumanGUIPlayer) {
                 TMAction action = (TMAction) gameState.getHistory().get(gameState.getHistory().size()-1);
-                TMTurnOrder turnOrder = (TMTurnOrder) gameState.getTurnOrder();
+                TMTurnOrder turnOrder = (TMTurnOrder) gs.getTurnOrder();
                 if (!action.equals(lastAction) || !turnOrder.equals(this.turnOrder)) {
                     createActionMenu(player, (TMGameState) gameState);
                     this.lastAction = action.copy();

@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import core.CoreConstants;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import utilities.Utils.ComponentType;
 
 public class Dice extends Component {
     protected int nSides;  // Number of sides
@@ -21,12 +21,12 @@ public class Dice extends Component {
     }
 
     public Dice(int nSides) {
-        super(ComponentType.DICE);
+        super(CoreConstants.ComponentType.DICE);
         this.nSides = nSides;
     }
 
     private Dice(int nSides, int value, int ID) {
-        super(ComponentType.DICE, ID);
+        super(CoreConstants.ComponentType.DICE, ID);
         this.nSides = nSides;
         this.value = value;
     }

@@ -30,6 +30,6 @@ public class LinearStateHeuristic extends AbstractStateHeuristic {
         for (int i = 0; i < phi.length; i++) {
             retValue += phi[i] * coefficients[i+1];
         }
-        return Utils.range(retValue, minValue, maxValue);
+        return Utils.clamp(retValue, minValue, maxValue);
     }
 }

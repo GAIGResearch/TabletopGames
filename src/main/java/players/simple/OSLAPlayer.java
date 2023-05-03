@@ -2,6 +2,7 @@ package players.simple;
 
 import core.AbstractForwardModel;
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
@@ -39,7 +40,7 @@ public class OSLAPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState gs, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState gs, List<AbstractAction> actions) {
 
         double maxQ = Double.NEGATIVE_INFINITY;
         AbstractAction bestAction = null;
@@ -52,7 +53,7 @@ public class OSLAPlayer extends AbstractPlayer {
 
             getForwardModel().next(gsCopy, action);
 
-            if (gsCopy.getTurnOrder() instanceof StandardTurnOrder) {
+            if (gs instanceof AbstractGameStateWithTurnOrder && ((AbstractGameStateWithTurnOrder)gsCopy).getTurnOrder() instanceof StandardTurnOrder) {
                 advanceToEndOfRoundWithRandomActions(gsCopy, playerID);
             }
 

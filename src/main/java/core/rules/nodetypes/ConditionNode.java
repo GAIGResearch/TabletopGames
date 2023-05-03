@@ -1,6 +1,7 @@
 package core.rules.nodetypes;
 
 import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.rules.Node;
 
 /**
@@ -38,7 +39,7 @@ public abstract class ConditionNode extends Node {
     protected abstract boolean test(AbstractGameState gs);
 
     @Override
-    public final Node execute(AbstractGameState gs) {
+    public final Node execute(AbstractGameStateWithTurnOrder gs) {
         passed = test(gs);
         return getNext();
     }

@@ -9,7 +9,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import utilities.Pair;
-import utilities.Utils;
 import utilities.Vector2D;
 
 import java.io.FileReader;
@@ -28,11 +27,11 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
     private BoardNode[][] grid;  // 2D grid representation of this board
 
     protected GridBoard() {
-        super(Utils.ComponentType.BOARD);
+        super(CoreConstants.ComponentType.BOARD);
     }
 
     public GridBoard(int width, int height) {
-        super(Utils.ComponentType.BOARD);
+        super(CoreConstants.ComponentType.BOARD);
         this.width = width;
         this.height = height;
         this.grid = new BoardNode[height][width];
@@ -45,28 +44,27 @@ public class GridBoard extends Component implements IComponentContainer<BoardNod
     }
 
     public GridBoard(BoardNode[][] grid) {
-        super(Utils.ComponentType.BOARD);
+        super(CoreConstants.ComponentType.BOARD);
         this.width = grid[0].length;
         this.height = grid.length;
         this.grid = grid;
     }
 
     protected GridBoard(BoardNode[][] grid, int ID) {
-        super(Utils.ComponentType.BOARD, ID);
+        super(CoreConstants.ComponentType.BOARD, ID);
         this.width = grid[0].length;
         this.height = grid.length;
         this.grid = grid;
     }
 
     protected GridBoard(int width, int height, int ID) {
-        super(Utils.ComponentType.BOARD, ID);
+        super(CoreConstants.ComponentType.BOARD, ID);
         this.width = width;
         this.height = height;
         this.grid = new BoardNode[height][width];
     }
-
     public GridBoard(GridBoard orig) {
-        super(Utils.ComponentType.BOARD);
+        super(CoreConstants.ComponentType.BOARD);
         this.width = orig.getWidth();
         this.height = orig.getHeight();
         this.grid = orig.grid.clone();

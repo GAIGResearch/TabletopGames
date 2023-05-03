@@ -18,6 +18,9 @@ public class Chapel extends DominionAction implements IExtendedSequence {
     public Chapel(int playerId) {
         super(CardType.CHAPEL, playerId);
     }
+    public Chapel(int playerId, boolean dummy) {
+        super(CardType.CHAPEL, playerId, dummy);
+    }
 
     boolean executed = false;
 
@@ -35,7 +38,7 @@ public class Chapel extends DominionAction implements IExtendedSequence {
      */
     @Override
     public Chapel copy() {
-        Chapel retValue = new Chapel(player);
+        Chapel retValue = new Chapel(player, dummyAction);
         retValue.executed = executed;
         return retValue;
     }
@@ -78,13 +81,13 @@ public class Chapel extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof Chapel) {
             Chapel other = (Chapel) obj;
-            return other.player == player && other.executed == executed;
+            return super.equals(obj) && other.executed == executed;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(executed, player, CardType.CHAPEL);
+        return super.hashCode() + (executed ? 1 : 0);
     }
 }

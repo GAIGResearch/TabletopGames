@@ -3,10 +3,8 @@ package games.battlelore.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
-import games.battlelore.BattleloreGameState;
 import games.battlelore.components.MapTile;
 import games.battlelore.components.Unit;
-import games.dotsboxes.AddGridCellEdge;
 
 import java.util.Objects;
 
@@ -38,8 +36,6 @@ public class SkipTurnAction extends AbstractAction {
             return false;
         }
 
-        BattleloreGameState state = (BattleloreGameState) gameState;
-        state.IncrementTurn(playerID);
         MapTile units = (MapTile) gameState.getComponentById(unitsID);
         if (units != null) {
             for (Unit unit : units.GetUnits()) {

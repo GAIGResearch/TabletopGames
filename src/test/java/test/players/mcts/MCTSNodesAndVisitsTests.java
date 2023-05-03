@@ -3,13 +3,15 @@ package test.players.mcts;
 import core.*;
 import core.actions.*;
 import core.interfaces.IStatisticLogger;
-import games.dominion.DominionGame;
+import games.GameType;
+import games.dominion.DominionForwardModel;
+import games.dominion.DominionGameState;
 import games.dominion.DominionParameters;
 import org.junit.*;
 import players.PlayerConstants;
 import players.mcts.*;
 import players.simple.RandomPlayer;
-import utilities.SummaryLogger;
+import evaluation.loggers.SummaryLogger;
 
 import java.util.*;
 
@@ -36,13 +38,13 @@ public class MCTSNodesAndVisitsTests {
     }
 
     public Game createGame(MCTSParams params) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(244)));
-        return new DominionGame(players, DominionParameters.firstGame(330245));
+        return new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.firstGame(330245), players.size()));
     }
 
     @Test
@@ -93,6 +95,7 @@ public class MCTSNodesAndVisitsTests {
         params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
         params.maxTreeDepth = 3;
         params.information = MCTSEnums.Information.Closed_Loop;
+        params.discardStateAfterEachIteration = false;
         Game game = createGame(params);
         runGame(game, 4, new int[0], new int[0]);
     }
@@ -101,6 +104,7 @@ public class MCTSNodesAndVisitsTests {
     public void reducedDepth3() {
         params.maxTreeDepth = 3;
         params.information = MCTSEnums.Information.Closed_Loop;
+        params.discardStateAfterEachIteration = false;
         Game game = createGame(params);
         runGame(game, 4, new int[0], new int[0]);
     }
@@ -114,7 +118,7 @@ public class MCTSNodesAndVisitsTests {
             mctsPlayer.setStatsLogger(logger);
 
             AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                    .getAction(state, forwardModel.computeAvailableActions(state));
+                    ._getAction(state, forwardModel.computeAvailableActions(state));
 
             if (state.getCurrentPlayer() == 0) {
                 logger.processDataAndFinish();

@@ -1,12 +1,13 @@
 package test.games.dominion;
 
 import core.AbstractPlayer;
+import core.Game;
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.components.PartialObservableDeck;
+import games.GameType;
 import games.dominion.DominionConstants.DeckType;
 import games.dominion.DominionForwardModel;
-import games.dominion.DominionGame;
 import games.dominion.DominionGameState;
 import games.dominion.DominionGameState.DominionGamePhase;
 import games.dominion.DominionParameters;
@@ -31,8 +32,8 @@ public class BaseActionCardsTest {
             new TestPlayer(),
             new TestPlayer());
 
-    DominionGame game = new DominionGame(players, DominionParameters.firstGame(System.currentTimeMillis()));
-    DominionGame gameImprovements = new DominionGame(players, DominionParameters.improvements(System.currentTimeMillis()));
+    Game game = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.firstGame(System.currentTimeMillis()), players.size()));
+    Game gameImprovements = new Game(GameType.Dominion, players, new DominionForwardModel(), new DominionGameState(DominionParameters.improvements(System.currentTimeMillis()), players.size()));
     DominionForwardModel fm = new DominionForwardModel();
 
     @Test
@@ -157,8 +158,8 @@ public class BaseActionCardsTest {
     @Test
     public void militiaCausesAllOtherPlayersToDiscardDownToFive() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.endOfTurn(0);
-        state.endOfTurn(1);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
         assertEquals(2, state.getCurrentPlayer());
         DominionAction militia = new Militia(2);
         state.addCard(CardType.MILITIA, 2, DeckType.HAND);
@@ -182,9 +183,9 @@ public class BaseActionCardsTest {
     @Test
     public void militiaSkipsPlayersWithThreeOrFewerCards() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.endOfTurn(0);
-        state.endOfTurn(1);
-        state.endOfTurn(2);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
         assertEquals(3, state.getCurrentPlayer());
         DominionAction militia = new Militia(3);
         state.addCard(CardType.MILITIA, 3, DeckType.HAND);
@@ -242,14 +243,21 @@ public class BaseActionCardsTest {
         assertFalse(state.isDefended(0));
     }
 
+    private void moveForwardToNextPlayer(DominionGameState state) {
+        int startingPlayer = state.getCurrentPlayer();
+        while (state.getCurrentPlayer() == startingPlayer)
+            fm.next(state, new EndPhase());
+    }
+
     @Test
     public void moatDefendsAgainstMilitia() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.endOfTurn(0);
-        state.endOfTurn(1);
-        state.endOfTurn(2);
+        moveForwardToNextPlayer(state);
+        moveForwardToNextPlayer(state);
+        moveForwardToNextPlayer(state);
         state.addCard(CardType.MOAT, 0, DeckType.HAND);
         state.addCard(CardType.MILITIA, 3, DeckType.HAND);
+        assertEquals(3, state.getCurrentPlayer());
         DominionAction militia = new Militia(3);
 
         fm.next(state, militia);
@@ -276,9 +284,9 @@ public class BaseActionCardsTest {
     @Test
     public void notRevealingMoatDoesNotDefendAgainstMilitia() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.endOfTurn(0);
-        state.endOfTurn(1);
-        state.endOfTurn(2);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
         state.addCard(CardType.MOAT, 0, DeckType.HAND);
         state.addCard(CardType.MILITIA, 3, DeckType.HAND);
         DominionAction militia = new Militia(3);
@@ -309,8 +317,8 @@ public class BaseActionCardsTest {
     @Test
     public void moatDefendsAgainstMilitiaII() {
         DominionGameState state = (DominionGameState) game.getGameState();
-        state.endOfTurn(0);
-        state.endOfTurn(1);
+        fm.endPlayerTurn(state);
+        fm.endPlayerTurn(state);
         assertEquals(2, state.getCurrentPlayer());
         DominionAction militia = new Militia(2);
         state.addCard(CardType.MILITIA, 2, DeckType.HAND);
@@ -335,7 +343,7 @@ public class BaseActionCardsTest {
         DominionGameState state = (DominionGameState) game.getGameState();
         state.setDefended(3);
         assertTrue(state.isDefended(3));
-        state.endOfTurn(0);
+        moveForwardToNextPlayer(state);
         for (int i = 0; i < 4; i++) {
             assertFalse(state.isDefended(i));
         }
@@ -926,55 +934,31 @@ public class BaseActionCardsTest {
         ThroneRoom throneRoom = new ThroneRoom(0);
         fm.next(state, throneRoom);
 
-        assertEquals(0, state.actionsLeft());
+        assertEquals(1, state.actionsLeft());
         assertEquals(throneRoom, state.currentActionInProgress());
         List<AbstractAction> nextActions = fm.computeAvailableActions(state);
         assertEquals(1, nextActions.size());
-        assertEquals(new EnthroneCard(CardType.MARKET, 0, 0), nextActions.get(0));
+        assertEquals(DominionCard.create(CardType.MARKET).getAction(0), nextActions.get(0));
 
-        fm.next(state, new EnthroneCard(CardType.MARKET, 0, 0));
+        fm.next(state, nextActions.get(0));
         assertEquals(1, state.actionsLeft());
         assertEquals(2, state.buysLeft());
         assertEquals(2, state.getDeck(DeckType.TABLE, 0).getSize());
         assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
 
         nextActions = fm.computeAvailableActions(state);
-        assertEquals(2, nextActions.size());
-        assertEquals(new EnthroneCard(CardType.MARKET, 0, 1), nextActions.get(0));
-        assertEquals(new EnthroneCard(null, 0, 1), nextActions.get(1));
+        assertEquals(1, nextActions.size());
+        assertEquals(DominionCard.create(CardType.MARKET).getAction(0, true), nextActions.get(0));
+        assertNotEquals(DominionCard.create(CardType.MARKET).getAction(0, false), nextActions.get(0));
 
-        fm.next(state, new EnthroneCard(CardType.MARKET, 0, 1));
-        assertEquals(2, state.actionsLeft());
+        fm.next(state, nextActions.get(0));
+        assertEquals(2, state.actionsLeft());  // we used our action on th eThrone Room, and then each Market gives +1 Action
         assertEquals(3, state.buysLeft());
         assertEquals(2, state.getDeck(DeckType.TABLE, 0).getSize());
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
         assertFalse(state.isActionInProgress());
     }
 
-    @Test
-    public void throneRoomNotUsingSecondAction() {
-        DominionGameState state = (DominionGameState) game.getGameState();
-        state.addCard(CardType.MARKET, 0, DeckType.HAND);
-        state.addCard(CardType.THRONE_ROOM, 0, DeckType.HAND);
-        ThroneRoom throneRoom = new ThroneRoom(0);
-        fm.next(state, throneRoom);
-
-        List<AbstractAction> nextActions = fm.computeAvailableActions(state);
-        assertEquals(new EnthroneCard(CardType.MARKET, 0, 0), nextActions.get(0));
-        fm.next(state, new EnthroneCard(CardType.MARKET, 0, 0));
-
-        nextActions = fm.computeAvailableActions(state);
-        assertEquals(2, nextActions.size());
-        assertEquals(new EnthroneCard(CardType.MARKET, 0, 1), nextActions.get(0));
-        assertEquals(new EnthroneCard(null, 0, 1), nextActions.get(1));
-
-        fm.next(state, nextActions.get(1));
-        assertEquals(1, state.actionsLeft());
-        assertEquals(2, state.buysLeft());
-        assertEquals(2, state.getDeck(DeckType.TABLE, 0).getSize());
-        assertEquals(6, state.getDeck(DeckType.HAND, 0).getSize());
-        assertFalse(state.isActionInProgress());
-    }
 
     @Test
     public void throneRoomWithNoActions() {
@@ -997,9 +981,9 @@ public class BaseActionCardsTest {
         assertEquals(throneRoom, state.currentActionInProgress());
         List<AbstractAction> nextActions = fm.computeAvailableActions(state);
         assertEquals(1, nextActions.size());
-        assertEquals(new EnthroneCard(CardType.WORKSHOP, 0, 0), nextActions.get(0));
+        assertEquals(new Workshop(0), nextActions.get(0));
 
-        fm.next(state, new EnthroneCard(CardType.WORKSHOP, 0, 0));
+        fm.next(state, nextActions.get(0));
         assertEquals(new Workshop(0), state.currentActionInProgress());
         assertEquals(0, state.actionsLeft());
         assertEquals(2, state.getDeck(DeckType.TABLE, 0).getSize());
@@ -1018,12 +1002,11 @@ public class BaseActionCardsTest {
         assertEquals(throneRoom, state.currentActionInProgress());
 
         nextActions = fm.computeAvailableActions(state);
-        assertEquals(2, nextActions.size());
-        assertEquals(new EnthroneCard(CardType.WORKSHOP, 0, 1), nextActions.get(0));
-        assertEquals(new EnthroneCard(null, 0, 1), nextActions.get(1));
+        assertEquals(1, nextActions.size());
+        assertEquals(new Workshop(0, true), nextActions.get(0));
 
-        fm.next(state, new EnthroneCard(CardType.WORKSHOP, 0, 1));
-        assertEquals(new Workshop(0), state.currentActionInProgress());
+        fm.next(state, nextActions.get(0));
+        assertEquals(new Workshop(0, true), state.currentActionInProgress());
         nextActions = fm.computeAvailableActions(state);
         assertEquals(11, nextActions.size());
 
@@ -1044,16 +1027,16 @@ public class BaseActionCardsTest {
 
         assertEquals(throneRoom, state.currentActionInProgress());
         List<AbstractAction> nextActions = fm.computeAvailableActions(state);
-        assertEquals(new EnthroneCard(CardType.MERCHANT, 0, 0), nextActions.get(0));
+        assertEquals(new Merchant(0), nextActions.get(0));
 
-        fm.next(state, new EnthroneCard(CardType.MERCHANT, 0, 0));
+        fm.next(state, nextActions.get(0));
         assertEquals(throneRoom, state.currentActionInProgress());
         nextActions = fm.computeAvailableActions(state);
-        assertEquals(new EnthroneCard(CardType.MERCHANT, 0, 1), nextActions.get(0));
+        assertEquals(new Merchant(0, true), nextActions.get(0));
         assertEquals(1, state.actionsLeft());
         assertEquals(7, state.getDeck(DeckType.HAND, 0).getSize());
 
-        fm.next(state, new EnthroneCard(CardType.MERCHANT, 0, 1));
+        fm.next(state, nextActions.get(0));
         assertFalse(state.isActionInProgress());
         assertEquals(DominionGamePhase.Play, state.getGamePhase());
         nextActions = fm.computeAvailableActions(state);
@@ -1079,12 +1062,12 @@ public class BaseActionCardsTest {
         assertEquals(throneRoom, state.currentActionInProgress());
         assertSame(throneRoom, state.currentActionInProgress());
         assertEquals(2, nextActions.size());
-        assertEquals(new EnthroneCard(CardType.MARKET, 0, 0), nextActions.get(1));
-        assertEquals(new EnthroneCard(CardType.THRONE_ROOM, 0, 0), nextActions.get(0));
+        assertEquals(DominionCard.create(CardType.THRONE_ROOM).getAction(0), nextActions.get(0));
+        assertEquals(DominionCard.create(CardType.MARKET).getAction(0), nextActions.get(1));
 
-        fm.next(state, new EnthroneCard(CardType.THRONE_ROOM, 0, 0));
-        assertEquals(0, state.actionsLeft());
-        assertFalse(throneRoom.equals(state.currentActionInProgress()));
+        fm.next(state, nextActions.get(0));
+        assertEquals(1, state.actionsLeft());
+        assertNotSame(throneRoom, state.currentActionInProgress());
         assertTrue(state.currentActionInProgress() instanceof ThroneRoom);
         // we now have the second throne room controlling the action flow
         nextActions = fm.computeAvailableActions(state);
@@ -1092,10 +1075,11 @@ public class BaseActionCardsTest {
         fm.next(state, nextActions.get(0)); // EnthroneMarket - I
         fm.next(state, fm.computeAvailableActions(state).get(0)); // EnthroneMarket - II
         fm.next(state, fm.computeAvailableActions(state).get(0)); // ThroneRoom for a second time
-        // we now have no actions for second ThroneRoom - so we should move to endPhase immediately
+        // we now have no actions for second ThroneRoom - so we should move to buy phase immediately
+        assertEquals(DominionGamePhase.Play, state.getGamePhase());
         nextActions = fm.computeAvailableActions(state);
         assertEquals(1, nextActions.size());
-        assertEquals(new EndPhase(), nextActions.get(0));
+        assertEquals(new EndPhase(), nextActions.get(0)); // EnthroneMarket - I
 
         assertEquals(3, state.buysLeft());
         assertEquals(3, state.getDeck(DeckType.TABLE, 0).getSize());

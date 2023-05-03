@@ -6,10 +6,9 @@ import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
 import core.actions.SetGridValueAction;
-import core.components.BoardNode;
 import core.components.Token;
+import games.GameType;
 import games.loveletter.LoveLetterForwardModel;
-import games.loveletter.LoveLetterGame;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.LoveLetterParameters;
 import games.tictactoe.*;
@@ -33,8 +32,8 @@ public class MultiTreeMCTSTests {
     TestMCTSPlayer mctsPlayer;
     MCTSParams params;
 
-    BoardNode x = TicTacToeConstants.playerMapping.get(0);
-    BoardNode o = TicTacToeConstants.playerMapping.get(1);
+    Token x = TicTacToeConstants.playerMapping.get(0);
+    Token o = TicTacToeConstants.playerMapping.get(1);
 
     AbstractForwardModel fm = new TicTacToeForwardModel();
     private Predicate<SingleTreeNode> childrenVisitsAddUp = node ->
@@ -68,25 +67,29 @@ public class MultiTreeMCTSTests {
     }
 
     public Game createTicTacToe(MCTSParams params, int gridSize) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         TicTacToeGameParameters gameParams = new TicTacToeGameParameters(3812);
         gameParams.gridSize = gridSize;
-        return new TicTacToeGame(players, gameParams);
+        Game game = GameType.TicTacToe.createGameInstance(2, gameParams);
+        game.reset(players);
+        return game;
     }
 
     public Game createLoveLetter(MCTSParams params) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
         players.add(new RandomPlayer(new Random(3023)));
         players.add(new RandomPlayer(new Random(3024)));
         LoveLetterParameters gameParams = new LoveLetterParameters(3812);
-        return new LoveLetterGame(players, gameParams);
+        Game game = GameType.LoveLetter.createGameInstance(players.size(), gameParams);
+        game.reset(players);
+        return game;
     }
 
     @Test
@@ -95,15 +98,15 @@ public class MultiTreeMCTSTests {
         TicTacToeGameState state = (TicTacToeGameState) ttt.getGameState();
         int board = state.getGridBoard().getComponentID();
 
-        fm.next(state, new SetGridValueAction(board, 1, 0, x));
-        fm.next(state, new SetGridValueAction(board, 0, 0, o));
-        fm.next(state, new SetGridValueAction(board, 0, 2, x));
-        fm.next(state, new SetGridValueAction(board, 1, 1, o));
+        fm.next(state, new SetGridValueAction<>(board, 1, 0, x));
+        fm.next(state, new SetGridValueAction<>(board, 0, 0, o));
+        fm.next(state, new SetGridValueAction<>(board, 0, 2, x));
+        fm.next(state, new SetGridValueAction<>(board, 1, 1, o));
 
         // o (p1) is now set to win on their next turn
 
-        AbstractAction action = mctsPlayer.getAction(state, fm.computeAvailableActions(state));
-        assertEquals(new SetGridValueAction(board, 2, 2, x), action);
+        AbstractAction action = mctsPlayer._getAction(state, fm.computeAvailableActions(state));
+        assertEquals(new SetGridValueAction<>(board, 2, 2, x), action);
         // this is the only logical move to prevent the o player winning on their turn
 
         SingleTreeNode root = mctsPlayer.getRoot(0);
@@ -125,15 +128,15 @@ public class MultiTreeMCTSTests {
         TicTacToeGameState state = (TicTacToeGameState) ttt.getGameState();
         int board = state.getGridBoard().getComponentID();
 
-        fm.next(state, new SetGridValueAction(board, 1, 0, x));
-        fm.next(state, new SetGridValueAction(board, 0, 0, o));
-        fm.next(state, new SetGridValueAction(board, 0, 2, x));
-        fm.next(state, new SetGridValueAction(board, 1, 1, o));
+        fm.next(state, new SetGridValueAction<>(board, 1, 0, x));
+        fm.next(state, new SetGridValueAction<>(board, 0, 0, o));
+        fm.next(state, new SetGridValueAction<>(board, 0, 2, x));
+        fm.next(state, new SetGridValueAction<>(board, 1, 1, o));
 
         // o (p1) is now set to win on their next turn
 
-        AbstractAction action = mctsPlayer.getAction(state, fm.computeAvailableActions(state));
-        assertEquals(new SetGridValueAction(board, 2, 2, x), action);
+        AbstractAction action = mctsPlayer._getAction(state, fm.computeAvailableActions(state));
+        assertEquals(new SetGridValueAction<>(board, 2, 2, x), action);
         // this is the only logical move to prevent the o player winning on their turn
 
         SingleTreeNode root = mctsPlayer.getRoot(0);
@@ -169,7 +172,7 @@ public class MultiTreeMCTSTests {
         TicTacToeGameState state = (TicTacToeGameState) game.getGameState();
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                ._getAction(state, fm.computeAvailableActions(state));
 
         TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
         System.out.println(stats);
@@ -223,7 +226,7 @@ public class MultiTreeMCTSTests {
 
         // need to call this to set up root
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                ._getAction(state, fm.computeAvailableActions(state));
 
         TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
         System.out.println(stats);
@@ -289,7 +292,7 @@ public class MultiTreeMCTSTests {
         // this puts player 1 in the lead
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                ._getAction(state, fm.computeAvailableActions(state));
 
 
         // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea
@@ -321,7 +324,7 @@ public class MultiTreeMCTSTests {
         // this puts player 1 in the lead
 
         AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
-                .getAction(state, fm.computeAvailableActions(state));
+                ._getAction(state, fm.computeAvailableActions(state));
 
 
         // the invariant then to check is that for each node in the tree p1 has a higher score than p0 or p3 for all treea

@@ -18,10 +18,10 @@ public class TargetGameLength implements IGameHeuristic {
         int result = 0;
         switch (type) {
             case ROUNDS:
-                result = game.getGameState().getTurnOrder().getRoundCounter();
+                result = game.getGameState().getRoundCounter();
                 break;
             case TURNS:
-                result = game.getGameState().getTurnOrder().getTurnCounter();
+                result = game.getGameState().getTurnCounter();
                 break;
             case TICKS:
                 result = game.getTick();

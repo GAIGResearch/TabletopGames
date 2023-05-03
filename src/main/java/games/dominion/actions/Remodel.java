@@ -24,6 +24,9 @@ public class Remodel extends DominionAction implements IExtendedSequence {
     public Remodel(int playerId) {
         super(CardType.REMODEL, playerId);
     }
+    public Remodel(int playerId, boolean dummy) {
+        super(CardType.REMODEL, playerId, dummy);
+    }
 
     @Override
     boolean _execute(DominionGameState state) {
@@ -100,7 +103,7 @@ public class Remodel extends DominionAction implements IExtendedSequence {
      */
     @Override
     public Remodel copy() {
-        Remodel retValue = new Remodel(player);
+        Remodel retValue = new Remodel(player, dummyAction);
         retValue.cardGained = cardGained;
         retValue.cardTrashed = cardTrashed;
         return retValue;
@@ -110,13 +113,13 @@ public class Remodel extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof Remodel) {
             Remodel other = (Remodel) obj;
-            return other.player == player && other.cardTrashed == cardGained && other.cardGained == cardGained;
+            return super.equals(obj) && other.cardTrashed == cardGained && other.cardGained == cardGained;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, cardGained, cardTrashed, CardType.REMODEL);
+        return Objects.hash(cardGained, cardTrashed) + 31 * super.hashCode();
     }
 }

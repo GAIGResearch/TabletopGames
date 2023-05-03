@@ -14,6 +14,9 @@ public class Poacher extends DominionAction implements IExtendedSequence {
     public Poacher(int playerId) {
         super(CardType.POACHER, playerId);
     }
+    public Poacher(int playerId, boolean dummy) {
+        super(CardType.POACHER, playerId, dummy);
+    }
 
     int cardsDiscarded = 0;
     int cardsToDiscard = 0;
@@ -63,7 +66,7 @@ public class Poacher extends DominionAction implements IExtendedSequence {
 
     @Override
     public Poacher copy() {
-        Poacher retValue = new Poacher(player);
+        Poacher retValue = new Poacher(player, dummyAction);
         retValue.cardsDiscarded = cardsDiscarded;
         retValue.cardsToDiscard = cardsToDiscard;
         return retValue;
@@ -73,13 +76,14 @@ public class Poacher extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if(obj instanceof Poacher) {
             Poacher other = (Poacher) obj;
-            return other.player == player && other.cardsToDiscard == cardsToDiscard && other.cardsDiscarded == cardsDiscarded;
+            return super.equals(obj) && other.cardsToDiscard == cardsToDiscard &&
+                    other.cardsDiscarded == cardsDiscarded;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, cardsDiscarded, cardsToDiscard, CardType.POACHER);
+        return Objects.hash(cardsDiscarded, cardsToDiscard) + 31 * super.hashCode();
     }
 }

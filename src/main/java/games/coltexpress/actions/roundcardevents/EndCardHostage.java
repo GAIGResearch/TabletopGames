@@ -23,7 +23,6 @@ public class EndCardHostage extends RoundEvent {
         for (Integer playerID : locomotive.playersInsideCompartment){
             gameState.addLoot(playerID, new Loot(Purse, reward));
         }
-        gameState.setGameStatus(Utils.GameResult.GAME_END);
         return true;
     }
 

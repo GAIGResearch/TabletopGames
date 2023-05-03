@@ -1,5 +1,6 @@
 package games.terraformingmars;
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
 import evaluation.TunableParameters;
 import games.terraformingmars.actions.PayForAction;
@@ -10,7 +11,6 @@ import games.terraformingmars.components.Milestone;
 import games.terraformingmars.components.TMCard;
 import games.terraformingmars.rules.effects.Bonus;
 import utilities.Pair;
-import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -121,12 +121,12 @@ public class TMHeuristic extends TunableParameters implements IStateHeuristic {
     public double evaluateState(AbstractGameState gameState, int playerId) {
         TMGameState gs = (TMGameState) gameState;
         TMGameParameters params = (TMGameParameters) gs.getGameParameters();
-        Utils.GameResult playerResult = gs.getPlayerResults()[playerId];
+        CoreConstants.GameResult playerResult = gs.getPlayerResults()[playerId];
 
-        if(playerResult == Utils.GameResult.LOSE) {
+        if(playerResult == CoreConstants.GameResult.LOSE_GAME) {
             return -1;
         }
-        if(playerResult == Utils.GameResult.WIN) {
+        if(playerResult == CoreConstants.GameResult.WIN_GAME) {
             return 1;
         }
 

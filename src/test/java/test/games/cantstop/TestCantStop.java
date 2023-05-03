@@ -1,14 +1,19 @@
 package test.games.cantstop;
 
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
 import games.GameType;
-import games.cantstop.*;
-import games.cantstop.actions.*;
+import games.cantstop.CantStopForwardModel;
+import games.cantstop.CantStopGamePhase;
+import games.cantstop.CantStopGameState;
+import games.cantstop.CantStopParameters;
+import games.cantstop.actions.AllocateDice;
+import games.cantstop.actions.Pass;
+import games.cantstop.actions.RollDice;
 import org.junit.*;
 import players.simple.RandomPlayer;
-import utilities.Utils;
 
 import java.util.*;
 
@@ -321,10 +326,10 @@ public class TestCantStop {
         fm.makeTemporaryMarkersPermanentAndClear(state);
         assertEquals(0, state.getCurrentPlayer());
         assertFalse(state.isNotTerminal());
-        assertEquals(Utils.GameResult.WIN, state.getPlayerResults()[0]);
-        assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[1]);
-        assertEquals(Utils.GameResult.LOSE, state.getPlayerResults()[2]);
-        assertEquals(Utils.GameResult.GAME_END, state.getGameStatus());
+        assertEquals(CoreConstants.GameResult.WIN_GAME, state.getPlayerResults()[0]);
+        assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[1]);
+        assertEquals(CoreConstants.GameResult.LOSE_GAME, state.getPlayerResults()[2]);
+        assertEquals(CoreConstants.GameResult.GAME_END, state.getGameStatus());
     }
 
     @Test

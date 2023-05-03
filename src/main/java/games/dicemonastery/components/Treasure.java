@@ -1,9 +1,9 @@
 package games.dicemonastery.components;
 
+import core.CoreConstants;
 import core.components.Component;
 import core.properties.*;
 import utilities.Hash;
-import utilities.Utils;
 
 import java.util.Objects;
 
@@ -28,7 +28,7 @@ public class Treasure extends Component {
     }
 
     private Treasure(String name, int vp, int cost, int limit) {
-        super(Utils.ComponentType.CARD, name);
+        super(CoreConstants.ComponentType.CARD, name);
         this.cost = cost;
         this.vp = vp;
         this.limit = limit;

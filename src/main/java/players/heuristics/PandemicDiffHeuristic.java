@@ -7,7 +7,6 @@ import core.interfaces.IStateHeuristic;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import utilities.Hash;
-import utilities.Utils;
 
 public class PandemicDiffHeuristic implements IStateHeuristic {
     private BoardStats rootBoardStats;
@@ -18,16 +17,16 @@ public class PandemicDiffHeuristic implements IStateHeuristic {
 
     @Override
     public double evaluateState(AbstractGameState gs, int playerId) {
-        Utils.GameResult gamestatus = gs.getGameStatus();
+        CoreConstants.GameResult gamestatus = gs.getGameStatus();
 
         // Compute a score relative to the root's state.
         BoardStats lastBoardState = new BoardStats((PandemicGameState)gs);
         double rawScore = rootBoardStats.score(lastBoardState);
 
-        if(gamestatus == Utils.GameResult.LOSE)
+        if(gamestatus == CoreConstants.GameResult.LOSE_GAME)
             rawScore = -1;
 
-        if(gamestatus == Utils.GameResult.WIN)
+        if(gamestatus == CoreConstants.GameResult.WIN_GAME)
             rawScore = 1;
 
         return rawScore;

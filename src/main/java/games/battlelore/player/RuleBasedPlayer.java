@@ -27,7 +27,7 @@ public class RuleBasedPlayer extends AbstractPlayer
     }
 
     @Override
-    public AbstractAction getAction(AbstractGameState observation, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState observation, List<AbstractAction> actions) {
         BattleloreGameState state = (BattleloreGameState) observation;
         GridBoard board = state.getBoard();
         float playerUnitPower = 0.f;

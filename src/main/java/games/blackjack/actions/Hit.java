@@ -1,21 +1,22 @@
 package games.blackjack.actions;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.components.FrenchCard;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
+import games.blackjack.BlackjackForwardModel;
 import games.blackjack.BlackjackGameState;
 import games.blackjack.BlackjackParameters;
-import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.Objects;
 
 public class Hit extends AbstractAction implements IPrintable {
-    private final int playerID;
-    private final boolean advanceTurnOrder;
-    private final boolean hidden;
+    public final int playerID;
+    public final boolean advanceTurnOrder;
+    public final boolean hidden;
 
     public Hit(int playerID){
         this.playerID = playerID;
@@ -41,37 +42,6 @@ public class Hit extends AbstractAction implements IPrintable {
             Arrays.fill(visibility, !hidden);
             playerHand.add(bjgs.getDrawDeck().draw(), visibility);
         }
-
-        // Check if bust or win score
-        int points = bjgs.calculatePoints(playerID);
-        if (points > ((BlackjackParameters)gameState.getGameParameters()).winScore) {
-            gameState.setPlayerResult(Utils.GameResult.LOSE, playerID);
-            if (advanceTurnOrder) {
-                gameState.getTurnOrder().endPlayerTurn(gameState);
-            }
-        } else if (points == ((BlackjackParameters)gameState.getGameParameters()).winScore) {
-            gameState.setPlayerResult(Utils.GameResult.WIN, playerID);
-            if (advanceTurnOrder) {
-                gameState.getTurnOrder().endPlayerTurn(gameState);
-            }
-        }
-
-//        String[] s = new String[5];
-//        s[0] = "Player " + bjgs.getCurrentPlayer() + " draws: " + card.toString();
-//        StringBuilder sBuilder = new StringBuilder();
-//        s[1] = "Player Hand: ";
-//        for (FrenchCard cards : playerHand.getComponents()){
-//            sBuilder.append(cards.toString());
-//            sBuilder.append(" ");
-//        }
-//        s[2] = sBuilder.toString();
-//        int point = bjgs.calculatePoints(bjgs.getCurrentPlayer());
-//        String str = String.valueOf(point);
-//        s[3] = str;
-//        s[4] = "----------------------------------------------------";
-//        for (String x : s){
-//            System.out.println(x);
-//        }
 
         return true;
     }

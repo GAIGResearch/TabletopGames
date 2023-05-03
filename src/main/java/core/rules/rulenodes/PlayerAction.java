@@ -1,6 +1,6 @@
 package core.rules.rulenodes;
 
-import core.AbstractGameState;
+import core.AbstractGameStateWithTurnOrder;
 import core.rules.Node;
 import core.rules.nodetypes.RuleNode;
 
@@ -23,7 +23,7 @@ public class PlayerAction extends RuleNode {
     }
 
     @Override
-    protected boolean run(AbstractGameState gs) {
+    protected boolean run(AbstractGameStateWithTurnOrder gs) {
         if (action != null) {
             action.execute(gs);
             return true;

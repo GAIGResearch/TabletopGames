@@ -19,6 +19,9 @@ public class Workshop extends DominionAction implements IExtendedSequence {
     public Workshop(int playerId) {
         super(CardType.WORKSHOP, playerId);
     }
+    public Workshop(int playerId, boolean dummy) {
+        super(CardType.WORKSHOP, playerId, dummy);
+    }
 
     @Override
     boolean _execute(DominionGameState state) {
@@ -57,7 +60,7 @@ public class Workshop extends DominionAction implements IExtendedSequence {
     }
 
     public Workshop copy() {
-        Workshop retValue = new Workshop(player);
+        Workshop retValue = new Workshop(player, dummyAction);
         retValue.executed = executed;
         return retValue;
     }
@@ -66,13 +69,13 @@ public class Workshop extends DominionAction implements IExtendedSequence {
     public boolean equals(Object obj) {
         if (obj instanceof Workshop) {
             Workshop other = (Workshop) obj;
-            return executed == other.executed && player == other.player;
+            return executed == other.executed && super.equals(obj);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(player, executed, CardType.WORKSHOP);
+        return super.hashCode() + (executed ? 1 : 0);
     }
 }

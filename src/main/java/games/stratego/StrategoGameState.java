@@ -5,7 +5,6 @@ import core.AbstractParameters;
 import core.components.BoardNode;
 import core.components.Component;
 import core.components.GridBoard;
-import core.turnorders.AlternatingTurnOrder;
 import games.GameType;
 import games.stratego.components.Piece;
 
@@ -22,11 +21,12 @@ public class StrategoGameState extends AbstractGameState {
      * @param gameParameters - game parameters.
      */
     public StrategoGameState(AbstractParameters gameParameters, int nPlayers) {
-        super(gameParameters, new AlternatingTurnOrder(nPlayers), GameType.Stratego);
+        super(gameParameters, nPlayers);
     }
 
-    protected StrategoGameState(AbstractParameters gameParameters) {
-        super(gameParameters, GameType.Stratego);
+    @Override
+    protected GameType _getGameType() {
+        return GameType.Stratego;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class StrategoGameState extends AbstractGameState {
 
     @Override
     protected AbstractGameState _copy(int playerId) {
-        StrategoGameState s = new StrategoGameState(gameParameters);
+        StrategoGameState s = new StrategoGameState(gameParameters, 2);
         s.gridBoard = gridBoard.emptyCopy();
         Piece.Alliance playerAlliance = null;
 
@@ -82,11 +82,6 @@ public class StrategoGameState extends AbstractGameState {
     @Override
     public double getGameScore(int playerId) {
         return playerResults[playerId].value;
-    }
-
-    @Override
-    protected void _reset() {
-        gridBoard = null;
     }
 
     @Override
