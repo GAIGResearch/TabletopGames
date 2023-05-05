@@ -68,7 +68,7 @@ public class MultiTreeNode extends SingleTreeNode {
 
         roots = new SingleTreeNode[state.getNPlayers()];
         roots[this.decisionPlayer] = SingleTreeNode.createRootNode(player, state, rnd, player.getFactory());
-        if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTreeParanoid)
+        if (params.paranoid)
             roots[this.decisionPlayer].paranoidPlayer = decisionPlayer;
         currentLocation = new SingleTreeNode[state.getNPlayers()];
         currentLocation[this.decisionPlayer] = roots[decisionPlayer];
@@ -112,7 +112,7 @@ public class MultiTreeNode extends SingleTreeNode {
                 // their first action in search; set a root for their tree
                 SingleTreeNode pseudoRoot = SingleTreeNode.createRootNode(mctsPlayer, currentState.copy(), rnd, mctsPlayer.getFactory());
                 pseudoRoot.decisionPlayer = currentActor;
-                if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTreeParanoid)
+                if (params.paranoid)
                     pseudoRoot.paranoidPlayer = decisionPlayer;
                 roots[currentActor] = pseudoRoot;
                 currentLocation[currentActor] = pseudoRoot;
