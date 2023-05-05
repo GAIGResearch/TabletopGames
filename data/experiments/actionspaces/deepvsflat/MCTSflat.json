@@ -15,8 +15,6 @@
   },
   "actionSpaceStructure" : "Flat",
   "actionSpaceContext": "Independent",
-  "expertIterationStateFeatures": "games.catan.CatanStateFeatures",
   "maintainMasterState": true,
-  "gatherTreeRecorder": true,
   "treeRecorderFolder": "test_01"
 }

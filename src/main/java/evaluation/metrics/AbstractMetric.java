@@ -60,7 +60,9 @@ public abstract class AbstractMetric
         Map<String, Object> toRecord = new HashMap<>();
         Map<String, Object> summaryData = recordedData.getSummary();
         for (String k: summaryData.keySet()) {
-            toRecord.put(getClass().getSimpleName() + "(" + k + ")" + ":" + e.type, summaryData.get(k));
+            String player = recordedData.name.substring(recordedData.name.indexOf(":"), 1+recordedData.name.lastIndexOf(":"));
+            String name = getClass().getSimpleName() + "(" + k + ")" + player + e.type; // Format: metricName(param):playerID:EVENT
+            toRecord.put(name, summaryData.get(k));
         }
         return toRecord;
     }

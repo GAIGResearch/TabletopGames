@@ -90,7 +90,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      * @param gs - game state to end current player's turn in.
      */
     @Override
-    public final void endPlayerTurn(AbstractGameState gs) {
+    public void endPlayerTurn(AbstractGameState gs) {
         int turnOwner = gs.turnOwner;
         do {
             turnOwner = (turnOwner + 1) % gs.nPlayers;

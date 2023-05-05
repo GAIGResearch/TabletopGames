@@ -34,6 +34,10 @@ public class MetricsGameListener implements IGameListener {
     public MetricsGameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
         this.metrics = new LinkedHashMap<>();
         this.loggers = new HashMap<>();
+
+        //Events of interest always contains GAME_OVER to do final summarizations.
+        eventsOfInterest.add(Event.GameEvent.GAME_OVER);
+
         for (AbstractMetric m : metrics) {
             this.metrics.put(m.getName(), m);
             eventsOfInterest.addAll(m.getEventTypes());
@@ -67,7 +71,8 @@ public class MetricsGameListener implements IGameListener {
                         Object metricResult = metric.run(this, event);
                         if(metricResult != null && (!(metricResult instanceof String) || !((String) metricResult).trim().equals(""))){
                             metricResults.add(metricResult);
-                            data.put(attrStr + ":" + i + ":" + event.type, metricResult);
+                            String player = game.getPlayers().get(i).toString();
+                            data.put(attrStr + ":" + player + ":" + event.type, metricResult);
                         }
                     }
                     //Aggregates per-player metrics for all players.

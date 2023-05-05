@@ -95,9 +95,12 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tmetrics=       The full class name of an IMetricsCollection implementation. " +
-                            "                 A comma-delimited string can be provided to gather several classes of metrics." +
-                            "                 If different listeners included, then a pipe-delimited string can be provided" +
-                            "                 to specify different metrics per listener.\n" +
+                            "\t                 A comma-delimited string can be provided to gather several classes of metrics." +
+                            "\t                 If different listeners included, then a pipe-delimited string can be provided" +
+                            "\t                 to specify different metrics per listener.\n" +
+                            "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
+                            "\t               This is ignored if a json file is provided for the listener.\n" +
+                            "\t               Defaults to utilities.SummaryLogger. \n" +
                             "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file.\n" +
                             "\t               Defaults to RoundRobinReport.txt\n" +
                             "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
@@ -137,9 +140,10 @@ public class RoundRobinTournament extends AbstractTournament {
                 List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(json, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
                 List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(json, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
                 List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(json, "listenerFile", "RoundRobinReport.txt").split("\\|")));
+                String loggerClass = getArg(json, "logger", "evaluation.loggers.SummaryLogger");
 
                 setup(gameToPlay, nPlayersPerGame, selfPlay, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
-                        listenerClasses, metricsClasses, listenerFiles);
+                        listenerClasses, metricsClasses, listenerFiles, loggerClass);
 
             } catch (FileNotFoundException ignored) {
             } catch (IOException | ParseException e) {
@@ -161,16 +165,17 @@ public class RoundRobinTournament extends AbstractTournament {
             List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
             List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
             List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
+            String loggerClass = getArg(args, "logger", "evaluation.loggers.SummaryLogger");
 
             setup(gameToPlay, nPlayersPerGame, selfPlay, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
-                    listenerClasses, metricsClasses, listenerFiles);
+                    listenerClasses, metricsClasses, listenerFiles, loggerClass);
         }
     }
 
     public static void setup(GameType gameToPlay, int nPlayersPerGame, boolean selfPlay, String mode, int matchups,
                              String playerDirectory, String gameParams, String statsLogPrefix, String resultsFile,
                              int reportPeriod, boolean randomGameParams, List<String> listenerClasses,
-                             List<String> metricsClasses, List<String> listenerFiles) {
+                             List<String> metricsClasses, List<String> listenerFiles, String loggerClass) {
 
         if (listenerClasses.size() > 1 && listenerFiles.size() > 1 && listenerClasses.size() != listenerFiles.size())
             throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
@@ -208,7 +213,7 @@ public class RoundRobinTournament extends AbstractTournament {
         tournament.listeners = new ArrayList<>();
         for (int l = 0; l < listenerClasses.size(); l++) {
             String logFile = listenerFiles.size() == 1 ? listenerFiles.get(0) : listenerFiles.get(l);
-            IStatisticLogger logger = new FileStatsLogger(logFile);
+            IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
             String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(l);
             IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), logger, metricsClass);
             tournament.listeners.add(gameTracker);

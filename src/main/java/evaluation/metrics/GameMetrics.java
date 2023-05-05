@@ -162,10 +162,10 @@ public class GameMetrics implements IMetricsCollection
         @Override
         public Object run(MetricsGameListener listener, Event e) {
             Map<String, Object> collectedData = new LinkedHashMap<>();
-            collectedData.put("TimeNext", listener.getGame().getNextTime() / 1e3);
-            collectedData.put("TimeCopy", listener.getGame().getCopyTime() / 1e3);
-            collectedData.put("TimeActionCompute", listener.getGame().getActionComputeTime() / 1e3);
-            collectedData.put("TimeAgent", listener.getGame().getAgentTime() / 1e3);
+            collectedData.put("TimeNext:GAME_OVER", listener.getGame().getNextTime() / 1e3);
+            collectedData.put("TimeCopy:GAME_OVER", listener.getGame().getCopyTime() / 1e3);
+            collectedData.put("TimeActionCompute:GAME_OVER", listener.getGame().getActionComputeTime() / 1e3);
+            collectedData.put("TimeAgent:GAME_OVER", listener.getGame().getAgentTime() / 1e3);
             return collectedData;
         }
         @Override
@@ -180,9 +180,9 @@ public class GameMetrics implements IMetricsCollection
         @Override
         public Object run(MetricsGameListener listener, Event e) {
             Map<String, Object> collectedData = new LinkedHashMap<>();
-            collectedData.put("Turns", listener.getGame().getGameState().getTurnCounter());
-            collectedData.put("Ticks", listener.getGame().getTick());
-            collectedData.put("Rounds", listener.getGame().getGameState().getRoundCounter());
+            collectedData.put("Turns:GAME_OVER", listener.getGame().getGameState().getTurnCounter());
+            collectedData.put("Ticks:GAME_OVER", listener.getGame().getTick());
+            collectedData.put("Rounds:GAME_OVER", listener.getGame().getGameState().getRoundCounter());
             return collectedData;
         }
         @Override
@@ -234,9 +234,9 @@ public class GameMetrics implements IMetricsCollection
                     .collect(new TAGSummariser());
 
             Map<String, Object> collectedData = new LinkedHashMap<>();
-            collectedData.put("ActionsPerTurnSum", listener.getGame().getNActionsPerTurn());
-            collectedData.put("Decisions", statsDecisions.n());
-            collectedData.put("DecisionPointsMean", statsDecisions.n() * 1.0 / statsDecisionsAll.n());
+            collectedData.put("ActionsPerTurnSum:GAME_OVER", listener.getGame().getNActionsPerTurn());
+            collectedData.put("Decisions:GAME_OVER", statsDecisions.n());
+            collectedData.put("DecisionPointsMean:GAME_OVER", statsDecisions.n() * 1.0 / statsDecisionsAll.n());
             return collectedData;
         }
         @Override
