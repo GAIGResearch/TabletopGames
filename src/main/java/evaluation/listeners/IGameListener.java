@@ -110,4 +110,5 @@ public interface IGameListener {
         return listener;
     }
 
+    default void init(Game game) {}
 }

@@ -2,11 +2,21 @@ package evaluation.listeners;
 
 import core.Game;
 import core.interfaces.IStatisticLogger;
-import evaluation.metrics.*;
-import evaluation.summarisers.*;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
+import evaluation.metrics.IMetricsCollection;
+import evaluation.summarisers.TAGNumericStatSummary;
+import evaluation.summarisers.TAGOccurrenceStatSummary;
+import evaluation.summarisers.TAGStatSummary;
+import evaluation.summarisers.TAGTimeSeriesSummary;
 import utilities.TimeStamp;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static evaluation.metrics.AbstractMetric.ReportDestination.Console;
+import static evaluation.metrics.AbstractMetric.ReportType.Plot;
 
 /**
  * Main Game Listener class. An instance can be attached to a game, which will then cause registered metrics in this
@@ -38,9 +48,9 @@ public class MetricsGameListener implements IGameListener {
             this.metrics.put(m.getName(), m);
             eventsOfInterest.addAll(m.getEventTypes());
         }
-        for (Event.GameEvent event: eventsOfInterest) {
-            this.loggers.put(event, logger.emptyCopy(event.name()));
-        }
+//        for (Event.GameEvent event: eventsOfInterest) {
+//            this.loggers.put(event, logger.emptyCopy(event.name()));
+//        }
     }
 
     /**
@@ -53,87 +63,38 @@ public class MetricsGameListener implements IGameListener {
             return;
 
         // Use of LinkedHashMap so that data is stored in the same order it is listed in the json config file
-        Map<String, Object> data = new LinkedHashMap<>();
-        Map<String, TAGStatSummary> aggregators = new LinkedHashMap<>();
 
         for (String attrStr : metrics.keySet()) {
             AbstractMetric metric = metrics.get(attrStr);
             if (metric.listens(event.type)) {
                 // Apply metric
-                if (metric.isRecordedPerPlayer()) {
-                    ArrayList<Object> metricResults = new ArrayList<>();
-                    for (int i = 0; i < event.state.getNPlayers(); i++) {
-                        event.playerID = i;
-                        Object metricResult = metric.run(this, event);
-                        if(metricResult != null && (!(metricResult instanceof String) || !((String) metricResult).trim().equals(""))){
-                            metricResults.add(metricResult);
-                            data.put(attrStr + ":" + i + ":" + event.type, metricResult);
-                        }
-                    }
-                    //Aggregates per-player metrics for all players.
-                    if(metric.isAggregate())
-                        aggregators.put(attrStr + ":All:" + event.type, aggregate(metricResults));
-                }
-                else
-                {
-                    Object metricResult = metric.run(this, event);
-                    if(metricResult != null && (!(metricResult instanceof String) || !((String) metricResult).trim().equals(""))) data.put(attrStr + ":" + event.type, metricResult);
-                }
-            }
-        }
-
-        // Record data!
-        loggers.get(event.type).record(data);
-
-        // Record aggregated data!
-        if(aggregators.size() > 0)
-        {
-            for(String k : aggregators.keySet())
-            {
-                TAGStatSummary ss = aggregators.get(k);
-                if (ss == null) continue;
-                if(ss.type == TAGStatSummary.StatType.Numeric)
-                {
-                    ArrayList<Double> aggData = ((TAGNumericStatSummary) ss).getElements();
-                    for(Double d : aggData)
-                        loggers.get(event.type).record(k, d);
-                }else if(ss.type == TAGStatSummary.StatType.Occurrence)
-                {
-                    HashMap<Object, Integer> aggData = ((TAGOccurrenceStatSummary) ss).getElements();
-                    for(Object o : aggData.keySet())
-                        loggers.get(event.type).record(k, o);
-                }else if(ss.type == TAGStatSummary.StatType.Time)
-                {
-                    ArrayList<TimeStamp> aggData = (ArrayList<TimeStamp>) ss.getElements();
-                    for(TimeStamp t : aggData)
-                        loggers.get(event.type).record(k, t);
-                }
+                metric.run(this, event);
             }
         }
 
         // Process data from events recorded multiple times during game
-        if (event.type == Event.GameEvent.GAME_OVER) {
-            IStatisticLogger gameOverLogger = loggers.get(Event.GameEvent.GAME_OVER);
-            if (gameOverLogger != null) {
-                for (Event.GameEvent e : loggers.keySet()) {
-                    if (!e.isOncePerGame()) {
-                        // Summarise at the end
-                        IStatisticLogger logger = loggers.get(e);
-                        Map<String, TAGStatSummary> dataLogged = logger.summary();
-                        ArrayList<String> keyDeletes = new ArrayList<>();
-                        for (String key : dataLogged.keySet()) {
-                            TAGStatSummary dataLoggedKey = dataLogged.get(key);
-                            processMetricGameOver(metrics.get(key.split(":")[0]), event, dataLoggedKey, gameOverLogger);
-//                            if(key.contains(":All:"))
-                                keyDeletes.add(key);
-                        }
-                        for(String kDel : keyDeletes)
-                            dataLogged.remove(kDel);
-                        // TODO Check correct reset for next game?
-                    }
-                }
-            }
-        }
+//        if (event.type == Event.GameEvent.GAME_OVER) {
+//            IStatisticLogger gameOverLogger = loggers.get(Event.GameEvent.GAME_OVER);
+//            if (gameOverLogger != null) {
+//                for (Event.GameEvent e : loggers.keySet()) {
+//                    if (!e.isOncePerGame()) {
+//                        // Summarise at the end
+//                        IStatisticLogger logger = loggers.get(e);
+//                        Map<String, TAGStatSummary> dataLogged = logger.summary();
+//                        ArrayList<String> keyDeletes = new ArrayList<>();
+//                        for (String key : dataLogged.keySet()) {
+//                            TAGStatSummary dataLoggedKey = dataLogged.get(key);
+//                            processMetricGameOver(metrics.get(key.split(":")[0]), event, dataLoggedKey, gameOverLogger);
+////                            if(key.contains(":All:"))
+//                                keyDeletes.add(key);
+//                        }
+//                        for(String kDel : keyDeletes)
+//                            dataLogged.remove(kDel);
+//                        // TODO Check correct reset for next game?
+//                    }
+//                }
+//            }
+//        }
     }
 
     /**
@@ -186,6 +147,7 @@ public class MetricsGameListener implements IGameListener {
         return null;
     }
 
+
     /**
      * This is called when all processing is finished, for example after running a sequence of games
      * As such, no state is provided.
@@ -193,18 +155,49 @@ public class MetricsGameListener implements IGameListener {
      * This is useful for Listeners that are just interested in aggregate data across many runs
      */
     public void allGamesFinished() {
-        if (loggers != null)
-            for (IStatisticLogger logger: loggers.values()) {
-                logger.processDataAndFinish();
+        List<AbstractMetric.ReportType> reportTypes = Arrays.asList(Plot);
+        List<AbstractMetric.ReportDestination> reportDestinations = Arrays.asList(Console);
+
+        boolean success = true;
+        String folderName = "metrics/out/" + game.getGameType().name() + "_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+        if (reportDestinations.contains(AbstractMetric.ReportDestination.File)) {
+            // Create a folder for all files to be put in, with the game name and current timestamp
+            File folder = new File(folderName);
+            if (!folder.exists()) {
+                success = folder.mkdir();
             }
+        }
+
+        // All metrics report themselves
+        if (success) {
+            for (AbstractMetric metric : metrics.values()) {
+                metric.allGamesFinished(folderName,
+                        reportTypes,
+                        reportDestinations);
+            }
+        }
+
+//        if (loggers != null)
+//            for (IStatisticLogger logger: loggers.values()) {
+//                logger.processDataAndFinish();
+//            }
     }
 
     /* Getters, setters */
     public final Map<Event.GameEvent, IStatisticLogger> getLoggers() {
         return loggers;
     }
-    public final void setGame(Game game) { this.game = game; }
+    public final void setGame(Game game) {
+        this.game = game;
+    }
     public final Game getGame() { return game; }
 
+    @Override
+    public void init(Game game) {
+        this.game = game;
 
+        for (AbstractMetric metric : metrics.values()) {
+            metric.init(game);
+        }
+    }
 }

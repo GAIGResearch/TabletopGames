@@ -170,6 +170,13 @@ public class GameReport {
                     // we also randomise the position of the players for each game
                     Collections.shuffle(allPlayers);
                     game.reset(allPlayers, startingSeed + i);
+
+                    if (i == 0) {
+                        // Initialize each listener
+                        for (IGameListener gameTracker : gameTrackers)
+                            gameTracker.init(game);
+                    }
+
                     // Randomize parameters
                     if (randomGameParams) {
                         params.randomize();

@@ -1,0 +1,12 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args": [
+    {
+      "class" : "evaluation.loggers.FileStatsLogger",
+      "args" : ["GameResults.txt"]
+    },
+    [
+      {"class": "evaluation.metrics.GameMetrics$GameScore" },
+      {"class": "evaluation.metrics.GameMetrics$FinalScore" }
+    ]]
+}
