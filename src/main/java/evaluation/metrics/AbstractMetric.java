@@ -7,9 +7,14 @@ import evaluation.summarisers.TAGStatSummary;
 import tech.tablesaw.api.*;
 import tech.tablesaw.columns.Column;
 import tech.tablesaw.plotly.Plot;
+import tech.tablesaw.plotly.api.BoxPlot;
 import tech.tablesaw.plotly.api.LinePlot;
+import tech.tablesaw.plotly.components.Axis;
 import tech.tablesaw.plotly.components.Figure;
+import tech.tablesaw.plotly.components.Layout;
 import tech.tablesaw.plotly.components.Line;
+import tech.tablesaw.plotly.traces.BarTrace;
+import tech.tablesaw.plotly.traces.BoxTrace;
 import tech.tablesaw.plotly.traces.ScatterTrace;
 import tech.tablesaw.plotly.traces.Trace;
 
@@ -368,46 +373,67 @@ public abstract class AbstractMetric
         Map<String, Figure> figures = new HashMap<>();
         for (i = 0; i < data.columnCount(); i++) {
             Column<?> column = data.column(i);
-            if (columnNames.contains(column.name()) && column instanceof NumberColumn) {
-                double[] x = new double[maxTick];
-                for (int j = 0; j < maxTick; j++) {
-                    x[j] = j;
-                }
-                double[] yMean = new double[column.size()];
-                double[] yMeanSdMinus = new double[column.size()];
-                double[] yMeanSdPlus = new double[column.size()];
-                for (int j = 0; j < maxTick; j++) {
-                    TAGNumericStatSummary ss = new TAGNumericStatSummary();
-                    for (int k = 0; k < nGames; k++) {
-                        Column<?> columnThisGame = tablesPerGame[k].column(column.name());
-                        if (columnThisGame.size() > j) {
-                            ss.add((double) columnThisGame.get(j));
-                        }
+            if (columnNames.contains(column.name())) {
+                if (column instanceof NumberColumn) {
+                    // Make a line plot - actually 3 lines, mean, mean+sd, mean-sd
+                    double[] x = new double[maxTick];
+                    for (int j = 0; j < maxTick; j++) {
+                        x[j] = j;
                     }
-                    double err = 0;
-                    if (ss.n() > 1) err = ss.stdErr();
-                    yMean[j] = ss.mean();
-                    yMeanSdMinus[j] = yMean[j] - err;
-                    yMeanSdPlus[j] = yMean[j] + err;
-                }
+                    double[] yMean = new double[column.size()];
+                    double[] yMeanSdMinus = new double[column.size()];
+                    double[] yMeanSdPlus = new double[column.size()];
+                    for (int j = 0; j < maxTick; j++) {
+                        TAGNumericStatSummary ss = new TAGNumericStatSummary();
+                        for (int k = 0; k < nGames; k++) {
+                            Column<?> columnThisGame = tablesPerGame[k].column(column.name());
+                            if (columnThisGame.size() > j) {
+                                ss.add((double) columnThisGame.get(j));
+                            }
+                        }
+                        double err = 0;
+                        if (ss.n() > 1) err = ss.stdErr();
+                        yMean[j] = ss.mean();
+                        yMeanSdMinus[j] = yMean[j] - err;
+                        yMeanSdPlus[j] = yMean[j] + err;
+                    }
 
-                Trace yMeanSdPlusTrace = ScatterTrace.builder(x, yMeanSdPlus).name("Mean + SD")
-                        .opacity(0.3)
-                        .line(Line.builder().simplify(true).dash(Line.Dash.DASH_DOT).color("rgb(0, 0, 255)").build())
-                        .mode(ScatterTrace.Mode.LINE).build();
-                Trace yMeanTrace = ScatterTrace.builder(x, yMean).name("Mean")
-                        .mode(ScatterTrace.Mode.LINE)
-                        .line(Line.builder().width(2).color("rgb(0, 0, 255)").build())
-                        .build();
-                Trace yMeanSdMinusTrace = ScatterTrace.builder(x, yMeanSdMinus).name("Mean - SD")
-                        .opacity(0.3)
-                        .line(Line.builder().simplify(true).dash(Line.Dash.DASH_DOT).color("rgb(0, 0, 255)").build())
-                        .mode(ScatterTrace.Mode.LINE).build();
+                    Trace yMeanSdPlusTrace = ScatterTrace.builder(x, yMeanSdPlus).name("Mean + SD")
+                            .opacity(0.3)
+                            .line(Line.builder().simplify(true).dash(Line.Dash.DASH_DOT).color("rgb(0, 0, 255)").build())
+                            .mode(ScatterTrace.Mode.LINE).build();
+                    Trace yMeanTrace = ScatterTrace.builder(x, yMean).name("Mean")
+                            .mode(ScatterTrace.Mode.LINE)
+                            .line(Line.builder().width(2).color("rgb(0, 0, 255)").build())
+                            .build();
+                    Trace yMeanSdMinusTrace = ScatterTrace.builder(x, yMeanSdMinus).name("Mean - SD")
+                            .opacity(0.3)
+                            .line(Line.builder().simplify(true).dash(Line.Dash.DASH_DOT).color("rgb(0, 0, 255)").build())
+                            .mode(ScatterTrace.Mode.LINE).build();
 
-                Figure figure = new Figure(yMeanSdPlusTrace, yMeanTrace, yMeanSdMinusTrace);
+                    Figure figure = new Figure(yMeanSdPlusTrace, yMeanTrace, yMeanSdMinusTrace);
 
 //                figures.put(column.name(), LinePlot.create(data.name(), "Data point", x, column.name(), y));
-                figures.put(column.name(), figure);
+                    figures.put(column.name(), figure);
+                } else {
+                    // Make box plots from the categorical counts across games
+
+                    // Create counts of each category per game
+                    Table[] tablesCountsPerGame = new Table[nGames];
+                    i = 0;
+                    for (Object id: data.column("GameID").unique().asObjectArray()) {
+                        tablesCountsPerGame[i] = ((StringColumn)column.where(data.stringColumn("GameID").isEqualTo((String) id))).countByCategory();
+                        i++;
+                    }
+                    Table countsPerGame = tablesCountsPerGame[0];
+                    for (i = 1; i < nGames; i++) {
+                        countsPerGame = countsPerGame.append(tablesCountsPerGame[i]);
+                    }
+
+                    // Create box plots from the counts
+                    Figure figure = BoxPlot.create(data.name(), countsPerGame, "Category", "Count");
+                    figures.put(column.name(), figure);
+                }
             }
         }
         return figures;
@@ -420,8 +446,18 @@ public abstract class AbstractMetric
     protected Map<String, Figure> plotData() {
         Map<String, Figure> figures = new HashMap<>();
         for (Column<?> column : data.columns()) {
-            if (columnNames.contains(column.name()) && column instanceof NumberColumn) {
-                figures.put(column.name(), LinePlot.create(data.name(), Table.create(column, data.column("GameID")), "GameID", column.name()));
+            if (columnNames.contains(column.name())) {
+                if (column instanceof NumberColumn) {
+                    figures.put(column.name(), LinePlot.create(data.name(), Table.create(column, data.column("GameID")), "GameID", column.name()));
+                } else {
+                    // Make a bar plot from the categorical count
+                    Table t2 = ((StringColumn)column).countByCategory();
+                    t2 = t2.sortDescendingOn(t2.column(1).name());
+                    Layout layout = Layout.builder().title(data.name()).yAxis(Axis.builder().title(column.name()).build()).build();
+                    BarTrace trace = BarTrace.builder(t2.categoricalColumn(0), t2.numberColumn(1))
+                            .build();
+                    figures.put(column.name(), new Figure(layout, trace));
+                }
             }
         }
         return figures;

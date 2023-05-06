@@ -1,6 +1,7 @@
 package evaluation.metrics;
 
 import core.AbstractGameState;
+import core.CoreConstants;
 import core.Game;
 import core.interfaces.IComponentContainer;
 import evaluation.listeners.MetricsGameListener;
@@ -236,14 +237,44 @@ public class GameMetrics implements IMetricsCollection
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
-    @Override
-    public Column<?>[] getColumns(Game game) {
-        return new Column[] {
-                StringColumn.create("ActionsType"),
-                StringColumn.create("ActionsDescription")
-        };
+        @Override
+        public Column<?>[] getColumns(Game game) {
+            return new Column[] {
+                    StringColumn.create("ActionsType"),
+                    StringColumn.create("ActionsDescription")
+            };
+        }
     }
-}
+
+    public static class Winner extends AbstractMetric {
+        public Winner(){super();}
+        public Winner(Event.GameEvent... args ){super(args);}
+
+        @Override
+        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            // iterate through player results in game state and find the winner
+            int winner = -1;
+            for (int i = 0; i < e.state.getNPlayers(); i++) {
+                if (e.state.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME) {
+                    winner = i;
+                    break;
+                }
+            }
+            records.put("PlayerIdx", String.valueOf(winner));
+        }
+
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return Collections.singleton(GAME_OVER);
+        }
+
+        @Override
+        public Column<?>[] getColumns(Game game) {
+            return new Column[] {
+                    StringColumn.create("PlayerIdx")
+            };
+        }
+    }
 
     /**
      * Returns the total number of components in the state as the first element of the returned value
