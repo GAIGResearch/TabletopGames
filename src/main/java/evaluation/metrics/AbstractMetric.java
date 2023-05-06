@@ -302,26 +302,27 @@ public abstract class AbstractMetric
                         }
                     }
 
-                    // Make a print table with detail counts per game
+                    // Make a print table with detail counts per game, transposed for more compact printing
                     Table printTable = summaryTable.transpose(true,false);
                     printTable.column(0).setName(column.name() + " \\ Game #");
+                    // Add table to the summary to print
                     summary.add(printTable + "\n");
 
                     // Make a print table with summary stats over all game
+                    // Taking the summary of the first category as start table. All have 2 columns, measure and value.
                     Table statsTable = summaryTable.intColumn(0).summary();
+                    // Change the name of the second column ('value') to the actual name of the category
                     statsTable.column(1).setName(summaryTable.column(0).name());
+                    // Name the table appropriately
                     statsTable.setName("Stats " + column.name());
+                    // Add the other categories as columns, taking only the second column (value) for each and naming them appropriately, according to the category name
                     for (i = 1; i < summaryTable.columnCount(); i++) {
                         DoubleColumn c = summaryTable.intColumn(i).summary().doubleColumn(1);
                         c.setName(summaryTable.column(i).name());
                         statsTable.addColumns(c);
                     }
+                    // Add table to the summary to print
                     summary.add(statsTable.transpose(true, true) + "\n");
-
-//                    for (Column<?> c: summaryTable.columns()) {
-//                        summary.add(data.name() + ":" + column.name() + ": " + c.summary() + "\n");
-//                    }
-//                    summary.add(data.name() + ": " + summaryTable.summary() + "\n");
                 } else {
                     // This is the same as summariseData
                     summary.add(data.name() + ": " + column.summary() + "\n");
