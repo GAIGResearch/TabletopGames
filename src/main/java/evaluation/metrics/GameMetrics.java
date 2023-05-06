@@ -5,6 +5,7 @@ import core.Game;
 import core.interfaces.IComponentContainer;
 import evaluation.listeners.MetricsGameListener;
 import tech.tablesaw.api.DoubleColumn;
+import tech.tablesaw.api.StringColumn;
 import tech.tablesaw.columns.Column;
 import utilities.Pair;
 
@@ -219,23 +220,30 @@ public class GameMetrics implements IMetricsCollection
 //            return Collections.singleton(Event.GameEvent.GAME_OVER);
 //        }
 //    }
-//
-//    public static class ActionTypes extends AbstractMetric {
-//        public ActionTypes(){super();}
-//        public ActionTypes(Event.GameEvent... args ){super(args);}
-//        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
-//
-//            Map<String, Object> collectedData = new LinkedHashMap<>();
-//            collectedData.put("ActionsType", e.action == null ? "NONE" : e.action.getClass().getSimpleName());
-//            collectedData.put("ActionsDescription", e.action == null ? "NONE" : e.action.getString(e.state));
-//            return collectedData;
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
-//        }
-//    }
+
+    public static class ActionTypes extends AbstractMetric {
+        public ActionTypes(){super();}
+        public ActionTypes(Event.GameEvent... args ){super(args);}
+
+        @Override
+        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            records.put("ActionsType", e.action == null ? "NONE" : e.action.getClass().getSimpleName());
+            records.put("ActionsDescription", e.action == null ? "NONE" : e.action.getString(e.state));
+        }
+
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+
+    @Override
+    public Column<?>[] getColumns(Game game) {
+        return new Column[] {
+                StringColumn.create("ActionsType"),
+                StringColumn.create("ActionsDescription")
+        };
+    }
+}
 
     /**
      * Returns the total number of components in the state as the first element of the returned value

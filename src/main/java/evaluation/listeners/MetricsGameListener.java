@@ -15,8 +15,8 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static evaluation.metrics.AbstractMetric.ReportDestination.Console;
-import static evaluation.metrics.AbstractMetric.ReportType.Plot;
+import static evaluation.metrics.AbstractMetric.ReportDestination.ToConsole;
+import static evaluation.metrics.AbstractMetric.ReportType.Summary;
 
 /**
  * Main Game Listener class. An instance can be attached to a game, which will then cause registered metrics in this
@@ -155,12 +155,12 @@ public class MetricsGameListener implements IGameListener {
      * This is useful for Listeners that are just interested in aggregate data across many runs
      */
     public void allGamesFinished() {
-        List<AbstractMetric.ReportType> reportTypes = Arrays.asList(Plot);
-        List<AbstractMetric.ReportDestination> reportDestinations = Arrays.asList(Console);
+        List<AbstractMetric.ReportType> reportTypes = Arrays.asList(Summary);
+        List<AbstractMetric.ReportDestination> reportDestinations = Arrays.asList(ToConsole);
 
         boolean success = true;
         String folderName = "metrics/out/" + game.getGameType().name() + "_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
-        if (reportDestinations.contains(AbstractMetric.ReportDestination.File)) {
+        if (reportDestinations.contains(AbstractMetric.ReportDestination.ToFile)) {
             // Create a folder for all files to be put in, with the game name and current timestamp
             File folder = new File(folderName);
             if (!folder.exists()) {
