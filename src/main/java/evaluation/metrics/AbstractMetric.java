@@ -17,6 +17,11 @@ import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Using TableSaw for data storage and visualisation:
+ * <a href="https://jtablesaw.github.io/tablesaw/userguide/toc">User Guide</a>
+ * <a href='https://www.javadoc.io/doc/tech.tablesaw/tablesaw-core/latest/overview-summary.html'>Java Doc</a>
+ */
 public abstract class AbstractMetric
 {
     Table data;
