@@ -263,6 +263,14 @@ public abstract class AbstractMetric
         return summary;
     }
 
+    /**
+     * Summarise the data recorded by this metric, per game. Only different for categorical (StringColumn) data.
+     * Same as summariseData for numerical data, even if progression through game.
+     * Prints 2 tables per metric:
+     *  - one showing detailed counts in each game for each categorical value
+     *  - one showing statistics overall for each categorical value (mean, std, min, max etc.)
+     * @return - a list of strings, each summarising a column of data, or other customized summary.
+     */
     protected List<String> summariseDataProgression() {
         int nGames = data.column("GameID").countUnique();
 
@@ -324,7 +332,7 @@ public abstract class AbstractMetric
                     // Add table to the summary to print
                     summary.add(statsTable.transpose(true, true) + "\n");
                 } else {
-                    // This is the same as summariseData
+                    // This is the same as summariseData for numerical data
                     summary.add(data.name() + ": " + column.summary() + "\n");
                 }
             }
@@ -408,7 +416,6 @@ public abstract class AbstractMetric
         Map<String, Figure> figures = new HashMap<>();
         for (Column<?> column : data.columns()) {
             if (columnNames.contains(column.name()) && column instanceof NumberColumn) {
-//                figures.add(LinePlot.create(data.name(), "Game ID", x, column.name(), y));
                 figures.put(column.name(), LinePlot.create(data.name(), Table.create(column, data.column("GameID")), "GameID", column.name()));
             }
         }
