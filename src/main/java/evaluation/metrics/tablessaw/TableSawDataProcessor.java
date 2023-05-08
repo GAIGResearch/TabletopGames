@@ -125,16 +125,17 @@ public class TableSawDataProcessor implements IDataProcessor {
      * Summarise the data recorded by this metric.
      * @return a list of strings, each summarising a column of data, or other customized summary.
      */
-    protected HashMap<String, List<String>> summariseData(AbstractMetric metric, Table data) {
+    protected HashMap<String, List<String>> summariseData(AbstractMetric metric, Table rawData) {
         HashMap<String, List<String>>  allDataSummaries = new HashMap<>();
-
-        for (Column<?> column : data.columns()) {
+        for (Column<?> c : rawData.columns()) {
+            Table filteredData = (rawData.where(rawData.column(c.name()).isNotMissing()));
+            Column<?> column = filteredData.column(c.name());
             if (metric.getColumnNames().contains(column.name())) {
                 List<String> summary = new ArrayList<>();
                 if (column instanceof StringColumn) {
-                    summary.add(data.name() + ": " + ((StringColumn) column).countByCategory() + "\n");
+                    summary.add(filteredData.name() + ": " + ((StringColumn) column).countByCategory() + "\n");
                 } else {
-                    summary.add(data.name() + ": " + column.summary() + "\n");
+                    summary.add(filteredData.name() + ": " + column.summary() + "\n");
                 }
                 allDataSummaries.put(column.name(), summary);
             }
@@ -150,11 +151,15 @@ public class TableSawDataProcessor implements IDataProcessor {
      *  - one showing statistics overall for each categorical value (mean, std, min, max etc.)
      * @return - a list of strings, each summarising a column of data, or other customized summary.
      */
-    protected HashMap<String, List<String>> summariseDataProgression(AbstractMetric metric, Table data) {
-        int nGames = data.column("GameID").countUnique();
+    protected HashMap<String, List<String>> summariseDataProgression(AbstractMetric metric, Table rawData) {
+        int nGames = rawData.column("GameID").countUnique();
         HashMap<String, List<String>>  allDataSummaries = new HashMap<>();
 
-        for (Column<?> column : data.columns()) {
+        for (Column<?> c : rawData.columns()) {
+
+            Table filteredData = (rawData.where(rawData.column(c.name()).isNotMissing()));
+            Column<?> column = filteredData.column(c.name());
+
             if (metric.getColumnNames().contains(column.name())) {
                 List<String> summary = new ArrayList<>();
                 if (column instanceof StringColumn) {
@@ -162,8 +167,8 @@ public class TableSawDataProcessor implements IDataProcessor {
                     Table[] tablesPerGame = new Table[nGames];
                     Set<String> categoryNames = new HashSet<>();
                     int i = 0;
-                    for (Object id: data.column("GameID").unique().asObjectArray()) {
-                        tablesPerGame[i] = ((StringColumn)column.where(data.stringColumn("GameID").isEqualTo((String) id))).countByCategory();
+                    for (Object id: filteredData.column("GameID").unique().asObjectArray()) {
+                        tablesPerGame[i] = ((StringColumn)column.where(filteredData.stringColumn("GameID").isEqualTo((String) id))).countByCategory();
                         // Needs transposing because the output of previous is several rows with category value, count (2 columns)
                         tablesPerGame[i] = tablesPerGame[i].transpose(false, true);
                         // Save all column names for the summary table
@@ -205,15 +210,15 @@ public class TableSawDataProcessor implements IDataProcessor {
                     statsTable.setName("Stats " + column.name());
                     // Add the other categories as columns, taking only the second column (value) for each and naming them appropriately, according to the category name
                     for (i = 1; i < summaryTable.columnCount(); i++) {
-                        DoubleColumn c = summaryTable.intColumn(i).summary().doubleColumn(1);
-                        c.setName(summaryTable.column(i).name());
-                        statsTable.addColumns(c);
+                        DoubleColumn dc = summaryTable.intColumn(i).summary().doubleColumn(1);
+                        dc.setName(summaryTable.column(i).name());
+                        statsTable.addColumns(dc);
                     }
                     // Add table to the summary to print
                     summary.add(statsTable.transpose(true, true) + "\n");
                 } else {
                     // This is the same as summariseData for numerical data
-                    summary.add(data.name() + ": " + column.summary() + "\n");
+                    summary.add(filteredData.name() + ": " + column.summary() + "\n");
                 }
 
                 allDataSummaries.put(column.name(), summary);
@@ -248,6 +253,7 @@ public class TableSawDataProcessor implements IDataProcessor {
         for (i = 0; i < data.columnCount(); i++) {
             Column<?> column = data.column(i);
             if (metric.getColumnNames().contains(column.name())) {
+                //TODO Not checked that this doesn't break with missing values. If error found, it may be that! o.O
                 if (column instanceof NumberColumn) {
                     // Make a line plot - actually 3 lines, mean, mean+sd, mean-sd
                     double[] x = new double[maxTick];
@@ -304,7 +310,9 @@ public class TableSawDataProcessor implements IDataProcessor {
                     Table[] tablesCountsPerGame = new Table[nGames];
                     int idx = 0;
                     for (Object id: data.column("GameID").unique().asObjectArray()) {
-                        tablesCountsPerGame[idx] = ((StringColumn)column.where(data.stringColumn("GameID").isEqualTo((String) id))).countByCategory();
+                        tablesCountsPerGame[idx] = ((StringColumn)column.where(data.stringColumn("GameID").isEqualTo((String) id)))
+                                .removeMissing()
+                                .countByCategory();
                         idx++;
                     }
                     Table countsPerGame = tablesCountsPerGame[0];
@@ -332,17 +340,20 @@ public class TableSawDataProcessor implements IDataProcessor {
      * Plot the data recorded by this metric.
      * @return - a list of figures, each plotting a column of data, or some customized plots.
      */
-    protected Map<String, Figure> plotData(AbstractMetric metric, Table data) {
+    protected Map<String, Figure> plotData(AbstractMetric metric, Table rawData) {
         Map<String, Figure> figures = new HashMap<>();
-        for (Column<?> column : data.columns()) {
+
+        for (Column<?> c : rawData.columns()) {
+            Table filteredData = (rawData.where(rawData.column(c.name()).isNotMissing()));
+            Column<?> column = filteredData.column(c.name());
             if (metric.getColumnNames().contains(column.name())) {
                 if (column instanceof NumberColumn) {
-                    figures.put(column.name(), LinePlot.create(data.name(), Table.create(column, data.column("GameID")), "GameID", column.name()));
+                    figures.put(column.name(), LinePlot.create(filteredData.name(), Table.create(column, filteredData.column("GameID")), "GameID", column.name()));
                 } else {
                     // Make a bar plot from the categorical count
                     Table t2 = ((StringColumn)column).countByCategory();
 //                    t2 = t2.sortDescendingOn(t2.column(1).name()); //todo this sorts the table, but not the plot when we build it.
-                    Layout layout = Layout.builder().title(data.name()).yAxis(Axis.builder().title(column.name()).build()).build();
+                    Layout layout = Layout.builder().title(filteredData.name()).yAxis(Axis.builder().title(column.name()).build()).build();
                     BarTrace trace = BarTrace.builder(t2.categoricalColumn(0), t2.numberColumn(1))
                             .build();
                     figures.put(column.name(), new Figure(layout, trace));

@@ -1,44 +1,51 @@
-//package games.loveletter.stats;
-//import core.CoreConstants;
-//import core.actions.AbstractAction;
-//import core.actions.LogEvent;
-//import core.components.Deck;
-//import evaluation.metrics.AbstractMetric;
-//import evaluation.metrics.Event;
-//import evaluation.listeners.MetricsGameListener;
-//import evaluation.metrics.IMetricsCollection;
-//import games.loveletter.LoveLetterGameState;
-//import games.loveletter.actions.*;
-//import games.loveletter.cards.LoveLetterCard;
-//
-//import java.util.*;
-//
-//@SuppressWarnings("unused")
-//public class LoveLetterMetrics implements IMetricsCollection {
-//
-//    public static class ActionsPlayed extends AbstractMetric
-//    {
-//        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
-//            Deck<LoveLetterCard> played = ((LoveLetterGameState)e.state).getPlayerDiscardCards().get(e.playerID);
-//            StringBuilder ss = new StringBuilder();
-//            for (LoveLetterCard card : played.getComponents()) {
-//                ss.append(card.cardType).append(",");
-//            }
-//            if (ss.toString().equals("")) return ss.toString();
-//            ss.append("]");
-//            return ss.toString().replace(",]", "");
-//        }
-//        @Override
-//        public boolean isRecordedPerPlayer() {
-//            return true;
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
-//        }
-//    }
-//
+package games.loveletter.stats;
+import core.CoreConstants;
+import core.Game;
+import core.actions.AbstractAction;
+import core.actions.LogEvent;
+import core.components.Deck;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
+import evaluation.listeners.MetricsGameListener;
+import evaluation.metrics.IMetricsCollection;
+import games.loveletter.LoveLetterGameState;
+import games.loveletter.actions.*;
+import games.loveletter.cards.LoveLetterCard;
+
+import java.util.*;
+
+@SuppressWarnings("unused")
+public class LoveLetterMetrics implements IMetricsCollection {
+
+    public static class ActionsPlayed extends AbstractMetric
+    {
+        @Override
+        public Map<String, Class<?>> getColumns(Game game) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (int i = 0; i < game.getPlayers().size(); i++) {
+                columns.put("Player-" + i, String.class);
+            }
+            columns.put("Aggregate", String.class);
+            return columns;
+        }
+
+        @Override
+        protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            PlayCard pc = (PlayCard) e.action;
+            for (int i = 0; i < listener.getGame().getPlayers().size(); i++) {
+                if(i == e.state.getCurrentPlayer())
+                    records.put("Player-" + e.state.getCurrentPlayer(), pc.getCardType().toString());
+                else records.put("Player-" + i, null);
+            }
+            records.put("Aggregate", pc.getCardType().toString());
+        }
+
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+    }
+
 //    public static class ActionsPlayedWin extends AbstractMetric
 //    {
 //        @Override
@@ -176,4 +183,4 @@
 //            return "";
 //        }
 //    }
-//}
+}
