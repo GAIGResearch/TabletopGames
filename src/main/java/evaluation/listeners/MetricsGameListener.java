@@ -11,10 +11,8 @@ import evaluation.metrics.tablessaw.DataTableSaw;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import static evaluation.metrics.IDataLogger.ReportDestination.ToConsole;
-import static evaluation.metrics.IDataLogger.ReportDestination.ToFile;
-import static evaluation.metrics.IDataLogger.ReportType.Summary;
+import static evaluation.metrics.IDataLogger.ReportDestination.*;
+import static evaluation.metrics.IDataLogger.ReportType.*;
 
 /**
  * Main Game Listener class. An instance can be attached to a game, which will then cause registered metrics in this
@@ -40,7 +38,7 @@ public class MetricsGameListener implements IGameListener {
 
     List<IDataLogger.ReportType> reportTypes = Arrays.asList(Summary);  //todo this needs to be read from JSON
 
-    List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToConsole); //todo this needs to be read from JSON
+    List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToFile); //todo this needs to be read from JSON
 
     String destFolder = "metrics/out/"; //todo this needs to be read from JSON
 

@@ -18,6 +18,8 @@ import tech.tablesaw.plotly.traces.ScatterTrace;
 import tech.tablesaw.plotly.traces.Trace;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class TableSawDataProcessor implements IDataProcessor {
@@ -36,25 +38,56 @@ public class TableSawDataProcessor implements IDataProcessor {
         System.out.println(dts.data);
     }
 
-    @Override
-    public void processSummaryToConsole(IDataLogger logger) {
-        DataTableSaw dts = (DataTableSaw) logger;
-        List<String> summarisedData;
+    private HashMap<String, List<String>> getSummarisedData(DataTableSaw dts)
+    {
+        HashMap<String, List<String>> summarisedData;
         if (dts.metric.getGamesCompleted() < dts.data.column(0).size()) {
             summarisedData = summariseDataProgression(dts.metric, dts.data);
         } else {
             summarisedData = summariseData(dts.metric, dts.data);
         }
-        System.out.println();
-        for (String summary : summarisedData) {
-            System.out.println(summary);
+        return summarisedData;
+    }
+
+
+    @Override
+    public void processSummaryToConsole(IDataLogger logger) {
+        DataTableSaw dts = (DataTableSaw) logger;
+        HashMap<String, List<String>> summarisedData = getSummarisedData(dts);
+
+        for (String columnSummary : summarisedData.keySet()) {
+            System.out.println();
+            for(String summaryLines : summarisedData.get(columnSummary))
+                System.out.println(summaryLines);
         }
     }
 
     @Override
     public void processSummaryToFile(IDataLogger logger, String folderName) {
-        // TODO: Ooops, not done yet, but should be easy to implement
-        System.out.println("Summary report not implemented yet");
+        DataTableSaw dts = (DataTableSaw) logger;
+        HashMap<String, List<String>> summarisedData = getSummarisedData(dts);
+
+        File summaryFolder = new File(folderName + "/summaries");
+        boolean success = true;
+        if (!summaryFolder.exists()) {
+            success = summaryFolder.mkdir();
+        }
+        File summaryFolderMetric = new File(folderName + "/summaries/" + dts.metric.getName());
+        if (!summaryFolderMetric.exists()) {
+            success = summaryFolderMetric.mkdir();
+        }
+
+        if (success) for (String columnSummary : summarisedData.keySet()) {
+            try {
+                FileWriter fw = new FileWriter(summaryFolderMetric + "/"  + columnSummary + ".txt");
+                for(String summaryLines : summarisedData.get(columnSummary))
+                    fw.write(summaryLines);
+                fw.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
     }
 
     @Override
@@ -88,26 +121,25 @@ public class TableSawDataProcessor implements IDataProcessor {
     }
 
 
-
-
-
-
     /**
      * Summarise the data recorded by this metric.
      * @return a list of strings, each summarising a column of data, or other customized summary.
      */
-    protected List<String> summariseData(AbstractMetric metric, Table data) {
-        List<String> summary = new ArrayList<>();
+    protected HashMap<String, List<String>> summariseData(AbstractMetric metric, Table data) {
+        HashMap<String, List<String>>  allDataSummaries = new HashMap<>();
+
         for (Column<?> column : data.columns()) {
             if (metric.getColumnNames().contains(column.name())) {
+                List<String> summary = new ArrayList<>();
                 if (column instanceof StringColumn) {
                     summary.add(data.name() + ": " + ((StringColumn) column).countByCategory() + "\n");
                 } else {
                     summary.add(data.name() + ": " + column.summary() + "\n");
                 }
+                allDataSummaries.put(column.name(), summary);
             }
         }
-        return summary;
+        return allDataSummaries;
     }
 
     /**
@@ -118,12 +150,13 @@ public class TableSawDataProcessor implements IDataProcessor {
      *  - one showing statistics overall for each categorical value (mean, std, min, max etc.)
      * @return - a list of strings, each summarising a column of data, or other customized summary.
      */
-    protected List<String> summariseDataProgression(AbstractMetric metric, Table data) {
+    protected HashMap<String, List<String>> summariseDataProgression(AbstractMetric metric, Table data) {
         int nGames = data.column("GameID").countUnique();
+        HashMap<String, List<String>>  allDataSummaries = new HashMap<>();
 
-        List<String> summary = new ArrayList<>();
         for (Column<?> column : data.columns()) {
             if (metric.getColumnNames().contains(column.name())) {
+                List<String> summary = new ArrayList<>();
                 if (column instanceof StringColumn) {
                     // Create counts of each category per game
                     Table[] tablesPerGame = new Table[nGames];
@@ -182,9 +215,11 @@ public class TableSawDataProcessor implements IDataProcessor {
                     // This is the same as summariseData for numerical data
                     summary.add(data.name() + ": " + column.summary() + "\n");
                 }
+
+                allDataSummaries.put(column.name(), summary);
             }
         }
-        return summary;
+        return allDataSummaries;
     }
 
     /**
