@@ -228,6 +228,8 @@ public class TableSawDataProcessor implements IDataProcessor {
      * @return - a list of figures, each plotting a column of data, or some customized plots.
      */
     protected Map<String, Figure> plotDataProgression(AbstractMetric metric, Table data) {
+        // todo add label axes and title
+
         int nGames = data.column("GameID").countUnique();
         int maxTick = 0;
         Table[] tablesPerGame = new Table[nGames];
@@ -284,7 +286,14 @@ public class TableSawDataProcessor implements IDataProcessor {
                             .line(Line.builder().simplify(true).dash(Line.Dash.DASH_DOT).color("rgb(0, 0, 255)").build())
                             .mode(ScatterTrace.Mode.LINE).build();
 
-                    Figure figure = new Figure(yMeanSdPlusTrace, yMeanTrace, yMeanSdMinusTrace);
+
+                    Layout layout = Layout.builder().title(data.name())
+                            .height(600).width(800)
+                            .yAxis(Axis.builder().title(column.name()).build())
+                            .xAxis(Axis.builder().title("Game tick").build())
+                            .build();
+
+                    Figure figure = new Figure(layout, yMeanSdPlusTrace, yMeanTrace, yMeanSdMinusTrace);
 
 //                figures.put(column.name(), LinePlot.create(data.name(), "Data point", x, column.name(), y));
                     figures.put(column.name(), figure);

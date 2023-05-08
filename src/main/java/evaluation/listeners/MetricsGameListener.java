@@ -38,7 +38,7 @@ public class MetricsGameListener implements IGameListener {
 
     List<IDataLogger.ReportType> reportTypes = Arrays.asList(RawData, Summary, Plot);  //todo this needs to be read from JSON
 
-    List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToFile); //todo this needs to be read from JSON
+    List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToBoth); //todo this needs to be read from JSON
 
     String destFolder = "metrics/out/"; //todo this needs to be read from JSON
 
@@ -94,7 +94,7 @@ public class MetricsGameListener implements IGameListener {
         }
 
         String folderName = destFolder + game.getGameType().name() + "_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
-        if (reportDestinations.contains(ToFile)) {
+        if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
             // Create a folder for all files to be put in, with the game name and current timestamp
             File folder = new File(folderName);
             if (!folder.exists()) {

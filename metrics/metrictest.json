@@ -6,8 +6,6 @@
       "args" : ["GameResults.txt"]
     },
     [
-      {"class": "evaluation.metrics.GameMetrics$ActionSpace" },
-      {"class": "evaluation.metrics.GameMetrics$ActionTypes" },
-      {"class": "evaluation.metrics.GameMetrics$Winner" }
+      {"class": "evaluation.metrics.GameMetrics$Decisions" }
     ]]
 }

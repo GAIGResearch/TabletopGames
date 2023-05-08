@@ -6,6 +6,8 @@ import core.Game;
 import core.interfaces.IComponentContainer;
 import evaluation.listeners.MetricsGameListener;
 import core.AbstractForwardModel;
+import evaluation.summarisers.TAGStatSummary;
+import evaluation.summarisers.TAGSummariser;
 import utilities.Pair;
 
 import java.util.*;
@@ -78,19 +80,17 @@ public class GameMetrics implements IMetricsCollection
         }
     }
 
-    public static class ActionSpace extends AbstractMetric{
+    public static class StateSpace extends AbstractMetric{
         @Override
         public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            Game g = listener.getGame();
-            AbstractForwardModel fm = g.getForwardModel();
-            records.put("Size", fm.computeAvailableActions(e.state).size());
+            records.put("Size", countComponents(e.state).a);
+        }
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return new HashSet<>(Arrays.asList(Event.GameEvent.ACTION_CHOSEN, Event.GameEvent.ABOUT_TO_START));
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
-        }
-
         public Map<String, Class<?>> getColumns(Game game) {
             Map<String, Class<?>> columns = new HashMap<>();
             columns.put("Size", Integer.class);
@@ -98,140 +98,16 @@ public class GameMetrics implements IMetricsCollection
         }
     }
 
-//    public static class StateSize extends AbstractMetric{
-//        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
-//            int components = countComponents(e.state).a;
-//            return (double) components;
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return new HashSet<>(Arrays.asList(Event.GameEvent.ACTION_CHOSEN, Event.GameEvent.ABOUT_TO_START));
-//        }
-//    }
-//
-//    public static class CurrentPlayer extends AbstractMetric{
-//        public CurrentPlayer(){super();}
-//        public CurrentPlayer(Event.GameEvent... args ){super(args);}
-//        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
-//            return e.state.getCurrentPlayer();
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return Collections.singleton(Event.GameEvent.ROUND_OVER);
-//        }
-//    }
-//
-//    public static class CurrentPlayerVisibility extends AbstractMetric{
-//        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
-//            AbstractGameState gs = e.state;
-//            int player = gs.getCurrentPlayer();
-//            Pair<Integer, int[]> allComp = countComponents(gs);
-//            return (allComp.b[player] / (double) allComp.a);
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
-//        }
-//    }
-//
-//    public static class ComputationTimes extends AbstractMetric{
-//        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
-//            Map<String, Object> collectedData = new LinkedHashMap<>();
-//            collectedData.put("TimeNext", listener.getGame().getNextTime() / 1e3);
-//            collectedData.put("TimeCopy", listener.getGame().getCopyTime() / 1e3);
-//            collectedData.put("TimeActionCompute", listener.getGame().getActionComputeTime() / 1e3);
-//            collectedData.put("TimeAgent", listener.getGame().getAgentTime() / 1e3);
-//            return collectedData;
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return Collections.singleton(Event.GameEvent.GAME_OVER);
-//        }
-//    }
-//
-//    public static class GameDuration extends AbstractMetric{
-//        public GameDuration(){super();}
-//        public GameDuration(Event.GameEvent... args ){super(args);}
-//        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
-//            Map<String, Object> collectedData = new LinkedHashMap<>();
-//            collectedData.put("Turns", listener.getGame().getGameState().getTurnCounter());
-//            collectedData.put("Ticks", listener.getGame().getTick());
-//            collectedData.put("Rounds", listener.getGame().getGameState().getRoundCounter());
-//            return collectedData;
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return Collections.singleton(Event.GameEvent.GAME_OVER);
-//        }
-//    }
-//
-//    public static class OrdinalPosition extends AbstractMetric{
-//        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
-//            return e.state.getOrdinalPosition(e.playerID);
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return Collections.singleton(Event.GameEvent.GAME_OVER);
-//        }
-//        @Override
-//        public boolean isRecordedPerPlayer() {
-//            return true;
-//        }
-//    }
-//
-//    public static class PlayerType extends AbstractMetric{
-//        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
-//            return listener.getGame().getPlayers().get(e.playerID).toString();
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return Collections.singleton(Event.GameEvent.GAME_OVER);
-//        }
-//        @Override
-//        public boolean isRecordedPerPlayer() {
-//            return true;
-//        }
-//    }
-//
-//    public static class Decisions extends AbstractMetric {
-//        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
-//            List<Pair<Integer, Integer>> actionSpaceRecord = listener.getGame().getActionSpaceSize();
-//            TAGStatSummary statsDecisionsAll = actionSpaceRecord.stream()
-//                    .map(r -> r.b)
-//                    .collect(new TAGSummariser());
-//            TAGStatSummary statsDecisions = actionSpaceRecord.stream()
-//                    .map(r -> r.b)
-//                    .filter(size -> size > 1)
-//                    .collect(new TAGSummariser());
-//
-//            Map<String, Object> collectedData = new LinkedHashMap<>();
-//            collectedData.put("ActionsPerTurnSum", listener.getGame().getNActionsPerTurn());
-//            collectedData.put("Decisions", statsDecisions.n());
-//            collectedData.put("DecisionPointsMean", statsDecisions.n() * 1.0 / statsDecisionsAll.n());
-//            return collectedData;
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return Collections.singleton(Event.GameEvent.GAME_OVER);
-//        }
-//    }
 
-    public static class ActionTypes extends AbstractMetric {
-        public ActionTypes(){super();}
-        public ActionTypes(Event.GameEvent... args ){super(args);}
+
+    public static class CurrentPlayerVisibility extends AbstractMetric{
 
         @Override
-        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            records.put("ActionsType", e.action == null ? "NONE" : e.action.getClass().getSimpleName());
-            records.put("ActionsDescription", e.action == null ? "NONE" : e.action.getString(e.state));
+        protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            AbstractGameState gs = e.state;
+            int player = gs.getCurrentPlayer();
+            Pair<Integer, int[]> allComp = countComponents(gs);
+            records.put("Percentage", (allComp.b[player] / (double) allComp.a) * 100.0);
         }
 
         @Override
@@ -242,8 +118,151 @@ public class GameMetrics implements IMetricsCollection
         @Override
         public Map<String, Class<?>> getColumns(Game game) {
             return new HashMap<String, Class<?>>() {{
-                put("ActionsType", String.class);
-                put("ActionsDescription", String.class);
+                put("Percentage", Double.class);
+            }};
+        }
+    }
+
+
+    public static class ComputationTimes extends AbstractMetric{
+
+        @Override
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("Time Next (ns)", Double.class);
+                put("Time Copy (ns)", Double.class);
+                put("Time Action Compute (ns)", Double.class);
+                put("Time Agent (ns)", Double.class);
+            }};
+        }
+
+        @Override
+        protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            //TODO: This is calculated in game and reported in the end. If we calculate at every step, we
+            // can get std errors in the plots when reporting the data.
+            records.put("Time Next (ns)", listener.getGame().getNextTime() / 1e3);
+            records.put("Time Copy (ns)", listener.getGame().getCopyTime() / 1e3);
+            records.put("Time Action Compute (ns)", listener.getGame().getActionComputeTime() / 1e3);
+            records.put("Time Agent (ns)", listener.getGame().getAgentTime() / 1e3);
+        }
+
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+    }
+
+    public static class OrdinalPosition extends AbstractMetric{
+        @Override
+        public Map<String, Class<?>> getColumns(Game game) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (int i = 0; i < game.getPlayers().size(); i++) {
+                columns.put("Player-" + i, Integer.class);
+                columns.put("Player-" + i + " rank", String.class);
+            }
+            return columns;
+        }
+
+        @Override
+        protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            for (int i = 0; i < e.state.getNPlayers(); i++) {
+                records.put("Player-" + i, e.state.getOrdinalPosition(i));
+                records.put("Player-" + i + " rank", String.valueOf(e.state.getOrdinalPosition(i) ));
+            }
+        }
+
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+
+    }
+
+    // Probably not useful on its own, but can be added to others.
+//    public static class PlayerType extends AbstractMetric{
+//        @Override
+//        public Map<String, Class<?>> getColumns(Game game) {
+//            Map<String, Class<?>> columns = new HashMap<>();
+//            for (int i = 0; i < game.getPlayers().size(); i++) {
+//                columns.put("PlayerType-" + i, String.class);
+//            }
+//            return columns;
+//        }
+//
+//        @Override
+//        protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+//            for (int i = 0; i < e.state.getNPlayers(); i++) {
+//                records.put("PlayerType-" + i, listener.getGame().getPlayers().get(i).toString());
+//            }
+//        }
+//
+//        @Override
+//        public Set<Event.GameEvent> getDefaultEventTypes() {
+//            return Collections.singleton(Event.GameEvent.GAME_OVER);
+//        }
+//    }
+
+
+
+    public static class Decisions extends AbstractMetric {
+
+        @Override
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("ActionsPerTurn (Sum)", Integer.class);
+                put("Decisions", Integer.class);
+                put("DecisionPoints (Mean)", Double.class);
+            }};
+        }
+
+        @Override
+        protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+
+            List<Pair<Integer, Integer>> actionSpaceRecord = listener.getGame().getActionSpaceSize();
+            TAGStatSummary statsDecisionsAll = actionSpaceRecord.stream()
+                    .map(r -> r.b)
+                    .collect(new TAGSummariser());
+            TAGStatSummary statsDecisions = actionSpaceRecord.stream()
+                    .map(r -> r.b)
+                    .filter(size -> size > 1)
+                    .collect(new TAGSummariser());
+
+            records.put("ActionsPerTurn (Sum)", listener.getGame().getNActionsPerTurn());
+            records.put("Decisions", statsDecisions.n());
+            records.put("DecisionPoints (Mean)", statsDecisions.n() * 1.0 / statsDecisionsAll.n());
+        }
+
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+    }
+
+    public static class Actions extends AbstractMetric {
+        public Actions(){super();}
+        public Actions(Event.GameEvent... args ){super(args);}
+
+        @Override
+        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            Game g = listener.getGame();
+            AbstractForwardModel fm = g.getForwardModel();
+
+            records.put("Actions Played", e.action == null ? "NONE" : e.action.getClass().getSimpleName());
+            records.put("Actions Played Description", e.action == null ? "NONE" : e.action.getString(e.state));
+            records.put("Action Space Size", fm.computeAvailableActions(e.state).size());
+        }
+
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("Actions Played", String.class);
+                put("Actions Played Description", String.class);
+                put("Action Space Size", Integer.class);
             }};
         }
     }
