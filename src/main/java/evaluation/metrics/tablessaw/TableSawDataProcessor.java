@@ -81,7 +81,7 @@ public class TableSawDataProcessor implements IDataProcessor {
             try {
                 FileWriter fw = new FileWriter(summaryFolderMetric + "/"  + columnSummary + ".txt");
                 for(String summaryLines : summarisedData.get(columnSummary))
-                    fw.write(summaryLines);
+                    fw.write(summaryLines + "\n");
                 fw.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -260,9 +260,10 @@ public class TableSawDataProcessor implements IDataProcessor {
                         for (int k = 0; k < nGames; k++) {
                             Column<?> columnThisGame = tablesPerGame[k].column(column.name());
                             if (columnThisGame.size() > j) {
-                                ss.add((double) columnThisGame.get(j));
+                                ss.add(Double.parseDouble(""+columnThisGame.get(j)));
                             }
                         }
+
                         double err = 0;
                         if (ss.n() > 1) err = ss.stdErr();
                         yMean[j] = ss.mean();

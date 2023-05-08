@@ -164,7 +164,9 @@ public abstract class AbstractMetric
 
         for (int i = 0; i < reportTypes.size(); i++) {
             IDataLogger.ReportType reportType = reportTypes.get(i);
-            IDataLogger.ReportDestination reportDestination = reportDestinations.get(i);
+            IDataLogger.ReportDestination reportDestination;
+            if(reportDestinations.size() == 1) reportDestination = reportDestinations.get(0);
+            else reportDestination = reportDestinations.get(i);
 
             if (reportType == IDataLogger.ReportType.RawData) {
                 if (reportDestination == IDataLogger.ReportDestination.ToFile || reportDestination == IDataLogger.ReportDestination.ToBoth) {

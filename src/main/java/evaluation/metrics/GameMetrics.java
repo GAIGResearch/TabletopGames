@@ -5,9 +5,7 @@ import core.CoreConstants;
 import core.Game;
 import core.interfaces.IComponentContainer;
 import evaluation.listeners.MetricsGameListener;
-import tech.tablesaw.api.DoubleColumn;
-import tech.tablesaw.api.StringColumn;
-import tech.tablesaw.columns.Column;
+import core.AbstractForwardModel;
 import utilities.Pair;
 
 import java.util.*;
@@ -80,19 +78,26 @@ public class GameMetrics implements IMetricsCollection
         }
     }
 
-//    public static class ActionSpace extends AbstractMetric{
-//        @Override
-//        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-//            Game g = listener.getGame();
-//            AbstractForwardModel fm = g.getForwardModel();
-//            return fm.computeAvailableActions(g.getGameState()).size();
-//        }
-//        @Override
-//        public Set<Event.GameEvent> getDefaultEventTypes() {
-//            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
-//        }
-//    }
-//
+    public static class ActionSpace extends AbstractMetric{
+        @Override
+        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            Game g = listener.getGame();
+            AbstractForwardModel fm = g.getForwardModel();
+            records.put("Size", fm.computeAvailableActions(e.state).size());
+        }
+
+        @Override
+        public Set<Event.GameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+
+        public Map<String, Class<?>> getColumns(Game game) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            columns.put("Size", Integer.class);
+            return columns;
+        }
+    }
+
 //    public static class StateSize extends AbstractMetric{
 //        @Override
 //        public Object run(MetricsGameListener listener, Event e) {
