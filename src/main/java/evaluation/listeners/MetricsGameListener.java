@@ -4,19 +4,17 @@ import core.Game;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
+import evaluation.metrics.IDataLogger;
 import evaluation.metrics.IMetricsCollection;
-import evaluation.summarisers.TAGNumericStatSummary;
-import evaluation.summarisers.TAGOccurrenceStatSummary;
-import evaluation.summarisers.TAGStatSummary;
-import evaluation.summarisers.TAGTimeSeriesSummary;
-import utilities.TimeStamp;
+import evaluation.metrics.tablessaw.DataTableSaw;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static evaluation.metrics.AbstractMetric.ReportDestination.ToFile;
-import static evaluation.metrics.AbstractMetric.ReportType.Plot;
+import static evaluation.metrics.IDataLogger.ReportDestination.ToConsole;
+import static evaluation.metrics.IDataLogger.ReportDestination.ToFile;
+import static evaluation.metrics.IDataLogger.ReportType.Summary;
 
 /**
  * Main Game Listener class. An instance can be attached to a game, which will then cause registered metrics in this
@@ -40,17 +38,21 @@ public class MetricsGameListener implements IGameListener {
     // Game this listener listens to
     protected Game game;
 
+    List<IDataLogger.ReportType> reportTypes = Arrays.asList(Summary);  //todo this needs to be read from JSON
+
+    List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToConsole); //todo this needs to be read from JSON
+
+    String destFolder = "metrics/out/"; //todo this needs to be read from JSON
+
     public MetricsGameListener() {}
     public MetricsGameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
         this.metrics = new LinkedHashMap<>();
         this.loggers = new HashMap<>();
         for (AbstractMetric m : metrics) {
+            m.setDataLogger(new DataTableSaw(m)); //todo this logger needs to be read from JSON
             this.metrics.put(m.getName(), m);
             eventsOfInterest.addAll(m.getEventTypes());
         }
-//        for (Event.GameEvent event: eventsOfInterest) {
-//            this.loggers.put(event, logger.emptyCopy(event.name()));
-//        }
     }
 
     /**
@@ -70,83 +72,12 @@ public class MetricsGameListener implements IGameListener {
                 // Apply metric
                 metric.run(this, event);
             }
+
+            if(event.type == Event.GameEvent.GAME_OVER)
+                metric.notifyGameOver();
         }
 
-        // Process data from events recorded multiple times during game
-//        if (event.type == Event.GameEvent.GAME_OVER) {
-//            IStatisticLogger gameOverLogger = loggers.get(Event.GameEvent.GAME_OVER);
-//            if (gameOverLogger != null) {
-//                for (Event.GameEvent e : loggers.keySet()) {
-//                    if (!e.isOncePerGame()) {
-//                        // Summarise at the end
-//                        IStatisticLogger logger = loggers.get(e);
-//                        Map<String, TAGStatSummary> dataLogged = logger.summary();
-//                        ArrayList<String> keyDeletes = new ArrayList<>();
-//                        for (String key : dataLogged.keySet()) {
-//                            TAGStatSummary dataLoggedKey = dataLogged.get(key);
-//                            processMetricGameOver(metrics.get(key.split(":")[0]), event, dataLoggedKey, gameOverLogger);
-////                            if(key.contains(":All:"))
-//                                keyDeletes.add(key);
-//                        }
-//                        for(String kDel : keyDeletes)
-//                            dataLogged.remove(kDel);
-//                        // TODO Check correct reset for next game?
-//                    }
-//                }
-//            }
-//        }
     }
-
-    /**
-     * @param metric - metric that has to post-process
-     * @param event - event type where the metric was logged
-     * @param dataLogged - data logged for this metric for this game
-     * @param gameOverLogger - logger in which to record the summarised version of this data for one data point per game
-     */
-    protected void processMetricGameOver(AbstractMetric metric, Event event, TAGStatSummary dataLogged, IStatisticLogger gameOverLogger) {
-//        gameOverLogger.record(dataLogged.getSummary());
-        Map<String, Object> toRecord;
-        if (metric != null) {
-            toRecord = metric.postProcessingGameOver(event, dataLogged);
-        } else {
-            // Default post-processing
-            toRecord = new HashMap<>();
-            Map<String, Object> summaryData = dataLogged.getSummary();
-            for (String k: summaryData.keySet()) {
-                toRecord.put(getClass().getSimpleName() + "(" + k + ")" + ":" + event.type, summaryData.get(k));
-            }
-        }
-        gameOverLogger.record(toRecord);
-    }
-
-    private TAGStatSummary aggregate(ArrayList<Object> metricsData)
-    {
-        if(metricsData.size() > 0) {
-            if (metricsData.get(0) instanceof Number) {  // TODO might want this as occurrence stat summary instead
-                TAGNumericStatSummary ss = new TAGNumericStatSummary();
-                for (Object metricsDatum : metricsData) {
-                    if (metricsDatum instanceof Integer) ss.add((Integer) metricsDatum);
-                    if (metricsDatum instanceof Double) ss.add((Double) metricsDatum);
-                }
-                return ss;
-            }else if (metricsData.get(0) instanceof TimeStamp) {
-                //This is a time series.
-                TAGTimeSeriesSummary ss = new TAGTimeSeriesSummary();
-                for (Object metricsDatum : metricsData) {
-                    TimeStamp timeStamp = (TimeStamp) metricsDatum;
-                    ss.append(timeStamp.x, timeStamp.v);
-                }
-                return ss;
-            } else {
-                TAGOccurrenceStatSummary ss = new TAGOccurrenceStatSummary();
-                for (Object metricsDatum : metricsData)
-                    ss.add(metricsDatum);
-                return ss;
-            }
-        }
-        return null;
-    }
-
 
     /**
      * This is called when all processing is finished, for example after running a sequence of games
@@ -155,11 +86,16 @@ public class MetricsGameListener implements IGameListener {
      * This is useful for Listeners that are just interested in aggregate data across many runs
      */
     public void allGamesFinished() {
-        List<AbstractMetric.ReportType> reportTypes = Arrays.asList(Plot);
-        List<AbstractMetric.ReportDestination> reportDestinations = Arrays.asList(ToFile);
 
         boolean success = true;
-        String folderName = "metrics/out/" + game.getGameType().name() + "_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
+
+        // If the "metrics/out/" does not exist, create it
+        File outFolder = new File(destFolder);
+        if (!outFolder.exists()) {
+            success = outFolder.mkdir();
+        }
+
+        String folderName = destFolder + game.getGameType().name() + "_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         if (reportDestinations.contains(ToFile)) {
             // Create a folder for all files to be put in, with the game name and current timestamp
             File folder = new File(folderName);
@@ -171,16 +107,12 @@ public class MetricsGameListener implements IGameListener {
         // All metrics report themselves
         if (success) {
             for (AbstractMetric metric : metrics.values()) {
-                metric.allGamesFinished(folderName,
+                metric.processFinishedGames(folderName,
                         reportTypes,
                         reportDestinations);
             }
         }
 
-//        if (loggers != null)
-//            for (IStatisticLogger logger: loggers.values()) {
-//                logger.processDataAndFinish();
-//            }
     }
 
     /* Getters, setters */

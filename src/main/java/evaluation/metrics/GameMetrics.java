@@ -45,14 +45,12 @@ public class GameMetrics implements IMetricsCollection
             return new HashSet<>(Arrays.asList(Event.GameEvent.ACTION_CHOSEN, GAME_OVER));
         }
         @Override
-        public Column<?>[] getColumns(Game game) {
-            Column<?>[] columns = new Column[game.getPlayers().size()+2];
-            int i;
-            for (i = 0; i < game.getPlayers().size(); i++) {
-                columns[i] = DoubleColumn.create("Player-" + i);
-            }
-            columns[i++] = DoubleColumn.create("Average");
-            columns[i] = DoubleColumn.create("LeaderGap");
+        public Map<String, Class<?>> getColumns(Game game) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (int i = 0; i < game.getPlayers().size(); i++)
+                columns.put("Player-" + i, Double.class);
+            columns.put("Average", Double.class);
+            columns.put("LeaderGap", Double.class);
             return columns;
         }
     }
@@ -74,11 +72,10 @@ public class GameMetrics implements IMetricsCollection
         }
 
         @Override
-        public Column<?>[] getColumns(Game game) {
-            Column<?>[] columns = new Column[game.getPlayers().size()];
-            for (int i = 0; i < game.getPlayers().size(); i++) {
-                columns[i] = DoubleColumn.create("Player-" + i);
-            }
+        public Map<String, Class<?>> getColumns(Game game) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (int i = 0; i < game.getPlayers().size(); i++)
+                columns.put("Player-" + i, Double.class);
             return columns;
         }
     }
@@ -238,11 +235,11 @@ public class GameMetrics implements IMetricsCollection
         }
 
         @Override
-        public Column<?>[] getColumns(Game game) {
-            return new Column[] {
-                    StringColumn.create("ActionsType"),
-                    StringColumn.create("ActionsDescription")
-            };
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("ActionsType", String.class);
+                put("ActionsDescription", String.class);
+            }};
         }
     }
 
@@ -269,10 +266,10 @@ public class GameMetrics implements IMetricsCollection
         }
 
         @Override
-        public Column<?>[] getColumns(Game game) {
-            return new Column[] {
-                    StringColumn.create("PlayerIdx")
-            };
+        public HashMap<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("PlayerIdx", String.class);
+            }};
         }
     }
 
