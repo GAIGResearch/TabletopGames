@@ -73,6 +73,7 @@ public class Vector2D {
     }
 
     public enum Direction {
+        NONE(new Vector2D()),
         UP(new Vector2D(0, -1)),
         DOWN(new Vector2D(0, 1)),
         LEFT(new Vector2D(-1, 0)),
@@ -96,6 +97,7 @@ public class Vector2D {
         }
         public static Pair<Direction, Integer> approxVecToDir(Vector2D vec) {
             int mult = Math.max(vec.x, vec.y);
+            if (mult == 0) return new Pair<>(NONE, 0);
             Direction d = vecToDir(vec.divide(mult));
             if (d != null) return new Pair<>(d, mult);
             return null;

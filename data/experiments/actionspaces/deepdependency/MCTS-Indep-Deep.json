@@ -13,10 +13,8 @@
   "heuristic" : {
     "class" : "players.heuristics.ScoreHeuristic"
   },
-  "actionSpaceStructure" : "Flat",
+  "actionSpaceStructure" : "Deep",
   "actionSpaceContext": "Independent",
-  "expertIterationStateFeatures": "games.stratego.StrategoStateFeatures",
   "maintainMasterState": true,
-  "gatherTreeRecorder": true,
-  "treeRecorderFolder": "test_03"
+  "treeRecorderFolder": "test_01"
 }
