@@ -22,7 +22,7 @@ public class GameMetrics implements IMetricsCollection
         public GameScore(Event.GameEvent... args ){super(args);}
 
         @Override
-        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             double sum = 0;
             int leaderID = -1;
             int secondID = -1;
@@ -39,6 +39,7 @@ public class GameMetrics implements IMetricsCollection
             } else {
                 records.put("LeaderGap", 0.0);
             }
+            return true;
         }
         @Override
         public Set<Event.GameEvent> getDefaultEventTypes() {
@@ -60,10 +61,11 @@ public class GameMetrics implements IMetricsCollection
         public FinalScore(Event.GameEvent... args ){super(args);}
 
         @Override
-        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             for (int i = 0; i < e.state.getNPlayers(); i++) {
                 records.put("Player-" + i, e.state.getGameScore(i));
             }
+            return true;
         }
 
         @Override
@@ -82,8 +84,9 @@ public class GameMetrics implements IMetricsCollection
 
     public static class StateSpace extends AbstractMetric{
         @Override
-        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             records.put("Size", countComponents(e.state).a);
+            return true;
         }
         @Override
         public Set<Event.GameEvent> getDefaultEventTypes() {
@@ -103,11 +106,12 @@ public class GameMetrics implements IMetricsCollection
     public static class CurrentPlayerVisibility extends AbstractMetric{
 
         @Override
-        protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             AbstractGameState gs = e.state;
             int player = gs.getCurrentPlayer();
             Pair<Integer, int[]> allComp = countComponents(gs);
             records.put("Percentage", (allComp.b[player] / (double) allComp.a) * 100.0);
+            return true;
         }
 
         @Override
@@ -137,11 +141,12 @@ public class GameMetrics implements IMetricsCollection
         }
 
         @Override
-        protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             records.put("Next (ms)", listener.getGame().getNextTime() / 1e3);
             records.put("Copy (ms)", listener.getGame().getCopyTime() / 1e3);
             records.put("Actions Available Compute (ms)", listener.getGame().getActionComputeTime() / 1e3);
             records.put("Agent (ms)", listener.getGame().getAgentTime() / 1e3);
+            return true;
         }
 
         @Override
@@ -162,11 +167,12 @@ public class GameMetrics implements IMetricsCollection
         }
 
         @Override
-        protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             for (int i = 0; i < e.state.getNPlayers(); i++) {
                 records.put("Player-" + i, e.state.getOrdinalPosition(i));
                 records.put("Player-" + i + " rank", String.valueOf(e.state.getOrdinalPosition(i) ));
             }
+            return true;
         }
 
         @Override
@@ -214,7 +220,7 @@ public class GameMetrics implements IMetricsCollection
         }
 
         @Override
-        protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
 
             List<Pair<Integer, Integer>> actionSpaceRecord = listener.getGame().getActionSpaceSize();
             TAGStatSummary statsDecisionsAll = actionSpaceRecord.stream()
@@ -228,6 +234,7 @@ public class GameMetrics implements IMetricsCollection
             records.put("ActionsPerTurn (Sum)", listener.getGame().getNActionsPerTurn());
             records.put("Decisions", statsDecisions.n());
             records.put("DecisionPoints (Mean)", statsDecisions.n() * 1.0 / statsDecisionsAll.n());
+            return true;
         }
 
         @Override
@@ -241,13 +248,14 @@ public class GameMetrics implements IMetricsCollection
         public Actions(Event.GameEvent... args ){super(args);}
 
         @Override
-        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             Game g = listener.getGame();
             AbstractForwardModel fm = g.getForwardModel();
 
             records.put("Actions Played", e.action == null ? "NONE" : e.action.getClass().getSimpleName());
             records.put("Actions Played Description", e.action == null ? "NONE" : e.action.getString(e.state));
             records.put("Action Space Size", fm.computeAvailableActions(e.state).size());
+            return true;
         }
 
         @Override
@@ -270,7 +278,7 @@ public class GameMetrics implements IMetricsCollection
         public Winner(Event.GameEvent... args ){super(args);}
 
         @Override
-        public void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             // iterate through player results in game state and find the winner
             int winner = -1;
             for (int i = 0; i < e.state.getNPlayers(); i++) {
@@ -280,6 +288,7 @@ public class GameMetrics implements IMetricsCollection
                 }
             }
             records.put("PlayerIdx", String.valueOf(winner));
+            return true;
         }
 
         @Override

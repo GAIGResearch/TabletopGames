@@ -30,10 +30,12 @@ public abstract class AbstractMetric
 
     /**
      * @param listener - game listener object, with access to the game itself and loggers
-     * @param e - event, including game event type, state, action and player ID (if these properties are relevant, they may not be set depending on event type)
-     * @param records - map of data points to be filled in by the metric with recorded information
+     * @param e        - event, including game event type, state, action and player ID (if these properties are relevant, they may not be set depending on event type)
+     * @param records  - map of data points to be filled in by the metric with recorded information
+     * @return - true if the data saved in records should be recorded indeed, false otherwise. The metric
+     * might want to listen to events for internal saving of information, but not actually record it in the data table.
      */
-    protected abstract void _run(MetricsGameListener listener, Event e, Map<String, Object> records);
+    protected abstract boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records);
 
     /**
      * @return set of game events this metric should record information for.
@@ -56,9 +58,6 @@ public abstract class AbstractMetric
      * @param e - event, which includes game event type, state, action and player ID
      */
     public final void run(MetricsGameListener listener, Event e) {
-        // Record default column data first, custom data for each default column
-        addDefaultData(e);
-
         // Ask for custom records from the metric and record these too
         Map<String, Object> records = new HashMap<>();
 
@@ -68,11 +67,16 @@ public abstract class AbstractMetric
         }
 
         // Run the metric and fill in the map with recorded data
-        _run(listener, e, records);
+        boolean record = _run(listener, e, records);
 
-        // Add the recorded data to the table
-        for (Map.Entry<String, Object> entry : records.entrySet()) {
-            dataLogger.addData(entry.getKey(), entry.getValue());
+        if (record) {
+            // Record default column data first, custom data for each default column
+            addDefaultData(e);
+
+            // Add the recorded data to the table
+            for (Map.Entry<String, Object> entry : records.entrySet()) {
+                dataLogger.addData(entry.getKey(), entry.getValue());
+            }
         }
     }
 

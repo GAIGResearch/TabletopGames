@@ -36,7 +36,7 @@ public class MetricsGameListener implements IGameListener {
     // Game this listener listens to
     protected Game game;
 
-    List<IDataLogger.ReportType> reportTypes = Arrays.asList(RawData, Summary, Plot);  //todo this needs to be read from JSON
+    List<IDataLogger.ReportType> reportTypes = Arrays.asList(Summary, Plot);  //todo this needs to be read from JSON
 
     List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToBoth); //todo this needs to be read from JSON
 

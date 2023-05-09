@@ -1,6 +1,7 @@
 package evaluation.metrics.tablessaw;
 
 import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
 import evaluation.metrics.IDataLogger;
 import evaluation.metrics.IDataProcessor;
 import evaluation.summarisers.TAGNumericStatSummary;
@@ -152,22 +153,24 @@ public class TableSawDataProcessor implements IDataProcessor {
      * @return - a list of strings, each summarising a column of data, or other customized summary.
      */
     protected HashMap<String, List<String>> summariseDataProgression(AbstractMetric metric, Table rawData) {
-        int nGames = rawData.column("GameID").countUnique();
+        int nGames;
         HashMap<String, List<String>>  allDataSummaries = new HashMap<>();
 
         for (Column<?> c : rawData.columns()) {
+            if (metric.getColumnNames().contains(c.name())) {
 
-            Table filteredData = (rawData.where(rawData.column(c.name()).isNotMissing()));
-            Column<?> column = filteredData.column(c.name());
+                Table filteredData = (rawData.where(rawData.column(c.name()).isNotMissing()));
+                Column<?> column = filteredData.column(c.name());
+                Object[] gameIds = filteredData.column("GameID").unique().asObjectArray();
+                nGames = gameIds.length;
 
-            if (metric.getColumnNames().contains(column.name())) {
                 List<String> summary = new ArrayList<>();
                 if (column instanceof StringColumn) {
                     // Create counts of each category per game
                     Table[] tablesPerGame = new Table[nGames];
                     Set<String> categoryNames = new HashSet<>();
                     int i = 0;
-                    for (Object id: filteredData.column("GameID").unique().asObjectArray()) {
+                    for (Object id: gameIds) {
                         tablesPerGame[i] = ((StringColumn)column.where(filteredData.stringColumn("GameID").isEqualTo((String) id))).countByCategory();
                         // Needs transposing because the output of previous is several rows with category value, count (2 columns)
                         tablesPerGame[i] = tablesPerGame[i].transpose(false, true);
@@ -215,7 +218,7 @@ public class TableSawDataProcessor implements IDataProcessor {
                         statsTable.addColumns(dc);
                     }
                     // Add table to the summary to print
-                    summary.add(statsTable.transpose(true, true) + "\n");
+                    summary.add(statsTable.transpose(true, true).sortDescendingOn("Mean") + "\n");
                 } else {
                     // This is the same as summariseData for numerical data
                     summary.add(filteredData.name() + ": " + column.summary() + "\n");
@@ -235,12 +238,13 @@ public class TableSawDataProcessor implements IDataProcessor {
     protected Map<String, Figure> plotDataProgression(AbstractMetric metric, Table data) {
         // todo add label axes and title
 
-        int nGames = data.column("GameID").countUnique();
+        Object[] gameIds = data.column("GameID").unique().asObjectArray();
+        int nGames = gameIds.length;
         int maxTick = 0;
         Table[] tablesPerGame = new Table[nGames];
 
         int i = 0;
-        for (Object id: data.column("GameID").unique().asObjectArray()) {  // todo game ID starts at 2???
+        for (Object id: gameIds) {  // todo game ID starts at 2???
             tablesPerGame[i] = data.where(data.stringColumn("GameID").isEqualTo((String) id));
             int maxTickThisGame = tablesPerGame[i].intColumn("Tick").size();
             if (maxTickThisGame > maxTick) {
@@ -268,7 +272,7 @@ public class TableSawDataProcessor implements IDataProcessor {
                         for (int k = 0; k < nGames; k++) {
                             Column<?> columnThisGame = tablesPerGame[k].column(column.name());
                             if (columnThisGame.size() > j) {
-                                ss.add(Double.parseDouble(""+columnThisGame.get(j)));
+                                ss.add(Double.parseDouble(String.valueOf(columnThisGame.get(j))));
                             }
                         }
 
@@ -292,11 +296,10 @@ public class TableSawDataProcessor implements IDataProcessor {
                             .line(Line.builder().simplify(true).dash(Line.Dash.DASH_DOT).color("rgb(0, 0, 255)").build())
                             .mode(ScatterTrace.Mode.LINE).build();
 
-
                     Layout layout = Layout.builder().title(data.name())
                             .height(600).width(800)
                             .yAxis(Axis.builder().title(column.name()).build())
-                            .xAxis(Axis.builder().title("Game tick").build())
+                            .xAxis(Axis.builder().title(getLabel(metric)).build())
                             .build();
 
                     Figure figure = new Figure(layout, yMeanSdPlusTrace, yMeanTrace, yMeanSdMinusTrace);
@@ -334,6 +337,23 @@ public class TableSawDataProcessor implements IDataProcessor {
             }
         }
         return figures;
+    }
+
+    /**
+     * Defines x-axis label for a progression plot, based on the events the metric listens to.
+     * Chooses the lowest level of granularity that the metric listens to.
+     * @param metric - the metric
+     * @return - the label
+     */
+    protected String getLabel(AbstractMetric metric) {
+        if (metric.listens(Event.GameEvent.GAME_EVENT)
+                || metric.listens(Event.GameEvent.ACTION_CHOSEN)
+                || metric.listens(Event.GameEvent.ACTION_TAKEN)) {
+            return "Game Tick";
+        } else if (metric.listens(Event.GameEvent.TURN_OVER)) {
+            return "Game Turn";
+        }
+        return "Game Round";
     }
 
     /**
