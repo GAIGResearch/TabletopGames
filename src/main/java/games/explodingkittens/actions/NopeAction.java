@@ -40,4 +40,16 @@ public class NopeAction extends DrawCard implements IPrintable, IsNopeable {
     public void actionPlayed(AbstractGameState gs) {
         // Doesn't need to do anything, this card is played automatically.
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof NopeAction)) return false;
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() + 792;
+    }
 }
