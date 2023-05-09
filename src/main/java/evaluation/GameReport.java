@@ -1,6 +1,7 @@
 package evaluation;
 
 import core.*;
+import core.interfaces.IGameRunner;
 import core.interfaces.IStatisticLogger;
 import evaluation.listeners.IGameListener;
 import evaluation.listeners.MetricsGameListener;
@@ -21,15 +22,25 @@ import java.util.stream.IntStream;
 import static java.util.stream.Collectors.toList;
 import static utilities.Utils.getArg;
 
-public class GameReport {
+public class GameReport implements IGameRunner {
 
     public static boolean debug = true;
+    IStatisticLogger statsLogger;
+    List<String> games;
+    List<Pair<Integer, Integer>> nPlayers;
+    private List<IGameListener> gameTrackers;
+    private int nGames;
+    private String playerDescriptor;
+    private String opponentDescriptor;
+    private String gameParams;
+    private boolean randomGameParams;
+    private String statsLog;
 
     /**
      * The idea here is that we get statistics from the decisions of a particular agent in
      * a game, or set of games
      *
-     * @param args
+     * @param args - arguments to the game report
      */
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
@@ -74,6 +85,8 @@ public class GameReport {
             return;
         }
 
+        GameReport gameReport = new GameReport();
+
         String setupFile = getArg(args, "setupFile", "");
         if (!setupFile.equals("")) {
             // Read from file instead
@@ -93,7 +106,7 @@ public class GameReport {
                 String nPlayersStr = getArg(json, "nPlayers", "all");
                 int nGames = getArg(json, "nGames", 1000);
                 String gamesStr = getArg(json, "games", "all");
-                setup(playerDescriptor, opponentDescriptor, gameParams, loggerClass, statsLog, listenerClasses, metricsClasses, logFiles, randomGameParams, nPlayersStr, nGames, gamesStr);
+                gameReport.setup(playerDescriptor, opponentDescriptor, gameParams, loggerClass, statsLog, listenerClasses, metricsClasses, logFiles, randomGameParams, nPlayersStr, nGames, gamesStr);
             } catch (FileNotFoundException ignored) {
             } catch (IOException | ParseException e) {
                 throw new RuntimeException(e);
@@ -111,21 +124,27 @@ public class GameReport {
             String nPlayersStr = getArg(args, "nPlayers", "all");
             int nGames = getArg(args, "nGames", 1000);
             String gamesStr = getArg(args, "games", "all");
-            setup(playerDescriptor, opponentDescriptor, gameParams, loggerClass, statsLog, listenerClasses, metricsClasses, logFiles, randomGameParams, nPlayersStr, nGames, gamesStr);
+            gameReport.setup(playerDescriptor, opponentDescriptor, gameParams, loggerClass, statsLog, listenerClasses, metricsClasses, logFiles, randomGameParams, nPlayersStr, nGames, gamesStr);
         }
+
+        gameReport.run();
     }
 
-    public static void setup(String playerDescriptor, String opponentDescriptor, String gameParams, String loggerClass,
+    public void setup(String playerDescriptor, String opponentDescriptor, String gameParams, String loggerClass,
                              String statsLog, List<String> listenerClasses, List<String> metricsClasses,
                              List<String> logFiles, boolean randomGameParams, String nPlayersStr, int nGames, String gamesStr) {
+        this.playerDescriptor = playerDescriptor;
+        this.opponentDescriptor = opponentDescriptor;
+        this.gameParams = gameParams;
+        this.randomGameParams = randomGameParams;
+        this.nGames = nGames;
+        this.statsLog = statsLog;
 
         if (listenerClasses.size() > 1 && logFiles.size() > 1 && listenerClasses.size() != logFiles.size())
             throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
 
-        long timeStart = System.currentTimeMillis();
-
         List<String> tempGames = new ArrayList<>(Arrays.asList(gamesStr.split("\\|")));
-        List<String> games = tempGames;
+        games = tempGames;
         if (tempGames.get(0).equals("all")) {
             games = Arrays.stream(GameType.values()).map(Enum::name).filter(name -> !tempGames.contains("-" + name)).collect(toList());
         }
@@ -134,7 +153,7 @@ public class GameReport {
             throw new IllegalArgumentException("Cannot yet provide a gameParams argument if running multiple games");
 
         // This creates a <MinPlayer, MaxPlayer> Pair for each game#
-        List<Pair<Integer, Integer>> nPlayers = Arrays.stream(nPlayersStr.split("\\|"))
+        nPlayers = Arrays.stream(nPlayersStr.split("\\|"))
                 .map(str -> {
                     if (str.contains("-")) {
                         int hyphenIndex = str.indexOf("-");
@@ -153,7 +172,7 @@ public class GameReport {
         if (nPlayers.size() > 1 && nPlayers.size() != games.size())
             throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list");
 
-        List<IGameListener> gameTrackers = new ArrayList<>();
+        gameTrackers = new ArrayList<>();
         for (int i = 0; i < listenerClasses.size(); i++) {
             String logFile = logFiles.size() == 1 ? logFiles.get(0) : logFiles.get(i);
             String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(i);
@@ -163,7 +182,12 @@ public class GameReport {
             gameTrackers.add(gameTracker);
         }
 
-        IStatisticLogger statsLogger = "".equals(statsLog) ? null : IStatisticLogger.createLogger(loggerClass, statsLog);
+        statsLogger = "".equals(statsLog) ? null : IStatisticLogger.createLogger(loggerClass, statsLog);
+    }
+
+    @SuppressWarnings("ConstantValue")
+    public void run() {
+        long timeStart = System.currentTimeMillis();
 
         // Then iterate over the Game Types
         for (int gameIndex = 0; gameIndex < games.size(); gameIndex++) {
@@ -235,6 +259,7 @@ public class GameReport {
                 while (true) {
                     vis.repaint();
                     try {
+                        //noinspection BusyWait
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         break;

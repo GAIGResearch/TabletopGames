@@ -4,7 +4,6 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IStatisticLogger;
 import evaluation.listeners.IGameListener;
-import evaluation.loggers.FileStatsLogger;
 import games.GameType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -218,7 +217,7 @@ public class RoundRobinTournament extends AbstractTournament {
             IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), logger, metricsClass);
             tournament.listeners.add(gameTracker);
         }
-        tournament.runTournament();
+        tournament.run();
         if (!statsLogPrefix.equals("")) {
             for (int i = 0; i < agents.size(); i++) {
                 AbstractPlayer agent = agents.get(i);
@@ -232,8 +231,7 @@ public class RoundRobinTournament extends AbstractTournament {
     /**
      * Runs the round robin tournament.
      */
-    @Override
-    public void runTournament() {
+    public void run() {
         for (int g = 0; g < games.size(); g++) {
             if (verbose)
                 System.out.println("Playing " + games.get(g).getGameType().name());

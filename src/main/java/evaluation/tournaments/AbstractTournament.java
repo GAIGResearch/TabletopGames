@@ -1,13 +1,17 @@
 package evaluation.tournaments;
 
-import core.*;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.Game;
+import core.interfaces.IGameRunner;
 import games.GameType;
 import utilities.Pair;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
-public abstract class AbstractTournament {
+public abstract class AbstractTournament implements IGameRunner {
     // List of players taking part in the tournament
     protected List<? extends AbstractPlayer> agents;
     // Games to play
@@ -66,9 +70,4 @@ public abstract class AbstractTournament {
     {
         this.resultsFileName = fileName;
     }
-
-    /**
-     * Runs the tournament in the given game, with the given players.
-     */
-    public abstract void runTournament();
 }
