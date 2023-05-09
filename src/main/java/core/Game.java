@@ -506,7 +506,7 @@ public class Game {
         // copying the gamestate also copies the game parameters and resets the random seed (so agents cannot use this
         // to reconstruct the starting hands etc.)
         AbstractGameState observation = gameState.copy(activePlayer);
-        copyTime += (System.nanoTime() - s);
+        copyTime = (System.nanoTime() - s);
   //      System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n", copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
 
         // Get actions for the player
@@ -515,7 +515,7 @@ public class Game {
         if (observedActions.size() == 0) {
             throw new AssertionError("No actions available for player " + activePlayer);
         }
-        actionComputeTime += (System.nanoTime() - s);
+        actionComputeTime = (System.nanoTime() - s);
         actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
 
         if (gameState.coreGameParameters.verbose) {
@@ -541,7 +541,7 @@ public class Game {
                 s = System.nanoTime();
                 if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
-                agentTime += (System.nanoTime() - s);
+                agentTime = (System.nanoTime() - s);
                 nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
@@ -572,7 +572,7 @@ public class Game {
             // Resolve action and game rules, time it
             s = System.nanoTime();
             forwardModel.next(gameState, action);
-            nextTime += (System.nanoTime() - s);
+            nextTime = (System.nanoTime() - s);
         }
 
         lastPlayer = activePlayer;
@@ -626,12 +626,12 @@ public class Game {
      * Timers average at the end of the game.
      */
     private void terminateTimers() {
-        nextTime /= gameState.getGameTick();
-        copyTime /= gameState.getGameTick();
-        actionComputeTime /= gameState.getGameTick();
-        agentTime /= nDecisions;
-        if (nActionsPerTurnCount > 0)
-            nActionsPerTurnSum /= nActionsPerTurnCount;
+//        nextTime /= gameState.getGameTick();
+//        copyTime /= gameState.getGameTick();
+//        actionComputeTime /= gameState.getGameTick();
+//        agentTime /= nDecisions;
+//        if (nActionsPerTurnCount > 0)
+//            nActionsPerTurnSum /= nActionsPerTurnCount;
     }
 
     /**

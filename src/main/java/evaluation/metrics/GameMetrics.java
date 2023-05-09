@@ -129,26 +129,24 @@ public class GameMetrics implements IMetricsCollection
         @Override
         public Map<String, Class<?>> getColumns(Game game) {
             return new HashMap<String, Class<?>>() {{
-                put("Time Next (ns)", Double.class);
-                put("Time Copy (ns)", Double.class);
-                put("Time Action Compute (ns)", Double.class);
-                put("Time Agent (ns)", Double.class);
+                put("Next (ms)", Double.class);
+                put("Copy (ms)", Double.class);
+                put("Actions Available Compute (ms)", Double.class);
+                put("Agent (ms)", Double.class);
             }};
         }
 
         @Override
         protected void _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            //TODO: This is calculated in game and reported in the end. If we calculate at every step, we
-            // can get std errors in the plots when reporting the data.
-            records.put("Time Next (ns)", listener.getGame().getNextTime() / 1e3);
-            records.put("Time Copy (ns)", listener.getGame().getCopyTime() / 1e3);
-            records.put("Time Action Compute (ns)", listener.getGame().getActionComputeTime() / 1e3);
-            records.put("Time Agent (ns)", listener.getGame().getAgentTime() / 1e3);
+            records.put("Next (ms)", listener.getGame().getNextTime() / 1e3);
+            records.put("Copy (ms)", listener.getGame().getCopyTime() / 1e3);
+            records.put("Actions Available Compute (ms)", listener.getGame().getActionComputeTime() / 1e3);
+            records.put("Agent (ms)", listener.getGame().getAgentTime() / 1e3);
         }
 
         @Override
         public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.GAME_OVER);
+            return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
         }
     }
 
