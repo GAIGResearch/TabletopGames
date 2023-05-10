@@ -233,8 +233,6 @@ public class TableSawDataProcessor implements IDataProcessor {
      * @return - a list of figures, each plotting a column of data, or some customized plots.
      */
     protected Map<String, Figure> plotDataProgression(AbstractMetric metric, Table data) {
-        // todo add label axes and title
-
         Object[] gameIds = data.column("GameID").unique().asObjectArray();
         int nGames = gameIds.length;
         int maxTick = 0;
