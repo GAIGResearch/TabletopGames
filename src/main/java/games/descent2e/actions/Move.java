@@ -24,15 +24,19 @@ public class Move extends AbstractAction {
     final Monster.Direction orientation;
     private Vector2D startPosition;
 
+    public int directionID;
+
     public Move(List<Vector2D> whereTo) {
         this.positionsTraveled = whereTo;
         this.orientation = Monster.Direction.DOWN;
         this.startPosition = new Vector2D(0,0);
+        this.directionID = -1;
     }
     public Move(List<Vector2D> whereTo, Monster.Direction finalOrientation) {
         this.positionsTraveled = whereTo;
         this.orientation = finalOrientation;
         this.startPosition = new Vector2D(0,0);
+        this.directionID = -1;
     }
 
     @Override
@@ -215,10 +219,12 @@ public class Move extends AbstractAction {
             startPosition = f.getPosition();
         }
 
-        String movement = "Move: " + getDirection(startPosition, move.get(0));
+        String moveNext = getDirection(startPosition, move.get(0));
+        String movement = "Move: " + moveNext;
         //String movement = "Move: " + startPosition + " to " + move.get(0);
         for(int i = 1; i < move.size(); i++) {
-            movement = movement + ", " + getDirection(move.get(i-1), move.get(i));
+            moveNext = getDirection(move.get(i-1), move.get(i));
+            movement = movement + ", " + moveNext;
             //movement = movement + ", then " + move.get(i-1) + " to " + move.get(i);
         }
 
@@ -262,6 +268,61 @@ public class Move extends AbstractAction {
         }
 
         return direction;
+    }
+
+    public int getDirectionIDFromDirection (String direction)
+    {
+        // Returns the ID for ordering the movement options
+        // Order is clockwise starting from NorthWest and ending at West
+        switch (direction) {
+            case "NW":
+                return 1;
+            case "N":
+                return 2;
+            case "NE":
+                return 3;
+            case "E":
+                return 4;
+            case "SE":
+                return 5;
+            case "S":
+                return 6;
+            case "SW":
+                return 7;
+            case "W":
+                return 8;
+            default:
+                return 0;
+        }
+    }
+
+    public void updateDirectionID(AbstractGameState gameState)
+    {
+        // If directionID is unset, update it
+        if (directionID == -1)
+        {
+            Figure f = ((DescentGameState) gameState).getActingFigure();
+            List<Vector2D> move = positionsTraveled;
+
+            if (startPosition.equals(new Vector2D(0,0)))
+            {
+                // If the Start Position has not been changed from initiation, we save it here
+                startPosition = f.getPosition();
+            }
+
+            String moveNext = getDirection(startPosition, move.get(0));
+            directionID = getDirectionIDFromDirection(moveNext);
+
+            for(int i = 1; i < move.size(); i++) {
+                moveNext = getDirection(move.get(i - 1), move.get(i));
+                directionID = (directionID * 10) + getDirectionIDFromDirection(moveNext);
+            }
+        }
+    }
+
+    public int getDirectionID()
+    {
+        return directionID;
     }
 
     public List<Vector2D> getPositionsTraveled() {

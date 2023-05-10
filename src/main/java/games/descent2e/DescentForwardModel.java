@@ -9,6 +9,7 @@ import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.*;
 import games.descent2e.actions.attack.MeleeAttack;
+import games.descent2e.actions.Move;
 import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
@@ -24,6 +25,7 @@ import utilities.Vector2D;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import games.descent2e.DescentTypes.*;
 
@@ -315,6 +317,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (movePoints.canExecute(dgs)) actions.add(movePoints);
 
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
+            //if (actingFigure.getAttribute())
             actions.addAll(attackActions(dgs, actingFigure));
 
             // - Rest
@@ -531,25 +534,33 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
     private List<AbstractAction> moveActions(DescentGameState dgs, Figure f) {
 
-        Map<Vector2D, Pair<Double,List<Vector2D>>> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
-        Map<Vector2D, Pair<Double,List<Vector2D>>> allPointOfInterests = getAllPointOfInterests(dgs, f);
+        Map<Vector2D, Pair<Double, List<Vector2D>>> allAdjacentNodes = getAllAdjacentNodes(dgs, f);
+        Map<Vector2D, Pair<Double, List<Vector2D>>> allPointOfInterests = getAllPointOfInterests(dgs, f);
 
 //        allAdjacentNodes.putAll(allPointOfInterests);
 
         // get all potential rotations for the figure
-        Map<Pair<Vector2D, Monster.Direction>, Pair<Double,List<Vector2D>>> allPossibleRotations = getPossibleRotationsForMoveActions(allAdjacentNodes, dgs, f);
-        List<AbstractAction> actions = new ArrayList<>();
-        for (Pair<Vector2D, Monster.Direction> loc : allPossibleRotations.keySet()){
+        Map<Pair<Vector2D, Monster.Direction>, Pair<Double, List<Vector2D>>> allPossibleRotations = getPossibleRotationsForMoveActions(allAdjacentNodes, dgs, f);
+        List<Move> actions = new ArrayList<>();
+        for (Pair<Vector2D, Monster.Direction> loc : allPossibleRotations.keySet()) {
             if (allPossibleRotations.get(loc).a <= f.getAttributeValue(Figure.Attribute.MovePoints)) {
-                actions.add(new Move(allPossibleRotations.get(loc).b, loc.b));
+                Move myMoveAction = new Move(allPossibleRotations.get(loc).b, loc.b);
+                myMoveAction.updateDirectionID(dgs);
+                actions.add(myMoveAction);
             }
         }
 
-        return actions;
+        // Sorts the movement actions to always be in the same order (Clockwise NW to W, One Space then Multiple Spaces)
+        Collections.sort(actions, Comparator.comparingInt(Move::getDirectionID));
+
+        List<AbstractAction> sortedActions = new ArrayList<>();
+        sortedActions.addAll(actions);
+
+        return sortedActions;
     }
 
     private List<AbstractAction> attackActions(DescentGameState dgs, Figure f) {
-        List<AbstractAction> actions = new ArrayList<>();
+        List<MeleeAttack> actions = new ArrayList<>();
         Vector2D currentLocation = f.getPosition();
         BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
         // Find valid neighbours in master graph - used for melee attacks
@@ -563,14 +574,38 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 if (f instanceof Monster && other instanceof Hero) {
                     // Monster attacks a hero
                     actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
-                } else if (f instanceof Hero && other instanceof Monster) {
+                }
+                else if (f instanceof Hero && other instanceof Monster)
+                {
                     // Player attacks a monster
-                    actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
+
+                    // Make sure that the Player only gets one instance of attacking the monster
+                    // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
+                    boolean canAdd = true;
+                    for (MeleeAttack action : actions)
+                    {
+                        if (other.getComponentID() == action.getDefendingFigure())
+                        {
+                            // If an attack action on the same enemy already exists, this prevents a duplicate from being added
+                            canAdd = false;
+                        }
+                    }
+
+                    if (canAdd)
+                    {
+                        actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
+                    }
                 }
             }
         }
 
-        return actions;
+        Collections.sort(actions, Comparator.comparingInt(MeleeAttack::getDefendingFigure));
+
+        List<AbstractAction> sortedActions = new ArrayList<>();
+
+        sortedActions.addAll(actions);
+
+        return sortedActions;
     }
 
     /*

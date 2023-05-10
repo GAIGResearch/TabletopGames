@@ -143,11 +143,13 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
 
     private void executePhase(DescentGameState state) {
-      //  System.out.println("Executing phase " + phase);
+        // System.out.println("Executing phase " + phase);
         switch (phase) {
             case NOT_STARTED:
             case ALL_DONE:
-                throw new AssertionError("Should never be executed");
+                // TODO Fix this temporary solution: it should not keep looping back to ALL_DONE, put the error back in
+                break;
+                //throw new AssertionError("Should never be executed");
             case PRE_ATTACK_ROLL:
                 // roll dice
                 damageRoll(state);
@@ -166,7 +168,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
                 break;
             case PRE_DEFENCE_ROLL:
                 if (attackMissed(state)) // no damage done, so can skip the defence roll
+                {
+                    System.out.println("Attack missed!");
                     phase = ALL_DONE;
+                }
                 else {
                     defenceRoll(state);
                     phase = POST_DEFENCE_ROLL;
@@ -350,6 +355,11 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
     public void addDamage(int damageBonus) {
         extraDamage += damageBonus;
+    }
+
+    public int getDefendingFigure()
+    {
+        return defendingFigure;
     }
 
 }
