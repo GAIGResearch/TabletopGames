@@ -174,9 +174,6 @@ public class LoveLetterForwardModel extends StandardForwardModel {
                     } else if (highestCard == llgs.playerHandCards.get(i).peek().cardType) tie = true;
                 }
             }
-            if (tie) {
-                int a = 0;
-            }
 
             // End the round and add up points
             Set<Integer> winners = roundEnd(llgs, playersAlive, soleWinner);

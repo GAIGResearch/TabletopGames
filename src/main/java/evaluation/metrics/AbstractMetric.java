@@ -232,7 +232,6 @@ public abstract class AbstractMetric
         return dataLogger.getDefaultProcessor();
     }
 
-
     public void addColumnName(String name) {
         columnNames.add(name);
     }
@@ -251,5 +250,9 @@ public abstract class AbstractMetric
 
     public void setDataLogger(IDataLogger logger) {
         this.dataLogger = logger;
+    }
+
+    public IDataLogger getDataLogger() {
+        return dataLogger;
     }
 }

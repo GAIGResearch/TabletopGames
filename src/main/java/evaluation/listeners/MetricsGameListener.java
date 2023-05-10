@@ -9,9 +9,10 @@ import evaluation.metrics.IMetricsCollection;
 import evaluation.metrics.tablessaw.DataTableSaw;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import static evaluation.metrics.IDataLogger.ReportDestination.*;
+
+import static evaluation.metrics.IDataLogger.ReportDestination.ToBoth;
+import static evaluation.metrics.IDataLogger.ReportDestination.ToFile;
 import static evaluation.metrics.IDataLogger.ReportType.*;
 
 /**
@@ -25,27 +26,27 @@ import static evaluation.metrics.IDataLogger.ReportType.*;
  */
 public class MetricsGameListener implements IGameListener {
 
-    // One logger per event type for this listener
-    protected Map<Event.GameEvent, IStatisticLogger> loggers;
-
     // List of metrics we are going to extract.
     protected Map<String, AbstractMetric> metrics;
 
+    // Events the metrics in this listener respond to. Game over is always added.
     protected Set<Event.GameEvent> eventsOfInterest = new HashSet<>();
 
     // Game this listener listens to
     protected Game game;
 
+    // Types of reports to generate: RawData, Summary, Plot
     List<IDataLogger.ReportType> reportTypes = Arrays.asList(Summary, Plot);  //todo this needs to be read from JSON
 
+    // Where to send the reports: ToConsole, ToFile or ToBoth
     List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToBoth); //todo this needs to be read from JSON
 
+    // Destination directory for the reports
     String destDir = "metrics/out/"; //by default
 
     public MetricsGameListener() {}
     public MetricsGameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
         this.metrics = new LinkedHashMap<>();
-        this.loggers = new HashMap<>();
         for (AbstractMetric m : metrics) {
             m.setDataLogger(new DataTableSaw(m)); //todo this logger needs to be read from JSON
             this.metrics.put(m.getName(), m);
@@ -129,14 +130,41 @@ public class MetricsGameListener implements IGameListener {
             for (AbstractMetric metric : metrics.values()) {
                 metric.processFinishedGames(destDir, reportTypes, reportDestinations);
             }
-        }
 
+            // We also create raw data files for groups of metrics responding to the same event
+            for (Event.GameEvent event : eventsOfInterest) {
+                List<AbstractMetric> eventMetrics = new ArrayList<>();
+                for (AbstractMetric metric : metrics.values()) {
+                    if (metric.listens(event)) {
+                        eventMetrics.add(metric);
+                    }
+                }
+                if (eventMetrics.size() > 1) {
+                    IDataLogger dataLogger = new DataTableSaw(eventMetrics, event.name(), eventToIndexingColumn(event));
+                    dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
+                }
+            }
+        }
+    }
+
+    private String eventToIndexingColumn(Event.GameEvent e) {
+        switch (e) {
+            case ABOUT_TO_START:
+            case GAME_OVER:
+                return "GameID";
+            case ROUND_OVER:
+                return "Round";
+            case TURN_OVER:
+                return "Turn";
+            case ACTION_CHOSEN:
+            case ACTION_TAKEN:
+            case GAME_EVENT:
+                return "Tick";
+        }
+        return null;
     }
 
     /* Getters, setters */
-    public final Map<Event.GameEvent, IStatisticLogger> getLoggers() {
-        return loggers;
-    }
     public final void setGame(Game game) {
         this.game = game;
     }

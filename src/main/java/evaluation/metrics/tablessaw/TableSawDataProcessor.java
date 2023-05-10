@@ -26,7 +26,7 @@ public class TableSawDataProcessor implements IDataProcessor {
     @Override
     public void processRawDataToFile(IDataLogger logger, String folderName) {
         DataTableSaw dts = (DataTableSaw) logger;
-        dts.data.write().csv(folderName + "/" + dts.metric.getName() + ".csv");
+        dts.data.write().csv(folderName + "/" + dts.data.name() + ".csv");
     }
 
     @Override

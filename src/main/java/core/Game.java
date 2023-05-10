@@ -595,12 +595,6 @@ public class Game {
             ((IPrintable) gameState).printToConsole();
         }
 
-        // We throw a ROUND_OVER event at the end of the game too, no need for hacking this in metrics etc.
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ROUND_OVER, gameState)));
-        if (gameState.coreGameParameters.recordEventHistory) {
-            gameState.recordHistory(Event.GameEvent.ROUND_OVER.name());
-        }
-
         // Timers should average
         terminateTimers();
 
