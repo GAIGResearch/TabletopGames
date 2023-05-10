@@ -14,10 +14,24 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class DominionMetrics implements IMetricsCollection {
 
-    public static class VictoryCardsLeft extends AbstractMetric {
+    public static class CardsInSupplyGameEnd extends AbstractMetric {
+        CardType[] cardTypes;
+
+        public CardsInSupplyGameEnd(){
+            super();
+            cardTypes = CardType.values();
+        }
+        public CardsInSupplyGameEnd(String[] args) {
+            super(args);
+            cardTypes = new CardType[args.length];
+            for (int i = 0; i < args.length; i++) {
+                cardTypes[i] = CardType.valueOf(args[i]);
+            }
+        }
+
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            for (CardType type : CardType.values()) {
+            for (CardType type : cardTypes) {
                 records.put(type.toString(), ((DominionGameState)e.state).cardsOfType(type, -1, DominionConstants.DeckType.SUPPLY));
             }
             return true;
@@ -31,7 +45,7 @@ public class DominionMetrics implements IMetricsCollection {
         @Override
         public Map<String, Class<?>> getColumns(Game game) {
             Map<String, Class<?>> columns = new HashMap<>();
-            for (CardType type : CardType.values()) {
+            for (CardType type : cardTypes) {
                 columns.put(type.toString(), Integer.class);
             }
             return columns;

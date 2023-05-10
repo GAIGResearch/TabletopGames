@@ -8,24 +8,43 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractMetric
 {
-
+    // Data logger, wrapper around a library that logs data into a table
     private IDataLogger dataLogger;
 
     // Set of event types this metric listens to, to record data when they occur
     private final Set<Event.GameEvent> eventTypes;
 
+    // Arguments for the metric, if any
+    protected final String[] args;
+
+    // Set of column names this metric records data for specifically
     private final Set<String> columnNames = new HashSet<>();
 
+    // Number of games completed so far, can be used for any metric reset between games
     private int gamesCompleted;
 
     public AbstractMetric() {
         this.gamesCompleted = 0;
         this.eventTypes = getDefaultEventTypes();
+        this.args = null;
     }
 
     public AbstractMetric(Event.GameEvent... args) {
         this.gamesCompleted = 0;
         this.eventTypes = Arrays.stream(args).collect(Collectors.toSet());
+        this.args = null;
+    }
+
+    public AbstractMetric(String[] args) {
+        this.gamesCompleted = 0;
+        this.eventTypes = getDefaultEventTypes();
+        this.args = args;
+    }
+
+    public AbstractMetric(String[] args, Event.GameEvent... events) {
+        this.gamesCompleted = 0;
+        this.eventTypes = Arrays.stream(events).collect(Collectors.toSet());
+        this.args = args;
     }
 
     /**
