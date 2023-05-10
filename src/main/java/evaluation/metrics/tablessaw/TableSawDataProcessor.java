@@ -9,18 +9,15 @@ import tech.tablesaw.api.*;
 import tech.tablesaw.columns.Column;
 import tech.tablesaw.plotly.Plot;
 import tech.tablesaw.plotly.api.LinePlot;
-import tech.tablesaw.plotly.components.Axis;
-import tech.tablesaw.plotly.components.Figure;
-import tech.tablesaw.plotly.components.Layout;
-import tech.tablesaw.plotly.components.Line;
+import tech.tablesaw.plotly.components.*;
 import tech.tablesaw.plotly.traces.BarTrace;
 import tech.tablesaw.plotly.traces.BoxTrace;
 import tech.tablesaw.plotly.traces.ScatterTrace;
 import tech.tablesaw.plotly.traces.Trace;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.*;
 
 public class TableSawDataProcessor implements IDataProcessor {
@@ -111,7 +108,7 @@ public class TableSawDataProcessor implements IDataProcessor {
                 figures = plotData(dts.metric, dts.data);
             }
             for (Map.Entry<String, Figure> figure : figures.entrySet()) {
-                Plot.show(figure.getValue(), new File(plotFolderMetric + "/" + figure.getKey() + ".html"));
+                TAGPlot.save(figure.getValue(), new File(plotFolderMetric + "/" + figure.getKey() + ".html"));
             }
         }
     }
@@ -121,10 +118,10 @@ public class TableSawDataProcessor implements IDataProcessor {
         System.out.println("Plot report to console not implemented yet");
     }
 
-
     /**
      * Summarise the data recorded by this metric.
-     * @return a list of strings, each summarising a column of data, or other customized summary.
+     * @return a mapping from column name to list of strings, each summarising a column of data,
+     * or other customized summary.
      */
     protected HashMap<String, List<String>> summariseData(AbstractMetric metric, Table rawData) {
         HashMap<String, List<String>>  allDataSummaries = new HashMap<>();
@@ -383,4 +380,18 @@ public class TableSawDataProcessor implements IDataProcessor {
         return figures;
     }
 
+    /**
+     * Overwrites functionality to only save the figures as .html files, rather than opening the browsers too.
+     */
+    static class TAGPlot extends Plot {
+        public static void save(Figure figure, File outputFile) {
+            Page page = Page.pageBuilder(figure, "target").build();
+            String output = page.asJavascript();
+            try (Writer writer = new OutputStreamWriter(Files.newOutputStream(outputFile.toPath()), StandardCharsets.UTF_8)) {
+                writer.write(output);
+            } catch (IOException var14) {
+                throw new UncheckedIOException(var14);
+            }
+        }
+    }
 }
