@@ -18,7 +18,7 @@ public abstract class AbstractMetric
     protected final String[] args;
 
     // Set of column names this metric records data for specifically
-    private Set<String> columnNames = new HashSet<>();
+    private final Set<String> columnNames = new HashSet<>();
 
     // Number of games completed so far, can be used for any metric reset between games
     private int gamesCompleted;
@@ -64,7 +64,7 @@ public abstract class AbstractMetric
     public void reset()
     {
         this.gamesCompleted = 0;
-        columnNames = new HashSet<>();
+        columnNames.clear();
         dataLogger.reset();
     }
 
