@@ -40,7 +40,7 @@ public class MetricsGameListener implements IGameListener {
 
     List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToBoth); //todo this needs to be read from JSON
 
-    String destFolder = "metrics/out/"; //todo this needs to be read from JSON
+    String destDir = "metrics/out/"; //by default
 
     public MetricsGameListener() {}
     public MetricsGameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
@@ -77,6 +77,35 @@ public class MetricsGameListener implements IGameListener {
 
     }
 
+
+    public boolean setOutputDirectory(String out, String time, String players){
+
+        boolean success = true;
+
+        if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
+            // If the "metrics/out/" does not exist, create it
+            File outFolder = new File(out);
+            if (!outFolder.exists()) {
+                success = outFolder.mkdir();
+            }
+
+            File timestampFolder = new File(out + "/" + time);
+            if (!timestampFolder.exists()) {
+                success = timestampFolder.mkdir();
+            }
+
+            File subfolder = new File(timestampFolder + "/" + players);
+            if (!subfolder.exists()) {
+                success = subfolder.mkdir();
+            }
+
+            if (success)
+                destDir = subfolder.getAbsolutePath() + "/";
+        }
+        return success;
+    }
+
+
     /**
      * This is called when all processing is finished, for example after running a sequence of games
      * As such, no state is provided.
@@ -87,16 +116,9 @@ public class MetricsGameListener implements IGameListener {
 
         boolean success = true;
 
-        // If the "metrics/out/" does not exist, create it
-        File outFolder = new File(destFolder);
-        if (!outFolder.exists()) {
-            success = outFolder.mkdir();
-        }
-
-        String folderName = destFolder + game.getGameType().name() + "_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
         if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
             // Create a folder for all files to be put in, with the game name and current timestamp
-            File folder = new File(folderName);
+            File folder = new File(destDir);
             if (!folder.exists()) {
                 success = folder.mkdir();
             }
@@ -105,9 +127,7 @@ public class MetricsGameListener implements IGameListener {
         // All metrics report themselves
         if (success) {
             for (AbstractMetric metric : metrics.values()) {
-                metric.processFinishedGames(folderName,
-                        reportTypes,
-                        reportDestinations);
+                metric.processFinishedGames(destDir, reportTypes, reportDestinations);
             }
         }
 
@@ -121,6 +141,13 @@ public class MetricsGameListener implements IGameListener {
         this.game = game;
     }
     public final Game getGame() { return game; }
+
+    public void reset()
+    {
+        for (AbstractMetric metric : metrics.values()) {
+            metric.reset();
+        }
+    }
 
     @Override
     public void init(Game game) {

@@ -14,7 +14,7 @@ public abstract class AbstractMetric
     // Set of event types this metric listens to, to record data when they occur
     private final Set<Event.GameEvent> eventTypes;
 
-    private final Set<String> columnNames = new HashSet<>();
+    private Set<String> columnNames = new HashSet<>();
 
     private int gamesCompleted;
 
@@ -42,6 +42,12 @@ public abstract class AbstractMetric
      */
     public abstract Set<Event.GameEvent> getDefaultEventTypes();
 
+    public void reset()
+    {
+        this.gamesCompleted = 0;
+        columnNames = new HashSet<>();
+        dataLogger.reset();
+    }
 
     /**
      * Initialize columns separately when we have access to the game.

@@ -17,6 +17,12 @@ public interface IDataLogger
     }
 
     /**
+     * Resets this data logger. This will be called when the number of players for a given game changes, which
+     * can potentially change the number of columns in the data logger.
+     */
+    default void reset() {}
+
+    /**
      * Initialise the data logger with the metric and game. This method is called once before the game starts.
      * @param game Game that is being played
      */

@@ -8,6 +8,7 @@ import games.GameType;
 import players.PlayerFactory;
 import utilities.Pair;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -125,15 +126,23 @@ public class GameReport {
 
         IStatisticLogger statsLogger = "".equals(statsLog) ? null : IStatisticLogger.createLogger(loggerClass, statsLog);
 
+        String destDir = "metrics/out/"; //todo this needs to be read from JSON
+        StringBuilder timeDir = new StringBuilder(new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
+
         // Then iterate over the Game Types
         for (int gameIndex = 0; gameIndex < games.size(); gameIndex++) {
             GameType gameType = GameType.valueOf(games.get(gameIndex));
+            String gameName = gameType.name();
+            timeDir.insert(0, gameName + "_");
+
 
             Pair<Integer, Integer> playerCounts = nPlayers.size() == 1 ? nPlayers.get(0) : nPlayers.get(gameIndex);
             int minPlayers = playerCounts.a > -1 ? playerCounts.a : gameType.getMinPlayers();
             int maxPlayers = playerCounts.b > -1 ? playerCounts.b : gameType.getMaxPlayers();
             for (int playerCount = minPlayers; playerCount <= maxPlayers; playerCount++) {
                 System.out.printf("Game: %s, Players: %d\n", gameType.name(), playerCount);
+                String playersDir = playerCount + "-players";
+
                 if (gameType.getMinPlayers() > playerCount) {
                     System.out.printf("Skipping game - minimum player count is %d%n", gameType.getMinPlayers());
                     continue;
@@ -190,33 +199,39 @@ public class GameReport {
                         System.out.printf("\tScore: %20s%n", IntStream.range(0, game.getPlayers().size()).mapToObj(p -> String.valueOf(game.getGameState().getGameScore(p))).collect(Collectors.joining(" | ")));
                     }
                 }
-            }
 
-            // Visualise data for this game, if visualiser available
-            List<MetricsGameListener> metricListeners = gameTrackers.stream()
-                    .filter(gt -> gt instanceof MetricsGameListener)
-                    .map(gt -> ((MetricsGameListener)gt))
-                    .collect(toList());
-            StatsVisualiser vis = StatsVisualiser.getVisualiserForGame(gameType, metricListeners);
-            if (vis != null) {
-                while (true) {
-                    vis.repaint();
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        break;
-//                        throw new RuntimeException(e);
+                // Visualise data for this game with this amount of players, if visualiser available
+                List<MetricsGameListener> metricListeners = gameTrackers.stream()
+                        .filter(gt -> gt instanceof MetricsGameListener)
+                        .map(gt -> ((MetricsGameListener)gt))
+                        .collect(toList());
+                StatsVisualiser vis = StatsVisualiser.getVisualiserForGame(gameType, metricListeners);
+                if (vis != null) {
+                    while (true) {
+                        vis.repaint();
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            break;
+    //                        throw new RuntimeException(e);
+                        }
                     }
                 }
+
+                // Once all games for this number of players are complete, let the gameTracker know
+                for (IGameListener gameTracker : gameTrackers) {
+                    gameTracker.setOutputDirectory(destDir, timeDir.toString(), playersDir.toString());
+                    gameTracker.allGamesFinished();
+                    if(playerCount < maxPlayers)
+                        gameTracker.reset();
+                }
+
+                if (statsLogger != null)
+                    statsLogger.processDataAndFinish();
+
             }
         }
 
-        // Once all games are complete, let the gameTracker know
-        for (IGameListener gameTracker : gameTrackers) {
-            gameTracker.allGamesFinished();
-        }
-        if (statsLogger != null)
-            statsLogger.processDataAndFinish();
 
         // How much time elapsed?
         long elapsed = System.currentTimeMillis() - timeStart;
