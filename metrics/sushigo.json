@@ -11,9 +11,10 @@
       {"class": "evaluation.metrics.GameMetrics$ComputationTimes" },
       {"class": "evaluation.metrics.GameMetrics$Decisions" },
       {"class": "evaluation.metrics.GameMetrics$Actions" },
-      {"class": "games.loveletter.stats.LoveLetterMetrics$DeckSize" },
-      {"class": "games.loveletter.stats.LoveLetterMetrics$CounterValue" },
-      {"class": "games.loveletter.stats.LoveLetterMetrics$EndGameStats" }
+      {"class": "games.sushigo.metrics.SushiGoMetrics$CardPlayedCount"},
+      {"class": "games.sushigo.metrics.SushiGoMetrics$CardNotChosenInFavourOf", "args": [ "Maki-1" ] },
+      {"class": "games.sushigo.metrics.SushiGoMetrics$CardPlayedWin"},
+      {"class": "games.sushigo.metrics.SushiGoMetrics$CardPoints"}
     ]
   ]
 }

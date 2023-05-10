@@ -5,6 +5,12 @@
       "class" : "evaluation.loggers.SummaryLogger"
     },
     [
+      {"class": "evaluation.metrics.GameMetrics$GameScore" },
+      {"class": "evaluation.metrics.GameMetrics$FinalScore" },
+      {"class": "evaluation.metrics.GameMetrics$StateSpace" },
+      {"class": "evaluation.metrics.GameMetrics$ComputationTimes" },
+      {"class": "evaluation.metrics.GameMetrics$Decisions" },
+      {"class": "evaluation.metrics.GameMetrics$Actions" },
       { "class": "games.pandemic.stats.PandemicMetrics$CounterValue", "args": [ "Disease yellow" ] },
       { "class": "games.pandemic.stats.PandemicMetrics$CounterValue", "args": [ "Disease Cube yellow" ] },
       { "class": "games.pandemic.stats.PandemicMetrics$CounterValue", "args": [ "Outbreaks" ] },
