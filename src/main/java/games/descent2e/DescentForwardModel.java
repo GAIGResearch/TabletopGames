@@ -9,6 +9,7 @@ import core.components.*;
 import core.properties.*;
 import games.descent2e.actions.*;
 import games.descent2e.actions.attack.MeleeAttack;
+import games.descent2e.actions.attack.RangedAttack;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.attack.SurgeAttackAction;
 import games.descent2e.actions.tokens.TokenAction;
@@ -342,7 +343,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             if (actingFigure instanceof Monster)
             {
                 // TODO Check if Monster is melee or ranged
-                attackType = AttackType.MELEE;
+                attackType = ((Monster) actingFigure).getAttackType();
             }
 
             if (attackType == AttackType.MELEE || attackType == AttackType.BOTH)
@@ -644,7 +645,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
     }
 
     private List<AbstractAction> rangedAttackActions(DescentGameState dgs, Figure f) {
-        List<MeleeAttack> actions = new ArrayList<>();
+        List<RangedAttack> actions = new ArrayList<>();
         Vector2D currentLocation = f.getPosition();
         BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
         // Find valid neighbours in master graph - used for melee attacks
@@ -657,7 +658,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                 Figure other = (Figure)dgs.getComponentById(neighbourID);
                 if (f instanceof Monster && other instanceof Hero) {
                     // Monster attacks a hero
-                    actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
+                    actions.add(new RangedAttack(f.getComponentID(), other.getComponentID()));
                 }
                 else if (f instanceof Hero && other instanceof Monster)
                 {
@@ -666,7 +667,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     // Make sure that the Player only gets one instance of attacking the monster
                     // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
                     boolean canAdd = true;
-                    for (MeleeAttack action : actions)
+                    for (RangedAttack action : actions)
                     {
                         if (other.getComponentID() == action.getDefendingFigure())
                         {
@@ -677,7 +678,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
                     if (canAdd)
                     {
-                        actions.add(new MeleeAttack(f.getComponentID(), other.getComponentID()));
+                        actions.add(new RangedAttack(f.getComponentID(), other.getComponentID()));
                     }
                 }
             }

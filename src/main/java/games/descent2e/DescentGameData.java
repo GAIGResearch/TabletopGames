@@ -312,6 +312,7 @@ public class DescentGameData extends AbstractGameData {
                     add("act2");
                     add("id");
                 }};
+
                 superT.loadFigure(obj, ignoreKeys);
 
                 ignoreKeys.clear();
@@ -328,6 +329,14 @@ public class DescentGameData extends AbstractGameData {
                 act2m.loadFigure((JSONObject) ((JSONArray)obj.get("act2")).get(0), ignoreKeys);
                 Monster act2M = new Monster();
                 act2M.loadFigure((JSONObject) ((JSONArray)obj.get("act2")).get(1), ignoreKeys);
+
+                String attackType = ((JSONArray)obj.get("attackType")).get(1).toString();
+                //System.out.println(attackType);
+                act1m.setAttackType(attackType);
+                act1M.setAttackType(attackType);
+                act2m.setAttackType(attackType);
+                act2M.setAttackType(attackType);
+                superT.setAttackType(attackType);
 
                 monsterDef.put("1-minion", act1m);
                 monsterDef.put("1-master", act1M);

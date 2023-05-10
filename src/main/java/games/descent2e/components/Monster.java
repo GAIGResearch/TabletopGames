@@ -1,11 +1,13 @@
 package games.descent2e.components;
 
 import core.components.Counter;
+import games.descent2e.DescentTypes.AttackType;
 import utilities.Pair;
 import utilities.Vector2D;
 
 public class Monster extends Figure {
 
+    AttackType attackType = AttackType.NONE;
     public enum Direction {
         DOWN(new Vector2D()),
         LEFT(new Vector2D(-1,0)),
@@ -64,6 +66,7 @@ public class Monster extends Figure {
     public Monster copy() {
         Monster copy = new Monster(componentName, nActionsExecuted.copy(), componentID);
         copy.orientation = orientation;
+        copy.attackType = attackType;
         super.copyComponentTo(copy);
         return copy;
     }
@@ -71,7 +74,27 @@ public class Monster extends Figure {
     public Monster copyNewID() {
         Monster copy = new Monster();
         copy.orientation = orientation;
+        copy.attackType = attackType;
         super.copyComponentTo(copy);
         return copy;
+    }
+
+    public void setAttackType(String attack)
+    {
+        switch (attack)
+        {
+            case "melee":
+                this.attackType = AttackType.MELEE;
+                break;
+            case "ranged":
+                this.attackType = AttackType.RANGED;
+                break;
+            default:
+                this.attackType = AttackType.NONE;
+        }
+    }
+
+    public AttackType getAttackType() {
+        return attackType;
     }
 }
