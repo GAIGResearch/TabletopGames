@@ -14,7 +14,6 @@
       {"class": "evaluation.metrics.GameMetrics$Winner" },
       {"class": "evaluation.metrics.GameMetrics$Actions" },
       {"class": "evaluation.metrics.GameMetrics$StateSpace" },
-      {"class": "evaluation.metrics.GameMetrics$CurrentPlayerVisibility" },
-      {"class": "games.loveletter.stats.LoveLetterMetrics$ActionsPlayed" }
+      {"class": "evaluation.metrics.GameMetrics$CurrentPlayerVisibility" }
     ]]
 }
