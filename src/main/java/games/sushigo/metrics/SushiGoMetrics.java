@@ -4,14 +4,15 @@ import core.CoreConstants;
 import core.Game;
 import core.components.Deck;
 import evaluation.listeners.MetricsGameListener;
-import evaluation.metrics.*;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
+import evaluation.metrics.IMetricsCollection;
 import evaluation.summarisers.TAGOccurrenceStatSummary;
 import evaluation.summarisers.TAGStatSummary;
 import games.sushigo.SGGameState;
 import games.sushigo.SGParameters;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
-import utilities.Group;
 import utilities.Pair;
 
 import java.util.*;
@@ -70,49 +71,66 @@ public class SushiGoMetrics implements IMetricsCollection {
      * TODO: This metric can probably benefit from a custom plotter/summarized. Implemented to be ok for raw data export.
      *
      */
-    public static class CardNotChosenInFavourOf extends AbstractParameterizedMetric {
-        public CardNotChosenInFavourOf(){super();}
+    public static class CardNotChosenInFavourOf extends AbstractMetric {
+        String[] focusTypes;
+        String[] allTypes;
+        public CardNotChosenInFavourOf() {
+            super();
+            List<String> params = new ArrayList<>();
+            for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
+                for (int count: type.getIconCountVariation()) {
+                    params.add(type.name() + "-" + count);
+                }
+            }
+            allTypes = params.toArray(new String[0]);
+            focusTypes = allTypes.clone();
+        }
+
+        public CardNotChosenInFavourOf(String[] args) {
+            super(args);
+            focusTypes = args;
+            List<String> params = new ArrayList<>();
+            for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
+                for (int count: type.getIconCountVariation()) {
+                    params.add(type.name() + "-" + count);
+                }
+            }
+            allTypes = params.toArray(new String[0]);
+        }
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            String typeCount = (String) getParameterValue("typeCount");
-            SGCard.SGCardType type = SGCard.SGCardType.valueOf(typeCount.split("-")[0]);
-            int count = Integer.parseInt(typeCount.split("-")[1]);
+            for (String typeCount: focusTypes) {
+                SGCard.SGCardType type = SGCard.SGCardType.valueOf(typeCount.split("-")[0]);
+                int count = Integer.parseInt(typeCount.split("-")[1]);
 
-            ArrayList<String> cardList = new ArrayList<>();
+                ArrayList<String> cardList = new ArrayList<>();
 
-            SGGameState gs = (SGGameState) e.state;
-            ChooseCard action = (ChooseCard)e.action;
-            Deck<SGCard> playerHand = gs.getPlayerHands().get(action.playerId);
-            SGCard chosenCard = playerHand.get(action.cardIdx);
+                SGGameState gs = (SGGameState) e.state;
+                ChooseCard action = (ChooseCard) e.action;
+                Deck<SGCard> playerHand = gs.getPlayerHands().get(action.playerId);
+                SGCard chosenCard = playerHand.get(action.cardIdx);
 
-            //Initialize all entries in the records Map to 0
-            for (String k: records.keySet()) {
-                records.put(k, 0);
-            }
+                //Initialize all entries in the records Map to 0
+                records.replaceAll((k, v) -> 0);
 
-            if(chosenCard.type == type && chosenCard.count == count) {
-                StringBuilder ss = new StringBuilder();
-                for (int i = 0; i < playerHand.getSize(); i++) {
-                    SGCard otherCard = playerHand.get(i);
-                    if (!chosenCard.toString().equals(otherCard.toString())) {
-                        ss.append(otherCard).append(",");
-                        cardList.add(otherCard.type.name() + "-" + otherCard.count);
+                if (chosenCard.type == type && chosenCard.count == count) {
+                    for (int i = 0; i < playerHand.getSize(); i++) {
+                        SGCard otherCard = playerHand.get(i);
+                        if (!chosenCard.toString().equals(otherCard.toString())) {
+                            cardList.add(otherCard.type.name() + "-" + otherCard.count);
+                        }
+                    }
+
+                    if (cardList.size() > 0) {
+                        for (String cardStr : cardList)
+                            records.put(typeCount + " -- " + cardStr, 1);
                     }
                 }
-
-                if(cardList.size() > 0)
-                {
-                    for(String cardStr : cardList)
-                        records.put(cardStr, 1);
-                    return true;
-                }
-
             }
-            return false;
+            return true;
         }
 
-        public CardNotChosenInFavourOf(Object arg){super(arg);}
         @Override
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
@@ -121,22 +139,12 @@ public class SushiGoMetrics implements IMetricsCollection {
         @Override
         public Map<String, Class<?>> getColumns(Game game) {
             Map<String, Class<?>> columns = new HashMap<>();
-            for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
-                for (int count: type.getIconCountVariation()) {
-                    columns.put(type.name() + "-" + count, Integer.class);
+            for (String typeCount: focusTypes) {
+                for (String typeCount1 : allTypes) {
+                    columns.put(typeCount + " -- " + typeCount1, Integer.class);
                 }
             }
             return columns;
-        }
-
-        public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            List<String> params = new ArrayList<>();
-            for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
-                for (int count: type.getIconCountVariation()) {
-                    params.add(type.name() + "-" + count);
-                }
-            }
-            return Collections.singletonList(new Group<>("typeCount", params, "Maki-1"));
         }
     }
 
@@ -144,82 +152,76 @@ public class SushiGoMetrics implements IMetricsCollection {
      * How many times each card type is played by the winning player
      {"class": "games.sushigo.metrics.SushiGoMetrics$CardPoints" }
      */
-    public static class CardPlayedWin extends AbstractParameterizedMetric {
-        public CardPlayedWin(){super();}
-
+    public static class CardPlayedWin extends AbstractMetric {
+        SGCard.SGCardType[] types = SGCard.SGCardType.values();
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            SGCard.SGCardType type = (SGCard.SGCardType) getParameterValue("type");
-            SGGameState gs = (SGGameState) e.state;
-            for (int i = 0; i < gs.getNPlayers(); i++) {
-                if (gs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME) {
-                    records.put("Count", gs.getPlayedCardTypesAllGame()[i].get(type).getValue());
-                    return true;
+            for (SGCard.SGCardType type: types) {
+                SGGameState gs = (SGGameState) e.state;
+                records.put(type + " Count", 0);
+                for (int i = 0; i < gs.getNPlayers(); i++) {
+                    if (gs.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME) {
+                        records.put(type + " Count", gs.getPlayedCardTypesAllGame()[i].get(type).getValue());
+                        break;
+                    }
                 }
             }
-            records.put("Count", 0);
             return true;
         }
-
-        public CardPlayedWin(Object arg){super(arg);}
-
 
         @Override
         public Map<String, Class<?>> getColumns(Game game) {
             Map<String, Class<?>> columns = new HashMap<>();
-            columns.put("Count", Integer.class);
+            for (SGCard.SGCardType type: types) {
+                columns.put(type.name() + " Count", Integer.class);
+            }
             return columns;
         }
 
         @Override
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
-        }
-        public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            return Collections.singletonList(new Group<>("type", Arrays.asList(SGCard.SGCardType.values()), SGCard.SGCardType.Maki));
         }
     }
 
     /**
      * How many points does each card type bring to a player on average
      */
-    public static class CardPoints extends AbstractParameterizedMetric {
-        public CardPoints(){super();}
+    public static class CardPoints extends AbstractMetric {
+        SGCard.SGCardType[] types = SGCard.SGCardType.values();
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            SGCard.SGCardType type = (SGCard.SGCardType) getParameterValue("type");
-            SGGameState gs = (SGGameState) e.state;
-            double sum = 0, sumPercentage = 0, sumDiff = 0;
-            for (int i = 0; i < gs.getNPlayers(); i++) {
-                sum += gs.getPointsPerCardType()[i].get(type).getValue();
-                sumPercentage += gs.getPointsPerCardType()[i].get(type).getValue() * 1.0 / gs.getPlayerScore()[i].getValue();
-                if(i < gs.getNPlayers()-1)
-                    sumDiff += Math.abs(gs.getPointsPerCardType()[i].get(type).getValue() - gs.getPointsPerCardType()[i+1].get(type).getValue());
+            for (SGCard.SGCardType type: types) {
+                SGGameState gs = (SGGameState) e.state;
+                double sum = 0, sumPercentage = 0, sumDiff = 0;
+                for (int i = 0; i < gs.getNPlayers(); i++) {
+                    sum += gs.getPointsPerCardType()[i].get(type).getValue();
+                    sumPercentage += gs.getPointsPerCardType()[i].get(type).getValue() * 1.0 / gs.getPlayerScore()[i].getValue();
+                    if (i < gs.getNPlayers() - 1)
+                        sumDiff += Math.abs(gs.getPointsPerCardType()[i].get(type).getValue() - gs.getPointsPerCardType()[i + 1].get(type).getValue());
+                }
+                records.put(type + " Average Points", sum / gs.getNPlayers());
+                records.put(type + " Average Points (%)", sumPercentage / gs.getNPlayers());
+                records.put(type + " Average Points (Diff)", sumDiff / (gs.getNPlayers() - 1));
             }
-            records.put("Average Points", sum/gs.getNPlayers());
-            records.put("Average Points (%)", sumPercentage/gs.getNPlayers());
-            records.put("Average Points (Diff)", sumDiff/(gs.getNPlayers()-1));
             return true;
         }
-
-        public CardPoints(Object arg){super(arg);}
 
         @Override
         public Map<String, Class<?>> getColumns(Game game) {
             Map<String, Class<?>> columns = new HashMap<>();
-            columns.put("Average Points", Double.class);
-            columns.put("Average Points (%)", Double.class);
-            columns.put("Average Points (Diff)", Double.class);
+            for (SGCard.SGCardType type: types) {
+                columns.put(type + " Average Points", Double.class);
+                columns.put(type + " Average Points (%)", Double.class);
+                columns.put(type + " Average Points (Diff)", Double.class);
+            }
             return columns;
         }
 
         @Override
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
-        }
-        public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            return Collections.singletonList(new Group<>("type", Arrays.asList(SGCard.SGCardType.values()), SGCard.SGCardType.Maki));
         }
     }
 
