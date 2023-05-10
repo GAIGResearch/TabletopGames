@@ -70,7 +70,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // TODO: read the following from quest setup
         dgs.overlord.setAttribute(Figure.Attribute.Fatigue, new Counter(0, 0, 7, "Overlord Fatigue"));
         dgs.overlord.setTokenType("Overlord");
-        // OVerlord is player 0, first hero is player 1
+        // Overlord is player 0, first hero is player 1
         dgs.getTurnOrder().setStartingPlayer(1);
 
         // TODO: Shuffle overlord deck and give overlord nPlayers cards.
@@ -318,14 +318,38 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
 
-            // TODO Check if actingFigure is melee or ranged
-            //if (actingFigure.getAttribute())
-            String attackType = "melee";
-            if (attackType == "melee")
+            AttackType attackType = AttackType.NONE;
+            if (actingFigure instanceof Hero)
+            {
+                // Examines the Hero's equipment to see what their weapon's range is
+                Deck<DescentCard> myEquipment = ((Hero) actingFigure).getHandEquipment();
+                int length = myEquipment.getComponents().size();
+                for (int i = 0; i < length; i++)
+                {
+                    AttackType temp = myEquipment.get(i).getAttackType();
+
+                    // Checks if the Hero can make a melee attack, ranged attack, or both with their current equipment
+                    if(temp != AttackType.NONE) {
+                        if (attackType == AttackType.NONE) {
+                            attackType = temp;
+                        } else if (attackType != temp) {
+                            attackType = AttackType.BOTH;
+                        }
+                    }
+                }
+            }
+
+            if (actingFigure instanceof Monster)
+            {
+                // TODO Check if Monster is melee or ranged
+                attackType = AttackType.MELEE;
+            }
+
+            if (attackType == AttackType.MELEE || attackType == AttackType.BOTH)
             {
                 actions.addAll(meleeAttackActions(dgs, actingFigure));
             }
-            if (attackType == "ranged")
+            if (attackType == AttackType.RANGED || attackType == AttackType.BOTH)
             {
                 actions.addAll(rangedAttackActions(dgs, actingFigure));
             }
@@ -594,6 +618,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
                     boolean canAdd = true;
                     for (MeleeAttack action : actions)
                     {
+                        // TODO Hash Set Comparison instead of ID
                         if (other.getComponentID() == action.getDefendingFigure())
                         {
                             // If an attack action on the same enemy already exists, this prevents a duplicate from being added
