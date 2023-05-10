@@ -61,6 +61,12 @@ public abstract class AbstractMetric
      */
     public abstract Set<Event.GameEvent> getDefaultEventTypes();
 
+    public void reset()
+    {
+        this.gamesCompleted = 0;
+        columnNames.clear();
+        dataLogger.reset();
+    }
 
     /**
      * Initialize columns separately when we have access to the game.

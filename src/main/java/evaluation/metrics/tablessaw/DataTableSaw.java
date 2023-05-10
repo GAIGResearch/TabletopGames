@@ -46,6 +46,11 @@ public class DataTableSaw implements IDataLogger {
             throw new AssertionError("Unknown column type");
     }
 
+    public void reset()
+    {
+        this.data = Table.create(metric.getName());
+    }
+
     public void init(Game game) {
 
         // Add default columns
