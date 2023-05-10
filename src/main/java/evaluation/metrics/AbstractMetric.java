@@ -154,8 +154,6 @@ public abstract class AbstractMetric
      * Standard name for this metric, using the class name. If parameterized metric, different format applies.
      */
     public final String getName() {
-        if (this instanceof AbstractParameterizedMetric)
-            return ((AbstractParameterizedMetric)this).name();
         return this.getClass().getSimpleName();
     }
 

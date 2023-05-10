@@ -1,4 +1,5 @@
 package games.pandemic.stats;
+
 import core.AbstractGameState;
 import core.Game;
 import core.components.BoardNode;
@@ -7,14 +8,18 @@ import core.components.Counter;
 import core.components.Deck;
 import core.properties.PropertyIntArray;
 import evaluation.listeners.MetricsGameListener;
-import evaluation.metrics.*;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
+import evaluation.metrics.IMetricsCollection;
 import games.pandemic.PandemicConstants;
 import games.pandemic.PandemicGameState;
 import games.pandemic.PandemicParameters;
-import utilities.Group;
 import utilities.Hash;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import static core.CoreConstants.GameResult.WIN_GAME;
 import static games.pandemic.PandemicConstants.colors;
@@ -23,19 +28,18 @@ import static games.pandemic.PandemicConstants.infectionHash;
 @SuppressWarnings("unused")
 public class PandemicMetrics implements IMetricsCollection {
 
-    public static class DeckSize extends AbstractParameterizedMetric {
-        public DeckSize(){super();}
+    public static class DeckSize extends AbstractMetric {
+        String[] deckNames = new String[]{"infection", "Player Deck"};
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            //if(key == null) throw new AssertionError("Argument for Constructor in " + getClass().getName() + " can't be null");
-            Component c = ((PandemicGameState)e.state).getComponent(Hash.GetInstance().hash((String) getParameterValue(("deckName"))));
-            //if(c == null) throw new AssertionError("name '" + key + "' does not correspond to any component in this game.");
-            records.put("Size", ((Deck<?>) c).getSize());
+            for (String deck: deckNames) {
+                Component c = ((PandemicGameState) e.state).getComponent(Hash.GetInstance().hash(deck));
+                records.put(deck + " Deck Size", ((Deck<?>) c).getSize());
+            }
             return true;
         }
 
-        public DeckSize(Object arg){super(arg);}
         @Override
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
@@ -44,49 +48,41 @@ public class PandemicMetrics implements IMetricsCollection {
         @Override
         public Map<String, Class<?>> getColumns(Game game) {
             Map<String, Class<?>> columns = new HashMap<>();
-            columns.put("Size", Integer.class);
+            for (String deck: deckNames) {
+                columns.put(deck + " Deck Size", Integer.class);
+            }
             return columns;
-        }
-
-        public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            return Collections.singletonList(new Group<>("deckName", Arrays.asList("infection", "Player Deck"), "infection"));
         }
     }
 
-    public static class CounterValue extends AbstractParameterizedMetric {
-        public CounterValue(){super();}
+    public static class CounterValue extends AbstractMetric {
+        String[] counters = new String[] {
+                "Disease yellow", "Disease red", "Disease blue", "Disease black",
+                "Disease Cube yellow", "Disease Cube red", "Disease Cube blue", "Disease Cube black",
+                "Outbreaks", "Infection Rate", "Research Stations"
+        };
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
-            String counterName = (String) getParameterValue("counterName");
-            //if(key == null) throw new AssertionError("Argument for Constructor in " + getClass().getName() + " can't be null");
-            Component c = ((PandemicGameState)e.state).getComponent(Hash.GetInstance().hash(counterName));
-            if(c == null) {
-                ((PandemicGameState)e.state).getComponent(Hash.GetInstance().hash(counterName));
-                throw new AssertionError("name '" + counterName + "' does not correspond to any component in this game.");
+            for (String counter: counters) {
+                Component c = ((PandemicGameState) e.state).getComponent(Hash.GetInstance().hash(counter));
+                records.put(counter, ((Counter) c).getValue());
             }
-            records.put("Value", ((Counter) c).getValue());
             return true;
         }
-
-        public CounterValue(Object arg){super(arg);}
-
 
         @Override
         public Map<String, Class<?>> getColumns(Game game) {
             Map<String, Class<?>> columns = new HashMap<>();
-            columns.put("Value", Integer.class);
+            for (String counter: counters) {
+                columns.put(counter, Integer.class);
+            }
             return columns;
         }
 
         @Override
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
-        }
-        public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            return Collections.singletonList(new Group<>("counterName", new ArrayList<>(Arrays.asList("Disease yellow", "Disease red", "Disease blue", "Disease black",
-                    "Disease Cube yellow", "Disease Cube red", "Disease Cube blue", "Disease Cube black",
-                    "Outbreaks", "Infection Rate", "Research Stations")), "Research Stations"));
         }
     }
 

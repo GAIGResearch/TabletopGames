@@ -12,7 +12,7 @@
       {"class": "evaluation.metrics.GameMetrics$Decisions" },
       {"class": "evaluation.metrics.GameMetrics$Actions" },
       {"class": "games.sushigo.metrics.SushiGoMetrics$CardPlayedCount"},
-      {"class": "games.sushigo.metrics.SushiGoMetrics$CardNotChosenInFavourOf", "args": [ "Maki-1" ] },
+      {"class": "games.sushigo.metrics.SushiGoMetrics$CardNotChosenInFavourOf", "args": [ ["Maki-1"] ] },
       {"class": "games.sushigo.metrics.SushiGoMetrics$CardPlayedWin"},
       {"class": "games.sushigo.metrics.SushiGoMetrics$CardPoints"}
     ]
