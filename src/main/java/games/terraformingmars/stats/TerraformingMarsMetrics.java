@@ -1,36 +1,51 @@
-//package games.terraformingmars.stats;
-//import core.CoreConstants;
-//import evaluation.listeners.MetricsGameListener;
-//import evaluation.metrics.*;
-//import games.terraformingmars.TMGameParameters;
-//import games.terraformingmars.TMGameState;
-//import games.terraformingmars.TMTypes;
-//import games.terraformingmars.components.Award;
-//import games.terraformingmars.components.Milestone;
-//import games.terraformingmars.components.TMCard;
-//import games.terraformingmars.components.TMMapTile;
-//import org.jetbrains.annotations.NotNull;
-//import utilities.Group;
-//import utilities.Pair;
-//import utilities.TimeStamp;
-//
-//import java.util.*;
-//
+package games.terraformingmars.stats;
+import core.CoreConstants;
+import core.Game;
+import evaluation.listeners.MetricsGameListener;
+import evaluation.metrics.*;
+import games.terraformingmars.TMGameParameters;
+import games.terraformingmars.TMGameState;
+import games.terraformingmars.TMTypes;
+import games.terraformingmars.components.Award;
+import games.terraformingmars.components.Milestone;
+import games.terraformingmars.components.TMCard;
+import games.terraformingmars.components.TMMapTile;
+import org.jetbrains.annotations.NotNull;
+import utilities.Group;
+import utilities.Pair;
+import utilities.TimeStamp;
+
+import java.util.*;
+
 //@SuppressWarnings("unused")
 //public class TerraformingMarsMetrics implements IMetricsCollection {
+//
+//
 //    public static class ParameterComplete extends AbstractParameterizedMetric {
 //        public ParameterComplete(){super();}
-//        public ParameterComplete(Object arg){super(arg);}
+//
 //        @Override
-//        public Object run(MetricsGameListener listener, Event e) {
+//        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
 //            TMTypes.GlobalParameter parameter = (TMTypes.GlobalParameter) getParameterValue("parameter");
 //            TMGameState tmgs = (TMGameState) e.state;
 //            if (tmgs.getGlobalParameters().containsKey(parameter)) {
 //                ArrayList<Pair<Integer, Integer>> increases = tmgs.getGlobalParameters().get(parameter).getIncreases();
-//                return increases.get(increases.size() - 1).a;
-//            }
-//            return 0;
+//                records.put("Parameter Value", increases.get(increases.size() - 1).a);
+//            }else
+//                records.put("Parameter Value", 0);
+//
+//            return true;
 //        }
+//
+//        public ParameterComplete(Object arg){super(arg);}
+//
+//        @Override
+//        public Map<String, Class<?>> getColumns(Game game) {
+//            Map<String, Class<?>> columns = new HashMap<>();
+//            columns.put("Parameter Value", Integer.class);
+//            return columns;
+//        }
+//
 //        @Override
 //        public Set<Event.GameEvent> getDefaultEventTypes() {
 //            return Collections.singleton(Event.GameEvent.GAME_OVER);
@@ -39,6 +54,8 @@
 //            return Collections.singletonList(new Group<>("parameter", Arrays.asList(TMTypes.GlobalParameter.values()), TMTypes.GlobalParameter.Oxygen));
 //        }
 //    }
+
+
 //
 //    public static class ParameterIncrease extends AbstractParameterizedMetric {
 //        public ParameterIncrease(){super();}
