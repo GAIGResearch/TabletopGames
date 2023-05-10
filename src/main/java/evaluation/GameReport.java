@@ -220,7 +220,7 @@ public class GameReport {
 
                 // Once all games for this number of players are complete, let the gameTracker know
                 for (IGameListener gameTracker : gameTrackers) {
-                    gameTracker.setOutputDirectory(destDir, timeDir.toString(), playersDir.toString());
+                    gameTracker.setOutputDirectory(destDir, timeDir.toString(), playersDir);
                     gameTracker.allGamesFinished();
                     if(playerCount < maxPlayers)
                         gameTracker.reset();
