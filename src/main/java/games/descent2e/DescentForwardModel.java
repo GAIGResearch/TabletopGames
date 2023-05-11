@@ -669,7 +669,6 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         // Prevents the attacker from trying to shoot itself
         rangedTargets.remove(currentTile.getComponentID());
-        System.out.println(rangedTargets);
 
         for (int neighbourCompID : rangedTargets) {
             BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);

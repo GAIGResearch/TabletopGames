@@ -169,7 +169,9 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
             case PRE_DEFENCE_ROLL:
                 if (attackMissed(state)) // no damage done, so can skip the defence roll
                 {
-                    System.out.println("Attack missed!");
+                    Figure attacker = (Figure) state.getComponentById(attackingFigure);
+                    attacker.getNActionsExecuted().increment();
+                    //System.out.println("Attack missed!");
                     phase = ALL_DONE;
                 }
                 else {
