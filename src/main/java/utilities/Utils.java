@@ -426,12 +426,17 @@ public abstract class Utils {
                     } else if (first instanceof Long) {
                         argClasses[i] = int[].class;
                         args[i] = ((Long) first).intValue();
+                        arg = ((JSONArray) arg).toArray(new Long[0]);
                     } else if (first instanceof Double) {
                         argClasses[i] = double[].class;
+                        arg = ((JSONArray) arg).toArray(new Double[0]);
                     } else if (first instanceof Boolean) {
                         argClasses[i] = boolean[].class;
+                        arg = ((JSONArray) arg).toArray(new Boolean[0]);
                     } else if (first instanceof String) {
                         argClasses[i] = String[].class;
+                        arg = ((JSONArray) arg).toArray(new String[0]);
+                        int a = 0;
                     }
                 } else {
                     throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());

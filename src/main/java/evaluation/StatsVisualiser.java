@@ -34,7 +34,8 @@ public abstract class StatsVisualiser extends JFrame {
 
     public StatsVisualiser(List<MetricsGameListener> listeners) {
         if (listeners.size() > 1) System.out.println("Only showing first listener");
-        loggers = listeners.get(0).getLoggers();
+//        loggers = listeners.get(0).get();
+        loggers = new HashMap<>(); // todo
 
         // Default colors
         getContentPane().setBackground(backgroundColor);
