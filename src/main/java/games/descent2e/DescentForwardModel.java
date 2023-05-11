@@ -677,35 +677,35 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             int neighbourID = ((PropertyInt)neighbour.getProperty(playersHash)).value;
             if ( neighbourID != -1 ) {
                 Figure other = (Figure)dgs.getComponentById(neighbourID);
-                if (f instanceof Monster && other instanceof Hero) {
-                    // Monster attacks a hero
-                    actions.add(new RangedAttack(f.getComponentID(), other.getComponentID()));
-                }
-                else if (f instanceof Hero && other instanceof Monster)
-                {
-                    // Player attacks a monster
 
-                    // Make sure that the Player only gets one instance of attacking the monster
-                    // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
-                    boolean canAdd = true;
-                    for (RangedAttack action : actions)
-                    {
-                        if (other.getComponentID() == action.getDefendingFigure())
-                        {
-                            // If an attack action on the same enemy already exists, this prevents a duplicate from being added
-                            canAdd = false;
-                        }
-                    }
-
-                    if (canAdd)
-                    {
+                // Checks to make sure that there is a line of sight before approving the attack action
+                boolean lineOfSight = hasLineOfSight(dgs, f.getPosition(), other.getPosition());
+                if (lineOfSight) {
+                    if (f instanceof Monster && other instanceof Hero) {
+                        // Monster attacks a hero
                         actions.add(new RangedAttack(f.getComponentID(), other.getComponentID()));
+                    } else if (f instanceof Hero && other instanceof Monster) {
+                        // Player attacks a monster
+
+                        // Make sure that the Player only gets one instance of attacking the monster
+                        // This was previously an issue when dealing with Large creatures that took up multiple adjacent spaces
+                        boolean canAdd = true;
+                        for (RangedAttack action : actions) {
+                            if (other.getComponentID() == action.getDefendingFigure()) {
+                                // If an attack action on the same enemy already exists, this prevents a duplicate from being added
+                                canAdd = false;
+                            }
+                        }
+
+                        if (canAdd) {
+                            actions.add(new RangedAttack(f.getComponentID(), other.getComponentID()));
+                        }
                     }
                 }
             }
         }
 
-        Collections.sort(actions, Comparator.comparingInt(MeleeAttack::getDefendingFigure));
+        Collections.sort(actions, Comparator.comparingInt(RangedAttack::getDefendingFigure));
 
         List<AbstractAction> sortedActions = new ArrayList<>();
 
@@ -1416,12 +1416,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
     private boolean hasLineOfSight(DescentGameState dgs, Vector2D startPoint, Vector2D endPoint){
 
+        int counter = 0;
         boolean hasLineOfSight = true;
+
         ArrayList<Vector2D> containedPoints = LineOfSight.bresenhamsLineAlgorithm(startPoint, endPoint);
 
-
         // For each coordinate in the line, check:
-        // 1) Does the coordinate have it's board node
+        // 1) Does the coordinate have its board node
         // 2) Is the board node empty (no character on location)
         // 3) Is the board node connected to previously checked board node
         // If any of these are false, then there is no LOS
@@ -1452,6 +1453,9 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
             }
         }
 
-        return hasLineOfSight;
+        if (hasLineOfSight)
+            counter++;
+
+        return (counter > 0);
     }
 }
