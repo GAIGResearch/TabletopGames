@@ -1,9 +1,10 @@
 package evaluation;
 
-import core.*;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.Game;
 import core.interfaces.IStatisticLogger;
 import evaluation.listeners.IGameListener;
-import evaluation.listeners.MetricsGameListener;
 import games.GameType;
 import players.PlayerFactory;
 import utilities.Pair;
@@ -201,22 +202,23 @@ public class GameReport {
                 }
 
                 // Visualise data for this game with this amount of players, if visualiser available
-                List<MetricsGameListener> metricListeners = gameTrackers.stream()
-                        .filter(gt -> gt instanceof MetricsGameListener)
-                        .map(gt -> ((MetricsGameListener)gt))
-                        .collect(toList());
-                StatsVisualiser vis = StatsVisualiser.getVisualiserForGame(gameType, metricListeners);
-                if (vis != null) {
-                    while (true) {
-                        vis.repaint();
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            break;
-    //                        throw new RuntimeException(e);
-                        }
-                    }
-                }
+                // TODO update to new metric system
+//                List<MetricsGameListener> metricListeners = gameTrackers.stream()
+//                        .filter(gt -> gt instanceof MetricsGameListener)
+//                        .map(gt -> ((MetricsGameListener)gt))
+//                        .collect(toList());
+//                StatsVisualiser vis = StatsVisualiser.getVisualiserForGame(gameType, metricListeners);
+//                if (vis != null) {
+//                    while (true) {
+//                        vis.repaint();
+//                        try {
+//                            Thread.sleep(100);
+//                        } catch (InterruptedException e) {
+//                            break;
+//    //                        throw new RuntimeException(e);
+//                        }
+//                    }
+//                }
 
                 // Once all games for this number of players are complete, let the gameTracker know
                 for (IGameListener gameTracker : gameTrackers) {

@@ -2,6 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
@@ -513,7 +514,12 @@ public class Game {
         s = System.nanoTime();
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
         if (observedActions.size() == 0) {
-            throw new AssertionError("No actions available for player " + activePlayer);
+            Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
+            IExtendedSequence topOfStack = actionsInProgress.peek();
+            throw new AssertionError("No actions available for player " + activePlayer
+                    + ". Last action: " + gameState.getHistory().get(gameState.getHistory().size() - 1)
+                    + ". Actions in progress: " + actionsInProgress.size()
+                    + ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")");
         }
         actionComputeTime = (System.nanoTime() - s);
         actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
