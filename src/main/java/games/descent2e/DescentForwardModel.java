@@ -18,6 +18,7 @@ import games.descent2e.components.tokens.DToken;
 import games.descent2e.concepts.DescentReward;
 import games.descent2e.concepts.GameOverCondition;
 import games.descent2e.concepts.Quest;
+import scala.Int;
 import utilities.LineOfSight;
 import utilities.Pair;
 import utilities.Utils;
@@ -342,7 +343,7 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
             if (actingFigure instanceof Monster)
             {
-                // TODO Check if Monster is melee or ranged
+                // TODO Check if Monster is melee or ranged (current method could do with improving)
                 attackType = ((Monster) actingFigure).getAttackType();
             }
 
@@ -648,8 +649,29 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         List<RangedAttack> actions = new ArrayList<>();
         Vector2D currentLocation = f.getPosition();
         BoardNode currentTile = dgs.masterBoard.getElement(currentLocation.getX(), currentLocation.getY());
-        // Find valid neighbours in master graph - used for melee attacks
-        for (int neighbourCompID : currentTile.getNeighbours().keySet()) {
+
+        // Find valid neighbours of neighbours in master graph - used for ranged attacks
+        Set<Integer> rangedTargets = currentTile.getNeighbours().keySet();
+
+
+        // Only finds neighbours up to a set maximum range
+        for (int i = 1; i < RangedAttack.MAX_RANGE; i++) {
+
+            Set<Integer> startTargets = rangedTargets;
+
+            for (Integer possibleTarget : startTargets) {
+                // Collects all possible neighbours of neighbours, and adds them to the list of potential target locations
+                Set<Integer> newTargets = ((BoardNode) dgs.getComponentById(possibleTarget)).getNeighbours().keySet().stream().collect(Collectors.toSet());
+                newTargets.addAll(rangedTargets);
+                rangedTargets = newTargets;
+            }
+        }
+
+        // Prevents the attacker from trying to shoot itself
+        rangedTargets.remove(currentTile.getComponentID());
+        System.out.println(rangedTargets);
+
+        for (int neighbourCompID : rangedTargets) {
             BoardNode neighbour = (BoardNode) dgs.getComponentById(neighbourCompID);
             if (neighbour == null) continue;
             Vector2D loc = ((PropertyVector2D) neighbour.getProperty(coordinateHash)).values;
