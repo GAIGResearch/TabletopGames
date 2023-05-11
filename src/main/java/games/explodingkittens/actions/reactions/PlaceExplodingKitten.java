@@ -1,9 +1,9 @@
 package games.explodingkittens.actions.reactions;
 
+import core.AbstractGameState;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.DrawCard;
-import core.AbstractGameState;
 import core.interfaces.IPrintable;
 import games.explodingkittens.ExplodingKittensGameState;
 import games.explodingkittens.ExplodingKittensTurnOrder;
@@ -42,5 +42,17 @@ public class PlaceExplodingKitten extends DrawCard implements IPrintable {
     @Override
     public AbstractAction copy() {
         return new PlaceExplodingKitten(deckFrom, deckTo, fromIndex, toIndex);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (!(other instanceof PlaceExplodingKitten)) return false;
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode() - 293792;
     }
 }
