@@ -1,6 +1,5 @@
 package games.descent2e;
 
-import core.AbstractForwardModel;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModelWithTurnOrder;
@@ -12,16 +11,17 @@ import games.descent2e.actions.attack.MeleeAttack;
 import games.descent2e.actions.attack.RangedAttack;
 import games.descent2e.actions.Move;
 import games.descent2e.actions.attack.SurgeAttackAction;
+import games.descent2e.actions.conditions.Diseased;
+import games.descent2e.actions.conditions.Poisoned;
+import games.descent2e.actions.conditions.Stunned;
 import games.descent2e.actions.tokens.TokenAction;
 import games.descent2e.components.*;
 import games.descent2e.components.tokens.DToken;
 import games.descent2e.concepts.DescentReward;
 import games.descent2e.concepts.GameOverCondition;
 import games.descent2e.concepts.Quest;
-import scala.Int;
 import utilities.LineOfSight;
 import utilities.Pair;
-import utilities.Utils;
 import utilities.Vector2D;
 
 import java.awt.*;
@@ -298,113 +298,138 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
         // End turn is always possible
         actions.add(new EndTurn());
 
-        // Every other action can only occur if we are not stunned
-        if (!actingFigure.hasCondition(DescentCondition.Stun)) {
+        // First, we must check if we can make a Poisoned or Diseased attribute test
+        // We cannot make any actions before we have taken our attribute tests against these conditions
 
-            // If we have movement points to spend, and not immobilized, add move actions
-            if ((!actingFigure.hasCondition(DescentTypes.DescentCondition.Immobilize))
-                    && (actingFigure.getAttributeValue(Figure.Attribute.MovePoints) > 0)) {
-                actions.addAll(moveActions(dgs, actingFigure));
+        boolean noTestsMade = true;
+
+        if (actingFigure.hasCondition(DescentCondition.Poison) || actingFigure.hasCondition(DescentCondition.Disease))
+        {
+            Diseased diseased = new Diseased();
+            if (diseased.canExecute(dgs)) {
+                actions.add(diseased);
+                noTestsMade = false;
             }
 
-            // TODO: stamina move, not an "action", but same rules for move apply [DONE - Toby]
-            // If a hero has stamina to spare, add move actions that cost fatigue
-            if (actingFigure instanceof Hero) {
-                if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
-                    GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
-                    if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
+            Poisoned poisoned = new Poisoned();
+            if (poisoned.canExecute(dgs)) {
+                actions.add(poisoned);
+                noTestsMade = false;
+            }
+        }
+
+        // If we have made all our Attribute Tests, then we can take our other actions
+        if (noTestsMade) {
+
+            // Every other action can only occur if we are not stunned
+            if (!actingFigure.hasCondition(DescentCondition.Stun)) {
+
+                // If we have movement points to spend, and not immobilized, add move actions
+                if ((!actingFigure.hasCondition(DescentTypes.DescentCondition.Immobilize))
+                        && (actingFigure.getAttributeValue(Figure.Attribute.MovePoints) > 0)) {
+                    actions.addAll(moveActions(dgs, actingFigure));
                 }
-            }
 
-            // Add actions that cost action points
-            if (!actingFigure.getNActionsExecuted().isMaximum()) {
-                // Get movement points action
-                GetMovementPoints movePoints = new GetMovementPoints();
-                if (movePoints.canExecute(dgs)) actions.add(movePoints);
-
-                // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
-
-                AttackType attackType = AttackType.NONE;
+                // TODO: stamina move, not an "action", but same rules for move apply [DONE - Toby]
+                // If a hero has stamina to spare, add move actions that cost fatigue
                 if (actingFigure instanceof Hero) {
-                    // Examines the Hero's equipment to see what their weapon's range is
-                    Deck<DescentCard> myEquipment = ((Hero) actingFigure).getHandEquipment();
-                    int length = myEquipment.getComponents().size();
-                    for (int i = 0; i < length; i++) {
-                        AttackType temp = myEquipment.get(i).getAttackType();
+                    if (!actingFigure.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
+                        GetFatiguedMovementPoints fatiguedMovementPoints = new GetFatiguedMovementPoints();
+                        if (fatiguedMovementPoints.canExecute(dgs)) actions.add(fatiguedMovementPoints);
+                    }
+                }
 
-                        // Checks if the Hero can make a melee attack, ranged attack, or both with their current equipment
-                        if (temp != AttackType.NONE) {
-                            if (attackType == AttackType.NONE) {
-                                attackType = temp;
-                            } else if (attackType != temp) {
-                                attackType = AttackType.BOTH;
+                // Add actions that cost action points
+                if (!actingFigure.getNActionsExecuted().isMaximum()) {
+                    // Get movement points action
+                    GetMovementPoints movePoints = new GetMovementPoints();
+                    if (movePoints.canExecute(dgs)) actions.add(movePoints);
+
+                    // - Attack with 1 equipped weapon [ + monsters, the rest are just heroes] TODO
+
+                    AttackType attackType = AttackType.NONE;
+                    if (actingFigure instanceof Hero) {
+                        // Examines the Hero's equipment to see what their weapon's range is
+                        Deck<DescentCard> myEquipment = ((Hero) actingFigure).getHandEquipment();
+                        int length = myEquipment.getComponents().size();
+                        for (int i = 0; i < length; i++) {
+                            AttackType temp = myEquipment.get(i).getAttackType();
+
+                            // Checks if the Hero can make a melee attack, ranged attack, or both with their current equipment
+                            if (temp != AttackType.NONE) {
+                                if (attackType == AttackType.NONE) {
+                                    attackType = temp;
+                                } else if (attackType != temp) {
+                                    attackType = AttackType.BOTH;
+                                }
                             }
                         }
                     }
-                }
 
-                if (actingFigure instanceof Monster) {
-                    // TODO Check if Monster is melee or ranged (current method could do with improving)
-                    attackType = ((Monster) actingFigure).getAttackType();
-                }
-
-                if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
-                    actions.addAll(meleeAttackActions(dgs, actingFigure));
-                }
-                if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
-                    actions.addAll(rangedAttackActions(dgs, actingFigure));
-                }
-
-                // - Rest
-                if (actingFigure instanceof Hero) {
-                    // Only heroes can rest
-                    Rest act = new Rest();
-                    if (act.canExecute(dgs)) {
-                        actions.add(act);
+                    if (actingFigure instanceof Monster) {
+                        // TODO Check if Monster is melee or ranged (current method could do with improving)
+                        attackType = ((Monster) actingFigure).getAttackType();
                     }
-                }
 
-                // - Open/close a door TODO
-                // - Revive hero TODO
-
-                // - Search
-                if (actingFigure instanceof Hero) {
-                    // Only heroes can search for adjacent Search tokens (or ones they're sitting on top of)
-                    Vector2D loc = actingFigure.getPosition();
-                    GridBoard board = dgs.getMasterBoard();
-                    List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
-                    for (DToken token : dgs.tokens) {
-                        if (token.getDescentTokenType() == DescentToken.Search
-                                && token.getPosition() != null
-                                && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
-                            for (DescentAction da : token.getEffects()) {
-                                actions.add(da.copy());
-                            }
-                        }
+                    if (attackType == AttackType.MELEE || attackType == AttackType.BOTH) {
+                        actions.addAll(meleeAttackActions(dgs, actingFigure));
                     }
-                }
+                    if (attackType == AttackType.RANGED || attackType == AttackType.BOTH) {
+                        actions.addAll(rangedAttackActions(dgs, actingFigure));
+                    }
 
-                // - Stand up TODO
-
-                // - Special (specified by quest)
-                if (actingFigure.getAbilities() != null) {
-                    for (DescentAction act : actingFigure.getAbilities()) {
-                        // Check if action can be executed right now
-                        if (act.canExecute(Triggers.ACTION_POINT_SPEND, dgs)) {
+                    // - Rest
+                    if (actingFigure instanceof Hero) {
+                        // Only heroes can rest
+                        Rest act = new Rest();
+                        if (act.canExecute(dgs)) {
                             actions.add(act);
                         }
                     }
+
+                    // - Open/close a door TODO
+                    // - Revive hero TODO
+
+                    // - Search
+                    if (actingFigure instanceof Hero) {
+                        // Only heroes can search for adjacent Search tokens (or ones they're sitting on top of)
+                        Vector2D loc = actingFigure.getPosition();
+                        GridBoard board = dgs.getMasterBoard();
+                        List<Vector2D> neighbours = getNeighbourhood(loc.getX(), loc.getY(), board.getWidth(), board.getHeight(), true);
+                        for (DToken token : dgs.tokens) {
+                            if (token.getDescentTokenType() == DescentToken.Search
+                                    && token.getPosition() != null
+                                    && (neighbours.contains(token.getPosition()) || token.getPosition().equals(loc))) {
+                                for (DescentAction da : token.getEffects()) {
+                                    actions.add(da.copy());
+                                }
+                            }
+                        }
+                    }
+
+                    // - Stand up TODO
+
+                    // - Special (specified by quest)
+                    if (actingFigure.getAbilities() != null) {
+                        for (DescentAction act : actingFigure.getAbilities()) {
+                            // Check if action can be executed right now
+                            if (act.canExecute(Triggers.ACTION_POINT_SPEND, dgs)) {
+                                actions.add(act);
+                            }
+                        }
+                    }
                 }
+
+                // TODO: exhaust a card for an action/modifier/effect "free" action
+
             }
 
-            // TODO: exhaust a card for an action/modifier/effect "free" action
+            // If we are stunned, we can only take the 'Stunned' action
+            else {
+                Stunned stunned = new Stunned();
+                if (stunned.canExecute(dgs)) actions.add(stunned);
+            }
 
-        }
-
-        // If we are stunned, we can only take the 'Stunned' action
-        else {
-            Stunned stunned = new Stunned();
-            if (stunned.canExecute(dgs)) actions.add(stunned);
         }
 
         return actions;

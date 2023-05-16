@@ -20,6 +20,9 @@ public class EndTurn extends DescentAction{
         Figure f = gs.getActingFigure();
         f.getNActionsExecuted().setToMax();
 
+        // Removes all attribute tests taken this turn from the list, so we can check them again next turn
+        f.clearAttributeTest();
+
         // If we are Immobilized, remove that condition now
         if(f.hasCondition(DescentTypes.DescentCondition.Immobilize)) { f.removeCondition(DescentTypes.DescentCondition.Immobilize); }
 

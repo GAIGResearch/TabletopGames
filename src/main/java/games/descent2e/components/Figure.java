@@ -64,12 +64,14 @@ public class Figure extends Token {
     Pair<Integer,Integer> size;
 
     Set<DescentTypes.DescentCondition> conditions;  // TODO: clear every quest + when figure exhausted?
+    Set<DescentTypes.DescentCondition> attributeTests;  // TODO Replace once AttributeTest works properly
     List<DescentAction> abilities;  // TODO track exhausted etc.
 
     public Figure(String name, int nActionsPossible) {
         super(name);
         size = new Pair<>(1,1);
         conditions = new HashSet<>();
+        attributeTests = new HashSet<>();
         attributes = new HashMap<>();
         attributes.put(XP, new Counter(0, 0, -1, "XP"));
         attributes.put(Gold, new Counter(0, 0, -1, "Gold"));
@@ -164,6 +166,23 @@ public class Figure extends Token {
 
     public boolean hasCondition(DescentTypes.DescentCondition condition) {
         return conditions.contains(condition);
+    }
+
+    public void addAttributeTest(DescentTypes.DescentCondition attributeTest) {
+        attributeTests.add(attributeTest);
+    }
+
+    public void removeAttributeTest(DescentTypes.DescentCondition attributeTest) {
+        attributeTests.remove(attributeTest);
+    }
+    public void clearAttributeTest() {
+        if (!(attributeTests).isEmpty()) {
+            attributeTests.clear();
+        }
+    }
+
+    public boolean hasAttributeTest(DescentTypes.DescentCondition attributeTest) {
+        return attributeTests.contains(attributeTest);
     }
 
     public void addAbility(DescentAction ability) {
