@@ -1,6 +1,7 @@
 package games.descent2e.actions.attack;
 
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
 
 import java.util.Objects;
@@ -12,7 +13,10 @@ public enum Surge {
     RANGE_PLUS_1(1, (a, s) -> a.addRange(1)),
     DAMAGE_PLUS_1(1, (a, s) -> a.addDamage(1)),
     PIERCE_2(1, (a, s) -> a.addPierce(2)),
-    STUN(1, (a, s) -> a.setStunning(true)), // TODO: This doesn't yet have any actual effect
+    DISEASE(1, (a, s) -> a.setDiseasing(true)),
+    IMMOBILIZE(1, (a, s) -> a.setImmobilizing(true)),
+    POISON(1, (a, s) -> a.setPoisoning(true)),
+    STUN(1, (a, s) -> a.setStunning(true)),
     RUNIC_KNOWLEDGE(1, (a, s) -> {
         int fatigue = s.getActingFigure().getAttribute(Figure.Attribute.Fatigue).getValue();
         s.getActingFigure().setAttribute(Figure.Attribute.Fatigue, fatigue + 1);
@@ -31,8 +35,10 @@ public enum Surge {
         if (surgesUsed > attack.surgesToSpend) {
             throw new AssertionError(String.format("%s: Requires %d surges and we only have %d to spend.", toString(), surgesUsed, attack.surgesToSpend));
         }
+
         // TODO: Record which Surges have been used to avoid re-use!
         attack.surgesToSpend -= surgesUsed;
+
         lambda.accept(attack, state);
     }
 

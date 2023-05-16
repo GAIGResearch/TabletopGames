@@ -2,8 +2,10 @@ package games.descent2e.actions.attack;
 
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
+import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.actions.Triggers;
+import games.descent2e.components.Figure;
 
 import java.util.Objects;
 
@@ -24,7 +26,12 @@ public class SurgeAttackAction extends DescentAction {
     }
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        String figureName = gameState.getComponentById(figureSource).getComponentName();
+        figureName = figureName.replace("Hero: ", "");
+
+        String surgeName = surge.name().replace("_", " ").replace("PLUS ", "+");
+        return String.format("Surge: "+ surgeName + " by " + figureName);
+        //return toString();
     }
 
     @Override
@@ -32,6 +39,29 @@ public class SurgeAttackAction extends DescentAction {
         MeleeAttack attack = (MeleeAttack) gs.currentActionInProgress();
         attack.registerSurge(surge);
         surge.apply(attack, gs);
+
+        // TODO Could probably make these neater somewhere else, but they work for now
+        // Applies the Diseased condition
+        if (attack.isDiseasing) {
+            Figure defender = (Figure) gs.getComponentById(attack.getDefendingFigure());
+            defender.addCondition(DescentTypes.DescentCondition.Disease);
+        }
+        // Applies the Immobilized condition
+        if (attack.isImmobilizing) {
+            Figure defender = (Figure) gs.getComponentById(attack.getDefendingFigure());
+            defender.addCondition(DescentTypes.DescentCondition.Immobilize);
+        }
+        // Applies the Poisoned condition
+        if (attack.isPoisoning) {
+            Figure defender = (Figure) gs.getComponentById(attack.getDefendingFigure());
+            defender.addCondition(DescentTypes.DescentCondition.Poison);
+        }
+        // Applies the Stunned condition
+        if (attack.isStunning) {
+            Figure defender = (Figure) gs.getComponentById(attack.getDefendingFigure());
+            defender.addCondition(DescentTypes.DescentCondition.Stun);
+        }
+
         return true;
     }
 

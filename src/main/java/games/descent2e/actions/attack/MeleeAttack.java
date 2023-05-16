@@ -60,7 +60,10 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     int interruptPlayer;
     int surgesToSpend;
     int extraRange, pierce, extraDamage;
-    boolean isStunning; // TODO: This doesn't actually stun the target (making them lose their next go) yet
+    boolean isDiseasing;
+    boolean isImmobilizing;
+    boolean isPoisoning;
+    boolean isStunning;
 
     Set<Surge> surgesUsed = new HashSet<>();
 
@@ -203,8 +206,6 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
         int defence = state.getDefenceDicePool().getShields() - pierce;
         if (defence < 0) defence = 0;
         damage = Math.max(damage - defence, 0);
-        // TODO Undo for debugging purposes
-        // damage = Math.max(damage - defence + 3, 0);
         Figure defender = (Figure) state.getComponentById(defendingFigure);
         defenderName = defender.getComponentName();
         int startingHealth = defender.getAttribute(Figure.Attribute.Health).getValue();
@@ -351,6 +352,15 @@ public class MeleeAttack extends DescentAction implements IExtendedSequence {
     }
     public void addPierce(int pierceBonus) {
         pierce += pierceBonus;
+    }
+    public void setDiseasing(boolean disease) {
+        isDiseasing = disease;
+    }
+    public void setImmobilizing(boolean immobilize) {
+        isImmobilizing = immobilize;
+    }
+    public void setPoisoning(boolean poison) {
+        isPoisoning = poison;
     }
     public void setStunning(boolean stun) {
         isStunning = stun;
