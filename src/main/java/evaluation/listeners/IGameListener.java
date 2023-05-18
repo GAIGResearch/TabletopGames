@@ -28,8 +28,7 @@ public interface IGameListener {
      */
     void allGamesFinished();
 
-    default boolean setOutputDirectory(String out, String time, String players) {return true;}
-
+    default boolean setOutputDirectory(String... nestedDirectories) {return true;}
 
     void setGame(Game game);
 
@@ -87,7 +86,7 @@ public interface IGameListener {
         if(listener == null) {
             // default
             AbstractMetric[] ms = new GameMetrics().getAllMetrics();
-            return new MetricsGameListener(logger, ms);
+            return new MetricsGameListener(ms);
         }
 
         return listener;
@@ -108,7 +107,7 @@ public interface IGameListener {
             e.printStackTrace();
         }
         if(listener == null)
-            return new MetricsGameListener(null, new AbstractMetric[0]);
+            return new MetricsGameListener(new AbstractMetric[0]);
         return listener;
     }
 

@@ -130,6 +130,7 @@ public abstract class AbstractMetric
         columns.put("Tick", Integer.class);
         columns.put("Turn", Integer.class);
         columns.put("Round", Integer.class);
+        columns.put("Event", String.class);
         return columns;
     }
 
@@ -146,6 +147,16 @@ public abstract class AbstractMetric
         dataLogger.addData("Tick", e.state.getGameTick());
         dataLogger.addData("Turn", e.state.getTurnCounter());
         dataLogger.addData("Round", e.state.getRoundCounter());
+        dataLogger.addData("Event", e.type.name());
+    }
+
+    /**
+     * @return true if this metric should filter data in table by event type when reporting, creating several
+     * tables of separate relevant data instead of one. Default behaviour is true. May override to return false
+     * if the metric is not event-specific or would like to keep all data together.
+     */
+    public boolean filterByEventTypeWhenReporting() {
+        return true;
     }
 
     /**
@@ -254,5 +265,20 @@ public abstract class AbstractMetric
 
     public IDataLogger getDataLogger() {
         return dataLogger;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractMetric)) return false;
+        AbstractMetric that = (AbstractMetric) o;
+        return Objects.equals(eventTypes, that.eventTypes) && Arrays.equals(args, that.args) && Objects.equals(columnNames, that.columnNames);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(eventTypes, columnNames);
+        result = 31 * result + Arrays.hashCode(args);
+        return result;
     }
 }

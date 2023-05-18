@@ -134,7 +134,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                 illegalActions[i] = illegalAction;
                 if (illegalAction || actions[i] == null) {
                     oldActions[i] = actions[i];
-                    action = rolloutPolicy.getAction(gsCopy, currentActions);
+                    action = rolloutPolicy.getAction(gsCopy);
                     if (repair || actions[i] == null) // if we are repairing then we override an illegal action with a random legitimate one
                         actions[i] = action;
                     if (repair && illegalAction)

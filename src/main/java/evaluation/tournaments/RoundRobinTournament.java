@@ -4,6 +4,7 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IStatisticLogger;
 import evaluation.listeners.IGameListener;
+import evaluation.loggers.SummaryLogger;
 import games.GameType;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -73,7 +75,6 @@ public class RoundRobinTournament extends AbstractTournament {
         if (argsList.contains("--help") || argsList.contains("-h")) {
             System.out.println(
                     "There are a number of possible arguments:\n" +
-                            "\tsetupFile=     (Optional) A JSON file with all of these parameters specified\n" +
                             "\tgame=          The name of the game to play. Defaults to Uno.\n" +
                             "\tnPlayers=      The number of players in each game. Defaults to 2.\n" +
                             "\tplayers=       The directory containing agent JSON files for the competing Players\n" +
@@ -89,29 +90,23 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               the same number of games in total.\n" +
                             "\tmatchups=      The total number of matchups to run if mode=random...\n" +
                             "\t               ...or the number of matchups to run per combination of players if mode=exhaustive\n" +
-                            "\tlistener=      (Optional) The full class name of an IGameListener implementation. \n" +
-                            "\t               Defaults to evaluation.metrics.MetricsGameListener. \n" +
+                            "\tdestDir=       The directory to which the results will be written. Defaults to 'metrics/out'.\n" +
+                            "\tlistener=      The full class name of an IGameListener implementation. Or the location\n" +
+                            "\t               of a json file from which a listener can be instantiated.\n" +
+                            "\t               Defaults to evaluation.metrics.GameStatisticsListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tmetrics=       The full class name of an IMetricsCollection implementation. " +
-                            "\t                 A comma-delimited string can be provided to gather several classes of metrics." +
-                            "\t                 If different listeners included, then a pipe-delimited string can be provided" +
-                            "\t                 to specify different metrics per listener.\n" +
-                            "\tlogger=        The full class name of an IStatisticsLogger implementation.\n" +
-                            "\t               This is ignored if a json file is provided for the listener.\n" +
-                            "\t               Defaults to utilities.SummaryLogger. \n" +
-                            "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file.\n" +
-                            "\t               Defaults to RoundRobinReport.txt\n" +
-                            "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
-                            "\t               use a different log file.\n" +
+                            "\t               A comma-delimited string can be provided to gather several classes of metrics." +
+                            "\t               If different listeners included, then a pipe-delimited string can be provided" +
+                            "\t               to specify different metrics per listener.\n" +
                             "\tresultsFile=   (Optional) Saves the results of the tournament to a file with this filename.\n" +
                             "\t               Defaults to null\n" +
                             "\treportPeriod=  (Optional) For random mode execution only, after how many games played results are reported.\n" +
                             "\t               Defaults to the end of the tournament\n" +
-                            "\tstatsLog=      The file to use for logging agent-specific statistics (e.g. MCTS iterations/depth)\n" +
+                            "\tstatsLog=      (Optional) The file to use for logging agent-specific statistics (e.g. MCTS iterations/depth)\n" +
                             "\t               A single line will be generated as the average for each agent, implicitly assuming they are\n" +
-                            "\t               all of the same type. If not supplied, then no logging will take place.\n" +
-                            "\trandomGameParams= (Optional) If specified, parameters for the game will be randomized for each game, and printed before the run"
+                            "\t               all of the same type. If not supplied, then no logging will take place.\n"
             );
             return;
         }
@@ -135,14 +130,14 @@ public class RoundRobinTournament extends AbstractTournament {
                 String resultsFile = getArg(json, "resultsFile", "");
                 int reportPeriod = getArg(json, "reportPeriod", matchups); //matchups
                 boolean randomGameParams = getArg(json, "randomGameParams", false);
+                String destDir = getArg(json, "destDir", "metrics/out");
 
                 List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(json, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
                 List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(json, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
-                List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(json, "listenerFile", "RoundRobinReport.txt").split("\\|")));
                 String loggerClass = getArg(json, "logger", "evaluation.loggers.SummaryLogger");
 
                 setup(gameToPlay, nPlayersPerGame, selfPlay, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
-                        listenerClasses, metricsClasses, listenerFiles, loggerClass);
+                        listenerClasses, metricsClasses, loggerClass, destDir);
 
             } catch (FileNotFoundException ignored) {
             } catch (IOException | ParseException e) {
@@ -160,24 +155,21 @@ public class RoundRobinTournament extends AbstractTournament {
             String resultsFile = getArg(args, "resultsFile", "");
             int reportPeriod = getArg(args, "reportPeriod", matchups); //matchups
             boolean randomGameParams = getArg(args, "randomGameParams", false);
+            String destDir = getArg(args, "destDir", "metrics/out");
 
             List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
             List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
-            List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
             String loggerClass = getArg(args, "logger", "evaluation.loggers.SummaryLogger");
 
             setup(gameToPlay, nPlayersPerGame, selfPlay, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
-                    listenerClasses, metricsClasses, listenerFiles, loggerClass);
+                    listenerClasses, metricsClasses, loggerClass, destDir);
         }
     }
 
     public static void setup(GameType gameToPlay, int nPlayersPerGame, boolean selfPlay, String mode, int matchups,
                              String playerDirectory, String gameParams, String statsLogPrefix, String resultsFile,
                              int reportPeriod, boolean randomGameParams, List<String> listenerClasses,
-                             List<String> metricsClasses, List<String> listenerFiles, String loggerClass) {
-
-        if (listenerClasses.size() > 1 && listenerFiles.size() > 1 && listenerClasses.size() != listenerFiles.size())
-            throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
+                             List<String> metricsClasses, String loggerClass, String destDir) {
 
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         if (!playerDirectory.equals("")) {
@@ -200,6 +192,8 @@ public class RoundRobinTournament extends AbstractTournament {
 
         AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, gameParams);
 
+        StringBuilder timeDir = new StringBuilder(gameToPlay.name() + "_" + nPlayersPerGame + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
+
         // Run!
         RoundRobinTournament tournament = mode.equals("exhaustive") ?
                 new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, params) :
@@ -211,11 +205,10 @@ public class RoundRobinTournament extends AbstractTournament {
 
         tournament.listeners = new ArrayList<>();
         for (int l = 0; l < listenerClasses.size(); l++) {
-            String logFile = listenerFiles.size() == 1 ? listenerFiles.get(0) : listenerFiles.get(l);
-            IStatisticLogger logger = IStatisticLogger.createLogger(loggerClass, logFile);
             String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(l);
-            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), logger, metricsClass);
+            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), new SummaryLogger(), metricsClass);
             tournament.listeners.add(gameTracker);
+            gameTracker.setOutputDirectory(destDir, timeDir.toString());
         }
         tournament.run();
         if (!statsLogPrefix.equals("")) {
@@ -235,6 +228,10 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int g = 0; g < games.size(); g++) {
             if (verbose)
                 System.out.println("Playing " + games.get(g).getGameType().name());
+
+            for (IGameListener gameTracker : listeners) {
+                gameTracker.init(games.get(g));
+            }
 
             LinkedList<Integer> matchUp = new LinkedList<>();
             createAndRunMatchUp(matchUp, g);
