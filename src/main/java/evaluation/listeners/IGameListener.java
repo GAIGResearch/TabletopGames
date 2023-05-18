@@ -28,6 +28,8 @@ public interface IGameListener {
      */
     void allGamesFinished();
 
+    default boolean setOutputDirectory(String out, String time, String players) {return true;}
+
 
     void setGame(Game game);
 
@@ -110,4 +112,7 @@ public interface IGameListener {
         return listener;
     }
 
+    default void reset() {}
+
+    default void init(Game game) {}
 }

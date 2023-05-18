@@ -18,9 +18,8 @@ public class Event
         // ACTION_TAKEN is triggered after a decision is implemented. The state hence contains the results of the action.
         //     This is useful if we want to update a GUI or similar.
 
-        boolean oncePerGame;
+        final boolean oncePerGame;
         GameEvent(boolean oncePerGame) {this.oncePerGame = oncePerGame;}
-
         public boolean isOncePerGame() {
             return oncePerGame;
         }

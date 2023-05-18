@@ -24,16 +24,15 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         // We can't just register with all items in the Stack, as this may represent some complex dependency
         // For example in Dominion where one can Throne Room a Throne Room, which then Thrones a Smithy
         if (currentState.actionsInProgress.size() > 0) {
-            IExtendedSequence topOfStack = currentState.actionsInProgress.pop();
+            IExtendedSequence topOfStack = currentState.actionsInProgress.peek();
             if (!topOfStack.equals(action)) {
                 topOfStack.registerActionTaken(currentState, action);
             } else {
-                if (currentState.actionsInProgress.size() > 0) {
-                    IExtendedSequence nextOnStack = currentState.actionsInProgress.peek();
+                if (currentState.actionsInProgress.size() > 1) {
+                    IExtendedSequence nextOnStack = currentState.actionsInProgress.get(currentState.actionsInProgress.size() - 2);
                     nextOnStack.registerActionTaken(currentState, action);
                 }
             }
-            currentState.actionsInProgress.push(topOfStack);
         }
         _afterAction(currentState, action);
     }

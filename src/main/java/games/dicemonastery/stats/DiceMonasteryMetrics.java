@@ -1,285 +1,255 @@
 package games.dicemonastery.stats;
+
+import core.Game;
 import evaluation.listeners.MetricsGameListener;
-import evaluation.metrics.*;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
+import evaluation.metrics.IDataProcessor;
+import evaluation.metrics.IMetricsCollection;
 import games.dicemonastery.DiceMonasteryConstants;
 import games.dicemonastery.DiceMonasteryGameState;
 import games.dicemonastery.actions.*;
 import games.dicemonastery.components.Monk;
-import utilities.Group;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
 
 import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
 
 @SuppressWarnings("unused")
 public class DiceMonasteryMetrics implements IMetricsCollection {
 
-    public static class Season extends AbstractMetric {
+    public static class Timing extends AbstractMetric {
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
-        @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return s.getSeason();
-        }
-    }
 
-    public static class Year extends AbstractMetric {
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return s.getYear();
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("Season", String.class);
+                put("Year", Integer.class);
+            }};
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+
+        @Override
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
+            records.put("Season", s.getSeason().name());
+            records.put("Year", s.getYear());
+            return true;
         }
     }
 
     public static class Piety extends AbstractMetric {
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            if (e.action == null) return 0;
-            if (e.action instanceof ChooseMonk) return ((ChooseMonk) e.action).piety;
-            if (e.action instanceof PromoteMonk) return ((PromoteMonk) e.action).pietyLevelToPromote;
-            return 0;
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            if (e.action == null) records.put("Piety", 0);
+            else if (e.action instanceof ChooseMonk) records.put("Piety", ((ChooseMonk) e.action).piety);
+            else if (e.action instanceof PromoteMonk) records.put("Piety", ((PromoteMonk) e.action).pietyLevelToPromote);
+            else records.put("Piety", 0);
+            return true;
         }
+        
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("Piety", Integer.class);
+            }};
         }
     }
 
     public static class Location extends AbstractMetric {
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            if (e.action instanceof PlaceMonk) return ((PlaceMonk) e.action).destination.name();
-            if (e.action instanceof ChooseMonk) return ((ChooseMonk) e.action).destination.name();
-            if (e.action instanceof PromoteMonk) return ((PromoteMonk) e.action).location.name();
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return s.getCurrentArea().name();
+            if (e.action instanceof PlaceMonk) records.put("Location", ((PlaceMonk) e.action).destination.name());
+            else if (e.action instanceof ChooseMonk) records.put("Location", ((ChooseMonk) e.action).destination.name());
+            else if (e.action instanceof PromoteMonk) records.put("Location", ((PromoteMonk) e.action).location.name());
+            else records.put("Location", s.getCurrentArea().name());
+            return true;
         }
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+        @Override
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("Location", String.class);
+            }};
         }
     }
 
     public static class Thing extends AbstractMetric {
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            if (e.action == null) return "";
-            if (e.action instanceof Buy) return ((Buy) e.action).resource.name();
-            if (e.action instanceof Sell) return ((Sell) e.action).resource.name();
-            if (e.action instanceof BuyTreasure) return ((BuyTreasure) e.action).treasure.getComponentName();
-            if (e.action instanceof WriteText) return ((WriteText) e.action).textType.getComponentName();
-            if (e.action instanceof TakeToken) return ((TakeToken) e.action).token.name();
-            if (e.action instanceof GoOnPilgrimage) return ((GoOnPilgrimage) e.action).destination.destination;
-            return "";
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            if (e.action == null) records.put("Thing", "");
+            else if (e.action instanceof Buy) records.put("Thing", ((Buy) e.action).resource.name());
+            else if (e.action instanceof Sell) records.put("Thing", ((Sell) e.action).resource.name());
+            else if (e.action instanceof BuyTreasure) records.put("Thing", ((BuyTreasure) e.action).treasure.getComponentName());
+            else if (e.action instanceof WriteText) records.put("Thing", ((WriteText) e.action).textType.getComponentName());
+            else if (e.action instanceof TakeToken) records.put("Thing", ((TakeToken) e.action).token.name());
+            else if (e.action instanceof GoOnPilgrimage) records.put("Thing", ((GoOnPilgrimage) e.action).destination.destination);
+            else records.put("Thing", "");
+            return true;
         }
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+        @Override
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("Thing", String.class);
+            }};
         }
     }
 
     public static class Value extends AbstractMetric {
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            if (e.action == null) return 0;
-            if (e.action instanceof Buy) return ((Buy) e.action).cost;
-            if (e.action instanceof Sell) return ((Sell) e.action).price;
-            if (e.action instanceof SummerBid)
-                return ((SummerBid) e.action).beer + 2 * ((SummerBid) e.action).mead;
-            if (e.action instanceof Pray) return ((Pray) e.action).prayerCount;
-            if (e.action instanceof TakeToken)
-                return 2 - ((DiceMonasteryGameState)e.state).availableBonusTokens(((TakeToken) e.action).fromArea).size();
-            if (e.action instanceof UseMonk) return ((UseMonk) e.action).getActionPoints();
-            return 0;
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records){
+            if (e.action == null) records.put("Value", 0);
+            else if (e.action instanceof Buy) records.put("Value", ((Buy) e.action).cost);
+            else if (e.action instanceof Sell) records.put("Value", ((Sell) e.action).price);
+            else if (e.action instanceof SummerBid)
+                records.put("Value", ((SummerBid) e.action).beer + 2 * ((SummerBid) e.action).mead);
+            else if (e.action instanceof Pray) records.put("Value", ((Pray) e.action).prayerCount);
+            else if (e.action instanceof TakeToken)
+                records.put("Value", 2 - ((DiceMonasteryGameState)e.state).availableBonusTokens(((TakeToken) e.action).fromArea).size());
+            else if (e.action instanceof UseMonk) records.put("Value", ((UseMonk) e.action).getActionPoints());
+            else records.put("Value", 0);
+            return true;
         }
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
+        @Override
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("Value", Integer.class);
+            }};
         }
     }
 
     public static class ActionPointsLeft extends AbstractMetric {
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records){
             DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return  s.getActionPointsLeft();
+            records.put("ActionPointsLeft", s.getActionPointsLeft());
+            return true;
         }
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
-    }
-
-
-    public static class IsSeason extends AbstractParameterizedMetric {
-        public IsSeason(){super();}
-        public IsSeason(Object arg){super(arg);}
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            DiceMonasteryConstants.Season season = (DiceMonasteryConstants.Season) getParameterValue("season");
-            DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return s.getSeason() == season;
-        }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
-        }
-        public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            return Collections.singletonList(new Group<>("season", Arrays.asList(DiceMonasteryConstants.Season.values()), DiceMonasteryConstants.Season.SPRING));
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("ActionPointsLeft", Integer.class);
+            }};
         }
     }
-
 
     public static class Turn extends AbstractMetric {
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records){
             DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
-            return (s.getYear() - 1) * 4 + s.getSeason().ordinal() + 1;
+            records.put("DM Turn", (s.getYear() - 1) * 4 + s.getSeason().ordinal() + 1);
+            return true;
         }
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
-    }
 
-
-    public static class MonksIn extends AbstractParameterizedMetric {
-        public MonksIn(){super();}
-        public MonksIn(Object arg){super(arg);}
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            DiceMonasteryConstants.ActionArea where = (DiceMonasteryConstants.ActionArea) getParameterValue("where");
-            return ((DiceMonasteryGameState)e.state).monksIn(where, e.playerID).size();
-        }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
-        }
-        public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            return Collections.singletonList(new Group<>("where", Arrays.asList(DiceMonasteryConstants.ActionArea.values()), STOREROOM));
+        public Map<String, Class<?>> getColumns(Game game) {
+            return new HashMap<String, Class<?>>() {{
+                put("DM Turn", Integer.class);
+            }};
         }
     }
 
-    public static class APIn extends AbstractParameterizedMetric {
-        public APIn(){super();}
-        public APIn(Object arg){super(arg);}
+    public static class ActionAreas extends AbstractMetric {
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            DiceMonasteryConstants.ActionArea where = (DiceMonasteryConstants.ActionArea) getParameterValue("where");
-            return ((DiceMonasteryGameState)e.state).monksIn(where, e.playerID).stream().mapToDouble(Monk::getPiety).sum();
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records){
+            DiceMonasteryGameState s = ((DiceMonasteryGameState)e.state);
+            for (DiceMonasteryConstants.ActionArea a : DiceMonasteryConstants.ActionArea.values()) {
+                for (int i = 0; i < s.getNPlayers(); i++) {
+                    records.put(a.name() + " - # Monks (Player " + i + ")", s.monksIn(a, i).size());
+                    records.put(a.name() + " - # AP (Player " + i + ")", s.monksIn(a, i).stream().mapToDouble(Monk::getPiety).sum());
+                    for (DiceMonasteryConstants.Resource r : DiceMonasteryConstants.Resource.values())
+                        records.put(a.name() + " - # " + r.name() + " (Player " + i + ")", s.getResource(i, r, a));
+                }
+            }
+            return true;
         }
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
-        public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            return Collections.singletonList(new Group<>("where", Arrays.asList(DiceMonasteryConstants.ActionArea.values()), STOREROOM));
-        }
-    }
 
-    public static class MonkPiety extends AbstractParameterizedMetric {
-        public MonkPiety(){super();}
-        public MonkPiety(Object arg){super(arg);}
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
-        }
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            int piety = (int) getParameterValue("piety");
-            return ((DiceMonasteryGameState)e.state).monksIn(null, e.playerID).stream().filter(m -> m.getPiety() == piety).count();
-        }
-        public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            return Collections.singletonList(new Group<>("piety", Arrays.asList(1, 2, 3, 4, 5), 4)); //TODO: James check these are sensible numbers.
+        public Map<String, Class<?>> getColumns(Game game) {
+            HashMap<String, Class<?>> columns = new HashMap<>();
+            for (DiceMonasteryConstants.ActionArea a : DiceMonasteryConstants.ActionArea.values()) {
+                for (int i = 0; i < game.getPlayers().size(); i++) {
+                    columns.put(a.name() + " - # Monks (Player " + i + ")", Integer.class);
+                    columns.put(a.name() + " - # AP (Player " + i + ")", Double.class);
+                    for (DiceMonasteryConstants.Resource r : DiceMonasteryConstants.Resource.values())
+                        columns.put(a.name() + " - # " + r.name() +  " (Player " + i + ")", Integer.class);
+                }
+            }
+            return columns;
         }
     }
 
+    public static class RoundOverCounts extends AbstractMetric {
+        public Map<String, BiFunction<Event, Integer, Integer>> allCategories = new HashMap<String, BiFunction<Event, Integer, Integer>>() {{
+            put("Writing Sets", (e, p) -> Math.min(((DiceMonasteryGameState)e.state).getResource(p, DiceMonasteryConstants.Resource.VELLUM, STOREROOM),
+                    ((DiceMonasteryGameState)e.state).getResource(p, DiceMonasteryConstants.Resource.CANDLE, STOREROOM)));
+            put("Pigments", (e, p) -> ((DiceMonasteryGameState)e.state).getStores(p, r -> r.isPigment).size());
+            put("Inks", (e, p) -> ((DiceMonasteryGameState)e.state).getStores(p, r -> r.isInk).size());
+            put("Monks Count", (e, p) -> ((DiceMonasteryGameState)e.state).monksIn(null, p).size());
+            put("Piety Sum", (e, p) -> ((DiceMonasteryGameState)e.state).monksIn(null, p).stream().mapToInt(Monk::getPiety).sum());
+            put("Victory Points", (e, p) -> ((DiceMonasteryGameState)e.state).getVictoryPoints(p));
+            put("Treasure Sum", (e, p) -> ((DiceMonasteryGameState)e.state).getTreasures(p).stream().mapToInt(t -> t.vp).sum());
+        }};
+        int nPlayers;
 
-    public static class ResourceInArea extends AbstractParameterizedMetric {
-        public ResourceInArea(){super();}
-        public ResourceInArea(Object... arg){super(arg);}
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            DiceMonasteryConstants.Resource resource = (DiceMonasteryConstants.Resource) getParameterValue("resource");
-            DiceMonasteryConstants.ActionArea area = (DiceMonasteryConstants.ActionArea) getParameterValue("area");
-            return ((DiceMonasteryGameState)e.state).getResource(e.playerID, resource, area);
+        public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records){
+            DiceMonasteryGameState s = (DiceMonasteryGameState) e.state;
+            nPlayers = s.getNPlayers();
+            for (int i = 0; i < nPlayers; i++) {
+                for (String categ: allCategories.keySet()) {
+                    records.put(categ + " - Player " + i, allCategories.get(categ).apply(e, i));
+                }
+            }
+            return true;
         }
+
         public Set<Event.GameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
-        public List<Group<String, List<?>, ?>> getAllowedParameters() {
-            return new ArrayList<>(Arrays.asList(
-                    new Group<>("resource", Arrays.asList(DiceMonasteryConstants.Resource.values()), DiceMonasteryConstants.Resource.SHILLINGS),
-                    new Group<>("area", Arrays.asList(DiceMonasteryConstants.ActionArea.values()), STOREROOM)
-                    ));
-        }
-    }
 
-    public static class WritingSets extends AbstractMetric {
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            return Math.min(((DiceMonasteryGameState)e.state).getResource(e.playerID, DiceMonasteryConstants.Resource.VELLUM, STOREROOM),
-                    ((DiceMonasteryGameState)e.state).getResource(e.playerID, DiceMonasteryConstants.Resource.CANDLE, STOREROOM));
+        public Map<String, Class<?>> getColumns(Game game) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (int i = 0; i < game.getPlayers().size(); i++) {
+                for (String categ: allCategories.keySet()) {
+                    columns.put(categ + " - Player " + i, Integer.class);
+                }
+            }
+            return columns;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
-        }
-    }
 
-    public static class Pigments extends AbstractMetric {
         @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            return ((DiceMonasteryGameState)e.state).getStores(e.playerID, r -> r.isPigment).size();
-        }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
+        public IDataProcessor getDataProcessor() {
+            return new TSDPRoundOverCounts();
         }
     }
-
-    public static class Inks extends AbstractMetric {
-        @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            return ((DiceMonasteryGameState)e.state).getStores(e.playerID, r -> r.isInk).size();
-        }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
-        }
-    }
-
-    public static class MonksCount extends AbstractMetric {
-        @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            return ((DiceMonasteryGameState)e.state).monksIn(null, e.playerID).size();
-        }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
-        }
-    }
-
-
-    public static class PietySum extends AbstractMetric {
-        @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            return ((DiceMonasteryGameState)e.state).monksIn(null, e.playerID).stream().mapToInt(Monk::getPiety).sum();
-        }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
-        }
-    }
-
-    public static class VictoryPoints extends AbstractMetric {
-        @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            return ((DiceMonasteryGameState)e.state).getVictoryPoints(e.playerID);
-        }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
-        }
-    }
-
-    public static class TreasureSum extends AbstractMetric {
-        @Override
-        public Object run(MetricsGameListener listener, Event e) {
-            return ((DiceMonasteryGameState)e.state).getTreasures(e.playerID).stream().mapToInt(t -> t.vp).sum();
-        }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.ROUND_OVER);
-        }
-    }
-
 }
