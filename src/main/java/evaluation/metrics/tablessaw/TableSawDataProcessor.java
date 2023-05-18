@@ -330,7 +330,7 @@ public class TableSawDataProcessor implements IDataProcessor {
                     Layout layout = Layout.builder().title(data.name())
                             .height(600).width(800)
                             .yAxis(Axis.builder().title("Count").build())
-                            .xAxis(Axis.builder().title(column.name()).build())
+                            .xAxis(Axis.builder().title(column.name()).categoryOrder(Axis.CategoryOrder.CATEGORY_ASCENDING).build())
                             .build();
                     BoxTrace trace = BoxTrace.builder(countsPerGame.categoricalColumn("Category"), countsPerGame.nCol("Count"))
                             .build();
@@ -376,7 +376,11 @@ public class TableSawDataProcessor implements IDataProcessor {
                     // Make a bar plot from the categorical count
                     Table t2 = ((StringColumn)column).countByCategory();
 //                    t2 = t2.sortDescendingOn(t2.column(1).name()); //todo this sorts the table, but not the plot when we build it.
-                    Layout layout = Layout.builder().title(filteredData.name()).yAxis(Axis.builder().title(column.name()).build()).build();
+                    Layout layout = Layout.builder()
+                            .title(filteredData.name())
+                            .yAxis(Axis.builder().title(column.name()).build())
+                            .xAxis(Axis.builder().categoryOrder(Axis.CategoryOrder.TRACE).build())
+                            .build();
                     BarTrace trace = BarTrace.builder(t2.categoricalColumn(0), t2.numberColumn(1))
                             .build();
                     figures.put(column.name(), new Figure(layout, trace));

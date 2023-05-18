@@ -276,20 +276,20 @@ public class GameMetrics implements IMetricsCollection {
 
             for (int i = 0; i < listener.getGame().getPlayers().size(); i++) {
                 if(i == e.state.getCurrentPlayer())
-                    records.put("Player-" + i, e.action == null ? "NONE" : e.action.toString());
+                    records.put("Player-" + i, e.action == null ? null : e.action.toString());
                 else records.put("Player-" + i, null);
                 for (int j = 0; j < playerNames.size(); j++) {
                     for (AbstractPlayer player: listener.getGame().getPlayers()) {
                         if (player.toString().equals(playerNames.get(j))) {
-                            records.put(playerNames.get(j) + "-" + j, e.action == null ? "NONE" : e.action.toString());
+                            records.put(playerNames.get(j) + "-" + j, e.action == null ? null : e.action.toString());
                         } else {
                             records.put(playerNames.get(j) + "-" + j, null);
                         }
                     }
                 }
             }
-            records.put("Actions Played", e.action == null ? "NONE" : e.action.toString());
-            records.put("Actions Played Description", e.action == null ? "NONE" : e.action.getString(e.state));
+            records.put("Actions Played", e.action == null ? null : e.action.toString());
+            records.put("Actions Played Description", e.action == null ? null : e.action.getString(e.state));
             records.put("Action Space Size", fm.computeAvailableActions(e.state).size());
 
             e.action = a;
