@@ -5,10 +5,7 @@ import core.Game;
 import evaluation.listeners.MetricsGameListener;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Records all data per player combination.
@@ -56,8 +53,18 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
 
     public void tournamentInit(Game game, int nPlayers, List<String> playerNames, List<AbstractPlayer> matchup) {
         // Create a data logger for this matchup
-        if (dataLoggers.containsKey(matchup)) {
-            setDataLogger(dataLoggers.get(matchup));
+        // TODO this counts same matchup if same type of players are in, regardless of order
+        // If order matters (E.G. to see first player advantage), then this should be adjusted
+        Set<AbstractPlayer> matchupSet = new HashSet<>(matchup);
+        IDataLogger loggerRecorded = null;
+        for (List<AbstractPlayer> key : dataLoggers.keySet()) {
+            if (new HashSet<>(key).containsAll(matchup) && matchupSet.containsAll(key)) {
+                loggerRecorded = dataLoggers.get(key);
+                break;
+            }
+        }
+        if (loggerRecorded != null) {
+            setDataLogger(loggerRecorded);
         } else {
             IDataLogger logger = dataLogger.create();
             dataLoggers.put(matchup, logger);
