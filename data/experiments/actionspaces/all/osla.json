@@ -1,8 +1,0 @@
-{
-	"class":"players.simple.OSLAHeuristic",
-	"heuristic" : {
-		"class" : "players.heuristics.ScoreHeuristic"
-	},
-	"budgetType" : "BUDGET_TIME",
-	"budget" : 40
-}

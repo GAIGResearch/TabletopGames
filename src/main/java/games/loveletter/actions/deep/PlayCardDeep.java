@@ -3,7 +3,6 @@ package games.loveletter.actions.deep;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
-import games.loveletter.LoveLetterGameState;
 import games.loveletter.actions.PlayCard;
 import games.loveletter.cards.LoveLetterCard;
 
@@ -20,15 +19,6 @@ public abstract class PlayCardDeep extends PlayCard implements IExtendedSequence
     public boolean execute(AbstractGameState llgs) {
         super.execute(llgs);
         llgs.setActionInProgress(this);
-        return true;
-    }
-
-    public String toString(){
-        return cardType + " (" + playerID + ")";
-    }
-
-    @Override
-    protected boolean _execute(LoveLetterGameState llgs) {
         return true;
     }
 

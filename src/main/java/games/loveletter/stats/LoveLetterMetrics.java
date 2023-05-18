@@ -16,7 +16,7 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class LoveLetterMetrics implements IMetricsCollection {
 
-    public static class ActionsPlayed extends AbstractTournamentMetric {
+    public static class CardsPlayed extends AbstractTournamentMetric {
         List<String> playerNames;
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {

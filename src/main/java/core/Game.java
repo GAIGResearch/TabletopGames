@@ -521,7 +521,7 @@ public class Game {
 
         // Get actions for the player
         s = System.nanoTime();
-        List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
+        List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
         if (observedActions.size() == 0) {
             Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
             IExtendedSequence topOfStack = actionsInProgress.peek();

@@ -48,6 +48,7 @@ public class MCTSPlayer extends AbstractPlayer {
 
     public MCTSPlayer(MCTSParams params, String name) {
         this.params = params;
+        this.parameters = params;
         rnd = new Random(this.params.getRandomSeed());
         rolloutStrategy = params.getRolloutStrategy();
         opponentModel = params.getOpponentModel();

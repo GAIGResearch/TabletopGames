@@ -8,7 +8,7 @@
       {"class": "evaluation.metrics.GameMetrics$ComputationTimes" },
       {"class": "evaluation.metrics.GameMetrics$Decisions" },
       {"class": "evaluation.metrics.GameMetrics$Actions" },
-      {"class": "games.loveletter.stats.LoveLetterMetrics$ActionsPlayed" },
+      {"class": "games.loveletter.stats.LoveLetterMetrics$CardsPlayed" },
       {"class": "games.loveletter.stats.LoveLetterMetrics$WinCause" },
       {"class": "games.loveletter.stats.LoveLetterMetrics$RoundLength" },
       {"class": "games.loveletter.stats.LoveLetterMetrics$EliminatingCards" }

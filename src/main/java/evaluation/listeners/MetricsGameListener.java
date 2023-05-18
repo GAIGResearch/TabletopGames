@@ -35,7 +35,7 @@ public class MetricsGameListener implements IGameListener {
     List<IDataLogger.ReportType> reportTypes = Arrays.asList(Summary, Plot);  //todo this needs to be read from JSON
 
     // Where to send the reports: ToConsole, ToFile or ToBoth
-    List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToBoth); //todo this needs to be read from JSON
+    List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToFile); //todo this needs to be read from JSON
 
     // Destination directory for the reports
     String destDir = "metrics/out/"; //by default

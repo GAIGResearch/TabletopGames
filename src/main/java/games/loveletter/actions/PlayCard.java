@@ -103,9 +103,8 @@ public class PlayCard extends AbstractAction {
 
     @Override
     public String toString() {
-        if (!canExecuteEffect) return cardType + " - no effect";
-        else if (cardType != null) return cardType.getString(this);
-        else return "(?) No effect";
+        if (cardType != null) return cardType.name();
+        return "(?)";
     }
 
     @Override
@@ -123,7 +122,9 @@ public class PlayCard extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return toString();
+        if (!canExecuteEffect) return cardType + " - no effect";
+        else if (cardType != null) return cardType.getString(this);
+        else return "(?) No effect";
     }
 
     public int getPlayerID() {

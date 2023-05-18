@@ -1,11 +1,9 @@
 package evaluation.metrics;
 
-import core.AbstractGameState;
-import core.CoreConstants;
-import core.Game;
+import core.*;
+import core.actions.AbstractAction;
 import core.interfaces.IComponentContainer;
 import evaluation.listeners.MetricsGameListener;
-import core.AbstractForwardModel;
 import evaluation.summarisers.TAGStatSummary;
 import evaluation.summarisers.TAGSummariser;
 import utilities.Pair;
@@ -257,6 +255,7 @@ public class GameMetrics implements IMetricsCollection {
     }
 
     public static class Actions extends AbstractTournamentMetric {
+        List<String> playerNames;
         public Actions() {
             super();
         }
@@ -269,10 +268,31 @@ public class GameMetrics implements IMetricsCollection {
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             Game g = listener.getGame();
             AbstractForwardModel fm = g.getForwardModel();
+            AbstractAction a = e.action.copy();
 
-            records.put("Actions Played", e.action == null ? "NONE" : e.action.getClass().getSimpleName());
+            if (e.state.isActionInProgress()) {
+                e.action = null;
+            }
+
+            for (int i = 0; i < listener.getGame().getPlayers().size(); i++) {
+                if(i == e.state.getCurrentPlayer())
+                    records.put("Player-" + i, e.action == null ? "NONE" : e.action.toString());
+                else records.put("Player-" + i, null);
+                for (int j = 0; j < playerNames.size(); j++) {
+                    for (AbstractPlayer player: listener.getGame().getPlayers()) {
+                        if (player.toString().equals(playerNames.get(j))) {
+                            records.put(playerNames.get(j) + "-" + j, e.action == null ? "NONE" : e.action.toString());
+                        } else {
+                            records.put(playerNames.get(j) + "-" + j, null);
+                        }
+                    }
+                }
+            }
+            records.put("Actions Played", e.action == null ? "NONE" : e.action.toString());
             records.put("Actions Played Description", e.action == null ? "NONE" : e.action.getString(e.state));
             records.put("Action Space Size", fm.computeAvailableActions(e.state).size());
+
+            e.action = a;
             return true;
         }
 
@@ -283,11 +303,18 @@ public class GameMetrics implements IMetricsCollection {
 
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
-            return new HashMap<String, Class<?>>() {{
-                put("Actions Played", String.class);
-                put("Actions Played Description", String.class);
-                put("Action Space Size", Integer.class);
-            }};
+            this.playerNames = playerNames;
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (int i = 0; i < nPlayersPerGame; i++) {
+                columns.put("Player-" + i, String.class);
+            }
+            for (int i = 0; i < playerNames.size(); i++) {
+                columns.put(playerNames.get(i) + "-" + i, String.class);
+            }
+            columns.put("Actions Played", String.class);
+            columns.put("Actions Played Description", String.class);
+            columns.put("Action Space Size", Integer.class);
+            return columns;
         }
     }
 
