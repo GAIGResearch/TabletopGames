@@ -134,10 +134,9 @@ public class RoundRobinTournament extends AbstractTournament {
 
                 List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(json, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
                 List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(json, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
-                String loggerClass = getArg(json, "logger", "evaluation.loggers.SummaryLogger");
 
                 setup(gameToPlay, nPlayersPerGame, selfPlay, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
-                        listenerClasses, metricsClasses, loggerClass, destDir);
+                        listenerClasses, metricsClasses, destDir);
 
             } catch (FileNotFoundException ignored) {
             } catch (IOException | ParseException e) {
@@ -159,17 +158,16 @@ public class RoundRobinTournament extends AbstractTournament {
 
             List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
             List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
-            String loggerClass = getArg(args, "logger", "evaluation.loggers.SummaryLogger");
 
             setup(gameToPlay, nPlayersPerGame, selfPlay, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
-                    listenerClasses, metricsClasses, loggerClass, destDir);
+                    listenerClasses, metricsClasses, destDir);
         }
     }
 
     public static void setup(GameType gameToPlay, int nPlayersPerGame, boolean selfPlay, String mode, int matchups,
                              String playerDirectory, String gameParams, String statsLogPrefix, String resultsFile,
                              int reportPeriod, boolean randomGameParams, List<String> listenerClasses,
-                             List<String> metricsClasses, String loggerClass, String destDir) {
+                             List<String> metricsClasses, String destDir) {
 
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         if (!playerDirectory.equals("")) {
@@ -225,12 +223,16 @@ public class RoundRobinTournament extends AbstractTournament {
      * Runs the round robin tournament.
      */
     public void run() {
+        List<String> agentNames = new ArrayList<>();
+        for (AbstractPlayer agent : agents)
+            agentNames.add(agent.toString());
+
         for (int g = 0; g < games.size(); g++) {
             if (verbose)
                 System.out.println("Playing " + games.get(g).getGameType().name());
 
-            for (IGameListener gameTracker : listeners) {
-                gameTracker.init(games.get(g));
+            for (IGameListener listener : listeners) {
+                listener.init(games.get(g), playersPerGame.get(g), agentNames);
             }
 
             LinkedList<Integer> matchUp = new LinkedList<>();
@@ -238,8 +240,10 @@ public class RoundRobinTournament extends AbstractTournament {
 
             reportResults(g);
         }
-        for (IGameListener listener : listeners)
+
+        for (IGameListener listener : listeners) {
             listener.allGamesFinished();
+        }
     }
 
 
@@ -301,9 +305,12 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.println(sb);
         }
 
-
+        List<String> agentNames = new ArrayList<>();
+        for (AbstractPlayer agent : agents)
+            agentNames.add(agent.toString());
         for (IGameListener listener : listeners) {
             games.get(gameIdx).addListener(listener);
+            listener.tournamentInit(games.get(gameIdx), playersPerGame.get(gameIdx), agentNames, matchUpPlayers);
         }
 
         // Run the game N = gamesPerMatchUp times with these players
@@ -316,6 +323,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 games.get(gameIdx).getGameState().getGameParameters().randomize();
                 System.out.println("Game parameters: " + games.get(gameIdx).getGameState().getGameParameters());
             }
+
             games.get(gameIdx).run();  // Always running tournaments without visuals
             GameResult[] results = games.get(gameIdx).getGameState().getPlayerResults();
 

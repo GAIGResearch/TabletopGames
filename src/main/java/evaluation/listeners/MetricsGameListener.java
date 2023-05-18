@@ -1,5 +1,6 @@
 package evaluation.listeners;
 
+import core.AbstractPlayer;
 import core.Game;
 import evaluation.metrics.*;
 import evaluation.metrics.tablessaw.DataTableSaw;
@@ -170,11 +171,20 @@ public class MetricsGameListener implements IGameListener {
     }
 
     @Override
-    public void init(Game game) {
+    public void init(Game game, int nPlayersPerGame, List<String> playerNames) {
         this.game = game;
 
         for (AbstractMetric metric : metrics.values()) {
-            metric.init(game);
+            metric.init(game, nPlayersPerGame, playerNames);
+        }
+    }
+
+    @Override
+    public void tournamentInit(Game game, int nPlayersPerGame, List<String> playerNames, List<AbstractPlayer> matchup) {
+        for (AbstractMetric metric : metrics.values()) {
+            if (metric instanceof AbstractTournamentMetric) {
+                ((AbstractTournamentMetric)metric).tournamentInit(game, nPlayersPerGame, playerNames, matchup);
+            }
         }
     }
 }

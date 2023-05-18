@@ -218,6 +218,7 @@ public class GameReport implements IGameRunner {
                     opponentDescriptor = "random";
                 }
                 List<AbstractPlayer> allPlayers = new ArrayList<>();
+                List<String> playerNames = new ArrayList<>();
                 for (int j = 0; j < playerCount; j++) {
                     if (opponentDescriptor.isEmpty() || (j == 0 && !playerDescriptor.isEmpty())) {
                         allPlayers.add(PlayerFactory.createPlayer(playerDescriptor));
@@ -227,6 +228,7 @@ public class GameReport implements IGameRunner {
                     } else {
                         allPlayers.add(PlayerFactory.createPlayer(opponentDescriptor));
                     }
+                    playerNames.add(allPlayers.get(j).toString());
                 }
                 long startingSeed = params == null ? System.currentTimeMillis() : params.getRandomSeed();
                 for (int i = 0; i < nGames; i++) {
@@ -239,7 +241,7 @@ public class GameReport implements IGameRunner {
                         // Initialize each listener
                         // we do this here (rather than before the loop over nGames) as we have to have the players set before we can initialize
                         for (IGameListener gameTracker : gameTrackers) {
-                            gameTracker.init(game);
+                            gameTracker.init(game, allPlayers.size(), playerNames);
                             gameTracker.setOutputDirectory(destDir, timeDir.toString(), playersDir);
                         }
                     }

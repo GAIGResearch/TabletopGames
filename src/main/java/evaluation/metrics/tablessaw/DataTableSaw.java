@@ -24,6 +24,10 @@ public class DataTableSaw implements IDataLogger {
         this.metric = metric;
         this.data = Table.create(metric.getName());
     }
+    private DataTableSaw(AbstractMetric metric, Table data) {
+        this.metric = metric;
+        this.data = data;
+    }
 
     /**
      * Builds a column using name and type, e.g. DoubleColumn.create("MyColumn")
@@ -78,7 +82,7 @@ public class DataTableSaw implements IDataLogger {
         this.data = Table.create(metric.getName());
     }
 
-    public void init(Game game) {
+    public void init(Game game, int nPlayersPerGame, List<String> playerNames) {
 
         // Add default columns
         Map<String, Class<?>> defaultColumns = metric.getDefaultColumns();
@@ -86,7 +90,7 @@ public class DataTableSaw implements IDataLogger {
             data.addColumns(buildColumn(entry.getKey(), entry.getValue()));
 
         // Add metric-defined columns
-        Map<String, Class<?>> columns = metric.getColumns(game);
+        Map<String, Class<?>> columns = metric.getColumns(nPlayersPerGame, playerNames);
         for (Map.Entry<String, Class<?>> entry : columns.entrySet())
             data.addColumns(buildColumn(entry.getKey(), entry.getValue()));
 
@@ -113,6 +117,21 @@ public class DataTableSaw implements IDataLogger {
     @Override
     public IDataProcessor getDefaultProcessor() {
         return new TableSawDataProcessor();
+    }
+
+    @Override
+    public IDataLogger copy() {
+        return new DataTableSaw(metric, data.copy());
+    }
+
+    @Override
+    public IDataLogger emptyCopy() {
+        return new DataTableSaw(metric, data.emptyCopy());
+    }
+
+    @Override
+    public IDataLogger create() {
+        return new DataTableSaw(metric);
     }
 
     /**

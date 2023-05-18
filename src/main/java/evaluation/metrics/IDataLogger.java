@@ -2,6 +2,8 @@ package evaluation.metrics;
 
 import core.Game;
 
+import java.util.List;
+
 public interface IDataLogger
 {
     enum ReportType {
@@ -26,7 +28,7 @@ public interface IDataLogger
      * Initialise the data logger with the metric and game. This method is called once before the game starts.
      * @param game Game that is being played
      */
-    void init(Game game);
+    void init(Game game, int nPlayersPerGame, List<String> playerNames);
 
     /**
      * Add a piece of data to a specific column.
@@ -41,4 +43,7 @@ public interface IDataLogger
      */
     IDataProcessor getDefaultProcessor();
 
+    IDataLogger copy();
+    IDataLogger emptyCopy();
+    IDataLogger create();
 }

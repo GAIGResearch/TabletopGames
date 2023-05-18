@@ -1,7 +1,6 @@
 package games.sushigo.metrics;
 
 import core.CoreConstants;
-import core.Game;
 import core.components.Deck;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
@@ -27,7 +26,7 @@ public class SushiGoMetrics implements IMetricsCollection {
     public static class CardPlayedCount extends AbstractMetric {
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             columns.put("Card played", String.class);
             return columns;
@@ -137,7 +136,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String typeCount: focusTypes) {
                 for (String typeCount1 : allTypes) {
@@ -170,7 +169,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (SGCard.SGCardType type: types) {
                 columns.put(type.name() + " Count", Integer.class);
@@ -209,7 +208,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (SGCard.SGCardType type: types) {
                 columns.put(type + " Average Points", Double.class);

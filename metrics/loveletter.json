@@ -1,9 +1,6 @@
 {
   "class": "evaluation.listeners.MetricsGameListener",
   "args": [
-    {
-      "class" : "evaluation.loggers.SummaryLogger"
-    },
     [
       {"class": "evaluation.metrics.GameMetrics$GameScore" },
       {"class": "evaluation.metrics.GameMetrics$FinalScore" },

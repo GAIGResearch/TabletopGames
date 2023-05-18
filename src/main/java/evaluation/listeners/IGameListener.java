@@ -1,14 +1,19 @@
 package evaluation.listeners;
 
+import core.AbstractPlayer;
 import core.Game;
 import core.interfaces.IStatisticLogger;
-import evaluation.metrics.*;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
+import evaluation.metrics.GameMetrics;
+import evaluation.metrics.IMetricsCollection;
 import utilities.Utils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public interface IGameListener {
 
@@ -113,5 +118,7 @@ public interface IGameListener {
 
     default void reset() {}
 
-    default void init(Game game) {}
+    default void init(Game game, int nPlayersPerGame, List<String> playerNames) {}
+
+    default void tournamentInit(Game game, int nPlayers, List<String> playerNames, List<AbstractPlayer> matchup) {}
 }

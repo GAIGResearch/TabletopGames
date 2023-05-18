@@ -1,10 +1,10 @@
 package games.loveletter.stats;
 
+import core.AbstractPlayer;
 import core.CoreConstants;
-import core.Game;
 import core.actions.LogEvent;
 import evaluation.listeners.MetricsGameListener;
-import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.AbstractTournamentMetric;
 import evaluation.metrics.Event;
 import evaluation.metrics.IMetricsCollection;
 import games.loveletter.LoveLetterGameState;
@@ -16,13 +16,17 @@ import java.util.*;
 @SuppressWarnings("unused")
 public class LoveLetterMetrics implements IMetricsCollection {
 
-    public static class ActionsPlayed extends AbstractMetric
-    {
+    public static class ActionsPlayed extends AbstractTournamentMetric {
+        List<String> playerNames;
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+            this.playerNames = playerNames;
             Map<String, Class<?>> columns = new HashMap<>();
-            for (int i = 0; i < game.getPlayers().size(); i++) {
+            for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("Player-" + i, String.class);
+            }
+            for (int i = 0; i < playerNames.size(); i++) {
+                columns.put(playerNames.get(i) + "-" + i, String.class);
             }
             columns.put("Aggregate", String.class);
             return columns;
@@ -35,6 +39,15 @@ public class LoveLetterMetrics implements IMetricsCollection {
                 if(i == e.state.getCurrentPlayer())
                     records.put("Player-" + e.state.getCurrentPlayer(), pc.getCardType().toString());
                 else records.put("Player-" + i, null);
+                for (int j = 0; j < playerNames.size(); j++) {
+                    for (AbstractPlayer player: listener.getGame().getPlayers()) {
+                        if (player.toString().equals(playerNames.get(j))) {
+                            records.put(playerNames.get(j) + "-" + j, pc.getCardType().toString());
+                        } else {
+                            records.put(playerNames.get(j) + "-" + j, null);
+                        }
+                    }
+                }
             }
             records.put("Aggregate", pc.getCardType().toString());
             return true;
@@ -46,7 +59,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
     }
 
-    public static class WinCause extends AbstractMetric
+    public static class WinCause extends AbstractTournamentMetric
     {
         int killer = -1;
         int victim = -1;
@@ -113,12 +126,12 @@ public class LoveLetterMetrics implements IMetricsCollection {
             return new HashSet<>(Arrays.asList(Event.GameEvent.ROUND_OVER, Event.GameEvent.GAME_EVENT));
         }
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
             return Collections.singletonMap("WinCause", String.class);
         }
     }
 
-    public static class RoundLength extends AbstractMetric
+    public static class RoundLength extends AbstractTournamentMetric
     {
         @Override
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
@@ -137,7 +150,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("# actions", Integer.class);
                 put("# actions (avg)", Double.class);
@@ -145,7 +158,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
     }
 
-    public static class EliminatingCards extends AbstractMetric {
+    public static class EliminatingCards extends AbstractTournamentMetric {
 
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
@@ -164,7 +177,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
             return Collections.singletonMap("EliminatingCard", String.class);
         }
     }
