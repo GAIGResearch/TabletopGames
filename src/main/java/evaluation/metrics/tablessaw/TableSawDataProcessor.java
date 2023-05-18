@@ -135,7 +135,7 @@ public class TableSawDataProcessor implements IDataProcessor {
 //                    summary.add(filteredData.name() + ": " + column.summary() + "\n");
                     summary = column.summary();
                 }
-                summary.setName(filteredData.name() + ": " + column.name());
+                summary.setName(filteredData.name() + "_" + column.name());
                 allDataSummaries.put(column.name(), Collections.singletonList(summary));
             }
         }
@@ -225,7 +225,7 @@ public class TableSawDataProcessor implements IDataProcessor {
                 } else {
                     // This is the same as summariseData for numerical data
                     Table sum = column.summary();
-                    sum.setName(filteredData.name() + ": " + column.name());
+                    sum.setName(filteredData.name() + "_" + column.name());
                     summary.add(sum);
                 }
 
