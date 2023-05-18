@@ -159,10 +159,6 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
                 g.setColor(Color.BLACK);
                 g.drawPolygon(tileHex);
 
-                if (tile.hasRobber()) {
-                    drawRobber(g, centreCoords);
-                }
-
                 if (tile.getTileType() != CatanTile.TileType.SEA && tile.getTileType() != CatanTile.TileType.DESERT) {
                     g.setColor(textColourMap.get(tile.getTileType()));
                     String type = "" + tile.getTileType();
@@ -186,6 +182,10 @@ public class CatanBoardView extends JComponent implements IScreenHighlight {
                         g.drawString(nDots, centreCoords.x - nSize/2, centreCoords.y + 28);
                         g.setFont(f);
                     }
+                }
+
+                if (tile.hasRobber()) {
+                    drawRobber(g, centreCoords);
                 }
             }
         }

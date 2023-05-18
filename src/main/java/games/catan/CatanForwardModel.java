@@ -134,6 +134,7 @@ public class CatanForwardModel extends StandardForwardModel {
                 if (gs.getCoreGameParameters().verbose) {
                     System.out.println("Game over! winner = " + player);
                 }
+                return;
             }
 
             if (action instanceof DoNothing) {

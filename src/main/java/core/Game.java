@@ -9,6 +9,7 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
+import games.stratego.StrategoStateFeatures;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
@@ -925,8 +926,8 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Catan");
-        boolean useGUI = Utils.getArg(args, "gui", false);
+        String gameType = Utils.getArg(args, "game", "Stratego");
+        boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
@@ -935,9 +936,12 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new RandomPlayer());
         players.add(new RandomPlayer());
-        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
         MCTSParams params1 = new MCTSParams();
+        params1.gatherTreeRecorder = true;
+        params1.discardStateAfterEachIteration = false;
+        params1.treeRecorderFolder = "treeRecorderStrategoDeep";
+        params1.EIStateFeatureVector = new StrategoStateFeatures();
         params1.actionSpace = new ActionSpace(ActionSpace.Structure.Deep);
         players.add(new MCTSPlayer(params1));
 //        MCTSParams params2 = new MCTSParams();

@@ -91,11 +91,14 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      */
     @Override
     public void endPlayerTurn(AbstractGameState gs) {
+        if (gs.getGameStatus() != GAME_ONGOING) return;
         int turnOwner = gs.turnOwner;
         do {
             turnOwner = (turnOwner + 1) % gs.nPlayers;
-            if (turnOwner == gs.turnOwner)
-                throw new AssertionError("Infinite loop - apparently all players are terminal, but game state is not");
+            if (turnOwner == gs.turnOwner) {
+                throw new AssertionError("Infinite loop - apparently all players are terminal, but game state is not. " +
+                        "Last action played: " + gs.getHistory().get(gs.getHistory().size() - 1));
+            }
         } while (!gs.isNotTerminalForPlayer(turnOwner));
         endPlayerTurn(gs, turnOwner);
     }

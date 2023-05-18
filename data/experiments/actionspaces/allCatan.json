@@ -2,7 +2,7 @@
   "class" : "evaluation.tournaments.RoundRobinTournament",
   "game": "Catan",
   "selfPlay": false,
-  "players": "data/experiments/actionspaces/all",
+  "players": "data/experiments/actionspaces/independentdeepness",
   "nPlayers": 4,
   "matchups": 1000,
   "listener": "data/metrics/GameResults.json"
