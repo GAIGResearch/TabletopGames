@@ -18,6 +18,9 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
     // Data logger, wrapper around a library that logs data into a table
     private final Map<List<AbstractPlayer>,IDataLogger> dataLoggers = new HashMap<>();
 
+    public AbstractTournamentMetric() {
+        super();
+    }
     public AbstractTournamentMetric(Event.GameEvent... args) {
         super(args);
     }
