@@ -25,7 +25,7 @@ public class StrategoMetrics implements IMetricsCollection {
         BattleOutcome;
         @Override
         public Set<IGameEvent> getValues() {
-            return new HashSet<>(Arrays.asList(Event.GameEvent.values()));
+            return new HashSet<>(Arrays.asList(StrategoEvent.values()));
         }
     }
 

@@ -17,6 +17,7 @@ import games.catan.actions.trade.OfferPlayerTrade;
 import games.catan.components.Building;
 import games.catan.components.CatanCard;
 import games.catan.components.CatanTile;
+import games.catan.stats.CatanMetrics;
 
 import java.util.*;
 
@@ -116,6 +117,8 @@ public class CatanForwardModel extends StandardForwardModel {
             } else {
                 if (gs.getTurnCounter() > 0 && gs.getTurnCounter() % (gs.getNPlayers()-1) == 0) {
                     // Finished setup
+                    gs.logEvent(CatanMetrics.CatanEvent.SetupComplete);
+
                     endRound(gs, 0);
                     gs.setGamePhase(Main);
                     rollDiceAndAllocateResources(gs, params);

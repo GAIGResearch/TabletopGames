@@ -118,6 +118,20 @@ public abstract class AbstractGameState {
         return isActionInProgress() ? actionsInProgress.peek().getCurrentPlayer(this) : turnOwner;
     }
     public final CoreConstants.GameResult[] getPlayerResults() {return playerResults;}
+    public final Set<Integer> getWinners() {
+        Set<Integer> winners = new HashSet<>();
+        for (int i = 0; i < playerResults.length; i++) {
+            if (playerResults[i] == CoreConstants.GameResult.WIN_GAME) winners.add(i);
+        }
+        return winners;
+    }
+    public final Set<Integer> getTied() {
+        Set<Integer> tied = new HashSet<>();
+        for (int i = 0; i < playerResults.length; i++) {
+            if (playerResults[i] == CoreConstants.GameResult.DRAW_GAME) tied.add(i);
+        }
+        return tied;
+    }
     public final IGamePhase getGamePhase() {
         return gamePhase;
     }
@@ -310,6 +324,13 @@ public abstract class AbstractGameState {
         listeners.forEach(l -> l.onEvent(Event.createEvent(event, this, logAction)));
         if (getCoreGameParameters().recordEventHistory) {
             recordHistory(eventText);
+        }
+    }
+    public void logEvent(IGameEvent event) {
+        AbstractAction logAction = new LogEvent(event.name());
+        listeners.forEach(l -> l.onEvent(Event.createEvent(event, this, logAction)));
+        if (getCoreGameParameters().recordEventHistory) {
+            recordHistory(event.name());
         }
     }
 
