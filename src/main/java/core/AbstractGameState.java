@@ -7,6 +7,7 @@ import core.components.Component;
 import core.components.PartialObservableDeck;
 import core.interfaces.IComponentContainer;
 import core.interfaces.IExtendedSequence;
+import core.interfaces.IGameEvent;
 import core.interfaces.IGamePhase;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
@@ -299,14 +300,14 @@ public abstract class AbstractGameState {
 
     // helper function to avoid time-consuming string manipulations if the message is not actually
     // going to be logged anywhere
-    public void logEvent(Supplier<String> eventText) {
+    public void logEvent(IGameEvent event, Supplier<String> eventText) {
         if (listeners.isEmpty() && !getCoreGameParameters().recordEventHistory)
             return; // to avoid expensive string manipulations
-        logEvent(eventText.get());
+        logEvent(event, eventText.get());
     }
-    public void logEvent(String eventText) {
+    public void logEvent(IGameEvent event, String eventText) {
         AbstractAction logAction = new LogEvent(eventText);
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_EVENT, this, logAction)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(event, this, logAction)));
         if (getCoreGameParameters().recordEventHistory) {
             recordHistory(eventText);
         }

@@ -5,6 +5,7 @@ import core.components.BoardNode;
 import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
+import core.interfaces.IGameEvent;
 import core.properties.PropertyIntArray;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
@@ -37,7 +38,7 @@ public class PandemicMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
@@ -77,7 +78,7 @@ public class PandemicMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
     }
@@ -95,7 +96,7 @@ public class PandemicMetrics implements IMetricsCollection {
             return true;
         }
 
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override

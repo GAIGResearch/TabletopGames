@@ -53,14 +53,14 @@ public class AttackMove extends Move {
         attackedPiece.setPieceKnown(true);
 
         if (attackedPiece.getPieceType() == Piece.PieceType.FLAG){
-            gs.logEvent(StrategoMetrics.StrategoEvent.EndCondition.name() + ":" + StrategoForwardModel.EndCondition.FLAG_CAPTURE.name() + ":" + gs.getCurrentPlayer());
+            gs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, StrategoMetrics.StrategoEvent.EndCondition.name() + ":" + StrategoForwardModel.EndCondition.FLAG_CAPTURE.name() + ":" + gs.getCurrentPlayer());
             gs.setGameStatus(CoreConstants.GameResult.GAME_END);
             gs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, gs.getCurrentPlayer());
             gs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 1-gs.getCurrentPlayer());
 
         } else if (attackedPiece.getPieceType() == Piece.PieceType.BOMB){
             if (movedPiece.getPieceType() == Piece.PieceType.MINER){
-                gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+                gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome, StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
                         movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
                         " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
                         movedPiece.getOwnerId());
@@ -72,7 +72,7 @@ public class AttackMove extends Move {
                         attackedPiece.getPiecePosition().getY(), movedPiece);
                 movedPiece.setPiecePosition(attackedPiece.getPiecePosition());
             } else {
-                gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+                gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome, StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
                         movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
                         " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
                         attackedPiece.getOwnerId());
@@ -83,7 +83,7 @@ public class AttackMove extends Move {
 
         } else if (attackedPiece.getPieceType() == Piece.PieceType.MARSHAL && movedPiece.getPieceType() == Piece.PieceType.SPY){
 
-            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome, StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
                     movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
                     " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
                     movedPiece.getOwnerId());
@@ -97,7 +97,7 @@ public class AttackMove extends Move {
 
         } else if (movedPieceRank > attackedPieceRank){
 
-            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome, StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
                     movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
                     " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
                     movedPiece.getOwnerId());
@@ -111,7 +111,7 @@ public class AttackMove extends Move {
 
         } else if (movedPieceRank == attackedPieceRank){
 
-            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome, StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
                     movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
                     " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
                     -1);  // a tie
@@ -123,7 +123,7 @@ public class AttackMove extends Move {
                     attackedPiece.getPiecePosition().getY(), null);
         } else {
 
-            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome, StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
                     movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
                     " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
                     attackedPiece.getOwnerId());

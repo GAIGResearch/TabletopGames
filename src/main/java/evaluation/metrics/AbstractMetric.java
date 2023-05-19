@@ -1,6 +1,7 @@
 package evaluation.metrics;
 
 import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 
 import java.util.*;
@@ -12,7 +13,7 @@ public abstract class AbstractMetric
     protected IDataLogger dataLogger;
 
     // Set of event types this metric listens to, to record data when they occur
-    private final Set<Event.GameEvent> eventTypes;
+    private final Set<IGameEvent> eventTypes;
 
     // Arguments for the metric, if any
     protected final String[] args;
@@ -59,7 +60,7 @@ public abstract class AbstractMetric
     /**
      * @return set of game events this metric should record information for.
      */
-    public abstract Set<Event.GameEvent> getDefaultEventTypes();
+    public abstract Set<IGameEvent> getDefaultEventTypes();
 
     public void reset()
     {
@@ -164,7 +165,7 @@ public abstract class AbstractMetric
      * Returs the set of events this metric listens to
      * @return set of events
      */
-    public Set<Event.GameEvent> getEventTypes() {
+    public Set<IGameEvent> getEventTypes() {
         return eventTypes;
     }
 
@@ -178,7 +179,7 @@ public abstract class AbstractMetric
     /**
      * @return true if this metric listens to the given game event type, false otherwise.
      */
-    public final boolean listens(Event.GameEvent eventType)
+    public final boolean listens(IGameEvent eventType)
     {
         //by default, we listen to all types of events.
         if(eventTypes == null) return true;

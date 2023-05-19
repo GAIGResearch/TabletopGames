@@ -1,6 +1,7 @@
 package games.stratego.metrics;
 
 import core.actions.LogEvent;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.AbstractTournamentMetric;
@@ -19,9 +20,13 @@ import java.util.*;
 
 @SuppressWarnings("unused")
 public class StrategoMetrics implements IMetricsCollection {
-    public enum StrategoEvent {
+    public enum StrategoEvent implements IGameEvent {
         EndCondition,
-        BattleOutcome
+        BattleOutcome;
+        @Override
+        public Set<IGameEvent> getValues() {
+            return new HashSet<>(Arrays.asList(Event.GameEvent.values()));
+        }
     }
 
     public static class GameEndReason extends AbstractTournamentMetric {
@@ -46,7 +51,7 @@ public class StrategoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_EVENT);
         }
     }
@@ -110,7 +115,7 @@ public class StrategoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_EVENT);
         }
     }
@@ -168,7 +173,7 @@ public class StrategoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
     }
@@ -211,7 +216,7 @@ public class StrategoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }

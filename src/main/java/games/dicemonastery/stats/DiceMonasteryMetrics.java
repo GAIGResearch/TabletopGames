@@ -1,5 +1,6 @@
 package games.dicemonastery.stats;
 
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
@@ -19,7 +20,7 @@ import static games.dicemonastery.DiceMonasteryConstants.ActionArea.STOREROOM;
 public class DiceMonasteryMetrics implements IMetricsCollection {
 
     public static class Timing extends AbstractMetric {
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
@@ -50,7 +51,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             return true;
         }
         
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
@@ -72,7 +73,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             else records.put("Location", s.getCurrentArea().name());
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
@@ -96,7 +97,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             else records.put("Thing", "");
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
@@ -122,7 +123,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             else records.put("Value", 0);
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
@@ -140,7 +141,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             records.put("ActionPointsLeft", s.getActionPointsLeft());
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
@@ -158,7 +159,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             records.put("DM Turn", (s.getYear() - 1) * 4 + s.getSeason().ordinal() + 1);
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
 
@@ -184,7 +185,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             }
             return true;
         }
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
 
@@ -228,7 +229,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             return true;
         }
 
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
 

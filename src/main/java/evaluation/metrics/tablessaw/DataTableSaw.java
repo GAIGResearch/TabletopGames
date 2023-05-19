@@ -1,8 +1,8 @@
 package evaluation.metrics.tablessaw;
 
 import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.Event;
 import evaluation.metrics.IDataLogger;
 import evaluation.metrics.IDataProcessor;
 import tech.tablesaw.api.*;
@@ -142,7 +142,7 @@ public class DataTableSaw implements IDataLogger {
      *                           Assumes a single row exists for each unique value in this column per game.
      *                           e.g. ROUND_OVER metrics can be grouped by specifying "Round" as the indexing column.
      */
-    public DataTableSaw(List<AbstractMetric> metricGroup, Event.GameEvent event, String indexingColumnName) {
+    public DataTableSaw(List<AbstractMetric> metricGroup, IGameEvent event, String indexingColumnName) {
         this.data = Table.create(event.name());
 
         // If this is true, then we don't need to worry about indexing
@@ -232,7 +232,7 @@ public class DataTableSaw implements IDataLogger {
     }
 
     /**
-     * Helper function for {@link #DataTableSaw(List, Event.GameEvent, String)}.
+     * Helper function for {@link #DataTableSaw(List, IGameEvent, String)}.
      * Filters the data by game ID and index, then adds the data to the table.
      * @param metricGroup - List of metrics to add data from in the table
      * @param allColumnNames - All column names in the table

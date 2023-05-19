@@ -4,6 +4,7 @@ import core.AbstractPlayer;
 import core.CoreConstants;
 import core.actions.AbstractAction;
 import core.actions.LogEvent;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.AbstractTournamentMetric;
@@ -86,8 +87,8 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return new HashSet<Event.GameEvent>() {{
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<IGameEvent>() {{
                 add(Event.GameEvent.ACTION_CHOSEN);
             }};
         }
@@ -148,8 +149,8 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
-            return new HashSet<Event.GameEvent>() {{
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<IGameEvent>() {{
                 add(Event.GameEvent.GAME_EVENT);
                 add(Event.GameEvent.ACTION_TAKEN);
             }};
@@ -196,7 +197,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
     }
@@ -268,7 +269,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Arrays.asList(Event.GameEvent.ROUND_OVER, Event.GameEvent.GAME_EVENT));
         }
         @Override
@@ -291,7 +292,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             return true;
         }
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ROUND_OVER);
         }
 
@@ -318,7 +319,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_EVENT);
         }
 

@@ -2,6 +2,7 @@ package games.sushigo.metrics;
 
 import core.CoreConstants;
 import core.components.Deck;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
@@ -44,7 +45,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
@@ -131,7 +132,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
@@ -178,7 +179,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
@@ -219,7 +220,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }

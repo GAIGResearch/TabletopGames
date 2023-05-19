@@ -7,6 +7,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
+import evaluation.metrics.Event;
 import games.GameType;
 import games.loveletter.cards.LoveLetterCard;
 
@@ -188,7 +189,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         while (playerHandCards.get(targetPlayer).getSize() > 0)
             playerDiscardCards.get(targetPlayer).add(playerHandCards.get(targetPlayer).draw());
 
-        logEvent("Killed player: " + whoKill + "," + targetPlayer + "," + cardType + "," + getCurrentPlayer());
+        logEvent(Event.GameEvent.GAME_EVENT, "Killed player: " + whoKill + "," + targetPlayer + "," + cardType + "," + getCurrentPlayer());
     }
 
     // Getters, Setters

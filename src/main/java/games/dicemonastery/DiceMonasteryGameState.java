@@ -5,6 +5,7 @@ import core.AbstractParameters;
 import core.components.Component;
 import core.components.Deck;
 import core.components.Token;
+import evaluation.metrics.Event;
 import games.GameType;
 import games.dicemonastery.components.*;
 
@@ -228,7 +229,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             vp = RETIREMENT_REWARDS[nextRetirementReward];
         }
         int finalVp = vp;
-        logEvent(() -> "Monk retired for " + finalVp + " VP");
+        logEvent(Event.GameEvent.GAME_EVENT, () -> "Monk retired for " + finalVp + " VP");
         addVP(vp, monk.getOwnerId());
         nextRetirementReward++;
     }
@@ -368,7 +369,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
             if (monksIn(null, player).isEmpty()) {
                 // Hire a free novice!
                 int finalPlayer = player;
-                logEvent(() -> String.format("Player %d gets new Novice due to lack of monks", finalPlayer));
+                logEvent(Event.GameEvent.GAME_EVENT, () -> String.format("Player %d gets new Novice due to lack of monks", finalPlayer));
                 createMonk(1, player);
             }
         }
@@ -587,7 +588,7 @@ public class DiceMonasteryGameState extends AbstractGameState {
                 // monks starve
                 int finalRequiredFood = requiredFood;
                 int finalPlayer = player;
-                logEvent(() -> String.format("Player %d fails to feed %d of %d monks", finalPlayer, finalRequiredFood, monks.size()));
+                logEvent(Event.GameEvent.GAME_EVENT, () -> String.format("Player %d fails to feed %d of %d monks", finalPlayer, finalRequiredFood, monks.size()));
                 addVP(-requiredFood, player);
                 // we also need to down-pip monks; let's assume we start at the lower value ones...excluding 1
                 // TODO: Make this a player decision

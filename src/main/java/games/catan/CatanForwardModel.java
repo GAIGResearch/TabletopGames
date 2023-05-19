@@ -10,6 +10,7 @@ import core.components.Counter;
 import core.components.Deck;
 import core.components.Edge;
 import core.components.GraphBoardWithEdges;
+import evaluation.metrics.Event;
 import games.catan.actions.build.BuyAction;
 import games.catan.actions.discard.DiscardResourcesPhase;
 import games.catan.actions.trade.OfferPlayerTrade;
@@ -191,7 +192,7 @@ public class CatanForwardModel extends StandardForwardModel {
         gs.setRollValue(rollValue);
 
         int roll = rollValue;
-        gs.logEvent(() -> "Dice roll of " + roll);
+        gs.logEvent(Event.GameEvent.GAME_EVENT, () -> "Dice roll of " + roll);
         if (gs.getCoreGameParameters().verbose) {
             System.out.println("Dice roll: " + gs.rollValue);
         }
@@ -223,7 +224,7 @@ public class CatanForwardModel extends StandardForwardModel {
                                 if (gs.getCoreGameParameters().verbose) {
                                     System.out.println("p" + who + " gets " + res);
                                 }
-                                gs.logEvent(() -> "Player " + who + " gets " + res);
+                                gs.logEvent(Event.GameEvent.GAME_EVENT, () -> "Player " + who + " gets " + res);
                             }
                         }
                     }

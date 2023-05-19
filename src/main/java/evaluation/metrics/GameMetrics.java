@@ -3,6 +3,7 @@ package evaluation.metrics;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IComponentContainer;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.summarisers.TAGStatSummary;
 import evaluation.summarisers.TAGSummariser;
@@ -45,7 +46,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Arrays.asList(ACTION_CHOSEN, ROUND_OVER, GAME_OVER));
         }
 
@@ -78,7 +79,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(GAME_OVER);
         }
 
@@ -101,7 +102,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Arrays.asList(ACTION_CHOSEN, Event.GameEvent.ABOUT_TO_START));
         }
 
@@ -124,7 +125,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Collections.singletonList(GAME_OVER));
         }
 
@@ -152,7 +153,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(ACTION_CHOSEN);
         }
 
@@ -187,7 +188,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_TAKEN);
         }
     }
@@ -213,7 +214,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
 
@@ -249,7 +250,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
@@ -289,7 +290,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(ACTION_CHOSEN);
         }
 
@@ -335,7 +336,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(GAME_OVER);
         }
 

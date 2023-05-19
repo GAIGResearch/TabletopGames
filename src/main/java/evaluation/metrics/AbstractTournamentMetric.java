@@ -2,6 +2,7 @@ package evaluation.metrics;
 
 import core.AbstractPlayer;
 import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 
 import java.io.File;
@@ -34,7 +35,7 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
     /**
      * @return set of game events this metric should record information for.
      */
-    public abstract Set<Event.GameEvent> getDefaultEventTypes();
+    public abstract Set<IGameEvent> getDefaultEventTypes();
 
     public void reset() {
         super.reset();
