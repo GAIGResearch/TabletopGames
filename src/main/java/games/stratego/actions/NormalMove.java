@@ -18,7 +18,7 @@ public class NormalMove extends Move{
     public final Vector2D displacement;
 
     // Independent
-    public final Vector2D destinationCoordinate;
+    public Vector2D destinationCoordinate;
 
     public NormalMove(Vector2D position, Vector2D displacement) {
         super(position);
@@ -44,28 +44,26 @@ public class NormalMove extends Move{
         GridBoard<Piece> board = ((StrategoGameState)gs).getGridBoard();
 
         board.setElement(movedPiece.getPiecePosition().getX(), movedPiece.getPiecePosition().getY(), null);
-        Vector2D destination;
-        if (destinationCoordinate != null) {
-            destination = destinationCoordinate;
-        } else {
-            destination = position.add(displacement);
+        if (destinationCoordinate == null) {
+            destinationCoordinate = position.add(displacement);
         }
-        board.setElement(destination.getX(), destination.getY(), movedPiece);
+
+        board.setElement(destinationCoordinate.getX(), destinationCoordinate.getY(), movedPiece);
 
         if (movedPiece.getPieceType() == Piece.PieceType.SCOUT &&
-                Distance.manhattan_distance(destination, movedPiece.getPiecePosition()) >
+                Distance.manhattan_distance(destinationCoordinate, movedPiece.getPiecePosition()) >
                         ((StrategoParams)gs.getGameParameters()).moveSpeed) {
             // Piece revealed itself to be scout
             movedPiece.setPieceKnown(true);
         }
-        movedPiece.setPiecePosition(destination);
+        movedPiece.setPiecePosition(destinationCoordinate);
 
         return true;
     }
 
     @Override
     public NormalMove copy() {
-        return new NormalMove(position, movedPieceID, destinationCoordinate, displacement);
+        return new NormalMove(position, movedPieceID, destinationCoordinate != null? destinationCoordinate.copy() : null, displacement);
     }
 
     @Override

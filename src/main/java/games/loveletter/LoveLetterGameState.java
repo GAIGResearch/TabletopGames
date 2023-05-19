@@ -188,7 +188,7 @@ public class LoveLetterGameState extends AbstractGameState implements IPrintable
         while (playerHandCards.get(targetPlayer).getSize() > 0)
             playerDiscardCards.get(targetPlayer).add(playerHandCards.get(targetPlayer).draw());
 
-        logEvent("Killed player: " + whoKill + "," + targetPlayer + "," + cardType);
+        logEvent("Killed player: " + whoKill + "," + targetPlayer + "," + cardType + "," + getCurrentPlayer());
     }
 
     // Getters, Setters

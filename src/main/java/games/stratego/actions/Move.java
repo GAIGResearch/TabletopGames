@@ -9,10 +9,10 @@ import java.util.Objects;
 
 public abstract class Move extends AbstractAction {
     // Dependent:
-    protected final Vector2D position;
+    public final Vector2D position;
 
     // Independent:
-    protected final int movedPieceID;
+    public final int movedPieceID;
 
     protected Move(Vector2D position) {
         this.position = position.copy();

@@ -3,7 +3,7 @@
   "game": "LoveLetter",
   "selfPlay": false,
   "players": "data/experiments/actionspaces/all",
-  "nPlayers": 2,
+  "nPlayers": 4,
   "matchups": 1000,
   "listener": "metrics/loveletter.json"
 }

@@ -6,7 +6,6 @@ import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
-import games.loveletter.actions.GuardAction;
 import games.loveletter.actions.PlayCard;
 import games.loveletter.cards.LoveLetterCard;
 
@@ -56,10 +55,10 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
             for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
                 if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
                     continue;
-                cardActions.add(new GuardAction(cardIdx, playerID, targetPlayer, null, false, false));
+                cardActions.add(new ChoosePlayer(targetPlayer));
             }
             // If no player can be targeted, create an effectively do-nothing action
-            if (cardActions.size() == 0) cardActions.add(new GuardAction(cardIdx, playerID, -1, null, false, false));
+            if (cardActions.size() == 0) cardActions.add(new ChoosePlayer(-1));
         } else {
             // Complete actions
             cardActions.addAll(LoveLetterCard.CardType.Guard.getFlatActions(gs, new PlayCard(cardIdx, playerID, false, targetPlayer)));
@@ -70,7 +69,7 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         if (step == Step.TargetPlayer) {
-            targetPlayer = ((GuardAction)action).getTargetPlayer();
+            targetPlayer = ((ChoosePlayer)action).player;
             if (targetPlayer == -1) step = Step.Done;
             else step = Step.CardType;
         }

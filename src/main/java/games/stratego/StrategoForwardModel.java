@@ -7,15 +7,20 @@ import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.components.GridBoard;
 import games.stratego.actions.DeepMove;
-import games.stratego.actions.Move;
 import games.stratego.components.Piece;
+import games.stratego.metrics.StrategoMetrics;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
 public class StrategoForwardModel extends StandardForwardModel {
+
+    public enum EndCondition {
+        FLAG_CAPTURE,
+        NO_MOVES_LEFT,
+        MAX_TURNS
+    }
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -94,12 +99,14 @@ public class StrategoForwardModel extends StandardForwardModel {
 
         List<AbstractAction> actions = _computeAvailableActions(sgs, currentState.getCoreGameParameters().actionSpace);
         if (actions.isEmpty()){
+            sgs.logEvent(StrategoMetrics.StrategoEvent.EndCondition.name() + ":" + EndCondition.NO_MOVES_LEFT.name() + ":" + sgs.getCurrentPlayer());
             // If the player can't take any actions, they lose
             sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
             sgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, sgs.getCurrentPlayer());
             sgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, 1-sgs.getCurrentPlayer());
         } else {
             if (sgs.getTurnCounter() >= ((StrategoParams)sgs.getGameParameters()).maxRounds) {
+                sgs.logEvent(StrategoMetrics.StrategoEvent.EndCondition.name() + ":" + EndCondition.MAX_TURNS.name());
                 // Max rounds reached, draw
                 sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
                 sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, sgs.getCurrentPlayer());

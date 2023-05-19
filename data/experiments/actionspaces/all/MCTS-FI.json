@@ -2,7 +2,7 @@
   "class" : "players.mcts.MCTSParams",
   "selectionPolicy" : "SIMPLE",
   "rolloutLength" : 5,
-  "information" : "Open_Loop",
+  "information" : "Information_Set",
   "opponentTreePolicy" : "SelfOnly",
   "maxTreeDepth" : 20,
   "treePolicy" : "EXP3",
@@ -14,7 +14,7 @@
     "class" : "players.heuristics.ScoreHeuristic"
   },
   "actionSpaceStructure" : "Flat",
-  "actionSpaceContext": "Dependent",
+  "actionSpaceContext": "Independent",
   "maintainMasterState": true,
   "treeRecorderFolder": "test_01"
 }

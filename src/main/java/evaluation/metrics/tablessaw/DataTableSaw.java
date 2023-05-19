@@ -263,11 +263,16 @@ public class DataTableSaw implements IDataLogger {
 
                 // Add the data from the row
                 for (Column<?> c : metricData.columns()) {
-                    String dataPoint = filteredData.column(c.name()).get(0).toString();
-                    if (m.getColumnNames().contains(c.name())) {
-                        rowData.put(m.getName() + "(" + c.name() + ")", dataPoint);
+                    Object o = filteredData.column(c.name()).get(0);
+                    if (o != null) {
+                        String dataPoint = o.toString();
+                        if (m.getColumnNames().contains(c.name())) {
+                            rowData.put(m.getName() + "(" + c.name() + ")", dataPoint);
+                        } else {
+                            rowData.put(c.name(), dataPoint);
+                        }
                     } else {
-                        rowData.put(c.name(), dataPoint);
+                        rowData.put(c.name(), null);
                     }
                 }
             }
@@ -276,10 +281,14 @@ public class DataTableSaw implements IDataLogger {
         // Here we should have one complete row, with or without missing values, but same size for all columns in the big table
         if (record) {
             for (Map.Entry<String, String> entry : rowData.entrySet()) {
-                if (entry.getValue() == null) {
-                    data.stringColumn(entry.getKey()).appendMissing();
+                if (data.containsColumn(entry.getKey())) {
+                    if (entry.getValue() == null) {
+                        data.stringColumn(entry.getKey()).appendMissing();
+                    } else {
+                        data.stringColumn(entry.getKey()).append(entry.getValue());
+                    }
                 } else {
-                    data.stringColumn(entry.getKey()).append(entry.getValue());
+                    // TODO fix, final combination of tables
                 }
             }
         }

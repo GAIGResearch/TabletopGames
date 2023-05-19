@@ -159,6 +159,8 @@ public class TableSawDataProcessor implements IDataProcessor {
 
                 Table filteredData = (rawData.where(rawData.column(c.name()).isNotMissing()));
                 Column<?> column = filteredData.column(c.name());
+                if (column.isEmpty()) continue;
+
                 Object[] gameIds = filteredData.column("GameID").unique().asObjectArray();
                 nGames = gameIds.length;
 
@@ -329,7 +331,7 @@ public class TableSawDataProcessor implements IDataProcessor {
                     // Create box plots from the counts
                     Layout layout = Layout.builder().title(data.name())
                             .height(600).width(800)
-                            .yAxis(Axis.builder().title("Count").build())
+                            .yAxis(Axis.builder().title("Count").range(0, 30).build())  //  TODO hard-coded range
                             .xAxis(Axis.builder().title(column.name()).categoryOrder(Axis.CategoryOrder.CATEGORY_ASCENDING).build())
                             .build();
                     BoxTrace trace = BoxTrace.builder(countsPerGame.categoricalColumn("Category"), countsPerGame.nCol("Count"))

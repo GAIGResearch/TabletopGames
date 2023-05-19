@@ -269,28 +269,20 @@ public class GameMetrics implements IMetricsCollection {
             Game g = listener.getGame();
             AbstractForwardModel fm = g.getForwardModel();
             AbstractAction a = e.action.copy();
+            AbstractPlayer currentPlayer = g.getPlayers().get(e.playerID);
+            int size = fm.computeAvailableActions(e.state, currentPlayer.getParameters().actionSpace).size();
 
             if (e.state.isActionInProgress()) {
                 e.action = null;
             }
 
-            for (int i = 0; i < listener.getGame().getPlayers().size(); i++) {
-                if(i == e.state.getCurrentPlayer())
-                    records.put("Player-" + i, e.action == null ? null : e.action.toString());
-                else records.put("Player-" + i, null);
-                for (int j = 0; j < playerNames.size(); j++) {
-                    for (AbstractPlayer player: listener.getGame().getPlayers()) {
-                        if (player.toString().equals(playerNames.get(j))) {
-                            records.put(playerNames.get(j) + "-" + j, e.action == null ? null : e.action.toString());
-                        } else {
-                            records.put(playerNames.get(j) + "-" + j, null);
-                        }
-                    }
-                }
-            }
+            records.put("Player-" + e.playerID, e.action == null ? null : e.action.toString());
+            records.put(currentPlayer.toString(), e.action == null ? null : e.action.toString());
+            records.put("Size-" + currentPlayer, size);
+
             records.put("Actions Played", e.action == null ? null : e.action.toString());
             records.put("Actions Played Description", e.action == null ? null : e.action.getString(e.state));
-            records.put("Action Space Size", fm.computeAvailableActions(e.state).size());
+            records.put("Action Space Size", size);
 
             e.action = a;
             return true;
@@ -308,8 +300,9 @@ public class GameMetrics implements IMetricsCollection {
             for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("Player-" + i, String.class);
             }
-            for (int i = 0; i < playerNames.size(); i++) {
-                columns.put(playerNames.get(i) + "-" + i, String.class);
+            for (String playerName : playerNames) {
+                columns.put(playerName, String.class);
+                columns.put("Size-" + playerName, Integer.class);
             }
             columns.put("Actions Played", String.class);
             columns.put("Actions Played Description", String.class);

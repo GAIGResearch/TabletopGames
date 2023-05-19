@@ -3,8 +3,10 @@ package games.stratego.actions;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.GridBoard;
+import games.stratego.StrategoForwardModel;
 import games.stratego.StrategoGameState;
 import games.stratego.components.Piece;
+import games.stratego.metrics.StrategoMetrics;
 import utilities.Vector2D;
 
 import java.util.Objects;
@@ -51,25 +53,41 @@ public class AttackMove extends Move {
         attackedPiece.setPieceKnown(true);
 
         if (attackedPiece.getPieceType() == Piece.PieceType.FLAG){
+            gs.logEvent(StrategoMetrics.StrategoEvent.EndCondition.name() + ":" + StrategoForwardModel.EndCondition.FLAG_CAPTURE.name() + ":" + gs.getCurrentPlayer());
             gs.setGameStatus(CoreConstants.GameResult.GAME_END);
             gs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, gs.getCurrentPlayer());
             gs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 1-gs.getCurrentPlayer());
 
         } else if (attackedPiece.getPieceType() == Piece.PieceType.BOMB){
             if (movedPiece.getPieceType() == Piece.PieceType.MINER){
+                gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+                        movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
+                        " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
+                        movedPiece.getOwnerId());
+
                 // Bomb is lost and miner moves into bomb's location
                 movedTileEmptied = board.setElement(movedPiece.getPiecePosition().getX(),
                         movedPiece.getPiecePosition().getY(), null);
                 destinationTileSet = board.setElement(attackedPiece.getPiecePosition().getX(),
                         attackedPiece.getPiecePosition().getY(), movedPiece);
                 movedPiece.setPiecePosition(attackedPiece.getPiecePosition());
-            } else{
+            } else {
+                gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+                        movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
+                        " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
+                        attackedPiece.getOwnerId());
                 // Piece is lost and removed from the board
                 movedTileEmptied = board.setElement(movedPiece.getPiecePosition().getX(),
                         movedPiece.getPiecePosition().getY(), null);
             }
 
         } else if (attackedPiece.getPieceType() == Piece.PieceType.MARSHAL && movedPiece.getPieceType() == Piece.PieceType.SPY){
+
+            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+                    movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
+                    " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
+                    movedPiece.getOwnerId());
+
             // Spy removes Marshal, but only if spy is the one attacking
             movedTileEmptied = board.setElement(movedPiece.getPiecePosition().getX(),
                     movedPiece.getPiecePosition().getY(), null);
@@ -78,6 +96,12 @@ public class AttackMove extends Move {
             movedPiece.setPiecePosition(attackedPiece.getPiecePosition());
 
         } else if (movedPieceRank > attackedPieceRank){
+
+            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+                    movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
+                    " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
+                    movedPiece.getOwnerId());
+
             // Higher rank wins
             movedTileEmptied = board.setElement(movedPiece.getPiecePosition().getX(),
                     movedPiece.getPiecePosition().getY(), null);
@@ -86,12 +110,24 @@ public class AttackMove extends Move {
             movedPiece.setPiecePosition(attackedPiece.getPiecePosition());
 
         } else if (movedPieceRank == attackedPieceRank){
+
+            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+                    movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
+                    " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
+                    -1);  // a tie
+
             // Both pieces are lost
             movedTileEmptied = board.setElement(movedPiece.getPiecePosition().getX(),
                     movedPiece.getPiecePosition().getY(), null);
             destinationTileEmptied = board.setElement(attackedPiece.getPiecePosition().getX(),
                     attackedPiece.getPiecePosition().getY(), null);
         } else {
+
+            gs.logEvent(StrategoMetrics.StrategoEvent.BattleOutcome.name() + ":" +
+                    movedPiece.getOwnerId() + " vs " + attackedPiece.getOwnerId() +
+                    " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
+                    attackedPiece.getOwnerId());
+
             // Higher rank wins
             movedTileEmptied = board.setElement(attackedPiece.getPiecePosition().getX(),
                     attackedPiece.getPiecePosition().getY(), null);
