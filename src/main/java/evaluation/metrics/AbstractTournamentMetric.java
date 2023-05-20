@@ -14,7 +14,7 @@ import java.util.*;
 public abstract class AbstractTournamentMetric extends  AbstractMetric
 {
     // Data logger, wrapper around a library that logs data into a table
-    private final Map<List<AbstractPlayer>,IDataLogger> dataLoggers = new HashMap<>();
+    private final Map<Set<AbstractPlayer>,IDataLogger> dataLoggers = new HashMap<>();
 
     public AbstractTournamentMetric() {
         super();
@@ -48,17 +48,17 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
      * Initialize columns separately when we have access to the game.
      * @param game - game to initialize columns for
      */
-    public void init(Game game, int nPlayers, List<String> playerNames) {
+    public void init(Game game, int nPlayers, Set<String> playerNames) {
         // Do nothing here, we init specially
     }
 
-    public void tournamentInit(Game game, int nPlayers, List<String> playerNames, List<AbstractPlayer> matchup) {
+    public void tournamentInit(Game game, int nPlayers, Set<String> playerNames, Set<AbstractPlayer> matchup) {
         // Create a data logger for this matchup
         // TODO this counts same matchup if same type of players are in, regardless of order
         // If order matters (E.G. to see first player advantage), then this should be adjusted
         Set<AbstractPlayer> matchupSet = new HashSet<>(matchup);
         IDataLogger loggerRecorded = null;
-        for (List<AbstractPlayer> key : dataLoggers.keySet()) {
+        for (Set<AbstractPlayer> key : dataLoggers.keySet()) {
             if (new HashSet<>(key).containsAll(matchup) && matchupSet.containsAll(key)) {
                 loggerRecorded = dataLoggers.get(key);
                 break;
@@ -89,7 +89,7 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
                         + dataLogger.getClass().getSimpleName() + ". Data Processor and Data Logger must be using the same library, and " +
                         " the Data Processor must extend the Data Logger's default processor.";
 
-        for (Map.Entry<List<AbstractPlayer>, IDataLogger> e: dataLoggers.entrySet()) {
+        for (Map.Entry<Set<AbstractPlayer>, IDataLogger> e: dataLoggers.entrySet()) {
             String folder = folderName + "/" + e.getKey().toString();
             // Make folder if it doesn't exist
             File f = new File(folder);

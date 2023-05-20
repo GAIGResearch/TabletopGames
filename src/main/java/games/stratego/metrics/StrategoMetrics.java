@@ -33,7 +33,7 @@ public class StrategoMetrics implements IMetricsCollection {
         // How many times did games end with flag capture vs player running out of options vs max number of game ticks?
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             columns.put("GameEnd", String.class);
             return columns;
@@ -61,7 +61,7 @@ public class StrategoMetrics implements IMetricsCollection {
     // How many times did the spy kill the marshall
     public static class BattleOutcome extends AbstractMetric {
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String name : playerNames) {
                 columns.put(name + "_wins", Integer.class);
@@ -125,7 +125,7 @@ public class StrategoMetrics implements IMetricsCollection {
     // Which piece type moves, which attacks
     public static class PieceMoves extends AbstractMetric {
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String name : playerNames) {
                 columns.put(name + "_move", String.class);
@@ -181,7 +181,7 @@ public class StrategoMetrics implements IMetricsCollection {
     // Sum of piece ranks at the end of the game
     public static class PieceStatsEnd extends AbstractMetric {
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String name : playerNames) {
                 columns.put(name + "_rankSum", Integer.class);

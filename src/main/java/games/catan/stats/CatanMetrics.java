@@ -54,7 +54,7 @@ public class CatanMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             columns.put("PlayerType", String.class);
             columns.put("PlayerType-StartingPos", String.class);
@@ -118,7 +118,7 @@ public class CatanMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String player : playerNames) {
                 columns.put(player + "_sumInitProduction", Integer.class);
@@ -162,7 +162,7 @@ public class CatanMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String player : playerNames) {
                 columns.put(player + "_portSettle", Integer.class);
@@ -193,7 +193,7 @@ public class CatanMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String p: playerNames) {
                 columns.put(p + "_nKnights", Integer.class);
@@ -231,7 +231,7 @@ public class CatanMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String p: playerNames) {
                 columns.put(p + "_nSevenOuts", Integer.class);
@@ -263,7 +263,7 @@ public class CatanMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String p: playerNames) {
                 columns.put(p + "_nLongestRoadSteals", Integer.class);
@@ -305,7 +305,7 @@ public class CatanMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String p: playerNames) {
                 columns.put(p + "_devType", String.class);
@@ -354,7 +354,7 @@ public class CatanMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             nTurnsInLead = new int[nPlayersPerGame];
             nTurnsPlayed = new int[nPlayersPerGame];
 
@@ -420,7 +420,7 @@ public class CatanMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String p: playerNames) {
                 columns.put(p + "_nRoadsCutOffToOthers", Integer.class);

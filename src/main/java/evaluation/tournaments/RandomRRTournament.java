@@ -26,8 +26,8 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RandomRRTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                              boolean selfPlay, int totalMatchUps, int reportPeriod, long seed, AbstractParameters gameParams) {
-        super(agents, gameToPlay, playersPerGame, 1, selfPlay, gameParams);
+                              boolean selfPlay, boolean mirror, int totalMatchUps, int reportPeriod, long seed, AbstractParameters gameParams) {
+        super(agents, gameToPlay, playersPerGame, 1, selfPlay, mirror, gameParams);
         this.totalMatchups = totalMatchUps;
         this.reportPeriod = reportPeriod;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
@@ -44,7 +44,24 @@ public class RandomRRTournament extends RoundRobinTournament {
     @Override
     public void createAndRunMatchUp(LinkedList<Integer> ignored, int gameIdx) {
         int nPlayers = playersPerGame.get(gameIdx);
-        for (int i = 0; i < totalMatchups; i++) {
+        int g = 0;
+        if (mirror) {
+            // First run mirror games
+            for (Integer agentID : agentIDs) {
+                List<Integer> matchup = new ArrayList<>(nPlayers);
+                for (int j = 0; j < nPlayers; j++) {
+                    matchup.add(agentID);
+                }
+                evaluateMatchUp(matchup, gameIdx);
+                g++;
+                if (g == totalMatchups)
+                    return;
+                if (g % reportPeriod == 0)
+                    reportResults(gameIdx);
+            }
+        }
+        // Then random games
+        for (int i = g; i < totalMatchups; i++) {
             List<Integer> matchup = new ArrayList<>(nPlayers);
             for (int j = 0; j < nPlayers; j++)
                 matchup.add(idStream.getAsInt());

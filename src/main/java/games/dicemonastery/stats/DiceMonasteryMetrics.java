@@ -25,7 +25,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Season", String.class);
                 put("Year", Integer.class);
@@ -56,7 +56,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Piety", Integer.class);
             }};
@@ -77,7 +77,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Location", String.class);
             }};
@@ -101,7 +101,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Thing", String.class);
             }};
@@ -127,7 +127,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Value", Integer.class);
             }};
@@ -145,7 +145,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("ActionPointsLeft", Integer.class);
             }};
@@ -164,7 +164,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("DM Turn", Integer.class);
             }};
@@ -190,7 +190,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             HashMap<String, Class<?>> columns = new HashMap<>();
             for (DiceMonasteryConstants.ActionArea a : DiceMonasteryConstants.ActionArea.values()) {
                 for (int i = 0; i < nPlayersPerGame; i++) {
@@ -234,7 +234,7 @@ public class DiceMonasteryMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (int i = 0; i < nPlayersPerGame; i++) {
                 for (String categ: allCategories.keySet()) {

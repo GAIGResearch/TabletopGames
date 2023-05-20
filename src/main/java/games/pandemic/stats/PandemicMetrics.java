@@ -43,7 +43,7 @@ public class PandemicMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String deck: deckNames) {
                 columns.put(deck + " Deck Size", Integer.class);
@@ -69,7 +69,7 @@ public class PandemicMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String counter: counters) {
                 columns.put(counter, Integer.class);
@@ -100,7 +100,7 @@ public class PandemicMetrics implements IMetricsCollection {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             columns.put("Victory", Double.class);
             columns.put("# Cured Diseases", Integer.class);

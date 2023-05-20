@@ -73,7 +73,7 @@ public abstract class AbstractMetric
      * Initialize columns separately when we have access to the game.
      * @param game - game to initialize columns for
      */
-    public void init(Game game, int nPlayers, List<String> playerNames) {
+    public void init(Game game, int nPlayers, Set<String> playerNames) {
         dataLogger.init(game, nPlayers, playerNames);
     }
 
@@ -115,7 +115,7 @@ public abstract class AbstractMetric
      * @param playerNames
      * @return map of column names and types
      */
-    public abstract Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames);
+    public abstract Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames);
 
     /**
      * Returns a map of default column names and types. This will be included in all metrics unless overwritten by the metric subclass.

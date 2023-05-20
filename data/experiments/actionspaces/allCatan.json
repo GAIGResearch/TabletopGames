@@ -1,9 +1,10 @@
 {
   "class" : "evaluation.tournaments.RoundRobinTournament",
   "game": "Catan",
-  "selfPlay": true,
+  "selfPlay": false,
   "players": "data/experiments/actionspaces/independentdeepness",
+  "mirror": true,
   "nPlayers": 4,
-  "matchups": 5,
+  "matchups": 10,
   "listener": "metrics/catan.json"
 }

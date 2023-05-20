@@ -51,7 +51,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (int i = 0; i < nPlayersPerGame; i++)
                 columns.put("Player-" + i, Double.class);
@@ -84,7 +84,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("Player-" + i, Double.class);
@@ -107,7 +107,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             columns.put("Size", Integer.class);
             return columns;
@@ -130,7 +130,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("PlayerType-" + i, String.class);
@@ -158,7 +158,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Percentage", Double.class);
             }};
@@ -169,7 +169,7 @@ public class GameMetrics implements IMetricsCollection {
     public static class ComputationTimes extends AbstractTournamentMetric {
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("Next (ms)", Double.class);
                 put("Copy (ms)", Double.class);
@@ -195,7 +195,7 @@ public class GameMetrics implements IMetricsCollection {
 
     public static class OrdinalPosition extends AbstractTournamentMetric {
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("Player-" + i, Integer.class);
@@ -223,7 +223,7 @@ public class GameMetrics implements IMetricsCollection {
     public static class Decisions extends AbstractTournamentMetric {
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("ActionsPerTurn (Sum)", Integer.class);
                 put("Decisions", Integer.class);
@@ -256,7 +256,7 @@ public class GameMetrics implements IMetricsCollection {
     }
 
     public static class Actions extends AbstractTournamentMetric {
-        List<String> playerNames;
+        Set<String> playerNames;
         public Actions() {
             super();
         }
@@ -295,7 +295,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             this.playerNames = playerNames;
             Map<String, Class<?>> columns = new HashMap<>();
             for (int i = 0; i < nPlayersPerGame; i++) {
@@ -341,7 +341,7 @@ public class GameMetrics implements IMetricsCollection {
         }
 
         @Override
-        public HashMap<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public HashMap<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("PlayerIdx", String.class);
             }};

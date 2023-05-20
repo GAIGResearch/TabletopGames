@@ -21,10 +21,10 @@ import java.util.*;
 public class LoveLetterMetrics implements IMetricsCollection {
 
     public static class CardStatsActionChosen extends AbstractMetric {
-        List<String> playerNames;
+        Set<String> playerNames;
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             this.playerNames = playerNames;
             for (String name: playerNames) {
@@ -95,12 +95,12 @@ public class LoveLetterMetrics implements IMetricsCollection {
     }
 
     public static class CardStatsGameEvent extends AbstractMetric {
-        List<String> playerNames;
+        Set<String> playerNames;
         LoveLetterCard.CardType cardPlayed = null;
         boolean successfulPlay = false;
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             this.playerNames = playerNames;
             for (String name: playerNames) {
@@ -160,14 +160,14 @@ public class LoveLetterMetrics implements IMetricsCollection {
     public static class CardsPlayed extends AbstractMetric {
         List<String> playerNames;
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
-            this.playerNames = playerNames;
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
+            this.playerNames = new ArrayList<>(playerNames);
             Map<String, Class<?>> columns = new HashMap<>();
             for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("Player-" + i, String.class);
             }
             for (int i = 0; i < playerNames.size(); i++) {
-                columns.put(playerNames.get(i) + "-" + i, String.class);
+                columns.put(this.playerNames.get(i) + "-" + i, String.class);
             }
             columns.put("Aggregate", String.class);
             return columns;
@@ -273,7 +273,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
             return new HashSet<>(Arrays.asList(Event.GameEvent.ROUND_OVER, Event.GameEvent.GAME_EVENT));
         }
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return Collections.singletonMap("WinCause", String.class);
         }
     }
@@ -297,7 +297,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("# actions", Integer.class);
                 put("# actions (avg)", Double.class);
@@ -324,7 +324,7 @@ public class LoveLetterMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return Collections.singletonMap("EliminatingCard", String.class);
         }
     }

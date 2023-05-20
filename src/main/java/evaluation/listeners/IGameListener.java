@@ -13,7 +13,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
 public interface IGameListener {
 
@@ -118,7 +118,7 @@ public interface IGameListener {
 
     default void reset() {}
 
-    default void init(Game game, int nPlayersPerGame, List<String> playerNames) {}
+    default void init(Game game, int nPlayersPerGame, Set<String> playerNames) {}
 
-    default void tournamentInit(Game game, int nPlayers, List<String> playerNames, List<AbstractPlayer> matchup) {}
+    default void tournamentInit(Game game, int nPlayers, Set<String> playerNames, Set<AbstractPlayer> matchup) {}
 }

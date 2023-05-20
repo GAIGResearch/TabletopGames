@@ -125,16 +125,18 @@ public class MetricsGameListener implements IGameListener {
             }
 
             // We also create raw data files for groups of metrics responding to the same event
-            for (IGameEvent event : eventsOfInterest) {
-                List<AbstractMetric> eventMetrics = new ArrayList<>();
-                for (AbstractMetric metric : metrics.values()) {
-                    if (metric.listens(event)) {
-                        eventMetrics.add(metric);
+            if (reportTypes.contains(RawDataPerEvent)) {
+                for (IGameEvent event : eventsOfInterest) {
+                    List<AbstractMetric> eventMetrics = new ArrayList<>();
+                    for (AbstractMetric metric : metrics.values()) {
+                        if (metric.listens(event)) {
+                            eventMetrics.add(metric);
+                        }
                     }
-                }
-                if (eventMetrics.size() > 1) {
-                    IDataLogger dataLogger = new DataTableSaw(eventMetrics, event, eventToIndexingColumn(event));
-                    dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
+                    if (eventMetrics.size() > 1) {
+                        IDataLogger dataLogger = new DataTableSaw(eventMetrics, event, eventToIndexingColumn(event));
+                        dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
+                    }
                 }
             }
         }
@@ -169,7 +171,7 @@ public class MetricsGameListener implements IGameListener {
     }
 
     @Override
-    public void init(Game game, int nPlayersPerGame, List<String> playerNames) {
+    public void init(Game game, int nPlayersPerGame, Set<String> playerNames) {
         this.game = game;
 
         for (AbstractMetric metric : metrics.values()) {
@@ -178,7 +180,7 @@ public class MetricsGameListener implements IGameListener {
     }
 
     @Override
-    public void tournamentInit(Game game, int nPlayersPerGame, List<String> playerNames, List<AbstractPlayer> matchup) {
+    public void tournamentInit(Game game, int nPlayersPerGame, Set<String> playerNames, Set<AbstractPlayer> matchup) {
         for (AbstractMetric metric : metrics.values()) {
             if (metric instanceof AbstractTournamentMetric) {
                 ((AbstractTournamentMetric)metric).tournamentInit(game, nPlayersPerGame, playerNames, matchup);

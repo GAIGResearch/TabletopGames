@@ -30,7 +30,7 @@ import static utilities.Utils.getArg;
 
 public class RoundRobinTournament extends AbstractTournament {
     private static boolean debug = false;
-    public final boolean selfPlay;
+    public final boolean selfPlay, mirror;
     private final int gamesPerMatchUp;
     protected List<IGameListener> listeners;
     public boolean verbose = true;
@@ -50,11 +50,11 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, boolean selfPlay, AbstractParameters gameParams) {
+                                int gamesPerMatchUp, boolean selfPlay, boolean mirror, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, gameParams);
-        if (!selfPlay && playersPerGame > this.agents.size()) {
-            throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
-                    "Either add more agents, reduce the number of players per game, or allow self-play.");
+        if (!mirror && !selfPlay && playersPerGame > this.agents.size()) {
+            throw new IllegalArgumentException("Not enough agents to fill a match without self-play or mirror-mode." +
+                    "Either add more agents, reduce the number of players per game, add mirror-mode, or allow self-play.");
         }
 
         this.agentIDs = new LinkedList<>();
@@ -63,6 +63,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
         this.gamesPerMatchUp = gamesPerMatchUp;
         this.selfPlay = selfPlay;
+        this.mirror = mirror;
         this.pointsPerPlayer = new double[agents.size()];
     }
 
@@ -122,6 +123,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 GameType gameToPlay = GameType.valueOf(getArg(json, "game", "SushiGo"));
                 int nPlayersPerGame = getArg(json, "nPlayers", 4);
                 boolean selfPlay = getArg(json, "selfPlay", false);
+                boolean mirror = getArg(json, "mirror", false);
                 String mode = getArg(json, "mode", "random");
                 int matchups = getArg(json, "matchups", 1);
                 String playerDirectory = getArg(json, "players", "");
@@ -135,7 +137,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(json, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
                 List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(json, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
 
-                setup(gameToPlay, nPlayersPerGame, selfPlay, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
+                setup(gameToPlay, nPlayersPerGame, selfPlay, mirror, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
                         listenerClasses, metricsClasses, destDir);
 
             } catch (FileNotFoundException ignored) {
@@ -146,6 +148,7 @@ public class RoundRobinTournament extends AbstractTournament {
             GameType gameToPlay = GameType.valueOf(getArg(args, "game", "SushiGo"));
             int nPlayersPerGame = getArg(args, "nPlayers", 4);
             boolean selfPlay = getArg(args, "selfPlay", false);
+            boolean mirror = getArg(args, "mirror", false);
             String mode = getArg(args, "mode", "random");
             int matchups = getArg(args, "matchups", 1);
             String playerDirectory = getArg(args, "players", "");
@@ -159,12 +162,12 @@ public class RoundRobinTournament extends AbstractTournament {
             List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
             List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
 
-            setup(gameToPlay, nPlayersPerGame, selfPlay, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
+            setup(gameToPlay, nPlayersPerGame, selfPlay, mirror, mode, matchups, playerDirectory, gameParams, statsLogPrefix, resultsFile, reportPeriod, randomGameParams,
                     listenerClasses, metricsClasses, destDir);
         }
     }
 
-    public static void setup(GameType gameToPlay, int nPlayersPerGame, boolean selfPlay, String mode, int matchups,
+    public static void setup(GameType gameToPlay, int nPlayersPerGame, boolean selfPlay, boolean mirror, String mode, int matchups,
                              String playerDirectory, String gameParams, String statsLogPrefix, String resultsFile,
                              int reportPeriod, boolean randomGameParams, List<String> listenerClasses,
                              List<String> metricsClasses, String destDir) {
@@ -194,8 +197,8 @@ public class RoundRobinTournament extends AbstractTournament {
 
         // Run!
         RoundRobinTournament tournament = mode.equals("exhaustive") ?
-                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, params) :
-                new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, selfPlay, matchups, reportPeriod,
+                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, mirror, params) :
+                new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, selfPlay, mirror, matchups, reportPeriod,
                         System.currentTimeMillis(), params);
 
         if (resultsFile.length() > 0)
@@ -223,7 +226,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * Runs the round robin tournament.
      */
     public void run() {
-        List<String> agentNames = new ArrayList<>();
+        Set<String> agentNames = new HashSet<>();
         for (AbstractPlayer agent : agents)
             agentNames.add(agent.toString());
 
@@ -273,6 +276,13 @@ public class RoundRobinTournament extends AbstractTournament {
             evaluateMatchUp(matchUp, gameIdx);
         } else {
             for (Integer agentID : this.agentIDs) {
+                if (mirror && matchUp.size() == 0) {
+                    for (int i = 0; i < playersPerGame.get(gameIdx); i++) {
+                        matchUp.add(agentID);
+                    }
+                    createAndRunMatchUp(matchUp, gameIdx);
+                    matchUp.clear();
+                }
                 if (selfPlay || !matchUp.contains(agentID)) {
                     matchUp.add(agentID);
                     createAndRunMatchUp(matchUp, gameIdx);
@@ -305,12 +315,12 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.println(sb);
         }
 
-        List<String> agentNames = new ArrayList<>();
+        Set<String> agentNames = new HashSet<>();
         for (AbstractPlayer agent : agents)
             agentNames.add(agent.toString());
         for (IGameListener listener : listeners) {
             games.get(gameIdx).addListener(listener);
-            listener.tournamentInit(games.get(gameIdx), playersPerGame.get(gameIdx), agentNames, matchUpPlayers);
+            listener.tournamentInit(games.get(gameIdx), playersPerGame.get(gameIdx), agentNames, new HashSet<>(matchUpPlayers));
         }
 
         // Run the game N = gamesPerMatchUp times with these players

@@ -218,7 +218,7 @@ public class GameReport implements IGameRunner {
                     opponentDescriptor = "random";
                 }
                 List<AbstractPlayer> allPlayers = new ArrayList<>();
-                List<String> playerNames = new ArrayList<>();
+                Set<String> playerNames = new HashSet<>();
                 for (int j = 0; j < playerCount; j++) {
                     if (opponentDescriptor.isEmpty() || (j == 0 && !playerDescriptor.isEmpty())) {
                         allPlayers.add(PlayerFactory.createPlayer(playerDescriptor));

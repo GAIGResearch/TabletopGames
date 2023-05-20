@@ -82,7 +82,7 @@ public class DataTableSaw implements IDataLogger {
         this.data = Table.create(metric.getName());
     }
 
-    public void init(Game game, int nPlayersPerGame, List<String> playerNames) {
+    public void init(Game game, int nPlayersPerGame, Set<String> playerNames) {
 
         // Add default columns
         Map<String, Class<?>> defaultColumns = metric.getDefaultColumns();
