@@ -3,8 +3,8 @@
   "game": "Catan",
   "selfPlay": false,
   "players": "data/experiments/actionspaces/independentdeepness",
-  "mirror": true,
-  "nPlayers": 4,
-  "matchups": 10,
+  "mirror": false,
+  "nPlayers": 3,
+  "matchups": 1000,
   "listener": "metrics/catan.json"
 }

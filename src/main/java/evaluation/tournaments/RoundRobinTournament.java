@@ -276,7 +276,7 @@ public class RoundRobinTournament extends AbstractTournament {
             evaluateMatchUp(matchUp, gameIdx);
         } else {
             for (Integer agentID : this.agentIDs) {
-                if (mirror && matchUp.size() == 0) {
+                if (mirror) {
                     for (int i = 0; i < playersPerGame.get(gameIdx); i++) {
                         matchUp.add(agentID);
                     }

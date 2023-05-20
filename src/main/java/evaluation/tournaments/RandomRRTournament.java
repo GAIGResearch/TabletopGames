@@ -44,30 +44,33 @@ public class RandomRRTournament extends RoundRobinTournament {
     @Override
     public void createAndRunMatchUp(LinkedList<Integer> ignored, int gameIdx) {
         int nPlayers = playersPerGame.get(gameIdx);
-        int g = 0;
         if (mirror) {
-            // First run mirror games
+            int nPerAgent = totalMatchups / agentIDs.size();
+            int g = 0;
             for (Integer agentID : agentIDs) {
-                List<Integer> matchup = new ArrayList<>(nPlayers);
-                for (int j = 0; j < nPlayers; j++) {
-                    matchup.add(agentID);
+                for (int i = 0; i < nPerAgent; i++) {
+                    List<Integer> matchup = new ArrayList<>(nPlayers);
+                    for (int j = 0; j < nPlayers; j++) {
+                        matchup.add(agentID);
+                    }
+                    evaluateMatchUp(matchup, gameIdx);
+                    g++;
+                    if (g == totalMatchups)
+                        return;
+                    if (g % reportPeriod == 0)
+                        reportResults(gameIdx);
                 }
+            }
+        } else {
+            // Random games
+            for (int i = 0; i < totalMatchups; i++) {
+                List<Integer> matchup = new ArrayList<>(nPlayers);
+                for (int j = 0; j < nPlayers; j++)
+                    matchup.add(idStream.getAsInt());
                 evaluateMatchUp(matchup, gameIdx);
-                g++;
-                if (g == totalMatchups)
-                    return;
-                if (g % reportPeriod == 0)
+                if ((i + 1) % reportPeriod == 0 && i != totalMatchups - 1)
                     reportResults(gameIdx);
             }
-        }
-        // Then random games
-        for (int i = g; i < totalMatchups; i++) {
-            List<Integer> matchup = new ArrayList<>(nPlayers);
-            for (int j = 0; j < nPlayers; j++)
-                matchup.add(idStream.getAsInt());
-            evaluateMatchUp(matchup, gameIdx);
-            if((i+1) % reportPeriod == 0 && i != totalMatchups - 1)
-                reportResults(gameIdx);
         }
     }
 
