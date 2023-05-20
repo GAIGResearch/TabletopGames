@@ -320,14 +320,14 @@ public abstract class AbstractGameState {
         logEvent(event, eventText.get());
     }
     public void logEvent(IGameEvent event, String eventText) {
-        AbstractAction logAction = new LogEvent(eventText);
+        LogEvent logAction = new LogEvent(eventText);
         listeners.forEach(l -> l.onEvent(Event.createEvent(event, this, logAction)));
         if (getCoreGameParameters().recordEventHistory) {
             recordHistory(eventText);
         }
     }
     public void logEvent(IGameEvent event) {
-        AbstractAction logAction = new LogEvent(event.name());
+        LogEvent logAction = new LogEvent(event.name());
         listeners.forEach(l -> l.onEvent(Event.createEvent(event, this, logAction)));
         if (getCoreGameParameters().recordEventHistory) {
             recordHistory(event.name());

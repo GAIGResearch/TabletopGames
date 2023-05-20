@@ -10,6 +10,8 @@ import core.components.Edge;
 
 import java.util.Objects;
 
+import static games.catan.stats.CatanMetrics.CatanEvent.LongestRoadSteal;
+
 public class BuildRoad extends AbstractAction {
     public final int x;
     public final int y;
@@ -55,6 +57,7 @@ public class BuildRoad extends AbstractAction {
                 // add points for longest road and set the new road in gamestate
                 if (cgs.getLongestRoadOwner() >= 0) {
                     // in this case the longest road was already claimed
+                    cgs.logEvent(LongestRoadSteal, String.valueOf(playerID));
                     cgs.addScore(cgs.getLongestRoadOwner(), -cp.longest_road_value);
                 }
                 cgs.addScore(playerID, cp.longest_road_value);

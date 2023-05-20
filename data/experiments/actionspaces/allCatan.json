@@ -4,6 +4,6 @@
   "selfPlay": false,
   "players": "data/experiments/actionspaces/independentdeepness",
   "nPlayers": 4,
-  "matchups": 1000,
-  "listener": "data/metrics/GameResults.json"
+  "matchups": 5,
+  "listener": "metrics/catan.json"
 }

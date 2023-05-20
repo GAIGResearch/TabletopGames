@@ -15,6 +15,7 @@ import java.util.*;
 
 import static core.CoreConstants.GameResult;
 import static games.catan.CatanConstants.HEX_SIDES;
+import static games.catan.stats.CatanMetrics.CatanEvent.LargestArmySteal;
 
 public class CatanGameState extends AbstractGameState {
     protected CatanTile[][] board;
@@ -213,7 +214,9 @@ public class CatanGameState extends AbstractGameState {
         } else {
             int max = knights[largestArmyOwner];
             for (int i = 0; i < knights.length; i++) {
-                if (knights[i] > max) {
+                if (knights[i] > max && largestArmyOwner != i) {
+                    logEvent(LargestArmySteal, String.valueOf(i));
+
                     // update scores
                     scores[largestArmyOwner] -= params.largest_army_value;
                     scores[i] += params.largest_army_value;

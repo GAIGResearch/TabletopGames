@@ -1,6 +1,7 @@
 package evaluation.metrics;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.LogEvent;
 import core.interfaces.IGameEvent;
 
 import java.util.Arrays;
@@ -65,7 +66,7 @@ public class Event
         return Event.createEvent(type, state, null, -1);
     }
 
-    public static Event createEvent(IGameEvent type, AbstractGameState state, AbstractAction action)
+    public static Event createEvent(IGameEvent type, AbstractGameState state, LogEvent action)
     {
         return Event.createEvent(type, state, action, -1);
     }

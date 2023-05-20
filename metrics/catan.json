@@ -1,0 +1,21 @@
+{
+  "class": "evaluation.listeners.MetricsGameListener",
+  "args": [
+    [
+      {"class": "games.stratego.metrics.CatanMetrics$Win" },
+      {"class": "evaluation.metrics.GameMetrics$GameScore" },
+      {"class": "evaluation.metrics.GameMetrics$FinalScore" },
+      {"class": "evaluation.metrics.GameMetrics$StateSpace" },
+      {"class": "evaluation.metrics.GameMetrics$ComputationTimes" },
+      {"class": "evaluation.metrics.GameMetrics$Decisions" },
+      {"class": "evaluation.metrics.GameMetrics$Actions" },
+      {"class": "games.stratego.metrics.CatanMetrics$StartingResources" },
+      {"class": "games.stratego.metrics.CatanMetrics$PortSettle" },
+      {"class": "games.stratego.metrics.CatanMetrics$Bonuses" },
+      {"class": "games.stratego.metrics.CatanMetrics$SevenOuts" },
+      {"class": "games.stratego.metrics.CatanMetrics$BonusSteal" },
+      {"class": "games.stratego.metrics.CatanMetrics$Developments" },
+      {"class": "games.stratego.metrics.CatanMetrics$RoadsCutOff" }
+    ]
+  ]
+}

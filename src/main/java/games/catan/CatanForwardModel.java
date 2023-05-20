@@ -25,6 +25,8 @@ import static core.CoreConstants.DefaultGamePhase.Main;
 import static games.catan.CatanConstants.HEX_SIDES;
 import static games.catan.CatanGameState.CatanGamePhase.Robber;
 import static games.catan.CatanGameState.CatanGamePhase.Setup;
+import static games.catan.stats.CatanMetrics.CatanEvent.RobberRoll;
+import static games.catan.stats.CatanMetrics.CatanEvent.SevenOut;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class CatanForwardModel extends StandardForwardModel {
@@ -206,10 +208,12 @@ public class CatanForwardModel extends StandardForwardModel {
             for (int p = 0; p < gs.getNPlayers(); p++) {
                 int nResInHand = gs.getNResourcesInHand(p);
                 if (nResInHand > cp.max_cards_without_discard) {
+                    gs.logEvent(SevenOut, String.valueOf(p));
                     int r = (int)(nResInHand * cp.perc_discard_robber); // remove half of the resources
                     new DiscardResourcesPhase(p, r).execute(gs);
                 }
             }
+            gs.logEvent(RobberRoll);
             gs.setGamePhase(Robber);
         } else {
             for (CatanTile[] catanTiles : board) {

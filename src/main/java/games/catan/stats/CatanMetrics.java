@@ -1,6 +1,8 @@
 package games.catan.stats;
 
+import core.actions.AbstractAction;
 import core.actions.LogEvent;
+import core.components.Edge;
 import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
@@ -8,15 +10,21 @@ import evaluation.metrics.Event;
 import evaluation.metrics.IMetricsCollection;
 import games.catan.CatanGameState;
 import games.catan.CatanParameters;
+import games.catan.actions.build.*;
 import games.catan.components.Building;
 import games.catan.components.CatanTile;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
+import static games.catan.CatanConstants.HEX_SIDES;
+
+@SuppressWarnings("unused")
 public class CatanMetrics implements IMetricsCollection {
     public enum CatanEvent implements IGameEvent {
         SetupComplete,
         PortSettle,
+        RobberRoll,
         SevenOut,
         LongestRoadSteal,
         LargestArmySteal;
@@ -159,24 +167,262 @@ public class CatanMetrics implements IMetricsCollection {
         }
     }
 
-    // On action chosen OR on game over to avoid deep duplicates?
+    // On game over:
+    // # knight cards played
+    // longest road length
+    public static class Bonuses extends AbstractMetric {
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            CatanGameState gs = (CatanGameState) e.state;
+            for (int i = 0; i < gs.getNPlayers(); i++) {
+                String playerName = listener.getGame().getPlayers().get(i).toString();
+                records.put(playerName + "_nKnights", gs.getKnights()[i]);
+                records.put(playerName + "_longestRoadLength", gs.getRoadLengths()[i]);
+            }
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (String p: playerNames) {
+                columns.put(p + "_nKnights", Integer.class);
+                columns.put(p + "_longestRoadLength", Integer.class);
+            }
+            return columns;
+        }
+    }
+
+    // On 7-out event:
+    // # times 7-outed
+    public static class SevenOuts extends AbstractMetric {
+        HashSet<Integer> sevenOuts = new HashSet<>();
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            CatanGameState gs = (CatanGameState) e.state;
+            if (e.type == CatanEvent.SevenOut) {
+                sevenOuts.add(Integer.parseInt(((LogEvent)e.action).text));
+                return false;
+            }
+            else {
+                for (int i = 0; i < gs.getNPlayers(); i++) {
+                    String playerName = listener.getGame().getPlayers().get(i).toString();
+                    records.put(playerName + "_nSevenOuts", sevenOuts.contains(i) ? 1 : 0);
+                }
+                sevenOuts.clear();
+            }
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<>(Arrays.asList(CatanEvent.SevenOut, CatanEvent.RobberRoll));
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (String p: playerNames) {
+                columns.put(p + "_nSevenOuts", Integer.class);
+            }
+            return columns;
+        }
+    }
+
+    // On LongestRoadSteal and LargestArmySteal events
+    // # times longest road and largest army were taken by other players after initially claimed
+    public static class BonusSteal extends AbstractMetric {
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            if (e.type == CatanEvent.LongestRoadSteal) {
+                String playerName = listener.getGame().getPlayers().get(Integer.parseInt(((LogEvent)e.action).text)).toString();
+                records.put(playerName + "_nLongestRoadSteals", 1);
+            }
+            else if (e.type == CatanEvent.LargestArmySteal) {
+                String playerName = listener.getGame().getPlayers().get(Integer.parseInt(((LogEvent)e.action).text)).toString();
+                records.put(playerName + "_nLargestArmySteals", 1);
+            }
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<>(Arrays.asList(CatanEvent.LongestRoadSteal, CatanEvent.LargestArmySteal));
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (String p: playerNames) {
+                columns.put(p + "_nLongestRoadSteals", Integer.class);
+                columns.put(p + "_nLargestArmySteals", Integer.class);
+            }
+            return columns;
+        }
+    }
+
+    // On action chosen:
     // # Development cards bought
     // # roads built
     // # settlements built
     // # cities built
+    public static class Developments extends AbstractMetric {
 
-    // On game over:
-    // # knight cards played
-    // longest road length
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            AbstractAction a = e.action;
+            String playerName = listener.getGame().getPlayers().get(e.playerID).toString();
+            if (a instanceof BuildCity) {
+                records.put(playerName + "_devType", BuyAction.BuyType.City.name());
+            } else if (a instanceof BuildSettlement && !((BuildSettlement) a).free) {
+                records.put(playerName + "_devType", BuyAction.BuyType.Settlement.name());
+            } else if (a instanceof BuildRoad && !((BuildRoad) a).free) {
+                records.put(playerName + "_devType", BuyAction.BuyType.Road.name());
+            } else if (a instanceof BuyDevelopmentCard) {
+                records.put(playerName + "_devType", BuyAction.BuyType.DevCard.name());
+            } else {
+                return false;
+            }
 
-    // On 7-out event:
-    // # times 7-outed
+            return true;
+        }
 
-    // On LongestRoadSteal and LargestArmySteal events
-    // # times longest road and largest army were taken by other players after initially claimed
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
+        }
 
-
-    // Settlements played adjacent to existing road
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (String p: playerNames) {
+                columns.put(p + "_devType", String.class);
+            }
+            return columns;
+        }
+    }
 
     // Percentage of turns in the lead
+    public static class LeadPercentage extends AbstractMetric {
+        int[] nTurnsInLead;
+        int[] nTurnsPlayed;
+
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            if (e.type == Event.GameEvent.GAME_OVER) {
+                for (int i = 0; i < e.state.getNPlayers(); i++) {
+                    String playerName = listener.getGame().getPlayers().get(i).toString();
+                    records.put(playerName + "_leadPercentage", (double) nTurnsInLead[i] / nTurnsPlayed[i]);
+                }
+                return true;
+            }
+            else if (e.type == Event.GameEvent.TURN_OVER) {
+                CatanGameState gs = (CatanGameState) e.state;
+                int pId = Integer.parseInt(((LogEvent)e.action).text);
+                int[] scores = gs.getScores();
+                int[] vps = gs.getVictoryPoints();
+                IntStream.range(0, e.state.getNPlayers()).forEach(i -> scores[i] += vps[i]);
+                int leader = pId;
+                for (int i = 0; i < e.state.getNPlayers(); i++) {
+                    if (scores[i] > scores[leader]) {
+                        leader = i;
+                    }
+                }
+                if (leader == pId) {
+                    nTurnsInLead[pId]++;
+                }
+                nTurnsPlayed[pId]++;
+            }
+            return false;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return new HashSet<>(Arrays.asList(Event.GameEvent.TURN_OVER, Event.GameEvent.GAME_OVER));
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+            nTurnsInLead = new int[nPlayersPerGame];
+            nTurnsPlayed = new int[nPlayersPerGame];
+
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (String p: playerNames) {
+                columns.put(p + "_leadPercentage", Double.class);
+            }
+            return columns;
+        }
+    }
+
+    // On game over:
+    // Check each vertex on the board. If there are 3 roads adjacent, check if 2 of those roads are owned by the same player.
+    // If so, check if the 3rd road is owned by a different player. If so, increment the number of roads cut off for that player.
+    public static class RoadsCutOff extends AbstractMetric {
+        @Override
+        protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
+            CatanGameState gs = (CatanGameState) e.state;
+            int[] cutOffs = new int[e.state.getNPlayers()];  // players cut off by others
+            int[] cuttingOffs = new int[e.state.getNPlayers()];  // players doing the cut offs
+            for (CatanTile[] row: gs.getBoard()) {
+                for (CatanTile tile: row) {
+                    for (int v = 0; v < HEX_SIDES; v++) {
+                        Building settlement = gs.getBuilding(tile, v);
+                        List<Integer> owners = new ArrayList<>();
+                        for (Edge edge: settlement.getEdges()) {
+                            if (edge.getOwnerId() != -1) {
+                                owners.add(edge.getOwnerId());
+                            }
+                        }
+                        if (owners.size() == 3) {
+                            Set<Integer> ownerSet = new HashSet<>(owners);
+                            if (ownerSet.size() == 2) {
+                                // A cutting off happened!
+                                // Find the one who only appears once in owners list
+                                int cutOffPlayer = -1;
+                                int cuttingOffPlayer = -1;
+                                for (int p: ownerSet) {
+                                    if (Collections.frequency(owners, p) == 1) {
+                                        cutOffPlayer = p;
+                                    } else {
+                                        cuttingOffPlayer = p;
+                                    }
+                                }
+                                cutOffs[cutOffPlayer]++;
+                                cuttingOffs[cuttingOffPlayer]++;
+                            }
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < e.state.getNPlayers(); i++) {
+                String playerName = listener.getGame().getPlayers().get(i).toString();
+                records.put(playerName + "_nRoadsCutOffToOthers", cuttingOffs[i]);
+                records.put(playerName + "_nRoadsCutOffByOthers", cutOffs[i]);
+            }
+            return true;
+        }
+
+        @Override
+        public Set<IGameEvent> getDefaultEventTypes() {
+            return Collections.singleton(Event.GameEvent.GAME_OVER);
+        }
+
+        @Override
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, List<String> playerNames) {
+            Map<String, Class<?>> columns = new HashMap<>();
+            for (String p: playerNames) {
+                columns.put(p + "_nRoadsCutOffToOthers", Integer.class);
+                columns.put(p + "_nRoadsCutOffByOthers", Integer.class);
+            }
+            return columns;
+        }
+    }
 }
