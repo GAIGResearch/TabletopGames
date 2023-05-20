@@ -94,6 +94,7 @@ public class CatanMetrics implements IMetricsCollection {
             for (int i = 0; i < gs.getNPlayers(); i++) {
                 String playerName = listener.getGame().getPlayers().get(i).toString();
                 for (CatanParameters.Resource r: CatanParameters.Resource.values()) {
+                    if (r == CatanParameters.Resource.WILD) continue;
                     if (initResources.get(i).contains(r)) {
                         // Count how many occurrences of r are in initResources.get(i)
                         int count = Collections.frequency(initResources.get(i), r);
@@ -123,6 +124,7 @@ public class CatanMetrics implements IMetricsCollection {
                 columns.put(player + "_sumInitProduction", Integer.class);
                 columns.put(player + "_varietyResources", Integer.class);
                 for (CatanParameters.Resource r : CatanParameters.Resource.values()) {
+                    if (r == CatanParameters.Resource.WILD) continue;
                     columns.put(player + "_init_" + r.name(), Integer.class);
                 }
             }
