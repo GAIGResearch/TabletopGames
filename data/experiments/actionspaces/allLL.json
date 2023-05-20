@@ -2,6 +2,7 @@
   "class" : "evaluation.tournaments.RoundRobinTournament",
   "game": "LoveLetter",
   "selfPlay": false,
+  "mirror": false,
   "players": "data/experiments/actionspaces/all",
   "nPlayers": 4,
   "matchups": 1000,

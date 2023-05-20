@@ -76,12 +76,11 @@ public class StrategoMetrics implements IMetricsCollection {
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             String[] text = ((LogEvent)e.action).text.split(":");
-            if (StrategoEvent.valueOf(text[0]) != StrategoEvent.BattleOutcome)
-                return false;
-
-            String[] players = text[1].split(" vs ");
-            String[] pieces = text[2].split(" vs ");
-            int winner = Integer.parseInt(text[3].trim());
+            String[] players = text[0].split(" vs ");
+            String[] pieces = text[1].split(" vs ");
+            int winner = Integer.parseInt(text[2].trim());
+            String attackerName = listener.getGame().getPlayers().get(Integer.parseInt(players[0].trim())).toString();
+            String defenderName = listener.getGame().getPlayers().get(Integer.parseInt(players[1].trim())).toString();
 
             for (String s : players) {
                 int i = Integer.parseInt(s.trim());
@@ -98,16 +97,16 @@ public class StrategoMetrics implements IMetricsCollection {
                 }
             }
 
-            records.put(listener.getGame().getPlayers().get(Integer.parseInt(players[0].trim())).toString() + "_attacker", 1);
-            records.put(listener.getGame().getPlayers().get(Integer.parseInt(players[1].trim())).toString() + "_defender", 0);
-            records.put(listener.getGame().getPlayers().get(Integer.parseInt(players[1].trim())).toString() + "_defender", 1);
-            records.put(listener.getGame().getPlayers().get(Integer.parseInt(players[0].trim())).toString() + "_attacker", 0);
+            records.put(attackerName + "_attacker", 1);
+            records.put(attackerName + "_defender", 0);
+            records.put(defenderName + "_defender", 1);
+            records.put(defenderName + "_attacker", 0);
 
             if (Piece.PieceType.valueOf(pieces[0].trim()) == Piece.PieceType.SPY) {
                 if (Piece.PieceType.valueOf(pieces[1].trim()) == Piece.PieceType.MARSHAL) {
-                    records.put(listener.getGame().getPlayers().get(Integer.parseInt(players[0].trim())).toString() + "_spykill", 1);
+                    records.put(attackerName + "_spykill", 1);
                 } else {
-                    records.put(listener.getGame().getPlayers().get(Integer.parseInt(players[0].trim())).toString() + "_spykill", 0);
+                    records.put(attackerName + "_spykill", 0);
                 }
             }
 
@@ -116,7 +115,7 @@ public class StrategoMetrics implements IMetricsCollection {
 
         @Override
         public Set<IGameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.GAME_EVENT);
+            return Collections.singleton(StrategoEvent.BattleOutcome);
         }
     }
 

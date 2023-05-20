@@ -1,20 +1,18 @@
 {
-  "class" : "players.mcts.MCTSParams",
-  "selectionPolicy" : "SIMPLE",
-  "rolloutLength" : 5,
-  "information" : "Information_Set",
-  "opponentTreePolicy" : "SelfOnly",
-  "maxTreeDepth" : 20,
-  "treePolicy" : "EXP3",
-  "expansionPolicy" : "RANDOM",
-  "budgetType" : "BUDGET_ITERATIONS",
-  "budget" : 100,
-  "breakMS" : 0,
-  "heuristic" : {
-    "class" : "players.heuristics.ScoreHeuristic"
+  "class": "players.mcts.MCTSParams",
+  "selectionPolicy": "SIMPLE",
+  "rolloutLength": 5,
+  "information": "Information_Set",
+  "opponentTreePolicy": "SelfOnly",
+  "maxTreeDepth": 20,
+  "treePolicy": "UCB",
+  "expansionPolicy": "RANDOM",
+  "budgetType": "BUDGET_ITERATIONS",
+  "budget": 100,
+  "breakMS": 0,
+  "heuristic": {
+    "class": "players.heuristics.ScoreHeuristic"
   },
-  "actionSpaceStructure" : "Flat",
-  "actionSpaceContext": "Independent",
-  "maintainMasterState": true,
-  "treeRecorderFolder": "test_01"
+  "actionSpaceStructure": "Flat",
+  "actionSpaceContext": "Independent"
 }
