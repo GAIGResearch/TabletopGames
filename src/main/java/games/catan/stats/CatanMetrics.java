@@ -80,11 +80,13 @@ public class CatanMetrics implements IMetricsCollection {
 
             for (CatanTile[] catanTiles : gs.getBoard()) {
                 for (CatanTile tile : catanTiles) {
-                    for (Building settl : gs.getBuildings(tile)) {
-                        int who = settl.getOwnerId();
-                        if (who != -1) {
-                            initResources.get(who).add(cp.productMapping.get(tile.getTileType()));
-                            initProductionSum[who] += nDots.get(tile.getNumber());
+                    if (tile.getTileType() != CatanTile.TileType.DESERT && tile.getTileType() != CatanTile.TileType.SEA) {
+                        for (Building settl : gs.getBuildings(tile)) {
+                            int who = settl.getOwnerId();
+                            if (who != -1) {
+                                initResources.get(who).add(cp.productMapping.get(tile.getTileType()));
+                                initProductionSum[who] += nDots.get(tile.getNumber());
+                            }
                         }
                     }
                 }
