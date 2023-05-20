@@ -52,7 +52,7 @@ public class RoundRobinTournament extends AbstractTournament {
     public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                                 int gamesPerMatchUp, boolean selfPlay, boolean mirror, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, gameParams);
-        if (!mirror && !selfPlay && playersPerGame > this.agents.size()) {
+        if (!(this instanceof RandomRRTournament) && !mirror && !selfPlay && playersPerGame > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play or mirror-mode." +
                     "Either add more agents, reduce the number of players per game, add mirror-mode, or allow self-play.");
         }
