@@ -35,6 +35,10 @@ public class RoundRobinTournament extends AbstractTournament {
     protected List<IGameListener> listeners;
     public boolean verbose = true;
     double[] pointsPerPlayer;
+    double[] winsPerPlayer;
+    double[][] winsPerPlayerPerOpponent;
+    int[] nGamesPlayed;
+    int[][] nGamesPlayedPerOpponent;
     protected LinkedHashMap<Integer, Double> finalRanking; // contains index of agent in agents
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
@@ -65,6 +69,14 @@ public class RoundRobinTournament extends AbstractTournament {
         this.selfPlay = selfPlay;
         this.mirror = mirror;
         this.pointsPerPlayer = new double[agents.size()];
+        this.winsPerPlayer = new double[agents.size()];
+        this.nGamesPlayed = new int[agents.size()];
+        this.nGamesPlayedPerOpponent = new int[agents.size()][];
+        this.winsPerPlayerPerOpponent = new double[agents.size()][];
+        for (int i = 0; i < agents.size(); i++) {
+            this.winsPerPlayerPerOpponent[i] = new double[agents.size()];
+            this.nGamesPlayedPerOpponent[i] = new int[agents.size()];
+        }
     }
 
     /**
@@ -339,8 +351,21 @@ public class RoundRobinTournament extends AbstractTournament {
 
             int numDraws = 0;
             for (int j = 0; j < matchUpPlayers.size(); j++) {
-                if (results[j] == GameResult.WIN_GAME) pointsPerPlayer[agentIDs.get(j)] += 1;
-                if (results[j] == GameResult.DRAW_GAME) numDraws++;
+                nGamesPlayed[agentIDs.get(j)] += 1;
+                for (int k = 0; k < matchUpPlayers.size(); k++) {
+                    if (k != j) {
+                        nGamesPlayedPerOpponent[agentIDs.get(j)][agentIDs.get(k)] += 1;
+                    }
+                }
+                if (results[j] == GameResult.WIN_GAME) {
+                    pointsPerPlayer[agentIDs.get(j)] += 1;
+                    winsPerPlayer[agentIDs.get(j)] += 1;
+                    for (int k = 0; k < matchUpPlayers.size(); k++) {
+                        if (k != j) {
+                            winsPerPlayerPerOpponent[agentIDs.get(j)][agentIDs.get(k)] += 1;
+                        }
+                    }
+                } else if (results[j] == GameResult.DRAW_GAME) numDraws++;
             }
 
             if (numDraws > 0) {
@@ -379,7 +404,6 @@ public class RoundRobinTournament extends AbstractTournament {
     protected void reportResults(int game_index) {
         calculateFinalResults();
         int gameCounter = (gamesPerMatchUp * matchUpsRun);
-        int gamesPerPlayer = gameCounter * playersPerGame.get(game_index) / agents.size();
         boolean toFile = resultsFileName != null;
         ArrayList<String> dataDump = new ArrayList<>();
 
@@ -392,14 +416,26 @@ public class RoundRobinTournament extends AbstractTournament {
             if (verbose) System.out.print(str);
 
             str = String.format("%s won %.1f%% of the %d games of the tournament. ",
-                    agents.get(i), 100.0 * pointsPerPlayer[i] / gameCounter, gameCounter);
+                    agents.get(i), 100.0 * winsPerPlayer[i] / gameCounter, gameCounter);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
 
             str = String.format("%s won %.1f%% of the %d games it played during the tournament.\n",
-                    agents.get(i), 100.0 * pointsPerPlayer[i] / gamesPerPlayer, gamesPerPlayer);
+                    agents.get(i), 100.0 * winsPerPlayer[i] / nGamesPlayed[i], nGamesPlayed[i]);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
+
+            for (int j = 0; j < this.agents.size(); j++) {
+                if (i != j) {
+                    str = String.format("\n%s won %.1f%% of the games against %s.",
+                            agents.get(i), 100.0 * winsPerPlayerPerOpponent[i][j] / nGamesPlayedPerOpponent[i][j], agents.get(j));
+                    if (toFile) dataDump.add(str);
+                    if (verbose) System.out.print(str);
+                }
+            }
+
+            if (toFile) dataDump.add("\n");
+            if (verbose) System.out.println();
         }
 
         String str = "---- Ranking ---- \n";

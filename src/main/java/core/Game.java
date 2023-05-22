@@ -524,11 +524,18 @@ public class Game {
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation, currentPlayer.getParameters().actionSpace);
         if (observedActions.size() == 0) {
             Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
-            IExtendedSequence topOfStack = actionsInProgress.peek();
+            IExtendedSequence topOfStack = null;
+            AbstractAction lastAction = null;
+            if (actionsInProgress.size() > 0) {
+                topOfStack = actionsInProgress.peek();
+            }
+            if (gameState.getHistory().size() > 1) {
+                lastAction = gameState.getHistory().get(gameState.getHistory().size() - 1);
+            }
             throw new AssertionError("No actions available for player " + activePlayer
-                    + ". Last action: " + gameState.getHistory().get(gameState.getHistory().size() - 1)
+                    + (lastAction != null? ". Last action: " + lastAction.getClass().getSimpleName() + " (" + lastAction + ")" : ". No actions in history")
                     + ". Actions in progress: " + actionsInProgress.size()
-                    + ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")");
+                    + (topOfStack != null? ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")" : ""));
         }
         actionComputeTime = (System.nanoTime() - s);
         actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));

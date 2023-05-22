@@ -7,14 +7,13 @@ import core.components.Token;
 import games.stratego.StrategoGameState;
 import games.stratego.StrategoParams;
 import games.stratego.actions.AttackMove;
-import games.stratego.actions.Move;
 import games.stratego.actions.NormalMove;
-import utilities.Distance;
 import utilities.Vector2D;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Piece extends Token {
 
@@ -78,34 +77,34 @@ public class Piece extends Token {
             return moves;
         }
 
-        if (pieceType == PieceType.SCOUT){
-            for (Vector2D.Direction dir: Vector2D.Direction.values4()) {
-                Vector2D newPos = position.copy();
-                newPos = newPos.add(dir.vector2D);
-                if (params.isTileValid(newPos.getX(), newPos.getY())) {
-                    addMove(board, params, moves, newPos, dir.vector2D, actionSpace);
-                }
-            }
-        } else {
-            for(Vector2D.Direction dir: Vector2D.Direction.values4()){  // horizontal or vertical
-                for (int j = 1; j <= params.moveSpeed; j++) {  // according to movement speed
-                    Vector2D dirCustom = dir.vector2D.mult(j);
-                    Vector2D newPos = position.copy();
-                    newPos = newPos.add(dirCustom);
+        int maxTravel = params.moveSpeed;
+        if (pieceType == PieceType.SCOUT) maxTravel = params.gridSize;
 
-                    if (params.isTileValid(newPos.getX(), newPos.getY())) {
-                        if (addMove(board, params, moves, newPos, dirCustom, actionSpace)) break;
-                    }
+        for (Vector2D.Direction dir: Vector2D.Direction.values4()) {
+            for (int j = 1; j <= maxTravel; j++) {
+                Vector2D dirCustom = dir.vector2D.mult(j);
+                Vector2D newPos = position.copy();
+                newPos = newPos.add(dirCustom);
+                Piece pieceAtTile = board.getElement(newPos.getX(), newPos.getY());
+                if (params.isTileValid(newPos.getX(), newPos.getY())  // Must be walkable tile
+                        && (pieceAtTile == null // Ok if empty tile, we can move there
+                        || pieceAtTile.getPieceAlliance() != alliance)) {  // Ok if enemy piece at tile, we attack
+                    addMove(board, moves, newPos, dirCustom, actionSpace);
+                } else {
+                    // No more valid moves in this direction
+                    break;
                 }
             }
         }
+
         return moves;
     }
 
-    private boolean addMove(GridBoard<Piece> board, StrategoParams params, List<AbstractAction> moves, Vector2D newPos,
+    private void addMove(GridBoard<Piece> board, List<AbstractAction> moves, Vector2D newPos,
                             Vector2D dir, ActionSpace actionSpace) {
         Piece pieceAtTile = board.getElement(newPos.getX(), newPos.getY());
         if (pieceAtTile == null) {
+            // Just move
             if (actionSpace.context == ActionSpace.Context.Dependent) {
                 // Dependent
                 moves.add(new NormalMove(position, dir));
@@ -114,20 +113,15 @@ public class Piece extends Token {
                 moves.add(new NormalMove(getComponentID(), newPos));
             }
         } else {
-            if (Distance.manhattan_distance(position, newPos) <= params.attackRange &&
-                    alliance != pieceAtTile.getPieceAlliance()) {
-                if (actionSpace.context == ActionSpace.Context.Dependent) {
-                    // Dependent
-                    moves.add(new AttackMove(position, newPos));
-                } else {
-                    // Independent, default
-                    moves.add(new AttackMove(getComponentID(), pieceAtTile.getComponentID()));
-                }
+            // Attack
+            if (actionSpace.context == ActionSpace.Context.Dependent) {
+                // Dependent
+                moves.add(new AttackMove(position, newPos));
+            } else {
+                // Independent, default
+                moves.add(new AttackMove(getComponentID(), pieceAtTile.getComponentID()));
             }
-            // Reached another piece and cannot occupy same square or jump over, finish
-            return true;
         }
-        return false;
     }
 
     @Override

@@ -53,7 +53,7 @@ public class AttackMove extends Move {
         attackedPiece.setPieceKnown(true);
 
         if (attackedPiece.getPieceType() == Piece.PieceType.FLAG){
-            gs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, StrategoMetrics.StrategoEvent.EndCondition.name() + ":" + StrategoForwardModel.EndCondition.FLAG_CAPTURE.name() + ":" + gs.getCurrentPlayer());
+            gs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, StrategoForwardModel.EndCondition.FLAG_CAPTURE.name() + ":" + gs.getCurrentPlayer());
             gs.setGameStatus(CoreConstants.GameResult.GAME_END);
             gs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, gs.getCurrentPlayer());
             gs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 1-gs.getCurrentPlayer());
@@ -128,12 +128,12 @@ public class AttackMove extends Move {
                     " : " + movedPiece.getPieceType().name() + " vs " + attackedPiece.getPieceType().name() + ":" +
                     attackedPiece.getOwnerId());
 
-            // Higher rank wins
-            movedTileEmptied = board.setElement(attackedPiece.getPiecePosition().getX(),
-                    attackedPiece.getPiecePosition().getY(), null);
-            destinationTileSet = board.setElement(movedPiece.getPiecePosition().getX(),
-                    movedPiece.getPiecePosition().getY(), attackedPiece);
-            attackedPiece.setPiecePosition(movedPiece.getPiecePosition());
+            // Defender wins, does not move, attacker just gets removed from the board
+            movedTileEmptied = board.setElement(movedPiece.getPiecePosition().getX(),
+                    movedPiece.getPiecePosition().getY(), null);
+//            destinationTileSet = board.setElement(movedPiece.getPiecePosition().getX(),
+//                    movedPiece.getPiecePosition().getY(), attackedPiece);
+//            attackedPiece.setPiecePosition(movedPiece.getPiecePosition());
         }
         return (movedTileEmptied && destinationTileEmptied && destinationTileSet);
     }

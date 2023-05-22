@@ -96,8 +96,10 @@ public class Vector2D {
             return null;
         }
         public static Pair<Direction, Integer> approxVecToDir(Vector2D vec) {
-            int mult = Math.max(vec.x, vec.y);
-            if (mult == 0) return new Pair<>(NONE, 0);
+            int mult = Math.max(Math.abs(vec.x), Math.abs(vec.y));
+            if (mult == 0) {
+                return new Pair<>(NONE, 0);
+            }
             Direction d = vecToDir(vec.divide(mult));
             if (d != null) return new Pair<>(d, mult);
             return null;

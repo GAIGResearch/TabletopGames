@@ -33,6 +33,7 @@ public class GameMetrics implements IMetricsCollection {
                 double score = e.state.getGameScore(i);
                 sum += score;
                 records.put("Player-" + i, score);
+                records.put("PlayerName-" + i, listener.getGame().getPlayers().get(i).toString());
                 if (e.state.getOrdinalPosition(i) == 1) leaderID = i;
                 if (e.state.getNPlayers() > 1 && e.state.getOrdinalPosition(i) == 2) secondID = i;
             }
@@ -53,8 +54,10 @@ public class GameMetrics implements IMetricsCollection {
         @Override
         public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
-            for (int i = 0; i < nPlayersPerGame; i++)
+            for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("Player-" + i, Double.class);
+                columns.put("PlayerName-" + i, String.class);
+            }
             columns.put("Average", Double.class);
             columns.put("LeaderGap", Double.class);
             return columns;
@@ -74,6 +77,7 @@ public class GameMetrics implements IMetricsCollection {
         public boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             for (int i = 0; i < e.state.getNPlayers(); i++) {
                 records.put("Player-" + i, e.state.getGameScore(i));
+                records.put("PlayerName-" + i, listener.getGame().getPlayers().get(i).toString());
             }
             return true;
         }
@@ -88,6 +92,7 @@ public class GameMetrics implements IMetricsCollection {
             Map<String, Class<?>> columns = new HashMap<>();
             for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("Player-" + i, Double.class);
+                columns.put("PlayerName-" + i, String.class);
             }
             return columns;
         }
@@ -200,6 +205,7 @@ public class GameMetrics implements IMetricsCollection {
             for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("Player-" + i, Integer.class);
                 columns.put("Player-" + i + " rank", String.class);
+                columns.put("PlayerName-" + i, String.class);
             }
             return columns;
         }
@@ -209,6 +215,7 @@ public class GameMetrics implements IMetricsCollection {
             for (int i = 0; i < e.state.getNPlayers(); i++) {
                 records.put("Player-" + i, e.state.getOrdinalPosition(i));
                 records.put("Player-" + i + " rank", String.valueOf(e.state.getOrdinalPosition(i)));
+                records.put("PlayerName-" + i, listener.getGame().getPlayers().get(i).toString());
             }
             return true;
         }

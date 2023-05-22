@@ -6,7 +6,6 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.components.GridBoard;
-import evaluation.metrics.Event;
 import games.stratego.actions.DeepMove;
 import games.stratego.components.Piece;
 import games.stratego.metrics.StrategoMetrics;
@@ -91,23 +90,24 @@ public class StrategoForwardModel extends StandardForwardModel {
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_END){
+        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_END || currentState.isActionInProgress()){
             return;
         }
-        StrategoGameState sgs = (StrategoGameState) currentState;
 
+        StrategoGameState sgs = (StrategoGameState) currentState;
         endPlayerTurn(sgs);
 
         List<AbstractAction> actions = _computeAvailableActions(sgs, currentState.getCoreGameParameters().actionSpace);
         if (actions.isEmpty()){
-            sgs.logEvent(Event.GameEvent.GAME_EVENT, StrategoMetrics.StrategoEvent.EndCondition.name() + ":" + EndCondition.NO_MOVES_LEFT.name() + ":" + sgs.getCurrentPlayer());
+            sgs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, EndCondition.NO_MOVES_LEFT.name() + ":" + sgs.getCurrentPlayer());
             // If the player can't take any actions, they lose
+            _computeAvailableActions(sgs, currentState.getCoreGameParameters().actionSpace);
             sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
             sgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, sgs.getCurrentPlayer());
             sgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, 1-sgs.getCurrentPlayer());
         } else {
             if (sgs.getTurnCounter() >= ((StrategoParams)sgs.getGameParameters()).maxRounds) {
-                sgs.logEvent(Event.GameEvent.GAME_EVENT, StrategoMetrics.StrategoEvent.EndCondition.name() + ":" + EndCondition.MAX_TURNS.name());
+                sgs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, EndCondition.MAX_TURNS.name());
                 // Max rounds reached, draw
                 sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
                 sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, sgs.getCurrentPlayer());

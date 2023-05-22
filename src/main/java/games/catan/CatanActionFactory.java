@@ -2,6 +2,7 @@ package games.catan;
 
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
+import core.actions.DoNothing;
 import core.components.Counter;
 import core.components.Deck;
 import core.components.Edge;
@@ -89,7 +90,7 @@ public class CatanActionFactory {
             }
 
             // Or counter-offer, if we've not already done too many steps
-            if (gs.nTradesThisTurn < ((CatanParameters)gs.getGameParameters()).max_trade_actions_allowed) {
+            if (gs.nTradesThisTurn < ((CatanParameters)gs.getGameParameters()).max_negotiation_count) {
                 actions.addAll(CatanActionFactory.getPlayerTradeOfferActions(gs, actionSpace, player, opt));
             }
         } else if (gs.getNResourcesInHand(player) > 0) {
@@ -221,6 +222,7 @@ public class CatanActionFactory {
                 if (gs.getPlayerResources(player).get(resource).getValue() > 0) actions.add(new DiscardResources(new CatanParameters.Resource[]{resource}, player));
             }
         }
+        if (actions.size() == 0) actions.add(new DoNothing());
         return actions;
     }
 

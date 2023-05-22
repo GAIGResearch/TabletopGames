@@ -3,6 +3,7 @@ package games.catan.actions.discard;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
+import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import games.catan.CatanActionFactory;
 import games.catan.CatanGameState;
@@ -48,7 +49,8 @@ public class DiscardResourcesPhase extends AbstractAction implements IExtendedSe
 
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
-        nDiscarded += ((DiscardResources) action).resourcesToDiscard.length;
+        if (action instanceof DoNothing) nDiscarded = nDiscards;
+        else nDiscarded += ((DiscardResources) action).resourcesToDiscard.length;
     }
 
     @Override

@@ -42,17 +42,14 @@ public class StrategoMetrics implements IMetricsCollection {
         @Override
         protected boolean _run(MetricsGameListener listener, Event e, Map<String, Object> records) {
             String[] text = ((LogEvent)e.action).text.split(":");
-            if (StrategoEvent.valueOf(text[0]) != StrategoEvent.EndCondition)
-                return false;
-
-            StrategoForwardModel.EndCondition condition = StrategoForwardModel.EndCondition.valueOf(text[1]);
+            StrategoForwardModel.EndCondition condition = StrategoForwardModel.EndCondition.valueOf(text[0]);
             records.put("GameEnd", condition.toString());
             return true;
         }
 
         @Override
         public Set<IGameEvent> getDefaultEventTypes() {
-            return Collections.singleton(Event.GameEvent.GAME_EVENT);
+            return Collections.singleton(StrategoMetrics.StrategoEvent.EndCondition);
         }
     }
 
