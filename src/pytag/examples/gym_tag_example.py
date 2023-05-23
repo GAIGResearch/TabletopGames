@@ -1,5 +1,6 @@
-import gym_
-from gym_.wrappers import MergeActionMaskWrapper
+import pytag
+from pytag.gym.wrappers import MergeActionMaskWrapper
+
 import gymnasium as gym
 from gymnasium.vector import AsyncVectorEnv, SyncVectorEnv
 import numpy as np

@@ -7,15 +7,14 @@ from distutils.util import strtobool
 
 from gymnasium.vector import AsyncVectorEnv, SyncVectorEnv
 
-import gym_
+import pytag
+from pytag.gym.wrappers import MergeActionMaskWrapper
 import gymnasium as gym
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.distributions.categorical import Categorical
-
-from src.pytag.gym_.wrappers import MergeActionMaskWrapper
 
 
 from torch.utils.tensorboard import SummaryWriter
