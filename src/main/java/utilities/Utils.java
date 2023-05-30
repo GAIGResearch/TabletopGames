@@ -295,6 +295,7 @@ public abstract class Utils {
             allData.add(data.clone());
             return;
         }
+        if (allData.size() > 1000) return; // don't let the list get too big (1 million combinations is a lot!)
 
         for (int i = start; i <= end && end - i + 1 >= r - index; i++) {
             data[index] = arr[i];

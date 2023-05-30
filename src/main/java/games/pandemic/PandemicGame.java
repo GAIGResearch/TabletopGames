@@ -83,7 +83,7 @@ public class PandemicGame extends Game {
 
         PandemicParameters params = new PandemicParameters("data/pandemic/", System.currentTimeMillis());
         runCompetition(config, players, -1, false, listeners, nRepetition, ac);
-        pl.allGamesFinished();
+        pl.report();
     }
 
 
@@ -163,7 +163,7 @@ public class PandemicGame extends Game {
 
             System.out.println(playerType.name());
             System.out.println("-----------------");
-            pl.allGamesFinished();
+            pl.report();
         }
 
         // Calculate ranking as per competition rules

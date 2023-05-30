@@ -80,7 +80,7 @@ public abstract class AbstractTournamentMetric extends  AbstractMetric
      * @param reportTypes - list of report types to produce
      * @param reportDestinations - list of report destinations to produce
      */
-    public void processFinishedGames(String folderName, List<IDataLogger.ReportType> reportTypes, List<IDataLogger.ReportDestination> reportDestinations)
+    public void report(String folderName, List<IDataLogger.ReportType> reportTypes, List<IDataLogger.ReportDestination> reportDestinations)
     {
         //DataProcessor with compatibility assertion:
         IDataProcessor dataProcessor = getDataProcessor();

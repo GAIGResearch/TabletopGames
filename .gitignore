@@ -32,3 +32,4 @@ out/production/ModernBoardGame/META-INF/
 
 javadoc/
 test*
+metrics/out/*

@@ -15,6 +15,5 @@
   },
   "actionSpaceStructure" : "Flat",
   "actionSpaceContext": "Dependent",
-  "maintainMasterState": true,
-  "treeRecorderFolder": "test_01"
+  "maintainMasterState": true
 }

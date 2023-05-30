@@ -43,6 +43,7 @@ public class RoundRobinTournament extends AbstractTournament {
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
     private boolean randomGameParams;
+    protected final String destDir, finalDir;
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -54,13 +55,13 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, boolean selfPlay, boolean mirror, AbstractParameters gameParams) {
+                                int gamesPerMatchUp, boolean selfPlay, boolean mirror, AbstractParameters gameParams,
+                                String destDir, String finalDir) {
         super(agents, gameToPlay, playersPerGame, gameParams);
         if (!(this instanceof RandomRRTournament) && !mirror && !selfPlay && playersPerGame > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play or mirror-mode." +
                     "Either add more agents, reduce the number of players per game, add mirror-mode, or allow self-play.");
         }
-
         this.agentIDs = new LinkedList<>();
         for (int i = 0; i < this.agents.size(); i++)
             this.agentIDs.add(i);
@@ -77,6 +78,9 @@ public class RoundRobinTournament extends AbstractTournament {
             this.winsPerPlayerPerOpponent[i] = new double[agents.size()];
             this.nGamesPlayedPerOpponent[i] = new int[agents.size()];
         }
+
+        this.destDir = destDir;
+        this.finalDir = finalDir;
     }
 
     /**
@@ -209,9 +213,9 @@ public class RoundRobinTournament extends AbstractTournament {
 
         // Run!
         RoundRobinTournament tournament = mode.equals("exhaustive") ?
-                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, mirror, params) :
+                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, mirror, params, destDir, timeDir.toString()) :
                 new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, selfPlay, mirror, matchups, reportPeriod,
-                        System.currentTimeMillis(), params);
+                        System.currentTimeMillis(), params, destDir, timeDir.toString());
 
         if (resultsFile.length() > 0)
             tournament.setOutputFileName(resultsFile);
@@ -257,7 +261,7 @@ public class RoundRobinTournament extends AbstractTournament {
         }
 
         for (IGameListener listener : listeners) {
-            listener.allGamesFinished();
+            listener.report();
         }
     }
 
@@ -427,8 +431,8 @@ public class RoundRobinTournament extends AbstractTournament {
 
             for (int j = 0; j < this.agents.size(); j++) {
                 if (i != j) {
-                    str = String.format("\n%s won %.1f%% of the games against %s.",
-                            agents.get(i), 100.0 * winsPerPlayerPerOpponent[i][j] / nGamesPlayedPerOpponent[i][j], agents.get(j));
+                    str = String.format("%s won %.1f%% of the %d games against %s.\n",
+                            agents.get(i), 100.0 * winsPerPlayerPerOpponent[i][j] / nGamesPlayedPerOpponent[i][j], nGamesPlayedPerOpponent[i][j], agents.get(j));
                     if (toFile) dataDump.add(str);
                     if (verbose) System.out.print(str);
                 }

@@ -6,5 +6,6 @@
   "mirror": false,
   "nPlayers": 4,
   "matchups": 1000,
-  "listener": "metrics/catan.json"
+  "listener": "metrics/catan.json",
+  "reportPeriod": 100
 }

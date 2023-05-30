@@ -281,7 +281,7 @@ public class GameReport implements IGameRunner {
 
                 // Once all games for this number of players are complete, let the gameTracker know
                 for (IGameListener gameTracker : gameTrackers) {
-                    gameTracker.allGamesFinished();
+                    gameTracker.report();
                     gameTracker.reset();
                 }
 

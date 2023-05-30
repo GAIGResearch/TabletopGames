@@ -8,7 +8,7 @@
   "treePolicy" : "UCB",
   "expansionPolicy" : "RANDOM",
   "budgetType" : "BUDGET_ITERATIONS",
-  "budget" : 100,
+  "budget" : 50,
   "breakMS" : 0,
   "heuristic" : {
     "class" : "players.heuristics.ScoreHeuristic"

@@ -31,7 +31,7 @@ public interface IGameListener {
      * <p>
      * This is useful for Listeners that are just interested in aggregate data across many runs
      */
-    void allGamesFinished();
+    void report();
 
     default boolean setOutputDirectory(String... nestedDirectories) {return true;}
 

@@ -107,7 +107,7 @@ public class MetricsGameListener implements IGameListener {
      * <p>
      * This is useful for Listeners that are just interested in aggregate data across many runs
      */
-    public void allGamesFinished() {
+    public void report() {
         boolean success = true;
 
         if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
@@ -121,7 +121,7 @@ public class MetricsGameListener implements IGameListener {
         // All metrics report themselves
         if (success) {
             for (AbstractMetric metric : metrics.values()) {
-                metric.processFinishedGames(destDir, reportTypes, reportDestinations);
+                metric.report(destDir, reportTypes, reportDestinations);
             }
 
             // We also create raw data files for groups of metrics responding to the same event
