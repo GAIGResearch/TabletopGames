@@ -1,9 +1,9 @@
-package games.MonopolyDeal;
+package games.monopolydeal;
 
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
-import games.MonopolyDeal.actions.MonopolyDealAction;
+import games.monopolydeal.actions.MonopolyDealAction;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package games.MonopolyDeal.components;
+package games.monopolydeal.components;
 
 import core.CoreConstants;
 import core.components.Component;

@@ -1,4 +1,4 @@
-package games.MonopolyDeal.actions;
+package games.monopolydeal.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;

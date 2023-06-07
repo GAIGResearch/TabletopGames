@@ -1,4 +1,4 @@
-package games.MonopolyDeal;
+package games.monopolydeal;
 
 import core.AbstractGameState;
 import core.AbstractParameters;

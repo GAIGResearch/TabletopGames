@@ -56,6 +56,7 @@ import static core.CoreConstants.*;
 import static games.GameType.Category.Number;
 import static games.GameType.Category.*;
 import static games.GameType.Mechanic.*;
+import games.monopolydeal.*;
 
 /**
  * Encapsulates all games available in the framework, with minimum and maximum number of players as per game rules.
@@ -164,7 +165,11 @@ public enum GameType {
     CantStop(2, 4,
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
-            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class);
+            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
+    MonopolyDeal(2, 5,
+            Arrays.asList(Strategy, Cards, Economic),
+            Arrays.asList(SetCollection, HandManagement, SimultaneousActionSelection),
+            MonopolyDealGameState.class, MonopolyDealForwardModel.class, MonopolyDealParameters.class, MonopolyDealGUIManager.class);
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
