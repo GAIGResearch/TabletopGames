@@ -27,7 +27,7 @@ public class MCTSNodesAndVisitsTests {
         // default Parameter settings for later changes
         params = new MCTSParams(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.information = MCTSEnums.Information.Information_Set;
         params.maxTreeDepth = 20;
         params.rolloutLength = 10;
@@ -38,7 +38,7 @@ public class MCTSNodesAndVisitsTests {
     }
 
     public Game createGame(MCTSParams params) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
@@ -58,7 +58,8 @@ public class MCTSNodesAndVisitsTests {
 
     @Test
     public void paranoid() {
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.Paranoid;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
+        params.paranoid = true;
         Game game = createGame(params);
         int[] expectedNodes = {200, 200, 200, 200};
         int[] errorMargin = {10, 10, 10, 10};
@@ -67,7 +68,7 @@ public class MCTSNodesAndVisitsTests {
 
     @Test
     public void maxN() {
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         Game game = createGame(params);
         int[] expectedNodes = {200, 200, 200, 200};
         int[] errorMargin = {10, 10, 10, 10};
@@ -92,7 +93,7 @@ public class MCTSNodesAndVisitsTests {
 
     @Test
     public void reducedDepth3MaxN() {
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.maxTreeDepth = 3;
         params.information = MCTSEnums.Information.Closed_Loop;
         params.discardStateAfterEachIteration = false;

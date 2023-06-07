@@ -2,14 +2,13 @@ package games.sushigo.actions;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IExtendedSequence;
 import games.sushigo.SGGameState;
 import games.sushigo.cards.SGCard;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ChooseCard extends AbstractAction implements IExtendedSequence {
     public final int playerId;
@@ -24,13 +23,9 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         this.useChopsticks = useChopsticks;
     }
 
-    public ChooseCard getHiddenChoice() {
-        return new ChooseCard(playerId, -1, useChopsticks);
-    }
-
     @Override
     public boolean execute(AbstractGameState gs) {
-        ((SGGameState)gs).addCardChoice(this, gs.getCurrentPlayer());
+        ((SGGameState) gs).addCardChoice(this, gs.getCurrentPlayer());
         if (useChopsticks) {
             gs.setActionInProgress(this);
         }
@@ -52,6 +47,8 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
                 actions.add(new ChooseCard(playerId, i, false));
             }
         }
+        if (actions.isEmpty())
+            throw new AssertionError("No actions");
         return actions;
     }
 
@@ -72,7 +69,12 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public ChooseCard copy() {
-        return this; // immutable
+        if (useChopsticks) {
+            ChooseCard retValue = new ChooseCard(playerId, cardIdx, useChopsticks);
+            retValue.chopstickChooseDone = chopstickChooseDone;
+            return retValue;
+        }
+        return this; // immutable if not using chopsticks
     }
 
     @Override
@@ -90,6 +92,22 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Choose card " + cardIdx + (useChopsticks? " (+chopsticks)" : "");
+        return "Choose card " + getCard(gameState).getComponentName() + " [" + cardIdx + "] " + (useChopsticks ? " (+chopsticks)" : "");
+    }
+
+    @Override
+    public Card getCard(AbstractGameState gs) {
+        SGGameState sggs = (SGGameState) gs;
+        return sggs.getPlayerHands().get(playerId).get(cardIdx);
+    }
+
+    @Override
+    public String toString() {
+        return "ChooseCard{" +
+                "playerId=" + playerId +
+                ", cardIdx=" + cardIdx +
+                ", useChopsticks=" + useChopsticks +
+                ", chopstickChooseDone=" + chopstickChooseDone +
+                '}';
     }
 }

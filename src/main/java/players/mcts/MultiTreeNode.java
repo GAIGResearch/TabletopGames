@@ -67,8 +67,8 @@ public class MultiTreeNode extends SingleTreeNode {
         instantiate(null, null, state);
 
         roots = new SingleTreeNode[state.getNPlayers()];
-        roots[this.decisionPlayer] = SingleTreeNode.createRootNode(player, state, rnd);
-        if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTreeParanoid)
+        roots[this.decisionPlayer] = SingleTreeNode.createRootNode(player, state, rnd, player.getFactory());
+        if (params.paranoid)
             roots[this.decisionPlayer].paranoidPlayer = decisionPlayer;
         currentLocation = new SingleTreeNode[state.getNPlayers()];
         currentLocation[this.decisionPlayer] = roots[decisionPlayer];
@@ -100,8 +100,8 @@ public class MultiTreeNode extends SingleTreeNode {
         for (int i = 0; i < currentLocation.length; i++)
             currentLocation[i] = roots[i];
 
-        List<Pair<Integer, AbstractAction>> actionsInTree = new ArrayList<>();
-        List<Pair<Integer, AbstractAction>> actionsInRollout = new ArrayList<>();
+        actionsInTree = new ArrayList<>();
+        actionsInRollout = new ArrayList<>();
 
         // Keep iterating while the state reached is not terminal and the depth of the tree is not exceeded
         do {
@@ -110,9 +110,9 @@ public class MultiTreeNode extends SingleTreeNode {
             int currentActor = currentState.getCurrentPlayer();
             if (roots[currentActor] == null) {
                 // their first action in search; set a root for their tree
-                SingleTreeNode pseudoRoot = SingleTreeNode.createRootNode(mctsPlayer, currentState.copy(), rnd);
+                SingleTreeNode pseudoRoot = SingleTreeNode.createRootNode(mctsPlayer, currentState.copy(), rnd, mctsPlayer.getFactory());
                 pseudoRoot.decisionPlayer = currentActor;
-                if (params.opponentTreePolicy == MCTSEnums.OpponentTreePolicy.MultiTreeParanoid)
+                if (params.paranoid)
                     pseudoRoot.paranoidPlayer = decisionPlayer;
                 roots[currentActor] = pseudoRoot;
                 currentLocation[currentActor] = pseudoRoot;
@@ -128,12 +128,12 @@ public class MultiTreeNode extends SingleTreeNode {
                 if (availableActions.isEmpty())
                     throw new AssertionError("We should always have something to choose from");
 
-                AbstractAction chosen = agent._getAction(currentState, availableActions);
+                AbstractAction chosen = agent.getAction(currentState, availableActions);
                 actionsInRollout.add(new Pair<>(currentActor, chosen));
                 if (debug)
                     System.out.printf("Rollout action chosen for P%d - %s %n", currentActor, chosen);
 
-                advance(currentState, chosen);
+                advance(currentState, chosen, true);
             } else {  // in the tree still for this player
                 // currentNode is the last node that this actor was at in their tree
                 currentNode = currentLocation[currentActor];
@@ -149,14 +149,14 @@ public class MultiTreeNode extends SingleTreeNode {
                     expansionActionTaken[currentActor] = true;
                     if (debug)
                         System.out.printf("Expansion action chosen for P%d - %s %n", currentActor, chosen);
-                    advance(currentState, chosen);
+                    advance(currentState, chosen, false);
                     // we will create the new node once we get back to a point when it is this player's action again
                 } else {
                     chosen = currentNode.treePolicyAction(true);
                     lastAction[currentActor] = chosen;
                     if (debug)
                         System.out.printf("Tree action chosen for P%d - %s %n", currentActor, chosen);
-                    advance(currentState, chosen);
+                    advance(currentState, chosen, false);
                 }
                 actionsInTree.add(new Pair<>(currentActor, chosen));
                 if (currentLocation[currentActor].depth >= params.maxTreeDepth)
@@ -166,7 +166,7 @@ public class MultiTreeNode extends SingleTreeNode {
             // for the decisionPlayer, or they are out of the game (in which case they will never get to expand a node)
         } while (currentState.isNotTerminal() &&
                 !(actionsInRollout.size() >= params.rolloutLength &&
-                        (nodeExpanded[decisionPlayer] || !currentState.isNotTerminalForPlayer(decisionPlayer))));
+                        (maxDepthReached[decisionPlayer] || nodeExpanded[decisionPlayer] || !currentState.isNotTerminalForPlayer(decisionPlayer))));
 
         for (int i = 0; i < nodeExpanded.length; i++) {
             updateCurrentLocation(i, currentState);
@@ -223,7 +223,7 @@ public class MultiTreeNode extends SingleTreeNode {
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("round", state.getRoundCounter());
         stats.put("turn", state.getTurnCounter());
-        stats.put("turnOwner", state.getTurnOwner());
+        stats.put("turnOwner", state.getCurrentPlayer());
         stats.put("iterations", numIters);
         stats.put("rolloutActions", rolloutActionsTaken / numIters);
         stats.put("time", timeTaken);

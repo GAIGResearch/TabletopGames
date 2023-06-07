@@ -8,13 +8,24 @@ import players.mcts.MultiTreeNode;
 import players.mcts.SingleTreeNode;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 
 public class TestMCTSPlayer extends MCTSPlayer {
 
-    public TestMCTSPlayer(MCTSParams params) {
+    protected Supplier<? extends SingleTreeNode> factory;
+
+    public TestMCTSPlayer(MCTSParams params, Supplier<? extends SingleTreeNode> factory) {
         super(params, "TestMCTSPlayer");
+        this.factory = factory;
+    }
+
+    @Override
+    protected Supplier<? extends SingleTreeNode> getFactory() {
+        if (factory == null)
+            return super.getFactory();
+        return factory;
     }
 
     public void setDebug(boolean debug) {

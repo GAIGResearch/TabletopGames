@@ -3,7 +3,8 @@ package evaluation.tournaments;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IStatisticLogger;
-import evaluation.listeners.GameListener;
+import evaluation.listeners.IGameListener;
+import evaluation.loggers.FileStatsLogger;
 import games.GameType;
 import players.PlayerFactory;
 import players.mcts.BasicMCTSPlayer;
@@ -11,7 +12,6 @@ import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
-import evaluation.loggers.FileStatsLogger;
 
 import java.io.FileWriter;
 import java.util.*;
@@ -25,7 +25,7 @@ public class RoundRobinTournament extends AbstractTournament {
     private static boolean debug = false;
     public final boolean selfPlay;
     private final int gamesPerMatchUp;
-    protected List<GameListener> listeners;
+    protected List<IGameListener> listeners;
     public boolean verbose = true;
     double[] pointsPerPlayer;
     protected LinkedHashMap<Integer, Double> finalRanking; // contains index of agent in agents
@@ -42,7 +42,7 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param gamesPerMatchUp - number of games for each combination of players.
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
-    public RoundRobinTournament(List<AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
+    public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
                                 int gamesPerMatchUp, boolean selfPlay, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, gameParams);
         if (!selfPlay && playersPerGame > this.agents.size()) {
@@ -84,7 +84,7 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\tmatchups=      The total number of matchups to run if mode=random...\n" +
                             "\t               ...or the number of matchups to run per combination of players if mode=exhaustive\n" +
                             "\tlistener=      (Optional) The full class name of an IGameListener implementation. \n" +
-                            "\t               Defaults to utilities.GameResultListener. \n" +
+                            "\t               Defaults to evaluation.metrics.MetricsGameListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tmetrics=       The full class name of an IMetricsCollection implementation. " +
@@ -119,7 +119,7 @@ public class RoundRobinTournament extends AbstractTournament {
         int reportPeriod = getArg(args, "reportPeriod", matchups); //matchups
         boolean randomGameParams = getArg(args, "randomGameParams", false);
 
-        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.GameListener").split("\\|")));
+        List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
         List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
         List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
 
@@ -131,7 +131,7 @@ public class RoundRobinTournament extends AbstractTournament {
             agents.addAll(PlayerFactory.createPlayers(playerDirectory));
             if (!statsLogPrefix.equals("")) {
                 for (AbstractPlayer agent : agents) {
-                    IStatisticLogger logger = IStatisticLogger.createLogger("utilities.SummaryLogger", statsLogPrefix + "_" + agent.toString() + ".txt");
+                    IStatisticLogger logger = IStatisticLogger.createLogger("evaluation.loggers.SummaryLogger", statsLogPrefix + "_" + agent.toString() + ".txt");
                     logger.record("Name", agent.toString());
                     agent.setStatsLogger(logger);
                 }
@@ -158,9 +158,10 @@ public class RoundRobinTournament extends AbstractTournament {
 
         tournament.listeners = new ArrayList<>();
         for (int l = 0; l < listenerClasses.size(); l++) {
-            IStatisticLogger logger = new FileStatsLogger(listenerFiles.get(l));
+            String logFile = listenerFiles.size() == 1 ? listenerFiles.get(0) : listenerFiles.get(l);
+            IStatisticLogger logger = new FileStatsLogger(logFile);
             String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(l);
-            GameListener gameTracker = GameListener.createListener(listenerClasses.get(l), logger, metricsClass);
+            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), logger, metricsClass);
             tournament.listeners.add(gameTracker);
         }
         tournament.runTournament();
@@ -188,7 +189,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
             reportResults(g);
         }
-        for (GameListener listener : listeners)
+        for (IGameListener listener : listeners)
             listener.allGamesFinished();
     }
 
@@ -252,7 +253,7 @@ public class RoundRobinTournament extends AbstractTournament {
         }
 
 
-        for (GameListener listener : listeners) {
+        for (IGameListener listener : listeners) {
             games.get(gameIdx).addListener(listener);
         }
 
@@ -295,20 +296,30 @@ public class RoundRobinTournament extends AbstractTournament {
         matchUpsRun++;
     }
 
+
+    protected void calculateFinalResults() {
+        finalRanking = new LinkedHashMap<>();
+        for (int i = 0; i < this.agents.size(); i++) {
+            finalRanking.put(i, pointsPerPlayer[i]);
+        }
+        // Sort by points.
+        finalRanking = finalRanking.entrySet().stream()
+                .sorted(Map.Entry.<Integer, Double>comparingByValue().reversed())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
+                        LinkedHashMap::new));
+    }
+
     protected void reportResults(int game_index) {
+        calculateFinalResults();
         int gameCounter = (gamesPerMatchUp * matchUpsRun);
         int gamesPerPlayer = gameCounter * playersPerGame.get(game_index) / agents.size();
         boolean toFile = resultsFileName != null;
         ArrayList<String> dataDump = new ArrayList<>();
-        HashMap<String, Double> ranked = new HashMap<>();
 
         // To console
         if (verbose)
             System.out.printf("============= %s - %d games played ============= \n", games.get(game_index).getGameType().name(), gameCounter);
         for (int i = 0; i < this.agents.size(); i++) {
-
-            ranked.put(agents.get(i).toString(), pointsPerPlayer[i]);
-
             String str = String.format("%s got %.2f points. ", agents.get(i), pointsPerPlayer[i]);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
@@ -328,15 +339,8 @@ public class RoundRobinTournament extends AbstractTournament {
         if (toFile) dataDump.add(str);
         if (verbose) System.out.print(str);
 
-        // Sort by points.
-        Map<String, Double> valueDescSortMap = ranked.entrySet().stream()
-                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
-                        LinkedHashMap::new));
-
-        // for(String name : ranked.keySet())
-        for (String name : valueDescSortMap.keySet()) {
-            str = String.format("%s: %.2f\n", name, valueDescSortMap.get(name));
+        for (Integer i : finalRanking.keySet()) {
+            str = String.format("%s: %.2f\n", agents.get(i).toString(), finalRanking.get(i));
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
         }
@@ -354,10 +358,11 @@ public class RoundRobinTournament extends AbstractTournament {
         }
     }
 
-    public List<GameListener> getListeners() {
+    public List<IGameListener> getListeners() {
         return listeners;
     }
-    public void setListeners(List<GameListener> listeners) {
+
+    public void setListeners(List<IGameListener> listeners) {
         this.listeners = listeners;
     }
 }

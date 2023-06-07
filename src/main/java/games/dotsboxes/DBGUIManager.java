@@ -1,19 +1,14 @@
 package games.dotsboxes;
 
-import core.CoreConstants;
-import core.Game;
+import core.*;
+import core.actions.AbstractAction;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.actions.AbstractAction;
 import players.human.ActionController;
+import utilities.ImageIO;
 
 import javax.swing.*;
 import java.awt.*;
-
-import utilities.ImageIO;
-
 import java.util.List;
 
 public class DBGUIManager extends AbstractGUIManager {
@@ -90,7 +85,6 @@ public class DBGUIManager extends AbstractGUIManager {
         gameInfo.add(playerStatus);
         gameInfo.add(playerScores);
         gameInfo.add(gamePhase);
-        gameInfo.add(turnOwner);
         gameInfo.add(turn);
         gameInfo.add(currentPlayer);
 

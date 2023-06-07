@@ -11,6 +11,9 @@ public class Merchant extends DominionAction {
     public Merchant(int playerId) {
         super(CardType.MERCHANT, playerId);
     }
+    public Merchant(int playerId, boolean dummy) {
+        super(CardType.MERCHANT, playerId, dummy);
+    }
 
     @Override
     boolean _execute(DominionGameState state) {

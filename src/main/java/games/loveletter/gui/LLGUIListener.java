@@ -1,7 +1,8 @@
 package games.loveletter.gui;
 
 import core.CoreConstants;
-import evaluation.listeners.GameListener;
+import core.Game;
+import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import games.loveletter.LoveLetterForwardModel;
 import games.loveletter.LoveLetterGameState;
@@ -11,7 +12,7 @@ import javax.swing.*;
 import java.util.HashSet;
 import java.util.Set;
 
-public class LLGUIListener extends GameListener {
+public class LLGUIListener implements IGameListener {
     final LoveLetterForwardModel fm;
     final GamePanel parent;
     final LoveLetterPlayerView[] playerHands;
@@ -42,5 +43,20 @@ public class LLGUIListener extends GameListener {
             // Message for pause and clarity
             JOptionPane.showMessageDialog(parent, "Round over! Winners: " + winners.toString() + ". Next round begins!");
         }
+    }
+
+    @Override
+    public void allGamesFinished() {
+
+    }
+
+    @Override
+    public void setGame(Game game) {
+
+    }
+
+    @Override
+    public Game getGame() {
+        return null;
     }
 }

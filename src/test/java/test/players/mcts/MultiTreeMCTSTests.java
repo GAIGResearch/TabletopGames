@@ -55,7 +55,7 @@ public class MultiTreeMCTSTests {
         // default Parameter settings for later changes
         params = new MCTSParams(9332);
         params.treePolicy = MCTSEnums.TreePolicy.UCB;
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MaxN;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.OneTree;
         params.information = MCTSEnums.Information.Information_Set;
         params.maxTreeDepth = 20;
         params.rolloutLength = 10;
@@ -67,7 +67,7 @@ public class MultiTreeMCTSTests {
     }
 
     public Game createTicTacToe(MCTSParams params, int gridSize) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
@@ -80,7 +80,7 @@ public class MultiTreeMCTSTests {
     }
 
     public Game createLoveLetter(MCTSParams params) {
-        mctsPlayer = new TestMCTSPlayer(params);
+        mctsPlayer = new TestMCTSPlayer(params, null);
         mctsPlayer.setDebug(true);
         List<AbstractPlayer> players = new ArrayList<>();
         players.add(mctsPlayer);
@@ -314,7 +314,8 @@ public class MultiTreeMCTSTests {
     @Test
     public void multiTreeTestLoveLetterRewardsParanoid() {
         params.budget = 1000;
-        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTreeParanoid;
+        params.opponentTreePolicy = MCTSEnums.OpponentTreePolicy.MultiTree;
+        params.paranoid = true;
         fm = new LoveLetterForwardModel();
         Game game = createLoveLetter(params);
         LoveLetterGameState state = (LoveLetterGameState) game.getGameState();

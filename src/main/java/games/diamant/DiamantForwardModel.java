@@ -91,7 +91,8 @@ public class DiamantForwardModel extends StandardForwardModel implements IOrdere
             playActions(dgs);
             dgs.actionsPlayed.clear();
         }
-        endPlayerTurn(dgs);
+        if (dgs.isNotTerminal())
+            endPlayerTurn(dgs);
     }
 
 

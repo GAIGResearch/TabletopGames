@@ -13,10 +13,18 @@ public abstract class DominionAction extends AbstractAction {
 
     protected final CardType type;
     protected final int player;
+    protected boolean dummyAction;
 
     public DominionAction(CardType type, int playerId) {
         this.type = type;
         this.player = playerId;
+        this.dummyAction = false;
+    }
+
+    public DominionAction(CardType type, int playerId, boolean dummy) {
+        this.type = type;
+        this.player = playerId;
+        this.dummyAction = dummy;
     }
 
     @Override
@@ -26,7 +34,7 @@ public abstract class DominionAction extends AbstractAction {
             System.out.println(gs);
             throw new AssertionError("Attempting to play an action out of turn : " + this);
         }
-        if (state.actionsLeft() < 1) {
+        if (!dummyAction && state.actionsLeft() < 1) {
             System.out.println(gs);
             throw new AssertionError("Insufficient actions to play action card " + this);
         }
@@ -34,11 +42,12 @@ public abstract class DominionAction extends AbstractAction {
             System.out.println(gs);
             throw new AssertionError("Should not be able to play Action Cards unless it is the Play Phase : " + this);
         }
-        if (!state.moveCard(type, player, DeckType.HAND, player, DeckType.TABLE)) {
+        if (!dummyAction && !state.moveCard(type, player, DeckType.HAND, player, DeckType.TABLE)) {
             System.out.println(gs);
             throw new AssertionError(String.format("Moving %s card from HAND to TABLE failed for player %d", type, player));
         }
-        state.changeActions(-1);  // use up one action from playing this card
+        if (!dummyAction)
+            state.changeActions(-1);  // use up one action from playing this card
         executeCoreCardTypeFunctionality(state);
         return _execute(state);
     }
@@ -61,14 +70,14 @@ public abstract class DominionAction extends AbstractAction {
     public boolean equals(Object obj) {
         if (obj instanceof DominionAction) {
             DominionAction other = (DominionAction) obj;
-            return type == other.type && player == other.player;
+            return type == other.type && player == other.player && dummyAction == other.dummyAction;
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, player);
+        return Objects.hash(type, player, dummyAction);
     }
 
     @Override

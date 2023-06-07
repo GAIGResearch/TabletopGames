@@ -1,9 +1,9 @@
 package evaluation.listeners;
 
 import core.AbstractGameState;
+import core.Game;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
-import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
 
 import java.util.*;
@@ -15,26 +15,29 @@ import java.util.stream.IntStream;
  * When a game is finished, and we know the final result, the records for the game can be updated with this (i.e.
  * win/loss, score, ordinal position), and all the records written to file.
  */
-public abstract class FeatureListener extends GameListener {
+public abstract class FeatureListener implements IGameListener {
 
     List<StateFeatureListener.LocalDataWrapper> currentData = new ArrayList<>();
     Event.GameEvent frequency;
-    boolean currentPlayerOnly = false;
+    boolean currentPlayerOnly;
+    IStatisticLogger logger;
+    Game game;
 
     protected FeatureListener(IStatisticLogger logger, Event.GameEvent frequency, boolean currentPlayerOnly) {
-        super(logger, new AbstractMetric[]{});
+        this.logger = logger;
         this.currentPlayerOnly = currentPlayerOnly;
         this.frequency = frequency;
     }
 
     @Override
-    public void onEvent(Event event)
-    {
-        if(event.type == Event.GameEvent.GAME_OVER) {
+    public void onEvent(Event event) {
+        if (event.type == frequency) {
+            processState(event.state, event.action);
+        }
 
+        if (event.type == Event.GameEvent.GAME_OVER) {
             // first we record a final state for each player
-            if(event.type == frequency)
-                processFinalState(event.state, null);
+            processState(event.state, null);
 
             // now we can update the result
             int totP = event.state.getNPlayers();
@@ -63,33 +66,40 @@ public abstract class FeatureListener extends GameListener {
                 for (int i = 0; i < record.array.length; i++) {
                     data.put(names()[i], record.array[i]);
                 }
-                data.put("PlayerCount", (double) game.getPlayers().size());
+                data.put("PlayerCount", (double) getGame().getPlayers().size());
                 data.put("TotalRounds", finalRound);
                 data.put("Win", winLoss[record.player]);
                 data.put("Ordinal", ordinal[record.player]);
                 data.put("FinalScore", finalScores[record.player]);
-                loggers.get(event.type).record(data);
+                logger.record(data);
             }
-            loggers.get(event.type).processDataAndNotFinish();
+            logger.processDataAndNotFinish();
             currentData = new ArrayList<>();
         }
 
+    }
+
+    @Override
+    public void allGamesFinished() {
+        logger.processDataAndFinish();
+    }
+
+    @Override
+    public void setGame(Game game) {
+        this.game = game;
+    }
+
+    @Override
+    public Game getGame() {
+        return game;
     }
 
     public abstract String[] names();
 
     public abstract double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
-    public void setLogger(IStatisticLogger newLogger) {
-        this.loggers = new HashMap<>();
-        for (Event.GameEvent event: Event.GameEvent.values()) {
-            this.loggers.put(event, newLogger.emptyCopy(event.name()));
-        }
-    }
-
-
-    public void processFinalState(AbstractGameState state, AbstractAction action) {
-        // we record one state for each player after every action is taken
+    public void processState(AbstractGameState state, AbstractAction action) {
+        // we record one state for each player after each relevant event occurs
         if (currentPlayerOnly && state.isNotTerminal()) {
             int p = state.getCurrentPlayer();
             double[] phi = extractFeatureVector(action, state, p);

@@ -81,11 +81,16 @@ public class SGForwardModel extends StandardForwardModel {
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
         if (currentState.isActionInProgress())
             return; // we only want to trigger this processing if an extended action sequence (i.e. Chopsticks) has been terminated
+
         SGGameState gs = (SGGameState) currentState;
 
         // Check if all players made their choice
-        int turn = gs.getTurnCounter();
-        if ((turn + 1) % gs.getNPlayers() == 0) {
+        int nextPlayer = gs.getCurrentPlayer();
+        do {
+            nextPlayer = (nextPlayer + 1) % gs.getNPlayers();
+        } while (nextPlayer != gs.getCurrentPlayer() && !gs.cardChoices.get(nextPlayer).isEmpty());
+
+        if (nextPlayer == gs.getCurrentPlayer()) {
             // They did! Reveal all cards at once. Process card reveal rules.
             revealCards(gs);
 
@@ -122,11 +127,13 @@ public class SGForwardModel extends StandardForwardModel {
 
         // End player turn
         if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            endPlayerTurn(gs);
+            endPlayerTurn(gs, nextPlayer);
         }
     }
 
     public void _endRound(SGGameState gs) {
+
+
         // Apply card end of round rules
         for (SGCard.SGCardType type: SGCard.SGCardType.values()) {
             type.onRoundEnd(gs);
@@ -187,6 +194,12 @@ public class SGForwardModel extends StandardForwardModel {
                 if (cc.useChopsticks) {
                     removeUsedChopsticks(gs, i);
                 }
+            }
+        }
+        int expectedPlayerCards = gs.getPlayerHands().get(0).getSize();
+        for (int i = 1; i < gs.getNPlayers(); i++) {
+            if (gs.getPlayerHands().get(i).getSize() != expectedPlayerCards) {
+                throw new AssertionError("Player " + i + " has " + gs.getPlayerHands().get(i).getSize() + " cards, expected " + expectedPlayerCards);
             }
         }
     }

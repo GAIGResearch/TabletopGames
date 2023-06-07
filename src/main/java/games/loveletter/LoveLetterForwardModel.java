@@ -139,7 +139,6 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IOrd
 
         if (llgs.playerHandCards.get(llgs.getCurrentPlayer()).getSize() >= 2)
             throw new AssertionError("Hand should not get this big");
-
         if (!checkEndOfRound(llgs, action)) {
             // move turn to the next player who has not already lost the round
             int nextPlayer = gameState.getCurrentPlayer();
@@ -172,6 +171,16 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IOrd
 
         // Round ends when only a single player is left, or when there are no cards left in the draw pile
         if (playersAlive == 1 || llgs.getRemainingCards() == 0) {
+            boolean tie = false;
+            LoveLetterCard.CardType highestCard = null;
+            for (int i = 0; i < llgs.getNPlayers(); i++) {
+                if (llgs.getPlayerResults()[i] != GameResult.LOSE_ROUND && llgs.playerHandCards.get(i).getSize() > 0) {
+                    if (highestCard == null) {
+                        highestCard = llgs.playerHandCards.get(i).peek().cardType;
+                    } else if (highestCard == llgs.playerHandCards.get(i).peek().cardType) tie = true;
+                }
+            }
+
             // End the round and add up points
             Set<Integer> winners = roundEnd(llgs, playersAlive, soleWinner);
 
@@ -183,8 +192,9 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IOrd
 
             GameResult result = GameResult.WIN_ROUND;
             if (winners.size() > 1) result = GameResult.DRAW_ROUND;
-            for (int i: winners) {
-                llgs.setPlayerResult(result, i);
+            for (int i = 0; i < llgs.getNPlayers(); i++) {
+                if (winners.contains(i)) llgs.setPlayerResult(result, i);
+                else llgs.setPlayerResult(GameResult.LOSE_ROUND, i);
             }
             endRound(llgs);
 
