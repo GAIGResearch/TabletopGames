@@ -168,7 +168,7 @@ public enum GameType {
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
     MonopolyDeal(2, 5,
             Arrays.asList(Strategy, Cards, Economic),
-            Arrays.asList(SetCollection, HandManagement, SimultaneousActionSelection),
+            Arrays.asList(SetCollection, HandManagement, TakeThat),
             MonopolyDealGameState.class, MonopolyDealForwardModel.class, MonopolyDealParameters.class, MonopolyDealGUIManager.class);
 
     // Core classes where the game is defined
