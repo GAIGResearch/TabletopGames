@@ -31,3 +31,4 @@ target/classes/META-INF/ModernBoardGame.kotlin_module
 out/production/ModernBoardGame/META-INF/
 
 javadoc/
+metrics/out/*
