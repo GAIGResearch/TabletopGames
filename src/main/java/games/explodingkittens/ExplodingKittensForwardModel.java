@@ -5,6 +5,8 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.CoreConstants.VisibilityMode;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
+import core.actions.DrawCard;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IOrderedActionSpace;
@@ -32,8 +34,10 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
      * @param firstState - the state to be modified to the initial game state.
      */
     protected void _setup(AbstractGameState firstState) {
-        root = generateActionTree();
-        leaves = root.getLeafNodes();
+        if (firstState.getCoreGameParameters().actionSpace.structure == ActionSpace.Structure.Tree) {
+            root = generateActionTree();
+            leaves = root.getLeafNodes();
+        }
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)firstState;
@@ -158,22 +162,29 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         }
     }
 
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, ActionSpace.Default);
+    }
+
     /**
      * Calculates the list of currently available actions, possibly depending on the game phase.
      * @return - List of AbstractAction objects.
      */
     @Override
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        if (root == null){
-            root = generateActionTree();
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
+        if (actionSpace.structure == ActionSpace.Structure.Tree){
+            root.resetTree();
+            leaves = root.getLeafNodes();
         }
-        root.resetTree();
+
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
         ArrayList<AbstractAction> actions;
 
         // The actions per player do not change a lot in between two turns
         // Could update an existing list instead of generating a new list every time we query this function
 
+        // todo we need to pass the tree type to the action factories
         // Find actions for the player depending on current game phase
         int player = ekgs.getCurrentPlayer();
         if (CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
@@ -189,6 +200,28 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         } else {
             actions = new ArrayList<>();
         }
+
+//        if (actionSpace.structure == ActionSpace.Structure.Tree){
+//            // todo rework these
+//            if (CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
+//                ActionTreeNode playNode = root.findChildrenByName("PLAY");
+//                if (actions.size() > 0){
+//                    playNode.setValue(1);
+//                    for (AbstractAction action : actions){
+//                        if (action instanceof DrawCard)
+//                            playNode.findChildrenByName(((DrawCard)action).getCard(gameState).cardType).setAction(action);
+//                    }
+//                }
+//            } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals(ekgs.getGamePhase())) {
+//
+//            } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Nope.equals(ekgs.getGamePhase())) {
+//
+//            } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Favor.equals(ekgs.getGamePhase())) {
+//
+//            } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.SeeTheFuture.equals(ekgs.getGamePhase())) {
+//
+//            }
+//        }
 
         return actions;
     }
@@ -418,7 +451,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         return leaves.stream()
                 .mapToInt(ActionTreeNode::getValue)
                 .toArray();
-//        return root.getActionMask();
     }
 
     @Override
@@ -426,115 +458,5 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         ActionTreeNode node = leaves.get(actionID);
         AbstractAction action = node.getAction();
         _next(state, action);
-//        AbstractAction action = root.getActionByVector(new int[]{actionID});
-//        _next(state, action);
-        // todo chooses some actions randomly - could fix this with the multi-level trees
-        // TODO the 2 of a kind cards are seemingly not implemented
-        // TODO these could be saved somewhere, this is useful for reference
-//        ArrayList<String> cardTypes = new ArrayList<>(Arrays.asList("EXPLODING_KITTEN", "DEFUSE", "NOPE", "ATTACK", "SKIP", "FAVOR",
-//                "SHUFFLE", "SEETHEFUTURE", "TACOCAT", "MELONCAT", "FURRYCAT", "BEARDCAT", "RAINBOWCAT"));
-//        Random rand = new Random();
-//        ExplodingKittensGameState ekgs = (ExplodingKittensGameState)state;
-//        int player = ekgs.getCurrentPlayer();
-//        Deck<ExplodingKittensCard> playerDeck = ekgs.playerHandCards.get(player);
-//
-//        ArrayList<AbstractAction> actions = playerActions(ekgs, player);
-//
-//        // todo check if we need all this or if we even need to compute all these?
-//        // todo depending on the gamephase we may have different actions, these may be handled using the mask
-//        if (CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
-//            actions = playerActions(ekgs, player);
-//        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals(ekgs.getGamePhase())) {
-//            // here the player just picks an index ,which may be any of the other action IDs
-//            actions = placeKittenActions(ekgs, player);
-//            _next(state, actions.get(rand.nextInt(actions.size())));
-//            return;
-//        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Nope.equals(ekgs.getGamePhase())) {
-//            actions = nopeActions(ekgs, player);
-//        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Favor.equals(ekgs.getGamePhase())) {
-//            actions = favorActions(ekgs, player);
-//            // find our selected card type to match the generated actions
-//            // todo: getFromIndex may be 0 if our hand is empty, which may happen
-//            for (AbstractAction favorAction: actions){
-//                ExplodingKittensCard c = playerDeck.get(((GiveCard)favorAction).getFromIndex());
-//                if (c.toString().equals(cardTypes.get(actionID))){
-//                    _next(state, favorAction);
-//                    return;
-//                }
-//            }
-//            System.out.println("WE have a problem with not finding the chosen card to return as a favor");
-//
-//        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.SeeTheFuture.equals(ekgs.getGamePhase())) {
-//            actions = seeTheFutureActions(ekgs, player);
-//            _next(state, actions.get(rand.nextInt(actions.size())));
-//            return;
-//        }
-//
-//        Class actionClass;
-//        switch (actionID){
-//            case 0:
-//                actionClass = DrawExplodingKittenCard.class; // pass/draw
-//                break;
-//            case 1:
-//                actionClass = PlaceExplodingKitten.class; // defuse
-//                break;
-//            case 2:
-//                actionClass = NopeAction.class;
-//                break;
-//            case 3:
-//                actionClass = AttackAction.class;
-//                break;
-//            case 4:
-//                actionClass = SkipAction.class;
-//                break;
-//            case 5:
-//                actionClass = FavorAction.class;
-//                break;
-//            case 6:
-//                actionClass = ShuffleAction.class;
-//                break;
-//            case 7:
-//                actionClass = SeeTheFuture.class;
-//                break;
-//            default:
-//                // todo default should be something else, but not all cards are implemented
-//                actionClass = DrawExplodingKittenCard.class;
-//        }
-//        try{
-//        switch (actionID) {
-//            case 0:
-//                if (!CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
-//                    // pass (situational, i.e: pass using nope)
-//                    _next(state, new PassAction());
-//                    return;
-//                } else {
-//                    // draw card
-//                    _next(state, new DrawExplodingKittenCard(ekgs.drawPile.getComponentID(), playerDeck.getComponentID()));
-//                    return;
-//                }
-//            case 1: // defuse
-//                actions = placeKittenActions(ekgs, player);
-//                _next(state, actions.get(rand.nextInt(actions.size())));
-//                return;
-//            case 2: // nope
-//                actions = nopeActions(ekgs, player);
-//                _next(state, actions.get(rand.nextInt(actions.size())));
-//                return;
-//            default:
-//                ArrayList<AbstractAction> finalActions = new ArrayList<>();
-////                for (AbstractAction action: computeAvailableActions(state)){
-//                // rest of the actions are more straightforward
-//                for (AbstractAction action : actions) {
-//                    if (action.getClass().equals(actionClass)) {
-//                        finalActions.add(action);
-//                    }
-//                }
-//                _next(state, finalActions.get(rand.nextInt(finalActions.size())));
-//                return;
-//        }
-//        } catch (Exception e){
-//            System.out.println(e);
-//        }
-
     }
 }

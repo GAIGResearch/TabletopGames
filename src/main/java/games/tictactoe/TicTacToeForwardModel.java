@@ -4,6 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.components.Token;
@@ -22,35 +23,55 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
     protected void _setup(AbstractGameState firstState) {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
         int gridSize = tttgp.gridSize;
-        root = generateActionTree(gridSize);
+        if (firstState.getCoreGameParameters().actionSpace.structure == ActionSpace.Structure.Tree)
+            root = generateActionTree(gridSize);
         TicTacToeGameState state = (TicTacToeGameState) firstState;
         state.gridBoard = new GridBoard<>(gridSize, gridSize, new Token(TicTacToeConstants.emptyCell));
     }
 
+
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        root.resetTree();
-        leaves = root.getLeafNodes();
+        return _computeAvailableActions(gameState, ActionSpace.Default);
+    }
+
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
+        if (actionSpace.structure == ActionSpace.Structure.Tree ) {
+            root.resetTree();
+            leaves = root.getLeafNodes();
+        }
         TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getCurrentPlayer();
 
-        if (gameState.isNotTerminal())
-            for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
-                ActionTreeNode xNode = root.findChildrenByName("X" + x);
-                for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                    ActionTreeNode yNode = xNode.findChildrenByName("Y" + y);
-                    if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
-                        actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
-                        xNode.setValue(1); // make sure that we set parent available
-                        yNode.setAction(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+        if (gameState.isNotTerminal()){
+            // Normal action space
+            if (actionSpace.structure != ActionSpace.Structure.Tree) {
+                for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
+                    for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
+                        if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
+                            actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+                        }
+                    }
+                }
+            } else {
+                // Update the tree
+                for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
+                    ActionTreeNode xNode = root.findChildrenByName("X" + x);
+                    for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
+                        ActionTreeNode yNode = xNode.findChildrenByName("Y" + y);
+                        if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
+                            actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+                            xNode.setValue(1); // make sure that we set parent available
+                            yNode.setAction(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+                        }
                     }
                 }
             }
-//        System.out.println(Arrays.toString(root.getActionMask()));
-//        System.out.println(root.getActionMaskNames());
+        }
+
         return actions;
-    }
+        }
 
     @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
@@ -199,20 +220,5 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
         ActionTreeNode node = leaves.get(actionID);
         AbstractAction action = node.getAction();
         _next(state, action);
-//        int gridSize = ((TicTacToeGameParameters) state.getGameParameters()).gridSize;
-//        int[] actionVector = new int[2]; // we have 2 levels in the tree
-//        actionVector[0] = (actionID-gridSize)/gridSize;
-//        actionVector[1] = (actionID-gridSize)%gridSize;
-//        nextPython(state, actionVector);
     }
-
-//    public void nextPython(AbstractGameState state, int[] actionVector) {
-//        ActionTreeNode node = root;
-//        for (int i = 0; i < actionVector.length; i++) {
-//            node = node.getChildren().get(actionVector[i]);
-//        }
-//        AbstractAction action = node.getAction();
-//        next(state, action);
-//
-//    }
 }
