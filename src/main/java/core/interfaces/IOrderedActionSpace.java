@@ -1,7 +1,9 @@
 package core.interfaces;
 
 import core.AbstractGameState;
+import utilities.ActionTreeNode;
 
+import java.util.List;
 import java.util.stream.IntStream;
 
 public interface IOrderedActionSpace {

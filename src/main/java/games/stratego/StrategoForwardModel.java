@@ -15,8 +15,10 @@ import games.stratego.components.Piece;
 import utilities.ActionTreeNode;
 import utilities.Distance;
 import games.stratego.metrics.StrategoMetrics;
+import utilities.Vector2D;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
@@ -55,33 +57,19 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
         leaves = root.getLeafNodes();
         state.setFirstPlayer(0);
     }
-
-    @Override
-//    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
+    private List<AbstractAction> getActionTree(StrategoGameState state){
         root.resetTree();
-        StrategoGameState state = (StrategoGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = gameState.getCurrentPlayer();
+        int player = state.getCurrentPlayer();
         Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
         List<Piece> pieces = state.gridBoard.getComponents();
-        state.getObservationVector();
-
-
-        if (pieces.isEmpty()){
-            throw new AssertionError("Error: No Pieces Found");
-//            state.setGameStatus(Utils.GameResult.GAME_END);
-            //           return actions;
-        }
-
         int c = 0;
         for (Piece piece : pieces){
             if (piece != null){
                 if (piece.getPieceAlliance() == playerAlliance) {
-                    Collection<Move> moves = piece.calculateMoves(state);
+                    List<AbstractAction> moves = piece.calculateMoves(state, ActionSpace.Default);
+//                    List<AbstractAction> moves = piece.calculateMoves(state, state.getCoreGameParameters().actionSpace);
                     actions.addAll(moves);
-
-                    // --- Action Trees ---
 
                     // Player unit on position
                     ActionTreeNode pos = root.getChildren().get(c);
@@ -90,15 +78,14 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
                     // Valid moves have been generated
                     // Encode them into tree
                     if (moves.size() > 0) {
-                        for (Move move : moves) {
-
+                        for (AbstractAction move : moves) {
                             // Chooses between attack and move
                             ActionTreeNode actionNode = move instanceof NormalMove
                                     ? pos.getChildren().get(1) : pos.getChildren().get(0);
                             actionNode.setValue(1);
 
                             // Gets direction of move
-                            String direction = getDirection(move.from(state), move.to(state));
+                            String direction = getDirection(piece.getPiecePosition(), ((Move)move).to(state));
                             ActionTreeNode directionNode = null;
                             switch (direction) {
                                 case "north":
@@ -121,7 +108,7 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
 
                             // If move is a normal move, action is stored in child due to scouts extra movement
                             if (move instanceof NormalMove) {
-                                int distanceIndex = (int) Distance.manhattan_distance(move.from(state), move.to(state)) - 1;
+                                int distanceIndex = (int) Distance.manhattan_distance(piece.getPiecePosition(), ((Move)move).to(state)) - 1;
                                 assert directionNode != null;
                                 directionNode.getChildren().get(distanceIndex).setAction(move);
                             }
@@ -132,26 +119,53 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
                             }
                         }
                     }
-
-
-                    List<AbstractAction> pieceActions = piece.calculateMoves(state, actionSpace);
-                    if (pieceActions.size() == 0) continue;
-                    if (actionSpace.structure == ActionSpace.Structure.Deep) {
-                        // Single action to choose the piece, then move for piece is selected sequentially
-                        if (actionSpace.context == ActionSpace.Context.Dependent) {
-                            actions.add(new DeepMove(player, piece.getPiecePosition(), actionSpace));
-                        } else {
-                            actions.add(new DeepMove(player, piece.getComponentID(), actionSpace));
-                        }
-                    } else {
-                        actions.addAll(pieceActions);
-                    }
                 }
             }
             c++;
         }
         assert actions.size() == root.getValidLeaves().size();
         return actions;
+
+    }
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
+        StrategoGameState state = (StrategoGameState) gameState;
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        int player = gameState.getCurrentPlayer();
+        Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
+        List<Piece> pieces = state.gridBoard.getComponents();
+
+        if (pieces.isEmpty()){
+            throw new AssertionError("Error: No Pieces Found");
+//            state.setGameStatus(Utils.GameResult.GAME_END);
+            //           return actions;
+        }
+
+        if (actionSpace.structure == ActionSpace.Structure.Tree){
+            actions.addAll(getActionTree(state));
+        } else{
+            for (Piece piece : pieces){
+                if (piece != null){
+                    if (piece.getPieceAlliance() == playerAlliance) {
+
+                        List<AbstractAction> pieceActions = piece.calculateMoves(state, actionSpace);
+                        if (pieceActions.size() == 0) continue;
+                        if (actionSpace.structure == ActionSpace.Structure.Deep) {
+                            // Single action to choose the piece, then move for piece is selected sequentially
+                            if (actionSpace.context == ActionSpace.Context.Dependent) {
+                                actions.add(new DeepMove(player, piece.getPiecePosition(), actionSpace));
+                            } else {
+                                actions.add(new DeepMove(player, piece.getComponentID(), actionSpace));
+                            }
+                        } else {
+                            actions.addAll(pieceActions);
+                        }
+                    }
+                }
+            }
+        }
+    return actions;
     }
 
     @Override
@@ -187,15 +201,15 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
         }
     }
 
-    private String getDirection(int[] pos1, int[] pos2) {
-        if (pos1[0] == pos2[0]) {
-            if (pos1[1] > pos2[1]) {
+    private String getDirection(Vector2D pos1, Vector2D pos2) {
+        if (pos1.getX() == pos2.getX()) {
+            if (pos1.getY() > pos2.getY()) {
                 return "north";
             } else {
                 return "south";
             }
         } else {
-            if (pos1[0] > pos2[0]) {
+            if (pos1.getX() > pos2.getX()) {
                 return "west";
             } else {
                 return "east";
@@ -240,7 +254,6 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
                 }
             }
         }
-
         return root;
     }
 
@@ -251,7 +264,7 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
 
     @Override
     public int[] getFixedActionSpace() {
-        return new int[0];
+        return new int[getActionSpace()];
     }
 
     @Override

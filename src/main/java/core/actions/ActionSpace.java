@@ -47,7 +47,8 @@ public class ActionSpace {
     public enum Structure {
         Default,
         Flat,
-        Deep
+        Deep,
+        Tree
     }
     public enum Flexibility {
         Default,

@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.actions.DoNothing;
 import core.components.Token;
 import core.interfaces.IOrderedActionSpace;
@@ -58,6 +59,7 @@ public class GYMEnv {
         } else game = gameToPlay.createGameInstance(players.size(), seed);
 
         assert game != null;
+        game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Tree);
         if (!(game.gameState instanceof IVectorisable && game.forwardModel instanceof IOrderedActionSpace)) {
             throw new Exception("Game has not implemented Reinforcement Learning Interface");
         }
@@ -188,7 +190,7 @@ public class GYMEnv {
                     currentPlayer.registerUpdatedObservation(observation);
                 } else {
                     // Get action from player, and time it
-                    action = currentPlayer.getAction(observation, observedActions);
+                    action = currentPlayer.getAction(observation);
                 }
             } else {
                 currentPlayer.registerUpdatedObservation(observation);
@@ -272,7 +274,7 @@ public class GYMEnv {
                     currentPlayer.registerUpdatedObservation(observation);
                 } else {
                     // Get action from player, and time it
-                    action = currentPlayer.getAction(observation, observedActions);
+                    action = currentPlayer.getAction(observation);
                 }
             } else {
                 currentPlayer.registerUpdatedObservation(observation);
@@ -319,60 +321,78 @@ public class GYMEnv {
         return this.gameState.getPlayerResults();
     }
 
+    public int sampleRNDAction(int[] mask, Random rnd){
+        /* take the action mask and sample a valid random action */
+        int[] trueIdx = IntStream.range(0, mask.length)
+                .filter(i -> mask[i] == 1)
+                .toArray();
+        int rndIdx = trueIdx[rnd.nextInt(trueIdx.length)];
+        return rndIdx;
+    }
+
     public static void main(String[] args) {
         Long seed = new Long(2466);
         Random rnd = new Random(seed);
         ArrayList<AbstractPlayer> players = new ArrayList<>();
+
+        // set up players
 //        players.add(new MCTSPlayer());
         players.add(new PythonAgent());
         players.add(new RandomPlayer(rnd));
-        players.add(new RandomPlayer(rnd));
-        players.add(new RandomPlayer(rnd));
+
+        boolean useGYM = true;
+
+        int wins = 0;
+        int episodes = 0;
+
+        boolean done = false;
+        int MAX_EPISODES = 100;
+        int steps = 0;
 
         try {
-            GYMEnv env = new GYMEnv(GameType.valueOf("LoveLetter"), null, players, 343, true);
-            boolean done = false;
-            int episodes = 0;
-            int MAX_EPISODES = 100;
-            int steps = 0;
-            env.reset();
-            List<Object> treeShape = env.forwardModel.root.getTreeShape();
-            int N_ACTIONS  = env.getActionSpace();
-            while (!done){
-//                int randomAction = rnd.nextInt(env.availableActions.size());
-                // todo we get the action mask, but how do we know how we should index it?
-                int[] mask = env.getActionMask();
-//                mask[0] = 0; mask[1] = 0; mask[2] = 0;
-                int[] trueIdx = IntStream.range(0, mask.length) // todo TTT valid actions (leaf nodes) start from 3
-                        .filter(i -> mask[i] == 1)
-                        .toArray();
-                int randomAction = trueIdx[rnd.nextInt(trueIdx.length)];
-//                int randomAction = rnd.nextInt(N_ACTIONS);
-                try{
-//                    System.out.println("playerID = " + env.getPlayerID());
-                        double[] obs = env.getObservationVector();
-//                    }
+            // Initialise the game
+            GYMEnv env = new GYMEnv(GameType.valueOf("Stratego"), null, players, 343, true);
+            if (!useGYM) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
+            // reset is always required before starting a new episode
+            env.reset();
+            while (!done){
+
+                if (useGYM){
+
+                    // get action mask and sample random action
+                    int randomAction = env.sampleRNDAction(env.getActionMask(), rnd);
+
+                    // get observation vector
+                    double[] obs = env.getObservationVector();
+
+                    // step the environment
                     env.step(randomAction);
-                } catch (Exception e){
-                    System.out.println("Exception in GYMEnv main " + e.toString());
+                } else {
+                    // this is the normal game loop
+                    List<AbstractAction> actions = env.forwardModel.computeAvailableActions(env.gameState);
+                    int randomAction = rnd.nextInt(actions.size());
+                    env.forwardModel.next(env.gameState, actions.get(randomAction));
+
                 }
+
+                // update stats
                 steps += 1;
                 done = env.isDone();
                 if (done){
                     episodes += 1;
                     System.out.println("episodes " + episodes + " is done in " + steps + " ; outcome:  " + env.getPlayerResults()[0].value);
+                    if (env.getPlayerResults()[0] == CoreConstants.GameResult.WIN_GAME)wins += 1;
                     if (episodes == MAX_EPISODES)break;
                     env.reset();
                     done = false;
                     steps = 0;
-
                 }
-
             }
         } catch (Exception e){
             System.out.println("Exception in GYMEnv init" + e);
         }
+        System.out.println("Run finished won " + wins + " out of " + episodes);
 
 
     }
