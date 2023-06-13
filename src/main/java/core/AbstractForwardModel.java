@@ -1,6 +1,7 @@
 package core;
 
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import utilities.ActionTreeNode;
 import utilities.ElapsedCpuChessTimer;
 
@@ -71,6 +72,7 @@ public abstract class AbstractForwardModel {
      * @return - List of AbstractAction objects.
      */
     protected abstract List<AbstractAction> _computeAvailableActions(AbstractGameState gameState);
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) { return _computeAvailableActions(gameState); }
 
     /**
      * Gets a copy of the FM with a new random number generator.
@@ -147,9 +149,16 @@ public abstract class AbstractForwardModel {
      * @return - the list of actions available.
      */
     public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState) {
+        return computeAvailableActions(gameState, gameState.coreGameParameters.actionSpace);
+    }
+
+    public final List<AbstractAction> computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         // If there is an action in progress (see IExtendedSequence), then delegate to that
         if (gameState.isActionInProgress()) {
-            return gameState.actionsInProgress.peek()._computeAvailableActions(gameState);
+            return gameState.actionsInProgress.peek()._computeAvailableActions(gameState, actionSpace);
+        }
+        if (actionSpace != null && !actionSpace.isDefault()) {
+            return _computeAvailableActions(gameState, actionSpace);
         }
         return _computeAvailableActions(gameState);
     }

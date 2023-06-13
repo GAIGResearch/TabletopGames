@@ -2,12 +2,11 @@ package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
+import evaluation.listeners.IGameListener;
 import games.GameType;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.function.IntSupplier;
 import java.util.stream.IntStream;
 
@@ -26,8 +25,8 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RandomRRTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                              boolean selfPlay, int totalMatchUps, int reportPeriod, long seed, AbstractParameters gameParams) {
-        super(agents, gameToPlay, playersPerGame, 1, selfPlay, gameParams);
+                              boolean selfPlay, boolean mirror, int totalMatchUps, int reportPeriod, long seed, AbstractParameters gameParams, String destDir, String finalDir) {
+        super(agents, gameToPlay, playersPerGame, 1, selfPlay, mirror, gameParams, destDir, finalDir);
         this.totalMatchups = totalMatchUps;
         this.reportPeriod = reportPeriod;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
@@ -44,13 +43,54 @@ public class RandomRRTournament extends RoundRobinTournament {
     @Override
     public void createAndRunMatchUp(LinkedList<Integer> ignored, int gameIdx) {
         int nPlayers = playersPerGame.get(gameIdx);
-        for (int i = 0; i < totalMatchups; i++) {
-            List<Integer> matchup = new ArrayList<>(nPlayers);
-            for (int j = 0; j < nPlayers; j++)
-                matchup.add(idStream.getAsInt());
-            evaluateMatchUp(matchup, gameIdx);
-            if((i+1) % reportPeriod == 0 && i != totalMatchups - 1)
-                reportResults(gameIdx);
+        if (mirror) {
+            int nPerAgent = totalMatchups / agentIDs.size();
+            int g = 0;
+            for (Integer agentID : agentIDs) {
+                for (int i = 0; i < nPerAgent; i++) {
+                    List<Integer> matchup = new ArrayList<>(nPlayers);
+                    for (int j = 0; j < nPlayers; j++) {
+                        matchup.add(agentID);
+                    }
+                    evaluateMatchUp(matchup, gameIdx);
+                    g++;
+                    if (g == totalMatchups) {
+                        for (IGameListener listener : listeners) {
+                            listener.setOutputDirectory(destDir, finalDir);
+                        }
+                        return;
+                    }
+                    if (g % reportPeriod == 0) {
+                        reportResults(gameIdx);
+
+                        StringBuilder timeDir = new StringBuilder("interim_" + games.get(gameIdx).getGameType().name() + "_" + nPlayers + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
+                        for (IGameListener listener : listeners) {
+                            listener.setOutputDirectory(destDir, timeDir.toString());
+                            listener.report();
+                        }
+                    }
+                }
+            }
+        } else {
+            // Random games
+            for (int i = 0; i < totalMatchups; i++) {
+                List<Integer> matchup = new ArrayList<>(nPlayers);
+                for (int j = 0; j < nPlayers; j++)
+                    matchup.add(idStream.getAsInt());
+                evaluateMatchUp(matchup, gameIdx);
+                if ((i + 1) % reportPeriod == 0 && i != totalMatchups - 1) {
+                    reportResults(gameIdx);
+
+                    StringBuilder timeDir = new StringBuilder("interim_" + games.get(gameIdx).getGameType().name() + "_" + nPlayers + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
+                    for (IGameListener listener : listeners) {
+                        listener.setOutputDirectory(destDir, timeDir.toString());
+                        listener.report();
+                    }
+                }
+            }
+            for (IGameListener listener : listeners) {
+                listener.setOutputDirectory(destDir, finalDir);
+            }
         }
     }
 

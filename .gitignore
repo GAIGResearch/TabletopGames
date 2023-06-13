@@ -35,3 +35,6 @@ javadoc/
 src/main/java/META-INF/MANIFEST.MF
 
 src/pytag/env/
+
+test*
+metrics/out/*

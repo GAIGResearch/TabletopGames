@@ -1,14 +1,19 @@
 package evaluation.listeners;
 
+import core.AbstractPlayer;
 import core.Game;
 import core.interfaces.IStatisticLogger;
-import evaluation.metrics.*;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
+import evaluation.metrics.GameMetrics;
+import evaluation.metrics.IMetricsCollection;
 import utilities.Utils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 public interface IGameListener {
 
@@ -26,10 +31,9 @@ public interface IGameListener {
      * <p>
      * This is useful for Listeners that are just interested in aggregate data across many runs
      */
-    void allGamesFinished();
+    void report();
 
-    default boolean setOutputDirectory(String out, String time, String players) {return true;}
-
+    default boolean setOutputDirectory(String... nestedDirectories) {return true;}
 
     void setGame(Game game);
 
@@ -87,7 +91,7 @@ public interface IGameListener {
         if(listener == null) {
             // default
             AbstractMetric[] ms = new GameMetrics().getAllMetrics();
-            return new MetricsGameListener(logger, ms);
+            return new MetricsGameListener(ms);
         }
 
         return listener;
@@ -108,11 +112,13 @@ public interface IGameListener {
             e.printStackTrace();
         }
         if(listener == null)
-            return new MetricsGameListener(null, new AbstractMetric[0]);
+            return new MetricsGameListener(new AbstractMetric[0]);
         return listener;
     }
 
     default void reset() {}
 
-    default void init(Game game) {}
+    default void init(Game game, int nPlayersPerGame, Set<String> playerNames) {}
+
+    default void tournamentInit(Game game, int nPlayers, Set<String> playerNames, Set<AbstractPlayer> matchup) {}
 }

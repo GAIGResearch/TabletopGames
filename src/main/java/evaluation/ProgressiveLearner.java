@@ -163,14 +163,14 @@ public class ProgressiveLearner {
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
-                finalMatchups, System.currentTimeMillis(), params);
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, false, finalMatchups,
+                finalMatchups, System.currentTimeMillis(), params, dataDir, dataDir);
 
         tournament.setListeners(new ArrayList<>());
         IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
         IGameListener gameTracker = IGameListener.createListener("evaluation.listeners.MetricsGameListener", logger, null);
         tournament.getListeners().add(gameTracker);
-        tournament.runTournament();
+        tournament.run();
         int winnerIndex = tournament.getWinnerIndex();
         if (winnerIndex != finalAgents.size() - 1) {
             // if the basePlayer won, then meh!
@@ -216,8 +216,8 @@ public class ProgressiveLearner {
 
     private void runGamesWithAgents() {
         // Run!
-        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
-                matchups, System.currentTimeMillis(), params);
+        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, false, matchups,
+                matchups, System.currentTimeMillis(), params, dataDir, dataDir);
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
         System.out.println("Explore = " + exploreEpsilon);
@@ -227,7 +227,7 @@ public class ProgressiveLearner {
         dataFilesByIteration[iter] = fileName;
         StateFeatureListener dataTracker = new StateFeatureListener(new FileStatsLogger(fileName), phi, frequency, currentPlayerOnly);
         tournament.setListeners(Collections.singletonList(dataTracker));
-        tournament.runTournament();
+        tournament.run();
     }
 
     private void learnFromNewData() {

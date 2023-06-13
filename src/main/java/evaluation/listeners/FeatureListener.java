@@ -80,7 +80,7 @@ public abstract class FeatureListener implements IGameListener {
     }
 
     @Override
-    public void allGamesFinished() {
+    public void report() {
         logger.processDataAndFinish();
     }
 

@@ -51,6 +51,8 @@ public class MCTSParams extends PlayerParameters {
     public boolean gatherExpertIterationData = false;
     public String expertIterationFileStem = "ExpertIterationData";
     public String expertIterationStateFeatures = "";
+    public boolean gatherTreeRecorder = false;
+    public String treeRecorderFolder = "tree_recorder";
     public IStateFeatureVector EIStateFeatureVector;
     public String expertIterationActionFeatures = "";
     public IActionFeatureVector EIActionFeatureVector;
@@ -102,7 +104,10 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("expIterFile", "");
         addTunableParameter("expertIterationStateFeatures", "");
         addTunableParameter("expertIterationActionFeatures", "");
-        addTunableParameter("advantageFunction", "");
+
+        addTunableParameter("gatherTreeRecorder", false);
+        addTunableParameter("treeRecorderFolder", "tree_recorder");
+
         addTunableParameter("biasVisits", 0, Arrays.asList(0, 1, 3, 10, 30, 100));
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
         addTunableParameter("progressiveWideningExponent", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.5));
@@ -163,6 +168,10 @@ public class MCTSParams extends PlayerParameters {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+        gatherTreeRecorder = (boolean) getParameterValue("gatherTreeRecorder");
+        treeRecorderFolder = (String) getParameterValue("treeRecorderFolder");
+
         advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         biasVisits = (int) getParameterValue("biasVisits");
         omaVisits = (int) getParameterValue("omaVisits");
@@ -266,6 +275,10 @@ public class MCTSParams extends PlayerParameters {
         retValue.expertIterationStateFeatures = expertIterationStateFeatures;
         retValue.EIStateFeatureVector = EIStateFeatureVector;
         retValue.expertIterationActionFeatures = expertIterationActionFeatures;
+
+        retValue.gatherTreeRecorder = gatherTreeRecorder;
+        retValue.treeRecorderFolder = treeRecorderFolder;
+
         retValue.EIActionFeatureVector = EIActionFeatureVector;
         retValue.advantageFunction = advantageFunction;
         retValue.biasVisits = biasVisits;

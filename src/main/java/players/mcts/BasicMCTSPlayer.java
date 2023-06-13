@@ -54,7 +54,7 @@ public class BasicMCTSPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> allActions) {
+    public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
         BasicTreeNode root = new BasicTreeNode(this, null, gameState, rnd);
 

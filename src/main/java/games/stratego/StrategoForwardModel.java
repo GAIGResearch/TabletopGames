@@ -4,21 +4,29 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.components.GridBoard;
 import core.interfaces.IOrderedActionSpace;
 import games.stratego.actions.AttackMove;
 import games.stratego.actions.Move;
 import games.stratego.actions.NormalMove;
+import games.stratego.actions.DeepMove;
 import games.stratego.components.Piece;
 import utilities.ActionTreeNode;
 import utilities.Distance;
+import games.stratego.metrics.StrategoMetrics;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
 public class StrategoForwardModel extends StandardForwardModel implements IOrderedActionSpace {
+
+    public enum EndCondition {
+        FLAG_CAPTURE,
+        NO_MOVES_LEFT,
+        MAX_TURNS
+    }
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -34,15 +42,13 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
         ArrayList<Piece> RedPieces = RedSetup.getRedSetup();
         ArrayList<Piece> BluePieces = BlueSetup.getBlueSetup();
 
-
-
         for (Piece piece : RedPieces){
             piece.setOwnerId(0);
-            state.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
+            state.gridBoard.setElement(piece.getPiecePosition().getX(), piece.getPiecePosition().getY(), piece.copy());
         }
         for (Piece piece : BluePieces){
             piece.setOwnerId(1);
-            state.gridBoard.setElement(piece.getPiecePosition()[0], piece.getPiecePosition()[1], piece.copy());
+            state.gridBoard.setElement(piece.getPiecePosition().getX(), piece.getPiecePosition().getY(), piece.copy());
         }
 
         root = generateActionTree(params.gridSize);
@@ -51,7 +57,8 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
     }
 
     @Override
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+//    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
         root.resetTree();
         StrategoGameState state = (StrategoGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
@@ -64,7 +71,7 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
         if (pieces.isEmpty()){
             throw new AssertionError("Error: No Pieces Found");
 //            state.setGameStatus(Utils.GameResult.GAME_END);
- //           return actions;
+            //           return actions;
         }
 
         int c = 0;
@@ -127,6 +134,18 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
                     }
 
 
+                    List<AbstractAction> pieceActions = piece.calculateMoves(state, actionSpace);
+                    if (pieceActions.size() == 0) continue;
+                    if (actionSpace.structure == ActionSpace.Structure.Deep) {
+                        // Single action to choose the piece, then move for piece is selected sequentially
+                        if (actionSpace.context == ActionSpace.Context.Dependent) {
+                            actions.add(new DeepMove(player, piece.getPiecePosition(), actionSpace));
+                        } else {
+                            actions.add(new DeepMove(player, piece.getComponentID(), actionSpace));
+                        }
+                    } else {
+                        actions.addAll(pieceActions);
+                    }
                 }
             }
             c++;
@@ -136,22 +155,30 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
     }
 
     @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, ActionSpace.Default);
+    }
+
+    @Override
     protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_END){
+        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_END || currentState.isActionInProgress()){
             return;
         }
-        StrategoGameState sgs = (StrategoGameState) currentState;
 
+        StrategoGameState sgs = (StrategoGameState) currentState;
         endPlayerTurn(sgs);
 
-        List<AbstractAction> actions = _computeAvailableActions(sgs);
+        List<AbstractAction> actions = _computeAvailableActions(sgs, currentState.getCoreGameParameters().actionSpace);
         if (actions.isEmpty()){
+            sgs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, EndCondition.NO_MOVES_LEFT.name() + ":" + sgs.getCurrentPlayer());
             // If the player can't take any actions, they lose
+            _computeAvailableActions(sgs, currentState.getCoreGameParameters().actionSpace);
             sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
             sgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, sgs.getCurrentPlayer());
             sgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, 1-sgs.getCurrentPlayer());
         } else {
             if (sgs.getTurnCounter() >= ((StrategoParams)sgs.getGameParameters()).maxRounds) {
+                sgs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, EndCondition.MAX_TURNS.name());
                 // Max rounds reached, draw
                 sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
                 sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, sgs.getCurrentPlayer());

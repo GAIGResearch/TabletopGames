@@ -3,6 +3,7 @@ package core;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
+import players.PlayerParameters;
 
 import java.util.*;
 
@@ -12,9 +13,10 @@ public abstract class AbstractPlayer {
     // ID of this player, assigned by the game
     int playerID;
     String name;
-    Random rnd = new Random(System.currentTimeMillis());
+    protected Random rnd = new Random(System.currentTimeMillis());
     // Forward model for the game
     private AbstractForwardModel forwardModel;
+    protected PlayerParameters parameters = new PlayerParameters(System.currentTimeMillis());
     protected List<AbstractPlayerDecorator> decorators = new ArrayList<>();
 
     /* Final methods */
@@ -74,10 +76,10 @@ public abstract class AbstractPlayer {
      * Then we apply any decorators to the chosen action.
      *
      * @param gameState
-     * @param possibleActions
      * @return
      */
-    public final AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+    public final AbstractAction getAction(AbstractGameState gameState) {
+        List<AbstractAction> possibleActions = forwardModel.computeAvailableActions(gameState, parameters.actionSpace);
         for (AbstractPlayerDecorator decorator : decorators) {
             possibleActions = decorator.actionFilter(gameState, possibleActions);
         }
@@ -114,7 +116,6 @@ public abstract class AbstractPlayer {
     public void setForwardModel(AbstractForwardModel model) {
         this.forwardModel = model;
     }
-
 
     /* Methods that should be implemented in subclass */
 
@@ -164,4 +165,7 @@ public abstract class AbstractPlayer {
         return Collections.emptyMap();
     }
 
+    public PlayerParameters getParameters() {
+        return parameters;
+    }
 }

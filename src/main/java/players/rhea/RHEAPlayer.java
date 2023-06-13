@@ -50,7 +50,7 @@ public class RHEAPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> possibleActions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         timer.setMaxTimeMillis(params.budget);
         numIters = 0;
@@ -108,6 +108,7 @@ public class RHEAPlayer extends AbstractPlayer {
             logStatistics(stateObs);
         // Return first action of best individual
         AbstractAction retValue = population.get(0).actions[0];
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(stateObs, params.actionSpace);
         if (!actions.contains(retValue))
             throw new AssertionError("Action chosen is not legitimate " + numIters + ", " + params.shiftLeft);
         return retValue;
