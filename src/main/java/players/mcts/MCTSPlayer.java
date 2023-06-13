@@ -26,6 +26,7 @@ public class MCTSPlayer extends AbstractPlayer {
     protected MCTSParams params;
     // Heuristics used for the agent
     protected IStateHeuristic heuristic;
+    // TODO: opponentHeuristic Not actually used yet
     protected IStateHeuristic opponentHeuristic;
     protected AbstractPlayer rolloutStrategy;
     protected boolean debug = false;
@@ -96,6 +97,10 @@ public class MCTSPlayer extends AbstractPlayer {
         if (rolloutStrategy instanceof MASTPlayer) {
             ((MASTPlayer) rolloutStrategy).setStats(root.MASTStatistics);
             ((MASTPlayer) rolloutStrategy).temperature = params.MASTBoltzmann;
+        }
+        if (opponentModel instanceof MASTPlayer) {
+            ((MASTPlayer) opponentModel).setStats(root.MASTStatistics);
+            ((MASTPlayer) opponentModel).temperature = params.MASTBoltzmann;
         }
         root.mctsSearch(getStatsLogger());
         if (params.gatherExpertIterationData) {

@@ -1,11 +1,14 @@
 package evaluation.tournaments;
 
-import core.*;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.Game;
 import games.GameType;
 import utilities.Pair;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class AbstractTournament {
     // List of players taking part in the tournament
@@ -69,6 +72,8 @@ public abstract class AbstractTournament {
 
     /**
      * Runs the tournament in the given game, with the given players.
+     *
+     * Returns the scores of players (in the same order the players were provided in the constructor).
      */
     public abstract void runTournament();
 }

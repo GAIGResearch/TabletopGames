@@ -7,7 +7,6 @@ import org.json.simple.parser.JSONParser;
 import utilities.Utils;
 
 import java.io.FileReader;
-import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -104,8 +103,6 @@ public abstract class TunableParameters extends AbstractParameters implements IT
         if (finalData == null)
             return null;
         Object data = (finalData instanceof Long) ? Integer.valueOf(((Long) finalData).intValue()) : finalData;
-        if (data.getClass() == defaultValue.getClass())
-            return (T) data;
         if (finalData instanceof JSONObject) {
             JSONObject subJson = (JSONObject) finalData;
             T retValue = Utils.loadClassFromJSON(subJson);
@@ -116,6 +113,8 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             }
             return retValue;
         }
+        if (data.getClass() == defaultValue.getClass())
+            return (T) data;
         if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {
             Optional<?> matchingValue = Arrays.stream(defaultValue.getClass().getEnumConstants()).filter(e -> e.toString().equals(data)).findFirst();
             if (matchingValue.isPresent()) {
@@ -123,6 +122,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             }
             throw new AssertionError("No Enum match found for " + name + " [" + data + "] in " + Arrays.toString(defaultValue.getClass().getEnumConstants()));
         }
+        System.out.println("Warning: parsing param " + name + "; couldn't find correct type, assigning default value: " + defaultValue);
         return defaultValue;
     }
 

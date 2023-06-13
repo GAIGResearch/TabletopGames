@@ -190,7 +190,7 @@ public class SGGameState extends AbstractGameState {
     }
 
     @Override
-    public double getTiebreak(int playerId) {
+    public double getTiebreak(int playerId, int tier) {
         // Tie-break is number of puddings
         return playedCardTypes[playerId].get(SGCard.SGCardType.Pudding).getValue();
     }

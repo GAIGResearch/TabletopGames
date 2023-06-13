@@ -1,18 +1,13 @@
 package evaluation.listeners;
 
 import core.Game;
-import core.interfaces.IStatisticLogger;
-import evaluation.metrics.AbstractMetric;
-import evaluation.metrics.Event;
-import evaluation.metrics.IDataLogger;
-import evaluation.metrics.IMetricsCollection;
+import evaluation.metrics.*;
 import evaluation.metrics.tablessaw.DataTableSaw;
 
 import java.io.File;
 import java.util.*;
 
-import static evaluation.metrics.IDataLogger.ReportDestination.ToBoth;
-import static evaluation.metrics.IDataLogger.ReportDestination.ToFile;
+import static evaluation.metrics.IDataLogger.ReportDestination.*;
 import static evaluation.metrics.IDataLogger.ReportType.*;
 
 /**
@@ -36,28 +31,37 @@ public class MetricsGameListener implements IGameListener {
     protected Game game;
 
     // Types of reports to generate: RawData, Summary, Plot
-    List<IDataLogger.ReportType> reportTypes = Arrays.asList(Summary, Plot);  //todo this needs to be read from JSON
+    List<IDataLogger.ReportType> reportTypes = Arrays.asList(RawData, Summary, Plot);  //todo this needs to be read from JSON
 
     // Where to send the reports: ToConsole, ToFile or ToBoth
-    List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToBoth); //todo this needs to be read from JSON
+    List<IDataLogger.ReportDestination> reportDestinations;
 
     // Destination directory for the reports
     String destDir = "metrics/out/"; //by default
 
-    public MetricsGameListener() {}
-    public MetricsGameListener(IStatisticLogger logger, AbstractMetric[] metrics) {
+    public MetricsGameListener() {
+    }
+
+    public MetricsGameListener(AbstractMetric[] metrics) {
+        this(ToBoth, metrics);
+    }
+
+    public MetricsGameListener(IDataLogger.ReportDestination logTo, AbstractMetric[] metrics) {
+        reportDestinations = Collections.singletonList(logTo);
         this.metrics = new LinkedHashMap<>();
         for (AbstractMetric m : metrics) {
             m.setDataLogger(new DataTableSaw(m)); //todo this logger needs to be read from JSON
             this.metrics.put(m.getName(), m);
             eventsOfInterest.addAll(m.getEventTypes());
         }
+        eventsOfInterest.add(Event.GameEvent.GAME_OVER);
     }
 
     /**
      * Manages all events.
-     * @param event  Event has information about its type and data fields for game, state, action and player.
-     *               It's not guaranteed that the data fields are different to null, so a check is necessary.
+     *
+     * @param event Event has information about its type and data fields for game, state, action and player.
+     *              It's not guaranteed that the data fields are different to null, so a check is necessary.
      */
     public void onEvent(Event event) {
         if (!eventsOfInterest.contains(event.type))
@@ -72,40 +76,33 @@ public class MetricsGameListener implements IGameListener {
                 metric.run(this, event);
             }
 
-            if(event.type == Event.GameEvent.GAME_OVER)
+            if (event.type == Event.GameEvent.GAME_OVER)
                 metric.notifyGameOver();
         }
-
     }
 
-
-    public boolean setOutputDirectory(String out, String time, String players){
+    @Override
+    public boolean setOutputDirectory(String... nestedDirectories) {
 
         boolean success = true;
 
         if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
             // If the "metrics/out/" does not exist, create it
-            File outFolder = new File(out);
-            if (!outFolder.exists()) {
-                success = outFolder.mkdir();
+            String folder = "";
+            for (String nestedDir : nestedDirectories) {
+                folder = folder + nestedDir + File.separator;
+                File outFolder = new File(folder);
+                if (!outFolder.exists()) {
+                    success = outFolder.mkdir();
+                }
+                if (!success)
+                    throw new AssertionError("Unable to create output directory" + outFolder.getAbsolutePath());
             }
 
-            File timestampFolder = new File(out + "/" + time);
-            if (!timestampFolder.exists()) {
-                success = timestampFolder.mkdir();
-            }
-
-            File subfolder = new File(timestampFolder + "/" + players);
-            if (!subfolder.exists()) {
-                success = subfolder.mkdir();
-            }
-
-            if (success)
-                destDir = subfolder.getAbsolutePath() + "/";
+            destDir = new File(folder).getAbsolutePath() + File.separator;
         }
         return success;
     }
-
 
     /**
      * This is called when all processing is finished, for example after running a sequence of games
@@ -114,7 +111,6 @@ public class MetricsGameListener implements IGameListener {
      * This is useful for Listeners that are just interested in aggregate data across many runs
      */
     public void allGamesFinished() {
-
         boolean success = true;
 
         if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
@@ -140,7 +136,7 @@ public class MetricsGameListener implements IGameListener {
                     }
                 }
                 if (eventMetrics.size() > 1) {
-                    IDataLogger dataLogger = new DataTableSaw(eventMetrics, event.name(), eventToIndexingColumn(event));
+                    IDataLogger dataLogger = new DataTableSaw(eventMetrics, event, eventToIndexingColumn(event));
                     dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
                 }
             }
@@ -168,10 +164,12 @@ public class MetricsGameListener implements IGameListener {
     public final void setGame(Game game) {
         this.game = game;
     }
-    public final Game getGame() { return game; }
 
-    public void reset()
-    {
+    public final Game getGame() {
+        return game;
+    }
+
+    public void reset() {
         for (AbstractMetric metric : metrics.values()) {
             metric.reset();
         }

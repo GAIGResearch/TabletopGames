@@ -23,6 +23,8 @@ import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
+import games.puertorico.*;
+import games.puertorico.gui.PuertoRicoGUI;
 import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
@@ -164,7 +166,13 @@ public enum GameType {
     CantStop(2, 4,
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
-            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class);
+            CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
+
+    PuertoRico(3, 5,
+            Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
+            Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
+            PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class);
+
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
@@ -462,7 +470,9 @@ public enum GameType {
         TableauBuilding,
         BattleCardDriven,
         CommandCards,
-        MoveThroughDeck;
+        MoveThroughDeck,
+        TrickTaking,
+        RoleSelection;
 
         /**
          * @return a list of all games using this mechanic.

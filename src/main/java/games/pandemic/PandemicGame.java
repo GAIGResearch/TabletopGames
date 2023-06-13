@@ -66,7 +66,7 @@ public class PandemicGame extends Game {
 
         // logging setup
         FileStatsLogger logger = new FileStatsLogger(logFile);
-        MetricsGameListener pl = new MetricsGameListener(logger, new PandemicMetrics().getAllMetrics());
+        MetricsGameListener pl = new MetricsGameListener(new PandemicMetrics().getAllMetrics());
 
         List<IGameListener> listeners = new ArrayList<>();
         listeners.add((pl));
@@ -146,7 +146,7 @@ public class PandemicGame extends Game {
         for (PlayerType playerType : playersToTest) {
 
             // logging setup
-            MetricsGameListener pl = new MetricsGameListener(new SummaryLogger(), new PandemicMetrics().getAllMetrics());
+            MetricsGameListener pl = new MetricsGameListener(new PandemicMetrics().getAllMetrics());
             List<IGameListener> listeners = new ArrayList<>();
             listeners.add((pl));
 

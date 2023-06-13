@@ -112,7 +112,7 @@ public class TMGUI extends AbstractGUIManager {
             //Handle exception
         }
 
-        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2);
+        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2, -1);
         historyInfo.setFont(defaultFont);
         historyInfo.setForeground(fontColor);
         JPanel historyWrapper = new JPanel();

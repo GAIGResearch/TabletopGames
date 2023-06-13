@@ -792,7 +792,9 @@ public class SingleTreeNode {
         }
         if (params.treePolicy == MCTSEnums.TreePolicy.Hedge) {
             // in this case we exponentiate the regret to get the probability of taking this action
-            return Math.exp(regret / params.hedgeBoltzmann);
+            double v = Math.exp(regret / params.hedgeBoltzmann);
+            if (Double.isNaN(v))
+                throw new AssertionError("We have a non-number in Hedge somewhere");
         }
         return Math.max(0.0, regret);
     }
@@ -814,23 +816,7 @@ public class SingleTreeNode {
         }
 
         Map<AbstractAction, Double> actionToValueMap = availableActions.stream().collect(toMap(Function.identity(), valueFn));
-
-        // then we normalise to a pdf
-        actionToValueMap = Utils.normaliseMap(actionToValueMap);
-        // we then add on the exploration bonus
-        double exploreBonus = explore / actionToValueMap.size();
-        Map<AbstractAction, Double> probabilityOfSelection = actionToValueMap.entrySet().stream().collect(
-                toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - explore) + exploreBonus));
-
-        // then we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
-        double cdfSample = rnd.nextDouble();
-        double cdf = 0.0;
-        for (AbstractAction action : probabilityOfSelection.keySet()) {
-            cdf += probabilityOfSelection.get(action);
-            if (cdf >= cdfSample)
-                return action;
-        }
-        throw new AssertionError("If we reach here, then something has gone wrong in the above code");
+        return Utils.sampleFrom(actionToValueMap, params.exploreEpsilon, rnd);
     }
 
     /**

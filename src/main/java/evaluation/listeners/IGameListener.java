@@ -28,8 +28,7 @@ public interface IGameListener {
      */
     void allGamesFinished();
 
-    default boolean setOutputDirectory(String out, String time, String players) {return true;}
-
+    default boolean setOutputDirectory(String... nestedDirectories) {return true;}
 
     void setGame(Game game);
 
@@ -77,7 +76,13 @@ public interface IGameListener {
                         constructor = clazz.getConstructor(IStatisticLogger.class, AbstractMetric[].class);
                         listener = (IGameListener) constructor.newInstance(logger, metrics.toArray(new AbstractMetric[0]));
                     } catch (NoSuchMethodException e) {
-                        return createListener(listenerClass);
+                        try{
+                            constructor = clazz.getConstructor(AbstractMetric[].class);
+                            listener = (IGameListener) constructor.newInstance(metrics.toArray(new AbstractMetric[0]));
+                        }catch(NoSuchMethodException e2)
+                        {
+                            return createListener(listenerClass);
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -87,7 +92,7 @@ public interface IGameListener {
         if(listener == null) {
             // default
             AbstractMetric[] ms = new GameMetrics().getAllMetrics();
-            return new MetricsGameListener(logger, ms);
+            return new MetricsGameListener(ms);
         }
 
         return listener;
@@ -108,7 +113,7 @@ public interface IGameListener {
             e.printStackTrace();
         }
         if(listener == null)
-            return new MetricsGameListener(null, new AbstractMetric[0]);
+            return new MetricsGameListener(new AbstractMetric[0]);
         return listener;
     }
 

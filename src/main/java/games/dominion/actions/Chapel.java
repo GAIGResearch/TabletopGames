@@ -58,7 +58,7 @@ public class Chapel extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         // if the action is DoNothing, then we have stopped
         // else we continue discarding
         if (action instanceof DoNothing) {

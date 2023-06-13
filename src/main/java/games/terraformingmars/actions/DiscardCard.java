@@ -72,7 +72,7 @@ public class DiscardCard extends TMAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         setCardID(((DiscardCard)action).getCardID());
     }
 

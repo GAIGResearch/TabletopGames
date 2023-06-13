@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static evaluation.tournaments.RoundRobinTournament.TournamentMode.SELF_PLAY;
 import static utilities.Utils.getArg;
 
 public class ProgressiveLearner {
@@ -163,7 +164,7 @@ public class ProgressiveLearner {
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  SELF_PLAY, finalMatchups,
                 finalMatchups, System.currentTimeMillis(), params);
 
         tournament.setListeners(new ArrayList<>());
@@ -216,7 +217,7 @@ public class ProgressiveLearner {
 
     private void runGamesWithAgents() {
         // Run!
-        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
+        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  SELF_PLAY, matchups,
                 matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);

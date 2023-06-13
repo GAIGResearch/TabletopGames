@@ -4,7 +4,7 @@ import core.AbstractParameters;
 import core.AbstractPlayer;
 import core.interfaces.IStatisticLogger;
 import evaluation.listeners.IGameListener;
-import evaluation.loggers.FileStatsLogger;
+import evaluation.loggers.SummaryLogger;
 import games.GameType;
 import players.PlayerFactory;
 import players.mcts.BasicMCTSPlayer;
@@ -12,26 +12,42 @@ import players.mcts.MCTSPlayer;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
+import utilities.Pair;
 
 import java.io.FileWriter;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static core.CoreConstants.GameResult;
+import static evaluation.tournaments.RoundRobinTournament.TournamentMode.*;
 import static utilities.Utils.getArg;
 
 
 public class RoundRobinTournament extends AbstractTournament {
     private static boolean debug = false;
-    public final boolean selfPlay;
+    public final TournamentMode tournamentMode;
     private final int gamesPerMatchUp;
-    protected List<IGameListener> listeners;
+    protected List<IGameListener> listeners = new ArrayList<>();
     public boolean verbose = true;
     double[] pointsPerPlayer;
-    protected LinkedHashMap<Integer, Double> finalRanking; // contains index of agent in agents
+    double[] pointsPerPlayerSquared;
+    double[] rankPerPlayer;
+    double[] rankPerPlayerSquared;
+    int[] gamesPerPlayer;
+    protected LinkedHashMap<Integer, Pair<Double, Double>> finalWinRanking; // contains index of agent in agents
+    protected LinkedHashMap<Integer, Pair<Double, Double>> finalOrdinalRanking; // contains index of agent in agents
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
     private boolean randomGameParams;
+
+    private boolean listenersInitialized = false;
+
+    public enum TournamentMode {
+        SELF_PLAY,
+        NO_SELF_PLAY,
+        ONE_VS_ALL
+    }
 
     /**
      * Create a round robin tournament, which plays all agents against all others.
@@ -40,12 +56,12 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param gameToPlay      - game to play in this tournament.
      * @param playersPerGame  - number of players per game.
      * @param gamesPerMatchUp - number of games for each combination of players.
-     * @param selfPlay        - true if agents are allowed to play copies of themselves.
+     * @param mode            - SELF_PLAY, NO_SELF_PLAY, or ONE_VS_ALL
      */
     public RoundRobinTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                                int gamesPerMatchUp, boolean selfPlay, AbstractParameters gameParams) {
+                                int gamesPerMatchUp, TournamentMode mode, AbstractParameters gameParams) {
         super(agents, gameToPlay, playersPerGame, gameParams);
-        if (!selfPlay && playersPerGame > this.agents.size()) {
+        if (mode == NO_SELF_PLAY && playersPerGame > this.agents.size()) {
             throw new IllegalArgumentException("Not enough agents to fill a match without self-play." +
                     "Either add more agents, reduce the number of players per game, or allow self-play.");
         }
@@ -55,12 +71,16 @@ public class RoundRobinTournament extends AbstractTournament {
             this.agentIDs.add(i);
 
         this.gamesPerMatchUp = gamesPerMatchUp;
-        this.selfPlay = selfPlay;
+        this.tournamentMode = mode;
         this.pointsPerPlayer = new double[agents.size()];
+        this.pointsPerPlayerSquared = new double[agents.size()];
+        this.rankPerPlayer = new double[agents.size()];
+        this.rankPerPlayerSquared = new double[agents.size()];
+        this.gamesPerPlayer = new int[agents.size()];
     }
 
     /**
-     * Main function, creates an runs the tournament with the given settings and players.
+     * Main function, creates and runs the tournament with the given settings and players.
      */
     @SuppressWarnings({"ConstantConditions"})
     public static void main(String[] args) {
@@ -83,26 +103,24 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\t               the same number of games in total.\n" +
                             "\tmatchups=      The total number of matchups to run if mode=random...\n" +
                             "\t               ...or the number of matchups to run per combination of players if mode=exhaustive\n" +
-                            "\tlistener=      (Optional) The full class name of an IGameListener implementation. \n" +
-                            "\t               Defaults to evaluation.metrics.MetricsGameListener. \n" +
+                            "\tdestDir=       The directory to which the results will be written. Defaults to 'metrics/out'.\n" +
+                            "\taddTimestamp=  If true (default), then the results will be written to a subdirectory of destDir.\n" +
+                            "\tlistener=      The full class name of an IGameListener implementation. Or the location\n" +
+                            "\t               of a json file from which a listener can be instantiated.\n" +
+                            "\t               Defaults to evaluation.metrics.GameStatisticsListener. \n" +
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tmetrics=       The full class name of an IMetricsCollection implementation. " +
-                            "                 A comma-delimited string can be provided to gather several classes of metrics." +
-                            "                 If different listeners included, then a pipe-delimited string can be provided" +
-                            "                 to specify different metrics per listener.\n" +
-                            "\tlistenerFile= (Optional) Will be used as the IStatisticsLogger log file.\n" +
-                            "\t               Defaults to RoundRobinReport.txt\n" +
-                            "\t               A pipe-delimited list should be provided if each distinct listener should\n" +
-                            "\t               use a different log file.\n" +
+                            "\t               A comma-delimited string can be provided to gather several classes of metrics." +
+                            "\t               If different listeners included, then a pipe-delimited string can be provided" +
+                            "\t               to specify different metrics per listener.\n" +
                             "\tresultsFile=   (Optional) Saves the results of the tournament to a file with this filename.\n" +
                             "\t               Defaults to null\n" +
                             "\treportPeriod=  (Optional) For random mode execution only, after how many games played results are reported.\n" +
                             "\t               Defaults to the end of the tournament\n" +
-                            "\tstatsLog=      The file to use for logging agent-specific statistics (e.g. MCTS iterations/depth)\n" +
+                            "\tstatsLog=      (Optional) The file to use for logging agent-specific statistics (e.g. MCTS iterations/depth)\n" +
                             "\t               A single line will be generated as the average for each agent, implicitly assuming they are\n" +
-                            "\t               all of the same type. If not supplied, then no logging will take place.\n" +
-                            "\trandomGameParams= (Optional) If specified, parameters for the game will be randomized for each game, and printed before the run"
+                            "\t               all of the same type. If not supplied, then no logging will take place.\n"
             );
             return;
         }
@@ -116,15 +134,13 @@ public class RoundRobinTournament extends AbstractTournament {
         String gameParams = getArg(args, "gameParams", "");
         String statsLogPrefix = getArg(args, "statsLog", "");
         String resultsFile = getArg(args, "resultsFile", "");
+        String destDir = getArg(args, "destDir", "metrics/out");
+        boolean addTimestamp = getArg(args, "addTimestamp", true);
         int reportPeriod = getArg(args, "reportPeriod", matchups); //matchups
-        boolean randomGameParams = getArg(args, "randomGameParams", false);
+        boolean verbose = getArg(args, "verbose", true);
 
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
         List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
-        List<String> listenerFiles = new ArrayList<>(Arrays.asList(getArg(args, "listenerFile", "RoundRobinReport.txt").split("\\|")));
-
-        if (listenerClasses.size() > 1 && listenerFiles.size() > 1 && listenerClasses.size() != listenerFiles.size())
-            throw new IllegalArgumentException("Lists of log files and listeners must be the same length");
 
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         if (!playerDirectory.equals("")) {
@@ -147,22 +163,28 @@ public class RoundRobinTournament extends AbstractTournament {
 
         AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, gameParams);
 
+        TournamentMode tournamentMode = selfPlay ? TournamentMode.SELF_PLAY : NO_SELF_PLAY;
+        if (Objects.equals(mode, "oneVsRest"))
+            tournamentMode = ONE_VS_ALL;
         // Run!
         RoundRobinTournament tournament = mode.equals("exhaustive") ?
-                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, selfPlay, params) :
-                new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, selfPlay, matchups, reportPeriod,
+                new RoundRobinTournament(agents, gameToPlay, nPlayersPerGame, matchups, tournamentMode, params) :
+                new RandomRRTournament(agents, gameToPlay, nPlayersPerGame, tournamentMode, matchups, reportPeriod,
                         System.currentTimeMillis(), params);
 
+        tournament.verbose = verbose;
         if (resultsFile.length() > 0)
             tournament.setOutputFileName(resultsFile);
 
-        tournament.listeners = new ArrayList<>();
+        StringBuilder timeDir = new StringBuilder(gameToPlay.name() + "_" + nPlayersPerGame + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
         for (int l = 0; l < listenerClasses.size(); l++) {
-            String logFile = listenerFiles.size() == 1 ? listenerFiles.get(0) : listenerFiles.get(l);
-            IStatisticLogger logger = new FileStatsLogger(logFile);
             String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(l);
-            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), logger, metricsClass);
+            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), new SummaryLogger(), metricsClass);
             tournament.listeners.add(gameTracker);
+            if (addTimestamp)
+                gameTracker.setOutputDirectory(destDir, timeDir.toString());
+            else
+                gameTracker.setOutputDirectory(destDir);
         }
         tournament.runTournament();
         if (!statsLogPrefix.equals("")) {
@@ -173,6 +195,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 agent.getStatsLogger().processDataAndFinish();
             }
         }
+
     }
 
     /**
@@ -183,10 +206,8 @@ public class RoundRobinTournament extends AbstractTournament {
         for (int g = 0; g < games.size(); g++) {
             if (verbose)
                 System.out.println("Playing " + games.get(g).getGameType().name());
-
             LinkedList<Integer> matchUp = new LinkedList<>();
             createAndRunMatchUp(matchUp, g);
-
             reportResults(g);
         }
         for (IGameListener listener : listeners)
@@ -195,11 +216,11 @@ public class RoundRobinTournament extends AbstractTournament {
 
 
     public int getWinnerIndex() {
-        if (finalRanking == null || finalRanking.isEmpty())
+        if (finalWinRanking == null || finalWinRanking.isEmpty())
             throw new UnsupportedOperationException("Cannot get winner before results have been calculated");
 
         // The winner is the first key in finalRanking
-        for (Integer key : finalRanking.keySet()) {
+        for (Integer key : finalWinRanking.keySet()) {
             return key;
         }
         throw new AssertionError("Should not be reachable");
@@ -216,14 +237,30 @@ public class RoundRobinTournament extends AbstractTournament {
      * @param gameIdx - index of game to play with this match-up.
      */
     public void createAndRunMatchUp(LinkedList<Integer> matchUp, int gameIdx) {
-        if (matchUp.size() == playersPerGame.get(gameIdx)) {
-            evaluateMatchUp(matchUp, gameIdx);
+        if (tournamentMode == ONE_VS_ALL) {
+            if (agents.size() != 2)
+                throw new AssertionError("ONE_VS_ALL mode requires exactly 2 players per game");
+            int nPlayers = playersPerGame.get(gameIdx);
+            for (int p = 0; p < nPlayers; p++) {
+                List<Integer> matchup = new ArrayList<>(nPlayers);
+                for (int j = 0; j < nPlayers; j++)
+                    if (j == p)
+                        matchup.add(0);
+                    else
+                        matchup.add(1);
+                evaluateMatchUp(matchup, gameIdx);
+            }
         } else {
-            for (Integer agentID : this.agentIDs) {
-                if (selfPlay || !matchUp.contains(agentID)) {
-                    matchUp.add(agentID);
-                    createAndRunMatchUp(matchUp, gameIdx);
-                    matchUp.remove(agentID);
+            // in this case we are in exhaustive mode, so we recursively construct all possible combinations of players
+            if (matchUp.size() == playersPerGame.get(gameIdx)) {
+                evaluateMatchUp(matchUp, gameIdx);
+            } else {
+                for (Integer agentID : this.agentIDs) {
+                    if (tournamentMode == SELF_PLAY || !matchUp.contains(agentID)) {
+                        matchUp.add(agentID);
+                        createAndRunMatchUp(matchUp, gameIdx);
+                        matchUp.remove(agentID);
+                    }
                 }
             }
         }
@@ -257,11 +294,20 @@ public class RoundRobinTournament extends AbstractTournament {
             games.get(gameIdx).addListener(listener);
         }
 
+
         // Run the game N = gamesPerMatchUp times with these players
         long currentSeed = games.get(gameIdx).getGameState().getGameParameters().getRandomSeed();
         for (int i = 0; i < this.gamesPerMatchUp; i++) {
 
             games.get(gameIdx).reset(matchUpPlayers, currentSeed + i + 1);
+
+            if (!listenersInitialized) {
+                for (IGameListener gameTracker : listeners) {
+                    gameTracker.init(games.get(gameIdx));
+                }
+                listenersInitialized = true;
+            }
+
             // Randomize parameters
             if (randomGameParams) {
                 games.get(gameIdx).getGameState().getGameParameters().randomize();
@@ -272,14 +318,25 @@ public class RoundRobinTournament extends AbstractTournament {
 
             int numDraws = 0;
             for (int j = 0; j < matchUpPlayers.size(); j++) {
-                if (results[j] == GameResult.WIN_GAME) pointsPerPlayer[agentIDs.get(j)] += 1;
-                if (results[j] == GameResult.DRAW_GAME) numDraws++;
+                int ordinalPos = games.get(gameIdx).getGameState().getOrdinalPosition(j);
+                rankPerPlayer[agentIDs.get(j)] += ordinalPos;
+                gamesPerPlayer[agentIDs.get(j)] += 1;
+                rankPerPlayerSquared[agentIDs.get(j)] += ordinalPos * ordinalPos;
+                if (results[j] == GameResult.WIN_GAME) {
+                    pointsPerPlayer[agentIDs.get(j)] += 1;
+                    pointsPerPlayerSquared[agentIDs.get(j)] += 1;
+                }
+                if (results[j] == GameResult.DRAW_GAME)
+                    numDraws++;
             }
 
             if (numDraws > 0) {
                 double pointsPerDraw = 1.0 / numDraws;
-                for (int j = 0; j < matchUpPlayers.size(); j++)
+                for (int j = 0; j < matchUpPlayers.size(); j++) {
                     if (results[j] == GameResult.DRAW_GAME) pointsPerPlayer[agentIDs.get(j)] += pointsPerDraw;
+                    if (results[j] == GameResult.DRAW_GAME)
+                        pointsPerPlayerSquared[agentIDs.get(j)] += pointsPerDraw * pointsPerDraw;
+                }
             }
 
             if (verbose) {
@@ -298,13 +355,24 @@ public class RoundRobinTournament extends AbstractTournament {
 
 
     protected void calculateFinalResults() {
-        finalRanking = new LinkedHashMap<>();
+        finalWinRanking = new LinkedHashMap<>();
+        finalOrdinalRanking = new LinkedHashMap<>();
         for (int i = 0; i < this.agents.size(); i++) {
-            finalRanking.put(i, pointsPerPlayer[i]);
+            // We calculate the standard deviation, and hence the standard error on the mean value
+            // (using a normal approximation, which is valid for large N)
+            double stdDev = pointsPerPlayerSquared[i] / gamesPerPlayer[i] - (pointsPerPlayer[i] / gamesPerPlayer[i])
+                    * (pointsPerPlayer[i] / gamesPerPlayer[i]);
+            finalWinRanking.put(i, new Pair<>(pointsPerPlayer[i] / gamesPerPlayer[i], stdDev / Math.sqrt(gamesPerPlayer[i])));
+            stdDev = rankPerPlayerSquared[i] / gamesPerPlayer[i] - (rankPerPlayer[i] / gamesPerPlayer[i]) * (rankPerPlayer[i] / gamesPerPlayer[i]);
+            finalOrdinalRanking.put(i, new Pair<>(rankPerPlayer[i] / gamesPerPlayer[i], stdDev / Math.sqrt(gamesPerPlayer[i])));
         }
         // Sort by points.
-        finalRanking = finalRanking.entrySet().stream()
-                .sorted(Map.Entry.<Integer, Double>comparingByValue().reversed())
+        finalWinRanking = finalWinRanking.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue((o1, o2) -> o2.a.compareTo(o1.a)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
+                        LinkedHashMap::new));
+        finalOrdinalRanking = finalOrdinalRanking.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue((o1, o2) -> o2.a.compareTo(o1.a)))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
                         LinkedHashMap::new));
     }
@@ -312,7 +380,6 @@ public class RoundRobinTournament extends AbstractTournament {
     protected void reportResults(int game_index) {
         calculateFinalResults();
         int gameCounter = (gamesPerMatchUp * matchUpsRun);
-        int gamesPerPlayer = gameCounter * playersPerGame.get(game_index) / agents.size();
         boolean toFile = resultsFileName != null;
         ArrayList<String> dataDump = new ArrayList<>();
 
@@ -330,7 +397,7 @@ public class RoundRobinTournament extends AbstractTournament {
             if (verbose) System.out.print(str);
 
             str = String.format("%s won %.1f%% of the %d games it played during the tournament.\n",
-                    agents.get(i), 100.0 * pointsPerPlayer[i] / gamesPerPlayer, gamesPerPlayer);
+                    agents.get(i), 100.0 * pointsPerPlayer[i] / gamesPerPlayer[i], gamesPerPlayer[i]);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
         }
@@ -339,8 +406,11 @@ public class RoundRobinTournament extends AbstractTournament {
         if (toFile) dataDump.add(str);
         if (verbose) System.out.print(str);
 
-        for (Integer i : finalRanking.keySet()) {
-            str = String.format("%s: %.2f\n", agents.get(i).toString(), finalRanking.get(i));
+        for (Integer i : finalWinRanking.keySet()) {
+            str = String.format("%s: Win rate %.2f +/- %.2f\tMean Ordinal %.2f +/- %.2f\n",
+                    agents.get(i).toString(),
+                    finalWinRanking.get(i).a, finalWinRanking.get(i).b,
+                    finalOrdinalRanking.get(i).a, finalOrdinalRanking.get(i).b);
             if (toFile) dataDump.add(str);
             if (verbose) System.out.print(str);
         }
@@ -356,6 +426,22 @@ public class RoundRobinTournament extends AbstractTournament {
                 e.printStackTrace();
             }
         }
+    }
+
+    public double getWinRate(int agentID) {
+        return finalWinRanking.get(agentID).a;
+    }
+
+    public double getWinStdErr(int agentID) {
+        return finalWinRanking.get(agentID).b;
+    }
+
+    public double getOrdinalRank(int agentID) {
+        return finalOrdinalRanking.get(agentID).a;
+    }
+
+    public double getOrdinalStdErr(int agentID) {
+        return finalOrdinalRanking.get(agentID).b;
     }
 
     public List<IGameListener> getListeners() {

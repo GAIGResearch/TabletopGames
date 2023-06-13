@@ -30,9 +30,6 @@ public class CantStopGUIManager extends AbstractGUIManager {
         parent.add(infoPanel, BorderLayout.NORTH);
         parent.add(actionPanel, BorderLayout.SOUTH);
         parent.setPreferredSize(new Dimension(width, height + defaultActionPanelHeight + defaultInfoPanelHeight + 20));
-        parent.revalidate();
-        parent.setVisible(true);
-        parent.repaint();
     }
 
     @Override

@@ -12,14 +12,12 @@ import utilities.Utils;
 import java.util.Arrays;
 import java.util.Random;
 
-import static players.mcts.MCTSEnums.Information.Closed_Loop;
-import static players.mcts.MCTSEnums.Information.Open_Loop;
+import static players.mcts.MCTSEnums.Information.*;
 import static players.mcts.MCTSEnums.MASTType.Rollout;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
-import static players.mcts.MCTSEnums.Strategies.PARAMS;
-import static players.mcts.MCTSEnums.Strategies.RANDOM;
+import static players.mcts.MCTSEnums.Strategies.*;
 import static players.mcts.MCTSEnums.TreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
@@ -41,7 +39,7 @@ public class MCTSParams extends PlayerParameters {
     public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
     public boolean paranoid = false;
     public MCTSEnums.Strategies rolloutType = RANDOM;
-    public MCTSEnums.Strategies oppModelType = RANDOM;
+    public MCTSEnums.Strategies oppModelType = MCTSEnums.Strategies.DEFAULT;  // Default is to use the same as rolloutType
     public String rolloutClass, oppModelClass = "";
     public AbstractPlayer rolloutPolicy;
     public ITunableParameters rolloutPolicyParams;
@@ -163,7 +161,6 @@ public class MCTSParams extends PlayerParameters {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         biasVisits = (int) getParameterValue("biasVisits");
         omaVisits = (int) getParameterValue("omaVisits");
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
@@ -178,6 +175,14 @@ public class MCTSParams extends PlayerParameters {
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST
                 || (biasVisits > 0 && advantageFunction == null)) {
             useMAST = true;
+        }
+
+        advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
+        if (advantageFunction instanceof TunableParameters) {
+            TunableParameters tunableHeuristic = (TunableParameters) advantageFunction;
+            for (String name : tunableHeuristic.getParameterNames()) {
+                tunableHeuristic.setParameterValue(name, this.getParameterValue("advantageFunction." + name));
+            }
         }
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         if (heuristic instanceof TunableParameters) {
@@ -227,6 +232,9 @@ public class MCTSParams extends PlayerParameters {
                 break;
             case "opponentModelParams":
                 setParameterValue("opponentModelParams", child);
+                break;
+            case "advantageFunction":
+                setParameterValue("advantageFunction", child);
                 break;
             default:
                 throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
@@ -289,6 +297,8 @@ public class MCTSParams extends PlayerParameters {
             return opponentModel;
         if (oppModelType == PARAMS)
             return (AbstractPlayer) opponentModelParams.instantiate();
+        if (oppModelType == MCTSEnums.Strategies.DEFAULT)
+            return getRolloutStrategy();
         return constructStrategy(oppModelType, oppModelClass);
     }
 
