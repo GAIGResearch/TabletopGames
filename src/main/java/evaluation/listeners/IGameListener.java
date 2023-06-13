@@ -3,6 +3,7 @@ package evaluation.listeners;
 import core.Game;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.*;
+import org.apache.commons.lang3.reflect.ConstructorUtils;
 import utilities.Utils;
 
 import java.io.File;
@@ -70,16 +71,17 @@ public interface IGameListener {
             }
             if (!listenerClass.equals("")) {
                 try {
+                    AbstractMetric[] mArray = metrics.toArray(new AbstractMetric[0]);
                     Class<?> clazz = Class.forName(listenerClass);
                     Constructor<?> constructor;
                     try {
-                        constructor = clazz.getConstructor(IStatisticLogger.class, AbstractMetric[].class);
-                        listener = (IGameListener) constructor.newInstance(logger, metrics.toArray(new AbstractMetric[0]));
-                    } catch (NoSuchMethodException e) {
+                        constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, IStatisticLogger.class, AbstractMetric[].class);
+                        listener = (IGameListener) constructor.newInstance((Object) mArray);
+                    } catch (Exception e) {
                         try{
-                            constructor = clazz.getConstructor(AbstractMetric[].class);
-                            listener = (IGameListener) constructor.newInstance(metrics.toArray(new AbstractMetric[0]));
-                        }catch(NoSuchMethodException e2)
+                            constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, mArray.getClass());
+                            listener = (IGameListener) constructor.newInstance((Object) mArray);
+                        }catch(Exception e2)
                         {
                             return createListener(listenerClass);
                         }
@@ -91,6 +93,7 @@ public interface IGameListener {
         }
         if(listener == null) {
             // default
+            System.out.println("Unable to instantiate listener/metrics - so defaulting to MetricsGameListener(GameMetrics.class)");
             AbstractMetric[] ms = new GameMetrics().getAllMetrics();
             return new MetricsGameListener(ms);
         }
