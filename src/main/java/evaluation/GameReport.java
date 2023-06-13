@@ -49,7 +49,7 @@ public class GameReport {
                             "\t               If 'all' is specified, then every possible playerCount for the game will be analysed.\n" +
                             "\tnGames=        The number of games to run for each game type. Defaults to 1000.\n" +
                             "\tdestDir=       The directory to which the results will be written. Defaults to 'metrics/out'.\n" +
-                            "\taddTimestamp=  If true (default), a timestamp will be added to the destination directory.\n" +
+                            "\taddTimestamp=  If true (default is false), a timestamp will be added to the destination directory.\n" +
                             "\tlistener=      The full class name of an IGameListener implementation. Or the location\n" +
                             "\t               of a json file from which a listener can be instantiated.\n" +
                             "\t               Defaults to evaluation.metrics.GameStatisticsListener. \n" +
@@ -74,7 +74,7 @@ public class GameReport {
         String gameParams = getArg(args, "gameParam", "");
         String statsLog = getArg(args, "statsLog", "");
         String destDir = getArg(args, "destDir", "metrics/out");
-        boolean addTimestamp = getArg(args, "addTimestamp", true);
+        boolean addTimestamp = getArg(args, "addTimestamp", false);
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
         List<String> metricsClasses = new ArrayList<>(Arrays.asList(getArg(args, "metrics", "evaluation.metrics.GameMetrics").split("\\|")));
         boolean randomGameParams = getArg(args, "randomGameParams", false);
