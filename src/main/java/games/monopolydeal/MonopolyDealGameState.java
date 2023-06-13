@@ -3,10 +3,17 @@ package games.monopolydeal;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
+import core.components.Deck;
+import core.components.PartialObservableDeck;
 import games.GameType;
+import games.dominion.cards.CardType;
+import games.dominion.cards.DominionCard;
+import games.monopolydeal.cards.MonopolyDealCard;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
@@ -17,6 +24,14 @@ import java.util.List;
  * Functions on the game state should never <b>change</b> the state of the game.</p>
  */
 public class MonopolyDealGameState extends AbstractGameState {
+
+    Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
+    // Then Decks for each player - Hand, Discard and Draw
+    PartialObservableDeck<MonopolyDealCard>[] playerHands;
+    Deck<MonopolyDealCard>[] playerBanks;
+
+    Deck<MonopolyDealCard> drawPile;
+    Deck<MonopolyDealCard> discardPile;
     /**
      * @param gameParameters - game parameters.
      * @param nPlayers       - number of players in the game
@@ -30,8 +45,7 @@ public class MonopolyDealGameState extends AbstractGameState {
      */
     @Override
     protected GameType _getGameType() {
-        // TODO: replace with game-specific enum value declared in GameType
-        return GameType.GameTemplate;
+        return GameType.MonopolyDeal;
     }
 
     /**

@@ -33,6 +33,8 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
     @Override
     protected void _setup(AbstractGameState firstState) {
         // TODO: perform initialization of variables and game setup
+        MonopolyDealGameState state = (MonopolyDealGameState) firstState;
+
     }
 
     /**
