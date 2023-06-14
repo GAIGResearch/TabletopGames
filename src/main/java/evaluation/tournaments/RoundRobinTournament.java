@@ -117,10 +117,7 @@ public class RoundRobinTournament extends AbstractTournament {
                             "\tresultsFile=   (Optional) Saves the results of the tournament to a file with this filename.\n" +
                             "\t               Defaults to null\n" +
                             "\treportPeriod=  (Optional) For random mode execution only, after how many games played results are reported.\n" +
-                            "\t               Defaults to the end of the tournament\n" +
-                            "\tstatsLog=      (Optional) The file to use for logging agent-specific statistics (e.g. MCTS iterations/depth)\n" +
-                            "\t               A single line will be generated as the average for each agent, implicitly assuming they are\n" +
-                            "\t               all of the same type. If not supplied, then no logging will take place.\n"
+                            "\t               Defaults to the end of the tournament\n"
             );
             return;
         }
@@ -132,7 +129,6 @@ public class RoundRobinTournament extends AbstractTournament {
         int matchups = getArg(args, "matchups", 1);
         String playerDirectory = getArg(args, "players", "");
         String gameParams = getArg(args, "gameParams", "");
-        String statsLogPrefix = getArg(args, "statsLog", "");
         String resultsFile = getArg(args, "resultsFile", "");
         String destDir = getArg(args, "destDir", "metrics/out");
         boolean addTimestamp = getArg(args, "addTimestamp", true);
@@ -145,13 +141,6 @@ public class RoundRobinTournament extends AbstractTournament {
         LinkedList<AbstractPlayer> agents = new LinkedList<>();
         if (!playerDirectory.equals("")) {
             agents.addAll(PlayerFactory.createPlayers(playerDirectory));
-            if (!statsLogPrefix.equals("")) {
-                for (AbstractPlayer agent : agents) {
-                    IStatisticLogger logger = IStatisticLogger.createLogger("evaluation.loggers.SummaryLogger", statsLogPrefix + "_" + agent.toString() + ".txt");
-                    logger.record("Name", agent.toString());
-                    agent.setStatsLogger(logger);
-                }
-            }
         } else {
             /* 2. Set up players */
             agents.add(new MCTSPlayer());
@@ -187,15 +176,6 @@ public class RoundRobinTournament extends AbstractTournament {
                 gameTracker.setOutputDirectory(destDir);
         }
         tournament.runTournament();
-        if (!statsLogPrefix.equals("")) {
-            for (int i = 0; i < agents.size(); i++) {
-                AbstractPlayer agent = agents.get(i);
-                agent.getStatsLogger().record("WinRate", tournament.pointsPerPlayer[i] / (double) (tournament.matchUpsRun * tournament.gamesPerMatchUp));
-                System.out.println("Statistics for agent " + agent);
-                agent.getStatsLogger().processDataAndFinish();
-            }
-        }
-
     }
 
     /**

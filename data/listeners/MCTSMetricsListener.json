@@ -7,6 +7,6 @@
     	{"enum" : "evaluation.metrics.IDataLogger$ReportType", "value" : "Summary"}
     ],
     [
-      {"class": "players.mcts.MCTSMetrics$Base" }
+      {"class": "players.mcts.MCTSMetrics$TreeStats" }
   ]]
 }

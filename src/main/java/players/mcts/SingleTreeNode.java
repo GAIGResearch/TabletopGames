@@ -205,7 +205,7 @@ public class SingleTreeNode {
     /**
      * Performs full MCTS search, using the defined budget limits.
      */
-    public void mctsSearch(IStatisticLogger statsLogger) {
+    public void mctsSearch() {
 
         // Variables for tracking time budget
         double avgTimeTaken;
@@ -265,10 +265,6 @@ public class SingleTreeNode {
                 stop = (copyCount + fmCallsCount) > params.budget || numIters > params.budget;
             }
         }
-
-        if (statsLogger != null) {
-            logTreeStatistics(statsLogger, numIters, elapsedTimer.elapsedMillis());
-        }
     }
 
     /**
@@ -316,38 +312,6 @@ public class SingleTreeNode {
             }
             root.MASTBackup(MASTActions, value);
         }
-    }
-
-    protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
-        Map<String, Object> stats = new LinkedHashMap<>();
-        TreeStatistics treeStats = new TreeStatistics(root);
-        stats.put("round", round);
-        stats.put("turn", turn);
-        stats.put("turnOwner", turnOwner);
-        stats.put("actingPlayer", decisionPlayer);
-        double[] visitProportions = Arrays.stream(actionVisits()).asDoubleStream().map(d -> d / nVisits).toArray();
-        stats.put("visitEntropy", entropyOf(visitProportions));
-        stats.put("iterations", numIters);
-        stats.put("fmCalls", fmCallsCount);
-        stats.put("copyCalls", copyCount);
-        stats.put("time", timeTaken);
-        stats.put("totalNodes", treeStats.totalNodes);
-        stats.put("leafNodes", treeStats.totalLeaves);
-        stats.put("terminalNodes", treeStats.totalTerminalNodes);
-        stats.put("maxDepth", treeStats.depthReached);
-        stats.put("nActionsRoot", children.size());
-        stats.put("nActionsTree", treeStats.meanActionsAtNode);
-        stats.put("maxActionsAtNode", treeStats.maxActionsAtNode);
-        OptionalInt maxVisits = Arrays.stream(actionVisits()).max();
-        stats.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) numIters);
-        AbstractAction bestAction = bestAction();
-        stats.put("bestAction", bestAction);
-        stats.put("bestValue", this.actionTotValue(bestAction, decisionPlayer) / this.actionVisits(bestAction));
-        stats.put("normalisedBestValue", Utils.normalise(this.actionTotValue(bestAction, decisionPlayer) / this.actionVisits(bestAction), lowReward, highReward));
-        stats.put("lowReward", this.lowReward);
-        stats.put("highReward", this.highReward);
-        stats.put("rolloutActions", this.rolloutActionsTaken / numIters);
-        statsLogger.record(stats);
     }
 
     /**

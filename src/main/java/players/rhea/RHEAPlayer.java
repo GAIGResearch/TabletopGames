@@ -104,8 +104,6 @@ public class RHEAPlayer extends AbstractPlayer {
 
         timeTaken = timer.elapsedMillis();
         timePerIteration = numIters == 0 ? 0.0 : (timeTaken - initTime) / numIters;
-        if (statsLogger != null)
-            logStatistics(stateObs);
         // Return first action of best individual
         AbstractAction retValue = population.get(0).actions[0];
         if (!actions.contains(retValue))
@@ -305,6 +303,5 @@ public class RHEAPlayer extends AbstractPlayer {
         stats.put("medianReward", population.size() == 1 ? population.get(0).value : population.get(population.size() / 2 - 1).value);
         stats.put("repairProportion", repairCount == 0 ? 0.0 : repairCount / (double) (repairCount + nonRepairCount));
         stats.put("repairsPerIteration", repairCount == 0 ? 0.0 : repairCount / (double) numIters);
-        statsLogger.record(stats);
     }
 }

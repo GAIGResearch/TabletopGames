@@ -8,7 +8,6 @@ import java.util.*;
 
 public abstract class AbstractPlayer {
 
-    protected IStatisticLogger statsLogger = null;
     // ID of this player, assigned by the game
     int playerID;
     String name;
@@ -46,14 +45,6 @@ public abstract class AbstractPlayer {
     public String toString() {
         if (name != null) return name;
         return this.getClass().getSimpleName();
-    }
-
-    public final IStatisticLogger getStatsLogger() {
-        return statsLogger;
-    }
-
-    public final void setStatsLogger(IStatisticLogger logger) {
-        this.statsLogger = logger;
     }
 
     public final void addDecorator(AbstractPlayerDecorator decorator) {

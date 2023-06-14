@@ -597,7 +597,6 @@ public class ParameterSearch {
                 .toArray();
         // now run the evaluation games on the final recommendation
         if (evaluator instanceof GameEvaluator && evalGames > 0) {
-            ((GameEvaluator) evaluator).reportStatistics = true;
             double[] results = IntStream.range(0, evalGames)
                     .mapToDouble(answer -> evaluator.evaluate(winnerSettings)).toArray();
 
@@ -605,7 +604,6 @@ public class ParameterSearch {
             double stdErr = Math.sqrt(Arrays.stream(results)
                     .map(d -> Math.pow(d - avg, 2.0)).sum()) / (evalGames - 1.0);
 
-            ((GameEvaluator) evaluator).reportStatistics = false;
             return new Pair<>(avg, stdErr);
         } else {
             return new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled()), 0.0);

@@ -23,7 +23,6 @@ import static java.util.stream.Collectors.toList;
  */
 public class GameEvaluator implements SolutionEvaluator {
 
-    public boolean reportStatistics;
     public IStatisticLogger statsLogger;
     public boolean debug = false;
     GameType game;
@@ -119,7 +118,6 @@ public class GameEvaluator implements SolutionEvaluator {
                 allPlayers.add(opponents.get(oppIndex).copy());
             } else {
                 AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(settings); // we create for each, in case this is coop
-                if (reportStatistics) tunedPlayer.setStatsLogger(statsLogger);
                 allPlayers.add(tunedPlayer);
             }
         }

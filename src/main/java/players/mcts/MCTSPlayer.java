@@ -102,7 +102,7 @@ public class MCTSPlayer extends AbstractPlayer {
             ((MASTPlayer) opponentModel).setStats(root.MASTStatistics);
             ((MASTPlayer) opponentModel).temperature = params.MASTBoltzmann;
         }
-        root.mctsSearch(getStatsLogger());
+        root.mctsSearch();
         if (params.gatherExpertIterationData) {
             ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer(
                     params.expertIterationFileStem,
