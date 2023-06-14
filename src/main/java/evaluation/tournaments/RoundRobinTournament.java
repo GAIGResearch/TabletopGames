@@ -179,7 +179,7 @@ public class RoundRobinTournament extends AbstractTournament {
         StringBuilder timeDir = new StringBuilder(gameToPlay.name() + "_" + nPlayersPerGame + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
         for (int l = 0; l < listenerClasses.size(); l++) {
             String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(l);
-            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), new SummaryLogger(), metricsClass);
+            IGameListener gameTracker = IGameListener.createListener(listenerClasses.get(l), metricsClass);
             tournament.listeners.add(gameTracker);
             if (addTimestamp)
                 gameTracker.setOutputDirectory(destDir, timeDir.toString());

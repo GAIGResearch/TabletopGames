@@ -112,7 +112,7 @@ public class GameReport {
         for (int i = 0; i < listenerClasses.size(); i++) {
             String metricsClass = metricsClasses.size() == 1 ? metricsClasses.get(0) : metricsClasses.get(i);
             String listenerClass = listenerClasses.get(i);
-            IGameListener gameTracker = IGameListener.createListener(listenerClass, new SummaryLogger(), metricsClass);
+            IGameListener gameTracker = IGameListener.createListener(listenerClass, metricsClass);
             gameTrackers.add(gameTracker);
         }
 

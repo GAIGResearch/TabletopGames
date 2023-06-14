@@ -88,7 +88,7 @@ public class SkillLadder {
             RRT.verbose = false;
             StringBuilder timeDir = new StringBuilder(gameType.name() + "_" + nPlayers + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
             for (String listenerClass : listenerClasses) {
-                IGameListener gameTracker = IGameListener.createListener(listenerClass, new SummaryLogger(), null);
+                IGameListener gameTracker = IGameListener.createListener(listenerClass, null);
                 RRT.getListeners().add(gameTracker);
                 if (addTimestamp)
                     gameTracker.setOutputDirectory(destDir,  "Budget_" + budgetBeingTested, timeDir.toString());

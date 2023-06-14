@@ -3,6 +3,7 @@ package evaluation.listeners;
 import core.Game;
 import evaluation.metrics.*;
 import evaluation.metrics.tablessaw.DataTableSaw;
+import shapeless.ops.nat;
 
 import java.io.File;
 import java.util.*;
@@ -31,7 +32,7 @@ public class MetricsGameListener implements IGameListener {
     protected Game game;
 
     // Types of reports to generate: RawData, Summary, Plot
-    List<IDataLogger.ReportType> reportTypes = Arrays.asList(RawData, Summary, Plot);  //todo this needs to be read from JSON
+    List<IDataLogger.ReportType> reportTypes = new ArrayList<>();
 
     // Where to send the reports: ToConsole, ToFile or ToBoth
     List<IDataLogger.ReportDestination> reportDestinations;
@@ -47,7 +48,12 @@ public class MetricsGameListener implements IGameListener {
     }
 
     public MetricsGameListener(IDataLogger.ReportDestination logTo, AbstractMetric[] metrics) {
+        this(logTo, new IDataLogger.ReportType[]{RawData, Summary, Plot}, metrics);
+    }
+
+    public MetricsGameListener(IDataLogger.ReportDestination logTo, IDataLogger.ReportType[] dataTypes, AbstractMetric[] metrics) {
         reportDestinations = Collections.singletonList(logTo);
+        this.reportTypes = Arrays.asList(dataTypes);
         this.metrics = new LinkedHashMap<>();
         for (AbstractMetric m : metrics) {
             m.setDataLogger(new DataTableSaw(m)); //todo this logger needs to be read from JSON
