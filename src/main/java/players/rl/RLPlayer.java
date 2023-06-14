@@ -32,25 +32,22 @@ public class RLPlayer extends AbstractPlayer {
 
     final String weightsPath = "./beta.txt";
 
-    RLActionVector features;
+    RLFeatureVector features;
     List<SAR> SARs = new ArrayList<SAR>();
 
     final public RLParams params;
 
     double[] beta = null;
 
-    public RLPlayer(RLActionVector features, RLParams params) {
-        this.features = features;
+    public RLPlayer(RLParams params) {
         this.params = params;
+        this.features = params.features;
     }
 
-    private float solve(double[] featureVector) {
-        switch (params.solver) {
-            case Q_LEARNING:
-                return 0;
-            case SARSA:
-                return 0;
-        }
+    private double solve(double[] featureVector) {
+        // TODO switch between params.solver (Q-Learning, SARSA, etc.)
+        // For now always Q Learning
+        // TODO add default value to params
         return 0;
     }
 

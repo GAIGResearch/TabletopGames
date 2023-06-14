@@ -3,9 +3,10 @@ package players.rl;
 import java.util.Arrays;
 
 import core.AbstractParameters;
+import core.interfaces.IStateFeatureVector;
 import players.PlayerParameters;
 
-public class RLParams extends PlayerParameters {
+public class TabRLParams extends PlayerParameters {
 
     enum Solver {
         Q_LEARNING,
@@ -18,13 +19,13 @@ public class RLParams extends PlayerParameters {
     public float gamma = 0.5f;
     public float epsilon = 0.5f;
 
-    public final RLFeatureVector features;
+    public final IStateFeatureVector features;
 
-    public RLParams(RLFeatureVector features) {
+    public TabRLParams(IStateFeatureVector features) {
         this(features, System.currentTimeMillis());
     }
 
-    public RLParams(RLFeatureVector features, long seed) {
+    public TabRLParams(IStateFeatureVector features, long seed) {
         super(seed);
         this.features = features;
         addTunableParameter("solver", Solver.Q_LEARNING, Arrays.asList(Solver.values()));
@@ -34,13 +35,13 @@ public class RLParams extends PlayerParameters {
     }
 
     @Override
-    public RLPlayer instantiate() {
-        return new RLPlayer(this);
+    public TabRLPlayer instantiate() {
+        return new TabRLPlayer(this);
     }
 
     @Override
     protected AbstractParameters _copy() {
-        RLParams retValue = new RLParams(features, System.currentTimeMillis());
+        TabRLParams retValue = new TabRLParams(features, System.currentTimeMillis());
         retValue.solver = solver;
         retValue.alpha = alpha;
         retValue.gamma = gamma;
