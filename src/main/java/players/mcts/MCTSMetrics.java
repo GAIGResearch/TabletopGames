@@ -43,8 +43,9 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("ActionsAtRoot", root.children.size());
                 records.put("fmCalls", root.fmCallsCount / root.getVisits());
                 records.put("copyCalls", root.copyCount / root.getVisits());
+                return true;
             }
-            return true;
+            return false;
         }
 
         @Override

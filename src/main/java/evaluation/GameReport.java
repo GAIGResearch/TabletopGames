@@ -38,7 +38,7 @@ public class GameReport {
                             "\t               Specifying all|-name1|-name2... will run all games except for name1, name2...\n" +
                             "\tplayer=        The JSON file containing the details of the Player to monitor, OR\n" +
                             "\t               one of mcts|rmhc|random|osla|<className>. The default is 'random'.\n" +
-                            "\topponent=      (Optional) JSON file containing the details of the Player to monitor, OR\n" +
+                            "\topponent=      (Optional) JSON file containing the details of the opponents, OR\n" +
                             "\t               one of mcts|rmhc|random|osla|<className>.\n" +
                             "\t               If not specified then *all* of the players use the same agent type as specified\n" +
                             "\t               with the previous parameter.\n" +
