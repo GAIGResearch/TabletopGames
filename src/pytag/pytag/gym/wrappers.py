@@ -8,7 +8,6 @@ import torch
 
 import gymnasium as gym
 from gymnasium.vector import VectorEnvWrapper
-import gymnasium.wrappers
 
 
 class MergeActionMaskWrapper(VectorEnvWrapper):
