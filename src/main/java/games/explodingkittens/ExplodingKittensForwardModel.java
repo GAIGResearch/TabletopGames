@@ -175,7 +175,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         // The actions per player do not change a lot in between two turns
         // Could update an existing list instead of generating a new list every time we query this function
 
-        // todo we need to pass the tree type to the action factories
         // Find actions for the player depending on current game phase
         int player = ekgs.getCurrentPlayer();
         if (CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
@@ -191,28 +190,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         } else {
             actions = new ArrayList<>();
         }
-
-//        if (actionSpace.structure == ActionSpace.Structure.Tree){
-//            // todo rework these
-//            if (CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
-//                ActionTreeNode playNode = root.findChildrenByName("PLAY");
-//                if (actions.size() > 0){
-//                    playNode.setValue(1);
-//                    for (AbstractAction action : actions){
-//                        if (action instanceof DrawCard)
-//                            playNode.findChildrenByName(((DrawCard)action).getCard(gameState).cardType).setAction(action);
-//                    }
-//                }
-//            } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals(ekgs.getGamePhase())) {
-//
-//            } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Nope.equals(ekgs.getGamePhase())) {
-//
-//            } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Favor.equals(ekgs.getGamePhase())) {
-//
-//            } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.SeeTheFuture.equals(ekgs.getGamePhase())) {
-//
-//            }
-//        }
 
         return actions;
     }
@@ -231,7 +208,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
     private ArrayList<AbstractAction> playerActions(ExplodingKittensGameState ekgs, int playerID){
         ArrayList<AbstractAction> actions = new ArrayList<>();
         Deck<ExplodingKittensCard> playerDeck = ekgs.playerHandCards.get(playerID);
-        ActionTreeNode playNode = root.findChildrenByName("PLAY");
+//        ActionTreeNode playNode = root.findChildrenByName("PLAY");
 
         HashSet<ExplodingKittensCard.CardType> types = new HashSet<>();
         for (int c = 0; c < playerDeck.getSize(); c++) {
@@ -250,9 +227,9 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
                 case EXPLODING_KITTEN:
                     break;
                 case SKIP:
-                    playNode.setValue(1);
+//                    playNode.setValue(1);
                     actions.add(new SkipAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
-                    playNode.findChildrenByName("SKIP").setAction(new SkipAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
+//                    playNode.findChildrenByName("SKIP").setAction(new SkipAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
                     break;
                 case FAVOR:
                     for (int player = 0; player < ekgs.getNPlayers(); player++) {
@@ -260,8 +237,8 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
                             continue;
                         if (ekgs.playerHandCards.get(player).getSize() > 0) {
                             actions.add(new FavorAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, player));
-                            playNode.setValue(1);
-                            playNode.findChildrenByName("FAVOR").setAction(new FavorAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, player));
+//                            playNode.setValue(1);
+//                            playNode.findChildrenByName("FAVOR").setAction(new FavorAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, player));
                         }
                     }
                     break;
@@ -272,14 +249,14 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
                             continue;
 
                         actions.add(new AttackAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, targetPlayer));
-                        playNode.setValue(1);
-                        playNode.findChildrenByName("ATTACK").setAction(new AttackAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, targetPlayer));
+//                        playNode.setValue(1);
+//                        playNode.findChildrenByName("ATTACK").setAction(new AttackAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, targetPlayer));
                     }
                     break;
                 case SHUFFLE:
                     actions.add(new ShuffleAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
-                    playNode.setValue(1);
-                    playNode.findChildrenByName("SHUFFLE").setAction(new ShuffleAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
+//                    playNode.setValue(1);
+//                    playNode.findChildrenByName("SHUFFLE").setAction(new ShuffleAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
                     break;
                 case SEETHEFUTURE:
 //                    actions.add(new SeeTheFuture(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, playerID));
@@ -303,7 +280,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
 
         // add end turn by drawing a card
         actions.add(new DrawExplodingKittenCard(ekgs.drawPile.getComponentID(), playerDeck.getComponentID()));
-        root.findChildrenByName("DRAW").setAction(new DrawExplodingKittenCard(ekgs.drawPile.getComponentID(), playerDeck.getComponentID()));
+//        root.findChildrenByName("DRAW").setAction(new DrawExplodingKittenCard(ekgs.drawPile.getComponentID(), playerDeck.getComponentID()));
         return actions;
     }
 
@@ -320,9 +297,9 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         if (explodingKittenCard != -1) {
             for (int i = 0; i <= ekgs.drawPile.getSize(); i++) {
                 actions.add(new PlaceExplodingKitten(playerDeck.getComponentID(), ekgs.drawPile.getComponentID(), explodingKittenCard, i));
-                if (i < N_CARDS_TO_CHECK){
-                    root.findChildrenByName("DEFUSE").findChildrenByName("PUT" + i, true).setAction(new PlaceExplodingKitten(playerDeck.getComponentID(), ekgs.drawPile.getComponentID(), explodingKittenCard, i));
-                }
+//                if (i < N_CARDS_TO_CHECK){
+//                    root.findChildrenByName("DEFUSE").findChildrenByName("PUT" + i, true).setAction(new PlaceExplodingKitten(playerDeck.getComponentID(), ekgs.drawPile.getComponentID(), explodingKittenCard, i));
+//                }
             }
         }
         return actions;
@@ -334,11 +311,11 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         for (int c = 0; c < playerDeck.getSize(); c++) {
             if (playerDeck.getComponents().get(c).cardType == ExplodingKittensCard.CardType.NOPE) {
                 actions.add(new NopeAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
-                root.findChildrenByName("NOPE").findChildrenByName("NOPE").setAction(new NopeAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
+//                root.findChildrenByName("NOPE").findChildrenByName("NOPE").setAction(new NopeAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
                 break;
             }
         }
-        root.findChildrenByName("NOPE").findChildrenByName("PASS").setAction(new PassAction());
+//        root.findChildrenByName("NOPE").findChildrenByName("PASS").setAction(new PassAction());
         actions.add(new PassAction());
         return actions;
     }
@@ -350,7 +327,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         // todo this requires mapping the card type to indices
         for (int card = 0; card < playerDeck.getSize(); card++) {
             actions.add(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), card));
-            root.findChildrenByName("FAVOR").findChildrenByName(playerDeck.get(card).toString()).setAction(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), card));
+//            root.findChildrenByName("FAVOR").findChildrenByName(playerDeck.get(card).toString()).setAction(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), card));
         }
         if (actions.isEmpty()) // the target has no cards.
             actions.add(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), -1));
@@ -394,9 +371,99 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
 
     @Override
     public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
-        // TODO
         root.resetTree();
-        return null;
+        ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
+
+        int playerID = ekgs.getCurrentPlayer();
+        Deck<ExplodingKittensCard> playerDeck = ekgs.playerHandCards.get(playerID);
+        if (CoreConstants.DefaultGamePhase.Main.equals(ekgs.getGamePhase())) {
+
+            ActionTreeNode playNode = root.findChildrenByName("PLAY");
+
+            HashSet<ExplodingKittensCard.CardType> types = new HashSet<>();
+            for (int c = 0; c < playerDeck.getSize(); c++) {
+                ExplodingKittensCard card = playerDeck.get(c);
+                if (types.contains(card.cardType)) continue;
+                types.add(card.cardType);
+
+                switch (card.cardType) {
+                    case SKIP:
+                        playNode.setValue(1);
+                        playNode.findChildrenByName("SKIP").setAction(new SkipAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
+                        break;
+                    case FAVOR:
+                        for (int player = 0; player < ekgs.getNPlayers(); player++) {
+                            if (player == playerID)
+                                continue;
+                            if (ekgs.playerHandCards.get(player).getSize() > 0) {
+                                playNode.setValue(1);
+                                playNode.findChildrenByName("FAVOR").setAction(new FavorAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, player));
+                            }
+                        }
+                        break;
+                    case ATTACK:
+                        for (int targetPlayer = 0; targetPlayer < ekgs.getNPlayers(); targetPlayer++) {
+
+                            if (targetPlayer == playerID || ekgs.getPlayerResults()[targetPlayer] != CoreConstants.GameResult.GAME_ONGOING)
+                                continue;
+
+                            playNode.setValue(1);
+                            playNode.findChildrenByName("ATTACK").setAction(new AttackAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, targetPlayer));
+                        }
+                        break;
+                    case SHUFFLE:
+                        playNode.setValue(1);
+                        playNode.findChildrenByName("SHUFFLE").setAction(new ShuffleAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
+                        break;
+                    case SEETHEFUTURE:
+                        // todo this action not implemented correctly
+    //                    actions.add(new SeeTheFuture(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, playerID));
+//                        playNode.setValue(1);
+    //                    playNode.findChildrenByName("SEETHEFUTURE").setAction(new SeeTheFuture(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c, playerID));
+                        break;
+//                    default:
+//                        System.out.println("No actions known for cardtype: " + card.cardType);
+                }
+            }
+
+            // add end turn by drawing a card
+            root.findChildrenByName("DRAW").setAction(new DrawExplodingKittenCard(ekgs.drawPile.getComponentID(), playerDeck.getComponentID()));
+
+        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Defuse.equals(ekgs.getGamePhase())) {
+            int explodingKittenCard = -1;
+            for (int i = 0; i < playerDeck.getSize(); i++) {
+                if (playerDeck.getComponents().get(i).cardType == ExplodingKittensCard.CardType.EXPLODING_KITTEN) {
+                    explodingKittenCard = i;
+                    break;
+                }
+            }
+            if (explodingKittenCard != -1) {
+                for (int i = 0; i <= ekgs.drawPile.getSize(); i++) {
+                    if (i < N_CARDS_TO_CHECK){
+                        root.findChildrenByName("DEFUSE").findChildrenByName("PUT" + i, true).setAction(new PlaceExplodingKitten(playerDeck.getComponentID(), ekgs.drawPile.getComponentID(), explodingKittenCard, i));
+                    }
+                }
+            }
+        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Nope.equals(ekgs.getGamePhase())) {
+            for (int c = 0; c < playerDeck.getSize(); c++) {
+                if (playerDeck.getComponents().get(c).cardType == ExplodingKittensCard.CardType.NOPE) {
+                    root.findChildrenByName("NOPE").findChildrenByName("NOPE").setAction(new NopeAction(playerDeck.getComponentID(), ekgs.discardPile.getComponentID(), c));
+                    break;
+                }
+            }
+            root.findChildrenByName("NOPE").findChildrenByName("PASS").setAction(new PassAction());
+            System.out.println("got boht nope actions");
+        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.Favor.equals(ekgs.getGamePhase())) {
+            Deck<ExplodingKittensCard> receiverDeck = ekgs.playerHandCards.get(ekgs.playerGettingAFavor);
+            // this requires mapping the card type to indices
+            for (int card = 0; card < playerDeck.getSize(); card++) {
+                root.findChildrenByName("FAVOR").findChildrenByName(playerDeck.get(card).toString()).setAction(new GiveCard(playerDeck.getComponentID(), receiverDeck.getComponentID(), card));
+            }
+        } else if (ExplodingKittensGameState.ExplodingKittensGamePhase.SeeTheFuture.equals(ekgs.getGamePhase())) {
+            // todo this is not correctly implemented
+        }
+
+        return root;
     }
 
     public ActionTreeNode initActionTree(AbstractGameState gs){

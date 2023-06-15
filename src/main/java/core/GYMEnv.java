@@ -362,7 +362,7 @@ public class GYMEnv {
 
         try {
             // Initialise the game
-            GYMEnv env = new GYMEnv(GameType.valueOf("Diamant"), null, players, 343, true);
+            GYMEnv env = new GYMEnv(GameType.valueOf("ExplodingKittens"), null, players, 343, true);
             if (!useGYM) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
             // reset is always required before starting a new episode
