@@ -38,18 +38,16 @@ public class RandomRRTournament extends RoundRobinTournament {
      * search of all permutations would be prohibitive.
      *
      * @param ignored - this input is ignored
-     * @param gameIdx - index of game to play with this match-up.
      */
     @Override
-    public void createAndRunMatchUp(LinkedList<Integer> ignored, int gameIdx) {
-        int nPlayers = playersPerGame.get(gameIdx);
+    public void createAndRunMatchUp(LinkedList<Integer> ignored) {
         for (int i = 0; i < totalMatchups; i++) {
-            List<Integer> matchup = new ArrayList<>(nPlayers);
-            for (int j = 0; j < nPlayers; j++)
+            List<Integer> matchup = new ArrayList<>(playersPerGame);
+            for (int j = 0; j < playersPerGame; j++)
                 matchup.add(idStream.getAsInt());
-            evaluateMatchUp(matchup, gameIdx);
+            evaluateMatchUp(matchup);
             if(reportPeriod > 0 && (i+1) % reportPeriod == 0 && i != totalMatchups - 1)
-                reportResults(gameIdx);
+                reportResults();
         }
     }
 

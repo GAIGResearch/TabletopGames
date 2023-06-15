@@ -286,13 +286,12 @@ public class RoundRobinTournament extends AbstractTournament {
      */
     @Override
     public void runTournament() {
-        for (int g = 0; g < games.size(); g++) {
-            if (verbose)
-                System.out.println("Playing " + games.get(g).getGameType().name());
-            LinkedList<Integer> matchUp = new LinkedList<>();
-            createAndRunMatchUp(matchUp, g);
-            reportResults(g);
-        }
+        if (verbose)
+            System.out.println("Playing " + games.getGameType().name());
+        LinkedList<Integer> matchUp = new LinkedList<>();
+        createAndRunMatchUp(matchUp);
+        reportResults();
+
         for (IGameListener listener : listeners)
             listener.allGamesFinished();
     }
@@ -317,13 +316,12 @@ public class RoundRobinTournament extends AbstractTournament {
      * Recursively creates one combination of players and evaluates it.
      *
      * @param matchUp - current combination of players, updated recursively.
-     * @param gameIdx - index of game to play with this match-up.
      */
-    public void createAndRunMatchUp(LinkedList<Integer> matchUp, int gameIdx) {
+    public void createAndRunMatchUp(LinkedList<Integer> matchUp) {
         if (tournamentMode == ONE_VS_ALL) {
             // In this case agents.get(0) must always play
             Random rnd = new Random(System.currentTimeMillis());
-            int nPlayers = playersPerGame.get(gameIdx);
+            int nPlayers = playersPerGame;
             List<Integer> randomAgentOrder = new ArrayList<>(this.agentIDs);
             randomAgentOrder.remove(Integer.valueOf(0));
             for (int p = 0; p < nPlayers; p++) {
@@ -338,18 +336,18 @@ public class RoundRobinTournament extends AbstractTournament {
                             matchup.add(randomAgentOrder.get(j % randomAgentOrder.size()));
                         }
                     }
-                    evaluateMatchUp(matchup, gameIdx, 1);
+                    evaluateMatchUp(matchup, 1);
                 }
             }
         } else {
             // in this case we are in exhaustive mode, so we recursively construct all possible combinations of players
-            if (matchUp.size() == playersPerGame.get(gameIdx)) {
-                evaluateMatchUp(matchUp, gameIdx);
+            if (matchUp.size() == playersPerGame) {
+                evaluateMatchUp(matchUp);
             } else {
                 for (Integer agentID : this.agentIDs) {
                     if (tournamentMode == SELF_PLAY || !matchUp.contains(agentID)) {
                         matchUp.add(agentID);
-                        createAndRunMatchUp(matchUp, gameIdx);
+                        createAndRunMatchUp(matchUp);
                         matchUp.remove(agentID);
                     }
                 }
@@ -357,17 +355,16 @@ public class RoundRobinTournament extends AbstractTournament {
         }
     }
 
-    protected void evaluateMatchUp(List<Integer> agentIDs, int gameIdx) {
-        evaluateMatchUp(agentIDs, gameIdx, gamesPerMatchUp);
+    protected void evaluateMatchUp(List<Integer> agentIDs) {
+        evaluateMatchUp(agentIDs, gamesPerMatchUp);
     }
 
     /**
      * Evaluates one combination of players.
      *
      * @param agentIDs - IDs of agents participating in this run.
-     * @param gameIdx  - index of game to play in this evaluation.
      */
-    protected void evaluateMatchUp(List<Integer> agentIDs, int gameIdx, int nGames) {
+    protected void evaluateMatchUp(List<Integer> agentIDs, int nGames) {
         if (debug)
             System.out.printf("Evaluate %s at %tT%n", agentIDs.toString(), System.currentTimeMillis());
         LinkedList<AbstractPlayer> matchUpPlayers = new LinkedList<>();
@@ -386,34 +383,34 @@ public class RoundRobinTournament extends AbstractTournament {
 
 
         for (IGameListener listener : listeners) {
-            games.get(gameIdx).addListener(listener);
+            games.addListener(listener);
         }
 
 
         // Run the game N = gamesPerMatchUp times with these players
-        long currentSeed = games.get(gameIdx).getGameState().getGameParameters().getRandomSeed();
+        long currentSeed = games.getGameState().getGameParameters().getRandomSeed();
         for (int i = 0; i < nGames; i++) {
 
-            games.get(gameIdx).reset(matchUpPlayers, currentSeed + i + 1);
+            games.reset(matchUpPlayers, currentSeed + i + 1);
 
             if (!listenersInitialized) {
                 for (IGameListener gameTracker : listeners) {
-                    gameTracker.init(games.get(gameIdx));
+                    gameTracker.init(games);
                 }
                 listenersInitialized = true;
             }
 
             // Randomize parameters
             if (randomGameParams) {
-                games.get(gameIdx).getGameState().getGameParameters().randomize();
-                System.out.println("Game parameters: " + games.get(gameIdx).getGameState().getGameParameters());
+                games.getGameState().getGameParameters().randomize();
+                System.out.println("Game parameters: " + games.getGameState().getGameParameters());
             }
-            games.get(gameIdx).run();  // Always running tournaments without visuals
-            GameResult[] results = games.get(gameIdx).getGameState().getPlayerResults();
+            games.run();  // Always running tournaments without visuals
+            GameResult[] results = games.getGameState().getPlayerResults();
 
             int numDraws = 0;
             for (int j = 0; j < matchUpPlayers.size(); j++) {
-                int ordinalPos = games.get(gameIdx).getGameState().getOrdinalPosition(j);
+                int ordinalPos = games.getGameState().getOrdinalPosition(j);
                 rankPerPlayer[agentIDs.get(j)] += ordinalPos;
                 gamesPerPlayer[agentIDs.get(j)] += 1;
                 rankPerPlayerSquared[agentIDs.get(j)] += ordinalPos * ordinalPos;
@@ -444,7 +441,7 @@ public class RoundRobinTournament extends AbstractTournament {
             }
 
         }
-        games.get(gameIdx).clearListeners();
+        games.clearListeners();
         matchUpsRun++;
     }
 
@@ -472,7 +469,7 @@ public class RoundRobinTournament extends AbstractTournament {
                         LinkedHashMap::new));
     }
 
-    protected void reportResults(int game_index) {
+    protected void reportResults() {
         calculateFinalResults();
         int gameCounter = (gamesPerMatchUp * matchUpsRun);
         boolean toFile = !resultsFile.equals("");
@@ -480,7 +477,7 @@ public class RoundRobinTournament extends AbstractTournament {
 
         // To console
         if (verbose)
-            System.out.printf("============= %s - %d games played ============= \n", games.get(game_index).getGameType().name(), gameCounter);
+            System.out.printf("============= %s - %d games played ============= \n", games.getGameType().name(), gameCounter);
         for (int i = 0; i < this.agents.size(); i++) {
             String str = String.format("%s got %.2f points. ", agents.get(i), pointsPerPlayer[i]);
             if (toFile) dataDump.add(str);
