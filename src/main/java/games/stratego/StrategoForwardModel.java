@@ -53,12 +53,97 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
             state.gridBoard.setElement(piece.getPiecePosition().getX(), piece.getPiecePosition().getY(), piece.copy());
         }
 
-        root = generateActionTree(params.gridSize);
-        leaves = root.getLeafNodes();
         state.setFirstPlayer(0);
     }
-    private List<AbstractAction> getActionTree(StrategoGameState state){
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
+        StrategoGameState state = (StrategoGameState) gameState;
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        int player = gameState.getCurrentPlayer();
+        Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
+        List<Piece> pieces = state.gridBoard.getComponents();
+
+        if (pieces.isEmpty()){
+            throw new AssertionError("Error: No Pieces Found");
+//            state.setGameStatus(Utils.GameResult.GAME_END);
+            //           return actions;
+        }
+
+        for (Piece piece : pieces){
+            if (piece != null){
+                if (piece.getPieceAlliance() == playerAlliance) {
+
+                    List<AbstractAction> pieceActions = piece.calculateMoves(state, actionSpace);
+                    if (pieceActions.size() == 0) continue;
+                    if (actionSpace.structure == ActionSpace.Structure.Deep) {
+                        // Single action to choose the piece, then move for piece is selected sequentially
+                        if (actionSpace.context == ActionSpace.Context.Dependent) {
+                            actions.add(new DeepMove(player, piece.getPiecePosition(), actionSpace));
+                        } else {
+                            actions.add(new DeepMove(player, piece.getComponentID(), actionSpace));
+                        }
+                    } else {
+                        actions.addAll(pieceActions);
+                    }
+                }
+            }
+        }
+    return actions;
+    }
+
+    @Override
+    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
+        return _computeAvailableActions(gameState, ActionSpace.Default);
+    }
+
+    @Override
+    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
+        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_END || currentState.isActionInProgress()){
+            return;
+        }
+
+        StrategoGameState sgs = (StrategoGameState) currentState;
+        endPlayerTurn(sgs);
+
+        List<AbstractAction> actions = _computeAvailableActions(sgs, currentState.getCoreGameParameters().actionSpace);
+        if (actions.isEmpty()){
+            sgs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, EndCondition.NO_MOVES_LEFT.name() + ":" + sgs.getCurrentPlayer());
+            // If the player can't take any actions, they lose
+            _computeAvailableActions(sgs, currentState.getCoreGameParameters().actionSpace);
+            sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
+            sgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, sgs.getCurrentPlayer());
+            sgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, 1-sgs.getCurrentPlayer());
+        } else {
+            if (sgs.getTurnCounter() >= ((StrategoParams)sgs.getGameParameters()).maxRounds) {
+                sgs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, EndCondition.MAX_TURNS.name());
+                // Max rounds reached, draw
+                sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
+                sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, sgs.getCurrentPlayer());
+                sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, 1-sgs.getCurrentPlayer());
+            }
+        }
+    }
+
+    private String getDirection(Vector2D pos1, Vector2D pos2) {
+        if (pos1.getX() == pos2.getX()) {
+            if (pos1.getY() > pos2.getY()) {
+                return "north";
+            } else {
+                return "south";
+            }
+        } else {
+            if (pos1.getX() > pos2.getX()) {
+                return "west";
+            } else {
+                return "east";
+            }
+        }
+    }
+
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState){
         root.resetTree();
+        StrategoGameState state = (StrategoGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = state.getCurrentPlayer();
         Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
@@ -123,101 +208,12 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
             }
             c++;
         }
-        assert actions.size() == root.getValidLeaves().size();
-        return actions;
-
+        return root;
     }
 
-    @Override
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
-        StrategoGameState state = (StrategoGameState) gameState;
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        int player = gameState.getCurrentPlayer();
-        Piece.Alliance playerAlliance = StrategoConstants.playerMapping.get(player);
-        List<Piece> pieces = state.gridBoard.getComponents();
-
-        if (pieces.isEmpty()){
-            throw new AssertionError("Error: No Pieces Found");
-//            state.setGameStatus(Utils.GameResult.GAME_END);
-            //           return actions;
-        }
-
-        if (actionSpace.structure == ActionSpace.Structure.Tree){
-            actions.addAll(getActionTree(state));
-        } else{
-            for (Piece piece : pieces){
-                if (piece != null){
-                    if (piece.getPieceAlliance() == playerAlliance) {
-
-                        List<AbstractAction> pieceActions = piece.calculateMoves(state, actionSpace);
-                        if (pieceActions.size() == 0) continue;
-                        if (actionSpace.structure == ActionSpace.Structure.Deep) {
-                            // Single action to choose the piece, then move for piece is selected sequentially
-                            if (actionSpace.context == ActionSpace.Context.Dependent) {
-                                actions.add(new DeepMove(player, piece.getPiecePosition(), actionSpace));
-                            } else {
-                                actions.add(new DeepMove(player, piece.getComponentID(), actionSpace));
-                            }
-                        } else {
-                            actions.addAll(pieceActions);
-                        }
-                    }
-                }
-            }
-        }
-    return actions;
-    }
-
-    @Override
-    protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState) {
-        return _computeAvailableActions(gameState, ActionSpace.Default);
-    }
-
-    @Override
-    protected void _afterAction(AbstractGameState currentState, AbstractAction action) {
-        if (currentState.getGameStatus() == CoreConstants.GameResult.GAME_END || currentState.isActionInProgress()){
-            return;
-        }
-
-        StrategoGameState sgs = (StrategoGameState) currentState;
-        endPlayerTurn(sgs);
-
-        List<AbstractAction> actions = _computeAvailableActions(sgs, currentState.getCoreGameParameters().actionSpace);
-        if (actions.isEmpty()){
-            sgs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, EndCondition.NO_MOVES_LEFT.name() + ":" + sgs.getCurrentPlayer());
-            // If the player can't take any actions, they lose
-            _computeAvailableActions(sgs, currentState.getCoreGameParameters().actionSpace);
-            sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
-            sgs.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, sgs.getCurrentPlayer());
-            sgs.setPlayerResult(CoreConstants.GameResult.WIN_GAME, 1-sgs.getCurrentPlayer());
-        } else {
-            if (sgs.getTurnCounter() >= ((StrategoParams)sgs.getGameParameters()).maxRounds) {
-                sgs.logEvent(StrategoMetrics.StrategoEvent.EndCondition, EndCondition.MAX_TURNS.name());
-                // Max rounds reached, draw
-                sgs.setGameStatus(CoreConstants.GameResult.GAME_END);
-                sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, sgs.getCurrentPlayer());
-                sgs.setPlayerResult(CoreConstants.GameResult.DRAW_GAME, 1-sgs.getCurrentPlayer());
-            }
-        }
-    }
-
-    private String getDirection(Vector2D pos1, Vector2D pos2) {
-        if (pos1.getX() == pos2.getX()) {
-            if (pos1.getY() > pos2.getY()) {
-                return "north";
-            } else {
-                return "south";
-            }
-        } else {
-            if (pos1.getX() > pos2.getX()) {
-                return "west";
-            } else {
-                return "east";
-            }
-        }
-    }
-
-    private ActionTreeNode generateActionTree(int gridSize) {
+    public ActionTreeNode initActionTree(AbstractGameState state) {
+        StrategoGameState sgs = (StrategoGameState) state;
+        int gridSize = ((StrategoParams) sgs.getGameParameters()).gridSize;
         root = new ActionTreeNode(0, "root");
 
         // Tree Structure
@@ -257,27 +253,4 @@ public class StrategoForwardModel extends StandardForwardModel implements IOrder
         return root;
     }
 
-    @Override
-    public int getActionSpace() {
-        return leaves.size();
-    }
-
-    @Override
-    public int[] getFixedActionSpace() {
-        return new int[getActionSpace()];
-    }
-
-    @Override
-    public int[] getActionMask(AbstractGameState gameState) {
-        return leaves.stream()
-                .mapToInt(ActionTreeNode::getValue)
-                .toArray();
-    }
-
-    @Override
-    public void nextPython(AbstractGameState state, int actionID) {
-        ActionTreeNode node = leaves.get(actionID);
-        AbstractAction action = node.getAction();
-        next(state, action);
-    }
 }

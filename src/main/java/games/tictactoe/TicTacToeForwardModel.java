@@ -12,6 +12,7 @@ import core.interfaces.IOrderedActionSpace;
 import utilities.ActionTreeNode;
 import utilities.Utils;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,8 +24,6 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
     protected void _setup(AbstractGameState firstState) {
         TicTacToeGameParameters tttgp = (TicTacToeGameParameters) firstState.getGameParameters();
         int gridSize = tttgp.gridSize;
-        if (firstState.getCoreGameParameters().actionSpace.structure == ActionSpace.Structure.Tree)
-            root = generateActionTree(gridSize);
         TicTacToeGameState state = (TicTacToeGameState) firstState;
         state.gridBoard = new GridBoard<>(gridSize, gridSize, new Token(TicTacToeConstants.emptyCell));
     }
@@ -36,35 +35,16 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
     }
 
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
-        if (actionSpace.structure == ActionSpace.Structure.Tree ) {
-            root.resetTree();
-            leaves = root.getLeafNodes();
-        }
         TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
         ArrayList<AbstractAction> actions = new ArrayList<>();
         int player = gameState.getCurrentPlayer();
 
         if (gameState.isNotTerminal()){
             // Normal action space
-            if (actionSpace.structure != ActionSpace.Structure.Tree) {
-                for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
-                    for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                        if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
-                            actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
-                        }
-                    }
-                }
-            } else {
-                // Update the tree
-                for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
-                    ActionTreeNode xNode = root.findChildrenByName("X" + x);
-                    for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
-                        ActionTreeNode yNode = xNode.findChildrenByName("Y" + y);
-                        if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
-                            actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
-                            xNode.setValue(1); // make sure that we set parent available
-                            yNode.setAction(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
-                        }
+            for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
+                for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
+                    if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
+                        actions.add(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
                     }
                 }
             }
@@ -181,13 +161,9 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
         gameState.setPlayerResult(CoreConstants.GameResult.LOSE_GAME, 1 - winningPlayer);
     }
 
-    @Override
-    public int getActionSpace() {
-        return root.getSubNodes();
-    }
-
-    public ActionTreeNode generateActionTree(int gridSize){
-        root = new ActionTreeNode(0, "root");
+    public ActionTreeNode initActionTree(AbstractGameState gameState){
+        int gridSize = ((TicTacToeGameState) gameState).gridBoard.getWidth();
+        ActionTreeNode root = new ActionTreeNode(0, "root");
         for (int x = 0; x < gridSize; x++) {
             ActionTreeNode xNode = root.addChild(0, "X" + x);
             for (int y = 0; y < gridSize; y++) {
@@ -196,29 +172,21 @@ public class TicTacToeForwardModel extends StandardForwardModel implements IOrde
         }
         return root;
     }
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState){
+        root.resetTree();
 
-    public List<Object> getTreeShape() {
-        return root.getTreeShape();
-    }
-
-    @Override
-    public int[] getFixedActionSpace() {
-        return new int[getActionSpace()];
-    }
-
-    @Override
-    public int[] getActionMask(AbstractGameState gameState) {
-//        return root.getActionMask();
-        return leaves.stream()
-                .mapToInt(ActionTreeNode::getValue)
-                .toArray();
-    }
-
-    @Override
-    public void nextPython(AbstractGameState state, int actionID) {
-        // Manual conversion from actionID to actionVector
-        ActionTreeNode node = leaves.get(actionID);
-        AbstractAction action = node.getAction();
-        _next(state, action);
+        TicTacToeGameState tttgs = (TicTacToeGameState) gameState;
+        int player = tttgs.getCurrentPlayer();
+        for (int x = 0; x < tttgs.gridBoard.getWidth(); x++) {
+            ActionTreeNode xNode = root.findChildrenByName("X" + x);
+            for (int y = 0; y < tttgs.gridBoard.getHeight(); y++) {
+                ActionTreeNode yNode = xNode.findChildrenByName("Y" + y);
+                if (tttgs.gridBoard.getElement(x, y).getTokenType().equals(TicTacToeConstants.emptyCell)) {
+                    xNode.setValue(1); // make sure that we set parent available
+                    yNode.setAction(new SetGridValueAction<>(tttgs.gridBoard.getComponentID(), x, y, TicTacToeConstants.playerMapping.get(player)));
+                }
+            }
+        }
+        return root;
     }
 }

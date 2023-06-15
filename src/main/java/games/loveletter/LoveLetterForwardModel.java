@@ -37,11 +37,6 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IOrd
 
         // Set up first round
         setupRound(llgs, null);
-
-        if (firstState.getCoreGameParameters().actionSpace.structure == ActionSpace.Structure.Tree) {
-            root = generateActionTree();
-            leaves = root.getLeafNodes();
-        }
     }
 
     /**
@@ -325,8 +320,6 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IOrd
      */
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
-        if (actionSpace.structure == ActionSpace.Structure.Tree)
-            root.resetTree();
         LoveLetterGameState llgs = (LoveLetterGameState)gameState;
         if (llgs.getPlayerResults()[llgs.getCurrentPlayer()] == CoreConstants.GameResult.LOSE_ROUND)
             throw new AssertionError("???.");
@@ -350,46 +343,50 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IOrd
             } else if (actionSpace.structure == ActionSpace.Structure.Deep) {
                 actions.addAll(cardType.getDeepActions(llgs, cardIdx, playerID, true));
             }
-            else if (actionSpace.structure == ActionSpace.Structure.Tree) {
-                actions.addAll(cardType.getFlatActions(llgs, cardIdx, playerID, true));
-                for (AbstractAction action : actions) {
-                    PlayCard llAction = (PlayCard) action;
-
-                    // TODO - Probaly a better way to get the card names
-                    LoveLetterCard.CardType[] soloCards = new LoveLetterCard.CardType[]{
-                        LoveLetterCard.CardType.Handmaid,
-                        LoveLetterCard.CardType.Countess,
-                        LoveLetterCard.CardType.Princess
-                    };
-
-                    // Actions stored in the card type layer (Layer 1)
-                    if (Arrays.asList(soloCards).contains(llAction.getCardType())) {
-                        root.findChildrenByName(llAction.getCardType().toString().toLowerCase()).setAction(action);
-                    }
-
-                    // Actions where you target a player (Layer 2)
-                    else {
-                        ActionTreeNode cardNode = root.findChildrenByName(llAction.getCardType().toString().toLowerCase());
-                        ActionTreeNode playerNode = cardNode.findChildrenByName("player" + llAction.getTargetPlayer());
-                        if (llAction.getCardType() == LoveLetterCard.CardType.Guard) {
-                            if (llAction.getTargetCardType() == null){
-                                playerNode.getChildren().get(0).setAction(action);
-                            }
-                            else {
-                                playerNode.findChildrenByName(llAction.getTargetCardType().toString().toLowerCase()).setAction(action);
-                            }
-                        }
-                        else {
-                            playerNode.setAction(action);
-                        }
-                    }
-                }
-            assert actions.size() == root.getValidLeaves().size();
-            }
 
         }
 
         return new ArrayList<>(actions);
+    }
+
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState){
+        // todo test this
+        root.resetTree();
+
+        ArrayList<AbstractAction> actions = (ArrayList<AbstractAction>) computeAvailableActions(gameState, ActionSpace.Default);
+        for (AbstractAction action : actions) {
+            PlayCard llAction = (PlayCard) action;
+
+            // TODO - Probaly a better way to get the card names
+            LoveLetterCard.CardType[] soloCards = new LoveLetterCard.CardType[]{
+                    LoveLetterCard.CardType.Handmaid,
+                    LoveLetterCard.CardType.Countess,
+                    LoveLetterCard.CardType.Princess
+            };
+
+            // Actions stored in the card type layer (Layer 1)
+            if (Arrays.asList(soloCards).contains(llAction.getCardType())) {
+                root.findChildrenByName(llAction.getCardType().toString().toLowerCase()).setAction(action);
+            }
+
+            // Actions where you target a player (Layer 2)
+            else {
+                ActionTreeNode cardNode = root.findChildrenByName(llAction.getCardType().toString().toLowerCase());
+                ActionTreeNode playerNode = cardNode.findChildrenByName("player" + llAction.getTargetPlayer());
+                if (llAction.getCardType() == LoveLetterCard.CardType.Guard) {
+                    if (llAction.getTargetCardType() == null){
+                        playerNode.getChildren().get(0).setAction(action);
+                    }
+                    else {
+                        playerNode.findChildrenByName(llAction.getTargetCardType().toString().toLowerCase()).setAction(action);
+                    }
+                }
+                else {
+                    playerNode.setAction(action);
+                }
+            }
+        }
+        return root;
     }
 
 
@@ -397,12 +394,11 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IOrd
      * Generates the action tree for the game.
      * @return - Root node of the action tree.
      */
-    public ActionTreeNode generateActionTree() {
+    public ActionTreeNode initActionTree( AbstractGameState gameState) {
         // Schema
         // 0 Actions for each card type (0-7)
         // 1 Player action being used on (0 - 3)
-
-        root = new ActionTreeNode(0, "root");
+        ActionTreeNode root = new ActionTreeNode(0, "root");
 
         // TODO - Probaly a better way to get the card names
         String[] cardNames = new String[]{"guard", "priest", "baron", "handmaid", "prince", "king", "countess", "princess"};
@@ -412,9 +408,7 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IOrd
 
             // Add each card type
             ActionTreeNode action = root.addChild(0, name);
-
             if (!Arrays.asList(selfCards).contains(name)) {
-
                 // Player -1 is for when card will have no effect (e.g. opp using handmaid)
                 for (int i = -1; i < 4; i++) {
                     ActionTreeNode player = action.addChild(0, "player" + i);
@@ -432,27 +426,4 @@ public class LoveLetterForwardModel extends StandardForwardModel implements IOrd
         return root;
     }
 
-    @Override
-    public int getActionSpace() {
-        return leaves.size();
-    }
-
-    @Override
-    public int[] getFixedActionSpace() {
-        return new int[getActionSpace()];
-    }
-
-    @Override
-    public int[] getActionMask(AbstractGameState gameState) {
-        return leaves.stream()
-                .mapToInt(ActionTreeNode::getValue)
-                .toArray();
-    }
-
-    @Override
-    public void nextPython(AbstractGameState state, int actionID) {
-        ActionTreeNode node = leaves.get(actionID);
-        AbstractAction action = node.getAction();
-        next(state, action);
-    }
 }

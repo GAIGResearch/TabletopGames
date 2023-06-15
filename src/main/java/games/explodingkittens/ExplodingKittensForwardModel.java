@@ -34,10 +34,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
      * @param firstState - the state to be modified to the initial game state.
      */
     protected void _setup(AbstractGameState firstState) {
-        if (firstState.getCoreGameParameters().actionSpace.structure == ActionSpace.Structure.Tree) {
-            root = generateActionTree(firstState);
-            leaves = root.getLeafNodes();
-        }
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
 
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState)firstState;
@@ -173,11 +169,6 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
      */
     @Override
     protected List<AbstractAction> _computeAvailableActions(AbstractGameState gameState, ActionSpace actionSpace) {
-        if (actionSpace.structure == ActionSpace.Structure.Tree){
-            root.resetTree();
-            leaves = root.getLeafNodes();
-        }
-
         ExplodingKittensGameState ekgs = (ExplodingKittensGameState) gameState;
         ArrayList<AbstractAction> actions;
 
@@ -400,8 +391,15 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
 
         return actions;
     }
-    
-    public ActionTreeNode generateActionTree(AbstractGameState gs){
+
+    @Override
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
+        // TODO
+        root.resetTree();
+        return null;
+    }
+
+    public ActionTreeNode initActionTree(AbstractGameState gs){
         // set up the action tree
         ActionTreeNode tree = new ActionTreeNode(0, "root");
         tree.addChild(0, "DRAW");
@@ -430,33 +428,5 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
 
         }
         return tree;
-    }
-
-    public List<Object> getTreeShape() {
-        return root.getTreeShape();
-    }
-
-    @Override
-    public int getActionSpace() {
-        return leaves.size(); // pass (draw) or play any of the card types
-    }
-
-    @Override
-    public int[] getFixedActionSpace() {
-        return new int[getActionSpace()];
-    }
-
-    @Override
-    public int[] getActionMask(AbstractGameState gameState) {
-        return leaves.stream()
-                .mapToInt(ActionTreeNode::getValue)
-                .toArray();
-    }
-
-    @Override
-    public void nextPython(AbstractGameState state, int actionID) {
-        ActionTreeNode node = leaves.get(actionID);
-        AbstractAction action = node.getAction();
-        _next(state, action);
     }
 }

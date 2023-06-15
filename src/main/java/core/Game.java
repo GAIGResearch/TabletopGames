@@ -22,17 +22,17 @@ import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
 import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
+import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static utilities.Utils.componentToImage;
@@ -941,7 +941,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Catan");
+        String gameType = Utils.getArg(args, "game", "Stratego");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -949,8 +949,8 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-//        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
         MCTSParams params1 = new MCTSParams();
         params1.gatherTreeRecorder = true;
@@ -958,10 +958,10 @@ public class Game {
         params1.treeRecorderFolder = "treeRecorderCatanFlat";
         params1.EIStateFeatureVector = new CatanStateFeatures();
         params1.actionSpace = new ActionSpace(ActionSpace.Structure.Flat);
-        players.add(new MCTSPlayer(params1));
-        players.add(new MCTSPlayer((MCTSParams) params1.copy()));
-        players.add(new MCTSPlayer((MCTSParams) params1.copy()));
-        players.add(new MCTSPlayer((MCTSParams) params1.copy()));
+//        players.add(new MCTSPlayer(params1));
+//        players.add(new MCTSPlayer((MCTSParams) params1.copy()));
+//        players.add(new MCTSPlayer((MCTSParams) params1.copy()));
+//        players.add(new MCTSPlayer((MCTSParams) params1.copy()));
 //        MCTSParams params2 = new MCTSParams();
 //        params2.actionSpace = new ActionSpace(ActionSpace.Structure.Flat);
 //        players.add(new MCTSPlayer(params2));
@@ -979,10 +979,11 @@ public class Game {
 
         /* Run multiple games */
 //        ArrayList<GameType> games = new ArrayList<>(Arrays.asList(GameType.values()));
+//        games.add(GameType.Stratego);
 //        games.remove(LoveLetter);
 //        games.remove(Pandemic);
 //        games.remove(TicTacToe);
-//        runMany(games, players, 100L, 100, false, false, null, turnPause);
+//        runMany(games, players, 100L, 100, false, true, null, turnPause);
 //        runMany(new ArrayList<GameType>() {{add(Uno);}}, players, 100L, 100, false, false, null, turnPause);
     }
 

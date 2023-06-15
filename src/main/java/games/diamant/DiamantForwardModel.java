@@ -11,6 +11,7 @@ import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
+import utilities.ActionTreeNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -254,41 +255,24 @@ public class DiamantForwardModel extends StandardForwardModel implements IOrdere
     }
 
     @Override
-    public int getActionSpace() {
-        return 3;
+    public ActionTreeNode initActionTree(AbstractGameState gameState) {
+        ActionTreeNode tree = new ActionTreeNode(0, "root");
+        tree.addChild(0, "continue");
+        tree.addChild(0, "exit");
+        tree.addChild(0, "out"); // dummy action for staying in cave
+        return tree;
     }
 
     @Override
-    public int[] getFixedActionSpace() {
-        // Actions 0 - stay in cave 1 - leave cave 2 - out of cave (dummy action)
-        return IntStream.range(0, getActionSpace()).toArray();
-    }
-
-    @Override
-    public int[] getActionMask(AbstractGameState gameState) {
-        int[] actionMask;
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
         DiamantGameState dgs = (DiamantGameState) gameState;
-        List<AbstractAction> actionsList = computeAvailableActions(dgs);
-
-        //Player out of cave
-        if (actionsList.size() == 1) return new int[]{0, 0, 1};
-
-        //Player in cave
-        else return new int[]{1, 1, 0};
-    }
-
-    @Override
-    public void nextPython(AbstractGameState state, int actionID) {
-        switch (actionID) {
-            case 0:
-                next(state, new ContinueInCave());
-                break;
-            case 1:
-                next(state, new ExitFromCave());
-                break;
-            case 2:
-                next(state, new OutOfCave());
-                break;
+        root.resetTree();
+        if (dgs.playerInCave.get(gameState.getCurrentPlayer())) {
+            root.findChildrenByName("continue").setAction(new ContinueInCave());
+            root.findChildrenByName("exit").setAction(new ExitFromCave());
+        } else {
+            root.findChildrenByName("out").setAction(new OutOfCave());
         }
+        return root;
     }
 }

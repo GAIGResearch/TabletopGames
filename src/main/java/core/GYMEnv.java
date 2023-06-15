@@ -51,7 +51,7 @@ public class GYMEnv {
         } else game = gameToPlay.createGameInstance(players.size(), seed);
 
         assert game != null;
-        game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Tree);
+//        game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Tree);
         if (!(game.gameState instanceof IVectorisable && game.forwardModel instanceof IOrderedActionSpace)) {
             throw new Exception("Game has not implemented Reinforcement Learning Interface");
         }
@@ -96,28 +96,22 @@ public class GYMEnv {
         else throw new Exception("Function is not implemented");
     }
 
-    // Gets the action space as an integer
-    public int getActionSpace() throws Exception {
-        if (forwardModel instanceof IOrderedActionSpace) {
-            return ((IOrderedActionSpace) forwardModel).getActionSpace();
-        }
-        else throw new Exception("Function is not implemented");
+    // Gets the action space size as an integer
+    public int getActionSpace(){
+        return leaves.size();
     }
 
     // Gets the actions as an integer array
-    public int[] getFixedActionSpace() throws Exception {
-        if (forwardModel instanceof IOrderedActionSpace) {
-            return ((IOrderedActionSpace) forwardModel).getFixedActionSpace();
-        }
-        else throw new Exception("Function is not implemented");
+    public int[] getFixedActionSpace() {
+        return new int[this.leaves.size()];
+
     }
 
     // Gets the action mask as a boolean array
-    public int[] getActionMask() throws Exception {
-        if (forwardModel instanceof IOrderedActionSpace) {
-            return ((IOrderedActionSpace) forwardModel).getActionMask(gameState);
-        }
-        else throw new Exception("Function is not implemented");
+    public int[] getActionMask() {
+        return leaves.stream()
+                .mapToInt(ActionTreeNode::getValue)
+                .toArray();
     }
 
     public String getActionMaskJson() throws Exception {
@@ -160,7 +154,12 @@ public class GYMEnv {
         gameState.gameParameters.setRandomSeed(this.lastSeed);
         this.forwardModel = game.getForwardModel();
         this.availableActions = forwardModel.computeAvailableActions(gameState);
-        this.root = ((IOrderedActionSpace)this.forwardModel).generateActionTree(this.gameState);
+        if (this.root == null){
+            this.root = ((IOrderedActionSpace)this.forwardModel).initActionTree(this.gameState);
+        }
+        // update with initial actions
+        this.root = ((IOrderedActionSpace)this.forwardModel).updateActionTree(this.root, this.gameState);
+        this.leaves = root.getLeafNodes();
 
         // execute the game if needed until Python agent is required to make a decision
         int activePlayer = gameState.getCurrentPlayer();
@@ -230,23 +229,9 @@ public class GYMEnv {
         return availableActions;
     }
 
-
-    public AbstractGameState step(int actionId) throws Exception{
-        // execute action and loop until a PythonAgent is required to make a decision
-        if (isDone()){
-            throw new Exception("Need to reset the environment after each finished episode");
-        } else if (this.gameState == null){
-            throw new Exception("Need to reset the environment before calling step");
-        }
-//        AbstractAction a_ = this.availableActions.get(a);
-//        forwardModel.next(gameState, a_);
-        executeAction(actionId);
-        if (isDone()){
-            // check if the game has just ended
-            // game is over
-            return gameState.copy(gameState.getCurrentPlayer());
-        }
-
+    // Executes game loop until RL agent is required to make a decision
+    // returns true if game is over
+    public boolean nextDecision(){
         int activePlayer = gameState.getCurrentPlayer();
         AbstractPlayer currentPlayer = players.get(activePlayer);
         while ( !(currentPlayer instanceof PythonAgent)){
@@ -255,7 +240,7 @@ public class GYMEnv {
 
             if (isDone()){
                 // game is over
-                return observation;
+                return true;
             }
 
             // Start the timer for this decision
@@ -293,10 +278,40 @@ public class GYMEnv {
             lastPlayer = activePlayer;
             activePlayer = gameState.getCurrentPlayer();
             currentPlayer = players.get(gameState.getCurrentPlayer());
-
         }
+        return false;
+    }
+
+
+    public AbstractGameState step(int actionId) throws Exception{
+        // execute action and loop until an RL agent is required to make a decision
+        if (isDone()){
+            throw new Exception("Need to reset the environment after each finished episode");
+        } else if (this.gameState == null){
+            throw new Exception("Need to reset the environment before calling step");
+        }
+        // executes the seleted actions
+        executeAction(actionId);
+        if (isDone()){
+            // check if the game has just ended
+            // game is over
+            return gameState.copy(gameState.getCurrentPlayer());
+        }
+
+        // update game until RL agent is required to make a decision - if game is over in the mean time returns isTerminal
+        boolean isTerminal = nextDecision();
+        if (isTerminal){
+            // game is over
+            return gameState.copy(gameState.getCurrentPlayer());
+        }
+
+        int activePlayer = gameState.getCurrentPlayer();
         AbstractGameState observation = gameState.copy(activePlayer);
+
+        // Compute the updated available actions and the action tree
         this.availableActions = forwardModel.computeAvailableActions(observation);
+        this.root = ((IOrderedActionSpace)this.forwardModel).updateActionTree(this.root, this.gameState);
+        this.leaves = root.getLeafNodes();
 
         return observation;
     }
@@ -310,7 +325,7 @@ public class GYMEnv {
     }
 
     public List getTreeShape(){
-        return this.forwardModel.root.getTreeShape();
+        return this.root.getTreeShape();
     }
 
     public CoreConstants.GameResult[] getPlayerResults(){
@@ -347,7 +362,7 @@ public class GYMEnv {
 
         try {
             // Initialise the game
-            GYMEnv env = new GYMEnv(GameType.valueOf("Stratego"), null, players, 343, true);
+            GYMEnv env = new GYMEnv(GameType.valueOf("Diamant"), null, players, 343, true);
             if (!useGYM) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
             // reset is always required before starting a new episode
@@ -361,14 +376,21 @@ public class GYMEnv {
 
                     // get observation vector
                     double[] obs = env.getObservationVector();
+                    double reward = env.getReward();
+//                    System.out.println("at step " + steps + " the reward is " + reward + "player ID " + env.gameState.getCurrentPlayer());
 
                     // step the environment
                     env.step(randomAction);
                 } else {
                     // this is the normal game loop
                     List<AbstractAction> actions = env.forwardModel.computeAvailableActions(env.gameState);
+
+                    double reward = env.getReward();
+//                    System.out.println("at step " + steps + " the reward is " + reward + "player ID " + env.gameState.getCurrentPlayer());
+
                     int randomAction = rnd.nextInt(actions.size());
-                    env.forwardModel.next(env.gameState, actions.get(randomAction));
+                    env.step(randomAction);
+//                    env.forwardModel.next(env.gameState, actions.get(randomAction));
 
                 }
 
