@@ -17,6 +17,9 @@ public interface IOrderedActionSpace {
     //Returns an action mask of valid and invalid actions
     public int[] getActionMask(AbstractGameState gameState);
 
+    // function to generate the action tree
+    public ActionTreeNode generateActionTree(AbstractGameState gameState);
+
     //Given an ID, plays an action
     void nextPython(AbstractGameState state, int actionID);
 }

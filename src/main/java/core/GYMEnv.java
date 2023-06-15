@@ -3,26 +3,16 @@ package core;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
-import core.components.Token;
 import core.interfaces.IOrderedActionSpace;
 import core.interfaces.IVectorisable;
 import games.GameType;
-import games.diamant.DiamantGameState;
-import games.explodingkittens.ExplodingKittensGameState;
-import games.tictactoe.TicTacToeConstants;
-import games.tictactoe.TicTacToeGameState;
-import games.tictactoe.TicTacToeStateVector;
-import org.json.simple.JSONObject;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSPlayer;
 import players.python.PythonAgent;
 import players.simple.RandomPlayer;
 import utilities.ActionTreeNode;
-import utilities.Utils;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -30,12 +20,14 @@ import java.util.stream.IntStream;
 
 public class GYMEnv {
     private Game game;
+    // root of the action tree
+    private ActionTreeNode root;
+    // list of leaf nodes
+    private List<ActionTreeNode> leaves;
     private AbstractGameState gameState;
-    private IVectorisable iface;
     private AbstractForwardModel forwardModel;
     private List<AbstractPlayer> players;
     private int turnPause = 0;
-    private boolean debug = false;
     private int tick;
     private int lastPlayer; // used to track actions per 'turn'
     private List<AbstractAction> availableActions;
@@ -48,7 +40,7 @@ public class GYMEnv {
 
     public GYMEnv(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, boolean isNormalized) throws Exception {
 
-        //                              boolean randomizeParameters, List<IGameListener> listeners
+        // boolean randomizeParameters, List<IGameListener> listeners
         this.seedRandom = new Random(seed);
         this.isNormalized = isNormalized;
         this.players = players;
@@ -143,11 +135,14 @@ public class GYMEnv {
     }
 
     // Plays an action given an actionID
-    public void playAction(int actionID) throws Exception {
-//        forwardModel.next(gameState, this.availableActions.get(actionID));
+    public void executeAction(int actionID) throws Exception {
         if (forwardModel instanceof IOrderedActionSpace) {
-            ((IOrderedActionSpace) forwardModel).nextPython(gameState, actionID);
+            ActionTreeNode node = leaves.get(actionID);
+            AbstractAction action = node.getAction();
+            forwardModel.next(gameState, action);
         }
+//            ((IOrderedActionSpace) forwardModel).nextPython(gameState, actionID);
+//        }
         else throw new Exception("Function is not implemented");
     }
 
@@ -165,6 +160,7 @@ public class GYMEnv {
         gameState.gameParameters.setRandomSeed(this.lastSeed);
         this.forwardModel = game.getForwardModel();
         this.availableActions = forwardModel.computeAvailableActions(gameState);
+        this.root = ((IOrderedActionSpace)this.forwardModel).generateActionTree(this.gameState);
 
         // execute the game if needed until Python agent is required to make a decision
         int activePlayer = gameState.getCurrentPlayer();
@@ -235,7 +231,7 @@ public class GYMEnv {
     }
 
 
-    public AbstractGameState step(int a) throws Exception{
+    public AbstractGameState step(int actionId) throws Exception{
         // execute action and loop until a PythonAgent is required to make a decision
         if (isDone()){
             throw new Exception("Need to reset the environment after each finished episode");
@@ -244,7 +240,7 @@ public class GYMEnv {
         }
 //        AbstractAction a_ = this.availableActions.get(a);
 //        forwardModel.next(gameState, a_);
-        playAction(a);
+        executeAction(actionId);
         if (isDone()){
             // check if the game has just ended
             // game is over

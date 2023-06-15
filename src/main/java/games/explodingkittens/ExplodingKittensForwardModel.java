@@ -35,7 +35,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
      */
     protected void _setup(AbstractGameState firstState) {
         if (firstState.getCoreGameParameters().actionSpace.structure == ActionSpace.Structure.Tree) {
-            root = generateActionTree();
+            root = generateActionTree(firstState);
             leaves = root.getLeafNodes();
         }
         Random rnd = new Random(firstState.getGameParameters().getRandomSeed());
@@ -401,7 +401,7 @@ public class ExplodingKittensForwardModel extends AbstractForwardModel implement
         return actions;
     }
     
-    public ActionTreeNode generateActionTree(){
+    public ActionTreeNode generateActionTree(AbstractGameState gs){
         // set up the action tree
         ActionTreeNode tree = new ActionTreeNode(0, "root");
         tree.addChild(0, "DRAW");
