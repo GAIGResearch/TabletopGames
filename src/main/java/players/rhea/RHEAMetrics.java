@@ -20,13 +20,13 @@ public class RHEAMetrics implements IMetricsCollection {
                 RHEAPlayer rheaPlayer = (RHEAPlayer) player;
                 stats.put("iterations", rheaPlayer.numIters);
                 stats.put("fmCalls", rheaPlayer.numIters == 0 ? 0 : rheaPlayer.fmCalls / rheaPlayer.numIters);
-                stats.put("copyCalls", rheaPlayer.numIters == 0 ? 0 : rheaPlayer.copyCalls /  rheaPlayer.numIters);
+                stats.put("copyCalls", rheaPlayer.numIters == 0 ? 0 : rheaPlayer.copyCalls / rheaPlayer.numIters);
                 stats.put("time", rheaPlayer.timeTaken);
                 stats.put("timePerIteration", rheaPlayer.timePerIteration);
                 stats.put("initTime", rheaPlayer.initTime);
-                stats.put("hiReward", rheaPlayer.population.get(0).value);
-                stats.put("loReward", rheaPlayer.population.get(rheaPlayer.population.size() - 1).value);
-                stats.put("medianReward", rheaPlayer.population.size() == 1 ?
+                stats.put("hiReward", rheaPlayer.numIters == 0 ? 0 : rheaPlayer.population.get(0).value);
+                stats.put("loReward", rheaPlayer.numIters == 0 ? 0 : rheaPlayer.population.get(rheaPlayer.population.size() - 1).value);
+                stats.put("medianReward", rheaPlayer.numIters == 0 ? 0 : rheaPlayer.population.size() == 1 ?
                         rheaPlayer.population.get(0).value :
                         rheaPlayer.population.get(rheaPlayer.population.size() / 2 - 1).value);
                 stats.put("repairProportion", rheaPlayer.repairCount == 0 ? 0.0 : rheaPlayer.repairCount / (double) (rheaPlayer.repairCount + rheaPlayer.nonRepairCount));
