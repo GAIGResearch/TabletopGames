@@ -19,8 +19,8 @@ public class RHEAMetrics implements IMetricsCollection {
             if (player instanceof RHEAPlayer) {
                 RHEAPlayer rheaPlayer = (RHEAPlayer) player;
                 stats.put("iterations", rheaPlayer.numIters);
-                stats.put("fmCalls", rheaPlayer.fmCalls / rheaPlayer.numIters);
-                stats.put("copyCalls", rheaPlayer.copyCalls /  rheaPlayer.numIters);
+                stats.put("fmCalls", rheaPlayer.numIters == 0 ? 0 : rheaPlayer.fmCalls / rheaPlayer.numIters);
+                stats.put("copyCalls", rheaPlayer.numIters == 0 ? 0 : rheaPlayer.copyCalls /  rheaPlayer.numIters);
                 stats.put("time", rheaPlayer.timeTaken);
                 stats.put("timePerIteration", rheaPlayer.timePerIteration);
                 stats.put("initTime", rheaPlayer.initTime);
