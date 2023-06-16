@@ -475,7 +475,7 @@ public class RoundRobinTournament extends AbstractTournament {
         int gameCounter = (gamesPerMatchUp * matchUpsRun);
         boolean toFile = !resultsFile.equals("");
         ArrayList<String> dataDump = new ArrayList<>();
-        dataDump.add(name);
+        dataDump.add(name + "\n");
 
         // To console
         if (verbose)

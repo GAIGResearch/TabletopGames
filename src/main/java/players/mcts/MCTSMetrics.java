@@ -27,10 +27,10 @@ public class MCTSMetrics implements IMetricsCollection {
                             .findFirst().orElseThrow(() -> new AssertionError("No root found for player " + e.state.getCurrentPlayer()));
                 }
                 TreeStatistics treeStats = new TreeStatistics(root);
-                int visits = mctsPlayer.root.getVisits();
+                int visits = root.getVisits();
                 if (visits == 0) visits = 1;
                 records.put("PlayerType", mctsPlayer.toString());
-                records.put("Iterations", mctsPlayer.root.getVisits());
+                records.put("Iterations", root.getVisits());
                 records.put("MaxDepth", treeStats.depthReached);
                 records.put("MeanLeafDepth", treeStats.meanLeafDepth);
                 records.put("Nodes", treeStats.totalNodes);
@@ -91,8 +91,6 @@ public class MCTSMetrics implements IMetricsCollection {
                 } else {
                     return false;  // nothing to record
                 }
-                int visits = mctsPlayer.root.getVisits();
-                if (visits == 0) visits = 1;
                 List<TreeStatistics> treeStats = otherRoots.stream().map(TreeStatistics::new).collect(Collectors.toList());
                 records.put("PlayerType", mctsPlayer.toString());
                 records.put("MaxDepth", treeStats.stream().mapToInt(ts -> ts.depthReached).average().orElse(0.0));
@@ -100,7 +98,6 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("Nodes", treeStats.stream().mapToInt(ts -> ts.totalNodes).average().orElse(0.0));
                 records.put("OneActionNodes", treeStats.stream().mapToInt(ts -> ts.oneActionNodes).average().orElse(0.0));
                 records.put("MeanActionsAtNode", treeStats.stream().mapToDouble(ts -> ts.meanActionsAtNode).average().orElse(0.0));
-                records.put("RolloutLength", otherRoots.stream().mapToInt(root -> root.rolloutActionsTaken).average().orElse(0.0) / visits);
                 records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.children.size()).average().orElse(0.0));
                 return true;
             }
@@ -121,7 +118,6 @@ public class MCTSMetrics implements IMetricsCollection {
             cols.put("Nodes", Double.class);
             cols.put("OneActionNodes", Double.class);
             cols.put("MeanActionsAtNode", Double.class);
-            cols.put("RolloutLength", Double.class);
             cols.put("ActionsAtRoot", Double.class);
             return cols;
         }

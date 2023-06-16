@@ -66,7 +66,10 @@ public class TreeStatistics {
         depthReached = greatestDepth;
         totalNodes = Arrays.stream(nodesAtDepth).sum();
         oneActionNodes = oneAction;
-        meanActionsAtNode = (double) (totalActions - oneActionNodes) / (totalNodes - oneActionNodes);
+        if (totalNodes == oneActionNodes)
+            meanActionsAtNode = 1.0;
+        else
+            meanActionsAtNode = (double) (totalActions - oneActionNodes) / (totalNodes - oneActionNodes);
         totalLeaves = Arrays.stream(leavesAtDepth).sum();
         totalTerminalNodes = Arrays.stream(gameTerminalNodesAtDepth).sum();
         nodeDistribution = Arrays.stream(nodesAtDepth, 0, Math.min(depthReached + 1, maxDepth)).asDoubleStream().map(i -> i / totalNodes).toArray();
