@@ -47,7 +47,7 @@ public class Settler extends PuertoRicoRole<Settler> {
         List<AbstractAction> retValue = uniqueVisibleCrops.stream().map(DrawPlantation::new).collect(toList());
         if (state.getQuarriesLeft() > 0 && (currentPlayer == roleOwner || state.hasActiveBuilding(currentPlayer, CONSTRUCTION_HUT)))
             retValue.add(new BuildQuarry());
-        retValue.add(new DoNothing()); // we can always choose not to pick a plantation
+        retValue.add(new DoNothing()); // we can always choose not pick a plantation
         return retValue;
     }
 

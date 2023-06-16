@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.joining;
 public abstract class AbstractGUIManager {
     protected GamePanel parent;
     protected Game game;
-    protected int humanPlayerId;
+    protected Set<Integer> humanPlayerId;
 
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
@@ -37,14 +37,14 @@ public abstract class AbstractGUIManager {
     protected JLabel gameStatus, playerStatus, turn, currentPlayer, gamePhase, playerScores;
     protected JTextPane historyInfo;
     protected JScrollPane historyContainer;
-    protected int historyPerspective = -1;
+    protected Set<Integer> historyPerspective = new HashSet<>();
     protected List<String> history = new ArrayList<>();
 
     private int actionsAtLastUpdate;
 
     protected int width, height;
 
-    public AbstractGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+    public AbstractGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         this.ac = ac;
         this.maxActionSpace = getMaxActionSpace();
         this.parent = parent;
@@ -160,6 +160,14 @@ public abstract class AbstractGUIManager {
         return pane;
     }
 
+    public ActionController getAC() {
+        return ac;
+    }
+
+    public Set<Integer> getHumanPlayerId() {
+        return humanPlayerId;
+    }
+
     /**
      * Creates a JPanel containing labels with default game state information.
      *
@@ -187,14 +195,14 @@ public abstract class AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        createActionHistoryPanel(width / 2 - 10, height, -1);
+        createActionHistoryPanel(width / 2 - 10, height, new HashSet<>());
         wrapper.add(historyContainer);
         return wrapper;
     }
 
-    protected void createActionHistoryPanel(int width, int height, int perspective) {
+    protected void createActionHistoryPanel(int width, int height, Set<Integer> perspective) {
         this.historyPerspective = perspective;
-        if (perspective > -1) {
+        if (perspective.size() > 0) {
             // we need to create a GameListener for ACTION_CHOSEN events
             game.addListener(new IGameListener() {
                 @Override
@@ -237,7 +245,7 @@ public abstract class AbstractGUIManager {
      * @param gameState - current game state to be used for the update.
      */
     protected void updateGameStateInfo(AbstractGameState gameState) {
-        if (historyPerspective == -1) {
+        if (historyPerspective.size() == 0) {
             history = gameState.getHistoryAsText();
             // otherwise we populate history from ACTION_CHOSEN events
         }

@@ -59,7 +59,7 @@ public class PandemicGUIManager extends AbstractGUIManager implements IScreenHig
     // Game state info
     JLabel gameTurnStep;
 
-    public PandemicGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+    public PandemicGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
         if (game == null || ac == null) return;
 

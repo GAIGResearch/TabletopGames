@@ -39,6 +39,8 @@ public class PuertoRicoForwardModel extends StandardForwardModel {
             pb.changeDoubloons(params.startingDoubloons[firstState.getNPlayers()][i]);
         }
 
+        pgs.currentRole = null;
+
         pgs.plantationDeck = new Deck<>("Plantation Deck", CoreConstants.VisibilityMode.HIDDEN_TO_ALL);
         pgs.visiblePlantations = new Deck<>("Available Plantations", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);
         pgs.plantationDiscards = new Deck<>("Discarded Plantations", CoreConstants.VisibilityMode.VISIBLE_TO_ALL);

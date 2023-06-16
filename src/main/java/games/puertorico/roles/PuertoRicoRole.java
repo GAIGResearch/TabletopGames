@@ -71,6 +71,7 @@ public abstract class PuertoRicoRole<T extends PuertoRicoRole<T>> implements IEx
 
         if (executionComplete(state)) {
             // if we get here, then all players have finished
+            state.setCurrentRole(null, -1);
             postPhaseProcessing(state);
         }
     }
@@ -98,6 +99,7 @@ public abstract class PuertoRicoRole<T extends PuertoRicoRole<T>> implements IEx
         // it is possible that no players have anything to do, in which case we are done
         // otherwise we stick the role on the Stack to take control of the role actions
         if (executionComplete(state)) {
+            state.setCurrentRole(null, -1);
             postPhaseProcessing(state);
         } else {
             state.setActionInProgress(this);

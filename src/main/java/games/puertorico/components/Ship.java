@@ -68,4 +68,9 @@ public class Ship extends Component {
     public int hashCode() {
         return this.capacity + 7 * this.spacesFilled + 31 * this.cargo.map(Enum::ordinal).orElse(0) - 3939;
     }
+
+    @Override
+    public String toString() {
+        return (getCurrentCargo() != null? getCurrentCargo().name() + ": " + spacesFilled + "/" + capacity : "Empty");
+    }
 }

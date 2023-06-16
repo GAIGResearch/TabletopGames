@@ -288,18 +288,18 @@ public enum GameType {
         if (guiManagerClass == null) throw new AssertionError("No GUI manager class declared for the game: " + this);
 
         // Find ID of human player, if any (-1 if none)
-        int human = -1;
+        Set<Integer> human = new HashSet<>();
         if (game != null && game.getPlayers() != null) {
             for (int i = 0; i < game.getPlayers().size(); i++) {
                 if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
-                    human = i;
+                    human.add(i);
                     break;
                 }
             }
         }
 
         try {
-            Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(guiManagerClass, GamePanel.class, Game.class, ActionController.class, Integer.class);
+            Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(guiManagerClass, GamePanel.class, Game.class, ActionController.class, Set.class);
             return (AbstractGUIManager) constructorGS.newInstance(parent, game, ac, human);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);

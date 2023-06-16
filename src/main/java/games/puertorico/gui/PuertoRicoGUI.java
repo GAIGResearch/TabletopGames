@@ -1,8 +1,10 @@
 package games.puertorico.gui;
 
 import core.*;
+import core.actions.AbstractAction;
+import games.puertorico.PuertoRicoConstants;
 import games.puertorico.PuertoRicoGameState;
-import games.puertorico.PuertoRicoParameters;
+import games.puertorico.actions.*;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
 import gui.IScreenHighlight;
@@ -14,9 +16,10 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.*;
+import java.util.List;
 
-import static games.puertorico.gui.PRGUIUtils.secondaryColor;
-import static games.puertorico.gui.PRGUIUtils.titleColor;
+import static games.puertorico.gui.PRGUIUtils.*;
 
 public class PuertoRicoGUI extends AbstractGUIManager {
     JLabel roundCount;
@@ -24,17 +27,18 @@ public class PuertoRicoGUI extends AbstractGUIManager {
     Border highlightActive = BorderFactory.createLineBorder(titleColor, 3);
     Border highlightLose = BorderFactory.createLineBorder(new Color(208, 67, 67), 3);
     Border highlightWin = BorderFactory.createLineBorder(new Color(130, 199, 49), 3);
+
+    GSShipsAndMarket shipsAndMarket;
     PlayerBoard[] playerBoards;
     Border[] playerViewBorders, playerViewBordersHighlightCurrent, playerViewBordersHighlightWin, playerViewBordersHighlightLose;
 
-    public PuertoRicoGUI(GamePanel parent, Game game, ActionController ac, int human) {
+    public PuertoRicoGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
         if (game == null) return;
 
         width = 1000;
         height = 700;
         PuertoRicoGameState gs = (PuertoRicoGameState) game.getGameState();
-        PuertoRicoParameters params = (PuertoRicoParameters) game.getGameState().getGameParameters();
 
         JPanel wrapper = new JPanel();
         wrapper.setOpaque(true);
@@ -69,20 +73,18 @@ public class PuertoRicoGUI extends AbstractGUIManager {
         roundCount.setFont(PRGUIUtils.textFontBold);
         roundCount.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.black));
         gameStateInfo.add(roundCount);
-        gameStateInfo.add(new GSInfo(gs));
-        gameStateInfo.add(new GSPlantations(gs));
-        gameStateInfo.add(new GSShipsAndMarket(gs));
+        gameStateInfo.add(new GSInfo(this, gs));
+        gameStateInfo.add(new GSPlantations(this, gs));
+        shipsAndMarket = new GSShipsAndMarket(this, gs);
+        gameStateInfo.add(shipsAndMarket);
 
         // Middle: role panel + buildings available
-//        JPanel middlePanel = new JPanel();
-//        middlePanel.setOpaque(false);
-//        middlePanel.setLayout(new BoxLayout(middlePanel, BoxLayout.X_AXIS));
-        top.add(new RolePanel(gs));
-        top.add(new GSBuildings(gs));
-//        top.add(middlePanel);
+        RolePanel rolePanel = new RolePanel(this, gs);
+        top.add(rolePanel);
+        top.add(new GSBuildings(this, gs));
 
         // Right: action history
-        createActionHistoryPanel(300, 200, -1);
+        createActionHistoryPanel(300, 200, new HashSet<>());
         top.add(historyContainer);
 
         /* ------------------------------------- */
@@ -97,9 +99,11 @@ public class PuertoRicoGUI extends AbstractGUIManager {
         playerBoards = new PlayerBoard[gs.getNPlayers()];
         // player boards
         // player ID, name in border
+        List<IScreenHighlight> highlights = new ArrayList<>();
         for (int i = 0; i < gs.getNPlayers(); i++) {
-            PlayerBoard pb = new PlayerBoard(gs, i);
+            PlayerBoard pb = new PlayerBoard(this, gs, i);
             playerBoards[i] = pb;
+            highlights.add(pb);
 
             TitledBorder titleBorder = BorderFactory.createTitledBorder(
                     BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), "Player " + i + " [" + game.getPlayers().get(i).toString() + "]",
@@ -117,20 +121,146 @@ public class PuertoRicoGUI extends AbstractGUIManager {
 
             pb.setBorder(titleBorder);
             middle.add(pb);
-            // TODO // Highlight current player (border)
-            // TODO Highlight WIN/LOSE
         }
 
         /* ------------------------------------- */
+        highlights.add(shipsAndMarket);
+        highlights.add(rolePanel);
+
         // Bottom panel: actions
         wrapper.add(top);
         wrapper.add(middle);
-        wrapper.add(createActionPanel(new IScreenHighlight[0], width, 50, false, false, null));
+        wrapper.add(createActionPanel(highlights.toArray(new IScreenHighlight[0]), width, 50, false, false, null));
+
+        // Action buttons / instructions styling
+        for (ActionButton ab: actionButtons) {
+            ab.setUI(buttonUI);
+            ab.setBackground(Color.white);
+        }
     }
 
     @Override
     public int getMaxActionSpace() {
         return 100;
+    }
+
+    @Override
+    protected void updateActionButtons(AbstractPlayer player, AbstractGameState gameState) {
+        if (gameState.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING && !(actionButtons == null)) {
+            PuertoRicoGameState gs = (PuertoRicoGameState) gameState;
+            List<AbstractAction> actions = player.getForwardModel().computeAvailableActions(gameState);
+            Set<String> markedActionInstructions = new HashSet<>();
+            int nButtonsCreated = 0;
+            for (int i = 0; i < actions.size() && i < maxActionSpace; i++) {
+                if (actions.get(i) instanceof SelectRole) {
+                    if (!markedActionInstructions.contains("SelectRole")) {
+                        actionButtons[nButtonsCreated].setVisible(true);
+                        actionButtons[nButtonsCreated].setEnabled(false);
+                        actionButtons[nButtonsCreated].setButtonAction(null, "Select a role (click on the role name chosen in the role panel)");
+                        markedActionInstructions.add("SelectRole");
+                        nButtonsCreated++;
+                    }
+                } else if (actions.get(i) instanceof Build) {
+                    if (!markedActionInstructions.contains("Build")) {
+                        actionButtons[nButtonsCreated].setVisible(true);
+                        actionButtons[nButtonsCreated].setEnabled(false);
+                        actionButtons[nButtonsCreated].setButtonAction(null, "Select a building (click on the building tile in the market)");
+                        markedActionInstructions.add("Build");
+                        nButtonsCreated++;
+                    }
+                } else if (actions.get(i) instanceof DrawPlantation || actions.get(i) instanceof BuildQuarry) {
+                    if (!markedActionInstructions.contains("DrawPlantation")) {
+                        actionButtons[nButtonsCreated].setVisible(true);
+                        actionButtons[nButtonsCreated].setEnabled(false);
+                        String drawFromStack = "";
+                        if (gs.hasActiveBuilding(gameState.getCurrentPlayer(), PuertoRicoConstants.BuildingType.HACIENDA)) {
+                            drawFromStack = ", or the stack";
+                        }
+                        if (gameState.getCurrentPlayer() == gs.getRoleOwner()) {
+                            actionButtons[nButtonsCreated].setButtonAction(null, "Select a visible plantation" + drawFromStack + ", or a quarry.");
+                        } else {
+                            actionButtons[nButtonsCreated].setButtonAction(null, "Select a visible plantation" + drawFromStack + ".");
+                        }
+                        markedActionInstructions.add("DrawPlantation");
+                        nButtonsCreated++;
+                    }
+                } else if (actions.get(i) instanceof ShipCargo) {
+                    if (((ShipCargo)actions.get(i)).shipNumber >= 10) {
+                        // Shipping to private wharf
+                        if (playerBoards[gs.getCurrentPlayer()].cropClicked != null) {
+                            actionButtons[nButtonsCreated].setVisible(true);
+                            actionButtons[nButtonsCreated].setEnabled(true);
+                            actionButtons[nButtonsCreated].setButtonAction(actions.get(i), "Load " + playerBoards[gs.getCurrentPlayer()].cropClicked.toString() + " on your private wharf.");
+                            nButtonsCreated++;
+                        }
+                    } else {
+                        // needs ship + cargo
+                        if (!markedActionInstructions.contains("ShipCargo")) {
+                            actionButtons[nButtonsCreated].setVisible(true);
+                            actionButtons[nButtonsCreated].setEnabled(false);
+                            actionButtons[nButtonsCreated].setButtonAction(null, "Select a cargo to load from your player board, and a ship (or use button after selecting crop to load to private wharf, if available).");
+                            markedActionInstructions.add("ShipCargo");
+                            nButtonsCreated++;
+                        }
+                    }
+                } else if (actions.get(i) instanceof DiscardGoodsExcept || actions.get(i) instanceof WarehouseStorage) {
+                    String action = actions.get(i) instanceof DiscardGoodsExcept ? "keep" : "store";
+                    if (playerBoards[gs.getCurrentPlayer()].cropClicked == null) {
+                        // Instructions to pick a crop
+                        if (!markedActionInstructions.contains("DiscardGoodsExcept")) {
+                            actionButtons[nButtonsCreated].setVisible(true);
+                            actionButtons[nButtonsCreated].setEnabled(false);
+                            actionButtons[nButtonsCreated].setButtonAction(null, "You must select a crop on your player board to " + action + (action.equals("keep")? " (others not stored will be lost)" : "") + ".");
+                            markedActionInstructions.add("DiscardGoodsExcept");
+                            nButtonsCreated++;
+                        }
+                    } else {
+                        // Button matching the crop
+                        PuertoRicoConstants.Crop actionCrop = actions.get(i) instanceof DiscardGoodsExcept ? ((DiscardGoodsExcept)actions.get(i)).crop
+                                : ((WarehouseStorage)actions.get(i)).storedCrop;
+                        if (actionCrop != playerBoards[gs.getCurrentPlayer()].cropClicked) continue;
+
+                        actionButtons[nButtonsCreated].setVisible(true);
+                        actionButtons[nButtonsCreated].setEnabled(true);
+                        actionButtons[nButtonsCreated].setButtonAction(actions.get(i),  capitalize(action) + " " + actionCrop.name());
+                        nButtonsCreated++;
+                    }
+                } else if (actions.get(i) instanceof GainCrop) {
+                    if (!markedActionInstructions.contains("GainCrop")) {
+                        actionButtons[nButtonsCreated].setVisible(true);
+                        actionButtons[nButtonsCreated].setEnabled(false);
+                        actionButtons[nButtonsCreated].setButtonAction(null, "Select a crop on your player board to gain as Craftsman bonus.");
+                        markedActionInstructions.add("GainCrop");
+                        nButtonsCreated++;
+                    }
+                } else if (actions.get(i) instanceof OccupyBuilding || actions.get(i) instanceof OccupyPlantation) {
+                    if (!markedActionInstructions.contains("OccupyBuilding")) {
+                        actionButtons[nButtonsCreated].setVisible(true);
+                        actionButtons[nButtonsCreated].setEnabled(false);
+                        actionButtons[nButtonsCreated].setButtonAction(null, "Select a building or plantation on your player board with an available space to place a colonist.");
+                        markedActionInstructions.add("OccupyBuilding");
+                        nButtonsCreated++;
+                    }
+                } else if (actions.get(i) instanceof Sell) {
+                    if (!markedActionInstructions.contains("Sell")) {
+                        actionButtons[nButtonsCreated].setVisible(true);
+                        actionButtons[nButtonsCreated].setEnabled(false);
+                        actionButtons[nButtonsCreated].setButtonAction(null, "Select a crop on your player board to sell.");
+                        markedActionInstructions.add("Sell");
+                        nButtonsCreated++;
+                    }
+                } else {
+                    actionButtons[nButtonsCreated].setVisible(true);
+                    actionButtons[nButtonsCreated].setEnabled(true);
+                    actionButtons[nButtonsCreated].setButtonAction(actions.get(i), gameState);
+                    nButtonsCreated++;
+                }
+            }
+            for (int i = nButtonsCreated; i < actionButtons.length; i++) {
+                actionButtons[i].setVisible(false);
+                actionButtons[i].setButtonAction(null, "");
+            }
+        }
     }
 
     @Override

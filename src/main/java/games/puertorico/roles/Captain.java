@@ -48,7 +48,7 @@ public class Captain extends PuertoRicoRole<Captain> {
                 }
             }
         }
-        if (retValue.isEmpty() && state.hasActiveBuilding(currentPlayer, WHARF)) {
+        if (state.hasActiveBuilding(currentPlayer, WHARF)) {
             // in this case we can still ship from the wharf
             for (PuertoRicoConstants.Crop c : PuertoRicoConstants.Crop.values()) {
                 if (state.getStoresOf(currentPlayer, c) > 0) {

@@ -25,6 +25,9 @@ public class PuertoRicoGameState extends AbstractGameState {
     EnumMap<PuertoRicoConstants.Crop, Integer> cropSupply;
     EnumMap<Role, Boolean> rolesAvailable;
     Map<Role, Integer> moneyOnRoles;
+    Role currentRole;
+    int roleOwner;
+
     int colonistsInSupply;
     int colonistsOnShip;
     int vpSupply;
@@ -49,10 +52,19 @@ public class PuertoRicoGameState extends AbstractGameState {
         return playerBoards.get(player);
     }
 
-    public void setCurrentRole(Role role) {
-        if (!rolesAvailable.get(role))
+    public void setCurrentRole(Role role, int roleOwner) {
+        if (role != null && !rolesAvailable.get(role)) {
             throw new IllegalArgumentException("Role " + role + " is not available");
-        rolesAvailable.put(role, false);
+        }
+        if (role != null) {
+            rolesAvailable.put(role, false);
+        }
+        currentRole = role;
+        this.roleOwner = roleOwner;
+    }
+
+    public int getRoleOwner() {
+        return roleOwner;
     }
 
     public Map<Role, Integer> getAvailableRoles() {
@@ -67,6 +79,10 @@ public class PuertoRicoGameState extends AbstractGameState {
     public boolean isRoleAvailable(Role r) {
         if (rolesAvailable.containsKey(r)) return rolesAvailable.get(r);
         return false;
+    }
+
+    public Role getCurrentRole() {
+        return currentRole;
     }
 
     public int getMoneyOnRole(Role r) {
@@ -278,6 +294,7 @@ public class PuertoRicoGameState extends AbstractGameState {
         retValue.colonistsInSupply = colonistsInSupply;
         retValue.colonistsOnShip = colonistsOnShip;
         retValue.vpSupply = vpSupply;
+        retValue.currentRole = currentRole;
         retValue.gameEndTriggered = gameEndTriggered;
         retValue.moneyOnRoles = new EnumMap<>(moneyOnRoles);
         retValue.soldInMarket = new ArrayList<>(soldInMarket);
@@ -317,6 +334,7 @@ public class PuertoRicoGameState extends AbstractGameState {
                     rolesAvailable.equals(other.rolesAvailable) &&
                     cropSupply.equals(other.cropSupply) &&
                     vpSupply == other.vpSupply &&
+                    currentRole == other.currentRole &&
                     colonistsInSupply == other.colonistsInSupply &&
                     colonistsOnShip == other.colonistsOnShip &&
                     gameEndTriggered == other.gameEndTriggered &&
@@ -331,7 +349,7 @@ public class PuertoRicoGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        return Objects.hash(ships, plantationDeck, playerBoards, visiblePlantations, rolesAvailable, vpSupply, soldInMarket,
+        return Objects.hash(ships, plantationDeck, playerBoards, visiblePlantations, currentRole, rolesAvailable, vpSupply, soldInMarket,
                 colonistsInSupply, colonistsOnShip, cropSupply, plantationDiscards, gameEndTriggered, moneyOnRoles, quarries, buildingsAvailable);
     }
 
@@ -342,6 +360,7 @@ public class PuertoRicoGameState extends AbstractGameState {
         sb.append(Objects.hash(plantationDiscards, plantationDeck)).append("|");
         sb.append(playerBoards.hashCode()).append("|");
         sb.append(visiblePlantations.hashCode()).append("|");
+        sb.append(currentRole).append("|");
         sb.append(rolesAvailable.hashCode()).append("|");
         sb.append(cropSupply.hashCode()).append("|");
         sb.append(Objects.hash(colonistsInSupply, colonistsOnShip, gameEndTriggered, vpSupply)).append("|");

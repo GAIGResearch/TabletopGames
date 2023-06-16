@@ -11,6 +11,7 @@ import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import gui.*;
 import players.human.*;
+import players.mcts.MCTSParams;
 import players.mcts.MCTSPlayer;
 import utilities.Pair;
 import utilities.Utils;
@@ -802,7 +803,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Sirius");
+        String gameType = Utils.getArg(args, "game", "PuertoRico");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -812,9 +813,9 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new RandomPlayer());
 
-//        MCTSParams params = new MCTSParams();
+        MCTSParams params = new MCTSParams();
 //        params.heuristic = new VioletHeuristics();
-//        players.add(new MCTSPlayer(params));
+        players.add(new MCTSPlayer(params));
 
         players.add(new MCTSPlayer());
 

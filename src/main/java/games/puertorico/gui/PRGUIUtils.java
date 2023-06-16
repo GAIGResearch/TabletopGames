@@ -7,6 +7,7 @@ import games.puertorico.components.ProductionBuilding;
 import games.puertorico.components.Ship;
 import utilities.Pair;
 
+import javax.swing.plaf.metal.MetalButtonUI;
 import java.awt.*;
 import java.awt.font.TextAttribute;
 import java.awt.geom.GeneralPath;
@@ -15,6 +16,8 @@ import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class PRGUIUtils {
+    public static boolean showTooltips = true;
+
     // Sizes
     public static int pad = 4;
     public static int barrelWidth = 12;
@@ -37,9 +40,12 @@ public class PRGUIUtils {
     public static int alphaColonistSpace = 50;
     public static Stroke stroke2 = new BasicStroke(2);
 
+    public static PRButtonUI buttonUI = new PRButtonUI();
+
     // Colors
     public static Color colonistColor = new Color(65, 44, 44);
     public static Color colonistColorLight = new Color(114, 79, 79);
+    public static double cropColorFade = 0.2;
     public static Map<PuertoRicoConstants.Crop, Color> cropColorMap = new HashMap<PuertoRicoConstants.Crop, Color>() {{
         put(PuertoRicoConstants.Crop.CORN, new Color(229, 190, 81));
         put(PuertoRicoConstants.Crop.INDIGO, new Color(47, 115, 164));
@@ -58,6 +64,7 @@ public class PRGUIUtils {
     }};
     public static Color backgroundColor = new Color(205, 231, 248);
     public static Color titleColor = new Color(73, 200, 232);
+    public static Color highlightColor = new Color(6, 169, 145);
     public static Color secondaryColor = new Color(42, 91, 154);
     public static Color secondaryColorFaint = new Color(106, 130, 161);
     public static Color shipColor = new Color(204, 167, 120, 240);
@@ -69,6 +76,7 @@ public class PRGUIUtils {
     // Fonts
     public static int roleFontSize = 16;
     public static Font roleFontAvailable = new Font("Book Antiqua", Font.BOLD, roleFontSize);
+    public static Font roleFontAvailableButNotChosen = new Font("Book Antiqua", Font.PLAIN, roleFontSize);
     public static int titleFontSize = 30;
     public static Font titleFont = new Font("Book Antiqua", Font.BOLD, titleFontSize);
     public static int textFontSize = 14;
@@ -102,6 +110,28 @@ public class PRGUIUtils {
         return s.replace("_", " ");
     }
 
+    public static void drawHexagon(Graphics2D g, int x, int y, Color color, int width, int height) {
+        GeneralPath gp = new GeneralPath();
+        gp.moveTo(x + width/2., y);
+        gp.lineTo(x + width, y + height/4.);
+        gp.lineTo(x + width, y + height*3./4);
+        gp.lineTo(x + width/2., y + height);
+        gp.lineTo(x, y + height*3./4);
+        gp.lineTo(x, y + height/4.);
+        gp.closePath();
+
+        g.setColor(color);
+        g.fill(gp);
+        if (outline) {
+            g.setColor(Color.BLACK);
+            g.draw(gp);
+        }
+    }
+
+    public static void drawBarrel(Graphics2D g, int x, int y, Color color) {
+        drawBarrel(g, x, y, color, Color.BLACK);
+    }
+
     /**
      * Returns simple barrel shape.
      * @param g - graphics object
@@ -109,7 +139,7 @@ public class PRGUIUtils {
      * @param y - top-left Y
      * @param color - color of barrel
      */
-    public static void drawBarrel(Graphics2D g, int x, int y, Color color) {
+    public static void drawBarrel(Graphics2D g, int x, int y, Color color, Color outlineColor) {
         GeneralPath gp = new GeneralPath();
         gp.moveTo(x + barrelBend, y);
         gp.lineTo(x + barrelWidth - barrelBend, y);
@@ -120,7 +150,7 @@ public class PRGUIUtils {
         g.setColor(color);
         g.fill(gp);
         if (outline) {
-            g.setColor(Color.black);
+            g.setColor(outlineColor);
             g.draw(gp);
         }
         if (barrelDetail) {
@@ -149,10 +179,11 @@ public class PRGUIUtils {
                 detailGP.curveTo(quarter1X, y + barrelHeight*3/4. + barrelBend/2., quarter2X, y + barrelHeight*3/4. + barrelBend/2., x + barrelWidth - barrelBend/2., y + barrelHeight*3/4.);
             }
 
-            g.setColor(Color.black);
+            g.setColor(outlineColor);
             g.draw(detailGP);
         }
     }
+
     public static void drawColonist(Graphics2D g, int x, int y) {
         drawColonist(g, x, y, colonistRadius, colonistRadiusDetail);
     }
@@ -175,6 +206,10 @@ public class PRGUIUtils {
         }
     }
 
+    public static Pair<Integer, Integer> drawShip(Graphics2D g, Ship ship, int x, int y) {
+        return drawShip(g, ship, x, y, ship.getCurrentCargo(), ship.getSpacesFilled());
+    }
+
     /**
      * Draws a Puerto Rico ship with indicated dimensions and properties.
      * @param g - graphics object
@@ -183,7 +218,7 @@ public class PRGUIUtils {
      * @param y - top-left y
      * @return - width and height of ship drawn
      */
-    public static Pair<Integer, Integer> drawShip(Graphics2D g, Ship ship, int x, int y) {
+    public static Pair<Integer, Integer> drawShip(Graphics2D g, Ship ship, int x, int y, PuertoRicoConstants.Crop crop, int nFilled) {
         int nLines = ship.capacity / nSpacesOnLine;
         int nSpacesLastRow = ship.capacity % nSpacesOnLine;
         if (nSpacesLastRow == 0) {
@@ -215,11 +250,11 @@ public class PRGUIUtils {
         int startY = y + shipSpaceSize/2;
         for (int i = 0; i < nLines; i++) {
             if (i != nLines-1 || nSpacesLastRow == nSpacesOnLine) {
-                drawSpaces(g, ship, outline, nSpacesOnLine, startX, startY, i);
+                drawSpaces(g, ship, outline, nSpacesOnLine, startX, startY, i, crop, nFilled);
             } else {
                 // Last row has fewer spaces, first calculate offset in order to center spaces
                 startX = x + width/2 - nSpacesLastRow*shipSpaceSize/2;
-                drawSpaces(g, ship, outline, nSpacesLastRow, startX, startY, i);
+                drawSpaces(g, ship, outline, nSpacesLastRow, startX, startY, i, crop, nFilled);
             }
         }
         return new Pair<>(width, height);
@@ -228,14 +263,21 @@ public class PRGUIUtils {
     /**
      * Helper method to draw spaces on a line in the ship
      * @param g - graphics object
-     * @param ship - {@link Ship} object with information on capacity {@link Ship#capacity}, spaces filled {@link Ship#getSpacesFilled} and cargo {@link Ship#getCurrentCargo}
      * @param outline - if true, black outline is drawn
      * @param nSpacesOnLine - how many spaces drawn in the line
      * @param startX - where the row starts, top-left X
      * @param startY - top-left Y
      * @param i - row index
+     * @param crop - cargo for ship
+     * @param nFilled - how many spaces on the ship are filled
      */
-    private static void drawSpaces(Graphics2D g, Ship ship, boolean outline, int nSpacesOnLine, int startX, int startY, int i) {
+    private static void drawSpaces(Graphics2D g, Ship ship, boolean outline, int nSpacesOnLine, int startX, int startY, int i, PuertoRicoConstants.Crop crop, int nFilled) {
+        Color fadeColor = cropColorMap.get(crop);
+        Color fadeOutlineColor = Color.black;
+        if (fadeColor != null) {
+            fadeColor = new Color(cropColorMap.get(crop).getRed(), cropColorMap.get(crop).getGreen(), cropColorMap.get(crop).getBlue(), (int) (255 * cropColorFade));
+            fadeOutlineColor = new Color(0,0,0, (int) (255 * cropColorFade));
+        }
         for (int j = 0; j < nSpacesOnLine; j++) {
             g.setColor(spaceColor);
             g.fillRect(startX + shipSpaceSize*j, startY + shipSpaceSize * i, shipSpaceSize, shipSpaceSize);
@@ -246,7 +288,12 @@ public class PRGUIUtils {
             if (i*nSpacesOnLine + j < ship.getSpacesFilled()) {
                 drawBarrel(g, startX + shipSpaceSize * j + shipSpaceSize / 2 - barrelWidth / 2,
                         startY + shipSpaceSize * i + shipSpaceSize / 2 - barrelHeight / 2,
-                        cropColorMap.get(ship.getCurrentCargo()));
+                        cropColorMap.get(crop));
+            } else if (i * nSpacesOnLine + j < nFilled) {
+                // Shadow barrel
+                drawBarrel(g, startX + shipSpaceSize * j + shipSpaceSize / 2 - barrelWidth / 2 + 1,
+                        startY + shipSpaceSize * i + shipSpaceSize / 2 - barrelHeight / 2 + 1,
+                        fadeColor, fadeOutlineColor);
             }
         }
     }
@@ -341,5 +388,11 @@ public class PRGUIUtils {
 
     private static void drawColonistSpace(Graphics2D g, int x, int y, Color color, boolean occupied) {
         drawColonistSpace(g, x, y, colonistRadius, colonistRadiusDetail, color, occupied);
+    }
+
+    public static class PRButtonUI extends MetalButtonUI {
+        protected Color getDisabledTextColor() {
+            return secondaryColor;
+        }
     }
 }

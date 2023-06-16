@@ -19,6 +19,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.List;
+import java.util.Set;
 
 import static games.coltexpress.ColtExpressGameState.ColtExpressGamePhase.ExecuteActions;
 
@@ -51,7 +52,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
     Border highlightActive = BorderFactory.createLineBorder(new Color(220, 169, 11), 3);
     Border[] playerViewBorders;
 
-    public ColtExpressGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+    public ColtExpressGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
         super(parent, game, ac, humanID);
 
         UIManager.put("TabbedPane.contentOpaque", false);
@@ -250,7 +251,7 @@ public class ColtExpressGUIManager extends AbstractGUIManager {
             plannedActions.updateComponent(cegs.getPlannedActions());
             int activePlayer = player != null? (gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer ||
                     gameState.getCoreGameParameters().alwaysDisplayFullObservable? player.getPlayerID():
-                    player.getPlayerID()==humanPlayerId? player.getPlayerID():-1) : -1;
+                    humanPlayerId.contains(player.getPlayerID())? player.getPlayerID():-1) : -1;
             plannedActions.informActivePlayer(activePlayer);
 
             // Show planned actions from the first played

@@ -11,30 +11,50 @@ public class PuertoRicoConstants {
     public enum ActionRotation {SINGLE_ACTION, MULTIPLE_ACTIONS, MULTIPLE_ROUNDS}
 
     public enum Role {
-        CAPTAIN(true, ActionRotation.MULTIPLE_ROUNDS),
-        DISCARD(true, ActionRotation.MULTIPLE_ACTIONS, true),
-        BUILDER(true),
-        MAYOR(true, ActionRotation.MULTIPLE_ACTIONS),
-        TRADER(true),
-        SETTLER(true),
-        CRAFTSMAN(false),
-        PROSPECTOR(false);
+        CAPTAIN(true, "All players load goods on the cargo ships (public or private), starting with the player who chose the role.\n" +
+                "Each cargo ship carries good of a single kind, and no 2 ships may carry goods of the same type.\n" +
+                "Players load only one kind of goods, and they must load as many as possible, if any valid goods are available.\n" +
+                "The phase continues as long as at least 1 player has goods they can load. If they can, they must load goods.\n" +
+                "Players earn 1VP per good loaded.\n" +
+                "When the phase ends, leftover goods must be stored. Each player can store for free 1 type of good. Good types may also be stored in warehouses.\n" +
+                "If goods cannot be stored, they are lost. Finally, the full cargo ships get unloaded.", ActionRotation.MULTIPLE_ROUNDS),
+        DISCARD(true, "All players discard goods if leftover from Captain phase.", ActionRotation.MULTIPLE_ACTIONS, true),
+        BUILDER(true, "All players may buy a building and place it in their town.\n" +
+                "The cost of the building is reduced by 1 for the player who chose the Builder role.\n" +
+                "The cost is further reduced by 1 for each quarry the player owns.\n" +
+                "The player may buy a building of any size, as long as it fits in their town. "),
+        MAYOR(true, "All players earn colonists and place them on either plantations, quarries or buildings.\n" +
+                "All players pick 1 colonist from the colonist ship in turn order, starting with the player who chose the role, until no more colonists remain on the ship.\n" +
+                "The player who chose the role earns 1 extra colonist.\n" +
+                "Colonists may be moved from one plantation, quarry or building to another. Only occupied tiles function.\n" +
+                "When the phase ends, the ship gets filled with colonists again: 1 for every unoccupied space in the buildings in all players' towns.", ActionRotation.MULTIPLE_ACTIONS),
+        TRADER(true, "All players sell goods. Each player may sell a single good.\n" +
+                "The player earns doubloons equal to the value of the good sold, as indicated in the market area.\n" +
+                "The player who chose the role earns 1 extra doubloon for the good sold.\n" +
+                "Players can't sell any more goods if the trading house is full. The trading house buys only different kinds of goods (exception: office building)."),
+        SETTLER(true, "Take a plantation tile from the supply and place it in your island.\n" +
+                "The player who chose the role may take a quarry instead. "),
+        CRAFTSMAN(false, "All players produce goods from all occupied plantations with a matching occupied factory (exception: corn does not need a factory).\n" +
+                "The player who chose the role produces 1 extra good of their choice."),
+        PROSPECTOR(false, "Take 1 doubloon from the bank. All other players get nothing.");
+        public final String description;
         public final boolean allPlayers;
         public final ActionRotation rotationType;
         public final boolean hidden; // for implementation - not provided as an option to the player
 
-        Role(boolean allPlayers) {
-            this(allPlayers, ActionRotation.SINGLE_ACTION, false);
+        Role(boolean allPlayers, String description) {
+            this(allPlayers, description, ActionRotation.SINGLE_ACTION, false);
         }
 
-        Role(boolean allPlayers, ActionRotation actionType) {
-            this(allPlayers, actionType, false);
+        Role(boolean allPlayers, String description, ActionRotation actionType) {
+            this(allPlayers, description, actionType, false);
         }
 
-        Role(boolean allPlayers, ActionRotation actionType, boolean hidden) {
+        Role(boolean allPlayers, String description, ActionRotation actionType, boolean hidden) {
             this.allPlayers = allPlayers;
             this.rotationType = actionType;
             this.hidden = hidden;
+            this.description = description;
         }
 
         public PuertoRicoRole<?> getAction(PuertoRicoGameState state) {

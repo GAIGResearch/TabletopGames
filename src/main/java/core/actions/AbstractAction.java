@@ -1,8 +1,9 @@
 package core.actions;
 
 import core.AbstractGameState;
-import core.components.Card;
 import core.interfaces.IPrintable;
+
+import java.util.Set;
 
 public abstract class AbstractAction implements IPrintable {
 
@@ -42,7 +43,7 @@ public abstract class AbstractAction implements IPrintable {
      * @param perspectivePlayer - player to whom the action should be represented.
      * @return - string representation of this action.
      */
-    public String getString(AbstractGameState gs, int perspectivePlayer) {
+    public String getString(AbstractGameState gs, Set<Integer> perspectivePlayer) {
         return getString(gs);
     }
 
