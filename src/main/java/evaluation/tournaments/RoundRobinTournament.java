@@ -516,6 +516,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 FileWriter writer = new FileWriter(resultsFile, true);
                 for (String line : dataDump)
                     writer.write(line);
+                writer.write("\n");
                 writer.close();
             } catch (Exception e) {
                 e.printStackTrace();
