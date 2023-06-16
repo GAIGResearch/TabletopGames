@@ -324,13 +324,13 @@ public class TestCaptain {
             fm.next(state, fm.computeAvailableActions(state).get(0));
         } while (state.getCurrentPlayer() != 2);
         List<AbstractAction> actions = fm.computeAvailableActions(state);
-        // we do not yet have the Wharf option
-        assertTrue(actions.stream().noneMatch(a -> a instanceof ShipCargo && ((ShipCargo) a).shipNumber == 12));
+        // we *do* already yet have the Wharf option
+        assertTrue(actions.stream().anyMatch(a -> a instanceof ShipCargo && ((ShipCargo) a).shipNumber == 12));
 
         do {
             fm.next(state, fm.computeAvailableActions(state).get(0));
         } while (state.getCurrentPlayer() != 2);
-        // at this stage all the ships are full, so we should have the Wharf option
+        // at this stage all the ships are full, so we should still have the Wharf option
         actions = fm.computeAvailableActions(state);
         assertTrue(actions.stream().anyMatch(a -> a instanceof ShipCargo && ((ShipCargo) a).shipNumber == 12));
         assertTrue(actions.stream().noneMatch(a -> a instanceof ShipCargo && ((ShipCargo) a).shipNumber < 10));

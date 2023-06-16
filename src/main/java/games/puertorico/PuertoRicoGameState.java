@@ -52,7 +52,7 @@ public class PuertoRicoGameState extends AbstractGameState {
         return playerBoards.get(player);
     }
 
-    public void setCurrentRole(Role role, int roleOwner) {
+    public void setCurrentRole(Role role) {
         if (role != null && !rolesAvailable.get(role)) {
             throw new IllegalArgumentException("Role " + role + " is not available");
         }
@@ -60,7 +60,7 @@ public class PuertoRicoGameState extends AbstractGameState {
             rolesAvailable.put(role, false);
         }
         currentRole = role;
-        this.roleOwner = roleOwner;
+        this.roleOwner = getCurrentPlayer();
     }
 
     public int getRoleOwner() {

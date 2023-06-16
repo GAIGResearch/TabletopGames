@@ -59,13 +59,14 @@ public class RoundRobinTournament extends AbstractTournament {
             System.out.println(
                     "There are a number of possible arguments:\n" +
                             "\tgame=          A list of the games to be played. If there is more than one, then use a \n" +
-                            "\t               pipe-delimited list, for example games=Uno|ColtExpress|Pandemic.\n" +
+                            "\t               pipe-delimited list, for example game=Uno|ColtExpress|Pandemic.\n" +
                             "\t               The default is 'all' to indicate that all games should be analysed.\n" +
                             "\t               Specifying all|-name1|-name2... will run all games except for name1, name2...\n" +
                             "\tnPlayers=      The total number of players in each game (the default is 'all') \n " +
                             "\t               A range can also be specified, for example 3-5. \n " +
                             "\t               Different player counts can be specified for each game in pipe-delimited format.\n" +
                             "\t               If 'all' is specified, then every possible playerCount for the game will be analysed.\n" +
+                            "\tverbose=       If true, then the result of each game is reported. Default is false.\n"+
                             "\tplayers=       The directory containing agent JSON files for the competing Players\n" +
                             "\t               If not specified, this defaults to very basic OSLA, RND, RHEA and MCTS players.\n" +
                             "\tmode=          exhaustive|random - defaults to exhaustive.\n" +

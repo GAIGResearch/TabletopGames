@@ -21,7 +21,7 @@ public class SelectRole extends AbstractAction {
             throw new AssertionError("Role not available: " + role);
         }
         prgs.changeDoubloons(prgs.getCurrentPlayer(), moneyOnRole);
-        prgs.setCurrentRole(role, prgs.getCurrentPlayer());
+        prgs.setCurrentRole(role);
         // We may then have some initial set up to do at the start of a phase
         PuertoRicoRole<?> roleAction = role.getAction(prgs);
         roleAction.startNewPhase(prgs);
