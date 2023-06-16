@@ -304,20 +304,56 @@ public class SGGameState extends AbstractGameState implements IVectorisable {
 
     @Override
     public double[] getNormalizedObservationVector() {
+        // todo would be better in SGParameters -> at least generating a list of strings
+        int maxCardsInHand = ((SGParameters)getGameParameters()).nCards;
+        int nUnique = Arrays.stream(SGCard.SGCardType.values()).map(e -> e.getIconCountVariation().length).mapToInt(i -> i).sum();
+        String uniqueCards[] = new String[nUnique];
+        int counter = 0;
+        for (SGCard.SGCardType cardType: SGCard.SGCardType.values()){
+            if (cardType.getIconCountVariation().length == 1){
+                uniqueCards[counter] = cardType.name();
+                counter ++;
+            } else {
+                for (int i = 0; i < cardType.getIconCountVariation().length; i++) {
+                    uniqueCards[counter] = cardType.name() + "-" + cardType.getIconCountVariation()[i];
+                    counter++;
+                }
+            }
+        }
         /* state representation */
-        // played cards
         // rounds
         // cards in hand
         // player score
-        int maxCardsInHand = ((SGParameters)getGameParameters()).nCards;
-        playerHands.get(getCurrentPlayer()).getComponents();
-//        int[]
+
+        // encode player hand - note that this could be one hot encoded
+        int playerHand[] = new int[maxCardsInHand];
+        List<SGCard> cardsInHand = playerHands.get(getCurrentPlayer()).getComponents();
+        for (int i = 0; i < cardsInHand.size(); i++){
+            playerHand[i] = Arrays.asList(uniqueCards).indexOf(cardsInHand.get(i).toString());
+        }
+
+        // played cards
+
+        // todo check if this include the counts
+        for (int i = 0; i < nPlayers; i++){
+            List<SGCard> playedCards = getPlayedCards().get(i).getComponents();
+//            Arrays.asList(uniqueCards).indexOf(cardsInHand.get(i).toString());
+        }
+
 
         return new double[0];
     }
 
     public int[] encodeCardType(List<SGCard> deck){
-        SGCard.SGCardType cardTypes[] = SGCard.SGCardType.values();
+        int nUnique = (int) Arrays.stream(SGCard.SGCardType.values()).map(e -> e.getIconCountVariation().length).count();
+        String uniqueCards[] = new String[nUnique];
+        int counter = 0;
+        for (SGCard.SGCardType cardType: SGCard.SGCardType.values()){
+            for (int i = 0; i < cardType.getIconCountVariation().length; i++){
+                uniqueCards[counter] = cardType.name() + cardType.getIconCountVariation()[i];
+                counter ++;
+            }
+        }
         // todo need to encode different variants correctly
         for (SGCard cards: deck){
             cards.getType();
