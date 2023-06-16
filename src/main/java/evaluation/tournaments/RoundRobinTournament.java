@@ -2,10 +2,7 @@ package evaluation.tournaments;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.Game;
-import core.interfaces.IStatisticLogger;
 import evaluation.listeners.IGameListener;
-import evaluation.loggers.SummaryLogger;
 import games.GameType;
 import players.PlayerFactory;
 import players.mcts.BasicMCTSPlayer;
@@ -19,7 +16,6 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameResult;
 import static evaluation.tournaments.RoundRobinTournament.TournamentMode.*;
@@ -43,6 +39,7 @@ public class RoundRobinTournament extends AbstractTournament {
     LinkedList<Integer> agentIDs;
     private int matchUpsRun;
     private boolean randomGameParams;
+    public final String name;
 
     private boolean listenersInitialized = false;
 
@@ -120,7 +117,7 @@ public class RoundRobinTournament extends AbstractTournament {
         String destDir = getArg(args, "destDir", "metrics/out");
         boolean addTimestamp = getArg(args, "addTimestamp", false);
         int reportPeriod = getArg(args, "reportPeriod", matchups);
-        boolean verbose = getArg(args, "verbose", true);
+        boolean verbose = getArg(args, "verbose", false);
         String resultsFile = getArg(args, "output", "");
 
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "evaluation.listeners.MetricsGameListener").split("\\|")));
@@ -187,6 +184,7 @@ public class RoundRobinTournament extends AbstractTournament {
                 // run tournament
                 tournament.verbose = verbose;
                 tournament.resultsFile = resultsFile;
+                tournament.randomGameParams = getArg(args, "randomGameParams", false);
                 tournament.runTournament();
             }
         }
@@ -278,6 +276,7 @@ public class RoundRobinTournament extends AbstractTournament {
         this.rankPerPlayer = new double[agents.size()];
         this.rankPerPlayerSquared = new double[agents.size()];
         this.gamesPerPlayer = new int[agents.size()];
+        this.name = String.format("Game: %s, Players: %d, GamesPerMatchup: %d, Mode: %s", gameToPlay.name(), playersPerGame, gamesPerMatchUp, mode.name());
     }
 
 
@@ -391,8 +390,10 @@ public class RoundRobinTournament extends AbstractTournament {
         long currentSeed = games.getGameState().getGameParameters().getRandomSeed();
         for (int i = 0; i < nGames; i++) {
 
-            games.reset(matchUpPlayers, currentSeed + i + 1);
+            if (randomGameParams)
+                games.getGameState().getGameParameters().randomize();
 
+            games.reset(matchUpPlayers, currentSeed + i + 1);
             if (!listenersInitialized) {
                 for (IGameListener gameTracker : listeners) {
                     gameTracker.init(games);
@@ -474,6 +475,7 @@ public class RoundRobinTournament extends AbstractTournament {
         int gameCounter = (gamesPerMatchUp * matchUpsRun);
         boolean toFile = !resultsFile.equals("");
         ArrayList<String> dataDump = new ArrayList<>();
+        dataDump.add(name);
 
         // To console
         if (verbose)

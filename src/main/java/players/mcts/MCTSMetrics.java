@@ -22,11 +22,13 @@ public class MCTSMetrics implements IMetricsCollection {
                 MCTSPlayer mctsPlayer = (MCTSPlayer) player;
                 SingleTreeNode root = mctsPlayer.root;
                 if (root instanceof MultiTreeNode) {
-                    root = Arrays.stream(((MultiTreeNode)root).roots).filter(Objects::nonNull)
+                    root = Arrays.stream(((MultiTreeNode) root).roots).filter(Objects::nonNull)
                             .filter(node -> node.decisionPlayer == e.state.getCurrentPlayer())
-                            .findFirst().orElseThrow(() -> new AssertionError("No root found for player " +e.state.getCurrentPlayer()));
+                            .findFirst().orElseThrow(() -> new AssertionError("No root found for player " + e.state.getCurrentPlayer()));
                 }
                 TreeStatistics treeStats = new TreeStatistics(root);
+                int visits = mctsPlayer.root.getVisits();
+                if (visits == 0) visits = 1;
                 records.put("PlayerType", mctsPlayer.toString());
                 records.put("Iterations", mctsPlayer.root.getVisits());
                 records.put("MaxDepth", treeStats.depthReached);
@@ -34,13 +36,13 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("Nodes", treeStats.totalNodes);
                 records.put("OneActionNodes", treeStats.oneActionNodes);
                 records.put("MeanActionsAtNode", treeStats.meanActionsAtNode);
-                records.put("RolloutLength", mctsPlayer.root.rolloutActionsTaken / (double) mctsPlayer.root.getVisits());
+                records.put("RolloutLength", mctsPlayer.root.rolloutActionsTaken / (double) visits);
                 OptionalInt maxVisits = Arrays.stream(root.actionVisits()).max();
-                records.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) root.getVisits());
+                records.put("maxVisitProportion", (maxVisits.isPresent() ? maxVisits.getAsInt() : 0) / (double) visits);
                 records.put("Action", e.action.getString(e.state));
                 records.put("ActionsAtRoot", root.children.size());
-                records.put("fmCalls", mctsPlayer.root.fmCallsCount / mctsPlayer.root.getVisits());
-                records.put("copyCalls", mctsPlayer.root.copyCount / mctsPlayer.root.getVisits());
+                records.put("fmCalls", mctsPlayer.root.fmCallsCount / visits);
+                records.put("copyCalls", mctsPlayer.root.copyCount / visits);
                 return true;
             }
             return false;
@@ -81,7 +83,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 MCTSPlayer mctsPlayer = (MCTSPlayer) player;
                 List<SingleTreeNode> otherRoots;
                 if (mctsPlayer.root instanceof MultiTreeNode) {
-                    otherRoots = Arrays.stream(((MultiTreeNode)mctsPlayer.root).roots).filter(Objects::nonNull)
+                    otherRoots = Arrays.stream(((MultiTreeNode) mctsPlayer.root).roots).filter(Objects::nonNull)
                             .filter(node -> node.decisionPlayer != e.state.getCurrentPlayer())
                             .collect(Collectors.toList());
                     if (otherRoots.isEmpty())
@@ -89,6 +91,8 @@ public class MCTSMetrics implements IMetricsCollection {
                 } else {
                     return false;  // nothing to record
                 }
+                int visits = mctsPlayer.root.getVisits();
+                if (visits == 0) visits = 1;
                 List<TreeStatistics> treeStats = otherRoots.stream().map(TreeStatistics::new).collect(Collectors.toList());
                 records.put("PlayerType", mctsPlayer.toString());
                 records.put("MaxDepth", treeStats.stream().mapToInt(ts -> ts.depthReached).average().orElse(0.0));
@@ -96,7 +100,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 records.put("Nodes", treeStats.stream().mapToInt(ts -> ts.totalNodes).average().orElse(0.0));
                 records.put("OneActionNodes", treeStats.stream().mapToInt(ts -> ts.oneActionNodes).average().orElse(0.0));
                 records.put("MeanActionsAtNode", treeStats.stream().mapToDouble(ts -> ts.meanActionsAtNode).average().orElse(0.0));
-                records.put("RolloutLength", otherRoots.stream().mapToInt(root -> root.rolloutActionsTaken).average().orElse(0.0) / mctsPlayer.root.getVisits());
+                records.put("RolloutLength", otherRoots.stream().mapToInt(root -> root.rolloutActionsTaken).average().orElse(0.0) / visits);
                 records.put("ActionsAtRoot", otherRoots.stream().mapToInt(node -> node.children.size()).average().orElse(0.0));
                 return true;
             }
