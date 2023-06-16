@@ -154,63 +154,20 @@ public class GYMEnv {
         gameState.gameParameters.setRandomSeed(this.lastSeed);
         this.forwardModel = game.getForwardModel();
         this.availableActions = forwardModel.computeAvailableActions(gameState);
+
+        // execute the game if needed until Python agent is required to make a decision
+        boolean isTerminal = nextDecision();
+
+        // get action tree for current player
         if (this.root == null){
             this.root = ((IOrderedActionSpace)this.forwardModel).initActionTree(this.gameState);
         }
         // update with initial actions
+        // Compute the updated available actions and the action tree
+        AbstractGameState observation = gameState.copy(gameState.getCurrentPlayer());
+        this.availableActions = forwardModel.computeAvailableActions(observation);
         this.root = ((IOrderedActionSpace)this.forwardModel).updateActionTree(this.root, this.gameState);
         this.leaves = root.getLeafNodes();
-
-        // execute the game if needed until Python agent is required to make a decision
-        int activePlayer = gameState.getCurrentPlayer();
-        AbstractPlayer currentPlayer = players.get(activePlayer);
-        while ( !(currentPlayer instanceof PythonAgent)){
-            AbstractGameState observation = gameState.copy(activePlayer);
-            List<core.actions.AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
-
-            if (isDone()){
-                // game is over
-                return;
-            }
-
-            // Start the timer for this decision
-            gameState.playerTimer[activePlayer].resume();
-
-            // Either ask player which action to use or, in case no actions are available, report the updated observation
-            core.actions.AbstractAction action = null;
-            if (observedActions.size() > 0) {
-                if (observedActions.size() == 1 && (!(currentPlayer instanceof HumanGUIPlayer) || observedActions.get(0) instanceof DoNothing)) {
-                    // Can only do 1 action, so do it.
-                    action = observedActions.get(0);
-                    currentPlayer.registerUpdatedObservation(observation);
-                } else {
-                    // Get action from player, and time it
-                    action = currentPlayer.getAction(observation);
-                }
-            } else {
-                currentPlayer.registerUpdatedObservation(observation);
-            }
-
-            // End the timer for this decision
-            gameState.playerTimer[activePlayer].pause();
-            gameState.playerTimer[activePlayer].incrementAction();
-
-            if (gameState.coreGameParameters.verbose && !(action == null)) {
-                System.out.println(action);
-            }
-            if (action == null)
-                throw new AssertionError("We have a NULL action in the Game loop");
-
-            // Check player timeout
-            forwardModel.next(gameState, action);
-            tick++;
-
-            lastPlayer = activePlayer;
-            activePlayer = gameState.getCurrentPlayer();
-            currentPlayer = players.get(gameState.getCurrentPlayer());
-        }
-        AbstractGameState observation = gameState.copy(activePlayer);
-        this.availableActions = forwardModel.computeAvailableActions(observation);
     }
 
     public int getPlayerID(){
@@ -350,6 +307,7 @@ public class GYMEnv {
 //        players.add(new MCTSPlayer());
         players.add(new PythonAgent());
         players.add(new RandomPlayer(rnd));
+//        players.add(new PythonAgent());
 
         boolean useGYM = true;
 
@@ -362,7 +320,7 @@ public class GYMEnv {
 
         try {
             // Initialise the game
-            GYMEnv env = new GYMEnv(GameType.valueOf("ExplodingKittens"), null, players, 343, true);
+            GYMEnv env = new GYMEnv(GameType.valueOf("SushiGo"), null, players, 343, true);
             if (!useGYM) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
             // reset is always required before starting a new episode
@@ -376,6 +334,7 @@ public class GYMEnv {
 
                     // get observation vector
                     double[] obs = env.getObservationVector();
+                    String json = env.getObservationJson();
                     double reward = env.getReward();
 //                    System.out.println("at step " + steps + " the reward is " + reward + "player ID " + env.gameState.getCurrentPlayer());
 

@@ -3,14 +3,17 @@ package games.sushigo;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
+import core.interfaces.IVectorisable;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
+import org.json.simple.JSONObject;
+import utilities.Pair;
 
 import java.util.*;
 
 @SuppressWarnings("unchecked")
-public class SGGameState extends AbstractGameState {
+public class SGGameState extends AbstractGameState implements IVectorisable {
     List<Deck<SGCard>> playerHands;
     Deck<SGCard> drawPile;
     Deck<SGCard> discardPile;
@@ -273,5 +276,60 @@ public class SGGameState extends AbstractGameState {
                 Arrays.hashCode(playedCardTypes) + "|" +
                 Arrays.hashCode(playedCardTypesAllGame) + "|" +
                 super.hashCode() + "|";
+    }
+
+    @Override
+    public String getObservationJson() {
+        JSONObject json = new JSONObject();
+        int playerID = getCurrentPlayer();
+        json.put("PlayerID", playerID);
+        json.put("cardsInHand", getPlayerHands().get(playerID));
+        json.put("playedCards", getPlayedCards().get(playerID));
+        json.put("playerScore", playerScore[playerID]);
+        for (int i = 0; i < nPlayers; i++){
+            if (i != playerID){
+                json.put("P" + i + "playedCards", getPlayedCards().get(i));
+                json.put("P" + i + "score", playerScore[i]);
+
+            }
+        }
+        json.put("rounds", getRoundCounter());
+        return json.toJSONString();
+    }
+
+    @Override
+    public double[] getObservationVector() {
+        return new double[0];
+    }
+
+    @Override
+    public double[] getNormalizedObservationVector() {
+        /* state representation */
+        // played cards
+        // rounds
+        // cards in hand
+        // player score
+        int maxCardsInHand = ((SGParameters)getGameParameters()).nCards;
+        playerHands.get(getCurrentPlayer()).getComponents();
+//        int[]
+
+        return new double[0];
+    }
+
+    public int[] encodeCardType(List<SGCard> deck){
+        SGCard.SGCardType cardTypes[] = SGCard.SGCardType.values();
+        // todo need to encode different variants correctly
+        for (SGCard cards: deck){
+            cards.getType();
+        }
+        for (Pair<SGCard.SGCardType, Integer> types : ((SGParameters) getGameParameters()).nCardsPerType.keySet()){
+
+        }
+        return new int[0];
+    }
+
+    @Override
+    public int getObservationSpace() {
+        return 0;
     }
 }

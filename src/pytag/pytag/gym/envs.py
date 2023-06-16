@@ -8,10 +8,11 @@ from abc import abstractmethod
 from typing import Dict, List, Union
 
 class TagSingleplayerGym(gym.Env):
-    def __init__(self, game_id: str, agent_ids: List[str], seed: int=0):
+    def __init__(self, game_id: str, agent_ids: List[str], seed: int=0, obs_type:str="vector"):
         super().__init__()
         self._last_obs_vector = None
         self._last_action_mask = None
+        self._obstype = obs_type
         
         # Initialize the java environment
         gameType = GameType.valueOf(Utils.getArg([""], "game", game_id))
@@ -72,8 +73,12 @@ class TagSingleplayerGym(gym.Env):
         return self._last_action_mask[action] 
     
     def _update_data(self):
-        obs = self._java_env.getObservationVector()
-        self._last_obs_vector = np.array(obs, dtype=np.float32)
+        if self._obstype == "vector":
+            obs = self._java_env.getObservationVector()
+            self._last_obs_vector = np.array(obs, dtype=np.float32)
+        elif self._obstype == "json":
+            obs = self._java_env.getObservationJson()
+            self._last_obs_vector = obs
         
         action_mask = self._java_env.getActionMask()
         self._last_action_mask = np.array(action_mask, dtype=bool)

@@ -7,7 +7,7 @@ import torch
 import jpype
 from jpype import *
 import jpype.imports
-from gym_.wrappers import StrategoWrapper
+from pytag.gym.wrappers import StrategoWrapper, SushiGoWrapper
 
 def make_env(env_id, seed, opponent, n_players, framestack=1):
     def thunk():
@@ -15,9 +15,12 @@ def make_env(env_id, seed, opponent, n_players, framestack=1):
         agent_ids = ["python"]
         for i in range(n_players - 1):
             agent_ids.append(opponent)
+        # obs_type = "json" if "Sushi" in env_id else "vector" # , obs_type=obs_type
         env = gym.make(env_id, seed=seed, agent_ids=agent_ids)
         if "Stratego" in env_id:
             env = StrategoWrapper(env)
+        # if "Sushi" in env_id:
+        #     env = SushiGoWrapper(env)
         if framestack > 1:
             env = FrameStack(env, framestack)
         return env

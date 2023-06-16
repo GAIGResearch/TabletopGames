@@ -15,6 +15,12 @@ gym.envs.register(
 )
 
 gym.envs.register(
+     id='TAG/SushiGo-v0',
+     entry_point='pytag.gym.envs:TagSingleplayerGym',
+     kwargs={"game_id": "SushiGo", "agent_ids": ["python", "random"], "obs_type": "vector"}
+)
+
+gym.envs.register(
      id='TAG/ExplodingKittens-v0',
      entry_point='pytag.gym.envs:TagSingleplayerGym',
      kwargs={"game_id": "ExplodingKittens", "agent_ids": ["python", "random"]}

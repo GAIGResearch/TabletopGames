@@ -37,6 +37,19 @@ class StrategoWrapper(gym.ObservationWrapper):
         observation_ = observation_.permute(2, 0, 1).float()
         return observation_
 
+class SushiGoWrapper(gym.ObservationWrapper):
+    def __init__(self, env):
+        super().__init__(env)
+        self.observation_space = gym.spaces.Box(low=0, high=1, shape=(27, 10, 10), dtype=np.float32)
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        return self.observation(obs), info
+    def observation(self, observation):
+        observation_ = torch.from_numpy(observation.reshape(10, 10)).to(torch.int64)
+        observation_ = torch.nn.functional.one_hot(observation_+13, num_classes=27)
+        observation_ = observation_.permute(2, 0, 1).float()
+        return observation_
+
 class RecordEpisodeStatistics(gym.Wrapper):
     # Based on RecordEpisodeStatistics from gymnasium, but it checks whether the player has won the game
     """This wrapper will keep track of cumulative rewards and episode lengths.

@@ -207,6 +207,7 @@ public class ActionTreeNode {
     public AbstractAction getAction() {return action;}
     public void setAction(AbstractAction action) {
         this.value = 1;
+        this.parent.value = 1;
         this.action = action;
     }
     public AbstractAction getActionByVector(int[] vector){

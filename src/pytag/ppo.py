@@ -14,8 +14,8 @@ import torch.optim as optim
 
 from torch.utils.tensorboard import SummaryWriter
 
-from gym_.wrappers import MergeActionMaskWrapper, RecordEpisodeStatistics
-from utils.common import make_env
+from pytag.gym.wrappers import MergeActionMaskWrapper, RecordEpisodeStatistics
+from pytag.utils.common import make_env
 from utils.networks import PPONet
 
 def parse_args():
