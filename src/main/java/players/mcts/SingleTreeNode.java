@@ -33,7 +33,6 @@ public class SingleTreeNode {
     protected AbstractPlayer[] opponentModels;
     protected Random rnd;
     protected IStateHeuristic heuristic;
-    protected IStateHeuristic opponentHeuristic;
     // Number of FM calls and State copies up until this node
     protected int fmCallsCount;
     protected int copyCount;
@@ -101,15 +100,8 @@ public class SingleTreeNode {
         retValue.MASTStatistics = new ArrayList<>();
         for (int i = 0; i < state.getNPlayers(); i++)
             retValue.MASTStatistics.add(new HashMap<>());
-        retValue.MASTFunction = (a, s) -> {
-            Map<Object, Pair<Integer, Double>> MAST = retValue.MASTStatistics.get(retValue.decisionPlayer);
-            Object key = retValue.params.MASTActionKey == null ? a : retValue.params.MASTActionKey.key(a);
-            if (MAST.containsKey(key)) {
-                Pair<Integer, Double> stats = MAST.get(key);
-                return stats.b / (stats.a + retValue.params.epsilon);
-            }
-            return 0.0;
-        };
+        MASTActionHeuristic MASTHeuristic = new MASTActionHeuristic(retValue.MASTStatistics, retValue.params.MASTActionKey, retValue.params.MASTDefaultValue);
+        retValue.MASTFunction = MASTHeuristic::evaluateAction;
         retValue.instantiate(null, null, state);
         return retValue;
     }
