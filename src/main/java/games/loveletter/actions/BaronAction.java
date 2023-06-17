@@ -10,13 +10,13 @@ import games.loveletter.cards.LoveLetterCard;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The Baron lets two players compare their hand card. The player with the lesser valued card is removed from the game.
  */
 public class BaronAction extends PlayCard implements IPrintable {
-    private LoveLetterCard.CardType playerCard, opponentCard;
+    private transient LoveLetterCard.CardType playerCard;
+    private transient LoveLetterCard.CardType opponentCard;
 
     public BaronAction(int playerID, int opponentID, boolean canExecuteEffect) {
         super(LoveLetterCard.CardType.Baron, playerID, opponentID, null, null, canExecuteEffect);
@@ -65,14 +65,7 @@ public class BaronAction extends PlayCard implements IPrintable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof BaronAction)) return false;
-        if (!super.equals(o)) return false;
-        BaronAction that = (BaronAction) o;
-        return playerCard == that.playerCard && opponentCard == that.opponentCard;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), playerCard, opponentCard);
+        return super.equals(o);
     }
 
     public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {

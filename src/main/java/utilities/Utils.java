@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.*;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 public abstract class Utils {
@@ -440,7 +441,6 @@ public abstract class Utils {
                     argClasses[i] = arg.getClass();
                 } else if (arg instanceof Long) {
                     argClasses[i] = int.class;
-                    args[i] = ((Long) arg).intValue();
                 } else if (arg instanceof Double) {
                     argClasses[i] = double.class;
                 } else if (arg instanceof Boolean) {
@@ -461,7 +461,6 @@ public abstract class Utils {
 
                     } else if (first instanceof Long) {
                         argClasses[i] = int[].class;
-                        args[i] = ((Long) first).intValue();
                         arg = ((JSONArray) arg).toArray(new Long[0]);
                     } else if (first instanceof Double) {
                         argClasses[i] = double[].class;
@@ -472,12 +471,15 @@ public abstract class Utils {
                     } else if (first instanceof String) {
                         argClasses[i] = String[].class;
                         arg = ((JSONArray) arg).toArray(new String[0]);
-                        int a = 0;
                     }
                 } else {
                     throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
                 }
-                args[i] = arg;
+                if (arg instanceof Long) {
+                    args[i] = ((Long) arg).intValue();
+                } else {
+                    args[i] = arg;
+                }
             }
 
             Class<?> clazz = Class.forName(cl);
@@ -651,5 +653,26 @@ public abstract class Utils {
             default: return "th";
         }
     }
+
+
+    public static double[] enumToOneHot(Enum<?> e) {
+        return enumToOneHot(e, 1.0);
+    }
+
+    public static double[] enumToOneHot(Enum<?> e, double value) {
+        double[] retValue = new double[e.getClass().getEnumConstants().length];
+        retValue[e.ordinal()] = value;
+        return retValue;
+    }
+
+    public static List<String> enumNames(Class<? extends Enum<?>> e) {
+        return Arrays.stream(e.getEnumConstants()).map(Enum::name).collect(toList());
+    }
+
+    public static List<String> enumNames(Enum<?> e) {
+        return enumNames((Class<? extends Enum<?>>) e.getClass());
+    }
+
+
 
 }

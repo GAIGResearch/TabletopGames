@@ -17,7 +17,7 @@ public class RHEAPlayer extends AbstractPlayer {
     private static final AbstractPlayer randomPlayer = new RandomPlayer();
     private final Random randomGenerator;
     RHEAParams params;
-    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
+    List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     protected List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
     protected double timePerIteration = 0, timeTaken = 0, initTime = 0;
@@ -69,7 +69,7 @@ public class RHEAPlayer extends AbstractPlayer {
                         .map(m -> Utils.decay(m, params.discountFactor))
                         .collect(Collectors.toList());
             }
-            mastPlayer = new MASTPlayer(new Random(params.getRandomSeed()));
+            mastPlayer = new MASTPlayer(null, 1.0, 0.0, System.currentTimeMillis(), 0.0);
             mastPlayer.setStats(MASTStatistics);
         }
         // Initialise individuals

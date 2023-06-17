@@ -9,7 +9,6 @@ import games.loveletter.cards.LoveLetterCard;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The targeted player discards its current and draws a new one.
@@ -17,7 +16,8 @@ import java.util.Objects;
  */
 public class PrinceAction extends PlayCard implements IPrintable {
 
-    private LoveLetterCard.CardType cardDiscarded;
+    private transient LoveLetterCard.CardType cardDiscarded;
+    // Not part of state; purely used for logging purposes
 
     public PrinceAction(int playerID, int opponentID, boolean canExecuteEffect) {
         super(LoveLetterCard.CardType.Prince, playerID, opponentID, null, null, canExecuteEffect);
@@ -59,14 +59,7 @@ public class PrinceAction extends PlayCard implements IPrintable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PrinceAction)) return false;
-        if (!super.equals(o)) return false;
-        PrinceAction that = (PrinceAction) o;
-        return cardDiscarded == that.cardDiscarded;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), cardDiscarded);
+        return super.equals(o);
     }
 
     @Override

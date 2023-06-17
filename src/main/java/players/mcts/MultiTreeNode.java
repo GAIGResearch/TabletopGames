@@ -42,7 +42,6 @@ public class MultiTreeNode extends SingleTreeNode {
         this.params = player.params;
         this.forwardModel = player.getForwardModel();
         this.heuristic = player.heuristic;
-        this.opponentHeuristic = player.opponentHeuristic;
         this.rnd = rnd;
         this.opponentModels = new AbstractPlayer[state.getNPlayers()];
         mctsPlayer = player;
@@ -57,7 +56,7 @@ public class MultiTreeNode extends SingleTreeNode {
         for (int i = 0; i < state.getNPlayers(); i++)
             MASTStatistics.add(new HashMap<>());
         MASTFunction = (a, s) -> {
-            Map<AbstractAction, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
+            Map<Object, Pair<Integer, Double>> MAST = MASTStatistics.get(decisionPlayer);
             if (MAST.containsKey(a)) {
                 Pair<Integer, Double> stats = MAST.get(a);
                 return stats.b / (stats.a + params.epsilon);

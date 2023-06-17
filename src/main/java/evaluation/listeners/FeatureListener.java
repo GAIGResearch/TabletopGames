@@ -1,7 +1,6 @@
 package evaluation.listeners;
 
-import core.AbstractGameState;
-import core.Game;
+import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
@@ -23,14 +22,18 @@ public abstract class FeatureListener implements IGameListener {
     IStatisticLogger logger;
     Game game;
 
-    protected FeatureListener(IStatisticLogger logger, Event.GameEvent frequency, boolean currentPlayerOnly) {
-        this.logger = logger;
+    protected FeatureListener(Event.GameEvent frequency, boolean currentPlayerOnly) {
         this.currentPlayerOnly = currentPlayerOnly;
         this.frequency = frequency;
     }
 
+    public void setLogger(IStatisticLogger logger) {
+        this.logger = logger;
+    }
+
     @Override
     public void onEvent(Event event) {
+
         if (event.type == frequency && frequency != Event.GameEvent.GAME_OVER) {
             // if GAME_OVER, then we cover this a few lines down
             processState(event.state, event.action);
@@ -41,43 +44,48 @@ public abstract class FeatureListener implements IGameListener {
             processState(event.state, null);
 
             // now we can update the result
-            int totP = event.state.getNPlayers();
-            double[] finalScores = IntStream.range(0, totP).mapToDouble(event.state::getGameScore).toArray();
-            double[] winLoss = Arrays.stream(event.state.getPlayerResults()).mapToDouble(r -> {
-                switch (r) {
-                    case WIN_GAME:
-                        return 1.0;
-                    case DRAW_GAME:
-                        return 0.5;
-                    default:
-                        return 0.0;
-                }
-            }).toArray();
-            double[] ordinal = IntStream.range(0, totP).mapToDouble(event.state::getOrdinalPosition).toArray();
-            double finalRound = event.state.getRoundCounter();
-            for (StateFeatureListener.LocalDataWrapper record : currentData) {
-                // we use a LinkedHashMap so that the order of the keys is preserved, and hence the
-                // data is written to file in a sensible order for human viewing
-                Map<String, Double> data = new LinkedHashMap<>();
-                data.put("GameID", (double) event.state.getGameID());
-                data.put("Player", (double) record.player);
-                data.put("Round", (double) record.gameRound);
-                data.put("Turn", (double) record.gameTurn);
-                data.put("CurrentScore", record.currentScore);
-                for (int i = 0; i < record.array.length; i++) {
-                    data.put(names()[i], record.array[i]);
-                }
-                data.put("PlayerCount", (double) getGame().getPlayers().size());
-                data.put("TotalRounds", finalRound);
-                data.put("Win", winLoss[record.player]);
-                data.put("Ordinal", ordinal[record.player]);
-                data.put("FinalScore", finalScores[record.player]);
-                logger.record(data);
-            }
-            logger.processDataAndNotFinish();
-            currentData = new ArrayList<>();
+            writeDataWithStandardHeaders(event.state);
         }
+    }
 
+
+    protected void writeDataWithStandardHeaders(AbstractGameState state) {
+        int totP = state.getNPlayers();
+        double[] finalScores = IntStream.range(0, totP).mapToDouble(state::getGameScore).toArray();
+        double[] winLoss = Arrays.stream(state.getPlayerResults()).mapToDouble(r -> {
+            switch (r) {
+                case WIN_GAME:
+                    return 1.0;
+                case DRAW_GAME:
+                    return 0.5;
+                default:
+                    return 0.0;
+            }
+        }).toArray();
+        double[] ordinal = IntStream.range(0, totP).mapToDouble(state::getOrdinalPosition).toArray();
+        double finalRound = state.getRoundCounter();
+        for (StateFeatureListener.LocalDataWrapper record : currentData) {
+            // we use a LinkedHashMap so that the order of the keys is preserved, and hence the
+            // data is written to file in a sensible order for human viewing
+            Map<String, Double> data = new LinkedHashMap<>();
+            data.put("GameID", (double) state.getGameID());
+            data.put("Player", (double) record.player);
+            data.put("Round", (double) record.gameRound);
+            data.put("Turn", (double) record.gameTurn);
+            data.put("CurrentScore", record.currentScore);
+            for (int i = 0; i < record.array.length; i++) {
+                data.put(names()[i], record.array[i]);
+            }
+            data.put("PlayerCount", (double) getGame().getPlayers().size());
+            data.put("TotalRounds", finalRound);
+            data.put("ActionScore", record.actionScore);
+            data.put("Win", winLoss[record.player]);
+            data.put("Ordinal", ordinal[record.player]);
+            data.put("FinalScore", finalScores[record.player]);
+            logger.record(data);
+        }
+        logger.processDataAndNotFinish();
+        currentData = new ArrayList<>();
     }
 
     @Override
@@ -99,16 +107,28 @@ public abstract class FeatureListener implements IGameListener {
 
     public abstract double[] extractFeatureVector(AbstractAction action, AbstractGameState state, int perspectivePlayer);
 
+
+    /**
+     * this takes in the raw JSON string of an agent definition, and applies appropriate
+     * string replacements to inject the relevant features to use. The two standards are:
+     * *PHI* for an IStateFeatureVector implementation
+     * *PSI* for an IActionFeatureVector implementation
+     *
+     * @param raw
+     * @return
+     */
+    public abstract String injectAgentAttributes(String raw);
+
     public void processState(AbstractGameState state, AbstractAction action) {
         // we record one state for each player after each relevant event occurs
         if (currentPlayerOnly && state.isNotTerminal()) {
             int p = state.getCurrentPlayer();
             double[] phi = extractFeatureVector(action, state, p);
-            currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state));
+            currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, 0.0));
         } else {
             for (int p = 0; p < state.getNPlayers(); p++) {
                 double[] phi = extractFeatureVector(action, state, p);
-                currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state));
+                currentData.add(new StateFeatureListener.LocalDataWrapper(p, phi, state, 0.0));
             }
         }
     }
@@ -119,14 +139,16 @@ public abstract class FeatureListener implements IGameListener {
         final int gameTurn;
         final int gameRound;
         final double currentScore;
+        final double actionScore;
         final double[] array;
 
-        LocalDataWrapper(int player, double[] contents, AbstractGameState state) {
+        LocalDataWrapper(int player, double[] contents, AbstractGameState state, double actionScore) {
             array = contents;
             this.gameTurn = state.getTurnCounter();
             this.gameRound = state.getRoundCounter();
             this.player = player;
             this.currentScore = state.getGameScore(player);
+            this.actionScore = actionScore;
         }
     }
 }
