@@ -2,14 +2,13 @@ package games.loveletter.actions;
 
 import core.AbstractGameState;
 import core.CoreConstants;
+import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
-import core.components.PartialObservableDeck;
 import games.loveletter.cards.LoveLetterCard;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The Priest allows a player to see another player's hand cards.
@@ -17,7 +16,7 @@ import java.util.Objects;
  */
 public class PriestAction extends PlayCard implements IPrintable {
 
-    private LoveLetterCard.CardType opponentCard;
+    private transient LoveLetterCard.CardType opponentCard;
 
     public PriestAction(int playerID, int opponentID, boolean canExecuteEffect) {
         super(LoveLetterCard.CardType.Priest, playerID, opponentID, null, null, canExecuteEffect);
@@ -57,14 +56,7 @@ public class PriestAction extends PlayCard implements IPrintable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof PriestAction)) return false;
-        if (!super.equals(o)) return false;
-        PriestAction that = (PriestAction) o;
-        return opponentCard == that.opponentCard;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), opponentCard);
+        return super.equals(o);
     }
 
     @Override

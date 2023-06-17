@@ -3,7 +3,6 @@ package evaluation;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import evaluation.listeners.IGameListener;
-import evaluation.loggers.SummaryLogger;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import players.PlayerFactory;

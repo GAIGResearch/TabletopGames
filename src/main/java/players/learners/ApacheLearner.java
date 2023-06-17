@@ -1,7 +1,15 @@
 package players.learners;
 
-import org.apache.spark.sql.*;
-import org.apache.spark.sql.types.*;
+import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.Metadata;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,11 +20,19 @@ public abstract class ApacheLearner extends AbstractLearner {
 
     Dataset<Row> apacheData;
     boolean debug = false;
+
     static SparkSession spark = SparkSession
             .builder()
             .appName("Java Spark SQL basic example")
             //     .config("spark.driver.memory", "1g")
             .master("local").getOrCreate();
+    static {
+        // And the hack to get this to work on Windows (without the Winutils.exe and hadoop.dll nightmare)
+        spark.sparkContext().hadoopConfiguration().setClass("fs.file.impl", BareLocalFileSystem.class, FileSystem.class);
+    }
+    public ApacheLearner(double gamma, Target target) {
+        super(gamma, target);
+    }
 
     @Override
     public void learnFrom(String... files) {

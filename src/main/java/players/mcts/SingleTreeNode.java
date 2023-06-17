@@ -66,7 +66,7 @@ public class SingleTreeNode {
     // could be by any player - each of which would transition to a different Node OpenLoop search. (Closed Loop will
     // only ever have one position in the array populated: and similarly if we are using a SelfOnly tree).
     Map<AbstractAction, SingleTreeNode[]> children = new HashMap<>();
-    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
+    List<Map<Object, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
     ToDoubleBiFunction<AbstractAction, AbstractGameState> advantageFunction = (a, s) -> advantagesOfActionsFromOLS.getOrDefault(a, 0.0);
     ToDoubleBiFunction<AbstractAction, AbstractGameState> MASTFunction;
     // The total value of all trajectories through this node (one element per player)
@@ -89,7 +89,6 @@ public class SingleTreeNode {
         retValue.params = player.params;
         retValue.forwardModel = player.getForwardModel();
         retValue.heuristic = player.heuristic;
-        retValue.opponentHeuristic = player.opponentHeuristic;
         retValue.rnd = rnd;
         retValue.opponentModels = new AbstractPlayer[state.getNPlayers()];
         for (int p = 0; p < retValue.opponentModels.length; p++) {
@@ -103,9 +102,10 @@ public class SingleTreeNode {
         for (int i = 0; i < state.getNPlayers(); i++)
             retValue.MASTStatistics.add(new HashMap<>());
         retValue.MASTFunction = (a, s) -> {
-            Map<AbstractAction, Pair<Integer, Double>> MAST = retValue.MASTStatistics.get(retValue.decisionPlayer);
-            if (MAST.containsKey(a)) {
-                Pair<Integer, Double> stats = MAST.get(a);
+            Map<Object, Pair<Integer, Double>> MAST = retValue.MASTStatistics.get(retValue.decisionPlayer);
+            Object key = retValue.params.MASTActionKey == null ? a : retValue.params.MASTActionKey.key(a);
+            if (MAST.containsKey(key)) {
+                Pair<Integer, Double> stats = MAST.get(key);
                 return stats.b / (stats.a + retValue.params.epsilon);
             }
             return 0.0;
@@ -187,9 +187,15 @@ public class SingleTreeNode {
                 advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
                         .collect(toMap(a -> a, a -> root.MASTFunction.applyAsDouble(a, actionState)));
             } else {
-                if (params.advantageFunction != null)
-                    advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
-                            .collect(toMap(a -> a, a -> params.advantageFunction.evaluateAction(a, actionState)));
+                if (params.advantageFunction != null) {
+                    // advantagesOfActionsFromOLS = actionsFromOpenLoopState.stream()
+                    //        .collect(toMap(a -> a, a -> params.advantageFunction.evaluateAction(a, actionState)));
+                    double[] actionValues = params.advantageFunction.evaluateAllActions(actionsFromOpenLoopState, actionState);
+                    advantagesOfActionsFromOLS = new HashMap<>();
+                    for (int i = 0; i < actionsFromOpenLoopState.size(); i++) {
+                        advantagesOfActionsFromOLS.put(actionsFromOpenLoopState.get(i), actionValues[i]);
+                    }
+                }
             }
             for (AbstractAction action : actionsFromOpenLoopState) {
                 if (!children.containsKey(action)) {
@@ -318,7 +324,7 @@ public class SingleTreeNode {
      * Uses plain java loop instead of streams for performance
      * (this is called often enough it can make a measurable difference)
      */
-    protected int actionVisits(AbstractAction action) {
+    public int actionVisits(AbstractAction action) {
         int retValue = 0;
         SingleTreeNode[] nodes = children.get(action);
         if (nodes != null) {
@@ -340,7 +346,7 @@ public class SingleTreeNode {
      * Uses plain java loop instead of streams for performance
      * (this is called often enough it can make a measurable difference)
      */
-    protected double actionTotValue(AbstractAction action, int playerId) {
+    public double actionTotValue(AbstractAction action, int playerId) {
         double retValue = 0.0;
         SingleTreeNode[] nodes = children.get(action);
         if (nodes != null) {
@@ -925,10 +931,11 @@ public class SingleTreeNode {
         for (Pair<Integer, AbstractAction> pair : rolloutActions) {
             AbstractAction action = pair.b;
             int player = pair.a;
-            Pair<Integer, Double> stats = MASTStatistics.get(player).getOrDefault(action, new Pair<>(0, 0.0));
+            Object actionKey = params.MASTActionKey == null ? action.copy() : params.MASTActionKey.key(action);
+            Pair<Integer, Double> stats = MASTStatistics.get(player).getOrDefault(actionKey, new Pair<>(0, 0.0));
             stats.a++;  // visits
             stats.b += delta[player];   // value
-            MASTStatistics.get(player).put(action.copy(), stats);
+            MASTStatistics.get(player).put(actionKey, stats);
         }
     }
 

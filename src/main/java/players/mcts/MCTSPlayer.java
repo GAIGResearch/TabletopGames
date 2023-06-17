@@ -26,12 +26,10 @@ public class MCTSPlayer extends AbstractPlayer {
     protected MCTSParams params;
     // Heuristics used for the agent
     protected IStateHeuristic heuristic;
-    // TODO: opponentHeuristic Not actually used yet
-    protected IStateHeuristic opponentHeuristic;
     protected AbstractPlayer rolloutStrategy;
     protected boolean debug = false;
     protected SingleTreeNode root;
-    List<Map<AbstractAction, Pair<Integer, Double>>> MASTStats;
+    List<Map<Object, Pair<Integer, Double>>> MASTStats;
     private AbstractPlayer opponentModel;
     private IActionHeuristic advantageFunction;
 
@@ -53,7 +51,6 @@ public class MCTSPlayer extends AbstractPlayer {
         rolloutStrategy = params.getRolloutStrategy();
         opponentModel = params.getOpponentModel();
         heuristic = params.getHeuristic();
-        opponentHeuristic = params.getOpponentHeuristic();
         advantageFunction = params.advantageFunction;
         setName(name);
     }
@@ -94,22 +91,14 @@ public class MCTSPlayer extends AbstractPlayer {
                     .map(m -> Utils.decay(m, params.MASTGamma))
                     .collect(Collectors.toList());
 
-        if (rolloutStrategy instanceof MASTPlayer) {
-            ((MASTPlayer) rolloutStrategy).setStats(root.MASTStatistics);
-            ((MASTPlayer) rolloutStrategy).temperature = params.MASTBoltzmann;
+        if (rolloutStrategy instanceof IMASTUser) {
+            ((IMASTUser) rolloutStrategy).setStats(root.MASTStatistics);
         }
-        if (opponentModel instanceof MASTPlayer) {
-            ((MASTPlayer) opponentModel).setStats(root.MASTStatistics);
-            ((MASTPlayer) opponentModel).temperature = params.MASTBoltzmann;
+        if (opponentModel instanceof IMASTUser) {
+            ((IMASTUser) opponentModel).setStats(root.MASTStatistics);
         }
         root.mctsSearch();
-        if (params.gatherExpertIterationData) {
-            ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer(
-                    params.expertIterationFileStem,
-                    params.EIStateFeatureVector, params.EIActionFeatureVector);
-            eidg.recordData(root, getForwardModel());
-            eidg.close();
-        }
+
         if (advantageFunction instanceof ITreeProcessor)
             ((ITreeProcessor) advantageFunction).process(root);
         if (rolloutStrategy instanceof ITreeProcessor)

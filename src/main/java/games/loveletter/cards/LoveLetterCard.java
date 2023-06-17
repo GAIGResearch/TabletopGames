@@ -1,6 +1,5 @@
 package games.loveletter.cards;
 
-import core.actions.AbstractAction;
 import core.components.Card;
 import games.loveletter.LoveLetterParameters;
 
