@@ -547,4 +547,8 @@ public class RoundRobinTournament extends AbstractTournament {
     public void setListeners(List<IGameListener> listeners) {
         this.listeners = listeners;
     }
+
+    public int getNumberOfAgents() {
+        return agents.size();
+    }
 }

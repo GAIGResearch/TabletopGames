@@ -5,6 +5,7 @@ import org.apache.spark.ml.regression.DecisionTreeRegressionModel;
 import org.apache.spark.ml.regression.DecisionTreeRegressor;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import players.heuristics.DecisionTreeActionHeuristic;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -58,7 +59,7 @@ public class DecisionTreeLearner extends ApacheLearner {
         drModel = dr.fit(training);
 
         if (debug)
-            System.out.println(drModel.toDebugString());
+            System.out.println(DecisionTreeActionHeuristic.prettifyDecisionTreeDescription(drModel, descriptions));
 
     }
 
@@ -67,7 +68,7 @@ public class DecisionTreeLearner extends ApacheLearner {
         try {
             drModel.write().overwrite().save(file);
             BufferedWriter writer = new BufferedWriter(new java.io.FileWriter(file + File.separator + "Description.txt"));
-            writer.write(drModel.toDebugString());
+            writer.write(DecisionTreeActionHeuristic.prettifyDecisionTreeDescription(drModel, descriptions));
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();

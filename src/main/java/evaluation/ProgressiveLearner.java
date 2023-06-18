@@ -13,6 +13,7 @@ import org.apache.commons.io.FileUtils;
 import players.PlayerFactory;
 import players.decorators.EpsilonRandom;
 import players.learners.AbstractLearner;
+import utilities.Pair;
 import utilities.Utils;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static evaluation.tournaments.RoundRobinTournament.TournamentMode.SELF_PLAY;
 import static utilities.Utils.getArg;
@@ -27,7 +29,7 @@ import static utilities.Utils.getArg;
 public class ProgressiveLearner {
 
     GameType gameToPlay;
-    String dataDir, player, defaultHeuristic, heuristic;
+    String dataDir, player, heuristic;
     AbstractParameters params;
     List<AbstractPlayer> agents;
     EpsilonRandom randomExplorer;
@@ -39,11 +41,10 @@ public class ProgressiveLearner {
     AbstractPlayer[] agentsPerGeneration;
     String[] dataFilesByIteration;
     String[] learnedFilesByIteration;
-    IStateFeatureVector phi;
-    Event.GameEvent frequency;
-    boolean currentPlayerOnly;
-    String phiClass, prefix;
-    boolean useOnlyLast;
+    String prefix;
+    int elite;
+    boolean verbose;
+    List<Integer> currentElite = new ArrayList<>();
 
     public ProgressiveLearner(String[] args) {
 
@@ -59,8 +60,9 @@ public class ProgressiveLearner {
         matchups = getArg(args, "matchups", 1);
         finalMatchups = getArg(args, "finalMatchups", 1000);
         iterations = getArg(args, "iterations", 100);
-        useOnlyLast = getArg(args, "useOnlyLast", false);
         maxExplore = getArg(args, "explore", 0.0);
+        verbose = getArg(args, "verbose", false);
+        elite = getArg(args, "elite", iterations + 1);
         agentsPerGeneration = new AbstractPlayer[iterations];
         dataFilesByIteration = new String[iterations];
         String learnerDefinition = getArg(args, "learner", "");
@@ -108,7 +110,8 @@ public class ProgressiveLearner {
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tmatchups=      Defaults to 1. The number of games to play before the learning process is called.\n" +
                             "\titerations=    Stop after this number of learning iterations. Defaults to 100.\n" +
-                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000.\n"
+                            "\tfinalMatchups= The number of games to run in a final tournament between all agents. Defaults to 1000.\n" +
+                            "\telite=         The number of agents to keep in the tournament. Defaults to iterations.\n"
             );
             return;
         }
@@ -180,6 +183,15 @@ public class ProgressiveLearner {
         }
     }
 
+    private List<Integer> topNAgents(RoundRobinTournament tournament, int N) {
+        if (N <= tournament.getNumberOfAgents()) // in this case there is no selection
+            return IntStream.range(0, N).boxed().collect(Collectors.toList());
+        return IntStream.range(0, iter)
+                .mapToObj(i -> new Pair<>(i, tournament.getWinRate(i)))
+                .sorted((p1, p2) -> Double.compare(p2.b, p1.b))  // sort in reverse win rate order
+                .limit(N).map(p -> p.a).collect(Collectors.toList());
+    }
+
     private void loadAgents() {
         agents = new LinkedList<>();
         File playerLoc = new File(player);
@@ -188,13 +200,11 @@ public class ProgressiveLearner {
         if (playerLoc.isDirectory()) {
             throw new IllegalArgumentException("Not yet implemented for a directory of players");
         }
-        if (iter == 0 || useOnlyLast) {
+        if (iter == 0) {
             String fileName = learnedFilesByIteration[iter] == null ? "" : learnedFilesByIteration[iter];
             agents.add(PlayerFactory.createPlayer(player, rawJSON -> injectAgentAttributes(rawJSON, fileName)));
-            if (iter == 0) {
-                basePlayer = agents.get(0);
-                basePlayer.setName("Default Agent");
-            }
+            basePlayer = agents.get(0);
+            basePlayer.setName("Default Agent");
         } else {
             agents.add(basePlayer);
             agents.addAll(Arrays.asList(agentsPerGeneration).subList(0, iter));
@@ -211,7 +221,14 @@ public class ProgressiveLearner {
 
     private void runGamesWithAgents() {
         // Run!
-        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers, SELF_PLAY, matchups,
+        // First we only put the elite agents into the tournament, and track their numbers
+        List<AbstractPlayer> agentsToPlay = agents;
+        if (!currentElite.isEmpty()) {
+            // we need to create a new tournament with only the elite agents
+            agentsToPlay = currentElite.stream().map(i -> agents.get(i)).collect(Collectors.toList());
+        }
+
+        RoundRobinTournament tournament = new RandomRRTournament(agentsToPlay, gameToPlay, nPlayers, SELF_PLAY, matchups,
                 matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);
@@ -223,6 +240,25 @@ public class ProgressiveLearner {
         listener.setLogger(new FileStatsLogger(fileName, "\t", false));
         tournament.setListeners(Collections.singletonList(listener));
         tournament.runTournament();
+
+        if (verbose) {
+            for (int i = 0; i < agentsToPlay.size(); i++) {
+                System.out.printf("Agent: %d %s wins %.2f +/- %.3f%n", i, agentsToPlay.get(i).toString(),
+                        tournament.getWinRate(i), tournament.getWinStdErr(i));
+            }
+        }
+
+        if (elite < agentsToPlay.size() + 1) { // the +1 is the agent that has just been learned
+            // we need to select the elite agents
+            List<Integer> eliteIndices = topNAgents(tournament, elite); // these are the indices within currentElite
+            List<Integer> newElite = eliteIndices.stream().map(i -> currentElite.get(i)).collect(Collectors.toList());
+            newElite.add(iter); // add the new agent
+            Set<Integer> removedAgents = new HashSet<>(eliteIndices);
+            newElite.forEach(removedAgents::remove); // remove the new elite agents from the eliteIndices
+            if (verbose)
+                System.out.println("Removed agents = " + Arrays.toString(removedAgents.toArray()));
+            currentElite = newElite;
+        }
     }
 
     private void learnFromNewData() {

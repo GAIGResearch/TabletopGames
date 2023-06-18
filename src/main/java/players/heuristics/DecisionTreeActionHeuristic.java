@@ -79,4 +79,15 @@ public class DecisionTreeActionHeuristic implements IActionHeuristic {
         return predictions;
     }
 
+    public static String prettifyDecisionTreeDescription(DecisionTreeRegressionModel model, String[] featureNames) {
+        // the debug string of model contains labels of the form 'feature nn', where nn is the index of the feature
+        // We want to replace these with the actual feature names
+        // we go in reverse to stop replacing 'feature 10' with 'nameOfFeature0' etc.
+        String debugString = model.toDebugString();
+        for (int i = featureNames.length-1; i >= 0; i--) {
+            debugString = debugString.replace("feature " + i, featureNames[i]);
+        }
+        return debugString;
+    }
+
 }
