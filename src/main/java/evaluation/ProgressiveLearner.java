@@ -184,11 +184,9 @@ public class ProgressiveLearner {
     }
 
     private List<Integer> topNAgents(RoundRobinTournament tournament, int N) {
-        if (N <= tournament.getNumberOfAgents()) // in this case there is no selection
-            return IntStream.range(0, N).boxed().collect(Collectors.toList());
-        return IntStream.range(0, iter)
-                .mapToObj(i -> new Pair<>(i, tournament.getWinRate(i)))
-                .sorted((p1, p2) -> Double.compare(p2.b, p1.b))  // sort in reverse win rate order
+        return IntStream.range(0, tournament.getNumberOfAgents())
+                .mapToObj(i -> new Pair<>(i, tournament.getOrdinalRank(i)))
+                .sorted(Comparator.comparingDouble(p -> p.b))   // lower rank is better
                 .limit(N).map(p -> p.a).collect(Collectors.toList());
     }
 
@@ -222,11 +220,10 @@ public class ProgressiveLearner {
     private void runGamesWithAgents() {
         // Run!
         // First we only put the elite agents into the tournament, and track their numbers
-        List<AbstractPlayer> agentsToPlay = agents;
-        if (!currentElite.isEmpty()) {
-            // we need to create a new tournament with only the elite agents
-            agentsToPlay = currentElite.stream().map(i -> agents.get(i)).collect(Collectors.toList());
+        if (currentElite.isEmpty()) {
+            currentElite = IntStream.range(0, agents.size()).boxed().collect(Collectors.toList());
         }
+        List<AbstractPlayer> agentsToPlay = currentElite.stream().map(i -> agents.get(i)).collect(Collectors.toList());
 
         RoundRobinTournament tournament = new RandomRRTournament(agentsToPlay, gameToPlay, nPlayers, SELF_PLAY, matchups,
                 matchups, System.currentTimeMillis(), params);
@@ -243,22 +240,30 @@ public class ProgressiveLearner {
 
         if (verbose) {
             for (int i = 0; i < agentsToPlay.size(); i++) {
-                System.out.printf("Agent: %d %s wins %.2f +/- %.3f%n", i, agentsToPlay.get(i).toString(),
-                        tournament.getWinRate(i), tournament.getWinStdErr(i));
+                System.out.printf("Agent: %d %s\twins %.2f +/- %.3f\tOrd %.2f +/- %.2f%n", i, agentsToPlay.get(i).toString(),
+                        tournament.getWinRate(i), tournament.getWinStdErr(i), tournament.getOrdinalRank(i), tournament.getOrdinalStdErr(i));
             }
         }
-
-        if (elite < agentsToPlay.size() + 1) { // the +1 is the agent that has just been learned
+        List<Integer> eliteIndices = topNAgents(tournament, elite); // these are the indices within currentElite
+        List<Integer> newElite = eliteIndices.stream().map(i -> currentElite.get(i))
+                .collect(Collectors.toList());
+        if (verbose) {
+            System.out.println("Current elite = " + Arrays.toString(currentElite.toArray()));
+            System.out.println("Elite indices = " + Arrays.toString(eliteIndices.toArray()));
+            System.out.println("Elite agents  = " + Arrays.toString(newElite.toArray()));
+        }
+        if (elite < agentsToPlay.size()) {
             // we need to select the elite agents
-            List<Integer> eliteIndices = topNAgents(tournament, elite); // these are the indices within currentElite
-            List<Integer> newElite = eliteIndices.stream().map(i -> currentElite.get(i)).collect(Collectors.toList());
-            newElite.add(iter); // add the new agent
-            Set<Integer> removedAgents = new HashSet<>(eliteIndices);
-            newElite.forEach(removedAgents::remove); // remove the new elite agents from the eliteIndices
-            if (verbose)
+            Set<Integer> removedAgents = new HashSet<>(currentElite);
+            for (Integer i : newElite)
+                removedAgents.remove(i); // generate a list of agents that were elite but now aren't
+            if (verbose) {
+                System.out.println("Elite agents = " + Arrays.toString(newElite.toArray()));
                 System.out.println("Removed agents = " + Arrays.toString(removedAgents.toArray()));
+            }
             currentElite = newElite;
         }
+        currentElite.add(iter + 1); // add the new agent
     }
 
     private void learnFromNewData() {
