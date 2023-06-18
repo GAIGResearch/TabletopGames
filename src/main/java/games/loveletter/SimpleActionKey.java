@@ -8,7 +8,8 @@ public class SimpleActionKey implements IActionKey {
     @Override
     public String key(AbstractAction action) {
         if (action instanceof PlayCard) {
-            return ((PlayCard) action).getCardType().name();
+            PlayCard playCard = (PlayCard) action;
+            return playCard.getCardType().name() + "_" + playCard.getTargetCardType();
         }
         return "";
     }
