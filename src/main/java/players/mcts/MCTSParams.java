@@ -207,7 +207,8 @@ public class MCTSParams extends PlayerParameters {
                 setParameterValue("advantageFunction", child);
                 break;
             default:
-                throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
+                setParameterValue(nameSpace, child);
+             //   throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
         }
         return child;
     }
