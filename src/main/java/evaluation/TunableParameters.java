@@ -113,6 +113,9 @@ public abstract class TunableParameters extends AbstractParameters implements IT
             }
             return retValue;
         }
+        if (defaultValue == null) {
+            throw new AssertionError("No default value provided for " + name + " to check JSON validity");
+        }
         if (data.getClass() == defaultValue.getClass())
             return (T) data;
         if (data.getClass() == String.class && defaultValue.getClass().isEnum()) {

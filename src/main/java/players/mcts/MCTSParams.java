@@ -98,7 +98,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
         addTunableParameter("progressiveWideningExponent", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.5));
         addTunableParameter("normaliseRewards", true);
-        addTunableParameter("nodesStoreScoreDelta", false);
+        addTunableParameter("nodesStoreScoreDelta", true);
         addTunableParameter("maintainMasterState", false);
         addTunableParameter("discardStateAfterEachIteration", true);
         addTunableParameter("advantageFunction", IActionHeuristic.nullReturn);
