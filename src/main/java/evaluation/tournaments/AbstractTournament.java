@@ -11,6 +11,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 public abstract class AbstractTournament {
+
+
+    public enum TournamentMode {
+        SELF_PLAY,
+        NO_SELF_PLAY,
+        ONE_VS_ALL
+    }
     // List of players taking part in the tournament
     protected List<? extends AbstractPlayer> agents;
     // Games to play

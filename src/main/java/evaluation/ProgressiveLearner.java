@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static evaluation.tournaments.RoundRobinTournament.TournamentMode.SELF_PLAY;
+import static evaluation.tournaments.AbstractTournament.TournamentMode.SELF_PLAY;
 import static utilities.Utils.getArg;
 
 public class ProgressiveLearner {

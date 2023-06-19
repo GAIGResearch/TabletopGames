@@ -31,7 +31,7 @@ import java.util.function.IntToDoubleFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static evaluation.tournaments.RoundRobinTournament.TournamentMode.NO_SELF_PLAY;
+import static evaluation.tournaments.AbstractTournament.TournamentMode.NO_SELF_PLAY;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static utilities.Utils.getArg;

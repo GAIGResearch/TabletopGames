@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static evaluation.tournaments.RoundRobinTournament.TournamentMode.ONE_VS_ALL;
+import static evaluation.tournaments.AbstractTournament.TournamentMode.ONE_VS_ALL;
 import static utilities.Utils.getArg;
 
 /**
