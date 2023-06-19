@@ -1,111 +1,138 @@
-import os.path
-import random
-import time
+import os, random, time
 import json
-import jpype
-from jpype import java
-import jpype.imports
-from jpype.types import *
-from gym_.core import get_agent_class
-import numpy as np
 
+import jpype
+import jpype.imports
+
+import numpy as np
+from typing import List
+
+def get_agent_class(agent_name):
+    if agent_name == "random":
+        return jpype.JClass("players.simple.RandomPlayer")
+    if agent_name == "mcts":
+        return jpype.JClass("players.mcts.MCTSPlayer")
+    if agent_name == "osla":
+        return jpype.JClass("players.simple.OSLAPlayer")
+    if agent_name == "python":
+        return jpype.JClass("players.python.PythonAgent")
+    return None
+
+def get_mcts_with_params(json_path):
+    PlayerFactory = jpype.JClass("players.PlayerFactory")
+    with open(os.path.expanduser(json_path)) as json_file:
+        json_string = json.load(json_file)
+    json_string = str(json_string).replace('\'', '\"') # JAVA only uses " for string
+    return jpype.JClass("players.mcts.MCTSPlayer")(PlayerFactory.fromJSONString(json_string))
 
 class PyTAG():
-    def __init__(self, agents, seed=42, game="Diamant", jar_path="jars/ModernBoardGame.jar", isNormalized = True):
-        # JPYPE setup
-        self.root_path = os.getcwd()
-        # jpype.addClassPath(os.path.join(self.root_path, jar_path))
-        jpype.addClassPath(jpype.getDefaultJVMPath())
-        jpype.addClassPath(jar_path)
+    def __init__(self, agent_ids: List[str], game_id: str="Diamant", seed: int=0, obs_type:str="vector",  jar_path="jars/ModernBoardGame.jar", isNormalized = True):
+        self._last_obs_vector = None
+        self._last_action_mask = None
+        self._rnd = random.Random(seed)
+        self._obs_type = obs_type
+
+        # start up the JVM
+        tag_jar = os.path.join(os.path.dirname(__file__), 'jars', 'ModernBoardGame.jar')
+        jpype.addClassPath(tag_jar)
         if not jpype.isJVMStarted():
-            # jpype.startJVM(jpype.getDefaultJVMPath(), '-Djava.class.path=' + jar_path)
-            jpype.startJVM(convertStrings=False) #classpath=[jpype.getDefaultJVMPath(), jar_path]) #classpath=os.path.join(self.root_path, jar_path))
+            jpype.startJVM(convertStrings=False)
 
-        print(jpype.java.lang.System.getProperty("java.class.path"))
-
+        # access to the java classes
         GYMEnv = jpype.JClass("core.GYMEnv")
         Utils = jpype.JClass("utilities.Utils")
         GameType = jpype.JClass("games.GameType")
 
-        try:
-            # it does see the package structure as PyCharm makes recommendations in the debugger
-            GYMEnv = jpype.JClass("<core.GYMEnv>")
-            Utils = jpype.JClass("utilities.Utils")
-            GameType = jpype.JClass("games.GameType")
-        except jpype.JException as ex:
-            print("Caught base exception : ", str(ex))
-            print(ex.stacktrace())
-        except Exception as e:
-            print(e)
+        # Initialize the java environment
+        gameType = GameType.valueOf(Utils.getArg([""], "game", game_id))
 
-        null = jpype.java.lang.String @ None
-        null_list = jpype.java.util.List @ None
-        gameType = Utils.getArg([""], "game", game)
-        players = jpype.java.util.ArrayList()
-        # todo throw exception if player is incorrect
-        for agent in agents:
-            agent_class = get_agent_class(agent)
-            players.add(agent_class())
-        self.env = GYMEnv(GameType.valueOf(gameType), null, players, java.lang.Long(seed))
-        # todo get obs and action spaces
-        self.observation_space = 9 #self.env.getObservationSpace()
-        self.action_space = 3 #self.env.getActionSpace()
-        self.gs = None
-        self.prev_reward = 0
+        if agent_ids[0] == "mcts":
+            agents = [get_mcts_with_params(f"~/data/pyTAG/MCTS_for_{game_id}.json")() for agent_id in agent_ids]
+        else:
+            agents = [get_agent_class(agent_id)() for agent_id in agent_ids]
+        self._playerID = agent_ids.index("python") # if multiple python agents this is the first one
 
-    def getObs(self):
-        return self.env.getFeatures()
+        self._java_env = GYMEnv(gameType, None, jpype.java.util.ArrayList(agents), seed, True)
 
-    def getPlayerID(self):
-        return self.env.getPlayerID()
+        # Construct action/observation space
+        self._java_env.reset()
+        action_mask = self._java_env.getActionMask()
+        num_actions = len(action_mask)
+        self.action_space = num_actions
+
+        obs_size = int(self._java_env.getObservationSpace())
+        self.observation_space = (obs_size,)
+        self._action_tree_shape = 1
+
+    def get_action_tree_shape(self):
+        return self._action_tree_shape
 
     def reset(self):
-        self.prev_reward = 0
-        self.gs = self.env.reset()
-        obs = np.asarray(self.env.getObservationVector())
-        return obs
+        self._java_env.reset()
+        self._update_data()
 
-    def getActions(self):
-        return self.env.getActions()
-
-    def getActionMask(self):
-        return self.env.getActionMask()
-
-    def get_observation_as_json(self):
-        java_json = self.env.getObservationJson()
-        return json.loads(str(java_json))
-
-    def has_won(self):
-        if str(self.env.getPlayerResults()[0]) == "WIN":
-            # print(f"Player won with reward {reward}")
-            return True
-        return False
+        return self._last_obs_vector, {"action_tree": self._action_tree_shape, "action_mask": self._last_action_mask,
+                                       "has_won": int(
+                                           str(self._java_env.getPlayerResults()[self._playerID]) == "WIN_GAME")}
 
     def step(self, action):
-        playerID = self.env.getPlayerID()
-        self.env.step(action)
-        obs = np.asarray(self.env.getObservationVector())
-        # reward = self.env.getReward()
-        # reward = self.prev_reward - reward
-        # self.prev_reward = reward
-        # if action == 1:
-        #     reward = self.env.getReward()/17
-        # else:
-        #     reward = 0
-        # reward = obs[1]
-        # todo win/loss reward
-        reward = 0.0
-        if str(self.env.getPlayerResults()[0]) == "WIN":
-            reward = 1.0
-        done = self.env.isDone()
-        return obs, reward, done, {}
+        # Verify
+        if not self.is_valid_action(action):
+            # Execute a random action
+            valid_actions = np.where(self._last_action_mask)[0]
+            action = self._rnd.choice(valid_actions)
+            self._java_env.step(action)
+            reward = -1
+        else:
+            self._java_env.step(action)
+            reward = int(str(self._java_env.getPlayerResults()[self._playerID]) == "WIN_GAME")
+            if str(self._java_env.getPlayerResults()[self._playerID]) == "LOSE_GAME": reward = -1
+
+        self._update_data()
+        done = self._java_env.isDone()
+        info = {"action_mask": self._last_action_mask,
+                "has_won": int(str(self._java_env.getPlayerResults()[self._playerID]) == "WIN_GAME")}
+        return self._last_obs_vector, reward, done, info
 
     def close(self):
         jpype.shutdownJVM()
 
+    def is_valid_action(self, action: int) -> bool:
+        return self._last_action_mask[action]
+
+    def _update_data(self):
+        if self._obs_type == "vector":
+            obs = self._java_env.getObservationVector()
+            self._last_obs_vector = np.array(obs, dtype=np.float32)
+        elif self._obs_type == "json":
+            obs = self._java_env.getObservationJson()
+            self._last_obs_vector = obs
+
+        action_mask = self._java_env.getActionMask()
+        self._last_action_mask = np.array(action_mask, dtype=bool)
+
+    def getVectorObs(self):
+        return self._java_env.getFeatures()
+
+    def getJSONObs(self):
+        return self._java_env.getObservationJson()
+
+    def sample_rnd_action(self):
+        valid_actions = np.where(self._last_action_mask)[0]
+        action = self._rnd.choice(valid_actions)
+        return action
+
+
+    def getPlayerID(self):
+        return self._java_env.getPlayerID()
+
+    def has_won(self):
+        return int(str(self._java_env.getPlayerResults()[self._playerID]) == "WIN_GAME")
+
+
 if __name__ == "__main__":
     EPISODES = 100
-    players = ["python", "random"]
+    players = ["python", "python"]
     env = PyTAG(players)
     done = False
 
@@ -118,12 +145,12 @@ if __name__ == "__main__":
         while not done:
             steps += 1
 
-            rnd_action = random.randint(0, len(env.getActions())-1)
-            # print(f"player {env.env.getPlayerID()} choose action {rnd_action}")
+            rnd_action = env.sample_rnd_action()
+
             obs, reward, done, info = env.step(rnd_action)
             if done:
-                print(f"Game over rewards {reward} in {steps} steps results =  {env.env.getPlayerResults()[0]}")
-                if str(env.env.getPlayerResults()[0]) == "WIN":
+                print(f"Game over rewards {reward} in {steps} steps results =  {env.has_won()}")
+                if env.has_won():
                     wins += 1
                 break
 
