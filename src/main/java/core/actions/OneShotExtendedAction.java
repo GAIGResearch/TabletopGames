@@ -1,6 +1,6 @@
-package core;
+package core.actions;
 
-import core.actions.AbstractAction;
+import core.AbstractGameState;
 import core.interfaces.IExtendedSequence;
 
 import java.util.List;
