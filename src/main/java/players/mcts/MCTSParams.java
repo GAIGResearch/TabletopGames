@@ -197,15 +197,6 @@ public class MCTSParams extends PlayerParameters {
                 heuristic = (IStateHeuristic) child;
                 setParameterValue("heuristic", child);
                 break;
-            case "rolloutPolicyParams":
-                setParameterValue("rolloutPolicyParams", child);
-                break;
-            case "opponentModelParams":
-                setParameterValue("opponentModelParams", child);
-                break;
-            case "advantageFunction":
-                setParameterValue("advantageFunction", child);
-                break;
             default:
                 setParameterValue(nameSpace, child);
              //   throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
