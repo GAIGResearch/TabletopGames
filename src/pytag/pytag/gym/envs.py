@@ -2,7 +2,7 @@ import gymnasium as gym
 import numpy as np
 import jpype
 
-from .core import GymEnv, GameType, Utils, get_agent_class, get_mcts_with_params
+from .core import PyTAG, GameType, Utils, get_agent_class, get_mcts_with_params
 
 from abc import abstractmethod
 from typing import Dict, List, Union
@@ -23,7 +23,7 @@ class TagSingleplayerGym(gym.Env):
             agents = [get_agent_class(agent_id)() for agent_id in agent_ids]
         self._playerID = agent_ids.index("python")
         # ToDo accept the List interface in GymEnv, this allows us to pass agents directly instead of converting it first
-        self._java_env = GymEnv(gameType, None, jpype.java.util.ArrayList(agents), seed, True)
+        self._java_env = PyTAG(gameType, None, jpype.java.util.ArrayList(agents), seed, True)
         # print(f"initial seed = {self._java_env.getSeed()}")
 
         # Construct action/observation space

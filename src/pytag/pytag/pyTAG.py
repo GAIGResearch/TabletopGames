@@ -39,7 +39,7 @@ class PyTAG():
             jpype.startJVM(convertStrings=False)
 
         # access to the java classes
-        GYMEnv = jpype.JClass("core.GYMEnv")
+        PyTAGEnv = jpype.JClass("core.PyTAG")
         Utils = jpype.JClass("utilities.Utils")
         GameType = jpype.JClass("games.GameType")
 
@@ -52,7 +52,7 @@ class PyTAG():
             agents = [get_agent_class(agent_id)() for agent_id in agent_ids]
         self._playerID = agent_ids.index("python") # if multiple python agents this is the first one
 
-        self._java_env = GYMEnv(gameType, None, jpype.java.util.ArrayList(agents), seed, True)
+        self._java_env = PyTAGEnv(gameType, None, jpype.java.util.ArrayList(agents), seed, True)
 
         # Construct action/observation space
         self._java_env.reset()

@@ -8,7 +8,7 @@ jpype.addClassPath(tag_jar)
 if not jpype.isJVMStarted():
     jpype.startJVM(convertStrings=False)
 
-GymEnv = jpype.JClass("core.GYMEnv")
+PyTAG = jpype.JClass("core.PyTAG")
 Utils = jpype.JClass("utilities.Utils")
 GameType = jpype.JClass("games.GameType")
 PlayerFactory = jpype.JClass("players.PlayerFactory")

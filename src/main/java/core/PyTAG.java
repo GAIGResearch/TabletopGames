@@ -18,7 +18,7 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 
-public class GYMEnv {
+public class PyTAG {
     private Game game;
     // root of the action tree
     private ActionTreeNode root;
@@ -38,7 +38,7 @@ public class GYMEnv {
     private long lastSeed;
 
 
-    public GYMEnv(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, boolean isNormalized) throws Exception {
+    public PyTAG(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, boolean isNormalized) throws Exception {
 
         // boolean randomizeParameters, List<IGameListener> listeners
         this.seedRandom = new Random(seed);
@@ -309,7 +309,7 @@ public class GYMEnv {
         players.add(new RandomPlayer(rnd));
 //        players.add(new PythonAgent());
 
-        boolean useGYM = true;
+        boolean usePyTAG = true;
 
         int wins = 0;
         int episodes = 0;
@@ -320,14 +320,14 @@ public class GYMEnv {
 
         try {
             // Initialise the game
-            GYMEnv env = new GYMEnv(GameType.valueOf("SushiGo"), null, players, 343, true);
-            if (!useGYM) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
+            PyTAG env = new PyTAG(GameType.valueOf("SushiGo"), null, players, 343, true);
+            if (!usePyTAG) env.game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Default);
 
             // reset is always required before starting a new episode
             env.reset();
             while (!done){
 
-                if (useGYM){
+                if (usePyTAG){
 
                     // get action mask and sample random action
                     int randomAction = env.sampleRNDAction(env.getActionMask(), rnd);
@@ -367,7 +367,7 @@ public class GYMEnv {
                 }
             }
         } catch (Exception e){
-            System.out.println("Exception in GYMEnv init" + e);
+            System.out.println("Exception during game initialisation" + e);
         }
         System.out.println("Run finished won " + wins + " out of " + episodes);
 

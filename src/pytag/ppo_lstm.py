@@ -5,7 +5,6 @@ import random
 import time
 from distutils.util import strtobool
 
-import gym_
 import gymnasium as gym
 import numpy as np
 import torch
