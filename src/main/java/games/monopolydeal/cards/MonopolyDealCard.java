@@ -2,8 +2,6 @@ package games.monopolydeal.cards;
 
 import core.actions.AbstractAction;
 import core.components.Card;
-import games.dominion.cards.DominionCard;
-import games.dominion.cards.Gardens;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.actions.*;
 
