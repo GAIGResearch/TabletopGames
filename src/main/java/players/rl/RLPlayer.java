@@ -1,109 +1,106 @@
 package players.rl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-
-import core.AbstractGameState;
-import core.AbstractPlayer;
-import core.actions.AbstractAction;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
-class SAR {
-    public final AbstractGameState s;
-    public final AbstractAction a;
-    public final float r;
-
-    SAR(AbstractGameState s, AbstractAction a, float r) {
-        this.s = s;
-        this.a = a;
-        this.r = r;
-    }
-}
+import core.AbstractGameState;
+import core.AbstractPlayer;
+import core.CoreConstants.GameResult;
+import core.actions.AbstractAction;
+import core.interfaces.IStateFeatureVector;
+import players.rl.dataStructures.LinearApproxQWDS;
+import players.rl.dataStructures.QWeightsDataStructure;
+import players.rl.dataStructures.TabularQWDS;
+import players.rl.dataStructures.TurnSAR;
 
 public class RLPlayer extends AbstractPlayer {
 
-    final String weightsPath = "./beta.txt";
+    protected final Random rng;
+    protected final String resourcesPath = "src/main/java/players/rl/resources/";
 
-    RLFeatureVector features;
-    List<SAR> SARs = new ArrayList<SAR>();
+    protected RLTrainer trainer;
 
     final public RLParams params;
+    public IStateFeatureVector features;
 
-    double[] beta = null;
+    final QWeightsDataStructure qWeights;
 
-    public RLPlayer(RLParams params) {
+    public RLPlayer(QWeightsDataStructure qWeights, RLParams params) {
+        this.rng = new Random(params.getRandomSeed());
         this.params = params;
-        this.features = params.features;
+        this.qWeights = qWeights;
     }
 
-    private double solve(double[] featureVector) {
-        // TODO switch between params.solver (Q-Learning, SARSA, etc.)
-        // For now always Q Learning
-        // TODO add default value to params
-        return 0;
+    protected RLPlayer(QWeightsDataStructure qWeights, RLParams params, RLTrainer trainer) {
+        this(qWeights, params);
+        this.trainer = trainer;
     }
 
     @Override
     public void initializePlayer(AbstractGameState gameState) {
-        if (fileExists(weightsPath)) {
-            try {
-                String weights = loadFileContent(weightsPath);
-                beta = Arrays.stream(weights.split("\n")).mapToDouble(Double::parseDouble).toArray();
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (trainer == null) {
+            String readPath = resourcesPath + gameState.getGameType().name() + "/beta.txt";
+            Path path = Paths.get(readPath);
+            if (Files.exists(path) && Files.isRegularFile(path)) {
+                try {
+                    String[] qWeightStrings = Files.readString(path).split("\n");
+                    qWeights.parseQWeightsTextFile(qWeightStrings);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
     @Override
     public void finalizePlayer(AbstractGameState gameState) {
-        String outputText = "";
-        for (double b : beta)
-            outputText += b + "\n";
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(weightsPath))) {
-            writer.write(outputText);
-        } catch (IOException e) {
-            System.out.println("An error occurred while writing to the file: " + e.getMessage());
-        }
+        if (trainer == null)
+            return;
+        float reward = gameState.getPlayerResults()[getPlayerID()] == GameResult.WIN_GAME ? 1 : -1;
+        trainer.addTurn(getPlayerID(), new TurnSAR(gameState, null, null, reward));
+        trainer.train(this);
     }
 
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> possibleActions) {
-        int playerID = gameState.getCurrentPlayer();
+        AbstractAction chosenAction = trainer == null || rng.nextFloat() > params.epsilon
+                ? randArgmaxEvaluation(gameState, possibleActions)
+                : possibleActions.get(rng.nextInt(possibleActions.size()));
 
-        // TODO initialize beta earlier - need number of features
-        if (beta == null)
-            beta = new double[features.featureVector(possibleActions.get(0), gameState, playerID).length];
-
-        // TODO choose action based on epsln-greedy policy
-        AbstractAction chosenAction = possibleActions.stream()
-                .max(Comparator.comparing(a -> solve(features.featureVector(a, gameState, playerID)))).get();
-        SARs.add(new SAR(gameState, chosenAction, 0));
+        // TODO implement better methods for reward (score, etc.?)
+        if (trainer != null)
+            trainer.addTurn(getPlayerID(), new TurnSAR(gameState, chosenAction, possibleActions, 0));
         return chosenAction;
     }
 
+    protected AbstractAction randArgmaxEvaluation(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+        // Choose an action that maximizes the Q-function
+        List<AbstractAction> maximizingActions = new LinkedList<AbstractAction>();
+        double qMax = -Double.MAX_VALUE;
+        for (AbstractAction a : possibleActions) {
+            // Apply the action to the state
+            double q = qWeights.evaluateQ(this, gameState, a);
+            // Keep all actions that maximize Q
+            if (q > qMax) {
+                maximizingActions = new LinkedList<AbstractAction>();
+                maximizingActions.add(a);
+                qMax = q;
+            } else if (q == qMax)
+                maximizingActions.add(a);
+        }
+        // Choose a random action that maximizes Q
+        return maximizingActions.get(rng.nextInt(maximizingActions.size()));
+    }
+
     @Override
-    public AbstractPlayer copy() {
+    public RLPlayer copy() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'copy'");
-    }
-
-    public static boolean fileExists(String filePath) {
-        Path path = Paths.get(filePath);
-        return Files.exists(path) && Files.isRegularFile(path);
-    }
-
-    public static String loadFileContent(String filePath) throws IOException {
-        return Files.readString(Paths.get(filePath));
     }
 
 }

@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
+import core.interfaces.IStateFeatureVector;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
@@ -15,9 +16,10 @@ import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.*;
-import players.rl.TabRLParams;
-import players.rl.TabRLPlayer;
-import players.simple.RandomPlayer;
+import players.rl.RLParams;
+import players.rl.RLPlayer;
+import players.rl.dataStructures.QWeightsDataStructure;
+import players.rl.dataStructures.TabularQWDS;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -220,7 +222,7 @@ public class Game {
                 } else {
                     break;
                 }
-                // System.out.println("Game " + i + "/" + nRepetitions);
+                System.out.println("Game " + i + "/" + nRepetitions);
             }
 
             if (game != null) {
@@ -929,22 +931,23 @@ public class Game {
      */
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "TicTacToe");
-        boolean useGUI = Utils.getArg(args, "gui", false);
-        int turnPause = Utils.getArg(args, "turnPause", 0);
+        boolean useGUI = Utils.getArg(args, "gui", true);
+        int turnPause = Utils.getArg(args, "turnPause", 2500);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        TabRLParams p = new TabRLParams(new TicTacToeStateVector());
-        players.add(new TabRLPlayer(p));
-        players.add(new RandomPlayer());
+        IStateFeatureVector features = new TicTacToeStateVector();
+        RLParams p1 = new RLParams(features);
+        TabularQWDS qwds = new TabularQWDS(features);
+        players.add(new RLPlayer(qwds, p1));
+        players.add(new RLPlayer(qwds, p1));
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
-//        players.add(new RMHCPlayer());
-//        players.add(new HumanGUIPlayer(ac));
+// players.add(new RMHCPlayer());
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 
