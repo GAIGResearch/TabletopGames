@@ -6,9 +6,6 @@ public enum SetType {
     LightBlue(3);
 
     public final int setSize;
-    public final boolean hasWild;
-    public final boolean hasHouse;
-    public final boolean hasHotel;
     public final int[] rent;
 
     SetType(){
@@ -19,9 +16,6 @@ public enum SetType {
     }
     SetType(int setSize, int[] rent){
         this.setSize = setSize;
-        this.hasWild = false;
-        this.hasHouse = false;
-        this.hasHotel = false;
         this.rent = rent;
     }
 }
