@@ -2,18 +2,21 @@ package games.monopolydeal;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import games.GameType;
-import games.dominion.cards.CardType;
-import games.dominion.cards.DominionCard;
+import games.dominion.DominionParameters;
+import games.monopolydeal.cards.Board;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
+import games.monopolydeal.cards.Set;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
+import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+
+import java.util.*;
 
 /**
  * <p>The game state encapsulates all game information. It is a data-only class, with game functionality present
@@ -25,10 +28,13 @@ import java.util.Map;
  */
 public class MonopolyDealGameState extends AbstractGameState {
 
-    Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
-    // Then Decks for each player - Hand, Discard and Draw
+    MonopolyDealParameters params;
+    Random rnd;
+
+    //GameState members
+    //Player Data members
     PartialObservableDeck<MonopolyDealCard>[] playerHands;
-    Deck<MonopolyDealCard>[] playerBanks;
+    Board[] playerBoards;
 
     Deck<MonopolyDealCard> drawPile;
     Deck<MonopolyDealCard> discardPile;
@@ -38,6 +44,25 @@ public class MonopolyDealGameState extends AbstractGameState {
      */
     public MonopolyDealGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);
+
+        rnd = new Random(gameParameters.getRandomSeed());
+        params = (MonopolyDealParameters) gameParameters;
+        this._reset();
+    }
+
+    protected void _reset() {
+        playerHands = new PartialObservableDeck[getNPlayers()];
+        playerBoards = new Board[getNPlayers()];
+
+        drawPile = new Deck<MonopolyDealCard>("Draw Pile",HIDDEN_TO_ALL);
+        discardPile = new Deck<MonopolyDealCard>("Discard Pile",VISIBLE_TO_ALL);
+        for(int i=0;i<getNPlayers();i++){
+            boolean[] handVisibility = new boolean[getNPlayers()];
+            handVisibility[i] = true;
+            playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
+            playerBoards[i] = new Board(i+1);
+
+        }
     }
 
     /**

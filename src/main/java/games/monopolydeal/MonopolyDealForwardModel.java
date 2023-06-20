@@ -4,6 +4,8 @@ import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import games.monopolydeal.actions.MonopolyDealAction;
+import games.monopolydeal.cards.CardType;
+import games.monopolydeal.cards.MonopolyDealCard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +36,22 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
     protected void _setup(AbstractGameState firstState) {
         // TODO: perform initialization of variables and game setup
         MonopolyDealGameState state = (MonopolyDealGameState) firstState;
+        MonopolyDealParameters params = state.params;
 
+        // Add cards to Deck
+        state.drawPile.add(MonopolyDealCard.create(CardType.Money10));
+        for (CardType cT:state.params.cardsIncludedInGame.keySet()) {
+            for(int i =0;i<state.params.cardsIncludedInGame.get(cT);i++){
+                state.drawPile.add(MonopolyDealCard.create(cT));
+            }
+        }
+        //Shuffle Deck
+        state.drawPile.shuffle(state.rnd);
+        //Deal 5 cards to each player
+        for(int i=0;i< state.getNPlayers();i++){
+            for(int j=0;j<state.params.INITIAL_DEAL;j++)
+                state.playerHands[i].add(state.drawPile.draw());
+        }
     }
 
     /**
