@@ -8,10 +8,10 @@ jpype.addClassPath(tag_jar)
 if not jpype.isJVMStarted():
     jpype.startJVM(convertStrings=False)
 
-# GymEnv = jpype.JClass("core.GYMEnv")
-# Utils = jpype.JClass("utilities.Utils")
-# GameType = jpype.JClass("games.GameType")
-# PlayerFactory = jpype.JClass("players.PlayerFactory")
+GymEnv = jpype.JClass("core.GYMEnv")
+Utils = jpype.JClass("utilities.Utils")
+GameType = jpype.JClass("games.GameType")
+PlayerFactory = jpype.JClass("players.PlayerFactory")
 
 def get_agent_class(agent_name):
     if agent_name == "random":

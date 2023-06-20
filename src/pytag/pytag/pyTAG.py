@@ -129,11 +129,48 @@ class PyTAG():
     def has_won(self):
         return int(str(self._java_env.getPlayerResults()[self._playerID]) == "WIN_GAME")
 
+def get_card_id(card):
+    card_types = ["Maki-1", "Maki-2", "Maki-3", "Chopsticks", "Tempura", "Sashimi", "Dumpling", "SquidNigiri", "SalmonNigiri", "EggNigiri", "Wasabi", "Pudding"]
+    card_emb = np.zeros(len(card_types))
+    if card != "EmptyDeck":
+        card_emb[card_types.index(card)] = 1
+    return card_emb
+def process_json_obs(json_obs, normalise=True):
+    # actions represent cardIds from left to right
+    # todo fix observation shape for N-players
+    json_ = json.loads(str(json_obs))
+    player_id = json_["PlayerID"]
+    played_cards = json_["playedCards"].split(",")
+    cards_in_hand = json_["cardsInHand"].split(",")
+    score = json_["playerScore"] / 50 # keep it close to 0-1
+    round = json_["rounds"] / 3 # max 3 rounds
+
+    opp_scores = []
+    opponent_played_cards_ = []
+    for key in json_.keys():
+        if f"opp" in key and "playedCards" in key:
+            opp_played_cards = json_[key].split(",")
+            opponent_played_cards_.append(([get_card_id(card) for card in opp_played_cards]))
+        if f"opp" in key and "score" in key:
+            opp_score = json_[key] / 50
+            opp_scores.append(opp_score)
+
+    played_cards_ = [get_card_id(card) for card in played_cards]
+    cards_in_hand_ = [get_card_id(card)  for card in cards_in_hand]
+
+    score = np.expand_dims(score, 0)
+    round = np.expand_dims(round, 0)
+    played_cards = np.stack(played_cards_).flatten()
+    cards_in_hand = np.stack(cards_in_hand_, 0).flatten()
+    opp_played_cards = np.stack(opponent_played_cards_, 1).flatten()
+    obs = np.concatenate([score, round, played_cards, cards_in_hand, opp_played_cards, opp_scores])
+    return obs
+
 
 if __name__ == "__main__":
     EPISODES = 100
     players = ["python", "python"]
-    env = PyTAG(players)
+    env = PyTAG(players, game_id="SushiGo", obs_type="json")
     done = False
 
     start_time = time.time()
@@ -148,6 +185,8 @@ if __name__ == "__main__":
             rnd_action = env.sample_rnd_action()
 
             obs, reward, done, info = env.step(rnd_action)
+            json_obs  = env.getJSONObs()
+            json_obs = process_json_obs(env.getJSONObs())
             if done:
                 print(f"Game over rewards {reward} in {steps} steps results =  {env.has_won()}")
                 if env.has_won():

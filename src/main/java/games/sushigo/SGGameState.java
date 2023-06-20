@@ -283,17 +283,18 @@ public class SGGameState extends AbstractGameState implements IVectorisable {
         JSONObject json = new JSONObject();
         int playerID = getCurrentPlayer();
         json.put("PlayerID", playerID);
+        json.put("nPlayers", getNPlayers());
+        json.put("rounds", getRoundCounter());
         json.put("cardsInHand", getPlayerHands().get(playerID).toString());
         json.put("playedCards", getPlayedCards().get(playerID).toString());
         json.put("playerScore", playerScore[playerID]);
         for (int i = 0; i < nPlayers; i++){
             if (i != playerID){
-                json.put("P" + i + "playedCards", getPlayedCards().get(i).toString());
-                json.put("P" + i + "score", playerScore[i]);
+                json.put("opp" + i + "playedCards", getPlayedCards().get(i).toString());
+                json.put("opp" + i + "score", playerScore[i]);
 
             }
         }
-        json.put("rounds", getRoundCounter());
         return json.toJSONString();
     }
 

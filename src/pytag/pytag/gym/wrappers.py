@@ -1,4 +1,5 @@
 import time
+import json
 from collections import deque
 from typing import Optional
 
@@ -38,19 +39,60 @@ class StrategoWrapper(gym.ObservationWrapper):
         return observation_
 
 class SushiGoWrapper(gym.ObservationWrapper):
+    # Sushi GO wrapper - an example that extracts the observation from JSON
     def __init__(self, env):
         super().__init__(env)
-        # self.card_list = ["Tempura", "Maki-1"]
-        self.observation_space = gym.spaces.Box(low=0, high=1, shape=(27, 10, 10), dtype=np.float32)
+        self.card_types = ["Maki", "Maki-2", "Maki-3", "Chopsticks", "Tempura", "Sashimi", "Dumpling", "SquidNigiri",
+                      "SalmonNigiri", "EggNigiri", "Wasabi", "Pudding"]
+
+        self.observation_space = gym.spaces.Box(low=0, high=1, shape=[147], dtype=np.float32)
+        self.max_cards_in_hand = 10
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
         return self.observation(obs), info
     def observation(self, observation):
-        # self._java_env.getObservationJson()
-        observation_ = torch.from_numpy(observation.reshape(10, 10)).to(torch.int64)
-        observation_ = torch.nn.functional.one_hot(observation_+13, num_classes=27)
-        observation_ = observation_.permute(2, 0, 1).float()
-        return observation_
+        obs = self.process_json_obs(observation)
+        obs = torch.from_numpy(obs).float()
+        return obs
+
+    def get_card_id(self, card):
+        card_emb = np.zeros(len(self.card_types))
+        if card != "EmptyDeck":
+            card_emb[self.card_types.index(card)] = 1
+        return card_emb
+
+    def process_json_obs(self, json_obs, normalise=True):
+        # actions represent cardIds from left to right
+        # todo fix observation shape for N-players
+        json_ = json.loads(str(json_obs))
+        player_id = json_["PlayerID"]
+        played_cards = json_["playedCards"].split(",")
+        cards_in_hand = json_["cardsInHand"].split(",")
+        score = json_["playerScore"] / 50  # keep it close to 0-1
+        round = json_["rounds"] / 3  # max 3 rounds
+
+        opp_scores = []
+        opponent_played_cards_ = []
+        for key in json_.keys():
+            if f"opp" in key and "playedCards" in key:
+                opp_played_cards = json_[key].split(",")
+                opponent_played_cards_.append(([self.get_card_id(card) for card in opp_played_cards]))
+            if f"opp" in key and "score" in key:
+                opp_score = json_[key] / 50
+                opp_scores.append(opp_score)
+
+        played_cards_ = [self.get_card_id(card) for card in played_cards]
+        cards_in_hand_ = [self.get_card_id(card) for card in cards_in_hand]
+        while len(cards_in_hand_) < self.max_cards_in_hand:
+            cards_in_hand_.append(np.zeros(len(self.card_types)))
+
+        score = np.expand_dims(score, 0)
+        round = np.expand_dims(round, 0)
+        played_cards = np.sum(played_cards_, axis=0)
+        cards_in_hand = np.stack(cards_in_hand_, 0).flatten()
+        opp_played_cards = np.sum(opponent_played_cards_, axis=1).flatten() # todo check on this
+        obs = np.concatenate([score, round, played_cards, cards_in_hand, opp_played_cards, opp_scores])
+        return obs
 
 class RecordEpisodeStatistics(gym.Wrapper):
     # Based on RecordEpisodeStatistics from gymnasium, but it checks whether the player has won the game
