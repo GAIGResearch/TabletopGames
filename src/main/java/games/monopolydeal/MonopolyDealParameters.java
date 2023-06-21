@@ -2,6 +2,8 @@ package games.monopolydeal;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
+import core.Game;
+import games.GameType;
 import games.monopolydeal.cards.CardType;
 import evaluation.TunableParameters;
 
@@ -9,6 +11,7 @@ import evaluation.TunableParameters;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>This class should hold a series of variables representing game parameters (e.g. number of cards dealt to players,
@@ -22,12 +25,12 @@ import java.util.Map;
  */
 public class MonopolyDealParameters extends TunableParameters {
 
-    public int HAND_SIZE = 7;
-    public int DRAWS_WHEN_EMPTY = 5;
-    public int INITIAL_DEAL = 5;
-    public int ACTIONS_PER_TURN = 3;
-    public int DRAWS_PER_TURN = 2;
-    public int SETS_TO_WIN = 3;
+    public int HAND_SIZE;
+    public int DRAWS_WHEN_EMPTY;
+    public int INITIAL_DEAL;
+    public int ACTIONS_PER_TURN;
+    public int DRAWS_PER_TURN;
+    public int SETS_TO_WIN;
     Map<CardType, Integer> cardsIncludedInGame = new HashMap<>();
     public MonopolyDealParameters(long seed) {
         super(seed);
@@ -115,18 +118,27 @@ public class MonopolyDealParameters extends TunableParameters {
 
     @Override
     protected boolean _equals(Object o) {
-        // TODO: compare all variables.
-        return o instanceof MonopolyDealParameters;
+        // compare all variables.
+        if(o instanceof  MonopolyDealParameters){
+            MonopolyDealParameters mDP = (MonopolyDealParameters) o;
+            if(mDP.HAND_SIZE == this.HAND_SIZE && mDP.SETS_TO_WIN == this.SETS_TO_WIN && mDP.DRAWS_PER_TURN == this.DRAWS_PER_TURN &&
+            mDP.ACTIONS_PER_TURN == this.ACTIONS_PER_TURN && mDP.DRAWS_WHEN_EMPTY == this.DRAWS_WHEN_EMPTY && mDP.INITIAL_DEAL == this.INITIAL_DEAL &&
+                    Objects.equals(mDP.cardsIncludedInGame,this.cardsIncludedInGame)){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public int hashCode() {
-        // TODO: include the hashcode of all variables.
-        return super.hashCode();
+        // include the hashcode of all variables.
+        int result = Objects.hash(super.hashCode(), HAND_SIZE,SETS_TO_WIN,DRAWS_PER_TURN,ACTIONS_PER_TURN,DRAWS_WHEN_EMPTY,INITIAL_DEAL,cardsIncludedInGame);
+        return result;
     }
 
     @Override
     public Object instantiate() {
-        return null;
+        return new Game(GameType.MonopolyDeal,new MonopolyDealForwardModel(),new MonopolyDealGameState(this,GameType.MonopolyDeal.getMinPlayers()));
     }
 }

@@ -34,7 +34,7 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
      */
     @Override
     protected void _setup(AbstractGameState firstState) {
-        // TODO: perform initialization of variables and game setup
+        // initialization of variables and game setup
         MonopolyDealGameState state = (MonopolyDealGameState) firstState;
         MonopolyDealParameters params = state.params;
 
@@ -48,8 +48,8 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
         //Shuffle Deck
         state.drawPile.shuffle(state.rnd);
         //Deal 5 cards to each player
-        for(int i=0;i< state.getNPlayers();i++){
-            for(int j=0;j<state.params.INITIAL_DEAL;j++)
+        for(int i=0;i< state.getNPlayers();i++) {
+            for (int j = 0; j < state.params.INITIAL_DEAL; j++)
                 state.playerHands[i].add(state.drawPile.draw());
         }
     }

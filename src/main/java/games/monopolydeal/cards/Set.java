@@ -2,10 +2,10 @@ package games.monopolydeal.cards;
 
 import core.CoreConstants;
 import core.components.Deck;
+import org.apache.poi.ss.formula.atp.Switch;
 
 public class Set extends Deck<MonopolyDealCard> {
     SetType type;
-
     boolean isComplete;
     boolean hasWild; // Used to check for modifyBoard
     // Used to check rent
@@ -19,6 +19,19 @@ public class Set extends Deck<MonopolyDealCard> {
         hasHotel = false;
     }
 
+    // Copy constructor???
+    public Set copy(){
+        Set retValue = (Set) super.copy();
+
+        retValue.type = type;
+        retValue.isComplete = isComplete;
+        retValue.hasHouse = hasHouse;
+        retValue.hasHotel = hasHotel;
+        retValue.hasWild = hasWild;
+
+        return retValue;
+    }
+
     // Note to self
     // Add house/hotel only if complete set
     // modify properties only if no house/hotel present
@@ -28,6 +41,8 @@ public class Set extends Deck<MonopolyDealCard> {
         if(c.type == CardType.House ) hasHouse = true;
         else if (c.type == CardType.Hotel ) hasHotel = true;
         else if(getSize()+1 == type.setSize) isComplete = true;
+
+        if(c.isPropertyWildCard())hasWild = true;
         return super.add(c);
     }
     @Override
@@ -35,6 +50,13 @@ public class Set extends Deck<MonopolyDealCard> {
         if(c.type == CardType.House ) hasHouse = false;
         else if (c.type == CardType.Hotel ) hasHotel = false;
         else if(getSize() < type.setSize) isComplete = false;
+        if(c.isPropertyWildCard()){
+            int wildCount = 0;
+            for (MonopolyDealCard dealCard: this.components) {
+                if(dealCard.isPropertyWildCard())wildCount++;
+            }
+            if(wildCount==1)hasWild = false;
+        }
         return super.remove(c);
     }
 }

@@ -34,7 +34,9 @@ public class MonopolyDealGameState extends AbstractGameState {
     //GameState members
     //Player Data members
     PartialObservableDeck<MonopolyDealCard>[] playerHands;
-    Board[] playerBoards;
+    //Board[] playerBoards;
+    Deck<MonopolyDealCard>[] playerBanks;
+    List<Set>[] playerPropertySets;
 
     Deck<MonopolyDealCard> drawPile;
     Deck<MonopolyDealCard> discardPile;
@@ -52,15 +54,19 @@ public class MonopolyDealGameState extends AbstractGameState {
 
     protected void _reset() {
         playerHands = new PartialObservableDeck[getNPlayers()];
-        playerBoards = new Board[getNPlayers()];
+        playerBanks = new Deck[getNPlayers()];
+        playerPropertySets = new List[getNPlayers()];
+        //playerBoards = new Board[getNPlayers()];
 
-        drawPile = new Deck<MonopolyDealCard>("Draw Pile",HIDDEN_TO_ALL);
-        discardPile = new Deck<MonopolyDealCard>("Discard Pile",VISIBLE_TO_ALL);
+        drawPile = new Deck<>("Draw Pile",HIDDEN_TO_ALL);
+        discardPile = new Deck<>("Discard Pile",VISIBLE_TO_ALL);
         for(int i=0;i<getNPlayers();i++){
             boolean[] handVisibility = new boolean[getNPlayers()];
             handVisibility[i] = true;
             playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
-            playerBoards[i] = new Board(i+1);
+            playerBanks[i] = new Deck<>("Bank of Player"+i+1,VISIBLE_TO_ALL);
+            playerPropertySets[i] = new ArrayList<>();
+            //playerBoards[i] = new Board(i+1);
 
         }
     }
@@ -81,8 +87,16 @@ public class MonopolyDealGameState extends AbstractGameState {
      */
     @Override
     protected List<Component> _getAllComponents() {
-        // TODO: add all components to the list
-        return new ArrayList<>();
+        // add all components to the list
+        List<Component> components = new ArrayList<>();
+        components.addAll(Arrays.asList(playerHands));
+        components.addAll(Arrays.asList(playerBanks));
+        for(int i=0;i<getNPlayers();i++){
+            components.addAll(playerPropertySets[i]);
+        }
+        components.add(discardPile);
+        components.add(drawPile);
+        return components;
     }
 
     /**
@@ -99,9 +113,31 @@ public class MonopolyDealGameState extends AbstractGameState {
      */
     @Override
     protected MonopolyDealGameState _copy(int playerId) {
-        MonopolyDealGameState copy = new MonopolyDealGameState(gameParameters, getNPlayers());
+        MonopolyDealGameState retValue = new MonopolyDealGameState(gameParameters, getNPlayers());
         // TODO: deep copy all variables to the new game state.
-        return copy;
+
+        // Hidden values
+        for (int p = 0; p < getNPlayers(); p++) {
+            if (playerId == -1) {
+                retValue.playerHands[p] = playerHands[p].copy();
+                
+            } else if (playerId == p) {
+
+            } else{
+
+            }
+
+        }
+        // Completely visible values
+        for(int i=0;i<getNPlayers();i++){
+            retValue.playerBanks[i] = playerBanks[i].copy();
+            for (Set propertySet:playerPropertySets[i]) {
+                retValue.playerPropertySets[i].add(propertySet.copy());
+            }
+        }
+        retValue.discardPile = discardPile.copy();
+
+        return retValue;
     }
 
     /**
