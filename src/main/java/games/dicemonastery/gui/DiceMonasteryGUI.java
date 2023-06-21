@@ -16,6 +16,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -36,9 +37,8 @@ public class DiceMonasteryGUI extends AbstractGUIManager {
     List<PlayerBoard> playerBoards;
     MainBoard mainBoard;
 
-    public DiceMonasteryGUI(GamePanel p, Game game, ActionController ac, int humanID) {
+    public DiceMonasteryGUI(GamePanel p, Game game, ActionController ac, Set<Integer> humanID) {
         super(p, game, ac, humanID);
-        this.humanId = humanID;
 
         if (game != null && game.getGameState() != null) {
             AbstractGameState gameState = game.getGameState();

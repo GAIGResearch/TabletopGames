@@ -101,7 +101,7 @@ public class SummaryLogger implements IStatisticLogger {
     @Override
     public void processDataAndFinish() {
         if (printToConsole && data.size() > 0) {
-            System.out.println();
+//            System.out.println();
             System.out.println(this);
         }
 
@@ -183,32 +183,71 @@ public class SummaryLogger implements IStatisticLogger {
         // TODO: assumes format "METRIC (PARAM1_VALUE, PARAM2_VALUE ...):EVENT"
         Map<String, Map<String, Map<String, TAGStatSummary>>> groupedData = new HashMap<>();
         int keyMaxLength = 0;
+        int expectedColonChunks = 3;
         for (String key: data.keySet()) {
             String[] split = key.split(":");
             String group = "Other";
-            if (split.length == 2) group = split[1];
-            if (!groupedData.containsKey(group)) groupedData.put(group, new HashMap<>());
+            if (split.length == expectedColonChunks)
+                group = split[expectedColonChunks-1];
+            else 
+                group = split[split.length-1];
+            if (!groupedData.containsKey(group))
+                groupedData.put(group, new HashMap<>());
             Map<String, Map<String, TAGStatSummary>> eventGroupData = groupedData.get(group);
 
             // Group parameterized data further by metric
             split[0] = split[0].replace(")(", " > ");
             String[] split2 = split[0].split("\\(");
             String metricName = split2[0];
+            if(split.length > 2)
+                 metricName += ":" + split[1];
+
             String params = "";
-            if (split2.length == 2) params = split2[1].replace(")", "");
-            if (!eventGroupData.containsKey(metricName)) eventGroupData.put(metricName, new HashMap<>());
+            if (split2.length == 2)
+                params = split2[1].replace(")", "");
+            if (!eventGroupData.containsKey(metricName))
+                eventGroupData.put(metricName, new HashMap<>());
             eventGroupData.get(metricName).put(params, data.get(key));
 
-            if (params.length() > keyMaxLength) keyMaxLength = params.length();
-            if (metricName.length() > keyMaxLength) keyMaxLength = metricName.length();
+            if (params.length() > keyMaxLength)
+                keyMaxLength = params.length();
+            if (metricName.length() > keyMaxLength)
+                keyMaxLength = metricName.length();
         }
 
         for (String event: groupedData.keySet()) {
-            Map<String, Map<String, TAGStatSummary>> eventData = groupedData.get(event);
-            sb.append("\n").append("Event: ").append(event).append("\n");
 
+            // To sort the way in which we print the metrics.
+            PriorityQueue<Pair<String, Map<String, TAGStatSummary>>> printInOrder = new PriorityQueue<>(new Comparator<Pair<String, Map<String, TAGStatSummary>>>() {
+                @Override
+                public int compare(Pair<String, Map<String, TAGStatSummary>> o1, Pair<String, Map<String, TAGStatSummary>> o2) {
+                    return Integer.compare(o1.b.size(), o2.b.size());
+                }
+            });
+
+            //Sort prints so metrics that have more than one value recorded are printed together (and at the end) for this event.
+            Map<String, Map<String, TAGStatSummary>> eventData = groupedData.get(event);
             for (String metric: eventData.keySet()) {
                 Map<String, TAGStatSummary> d = eventData.get(metric);
+                printInOrder.add(new Pair<>(metric, d));
+            }
+
+            //Prints event header
+            String eventHeader = "Event: " + event;
+            int nEH = eventHeader.length();
+            sb.append("\n");
+            for(int i = 0; i < nEH; i++) sb.append("#");
+            sb.append("\n").append(eventHeader).append("\n");
+            for(int i = 0; i < nEH; i++) sb.append("#");
+            sb.append("\n");
+
+            // Print each metric
+            while(!printInOrder.isEmpty())
+            {
+                Pair<String, Map<String, TAGStatSummary>> data = printInOrder.poll();
+                Map<String, TAGStatSummary> d = data.b;
+                String metric = data.a;
+
                 if (d.size() > 1) {
                     sb.append("\n");
                 }
@@ -224,7 +263,7 @@ public class SummaryLogger implements IStatisticLogger {
                         // Print numeric data, stat summaries
                         TAGNumericStatSummary stats = (TAGNumericStatSummary) summary;
                         if (d.size() > 1) {
-                            sb.append(String.format("%-" + keyMaxLength + "s", key)).append("\t");
+                            sb.append(String.format(" * %-" + keyMaxLength + "s", key)).append("\t");
                         }
                         if (stats.n() == 1) {
                             sb.append(String.format("\tValue: %8.3g\n", stats.mean()));
@@ -265,7 +304,9 @@ public class SummaryLogger implements IStatisticLogger {
                         sb.append("\n").append(stats.stringSummary());
                     }
                 }
+
             }
+
         }
 
         return sb.toString();

@@ -2,6 +2,7 @@ package evaluation.metrics.tablessaw;
 
 import core.Game;
 import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
 import evaluation.metrics.IDataLogger;
 import evaluation.metrics.IDataProcessor;
 import tech.tablesaw.api.*;
@@ -117,21 +118,33 @@ public class DataTableSaw implements IDataLogger {
     /**
      * Puts together several compatible metrics into a single table.
      * @param metricGroup - List of metrics to combine
-     * @param dataTableName - Name of the table to create
+     * @param event - Event to filter by
      * @param indexingColumnName - Name of the column to use for indexing.
      *                           Assumes a single row exists for each unique value in this column per game.
      *                           e.g. ROUND_OVER metrics can be grouped by specifying "Round" as the indexing column.
      */
-    public DataTableSaw(List<AbstractMetric> metricGroup, String dataTableName, String indexingColumnName) {
-        this.data = Table.create(dataTableName);
+    public DataTableSaw(List<AbstractMetric> metricGroup, Event.GameEvent event, String indexingColumnName) {
+        this.data = Table.create(event.name());
 
         // If this is true, then we don't need to worry about indexing
         boolean indexingColumnIsGameID = indexingColumnName.equals("GameID");
 
+        // Find only the rows which were recorded for the given event
+        // TODO: Apply same filtering for all other data processing, separate table into different events before reporting
+        Map<AbstractMetric, Table> metricTables = new HashMap<>();
+        for (AbstractMetric m : metricGroup) {
+            Table metricData = ((DataTableSaw)m.getDataLogger()).data;
+            if (m.filterByEventTypeWhenReporting()) {
+                metricTables.put(m, metricData.where(metricData.stringColumn("Event").isEqualTo(event.name())));
+            } else {
+                metricTables.put(m, metricData);
+            }
+        }
+
         // Find and sort ascending all unique values in the column to use for indexing in all the metrics
         List<Integer> gameIDs = new ArrayList<>();
-        for (AbstractMetric m : metricGroup) {
-            StringColumn c = ((DataTableSaw)m.getDataLogger()).data.stringColumn("GameID");
+        for (Table metricData: metricTables.values()) {
+            StringColumn c = metricData.stringColumn("GameID");
             for (String s : c.asList()) {
                 int id = Integer.parseInt(s);
                 if (!gameIDs.contains(id)) {
@@ -145,8 +158,9 @@ public class DataTableSaw implements IDataLogger {
         int maxIndex = 0;
         Map<String, Set<String>> columnNames = new HashMap<>();
         Set<String> allColumnNames = new HashSet<>();  // Including only the default at start, the others separate for ordering
-        for (AbstractMetric m : metricGroup) {
-            Table metricData = ((DataTableSaw)m.getDataLogger()).data;
+        for (Map.Entry<AbstractMetric, Table> metricTableEntry : metricTables.entrySet()) {
+            Table metricData = metricTableEntry.getValue();
+            AbstractMetric m = metricTableEntry.getKey();
             columnNames.put(m.getName(), m.getColumnNames());
             allColumnNames.addAll(m.getDefaultColumns().keySet());
 
@@ -190,16 +204,16 @@ public class DataTableSaw implements IDataLogger {
         for (int id: gameIDs) {
             if (!indexingColumnIsGameID) {
                 for (int idx = 0; idx < maxIndex; idx++) {
-                    filterAndRecordData(metricGroup, allColumnNames, id, indexingColumnName, idx);
+                    filterAndRecordData(metricTables, allColumnNames, id, indexingColumnName, idx);
                 }
             } else {
-                filterAndRecordData(metricGroup, allColumnNames, id, null, -1);
+                filterAndRecordData(metricTables, allColumnNames, id, null, -1);
             }
         }
     }
 
     /**
-     * Helper function for {@link #DataTableSaw(List, String, String)}.
+     * Helper function for {@link #DataTableSaw(List, Event.GameEvent, String)}.
      * Filters the data by game ID and index, then adds the data to the table.
      * @param metricGroup - List of metrics to add data from in the table
      * @param allColumnNames - All column names in the table
@@ -207,7 +221,7 @@ public class DataTableSaw implements IDataLogger {
      * @param indexingColumnName - Name of the column to use for indexing. If null, then we don't filter by this column
      * @param idx - Index to filter by. If -1, then we don't filter by this index
      */
-    private void filterAndRecordData(List<AbstractMetric> metricGroup, Set<String> allColumnNames, int gameID, String indexingColumnName, int idx) {
+    private void filterAndRecordData(Map<AbstractMetric, Table> metricGroup, Set<String> allColumnNames, int gameID, String indexingColumnName, int idx) {
         Map<String, String> rowData = new HashMap<>();
         for (String colName : allColumnNames) {
             rowData.put(colName, null);
@@ -215,8 +229,9 @@ public class DataTableSaw implements IDataLogger {
         boolean record = false;
 
         // Find the row matching game ID and index in all the metric tables. If we don't find it, we add missing for the columns that metric is responsible for
-        for (AbstractMetric m : metricGroup) {
-            Table metricData = ((DataTableSaw) m.getDataLogger()).data;
+        for (Map.Entry<AbstractMetric, Table> metricTableEntry : metricGroup.entrySet()) {
+            AbstractMetric m = metricTableEntry.getKey();
+            Table metricData = metricTableEntry.getValue();
             // Filter the table first by game ID
             Table filteredData = metricData.where(metricData.stringColumn("GameID").isEqualTo(String.valueOf(gameID)));
             // Then find the indexing column, if needed

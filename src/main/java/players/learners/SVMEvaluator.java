@@ -1,12 +1,16 @@
 package players.learners;
 
-import core.*;
-import core.interfaces.*;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.Game;
+import core.interfaces.IStateFeatureVector;
+import core.interfaces.ITunableParameters;
 import evaluation.ITPSearchSpace;
 import evaluation.ParameterSearch;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
 import games.GameType;
+import libsvm.svm_parameter;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
@@ -14,15 +18,16 @@ import players.PlayerFactory;
 import players.heuristics.LeaderHeuristic;
 import players.heuristics.SVMStateHeuristic;
 import players.mcts.MCTSPlayer;
+import utilities.Pair;
+import utilities.Utils;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
-
-import libsvm.*;
-import utilities.Pair;
-import utilities.Utils;
 
 import static java.util.stream.Collectors.joining;
 import static utilities.Utils.getArg;
@@ -237,11 +242,11 @@ public class SVMEvaluator implements SolutionEvaluator {
         // This loops once for each complete repetition of NTBEA specified.
         // runNTBEA runs a complete set of trials, and spits out the mean and std error on the mean of the best sampled result
         // These mean statistics are calculated from the evaluation trials that are run after NTBEA is complete. (evalGames)
-        Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
+        Pair<Pair<Double, Double>, int[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new int[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
             landscapeModel.reset();
             Pair<Double, Double> r = ParameterSearch.runNTBEA(evaluator, null, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
-            Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
+            Pair<Pair<Double, Double>, int[]> retValue = new Pair<>(r, Arrays.stream(landscapeModel.getBestOfSampled()).mapToInt(i -> (int) i).toArray());
             ParameterSearch.printDetailsOfRun(retValue, searchSpace, logfile, false, null);
             if (retValue.a.a > bestResult.a.a)
                 bestResult = retValue;

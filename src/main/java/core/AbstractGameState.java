@@ -14,7 +14,6 @@ import java.util.function.*;
 
 import static core.CoreConstants.GameResult.GAME_ONGOING;
 import static java.util.stream.Collectors.toList;
-import static core.CoreConstants.GameResult.*;
 
 /**
  * Contains all game state information.
@@ -382,19 +381,6 @@ public abstract class AbstractGameState {
      * @return - double, score of current state
      */
     public abstract double getGameScore(int playerId);
-
-    /**
-     * This is an optional implementation and is used in getOrdinalPosition() to break any ties based on pure game score
-     * Implementing this may be a simpler approach in many cases than re-implementing getOrdinalPosition()
-     * For example in ColtExpress, the tie break is the number of bullet cards in hand - and this only affects the outcome
-     * if the score is a tie.
-     *
-     * @param playerId - the player observed
-     * @return null by default - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score
-     */
-    public double getTiebreak(int playerId) {
-        return getTiebreak(playerId, 1);
-    }
 
     /**
      * @param playerId - the player observed

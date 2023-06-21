@@ -26,11 +26,11 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
         if (currentState.actionsInProgress.size() > 0) {
             IExtendedSequence topOfStack = currentState.actionsInProgress.peek();
             if (!topOfStack.equals(action)) {
-                topOfStack.registerActionTaken(currentState, action);
+                topOfStack._afterAction(currentState, action);
             } else {
                 if (currentState.actionsInProgress.size() > 1) {
                     IExtendedSequence nextOnStack = currentState.actionsInProgress.get(currentState.actionsInProgress.size() - 2);
-                    nextOnStack.registerActionTaken(currentState, action);
+                    nextOnStack._afterAction(currentState, action);
                 }
             }
         }

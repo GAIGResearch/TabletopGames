@@ -44,7 +44,7 @@ public class Bureaucrat extends DominionAttackAction {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         if ((action instanceof MoveCard && ((MoveCard) action).playerFrom == currentTarget) ||
                 (action instanceof RevealHand && ((RevealHand) action).player == currentTarget)) {
             victimHasResponded = true;

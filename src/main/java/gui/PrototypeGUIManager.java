@@ -14,6 +14,7 @@ import players.human.HumanGUIPlayer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Set;
 
 public class PrototypeGUIManager extends AbstractGUIManager {
     JComponent view;
@@ -22,11 +23,11 @@ public class PrototypeGUIManager extends AbstractGUIManager {
     protected ComponentView[] componentViews;
     protected int maxComponentsInDeck = 100;
 
-    public PrototypeGUIManager(GamePanel parent, GameType gameType, Game game, ActionController ac, int humanId, int maxActionSpace) {
+    public PrototypeGUIManager(GamePanel parent, GameType gameType, Game game, ActionController ac, Set<Integer> humanId, int maxActionSpace) {
         this(parent, gameType, game, ac, humanId, maxActionSpace, defaultDisplayWidth, defaultDisplayHeight);
     }
 
-    public PrototypeGUIManager(GamePanel parent, GameType gameType, Game game, ActionController ac, int humanId, int maxActionSpace,
+    public PrototypeGUIManager(GamePanel parent, GameType gameType, Game game, ActionController ac, Set<Integer> humanId, int maxActionSpace,
                                int displayWidth, int displayHeight) {
         super(parent, game, ac, humanId);
         this.width = displayWidth;

@@ -44,7 +44,7 @@ public class TestRoundCardVisibilityAndShuffling {
     static class TestRoundEndListener extends MetricsGameListener {
 
         public TestRoundEndListener(IStatisticLogger logger, AbstractMetric[] metrics) {
-            super(logger, metrics);
+            super(metrics);
         }
 
 

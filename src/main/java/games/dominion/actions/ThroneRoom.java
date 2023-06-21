@@ -58,7 +58,7 @@ public class ThroneRoom extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         DominionGameState dgs = (DominionGameState) state;
         DominionAction da = (DominionAction) action;
         if (enthronedCard == null) {

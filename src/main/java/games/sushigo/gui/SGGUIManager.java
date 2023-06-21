@@ -15,6 +15,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.Set;
 
 public class SGGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -33,7 +34,7 @@ public class SGGUIManager extends AbstractGUIManager {
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
     Border[] playerViewBorders;
 
-    public SGGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+    public SGGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
         super(parent, game, ac, humanID);
 
         if (game != null) {
@@ -132,7 +133,7 @@ public class SGGUIManager extends AbstractGUIManager {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update(parsedGameState);
                 if (i == gameState.getCurrentPlayer()
-                        || i == humanPlayerId) {
+                        || humanPlayerId.contains(i)) {
                     playerHands[i].playerHandView.setFront(true);
                     playerHands[i].setFocusable(true);
                 } else {
