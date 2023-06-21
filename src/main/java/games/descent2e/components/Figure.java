@@ -182,6 +182,10 @@ public class Figure extends Token {
     }
 
     public boolean hasAttributeTest(DescentTypes.DescentCondition attributeTest) {
+        if (attributeTests == null) {
+            return false;
+        }
+
         return attributeTests.contains(attributeTest);
     }
 

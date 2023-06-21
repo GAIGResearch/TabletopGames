@@ -5,6 +5,10 @@ import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.components.Figure;
 
+// TODO REMOVE WHEN NOT DEBUGGING
+import games.descent2e.components.Hero;
+import java.util.Random;
+
 public class EndTurn extends DescentAction{
     public EndTurn() {
         super(Triggers.ACTION_POINT_SPEND);
@@ -26,8 +30,52 @@ public class EndTurn extends DescentAction{
         // If we are Immobilized, remove that condition now
         if(f.hasCondition(DescentTypes.DescentCondition.Immobilize)) { f.removeCondition(DescentTypes.DescentCondition.Immobilize); }
 
+        // TODO REMOVE WHEN NOT DEBUGGING
+        /*if (f instanceof Hero)
+        {
+            debug_RandomStatus(f);
+        }*/
+
         gs.getTurnOrder().endPlayerTurn(gs);
         return true;
+    }
+
+    public void debug_RandomStatus(Figure f)
+    {
+        Random random = new Random();
+        int randInt = random.nextInt(4);
+
+        switch(randInt)
+        {
+            case 0:
+                if(!f.hasCondition(DescentTypes.DescentCondition.Disease))
+                {
+                    f.addCondition(DescentTypes.DescentCondition.Disease);
+                    System.out.println("Added Diseased");
+                    break;
+                }
+            case 1:
+                if(!f.hasCondition(DescentTypes.DescentCondition.Poison))
+                {
+                    f.addCondition(DescentTypes.DescentCondition.Poison);
+                    System.out.println("Added Poisoned");
+                    break;
+                }
+            case 2:
+                if(!f.hasCondition(DescentTypes.DescentCondition.Stun))
+                {
+                    f.addCondition(DescentTypes.DescentCondition.Stun);
+                    System.out.println("Added Stun");
+                    break;
+                }
+            case 3:
+                if(!f.hasCondition(DescentTypes.DescentCondition.Immobilize))
+                {
+                    f.addCondition(DescentTypes.DescentCondition.Immobilize);
+                    System.out.println("Added Immobilized");
+                    break;
+                }
+        }
     }
 
     @Override

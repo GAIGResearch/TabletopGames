@@ -27,6 +27,6 @@ public class AttributeTest extends AbstractAction {
 
     @Override
     public String getString(AbstractGameState gameState) {
-        return "Test attribute";
+        return "Attribute Test";
     }
 }
