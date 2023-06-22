@@ -11,6 +11,7 @@
     "attackType": ["String", "ranged"],
     "act1": [
       {
+        "instance": ["String", "Minion"],
         "color": ["Color", "white"],
         "MovePoints": ["Integer", 5],
         "Health": ["Integer", 2],
@@ -19,6 +20,7 @@
         "passive": ["String[]", ["Scamper", "Cowardly", "Surge: +1 Range", "Surge: +1 Heart"]]
       },
       {
+        "instance": ["String", "Master"],
         "color": ["Color", "red"],
         "MovePoints": ["Integer", 5],
         "Health": ["Integer", 4],
@@ -29,6 +31,7 @@
     ],
     "act2": [
       {
+        "instance": ["String", "Minion"],
         "color": ["Color", "white"],
         "MovePoints": ["Integer", 5],
         "Health": ["Integer", 4],
@@ -37,6 +40,7 @@
         "passive": ["String[]", ["Scamper", "Cowardly", "Surge: +2 Range", "Surge: +2 Heart"]]
       },
       {
+        "instance": ["String", "Master"],
         "color": ["Color", "red"],
         "MovePoints": ["Integer", 5],
         "Health": ["Integer", 6],
@@ -57,6 +61,7 @@
     "attackType": ["String", "melee"],
     "act1": [
       {
+        "instance": ["String", "Minion"],
         "color": ["Color", "white"],
         "MovePoints": ["Integer", 4],
         "Health": ["Integer", 4],
@@ -66,6 +71,7 @@
         "action": ["String[]", ["Howl"]]
       },
       {
+        "instance": ["String", "Master"],
         "color": ["Color", "red"],
         "MovePoints": ["Integer", 4],
         "Health": ["Integer", 6],
@@ -77,6 +83,7 @@
     ],
     "act2": [
       {
+        "instance": ["String", "Minion"],
         "color": ["Color", "white"],
         "MovePoints": ["Integer", 4],
         "Health": ["Integer", 6],
@@ -86,6 +93,7 @@
         "action": ["String[]", ["Howl"]]
       },
       {
+        "instance": ["String", "Master"],
         "color": ["Color", "red"],
         "MovePoints": ["Integer", 4],
         "Health": ["Integer", 8],
@@ -93,6 +101,362 @@
         "attack": ["String[]", ["blue", "red", "yellow"]],
         "passive": ["String[]", ["NightStalker", "Surge: +2 Heart"]],
         "action": ["String[]", ["Howl"]]
+      }
+    ]
+  },
+
+  {
+    "id": "Zombie",
+    "type": ["String", "Monster"],
+    "setup": ["Integer[]", [2, 3, 4]],
+    "traits": ["String[]", ["Cursed", "Building"]],
+    "size": ["String", "1x1"],
+    "img": ["String", "monsters/zombie.png"],
+    "attackType": ["String", "melee"],
+    "act1": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 3],
+        "defence": ["String[]", ["brown"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Shambling", "Surge: Disease","Surge: +1 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 6],
+        "defence": ["String[]", ["brown"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Shambling", "Surge: Disease","Surge: +1 Heart"]],
+        "action": ["String[]", ["Grab"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 5],
+        "defence": ["String[]", ["brown"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Shambling", "Surge: Disease","Surge: +2 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 9],
+        "defence": ["String[]", ["brown"]],
+        "attack": ["String[]", ["blue", "yellow", "red"]],
+        "passive": ["String[]", ["Shambling", "Surge: Disease","Surge: +2 Heart"]],
+        "action": ["String[]", ["Grab"]]
+      }
+    ]
+  },
+
+  {
+    "id": "Cave Spider",
+    "type": ["String", "Monster"],
+    "setup": ["Integer[]", [2, 3, 4]],
+    "traits": ["String[]", ["Wilderness", "Cave"]],
+    "size": ["String", "1x1"],
+    "img": ["String", "monsters/cave-spider.png"],
+    "attackType": ["String", "melee"],
+    "act1": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 3],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Surge: Poison","Surge: +1 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 5],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Web","Surge: Poison","Surge: +1 Heart"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 5],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow", "yellow"]],
+        "passive": ["String[]", ["Surge: Poison","Surge: +2 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 7],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow", "yellow"]],
+        "passive": ["String[]", ["Web","Surge: Poison","Surge: +2 Heart","Surge: +1 Heart"]]
+      }
+    ]
+  },
+
+  {
+    "id": "Flesh Moulder",
+    "type": ["String", "Monster"],
+    "setup": ["Integer[]", [1, 2, 3]],
+    "traits": ["String[]", ["Cursed", "Civilised"]],
+    "size": ["String", "1x1"],
+    "img": ["String", "monsters/flesh-moulder.png"],
+    "attackType": ["String", "ranged"],
+    "act1": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 4],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Surge: Mend 1","Surge: +1 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 5],
+        "defence": ["String[]", ["grey"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Surge: Mend 2","Surge: +2 Heart"]],
+        "action": ["String[]", ["Heal"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 5],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "yellow"]],
+        "passive": ["String[]", ["Surge: Mend 2","Surge: +2 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 7],
+        "defence": ["String[]", ["grey", "brown"]],
+        "attack": ["String[]", ["blue", "yellow", "yellow"]],
+        "passive": ["String[]", ["Surge: Mend 3","Surge: +3 Heart"]],
+        "action": ["String[]", ["Heal"]]
+      }
+    ]
+  },
+
+  {
+    "id": "Ettin",
+    "type": ["String", "Monster"],
+    "setup": ["Integer[]", [1, 0, 1]],
+    "traits": ["String[]", ["Mountain", "Cave"]],
+    "size": ["String", "2x2"],
+    "img": ["String", "monsters/ettin.png"],
+    "attackType": ["String", "melee"],
+    "act1": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 5],
+        "defence": ["String[]", ["grey", "grey"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Reach","Surge: +2 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 8],
+        "defence": ["String[]", ["grey", "grey"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Reach","Surge: +3 Heart"]],
+        "action": ["String[]", ["Throw"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 7],
+        "defence": ["String[]", ["black", "grey"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Reach","Surge: +1 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 9],
+        "defence": ["String[]", ["black", "grey"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Reach","Surge: +2 Heart"]],
+        "action": ["String[]", ["Throw"]]
+      }
+    ]
+  },
+
+  {
+    "id": "Elemental",
+    "type": ["String", "Monster"],
+    "setup": ["Integer[]", [1, 0, 1]],
+    "traits": ["String[]", ["Cold", "Hot"]],
+    "size": ["String", "2x2"],
+    "img": ["String", "monsters/elemental.png"],
+    "attackType": ["String", "ranged"],
+    "act1": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 4],
+        "defence": ["String[]", ["black"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "action": ["String[]", ["Air", "Earth", "Fire", "Water"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 6],
+        "defence": ["String[]", ["black"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "action": ["String[]", ["Air", "Earth", "Fire", "Water"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 8],
+        "defence": ["String[]", ["black", "brown"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
+        "action": ["String[]", ["Air", "Earth", "Fire", "Water"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 4],
+        "Health": ["Integer", 10],
+        "defence": ["String[]", ["black", "brown"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
+        "action": ["String[]", ["Air", "Earth", "Fire", "Water"]]
+      }
+    ]
+  },
+
+  {
+    "id": "Merriod",
+    "type": ["String", "Monster"],
+    "setup": ["Integer[]", [1, 0, 1]],
+    "traits": ["String[]", ["Wilderness", "Water"]],
+    "size": ["String", "2x2"],
+    "img": ["String", "monsters/merriod.png"],
+    "attackType": ["String", "melee"],
+    "act1": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 5],
+        "defence": ["String[]", ["black"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Reach","Surge: Immobilize","Surge: +1 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 7],
+        "defence": ["String[]", ["black"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Reach", "Flail","Surge: Immobilize","Surge: +2 Heart"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 7],
+        "defence": ["String[]", ["grey", "grey"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
+        "passive": ["String[]", ["Reach","Surge: Immobilize","Surge: +2 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 9],
+        "defence": ["String[]", ["grey", "grey"]],
+        "attack": ["String[]", ["blue", "red", "yellow"]],
+        "passive": ["String[]", ["Reach", "Flail","Surge: Immobilize","Surge: +3 Heart"]]
+      }
+    ]
+  },
+
+  {
+    "id": "Shadow Dragon",
+    "type": ["String", "Monster"],
+    "setup": ["Integer[]", [1, 0, 1]],
+    "traits": ["String[]", ["Dark", "Cave"]],
+    "size": ["String", "2x2"],
+    "img": ["String", "monsters/merriod.png"],
+    "attackType": ["String", "melee"],
+    "act1": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 6],
+        "defence": ["String[]", ["grey", "grey"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Shadow","Surge: +1 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 9],
+        "defence": ["String[]", ["grey", "grey"]],
+        "attack": ["String[]", ["blue", "red"]],
+        "passive": ["String[]", ["Shadow","Surge: Fire Breath","Surge: +2 Heart"]]
+      }
+    ],
+    "act2": [
+      {
+        "instance": ["String", "Minion"],
+        "color": ["Color", "white"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 8],
+        "defence": ["String[]", ["black", "grey"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Shadow","Surge: +2 Heart"]]
+      },
+      {
+        "instance": ["String", "Master"],
+        "color": ["Color", "red"],
+        "MovePoints": ["Integer", 3],
+        "Health": ["Integer", 10],
+        "defence": ["String[]", ["black", "grey"]],
+        "attack": ["String[]", ["blue", "red", "red"]],
+        "passive": ["String[]", ["Shadow","Surge: Fire Breath","Surge: +3 Heart"]]
       }
     ]
   }

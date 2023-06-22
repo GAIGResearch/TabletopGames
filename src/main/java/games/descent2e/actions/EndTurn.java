@@ -40,6 +40,7 @@ public class EndTurn extends DescentAction{
         return true;
     }
 
+    // TODO Delete after debugging, don't include in the final version
     public void debug_RandomStatus(Figure f)
     {
         Random random = new Random();

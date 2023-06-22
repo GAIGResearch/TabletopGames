@@ -30,23 +30,8 @@ public class Diseased extends DescentAction {
 
         Figure f = dgs.getActingFigure();
 
-        // TODO Attribute Test
-
-        boolean attributeTest = true;
-
-        int willpower = f.getAttributeValue(Figure.Attribute.Willpower);
-
-        dgs.setAttributeDicePool(DicePool.constructDicePool("GREY", "BLACK"));
-
-        dgs.getAttributeDicePool().roll(dgs.getRandom());
-        int result = dgs.getAttributeDicePool().getShields();
-        System.out.println(result + "; " + willpower);
-
-        if (result > willpower)
-        {
-            // If result <= willpower, success; else, failure
-            attributeTest = false;
-        }
+        // Diseased tests against Willpower
+        boolean attributeTest = attributeTest(dgs, f.getAttributeValue(Figure.Attribute.Willpower));
 
         if (attributeTest) {
             f.removeCondition(DescentTypes.DescentCondition.Disease);
@@ -62,6 +47,17 @@ public class Diseased extends DescentAction {
         f.addAttributeTest(DescentTypes.DescentCondition.Disease);
 
         return true;
+    }
+
+    private boolean attributeTest(DescentGameState dgs, int attribute)
+    {
+        dgs.setAttributeDicePool(DicePool.constructDicePool("GREY", "BLACK"));
+
+        dgs.getAttributeDicePool().roll(dgs.getRandom());
+
+        if (dgs.getAttributeDicePool().getShields() <= attribute) { return true;}
+
+        else { return false;}
     }
 
     @Override

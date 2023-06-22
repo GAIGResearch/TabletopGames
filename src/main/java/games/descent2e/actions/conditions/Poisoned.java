@@ -30,22 +30,8 @@ public class Poisoned extends DescentAction {
 
         Figure f = dgs.getActingFigure();
 
-        // TODO Attribute Test
-
-        boolean attributeTest = true;
-
-        int might = f.getAttributeValue(Figure.Attribute.Might);
-
-        dgs.setAttributeDicePool(DicePool.constructDicePool("GREY", "BLACK"));
-
-        dgs.getAttributeDicePool().roll(dgs.getRandom());
-        int result = dgs.getAttributeDicePool().getShields();
-
-        if (result > might)
-        {
-            // If result <= might, success; else, failure
-            attributeTest = false;
-        }
+        // Poisoned tests against Might
+        boolean attributeTest = attributeTest(dgs, f.getAttributeValue(Figure.Attribute.Might));
 
         if (attributeTest) {
             f.removeCondition(DescentTypes.DescentCondition.Poison);
@@ -59,6 +45,17 @@ public class Poisoned extends DescentAction {
         f.addAttributeTest(DescentTypes.DescentCondition.Poison);
 
         return true;
+    }
+
+    private boolean attributeTest(DescentGameState dgs, int attribute)
+    {
+        dgs.setAttributeDicePool(DicePool.constructDicePool("GREY", "BLACK"));
+
+        dgs.getAttributeDicePool().roll(dgs.getRandom());
+
+        if (dgs.getAttributeDicePool().getShields() <= attribute) { return true;}
+
+        else { return false;}
     }
 
     @Override
