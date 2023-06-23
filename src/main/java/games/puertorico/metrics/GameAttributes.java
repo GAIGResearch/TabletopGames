@@ -1,8 +1,10 @@
 package games.puertorico.metrics;
 
-import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
-import evaluation.metrics.*;
+import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
+import evaluation.metrics.IMetricsCollection;
 import games.puertorico.PuertoRicoConstants;
 import games.puertorico.PuertoRicoGameState;
 
@@ -43,16 +45,16 @@ public class GameAttributes implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Arrays.asList(Event.GameEvent.GAME_OVER, Event.GameEvent.ROUND_OVER));
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new LinkedHashMap<>();
             for (PuertoRicoConstants.BuildingType building : buildings) {
                 columns.put("Total " + building, Integer.class);
-                for (int i = 0; i < game.getGameState().getNPlayers(); i++) {
+                for (int i = 0; i < nPlayersPerGame; i++) {
                     columns.put("Player " + i + " " + building, Integer.class);
                 }
             }
@@ -62,7 +64,7 @@ public class GameAttributes implements IMetricsCollection {
 
     public static class SupplyCounts extends AbstractMetric {
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             return new HashMap<String, Class<?>>() {{
                 put("VP Chips Left", Integer.class);
                 put("Colonists Left", Integer.class);
@@ -80,7 +82,7 @@ public class GameAttributes implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Arrays.asList(Event.GameEvent.GAME_OVER, Event.GameEvent.ROUND_OVER));
         }
     }
@@ -101,14 +103,14 @@ public class GameAttributes implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Arrays.asList(Event.GameEvent.GAME_OVER, Event.GameEvent.ROUND_OVER));
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new LinkedHashMap<>();
-            for (int i = 0; i < game.getGameState().getNPlayers(); i++) {
+            for (int i = 0; i < nPlayersPerGame; i++) {
                 columns.put("Player " + i + " Town Size", Integer.class);  // TODO: this is # buildings
                 columns.put("Player " + i + " Plantation Size", Integer.class);  // TODO: this is # plantations
                 columns.put("Player " + i + " Doubloons", Integer.class);
@@ -150,15 +152,15 @@ public class GameAttributes implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Arrays.asList(Event.GameEvent.GAME_OVER, Event.GameEvent.ROUND_OVER));
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (PuertoRicoConstants.Crop crop : crops) {
-                for (int i = 0; i < game.getGameState().getNPlayers(); i++) {
+                for (int i = 0; i < nPlayersPerGame; i++) {
                     columns.put("Player " + i + " " + crop.name(), Integer.class);
                 }
                 columns.put(crop.name(), Integer.class);
@@ -198,15 +200,15 @@ public class GameAttributes implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Arrays.asList(Event.GameEvent.GAME_OVER, Event.GameEvent.ROUND_OVER));
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (PuertoRicoConstants.Crop crop : crops) {
-                for (int i = 0; i < game.getGameState().getNPlayers(); i++) {
+                for (int i = 0; i < nPlayersPerGame; i++) {
                     columns.put("Player " + i + " " + crop.name(), Integer.class);
                 }
                 columns.put(crop.name(), Integer.class);
@@ -240,12 +242,12 @@ public class GameAttributes implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Arrays.asList(Event.GameEvent.GAME_OVER, Event.GameEvent.ROUND_OVER));
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (PuertoRicoConstants.Crop crop : crops) {
                 columns.put(crop.name(), Integer.class);
@@ -280,12 +282,12 @@ public class GameAttributes implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return new HashSet<>(Collections.singletonList(Event.GameEvent.ROUND_OVER));
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (PuertoRicoConstants.Role role : roles) {
                 columns.put(role.name(), Integer.class);

@@ -68,7 +68,7 @@ public class DeepPlaceSettlementThenRoad extends PlaceSettlementWithRoad impleme
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         executed = true;
         CatanParameters cp = (CatanParameters) state.getGameParameters();
 

@@ -104,7 +104,7 @@ public class DeepCounterOffer extends AbstractAction implements IExtendedSequenc
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         if (choice == Choice.ChooseNRequested) {
             // Complete
             OfferPlayerTrade opt = (OfferPlayerTrade) ((CatanGameState)state).getTradeOffer();

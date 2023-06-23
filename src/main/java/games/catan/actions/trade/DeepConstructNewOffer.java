@@ -174,7 +174,7 @@ public class DeepConstructNewOffer extends AbstractAction implements IExtendedSe
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         CatanGameState gs = ((CatanGameState) state);
         if (choice == ChooseNRequested) {
             // Complete

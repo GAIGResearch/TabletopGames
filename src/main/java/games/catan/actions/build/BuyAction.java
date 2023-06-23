@@ -47,7 +47,7 @@ public class BuyAction extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         executed = true;
     }
 

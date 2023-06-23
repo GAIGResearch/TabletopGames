@@ -51,7 +51,7 @@ public class DeepDefaultTrade extends AbstractAction implements IExtendedSequenc
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         executed = true;
     }
 

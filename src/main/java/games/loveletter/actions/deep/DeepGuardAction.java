@@ -67,7 +67,7 @@ public class DeepGuardAction extends PlayCardDeep implements IExtendedSequence, 
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         if (step == Step.TargetPlayer) {
             targetPlayer = ((ChoosePlayer)action).player;
             if (targetPlayer == -1) step = Step.Done;

@@ -80,7 +80,7 @@ public class MoveRobber extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         executed = true;
         state.setGamePhase(Main);  // If there were no targets to steal from, then this is not set in StealResource action, need it to stop looping
     }

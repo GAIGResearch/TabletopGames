@@ -33,7 +33,7 @@ public abstract class PlayCardDeep extends PlayCard implements IExtendedSequence
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         executed = true;
     }
 
