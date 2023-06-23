@@ -1,9 +1,0 @@
-{
-  "class" : "evaluation.tournaments.RoundRobinTournament",
-  "game": "Stratego",
-  "selfPlay": false,
-  "players": "data/experiments/actionspaces/all",
-  "nPlayers": 2,
-  "matchups": 1000,
-  "listener": "metrics/stratego.json"
-}

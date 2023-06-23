@@ -255,6 +255,12 @@ public abstract class Utils {
                 .collect(toMap(key -> key, key -> decay(map.get(key), gamma)));
     }
 
+    public static <T> T getArg(Object args, String name, T defaultValue) {
+        if (args instanceof JSONObject) return getArg((JSONObject) args, name, defaultValue);
+        else if (args instanceof String[]) return getArg((String[]) args, name, defaultValue);
+        else throw new IllegalArgumentException("Unknown args type " + args.getClass());
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T getArg(String[] args, String name, T defaultValue) {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();

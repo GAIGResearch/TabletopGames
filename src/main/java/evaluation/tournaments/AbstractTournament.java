@@ -14,6 +14,7 @@ public abstract class AbstractTournament implements IGameRunner {
         NO_SELF_PLAY,
         ONE_VS_ALL
     }
+    public final TournamentMode tournamentMode;
     // List of players taking part in the tournament
     protected List<? extends AbstractPlayer> agents;
     // Games to play
@@ -32,7 +33,9 @@ public abstract class AbstractTournament implements IGameRunner {
      * @param gameToPlay     - game to play in this tournament.
      * @param nPlayerPerGame - number of players per game.
      */
-    public AbstractTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int nPlayerPerGame, AbstractParameters gameParams) {
+    public AbstractTournament(TournamentMode mode, List<? extends AbstractPlayer> agents, GameType gameToPlay,
+                              int nPlayerPerGame, AbstractParameters gameParams) {
+        this.tournamentMode = mode;
         this.agents = agents;
 
         this.game = gameParams == null ?
