@@ -7,12 +7,12 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 
-import static games.descent2e.actions.Triggers.ACTION_POINT_SPEND;
+import static games.descent2e.actions.Triggers.*;
 
 public class Diseased extends DescentAction {
 
     public Diseased() {
-        super(ACTION_POINT_SPEND);
+        super(FORCED);
     }
 
     @Override
@@ -31,7 +31,9 @@ public class Diseased extends DescentAction {
         Figure f = dgs.getActingFigure();
 
         // Diseased tests against Willpower
-        boolean attributeTest = attributeTest(dgs, f.getAttributeValue(Figure.Attribute.Willpower));
+        Figure.Attribute attribute = Figure.Attribute.Willpower;
+        boolean attributeTest = attributeTest(dgs, f.getAttributeValue(attribute));
+        System.out.println((attribute));
 
         if (attributeTest) {
             f.removeCondition(DescentTypes.DescentCondition.Disease);
@@ -55,9 +57,15 @@ public class Diseased extends DescentAction {
 
         dgs.getAttributeDicePool().roll(dgs.getRandom());
 
-        if (dgs.getAttributeDicePool().getShields() <= attribute) { return true;}
+        if (dgs.getAttributeDicePool().getShields() <= attribute)
+        {
+            return true;
+        }
 
-        else { return false;}
+        else
+        {
+            return false;
+        }
     }
 
     @Override

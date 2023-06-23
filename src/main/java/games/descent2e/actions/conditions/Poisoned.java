@@ -7,12 +7,12 @@ import games.descent2e.actions.DescentAction;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 
-import static games.descent2e.actions.Triggers.ACTION_POINT_SPEND;
+import static games.descent2e.actions.Triggers.*;
 
 public class Poisoned extends DescentAction {
 
     public Poisoned() {
-        super(ACTION_POINT_SPEND);
+        super(FORCED);
     }
 
     @Override
@@ -31,7 +31,9 @@ public class Poisoned extends DescentAction {
         Figure f = dgs.getActingFigure();
 
         // Poisoned tests against Might
-        boolean attributeTest = attributeTest(dgs, f.getAttributeValue(Figure.Attribute.Might));
+        Figure.Attribute attribute = Figure.Attribute.Might;
+        boolean attributeTest = attributeTest(dgs, f.getAttributeValue(attribute));
+        System.out.println((attribute));
 
         if (attributeTest) {
             f.removeCondition(DescentTypes.DescentCondition.Poison);

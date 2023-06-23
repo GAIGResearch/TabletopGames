@@ -4,11 +4,9 @@ import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.DescentAction;
-import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
-import games.descent2e.components.Hero;
 
-import static games.descent2e.actions.Triggers.ACTION_POINT_SPEND;
+import static games.descent2e.actions.Triggers.*;
 
 public class Stunned extends DescentAction {
 
