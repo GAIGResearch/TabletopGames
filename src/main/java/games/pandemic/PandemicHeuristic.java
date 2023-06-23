@@ -6,9 +6,8 @@ import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IStateHeuristic;
 import core.properties.PropertyString;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import utilities.Hash;
-import utilities.Utils;
 
 import static games.pandemic.PandemicConstants.*;
 import static utilities.Utils.indexOf;

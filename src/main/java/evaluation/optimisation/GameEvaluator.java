@@ -1,4 +1,4 @@
-package evaluation;
+package evaluation.optimisation;
 
 import core.AbstractParameters;
 import core.AbstractPlayer;

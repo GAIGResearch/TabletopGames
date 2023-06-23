@@ -2,7 +2,7 @@ package players;
 
 import core.actions.ActionSpace;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 import java.util.*;
 

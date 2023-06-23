@@ -2,7 +2,7 @@ package players.simple;
 
 import core.AbstractParameters;
 import core.interfaces.IActionHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 public class BoltzmannActionParams extends TunableParameters {
 

@@ -3,7 +3,7 @@ package players.mcts;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.interfaces.*;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 import players.simple.RandomPlayer;

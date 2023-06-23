@@ -1,6 +1,6 @@
 package games.dicemonastery.heuristics;
 
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import players.heuristics.ActionValueHeuristic;
 
 public class AdvantageParams extends TunableParameters {

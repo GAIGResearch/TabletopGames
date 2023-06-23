@@ -1,7 +1,7 @@
 package games.dominion;
 
 import core.*;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 import games.dominion.cards.*;
 
