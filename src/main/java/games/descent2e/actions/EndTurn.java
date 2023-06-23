@@ -44,7 +44,7 @@ public class EndTurn extends DescentAction{
     public void debug_RandomStatus(Figure f)
     {
         Random random = new Random();
-        int randInt = random.nextInt(4);
+        int randInt = random.nextInt(2);
 
         switch(randInt)
         {

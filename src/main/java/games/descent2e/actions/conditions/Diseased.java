@@ -3,6 +3,7 @@ package games.descent2e.actions.conditions;
 import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
+import games.descent2e.actions.AttributeTest;
 import games.descent2e.actions.DescentAction;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
@@ -32,10 +33,14 @@ public class Diseased extends DescentAction {
 
         // Diseased tests against Willpower
         Figure.Attribute attribute = Figure.Attribute.Willpower;
-        boolean attributeTest = attributeTest(dgs, f.getAttributeValue(attribute));
-        System.out.println((attribute));
+        //System.out.println((attribute));
 
-        if (attributeTest) {
+        AttributeTest attributeTest = new AttributeTest(f.getComponentID());
+        attributeTest.setAttribute(attribute);
+        attributeTest.execute(dgs);
+        boolean result = attributeTest.getResult();
+
+        if (result) {
             f.removeCondition(DescentTypes.DescentCondition.Disease);
             System.out.println("Passed Disease Test!");
         }
@@ -49,23 +54,6 @@ public class Diseased extends DescentAction {
         f.addAttributeTest(DescentTypes.DescentCondition.Disease);
 
         return true;
-    }
-
-    private boolean attributeTest(DescentGameState dgs, int attribute)
-    {
-        dgs.setAttributeDicePool(DicePool.constructDicePool("GREY", "BLACK"));
-
-        dgs.getAttributeDicePool().roll(dgs.getRandom());
-
-        if (dgs.getAttributeDicePool().getShields() <= attribute)
-        {
-            return true;
-        }
-
-        else
-        {
-            return false;
-        }
     }
 
     @Override
