@@ -1,7 +1,6 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.actions.ActionSpace;
 import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
@@ -10,7 +9,6 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
-import games.catan.CatanStateFeatures;
 import gui.AbstractGUIManager;
 import gui.GUI;
 import gui.GamePanel;
@@ -20,19 +18,18 @@ import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.ActionController;
 import players.human.HumanConsolePlayer;
 import players.human.HumanGUIPlayer;
-import players.mcts.MCTSParams;
-import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
 import javax.swing.*;
-import javax.swing.Timer;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static utilities.Utils.componentToImage;
@@ -952,12 +949,6 @@ public class Game {
         players.add(new RandomPlayer());
         players.add(new RandomPlayer());
 //        players.add(new MCTSPlayer());
-        MCTSParams params1 = new MCTSParams();
-        params1.gatherTreeRecorder = true;
-        params1.discardStateAfterEachIteration = false;
-        params1.treeRecorderFolder = "treeRecorderCatanFlat";
-        params1.EIStateFeatureVector = new CatanStateFeatures();
-        params1.actionSpace = new ActionSpace(ActionSpace.Structure.Flat);
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new MCTSPlayer((MCTSParams) params1.copy()));
 //        players.add(new MCTSPlayer((MCTSParams) params1.copy()));
