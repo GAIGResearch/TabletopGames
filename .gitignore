@@ -38,3 +38,4 @@ src/pytag/env/
 
 test*
 metrics/out/*
+treeRecorder*
