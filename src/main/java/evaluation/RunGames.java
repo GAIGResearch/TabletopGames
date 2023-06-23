@@ -173,6 +173,7 @@ public class RunGames {
         List<String> tempGames = new ArrayList<>(Arrays.asList(getArg(args, "game", "all").split("\\|")));
         List<String> games = tempGames;
         if (tempGames.get(0).equals("all")) {
+            tempGames.add("-GameTemplate"); // so that  we always remove this one
             games = Arrays.stream(GameType.values()).map(Enum::name).filter(name -> !tempGames.contains("-" + name)).collect(toList());
         }
 
@@ -187,6 +188,16 @@ public class RunGames {
                     } else
                         return new Pair<>(Integer.valueOf(str), Integer.valueOf(str));
                 }).collect(toList());
+        // if only one game size was provided, then it applies to all games in the list
+        // or vice versa
+        if (games.size() == 1 && nPlayers.size() > 1) {
+            for (int loop = 0; loop < nPlayers.size() - 1; loop++)
+                games.add(games.get(0));
+        }
+        if (nPlayers.size() == 1 && games.size() > 1) {
+            for (int loop = 0; loop < games.size() - 1; loop++)
+                nPlayers.add(nPlayers.get(0));
+        }
         // Then fill in the min/max player counts for the games that were specified as "all"
         // And repair min/max player counts that were specified incorrectly
         for (int i = 0; i < nPlayers.size(); i++) {
@@ -200,15 +211,6 @@ public class RunGames {
                 nPlayers.set(i, new Pair<>(nPlayers.get(i).a, game.getMaxPlayers()));
         }
 
-        // if only one game size was provided, then it applies to all games in the list
-        if (games.size() == 1 && nPlayers.size() > 1) {
-            for (int loop = 0; loop < nPlayers.size() - 1; loop++)
-                games.add(games.get(0));
-        }
-        if (nPlayers.size() == 1 && games.size() > 1) {
-            for (int loop = 0; loop < games.size() - 1; loop++)
-                nPlayers.add(nPlayers.get(0));
-        }
         if (nPlayers.size() > 1 && nPlayers.size() != games.size())
             throw new IllegalArgumentException("If specified, then nPlayers length must be one, or match the length of the games list");
 
@@ -217,6 +219,8 @@ public class RunGames {
             GameType game = GameType.valueOf(games.get(i));
             int minPlayers = nPlayers.get(i).a;
             int maxPlayers = nPlayers.get(i).b;
+            if (maxPlayers < minPlayers)
+                continue;  // in this case the game does not support the desired player count
             int[] playerCounts = new int[maxPlayers - minPlayers + 1];
             Arrays.setAll(playerCounts, n -> n + minPlayers);
             gamesAndPlayerCounts.put(game, playerCounts);
