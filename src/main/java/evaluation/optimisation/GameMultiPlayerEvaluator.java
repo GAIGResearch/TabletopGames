@@ -1,14 +1,12 @@
-package evaluation;
+package evaluation.optimisation;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.interfaces.IStateHeuristic;
-import core.interfaces.IStatisticLogger;
 import evodef.MultiSolutionEvaluator;
 import evodef.SearchSpace;
 import games.GameType;
-import evaluation.loggers.SummaryLogger;
 
 import java.util.*;
 

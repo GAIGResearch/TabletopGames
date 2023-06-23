@@ -2,7 +2,7 @@ package players.rhea;
 
 import core.AbstractGameState;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
 import players.PlayerParameters;
 

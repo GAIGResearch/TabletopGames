@@ -1,7 +1,7 @@
 package core;
 
 import core.interfaces.ITunableParameters;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.GameType;
 
 import java.util.*;

@@ -3,7 +3,7 @@ package games.dotsboxes;
 import core.AbstractGameState;
 import core.CoreConstants;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import utilities.Utils;
 
 

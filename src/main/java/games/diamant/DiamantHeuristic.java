@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.Counter;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 import java.util.List;
 import java.util.stream.Collectors;

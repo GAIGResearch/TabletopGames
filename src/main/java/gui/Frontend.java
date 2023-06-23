@@ -3,7 +3,7 @@ package gui;
 import core.*;
 import core.actions.AbstractAction;
 import evaluation.listeners.MetricsGameListener;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import evaluation.metrics.Event;
 import games.GameType;
 import gui.models.AITableModel;

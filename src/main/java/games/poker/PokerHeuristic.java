@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.CoreConstants;
 import core.components.FrenchCard;
 import core.interfaces.*;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 
 import java.util.*;
 
