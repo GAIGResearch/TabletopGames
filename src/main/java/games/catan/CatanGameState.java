@@ -113,7 +113,7 @@ public class CatanGameState extends AbstractGameState {
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(super.hashCode(), catanGraph, exchangeRates, largestArmyOwner, longestRoadOwner, longestRoadLength, largestArmySize, rollValue, rnd, playerResources, playerTokens, playerDevCards, resourcePool, devCards, developmentCardPlayed, tradeOffer, negotiationStepsCount, nTradesThisTurn);
+        int result = Objects.hash(super.hashCode(), catanGraph, exchangeRates, largestArmyOwner, longestRoadOwner, longestRoadLength, largestArmySize, rollValue, playerResources, playerTokens, playerDevCards, resourcePool, devCards, developmentCardPlayed, tradeOffer, negotiationStepsCount, nTradesThisTurn);
         result = 31 * result + Arrays.deepHashCode(board);
         result = 31 * result + Arrays.hashCode(scores);
         result = 31 * result + Arrays.hashCode(victoryPoints);
