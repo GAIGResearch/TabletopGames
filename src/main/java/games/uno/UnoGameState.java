@@ -245,7 +245,7 @@ public class UnoGameState extends AbstractGameState implements IPrintable {
                     if (otherScore > playerScore)
                         ordinal++;
                     else if (otherScore == playerScore) {
-                        if (getTiebreak(i) > getTiebreak(playerId))
+                        if (getTiebreak(i, 1) > getTiebreak(playerId, 1))
                             ordinal++;
                     }
                 }

@@ -218,7 +218,6 @@ public class MultiTreeNode extends SingleTreeNode {
     }
 
 
-    @Override
     protected void logTreeStatistics(IStatisticLogger statsLogger, int numIters, long timeTaken) {
         Map<String, Object> stats = new LinkedHashMap<>();
         stats.put("round", state.getRoundCounter());

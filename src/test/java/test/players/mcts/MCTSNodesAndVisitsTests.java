@@ -115,14 +115,10 @@ public class MCTSNodesAndVisitsTests {
         AbstractGameState state = game.getGameState();
         AbstractForwardModel forwardModel = game.getForwardModel();
         do {
-            IStatisticLogger logger = new SummaryLogger();
-            mctsPlayer.setStatsLogger(logger);
-
             AbstractAction actionChosen = game.getPlayers().get(state.getCurrentPlayer())
                     ._getAction(state, forwardModel.computeAvailableActions(state));
 
             if (state.getCurrentPlayer() == 0) {
-                logger.processDataAndFinish();
                 TreeStatistics stats = new TreeStatistics(mctsPlayer.getRoot(0));
                 assertEquals(200, mctsPlayer.getRoot(0).getVisits());
                 if (params.maxTreeDepth == 3)

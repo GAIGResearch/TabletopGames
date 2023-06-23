@@ -413,19 +413,6 @@ public abstract class AbstractGameState {
     public abstract double getGameScore(int playerId);
 
     /**
-     * This is an optional implementation and is used in getOrdinalPosition() to break any ties based on pure game score
-     * Implementing this may be a simpler approach in many cases than re-implementing getOrdinalPosition()
-     * For example in ColtExpress, the tie break is the number of bullet cards in hand - and this only affects the outcome
-     * if the score is a tie.
-     *
-     * @param playerId - the player observed
-     * @return null by default - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score
-     */
-    public double getTiebreak(int playerId) {
-        return getTiebreak(playerId, 1);
-    }
-
-    /**
      * @param playerId - the player observed
      * @param tier - if multiple tiebreaks available in the game, this parameter can be used to specify what each one does, applied in the order 1,2,3 ...
      * @return Double.MAX_VALUE - meaning no tiebreak set for the game; if overwriting, should return the player's tiebreak score, given tier

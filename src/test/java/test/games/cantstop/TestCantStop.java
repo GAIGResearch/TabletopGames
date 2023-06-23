@@ -20,7 +20,6 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class TestCantStop {
-
     Game cantStop;
     List<AbstractPlayer> players;
     CantStopForwardModel fm = new CantStopForwardModel();

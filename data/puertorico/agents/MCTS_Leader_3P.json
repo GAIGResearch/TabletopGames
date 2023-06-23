@@ -1,0 +1,21 @@
+{
+        "class":"players.mcts.MCTSParams",
+        "K" : 1.0,
+        "exploreEpsilon" : 0.10,
+        "rolloutLength" : 30,
+        "maxTreeDepth" : 100,
+        "rolloutType" : "RANDOM",
+        "budgetType" : "BUDGET_TIME",
+        "selectionPolicy" : "SIMPLE",
+        "information" : "Information_Set",
+        "treePolicy" : "RegretMatching",
+        "rolloutTermination" : "DEFAULT",
+        "opponentTreePolicy" : "SelfOnly",
+        "budget" : 40,
+        "heuristic" : {
+        	"class" : "players.heuristics.LeaderHeuristic"
+        },
+        "epsilon" : 1e-6,
+        "breakMS" : 0,
+        "maintainMasterState" : false
+}

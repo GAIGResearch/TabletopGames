@@ -173,7 +173,11 @@ public class TableSawDataProcessor implements IDataProcessor {
                     for (Object id: gameIds) {
                         tablesPerGame[i] = ((StringColumn)column.where(filteredData.stringColumn("GameID").isEqualTo((String) id))).countByCategory();
                         // Needs transposing because the output of previous is several rows with category value, count (2 columns)
-                        tablesPerGame[i] = tablesPerGame[i].transpose(false, true);
+                        try {
+                            tablesPerGame[i] = tablesPerGame[i].transpose(false, true);
+                        }catch (Exception e){
+                            System.out.println("Error transposing table: " + e);
+                        }
                         // Save all column names for the summary table
                         categoryNames.addAll(tablesPerGame[i].columnNames());
                         i++;

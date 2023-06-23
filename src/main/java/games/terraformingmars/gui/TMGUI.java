@@ -27,8 +27,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
 
 import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
@@ -63,7 +62,7 @@ public class TMGUI extends AbstractGUIManager {
     TMAction lastAction;
     TMTurnOrder turnOrder;
 
-    public TMGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
+    public TMGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
         if (game == null) return;
 
@@ -112,7 +111,7 @@ public class TMGUI extends AbstractGUIManager {
             //Handle exception
         }
 
-        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2);
+        createActionHistoryPanel(defaultDisplayWidth, defaultInfoPanelHeight/2, new HashSet<>());
         historyInfo.setFont(defaultFont);
         historyInfo.setForeground(fontColor);
         JPanel historyWrapper = new JPanel();

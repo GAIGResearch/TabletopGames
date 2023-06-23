@@ -193,7 +193,7 @@ public class SGGameState extends AbstractGameState implements IVectorisable {
     }
 
     @Override
-    public double getTiebreak(int playerId) {
+    public double getTiebreak(int playerId, int tier) {
         // Tie-break is number of puddings
         return playedCardTypes[playerId].get(SGCard.SGCardType.Pudding).getValue();
     }

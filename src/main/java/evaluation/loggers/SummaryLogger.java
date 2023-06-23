@@ -101,7 +101,7 @@ public class SummaryLogger implements IStatisticLogger {
     @Override
     public void processDataAndFinish() {
         if (printToConsole && data.size() > 0) {
-            System.out.println();
+//            System.out.println();
             System.out.println(this);
         }
 

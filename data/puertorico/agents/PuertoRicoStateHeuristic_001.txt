@@ -1,0 +1,2 @@
+BIAS	VP_Chips	VP	TownSize	PlantationSize	Quarries	TownVacancies	PlantationVacancies	Doubloons	ProductionCapacity	ProductionVariety	StoreVolume	StoreVariety
+0.088	-0.007	0.063	-0.26	-0.17	0.016	0.10	0.14	0.014	0.23	0.019	0.044	-0.029

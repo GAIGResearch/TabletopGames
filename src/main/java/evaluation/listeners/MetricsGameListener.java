@@ -34,10 +34,10 @@ public class MetricsGameListener implements IGameListener {
     protected Game game;
 
     // Types of reports to generate: RawData, Summary, Plot
-    List<IDataLogger.ReportType> reportTypes = Arrays.asList(RawData, Summary);  //todo this needs to be read from JSON
+    List<IDataLogger.ReportType> reportTypes = new ArrayList<>();
 
     // Where to send the reports: ToConsole, ToFile or ToBoth
-    List<IDataLogger.ReportDestination> reportDestinations = Arrays.asList(ToFile); //todo this needs to be read from JSON
+    List<IDataLogger.ReportDestination> reportDestinations;
 
     // Destination directory for the reports
     String destDir = "metrics/out/"; //by default
@@ -46,12 +46,23 @@ public class MetricsGameListener implements IGameListener {
     }
 
     public MetricsGameListener(AbstractMetric[] metrics) {
+        this(ToBoth, metrics);
+    }
+
+    public MetricsGameListener(IDataLogger.ReportDestination logTo, AbstractMetric[] metrics) {
+        this(logTo, new IDataLogger.ReportType[]{RawData, Summary, Plot}, metrics);
+    }
+
+    public MetricsGameListener(IDataLogger.ReportDestination logTo, IDataLogger.ReportType[] dataTypes, AbstractMetric[] metrics) {
+        reportDestinations = Collections.singletonList(logTo);
+        this.reportTypes = Arrays.asList(dataTypes);
         this.metrics = new LinkedHashMap<>();
         for (AbstractMetric m : metrics) {
             m.setDataLogger(new DataTableSaw(m)); //todo this logger needs to be read from JSON
             this.metrics.put(m.getName(), m);
             eventsOfInterest.addAll(m.getEventTypes());
         }
+        eventsOfInterest.add(Event.GameEvent.GAME_OVER);
     }
 
     /**
@@ -87,7 +98,7 @@ public class MetricsGameListener implements IGameListener {
             // If the "metrics/out/" does not exist, create it
             String folder = "";
             for (String nestedDir : nestedDirectories) {
-                folder = folder + nestedDir + "/";
+                folder = folder + nestedDir + File.separator;
                 File outFolder = new File(folder);
                 if (!outFolder.exists()) {
                     success = outFolder.mkdir();
@@ -96,7 +107,7 @@ public class MetricsGameListener implements IGameListener {
                     throw new AssertionError("Unable to create output directory" + outFolder.getAbsolutePath());
             }
 
-            destDir = new File(folder).getAbsolutePath() + "/";
+            destDir = new File(folder).getAbsolutePath() + File.separator;
         }
         return success;
     }
@@ -137,6 +148,10 @@ public class MetricsGameListener implements IGameListener {
                         IDataLogger dataLogger = new DataTableSaw(eventMetrics, event, eventToIndexingColumn(event));
                         dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
                     }
+                }
+                if (eventMetrics.size() > 1) {
+                    IDataLogger dataLogger = new DataTableSaw(eventMetrics, event, eventToIndexingColumn(event));
+                    dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
                 }
             }
         }

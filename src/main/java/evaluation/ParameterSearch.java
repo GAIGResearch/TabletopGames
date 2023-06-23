@@ -1,10 +1,14 @@
 package evaluation;
 
-import core.*;
+import core.AbstractGameState;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.CoreConstants;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
 import core.interfaces.ITunableParameters;
+import evaluation.tournaments.RandomRRTournament;
 import evodef.EvoAlg;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
@@ -23,8 +27,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.function.IntToDoubleFunction;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static evaluation.tournaments.AbstractTournament.TournamentMode.NO_SELF_PLAY;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 import static utilities.Utils.getArg;
@@ -42,6 +49,7 @@ public class ParameterSearch {
                         "Then there are a number of optional arguments:\n" +
                         "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
+                        "\ttournament=    The number of games to run as a tournament with the winners of all NTBEA iterations (default is 0) \n" +
                         "\topponent=      The agent used as opponent. Default is not to use a specific opponent, but use MultiNTBEA. \n" +
                         "\t               This can any of: \n" +
                         "\t               \t'coop' uses the agent being tuned (via searchSpace) for all agents (i.e. for coop games)\n" +
@@ -156,9 +164,11 @@ public class ParameterSearch {
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
         long seed = getArg(args, "seed", System.currentTimeMillis());
         String logfile = getArg(args, "logFile", "");
+        boolean statsLog = getArg(args, "statsLog", false);
         String evalMethod = getArg(args, "eval", "Win");
         String paramFile = getArg(args, "gameParam", "");
         AbstractParameters gameParams = AbstractParameters.createFromFile(game, paramFile);
+        int tournamentGames = getArg(args, "tournament", 0);
 
         ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
         int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
@@ -225,16 +235,52 @@ public class ParameterSearch {
         // This loops once for each complete repetition of NTBEA specified.
         // runNTBEA runs a complete set of trials, and spits out the mean and std error on the mean of the best sampled result
         // These mean statistics are calculated from the evaluation trials that are run after NTBEA is complete. (evalGames)
-        Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
+        Pair<Pair<Double, Double>, int[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new int[0]);
+        List<Object> winnersPerRun = new ArrayList<>();
+        List<int[]> winnerSettings = new ArrayList<>();
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
             landscapeModel.reset();
-            evaluator.statsLogger = IStatisticLogger.createLogger("evaluation.loggers.SummaryLogger", "Agent_" + String.format("%2d", repeats+1) + "_" + logfile);
+            if (statsLog && !logfile.isEmpty())
+                evaluator.statsLogger = IStatisticLogger.createLogger("evaluation.loggers.SummaryLogger", "Agent_" + String.format("%2d", repeats + 1) + "_" + logfile);
             Pair<Double, Double> r = runNTBEA(evaluator, null, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
-            Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
+            int[] winner = Arrays.stream(landscapeModel.getBestOfSampled())
+                    .mapToInt(d -> (int) d)
+                    .toArray();
+            winnersPerRun.add(searchSpace.getAgent(winner));
+            winnerSettings.add(winner);
+            Pair<Pair<Double, Double>, int[]> retValue = new Pair<>(r, winner);
             printDetailsOfRun(retValue, searchSpace, logfile, verbose, evaluator.statsLogger);
             if (retValue.a.a > bestResult.a.a)
                 bestResult = retValue;
 
+        }
+        if (tournamentGames > 0 && winnersPerRun.get(0) instanceof AbstractPlayer) {
+            List<AbstractPlayer> players = winnersPerRun.stream().map(p -> (AbstractPlayer) p).collect(Collectors.toList());
+            for (int i = 0; i < players.size(); i++) {
+                players.get(i).setName(Arrays.toString(winnerSettings.get(i)));
+            }
+            RandomRRTournament tournament = new RandomRRTournament(players, game, nPlayers, NO_SELF_PLAY, tournamentGames, 0, seed, gameParams);
+            tournament.verbose = false;
+            tournament.runTournament();
+            // create a new list of results in descending order of score
+            IntToDoubleFunction cmp = evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
+            List<Integer> agentsInOrder = IntStream.range(0, players.size())
+                    .boxed()
+                    .sorted(Comparator.comparingDouble(cmp::applyAsDouble))
+                    .collect(Collectors.toList());
+            Collections.reverse(agentsInOrder);
+            for (int index : agentsInOrder) {
+                System.out.printf("Player %d %s\tWin Rate: %.3f +/- %.3f\tMean Ordinal: %.2f +/- %.2f%n", index, Arrays.toString(winnerSettings.get(index)),
+                        tournament.getWinRate(index), tournament.getWinStdErr(index),
+                        tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
+                Pair<Double, Double> resultToReport = new Pair<>(tournament.getWinRate(index), tournament.getWinStdErr(index));
+                if (evalMethod.equals("Ordinal"))
+                    resultToReport = new Pair<>(tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
+                logSummary(new Pair<>(resultToReport, winnerSettings.get(index)), searchSpace, "RRT_" + logfile);
+            }
+            bestResult = evalMethod.equals("Ordinal") ?
+                    new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
+                    new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
         }
         System.out.println("\nFinal Recommendation: ");
         // we don't log the final run to file to avoid duplication
@@ -285,11 +331,11 @@ public class ParameterSearch {
         // This loops once for each complete repetition of NTBEA specified.
         // runNTBEA runs a complete set of trials, and spits out the mean and std error on the mean of the best sampled result
         // These mean statistics are calculated from the evaluation trials that are run after NTBEA is complete. (evalGames)
-        Pair<Pair<Double, Double>, double[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new double[0]);
+        Pair<Pair<Double, Double>, int[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new int[0]);
         for (int mainLoop = 0; mainLoop < repeats; mainLoop++) {
             landscapeModel.reset();
             Pair<Double, Double> r = runNTBEA(null, evaluator, searchFramework, iterationsPerRun, iterationsPerRun, evalGames, verbose);
-            Pair<Pair<Double, Double>, double[]> retValue = new Pair<>(r, landscapeModel.getBestOfSampled());
+            Pair<Pair<Double, Double>, int[]> retValue = new Pair<>(r, Arrays.stream(landscapeModel.getBestOfSampled()).mapToInt(d -> (int) d).toArray());
             printDetailsOfRun(retValue, searchSpace, logfile, verbose, null);
             printDiversityResults(landscapeModel, kExplore);
 
@@ -314,12 +360,12 @@ public class ParameterSearch {
      *                    a more accurate estimate of their utility).
      * @param searchSpace The relevant searchSpace
      */
-    public static void printDetailsOfRun(Pair<Pair<Double, Double>, double[]> data, ITPSearchSpace searchSpace, String logFile, boolean verbose, IStatisticLogger statsLogger) {
+    public static void printDetailsOfRun(Pair<Pair<Double, Double>, int[]> data, ITPSearchSpace searchSpace, String logFile, boolean verbose, IStatisticLogger statsLogger) {
         System.out.printf("Recommended settings have score %.3g +/- %.3g:\t%s\n %s%n",
                 data.a.a, data.a.b,
-                Arrays.stream(data.b).mapToObj(it -> String.format("%.0f", it)).collect(joining(", ")),
+                Arrays.stream(data.b).mapToObj(it -> String.format("%d", it)).collect(joining(", ")),
                 IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
-                        .map(p -> String.format("\t%s:\t%s\n", searchSpace.name(p.a), valueToString(p.a, p.b.intValue(), searchSpace)))
+                        .map(p -> String.format("\t%s:\t%s\n", searchSpace.name(p.a), valueToString(p.a, p.b, searchSpace)))
                         .collect(joining(" ")));
 
         if (verbose && statsLogger != null && logFile.isEmpty()) {
@@ -328,41 +374,47 @@ public class ParameterSearch {
         }
 
         if (!logFile.isEmpty()) {
-            try {
-                File log = new File(logFile);
-                boolean fileExists = log.exists();
-                FileWriter writer = new FileWriter(log, true);
-                // if logFile does not yet exist, write a header line first
-                if (!fileExists) {
-                    List<String> headers = new ArrayList<>();
-                    headers.addAll(Arrays.asList("estimated value", "standard error"));
-                    headers.addAll(searchSpace.getSearchKeys());
-                    writer.write(String.join("\t", headers) + "\n");
-                }
-                // then write the output
-                String firstPart = String.format("%.4g\t%.4g\t", data.a.a, data.a.b);
-                String values = IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
-                        .map(p -> valueToString(p.a, p.b.intValue(), searchSpace))
-                        .collect(joining("\t"));
-                writer.write(firstPart + values + "\n");
-                writer.flush();
-                writer.close();
+            logSummary(data, searchSpace, logFile);
 
-                if (statsLogger != null) {
-                    statsLogger.record("estimated value", data.a.a);
-                    for (int index = 0; index < data.b.length; index++) {
-                        String key = searchSpace.name(index);
-                        String value = valueToString(index, (int) data.b[index], searchSpace);
-                        statsLogger.record(key, value);
-                    }
-                    statsLogger.processDataAndFinish();
+            if (statsLogger != null) {
+                statsLogger.record("estimated value", data.a.a);
+                for (int index = 0; index < data.b.length; index++) {
+                    String key = searchSpace.name(index);
+                    String value = valueToString(index, data.b[index], searchSpace);
+                    statsLogger.record(key, value);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println(e.getMessage() + " : Error accessing file " + logFile);
+                statsLogger.processDataAndFinish();
             }
         }
 
+    }
+
+    private static void logSummary(Pair<Pair<Double, Double>, int[]> data, ITPSearchSpace searchSpace, String logFile) {
+        try {
+            File log = new File(logFile);
+            boolean fileExists = log.exists();
+            FileWriter writer = new FileWriter(log, true);
+            // if logFile does not yet exist, write a header line first
+            if (!fileExists) {
+                List<String> headers = new ArrayList<>();
+                headers.addAll(Arrays.asList("estimated value", "standard error"));
+                headers.addAll(searchSpace.getSearchKeys());
+                writer.write(String.join("\t", headers) + "\n");
+            }
+            // then write the output
+            String firstPart = String.format("%.4g\t%.4g\t", data.a.a, data.a.b);
+            String values = IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
+                    .map(p -> valueToString(p.a, p.b, searchSpace))
+                    .collect(joining("\t"));
+            writer.write(firstPart + values + "\n");
+            writer.flush();
+            writer.close();
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage() + " : Error accessing file " + logFile);
+        }
     }
 
     private static String valueToString(int paramIndex, int valueIndex, ITPSearchSpace ss) {
@@ -489,7 +541,7 @@ public class ParameterSearch {
                                                 int evalGames, boolean logResults) {
 
         NTupleSystem landscapeModel = (NTupleSystem) searchFramework.getModel();
-        SearchSpace searchSpace = landscapeModel.getSearchSpace();
+        ITPSearchSpace searchSpace = (ITPSearchSpace) landscapeModel.getSearchSpace();
 
         // If reportEvery == totalRuns, then this will just loop once
         // (Which is the usual default)
@@ -540,22 +592,18 @@ public class ParameterSearch {
                         );
             }
         }
+        int[] winnerSettings = Arrays.stream(landscapeModel.getBestOfSampled())
+                .mapToInt(d -> (int) d)
+                .toArray();
         // now run the evaluation games on the final recommendation
         if (evaluator instanceof GameEvaluator && evalGames > 0) {
-            ((GameEvaluator) evaluator).reportStatistics = true;
             double[] results = IntStream.range(0, evalGames)
-                    .mapToDouble(answer -> {
-                        int[] settings = Arrays.stream(landscapeModel.getBestOfSampled())
-                                .mapToInt(d -> (int) d)
-                                .toArray();
-                        return evaluator.evaluate(settings);
-                    }).toArray();
+                    .mapToDouble(answer -> evaluator.evaluate(winnerSettings)).toArray();
 
             double avg = Arrays.stream(results).average().orElse(0.0);
             double stdErr = Math.sqrt(Arrays.stream(results)
                     .map(d -> Math.pow(d - avg, 2.0)).sum()) / (evalGames - 1.0);
 
-            ((GameEvaluator) evaluator).reportStatistics = false;
             return new Pair<>(avg, stdErr);
         } else {
             return new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled()), 0.0);

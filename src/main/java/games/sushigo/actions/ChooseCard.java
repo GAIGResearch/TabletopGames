@@ -58,7 +58,7 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         chopstickChooseDone = true;
     }
 
@@ -95,7 +95,6 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         return "Choose card " + getCard(gameState).getComponentName() + " [" + cardIdx + "] " + (useChopsticks ? " (+chopsticks)" : "");
     }
 
-    @Override
     public Card getCard(AbstractGameState gs) {
         SGGameState sggs = (SGGameState) gs;
         return sggs.getPlayerHands().get(playerId).get(cardIdx);

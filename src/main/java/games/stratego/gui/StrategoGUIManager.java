@@ -17,12 +17,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class StrategoGUIManager extends AbstractGUIManager implements IScreenHighlight {
 
     StrategoBoardView view;
 
-    public StrategoGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+    public StrategoGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         super(parent, game, ac, human);
 
         if (game == null) return;

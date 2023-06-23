@@ -1,22 +1,16 @@
 package evaluation;
 
-import core.*;
+import core.AbstractParameters;
+import core.AbstractPlayer;
+import core.Game;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
-import games.GameType;
-import evaluation.loggers.SummaryLogger;
-
-import core.AbstractPlayer;
-import core.Game;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
+import games.GameType;
 
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -29,8 +23,7 @@ import static java.util.stream.Collectors.toList;
  */
 public class GameEvaluator implements SolutionEvaluator {
 
-    public boolean reportStatistics;
-    public IStatisticLogger statsLogger = new SummaryLogger();
+    public IStatisticLogger statsLogger;
     public boolean debug = false;
     GameType game;
     AbstractParameters gameParams;
@@ -125,7 +118,6 @@ public class GameEvaluator implements SolutionEvaluator {
                 allPlayers.add(opponents.get(oppIndex).copy());
             } else {
                 AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(settings); // we create for each, in case this is coop
-                if (reportStatistics) tunedPlayer.setStatsLogger(statsLogger);
                 allPlayers.add(tunedPlayer);
             }
         }

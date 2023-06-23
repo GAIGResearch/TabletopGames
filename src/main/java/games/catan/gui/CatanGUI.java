@@ -62,7 +62,7 @@ public class CatanGUI extends AbstractGUIManager implements IScreenHighlight {
         playerHighlight.add(p);
     }
 
-    public CatanGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
+    public CatanGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
         if (game == null) return;
         this.gs = (CatanGameState) game.getGameState();

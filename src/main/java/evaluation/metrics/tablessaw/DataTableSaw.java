@@ -3,6 +3,7 @@ package evaluation.metrics.tablessaw;
 import core.Game;
 import core.interfaces.IGameEvent;
 import evaluation.metrics.AbstractMetric;
+import evaluation.metrics.Event;
 import evaluation.metrics.IDataLogger;
 import evaluation.metrics.IDataProcessor;
 import tech.tablesaw.api.*;

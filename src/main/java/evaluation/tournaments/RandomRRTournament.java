@@ -22,11 +22,11 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param agents          - players for the tournament.
      * @param gameToPlay      - game to play in this tournament.
      * @param playersPerGame  - number of players per game.
-     * @param selfPlay        - true if agents are allowed to play copies of themselves.
      */
     public RandomRRTournament(List<? extends AbstractPlayer> agents, GameType gameToPlay, int playersPerGame,
-                              boolean selfPlay, boolean mirror, int totalMatchUps, int reportPeriod, long seed, AbstractParameters gameParams, String destDir, String finalDir) {
-        super(agents, gameToPlay, playersPerGame, 1, selfPlay, mirror, gameParams, destDir, finalDir);
+                              TournamentMode tournamentMode, int totalMatchUps, int reportPeriod, long seed,
+                              AbstractParameters gameParams, String finalDir, String destDir) {
+        super(agents, gameToPlay, playersPerGame, 1, tournamentMode, gameParams, finalDir, destDir);
         this.totalMatchups = totalMatchUps;
         this.reportPeriod = reportPeriod;
         idStream = new PermutationCycler(agents.size(), seed, playersPerGame);
@@ -38,59 +38,26 @@ public class RandomRRTournament extends RoundRobinTournament {
      * search of all permutations would be prohibitive.
      *
      * @param ignored - this input is ignored
-     * @param gameIdx - index of game to play with this match-up.
      */
     @Override
-    public void createAndRunMatchUp(LinkedList<Integer> ignored, int gameIdx) {
-        int nPlayers = playersPerGame.get(gameIdx);
-        if (mirror) {
-            int nPerAgent = totalMatchups / agentIDs.size();
-            int g = 0;
-            for (Integer agentID : agentIDs) {
-                for (int i = 0; i < nPerAgent; i++) {
-                    List<Integer> matchup = new ArrayList<>(nPlayers);
-                    for (int j = 0; j < nPlayers; j++) {
-                        matchup.add(agentID);
-                    }
-                    evaluateMatchUp(matchup, gameIdx);
-                    g++;
-                    if (g == totalMatchups) {
-                        for (IGameListener listener : listeners) {
-                            listener.setOutputDirectory(destDir, finalDir);
-                        }
-                        return;
-                    }
-                    if (g % reportPeriod == 0) {
-                        reportResults(gameIdx);
+    public void createAndRunMatchUp(LinkedList<Integer> ignored) {
+        for (int i = 0; i < totalMatchups; i++) {
+            List<Integer> matchup = new ArrayList<>(this.nPlayers);
+            for (int j = 0; j < this.nPlayers; j++)
+                matchup.add(idStream.getAsInt());
+            evaluateMatchUp(matchup);
+            if(reportPeriod > 0 && (i+1) % reportPeriod == 0 && i != totalMatchups - 1) {
+                reportResults();
 
-                        StringBuilder timeDir = new StringBuilder("interim_" + games.get(gameIdx).getGameType().name() + "_" + nPlayers + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
-                        for (IGameListener listener : listeners) {
-                            listener.setOutputDirectory(destDir, timeDir.toString());
-                            listener.report();
-                        }
-                    }
+                StringBuilder timeDir = new StringBuilder("interim_" + game.getGameType().name() + "_" + nPlayers + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
+                for (IGameListener listener : listeners) {
+                    listener.setOutputDirectory(destDir, timeDir.toString());
+                    listener.report();
                 }
             }
-        } else {
-            // Random games
-            for (int i = 0; i < totalMatchups; i++) {
-                List<Integer> matchup = new ArrayList<>(nPlayers);
-                for (int j = 0; j < nPlayers; j++)
-                    matchup.add(idStream.getAsInt());
-                evaluateMatchUp(matchup, gameIdx);
-                if ((i + 1) % reportPeriod == 0 && i != totalMatchups - 1) {
-                    reportResults(gameIdx);
-
-                    StringBuilder timeDir = new StringBuilder("interim_" + games.get(gameIdx).getGameType().name() + "_" + nPlayers + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
-                    for (IGameListener listener : listeners) {
-                        listener.setOutputDirectory(destDir, timeDir.toString());
-                        listener.report();
-                    }
-                }
-            }
-            for (IGameListener listener : listeners) {
-                listener.setOutputDirectory(destDir, finalDir);
-            }
+        }
+        for (IGameListener listener : listeners) {
+            listener.setOutputDirectory(destDir, finalDir);
         }
     }
 
@@ -129,8 +96,7 @@ public class RandomRRTournament extends RoundRobinTournament {
          */
         private void shuffle() {
             int[] leastEntries = new int[nPlayers - 1];
-            for (int i = 0; i < leastEntries.length; i++)
-                leastEntries[i] = currentPermutation[currentPermutation.length - (nPlayers - 1) + i];
+            System.arraycopy(currentPermutation, currentPermutation.length - (nPlayers - 1), leastEntries, 0, leastEntries.length);
             for (int i = 0; i < currentPermutation.length - 1; i++) {
                 int swapPosition = rnd.nextInt(currentPermutation.length - i) + i;
                 if (swapPosition != i && !overlapRisk(i, swapPosition, leastEntries)) {

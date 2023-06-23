@@ -59,7 +59,7 @@ public class Cellar extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState gs, AbstractAction action) {
+    public void _afterAction(AbstractGameState gs, AbstractAction action) {
         DominionGameState state = (DominionGameState) gs;
         // if the action is DoNothing, then we have stopped
         // else we continue discarding

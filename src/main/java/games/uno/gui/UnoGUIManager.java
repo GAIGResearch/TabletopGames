@@ -15,6 +15,7 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.Set;
 
 
 public class UnoGUIManager extends AbstractGUIManager {
@@ -38,7 +39,7 @@ public class UnoGUIManager extends AbstractGUIManager {
     Border highlightActive = BorderFactory.createLineBorder(new Color(47, 132, 220), 3);
     Border[] playerViewBorders;
 
-    public UnoGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+    public UnoGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
         super(parent, game, ac, humanID);
 
         if (game != null) {
@@ -137,7 +138,7 @@ public class UnoGUIManager extends AbstractGUIManager {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 playerHands[i].update((UnoGameState) gameState);
                 if (i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || i == humanPlayerId
+                        || humanPlayerId.contains(i)
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable) {
                     playerHands[i].playerHandView.setFront(true);
                     playerHands[i].setFocusable(true);
