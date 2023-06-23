@@ -3,7 +3,6 @@ package players.mcts;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
-import core.interfaces.IStatisticLogger;
 import players.PlayerConstants;
 import utilities.*;
 
@@ -531,7 +530,7 @@ public class SingleTreeNode {
             List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs, params.actionSpace);
             if (availableActions.isEmpty())
                 throw new AssertionError("Should always have at least one action possible..." + (action != null? " Last action: " + action : ""));
-            action = oppModel.getAction(gs);
+            action = oppModel.getAction(gs, availableActions);
             if (inRollout) {
                 rolloutDepth++;
                 root.actionsInRollout.add(new Pair<>(gs.getCurrentPlayer(), action));
@@ -816,7 +815,7 @@ public class SingleTreeNode {
                 if (availableActions.isEmpty()) {
                     throw new AssertionError("No actions available in rollout!" + (next != null? " Last action: " + next.toString() : ""));
                 }
-                next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState);
+                next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
                 root.actionsInRollout.add(new Pair<>(lastActorInRollout, next));
                 advance(rolloutState, next, true);

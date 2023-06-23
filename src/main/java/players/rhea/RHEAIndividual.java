@@ -128,13 +128,13 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                 AbstractAction action;
                 AbstractGameState gsCopy = gs.copy();
                 copyCalls++;
-                List<AbstractAction> currentActions = fm.computeAvailableActions(gsCopy);
+                List<AbstractAction> currentActions = fm.computeAvailableActions(gsCopy, rolloutPolicy.getParameters().actionSpace);
                 availableActions[i] = currentActions;
                 boolean illegalAction = !currentActions.contains(actions[i]);
                 illegalActions[i] = illegalAction;
                 if (illegalAction || actions[i] == null) {
                     oldActions[i] = actions[i];
-                    action = rolloutPolicy.getAction(gsCopy);
+                    action = rolloutPolicy.getAction(gsCopy, currentActions);
                     if (repair || actions[i] == null) // if we are repairing then we override an illegal action with a random legitimate one
                         actions[i] = action;
                     if (repair && illegalAction)

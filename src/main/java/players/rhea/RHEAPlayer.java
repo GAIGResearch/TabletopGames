@@ -34,6 +34,7 @@ public class RHEAPlayer extends AbstractPlayer {
     public RHEAPlayer(RHEAParams params) {
         randomGenerator = new Random(params.getRandomSeed());
         this.params = params;
+        this.parameters = params;
         setName("rhea");
     }
 

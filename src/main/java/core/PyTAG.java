@@ -212,7 +212,7 @@ public class PyTAG {
                     currentPlayer.registerUpdatedObservation(observation);
                 } else {
                     // Get action from player, and time it
-                    action = currentPlayer.getAction(observation);
+                    action = currentPlayer.getAction(observation, observedActions);
                 }
             } else {
                 currentPlayer.registerUpdatedObservation(observation);
@@ -299,7 +299,7 @@ public class PyTAG {
     }
 
     public static void main(String[] args) {
-        Long seed = new Long(2466);
+        long seed = 2466;
         Random rnd = new Random(seed);
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 

@@ -546,7 +546,7 @@ public class Game {
                 // Get action from player, and time it
                 s = System.nanoTime();
                 if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
-                action = currentPlayer.getAction(observation);
+                action = currentPlayer.getAction(observation, observedActions);
 
                 agentTime += (System.nanoTime() - s);
                 nDecisions++;

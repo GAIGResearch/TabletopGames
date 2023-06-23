@@ -1,7 +1,6 @@
 package core;
 
 import core.actions.AbstractAction;
-import core.interfaces.IStatisticLogger;
 import evaluation.metrics.Event;
 import players.PlayerParameters;
 
@@ -15,7 +14,7 @@ public abstract class AbstractPlayer {
     protected Random rnd = new Random(System.currentTimeMillis());
     // Forward model for the game
     private AbstractForwardModel forwardModel;
-    protected PlayerParameters parameters = new PlayerParameters(System.currentTimeMillis());
+    public PlayerParameters parameters = new PlayerParameters(System.currentTimeMillis());
     protected List<AbstractPlayerDecorator> decorators = new ArrayList<>();
 
     /* Final methods */
@@ -67,22 +66,22 @@ public abstract class AbstractPlayer {
      * Then we apply any decorators to the chosen action.
      *
      * @param gameState
+     * @param observedActions
      * @return
      */
-    public final AbstractAction getAction(AbstractGameState gameState) {
-        List<AbstractAction> possibleActions = forwardModel.computeAvailableActions(gameState, parameters.actionSpace);
+    public final AbstractAction getAction(AbstractGameState gameState, List<AbstractAction> observedActions) {
         for (AbstractPlayerDecorator decorator : decorators) {
-            possibleActions = decorator.actionFilter(gameState, possibleActions);
+            observedActions = decorator.actionFilter(gameState, observedActions);
         }
         AbstractAction action;
-        switch (possibleActions.size()) {
+        switch (observedActions.size()) {
             case 0:
                 throw new AssertionError("No actions available for player " + this);
             case 1:
-                action = possibleActions.get(0);
+                action = observedActions.get(0);
                 break;
             default:
-                action = _getAction(gameState, possibleActions);
+                action = _getAction(gameState, observedActions);
         }
         for (AbstractPlayerDecorator decorator : decorators) {
             decorator.recordDecision(gameState, action);
