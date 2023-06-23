@@ -4,16 +4,12 @@ import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
-import games.descent2e.actions.DescentAction;
-import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 
-import static games.descent2e.actions.Triggers.*;
+public class Poisoned extends AttributeTest {
 
-public class Poisoned extends DescentAction {
-
-    public Poisoned() {
-        super(FORCED);
+    public Poisoned(int testingFigure, Figure.Attribute attribute) {
+        super(testingFigure, attribute);
     }
 
     @Override
@@ -27,38 +23,23 @@ public class Poisoned extends DescentAction {
     }
 
     @Override
-    public boolean execute(DescentGameState dgs) {
-
-        Figure f = dgs.getActingFigure();
-
-        // Poisoned tests against Might
-        Figure.Attribute attribute = Figure.Attribute.Might;
-        //System.out.println((attribute));
-
-        AttributeTest attributeTest = new AttributeTest(f.getComponentID());
-        attributeTest.setAttribute(attribute);
-        attributeTest.execute(dgs);
-        boolean result = attributeTest.getResult();
-
-        if (result) {
+    public void resolveTest(Figure f, boolean result)
+    {
+        if (result)
+        {
             f.removeCondition(DescentTypes.DescentCondition.Poison);
             System.out.println("Passed Poisoned Test!");
         }
-        else {
-            if (!f.getAttribute(Figure.Attribute.Health).isMinimum()) {
+        else
+        {
+            if (!f.getAttribute(Figure.Attribute.Health).isMinimum())
+            {
                 f.getAttribute(Figure.Attribute.Health).decrement();
                 System.out.println("Failed Poisoned Test!");
             }
         }
 
         f.addAttributeTest(DescentTypes.DescentCondition.Poison);
-
-        return true;
-    }
-
-    @Override
-    public DescentAction copy() {
-        return this;
     }
 
     @Override

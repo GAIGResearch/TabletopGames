@@ -4,16 +4,12 @@ import core.AbstractGameState;
 import games.descent2e.DescentGameState;
 import games.descent2e.DescentTypes;
 import games.descent2e.actions.AttributeTest;
-import games.descent2e.actions.DescentAction;
-import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
 
-import static games.descent2e.actions.Triggers.*;
+public class Diseased extends AttributeTest {
 
-public class Diseased extends DescentAction {
-
-    public Diseased() {
-        super(FORCED);
+    public Diseased(int testingFigure, Figure.Attribute attribute) {
+        super(testingFigure, attribute);
     }
 
     @Override
@@ -27,38 +23,23 @@ public class Diseased extends DescentAction {
     }
 
     @Override
-    public boolean execute(DescentGameState dgs) {
-
-        Figure f = dgs.getActingFigure();
-
-        // Diseased tests against Willpower
-        Figure.Attribute attribute = Figure.Attribute.Willpower;
-        //System.out.println((attribute));
-
-        AttributeTest attributeTest = new AttributeTest(f.getComponentID());
-        attributeTest.setAttribute(attribute);
-        attributeTest.execute(dgs);
-        boolean result = attributeTest.getResult();
-
-        if (result) {
+    public void resolveTest(Figure f, boolean result)
+    {
+        if (result)
+        {
             f.removeCondition(DescentTypes.DescentCondition.Disease);
             System.out.println("Passed Disease Test!");
         }
-        else {
-            if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum()) {
+        else
+        {
+            if (!f.getAttribute(Figure.Attribute.Fatigue).isMaximum())
+            {
                 f.getAttribute(Figure.Attribute.Fatigue).increment();
                 System.out.println("Failed Disease Test!");
             }
         }
 
         f.addAttributeTest(DescentTypes.DescentCondition.Disease);
-
-        return true;
-    }
-
-    @Override
-    public DescentAction copy() {
-        return this;
     }
 
     @Override

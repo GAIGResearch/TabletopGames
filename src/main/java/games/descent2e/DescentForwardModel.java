@@ -305,13 +305,13 @@ public class DescentForwardModel extends StandardForwardModelWithTurnOrder {
 
         if (actingFigure.hasCondition(DescentCondition.Poison) || actingFigure.hasCondition(DescentCondition.Disease))
         {
-            Diseased diseased = new Diseased();
+            Diseased diseased = new Diseased(actingFigure.getComponentID(), Figure.Attribute.Willpower);
             if (diseased.canExecute(dgs)) {
                 actions.add(diseased);
                 noTestsMade = false;
             }
 
-            Poisoned poisoned = new Poisoned();
+            Poisoned poisoned = new Poisoned(actingFigure.getComponentID(), Figure.Attribute.Might);
             if (poisoned.canExecute(dgs)) {
                 actions.add(poisoned);
                 noTestsMade = false;

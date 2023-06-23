@@ -6,10 +6,11 @@ import core.interfaces.IExtendedSequence;
 import games.descent2e.DescentGameState;
 import games.descent2e.components.DicePool;
 import games.descent2e.components.Figure;
+import games.descent2e.components.Hero;
+import games.descent2e.components.Monster;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import static games.descent2e.actions.Triggers.*;
 import static games.descent2e.actions.AttributeTest.TestPhase.*;
@@ -53,9 +54,10 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
     int penaltyToRoll = 0;
     boolean result = false;
 
-    public AttributeTest(int testingFigure) {
+    public AttributeTest(int testingFigure, Figure.Attribute attribute) {
         super(FORCED);
         this.testingFigure = testingFigure;
+        this.attribute = attribute;
     }
 
     @Override
@@ -137,6 +139,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
                 break;
             case POST_TEST_ROLL:
                 // Any rerolls are executed via interrupts
+                resolveTest(state.getActingFigure(), result);
                 phase = ALL_DONE;
                 break;
         }
@@ -145,13 +148,25 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
 
     private void testAttribute(DescentGameState dgs)
     {
+        Figure f = dgs.getActingFigure();
+
+        // Only Heroes and Lieutenant Monsters can make Attribute Tests
+
+        if (f instanceof Monster || !(f instanceof Hero))
+        {
+            // By default, regular Monsters will always fail, as they have no attributes
+            if (!((Monster) f).isLieutenant())
+            {
+                result = false;
+                return;
+            }
+        }
+
         dgs.setAttributeDicePool(DicePool.constructDicePool("GREY", "BLACK"));
 
         dgs.getAttributeDicePool().roll(dgs.getRandom());
 
         int roll = dgs.getAttributeDicePool().getShields();
-
-        phase = POST_TEST_ROLL;
 
         // Normally, both penalties remain at 0, however the Overlord can influence either
         if ((roll + penaltyToRoll) <= (attributeValue - penaltyToAttribute))
@@ -163,6 +178,11 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         {
             result = false;
         }
+    }
+
+    public void resolveTest(Figure f, boolean result)
+    {
+        return;
     }
 
     @Override
@@ -192,7 +212,7 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
 
     @Override
     public AttributeTest copy() {
-        AttributeTest retValue = new AttributeTest(testingFigure);
+        AttributeTest retValue = new AttributeTest(testingFigure, attribute);
         retValue.testingPlayer = testingPlayer;
         retValue.phase = phase;
         retValue.interruptPlayer = interruptPlayer;
@@ -242,9 +262,19 @@ public class AttributeTest extends DescentAction implements IExtendedSequence {
         penaltyToAttribute += penalty;
     }
 
+    public int getPenaltyToAttribute()
+    {
+        return penaltyToAttribute;
+    }
+
     public void addPenaltyToRoll(int penalty)
     {
         penaltyToRoll += penalty;
+    }
+
+    public int getPenaltyToRoll()
+    {
+        return penaltyToRoll;
     }
 
     public boolean getResult()

@@ -7,6 +7,7 @@ import utilities.Vector2D;
 
 public class Monster extends Figure {
 
+    boolean lieutenant = false;
     AttackType attackType = AttackType.NONE;
     public enum Direction {
         DOWN(new Vector2D()),
@@ -67,6 +68,7 @@ public class Monster extends Figure {
         Monster copy = new Monster(componentName, nActionsExecuted.copy(), componentID);
         copy.orientation = orientation;
         copy.attackType = attackType;
+        copy.lieutenant = lieutenant;
         super.copyComponentTo(copy);
         return copy;
     }
@@ -75,6 +77,7 @@ public class Monster extends Figure {
         Monster copy = new Monster();
         copy.orientation = orientation;
         copy.attackType = attackType;
+        copy.lieutenant = lieutenant;
         super.copyComponentTo(copy);
         return copy;
     }
@@ -92,6 +95,10 @@ public class Monster extends Figure {
             default:
                 this.attackType = AttackType.NONE;
         }
+    }
+
+    public boolean isLieutenant() {
+        return lieutenant;
     }
 
     public AttackType getAttackType() {
