@@ -171,7 +171,7 @@
                             </descriptorRefs>
                             <archive>
                                 <manifest>
-                                    <mainClass>evaluation.ParameterSearch</mainClass>
+                                    <mainClass>evaluation.optimisation.ParameterSearch</mainClass>
                                 </manifest>
                             </archive>
                             <finalName>ParameterSearch</finalName>

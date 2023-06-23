@@ -1,6 +1,5 @@
 package core.interfaces;
 
-import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
 
 import java.util.*;

@@ -2,7 +2,7 @@ package players.simple;
 
 import core.*;
 import core.interfaces.*;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
 
 

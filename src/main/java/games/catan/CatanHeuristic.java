@@ -6,7 +6,7 @@ import core.CoreConstants;
 import core.components.Card;
 import core.components.Deck;
 import core.interfaces.IStateHeuristic;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import games.catan.components.Settlement;
 
 import java.util.ArrayList;

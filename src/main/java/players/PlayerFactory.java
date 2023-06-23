@@ -1,13 +1,11 @@
 package players;
 
 import core.AbstractPlayer;
-import evaluation.TunableParameters;
+import evaluation.optimisation.TunableParameters;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import players.mcts.BasicMCTSPlayer;
-import players.mcts.MCTSParams;
-import players.mcts.MCTSPlayer;
 import players.rhea.RHEAParams;
 import players.rhea.RHEAPlayer;
 import players.rmhc.RMHCParams;
