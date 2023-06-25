@@ -4,26 +4,15 @@ import java.util.Arrays;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IActionFeatureVector;
 import players.rl.RLPlayer;
-import players.rl.RLTrainer;
 
 public class LinearApproxQWDS extends QWeightsDataStructure {
 
-    double[] qWeights;
-    IActionFeatureVector features;
-
-    public LinearApproxQWDS() {
-        super();
-    }
-
-    public LinearApproxQWDS(RLTrainer trainer) {
-        super(trainer);
-    }
+    public double[] qWeights;
 
     @Override
     public double evaluateQ(RLPlayer player, AbstractGameState state, AbstractAction action) {
-        double[] featureVector = features.featureVector(action, state, player.getPlayerID());
+        double[] featureVector = params.features.featureVector(action, state, player.getPlayerID());
         double ret = 0;
         for (int i = 0; i < featureVector.length; i++)
             ret += qWeights[i] * featureVector[i];
@@ -35,7 +24,7 @@ public class LinearApproxQWDS extends QWeightsDataStructure {
         // if (trainer != null)
         // qWeights = trainer.qWeights;
         // else
-        qWeights = new double[features.names().length];
+        qWeights = new double[params.features.names().length];
     }
 
     @Override

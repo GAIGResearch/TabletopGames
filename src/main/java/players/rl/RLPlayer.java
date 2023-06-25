@@ -12,37 +12,43 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants.GameResult;
 import core.actions.AbstractAction;
-import core.interfaces.IStateFeatureVector;
-import players.rl.dataStructures.LinearApproxQWDS;
 import players.rl.dataStructures.QWeightsDataStructure;
-import players.rl.dataStructures.TabularQWDS;
 import players.rl.dataStructures.TurnSAR;
 
+
 public class RLPlayer extends AbstractPlayer {
+
+    enum RLType {
+        TABULAR,
+        LINEAR_APPROX,
+    }
 
     protected final Random rng;
     protected final String resourcesPath = "src/main/java/players/rl/resources/";
 
-    protected RLTrainer trainer;
+    public RLTrainer trainer;
 
     final public RLParams params;
-    public IStateFeatureVector features;
 
-    final QWeightsDataStructure qWeights;
+    private QWeightsDataStructure qWeights;
 
     public RLPlayer(QWeightsDataStructure qWeights, RLParams params) {
         this.rng = new Random(params.getRandomSeed());
         this.params = params;
         this.qWeights = qWeights;
+        this.qWeights.setParams(params);
     }
 
     protected RLPlayer(QWeightsDataStructure qWeights, RLParams params, RLTrainer trainer) {
         this(qWeights, params);
         this.trainer = trainer;
+        this.qWeights.setTrainingParams(trainer.params);
     }
 
     @Override
     public void initializePlayer(AbstractGameState gameState) {
+        this.params.features.linkPlayer(this);
+
         if (trainer == null) {
             String readPath = resourcesPath + gameState.getGameType().name() + "/beta.txt";
             Path path = Paths.get(readPath);

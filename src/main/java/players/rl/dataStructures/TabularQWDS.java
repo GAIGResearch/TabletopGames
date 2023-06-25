@@ -4,9 +4,7 @@ import java.util.Map;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
-import core.interfaces.IStateFeatureVector;
 import players.rl.RLPlayer;
-import players.rl.RLTrainer;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -15,18 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class TabularQWDS extends QWeightsDataStructure {
-    Map<String, Double> qWeights;
-    IStateFeatureVector features;
 
-    public TabularQWDS(IStateFeatureVector features) {
-        super();
-        this.features = features;
-    }
-
-    public TabularQWDS(IStateFeatureVector features, RLTrainer trainer) {
-        super(trainer);
-        this.features = features;
-    }
+    public Map<String, Double> qWeights;
 
     @Override
     public void initQWeights() {
@@ -56,7 +44,7 @@ public class TabularQWDS extends QWeightsDataStructure {
 
         double q_s0a0 = evaluateQ(player, s0, t0.a);
         // Q-Learning formula
-        q_s0a0 = q_s0a0 + trainer.params.alpha * (t1.r + trainer.params.gamma * maxQ_s1a - q_s0a0);
+        q_s0a0 = q_s0a0 + trainingParams.alpha * (t1.r + trainingParams.gamma * maxQ_s1a - q_s0a0);
         add(player, s0, t0.a, q_s0a0);
     }
 
@@ -82,9 +70,7 @@ public class TabularQWDS extends QWeightsDataStructure {
     }
 
     private String getStateId(RLPlayer player, AbstractGameState state, AbstractAction action) {
-        AbstractGameState copyState = state.copy(player.getPlayerID());
-        player.getForwardModel().next(copyState, action);
-        double[] featureVector = features.featureVector(copyState, player.getPlayerID());
+        double[] featureVector = params.features.featureVector(action, state, player.getPlayerID());
         return Arrays.toString(featureVector).replaceAll(" ", "");
     }
 

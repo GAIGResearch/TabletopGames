@@ -10,20 +10,17 @@ import java.util.List;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import players.rl.RLParams;
 import players.rl.RLPlayer;
-import players.rl.RLTrainer;
+import players.rl.RLTrainingParams;
 
 public abstract class QWeightsDataStructure {
 
-    protected RLTrainer trainer;
+    protected RLParams params;
+    protected RLTrainingParams trainingParams;
 
-    public QWeightsDataStructure() {
+    QWeightsDataStructure() {
         initQWeights();
-    }
-
-    public QWeightsDataStructure(RLTrainer trainer) {
-        this();
-        this.trainer = trainer;
     }
 
     public abstract void initQWeights();
@@ -47,7 +44,7 @@ public abstract class QWeightsDataStructure {
         }
     }
 
-    public void tryReadBetaFromFile(String readPath) {
+    public void tryReadQWeightsFromFile(String readPath) {
         Path path = Paths.get(readPath);
         if (Files.exists(path) && Files.isRegularFile(path)) {
             try {
@@ -59,7 +56,7 @@ public abstract class QWeightsDataStructure {
         }
     }
 
-    public void writeBetaToFile(String resourcesPath, String gameName) {
+    public void writeQWeightsToFile(String resourcesPath, String gameName) {
         // Write beta to the file
         String outputText = qWeightsToString();
         String writePath = resourcesPath + gameName + "/beta.txt";
@@ -74,6 +71,14 @@ public abstract class QWeightsDataStructure {
         } catch (IOException e) {
             System.out.println("An error occurred while writing beta to the file: " + e.getMessage());
         }
+    }
+
+    public void setParams(RLParams params) {
+        this.params = params;
+    }
+
+    public void setTrainingParams(RLTrainingParams trainingParams) {
+        this.trainingParams = trainingParams;
     }
 
 }

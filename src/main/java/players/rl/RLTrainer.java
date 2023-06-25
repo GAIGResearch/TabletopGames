@@ -7,12 +7,12 @@ import java.util.Map;
 
 import core.AbstractPlayer;
 import core.Game;
-import core.interfaces.IStateFeatureVector;
 import evaluation.listeners.IGameListener;
 import games.GameType;
 import games.tictactoe.TicTacToeStateVector;
 import players.human.ActionController;
 import players.rl.dataStructures.QWeightsDataStructure;
+import players.rl.dataStructures.RLFeatureVector;
 import players.rl.dataStructures.TabularQWDS;
 import players.rl.dataStructures.TurnSAR;
 
@@ -20,23 +20,21 @@ public class RLTrainer {
 
     Map<Integer, List<TurnSAR>> playerTurns;
 
-    public final RLTrainerParams params;
-
-    IStateFeatureVector features;
-
+    private String gameName;
+    public final RLTrainingParams params;
+    RLFeatureVector features;
     QWeightsDataStructure qwds;
 
     // FIXME these are temp variables
     private final String resourcesPath = "src/main/java/players/rl/resources/";
-    private String gameName;
 
-    RLTrainer(RLTrainerParams params) {
-        // TODO set game name and more through RLTrainerParams
+    RLTrainer(RLTrainingParams params) {
+        // TODO set game name and more through RLTrainingParams
         this.gameName = "TicTacToe";
         this.params = params;
         this.features = new TicTacToeStateVector();
-        qwds = new TabularQWDS(features, this);
-        qwds.tryReadBetaFromFile(resourcesPath + gameName + "/beta.txt");
+        qwds = new TabularQWDS();
+        qwds.tryReadQWeightsFromFile(resourcesPath + gameName + "/beta.txt");
         resetTrainer();
     }
 
@@ -69,16 +67,20 @@ public class RLTrainer {
         players.add(new RLPlayer(qwds, playerParams, this));
         players.add(new RLPlayer(qwds, playerParams, this));
         int nIterations = 100000;
-        for (int i = 1; i <= 100000; i++) {
-            if (i % (nIterations / 100) == 0) {
-                System.out.println((i / (nIterations / 100)) + "%");
-                qwds.writeBetaToFile(resourcesPath, gameName);
+        System.out.println("Starting training...");
+        for (int i = 1; i <= nIterations; i++) {
+            int splitSize = nIterations / 100;
+            if (splitSize != 0 && i % splitSize == 0) {
+                System.out.println((i / splitSize) + "%");
+                // Every 10%, write progress to file
+                if ((i / splitSize) % 10 == 0)
+                    qwds.writeQWeightsToFile(resourcesPath, gameName);
             }
             runGame(GameType.valueOf(gameName), gameParams, players, System.currentTimeMillis(), false, null,
                     useGUI ? new ActionController() : null, turnPause);
         }
-        qwds.writeBetaToFile(resourcesPath, gameName);
-
+        qwds.writeQWeightsToFile(resourcesPath, gameName);
+        System.out.print("Training complete!");
     }
 
     private void runGame(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
@@ -88,7 +90,7 @@ public class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainerParams params = new RLTrainerParams();
+        RLTrainingParams params = new RLTrainingParams();
         RLTrainer trainer = new RLTrainer(params);
         trainer.runTraining();
     }

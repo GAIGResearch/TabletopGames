@@ -2,12 +2,13 @@ package games.tictactoe;
 
 import core.AbstractGameState;
 import core.components.Token;
-import core.interfaces.IStateFeatureVector;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-public class TicTacToeStateVector implements IStateFeatureVector {
+import players.rl.dataStructures.SimRLFeatureVector;
+
+public class TicTacToeStateVector extends SimRLFeatureVector {
 
     // assume the grid is 3x3 ... if not, write a new StateVector
     private final String[] names = (String[]) IntStream.range(0, 3).boxed().flatMap(row ->

@@ -19,6 +19,7 @@ import players.human.*;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
 import players.rl.dataStructures.QWeightsDataStructure;
+import players.rl.dataStructures.RLFeatureVector;
 import players.rl.dataStructures.TabularQWDS;
 import utilities.Pair;
 import utilities.Utils;
@@ -938,9 +939,9 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        IStateFeatureVector features = new TicTacToeStateVector();
+        RLFeatureVector features = new TicTacToeStateVector();
         RLParams p1 = new RLParams(features);
-        TabularQWDS qwds = new TabularQWDS(features);
+        TabularQWDS qwds = new TabularQWDS();
         players.add(new RLPlayer(qwds, p1));
         players.add(new RLPlayer(qwds, p1));
 //        players.add(new MCTSPlayer());
