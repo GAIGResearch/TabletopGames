@@ -217,6 +217,24 @@
                             <goal>single</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>SkillLadder</id>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>evaluation.SkillLadder</mainClass>
+                                </manifest>
+                            </archive>
+                            <finalName>SkillLadder</finalName>
+                        </configuration>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
