@@ -2,16 +2,15 @@ package games.monopolydeal.cards;
 
 import core.CoreConstants;
 import core.components.Deck;
-import org.apache.poi.ss.formula.atp.Switch;
 
-public class Set extends Deck<MonopolyDealCard> {
+public class PropertySet extends Deck<MonopolyDealCard> {
     SetType type;
     boolean isComplete;
     boolean hasWild; // Used to check for modifyBoard
     // Used to check rent
     boolean hasHouse;
     boolean hasHotel;
-    public Set(String name, CoreConstants.VisibilityMode visibility,SetType type) {
+    public PropertySet(String name, CoreConstants.VisibilityMode visibility, SetType type) {
         super(name, visibility);
         this.type = type;
         isComplete = false;
@@ -20,8 +19,8 @@ public class Set extends Deck<MonopolyDealCard> {
     }
 
     // Copy constructor???
-    public Set copy(){
-        Set retValue = (Set) super.copy();
+    public PropertySet copy(){
+        PropertySet retValue = (PropertySet) super.copy();
 
         retValue.type = type;
         retValue.isComplete = isComplete;

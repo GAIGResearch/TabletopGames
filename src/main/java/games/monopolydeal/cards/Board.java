@@ -1,6 +1,5 @@
 package games.monopolydeal.cards;
 
-import core.CoreConstants;
 import core.components.Deck;
 
 import java.util.ArrayList;
@@ -10,10 +9,10 @@ import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
 public class Board {
     public Deck<MonopolyDealCard> playerBank;
-    public List<Set> playerPropertySets;
+    public List<PropertySet> playerPropertySets;
 
     public Board(int playerId) {
         playerBank = new Deck<MonopolyDealCard>("Bank of Player:" + playerId, VISIBLE_TO_ALL);
-        playerPropertySets = new ArrayList<Set>();
+        playerPropertySets = new ArrayList<PropertySet>();
     }
 }

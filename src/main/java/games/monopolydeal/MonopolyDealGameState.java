@@ -2,16 +2,13 @@ package games.monopolydeal;
 
 import core.AbstractGameState;
 import core.AbstractParameters;
-import core.CoreConstants;
 import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
+import core.interfaces.IGamePhase;
 import games.GameType;
-import games.dominion.DominionParameters;
-import games.monopolydeal.cards.Board;
-import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
-import games.monopolydeal.cards.Set;
+import games.monopolydeal.cards.PropertySet;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
@@ -36,10 +33,15 @@ public class MonopolyDealGameState extends AbstractGameState {
     PartialObservableDeck<MonopolyDealCard>[] playerHands;
     //Board[] playerBoards;
     Deck<MonopolyDealCard>[] playerBanks;
-    List<Set>[] playerPropertySets;
+    List<PropertySet>[] playerPropertySets;
 
     Deck<MonopolyDealCard> drawPile;
     Deck<MonopolyDealCard> discardPile;
+
+
+    // Player turn status members
+    int actionsLeft = 3;
+    boolean turnStart = true;
     /**
      * @param gameParameters - game parameters.
      * @param nPlayers       - number of players in the game
@@ -49,6 +51,8 @@ public class MonopolyDealGameState extends AbstractGameState {
 
         rnd = new Random(gameParameters.getRandomSeed());
         params = (MonopolyDealParameters) gameParameters;
+        actionsLeft = params.ACTIONS_PER_TURN;
+        turnStart = true;
         this._reset();
     }
 
@@ -56,7 +60,6 @@ public class MonopolyDealGameState extends AbstractGameState {
         playerHands = new PartialObservableDeck[getNPlayers()];
         playerBanks = new Deck[getNPlayers()];
         playerPropertySets = new List[getNPlayers()];
-        //playerBoards = new Board[getNPlayers()];
 
         drawPile = new Deck<>("Draw Pile",HIDDEN_TO_ALL);
         discardPile = new Deck<>("Discard Pile",VISIBLE_TO_ALL);
@@ -66,8 +69,6 @@ public class MonopolyDealGameState extends AbstractGameState {
             playerHands[i] = new PartialObservableDeck<>("Hand of Player " + i + 1, handVisibility);
             playerBanks[i] = new Deck<>("Bank of Player"+i+1,VISIBLE_TO_ALL);
             playerPropertySets[i] = new ArrayList<>();
-            //playerBoards[i] = new Board(i+1);
-
         }
     }
 
@@ -131,13 +132,36 @@ public class MonopolyDealGameState extends AbstractGameState {
         // Completely visible values
         for(int i=0;i<getNPlayers();i++){
             retValue.playerBanks[i] = playerBanks[i].copy();
-            for (Set propertySet:playerPropertySets[i]) {
+            for (PropertySet propertySet:playerPropertySets[i]) {
                 retValue.playerPropertySets[i].add(propertySet.copy());
             }
         }
         retValue.discardPile = discardPile.copy();
+        retValue.actionsLeft = actionsLeft;
+        retValue.turnStart = turnStart;
 
         return retValue;
+    }
+
+    public boolean canModifyBoard(int playerID){
+        return false;
+    }
+    public void drawCard(int playerID,int drawCount){
+        for(int i=0;i<drawCount;i++) {
+            if(drawPile.getSize() == 0){
+                resetDrawPile();
+            }
+            playerHands[playerID].add(drawPile.draw());
+        }
+    }
+    public void resetDrawPile(){
+        drawPile.add(discardPile);
+        discardPile.clear();
+        drawPile.shuffle(rnd);
+    }
+    public void endTurn() {
+        actionsLeft = params.ACTIONS_PER_TURN;
+        turnStart = true;
     }
 
     /**
@@ -176,5 +200,9 @@ public class MonopolyDealGameState extends AbstractGameState {
     public int hashCode() {
         // TODO: include the hash code of all variables
         return super.hashCode();
+    }
+    public enum MonopolyDealGamePhase implements IGamePhase {
+        Play,
+        Discard
     }
 }
