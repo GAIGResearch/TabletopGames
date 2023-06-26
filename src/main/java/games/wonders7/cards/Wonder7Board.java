@@ -8,25 +8,25 @@ import games.wonders7.Wonders7GameState;
 import java.util.*;
 
 public class Wonder7Board extends Card {
-    public enum wonder {
-        colossus,
-        lighthouse,
-        temple,
-        gardens,
-        statue,
-        mausoleum,
-        pyramids
+    public enum Wonder {
+        Colossus,
+        Lighthouse,
+        Temple,
+        Gardens,
+        Statue,
+        Mausoleum,
+        Pyramids
     }
 
     public final String wonderName;
-    public final wonder type;
+    public final Wonder type;
     public boolean effectUsed;
     public int wonderStage;
     public final Map<Wonders7Constants.Resource, Integer> resourcesProduced; // Default wonder production
     public List<Map<Wonders7Constants.Resource, Integer>> constructionCosts; // Cost of each stage
     public List<Map<Wonders7Constants.Resource, Integer>> stageProduce; // Production of each stage
 
-    public Wonder7Board(wonder type, List<Map<Wonders7Constants.Resource, Integer>> constructionCosts,
+    public Wonder7Board(Wonder type, List<Map<Wonders7Constants.Resource, Integer>> constructionCosts,
                         List<Map<Wonders7Constants.Resource, Integer>> stageProduce) {
         super(type.toString());
         this.type = type;
@@ -38,47 +38,47 @@ public class Wonder7Board extends Card {
         this.effectUsed = true;
 
         switch (type){
-            case colossus:
+            case Colossus:
                 this.wonderName = "The Colossus of Rhodes          ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.ore, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Ore, 1);
                 break;
-            case lighthouse:
+            case Lighthouse:
                 this.wonderName = "The Lighthouse of Alexandria    ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.glass, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Glass, 1);
                 break;
-            case temple:
+            case Temple:
                 this.wonderName = "The Temple of Artemis in Ephesus";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.papyrus, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Papyrus, 1);
                 break;
-            case gardens:
+            case Gardens:
                 this.wonderName = "The Hanging Gardens of Babylon  ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.clay, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Clay, 1);
                 break;
-            case statue:
+            case Statue:
                 this.wonderName = "The Statue of Zeus in Olympia   ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.wood, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Wood, 1);
                 break;
-            case mausoleum:
+            case Mausoleum:
                 this.wonderName = "The Mausoleum of Halicarnassus  ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.textile, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Textile, 1);
                 break;
-            case pyramids:
+            case Pyramids:
                 this.wonderName = "The Pyramids of Giza            ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.stone, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Stone, 1);
                 break;
             default: this.wonderName = ""; this.resourcesProduced = new HashMap<>();
             break;
         }
     }
 
-    public Wonder7Board(wonder type, List<Map<Wonders7Constants.Resource, Integer>> constructionCosts,
+    public Wonder7Board(Wonder type, List<Map<Wonders7Constants.Resource, Integer>> constructionCosts,
                         List<Map<Wonders7Constants.Resource, Integer>> stageProduce, int componentID) {
         super(type.toString(),componentID);
         this.type = type;
@@ -90,40 +90,40 @@ public class Wonder7Board extends Card {
         this.effectUsed = true;
 
         switch (type){
-            case colossus:
+            case Colossus:
                 this.wonderName = "The Colossus of Rhodes          ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.ore, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Ore, 1);
                 break;
-            case lighthouse:
+            case Lighthouse:
                 this.wonderName = "The Lighthouse of Alexandria    ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.glass, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Glass, 1);
                 break;
-            case temple:
+            case Temple:
                 this.wonderName = "The Temple of Artemis in Ephesus";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.papyrus, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Papyrus, 1);
                 break;
-            case gardens:
+            case Gardens:
                 this.wonderName = "The Hanging Gardens of Babylon  ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.clay, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Clay, 1);
                 break;
-            case statue:
+            case Statue:
                 this.wonderName = "The Statue of Zeus in Olympia   ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.wood, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Wood, 1);
                 break;
-            case mausoleum:
+            case Mausoleum:
                 this.wonderName = "The Mausoleum of Halicarnassus  ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.textile, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Textile, 1);
                 break;
-            case pyramids:
+            case Pyramids:
                 this.wonderName = "The Pyramids of Giza            ";
                 this.resourcesProduced = new HashMap<>();
-                this.resourcesProduced.put(Wonders7Constants.Resource.stone, 1);
+                this.resourcesProduced.put(Wonders7Constants.Resource.Stone, 1);
                 break;
             default: this.wonderName = ""; this.resourcesProduced = new HashMap<>();
                 break;

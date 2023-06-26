@@ -37,10 +37,10 @@ public class PlayCard extends DrawCard {
         Wonder7Card card = wgs.getPlayerHand(wgs.getCurrentPlayer()).get(index); // Card being selected
 
         // Removes coins paid for card
-        if (card.constructionCost.get(Wonders7Constants.Resource.coin)!=null) {
-            int cardValue = card.constructionCost.get(Wonders7Constants.Resource.coin); // Number of coins the card costs
-            int playerValue = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.coin); // Number of coins the player owns
-            wgs.getPlayerResources(wgs.getCurrentPlayer()).put(Wonders7Constants.Resource.coin, playerValue - cardValue);// Subtracts coins
+        if (card.constructionCost.get(Wonders7Constants.Resource.Coin)!=null) {
+            int cardValue = card.constructionCost.get(Wonders7Constants.Resource.Coin); // Number of coins the card costs
+            int playerValue = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.Coin); // Number of coins the player owns
+            wgs.getPlayerResources(wgs.getCurrentPlayer()).put(Wonders7Constants.Resource.Coin, playerValue - cardValue);// Subtracts coins
         }
 
         // Gives player resources produced from card

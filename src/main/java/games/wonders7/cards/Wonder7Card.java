@@ -155,7 +155,7 @@ public class Wonder7Card extends Card {
         key = neededResources.keySet();
         for (Wonders7Constants.Resource resource : key)
             coinCost += 2*neededResources.get(resource); // For each unit of the resource needed
-        if (coinCost>wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.coin)){return false;} // If player can pay the neighbour for the resources
+        if (coinCost>wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.Coin)){return false;} // If player can pay the neighbour for the resources
 
 
         HashMap<Wonders7Constants.Resource, Integer> neighbourResources = new HashMap<>(); // Resources offered by the neighbour
@@ -225,7 +225,7 @@ public class Wonder7Card extends Card {
         key = neededResources.keySet();
         for (Wonders7Constants.Resource resource : key)
             coinCost += 2*neededResources.get(resource); // For each unit of the resource needed
-        if (coinCost>wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.coin)){return false;} // If player can pay the neighbour for the resources
+        if (coinCost>wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.Coin)){return false;} // If player can pay the neighbour for the resources
 
 
         HashMap<Wonders7Constants.Resource, Integer> neighbourResources = new HashMap<>(); // Resources offered by the neighbour

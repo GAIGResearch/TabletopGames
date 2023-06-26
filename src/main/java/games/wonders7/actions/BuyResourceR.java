@@ -52,10 +52,10 @@ public class BuyResourceR extends DrawCard {
             coinCost += 2*neededResources.get(resource); // For each unit of the resource needed
 
         // Gives player to the right their money and removes coins from current player
-        int currentPlayerCoins = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.coin); // Current players coin count
-        int neighbourCoins = wgs.getPlayerResources((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).get(Wonders7Constants.Resource.coin); // Neighbour's coin count
-        wgs.getPlayerResources(wgs.getCurrentPlayer()).put(Wonders7Constants.Resource.coin, currentPlayerCoins - coinCost); // Player pays coins to neighbour
-        wgs.getPlayerResources((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).put(Wonders7Constants.Resource.coin, neighbourCoins + coinCost); // Neighbour receives coins for player
+        int currentPlayerCoins = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.Coin); // Current players coin count
+        int neighbourCoins = wgs.getPlayerResources((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).get(Wonders7Constants.Resource.Coin); // Neighbour's coin count
+        wgs.getPlayerResources(wgs.getCurrentPlayer()).put(Wonders7Constants.Resource.Coin, currentPlayerCoins - coinCost); // Player pays coins to neighbour
+        wgs.getPlayerResources((wgs.getCurrentPlayer()+1)%wgs.getNPlayers()).put(Wonders7Constants.Resource.Coin, neighbourCoins + coinCost); // Neighbour receives coins for player
 
         // Gives player resources produced from card
         key = card.resourcesProduced.keySet(); // Gets all the resources the card provides
