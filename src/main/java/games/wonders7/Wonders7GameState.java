@@ -133,27 +133,27 @@ public class Wonders7GameState extends AbstractGameState {
         }
         // Evaluate military conflicts
         int nextplayer = (playerId +1)% getNPlayers();
-        if(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.shield) > playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.shield)){ // IF PLAYER i WINS
-            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.victory,  playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.victory)+(2*currentAge-1)); // 2N-1 POINTS FOR PLAYER i
-            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.victory,  playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.victory)-1); // -1 FOR THE PLAYER i+1
+        if(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Shield) > playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)){ // IF PLAYER i WINS
+            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory)+(2*currentAge-1)); // 2N-1 POINTS FOR PLAYER i
+            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory)-1); // -1 FOR THE PLAYER i+1
         }
-        else if (playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.shield) < playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.shield)){ // IF PLAYER i+1 WINS
-            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.victory,  playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.victory)-1);// -1 POINT FOR THE PLAYER i
-            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.victory,  playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.victory)+(2*currentAge-1));// 2N-1 POINTS FOR PLAYER i+1
+        else if (playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Shield) < playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)){ // IF PLAYER i+1 WINS
+            playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory)-1);// -1 POINT FOR THE PLAYER i
+            playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory)+(2*currentAge-1));// 2N-1 POINTS FOR PLAYER i+1
         }
 
-        int vp = playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.victory);
+        int vp = playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory);
         // Treasury
-        vp += playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.coin)/3;
+        vp += playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Coin)/3;
         // Scientific
-        vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.cog),2);
-        vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.compass),2);
-        vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.tablet),2);
+        vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog),2);
+        vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass),2);
+        vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet),2);
         // Sets of different science symbols
-        vp += 7*Math.min(Math.min(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.cog),playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.compass)),playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.tablet));
+        vp += 7*Math.min(Math.min(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog),playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass)),playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet));
 
-        playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.victory, vp);
-        return playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.victory);
+        playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, vp);
+        return playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory);
     }
 
 

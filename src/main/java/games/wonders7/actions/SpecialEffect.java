@@ -39,11 +39,11 @@ public class SpecialEffect extends DrawCard {
 
         Wonder7Board board = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer());
         switch (board.type){
-            case lighthouse:
-            case mausoleum:
-            case gardens:
+            case Lighthouse:
+            case Mausoleum:
+            case Gardens:
                 wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).effectUsed = true;
-            case statue:
+            case Statue:
                 // Gives player resources produced from card
                 Set<Wonders7Constants.Resource> keys = card.resourcesProduced.keySet(); // Gets all the resources the card provides
                 for (Wonders7Constants.Resource resource: keys){  // Goes through all keys for each resource

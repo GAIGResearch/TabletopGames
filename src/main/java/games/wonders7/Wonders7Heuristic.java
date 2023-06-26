@@ -42,36 +42,36 @@ public class Wonders7Heuristic extends TunableParameters implements IStateHeuris
         for (int i=0;i<wgs.getNPlayers();i++){
             // Evaluate military conflicts
             int nextplayer = (i+1)% wgs.getNPlayers();
-            if(playerResourcesCopy.get(i).get(Wonders7Constants.Resource.shield) > playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.shield)){ // IF PLAYER i WINS
-                playerResourcesCopy.get(i).put(Wonders7Constants.Resource.victory,  playerResourcesCopy.get(i).get(Wonders7Constants.Resource.victory)+(2*wgs.currentAge-1)); // 2N-1 POINTS FOR PLAYER i
-                playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.victory,  playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.victory)-1); // -1 FOR THE PLAYER i+1
+            if(playerResourcesCopy.get(i).get(Wonders7Constants.Resource.Shield) > playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)){ // IF PLAYER i WINS
+                playerResourcesCopy.get(i).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(i).get(Wonders7Constants.Resource.Victory)+(2*wgs.currentAge-1)); // 2N-1 POINTS FOR PLAYER i
+                playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory)-1); // -1 FOR THE PLAYER i+1
             }
-            else if (playerResourcesCopy.get(i).get(Wonders7Constants.Resource.shield) < playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.shield)){ // IF PLAYER i+1 WINS
-                playerResourcesCopy.get(i).put(Wonders7Constants.Resource.victory,  playerResourcesCopy.get(i).get(Wonders7Constants.Resource.victory)-1);// -1 POINT FOR THE PLAYER i
-                playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.victory,  playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.victory)+(2*wgs.currentAge-1));// 2N-1 POINTS FOR PLAYER i+1
+            else if (playerResourcesCopy.get(i).get(Wonders7Constants.Resource.Shield) < playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Shield)){ // IF PLAYER i+1 WINS
+                playerResourcesCopy.get(i).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(i).get(Wonders7Constants.Resource.Victory)-1);// -1 POINT FOR THE PLAYER i
+                playerResourcesCopy.get(nextplayer).put(Wonders7Constants.Resource.Victory,  playerResourcesCopy.get(nextplayer).get(Wonders7Constants.Resource.Victory)+(2*wgs.currentAge-1));// 2N-1 POINTS FOR PLAYER i+1
             }
 
-            int vp = playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.victory);
+            int vp = playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory);
             // Treasury
-            vp += playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.coin)/3;
+            vp += playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Coin)/3;
             // Scientific
-            vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.cog),2);
-            vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.compass),2);
-            vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.tablet),2);
+            vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog),2);
+            vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass),2);
+            vp += (int)Math.pow(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet),2);
             // Sets of different science symbols
-            vp += 7*Math.min(Math.min(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.cog),playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.compass)),playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.tablet));
-            playerResourcesCopy.get(i).put(Wonders7Constants.Resource.victory, vp);
+            vp += 7*Math.min(Math.min(playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Cog),playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Compass)),playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Tablet));
+            playerResourcesCopy.get(i).put(Wonders7Constants.Resource.Victory, vp);
         }
-        if (wgs.currentAge == 4) playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.victory, wgs.playerResources.get(playerId).get(Wonders7Constants.Resource.victory)); // If Game is completed and VP have already been calculated for players, use already calculated scores
+        if (wgs.currentAge == 4) playerResourcesCopy.get(playerId).put(Wonders7Constants.Resource.Victory, wgs.playerResources.get(playerId).get(Wonders7Constants.Resource.Victory)); // If Game is completed and VP have already been calculated for players, use already calculated scores
 
         // Counts the accumulated total of each player in the game
         for (int i=0;i<wgs.getNPlayers();i++){
-            totalVP += playerResourcesCopy.get(i).get(Wonders7Constants.Resource.victory);
-            if ((playerResourcesCopy.get(i).get(Wonders7Constants.Resource.victory) > highestVP) && (i!=playerId)) highestVP = playerResourcesCopy.get(i).get(Wonders7Constants.Resource.victory);
+            totalVP += playerResourcesCopy.get(i).get(Wonders7Constants.Resource.Victory);
+            if ((playerResourcesCopy.get(i).get(Wonders7Constants.Resource.Victory) > highestVP) && (i!=playerId)) highestVP = playerResourcesCopy.get(i).get(Wonders7Constants.Resource.Victory);
         }
 
         if (totalVP==0) return 0;
-        return playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.victory)/totalVP;
+        return playerResourcesCopy.get(playerId).get(Wonders7Constants.Resource.Victory)/totalVP;
     }
 
     @Override

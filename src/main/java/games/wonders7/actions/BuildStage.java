@@ -37,10 +37,10 @@ public class BuildStage extends AbstractAction {
         if (wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).wonderStage == 2){
             Wonder7Board board = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer());
             switch (board.type){
-                case lighthouse:
-                case mausoleum:
-                case gardens:
-                case statue:
+                case Lighthouse:
+                case Mausoleum:
+                case Gardens:
+                case Statue:
                     wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).effectUsed = false;
                 default:
                     break;
