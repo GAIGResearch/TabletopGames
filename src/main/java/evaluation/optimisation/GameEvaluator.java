@@ -6,6 +6,7 @@ import core.Game;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
+import evaluation.listeners.IGameListener;
 import evodef.SearchSpace;
 import evodef.SolutionEvaluator;
 import games.GameType;
@@ -35,6 +36,7 @@ public class GameEvaluator implements SolutionEvaluator {
     boolean fullyCoop;
     IStateHeuristic stateHeuristic;
     IGameHeuristic gameHeuristic;
+    List<IGameListener> listeners = new ArrayList<>();
 
     /**
      * GameEvaluator
@@ -129,6 +131,13 @@ public class GameEvaluator implements SolutionEvaluator {
 
         nEvals++;
         return tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerIndex);
+    }
+
+    public void addListener(IGameListener listener) {
+        listeners.add(listener);
+    }
+    public void clearListeners() {
+        listeners.clear();
     }
 
     /**

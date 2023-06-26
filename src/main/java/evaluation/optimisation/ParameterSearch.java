@@ -17,7 +17,6 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
 import static utilities.Utils.getArg;
 import static utilities.Utils.loadJSONFile;
 
@@ -30,7 +29,7 @@ public class ParameterSearch {
                         "\tsearchSpace=   The json-format file of the search space to use. No default.\n" +
                         "\tgame=          The game to be used for tuning. No default.\n" +
                         "\tnPlayers=      The total number of players in each game (the default is game.Min#players) \n " +
-                        "\ttrialsPerRun=  The number of iterations of NTBEA to run (default is 1000) \n" +
+                        "\tnGames=        The number of iterations of NTBEA to run (default is 1000) \n" +
                         "\tevalGames=     The number of games to run with the best predicted setting to estimate its true value (default is 20% of NTBEA iterations) \n" +
                         "\trepeat=        The number of times NTBEA should be re-run, to find a single best recommendation \n" +
                         "\ttournament=    The number of games to run as a tournament with the winners of all NTBEA iterations (default is 0) \n" +
@@ -54,7 +53,8 @@ public class ParameterSearch {
                         "\tverbose=       Will log the results marginalised to each dimension, and the Top 10 best tuples for each run \n" +
                         "\tseed=          Random seed for Game use (not used by NTBEA itself). Defaults to System.currentTimeMillis()\n" +
                         "\tlogFile=       Output file with results of each run for easier statistical analysis\n" +
-                        "\tmode=          Defaults to NTBEA. The other options are MultiNTBEA and CoopNTBEA. This last uses the same agent for all players.\n"
+                        "\tmode=          Defaults to NTBEA. The other options are MultiNTBEA and CoopNTBEA. This last uses the same agent for all players.\n" +
+                        "\tlistener=      A JSON file that defines an IGameListener to be used. A pipe-delimited list of such files can be provided.\n"
         );
 
         GameType game = GameType.valueOf(getArg(args, "game", "GameTemplate"));
@@ -77,7 +77,7 @@ public class ParameterSearch {
             JSONObject json = null;
             if (fileExists) {
                 // We import the file as a JSONObject
-                json = loadJSONFile(args[0]);
+                json = loadJSONFile(searchSpaceFile);
                 className = (String) json.get("class");
                 if (className == null) {
                     System.out.println("No class property found in SearchSpaceJSON file. This is required to specify the ITunableParameters class that the file complements");

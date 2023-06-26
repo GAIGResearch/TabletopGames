@@ -7,6 +7,7 @@ import core.CoreConstants;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import core.interfaces.IStatisticLogger;
+import evaluation.listeners.IGameListener;
 import evaluation.tournaments.RandomRRTournament;
 import evodef.BanditLandscapeModel;
 import evodef.EvoAlg;
@@ -46,6 +47,7 @@ public class NTBEA {
     List<AbstractPlayer> opponents;
     IGameHeuristic gameHeuristic = null;
     IStateHeuristic stateHeuristic = null;
+    int currentIteration = 0;
 
     public NTBEA(NTupleSystem landscapeModel, NTBEAParameters parameters, GameType game, int nPlayers) {
         this.landscapeModel = landscapeModel;
@@ -107,7 +109,7 @@ public class NTBEA {
 
     public void run() {
 
-        for (int mainLoop = 0; mainLoop < params.repeats; mainLoop++) {
+        for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             runIteration();
         }
 
@@ -120,6 +122,7 @@ public class NTBEA {
             }
             RandomRRTournament tournament = new RandomRRTournament(players, game, nPlayers, NO_SELF_PLAY, params.tournamentGames, 0, params.seed, gameParams);
             tournament.verbose = false;
+            createListeners().forEach(tournament::addListener);
             tournament.runTournament();
             // create a new list of results in descending order of score
             IntToDoubleFunction cmp = params.evalMethod.equals("Ordinal") ? i -> -tournament.getOrdinalRank(i) : tournament::getWinRate;
@@ -173,9 +176,27 @@ public class NTBEA {
             bestResult = resultToReport;
     }
 
+    private List<IGameListener> createListeners() {
+        List<IGameListener> retValue = params.listenerClasses.stream().map(IGameListener::createListener).collect(Collectors.toList());
+        List<String> directories = new ArrayList<>();
+        directories.add(params.destDir);
+        if (currentIteration < params.repeats)
+            directories.add(String.format("%3d", currentIteration + 1));
+        else
+            directories.add("Final");
+        retValue.forEach(l -> l.setOutputDirectory(directories.toArray(new String[0])));
+        return retValue;
+    }
+
     protected Pair<Double, Double> evaluateWinner(int[] winnerSettings) {
+
+        // Add listeners
+        createListeners().forEach(evaluator::addListener);
+
         double[] results = IntStream.range(0, params.evalGame)
                 .mapToDouble(answer -> evaluator.evaluate(winnerSettings)).toArray();
+
+        evaluator.clearListeners();
 
         double avg = Arrays.stream(results).average().orElse(0.0);
         double stdErr = Math.sqrt(Arrays.stream(results)
