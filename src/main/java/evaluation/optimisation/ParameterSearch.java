@@ -1,24 +1,8 @@
 package evaluation.optimisation;
 
-import core.AbstractGameState;
-import core.CoreConstants;
-import core.interfaces.IStateHeuristic;
-import core.interfaces.ITunableParameters;
-import evodef.SearchSpace;
 import games.GameType;
-import ntbea.MultiNTupleBanditEA;
-import ntbea.NTupleSystem;
-import org.json.simple.JSONObject;
-import utilities.Pair;
-
-import java.io.File;
-import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.stream.IntStream;
-
-import static java.util.stream.Collectors.joining;
 import static utilities.Utils.getArg;
-import static utilities.Utils.loadJSONFile;
 
 public class ParameterSearch {
 
@@ -63,75 +47,20 @@ public class ParameterSearch {
             return;
         }
         int nPlayers = getArg(args, "nPlayers", game.getMinPlayers());
-        ITPSearchSpace searchSpace;
         String searchSpaceFile = getArg(args, "searchSpace", "");
         if (searchSpaceFile.equals("")) {
             System.out.println("No search space file provided. Please provide a search space file.");
             return;
         }
 
-        boolean fileExists = (new File(searchSpaceFile)).exists();
-        try {
-            String className = searchSpaceFile;
-            Constructor<ITunableParameters> constructor;
-            JSONObject json = null;
-            if (fileExists) {
-                // We import the file as a JSONObject
-                json = loadJSONFile(searchSpaceFile);
-                className = (String) json.get("class");
-                if (className == null) {
-                    System.out.println("No class property found in SearchSpaceJSON file. This is required to specify the ITunableParameters class that the file complements");
-                    return;
-                }
-            }
-            Class<ITunableParameters> itpClass = (Class<ITunableParameters>) Class.forName(className);
-            constructor = itpClass.getConstructor();
-            ITunableParameters itp = constructor.newInstance();
-            // We then initialise the ITPSearchSpace with this ITP and the JSON details
-            searchSpace = fileExists ? new ITPSearchSpace(itp, json) : new ITPSearchSpace(itp);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new AssertionError(e.getClass() + " : " + e.getMessage() + "Error loading ITunableParameters class in " + args[0]);
-        }
-
         NTBEAParameters params = new NTBEAParameters(args);
-
-        int searchSpaceSize = IntStream.range(0, searchSpace.nDims()).reduce(1, (acc, i) -> acc * searchSpace.nValues(i));
-        int twoTupleSize = IntStream.range(0, searchSpace.nDims() - 1)
-                .map(i -> searchSpace.nValues(i) *
-                        IntStream.range(i + 1, searchSpace.nDims())
-                                .map(searchSpace::nValues).sum()
-                ).sum();
-        int threeTupleSize = IntStream.range(0, searchSpace.nDims() - 2)
-                .map(i -> searchSpace.nValues(i) *
-                        IntStream.range(i + 1, searchSpace.nDims()).map(j ->
-                                searchSpace.nValues(j) * IntStream.range(j + 1, searchSpace.nDims())
-                                        .map(searchSpace::nValues).sum()
-                        ).sum()
-                ).sum();
-
-        System.out.printf("Search space consists of %d states and %d possible 2-Tuples%s%n",
-                searchSpaceSize, twoTupleSize, params.useThreeTuples ? String.format(" and %d 3-Tuples", threeTupleSize) : "");
-
-        for (int i = 0; i < searchSpace.nDims(); i++) {
-            int finalI = i;
-            String allValues = IntStream.range(0, searchSpace.nValues(i))
-                    .mapToObj(j -> searchSpace.value(finalI, j))
-                    .map(Object::toString)
-                    .collect(joining(", "));
-            System.out.printf("%30s has %d values %s%n", searchSpace.name(i), searchSpace.nValues(i), allValues);
-        }
-
-        // Now initialise the other bits and pieces needed for the NTBEA package
-        NTupleSystem landscapeModel = new NTupleSystem(searchSpace);
-        landscapeModel.setUse3Tuple(params.useThreeTuples);
-        landscapeModel.addTuples();
+        params.printSearchSpaceDetails();
 
         if (params.mode == NTBEAParameters.Mode.MultiNTBEA) {
-            MultiNTBEA multiNTBEA = new MultiNTBEA(landscapeModel, params, game, nPlayers);
+            MultiNTBEA multiNTBEA = new MultiNTBEA(params, game, nPlayers);
             multiNTBEA.run();
         } else {
-            NTBEA singleNTBEA = new NTBEA(landscapeModel, params, game, nPlayers);
+            NTBEA singleNTBEA = new NTBEA(params, game, nPlayers);
             singleNTBEA.run();
         }
     }

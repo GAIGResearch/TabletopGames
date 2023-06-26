@@ -8,6 +8,7 @@ import core.interfaces.IActionHeuristic;
 import evaluation.listeners.IGameListener;
 import core.interfaces.IStateHeuristic;
 import evaluation.metrics.Event;
+import players.IAnyTimePlayer;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.*;
 import static players.mcts.MCTSEnums.OpponentTreePolicy.MultiTree;
 
-public class MCTSPlayer extends AbstractPlayer {
+public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
 
     // Random object for this player
     protected Random rnd;
@@ -188,4 +189,13 @@ public class MCTSPlayer extends AbstractPlayer {
         return retValue;
     }
 
+    @Override
+    public void setBudget(int budget) {
+        params.budget = budget;
+    }
+
+    @Override
+    public int getBudget() {
+        return params.budget;
+    }
 }
