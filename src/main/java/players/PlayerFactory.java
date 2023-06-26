@@ -12,6 +12,7 @@ import players.rmhc.RMHCParams;
 import players.rmhc.RMHCPlayer;
 import players.simple.OSLAPlayer;
 import players.simple.RandomPlayer;
+import utilities.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,22 +45,9 @@ import java.util.function.Function;
  */
 public class PlayerFactory {
 
-    private static final JSONParser parser = new JSONParser();
-
-    private static String readJSONFile(FileReader reader, String fileName) {
-        try {
-            JSONObject json = (JSONObject) parser.parse(reader);
-            return json.toJSONString();
-        } catch (IOException e) {
-            throw new AssertionError("IO Error processing file " + fileName + " : " + e.getMessage());
-        } catch (ParseException e) {
-            throw new AssertionError("Parse Error processing file " + fileName + " : " + e.toString());
-        }
-    }
-
     public static AbstractPlayer fromJSONString(String json) {
         try {
-            return fromJSONObject((JSONObject) parser.parse(json));
+            return fromJSONObject((JSONObject) Utils.parser.parse(json));
         } catch (ParseException e) {
             throw new AssertionError("Error processing JSON string " + e.getMessage());
         }
@@ -119,16 +107,12 @@ public class PlayerFactory {
         // If it is then we go the JSON route
         // If not then we now support a short-hand method for some simple defaults
 
-        try {
-            FileReader reader = new FileReader(data);
-            String json = readJSONFile(reader, data);
-            if (preprocessor != null)
-                json = preprocessor.apply(json);
+        File f = new File(data);
+        if (f.exists()) {
+            String json = Utils.readJSONFile(data, preprocessor);
             AbstractPlayer retValue = fromJSONString(json);
             retValue.setName(data.substring(0, data.indexOf(".")));
             return retValue;
-        } catch (FileNotFoundException e) {
-            // this is fine...we move along
         }
         // if we get here then the file does not exist
 
@@ -153,6 +137,7 @@ public class PlayerFactory {
     public static List<AbstractPlayer> createPlayers(String opponentDescriptor) {
         return createPlayers(opponentDescriptor, Function.identity());
     }
+
     public static List<AbstractPlayer> createPlayers(String opponentDescriptor, Function<String, String> preprocessor) {
         List<AbstractPlayer> retValue = new ArrayList<>();
         File od = new File(opponentDescriptor);

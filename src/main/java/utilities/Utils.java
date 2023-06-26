@@ -5,6 +5,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import scala.util.parsing.json.JSON;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -13,6 +14,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.*;
+import java.util.function.Function;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -174,12 +176,13 @@ public abstract class Utils {
     }
 
     /**
-     *        we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
-     *        exploreEpsilon is the percentage chance of taking a random action
+     * we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
+     * exploreEpsilon is the percentage chance of taking a random action
+     *
      * @param itemsAndValues A map keyed by the things to select (e.g. Actions or Integers), and their unnormalised values
      * @param rnd
-     * @return
      * @param <T>
+     * @return
      */
     public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double exploreEpsilon, Random rnd) {
         Map<T, Double> normalisedMap = Utils.normaliseMap(itemsAndValues);
@@ -311,15 +314,23 @@ public abstract class Utils {
         return defaultValue;
     }
 
+    public static final JSONParser parser = new JSONParser();
     public static JSONObject loadJSONFile(String fileName) {
         try {
             FileReader reader = new FileReader(fileName);
-            JSONParser parser = new JSONParser();
             return (JSONObject) parser.parse(reader);
         } catch (IOException | ParseException e) {
-            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage() + " : " + e.toString());
+            throw new AssertionError("Error processing file " + fileName + " : " + e.getMessage() + " : " + e);
         }
     }
+
+    public static String readJSONFile(String fileName, Function<String, String> preprocessor) {
+        JSONObject json = loadJSONFile(fileName);
+        if (preprocessor != null)
+            return preprocessor.apply(json.toJSONString());
+        return json.toJSONString();
+    }
+
 
     /**
      * Recursively computes combinations of numbers in an array, taken {r} at a time. Each combination is added into the
@@ -344,6 +355,7 @@ public abstract class Utils {
             combinationUtil(arr, data, i + 1, end, index + 1, r, allData);
         }
     }
+
     public static void combinationUtil(Object[] arr, Object[] data, int start, int end, int index, int r, HashSet<Object[]> allData) {
         if (index == r) {
             allData.add(data.clone());
@@ -372,7 +384,8 @@ public abstract class Utils {
 
     /**
      * Generate all combinations of objects in the given array, in sizes from min to max (capped 1 - array length)
-     * @param arr - input array of objects, e.g. (Apple, Pear, Apple)
+     *
+     * @param arr           - input array of objects, e.g. (Apple, Pear, Apple)
      * @param minSizeOutput - minimum size of output array, e.g. 1
      * @param maxSizeOutput - maximum size of output array, e.g. 2
      * @return - All combinations of objects in arrays of different sizes, e.g. (Apple), (Pear), (Apple, Pear), (Pear, Apple)
@@ -390,13 +403,13 @@ public abstract class Utils {
 
     /**
      * Returns a list of objects arrays, each one a combination of elements from the param
-     *  Example: input [[1, 2] [3] [4, 5]] ===> output [[1, 3, 4], [2, 3, 4], [1, 3, 5], [2, 3, 5]]
+     * Example: input [[1, 2] [3] [4, 5]] ===> output [[1, 3, 4], [2, 3, 4], [1, 3, 5], [2, 3, 5]]
      * Algorithm from <a href="https://www.geeksforgeeks.org/combinations-from-n-arrays-picking-one-element-from-each-array/">here</a>
+     *
      * @param arr A list of array objects to combine/
      * @return the combination of elements.
      */
-    public static List<Object[]> generateCombinations(List<Object[]> arr)
-    {
+    public static List<Object[]> generateCombinations(List<Object[]> arr) {
         ArrayList<Object[]> combinations = new ArrayList<>();
 
         // Number of arrays
@@ -406,13 +419,12 @@ public abstract class Utils {
         int[] indices = new int[n];
 
         // Initialize with first element's index
-        for(int i = 0; i < n; i++) indices[i] = 0;
+        for (int i = 0; i < n; i++) indices[i] = 0;
 
-        while (true)
-        {
+        while (true) {
             // Add current combination
             Object[] objs = new Object[n];
-            for(int i = 0; i < n; i++) objs[i] = arr.get(i)[indices[i]];
+            for (int i = 0; i < n; i++) objs[i] = arr.get(i)[indices[i]];
             combinations.add(objs);
 
             // Find the rightmost array that has more elements left after the current element in that array
@@ -428,7 +440,7 @@ public abstract class Utils {
             indices[next]++;
 
             // For all arrays to the right of this array current index again points to first element
-            for(int i = next + 1; i < n; i++)
+            for (int i = next + 1; i < n; i++)
                 indices[i] = 0;
         }
     }
@@ -512,7 +524,7 @@ public abstract class Utils {
             Constructor<?> constructor = ConstructorUtils.getMatchingAccessibleConstructor(clazz, argClasses);
             if (constructor == null)
                 throw new AssertionError("No matching Constructor found for " + clazz);
-     //       System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
+            //       System.out.println("Invoking constructor for " + clazz + " with " + Arrays.toString(args));
             Object retValue = constructor.newInstance(args);
             return outputClass.cast(retValue);
 
@@ -527,10 +539,8 @@ public abstract class Utils {
         }
     }
 
-    public static Class<?> determineArrayClass(JSONArray array)
-    {
-        if(array.size() > 1)
-        {
+    public static Class<?> determineArrayClass(JSONArray array) {
+        if (array.size() > 1) {
             JSONObject first = (JSONObject) array.get(0);
             String firstCl = (String) first.getOrDefault("class", "");
             for (int i = 1; i < array.size(); ++i) {
@@ -657,10 +667,11 @@ public abstract class Utils {
 
     /**
      * Accept a string, like aCamelString
+     *
      * @param s - input string in camel case
      * @return string with each word separated by a space
      */
-    public static String splitCamelCaseString(String s){
+    public static String splitCamelCaseString(String s) {
         StringBuilder r = new StringBuilder();
         for (String w : s.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])")) {
             r.append(w).append(" ");
@@ -673,10 +684,14 @@ public abstract class Utils {
             return "th";
         }
         switch (n % 10) {
-            case 1:  return "st";
-            case 2:  return "nd";
-            case 3:  return "rd";
-            default: return "th";
+            case 1:
+                return "st";
+            case 2:
+                return "nd";
+            case 3:
+                return "rd";
+            default:
+                return "th";
         }
     }
 
