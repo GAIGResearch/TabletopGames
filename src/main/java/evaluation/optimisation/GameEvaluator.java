@@ -23,7 +23,6 @@ import static java.util.stream.Collectors.toList;
  */
 public class GameEvaluator implements SolutionEvaluator {
 
-    public IStatisticLogger statsLogger;
     public boolean debug = false;
     GameType game;
     AbstractParameters gameParams;
