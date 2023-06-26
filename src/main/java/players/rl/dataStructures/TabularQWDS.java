@@ -49,7 +49,7 @@ public class TabularQWDS extends QWeightsDataStructure {
     }
 
     @Override
-    public void parseQWeightsTextFile(String[] qWeightStrings) {
+    public void parseQWeights(String[] qWeightStrings) {
         Arrays.stream(qWeightStrings).forEach(s -> {
             String[] entry = s.split(":");
             qWeights.put(entry[0], Double.parseDouble(entry[1]));

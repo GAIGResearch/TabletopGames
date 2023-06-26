@@ -1,11 +1,4 @@
 package players.rl.dataStructures;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import core.AbstractGameState;
@@ -16,8 +9,8 @@ import players.rl.RLTrainingParams;
 
 public abstract class QWeightsDataStructure {
 
-    protected RLParams params;
-    protected RLTrainingParams trainingParams;
+    public RLParams params;
+    public RLTrainingParams trainingParams;
 
     QWeightsDataStructure() {
         initQWeights();
@@ -31,7 +24,7 @@ public abstract class QWeightsDataStructure {
 
     public abstract void qLearning(RLPlayer player, TurnSAR t0, TurnSAR t1);
 
-    public abstract void parseQWeightsTextFile(String[] qWeightStrings);
+    public abstract void parseQWeights(String[] qWeightStrings);
 
     public abstract String qWeightsToString();
 
@@ -41,35 +34,6 @@ public abstract class QWeightsDataStructure {
             TurnSAR t0 = turns.get(i);
             TurnSAR t1 = turns.get(i + 1);
             qLearning(player, t0, t1);
-        }
-    }
-
-    public void tryReadQWeightsFromFile(String readPath) {
-        Path path = Paths.get(readPath);
-        if (Files.exists(path) && Files.isRegularFile(path)) {
-            try {
-                String[] weightStrings = Files.readString(path).split("\n");
-                parseQWeightsTextFile(weightStrings);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void writeQWeightsToFile(String resourcesPath, String gameName) {
-        // Write beta to the file
-        String outputText = qWeightsToString();
-        String writePath = resourcesPath + gameName + "/beta.txt";
-        try {
-            // Create directory if doesn't exist
-            Path gameFolder = Path.of(resourcesPath, gameName);
-            if (!Files.exists(gameFolder))
-                Files.createDirectories(gameFolder);
-            BufferedWriter writer = new BufferedWriter(new FileWriter(writePath));
-            writer.write(outputText);
-            writer.close();
-        } catch (IOException e) {
-            System.out.println("An error occurred while writing beta to the file: " + e.getMessage());
         }
     }
 

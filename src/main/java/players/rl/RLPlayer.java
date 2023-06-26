@@ -55,7 +55,7 @@ public class RLPlayer extends AbstractPlayer {
             if (Files.exists(path) && Files.isRegularFile(path)) {
                 try {
                     String[] qWeightStrings = Files.readString(path).split("\n");
-                    qWeights.parseQWeightsTextFile(qWeightStrings);
+                    qWeights.parseQWeights(qWeightStrings);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

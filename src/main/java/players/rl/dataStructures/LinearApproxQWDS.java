@@ -28,7 +28,7 @@ public class LinearApproxQWDS extends QWeightsDataStructure {
     }
 
     @Override
-    public void parseQWeightsTextFile(String[] qWeightStrings) {
+    public void parseQWeights(String[] qWeightStrings) {
         qWeights = Arrays.stream(qWeightStrings).mapToDouble(Double::parseDouble).toArray();
     }
 
