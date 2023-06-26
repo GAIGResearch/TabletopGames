@@ -107,7 +107,7 @@ public class NTBEA {
         );
     }
 
-    public void run() {
+    public Object run() {
 
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             runIteration();
@@ -147,10 +147,10 @@ public class NTBEA {
         System.out.println("\nFinal Recommendation: ");
         // we don't log the final run to file to avoid duplication
         printDetailsOfRun(bestResult, searchSpace, "");
+        return searchSpace.getAgent(bestResult.b);
     }
 
     protected void runIteration() {
-        // TODO: Add GameListeners if configured
         landscapeModel.reset();
 
         for (int i = 0; i < params.iterationsPerRun; i++) {
