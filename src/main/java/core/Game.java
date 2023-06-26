@@ -9,22 +9,24 @@ import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
-import gui.*;
-import players.human.*;
+import gui.AbstractGUIManager;
+import gui.GUI;
+import gui.GamePanel;
+import players.human.ActionController;
+import players.human.HumanConsolePlayer;
+import players.human.HumanGUIPlayer;
 import players.mcts.MCTSPlayer;
+import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
-import javax.swing.Timer;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.*;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static utilities.Utils.componentToImage;
 
 public class Game {
 
@@ -802,7 +804,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Sirius");
+        String gameType = Utils.getArg(args, "game", "Wonders7");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -810,7 +812,7 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-//        players.add(new RandomPlayer());
+        players.add(new RandomPlayer());
 
 //        MCTSParams params = new MCTSParams();
 //        params.heuristic = new VioletHeuristics();

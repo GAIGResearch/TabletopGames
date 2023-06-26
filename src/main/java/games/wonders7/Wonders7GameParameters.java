@@ -1,24 +1,14 @@
 package games.wonders7;
 
-import core.AbstractGameState;
 import core.AbstractParameters;
 import core.Game;
 import evaluation.TunableParameters;
 import games.GameType;
 
-
 import java.util.Objects;
 
 public class Wonders7GameParameters extends TunableParameters {
-    // The Parameters of the game should contain any Game constants.
-    // Having them all in one place makes it easy to amend them, and also to tune them as part of Game Design.
-    // For straightforward and simple examples, have a look at those for Diamant and DotsAndBoxes.
-    //
-
     public int nWonderCardsPerPlayer = 7;
-
-
-
 
     public Wonders7GameParameters(long seed) {
         super(seed);

@@ -8,7 +8,6 @@ import games.wonders7.Wonders7GameState;
 import games.wonders7.cards.Wonder7Card;
 
 import java.util.Objects;
-import java.util.Set;
 
 public class DiscardCard extends DrawCard {
     public String cardName;
@@ -31,8 +30,8 @@ public class DiscardCard extends DrawCard {
         Wonder7Card card = wgs.getPlayerHand(wgs.getCurrentPlayer()).get(index); // Card being removed
 
         // Player gets 3 coins from discarding card
-        int playerValue = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.resources.coin); // No. Coins player has
-        wgs.getPlayerResources(wgs.getCurrentPlayer()).put(Wonders7Constants.resources.coin,  playerValue+3); // Adds 3 coins to player coin count
+        int playerValue = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(Wonders7Constants.Resource.coin); // No. Coins player has
+        wgs.getPlayerResources(wgs.getCurrentPlayer()).put(Wonders7Constants.Resource.coin,  playerValue+3); // Adds 3 coins to player coin count
 
         // Removes card from player hand and adds to discarded cards deck
         wgs.getPlayerHand(wgs.getCurrentPlayer()).remove(card); // remove
@@ -56,15 +55,15 @@ public class DiscardCard extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Wonder7Card)) return false;
+        if (!(o instanceof DiscardCard)) return false;
         if (!super.equals(o)) return false;
-        DiscardCard discardCard = (DiscardCard) o;
-        return Objects.equals(cardName, discardCard.cardName);
+        DiscardCard that = (DiscardCard) o;
+        return Objects.equals(cardName, that.cardName);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(),cardName);
+        return Objects.hash(super.hashCode(), cardName);
     }
 
     @Override

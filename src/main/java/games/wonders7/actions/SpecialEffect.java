@@ -45,8 +45,8 @@ public class SpecialEffect extends DrawCard {
                 wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).effectUsed = true;
             case statue:
                 // Gives player resources produced from card
-                Set<Wonders7Constants.resources> keys = card.resourcesProduced.keySet(); // Gets all the resources the card provides
-                for (Wonders7Constants.resources resource: keys){  // Goes through all keys for each resource
+                Set<Wonders7Constants.Resource> keys = card.resourcesProduced.keySet(); // Gets all the resources the card provides
+                for (Wonders7Constants.Resource resource: keys){  // Goes through all keys for each resource
                     int cardValue = card.resourcesProduced.get(resource); // Number of resource the card provides
                     int playerValue = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource); // Number of resource the player owns
                     wgs.getPlayerResources(wgs.getCurrentPlayer()).put(resource, playerValue + cardValue); // Adds the resources provided by the card to the players resource count
@@ -76,10 +76,10 @@ public class SpecialEffect extends DrawCard {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Wonder7Card)) return false;
+        if (!(o instanceof SpecialEffect)) return false;
         if (!super.equals(o)) return false;
-        SpecialEffect specialEffect = (SpecialEffect) o;
-        return Objects.equals(cardName, specialEffect.cardName);
+        SpecialEffect that = (SpecialEffect) o;
+        return Objects.equals(cardName, that.cardName);
     }
 
     @Override

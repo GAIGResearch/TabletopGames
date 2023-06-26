@@ -2,19 +2,20 @@ package games.wonders7.gui;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
+import core.CoreConstants;
 import core.Game;
 import games.wonders7.Wonders7GameState;
 import gui.AbstractGUIManager;
 import gui.GamePanel;
-import gui.ScreenHighlight;
+import gui.IScreenHighlight;
 import players.human.ActionController;
-import utilities.Utils;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.util.Set;
 
 public class Wonders7GUI extends AbstractGUIManager {
     JLabel ageLabel;
@@ -22,8 +23,8 @@ public class Wonders7GUI extends AbstractGUIManager {
     Border highlightActive = BorderFactory.createLineBorder(new Color(220, 27, 67), 3);
     Border[] playerViewBorders, playerViewBordersHighlight, playerViewBordersHighlightLose, playerViewBordersHighlightWin;
 
-    public Wonders7GUI(GamePanel parent, Game game, ActionController ac) {
-        super(parent, ac, 200);
+    public Wonders7GUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
+        super(parent, game, ac, humanId);
         if (game == null) return;
 
         parent.setLayout(new BoxLayout(parent, BoxLayout.Y_AXIS));
@@ -96,7 +97,12 @@ public class Wonders7GUI extends AbstractGUIManager {
         parent.add(secondRow);
 
         // Action panel
-        parent.add(createActionPanel(new ScreenHighlight[0], defaultDisplayWidth, defaultActionPanelHeight));
+        parent.add(createActionPanel(new IScreenHighlight[0], defaultDisplayWidth, defaultActionPanelHeight));
+    }
+
+    @Override
+    public int getMaxActionSpace() {
+        return 200;
     }
 
     @Override
@@ -114,7 +120,7 @@ public class Wonders7GUI extends AbstractGUIManager {
         } else {
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 // Highlight win/lose player
-                if (gameState.getPlayerResults()[i] == Utils.GameResult.WIN) {
+                if (gameState.getPlayerResults()[i] == CoreConstants.GameResult.WIN_GAME) {
                     playerViews[i].setBorder(playerViewBordersHighlightWin[i]);
                 } else {
                     playerViews[i].setBorder(playerViewBordersHighlightLose[i]);

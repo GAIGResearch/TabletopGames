@@ -2,7 +2,6 @@ package games.wonders7.gui;
 
 import games.wonders7.Wonders7Constants;
 import games.wonders7.Wonders7GameState;
-import games.wonders7.cards.Wonder7Card;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,12 +31,12 @@ public class PlayerView extends JComponent {
             - Wonder board
          */
         int fontSize = g.getFont().getSize();
-        HashMap<Wonders7Constants.resources, Integer> playerResources = gs.getPlayerResources(playerId);
+        HashMap<Wonders7Constants.Resource, Integer> playerResources = gs.getPlayerResources(playerId);
 
         g.drawRect(pad,pad,width-pad*2, height-pad*2-borderHeight);
         int y = pad*2 + fontSize;
         g.drawString("Score: " + gs.getGameScore(playerId), pad*2, y);
-        for (Wonders7Constants.resources res: playerResources.keySet()) {
+        for (Wonders7Constants.Resource res: playerResources.keySet()) {
             y += fontSize;
             g.drawString(res.name() + ": " + playerResources.get(res), pad*2, y);
         }

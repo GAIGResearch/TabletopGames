@@ -66,7 +66,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      * @param gs         - game state to end current player's turn in.
      * @param nextPlayer - the player whose turn it is next.
      */
-    public final void endPlayerTurn(AbstractGameState gs, int nextPlayer) {
+    public void endPlayerTurn(AbstractGameState gs, int nextPlayer) {
         if (gs.getGameStatus() != GAME_ONGOING) return;
 
         gs.getPlayerTimer()[gs.getCurrentPlayer()].incrementTurn();
@@ -89,7 +89,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      * @param gs - game state to end current player's turn in.
      */
     @Override
-    public final void endPlayerTurn(AbstractGameState gs) {
+    public void endPlayerTurn(AbstractGameState gs) {
         int turnOwner = gs.turnOwner;
         do {
             turnOwner = (turnOwner + 1) % gs.nPlayers;
@@ -112,7 +112,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      * @param gs                     - current game state.
      * @param firstPlayerOfNextRound the first player to act in the next round
      */
-    public final void endRound(AbstractGameState gs, int firstPlayerOfNextRound) {
+    public void endRound(AbstractGameState gs, int firstPlayerOfNextRound) {
         if (gs.getGameStatus() != GAME_ONGOING) return;
 
         gs.getPlayerTimer()[gs.getCurrentPlayer()].incrementRound();
@@ -139,7 +139,7 @@ public abstract class StandardForwardModel extends AbstractForwardModel {
      * End a round, with no change to the firstPlayer
      * @param gs
      */
-    public final void endRound(AbstractGameState gs) {
+    public void endRound(AbstractGameState gs) {
         endRound(gs, gs.firstPlayer);
     }
 
