@@ -32,3 +32,4 @@ out/production/ModernBoardGame/META-INF/
 
 javadoc/
 metrics/out/*
+treeRecorder*
