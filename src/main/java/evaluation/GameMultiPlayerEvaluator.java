@@ -25,8 +25,6 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
     int nPlayers;
     int nEvals = 0;
     Random rnd;
-    public boolean reportStatistics;
-    public IStatisticLogger statsLogger = new SummaryLogger();
     IStateHeuristic stateHeuristic;
 
 
@@ -72,7 +70,6 @@ public class GameMultiPlayerEvaluator implements MultiSolutionEvaluator {
 
         for (int i = 0; i < nPlayers; i++) {
             AbstractPlayer tunedPlayer = (AbstractPlayer) searchSpace.getAgent(settings.get(i));
-            if (reportStatistics) tunedPlayer.setStatsLogger(statsLogger);
             allPlayers.add(tunedPlayer);
         }
 

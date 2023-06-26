@@ -173,6 +173,41 @@ public abstract class Utils {
         return (input + epsilon) * (1.0 + epsilon * (random - 0.5));
     }
 
+    /**
+     *        we sample a uniform variable in [0, 1] and ascend the cdf to find the selection
+     *        exploreEpsilon is the percentage chance of taking a random action
+     * @param itemsAndValues A map keyed by the things to select (e.g. Actions or Integers), and their unnormalised values
+     * @param rnd
+     * @return
+     * @param <T>
+     */
+    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double exploreEpsilon, Random rnd) {
+        Map<T, Double> normalisedMap = Utils.normaliseMap(itemsAndValues);
+        // we then add on the exploration bonus
+        if (exploreEpsilon > 0.0) {
+            double exploreBonus = exploreEpsilon / normalisedMap.size();
+            normalisedMap = normalisedMap.entrySet().stream().collect(
+                    toMap(Map.Entry::getKey, e -> e.getValue() * (1.0 - exploreEpsilon) + exploreBonus));
+        }
+        double cdfSample = rnd.nextDouble();
+        double cdf = 0.0;
+        for (T item : normalisedMap.keySet()) {
+            cdf += normalisedMap.get(item);
+            if (cdf >= cdfSample)
+                return item;
+        }
+        throw new AssertionError("Should never get here!");
+    }
+
+    public static <T> T sampleFrom(Map<T, Double> itemsAndValues, double temperature, double exploreEpsilon, Random rnd) {
+        double temp = Math.max(temperature, 0.001);
+        // first we find the largest value, and subtract that from all values
+        double maxValue = itemsAndValues.values().stream().mapToDouble(d -> d).max().orElse(0.0);
+        Map<T, Double> tempModified = itemsAndValues.entrySet().stream().collect(
+                toMap(Map.Entry::getKey, e -> Math.exp((e.getValue() - maxValue) / temp)));
+        return sampleFrom(tempModified, exploreEpsilon, rnd);
+    }
+
     public static double entropyOf(double... data) {
         double sum = Arrays.stream(data).sum();
         double[] normalised = Arrays.stream(data).map(d -> d / sum).toArray();
@@ -181,7 +216,8 @@ public abstract class Utils {
 
     public static <T> Map<T, Double> normaliseMap(Map<T, ? extends Number> input) {
         int lessThanZero = (int) input.values().stream().filter(n -> n.doubleValue() < 0.0).count();
-        if (lessThanZero > 0) throw new AssertionError("Probability has negative values!");
+        if (lessThanZero > 0)
+            throw new AssertionError("Probability has negative values!");
         double sum = input.values().stream().mapToDouble(Number::doubleValue).sum();
         if (sum == 0.0) {
             // the sum is zero, with no negative values. Hence all values are zero, and we return a uniform distribution.
@@ -426,12 +462,17 @@ public abstract class Utils {
                     } else if (first instanceof Long) {
                         argClasses[i] = int[].class;
                         args[i] = ((Long) first).intValue();
+                        arg = ((JSONArray) arg).toArray(new Long[0]);
                     } else if (first instanceof Double) {
                         argClasses[i] = double[].class;
+                        arg = ((JSONArray) arg).toArray(new Double[0]);
                     } else if (first instanceof Boolean) {
                         argClasses[i] = boolean[].class;
+                        arg = ((JSONArray) arg).toArray(new Boolean[0]);
                     } else if (first instanceof String) {
                         argClasses[i] = String[].class;
+                        arg = ((JSONArray) arg).toArray(new String[0]);
+                        int a = 0;
                     }
                 } else {
                     throw new AssertionError("Unexpected arg " + arg + " in " + json.toJSONString());
@@ -597,6 +638,18 @@ public abstract class Utils {
             r.append(w).append(" ");
         }
         return r.toString().trim();
+    }
+
+    public static String getNumberSuffix(final int n) {
+        if (n >= 11 && n <= 13) {
+            return "th";
+        }
+        switch (n % 10) {
+            case 1:  return "st";
+            case 2:  return "nd";
+            case 3:  return "rd";
+            default: return "th";
+        }
     }
 
 }

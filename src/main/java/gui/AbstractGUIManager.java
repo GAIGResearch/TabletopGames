@@ -5,11 +5,13 @@ import core.AbstractPlayer;
 import core.CoreConstants;
 import core.Game;
 import core.actions.AbstractAction;
+import evaluation.listeners.IGameListener;
+import evaluation.metrics.Event;
 import players.human.ActionController;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.IntStream;
@@ -19,14 +21,15 @@ import static java.util.stream.Collectors.joining;
 public abstract class AbstractGUIManager {
     protected GamePanel parent;
     protected Game game;
-    protected int humanPlayerId;
+    protected Set<Integer> humanPlayerId;
 
     public static int defaultItemSize = 50;
     public static int defaultActionPanelHeight = 100;
-    public static int defaultInfoPanelHeight = 180;
+    public static int defaultInfoPanelHeight = 180, defaultInfoPanelWidth = 300;
     public static int defaultCardWidth = 100, defaultCardHeight = 80;
     public static int defaultBoardWidth = 400, defaultBoardHeight = 300;
     public static int defaultDisplayWidth = 500, defaultDisplayHeight = 400;
+
 
     protected ActionButton[] actionButtons;
     protected int maxActionSpace;
@@ -34,11 +37,14 @@ public abstract class AbstractGUIManager {
     protected JLabel gameStatus, playerStatus, turn, currentPlayer, gamePhase, playerScores;
     protected JTextPane historyInfo;
     protected JScrollPane historyContainer;
+    protected Set<Integer> historyPerspective = new HashSet<>();
+    protected List<String> history = new ArrayList<>();
+
     private int actionsAtLastUpdate;
 
     protected int width, height;
 
-    public AbstractGUIManager(GamePanel parent, Game game, ActionController ac, int human) {
+    public AbstractGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> human) {
         this.ac = ac;
         this.maxActionSpace = getMaxActionSpace();
         this.parent = parent;
@@ -99,9 +105,9 @@ public abstract class AbstractGUIManager {
      *
      * @param highlights - when button is clicked, any GUI highlights are cleared. This array contains all lists of
      *                   highlights maintained by the GUI. Can be null if not used.
-     * @param width - width of this panel.
-     * @param height - height of this panel.
-     * @param opaque - true by default. if false, all panels created are not opaque (transparent).
+     * @param width      - width of this panel.
+     * @param height     - height of this panel.
+     * @param opaque     - true by default. if false, all panels created are not opaque (transparent).
      * @return - JComponent containing all action buttons.
      */
     protected JComponent createActionPanelOpaque(IScreenHighlight[] highlights, int width, int height, boolean opaque) {
@@ -116,9 +122,10 @@ public abstract class AbstractGUIManager {
         return createActionPanel(highlights, width, height, true, true, onActionSelected);
     }
 
-    protected JComponent createActionPanel (IScreenHighlight[]highlights, int width, int height, boolean boxLayout){
+    protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout) {
         return createActionPanel(highlights, width, height, boxLayout, true, null);
     }
+
     protected JComponent createActionPanel(IScreenHighlight[] highlights, int width, int height, boolean boxLayout, boolean opaque, Consumer<ActionButton> onActionSelected) {
         JPanel actionPanel = new JPanel();
         if (boxLayout) {
@@ -138,6 +145,10 @@ public abstract class AbstractGUIManager {
 
         JScrollPane pane = new JScrollPane(actionPanel);
         pane.setPreferredSize(new Dimension(width, height));
+
+        pane.setMinimumSize(new Dimension(width, height));
+        pane.setPreferredSize(new Dimension(width, height));
+
         if (boxLayout) {
             pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         }
@@ -147,6 +158,14 @@ public abstract class AbstractGUIManager {
         pane.getViewport().setOpaque(opaque);
 
         return pane;
+    }
+
+    public ActionController getAC() {
+        return ac;
+    }
+
+    public Set<Integer> getHumanPlayerId() {
+        return humanPlayerId;
     }
 
     /**
@@ -176,15 +195,48 @@ public abstract class AbstractGUIManager {
         wrapper.setLayout(new FlowLayout());
         wrapper.add(gameInfo);
 
-        createActionHistoryPanel(width/2 - 10, height);
+        createActionHistoryPanel(width / 2 - 10, height, new HashSet<>());
         wrapper.add(historyContainer);
         return wrapper;
     }
 
-    protected void createActionHistoryPanel(int width, int height) {
+    protected void createActionHistoryPanel(int width, int height, Set<Integer> perspective) {
+        this.historyPerspective = perspective;
+        if (perspective.size() > 0) {
+            // we need to create a GameListener for ACTION_CHOSEN events
+            game.addListener(new IGameListener() {
+                @Override
+                public void onEvent(Event event) {
+                    if (event.type == Event.GameEvent.ACTION_CHOSEN) {
+                        history.add("Player " + event.state.getCurrentPlayer() + " : " + event.action.getString(game.getGameState(), perspective));
+                    } else if (event.type == Event.GameEvent.GAME_EVENT) {
+                        history.add(event.toString());
+                    } else if (event.type == Event.GameEvent.GAME_OVER) {
+                        for (int i = 0; i < event.state.getNPlayers(); i++) {
+                            history.add(String.format("Player %d finishes at position %d with score: %.0f", i, event.state.getOrdinalPosition(i), event.state.getGameScore(i)));
+                        }
+                    }
+                }
+
+                @Override
+                public void allGamesFinished() {
+                }
+
+                @Override
+                public void setGame(Game game) {
+                }
+
+                @Override
+                public Game getGame() {
+                    return null;
+                }
+            });
+        }
         historyInfo.setPreferredSize(new Dimension(width, height));
         historyContainer = new JScrollPane(historyInfo);
         historyContainer.setPreferredSize(new Dimension(width - 15, height));
+        historyContainer.setMinimumSize(new Dimension(width - 15, height));
+        historyContainer.setMaximumSize(new Dimension(width - 15, height));
     }
 
     /**
@@ -193,7 +245,10 @@ public abstract class AbstractGUIManager {
      * @param gameState - current game state to be used for the update.
      */
     protected void updateGameStateInfo(AbstractGameState gameState) {
-        List<String> history = gameState.getHistoryAsText();
+        if (historyPerspective.size() == 0) {
+            history = gameState.getHistoryAsText();
+            // otherwise we populate history from ACTION_CHOSEN events
+        }
         if (history.size() > actionsAtLastUpdate) {
             // this is to stop the panel updating on every tick during one's own turn
             actionsAtLastUpdate = history.size();
@@ -222,14 +277,15 @@ public abstract class AbstractGUIManager {
      * @param gameState   - current game state to be used in updating visuals.
      * @param showActions - if false, action buttons not shown
      */
-    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions){
+    public void update(AbstractPlayer player, AbstractGameState gameState, boolean showActions) {
         updateGameStateInfo(gameState);
         _update(player, gameState);
         if (showActions)
             updateActionButtons(player, gameState);
         else
             resetActionButtons();
-        parent.repaint();
+        //      parent.revalidate();
+        //      parent.repaint();
     }
 
     protected void resetActionButtons() {
@@ -263,7 +319,7 @@ public abstract class AbstractGUIManager {
                     }
                 }
                 resetActionButtons();
-                if (onActionSelected!= null)
+                if (onActionSelected != null)
                     onActionSelected.accept(this);
             });
         }

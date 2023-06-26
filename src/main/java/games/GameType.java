@@ -27,6 +27,8 @@ import games.loveletter.*;
 import games.loveletter.gui.LoveLetterGUIManager;
 import games.pandemic.*;
 import games.pandemic.gui.PandemicGUIManager;
+import games.puertorico.*;
+import games.puertorico.gui.PuertoRicoGUI;
 import games.terraformingmars.*;
 import games.terraformingmars.gui.TMGUI;
 import games.poker.*;
@@ -169,7 +171,12 @@ public enum GameType {
             Arrays.asList(Dice, Abstract),
             Collections.singletonList(PushYourLuck),
             CantStopGameState.class, CantStopForwardModel.class, CantStopParameters.class, CantStopGUIManager.class),
-    Hanabi(2,5, new ArrayList<>(), new ArrayList<>(), HanabiGameState.class, HanabiForwardModel.class, HanabiParameters.class, HanabiGUIManager.class);
+    Hanabi(2,5, new ArrayList<>(), new ArrayList<>(), HanabiGameState.class, HanabiForwardModel.class, HanabiParameters.class, HanabiGUIManager.class),
+    PuertoRico(3, 5,
+            Arrays.asList(Strategy, Economic, Manufacturing, TerritoryBuilding),
+            Arrays.asList(EndGameBonus, TilePlacement, RoleSelection, EngineBuilding, TableauBuilding),
+            PuertoRicoGameState.class, PuertoRicoForwardModel.class, PuertoRicoParameters.class, PuertoRicoGUI.class);
+
 
     // Core classes where the game is defined
     final Class<? extends AbstractGameState> gameStateClass;
@@ -285,18 +292,18 @@ public enum GameType {
         if (guiManagerClass == null) throw new AssertionError("No GUI manager class declared for the game: " + this);
 
         // Find ID of human player, if any (-1 if none)
-        int human = -1;
+        Set<Integer> human = new HashSet<>();
         if (game != null && game.getPlayers() != null) {
             for (int i = 0; i < game.getPlayers().size(); i++) {
                 if (game.getPlayers().get(i) instanceof HumanGUIPlayer) {
-                    human = i;
+                    human.add(i);
                     break;
                 }
             }
         }
 
         try {
-            Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(guiManagerClass, GamePanel.class, Game.class, ActionController.class, Integer.class);
+            Constructor<?> constructorGS = ConstructorUtils.getMatchingAccessibleConstructor(guiManagerClass, GamePanel.class, Game.class, ActionController.class, Set.class);
             return (AbstractGUIManager) constructorGS.newInstance(parent, game, ac, human);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
@@ -467,7 +474,9 @@ public enum GameType {
         TableauBuilding,
         BattleCardDriven,
         CommandCards,
-        MoveThroughDeck;
+        MoveThroughDeck,
+        TrickTaking,
+        RoleSelection;
 
         /**
          * @return a list of all games using this mechanic.

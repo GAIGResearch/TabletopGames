@@ -18,13 +18,13 @@ public class RHEAPlayer extends AbstractPlayer {
     private final Random randomGenerator;
     RHEAParams params;
     List<Map<AbstractAction, Pair<Integer, Double>>> MASTStatistics; // a list of one Map per player. Action -> (visits, totValue)
-    private List<RHEAIndividual> population = new ArrayList<>();
+    protected List<RHEAIndividual> population = new ArrayList<>();
     // Budgets
-    private double timePerIteration = 0, timeTaken = 0, initTime = 0;
-    private int numIters = 0;
-    private int fmCalls = 0;
-    private int copyCalls = 0;
-    private int repairCount, nonRepairCount;
+    protected double timePerIteration = 0, timeTaken = 0, initTime = 0;
+    protected int numIters = 0;
+    protected int fmCalls = 0;
+    protected int copyCalls = 0;
+    protected int repairCount, nonRepairCount;
     private MASTPlayer mastPlayer;
 
     public RHEAPlayer() {
@@ -104,8 +104,6 @@ public class RHEAPlayer extends AbstractPlayer {
 
         timeTaken = timer.elapsedMillis();
         timePerIteration = numIters == 0 ? 0.0 : (timeTaken - initTime) / numIters;
-        if (statsLogger != null)
-            logStatistics(stateObs);
         // Return first action of best individual
         AbstractAction retValue = population.get(0).actions[0];
         if (!actions.contains(retValue))
@@ -289,22 +287,5 @@ public class RHEAPlayer extends AbstractPlayer {
         }
     }
 
-    protected void logStatistics(AbstractGameState state) {
-        Map<String, Object> stats = new LinkedHashMap<>();
-        stats.put("round", state.getRoundCounter());
-        stats.put("turn", state.getTurnCounter());
-        stats.put("turnOwner", state.getCurrentPlayer());
-        stats.put("iterations", numIters);
-        stats.put("fmCalls", fmCalls);
-        stats.put("copyCalls", copyCalls);
-        stats.put("time", timeTaken);
-        stats.put("timePerIteration", timePerIteration);
-        stats.put("initTime", initTime);
-        stats.put("hiReward", population.get(0).value);
-        stats.put("loReward", population.get(population.size() - 1).value);
-        stats.put("medianReward", population.size() == 1 ? population.get(0).value : population.get(population.size() / 2 - 1).value);
-        stats.put("repairProportion", repairCount == 0 ? 0.0 : repairCount / (double) (repairCount + nonRepairCount));
-        stats.put("repairsPerIteration", repairCount == 0 ? 0.0 : repairCount / (double) numIters);
-        statsLogger.record(stats);
-    }
+
 }

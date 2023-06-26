@@ -14,6 +14,7 @@ import players.human.ActionController;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.Set;
 
 public class CatanGUI extends AbstractGUIManager {
     CatanGameState gs;
@@ -31,7 +32,7 @@ public class CatanGUI extends AbstractGUIManager {
     JLabel devCards;
     JLabel playerColourLabel;
 
-    public CatanGUI(GamePanel parent, Game game, ActionController ac, int humanId) {
+    public CatanGUI(GamePanel parent, Game game, ActionController ac, Set<Integer> humanId) {
         super(parent, game, ac, humanId);
         if (game == null) return;
 

@@ -85,8 +85,12 @@ public class SGForwardModel extends StandardForwardModel {
         SGGameState gs = (SGGameState) currentState;
 
         // Check if all players made their choice
-        int turn = gs.getTurnCounter();
-        if ((turn + 1) % gs.getNPlayers() == 0) {
+        int nextPlayer = gs.getCurrentPlayer();
+        do {
+            nextPlayer = (nextPlayer + 1) % gs.getNPlayers();
+        } while (nextPlayer != gs.getCurrentPlayer() && !gs.cardChoices.get(nextPlayer).isEmpty());
+
+        if (nextPlayer == gs.getCurrentPlayer()) {
             // They did! Reveal all cards at once. Process card reveal rules.
             revealCards(gs);
 
@@ -123,7 +127,7 @@ public class SGForwardModel extends StandardForwardModel {
 
         // End player turn
         if (gs.getGameStatus() == CoreConstants.GameResult.GAME_ONGOING) {
-            endPlayerTurn(gs);
+            endPlayerTurn(gs, nextPlayer);
         }
     }
 

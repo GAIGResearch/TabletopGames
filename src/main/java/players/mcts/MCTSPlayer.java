@@ -26,6 +26,7 @@ public class MCTSPlayer extends AbstractPlayer {
     protected MCTSParams params;
     // Heuristics used for the agent
     protected IStateHeuristic heuristic;
+    // TODO: opponentHeuristic Not actually used yet
     protected IStateHeuristic opponentHeuristic;
     protected AbstractPlayer rolloutStrategy;
     protected boolean debug = false;
@@ -83,7 +84,7 @@ public class MCTSPlayer extends AbstractPlayer {
     @Override
     public AbstractAction _getAction(AbstractGameState gameState, List<AbstractAction> actions) {
         // Search for best action from the root
-        if (params.opponentTreePolicy == MultiTree || params.opponentTreePolicy == MultiTreeParanoid)
+        if (params.opponentTreePolicy == MultiTree)
             root = new MultiTreeNode(this, gameState, rnd);
         else
             root = SingleTreeNode.createRootNode(this, gameState, rnd, getFactory());
@@ -97,7 +98,11 @@ public class MCTSPlayer extends AbstractPlayer {
             ((MASTPlayer) rolloutStrategy).setStats(root.MASTStatistics);
             ((MASTPlayer) rolloutStrategy).temperature = params.MASTBoltzmann;
         }
-        root.mctsSearch(getStatsLogger());
+        if (opponentModel instanceof MASTPlayer) {
+            ((MASTPlayer) opponentModel).setStats(root.MASTStatistics);
+            ((MASTPlayer) opponentModel).temperature = params.MASTBoltzmann;
+        }
+        root.mctsSearch();
         if (params.gatherExpertIterationData) {
             ExpertIterationDataGatherer eidg = new ExpertIterationDataGatherer(
                     params.expertIterationFileStem,

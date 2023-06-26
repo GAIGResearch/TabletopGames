@@ -1,9 +1,7 @@
 package players.mcts;
 
 import core.AbstractGameState;
-import core.AbstractParameters;
 import core.AbstractPlayer;
-import core.actions.AbstractAction;
 import core.interfaces.*;
 import evaluation.TunableParameters;
 import org.json.simple.JSONObject;
@@ -13,18 +11,14 @@ import utilities.Utils;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.function.ToDoubleBiFunction;
 
-import static players.mcts.MCTSEnums.Information.Closed_Loop;
-import static players.mcts.MCTSEnums.Information.Open_Loop;
+import static players.mcts.MCTSEnums.Information.*;
 import static players.mcts.MCTSEnums.MASTType.Rollout;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.MaxN;
-import static players.mcts.MCTSEnums.OpponentTreePolicy.Paranoid;
+import static players.mcts.MCTSEnums.OpponentTreePolicy.OneTree;
 import static players.mcts.MCTSEnums.RolloutTermination.DEFAULT;
 import static players.mcts.MCTSEnums.SelectionPolicy.ROBUST;
-import static players.mcts.MCTSEnums.Strategies.PARAMS;
-import static players.mcts.MCTSEnums.Strategies.RANDOM;
-import static players.mcts.MCTSEnums.TreePolicy.UCB;
+import static players.mcts.MCTSEnums.Strategies.*;
+import static players.mcts.MCTSEnums.TreePolicy.*;
 
 public class MCTSParams extends PlayerParameters {
 
@@ -37,12 +31,15 @@ public class MCTSParams extends PlayerParameters {
     public boolean useMAST = false;
     public double MASTGamma = 0.5;
     public double MASTBoltzmann = 0.1;
+    public double exp3Boltzmann = 0.1;
+    public double hedgeBoltzmann = 0.1;
     public MCTSEnums.Strategies expansionPolicy = RANDOM;
     public MCTSEnums.SelectionPolicy selectionPolicy = ROBUST;
     public MCTSEnums.TreePolicy treePolicy = UCB;
-    public MCTSEnums.OpponentTreePolicy opponentTreePolicy = Paranoid;
+    public MCTSEnums.OpponentTreePolicy opponentTreePolicy = OneTree;
+    public boolean paranoid = false;
     public MCTSEnums.Strategies rolloutType = RANDOM;
-    public MCTSEnums.Strategies oppModelType = RANDOM;
+    public MCTSEnums.Strategies oppModelType = MCTSEnums.Strategies.DEFAULT;  // Default is to use the same as rolloutType
     public String rolloutClass, oppModelClass = "";
     public AbstractPlayer rolloutPolicy;
     public ITunableParameters rolloutPolicyParams;
@@ -75,7 +72,9 @@ public class MCTSParams extends PlayerParameters {
     public MCTSParams(long seed) {
         super(seed);
         addTunableParameter("K", Math.sqrt(2), Arrays.asList(0.0, 0.1, 1.0, Math.sqrt(2), 3.0, 10.0));
-        addTunableParameter("boltzmannTemp", 0.1);
+        addTunableParameter("MASTBoltzmann", 0.1);
+        addTunableParameter("exp3Boltzmann", 0.1);
+        addTunableParameter("hedgeBoltzmann", 0.1);
         addTunableParameter("rolloutLength", 10, Arrays.asList(0, 3, 10, 30, 100));
         addTunableParameter("maxTreeDepth", 10, Arrays.asList(1, 3, 10, 30, 100));
         addTunableParameter("epsilon", 1e-6);
@@ -90,7 +89,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("information", Open_Loop, Arrays.asList(MCTSEnums.Information.values()));
         addTunableParameter("selectionPolicy", ROBUST, Arrays.asList(MCTSEnums.SelectionPolicy.values()));
         addTunableParameter("treePolicy", UCB, Arrays.asList(MCTSEnums.TreePolicy.values()));
-        addTunableParameter("opponentTreePolicy", MaxN, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
+        addTunableParameter("opponentTreePolicy", OneTree, Arrays.asList(MCTSEnums.OpponentTreePolicy.values()));
         addTunableParameter("exploreEpsilon", 0.1);
         addTunableParameter("heuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
         addTunableParameter("opponentHeuristic", (IStateHeuristic) AbstractGameState::getHeuristicScore);
@@ -111,6 +110,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("discardStateAfterEachIteration", true);
         addTunableParameter("advantageFunction", IActionHeuristic.nullReturn);
         addTunableParameter("omaVisits", 0);
+        addTunableParameter("paranoid", false);
     }
 
     @Override
@@ -125,14 +125,21 @@ public class MCTSParams extends PlayerParameters {
         rolloutTermination = (MCTSEnums.RolloutTermination) getParameterValue("rolloutTermination");
         oppModelType = (MCTSEnums.Strategies) getParameterValue("oppModelType");
         information = (MCTSEnums.Information) getParameterValue("information");
-        selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
-        expansionPolicy = (MCTSEnums.Strategies) getParameterValue("expansionPolicy");
         treePolicy = (MCTSEnums.TreePolicy) getParameterValue("treePolicy");
+        selectionPolicy = (MCTSEnums.SelectionPolicy) getParameterValue("selectionPolicy");
+        if (selectionPolicy == MCTSEnums.SelectionPolicy.TREE &&
+                (treePolicy == UCB || treePolicy == UCB_Tuned || treePolicy == AlphaGo)) {
+            // in this case TREE is equivalent to SIMPLE
+            selectionPolicy = MCTSEnums.SelectionPolicy.SIMPLE;
+        }
+        expansionPolicy = (MCTSEnums.Strategies) getParameterValue("expansionPolicy");
         opponentTreePolicy = (MCTSEnums.OpponentTreePolicy) getParameterValue("opponentTreePolicy");
         exploreEpsilon = (double) getParameterValue("exploreEpsilon");
-        MASTBoltzmann = (double) getParameterValue("boltzmannTemp");
+        MASTBoltzmann = (double) getParameterValue("MASTBoltzmann");
         MAST = (MCTSEnums.MASTType) getParameterValue("MAST");
         MASTGamma = (double) getParameterValue("MASTGamma");
+        exp3Boltzmann = (double) getParameterValue("exp3Boltzmann");
+        hedgeBoltzmann = (double) getParameterValue("hedgeBoltzmann");
         rolloutClass = (String) getParameterValue("rolloutClass");
         oppModelClass = (String) getParameterValue("oppModelClass");
         gatherExpertIterationData = (boolean) getParameterValue("expertIteration");
@@ -154,7 +161,6 @@ public class MCTSParams extends PlayerParameters {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
         biasVisits = (int) getParameterValue("biasVisits");
         omaVisits = (int) getParameterValue("omaVisits");
         progressiveWideningConstant = (double) getParameterValue("progressiveWideningConstant");
@@ -162,12 +168,21 @@ public class MCTSParams extends PlayerParameters {
         normaliseRewards = (boolean) getParameterValue("normaliseRewards");
         nodesStoreScoreDelta = (boolean) getParameterValue("nodesStoreScoreDelta");
         maintainMasterState = (boolean) getParameterValue("maintainMasterState");
+        paranoid = (boolean) getParameterValue("paranoid");
         discardStateAfterEachIteration = (boolean) getParameterValue("discardStateAfterEachIteration");
         if (information == Closed_Loop)
             discardStateAfterEachIteration = false;
         if (expansionPolicy == MCTSEnums.Strategies.MAST || rolloutType == MCTSEnums.Strategies.MAST
                 || (biasVisits > 0 && advantageFunction == null)) {
             useMAST = true;
+        }
+
+        advantageFunction = (IActionHeuristic) getParameterValue("advantageFunction");
+        if (advantageFunction instanceof TunableParameters) {
+            TunableParameters tunableHeuristic = (TunableParameters) advantageFunction;
+            for (String name : tunableHeuristic.getParameterNames()) {
+                tunableHeuristic.setParameterValue(name, this.getParameterValue("advantageFunction." + name));
+            }
         }
         heuristic = (IStateHeuristic) getParameterValue("heuristic");
         if (heuristic instanceof TunableParameters) {
@@ -218,6 +233,9 @@ public class MCTSParams extends PlayerParameters {
             case "opponentModelParams":
                 setParameterValue("opponentModelParams", child);
                 break;
+            case "advantageFunction":
+                setParameterValue("advantageFunction", child);
+                break;
             default:
                 throw new AssertionError("Unknown child in TunableParameters: " + nameSpace);
         }
@@ -236,6 +254,8 @@ public class MCTSParams extends PlayerParameters {
         retValue.useMAST = useMAST;
         retValue.MASTGamma = MASTGamma;
         retValue.MASTBoltzmann = MASTBoltzmann;
+        retValue.exp3Boltzmann = exp3Boltzmann;
+        retValue.hedgeBoltzmann = hedgeBoltzmann;
         retValue.expansionPolicy = expansionPolicy;
         retValue.selectionPolicy = selectionPolicy;
         retValue.treePolicy = treePolicy;
@@ -267,6 +287,7 @@ public class MCTSParams extends PlayerParameters {
         retValue.heuristic = heuristic;
         retValue.opponentHeuristic = opponentHeuristic;
         retValue.discardStateAfterEachIteration = discardStateAfterEachIteration;
+        retValue.paranoid = paranoid;
         return retValue;
     }
 
@@ -276,6 +297,8 @@ public class MCTSParams extends PlayerParameters {
             return opponentModel;
         if (oppModelType == PARAMS)
             return (AbstractPlayer) opponentModelParams.instantiate();
+        if (oppModelType == MCTSEnums.Strategies.DEFAULT)
+            return getRolloutStrategy();
         return constructStrategy(oppModelType, oppModelClass);
     }
 

@@ -69,7 +69,7 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.13</artifactId>
-            <version>3.3.1</version>
+            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -85,6 +85,31 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.7</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.tablesaw</groupId>
+            <artifactId>tablesaw-core</artifactId>
+            <version>0.43.1</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.tablesaw</groupId>
+            <artifactId>tablesaw-html</artifactId>
+            <version>0.43.1</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.tablesaw</groupId>
+            <artifactId>tablesaw-json</artifactId>
+            <version>0.43.1</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.tablesaw</groupId>
+            <artifactId>tablesaw-jsplot</artifactId>
+            <version>0.43.1</version>
+        </dependency>
+        <dependency>
+            <groupId>tech.tablesaw</groupId>
+            <artifactId>tablesaw-excel</artifactId>
+            <version>0.43.1</version>
         </dependency>
     </dependencies>
 
@@ -132,24 +157,6 @@
                                 </manifest>
                             </archive>
                             <finalName>FrontEnd</finalName>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>GameReport</id>
-                        <configuration>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifest>
-                                    <mainClass>evaluation.GameReport</mainClass>
-                                </manifest>
-                            </archive>
-                            <finalName>GameReport</finalName>
                         </configuration>
                         <phase>package</phase>
                         <goals>

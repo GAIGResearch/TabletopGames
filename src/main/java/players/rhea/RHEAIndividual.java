@@ -105,6 +105,12 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
         int fmCalls = 0, copyCalls = 0;
         AbstractGameState gs = gameStates[startIndex].copy();
 
+        // This lot are a local record for use in debugging; Very useful, with no compute overhead for keeping a local copy
+        AbstractGameState[] oldGameStates = new AbstractGameState[gameStates.length];
+        List<AbstractAction>[] availableActions = new List[gameStates.length];
+        AbstractAction[] oldActions = new AbstractAction[actions.length];
+        boolean[] illegalActions = new boolean[actions.length];
+
         for (int i = 0; i < startIndex; i++) {
             double score;
             score = heuristic.evaluateState(gameStates[i + 1], playerID);
@@ -123,8 +129,11 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                 AbstractGameState gsCopy = gs.copy();
                 copyCalls++;
                 List<AbstractAction> currentActions = fm.computeAvailableActions(gsCopy);
+                availableActions[i] = currentActions;
                 boolean illegalAction = !currentActions.contains(actions[i]);
+                illegalActions[i] = illegalAction;
                 if (illegalAction || actions[i] == null) {
+                    oldActions[i] = actions[i];
                     action = rolloutPolicy.getAction(gsCopy, currentActions);
                     if (repair || actions[i] == null) // if we are repairing then we override an illegal action with a random legitimate one
                         actions[i] = action;
@@ -150,6 +159,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                     fm.next(gsCopy, moves.get(gen.nextInt(moves.size())));
                     fmCalls++;
                 }
+                oldGameStates[i+1] = gameStates[i+1];
                 gameStates[i + 1] = gsCopy;
                 // Individual length increased
                 length++;

@@ -1,6 +1,7 @@
 package evaluation.loggers;
 
 import core.interfaces.IStatisticLogger;
+import evaluation.summarisers.TAGOccurrenceStatSummary;
 import evaluation.summarisers.TAGStatSummary;
 
 import java.io.*;
@@ -80,7 +81,7 @@ public class FileStatsLogger implements IStatisticLogger {
                 // then write a header line to the file
                 if (headerNeeded) {
                     String outputLine = String.join(delimiter, allKeys) + "\n";
-                    outputLine = outputLine.replaceAll(":" + actionName  + delimiter, delimiter);
+                    outputLine = outputLine.replaceAll(":" + actionName + delimiter, delimiter);
                     outputLine = outputLine.replaceAll(":" + actionName + "\\n", "\n");
                     writer.write(outputLine);
                 }
@@ -92,17 +93,42 @@ public class FileStatsLogger implements IStatisticLogger {
                         }
                 );
             }
-            List<String> outputData = allKeys.stream().map(key -> {
+            List<String> outputData = new ArrayList<>();
+            for (String key: allKeys) {
                 Object datum = data.get(key);
-                if (datum == null) return "";
-                if (datum instanceof Integer) return String.format(intFormat, datum);
-                if (datum instanceof Double) return String.format(doubleFormat, datum);
-                return datum.toString();
-            }).collect(toList());
+                if (datum == null) {
+                    outputData.add("NA");
+                    continue;
+                }
+                // If this is a summary, then we return the single most common occurrence
+                if (datum instanceof TAGOccurrenceStatSummary) {
+                    TAGOccurrenceStatSummary summary = (TAGOccurrenceStatSummary) datum;
+                    datum = summary.getHighestOccurrence().a;
+                }
+                if (datum instanceof Integer) {
+                    outputData.add(String.format(intFormat, datum));
+                    continue;
+                }
+                if (datum instanceof Double) {
+                    outputData.add(String.format(doubleFormat, datum));
+                    continue;
+                }
+                if (datum instanceof Map) {
+                    Map<String, ?> map = (Map<String, ?>) datum;
+                    if (map.size() == 1)
+                        outputData.add(map.values().iterator().next().toString());
+                    else
+                        outputData.add(map.toString());
+                    continue;
+                }
 
-            String outputLine = String.join(delimiter, outputData) + "\n";
+                outputData.add(datum.toString());
+            }
 
-            writer.write(outputLine);
+            if (!outputData.isEmpty()) {
+                String outputLine = String.join(delimiter, outputData) + "\n";
+                writer.write(outputLine);
+            }
         } catch (IOException e) {
             e.printStackTrace();
             throw new AssertionError("Problem writing to file " + writer.toString() + " : " + e.getMessage());
@@ -111,7 +137,7 @@ public class FileStatsLogger implements IStatisticLogger {
 
     @Override
     public void record(String key, Object datum) {
-      //   System.out.println("Datum ignored - FileStatsLogger only to be used with other record() : " + key);
+        //   System.out.println("Datum ignored - FileStatsLogger only to be used with other record() : " + key);
     }
 
     public void flush() {
@@ -127,6 +153,7 @@ public class FileStatsLogger implements IStatisticLogger {
      */
     @Override
     public void processDataAndFinish() {
+        if (writer == null) return;
         try {
             writer.flush();
             writer.close();
@@ -138,6 +165,7 @@ public class FileStatsLogger implements IStatisticLogger {
 
     @Override
     public void processDataAndNotFinish() {
+        if (writer == null) return;
         try {
             writer.flush();
         } catch (Exception e) {
@@ -162,7 +190,7 @@ public class FileStatsLogger implements IStatisticLogger {
         if (fileParts.length != 2)
             throw new AssertionError("Filename does not conform to expected <stem>.<type>");
         String newFileName = fileParts[0] + "_" + id + "." + fileParts[1];
-        FileStatsLogger retValue =  new FileStatsLogger(newFileName, delimiter, append);
+        FileStatsLogger retValue = new FileStatsLogger(newFileName, delimiter, append);
         retValue.actionName = id;
         return retValue;
     }

@@ -9,7 +9,6 @@ import games.sushigo.SGGameState;
 import games.sushigo.cards.SGCard;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ChooseCard extends AbstractAction implements IExtendedSequence {
     public final int playerId;
@@ -22,10 +21,6 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         this.playerId = playerId;
         this.cardIdx = cardIdx;
         this.useChopsticks = useChopsticks;
-    }
-
-    public ChooseCard getHiddenChoice() {
-        return new ChooseCard(playerId, -1, useChopsticks);
     }
 
     @Override
@@ -63,7 +58,7 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         chopstickChooseDone = true;
     }
 
@@ -100,7 +95,6 @@ public class ChooseCard extends AbstractAction implements IExtendedSequence {
         return "Choose card " + getCard(gameState).getComponentName() + " [" + cardIdx + "] " + (useChopsticks ? " (+chopsticks)" : "");
     }
 
-    @Override
     public Card getCard(AbstractGameState gs) {
         SGGameState sggs = (SGGameState) gs;
         return sggs.getPlayerHands().get(playerId).get(cardIdx);

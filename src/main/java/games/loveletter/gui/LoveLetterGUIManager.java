@@ -25,6 +25,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.Set;
 
 public class LoveLetterGUIManager extends AbstractGUIManager {
     // Settings for display areas
@@ -53,7 +54,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
     LoveLetterGameState llgs;
     LoveLetterForwardModel fm;
 
-    public LoveLetterGUIManager(GamePanel parent, Game game, ActionController ac, int humanID) {
+    public LoveLetterGUIManager(GamePanel parent, Game game, ActionController ac, Set<Integer> humanID) {
         super(parent, game, ac, humanID);
 
         UIManager.put("TabbedPane.contentOpaque", false);
@@ -315,7 +316,7 @@ public class LoveLetterGUIManager extends AbstractGUIManager {
             llgs = (LoveLetterGameState)gameState.copy();
             for (int i = 0; i < gameState.getNPlayers(); i++) {
                 boolean front = i == gameState.getCurrentPlayer() && gameState.getCoreGameParameters().alwaysDisplayCurrentPlayer
-                        || i == humanPlayerId
+                        || humanPlayerId.contains(i)
                         || gameState.getCoreGameParameters().alwaysDisplayFullObservable;
                 playerHands[i].update(llgs, front);
 

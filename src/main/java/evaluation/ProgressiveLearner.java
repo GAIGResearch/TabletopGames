@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static evaluation.tournaments.AbstractTournament.TournamentMode.SELF_PLAY;
 import static utilities.Utils.getArg;
 
 public class ProgressiveLearner {
@@ -163,13 +164,10 @@ public class ProgressiveLearner {
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  true, finalMatchups,
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  SELF_PLAY, finalMatchups,
                 finalMatchups, System.currentTimeMillis(), params);
 
         tournament.setListeners(new ArrayList<>());
-        IStatisticLogger logger = new FileStatsLogger(prefix + "_Final.txt");
-        IGameListener gameTracker = IGameListener.createListener("evaluation.listeners.MetricsGameListener", logger, null);
-        tournament.getListeners().add(gameTracker);
         tournament.runTournament();
         int winnerIndex = tournament.getWinnerIndex();
         if (winnerIndex != finalAgents.size() - 1) {
@@ -216,7 +214,7 @@ public class ProgressiveLearner {
 
     private void runGamesWithAgents() {
         // Run!
-        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  true, matchups,
+        RoundRobinTournament tournament = new RandomRRTournament(agents, gameToPlay, nPlayers,  SELF_PLAY, matchups,
                 matchups, System.currentTimeMillis(), params);
         tournament.verbose = false;
         double exploreEpsilon = maxExplore * (iterations - iter - 1) / (iterations - 1);

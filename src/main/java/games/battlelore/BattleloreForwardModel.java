@@ -78,11 +78,11 @@ public class BattleloreForwardModel extends StandardForwardModel {
 
         if (checkGameEnd((BattleloreGameState) currentState, playerId) || state.getRoundCounter() >= maxRounds) {
             endGame(currentState);
+        } else {
+            endPlayerTurn(currentState);
+            if (currentState.getCurrentPlayer() == 0)
+                endRound(currentState);
         }
-
-        endPlayerTurn(currentState);
-        if (currentState.getCurrentPlayer() == 0)
-            endRound(currentState);
     }
 
     private void PutLearningScenarioUnits(BattleloreGameState gameState) {

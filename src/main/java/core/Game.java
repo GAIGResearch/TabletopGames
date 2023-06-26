@@ -2,6 +2,7 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
@@ -9,13 +10,8 @@ import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
 import gui.*;
-import io.humble.video.*;
-import io.humble.video.awt.MediaPictureConverter;
-import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.*;
 import players.mcts.MCTSPlayer;
-import players.simple.OSLAPlayer;
-import players.simple.RandomPlayer;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -58,11 +54,6 @@ public class Game {
     private boolean debug = false;
     // Video recording
     private Rectangle areaBounds;
-    private MediaPictureConverter converter = null;
-    private MediaPacket packet;
-    private MediaPicture picture;
-    private Encoder encoder;
-    private Muxer muxer;
     private boolean recordingVideo = false;
     String fileName = "output.mp4";
     String formatName = "mp4";
@@ -147,7 +138,6 @@ public class Game {
                 // Video recording setup
                 if (game.recordingVideo) {
                     game.areaBounds = new Rectangle(0, 0, frame.getWidth(), frame.getHeight());
-                    game.setupVideoRecording(game.fileName, game.formatName, game.codecName, game.snapsPerSecond);
                 }
 
                 Timer guiUpdater = new Timer((int) game.getCoreParameters().frameSleepMS, event -> game.updateGUI(gui, frame));
@@ -337,7 +327,6 @@ public class Game {
         if (gui != null) {
             gui.update(player, gameState, isHumanToMove());
             frame.repaint();
-            videoRecordFrame(frame);
         }
     }
 
@@ -393,13 +382,14 @@ public class Game {
         nActionsPerTurn = 1;
         nActionsPerTurnCount = 0;
         lastPlayer = -1;
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START, gameState)));
     }
 
     /**
      * Runs the game,
      */
     public final void run() {
+
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.ABOUT_TO_START, gameState)));
 
         boolean firstEnd = true;
 
@@ -497,6 +487,8 @@ public class Game {
 
         // This is the next player to be asked for a decision
         int activePlayer = gameState.getCurrentPlayer();
+        if (!gameState.isNotTerminalForPlayer(activePlayer))
+            throw new AssertionError("Player " + activePlayer + " is not allowed to move");
         AbstractPlayer currentPlayer = players.get(activePlayer);
         if (debug) System.out.printf("Starting oneAction for player %s%n", activePlayer);
 
@@ -505,16 +497,22 @@ public class Game {
         // copying the gamestate also copies the game parameters and resets the random seed (so agents cannot use this
         // to reconstruct the starting hands etc.)
         AbstractGameState observation = gameState.copy(activePlayer);
-        copyTime += (System.nanoTime() - s);
+        copyTime = (System.nanoTime() - s);
   //      System.out.printf("Total copyTime in ms = %.2f at tick %d (Avg %.3f) %n", copyTime / 1e6, tick, copyTime / (tick +1.0) / 1e6);
 
         // Get actions for the player
         s = System.nanoTime();
         List<AbstractAction> observedActions = forwardModel.computeAvailableActions(observation);
         if (observedActions.size() == 0) {
-            throw new AssertionError("No actions available for player " + activePlayer);
+            Stack<IExtendedSequence> actionsInProgress = gameState.getActionsInProgress();
+            IExtendedSequence topOfStack = actionsInProgress.peek();
+            throw new AssertionError("No actions available for player " + activePlayer
+                    + ". Last action: " + gameState.getHistory().get(gameState.getHistory().size() - 1)
+                    + ". Actions in progress: " + actionsInProgress.size()
+                    + ". Top of stack: " + topOfStack.getClass().getSimpleName() + " (" + topOfStack + ")");
+
         }
-        actionComputeTime += (System.nanoTime() - s);
+        actionComputeTime = (System.nanoTime() - s);
         actionSpaceSize.add(new Pair<>(activePlayer, observedActions.size()));
 
         if (gameState.coreGameParameters.verbose) {
@@ -540,7 +538,7 @@ public class Game {
                 s = System.nanoTime();
                 if (debug) System.out.printf("About to get action for player %d%n", gameState.getCurrentPlayer());
                 action = currentPlayer.getAction(observation, observedActions);
-                agentTime += (System.nanoTime() - s);
+                agentTime = (System.nanoTime() - s);
                 nDecisions++;
             }
             if (gameState.coreGameParameters.competitionMode && action != null && !observedActions.contains(action)) {
@@ -571,7 +569,7 @@ public class Game {
             // Resolve action and game rules, time it
             s = System.nanoTime();
             forwardModel.next(gameState, action);
-            nextTime += (System.nanoTime() - s);
+            nextTime = (System.nanoTime() - s);
         }
 
         lastPlayer = activePlayer;
@@ -602,6 +600,9 @@ public class Game {
         listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.GAME_OVER, gameState)));
         if (gameState.coreGameParameters.recordEventHistory) {
             gameState.recordHistory(Event.GameEvent.GAME_OVER.name());
+            for (int i = 0; i < gameState.getNPlayers(); i++) {
+                gameState.recordHistory(String.format("Player %d finishes at position %d with score: %.0f", i, gameState.getOrdinalPosition(i), gameState.getGameScore(i)));
+            }
         }
         if (gameState.coreGameParameters.verbose) {
             System.out.println("Game Over");
@@ -611,10 +612,6 @@ public class Game {
         for (AbstractPlayer player : players) {
             player.finalizePlayer(gameState.copy(player.getPlayerID()));
         }
-
-        // Close video recording writer
-        terminateVideoRecording();
-
         // Inform listeners of game end
 //        for (GameListener gameTracker : listeners) {
 //            gameTracker.allGamesFinished();
@@ -625,12 +622,12 @@ public class Game {
      * Timers average at the end of the game.
      */
     private void terminateTimers() {
-        nextTime /= gameState.getGameTick();
-        copyTime /= gameState.getGameTick();
-        actionComputeTime /= gameState.getGameTick();
-        agentTime /= nDecisions;
-        if (nActionsPerTurnCount > 0)
-            nActionsPerTurnSum /= nActionsPerTurnCount;
+//        nextTime /= gameState.getGameTick();
+//        copyTime /= gameState.getGameTick();
+//        actionComputeTime /= gameState.getGameTick();
+//        agentTime /= nDecisions;
+//        if (nActionsPerTurnCount > 0)
+//            nActionsPerTurnSum /= nActionsPerTurnCount;
     }
 
     /**
@@ -792,119 +789,6 @@ public class Game {
         return gameType.toString();
     }
 
-    public void setupVideoRecording(String filename, String formatname,
-                                    String codecname, int snapsPerSecond) {
-        if (recordingVideo) {
-            try {
-                final Rational framerate = Rational.make(1, snapsPerSecond);
-
-                // First we create a muxer using the passed in filename and formatname if given.
-                muxer = Muxer.make(filename, null, formatname);
-
-                /* Now, we need to decide what type of codec to use to encode video. Muxers
-                 * have limited sets of codecs they can use. We're going to pick the first one that
-                 * works, or if the user supplied a codec name, we're going to force-fit that
-                 * in instead.
-                 */
-                final MuxerFormat format = muxer.getFormat();
-                final Codec codec;
-                if (codecname != null) {
-                    codec = Codec.findEncodingCodecByName(codecname);
-                } else {
-                    codec = Codec.findEncodingCodec(format.getDefaultVideoCodecId());
-                }
-
-                // Now that we know what codec, we need to create an encoder
-                encoder = Encoder.make(codec);
-
-                /*
-                 * Video encoders need to know at a minimum:
-                 *   width
-                 *   height
-                 *   pixel format
-                 * Some also need to know frame-rate (older codecs that had a fixed rate at which video files could
-                 * be written needed this). There are many other options you can set on an encoder, but we're
-                 * going to keep it simpler here.
-                 */
-                encoder.setWidth(areaBounds.width);
-                encoder.setHeight(areaBounds.height);
-                // We are going to use 420P as the format because that's what most video formats these days use
-                final PixelFormat.Type pixelformat = PixelFormat.Type.PIX_FMT_YUV420P;
-                encoder.setPixelFormat(pixelformat);
-                encoder.setTimeBase(framerate);
-
-                /* An annoynace of some formats is that they need global (rather than per-stream) headers,
-                 * and in that case you have to tell the encoder. And since Encoders are decoupled from
-                 * Muxers, there is no easy way to know this beyond
-                 */
-                if (format.getFlag(MuxerFormat.Flag.GLOBAL_HEADER))
-                    encoder.setFlag(Encoder.Flag.FLAG_GLOBAL_HEADER, true);
-
-                // Open the encoder.
-                encoder.open(null, null);
-                // Add this stream to the muxer.
-                muxer.addNewStream(encoder);
-                // And open the muxer for business.
-                muxer.open(null, null);
-
-                /* Next, we need to make sure we have the right MediaPicture format objects
-                 * to encode data with. Java (and most on-screen graphics programs) use some
-                 * variant of Red-Green-Blue image encoding (a.k.a. RGB or BGR). Most video
-                 * codecs use some variant of YCrCb formatting. So we're going to have to
-                 * convert. To do that, we'll introduce a MediaPictureConverter object later. object.
-                 */
-                picture = MediaPicture.make(
-                        encoder.getWidth(),
-                        encoder.getHeight(),
-                        pixelformat);
-                picture.setTimeBase(framerate);
-
-                /* Now begin our main loop of taking screen snaps.
-                 * We're going to encode and then write out any resulting packets. */
-                packet = MediaPacket.make();
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void videoRecordFrame(JFrame gui) {
-        if (recordingVideo) {
-            // Make the screen capture && convert image to TYPE_3BYTE_BGR
-            final BufferedImage screen = componentToImage(gui, BufferedImage.TYPE_3BYTE_BGR);
-
-            // This is LIKELY not in YUV420P format, so we're going to convert it using some handy utilities.
-            if (converter == null)
-                converter = MediaPictureConverterFactory.createConverter(screen, picture);
-            converter.toPicture(picture, screen, gameState.getGameTick());
-
-            do {
-                encoder.encode(packet, picture);
-                if (packet.isComplete())
-                    muxer.write(packet, false);
-            } while (packet.isComplete());
-        }
-    }
-
-    private void terminateVideoRecording() {
-        if (recordingVideo) {
-            /* Encoders, like decoders, sometimes cache pictures so it can do the right key-frame optimizations.
-             * So, they need to be flushed as well. As with the decoders, the convention is to pass in a null
-             * input until the output is not complete.
-             */
-            do {
-                encoder.encode(packet, null);
-                if (packet.isComplete())
-                    muxer.write(packet, false);
-            } while (packet.isComplete());
-
-            // Finally, let's clean up after ourselves.
-            muxer.close();
-        }
-    }
-
-
-
     /**
      * The recommended way to run a game is via evaluations.Frontend, however that may not work on
      * some games for some screen sizes due to the vagaries of Java Swing...
@@ -918,7 +802,7 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "Hanabi");
+        String gameType = Utils.getArg(args, "game", "Sirius");
         boolean useGUI = Utils.getArg(args, "gui", true);
         int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
@@ -927,16 +811,18 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 //        players.add(new RandomPlayer());
-//        players.add(new RandomPlayer());
+
+//        MCTSParams params = new MCTSParams();
+//        params.heuristic = new VioletHeuristics();
+//        players.add(new MCTSPlayer(params));
+
         players.add(new MCTSPlayer());
-        players.add(new MCTSPlayer());
+
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
 //        players.add(new OSLAPlayer());
-//        players.add(new OSLAPlayer());
 //        players.add(new RMHCPlayer());
-//        players.add(new HumanGUIPlayer(ac));
-//        players.add(new HumanGUIPlayer(ac));
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new HumanConsolePlayer());
 //        players.add(new FirstActionPlayer());
 

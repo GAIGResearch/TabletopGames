@@ -202,6 +202,17 @@ public class Deck<T extends Component> extends Component implements IComponentCo
     }
 
     /**
+     * Adds a component to a deck at its bottom. Manages the case that the deck is empty.
+     * @param c component to add
+     * @return true if within capacity, false otherwise.
+     */
+    public boolean addToBottom(T c) {
+        if (components.size() == 0)
+            return add(c, 0);
+        else return add(c, components.size() - 1);
+    }
+
+    /**
      * Adds a full other deck to this deck, ignoring capacity.
      *
      * @param d - other deck to add to this deck.
@@ -274,6 +285,10 @@ public class Deck<T extends Component> extends Component implements IComponentCo
             if (!found)
                 throw new IllegalArgumentException(component + " not found in " + this);
         }
+    }
+
+    public boolean contains(T card) {
+        return components.contains(card);
     }
 
     /**

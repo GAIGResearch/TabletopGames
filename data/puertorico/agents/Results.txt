@@ -1,0 +1,7 @@
+---- Ranking ----
+MCTS_Leader_5P: 64.33
+MCTS_Leader_CustomRollout: 41.67
+MCTS_Leader_CustomBoth: 32.67
+MCTS_Leader_3P: 27.33
+MCTS_Leader_CustomExpansion: 25.17
+MCTS_Heuristic_Short: 8.83

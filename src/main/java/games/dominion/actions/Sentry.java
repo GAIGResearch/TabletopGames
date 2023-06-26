@@ -97,7 +97,7 @@ public class Sentry extends DominionAction implements IExtendedSequence {
     }
 
     @Override
-    public void registerActionTaken(AbstractGameState state, AbstractAction action) {
+    public void _afterAction(AbstractGameState state, AbstractAction action) {
         Decision decision = null;
         if (action instanceof TrashCard && ((TrashCard) action).player == player)
             decision = Decision.trash;

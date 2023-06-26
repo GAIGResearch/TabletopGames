@@ -31,7 +31,8 @@ public abstract class FeatureListener implements IGameListener {
 
     @Override
     public void onEvent(Event event) {
-        if (event.type == frequency) {
+        if (event.type == frequency && frequency != Event.GameEvent.GAME_OVER) {
+            // if GAME_OVER, then we cover this a few lines down
             processState(event.state, event.action);
         }
 
