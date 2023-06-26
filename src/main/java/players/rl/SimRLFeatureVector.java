@@ -1,4 +1,4 @@
-package players.rl.dataStructures;
+package players.rl;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;

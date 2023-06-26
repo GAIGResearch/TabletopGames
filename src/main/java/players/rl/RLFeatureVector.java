@@ -1,10 +1,9 @@
-package players.rl.dataStructures;
+package players.rl;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import core.interfaces.IActionFeatureVector;
-import players.rl.RLPlayer;
 
 /**
  * RLPlayer uses this feature vector. It links the player back to the feature
@@ -12,13 +11,13 @@ import players.rl.RLPlayer;
  */
 public abstract class RLFeatureVector implements IActionFeatureVector {
 
-    Map<Integer, RLPlayer> players;
+    protected Map<Integer, RLPlayer> players;
 
-    RLFeatureVector() {
+    protected RLFeatureVector() {
         players = new HashMap<>();
     }
 
-    public void linkPlayer(RLPlayer player) {
+    void linkPlayer(RLPlayer player) {
         players.put(player.getPlayerID(), player);
     }
 

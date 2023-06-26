@@ -8,10 +8,10 @@ public class RLTrainingParams {
     }
 
     public Solver solver = Solver.Q_LEARNING;
-    public float alpha = 0.5f;
-    public float gamma = 0.5f;
+    public float alpha = 0.1f;
+    public float gamma = 0.1f;
 
-    public int nGames;
+    public final int nGames;
 
     public RLTrainingParams(int nGames) {
         this.nGames = nGames;

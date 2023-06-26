@@ -12,8 +12,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.CoreConstants.GameResult;
 import core.actions.AbstractAction;
-import players.rl.dataStructures.QWeightsDataStructure;
-import players.rl.dataStructures.TurnSAR;
 
 
 public class RLPlayer extends AbstractPlayer {
@@ -23,14 +21,13 @@ public class RLPlayer extends AbstractPlayer {
         LINEAR_APPROX,
     }
 
-    protected final Random rng;
-    protected final String resourcesPath = "src/main/java/players/rl/resources/";
-
-    public RLTrainer trainer;
+    private final Random rng;
+    private final String resourcesPath = "src/main/java/players/rl/resources/";
 
     final public RLParams params;
-
     private QWeightsDataStructure qWeights;
+
+    private RLTrainer trainer;
 
     public RLPlayer(QWeightsDataStructure qWeights, RLParams params) {
         this.rng = new Random(params.getRandomSeed());
@@ -39,7 +36,7 @@ public class RLPlayer extends AbstractPlayer {
         this.qWeights.setParams(params);
     }
 
-    protected RLPlayer(QWeightsDataStructure qWeights, RLParams params, RLTrainer trainer) {
+    RLPlayer(QWeightsDataStructure qWeights, RLParams params, RLTrainer trainer) {
         this(qWeights, params);
         this.trainer = trainer;
         this.qWeights.setTrainingParams(trainer.params);
@@ -84,7 +81,7 @@ public class RLPlayer extends AbstractPlayer {
         return chosenAction;
     }
 
-    protected AbstractAction randArgmaxEvaluation(AbstractGameState gameState, List<AbstractAction> possibleActions) {
+    private AbstractAction randArgmaxEvaluation(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         // Choose an action that maximizes the Q-function
         List<AbstractAction> maximizingActions = new LinkedList<AbstractAction>();
         double qMax = -Double.MAX_VALUE;

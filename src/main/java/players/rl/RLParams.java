@@ -4,14 +4,13 @@ import java.util.Arrays;
 
 import core.AbstractParameters;
 import players.PlayerParameters;
-import players.rl.dataStructures.RLFeatureVector;
 
 public class RLParams extends PlayerParameters {
 
     int qWeightsFileId = 0;
 
     // TODO Choose good default values
-    public float epsilon = 0.5f;
+    public float epsilon = 0.25f;
 
     public final RLFeatureVector features;
 

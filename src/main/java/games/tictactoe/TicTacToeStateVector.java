@@ -2,11 +2,10 @@ package games.tictactoe;
 
 import core.AbstractGameState;
 import core.components.Token;
+import players.rl.SimRLFeatureVector;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
-
-import players.rl.dataStructures.SimRLFeatureVector;
 
 public class TicTacToeStateVector extends SimRLFeatureVector {
 

@@ -16,11 +16,11 @@ import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.*;
+import players.rl.QWeightsDataStructure;
+import players.rl.RLFeatureVector;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
-import players.rl.dataStructures.QWeightsDataStructure;
-import players.rl.dataStructures.RLFeatureVector;
-import players.rl.dataStructures.TabularQWDS;
+import players.rl.TabularQWDS;
 import utilities.Pair;
 import utilities.Utils;
 
