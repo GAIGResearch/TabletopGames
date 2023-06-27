@@ -18,6 +18,9 @@ import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
 import org.json.simple.JSONObject;
 import players.PlayerFactory;
+import players.heuristics.OrdinalPosition;
+import players.heuristics.PureScoreHeuristic;
+import players.heuristics.WinOnlyHeuristic;
 import utilities.Pair;
 import utilities.StatSummary;
 import utilities.Utils;
@@ -208,13 +211,13 @@ public class ParameterSearch {
 
         } else {
             if (evalMethod.equals("Win"))
-                stateHeuristic = (s, p) -> s.getPlayerResults()[p] == CoreConstants.GameResult.WIN_GAME ? 1.0 : 0.0;
+                stateHeuristic = new WinOnlyHeuristic();
             if (evalMethod.equals("Score"))
-                stateHeuristic = AbstractGameState::getGameScore;
+                stateHeuristic = new PureScoreHeuristic();
             if (evalMethod.equals("Heuristic"))
                 stateHeuristic = AbstractGameState::getHeuristicScore;
             if (evalMethod.equals("Ordinal")) // we maximise, so the lowest ordinal position of 1 is best
-                stateHeuristic = (s, p) -> -(double) s.getOrdinalPosition(p);
+                stateHeuristic = new OrdinalPosition();
             if (stateHeuristic == null)
                 throw new AssertionError("Invalid evaluation method provided: " + evalMethod);
         }
