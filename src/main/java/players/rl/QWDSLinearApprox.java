@@ -5,7 +5,7 @@ import java.util.Arrays;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
-public class LinearApproxQWDS extends QWeightsDataStructure {
+public class QWDSLinearApprox extends QWeightsDataStructure {
 
     private double[] qWeights;
 

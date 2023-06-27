@@ -18,7 +18,7 @@ import players.human.*;
 import players.rl.RLFeatureVector;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
-import players.rl.TabularQWDS;
+import players.rl.QWDSTabular;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -939,10 +939,10 @@ public class Game {
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         RLFeatureVector features1 = new TicTacToeStateVector();
         RLParams p1 = new RLParams(features1);
-        TabularQWDS qwds1 = new TabularQWDS();
+        QWDSTabular qwds1 = new QWDSTabular();
         RLFeatureVector features2 = new TicTacToeStateVector();
         RLParams p2 = new RLParams(features2);
-        TabularQWDS qwds2 = new TabularQWDS();
+        QWDSTabular qwds2 = new QWDSTabular();
         p1.qWeightsFileId = 4;
         p2.qWeightsFileId = 4;
         players.add(new RLPlayer(qwds1, p1));

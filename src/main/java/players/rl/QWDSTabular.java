@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TabularQWDS extends QWeightsDataStructure {
+public class QWDSTabular extends QWeightsDataStructure {
 
     private Map<String, Double> qWeights;
 
