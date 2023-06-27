@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
+import core.actions.AbstractAction;
 import evaluation.listeners.IGameListener;
 import games.GameType;
 import games.tictactoe.TicTacToeStateVector;
@@ -25,18 +27,29 @@ class RLTrainer {
         // TODO set game name and more through RLTrainingParams
         this.gameName = "TicTacToe";
         this.params = params;
-        this.qwds = new TabularQWDS();
-        this.dp = new DataProcessor(qwds);
+        this.qwds = new QWDSTabular();
         resetTrainer();
     }
 
-    void addTurn(int playerId, TurnSAR turn) {
+    void initializeTrainer(AbstractGameState state) {
+        this.dp = new DataProcessor(qwds);
+    }
+
+    void addTurn(RLPlayer player, AbstractGameState state, AbstractAction action,
+            List<AbstractAction> possibleActions) {
+        int playerId = player.getPlayerID();
+        AbstractGameState nextState = state.copy(playerId);
+        if (action != null) // For the final game state
+            player.getForwardModel().next(nextState, action);
+        double reward = params.heuristic.evaluateState(nextState, playerId);
+        TurnSAR turn = new TurnSAR(state, action, possibleActions, reward);
         if (!playerTurns.containsKey(playerId))
             playerTurns.put(playerId, new ArrayList<TurnSAR>());
         playerTurns.get(playerId).add(turn);
     }
 
-    void train(RLPlayer player) {
+    void train(RLPlayer player, AbstractGameState finalGameState) {
+        addTurn(player, finalGameState, null, null);
         // TODO implement other methods than qLearning
         qwds.qLearning(player, playerTurns.get(player.getPlayerID()));
     }
@@ -56,7 +69,7 @@ class RLTrainer {
 
         RLParams playerParams = new RLParams(new TicTacToeStateVector());
         playerParams.epsilon = 0.35f;
-        playerParams.qWeightsFileId = 2;
+        playerParams.qWeightsFileId = 0;
 
         players.add(new RLPlayer(qwds, playerParams, this));
         players.add(new RLPlayer(qwds, playerParams, this));
@@ -96,7 +109,7 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams(9000000);
+        RLTrainingParams params = new RLTrainingParams(10000);
         params.alpha = 0.25f;
         params.gamma = 0.25f;
         RLTrainer trainer = new RLTrainer(params);

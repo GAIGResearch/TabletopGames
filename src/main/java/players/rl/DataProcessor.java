@@ -20,19 +20,43 @@ import java.util.stream.IntStream;
 
 class DataProcessor {
 
-    private enum Db {
-        id, alpha, gamma, epsilon, solver, nGamesTotal, nGamesThisId, startId, startNGames
+    // An entry for the database. Content defined in DataProcessor::formatData
+    private enum DBEntry {
+        // The ID of this entry (Z+)
+        ID,
+        // The alpha value used [0, 1]
+        Alpha,
+        // The gamma value used [0, 1]
+        Gamma,
+        // The epsilon value used [0, 1]
+        Epsilon,
+        // The solver used (Q-Learning, SARSA, etc.)
+        Solver,
+        // The class name of the used IStateHeuristic
+        Heuristic,
+        // The class name of the used players.rl.QWeightsDataStructure
+        QWeightsDataStructure,
+        // The class name of the used players.rl.RLFeatureVector
+        RLFeatureVector,
+        // The total number of games played by this entry
+        NGamesTotal,
+        // The number of games played by this entry with these parameters & settings
+        NGamesThisId,
+        // The ID of the entry which was used as a starting point for this training
+        StartID,
+        // The total number of games played before using these parameters & settings
+        StartNGames
     }
 
-    private final String[] header = Arrays.stream(Db.values()).map(Enum::name).toArray(String[]::new);
+    private final String[] header = Arrays.stream(DBEntry.values()).map(Enum::name).toArray(String[]::new);
 
-    private final int db_id = Db.id.ordinal();
+    private final int db_id = DBEntry.ID.ordinal();
 
     private QWeightsDataStructure qwds;
 
     private final String dbFileName = "qWeightsDB.csv";
     private final String dbPath;
-    public final String qWeightsFolderPath;
+    private final String qWeightsFolderPath;
 
     DataProcessor(QWeightsDataStructure qwds) {
         this.qwds = qwds;
@@ -60,29 +84,32 @@ class DataProcessor {
     private String[] formatData(int id, int nGamesAdded) {
         int startId = qwds.params.qWeightsFileId;
 
-        String _nGamesThisId = readDatabaseEntry(id, Db.nGamesThisId);
-        int nGamesThisId = (_nGamesThisId != null ? Integer.parseInt(_nGamesThisId) : 0) + nGamesAdded;
+        String _nGamesThisId = readDatabaseEntry(id, DBEntry.NGamesThisId);
+        int nGamesThisId = (_nGamesThisId != null ? (int) Double.parseDouble(_nGamesThisId) : 0) + nGamesAdded;
 
-        String _startNGames = readDatabaseEntry(startId, Db.nGamesTotal);
-        int startNGames = _startNGames != null ? Integer.parseInt(_startNGames) : 0;
+        String _startNGames = readDatabaseEntry(startId, DBEntry.NGamesTotal);
+        int startNGames = _startNGames != null ? (int) Double.parseDouble(_startNGames) : 0;
 
-        Map<Db, String> entries = new HashMap<Db, String>() {
+        Map<DBEntry, String> entries = new HashMap<DBEntry, String>() {
             {
-                put(Db.id, Integer.toString(id));
-                put(Db.alpha, Double.toString(qwds.trainingParams.alpha));
-                put(Db.gamma, String.format("%.3f", qwds.trainingParams.gamma));
-                put(Db.epsilon, Double.toString(qwds.params.epsilon));
-                put(Db.solver, qwds.trainingParams.solver.name());
-                put(Db.nGamesTotal, Integer.toString(startNGames + nGamesThisId));
-                put(Db.nGamesThisId, Integer.toString(nGamesThisId));
-                put(Db.startId, Integer.toString(startId));
-                put(Db.startNGames, Integer.toString(startNGames));
+                put(DBEntry.ID, Integer.toString(id));
+                put(DBEntry.Alpha, String.format("%.3f", qwds.trainingParams.alpha));
+                put(DBEntry.Gamma, String.format("%.3f", qwds.trainingParams.gamma));
+                put(DBEntry.Epsilon, String.format("%.3f", qwds.params.epsilon));
+                put(DBEntry.Solver, qwds.trainingParams.solver.name());
+                put(DBEntry.Heuristic, qwds.trainingParams.heuristic.getClass().getCanonicalName());
+                put(DBEntry.QWeightsDataStructure, qwds.getClass().getCanonicalName());
+                put(DBEntry.RLFeatureVector, qwds.params.features.getClass().getCanonicalName());
+                put(DBEntry.NGamesTotal, String.format("%.3e", (float) (startNGames + nGamesThisId)));
+                put(DBEntry.NGamesThisId, String.format("%.3e", (float) nGamesThisId));
+                put(DBEntry.StartID, startId == 0 ? "-" : Integer.toString(startId));
+                put(DBEntry.StartNGames, startId == 0 ? "-" : String.format("%.3e", (float) startNGames));
             }
         };
-        return Arrays.stream(Db.values()).map(col -> entries.getOrDefault(col, "")).toArray(String[]::new);
+        return Arrays.stream(DBEntry.values()).map(col -> entries.getOrDefault(col, "")).toArray(String[]::new);
     }
 
-    private String readDatabaseEntry(int id, Db col) {
+    private String readDatabaseEntry(int id, DBEntry col) {
         String[] entry = readDatabaseEntry(id);
         if (entry != null)
             return entry[col.ordinal()];

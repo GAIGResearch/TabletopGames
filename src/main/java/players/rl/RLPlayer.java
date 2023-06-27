@@ -1,16 +1,11 @@
 package players.rl;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 import core.AbstractGameState;
 import core.AbstractPlayer;
-import core.CoreConstants.GameResult;
 import core.actions.AbstractAction;
 
 
@@ -47,15 +42,15 @@ public class RLPlayer extends AbstractPlayer {
     public void initializePlayer(AbstractGameState gameState) {
         this.params.features.linkPlayer(this);
         this.qWeights.initialize(gameState.getGameType().name());
+        if (this.trainer != null)
+            this.trainer.initializeTrainer(gameState);
     }
 
     @Override
     public void finalizePlayer(AbstractGameState gameState) {
         if (trainer == null)
             return;
-        float reward = gameState.getPlayerResults()[getPlayerID()] == GameResult.WIN_GAME ? 1 : -1;
-        trainer.addTurn(getPlayerID(), new TurnSAR(gameState, null, null, reward));
-        trainer.train(this);
+        trainer.train(this, gameState);
     }
 
     @Override
@@ -66,7 +61,7 @@ public class RLPlayer extends AbstractPlayer {
 
         // TODO implement better methods for reward (score, etc.?)
         if (trainer != null)
-            trainer.addTurn(getPlayerID(), new TurnSAR(gameState, chosenAction, possibleActions, 0));
+            trainer.addTurn(this, gameState, chosenAction, possibleActions);
         return chosenAction;
     }
 

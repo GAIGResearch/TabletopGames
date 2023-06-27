@@ -47,6 +47,8 @@ public abstract class QWeightsDataStructure {
 
     private void tryReadQWeightsFromFile() {
         initQWeights();
+        if (params.qWeightsFileId == 0)
+            return;
         String readPath = qWeightsFolderPath + params.qWeightsFileId + ".txt";
         Path path = Paths.get(readPath);
         try {
