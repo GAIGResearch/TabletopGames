@@ -192,6 +192,7 @@ public class MCTSPlayer extends AbstractPlayer implements IAnyTimePlayer {
     @Override
     public void setBudget(int budget) {
         params.budget = budget;
+        params.setParameterValue("budget", budget);
     }
 
     @Override

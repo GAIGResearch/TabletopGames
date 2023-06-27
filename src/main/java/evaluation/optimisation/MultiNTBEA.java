@@ -37,9 +37,9 @@ public class MultiNTBEA extends NTBEA {
     }
 
     @Override
-    protected void runTrial() {
+    protected void runTrials() {
         multiPlayerEvaluator.reset();
-        searchFramework.runTrial(multiPlayerEvaluator, 1);
+        searchFramework.runTrial(multiPlayerEvaluator, params.iterationsPerRun);
     }
 
 

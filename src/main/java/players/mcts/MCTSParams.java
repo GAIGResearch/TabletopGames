@@ -244,51 +244,10 @@ public class MCTSParams extends PlayerParameters {
 
     @Override
     protected MCTSParams _copy() {
-        MCTSParams retValue = new MCTSParams(System.currentTimeMillis());
-        retValue.K = K;
-        retValue.rolloutLength = rolloutLength;
-        retValue.maxTreeDepth = maxTreeDepth;
-        retValue.epsilon = epsilon;
-        retValue.information = information;
-        retValue.MAST = MAST;
-        retValue.useMAST = useMAST;
-        retValue.MASTGamma = MASTGamma;
-        retValue.MASTBoltzmann = MASTBoltzmann;
-        retValue.exp3Boltzmann = exp3Boltzmann;
-        retValue.hedgeBoltzmann = hedgeBoltzmann;
-        retValue.expansionPolicy = expansionPolicy;
-        retValue.selectionPolicy = selectionPolicy;
-        retValue.treePolicy = treePolicy;
-        retValue.opponentTreePolicy = opponentTreePolicy;
-        retValue.rolloutType = rolloutType;
-        retValue.oppModelType = oppModelType;
-        retValue.rolloutClass = rolloutClass;
-        retValue.oppModelClass = oppModelClass;
-        retValue.rolloutPolicy = rolloutPolicy == null ? null : rolloutPolicy.copy();
-        retValue.rolloutPolicyParams = rolloutPolicyParams;
-        retValue.opponentModel = opponentModel == null ? null : opponentModel.copy();
-        retValue.opponentModelParams = opponentModelParams;
-        retValue.exploreEpsilon = exploreEpsilon;
-        retValue.gatherExpertIterationData = gatherExpertIterationData;
-        retValue.expertIterationFileStem = expertIterationFileStem;
-        retValue.expertIterationStateFeatures = expertIterationStateFeatures;
-        retValue.EIStateFeatureVector = EIStateFeatureVector;
-        retValue.expertIterationActionFeatures = expertIterationActionFeatures;
-        retValue.EIActionFeatureVector = EIActionFeatureVector;
-        retValue.advantageFunction = advantageFunction;
-        retValue.biasVisits = biasVisits;
-        retValue.omaVisits = omaVisits;
-        retValue.progressiveWideningConstant = progressiveWideningConstant;
-        retValue.progressiveWideningExponent = progressiveWideningExponent;
-        retValue.normaliseRewards = normaliseRewards;
-        retValue.nodesStoreScoreDelta = nodesStoreScoreDelta;
-        retValue.maintainMasterState = maintainMasterState;
-        retValue.rolloutTermination = rolloutTermination;
-        retValue.heuristic = heuristic;
-        retValue.opponentHeuristic = opponentHeuristic;
-        retValue.discardStateAfterEachIteration = discardStateAfterEachIteration;
-        retValue.paranoid = paranoid;
-        return retValue;
+        // All the copying is done in TunableParameters.copy()
+        // Note that any *local* changes of parameters will not be copied
+        // unless they have been 'registered' with setParameterValue("name", value)
+        return new MCTSParams(System.currentTimeMillis());
     }
 
 
