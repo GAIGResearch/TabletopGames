@@ -10,9 +10,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -33,17 +30,14 @@ class DataProcessor {
 
     private QWeightsDataStructure qwds;
 
-    private final String resourcesPath = "src/main/java/players/rl/resources/";
     private final String dbFileName = "qWeightsDB.csv";
-    private String dbPath;
-    private String gameFolderPath;
-    private String qWeightsFolderPath;
+    private final String dbPath;
+    public final String qWeightsFolderPath;
 
-    DataProcessor(QWeightsDataStructure qwds, String gameName) {
+    DataProcessor(QWeightsDataStructure qwds) {
         this.qwds = qwds;
-        this.gameFolderPath = resourcesPath + gameName + "/";
-        this.dbPath = gameFolderPath + dbFileName;
-        this.qWeightsFolderPath = gameFolderPath + "qWeights/";
+        this.dbPath = qwds.getGameFolderPath() + dbFileName;
+        this.qWeightsFolderPath = qwds.getQWeightsFolderPath();
         createMissingFoldersAndFiles();
         cleanDeletedFilesFromDB();
     }
@@ -76,7 +70,7 @@ class DataProcessor {
             {
                 put(Db.id, Integer.toString(id));
                 put(Db.alpha, Double.toString(qwds.trainingParams.alpha));
-                put(Db.gamma, Double.toString(qwds.trainingParams.gamma));
+                put(Db.gamma, String.format("%.3f", qwds.trainingParams.gamma));
                 put(Db.epsilon, Double.toString(qwds.params.epsilon));
                 put(Db.solver, qwds.trainingParams.solver.name());
                 put(Db.nGamesTotal, Integer.toString(startNGames + nGamesThisId));
@@ -171,19 +165,6 @@ class DataProcessor {
         entries.add(entry);
         entries.sort((e1, e2) -> Integer.compare(Integer.parseInt(e1[db_id]), Integer.parseInt(e2[db_id])));
         return entries;
-    }
-
-    void tryReadQWeightsFromFile() {
-        String readPath = qWeightsFolderPath + qwds.params.qWeightsFileId + ".txt";
-        Path path = Paths.get(readPath);
-        if (Files.exists(path) && Files.isRegularFile(path)) {
-            try {
-                String[] weightStrings = Files.readString(path).split("\n");
-                qwds.parseQWeights(weightStrings);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private void writeQWeightsToFile(int id) {

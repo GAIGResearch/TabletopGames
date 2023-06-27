@@ -16,13 +16,14 @@ import core.actions.AbstractAction;
 
 public class RLPlayer extends AbstractPlayer {
 
+    public static final String resourcesPath = "src/main/java/players/rl/resources/";
+
     enum RLType {
         TABULAR,
         LINEAR_APPROX,
     }
 
     private final Random rng;
-    private final String resourcesPath = "src/main/java/players/rl/resources/";
 
     final public RLParams params;
     private QWeightsDataStructure qWeights;
@@ -45,19 +46,7 @@ public class RLPlayer extends AbstractPlayer {
     @Override
     public void initializePlayer(AbstractGameState gameState) {
         this.params.features.linkPlayer(this);
-
-        if (trainer == null) {
-            String readPath = resourcesPath + gameState.getGameType().name() + "/beta.txt";
-            Path path = Paths.get(readPath);
-            if (Files.exists(path) && Files.isRegularFile(path)) {
-                try {
-                    String[] qWeightStrings = Files.readString(path).split("\n");
-                    qWeights.parseQWeights(qWeightStrings);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        this.qWeights.initialize(gameState.getGameType().name());
     }
 
     @Override
@@ -90,7 +79,7 @@ public class RLPlayer extends AbstractPlayer {
             double q = qWeights.evaluateQ(this, gameState, a);
             // Keep all actions that maximize Q
             if (q > qMax) {
-                maximizingActions = new LinkedList<AbstractAction>();
+                maximizingActions.clear();
                 maximizingActions.add(a);
                 qMax = q;
             } else if (q == qMax)

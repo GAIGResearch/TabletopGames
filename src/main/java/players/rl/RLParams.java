@@ -7,7 +7,7 @@ import players.PlayerParameters;
 
 public class RLParams extends PlayerParameters {
 
-    int qWeightsFileId = 0;
+    public int qWeightsFileId = 0;
 
     // TODO Choose good default values
     public float epsilon = 0.25f;

@@ -26,7 +26,7 @@ class RLTrainer {
         this.gameName = "TicTacToe";
         this.params = params;
         this.qwds = new TabularQWDS();
-        this.dp = new DataProcessor(qwds, gameName);
+        this.dp = new DataProcessor(qwds);
         resetTrainer();
     }
 
@@ -61,7 +61,6 @@ class RLTrainer {
         players.add(new RLPlayer(qwds, playerParams, this));
         players.add(new RLPlayer(qwds, playerParams, this));
 
-        dp.tryReadQWeightsFromFile();
         int nGames = params.nGames;
 
         int fileId = -1;
@@ -73,7 +72,7 @@ class RLTrainer {
                 System.out.println((i / splitSize) + "%");
                 // Every 10%, write progress to file
                 if ((i / splitSize) % 10 == 0)
-                    fileId = writeData(fileId, i);
+                    fileId = writeData(fileId, splitSize);
             }
             runGame(GameType.valueOf(gameName), gameParams, players, System.currentTimeMillis(), false, null,
                     useGUI ? new ActionController() : null, turnPause);
@@ -97,7 +96,7 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams(99000000);
+        RLTrainingParams params = new RLTrainingParams(9000000);
         params.alpha = 0.25f;
         params.gamma = 0.25f;
         RLTrainer trainer = new RLTrainer(params);

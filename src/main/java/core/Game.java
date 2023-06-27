@@ -4,7 +4,6 @@ import core.actions.AbstractAction;
 import core.actions.DoNothing;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
-import core.interfaces.IStateFeatureVector;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
@@ -16,7 +15,6 @@ import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.*;
-import players.rl.QWeightsDataStructure;
 import players.rl.RLFeatureVector;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
@@ -933,17 +931,22 @@ public class Game {
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "TicTacToe");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int turnPause = Utils.getArg(args, "turnPause", 2500);
+        int turnPause = Utils.getArg(args, "turnPause", 500);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        RLFeatureVector features = new TicTacToeStateVector();
-        RLParams p1 = new RLParams(features);
-        TabularQWDS qwds = new TabularQWDS();
-        players.add(new RLPlayer(qwds, p1));
-        players.add(new RLPlayer(qwds, p1));
+        RLFeatureVector features1 = new TicTacToeStateVector();
+        RLParams p1 = new RLParams(features1);
+        TabularQWDS qwds1 = new TabularQWDS();
+        RLFeatureVector features2 = new TicTacToeStateVector();
+        RLParams p2 = new RLParams(features2);
+        TabularQWDS qwds2 = new TabularQWDS();
+        p1.qWeightsFileId = 4;
+        p2.qWeightsFileId = 4;
+        players.add(new RLPlayer(qwds1, p1));
+        players.add(new RLPlayer(qwds2, p2));
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
