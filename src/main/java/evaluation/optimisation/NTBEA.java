@@ -121,7 +121,6 @@ public class NTBEA {
         // winners from each iteration to play in a tournament and pick the winner of this tournament
         if (params.tournamentGames > 0 && winnersPerRun.get(0) instanceof AbstractPlayer) {
             List<AbstractPlayer> players = winnersPerRun.stream().map(p -> (AbstractPlayer) p).collect(Collectors.toList());
-            // Add in the ones we have measured ourselves against
             for (int i = 0; i < players.size(); i++) {
                 players.get(i).setName("Winner " + i + " : " + Arrays.toString(winnerSettings.get(i)));
             }
