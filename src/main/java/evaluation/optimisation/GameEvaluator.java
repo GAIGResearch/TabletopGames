@@ -128,9 +128,12 @@ public class GameEvaluator implements SolutionEvaluator {
         newGame.reset(allPlayers, rnd.nextLong());
 
         newGame.run();
+        double retValue = tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerIndex);
+
+    //    System.out.println("GameEvaluator: " + retValue);
 
         nEvals++;
-        return tuningGame ? gameHeuristic.evaluateGame(newGame) : stateHeuristic.evaluateState(newGame.getGameState(), playerIndex);
+        return retValue;
     }
 
     public void addListener(IGameListener listener) {

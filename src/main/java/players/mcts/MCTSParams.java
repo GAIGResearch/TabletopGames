@@ -49,8 +49,6 @@ public class MCTSParams extends PlayerParameters {
     public boolean gatherExpertIterationData = false;
     public String expertIterationFileStem = "ExpertIterationData";
     public String expertIterationStateFeatures = "";
-    public boolean gatherTreeRecorder = false;
-    public String treeRecorderFolder = "tree_recorder";
     public IStateFeatureVector EIStateFeatureVector;
     public String expertIterationActionFeatures = "";
     public IActionFeatureVector EIActionFeatureVector;
@@ -102,10 +100,7 @@ public class MCTSParams extends PlayerParameters {
         addTunableParameter("expIterFile", "");
         addTunableParameter("expertIterationStateFeatures", "");
         addTunableParameter("expertIterationActionFeatures", "");
-
-        addTunableParameter("gatherTreeRecorder", false);
-        addTunableParameter("treeRecorderFolder", "tree_recorder");
-
+        addTunableParameter("advantageFunction", "");
         addTunableParameter("biasVisits", 0, Arrays.asList(0, 1, 3, 10, 30, 100));
         addTunableParameter("progressiveWideningConstant", 0.0, Arrays.asList(0.0, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0));
         addTunableParameter("progressiveWideningExponent", 0.0, Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.5));
@@ -249,55 +244,10 @@ public class MCTSParams extends PlayerParameters {
 
     @Override
     protected MCTSParams _copy() {
-        MCTSParams retValue = new MCTSParams(System.currentTimeMillis());
-        retValue.K = K;
-        retValue.rolloutLength = rolloutLength;
-        retValue.maxTreeDepth = maxTreeDepth;
-        retValue.epsilon = epsilon;
-        retValue.information = information;
-        retValue.MAST = MAST;
-        retValue.useMAST = useMAST;
-        retValue.MASTGamma = MASTGamma;
-        retValue.MASTBoltzmann = MASTBoltzmann;
-        retValue.exp3Boltzmann = exp3Boltzmann;
-        retValue.hedgeBoltzmann = hedgeBoltzmann;
-        retValue.expansionPolicy = expansionPolicy;
-        retValue.selectionPolicy = selectionPolicy;
-        retValue.treePolicy = treePolicy;
-        retValue.opponentTreePolicy = opponentTreePolicy;
-        retValue.rolloutType = rolloutType;
-        retValue.oppModelType = oppModelType;
-        retValue.rolloutClass = rolloutClass;
-        retValue.oppModelClass = oppModelClass;
-        retValue.rolloutPolicy = rolloutPolicy == null ? null : rolloutPolicy.copy();
-        retValue.rolloutPolicyParams = rolloutPolicyParams;
-        retValue.opponentModel = opponentModel == null ? null : opponentModel.copy();
-        retValue.opponentModelParams = opponentModelParams;
-        retValue.exploreEpsilon = exploreEpsilon;
-        retValue.gatherExpertIterationData = gatherExpertIterationData;
-        retValue.expertIterationFileStem = expertIterationFileStem;
-        retValue.expertIterationStateFeatures = expertIterationStateFeatures;
-        retValue.EIStateFeatureVector = EIStateFeatureVector;
-        retValue.expertIterationActionFeatures = expertIterationActionFeatures;
-
-        retValue.gatherTreeRecorder = gatherTreeRecorder;
-        retValue.treeRecorderFolder = treeRecorderFolder;
-
-        retValue.EIActionFeatureVector = EIActionFeatureVector;
-        retValue.advantageFunction = advantageFunction;
-        retValue.biasVisits = biasVisits;
-        retValue.omaVisits = omaVisits;
-        retValue.progressiveWideningConstant = progressiveWideningConstant;
-        retValue.progressiveWideningExponent = progressiveWideningExponent;
-        retValue.normaliseRewards = normaliseRewards;
-        retValue.nodesStoreScoreDelta = nodesStoreScoreDelta;
-        retValue.maintainMasterState = maintainMasterState;
-        retValue.rolloutTermination = rolloutTermination;
-        retValue.heuristic = heuristic;
-        retValue.opponentHeuristic = opponentHeuristic;
-        retValue.discardStateAfterEachIteration = discardStateAfterEachIteration;
-        retValue.paranoid = paranoid;
-        return retValue;
+        // All the copying is done in TunableParameters.copy()
+        // Note that any *local* changes of parameters will not be copied
+        // unless they have been 'registered' with setParameterValue("name", value)
+        return new MCTSParams(System.currentTimeMillis());
     }
 
 

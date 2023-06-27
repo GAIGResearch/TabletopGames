@@ -158,12 +158,15 @@ public class NTBEA {
         return params.searchSpace.getAgent(bestResult.b);
     }
 
+    protected void runTrials() {
+        evaluator.reset();
+        searchFramework.runTrial(evaluator, params.iterationsPerRun);
+    }
+
     protected void runIteration() {
         landscapeModel.reset();
 
-        for (int i = 0; i < params.iterationsPerRun; i++) {
-            runTrial();
-        }
+        runTrials();
 
         if (params.verbose)
             logResults();
@@ -216,11 +219,6 @@ public class NTBEA {
                 .map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGame - 1.0);
 
         return new Pair<>(avg, stdErr);
-    }
-
-    protected void runTrial() {
-        evaluator.reset();
-        searchFramework.runTrial(evaluator, 1);
     }
 
 
