@@ -7,6 +7,8 @@ import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import evaluation.listeners.IGameListener;
 import evaluation.tournaments.RandomRRTournament;
+import evaluation.tournaments.RoundRobinTournament;
+import org.apache.commons.math3.util.CombinatoricsUtils;
 import games.GameType;
 import ntbea.NTupleBanditEA;
 import ntbea.NTupleSystem;
@@ -125,7 +127,12 @@ public class NTBEA {
             for (int i = 0; i < players.size(); i++) {
                 players.get(i).setName("Winner " + i + " : " + Arrays.toString(winnerSettings.get(i)));
             }
-            RandomRRTournament tournament = new RandomRRTournament(players, game, nPlayers, NO_SELF_PLAY, params.tournamentGames, 0, params.seed, gameParams);
+            // Given we have N players in each game, and a total of 5 agents (the number of NTBEA iterations), we
+            // can reduce the variance in the results (and hence the accuracy of picking the best agent) by using the exhaustive mode
+            double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
+            int gamesPerMatchup = (int) Math.ceil(params.tournamentGames / combinationsOfPlayers);  // we round up.
+
+            RoundRobinTournament tournament = new RoundRobinTournament(players, game, nPlayers, gamesPerMatchup, NO_SELF_PLAY, gameParams);
             tournament.verbose = false;
             createListeners().forEach(tournament::addListener);
             tournament.runTournament();
