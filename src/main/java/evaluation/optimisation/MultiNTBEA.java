@@ -16,7 +16,7 @@ public class MultiNTBEA extends NTBEA {
 
     public MultiNTBEA(NTBEAParameters parameters, GameType game, int nPlayers) {
         super(parameters, game, nPlayers);
-        params.evalGame = 0;  // these are not used in the multi-player case (yet)
+        params.evalGames = 0;  // these are not used in the multi-player case (yet)
 
         searchFramework = new MultiNTupleBanditEA(landscapeModel, params.kExplore, params.neighbourhoodSize, nPlayers);
 

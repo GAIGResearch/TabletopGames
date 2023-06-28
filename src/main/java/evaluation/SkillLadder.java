@@ -3,18 +3,16 @@ package evaluation;
 import core.AbstractParameters;
 import core.AbstractPlayer;
 import evaluation.listeners.IGameListener;
-import evaluation.loggers.SummaryLogger;
 import evaluation.optimisation.NTBEA;
 import evaluation.optimisation.NTBEAParameters;
 import evaluation.tournaments.RoundRobinTournament;
 import games.GameType;
 import players.IAnyTimePlayer;
 import players.PlayerFactory;
-import players.mcts.MCTSPlayer;
 import players.simple.RandomPlayer;
+import utilities.Pair;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static evaluation.tournaments.AbstractTournament.TournamentMode.ONE_VS_ALL;
@@ -27,6 +25,9 @@ import static utilities.Utils.getArg;
  * higher budget agent in different player positions.
  */
 public class SkillLadder {
+
+    private static int NTBEARunsBetweenRungs = 4;
+    private static double NTBEABudgetOnTournament = 0.50;  // the complement will be spent on NTBEA runs
 
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
@@ -69,19 +70,22 @@ public class SkillLadder {
         String gameParams = getArg(args, "gameParams", "");
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "").split("\\|")));
 
-        int nPlayers = getArg(args, "nPlayers", 2);
         String game = getArg(args, "game", "TicTacToe");
         GameType gameType = GameType.valueOf(game);
+        int nPlayers = getArg(args, "nPlayers", gameType.getMinPlayers());
         AbstractParameters params = AbstractParameters.createFromFile(gameType, gameParams);
 
         AbstractPlayer baseAgent, newAgent;
+        int[] currentBestSettings = new int[0];
         if (NTBEABudget > 0) {
             // first we tune the minimum budget against a random player
             NTBEAParameters ntbeaParameters = constructNTBEAParameters(args, startingTimeBudget, NTBEABudget);
             NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
             ntbeaParameters.printSearchSpaceDetails();
             ntbea.setOpponents(Collections.singletonList(new RandomPlayer()));
-            baseAgent = (AbstractPlayer) ntbea.run();
+            Pair<Object, int[]> results = ntbea.run();
+            baseAgent = (AbstractPlayer) results.a;
+            currentBestSettings = results.b;
         } else {
             baseAgent = PlayerFactory.createPlayer(player, s -> s.replaceAll("-999", Integer.toString(startingTimeBudget)));
         }
@@ -100,8 +104,11 @@ public class SkillLadder {
                     ((IAnyTimePlayer) benchmark).setBudget(newBudget);
                 }
                 ntbea.setOpponents(Collections.singletonList(benchmark));
+                ntbea.addElite(currentBestSettings);
 
-                newAgent = (AbstractPlayer) ntbea.run();
+                Pair<Object, int[]> results = ntbea.run();
+                newAgent = (AbstractPlayer) results.a;
+                currentBestSettings = results.b;
             } else {
                 newAgent = PlayerFactory.createPlayer(player, s -> s.replaceAll("-999", String.valueOf(newBudget)));
             }
@@ -147,10 +154,10 @@ public class SkillLadder {
         // we divide the budget into 7 parts, 5 parts used for 5 independent runs, and then 2 parts used
         // to pick the best of these 5 suggestions
         ntbeaParameters.destDir = ntbeaParameters.destDir + File.separator + "Budget_" + agentBudget + File.separator + "NTBEA";
-        ntbeaParameters.repeats = 5;
-        ntbeaParameters.iterationsPerRun = gameBudget / 7;
-        ntbeaParameters.evalGame = 0;
-        ntbeaParameters.tournamentGames = gameBudget * 2 / 7;
+        ntbeaParameters.repeats = NTBEARunsBetweenRungs;
+        ntbeaParameters.tournamentGames = (int) (gameBudget * NTBEABudgetOnTournament);
+        ntbeaParameters.iterationsPerRun = (gameBudget - ntbeaParameters.tournamentGames) / NTBEARunsBetweenRungs;
+        ntbeaParameters.evalGames = 0;
         ntbeaParameters.opponentDescriptor = "random";
         ntbeaParameters.logFile = agentBudget + "_" + ntbeaParameters.logFile;
         return ntbeaParameters;
