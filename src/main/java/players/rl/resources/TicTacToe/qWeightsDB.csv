@@ -1,2 +1,2 @@
 "ID","Alpha","Gamma","Epsilon","Solver","Heuristic","QWeightsDataStructure","RLFeatureVector","NGamesTotal","NGamesThisId","StartID","StartNGames"
-"1","0.250","0.250","0.350","Q_LEARNING","players.heuristics.WinOnlyHeuristic","players.rl.QWDSTabular","games.tictactoe.TicTacToeStateVector","1.100e+04","1.100e+04","0","0.000e+00"
+"1","0.25","0.25","0.35","Q_LEARNING","players.heuristics.WinOnlyHeuristic","players.rl.QWDSTabular","games.tictactoe.TicTacToeStateVector","1","1","-","-"

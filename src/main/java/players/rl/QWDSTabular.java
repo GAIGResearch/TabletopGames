@@ -6,18 +6,14 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 
 public class QWDSTabular extends QWeightsDataStructure {
 
     private Map<String, Double> qWeights;
 
     @Override
-    protected void initQWeights() {
-        qWeights = new HashMap<String, Double>();
+    protected void initQWeightsEmpty() {
+        qWeights = new StateMap();
     }
 
     @Override
@@ -48,24 +44,18 @@ public class QWDSTabular extends QWeightsDataStructure {
     }
 
     @Override
-    protected void parseQWeights(String[] qWeightStrings) {
-        Arrays.stream(qWeightStrings).forEach(s -> {
-            String[] entry = s.split(":");
-            qWeights.put(entry[0], Double.parseDouble(entry[1]));
-        });
+    protected void parseQWeights(StateMap stateMap) {
+        qWeights = stateMap;
     }
 
     @Override
-    protected String qWeightsToString() {
-        List<String> outputs = new LinkedList<String>();
+    protected StateMap qWeightsToStateMap() {
+        StateMap qWeightsStateMap = new StateMap();
         for (String stateId : qWeights.keySet())
-            if (qWeights.containsKey(stateId))
-                outputs.add(stateId + ":" + qWeights.get(stateId));
-        outputs.sort(Comparator.comparingDouble((String s) -> Double.parseDouble(s.split(":")[1])).reversed());
-        String outputText = "";
-        for (String s : outputs)
-            outputText += s + "\n";
-        return outputText;
+            qWeightsStateMap.put(stateId, qWeights.get(stateId));
+        // qWeightsStateMap.sort(Comparator.comparingDouble((String s) ->
+        // Double.parseDouble(s.split(":")[1])).reversed());
+        return qWeightsStateMap;
     }
 
     private String getStateId(RLPlayer player, AbstractGameState state, AbstractAction action) {

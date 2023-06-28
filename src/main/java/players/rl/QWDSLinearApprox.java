@@ -1,7 +1,5 @@
 package players.rl;
 
-import java.util.Arrays;
-
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
@@ -19,7 +17,7 @@ public class QWDSLinearApprox extends QWeightsDataStructure {
     }
 
     @Override
-    protected void initQWeights() {
+    protected void initQWeightsEmpty() {
         // if (trainer != null)
         // qWeights = trainer.qWeights;
         // else
@@ -27,16 +25,18 @@ public class QWDSLinearApprox extends QWeightsDataStructure {
     }
 
     @Override
-    protected void parseQWeights(String[] qWeightStrings) {
-        qWeights = Arrays.stream(qWeightStrings).mapToDouble(Double::parseDouble).toArray();
+    protected void parseQWeights(StateMap stateMap) {
+        // TODO
+        // qWeights =
+        // Arrays.stream(qWeightStrings).mapToDouble(Double::parseDouble).toArray();
     }
 
     @Override
-    protected String qWeightsToString() {
+    protected StateMap qWeightsToStateMap() {
         String outputText = "";
         for (double q : qWeights)
             outputText += q + "\n";
-        return outputText;
+        return null;
     }
 
     @Override

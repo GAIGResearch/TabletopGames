@@ -32,16 +32,20 @@ class RLTrainer {
     }
 
     void initializeTrainer(AbstractGameState state) {
-        this.dp = new DataProcessor(qwds);
+        this.dp = new DataProcessor(qwds, gameName);
     }
 
     void addTurn(RLPlayer player, AbstractGameState state, AbstractAction action,
             List<AbstractAction> possibleActions) {
         int playerId = player.getPlayerID();
-        AbstractGameState nextState = state.copy(playerId);
+
+        // Calculate reward
+        AbstractGameState evalState = state.copy(playerId);
         if (action != null) // For the final game state
-            player.getForwardModel().next(nextState, action);
-        double reward = params.heuristic.evaluateState(nextState, playerId);
+            player.getForwardModel().next(evalState, action);
+        double reward = params.heuristic.evaluateState(evalState, playerId);
+
+        // Add the turn to playerTurns
         TurnSAR turn = new TurnSAR(state, action, possibleActions, reward);
         if (!playerTurns.containsKey(playerId))
             playerTurns.put(playerId, new ArrayList<TurnSAR>());
@@ -77,20 +81,24 @@ class RLTrainer {
         int nGames = params.nGames;
 
         int fileId = -1;
+        int nGamesSinceLastWrite = 0;
 
         System.out.println("Starting training...");
         for (int i = 1; i <= nGames; i++) {
+            runGame(GameType.valueOf(gameName), gameParams, players, System.currentTimeMillis(), false, null,
+                    useGUI ? new ActionController() : null, turnPause);
+            nGamesSinceLastWrite++;
             int splitSize = nGames / 100;
             if (splitSize != 0 && i % splitSize == 0) {
                 System.out.println((i / splitSize) + "%");
                 // Every 10%, write progress to file
-                if ((i / splitSize) % 10 == 0)
-                    fileId = writeData(fileId, splitSize);
+                if ((i / splitSize) % 10 == 0) {
+                    fileId = writeData(fileId, nGamesSinceLastWrite);
+                    nGamesSinceLastWrite = 0;
+                }
             }
-            runGame(GameType.valueOf(gameName), gameParams, players, System.currentTimeMillis(), false, null,
-                    useGUI ? new ActionController() : null, turnPause);
         }
-        writeData(fileId, nGames);
+        writeData(fileId, nGamesSinceLastWrite);
         System.out.print("Training complete!");
     }
 
@@ -109,7 +117,7 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams(10000);
+        RLTrainingParams params = new RLTrainingParams(1);
         params.alpha = 0.25f;
         params.gamma = 0.25f;
         RLTrainer trainer = new RLTrainer(params);
