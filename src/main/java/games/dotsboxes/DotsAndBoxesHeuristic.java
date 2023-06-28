@@ -76,13 +76,8 @@ public class DotsAndBoxesHeuristic extends TunableParameters implements IStateHe
      */
     @Override
     protected DotsAndBoxesHeuristic _copy() {
-        DotsAndBoxesHeuristic retValue = new DotsAndBoxesHeuristic();
-        retValue.POINTS = POINTS;
-        retValue.POINT_ADVANTAGE = POINT_ADVANTAGE;
-        retValue.THREE_BOXES = THREE_BOXES;
-        retValue.TWO_BOXES = TWO_BOXES;
-        retValue.ORDINAL = ORDINAL;
-        return retValue;
+        // all the parameters are then copied in ITunableParameters
+        return new DotsAndBoxesHeuristic();
     }
 
     /**
