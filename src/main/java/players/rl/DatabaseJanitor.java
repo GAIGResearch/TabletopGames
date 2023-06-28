@@ -75,15 +75,15 @@ class DatabaseJanitor {
         if (!resourcesFolder.exists() || !resourcesFolder.isDirectory())
             return;
 
-        for (File gameFolder : resourcesFolder.listFiles(f -> f.isDirectory()))
-            cleanupGame(gameFolder.getName());
+        for (String gameName : resourcesFolder.list((f, fn) -> f.isDirectory()))
+            cleanupGame(gameName);
     }
 
-    private static void cleanupGame(String gameName) {
+    static void cleanupGame(String gameName) {
         try {
             File gameFolder = new File(RLPlayer.resourcesPath + gameName);
             if (!gameFolder.exists() || !gameFolder.isDirectory())
-                throw new IllegalArgumentException("Error: Folder does not exist: " + gameFolder.getCanonicalPath());
+                return;
             File qWeightsFolder = getQWeightsFolder(gameFolder);
             if (qWeightsFolder == null)
                 return;

@@ -26,6 +26,8 @@ public abstract class QWeightsDataStructure {
     private String gameFolderPath;
     private String qWeightsFolderPath;
 
+    private String gameName;
+
     // Ensures agent doesn't need to load the files between every game
     private boolean initialized = false;
 
@@ -44,6 +46,7 @@ public abstract class QWeightsDataStructure {
     void initialize(String gameName) {
         if (initialized)
             return;
+        this.gameName = gameName;
         setPaths(gameName);
         tryReadQWeightsFromFile();
         initialized = true;
@@ -58,9 +61,9 @@ public abstract class QWeightsDataStructure {
         initQWeightsEmpty();
         if (params.qWeightsFileId == 0)
             return null;
-        String readPath = qWeightsFolderPath + params.qWeightsFileId + ".json";
         try {
-            JsonNode data = new ObjectMapper().readTree(new File(readPath));
+                File file = DataProcessor.getFileByID(params.qWeightsFileId, gameName);
+                JsonNode data = new ObjectMapper().readTree(file);
             StateMap stateMap = new StateMap() {
                 {
                     // TODO: JsonNode::fields does not guarantee order. Maybe use arrays instead
@@ -69,8 +72,10 @@ public abstract class QWeightsDataStructure {
                     // TODO: alternatively, use RLFeatureVector::names to maintain same order
                     Iterator<Map.Entry<String, JsonNode>> fields = data.get("Weights").fields();
                     Map.Entry<String, JsonNode> entry;
-                    while ((entry = fields.next()) != null)
+                    while (fields.hasNext()) {
+                        entry = fields.next();
                         put(entry.getKey(), entry.getValue().asDouble());
+                    }
                 }
             };
             parseQWeights(stateMap);

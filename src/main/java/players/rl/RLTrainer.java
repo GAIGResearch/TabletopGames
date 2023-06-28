@@ -17,17 +17,20 @@ import players.human.ActionController;
 class RLTrainer {
 
     public final RLTrainingParams params;
+    final RLParams playerParams;
     private Map<Integer, List<TurnSAR>> playerTurns;
 
     private String gameName;
     private QWeightsDataStructure qwds;
     private DataProcessor dp;
 
-    private RLTrainer(RLTrainingParams params) {
+    private RLTrainer(RLTrainingParams params, RLParams playerParams) {
         // TODO set game name and more through RLTrainingParams
         this.gameName = "TicTacToe";
         this.params = params;
+        this.playerParams = playerParams;
         this.qwds = new QWDSTabular();
+        DatabaseJanitor.cleanupGame(gameName);
         resetTrainer();
     }
 
@@ -70,10 +73,6 @@ class RLTrainer {
         String gameParams = null;
 
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-
-        RLParams playerParams = new RLParams(new TicTacToeStateVector());
-        playerParams.epsilon = 0.35f;
-        playerParams.qWeightsFileId = 0;
 
         players.add(new RLPlayer(qwds, playerParams, this));
         players.add(new RLPlayer(qwds, playerParams, this));
@@ -120,7 +119,10 @@ class RLTrainer {
         RLTrainingParams params = new RLTrainingParams(1);
         params.alpha = 0.25f;
         params.gamma = 0.25f;
-        RLTrainer trainer = new RLTrainer(params);
+        RLParams playerParams = new RLParams(new TicTacToeStateVector());
+        playerParams.epsilon = 0.35f;
+        playerParams.qWeightsFileId = 3;
+        RLTrainer trainer = new RLTrainer(params, playerParams);
         trainer.runTraining();
     }
 

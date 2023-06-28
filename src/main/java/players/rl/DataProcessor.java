@@ -34,7 +34,7 @@ class DataProcessor {
         // The ID of this entry (Z+)
         ID(Integer.class),
         // The full filename of this entry
-        // TODO: Filename(String.class),
+        Filename(File.class),
         // The alpha value used [0, 1]
         Alpha(Float.class),
         // The gamma value used [0, 1]
@@ -56,7 +56,7 @@ class DataProcessor {
         // The ID of the entry which was used as a starting point for this training
         StartID(Integer.class),
         // The filename of the entry used as a starting point for this training
-        // TODO: StartFilename(String.class),
+        StartFilename(File.class),
         // The total number of games played before using these parameters & settings
         StartNGames(Integer.class);
 
@@ -80,18 +80,23 @@ class DataProcessor {
             return value;
         }
 
-        void addToObjectNode(ObjectNode objectNode, Object value) {
-            if (value instanceof Integer)
-                objectNode.put(name(), (Integer) value);
-            else if (value instanceof Float)
-                objectNode.put(name(), (Float) value);
-            else if (value instanceof Double)
-                objectNode.put(name(), (Double) value);
-            else
-                objectNode.put(name(), (String) value);
-
+        static void addEntryToObjectNode(ObjectNode objectNode, DBEntry entry) {
+            for (DBCol col : DBCol.values()) {
+                // Special cases for some entries that are normally numbers
+                if (Arrays.asList("-", "DEL").contains(entry.get(col)))
+                    objectNode.put(col.name(), (String) entry.get(col));
+                else if (col.type == Integer.class)
+                    objectNode.put(col.name(), (Integer) entry.get(col));
+                else if (col.type == Float.class)
+                    objectNode.put(col.name(), (Float) entry.get(col));
+                else if (col.type == Double.class)
+                    objectNode.put(col.name(), (Double) entry.get(col));
+                else if (col.type == File.class)
+                    objectNode.put(col.name(), (String) entry.get(col));
+                else
+                    objectNode.put(col.name(), (String) entry.get(col));
+            }
         }
-
     }
 
     private static final String[] header = Arrays.stream(DBCol.values()).map(Enum::name).toArray(String[]::new);
@@ -130,6 +135,23 @@ class DataProcessor {
         initDatabase();
     }
 
+    static File getFileByID(int id, String gameName) {
+        File qWeightsFolder = new File(getQWeightsFolderPath(gameName));
+        if (!qWeightsFolder.exists() || !qWeightsFolder.isDirectory())
+            throw new IllegalArgumentException("Error: File with ID " + id + " does not exist in " + gameName);
+        for (File file : qWeightsFolder.listFiles(f -> f.isFile() && f.getName().matches(allowedFilenameRegex))) {
+            try {
+                JsonNode data = new ObjectMapper().readTree(file);
+                if (id == data.get("Metadata").get("ID").asInt())
+                    return file;
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+        return null;
+    }
+
     private DBEntry formatData(int id, int nGamesAdded) {
         int startId = qwds.params.qWeightsFileId;
 
@@ -139,9 +161,12 @@ class DataProcessor {
         Integer _startNGames = (Integer) readDatabaseEntry(startId, DBCol.NGamesTotal);
         int startNGames = _startNGames != null ? _startNGames : 0;
 
+        File file = getFileByID(id, gameName);
+
         return new DBEntry() {
             {
                 put(DBCol.ID, id);
+                put(DBCol.Filename, file == null ? id + ".json" : file.getName());
                 put(DBCol.Alpha, qwds.trainingParams.alpha);
                 put(DBCol.Gamma, qwds.trainingParams.gamma);
                 put(DBCol.Epsilon, qwds.params.epsilon);
@@ -152,6 +177,7 @@ class DataProcessor {
                 put(DBCol.NGamesTotal, startNGames + nGamesThisId);
                 put(DBCol.NGamesThisId, nGamesThisId);
                 put(DBCol.StartID, startId == 0 ? "-" : startId);
+                put(DBCol.StartFilename, startId == 0 ? "-" : getFileByID(startId, gameName).getName());
                 put(DBCol.StartNGames, startId == 0 ? "-" : startNGames);
             }
         };
@@ -251,8 +277,7 @@ class DataProcessor {
 
     private ObjectNode createQWeightsObjectNode(ObjectMapper objectMapper, DBEntry entry) {
         ObjectNode entryMetadata = objectMapper.createObjectNode();
-        for (DBCol col : DBCol.values())
-            col.addToObjectNode(entryMetadata, entry.get(col));
+        DBCol.addEntryToObjectNode(entryMetadata, entry);
 
         Map<String, Double> stateMap = qwds.qWeightsToStateMap();
         JsonNode weightsData = objectMapper.convertValue(stateMap, ObjectNode.class);
@@ -273,6 +298,7 @@ class DataProcessor {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(writePath))) {
             String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
             writer.write(json);
+            new File(writePath).setReadOnly();
         } catch (IOException e) {
             System.out.println("An error occurred while writing beta to the file: " +
                     e.getMessage());
