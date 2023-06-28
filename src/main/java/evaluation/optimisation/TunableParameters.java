@@ -152,7 +152,7 @@ public abstract class TunableParameters extends AbstractParameters implements IT
      */
     @Override
     public TunableParameters copy() {
-        AbstractParameters retValue = super.copy();
+        AbstractParameters retValue = super.copy();  // this calls ._copy()
         TunableParameters tunable = (TunableParameters) retValue;
         tunable.parameterNames = new ArrayList<>(parameterNames);
         tunable.possibleValues = new HashMap<>(possibleValues);
