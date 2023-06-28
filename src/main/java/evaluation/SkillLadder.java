@@ -26,9 +26,6 @@ import static utilities.Utils.getArg;
  */
 public class SkillLadder {
 
-    private static int NTBEARunsBetweenRungs = 4;
-    private static double NTBEABudgetOnTournament = 0.50;  // the complement will be spent on NTBEA runs
-
     public static void main(String[] args) {
         List<String> argsList = Arrays.asList(args);
         if (argsList.contains("--help") || argsList.contains("-h")) {
@@ -38,8 +35,10 @@ public class SkillLadder {
                             "\tnPlayers=      The number of players in each game. Defaults to 2.\n" +
                             "\tplayer=        The JSON file that contains the base configuration to use.\n" +
                             "\t               Use -999 for any budget parameter - this will be replaced with the budget to use.\n" +
+                            "\tsearchSpace=   The JSON file that contains the search space to use for NTBEA tuning.\n" +
+                            "\t               Use -999 for any budget parameter - this will be replaced with the budget to use.\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
-                            "\tnGames=        The total number of games to run in each iteration. Defaults to 100.\n" +
+                            "\tnGames=        The total number of games to run for each rung of the ladder. Defaults to 1000.\n" +
                             "\tstartBudget=   The budget to use for the first agent. Defaults to 8.\n" +
                             "\tmultiplier=    The factor by which to increase the budget each iteration. Defaults to 2.\n" +
                             "\titerations=    The number of iterations to run. Defaults to 5.\n" +
@@ -50,7 +49,8 @@ public class SkillLadder {
                             "\t               A pipe-delimited string can be provided to gather many types of statistics \n" +
                             "\t               from the same set of games.\n" +
                             "\tNTBEABudget=   The budget of games to use for NTBEA tuning at each budget count. Defaults to 0.\n" +
-                            "\t               If specified, then player is a searchSpace definition, and we use random as the lowest budget.\n"
+                            "\t               If specified, then player is a searchSpace definition, and we use random as the lowest budget.\n" +
+                            "\t               The default is to spend 50% on tuning, and 50% on the final tournament to pick the best.\n"
 
             );
             return;
@@ -66,6 +66,11 @@ public class SkillLadder {
             System.out.println("Please specify a player");
             System.exit(0);
         }
+        String searchSpace = getArg(args, "searchSpace", "");
+        if (NTBEABudget > 0 && searchSpace.isEmpty()) {
+            System.out.println("Please specify a search space");
+            System.exit(0);
+        }
         String destDir = getArg(args, "destDir", "metrics/out");
         String gameParams = getArg(args, "gameParams", "");
         List<String> listenerClasses = new ArrayList<>(Arrays.asList(getArg(args, "listener", "").split("\\|")));
@@ -77,12 +82,11 @@ public class SkillLadder {
 
         AbstractPlayer baseAgent, newAgent;
         int[] currentBestSettings = new int[0];
-        if (NTBEABudget > 0) {
+        if (NTBEABudget > 0 ) {
             // first we tune the minimum budget against a random player
             NTBEAParameters ntbeaParameters = constructNTBEAParameters(args, startingTimeBudget, NTBEABudget);
             NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
             ntbeaParameters.printSearchSpaceDetails();
-            ntbea.setOpponents(Collections.singletonList(new RandomPlayer()));
             Pair<Object, int[]> results = ntbea.run();
             baseAgent = (AbstractPlayer) results.a;
             currentBestSettings = results.b;
@@ -147,18 +151,18 @@ public class SkillLadder {
     }
 
     private static NTBEAParameters constructNTBEAParameters(String[] args, int agentBudget, int gameBudget) {
-        String[] modArgs = new String[args.length + 1];
-        System.arraycopy(args, 0, modArgs, 0, args.length);
-        modArgs[args.length] = "searchSpace=" + getArg(args, "player", "");
-        NTBEAParameters ntbeaParameters = new NTBEAParameters(modArgs, s -> s.replaceAll("-999", Integer.toString(agentBudget)));
-        // we divide the budget into 7 parts, 5 parts used for 5 independent runs, and then 2 parts used
-        // to pick the best of these 5 suggestions
+        int NTBEARunsBetweenRungs = 4;
+        double NTBEABudgetOnTournament = 0.50; // the complement will be spent on NTBEA runs
+
+        NTBEAParameters ntbeaParameters = new NTBEAParameters(args, s -> s.replaceAll("-999", Integer.toString(agentBudget)));
+
         ntbeaParameters.destDir = ntbeaParameters.destDir + File.separator + "Budget_" + agentBudget + File.separator + "NTBEA";
         ntbeaParameters.repeats = NTBEARunsBetweenRungs;
+
         ntbeaParameters.tournamentGames = (int) (gameBudget * NTBEABudgetOnTournament);
         ntbeaParameters.iterationsPerRun = (gameBudget - ntbeaParameters.tournamentGames) / NTBEARunsBetweenRungs;
         ntbeaParameters.evalGames = 0;
-        ntbeaParameters.opponentDescriptor = "random";
+        ntbeaParameters.opponentDescriptor = getArg(args, "player", "random");
         ntbeaParameters.logFile = agentBudget + "_" + ntbeaParameters.logFile;
         return ntbeaParameters;
     }
