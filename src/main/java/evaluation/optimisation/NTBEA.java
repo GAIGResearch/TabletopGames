@@ -144,8 +144,10 @@ public class NTBEA {
             for (int i = 0; i < players.size(); i++) {
                 players.get(i).setName("Winner " + i + " : " + Arrays.toString(winnerSettings.get(i)));
             }
-            // Given we have N players in each game, and a total of 5 agents (the number of NTBEA iterations), we
+            // Given we have N players in each game, and a total of M agents (the number of NTBEA iterations), we
             // can reduce the variance in the results (and hence the accuracy of picking the best agent) by using the exhaustive mode
+            // this does rely on not having, say 20 NTBEA iterations on a 6-player game (38k combinations); but assuming
+            // the advice of 10 or fewer iterations holds, then even on a 5-player game we have 252 combinations, which is fine.
             double combinationsOfPlayers = CombinatoricsUtils.binomialCoefficientDouble(players.size(), nPlayers);
             int gamesPerMatchup = (int) Math.ceil(params.tournamentGames / combinationsOfPlayers);  // we round up.
 

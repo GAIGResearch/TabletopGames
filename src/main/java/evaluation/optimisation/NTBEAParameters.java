@@ -86,7 +86,7 @@ public class NTBEAParameters {
             searchSpace = fileExists ? new ITPSearchSpace(itp, json) : new ITPSearchSpace(itp);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new AssertionError(e.getClass() + " : " + e.getMessage() + "Error loading ITunableParameters class in " + args[0]);
+            throw new AssertionError(e.getClass() + " : " + e.getMessage() + "\nError loading ITunableParameters class in " + args[0]);
         }
     }
 
