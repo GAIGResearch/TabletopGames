@@ -6,7 +6,6 @@ import core.AbstractPlayer;
 import core.interfaces.IGameHeuristic;
 import core.interfaces.IStateHeuristic;
 import evaluation.listeners.IGameListener;
-import evaluation.tournaments.RandomRRTournament;
 import evaluation.tournaments.RoundRobinTournament;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import games.GameType;
@@ -39,6 +38,7 @@ public class NTBEA {
     NTupleBanditEA searchFramework;
     List<Object> winnersPerRun = new ArrayList<>();
     List<int[]> winnerSettings = new ArrayList<>();
+    List<int[]> elites = new ArrayList<>();
     Pair<Pair<Double, Double>, int[]> bestResult = new Pair<>(new Pair<>(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY), new int[0]);
     GameEvaluator evaluator;
     AbstractParameters gameParams;
@@ -113,7 +113,16 @@ public class NTBEA {
         evaluator.opponents = opponents;
     }
 
-    public Object run() {
+    public void addElite(int[] settings) {
+        // We use these settings as players in our final tournament
+        elites.add(settings);
+    }
+
+    /**
+     * This returns the optimised object, plus the settings that produced it (indices to the values in the search space)
+     * @return
+     */
+    public Pair<Object, int[]> run() {
 
         for (currentIteration = 0; currentIteration < params.repeats; currentIteration++) {
             runIteration();
@@ -122,6 +131,15 @@ public class NTBEA {
         // After all runs are complete, if tournamentGames are specified, then we allow all the
         // winners from each iteration to play in a tournament and pick the winner of this tournament
         if (params.tournamentGames > 0 && winnersPerRun.get(0) instanceof AbstractPlayer) {
+            if (elites.size() > 0) {
+                // first of all we add the elites into winnerSettings, and winnersPerRun
+                // i.e. we effectively add an extra 'run' for each elite
+                for (int[] elite : elites) {
+                    winnerSettings.add(elite);
+                    winnersPerRun.add(params.searchSpace.getAgent(elite));
+                }
+            }
+
             List<AbstractPlayer> players = winnersPerRun.stream().map(p -> (AbstractPlayer) p).collect(Collectors.toList());
             for (int i = 0; i < players.size(); i++) {
                 players.get(i).setName("Winner " + i + " : " + Arrays.toString(winnerSettings.get(i)));
@@ -161,7 +179,7 @@ public class NTBEA {
             // we don't log the final run to file to avoid duplication
             printDetailsOfRun(bestResult);
         }
-        return params.searchSpace.getAgent(bestResult.b);
+        return new Pair<>(params.searchSpace.getAgent(bestResult.b), bestResult.b);
     }
 
     protected void runTrials() {
@@ -182,7 +200,7 @@ public class NTBEA {
                 .toArray();
 
         // now run the evaluation games on the final recommendation (if any...if not we report the NTBEA landscape estimate)
-        Pair<Double, Double> scoreOfBestAgent = params.evalGame == 0
+        Pair<Double, Double> scoreOfBestAgent = params.evalGames == 0
                 ? new Pair<>(landscapeModel.getMeanEstimate(landscapeModel.getBestOfSampled()), 0.0)
                 : evaluateWinner(thisWinnerSettings);
 
@@ -199,7 +217,7 @@ public class NTBEA {
     private List<IGameListener> createListeners() {
         List<IGameListener> retValue = params.listenerClasses.stream().map(IGameListener::createListener).collect(Collectors.toList());
         List<String> directories = Arrays.asList(params.destDir.split(Pattern.quote(File.separator)));
-        if (params.evalGame > 0) {
+        if (params.evalGames > 0) {
             // We only need multiple directories if we are running evaluation games after each iteration
             if (currentIteration < params.repeats)
                 directories.add(String.format("%3d", currentIteration + 1));
@@ -215,14 +233,14 @@ public class NTBEA {
         // Add listeners
         createListeners().forEach(evaluator::addListener);
 
-        double[] results = IntStream.range(0, params.evalGame)
+        double[] results = IntStream.range(0, params.evalGames)
                 .mapToDouble(answer -> evaluator.evaluate(winnerSettings)).toArray();
 
         evaluator.clearListeners();
 
         double avg = Arrays.stream(results).average().orElse(0.0);
         double stdErr = Math.sqrt(Arrays.stream(results)
-                .map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGame - 1.0);
+                .map(d -> Math.pow(d - avg, 2.0)).sum()) / (params.evalGames - 1.0);
 
         return new Pair<>(avg, stdErr);
     }

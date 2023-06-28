@@ -23,7 +23,7 @@ public class NTBEAParameters {
     public boolean tuningGame;
     public int iterationsPerRun;
     public int repeats;
-    public int evalGame;
+    public int evalGames;
     public double kExplore;
     public int tournamentGames;
     public int neighbourhoodSize;
@@ -46,7 +46,7 @@ public class NTBEAParameters {
         tuningGame = getArg(args, "tuneGame", false);
         iterationsPerRun = getArg(args, "nGames", 1000);
         repeats = getArg(args, "repeats", 10);
-        evalGame = getArg(args, "evalGame", iterationsPerRun / 5);
+        evalGames = getArg(args, "evalGame", iterationsPerRun / 5);
         kExplore = getArg(args, "kExplore", 1.0);
         tournamentGames = getArg(args, "tournamentGames", 0);
         neighbourhoodSize = getArg(args, "neighbourhoodSize", 50);
