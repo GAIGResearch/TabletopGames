@@ -66,9 +66,7 @@ public class MonopolyDealCard extends Card{
     public boolean isPropertyCard(){ return type.isProperty; }
     public boolean isPropertyWildCard(){ return type.isPropertyWild; }
     public int cardMoneyValue(){ return type.moneyValue; }
-
-
-    public games.monopolydeal.cards.CardType cardType() {
+    public CardType cardType() {
         return type;
     }
 

@@ -7,6 +7,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import games.GameType;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 
@@ -144,6 +145,11 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
 
     public boolean canModifyBoard(int playerID){
+        for(int i = 0; i< playerPropertySets[playerID].size();i++){
+            if(playerPropertySets[playerID].get(i).hasWild){
+                return true;
+            }
+        }
         return false;
     }
     public void drawCard(int playerID,int drawCount){
@@ -163,7 +169,21 @@ public class MonopolyDealGameState extends AbstractGameState {
         actionsLeft = params.ACTIONS_PER_TURN;
         turnStart = true;
     }
-
+    public void discardCard(MonopolyDealCard card, int playerID) {
+        playerHands[playerID].remove(card);
+        discardPile.add(card);
+    }
+    public void moveMoney(int fromPlayer, int toPlayer, List<MonopolyDealCard> money){
+        for (MonopolyDealCard card:money) {
+            playerBanks[fromPlayer].remove(card);
+            playerBanks[toPlayer].add(card);
+        }
+    }
+    // add property
+    // remove property
+    public Deck<MonopolyDealCard> getPlayerHand(int playerID){
+        return playerHands[playerID];
+    }
     /**
      * @param playerId - player observing the state.
      * @return a score for the given player approximating how well they are doing (e.g. how close they are to winning
@@ -201,6 +221,7 @@ public class MonopolyDealGameState extends AbstractGameState {
         // TODO: include the hash code of all variables
         return super.hashCode();
     }
+
     public enum MonopolyDealGamePhase implements IGamePhase {
         Play,
         Discard

@@ -5,11 +5,11 @@ import core.components.Deck;
 
 public class PropertySet extends Deck<MonopolyDealCard> {
     SetType type;
-    boolean isComplete;
-    boolean hasWild; // Used to check for modifyBoard
+    public boolean isComplete;
+    public boolean hasWild; // Used to check for modifyBoard
     // Used to check rent
-    boolean hasHouse;
-    boolean hasHotel;
+    public boolean hasHouse;
+    public boolean hasHotel;
     public PropertySet(String name, CoreConstants.VisibilityMode visibility, SetType type) {
         super(name, visibility);
         this.type = type;

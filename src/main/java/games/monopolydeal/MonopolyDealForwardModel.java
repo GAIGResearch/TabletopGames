@@ -3,19 +3,13 @@ package games.monopolydeal;
 import core.AbstractGameState;
 import core.StandardForwardModel;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
-import games.dominion.DominionConstants;
-import games.dominion.DominionGameState;
-import games.dominion.cards.DominionCard;
 import games.monopolydeal.actions.*;
 import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 /**
@@ -80,12 +74,15 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
                         availableActions.add(new ModifyBoard(playerID));
                     }
                     availableActions.add(new EndPhase());
+                    return availableActions;
                 }
                 return Collections.singletonList(new EndPhase());
             case "Discard":
                 if(state.playerHands[playerID].stream().count()>state.params.HAND_SIZE){
-                    List<AbstractAction> availableActions = new ArrayList<>();
-
+                    List<AbstractAction> availableActions = state.playerHands[playerID].stream()
+                            .map(card ->new DiscardCard(card.cardType(),playerID))
+                            .collect(toList());
+                    return availableActions;
                 }
             default:
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
@@ -121,10 +118,21 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
         switch (state.getGamePhase().toString()) {
             case "Play":
                 if ((state.actionsLeft < 1 || actionTaken instanceof EndPhase) && !state.isActionInProgress()) {
-                    state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Discard);
+                    if(state.playerHands[playerID].getSize()>state.params.HAND_SIZE){
+                        state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Discard);
+                    }
+                    else{
+                        state.endTurn();
+                        endPlayerTurn(currentState);
+                    }
                 }
             case "Discard":
-                state.endTurn();
+                if(state.playerHands[playerID].getSize()<=state.params.HAND_SIZE){
+                    state.endTurn();
+                    state.setGamePhase(MonopolyDealGameState.MonopolyDealGamePhase.Play);
+                    endPlayerTurn(currentState);
+                }
+
             default:
                 throw new AssertionError("Unknown Game Phase " + state.getGamePhase());
         }

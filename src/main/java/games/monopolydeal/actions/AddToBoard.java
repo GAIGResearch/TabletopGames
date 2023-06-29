@@ -3,9 +3,14 @@ package games.monopolydeal.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
+import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.MonopolyDealCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * <p>The extended actions framework supports 2 use-cases: <ol>
@@ -37,7 +42,14 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // TODO populate this list with available actions
-        return new ArrayList<>();
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+        int playerID = MDGS.getCurrentPlayer();
+        List<AbstractAction> availableActions = MDGS.getPlayerHand(playerID).stream()
+                .filter(MonopolyDealCard::isPropertyCard)
+                .map(card-> new AddProperty(card,playerID))
+                .collect(toList());
+        availableActions.addAll(MDGS.getPlayerHand(playerID).stream().filter(MonopolyDealCard::isPropertyCard).map(card ->new AddMoney(card,playerID)).collect(toList()));
+        return availableActions;
     }
 
     /**
