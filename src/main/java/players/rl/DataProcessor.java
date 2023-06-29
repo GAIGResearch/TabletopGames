@@ -2,8 +2,6 @@ package players.rl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.FloatNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.NumericNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -12,7 +10,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -23,7 +20,7 @@ import java.util.Map;
 class DataProcessor {
 
     // An entry for the database. Content defined in DataProcessor::formatData
-    enum Field {
+    static enum Field {
         // The seed used
         Seed,
         // The alpha value used [0, 1]
@@ -36,6 +33,8 @@ class DataProcessor {
         Solver,
         // The class name of the used IStateHeuristic
         Heuristic,
+        // The type of reinforcement learning done
+        Type,
         // The class name of the used players.rl.QWeightsDataStructure
         QWeightsDataStructure,
         // The class name of the used players.rl.RLFeatureVector
@@ -70,15 +69,21 @@ class DataProcessor {
         this.qwds = qwds;
         this.gameName = gameName;
         createMissingFoldersAndFiles();
-        initFile();
+        initOutfile();
         initMetadata();
     }
 
-    private void initFile() {
-        Date currentDate = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-        String formattedDate = dateFormat.format(currentDate);
-        outfile = new File(Paths.get(qwds.getFolderPath(gameName), formattedDate + ".json").toString());
+    private void initOutfile() {
+        String outfilePath;
+        if (qwds.trainingParams.overwriteInfile && qwds.params.getInfilePath() != null)
+            outfilePath = qwds.params.getInfilePath();
+        else {
+            Date currentDate = new Date();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+            String formattedDate = dateFormat.format(currentDate);
+            outfilePath = Paths.get(qwds.getFolderPath(gameName), formattedDate + ".json").toString();
+        }
+        outfile = new File(outfilePath);
     }
 
     private void initMetadata() {
@@ -100,6 +105,7 @@ class DataProcessor {
 
         metadata = om.createObjectNode()
                 .put(Field.Seed.name(), qwds.playerParams.getRandomSeed())
+                .put(Field.Type.name(), qwds.playerParams.type.name())
                 .put(Field.Alpha.name(), qwds.trainingParams.alpha)
                 .put(Field.Gamma.name(), qwds.trainingParams.gamma)
                 .put(Field.Epsilon.name(), qwds.playerParams.epsilon)
@@ -112,10 +118,9 @@ class DataProcessor {
         // TODO make separate function
         if (existingMetadata != null) {
             // Only keep existing metadata values that are different to current setup
-            for (String fn : Arrays.stream(Field.getUniqueFields()).map(f -> f.name()).toList()) {
-                if (existingMetadata.get(fn).equals(metadata.get(fn)))
+            for (String fn : Arrays.stream(Field.getUniqueFields()).map(f -> f.name()).toList())
+                if (existingMetadata.has(fn) && existingMetadata.get(fn).equals(metadata.get(fn)))
                     existingMetadata.remove(fn);
-            }
             // Check if only non-unique field names remain
             boolean allSettingsIdentical = true;
             Iterator<String> remainingFieldNames = existingMetadata.fieldNames();
@@ -146,6 +151,10 @@ class DataProcessor {
             System.exit(1);
         }
         return null;
+    }
+
+    void writeMetadata() {
+        writeQWeightsToFile();
     }
 
     void writeData(int nGames) {

@@ -37,10 +37,9 @@ public class QWDSTabular extends QWeightsDataStructure {
         AbstractGameState s0 = t0.s.copy();
         AbstractGameState s1 = t1.s;
 
-        double maxQ_s1a = t1.a == null
-                ? 0
-                : t1.possibleActions.stream().mapToDouble(a -> evaluateQ(player, s1, a)).max()
-                        .getAsDouble();
+        double maxQ_s1a = t1.a != null
+                ? t1.possibleActions.stream().mapToDouble(a -> evaluateQ(player, s1, a)).max().getAsDouble()
+                : 0;
 
         double q_s0a0 = evaluateQ(player, s0, t0.a);
         // Q-Learning formula

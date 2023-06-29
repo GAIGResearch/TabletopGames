@@ -34,22 +34,22 @@ class RLTrainer {
         this.playerParams = playerParams;
         this.qwds = new QWDSTabular(qwdsParams);
         resetTrainer();
+        prematurelySetupQWDS();
     }
 
-    void initializeTrainer(AbstractGameState state) {
-        if (this.dp == null)
-            this.dp = new DataProcessor(qwds, gameName);
+    void prematurelySetupQWDS() {
+        // Note: This is done because these functions are usually called from RLPlayer
+        // inside RLPlayer::initializePlayer. However, we need this information before
+        // that call, and are therefore calling these functions manually from here
+        qwds.setPlayerParams(playerParams);
+        qwds.setTrainingParams(params);
+        qwds.initialize(gameName);
     }
 
     void addTurn(RLPlayer player, AbstractGameState state, AbstractAction action,
             List<AbstractAction> possibleActions) {
         int playerId = player.getPlayerID();
-
-        // Calculate reward
-        AbstractGameState evalState = state.copy(playerId);
-        if (action != null) // For the final game state
-            player.getForwardModel().next(evalState, action);
-        double reward = params.heuristic.evaluateState(evalState, playerId);
+        double reward = params.heuristic.evaluateState(state, playerId);
 
         // Add the turn to playerTurns
         TurnSAR turn = new TurnSAR(state, action, possibleActions, reward);
@@ -83,17 +83,15 @@ class RLTrainer {
         int nGames = params.nGames;
 
         int nGamesSinceLastWrite = 0;
-        // Init file
+
+        this.dp = new DataProcessor(qwds, gameName);
+        dp.writeMetadata();
 
         System.out.println("Starting training...");
         for (int i = 1; i <= nGames; i++) {
             runGame(GameType.valueOf(gameName), gameParams, players, System.currentTimeMillis(), false, null,
                     useGUI ? new ActionController() : null, turnPause);
             nGamesSinceLastWrite++;
-            if (i == 1) {
-                dp.writeData(nGamesSinceLastWrite);
-                nGamesSinceLastWrite = 0;
-            }
             int splitSize = nGames / 100;
             if (splitSize != 0 && i % splitSize == 0) {
                 System.out.println((i / splitSize) + "%");
@@ -108,11 +106,6 @@ class RLTrainer {
         System.out.print("Training complete!");
     }
 
-    int writeData(int nGames) {
-        dp.writeData(nGames);
-        return 0;
-    }
-
     private void runGame(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
             boolean randomizeParameters, List<IGameListener> listeners, ActionController ac, int turnPause) {
         Game.runOne(gameToPlay, parameterConfigFile, players, seed, randomizeParameters, listeners, ac, turnPause);
@@ -120,18 +113,18 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams(15837);
-        params.alpha = 0.25f;
-        params.gamma = 0.5f;
+        RLTrainingParams params = new RLTrainingParams(1800000);
+        params.alpha = 0.125f;
+        params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
         params.overwriteInfile = false;
 
-        RLParams playerParams = new RLParams(new TicTacToeStateVector(), RLType.Tabular, 1688053622043l);
-        playerParams.epsilon = 0.35f;
+        RLParams playerParams = new RLParams(new TicTacToeStateVector(), RLType.Tabular);
+        playerParams.epsilon = 0.375f;
 
-        QWDSParams qwdsParams = new QWDSParams("2023-06-29_16-47-02.json");
-        qwdsParams.readFromFile = false;
+        QWDSParams qwdsParams = new QWDSParams("2023-06-29_19-17-07.json");
+        qwdsParams.useSettingsFromInfile = false;
 
         RLTrainer trainer = new RLTrainer(params, playerParams, qwdsParams);
         trainer.runTraining();

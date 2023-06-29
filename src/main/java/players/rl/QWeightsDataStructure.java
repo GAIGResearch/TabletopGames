@@ -29,6 +29,7 @@ public abstract class QWeightsDataStructure {
 
     public QWeightsDataStructure(QWDSParams params) {
         this.params = params;
+        initQWeightsEmpty();
     }
 
     // Ensures agent doesn't need to load the files between every game

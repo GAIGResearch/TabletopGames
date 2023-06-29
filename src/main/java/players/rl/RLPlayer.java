@@ -25,7 +25,7 @@ public class RLPlayer extends AbstractPlayer {
         }
     }
 
-    private final Random rng;
+    private Random rng;
 
     final public RLParams params;
     private QWeightsDataStructure qWeights;
@@ -37,7 +37,6 @@ public class RLPlayer extends AbstractPlayer {
     }
 
     public RLPlayer(RLParams params, QWeightsDataStructure qwds) {
-        this.rng = new Random(params.getRandomSeed());
         this.params = params;
         this.qWeights = qwds != null ? qwds : instantiateQWeights();
         this.qWeights.setPlayerParams(params);
@@ -51,7 +50,7 @@ public class RLPlayer extends AbstractPlayer {
 
     QWeightsDataStructure instantiateQWeights() {
         try {
-            return params.type.qWeightClass.getDeclaredConstructor().newInstance();
+            return params.type.qWeightClass.getDeclaredConstructor(String.class).newInstance((String) null);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
@@ -62,10 +61,9 @@ public class RLPlayer extends AbstractPlayer {
 
     @Override
     public void initializePlayer(AbstractGameState gameState) {
+        this.rng = new Random(params.getRandomSeed());
         this.params.features.linkPlayer(this);
         this.qWeights.initialize(gameState.getGameType().name());
-        if (this.trainer != null)
-            this.trainer.initializeTrainer(gameState);
     }
 
     @Override

@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 
 public class QWDSParams {
 
-    public boolean readFromFile = false;
+    public boolean useSettingsFromInfile = false;
 
     private final String infileName;
     protected Path infilePath;

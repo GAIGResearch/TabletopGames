@@ -942,10 +942,11 @@ public class Game {
         RLFeatureVector features1 = new TicTacToeStateVector();
         RLParams p1 = new RLParams(features1, RLType.Tabular);
         QWDSParams qwdsP = new QWDSParams(
-                "2023-06-29_14-51-14.json");
+                "2023-06-29_19-17-07.json");
+        qwdsP.useSettingsFromInfile = true;
         QWDSTabular qwds1 = new QWDSTabular(qwdsP);
-        players.add(new RLPlayer(p1, qwds1));
         players.add(new HumanGUIPlayer(ac));
+        players.add(new RLPlayer(p1, qwds1));
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
