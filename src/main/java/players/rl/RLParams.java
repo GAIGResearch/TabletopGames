@@ -7,7 +7,7 @@ import players.PlayerParameters;
 
 public class RLParams extends PlayerParameters {
 
-    public int qWeightsFileId = 0;
+    public String qWeightsFilePath = null;
 
     // TODO Choose good default values
     public float epsilon = 0.25f;
@@ -18,8 +18,8 @@ public class RLParams extends PlayerParameters {
         this(features, System.currentTimeMillis());
     }
 
-    public RLParams(RLFeatureVector features, int qWeightsFileId) {
-        this(features, qWeightsFileId, System.currentTimeMillis());
+    public RLParams(RLFeatureVector features, String qWeightsFilePath) {
+        this(features, qWeightsFilePath, System.currentTimeMillis());
     }
 
     public RLParams(RLFeatureVector features, long seed) {
@@ -28,9 +28,9 @@ public class RLParams extends PlayerParameters {
         addTunableParameter("epsilon", 0.5f, Arrays.asList(0f, .1f, .2f, .3f, .4f, .5f, .6f, .7f, .8f, .9f, 1f));
     }
 
-    public RLParams(RLFeatureVector features, int qWeightsFileId, long seed) {
+    public RLParams(RLFeatureVector features, String qWeightsFilePath, long seed) {
         this(features, seed);
-        this.qWeightsFileId = qWeightsFileId;
+        this.qWeightsFilePath = qWeightsFilePath;
     }
 
     @Override

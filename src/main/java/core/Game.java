@@ -943,8 +943,8 @@ public class Game {
         RLFeatureVector features2 = new TicTacToeStateVector();
         RLParams p2 = new RLParams(features2);
         QWDSTabular qwds2 = new QWDSTabular();
-        p1.qWeightsFileId = 4;
-        p2.qWeightsFileId = 4;
+        // p1.qWeightsFileId = 4;
+        // p2.qWeightsFileId = 4;
         players.add(new RLPlayer(qwds1, p1));
         players.add(new RLPlayer(qwds2, p2));
 //        players.add(new MCTSPlayer());

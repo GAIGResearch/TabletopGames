@@ -3,321 +3,139 @@ package players.rl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVWriter;
-import com.opencsv.exceptions.CsvException;
-import com.opencsv.exceptions.CsvValidationException;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Date;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 class DataProcessor {
 
-    // Alias used for readability and clarity
-    static class DBEntry extends HashMap<DBCol, Object> {
-    }
-
     // An entry for the database. Content defined in DataProcessor::formatData
     enum DBCol {
-        // The ID of this entry (Z+)
-        ID(Integer.class),
-        // The full filename of this entry
-        Filename(File.class),
+        // The seed used
+        Seed,
         // The alpha value used [0, 1]
-        Alpha(Float.class),
+        Alpha,
         // The gamma value used [0, 1]
-        Gamma(Float.class),
+        Gamma,
         // The epsilon value used [0, 1]
-        Epsilon(Float.class),
+        Epsilon,
         // The solver used (Q-Learning, SARSA, etc.)
-        Solver(String.class),
+        Solver,
         // The class name of the used IStateHeuristic
-        Heuristic(String.class),
+        Heuristic,
         // The class name of the used players.rl.QWeightsDataStructure
-        QWeightsDataStructure(String.class),
+        QWeightsDataStructure,
         // The class name of the used players.rl.RLFeatureVector
-        RLFeatureVector(String.class),
+        RLFeatureVector,
         // The total number of games played by this entry
-        NGamesTotal(Integer.class),
+        NGamesTotal,
         // The number of games played by this entry with these parameters & settings
-        NGamesThisId(Integer.class),
-        // The ID of the entry which was used as a starting point for this training
-        StartID(Integer.class),
-        // The filename of the entry used as a starting point for this training
-        StartFilename(File.class),
-        // The total number of games played before using these parameters & settings
-        StartNGames(Integer.class);
-
-        final Class<?> type;
-
-        DBCol(Class<?> type) {
-            this.type = type;
-        }
-
-        Object parse(String value) {
-            // Special cases for some entries that are normally numbers
-            if (Arrays.asList("-", "DEL").contains(value))
-                return value;
-            // Parse according to type
-            if (type.isAssignableFrom(Integer.class))
-                return Integer.parseInt(value);
-            if (type.isAssignableFrom(Float.class))
-                return Float.parseFloat(value);
-            if (type.isAssignableFrom(Double.class))
-                return Double.parseDouble(value);
-            return value;
-        }
-
-        static void addEntryToObjectNode(ObjectNode objectNode, DBEntry entry) {
-            for (DBCol col : DBCol.values()) {
-                // Special cases for some entries that are normally numbers
-                if (Arrays.asList("-", "DEL").contains(entry.get(col)))
-                    objectNode.put(col.name(), (String) entry.get(col));
-                else if (col.type == Integer.class)
-                    objectNode.put(col.name(), (Integer) entry.get(col));
-                else if (col.type == Float.class)
-                    objectNode.put(col.name(), (Float) entry.get(col));
-                else if (col.type == Double.class)
-                    objectNode.put(col.name(), (Double) entry.get(col));
-                else if (col.type == File.class)
-                    objectNode.put(col.name(), (String) entry.get(col));
-                else
-                    objectNode.put(col.name(), (String) entry.get(col));
-            }
-        }
+        NGamesWithTheseSettings,
+        // All data these weights were trained on previously
+        ContinuedFrom;
     }
-
-    private static final String[] header = Arrays.stream(DBCol.values()).map(Enum::name).toArray(String[]::new);
-
-    private final int db_id = DBCol.ID.ordinal();
 
     private QWeightsDataStructure qwds;
 
     private static final String qWeightsFolderName = "qWeights";
-    private static final String dbFileName = "qWeightsDB.csv";
-
-    // Matches [number].json or [number]_[anything].json, captures the number. E.g.:
-    // 1.json; 23.json; 4_text0.json; 5_text_0.json; 6_.json, 7__text.json, 8_0.json
-    static final String allowedFilenameRegex = "^(\\d+)(?:_\\w*)?\\.json$";
 
     private final String gameName;
+
+    private File outFile = null;
+    private ObjectNode metadata = null;
 
     DataProcessor(QWeightsDataStructure qwds, String gameName) {
         this.qwds = qwds;
         this.gameName = gameName;
         createMissingFoldersAndFiles();
+        initFile();
+        initMetadata();
     }
 
-    int writeData(int nGames) {
-        int id = findFirstFreeId();
-        writeDatabase(updateEntries(id, nGames, false), gameName);
-        return id;
+    private void initFile() {
+        Date currentDate = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        String formattedDate = dateFormat.format(currentDate);
+        outFile = new File(getQWeightsFolderPath(gameName) + formattedDate + ".json");
     }
 
-    void writeData(int id, int nGames) {
-        writeDatabase(updateEntries(id, nGames, true), gameName);
+    private void initMetadata() {
+        JsonNode existingMetadata = readFileMetadata(qwds.params.qWeightsFilePath);
+        int existingNGames = existingMetadata == null ? 0 : existingMetadata.get(DBCol.NGamesTotal.name()).asInt();
+        ObjectMapper om = new ObjectMapper();
+        metadata = om.createObjectNode()
+                .put(DBCol.Seed.name(), qwds.params.getRandomSeed())
+                .put(DBCol.Alpha.name(), qwds.trainingParams.alpha)
+                .put(DBCol.Gamma.name(), qwds.trainingParams.gamma)
+                .put(DBCol.Epsilon.name(), qwds.params.epsilon)
+                .put(DBCol.Solver.name(), qwds.trainingParams.solver.name())
+                .put(DBCol.Heuristic.name(), qwds.trainingParams.heuristic.getClass().getCanonicalName())
+                .put(DBCol.QWeightsDataStructure.name(), qwds.getClass().getCanonicalName())
+                .put(DBCol.RLFeatureVector.name(), qwds.params.features.getClass().getCanonicalName())
+                .put(DBCol.NGamesTotal.name(), existingNGames)
+                .put(DBCol.NGamesWithTheseSettings.name(), 0)
+                .set(DBCol.ContinuedFrom.name(), existingMetadata);
+    }
+
+    JsonNode readFileMetadata(String pathname) {
+        if (pathname == null)
+            return null;
+        try {
+            JsonNode data = new ObjectMapper().readTree(new File(pathname));
+            return data.get("Metadata");
+        } catch (IOException | NullPointerException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return null;
+    }
+
+    void writeData(int nGames) {
+        addGames(nGames);
+        writeQWeightsToFile();
     }
 
     private void createMissingFoldersAndFiles() {
         new File(getQWeightsFolderPath(gameName)).mkdirs();
-        initDatabase();
     }
 
-    static File getFileByID(int id, String gameName) {
-        File qWeightsFolder = new File(getQWeightsFolderPath(gameName));
-        if (!qWeightsFolder.exists() || !qWeightsFolder.isDirectory())
-            throw new IllegalArgumentException("Error: File with ID " + id + " does not exist in " + gameName);
-        for (File file : qWeightsFolder.listFiles(f -> f.isFile() && f.getName().matches(allowedFilenameRegex))) {
-            try {
-                JsonNode data = new ObjectMapper().readTree(file);
-                if (id == data.get("Metadata").get("ID").asInt())
-                    return file;
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-        }
-        return null;
-    }
-
-    private DBEntry formatData(int id, int nGamesAdded) {
-        int startId = qwds.params.qWeightsFileId;
-
-        Integer _nGamesThisId = (Integer) readDatabaseEntry(id, DBCol.NGamesThisId);
-        int nGamesThisId = (_nGamesThisId != null ? _nGamesThisId : 0) + nGamesAdded;
-
-        Integer _startNGames = (Integer) readDatabaseEntry(startId, DBCol.NGamesTotal);
-        int startNGames = _startNGames != null ? _startNGames : 0;
-
-        File file = getFileByID(id, gameName);
-
-        return new DBEntry() {
-            {
-                put(DBCol.ID, id);
-                put(DBCol.Filename, file == null ? id + ".json" : file.getName());
-                put(DBCol.Alpha, qwds.trainingParams.alpha);
-                put(DBCol.Gamma, qwds.trainingParams.gamma);
-                put(DBCol.Epsilon, qwds.params.epsilon);
-                put(DBCol.Solver, qwds.trainingParams.solver.name());
-                put(DBCol.Heuristic, qwds.trainingParams.heuristic.getClass().getCanonicalName());
-                put(DBCol.QWeightsDataStructure, qwds.getClass().getCanonicalName());
-                put(DBCol.RLFeatureVector, qwds.params.features.getClass().getCanonicalName());
-                put(DBCol.NGamesTotal, startNGames + nGamesThisId);
-                put(DBCol.NGamesThisId, nGamesThisId);
-                put(DBCol.StartID, startId == 0 ? "-" : startId);
-                put(DBCol.StartFilename, startId == 0 ? "-" : getFileByID(startId, gameName).getName());
-                put(DBCol.StartNGames, startId == 0 ? "-" : startNGames);
-            }
-        };
+    private void addGames(int nGamesToAdd) {
+        for (DBCol col : Arrays.asList(DBCol.NGamesTotal, DBCol.NGamesWithTheseSettings))
+            metadata.put(col.name(), metadata.get(col.name()).asInt() + nGamesToAdd);
     }
 
     private static String getQWeightsFolderPath(String gameName) {
-        return RLPlayer.resourcesPath + gameName + "/" + qWeightsFolderName + "/";
+        return RLPlayer.resourcesPath + qWeightsFolderName + "/" + gameName + "/";
     }
 
-    private static String getDBPath(String gameName) {
-        return RLPlayer.resourcesPath + gameName + "/" + dbFileName + "/";
-    }
-
-    private Object readDatabaseEntry(int id, DBCol col) {
-        DBEntry entry = readDatabaseEntry(id);
-        if (entry != null)
-            return entry.get(col);
-        return null;
-    }
-
-    private DBEntry readDatabaseEntry(int id) {
-        try (CSVReader reader = new CSVReader(new FileReader(getDBPath(gameName)))) {
-            String[] nextLine;
-            reader.skip(1); // Header
-            while ((nextLine = reader.readNext()) != null)
-                if (Integer.parseInt(nextLine[db_id]) == id)
-                    return strArray2DBEntry(nextLine);
-            reader.close();
-        } catch (IOException | CsvValidationException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private static DBEntry strArray2DBEntry(String[] entry) {
-        return new DBEntry() {
-            {
-                for (DBCol dbE : DBCol.values())
-                    put(dbE, dbE.parse(entry[dbE.ordinal()]));
-            }
-        };
-    }
-
-    static List<DBEntry> readDatabase(String gameName) {
-        try (CSVReader reader = new CSVReader(new FileReader(getDBPath(gameName)))) {
-            List<String[]> db = reader.readAll().stream().collect(Collectors.toCollection(LinkedList::new));
-            db.remove(0); // Remove header
-            // Convert each entry from String[] to Map<DBEntry, String>
-            return db.stream().map(e -> strArray2DBEntry(e)).collect(Collectors.toCollection(LinkedList::new));
-        } catch (IOException | CsvException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private void initDatabase() {
-        File file = new File(getDBPath(gameName));
-        boolean fileExists = file.exists();
-        if (!fileExists) {
-            try (CSVWriter writer = new CSVWriter(new FileWriter(file))) {
-                file.createNewFile();
-                writer.writeNext(header);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        file.setReadOnly();
-    }
-
-    static void writeDatabase(List<DBEntry> entries, String gameName) {
-        File file = new File(getDBPath(gameName));
-        file.setWritable(true);
-        try (CSVWriter writer = new CSVWriter(new FileWriter(file))) {
-            writer.writeNext(header);
-            for (DBEntry line : entries)
-                writer.writeNext(
-                        Arrays.stream(DBCol.values()).map(col -> line.getOrDefault(col, "").toString())
-                                .toArray(String[]::new));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        file.setReadOnly();
-    }
-
-    private List<DBEntry> updateEntries(int id, int nGames, boolean overwrite) {
-        DBEntry entry = formatData(id, nGames);
-        // First, write the current q-Weights to file [id].txt
-        writeQWeightsToFile(entry);
-        // Then, format the entry for the database, and add it to the database
-        List<DBEntry> entries = readDatabase(gameName);
-        if (overwrite)
-            entries.removeIf(e -> (int) e.get(DBCol.ID) == id);
-        entries.add(entry);
-        entries.sort((e1, e2) -> Integer.compare((int) e1.get(DBCol.ID), (int) e2.get(DBCol.ID)));
-        return entries;
-    }
-
-    private ObjectNode createQWeightsObjectNode(ObjectMapper objectMapper, DBEntry entry) {
-        ObjectNode entryMetadata = objectMapper.createObjectNode();
-        DBCol.addEntryToObjectNode(entryMetadata, entry);
-
+    private JsonNode createJsonNode(ObjectMapper objectMapper) {
         Map<String, Double> stateMap = qwds.qWeightsToStateMap();
         JsonNode weightsData = objectMapper.convertValue(stateMap, ObjectNode.class);
-
-        ObjectNode node = objectMapper.createObjectNode();
-        node.set("Metadata", entryMetadata);
-        node.set("Weights", weightsData);
-
-        return node;
+        ObjectNode outNode = objectMapper.createObjectNode();
+        outNode.set("Metadata", metadata);
+        outNode.set("Weights", weightsData);
+        return outNode;
     }
 
-    private void writeQWeightsToFile(DBEntry entry) {
-        String writePath = getQWeightsFolderPath(gameName) + entry.get(DBCol.ID) + ".json";
-
+    private void writeQWeightsToFile() {
         ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode node = createQWeightsObjectNode(objectMapper, entry);
+        JsonNode node = createJsonNode(objectMapper);
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(writePath))) {
+        outFile.setWritable(true);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outFile))) {
             String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
             writer.write(json);
-            new File(writePath).setReadOnly();
+            outFile.setReadOnly();
         } catch (IOException e) {
             System.out.println("An error occurred while writing beta to the file: " +
                     e.getMessage());
             System.exit(1);
         }
-    }
-
-    private int findFirstFreeId() {
-        File folder = new File(getQWeightsFolderPath(gameName));
-        File[] files = folder.listFiles();
-        List<Integer> unusedIds = IntStream.rangeClosed(1, files.length + 1).boxed()
-                .collect(Collectors.toCollection(LinkedList::new));
-        for (File file : files) {
-            Matcher matcher = Pattern.compile(DataProcessor.allowedFilenameRegex).matcher(file.getName());
-            if (file.isFile() && matcher.matches()) {
-                int id = Integer.parseInt(matcher.group(1));
-                unusedIds.removeIf(n -> n == id);
-            }
-        }
-        return unusedIds.get(0);
     }
 }

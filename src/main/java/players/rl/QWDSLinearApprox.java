@@ -33,10 +33,8 @@ public class QWDSLinearApprox extends QWeightsDataStructure {
 
     @Override
     protected StateMap qWeightsToStateMap() {
-        String outputText = "";
-        for (double q : qWeights)
-            outputText += q + "\n";
-        return null;
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'qWeightsToStateMap'");
     }
 
     @Override

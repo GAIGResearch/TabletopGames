@@ -22,7 +22,7 @@ class RLTrainer {
 
     private String gameName;
     private QWeightsDataStructure qwds;
-    private DataProcessor dp;
+    private DataProcessor dp = null;
 
     private RLTrainer(RLTrainingParams params, RLParams playerParams) {
         // TODO set game name and more through RLTrainingParams
@@ -30,12 +30,12 @@ class RLTrainer {
         this.params = params;
         this.playerParams = playerParams;
         this.qwds = new QWDSTabular();
-        DatabaseJanitor.cleanupGame(gameName);
         resetTrainer();
     }
 
     void initializeTrainer(AbstractGameState state) {
-        this.dp = new DataProcessor(qwds, gameName);
+        if (this.dp == null)
+            this.dp = new DataProcessor(qwds, gameName);
     }
 
     void addTurn(RLPlayer player, AbstractGameState state, AbstractAction action,
@@ -79,7 +79,6 @@ class RLTrainer {
 
         int nGames = params.nGames;
 
-        int fileId = -1;
         int nGamesSinceLastWrite = 0;
 
         System.out.println("Starting training...");
@@ -92,21 +91,18 @@ class RLTrainer {
                 System.out.println((i / splitSize) + "%");
                 // Every 10%, write progress to file
                 if ((i / splitSize) % 10 == 0) {
-                    fileId = writeData(fileId, nGamesSinceLastWrite);
+                    dp.writeData(nGamesSinceLastWrite);
                     nGamesSinceLastWrite = 0;
                 }
             }
         }
-        writeData(fileId, nGamesSinceLastWrite);
+        dp.writeData(nGamesSinceLastWrite);
         System.out.print("Training complete!");
     }
 
-    int writeData(int fileId, int nGames) {
-        if (fileId == -1)
-            fileId = dp.writeData(nGames);
-        else
-            dp.writeData(fileId, nGames);
-        return fileId;
+    int writeData(int nGames) {
+        dp.writeData(nGames);
+        return 0;
     }
 
     private void runGame(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
@@ -116,12 +112,12 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams(1);
-        params.alpha = 0.25f;
-        params.gamma = 0.25f;
+        RLTrainingParams params = new RLTrainingParams(151340);
+        params.alpha = 0.253f;
+        params.gamma = 0.253f;
         RLParams playerParams = new RLParams(new TicTacToeStateVector());
-        playerParams.epsilon = 0.35f;
-        playerParams.qWeightsFileId = 3;
+        playerParams.epsilon = 0.353f;
+        playerParams.qWeightsFilePath = "src/main/java/players/rl/resources/qWeights/TicTacToe/2023-06-29_00-56-09.json";
         RLTrainer trainer = new RLTrainer(params, playerParams);
         trainer.runTraining();
     }

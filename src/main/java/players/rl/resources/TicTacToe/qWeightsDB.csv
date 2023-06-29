@@ -1,4 +1,0 @@
-"ID","Filename","Alpha","Gamma","Epsilon","Solver","Heuristic","QWeightsDataStructure","RLFeatureVector","NGamesTotal","NGamesThisId","StartID","StartFilename","StartNGames"
-"1","1.json","0.25","0.25","0.35","Q_LEARNING","players.heuristics.WinOnlyHeuristic","players.rl.QWDSTabular","games.tictactoe.TicTacToeStateVector","1","1","-","-","-"
-"2","2.json","0.25","0.25","0.35","Q_LEARNING","players.heuristics.WinOnlyHeuristic","players.rl.QWDSTabular","games.tictactoe.TicTacToeStateVector","1","1","-","-","-"
-"3","3.json","0.25","0.25","0.35","Q_LEARNING","players.heuristics.WinOnlyHeuristic","players.rl.QWDSTabular","games.tictactoe.TicTacToeStateVector","2","1","2","2.json","1"
