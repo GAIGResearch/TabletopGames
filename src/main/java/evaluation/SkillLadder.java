@@ -85,6 +85,7 @@ public class SkillLadder {
         if (NTBEABudget > 0) {
             // first we tune the minimum budget against a random player
             NTBEAParameters ntbeaParameters = constructNTBEAParameters(args, startingTimeBudget, NTBEABudget);
+            ntbeaParameters.repeats = Math.max(nPlayers, ntbeaParameters.repeats);
             NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
             ntbeaParameters.printSearchSpaceDetails();
             Pair<Object, int[]> results = ntbea.run();
@@ -101,6 +102,9 @@ public class SkillLadder {
             int newBudget = oldBudget * timeBudgetMultiplier;
             if (NTBEABudget > 0) {
                 NTBEAParameters ntbeaParameters = constructNTBEAParameters(args, newBudget, NTBEABudget);
+                // ensure we have one repeat for each player position (to make the tournament easier)
+                // we will have one from the elite set, so we need nPlayers-1 more
+                ntbeaParameters.repeats = Math.max(nPlayers-1, ntbeaParameters.repeats);
                 NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
                 AbstractPlayer benchmark = baseAgent;
                 if (benchmark instanceof IAnyTimePlayer) {
