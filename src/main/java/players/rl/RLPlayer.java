@@ -1,5 +1,6 @@
 package players.rl;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -14,8 +15,14 @@ public class RLPlayer extends AbstractPlayer {
     public static final String resourcesPath = "src/main/java/players/rl/resources/";
 
     enum RLType {
-        TABULAR,
-        LINEAR_APPROX,
+        TABULAR(QWDSTabular.class),
+        LINEAR_APPROX(QWDSLinearApprox.class);
+
+        final Class<? extends QWeightsDataStructure> qWeightClass;
+
+        RLType(Class<? extends QWeightsDataStructure> qWeightClass) {
+            this.qWeightClass = qWeightClass;
+        }
     }
 
     private final Random rng;
@@ -25,17 +32,32 @@ public class RLPlayer extends AbstractPlayer {
 
     private RLTrainer trainer;
 
-    public RLPlayer(QWeightsDataStructure qWeights, RLParams params) {
+    public RLPlayer(RLParams params) {
+        this(params, (QWeightsDataStructure) null);
+    }
+
+    public RLPlayer(RLParams params, QWeightsDataStructure qwds) {
         this.rng = new Random(params.getRandomSeed());
         this.params = params;
-        this.qWeights = qWeights;
+        this.qWeights = qwds != null ? qwds : instantiateQWeights();
         this.qWeights.setParams(params);
     }
 
-    RLPlayer(QWeightsDataStructure qWeights, RLParams params, RLTrainer trainer) {
-        this(qWeights, params);
+    RLPlayer(RLParams params, QWeightsDataStructure qwds, RLTrainer trainer) {
+        this(params, qwds);
         this.trainer = trainer;
         this.qWeights.setTrainingParams(trainer.params);
+    }
+
+    QWeightsDataStructure instantiateQWeights() {
+        try {
+            return params.type.qWeightClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+            e.printStackTrace();
+            System.exit(1);
+            return null;
+        }
     }
 
     @Override

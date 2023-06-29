@@ -23,7 +23,7 @@ public class QWDSTabular extends QWeightsDataStructure {
 
     @Override
     protected double evaluateQ(RLPlayer player, AbstractGameState state, AbstractAction action) {
-        return qWeights.getOrDefault(getStateId(player, state, action), 0.5);
+        return qWeights.getOrDefault(getStateId(player, state, action), params.tabular.unknownStateQValue);
     }
 
     @Override

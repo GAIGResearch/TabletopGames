@@ -13,6 +13,7 @@ import evaluation.listeners.IGameListener;
 import games.GameType;
 import games.tictactoe.TicTacToeStateVector;
 import players.human.ActionController;
+import players.rl.RLPlayer.RLType;
 
 class RLTrainer {
 
@@ -74,8 +75,8 @@ class RLTrainer {
 
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        players.add(new RLPlayer(qwds, playerParams, this));
-        players.add(new RLPlayer(qwds, playerParams, this));
+        players.add(new RLPlayer(playerParams, qwds, this));
+        players.add(new RLPlayer(playerParams, qwds, this));
 
         int nGames = params.nGames;
 
@@ -112,12 +113,12 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
+        String inFile = "src/main/java/players/rl/resources/qWeights/TicTacToe/2023-06-29_00-56-09.json";
         RLTrainingParams params = new RLTrainingParams(151340);
         params.alpha = 0.253f;
         params.gamma = 0.253f;
-        RLParams playerParams = new RLParams(new TicTacToeStateVector());
+        RLParams playerParams = new RLParams(inFile, new TicTacToeStateVector(), RLType.TABULAR);
         playerParams.epsilon = 0.353f;
-        playerParams.qWeightsFilePath = "src/main/java/players/rl/resources/qWeights/TicTacToe/2023-06-29_00-56-09.json";
         RLTrainer trainer = new RLTrainer(params, playerParams);
         trainer.runTraining();
     }
