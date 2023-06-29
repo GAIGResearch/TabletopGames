@@ -26,7 +26,6 @@ public abstract class QWeightsDataStructure {
     protected RLTrainingParams trainingParams;
 
     private String gameFolderPath;
-    private String qWeightsFolderPath;
 
     public QWeightsDataStructure(QWDSParams params) {
         this.params = params;
@@ -56,7 +55,7 @@ public abstract class QWeightsDataStructure {
     }
 
     private void setPaths(String gameName) {
-        this.gameFolderPath = Paths.get(RLPlayer.resourcesPath, qWeightsFolderName, gameName).toString();
+        this.gameFolderPath = getFolderPath(gameName);
         params.initInFilePath(gameFolderPath);
     }
 
@@ -98,8 +97,8 @@ public abstract class QWeightsDataStructure {
         this.trainingParams = trainingParams;
     }
 
-    public String getQWeightsFolderPath() {
-        return qWeightsFolderPath;
+    String getFolderPath(String gameName) {
+        return Paths.get(RLPlayer.resourcesPath, qWeightsFolderName, gameName, playerParams.type.name()).toString();
     }
 
     public String getGameFolderPath() {

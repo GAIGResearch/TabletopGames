@@ -18,7 +18,7 @@ public class RLParams extends PlayerParameters {
     public final TabularParams tabular;
 
     // Tunable parameters
-    public float epsilon = 0.25f;
+    public double epsilon = 0.25f;
 
     public RLParams(RLFeatureVector features, RLType type) {
         this(features, type, System.currentTimeMillis());
@@ -28,7 +28,7 @@ public class RLParams extends PlayerParameters {
         super(seed);
         this.features = features;
         this.type = type;
-        tabular = this.type == RLType.TABULAR ? new TabularParams() : null;
+        tabular = this.type == RLType.Tabular ? new TabularParams() : null;
         addTunableParameters();
     }
 

@@ -11,8 +11,8 @@ public class RLTrainingParams {
     }
 
     public Solver solver = Solver.Q_LEARNING;
-    public float alpha = 0.1f;
-    public float gamma = 0.1f;
+    public double alpha = 0.1f;
+    public double gamma = 0.1f;
     public IStateHeuristic heuristic = new WinOnlyHeuristic();
     public boolean overwriteInfile = false;
 

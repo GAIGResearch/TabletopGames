@@ -940,7 +940,7 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         RLFeatureVector features1 = new TicTacToeStateVector();
-        RLParams p1 = new RLParams(features1, RLType.TABULAR);
+        RLParams p1 = new RLParams(features1, RLType.Tabular);
         QWDSParams qwdsP = new QWDSParams(
                 "2023-06-29_14-51-14.json");
         QWDSTabular qwds1 = new QWDSTabular(qwdsP);

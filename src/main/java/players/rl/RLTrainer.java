@@ -120,17 +120,17 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams(2150000);
+        RLTrainingParams params = new RLTrainingParams(15837);
         params.alpha = 0.25f;
-        params.gamma = 0.25f;
+        params.gamma = 0.5f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
         params.overwriteInfile = false;
 
-        RLParams playerParams = new RLParams(new TicTacToeStateVector(), RLType.TABULAR);
+        RLParams playerParams = new RLParams(new TicTacToeStateVector(), RLType.Tabular, 1688053622043l);
         playerParams.epsilon = 0.35f;
 
-        QWDSParams qwdsParams = new QWDSParams("2023-06-29_14-33-42.json");
+        QWDSParams qwdsParams = new QWDSParams("2023-06-29_16-47-02.json");
         qwdsParams.readFromFile = false;
 
         RLTrainer trainer = new RLTrainer(params, playerParams, qwdsParams);

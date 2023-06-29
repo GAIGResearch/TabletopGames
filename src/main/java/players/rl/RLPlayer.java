@@ -15,8 +15,8 @@ public class RLPlayer extends AbstractPlayer {
     public static final String resourcesPath = "src/main/java/players/rl/resources/";
 
     public enum RLType {
-        TABULAR(QWDSTabular.class),
-        LINEAR_APPROX(QWDSLinearApprox.class);
+        Tabular(QWDSTabular.class),
+        LinearApprox(QWDSLinearApprox.class);
 
         final Class<? extends QWeightsDataStructure> qWeightClass;
 
