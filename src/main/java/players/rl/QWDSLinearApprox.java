@@ -7,9 +7,13 @@ public class QWDSLinearApprox extends QWeightsDataStructure {
 
     private double[] qWeights;
 
+    public QWDSLinearApprox(QWDSParams qwdsParams) {
+        super(qwdsParams);
+    }
+
     @Override
     protected double evaluateQ(RLPlayer player, AbstractGameState state, AbstractAction action) {
-        double[] featureVector = params.features.featureVector(action, state, player.getPlayerID());
+        double[] featureVector = playerParams.features.featureVector(action, state, player.getPlayerID());
         double ret = 0;
         for (int i = 0; i < featureVector.length; i++)
             ret += qWeights[i] * featureVector[i];
@@ -21,7 +25,7 @@ public class QWDSLinearApprox extends QWeightsDataStructure {
         // if (trainer != null)
         // qWeights = trainer.qWeights;
         // else
-        qWeights = new double[params.features.names().length];
+        qWeights = new double[playerParams.features.names().length];
     }
 
     @Override

@@ -13,22 +13,19 @@ public class RLParams extends PlayerParameters {
     }
 
     // Mandatory and automatic params
-    public final String qWeightsFilePath;
     public final RLFeatureVector features;
     public final RLType type;
     public final TabularParams tabular;
 
     // Tunable parameters
-    // TODO Choose good default values
     public float epsilon = 0.25f;
 
-    public RLParams(String qWeightsFilePath, RLFeatureVector features, RLType type) {
-        this(qWeightsFilePath, features, type, System.currentTimeMillis());
+    public RLParams(RLFeatureVector features, RLType type) {
+        this(features, type, System.currentTimeMillis());
     }
 
-    public RLParams(String qWeightsFilePath, RLFeatureVector features, RLType type, long seed) {
+    public RLParams(RLFeatureVector features, RLType type, long seed) {
         super(seed);
-        this.qWeightsFilePath = qWeightsFilePath;
         this.features = features;
         this.type = type;
         tabular = this.type == RLType.TABULAR ? new TabularParams() : null;
@@ -46,7 +43,7 @@ public class RLParams extends PlayerParameters {
 
     @Override
     protected AbstractParameters _copy() {
-        RLParams retValue = new RLParams(qWeightsFilePath, features, type, System.currentTimeMillis());
+        RLParams retValue = new RLParams(features, type, System.currentTimeMillis());
         retValue.epsilon = epsilon;
         return retValue;
     }

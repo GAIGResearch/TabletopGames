@@ -14,7 +14,7 @@ public class RLPlayer extends AbstractPlayer {
 
     public static final String resourcesPath = "src/main/java/players/rl/resources/";
 
-    enum RLType {
+    public enum RLType {
         TABULAR(QWDSTabular.class),
         LINEAR_APPROX(QWDSLinearApprox.class);
 
@@ -40,7 +40,7 @@ public class RLPlayer extends AbstractPlayer {
         this.rng = new Random(params.getRandomSeed());
         this.params = params;
         this.qWeights = qwds != null ? qwds : instantiateQWeights();
-        this.qWeights.setParams(params);
+        this.qWeights.setPlayerParams(params);
     }
 
     RLPlayer(RLParams params, QWeightsDataStructure qwds, RLTrainer trainer) {

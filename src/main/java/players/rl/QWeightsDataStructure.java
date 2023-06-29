@@ -2,10 +2,9 @@ package players.rl;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,16 +14,23 @@ import core.actions.AbstractAction;
 
 public abstract class QWeightsDataStructure {
 
+    public static final String qWeightsFolderName = "qWeights";
+
     // Alias for a sorted(!) hashmap between the state name
     // (players.rl.RLFeatureVector::names) and weight value
     protected class StateMap extends LinkedHashMap<String, Double> {
     }
 
-    protected RLParams params;
+    protected QWDSParams params;
+    protected RLParams playerParams;
     protected RLTrainingParams trainingParams;
 
     private String gameFolderPath;
     private String qWeightsFolderPath;
+
+    public QWeightsDataStructure(QWDSParams params) {
+        this.params = params;
+    }
 
     // Ensures agent doesn't need to load the files between every game
     private boolean initialized = false;
@@ -50,29 +56,21 @@ public abstract class QWeightsDataStructure {
     }
 
     private void setPaths(String gameName) {
-        this.gameFolderPath = RLPlayer.resourcesPath + gameName + "/";
-        this.qWeightsFolderPath = gameFolderPath + "qWeights/";
+        this.gameFolderPath = Paths.get(RLPlayer.resourcesPath, qWeightsFolderName, gameName).toString();
+        params.initInFilePath(gameFolderPath);
     }
 
     private JsonNode tryReadQWeightsFromFile() {
         initQWeightsEmpty();
-        if (params.qWeightsFilePath == null)
+        if (params.getInfilePath() == null)
             return null;
         try {
-            File file = new File(params.qWeightsFilePath);
+            File file = new File(params.getInfilePath());
             JsonNode data = new ObjectMapper().readTree(file);
             StateMap stateMap = new StateMap() {
                 {
-                    // TODO: JsonNode::fields does not guarantee order. Maybe use arrays instead
-                    // Might have to have a json object inside the array, to keep state-value pairs
-                    // "Weights": [ { "name": "[stateName]", "value": [qValue] }, {...}, ... ]
-                    // TODO: alternatively, use RLFeatureVector::names to maintain same order
-                    Iterator<Map.Entry<String, JsonNode>> fields = data.get("Weights").fields();
-                    Map.Entry<String, JsonNode> entry;
-                    while (fields.hasNext()) {
-                        entry = fields.next();
-                        put(entry.getKey(), entry.getValue().asDouble());
-                    }
+                    data.get("Weights").fields()
+                            .forEachRemaining(e -> put(e.getKey(), e.getValue().asDouble()));
                 }
             };
             parseQWeights(stateMap);
@@ -92,8 +90,8 @@ public abstract class QWeightsDataStructure {
         }
     }
 
-    protected void setParams(RLParams params) {
-        this.params = params;
+    protected void setPlayerParams(RLParams params) {
+        this.playerParams = params;
     }
 
     protected void setTrainingParams(RLTrainingParams trainingParams) {

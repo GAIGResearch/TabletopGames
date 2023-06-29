@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -43,11 +44,9 @@ class DataProcessor {
 
     private QWeightsDataStructure qwds;
 
-    private static final String qWeightsFolderName = "qWeights";
-
     private final String gameName;
 
-    private File outFile = null;
+    private File outfile = null;
     private ObjectNode metadata = null;
 
     DataProcessor(QWeightsDataStructure qwds, String gameName) {
@@ -62,22 +61,22 @@ class DataProcessor {
         Date currentDate = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         String formattedDate = dateFormat.format(currentDate);
-        outFile = new File(getQWeightsFolderPath(gameName) + formattedDate + ".json");
+        outfile = new File(Paths.get(getQWeightsFolderPath(gameName), formattedDate + ".json").toString());
     }
 
     private void initMetadata() {
-        JsonNode existingMetadata = readFileMetadata(qwds.params.qWeightsFilePath);
+        JsonNode existingMetadata = readFileMetadata(qwds.params.getInfilePath());
         int existingNGames = existingMetadata == null ? 0 : existingMetadata.get(DBCol.NGamesTotal.name()).asInt();
         ObjectMapper om = new ObjectMapper();
         metadata = om.createObjectNode()
-                .put(DBCol.Seed.name(), qwds.params.getRandomSeed())
+                .put(DBCol.Seed.name(), qwds.playerParams.getRandomSeed())
                 .put(DBCol.Alpha.name(), qwds.trainingParams.alpha)
                 .put(DBCol.Gamma.name(), qwds.trainingParams.gamma)
-                .put(DBCol.Epsilon.name(), qwds.params.epsilon)
+                .put(DBCol.Epsilon.name(), qwds.playerParams.epsilon)
                 .put(DBCol.Solver.name(), qwds.trainingParams.solver.name())
                 .put(DBCol.Heuristic.name(), qwds.trainingParams.heuristic.getClass().getCanonicalName())
                 .put(DBCol.QWeightsDataStructure.name(), qwds.getClass().getCanonicalName())
-                .put(DBCol.RLFeatureVector.name(), qwds.params.features.getClass().getCanonicalName())
+                .put(DBCol.RLFeatureVector.name(), qwds.playerParams.features.getClass().getCanonicalName())
                 .put(DBCol.NGamesTotal.name(), existingNGames)
                 .put(DBCol.NGamesWithTheseSettings.name(), 0)
                 .set(DBCol.ContinuedFrom.name(), existingMetadata);
@@ -110,8 +109,8 @@ class DataProcessor {
             metadata.put(col.name(), metadata.get(col.name()).asInt() + nGamesToAdd);
     }
 
-    private static String getQWeightsFolderPath(String gameName) {
-        return RLPlayer.resourcesPath + qWeightsFolderName + "/" + gameName + "/";
+    private String getQWeightsFolderPath(String gameName) {
+        return Paths.get(RLPlayer.resourcesPath, QWeightsDataStructure.qWeightsFolderName, gameName).toString();
     }
 
     private JsonNode createJsonNode(ObjectMapper objectMapper) {
@@ -127,11 +126,11 @@ class DataProcessor {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode node = createJsonNode(objectMapper);
 
-        outFile.setWritable(true);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outFile))) {
+        outfile.setWritable(true);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outfile))) {
             String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(node);
             writer.write(json);
-            outFile.setReadOnly();
+            outfile.setReadOnly();
         } catch (IOException e) {
             System.out.println("An error occurred while writing beta to the file: " +
                     e.getMessage());

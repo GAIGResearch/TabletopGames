@@ -1,15 +1,21 @@
 package players.rl;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 public class QWDSTabular extends QWeightsDataStructure {
 
     private Map<String, Double> qWeights;
+
+    public QWDSTabular(QWDSParams qwdsParams) {
+        super(qwdsParams);
+    }
 
     @Override
     protected void initQWeightsEmpty() {
@@ -23,7 +29,7 @@ public class QWDSTabular extends QWeightsDataStructure {
 
     @Override
     protected double evaluateQ(RLPlayer player, AbstractGameState state, AbstractAction action) {
-        return qWeights.getOrDefault(getStateId(player, state, action), params.tabular.unknownStateQValue);
+        return qWeights.getOrDefault(getStateId(player, state, action), playerParams.tabular.unknownStateQValue);
     }
 
     @Override
@@ -31,7 +37,6 @@ public class QWDSTabular extends QWeightsDataStructure {
         AbstractGameState s0 = t0.s.copy();
         AbstractGameState s1 = t1.s;
 
-        // TODO more sophisticated reward?
         double maxQ_s1a = t1.a == null
                 ? 0
                 : t1.possibleActions.stream().mapToDouble(a -> evaluateQ(player, s1, a)).max()
@@ -53,13 +58,17 @@ public class QWDSTabular extends QWeightsDataStructure {
         StateMap qWeightsStateMap = new StateMap();
         for (String stateId : qWeights.keySet())
             qWeightsStateMap.put(stateId, qWeights.get(stateId));
-        // qWeightsStateMap.sort(Comparator.comparingDouble((String s) ->
-        // Double.parseDouble(s.split(":")[1])).reversed());
+        // Sort by value
+        qWeightsStateMap = qWeightsStateMap.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue,
+                        StateMap::new));
         return qWeightsStateMap;
     }
 
     private String getStateId(RLPlayer player, AbstractGameState state, AbstractAction action) {
-        double[] featureVector = params.features.featureVector(action, state, player.getPlayerID());
+        double[] featureVector = playerParams.features.featureVector(action, state, player.getPlayerID());
         return Arrays.toString(featureVector).replaceAll(" ", "");
     }
 

@@ -12,8 +12,10 @@ import core.actions.AbstractAction;
 import evaluation.listeners.IGameListener;
 import games.GameType;
 import games.tictactoe.TicTacToeStateVector;
+import players.heuristics.WinOnlyHeuristic;
 import players.human.ActionController;
 import players.rl.RLPlayer.RLType;
+import players.rl.RLTrainingParams.Solver;
 
 class RLTrainer {
 
@@ -25,12 +27,12 @@ class RLTrainer {
     private QWeightsDataStructure qwds;
     private DataProcessor dp = null;
 
-    private RLTrainer(RLTrainingParams params, RLParams playerParams) {
+    private RLTrainer(RLTrainingParams params, RLParams playerParams, QWDSParams qwdsParams) {
         // TODO set game name and more through RLTrainingParams
         this.gameName = "TicTacToe";
         this.params = params;
         this.playerParams = playerParams;
-        this.qwds = new QWDSTabular();
+        this.qwds = new QWDSTabular(qwdsParams);
         resetTrainer();
     }
 
@@ -81,12 +83,17 @@ class RLTrainer {
         int nGames = params.nGames;
 
         int nGamesSinceLastWrite = 0;
+        // Init file
 
         System.out.println("Starting training...");
         for (int i = 1; i <= nGames; i++) {
             runGame(GameType.valueOf(gameName), gameParams, players, System.currentTimeMillis(), false, null,
                     useGUI ? new ActionController() : null, turnPause);
             nGamesSinceLastWrite++;
+            if (i == 1) {
+                dp.writeData(nGamesSinceLastWrite);
+                nGamesSinceLastWrite = 0;
+            }
             int splitSize = nGames / 100;
             if (splitSize != 0 && i % splitSize == 0) {
                 System.out.println((i / splitSize) + "%");
@@ -113,13 +120,20 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        String inFile = "src/main/java/players/rl/resources/qWeights/TicTacToe/2023-06-29_00-56-09.json";
-        RLTrainingParams params = new RLTrainingParams(151340);
-        params.alpha = 0.253f;
-        params.gamma = 0.253f;
-        RLParams playerParams = new RLParams(inFile, new TicTacToeStateVector(), RLType.TABULAR);
-        playerParams.epsilon = 0.353f;
-        RLTrainer trainer = new RLTrainer(params, playerParams);
+        RLTrainingParams params = new RLTrainingParams(2150000);
+        params.alpha = 0.25f;
+        params.gamma = 0.25f;
+        params.solver = Solver.Q_LEARNING;
+        params.heuristic = new WinOnlyHeuristic();
+        params.overwriteInfile = false;
+
+        RLParams playerParams = new RLParams(new TicTacToeStateVector(), RLType.TABULAR);
+        playerParams.epsilon = 0.35f;
+
+        QWDSParams qwdsParams = new QWDSParams("2023-06-29_14-33-42.json");
+        qwdsParams.readFromFile = false;
+
+        RLTrainer trainer = new RLTrainer(params, playerParams, qwdsParams);
         trainer.runTraining();
     }
 

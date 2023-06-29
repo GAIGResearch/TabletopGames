@@ -18,6 +18,8 @@ import players.human.*;
 import players.rl.RLFeatureVector;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
+import players.rl.RLPlayer.RLType;
+import players.rl.QWDSParams;
 import players.rl.QWDSTabular;
 import utilities.Pair;
 import utilities.Utils;
@@ -938,15 +940,12 @@ public class Game {
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
         RLFeatureVector features1 = new TicTacToeStateVector();
-        RLParams p1 = new RLParams(features1);
-        QWDSTabular qwds1 = new QWDSTabular();
-        RLFeatureVector features2 = new TicTacToeStateVector();
-        RLParams p2 = new RLParams(features2);
-        QWDSTabular qwds2 = new QWDSTabular();
-        // p1.qWeightsFileId = 4;
-        // p2.qWeightsFileId = 4;
-        players.add(new RLPlayer(qwds1, p1));
-        players.add(new RLPlayer(qwds2, p2));
+        RLParams p1 = new RLParams(features1, RLType.TABULAR);
+        QWDSParams qwdsP = new QWDSParams(
+                "2023-06-29_14-51-14.json");
+        QWDSTabular qwds1 = new QWDSTabular(qwdsP);
+        players.add(new RLPlayer(p1, qwds1));
+        players.add(new HumanGUIPlayer(ac));
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));
