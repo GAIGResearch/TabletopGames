@@ -39,7 +39,7 @@ public class FreeCard extends DrawCard {
         // Gives player resources produced from card
         Set<Wonders7Constants.Resource> keys = card.resourcesProduced.keySet(); // Gets all the resources the card provides
         for (Wonders7Constants.Resource resource: keys){  // Goes through all keys for each resource
-            int cardValue = card.resourcesProduced.get(resource); // Number of resource the card provides
+            int cardValue = card.getNProduced(resource); // Number of resource the card provides
             int playerValue = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource); // Number of resource the player owns
             wgs.getPlayerResources(wgs.getCurrentPlayer()).put(resource, playerValue + cardValue); // Adds the resources provided by the card to the players resource count
         }

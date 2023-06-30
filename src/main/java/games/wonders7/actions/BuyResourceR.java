@@ -42,7 +42,7 @@ public class BuyResourceR extends DrawCard {
         HashMap<Wonders7Constants.Resource, Integer> neededResources = new HashMap<>();
         for (Wonders7Constants.Resource resource : key) { // Goes through every resource the player needs
             if ((wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource)) < card.constructionCost.get(resource)) { // If the player does not have resource count, added to needed resources
-                neededResources.put(resource, card.constructionCost.get(resource)-wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource));
+                neededResources.put(resource, card.getNCost(resource)-wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource));
             }
         }
         // Calculates the cost of resources
@@ -60,7 +60,7 @@ public class BuyResourceR extends DrawCard {
         // Gives player resources produced from card
         key = card.resourcesProduced.keySet(); // Gets all the resources the card provides
         for (Wonders7Constants.Resource resource: key){  // Goes through all keys for each resource
-            int cardValue = card.resourcesProduced.get(resource); // Number of resource the card provides
+            int cardValue = card.getNProduced(resource); // Number of resource the card provides
             int playerValue = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource); // Number of resource the player owns
             wgs.getPlayerResources(wgs.getCurrentPlayer()).put(resource, playerValue + cardValue); // Adds the resources provided by the card to the players resource count
         }

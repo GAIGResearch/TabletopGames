@@ -37,20 +37,19 @@ public class BuildStage extends AbstractAction {
         if (wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).wonderStage == 2){
             Wonder7Board board = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer());
             switch (board.type){
-                case Lighthouse:
-                case Mausoleum:
-                case Gardens:
-                case Statue:
+                case TheLighthouseOfAlexandria:
+                case TheMausoleumOfHalicarnassus:
+                case TheHangingGardensOfBabylon:
+                case TheStatueOfZeusInOlympia:
                     wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).effectUsed = false;
                 default:
                     break;
             }}
 
-
         // Gives player resources produced from stage
-        Set<Wonders7Constants.Resource> keys = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).stageProduce.get(wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).wonderStage-1).keySet(); // Gets all the resources the stage provides
+        Set<Wonders7Constants.Resource> keys = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).type.stageProduce.get(wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).wonderStage-1).keySet(); // Gets all the resources the stage provides
         for (Wonders7Constants.Resource resource: keys){  // Goes through all keys for each resource
-            int stageValue =  wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).stageProduce.get(wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).wonderStage-1).get(resource); // Number of resource the stage provides
+            int stageValue = wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).type.getStageProduce(wgs.getPlayerWonderBoard(wgs.getCurrentPlayer()).wonderStage - 1, resource); // Number of resource the stage provides
             int playerValue = wgs.getPlayerResources(wgs.getCurrentPlayer()).get(resource); // Number of resource the player owns
             wgs.getPlayerResources(wgs.getCurrentPlayer()).put(resource, playerValue + stageValue); // Adds the resources provided by the stage to the players resource count
         }
