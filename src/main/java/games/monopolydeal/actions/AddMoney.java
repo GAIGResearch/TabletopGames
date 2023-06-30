@@ -55,7 +55,12 @@ public class AddMoney extends AbstractAction {
     @Override
     public boolean equals(Object obj) {
         // TODO: compare all other variables in the class
-        return obj instanceof AddMoney;
+        if(obj instanceof AddMoney){
+            AddMoney temp = (AddMoney) obj;
+            if(temp.card == card && temp.player == player)
+                return true;
+        }
+        return false;
     }
 
     @Override

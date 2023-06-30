@@ -31,6 +31,8 @@ public class PropertySet extends Deck<MonopolyDealCard> {
         return retValue;
     }
 
+    public SetType getSetType(){return type;}
+
     // Note to self
     // Add house/hotel only if complete set
     // modify properties only if no house/hotel present
