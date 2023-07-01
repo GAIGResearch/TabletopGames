@@ -9,6 +9,7 @@ import utilities.Pair;
 import java.io.FileWriter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static core.CoreConstants.GameResult;
 import static evaluation.tournaments.AbstractTournament.TournamentMode.*;
@@ -31,6 +32,8 @@ public class RoundRobinTournament extends AbstractTournament {
     protected boolean randomGameParams;
     public final String name;
 
+    protected long randomSeed = System.currentTimeMillis();
+    private int[] gameSeeds;
     private boolean listenersInitialized = false;
 
 
@@ -102,7 +105,9 @@ public class RoundRobinTournament extends AbstractTournament {
      *
      * @param matchUp - current combination of players, updated recursively.
      */
-    public void createAndRunMatchUp(LinkedList<Integer> matchUp) {
+    public void createAndRunMatchUp(List<Integer> matchUp) {
+        Random seedRnd = new Random(randomSeed);
+        gameSeeds = IntStream.range(0, gamesPerMatchUp).map(i -> seedRnd.nextInt()).toArray();
         if (tournamentMode == ONE_VS_ALL) {
             // In this case agents.get(0) must always play
             Random rnd = new Random(System.currentTimeMillis());
@@ -111,17 +116,33 @@ public class RoundRobinTournament extends AbstractTournament {
             randomAgentOrder.remove(Integer.valueOf(0));
             for (int p = 0; p < nPlayers; p++) {
                 // we put the focus player at each position (p) in turn
-                for (int m = 0; m < this.gamesPerMatchUp; m++) {
-                    Collections.shuffle(randomAgentOrder, rnd);
+                if (randomAgentOrder.size() == 1) {
+                    // to reduce variance in this case we can use the same set of seeds for each case
                     List<Integer> matchup = new ArrayList<>(nPlayers);
                     for (int j = 0; j < nPlayers; j++) {
                         if (j == p)
                             matchup.add(0); // focus player
                         else {
-                            matchup.add(randomAgentOrder.get(j % randomAgentOrder.size()));
+                            matchup.add(randomAgentOrder.get(0));
                         }
                     }
-                    evaluateMatchUp(matchup, 1);
+                    // We split the total budget equally across the possible positions the focus player can be in
+                    // We will therefore use the first chunk of gameSeeds only (but use the same gameSeeds for each position)
+                    evaluateMatchUp(matchup, gamesPerMatchUp / nPlayers);
+                } else {
+                    gameSeeds = null;
+                    for (int m = 0; m < this.gamesPerMatchUp; m++) {
+                        Collections.shuffle(randomAgentOrder, rnd);
+                        List<Integer> matchup = new ArrayList<>(nPlayers);
+                        for (int j = 0; j < nPlayers; j++) {
+                            if (j == p)
+                                matchup.add(0); // focus player
+                            else {
+                                matchup.add(randomAgentOrder.get(j % randomAgentOrder.size()));
+                            }
+                        }
+                        evaluateMatchUp(matchup, 1);
+                    }
                 }
             }
         } else {
@@ -173,13 +194,10 @@ public class RoundRobinTournament extends AbstractTournament {
 
 
         // Run the game N = gamesPerMatchUp times with these players
-        long currentSeed = games.getGameState().getGameParameters().getRandomSeed();
         for (int i = 0; i < nGames; i++) {
-
-            if (randomGameParams)
-                games.getGameState().getGameParameters().randomize();
-
-            games.reset(matchUpPlayers, currentSeed + i + 1);
+            // Use the same seeds for all games in each matchup (if gameSeeds specified)
+            long currentSeed = gameSeeds == null ? games.getGameState().getGameParameters().getRandomSeed() + i + 1 : gameSeeds[i];
+            games.reset(matchUpPlayers, currentSeed);
             if (!listenersInitialized) {
                 for (IGameListener gameTracker : listeners) {
                     gameTracker.init(games);
@@ -344,6 +362,7 @@ public class RoundRobinTournament extends AbstractTournament {
     public void setRandomGameParams(boolean randomGameParams) {
         this.randomGameParams = randomGameParams;
     }
+
     public void setResultsFile(String resultsFile) {
         this.resultsFile = resultsFile;
     }

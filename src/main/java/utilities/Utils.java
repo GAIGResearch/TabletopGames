@@ -263,25 +263,27 @@ public abstract class Utils {
         Optional<String> raw = Arrays.stream(args).filter(i -> i.toLowerCase().startsWith(name.toLowerCase() + "=")).findFirst();
         if (raw.isPresent()) {
             String[] temp = raw.get().split("=");
-            if (temp.length < 2)
-                throw new IllegalArgumentException("No value provided for argument " + temp[0]);
-            String rawString = temp[1];
-            if (defaultValue instanceof Enum) {
-                T[] constants = (T[]) defaultValue.getClass().getEnumConstants();
-                for (T o : constants) {
-                    if (o.toString().equals(rawString))
-                        return o;
+            if (temp.length > 1) { // if no value is specified, we just return the default value
+                String rawString = temp[1];
+                if (defaultValue instanceof Enum) {
+                    T[] constants = (T[]) defaultValue.getClass().getEnumConstants();
+                    for (T o : constants) {
+                        if (o.toString().equals(rawString))
+                            return o;
+                    }
+                } else if (defaultValue instanceof Integer) {
+                    return (T) Integer.valueOf(rawString);
+                } else if (defaultValue instanceof Double) {
+                    return (T) Double.valueOf(rawString);
+                } else if (defaultValue instanceof Boolean) {
+                    return (T) Boolean.valueOf(rawString);
+                } else if (defaultValue instanceof String) {
+                    return (T) rawString;
+                } else {
+                    throw new AssertionError("Unexpected type of defaultValue : " + defaultValue.getClass());
                 }
-            } else if (defaultValue instanceof Integer) {
-                return (T) Integer.valueOf(rawString);
-            } else if (defaultValue instanceof Double) {
-                return (T) Double.valueOf(rawString);
-            } else if (defaultValue instanceof Boolean) {
-                return (T) Boolean.valueOf(rawString);
-            } else if (defaultValue instanceof String) {
-                return (T) rawString;
             } else {
-                throw new AssertionError("Unexpected type of defaultValue : " + defaultValue.getClass());
+                System.out.println("No value specified for " + name + ", using default value of " + defaultValue);
             }
         }
         return defaultValue;
