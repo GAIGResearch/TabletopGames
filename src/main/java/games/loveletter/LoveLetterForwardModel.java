@@ -5,19 +5,18 @@ import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.interfaces.IOrderedActionSpace;
+import core.interfaces.ITreeActionSpace;
 import games.GameType;
 import games.loveletter.actions.PlayCard;
 import games.loveletter.cards.LoveLetterCard;
 import utilities.ActionTreeNode;
 
-import javax.swing.*;
 import java.util.*;
 
 import static core.CoreConstants.*;
 
 
-public class LoveLetterForwardModel extends StandardForwardModel implements IOrderedActionSpace {
+public class LoveLetterForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
     /**
      * Creates the initial game-state of Love Letter.

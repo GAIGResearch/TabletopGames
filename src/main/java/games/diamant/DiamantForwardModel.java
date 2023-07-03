@@ -5,7 +5,7 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
-import core.interfaces.IOrderedActionSpace;
+import core.interfaces.ITreeActionSpace;
 import games.diamant.actions.ContinueInCave;
 import games.diamant.actions.ExitFromCave;
 import games.diamant.actions.OutOfCave;
@@ -16,12 +16,11 @@ import utilities.ActionTreeNode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.IntStream;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
 
-public class DiamantForwardModel extends StandardForwardModel implements IOrderedActionSpace {
+public class DiamantForwardModel extends StandardForwardModel implements ITreeActionSpace {
     @Override
     protected void _setup(AbstractGameState firstState) {
         DiamantGameState dgs = (DiamantGameState) firstState;

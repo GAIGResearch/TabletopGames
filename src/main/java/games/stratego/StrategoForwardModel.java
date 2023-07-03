@@ -6,7 +6,7 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.components.GridBoard;
-import core.interfaces.IOrderedActionSpace;
+import core.interfaces.ITreeActionSpace;
 import games.stratego.actions.AttackMove;
 import games.stratego.actions.Move;
 import games.stratego.actions.NormalMove;
@@ -18,11 +18,10 @@ import games.stratego.metrics.StrategoMetrics;
 import utilities.Vector2D;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-public class StrategoForwardModel extends StandardForwardModel implements IOrderedActionSpace {
+public class StrategoForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
     public enum EndCondition {
         FLAG_CAPTURE,

@@ -8,17 +8,15 @@ import core.actions.ActionSpace;
 import core.actions.SetGridValueAction;
 import core.components.GridBoard;
 import core.components.Token;
-import core.interfaces.IOrderedActionSpace;
+import core.interfaces.ITreeActionSpace;
 import utilities.ActionTreeNode;
-import utilities.Utils;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 
-public class TicTacToeForwardModel extends StandardForwardModel implements IOrderedActionSpace {
+public class TicTacToeForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
     @Override
     protected void _setup(AbstractGameState firstState) {

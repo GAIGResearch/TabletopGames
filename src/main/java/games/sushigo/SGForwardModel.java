@@ -6,19 +6,18 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
-import core.interfaces.IOrderedActionSpace;
+import core.interfaces.ITreeActionSpace;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
 import utilities.ActionTreeNode;
 import utilities.Pair;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static games.sushigo.cards.SGCard.SGCardType.*;
 
 @SuppressWarnings("unchecked")
-public class SGForwardModel extends StandardForwardModel implements IOrderedActionSpace {
+public class SGForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
     @Override
     protected void _setup(AbstractGameState firstState) {

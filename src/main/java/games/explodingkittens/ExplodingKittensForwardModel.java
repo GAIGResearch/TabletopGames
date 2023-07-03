@@ -6,10 +6,9 @@ import core.CoreConstants;
 import core.CoreConstants.VisibilityMode;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
-import core.actions.DrawCard;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
-import core.interfaces.IOrderedActionSpace;
+import core.interfaces.ITreeActionSpace;
 import games.GameType;
 import games.explodingkittens.actions.*;
 import games.explodingkittens.actions.reactions.ChooseSeeTheFutureOrder;
@@ -24,7 +23,7 @@ import java.util.*;
 import static games.explodingkittens.ExplodingKittensGameState.ExplodingKittensGamePhase.Nope;
 import static utilities.Utils.generatePermutations;
 
-public class ExplodingKittensForwardModel extends AbstractForwardModel implements IOrderedActionSpace {
+public class ExplodingKittensForwardModel extends AbstractForwardModel implements ITreeActionSpace {
     private final ArrayList<String> cardTypes = new ArrayList<>(Arrays.asList("EXPLODING_KITTEN", "DEFUSE", "NOPE", "ATTACK", "SKIP", "FAVOR",
             "SHUFFLE", "SEETHEFUTURE", "TACOCAT", "MELONCAT", "FURRYCAT", "BEARDCAT", "RAINBOWCAT"));
     private final int N_CARDS_TO_CHECK = 10;

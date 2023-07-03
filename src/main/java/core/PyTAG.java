@@ -3,7 +3,7 @@ package core;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
-import core.interfaces.IOrderedActionSpace;
+import core.interfaces.ITreeActionSpace;
 import core.interfaces.IVectorisable;
 import games.GameType;
 import players.human.HumanGUIPlayer;
@@ -52,7 +52,7 @@ public class PyTAG {
 
         assert game != null;
 //        game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Tree);
-        if (!(game.gameState instanceof IVectorisable && game.forwardModel instanceof IOrderedActionSpace)) {
+        if (!(game.gameState instanceof IVectorisable && game.forwardModel instanceof ITreeActionSpace)) {
             throw new Exception("Game has not implemented Reinforcement Learning Interface");
         }
 //        if (game != null) {
@@ -130,7 +130,7 @@ public class PyTAG {
 
     // Plays an action given an actionID
     public void executeAction(int actionID) throws Exception {
-        if (forwardModel instanceof IOrderedActionSpace) {
+        if (forwardModel instanceof ITreeActionSpace) {
             ActionTreeNode node = leaves.get(actionID);
             AbstractAction action = node.getAction();
             forwardModel.next(gameState, action);
@@ -160,13 +160,13 @@ public class PyTAG {
 
         // get action tree for current player
         if (this.root == null){
-            this.root = ((IOrderedActionSpace)this.forwardModel).initActionTree(this.gameState);
+            this.root = ((ITreeActionSpace)this.forwardModel).initActionTree(this.gameState);
         }
         // update with initial actions
         // Compute the updated available actions and the action tree
         AbstractGameState observation = gameState.copy(gameState.getCurrentPlayer());
         this.availableActions = forwardModel.computeAvailableActions(observation);
-        this.root = ((IOrderedActionSpace)this.forwardModel).updateActionTree(this.root, this.gameState);
+        this.root = ((ITreeActionSpace)this.forwardModel).updateActionTree(this.root, this.gameState);
         this.leaves = root.getLeafNodes();
     }
 
@@ -267,7 +267,7 @@ public class PyTAG {
 
         // Compute the updated available actions and the action tree
         this.availableActions = forwardModel.computeAvailableActions(observation);
-        this.root = ((IOrderedActionSpace)this.forwardModel).updateActionTree(this.root, this.gameState);
+        this.root = ((ITreeActionSpace)this.forwardModel).updateActionTree(this.root, this.gameState);
         this.leaves = root.getLeafNodes();
 
         return observation;
