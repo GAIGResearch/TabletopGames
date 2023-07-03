@@ -82,7 +82,7 @@ public class SkillLadder {
 
         AbstractPlayer baseAgent, newAgent;
         int[] currentBestSettings = new int[0];
-        if (NTBEABudget > 0 ) {
+        if (NTBEABudget > 0) {
             // first we tune the minimum budget against a random player
             NTBEAParameters ntbeaParameters = constructNTBEAParameters(args, startingTimeBudget, NTBEABudget);
             NTBEA ntbea = new NTBEA(ntbeaParameters, gameType, nPlayers);
@@ -128,14 +128,14 @@ public class SkillLadder {
                 if (listenerClass.isEmpty()) continue;
                 IGameListener gameTracker = IGameListener.createListener(listenerClass, null);
                 RRT.getListeners().add(gameTracker);
-                gameTracker.setOutputDirectory(destDir, "Budget_" + newBudget);
+                String[] nestedDirectories = new String[]{destDir, "Budget_" + newBudget};
+                gameTracker.setOutputDirectory(nestedDirectories);
             }
 
             long startTime = System.currentTimeMillis();
-            RRT.setResultsFile(game + "_Results.txt");
+            RRT.setResultsFile((destDir.isEmpty() ? "" : destDir + File.separator) + "TournamentResults.txt");
             RRT.runTournament();
             long endTime = System.currentTimeMillis();
-            ;
             System.out.printf("%d games in %3d minutes\tBudget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f\tvs Budget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f%n",
                     (gamesPerIteration / nPlayers) * nPlayers, (endTime - startTime) / 60000,
                     newBudget,
@@ -163,7 +163,7 @@ public class SkillLadder {
         ntbeaParameters.iterationsPerRun = (gameBudget - ntbeaParameters.tournamentGames) / NTBEARunsBetweenRungs;
         ntbeaParameters.evalGames = 0;
         ntbeaParameters.opponentDescriptor = getArg(args, "player", "random");
-        ntbeaParameters.logFile = agentBudget + "_" + ntbeaParameters.logFile;
+        ntbeaParameters.logFile = "NTBEA_Runs.log";
         return ntbeaParameters;
     }
 

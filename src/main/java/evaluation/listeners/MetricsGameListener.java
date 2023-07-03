@@ -4,6 +4,7 @@ import core.Game;
 import evaluation.metrics.*;
 import evaluation.metrics.tablessaw.DataTableSaw;
 import shapeless.ops.nat;
+import utilities.Utils;
 
 import java.io.File;
 import java.util.*;
@@ -94,17 +95,7 @@ public class MetricsGameListener implements IGameListener {
 
         if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
             // If the "metrics/out/" does not exist, create it
-            String folder = "";
-            for (String nestedDir : nestedDirectories) {
-                folder = folder + nestedDir + File.separator;
-                File outFolder = new File(folder);
-                if (!outFolder.exists()) {
-                    success = outFolder.mkdir();
-                }
-                if (!success)
-                    throw new AssertionError("Unable to create output directory" + outFolder.getAbsolutePath());
-            }
-
+            String folder = Utils.createDirectory(nestedDirectories);
             destDir = new File(folder).getAbsolutePath() + File.separator;
         }
         return success;

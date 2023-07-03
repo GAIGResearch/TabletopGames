@@ -15,6 +15,7 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -304,6 +305,25 @@ public abstract class Utils {
         return json.toJSONString();
     }
 
+    public static String createDirectory(String[] nestedDirectories) {
+        String folder = "";
+        boolean success = true;
+        for (String nestedDir : nestedDirectories) {
+            folder = folder + nestedDir + File.separator;
+            File outFolder = new File(folder);
+            if (!outFolder.exists()) {
+                success = outFolder.mkdir();
+            }
+            if (!success)
+                throw new AssertionError("Unable to create output directory" + outFolder.getAbsolutePath());
+        }
+        return folder;
+    }
+
+    public static String createDirectory(String fullDirectoryPath) {
+        String[] nestedDirectories = fullDirectoryPath.split(Pattern.quote(File.separator));
+        return createDirectory(nestedDirectories);
+    }
 
     /**
      * Recursively computes combinations of numbers in an array, taken {r} at a time. Each combination is added into the
