@@ -160,6 +160,7 @@ public class NTBEA {
                     .sorted(Comparator.comparingDouble(cmp::applyAsDouble))
                     .collect(Collectors.toList());
             Collections.reverse(agentsInOrder);
+            params.logFile = "RRT_" + params.logFile;
             for (int index : agentsInOrder) {
                 if (params.verbose)
                     System.out.printf("Player %d %s\tWin Rate: %.3f +/- %.3f\tMean Ordinal: %.2f +/- %.2f%n", index, Arrays.toString(winnerSettings.get(index)),
@@ -168,8 +169,10 @@ public class NTBEA {
                 Pair<Double, Double> resultToReport = new Pair<>(tournament.getWinRate(index), tournament.getWinStdErr(index));
                 if (params.evalMethod.equals("Ordinal"))
                     resultToReport = new Pair<>(tournament.getOrdinalRank(index), tournament.getOrdinalStdErr(index));
-                logSummary(new Pair<>(resultToReport, winnerSettings.get(index)), params.searchSpace, "RRT_" + params.logFile);
+
+                logSummary(new Pair<>(resultToReport, winnerSettings.get(index)), params);
             }
+            params.logFile = params.logFile.substring(4);
             bestResult = params.evalMethod.equals("Ordinal") ?
                     new Pair<>(new Pair<>(tournament.getOrdinalRank(agentsInOrder.get(0)), tournament.getOrdinalStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0))) :
                     new Pair<>(new Pair<>(tournament.getWinRate(agentsInOrder.get(0)), tournament.getWinStdErr(agentsInOrder.get(0))), winnerSettings.get(agentsInOrder.get(0)));
@@ -308,26 +311,27 @@ public class NTBEA {
 
     protected void logDetailsOfRun(Pair<Pair<Double, Double>, int[]> data) {
         if (!params.logFile.isEmpty()) {
-            logSummary(data, params.searchSpace, params.logFile);
+            logSummary(data, params);
         }
     }
 
-    private static void logSummary(Pair<Pair<Double, Double>, int[]> data, ITPSearchSpace searchSpace, String logFile) {
+    private static void logSummary(Pair<Pair<Double, Double>, int[]> data, NTBEAParameters params) {
         try {
-            File log = new File(logFile);
+            Utils.createDirectory(params.destDir);
+            File log = new File(params.destDir.isEmpty() ? params.logFile : params.destDir + File.separator + params.logFile);
             boolean fileExists = log.exists();
             FileWriter writer = new FileWriter(log, true);
             // if logFile does not yet exist, write a header line first
             if (!fileExists) {
                 List<String> headers = new ArrayList<>();
                 headers.addAll(Arrays.asList("estimated value", "standard error"));
-                headers.addAll(searchSpace.getSearchKeys());
+                headers.addAll(params.searchSpace.getSearchKeys());
                 writer.write(String.join("\t", headers) + "\n");
             }
             // then write the output
             String firstPart = String.format("%.4g\t%.4g\t", data.a.a, data.a.b);
             String values = IntStream.range(0, data.b.length).mapToObj(i -> new Pair<>(i, data.b[i]))
-                    .map(p -> valueToString(p.a, p.b, searchSpace))
+                    .map(p -> valueToString(p.a, p.b, params.searchSpace))
                     .collect(joining("\t"));
             writer.write(firstPart + values + "\n");
             writer.flush();
@@ -336,7 +340,7 @@ public class NTBEA {
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println(e.getMessage() + " : Error accessing file " + logFile);
+            System.out.println(e.getMessage() + " : Error accessing file " + params.logFile);
         }
     }
 
