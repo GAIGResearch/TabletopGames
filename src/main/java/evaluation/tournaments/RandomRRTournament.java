@@ -40,7 +40,7 @@ public class RandomRRTournament extends RoundRobinTournament {
      * @param ignored - this input is ignored
      */
     @Override
-    public void createAndRunMatchUp(LinkedList<Integer> ignored) {
+    public void createAndRunMatchUp(List<Integer> ignored) {
         for (int i = 0; i < totalMatchups; i++) {
             List<Integer> matchup = new ArrayList<>(playersPerGame);
             for (int j = 0; j < playersPerGame; j++)
