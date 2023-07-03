@@ -16,8 +16,7 @@ import players.human.ActionController;
 import players.rl.RLPlayer.RLType;
 import players.rl.RLTrainingParams.Solver;
 import players.rl.RLTrainingParams.WriteSegmentType;
-import players.rl.resources.featureVectors.TicTacToeDim2StateVector;
-import players.rl.resources.featureVectors.TicTacToeDim3StateVector;
+import players.rl.resources.featureVectors.*;
 
 class RLTrainer {
 
@@ -78,8 +77,7 @@ class RLTrainer {
             players.add(new RLPlayer(playerParams, qwds, this));
 
         this.dp = new DataProcessor(qwds, params.gameName);
-        dp.initSegmentFile(getNextSegmentThreshold(0), false);
-        dp.updateAndWriteFile(0);
+        dp.initAndWriteSegmentFile(getNextSegmentThreshold(0));
 
         System.out.println("Starting Training!");
 
@@ -91,7 +89,7 @@ class RLTrainer {
                     useGUI ? new ActionController() : null, turnPause);
             if (shouldWriteSegment(i)) {
                 dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
-                dp.initSegmentFile(getNextSegmentThreshold(i), false);
+                dp.initAndWriteSegmentFile(getNextSegmentThreshold(i));
                 gamesPlayedSinceLastWrite = 0;
             }
             if (shouldUpdate(i)) {
@@ -106,8 +104,7 @@ class RLTrainer {
                 System.out.print("\r" + progress + "%");
         }
 
-        dp.initSegmentFile(params.nGames, true);
-        dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
+        dp.initAndWriteSegmentFile(params.nGames);
         System.out.println("\tTraining complete!");
     }
 
@@ -161,18 +158,20 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams("TicTacToe", 2, 100000);
+        RLTrainingParams params = new RLTrainingParams("TicTacToe", 2, 10000000);
         params.writeSegmentType = WriteSegmentType.LOGARITHMIC;
         params.writeSegmentFactor = 2;
-        params.writeSegmentMinIterations = 1024;
-        params.updateXIterations = 1024;
+        params.writeSegmentMinIterations = 16384;
+        // params.updateXIterations = 10000;
         params.alpha = 0.0001f;
         params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
-        params.overwriteInfile = false;
 
-        RLParams playerParams = new RLParams(new TicTacToeDim3StateVector(), RLType.LinearApprox);
+        // long seed = System.currentTimeMillis();
+        long seed = 1688424067512l;
+
+        RLParams playerParams = new RLParams(new TicTacToeDim3StateVector(), RLType.LinearApprox, seed);
         playerParams.epsilon = 0.375f;
 
         String infilePath = null;

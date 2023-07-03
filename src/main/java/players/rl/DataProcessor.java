@@ -67,6 +67,8 @@ class DataProcessor {
     private File outfile = null;
     private ObjectNode metadata = null;
 
+    private int nGamesPlayedFromInfile;
+
     DataProcessor(QWeightsDataStructure qwds, String gameName) {
         this.qwds = qwds;
         this.gameName = gameName;
@@ -74,21 +76,15 @@ class DataProcessor {
         initMetadata();
     }
 
-    private void updateFinalOutfile(int nGames) {
-        if (qwds.trainingParams.overwriteInfile && qwds.getInfilePath() != null)
-            outfile = new File(qwds.getInfilePath());
-        else
-            updateSegmentOutfile(nGames);
-    }
-
     private void updateSegmentOutfile(int nGames) {
-        Path outfilePath = Paths.get(qwds.getFolderPath(gameName), dateTime + "_n=" + nGames + ".json");
+        int totalNGames = nGamesPlayedFromInfile + nGames;
+        Path outfilePath = Paths.get(qwds.getFolderPath(gameName), dateTime + "_n=" + totalNGames + ".json");
         outfile = outfilePath.toFile();
     }
 
     private void initMetadata() {
         ObjectNode existingMetadata = readFileMetadata(qwds.getInfilePath());
-        int existingNGames = existingMetadata == null ? 0 : existingMetadata.get(Field.NGamesTotal.name()).asInt();
+        nGamesPlayedFromInfile = existingMetadata == null ? 0 : existingMetadata.get(Field.NGamesTotal.name()).asInt();
 
         ObjectMapper om = new ObjectMapper();
 
@@ -113,7 +109,7 @@ class DataProcessor {
                 .put(Field.Heuristic.name(), qwds.trainingParams.heuristic.getClass().getCanonicalName())
                 .put(Field.QWeightsDataStructure.name(), qwds.getClass().getCanonicalName())
                 .put(Field.RLFeatureVector.name(), qwds.playerParams.features.getClass().getCanonicalName())
-                .put(Field.NGamesTotal.name(), existingNGames)
+                .put(Field.NGamesTotal.name(), nGamesPlayedFromInfile)
                 .put(Field.NGamesWithTheseSettings.name(), 0);
         // TODO make separate function
         if (existingMetadata != null) {
@@ -133,7 +129,8 @@ class DataProcessor {
                 // Merge settings
                 String fn = Field.NGamesWithTheseSettings.name();
                 metadata.put(fn, metadata.get(fn).asInt() + existingMetadata.get(fn).asInt());
-                existingMetadata = (ObjectNode) existingMetadata.get(Field.ContinuedFrom.name());
+                JsonNode _existing = existingMetadata.get(Field.ContinuedFrom.name());
+                existingMetadata = _existing.isNull() ? null : (ObjectNode) _existing;
             }
             // Add existing to ContinuedFrom
         }
@@ -153,11 +150,7 @@ class DataProcessor {
         return null;
     }
 
-    void initSegmentFile(int totalNGames, boolean isFinalFile) {
-        if (isFinalFile)
-            updateFinalOutfile(totalNGames);
-        else
-            updateSegmentOutfile(totalNGames);
+    void initAndWriteSegmentFile(int totalNGames) {
         updateSegmentOutfile(totalNGames);
     }
 

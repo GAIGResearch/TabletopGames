@@ -26,7 +26,6 @@ public class RLTrainingParams {
     public double alpha = 0.1f;
     public double gamma = 0.1f;
     public IStateHeuristic heuristic = new WinOnlyHeuristic();
-    public boolean overwriteInfile = false;
 
     public final String gameName;
     public final int nGames;
