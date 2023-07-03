@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -23,6 +24,8 @@ class DataProcessor {
     static enum Field {
         // The seed used
         Seed,
+        // The type of reinforcement learning done
+        Type,
         // The alpha value used [0, 1]
         Alpha,
         // The gamma value used [0, 1]
@@ -33,8 +36,6 @@ class DataProcessor {
         Solver,
         // The class name of the used IStateHeuristic
         Heuristic,
-        // The type of reinforcement learning done
-        Type,
         // The class name of the used players.rl.QWeightsDataStructure
         QWeightsDataStructure,
         // The class name of the used players.rl.RLFeatureVector
@@ -62,6 +63,7 @@ class DataProcessor {
 
     private final String gameName;
 
+    private String dateTime = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date());
     private File outfile = null;
     private ObjectNode metadata = null;
 
@@ -69,25 +71,23 @@ class DataProcessor {
         this.qwds = qwds;
         this.gameName = gameName;
         createMissingFoldersAndFiles();
-        initOutfile();
         initMetadata();
     }
 
-    private void initOutfile() {
-        String outfilePath;
-        if (qwds.trainingParams.overwriteInfile && qwds.params.getInfilePath() != null)
-            outfilePath = qwds.params.getInfilePath();
-        else {
-            Date currentDate = new Date();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-            String formattedDate = dateFormat.format(currentDate);
-            outfilePath = Paths.get(qwds.getFolderPath(gameName), formattedDate + ".json").toString();
-        }
-        outfile = new File(outfilePath);
+    private void updateFinalOutfile(int nGames) {
+        if (qwds.trainingParams.overwriteInfile && qwds.getInfilePath() != null)
+            outfile = new File(qwds.getInfilePath());
+        else
+            updateSegmentOutfile(nGames);
+    }
+
+    private void updateSegmentOutfile(int nGames) {
+        Path outfilePath = Paths.get(qwds.getFolderPath(gameName), dateTime + "_n=" + nGames + ".json");
+        outfile = outfilePath.toFile();
     }
 
     private void initMetadata() {
-        ObjectNode existingMetadata = readFileMetadata(qwds.params.getInfilePath());
+        ObjectNode existingMetadata = readFileMetadata(qwds.getInfilePath());
         int existingNGames = existingMetadata == null ? 0 : existingMetadata.get(Field.NGamesTotal.name()).asInt();
 
         ObjectMapper om = new ObjectMapper();
@@ -153,12 +153,16 @@ class DataProcessor {
         return null;
     }
 
-    void writeMetadata() {
-        writeQWeightsToFile();
+    void initSegmentFile(int totalNGames, boolean isFinalFile) {
+        if (isFinalFile)
+            updateFinalOutfile(totalNGames);
+        else
+            updateSegmentOutfile(totalNGames);
+        updateSegmentOutfile(totalNGames);
     }
 
-    void writeData(int nGames) {
-        addGames(nGames);
+    void updateAndWriteFile(int nGamesToAdd) {
+        addGames(nGamesToAdd);
         writeQWeightsToFile();
     }
 

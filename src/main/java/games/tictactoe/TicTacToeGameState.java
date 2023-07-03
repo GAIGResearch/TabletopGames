@@ -16,7 +16,7 @@ import java.util.Objects;
 
 public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Token> {
 
-    GridBoard<Token> gridBoard;
+    public GridBoard<Token> gridBoard;
 
     public TicTacToeGameState(AbstractParameters gameParameters, int nPlayers) {
         super(gameParameters, nPlayers);

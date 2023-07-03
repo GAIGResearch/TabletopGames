@@ -2,13 +2,15 @@ package players.rl;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import players.rl.RLPlayer.RLType;
 
 public class QWDSLinearApprox extends QWeightsDataStructure {
 
     private double[] qWeights;
+    private String[] featureNames;
 
-    public QWDSLinearApprox(QWDSParams qwdsParams) {
-        super(qwdsParams);
+    public QWDSLinearApprox(String infileNameOrAbsPath) {
+        super(infileNameOrAbsPath);
     }
 
     @Override
@@ -22,35 +24,36 @@ public class QWDSLinearApprox extends QWeightsDataStructure {
 
     @Override
     protected void initQWeightsEmpty() {
-        // if (trainer != null)
-        // qWeights = trainer.qWeights;
-        // else
-        qWeights = new double[playerParams.features.names().length];
+        featureNames = playerParams.features.names();
+        qWeights = new double[featureNames.length];
     }
 
     @Override
     protected void parseQWeights(StateMap stateMap) {
-        // TODO
-        // qWeights =
-        // Arrays.stream(qWeightStrings).mapToDouble(Double::parseDouble).toArray();
+        for (int i = 0; i < qWeights.length; i++)
+            qWeights[i] = stateMap.get(featureNames[i]);
     }
 
     @Override
     protected StateMap qWeightsToStateMap() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'qWeightsToStateMap'");
+        return new StateMap() {
+            {
+                for (int i = 0; i < qWeights.length; i++)
+                    put(featureNames[i], qWeights[i]);
+            }
+        };
     }
 
     @Override
-    protected void add(RLPlayer player, AbstractGameState state, AbstractAction action, double q) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'add'");
+    protected void add(RLPlayer player, AbstractGameState state, AbstractAction action, double delta) {
+        double[] featureVector = playerParams.features.featureVector(action, state, player.getPlayerID());
+        for (int i = 0; i < featureVector.length; i++)
+            qWeights[i] += delta * featureVector[i];
     }
 
     @Override
-    protected void qLearning(RLPlayer player, TurnSAR t0, TurnSAR t1) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'qLearning'");
+    public RLType getType() {
+        return RLType.LinearApprox;
     }
 
 }

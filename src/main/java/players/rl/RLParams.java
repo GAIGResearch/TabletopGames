@@ -14,8 +14,11 @@ public class RLParams extends PlayerParameters {
 
     // Mandatory and automatic params
     public final RLFeatureVector features;
-    public final RLType type;
+    public RLType type;
     public final TabularParams tabular;
+
+    // Only used for instance() method
+    public String inFileNameOrAbsPath = null;
 
     // Tunable parameters
     public double epsilon = 0.25f;
@@ -38,7 +41,9 @@ public class RLParams extends PlayerParameters {
 
     @Override
     public RLPlayer instantiate() {
-        return new RLPlayer(this);
+        if (inFileNameOrAbsPath == null)
+            throw new IllegalArgumentException("The variable inFileNameOrAbsPath must be set for instantiation");
+        return new RLPlayer(this, inFileNameOrAbsPath);
     }
 
     @Override

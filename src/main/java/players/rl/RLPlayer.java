@@ -32,25 +32,28 @@ public class RLPlayer extends AbstractPlayer {
 
     private RLTrainer trainer;
 
-    public RLPlayer(RLParams params) {
-        this(params, (QWeightsDataStructure) null);
-    }
-
-    public RLPlayer(RLParams params, QWeightsDataStructure qwds) {
+    public RLPlayer(RLParams params, String inFileNameOrAbsPath) {
+        if (inFileNameOrAbsPath == null)
+            throw new IllegalArgumentException("Must provide file name or absolute path for input file");
         this.params = params;
-        this.qWeights = qwds != null ? qwds : instantiateQWeights();
+        this.qWeights = instantiateQWeights(inFileNameOrAbsPath);
         this.qWeights.setPlayerParams(params);
     }
 
+    // Not public since only RLTrainer should be allowed (and need) to call this.
+    // All non-training instances should use other constructor
     RLPlayer(RLParams params, QWeightsDataStructure qwds, RLTrainer trainer) {
-        this(params, qwds);
+        this.params = params;
+        this.params.type = qwds.getType();
+        this.qWeights = qwds;
+        this.qWeights.setPlayerParams(params);
         this.trainer = trainer;
         this.qWeights.setTrainingParams(trainer.params);
     }
 
-    QWeightsDataStructure instantiateQWeights() {
+    private QWeightsDataStructure instantiateQWeights(String inFileNameOrAbsPath) {
         try {
-            return params.type.qWeightClass.getDeclaredConstructor(String.class).newInstance((String) null);
+            return params.type.qWeightClass.getDeclaredConstructor(String.class).newInstance(inFileNameOrAbsPath);
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
                 | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
@@ -88,7 +91,7 @@ public class RLPlayer extends AbstractPlayer {
     private AbstractAction randArgmaxEvaluation(AbstractGameState gameState, List<AbstractAction> possibleActions) {
         // Choose an action that maximizes the Q-function
         List<AbstractAction> maximizingActions = new LinkedList<AbstractAction>();
-        double qMax = -Double.MAX_VALUE;
+        double qMax = Double.NEGATIVE_INFINITY;
         for (AbstractAction a : possibleActions) {
             // Apply the action to the state
             double q = qWeights.evaluateQ(this, gameState, a);

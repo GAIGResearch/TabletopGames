@@ -19,8 +19,13 @@ import players.rl.RLFeatureVector;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
 import players.rl.RLPlayer.RLType;
-import players.rl.QWDSParams;
+import players.rl.resources.featureVectors.TicTacToeDim1StateVector;
+import players.rl.resources.featureVectors.TicTacToeDim2StateVector;
+import players.rl.resources.featureVectors.TicTacToeDim3StateVector;
+import players.rl.resources.featureVectors.TicTacToeRLStateVector;
+import players.rl.QWDSLinearApprox;
 import players.rl.QWDSTabular;
+import players.rl.QWeightsDataStructure;
 import utilities.Pair;
 import utilities.Utils;
 
@@ -933,20 +938,20 @@ public class Game {
     public static void main(String[] args) {
         String gameType = Utils.getArg(args, "game", "TicTacToe");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int turnPause = Utils.getArg(args, "turnPause", 500);
+        int turnPause = Utils.getArg(args, "turnPause", 1000);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        RLFeatureVector features1 = new TicTacToeStateVector();
-        RLParams p1 = new RLParams(features1, RLType.Tabular);
-        QWDSParams qwdsP = new QWDSParams(
-                "2023-06-29_19-17-07.json");
-        qwdsP.useSettingsFromInfile = true;
-        QWDSTabular qwds1 = new QWDSTabular(qwdsP);
-        players.add(new HumanGUIPlayer(ac));
-        players.add(new RLPlayer(p1, qwds1));
+        RLFeatureVector features1 = new TicTacToeDim3StateVector();
+        RLParams p1 = new RLParams(features1, RLType.LinearApprox);
+        // players.add(new RLPlayer(p1, "2023-07-03_23-41-07_n=100000.json"));
+        RLFeatureVector features2 = new TicTacToeDim1StateVector();
+        RLParams p2 = new RLParams(features2, RLType.Tabular);
+        players.add(new RLPlayer(p2, "2023-06-29_19-17-07.json"));
+        players.add(new RLPlayer(p1, "2023-07-03_23-41-07_n=100000.json"));
+        // players.add(new HumanGUIPlayer(ac));
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();
 //        players.add(new MCTSPlayer(params1));

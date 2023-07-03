@@ -1,26 +1,26 @@
 {
   "Metadata" : {
-    "Seed" : 1688066521764,
-    "Type" : "Tabular",
-    "Alpha" : 0.125,
-    "Gamma" : 0.875,
-    "Epsilon" : 0.375,
-    "Solver" : "Q_LEARNING",
-    "Heuristic" : "players.heuristics.WinOnlyHeuristic",
-    "QWeightsDataStructure" : "players.rl.QWDSTabular",
-    "RLFeatureVector" : "games.tictactoe.TicTacToeStateVector",
-    "NGamesTotal" : 10000000,
-    "NGamesWithTheseSettings" : 1800000,
-    "ContinuedFrom" : {
-      "Seed" : 1688062627560,
-      "NGamesTotal" : 8200000,
-      "NGamesWithTheseSettings" : 7200000,
-      "ContinuedFrom" : {
-        "Seed" : 1688062048720,
-        "Gamma" : 0.8751999735832214,
-        "NGamesTotal" : 1000000,
-        "NGamesWithTheseSettings" : 1000000,
-        "ContinuedFrom" : null
+    "Seed": 1688066521764,
+    "Type": "Tabular",
+    "Alpha": 0.125,
+    "Gamma": 0.875,
+    "Epsilon": 0.375,
+    "Solver": "Q_LEARNING",
+    "Heuristic": "players.heuristics.WinOnlyHeuristic",
+    "QWeightsDataStructure": "players.rl.QWDSTabular",
+    "RLFeatureVector": "players.rl.resources.featureVectors.TicTacToeDim1StateVector",
+    "NGamesTotal": 10000000,
+    "NGamesWithTheseSettings": 1800000,
+    "ContinuedFrom": {
+      "Seed": 1688062627560,
+      "NGamesTotal": 8200000,
+      "NGamesWithTheseSettings": 7200000,
+      "ContinuedFrom": {
+        "Seed": 1688062048720,
+        "Gamma": 0.8751999735832214,
+        "NGamesTotal": 1000000,
+        "NGamesWithTheseSettings": 1000000,
+        "ContinuedFrom": null
       }
     }
   },

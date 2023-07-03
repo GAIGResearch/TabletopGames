@@ -11,11 +11,13 @@ import core.Game;
 import core.actions.AbstractAction;
 import evaluation.listeners.IGameListener;
 import games.GameType;
-import games.tictactoe.TicTacToeStateVector;
 import players.heuristics.WinOnlyHeuristic;
 import players.human.ActionController;
 import players.rl.RLPlayer.RLType;
 import players.rl.RLTrainingParams.Solver;
+import players.rl.RLTrainingParams.WriteSegmentType;
+import players.rl.resources.featureVectors.TicTacToeDim2StateVector;
+import players.rl.resources.featureVectors.TicTacToeDim3StateVector;
 
 class RLTrainer {
 
@@ -23,16 +25,13 @@ class RLTrainer {
     final RLParams playerParams;
     private Map<Integer, List<TurnSAR>> playerTurns;
 
-    private String gameName;
     private QWeightsDataStructure qwds;
     private DataProcessor dp = null;
 
-    private RLTrainer(RLTrainingParams params, RLParams playerParams, QWDSParams qwdsParams) {
-        // TODO set game name and more through RLTrainingParams
-        this.gameName = "TicTacToe";
+    private RLTrainer(RLTrainingParams params, RLParams playerParams, String infileNameOrAbsPath) {
         this.params = params;
         this.playerParams = playerParams;
-        this.qwds = new QWDSTabular(qwdsParams);
+        this.qwds = new QWDSLinearApprox(infileNameOrAbsPath);
         resetTrainer();
         prematurelySetupQWDS();
     }
@@ -43,7 +42,7 @@ class RLTrainer {
         // that call, and are therefore calling these functions manually from here
         qwds.setPlayerParams(playerParams);
         qwds.setTrainingParams(params);
-        qwds.initialize(gameName);
+        qwds.initialize(params.gameName);
     }
 
     void addTurn(RLPlayer player, AbstractGameState state, AbstractAction action,
@@ -52,7 +51,7 @@ class RLTrainer {
         double reward = params.heuristic.evaluateState(state, playerId);
 
         // Add the turn to playerTurns
-        TurnSAR turn = new TurnSAR(state, action, possibleActions, reward);
+        TurnSAR turn = new TurnSAR(state.copy(playerId), action, possibleActions, reward);
         if (!playerTurns.containsKey(playerId))
             playerTurns.put(playerId, new ArrayList<TurnSAR>());
         playerTurns.get(playerId).add(turn);
@@ -69,41 +68,90 @@ class RLTrainer {
     }
 
     private void runTraining() {
-        // TODO add params to method (nIterations, nPlayers, game, etc.)
-
         boolean useGUI = false;
         int turnPause = 0;
         String gameParams = null;
 
         ArrayList<AbstractPlayer> players = new ArrayList<>();
 
-        players.add(new RLPlayer(playerParams, qwds, this));
-        players.add(new RLPlayer(playerParams, qwds, this));
+        for (int i = 0; i < params.nPlayers; i++)
+            players.add(new RLPlayer(playerParams, qwds, this));
 
-        int nGames = params.nGames;
+        this.dp = new DataProcessor(qwds, params.gameName);
+        dp.initSegmentFile(getNextSegmentThreshold(0), false);
+        dp.updateAndWriteFile(0);
 
-        int nGamesSinceLastWrite = 0;
+        System.out.println("Starting Training!");
 
-        this.dp = new DataProcessor(qwds, gameName);
-        dp.writeMetadata();
-
-        System.out.println("Starting training...");
-        for (int i = 1; i <= nGames; i++) {
-            runGame(GameType.valueOf(gameName), gameParams, players, System.currentTimeMillis(), false, null,
+        int gamesPlayedSinceLastWrite = 0;
+        int progress = -1;
+        for (int i = 0; i < params.nGames; i++) {
+            runGame(GameType.valueOf(params.gameName), gameParams, players, System.currentTimeMillis(), false,
+                    null,
                     useGUI ? new ActionController() : null, turnPause);
-            nGamesSinceLastWrite++;
-            int splitSize = nGames / 100;
-            if (splitSize != 0 && i % splitSize == 0) {
-                System.out.println((i / splitSize) + "%");
-                // Every 10%, write progress to file
-                if ((i / splitSize) % 10 == 0) {
-                    dp.writeData(nGamesSinceLastWrite);
-                    nGamesSinceLastWrite = 0;
-                }
+            if (shouldWriteSegment(i)) {
+                dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
+                dp.initSegmentFile(getNextSegmentThreshold(i), false);
+                gamesPlayedSinceLastWrite = 0;
             }
+            if (shouldUpdate(i)) {
+                dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
+                gamesPlayedSinceLastWrite = 0;
+            }
+            gamesPlayedSinceLastWrite++;
+            // Print progress
+            int _progress = progress;
+            progress = (100 * (i + 1)) / params.nGames;
+            if (progress != _progress)
+                System.out.print("\r" + progress + "%");
         }
-        dp.writeData(nGamesSinceLastWrite);
-        System.out.print("Training complete!");
+
+        dp.initSegmentFile(params.nGames, true);
+        dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
+        System.out.println("\tTraining complete!");
+    }
+
+    private int getNextSegmentThreshold(int n) {
+        final int factorThreshold = Math.max(params.writeSegmentMinIterations - 1, n);
+        int factor;
+        switch (params.writeSegmentType) {
+            case LINEAR:
+                factor = 0;
+                while (factor <= factorThreshold)
+                    factor += params.writeSegmentFactor;
+                return Math.min(factor, params.nGames);
+            case LOGARITHMIC:
+                factor = 1;
+                while (factor <= factorThreshold)
+                    factor *= params.writeSegmentFactor;
+                return Math.min(factor, params.nGames);
+            case NONE:
+                return params.nGames;
+            default:
+                throw new IllegalArgumentException(
+                        "Write Segment Type has illegal value: " + params.writeSegmentType.toString());
+        }
+    }
+
+    private boolean shouldUpdate(int iterations) {
+        if (iterations == 0)
+            return false;
+        return iterations % params.updateXIterations == 0;
+            }
+
+            private boolean shouldWriteSegment(int iterations) {
+                if (iterations < params.writeSegmentMinIterations)
+                    return false;
+                switch (params.writeSegmentType) {
+                    case LINEAR:
+                        return iterations % params.writeSegmentFactor == 0;
+                    case LOGARITHMIC:
+                        double log = Math.log(iterations) / Math.log(params.writeSegmentFactor);
+                        return Math.abs(log - Math.round(log)) < 1e-10;
+                    case NONE:
+                    default:
+                        return false;
+                }
     }
 
     private void runGame(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed,
@@ -113,20 +161,23 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams(1800000);
-        params.alpha = 0.125f;
+        RLTrainingParams params = new RLTrainingParams("TicTacToe", 2, 100000);
+        params.writeSegmentType = WriteSegmentType.LOGARITHMIC;
+        params.writeSegmentFactor = 2;
+        params.writeSegmentMinIterations = 1024;
+        params.updateXIterations = 1024;
+        params.alpha = 0.0001f;
         params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
         params.overwriteInfile = false;
 
-        RLParams playerParams = new RLParams(new TicTacToeStateVector(), RLType.Tabular);
+        RLParams playerParams = new RLParams(new TicTacToeDim3StateVector(), RLType.LinearApprox);
         playerParams.epsilon = 0.375f;
 
-        QWDSParams qwdsParams = new QWDSParams("2023-06-29_19-17-07.json");
-        qwdsParams.useSettingsFromInfile = false;
+        String infilePath = null;
 
-        RLTrainer trainer = new RLTrainer(params, playerParams, qwdsParams);
+        RLTrainer trainer = new RLTrainer(params, playerParams, infilePath);
         trainer.runTraining();
     }
 
