@@ -9,6 +9,7 @@ import games.monopolydeal.cards.MonopolyDealCard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -27,6 +28,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
 
     // The extended sequence usually keeps record of the player who played this action, to be able to inform the game whose turn it is to make decisions
     final int playerID;
+    boolean executed;
 
     public AddToBoard(int playerID) {
         this.playerID = playerID;
@@ -49,7 +51,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
                 .filter(MonopolyDealCard::isPropertyCard)
                 .map(card-> new AddProperty(card,playerID))
                 .collect(toList());
-        availableActions.addAll(MDGS.getPlayerHand(playerID).stream().filter(MonopolyDealCard::isPropertyCard).map(card ->new AddMoney(card,playerID)).collect(toList()));
+        availableActions.addAll(MDGS.getPlayerHand(playerID).stream().filter(((Predicate<? super MonopolyDealCard>)MonopolyDealCard::isPropertyCard).negate()).map(card ->new AddMoney(card,playerID)).collect(toList()));
         return availableActions;
     }
 
@@ -79,7 +81,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public void registerActionTaken(AbstractGameState state, AbstractAction action) {
         // TODO: Process the action that was taken.
-        int a =0;
+        executed = true;
     }
 
     /**
@@ -89,8 +91,7 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public boolean executionComplete(AbstractGameState state) {
         // TODO is execution of this sequence of actions complete?
-        int a=1;
-        return true;
+        return executed;
     }
 
     /**
@@ -127,12 +128,12 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AddToBoard that = (AddToBoard) o;
-        return playerID == that.playerID;
+        return playerID == that.playerID && executed == that.executed;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(playerID);
+        return Objects.hash(playerID, executed);
     }
 
     @Override

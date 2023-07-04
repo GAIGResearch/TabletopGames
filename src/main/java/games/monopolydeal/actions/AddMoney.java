@@ -73,7 +73,7 @@ public class AddMoney extends AbstractAction {
 
     @Override
     public String toString() {
-        return "Add " + card.toString() + " to Bank of player " + player;
+        return "Add " + card.toString() + " to Bank";
     }
 
     /**

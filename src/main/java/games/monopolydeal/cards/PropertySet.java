@@ -3,6 +3,8 @@ package games.monopolydeal.cards;
 import core.CoreConstants;
 import core.components.Deck;
 
+import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
+
 public class PropertySet extends Deck<MonopolyDealCard> {
     SetType type;
     public boolean isComplete;
@@ -17,18 +19,19 @@ public class PropertySet extends Deck<MonopolyDealCard> {
         hasHouse = false;
         hasHotel = false;
     }
-
     // Copy constructor???
     public PropertySet copy(){
-        PropertySet retValue = (PropertySet) super.copy();
-
-        retValue.type = type;
-        retValue.isComplete = isComplete;
-        retValue.hasHouse = hasHouse;
-        retValue.hasHotel = hasHotel;
-        retValue.hasWild = hasWild;
-
-        return retValue;
+        return propertySetBuilder(super.copy());
+    }
+    public PropertySet propertySetBuilder(Deck<MonopolyDealCard> cardDeck){
+        // Iterate through deck -> find property
+        MonopolyDealCard card = cardDeck.get(0);
+        SetType sType = card.getUseAs();
+        PropertySet newSet = new PropertySet(sType.toString(),VISIBLE_TO_ALL,sType);
+        if(cardDeck.getSize()>sType.setSize){
+            newSet.isComplete = true;
+        }
+        return newSet;
     }
 
     public SetType getSetType(){return type;}
@@ -59,5 +62,10 @@ public class PropertySet extends Deck<MonopolyDealCard> {
             if(wildCount==1)hasWild = false;
         }
         return super.remove(c);
+    }
+
+    @Override
+    public String toString() {
+        return type.toString();
     }
 }

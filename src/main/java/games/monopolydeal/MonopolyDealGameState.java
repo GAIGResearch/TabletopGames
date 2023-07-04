@@ -11,6 +11,7 @@ import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 import games.monopolydeal.cards.PropertySet;
 import games.monopolydeal.cards.SetType;
+import scala.sys.Prop;
 
 import static core.CoreConstants.VisibilityMode.HIDDEN_TO_ALL;
 import static core.CoreConstants.VisibilityMode.VISIBLE_TO_ALL;
@@ -205,7 +206,7 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     // add property
     public void addProperty(int playerID, MonopolyDealCard card){
-        SetType SType = getSetType(card);
+        SetType SType = card.getUseAs();
         int indx = getSetIndx(playerID,SType);
         if(indx != 99){
             playerPropertySets[playerID].get(indx).add(card);
@@ -215,45 +216,7 @@ public class MonopolyDealGameState extends AbstractGameState {
             pSet.add(card);
             playerPropertySets[playerID].add(pSet);
         }
-    }
-    public SetType getSetType(MonopolyDealCard card){
-        SetType sType;
-        switch (card.cardType()){
-            case BrownProperty:
-                sType = SetType.Brown;
-                break;
-            case BlueProperty:
-                sType = SetType.Blue;
-                break;
-            case GreenProperty:
-                sType = SetType.Green;
-                break;
-            case LightBlueProperty:
-                sType = SetType.LightBlue;
-                break;
-            case OrangeProperty:
-                sType = SetType.Orange;
-                break;
-            case PinkProperty:
-                sType = SetType.Pink;
-                break;
-            case RailRoadProperty:
-                sType = SetType.RailRoad;
-                break;
-            case RedProperty:
-                sType = SetType.Red;
-                break;
-            case UtilityProperty:
-                sType = SetType.Utility;
-                break;
-            case YellowProperty:
-                sType = SetType.Yellow;
-                break;
-            default:
-                sType = SetType.UNDEFINED;
-                break;
-        }
-        return sType;
+        playerHands[playerID].remove(card);
     }
     public int getSetIndx(int playerID, SetType type){
         int setIndx = 99;
