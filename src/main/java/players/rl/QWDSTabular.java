@@ -24,7 +24,7 @@ public class QWDSTabular extends QWeightsDataStructure {
     }
 
     @Override
-    protected void add(RLPlayer player, AbstractGameState state, AbstractAction action, double delta) {
+    protected void applyGradient(RLPlayer player, AbstractGameState state, AbstractAction action, double delta) {
         double q = evaluateQ(player, state, action);
         qWeights.put(getStateId(player, state, action), q + delta);
     }

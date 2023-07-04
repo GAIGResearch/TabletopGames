@@ -9,8 +9,10 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
+import core.interfaces.IActionFeatureVector;
 import evaluation.listeners.IGameListener;
 import games.GameType;
+import games.dotsboxes.DBStateFeaturesReduced;
 import players.heuristics.WinOnlyHeuristic;
 import players.human.ActionController;
 import players.rl.RLPlayer.RLType;
@@ -78,6 +80,7 @@ class RLTrainer {
 
         this.dp = new DataProcessor(qwds, params.gameName);
         dp.initNextSegmentFile(getNextSegmentThreshold(0));
+        dp.updateAndWriteFile(0);
 
         System.out.println("Starting Training!");
 
@@ -109,25 +112,15 @@ class RLTrainer {
     }
 
     private int getNextSegmentThreshold(int n) {
-        final int factorThreshold = Math.max(params.writeSegmentMinIterations - 1, n);
-        int factor;
-        switch (params.writeSegmentType) {
-            case LINEAR:
-                factor = 0;
-                while (factor <= factorThreshold)
-                    factor += params.writeSegmentFactor;
-                return Math.min(factor, params.nGames);
-            case LOGARITHMIC:
-                factor = 1;
-                while (factor <= factorThreshold)
-                    factor *= params.writeSegmentFactor;
-                return Math.min(factor, params.nGames);
-            case NONE:
-                return params.nGames;
-            default:
-                throw new IllegalArgumentException(
-                        "Write Segment Type has illegal value: " + params.writeSegmentType.toString());
-        }
+        WriteSegmentType type = params.writeSegmentType;
+        if (type == WriteSegmentType.NONE || params.writeSegmentFactor <= 0)
+            return params.nGames;
+
+        int nextSegmentNIterations = Math.max(type.n0, params.writeSegmentMinIterations);
+        while (nextSegmentNIterations <= n)
+            nextSegmentNIterations = type.operator.operate(nextSegmentNIterations, params.writeSegmentFactor);
+
+        return Math.min(nextSegmentNIterations, params.nGames);
     }
 
     private boolean shouldUpdate(int iterations) {
@@ -158,23 +151,26 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams("TicTacToe", 2, 1611392);
-        params.writeSegmentType = WriteSegmentType.NONE;
-        // params.writeSegmentFactor = 2;
-        // params.writeSegmentMinIterations = 1024;
-        params.updateXIterations = 16113;
-        params.alpha = 0.0001f;
+        RLTrainingParams params = new RLTrainingParams("TicTacToe", 2, 1000000);
+        params.writeSegmentType = WriteSegmentType.LOGARITHMIC;
+        params.writeSegmentFactor = 10;
+        params.writeSegmentMinIterations = 1000;
+        params.updateXIterations = 1000;
+        params.alpha = 0.001f;
         params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
+        params.outfilePrefix = "TTT";
 
-        // long seed = System.currentTimeMillis();
-        long seed = 1688424067512l;
+        long seed = System.currentTimeMillis();
+        // long seed = 1688424067512l;
 
-        RLParams playerParams = new RLParams(new TicTacToeDim3StateVector(), RLType.LinearApprox, seed);
+        RLParams playerParams = new RLParams(new TicTacToeDim1StateVector(), RLType.Tabular, seed);
         playerParams.epsilon = 0.375f;
 
-        String infilePath = "/Users/qmul/Documents/msc-project/TabletopGames/src/main/java/players/rl/resources/qWeights/TicTacToe/LinearApprox/2023-07-04_00-23-30_n=8388608.json";
+        String infilePath = null;
+        // String infilePath =
+        // "/Users/qmul/Documents/msc-project/TabletopGames/src/main/java/players/rl/resources/qWeights/TicTacToe/LinearApprox/2023-07-04_00-23-30_n=8388608.;
 
         RLTrainer trainer = new RLTrainer(params, playerParams, infilePath);
         trainer.runTraining();

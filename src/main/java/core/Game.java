@@ -937,13 +937,13 @@ public class Game {
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        RLFeatureVector features1 = new TicTacToeDim3StateVector();
+        RLFeatureVector features1 = new TicTacToeDim1StateVector();
         RLParams p1 = new RLParams(features1, RLType.LinearApprox);
-        // players.add(new RLPlayer(p1, "2023-07-03_23-41-07_n=100000.json"));
+        players.add(new RLPlayer(p1, "TTT1_n=100000.json"));
         RLFeatureVector features2 = new TicTacToeDim1StateVector();
         RLParams p2 = new RLParams(features2, RLType.Tabular);
-        players.add(new HumanGUIPlayer(ac));
         players.add(new RLPlayer(p2, "2023-06-29_19-17-07.json"));
+        // players.add(new HumanGUIPlayer(ac));
         // players.add(new RLPlayer(p1, "2023-07-03_23-41-07_n=100000.json"));
 //        players.add(new MCTSPlayer());
 //        MCTSParams params1 = new MCTSParams();

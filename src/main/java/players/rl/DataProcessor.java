@@ -78,7 +78,8 @@ class DataProcessor {
 
     private void updateSegmentOutfile(int nGames) {
         int totalNGames = nGamesPlayedFromInfile + nGames;
-        Path outfilePath = Paths.get(qwds.getFolderPath(gameName), dateTime + "_n=" + totalNGames + ".json");
+        String outfilePrefix = qwds.trainingParams.outfilePrefix != null ? qwds.trainingParams.outfilePrefix : dateTime;
+        Path outfilePath = Paths.get(qwds.getFolderPath(gameName), outfilePrefix + "_n=" + totalNGames + ".json");
         outfile = outfilePath.toFile();
     }
 

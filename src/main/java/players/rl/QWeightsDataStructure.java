@@ -42,7 +42,7 @@ public abstract class QWeightsDataStructure {
 
     protected abstract void initQWeightsEmpty();
 
-    protected abstract void add(RLPlayer player, AbstractGameState state, AbstractAction action, double q);
+    protected abstract void applyGradient(RLPlayer player, AbstractGameState state, AbstractAction action, double q);
 
     protected abstract double evaluateQ(RLPlayer player, AbstractGameState state, AbstractAction action);
 
@@ -122,9 +122,9 @@ public abstract class QWeightsDataStructure {
                     : t1.possibleActions.stream().mapToDouble(a -> evaluateQ(player, t1.s, a)).max().getAsDouble();
 
             // Q-Learning formula
-            double q_s0a0 = evaluateQ(player, t0.s, t1.a);
+            double q_s0a0 = evaluateQ(player, t0.s, t0.a);
             double delta = trainingParams.alpha * (t1.r + trainingParams.gamma * maxQ_s1a - q_s0a0);
-            add(player, t0.s, t0.a, delta);
+            applyGradient(player, t0.s, t0.a, delta);
         }
     }
 

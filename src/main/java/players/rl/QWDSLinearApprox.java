@@ -45,7 +45,7 @@ public class QWDSLinearApprox extends QWeightsDataStructure {
     }
 
     @Override
-    protected void add(RLPlayer player, AbstractGameState state, AbstractAction action, double delta) {
+    protected void applyGradient(RLPlayer player, AbstractGameState state, AbstractAction action, double delta) {
         double[] featureVector = playerParams.features.featureVector(action, state, player.getPlayerID());
         for (int i = 0; i < featureVector.length; i++)
             qWeights[i] += delta * featureVector[i];
