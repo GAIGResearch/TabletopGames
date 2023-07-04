@@ -9,7 +9,6 @@ import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.Game;
 import core.actions.AbstractAction;
-import core.interfaces.IActionFeatureVector;
 import evaluation.listeners.IGameListener;
 import games.GameType;
 import games.dotsboxes.DBStateFeaturesReduced;
@@ -18,7 +17,6 @@ import players.human.ActionController;
 import players.rl.RLPlayer.RLType;
 import players.rl.RLTrainingParams.Solver;
 import players.rl.RLTrainingParams.WriteSegmentType;
-import players.rl.resources.featureVectors.*;
 
 class RLTrainer {
 
@@ -32,7 +30,8 @@ class RLTrainer {
     private RLTrainer(RLTrainingParams params, RLParams playerParams, String infileNameOrAbsPath) {
         this.params = params;
         this.playerParams = playerParams;
-        this.qwds = new QWDSLinearApprox(infileNameOrAbsPath);
+        this.qwds = playerParams.type == RLType.Tabular ? new QWDSTabular(infileNameOrAbsPath)
+                : playerParams.type == RLType.LinearApprox ? new QWDSLinearApprox(infileNameOrAbsPath) : null;
         resetTrainer();
         prematurelySetupQWDS();
     }
@@ -151,21 +150,21 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams("TicTacToe", 2, 1000000);
+        RLTrainingParams params = new RLTrainingParams("DotsAndBoxes", 2, 10000);
         params.writeSegmentType = WriteSegmentType.LOGARITHMIC;
         params.writeSegmentFactor = 10;
-        params.writeSegmentMinIterations = 1000;
+        params.writeSegmentMinIterations = 100;
         params.updateXIterations = 1000;
         params.alpha = 0.001f;
         params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
-        params.outfilePrefix = "TTT";
+        params.outfilePrefix = "DABReduced";
 
         long seed = System.currentTimeMillis();
         // long seed = 1688424067512l;
 
-        RLParams playerParams = new RLParams(new TicTacToeDim1StateVector(), RLType.Tabular, seed);
+        RLParams playerParams = new RLParams(new DBStateFeaturesReduced(), RLType.LinearApprox, seed);
         playerParams.epsilon = 0.375f;
 
         String infilePath = null;

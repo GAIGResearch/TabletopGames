@@ -105,7 +105,7 @@ public abstract class QWeightsDataStructure {
         if (!metadata.get(Field.Type.name()).asText()
                 .equals(playerParams.type.name()))
             return false;
-        if (!metadata.get(Field.RLFeatureVector.name()).asText()
+        if (!metadata.get(Field.FeatureVector.name()).asText()
                 .equals(playerParams.features.getClass().getCanonicalName()))
             return false;
         return true;

@@ -39,7 +39,7 @@ class DataProcessor {
         // The class name of the used players.rl.QWeightsDataStructure
         QWeightsDataStructure,
         // The class name of the used players.rl.RLFeatureVector
-        RLFeatureVector,
+        FeatureVector,
         // The total number of games played by this entry
         NGamesTotal,
         // The number of games played by this entry with these parameters & settings
@@ -109,7 +109,7 @@ class DataProcessor {
                 .put(Field.Solver.name(), qwds.trainingParams.solver.name())
                 .put(Field.Heuristic.name(), qwds.trainingParams.heuristic.getClass().getCanonicalName())
                 .put(Field.QWeightsDataStructure.name(), qwds.getClass().getCanonicalName())
-                .put(Field.RLFeatureVector.name(), qwds.playerParams.features.getClass().getCanonicalName())
+                .put(Field.FeatureVector.name(), qwds.playerParams.getFeatureVectorCanonicalName())
                 .put(Field.NGamesTotal.name(), nGamesPlayedFromInfile)
                 .put(Field.NGamesWithTheseSettings.name(), 0);
         // TODO make separate function

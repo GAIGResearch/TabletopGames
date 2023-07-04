@@ -2,19 +2,22 @@ package core;
 
 import core.actions.AbstractAction;
 import core.actions.DoNothing;
+import core.interfaces.IActionFeatureVector;
 import core.interfaces.IExtendedSequence;
 import core.interfaces.IPrintable;
+import core.interfaces.IStateFeatureVector;
 import core.turnorders.ReactiveTurnOrder;
 import evaluation.listeners.IGameListener;
 import evaluation.metrics.Event;
 import evaluation.summarisers.TAGNumericStatSummary;
 import games.GameType;
+import games.dotsboxes.DBStateFeaturesReduced;
 import gui.*;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import players.human.*;
-import players.rl.RLFeatureVector;
+import players.mcts.MCTSPlayer;
 import players.rl.RLParams;
 import players.rl.RLPlayer;
 import players.rl.RLPlayer.RLType;
@@ -929,20 +932,26 @@ public class Game {
      * and then run this class.
      */
     public static void main(String[] args) {
-        String gameType = Utils.getArg(args, "game", "TicTacToe");
+        String gameType = Utils.getArg(args, "game", "DotsAndBoxes");
         boolean useGUI = Utils.getArg(args, "gui", true);
-        int turnPause = Utils.getArg(args, "turnPause", 1000);
+        int turnPause = Utils.getArg(args, "turnPause", 0);
         long seed = Utils.getArg(args, "seed", System.currentTimeMillis());
         ActionController ac = new ActionController();
 
         /* Set up players for the game */
         ArrayList<AbstractPlayer> players = new ArrayList<>();
-        RLFeatureVector features1 = new TicTacToeDim1StateVector();
-        RLParams p1 = new RLParams(features1, RLType.LinearApprox);
-        players.add(new RLPlayer(p1, "TTT1_n=100000.json"));
-        RLFeatureVector features2 = new TicTacToeDim1StateVector();
-        RLParams p2 = new RLParams(features2, RLType.Tabular);
-        players.add(new RLPlayer(p2, "2023-06-29_19-17-07.json"));
+
+        IStateFeatureVector features = new DBStateFeaturesReduced();
+        RLParams p1 = new RLParams(features, RLType.LinearApprox);
+        players.add(new RLPlayer(p1, "DABReduced_n=10000.json"));
+        // RLParams p2 = new RLParams(features, RLType.Tabular);
+        // players.add(new RLPlayer(p2, "DABReduced_n=10000.json"));
+        players.add(new MCTSPlayer());
+        // players.add(new MCTSPlayer());
+        // IStateFeatureVector features2 = new DBStateFeaturesReduced();
+        // RLParams p2 = new RLParams(features2, RLType.Tabular);
+        // players.add(new RLPlayer(p2,
+        // "/Users/qmul/Documents/msc-project/TabletopGames/src/main/java/players/rl/resources/qWeights/DotsAndBoxes/Tabular/DABReduced_n=10000.json"));
         // players.add(new HumanGUIPlayer(ac));
         // players.add(new RLPlayer(p1, "2023-07-03_23-41-07_n=100000.json"));
 //        players.add(new MCTSPlayer());

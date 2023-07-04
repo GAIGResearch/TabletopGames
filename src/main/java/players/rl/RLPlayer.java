@@ -8,6 +8,7 @@ import java.util.Random;
 import core.AbstractGameState;
 import core.AbstractPlayer;
 import core.actions.AbstractAction;
+import players.rl.utils.ApplyActionStateFeatureVector;
 
 
 public class RLPlayer extends AbstractPlayer {
@@ -65,7 +66,8 @@ public class RLPlayer extends AbstractPlayer {
     @Override
     public void initializePlayer(AbstractGameState gameState) {
         this.rng = new Random(params.getRandomSeed());
-        this.params.features.linkPlayer(this);
+        if (params.features instanceof ApplyActionStateFeatureVector)
+            ((ApplyActionStateFeatureVector) this.params.features).linkPlayer(this);
         this.qWeights.initialize(gameState.getGameType().name());
     }
 

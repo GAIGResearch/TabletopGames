@@ -3,8 +3,11 @@ package players.rl;
 import java.util.Arrays;
 
 import core.AbstractParameters;
+import core.interfaces.IActionFeatureVector;
+import core.interfaces.IStateFeatureVector;
 import players.PlayerParameters;
 import players.rl.RLPlayer.RLType;
+import players.rl.utils.ApplyActionStateFeatureVector;
 
 public class RLParams extends PlayerParameters {
 
@@ -13,7 +16,7 @@ public class RLParams extends PlayerParameters {
     }
 
     // Mandatory and automatic params
-    public final RLFeatureVector features;
+    public final IActionFeatureVector features;
     public RLType type;
     public final TabularParams tabular;
 
@@ -23,16 +26,24 @@ public class RLParams extends PlayerParameters {
     // Tunable parameters
     public double epsilon = 0.25f;
 
-    public RLParams(RLFeatureVector features, RLType type) {
+    public RLParams(IActionFeatureVector features, RLType type) {
         this(features, type, System.currentTimeMillis());
     }
 
-    public RLParams(RLFeatureVector features, RLType type, long seed) {
+    public RLParams(IActionFeatureVector features, RLType type, long seed) {
         super(seed);
         this.features = features;
         this.type = type;
         tabular = this.type == RLType.Tabular ? new TabularParams() : null;
         addTunableParameters();
+    }
+
+    public RLParams(IStateFeatureVector features, RLType type) {
+        this(features, type, System.currentTimeMillis());
+    }
+
+    public RLParams(IStateFeatureVector features, RLType type, long seed) {
+        this(new ApplyActionStateFeatureVector(features), type, seed);
     }
 
     private void addTunableParameters() {
@@ -51,6 +62,12 @@ public class RLParams extends PlayerParameters {
         RLParams retValue = new RLParams(features, type, System.currentTimeMillis());
         retValue.epsilon = epsilon;
         return retValue;
+    }
+
+    public String getFeatureVectorCanonicalName() {
+        if (features instanceof ApplyActionStateFeatureVector)
+            return ((ApplyActionStateFeatureVector) features).getFeatureVectorCanonicalName();
+        return features.getClass().getCanonicalName();
     }
 
 }

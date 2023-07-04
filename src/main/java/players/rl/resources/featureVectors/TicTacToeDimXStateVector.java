@@ -2,16 +2,16 @@ package players.rl.resources.featureVectors;
 
 import core.AbstractGameState;
 import core.components.Token;
+import core.interfaces.IStateFeatureVector;
 import games.tictactoe.TicTacToeConstants;
 import games.tictactoe.TicTacToeGameState;
-import players.rl.SimRLFeatureVector;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.stream.IntStream;
 
-public abstract class TicTacToeDimXStateVector extends SimRLFeatureVector {
+public abstract class TicTacToeDimXStateVector implements IStateFeatureVector {
 
     private final int dims;
     private final String[] names;
