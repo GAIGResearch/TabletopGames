@@ -8,6 +8,7 @@ import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
 import static scala.Console.print;
@@ -69,11 +70,13 @@ public class MonopolyDealForwardModel extends StandardForwardModel {
             case "Play":
                 if (state.actionsLeft > 0){
                     List<AbstractAction> availableActions = new ArrayList<>();
-                    availableActions.add(new PlayActionCard(playerID));
+                    if(state.playerHands[playerID].stream()
+                            .filter(((Predicate<? super MonopolyDealCard>)MonopolyDealCard::isPropertyCard).negate())
+                            .count() > 0)
+                        availableActions.add(new PlayActionCard(playerID));
                     availableActions.add(new AddToBoard(playerID));
-                    if(state.canModifyBoard(playerID)){
+                    if(state.canModifyBoard(playerID))
                         availableActions.add(new ModifyBoard(playerID));
-                    }
                     availableActions.add(new EndPhase());
                     return availableActions;
                 }

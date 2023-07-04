@@ -4,6 +4,7 @@ import core.actions.AbstractAction;
 import core.components.Card;
 import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.actions.*;
+import org.apache.poi.ss.formula.atp.Switch;
 
 public class MonopolyDealCard extends Card{
     CardType type;
@@ -118,6 +119,8 @@ public class MonopolyDealCard extends Card{
     public boolean isPropertyWildCard(){ return type.isPropertyWild; }
     public int cardMoneyValue(){ return type.moneyValue; }
     public SetType getUseAs() { return useAs; }
+    public void setUseAs(SetType sType) {  useAs = sType;}
+
     public CardType cardType() { return type; }
 
     @Override
@@ -133,5 +136,52 @@ public class MonopolyDealCard extends Card{
             return other.type == type;
         }
         return false;
+    }
+
+    public boolean isNotMulticolor() {
+        if(type == CardType.MulticolorWild)
+            return false;
+        return true;
+    }
+
+    public SetType getAlternateSetType(MonopolyDealCard card) {
+        SetType sType= card.getUseAs();
+        CardType cType = card.cardType();
+        switch(cType){
+            case MulticolorWild:
+                sType = SetType.UNDEFINED;
+                break;
+            case GreenBlueWild:
+                if(sType == SetType.Green)sType = SetType.Blue;
+                else sType = SetType.Green;
+                break;
+            case BrownLightBlueWild:
+                if(sType == SetType.Brown)sType = SetType.LightBlue;
+                else sType = SetType.Brown;
+                break;
+            case PinkOrangeWild:
+                if(sType == SetType.Pink)sType = SetType.Orange;
+                else sType = SetType.Pink;
+                break;
+            case RailRoadGreenWild:
+                if(sType == SetType.RailRoad)sType = SetType.Green;
+                else sType = SetType.RailRoad;
+                break;
+            case RailRoadLightBlueWild:
+                if(sType == SetType.RailRoad)sType = SetType.LightBlue;
+                else sType = SetType.RailRoad;
+                break;
+            case RailRoadUtilityWild:
+                if(sType == SetType.RailRoad)sType = SetType.Utility;
+                else sType = SetType.RailRoad;
+                break;
+            case RedYellowWild:
+                if(sType == SetType.Red)sType = SetType.Yellow;
+                else sType = SetType.Red;
+                break;
+            default:
+                throw new AssertionError("Not yet implemented : " + type);
+        }
+        return sType;
     }
 }

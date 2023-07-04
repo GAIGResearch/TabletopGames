@@ -150,7 +150,6 @@ public class MonopolyDealGameState extends AbstractGameState {
                 retValue.drawCard(p,playerHandSize[p]);
             }
         }
-
         // Completely visible values
         for(int i=0;i<getNPlayers();i++){
             retValue.playerBanks[i] = playerBanks[i].copy();
@@ -166,10 +165,8 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
 
     public boolean canModifyBoard(int playerID){
-        for(int i = 0; i< playerPropertySets[playerID].size();i++){
-            if(playerPropertySets[playerID].get(i).hasWild){
-                return true;
-            }
+        for (PropertySet pSet: playerPropertySets[playerID]) {
+            if(pSet.hasWild) return true;
         }
         return false;
     }
@@ -207,6 +204,11 @@ public class MonopolyDealGameState extends AbstractGameState {
     // add property
     public void addProperty(int playerID, MonopolyDealCard card){
         SetType SType = card.getUseAs();
+        addPropertyToSet(playerID,card,SType);
+    }
+    public void addPropertyToSet(int playerID, MonopolyDealCard card, SetType SType){
+        playerHands[playerID].remove(card);
+        card.setUseAs(SType);
         int indx = getSetIndx(playerID,SType);
         if(indx != 99){
             playerPropertySets[playerID].get(indx).add(card);
@@ -216,7 +218,13 @@ public class MonopolyDealGameState extends AbstractGameState {
             pSet.add(card);
             playerPropertySets[playerID].add(pSet);
         }
-        playerHands[playerID].remove(card);
+    }
+    public void removePropertyFrom(int playerID, MonopolyDealCard card, SetType from){
+        int indx = getSetIndx(playerID,from);
+        playerPropertySets[playerID].get(indx).remove(card);
+        if(playerPropertySets[playerID].get(indx).stream().count() == 0){
+            playerPropertySets[playerID].remove(indx);
+        }
     }
     public int getSetIndx(int playerID, SetType type){
         int setIndx = 99;
@@ -234,6 +242,9 @@ public class MonopolyDealGameState extends AbstractGameState {
     // remove property
     public Deck<MonopolyDealCard> getPlayerHand(int playerID){
         return playerHands[playerID];
+    }
+    public List<PropertySet> getPropertySets(int playerID) {
+        return playerPropertySets[playerID];
     }
     /**
      * @param playerId - player observing the state.
@@ -267,13 +278,6 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
         return count/params.SETS_TO_WIN;
     }
-
-//    @Override
-//    protected boolean _equals(Object o) {
-//        // TODO: compare all variables in the state
-//        return o instanceof MonopolyDealGameState;
-//    }
-
     @Override
     public boolean _equals(Object o) {
         if (this == o) return true;
@@ -291,7 +295,6 @@ public class MonopolyDealGameState extends AbstractGameState {
         result = 31 * result + Arrays.hashCode(playerPropertySets);
         return result;
     }
-
     public enum MonopolyDealGamePhase implements IGamePhase {
         Play,
         Discard

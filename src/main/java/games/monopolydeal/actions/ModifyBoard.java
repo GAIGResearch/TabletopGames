@@ -3,6 +3,10 @@ package games.monopolydeal.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
+import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.MonopolyDealCard;
+import games.monopolydeal.cards.PropertySet;
+import games.monopolydeal.cards.SetType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +43,34 @@ public class ModifyBoard extends AbstractAction implements IExtendedSequence {
     @Override
     public List<AbstractAction> _computeAvailableActions(AbstractGameState state) {
         // TODO populate this list with available actions
-        return new ArrayList<>();
+        MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
+        // move card from to
+        // Iterate through sets
+        //   find wilds
+        //      get alternate
+        //      MoveFromTo
+        List<AbstractAction> availableActions = new ArrayList<>();
+        for (PropertySet pSet: MDGS.getPropertySets(playerID)) {
+            if(pSet.hasWild){
+                for (int i=0;i<pSet.getSize();i++) {
+                    MonopolyDealCard card = pSet.get(i);
+                    if(card.isPropertyWildCard()){
+                        SetType sType = card.getAlternateSetType(card);
+                        if(sType==SetType.UNDEFINED){
+                            for (PropertySet propSet:MDGS.getPropertySets(playerID)) {
+                                if(propSet.getSetType() != card.getUseAs()){
+                                    availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),propSet.getSetType()));
+                                }
+                            }
+                        }
+                        else{
+                            availableActions.add(new MoveCardFromTo(playerID,card,pSet.getSetType(),sType));
+                        }
+                    }
+                }
+            }
+        }
+        return availableActions;
     }
 
     /**

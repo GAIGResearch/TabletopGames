@@ -4,7 +4,9 @@ import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.interfaces.IExtendedSequence;
 import games.monopolydeal.MonopolyDealGameState;
+import games.monopolydeal.cards.CardType;
 import games.monopolydeal.cards.MonopolyDealCard;
+import games.monopolydeal.cards.PropertySet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,11 +49,20 @@ public class AddToBoard extends AbstractAction implements IExtendedSequence {
         // TODO populate this list with available actions
         MonopolyDealGameState MDGS = (MonopolyDealGameState) state;
         int playerID = MDGS.getCurrentPlayer();
+        // Adding property cards and base wildcards to properties
         List<AbstractAction> availableActions = MDGS.getPlayerHand(playerID).stream()
                 .filter(MonopolyDealCard::isPropertyCard)
+                .filter(MonopolyDealCard::isNotMulticolor)
                 .map(card-> new AddProperty(card,playerID))
                 .collect(toList());
+        // Adding money to bank
         availableActions.addAll(MDGS.getPlayerHand(playerID).stream().filter(((Predicate<? super MonopolyDealCard>)MonopolyDealCard::isPropertyCard).negate()).map(card ->new AddMoney(card,playerID)).collect(toList()));
+        // Adding multicolor wild to existing sets
+        MonopolyDealCard temp = MonopolyDealCard.create(CardType.MulticolorWild);
+        if(MDGS.getPlayerHand(playerID).getComponents().contains(temp)){
+            availableActions.addAll(MDGS.getPropertySets(playerID).stream().filter(((Predicate<? super PropertySet>)PropertySet::getIsComplete).negate())
+                    .map(propertySet -> new AddWildTo(propertySet,playerID)).collect(toList()));
+        }
         return availableActions;
     }
 

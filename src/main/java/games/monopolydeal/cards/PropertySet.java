@@ -18,28 +18,24 @@ public class PropertySet extends Deck<MonopolyDealCard> {
         isComplete = false;
         hasHouse = false;
         hasHotel = false;
+        hasWild = false;
     }
     // Copy constructor???
     public PropertySet copy(){
-        return propertySetBuilder(super.copy());
-    }
-    public PropertySet propertySetBuilder(Deck<MonopolyDealCard> cardDeck){
-        // Iterate through deck -> find property
+        Deck<MonopolyDealCard> cardDeck = super.copy();
         MonopolyDealCard card = cardDeck.get(0);
         SetType sType = card.getUseAs();
         PropertySet newSet = new PropertySet(sType.toString(),VISIBLE_TO_ALL,sType);
-        if(cardDeck.getSize()>sType.setSize){
-            newSet.isComplete = true;
+        for (int i=0; i<cardDeck.getSize();i++) {
+            newSet.add(cardDeck.get(i));
         }
         return newSet;
     }
-
     public SetType getSetType(){return type;}
-
+    public boolean getIsComplete(){return isComplete;}
     // Note to self
     // Add house/hotel only if complete set
     // modify properties only if no house/hotel present
-
     @Override
     public boolean add(MonopolyDealCard c) {
         if(c.type == CardType.House ) hasHouse = true;
