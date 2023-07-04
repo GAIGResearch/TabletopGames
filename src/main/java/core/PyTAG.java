@@ -45,6 +45,11 @@ enum FeatureExtractors {
         this.stateFeatureJSON = stateFeatureJSON;
     }
 
+    @Override
+    public String toString() {
+        return "name:" + this.name() + " vector:" + (this.stateFeatureVector != null) + " json:" + (this.stateFeatureJSON != null);
+    }
+
     public IStateFeatureVector getStateFeatureVector() {
         if (stateFeatureVector == null) return null;
         try {
@@ -82,10 +87,20 @@ public class PyTAG {
     private int lastPlayer; // used to track actions per 'turn'
     private List<AbstractAction> availableActions;
 
-    boolean isNormalized; // Bool for whether you want obersvations to be normalized
+    boolean isNormalized; // Bool for whether you want observations to be normalized
 
     private Random seedRandom; // Random used for setting the seed for each episode
     private long lastSeed;
+
+    public static String getSupportedGames(){
+        /* returns the supported games with the corresponding feature extractors */
+        String supportedGames = "";
+        for (FeatureExtractors fe : FeatureExtractors.values()) {
+            supportedGames += fe.toString() + "\n";
+//            System.out.println(fe);
+        }
+        return supportedGames;
+    }
 
 
     public PyTAG(GameType gameToPlay, String parameterConfigFile, List<AbstractPlayer> players, long seed, boolean isNormalized) throws Exception {
@@ -104,13 +119,11 @@ public class PyTAG {
         } else game = gameToPlay.createGameInstance(players.size(), seed);
 
         assert game != null;
-//        game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Tree);
+
         if (this.stateVectoriser == null && this.stateJSONiser == null){
             throw new Exception("Game does not implement the state feature vector or JSON interface");
         }
-//        if (!(game.gameState instanceof IStateFeatureJSON && game.forwardModel instanceof ITreeActionSpace)) {
-//            throw new Exception("Game has not implemented Reinforcement Learning Interface");
-//        }
+
 //        if (game != null) {
 //            if (listeners != null)
 //                listeners.forEach(game::addListener);
@@ -136,11 +149,12 @@ public class PyTAG {
     }
 
     // Gets the observation space as an integer
-    public int getObservationSpace() throws Exception {
+    public int getObservationSpace() {
         if (stateVectoriser != null){
             return stateVectoriser.names().length;
         }
-        else throw new Exception("Function is not implemented");
+        return 0; // dummy value
+//        else throw new Exception("Function is not implemented");
 
     }
 
