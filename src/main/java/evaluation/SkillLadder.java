@@ -34,9 +34,12 @@ public class SkillLadder {
                             "\tgame=          The name of the game to play. Defaults to TicTacToe.\n" +
                             "\tnPlayers=      The number of players in each game. Defaults to 2.\n" +
                             "\tplayer=        The JSON file that contains the base configuration to use.\n" +
-                            "\t               Use -999 for any budget parameter - this will be replaced with the budget to use.\n" +
+                            "\t               If searchSpace is not specified, then also use -999 \n" +
+                            "\t               for any budget parameter - this will be replaced with the budget to use.\n" +
                             "\tsearchSpace=   The JSON file that contains the search space to use for NTBEA tuning.\n" +
                             "\t               Use -999 for any budget parameter - this will be replaced with the budget to use.\n" +
+                            "\t               If searchSpace is specified, then player will be used only to tune the lowest budget agent\n" +
+                            "\t               and will not be used otherwise - all tournaments in the ladder will use tuned agents using the searchspace.\n" +
                             "\tgameParams=    (Optional) A JSON file from which the game parameters will be initialised.\n" +
                             "\tnGames=        The total number of games to run for each rung of the ladder. Defaults to 1000.\n" +
                             "\tstartBudget=   The budget to use for the first agent. Defaults to 8.\n" +

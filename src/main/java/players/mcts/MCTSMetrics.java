@@ -24,7 +24,7 @@ public class MCTSMetrics implements IMetricsCollection {
                 if (root instanceof MultiTreeNode) {
                     root = Arrays.stream(((MultiTreeNode) root).roots).filter(Objects::nonNull)
                             .filter(node -> node.decisionPlayer == e.state.getCurrentPlayer())
-                            .findFirst().orElseThrow(() -> new AssertionError("No root found for player " + e.state.getCurrentPlayer()));
+                            .findFirst().orElse(null);
                 }
                 if (root == null) return false;
                 TreeStatistics treeStats = new TreeStatistics(root);
