@@ -4,7 +4,7 @@ import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.Component;
 import core.components.GridBoard;
-import core.interfaces.IVectorisable;
+import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.stratego.components.Piece;
 
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class StrategoGameState extends AbstractGameState implements IVectorisable {
+public class StrategoGameState extends AbstractGameState implements IStateFeatureJSON {
     GridBoard<Piece> gridBoard;
 
     /**

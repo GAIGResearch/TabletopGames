@@ -3,20 +3,60 @@ package core;
 import core.actions.AbstractAction;
 import core.actions.ActionSpace;
 import core.actions.DoNothing;
+import core.interfaces.IStateFeatureVector;
 import core.interfaces.ITreeActionSpace;
-import core.interfaces.IVectorisable;
+import core.interfaces.IStateFeatureJSON;
 import games.GameType;
+import games.diamant.DiamantFeatures;
+import org.apache.commons.lang3.reflect.ConstructorUtils;
 import players.human.HumanGUIPlayer;
 import players.python.PythonAgent;
 import players.simple.RandomPlayer;
 import utilities.ActionTreeNode;
 
+import games.explodingkittens.*;
 
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+enum Implementations {
+    /* Every game implementing the RL interfaces should be registered here, PyTAG uses this to reference the correct features extractors and action spaces */
+//    ExplodingKittens(ExplodingKittensForwardModel.class, ExplodingKittensGameState.class, ExplodingKittensStateFeatureVector.class, ExplodingKittensStateFeatureJSON.class),
+    Diamant(DiamantFeatures.class, DiamantFeatures.class);
+    Class<? extends AbstractForwardModel> forwardModel;
+    Class<? extends AbstractGameState> gameState;
+    Class<? extends IStateFeatureVector> stateFeatureVector;
+    Class<? extends IStateFeatureJSON> stateFeatureJSON;
+    Implementations(Class<? extends IStateFeatureVector> stateFeatureVector, Class<? extends IStateFeatureJSON> stateFeatureJSON) {
+//        this.forwardModel = forwardModel;
+//        this.gameState = gameState;
+        this.stateFeatureVector = stateFeatureVector;
+        this.stateFeatureJSON = stateFeatureJSON;
+    }
+
+    public IStateFeatureVector getStateFeatureVector() {
+        try {
+            return stateFeatureVector.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public IStateFeatureJSON getStateFeatureJSON() {
+        try {
+            return stateFeatureJSON.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
 
 public class PyTAG {
     private Game game;
@@ -26,6 +66,8 @@ public class PyTAG {
     private List<ActionTreeNode> leaves;
     private AbstractGameState gameState;
     private AbstractForwardModel forwardModel;
+    private IStateFeatureVector stateVectoriser;
+    private IStateFeatureJSON stateJSONiser;
     private List<AbstractPlayer> players;
     private int turnPause = 0;
     private int tick;
@@ -44,6 +86,9 @@ public class PyTAG {
         this.seedRandom = new Random(seed);
         this.isNormalized = isNormalized;
         this.players = players;
+        this.stateVectoriser = Implementations.valueOf(gameToPlay.toString()).getStateFeatureVector();
+        this.stateJSONiser = Implementations.valueOf(gameToPlay.toString()).getStateFeatureJSON();
+//        Implementations.valueOf(gameToPlay.toString()).stateFeatureVector
         // Creating game instance (null if not implemented)
         if (parameterConfigFile != null) {
             AbstractParameters params = AbstractParameters.createFromFile(gameToPlay, parameterConfigFile);
@@ -52,7 +97,7 @@ public class PyTAG {
 
         assert game != null;
 //        game.getCoreParameters().actionSpace = new ActionSpace(ActionSpace.Structure.Tree);
-        if (!(game.gameState instanceof IVectorisable && game.forwardModel instanceof ITreeActionSpace)) {
+        if (!(game.gameState instanceof IStateFeatureJSON && game.forwardModel instanceof ITreeActionSpace)) {
             throw new Exception("Game has not implemented Reinforcement Learning Interface");
         }
 //        if (game != null) {
@@ -73,25 +118,25 @@ public class PyTAG {
 
     // Gets observations in JSON
     public String getObservationJson() throws Exception {
-        if (gameState instanceof IVectorisable) {
-            return ((IVectorisable) gameState).getObservationJson();
+        if (gameState instanceof IStateFeatureJSON) {
+            return ((IStateFeatureJSON) gameState).getObservationJson();
         }
         else throw new Exception("Function is not implemented");
     }
 
     // Gets the observation space as an integer
     public int getObservationSpace() throws Exception {
-        if (gameState instanceof IVectorisable) {
-            return ((IVectorisable) gameState).getObservationSpace();
+        if (gameState instanceof IStateFeatureJSON) {
+            return ((IStateFeatureJSON) gameState).getObservationSpace();
         }
         else throw new Exception("Function is not implemented");
     }
 
     public double[] getObservationVector() throws Exception {
         AbstractGameState gs = gameState.copy(gameState.getCurrentPlayer());
-        if (gs instanceof IVectorisable) {
-            if (isNormalized) return ((IVectorisable) gs).getNormalizedObservationVector();
-            else return ((IVectorisable) gs).getObservationVector();
+        if (gs instanceof IStateFeatureJSON) {
+            if (isNormalized) return ((IStateFeatureJSON) gs).getNormalizedObservationVector();
+            else return ((IStateFeatureJSON) gs).getObservationVector();
         }
         else throw new Exception("Function is not implemented");
     }

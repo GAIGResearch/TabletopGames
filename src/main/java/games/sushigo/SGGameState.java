@@ -3,7 +3,7 @@ package games.sushigo;
 import core.AbstractGameState;
 import core.AbstractParameters;
 import core.components.*;
-import core.interfaces.IVectorisable;
+import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
@@ -13,7 +13,7 @@ import utilities.Pair;
 import java.util.*;
 
 @SuppressWarnings("unchecked")
-public class SGGameState extends AbstractGameState implements IVectorisable {
+public class SGGameState extends AbstractGameState implements IStateFeatureJSON {
     List<Deck<SGCard>> playerHands;
     Deck<SGCard> drawPile;
     Deck<SGCard> discardPile;

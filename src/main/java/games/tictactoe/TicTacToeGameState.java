@@ -7,7 +7,7 @@ import core.components.GridBoard;
 import core.components.Token;
 import core.interfaces.IGridGameState;
 import core.interfaces.IPrintable;
-import core.interfaces.IVectorisable;
+import core.interfaces.IStateFeatureJSON;
 import games.GameType;
 import org.json.simple.JSONObject;
 
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Token>, IVectorisable {
+public class TicTacToeGameState extends AbstractGameState implements IPrintable, IGridGameState<Token>, IStateFeatureJSON {
 
     GridBoard<Token> gridBoard;
 

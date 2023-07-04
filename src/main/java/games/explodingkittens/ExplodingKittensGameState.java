@@ -9,7 +9,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
-import core.interfaces.IVectorisable;
+import core.interfaces.IStateFeatureJSON;
 import core.turnorders.TurnOrder;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
@@ -18,7 +18,7 @@ import java.util.*;
 
 import static core.CoreConstants.VisibilityMode;
 
-public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder implements IPrintable, IVectorisable  {
+public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder implements IPrintable, IStateFeatureJSON {
 
     // Cards in each player's hand, index corresponds to player ID
     List<PartialObservableDeck<ExplodingKittensCard>> playerHandCards;

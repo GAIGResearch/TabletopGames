@@ -1,18 +1,17 @@
 package games.diamant;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.interfaces.IVectorisable;
+import core.interfaces.IStateFeatureJSON;
+import core.interfaces.IStateFeatureNormVector;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import java.util.Objects;
 import java.util.Random;
 
 
-public class DiamantGameState extends AbstractGameState implements IPrintable, IVectorisable {
+public class DiamantGameState extends AbstractGameState implements IPrintable {
     Deck<DiamantCard>          mainDeck;
     Deck<DiamantCard>          discardDeck;
     Deck<DiamantCard>          path;
@@ -29,56 +28,6 @@ public class DiamantGameState extends AbstractGameState implements IPrintable, I
     List<Counter> treasureChests;
     List<Counter> hands;
     List<Boolean> playerInCave;
-
-    @Override
-    public String getObservationJson() {
-        final JSONObject json = new JSONObject();
-        json.put("cave", nCave);
-        json.put("playersInCave", playerInCave.size());
-        json.put("pathNoGems", nGemsOnPath);
-        json.put("chestNoGems", getTreasureChests().get(getCurrentPlayer()).getValue());
-        json.put("hazardScorpionsOnPath", nHazardExplosionsOnPath);
-        json.put("hazardSnakesOnPath", nHazardSnakesOnPath);
-        json.put("hazardRockfallsOnPath", nHazardRockfallsOnPath);
-        json.put("hazardPoisonOnPath", nHazardPoissonGasOnPath);
-        json.put("hazardExplosionsOnPath", nHazardExplosionsOnPath);
-        return json.toJSONString();
-    }
-
-    @Override
-    public double[] getObservationVector() {
-        double[] retVal = new double[getObservationSpace()];
-        retVal[0] = getTreasureChests().get(getCurrentPlayer()).getValue();
-        retVal[1] = path.getComponents().get(path.getSize()-1).getNumberOfGems(); // nGemsOnPath;
-        retVal[2] = playerInCave.size();
-        retVal[3] = nCave;
-        retVal[4] = nHazardExplosionsOnPath;
-        retVal[5] = nHazardPoissonGasOnPath;
-        retVal[6] = nHazardRockfallsOnPath;
-        retVal[7] = nHazardScorpionsOnPath;
-        retVal[8] = nHazardSnakesOnPath;
-        return retVal;
-    }
-
-    @Override
-    public double[] getNormalizedObservationVector() {
-        double[] retVal = new double[getObservationSpace()];
-        retVal[0] = getTreasureChests().get(getCurrentPlayer()).getValue() / 100d;
-        retVal[1] = path.getComponents().get(path.getSize()-1).getNumberOfGems() / 17d;
-        retVal[2] = playerInCave.size() / (double) getNPlayers();
-        retVal[3] = nCave / 5d;
-        retVal[4] = nHazardExplosionsOnPath / 3d;
-        retVal[5] = nHazardPoissonGasOnPath/ 3d;
-        retVal[6] = nHazardRockfallsOnPath /3d;
-        retVal[7] = nHazardScorpionsOnPath /3d;
-        retVal[8] = nHazardSnakesOnPath/ 3d;
-        return retVal;
-    }
-
-    @Override
-    public int getObservationSpace() {
-        return 9;
-    }
 
     // helper data class to store interesting information
     static class PlayerTurnRecord {

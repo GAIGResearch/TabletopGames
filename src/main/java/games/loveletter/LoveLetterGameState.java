@@ -7,7 +7,7 @@ import core.components.Component;
 import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IPrintable;
-import core.interfaces.IVectorisable;
+import core.interfaces.IStateFeatureJSON;
 import evaluation.metrics.Event;
 import games.GameType;
 import games.loveletter.cards.LoveLetterCard;
@@ -15,7 +15,7 @@ import games.loveletter.cards.LoveLetterCard;
 import java.util.*;
 
 
-public class LoveLetterGameState extends AbstractGameState implements IPrintable, IVectorisable {
+public class LoveLetterGameState extends AbstractGameState implements IPrintable, IStateFeatureJSON {
 
     // List of cards in player hands
     List<PartialObservableDeck<LoveLetterCard>> playerHandCards;
