@@ -6,5 +6,4 @@ public interface IStateFeatureNormVector extends IStateFeatureVector {
 
     double[] normFeatureVector(AbstractGameState state, int playerID);
 
-    double[] normFeatureVector();
 }
