@@ -122,7 +122,7 @@ public class PlayActionCard extends AbstractAction implements IExtendedSequence 
     @Override
     public String toString() {
         // TODO: Replace with appropriate string, including any action parameters
-        return "My action name";
+        return "Play Action Card";
     }
 
     /**

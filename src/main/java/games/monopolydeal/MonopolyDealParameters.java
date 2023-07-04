@@ -35,7 +35,7 @@ public class MonopolyDealParameters extends TunableParameters {
     public MonopolyDealParameters(long seed) {
         super(seed);
         addTunableParameter("HAND_SIZE", 7, Arrays.asList(3,5,7,10));
-        addTunableParameter("INITIAL_DEAL", 5, Arrays.asList(3,5,7,10));
+        addTunableParameter("INITIAL_DEAL", 5, Arrays.asList(3,5));
         addTunableParameter("DRAWS_PER_TURN", 2, Arrays.asList(3,5,7,10));
         addTunableParameter("DRAWS_WHEN_EMPTY", 5, Arrays.asList(3,5,7,10));
         addTunableParameter("SETS_TO_WIN", 3, Arrays.asList(3,5,7,10));
@@ -117,24 +117,17 @@ public class MonopolyDealParameters extends TunableParameters {
     }
 
     @Override
-    protected boolean _equals(Object o) {
-        // compare all variables.
-        if(o instanceof  MonopolyDealParameters){
-            MonopolyDealParameters mDP = (MonopolyDealParameters) o;
-            if(mDP.HAND_SIZE == this.HAND_SIZE && mDP.SETS_TO_WIN == this.SETS_TO_WIN && mDP.DRAWS_PER_TURN == this.DRAWS_PER_TURN &&
-            mDP.ACTIONS_PER_TURN == this.ACTIONS_PER_TURN && mDP.DRAWS_WHEN_EMPTY == this.DRAWS_WHEN_EMPTY && mDP.INITIAL_DEAL == this.INITIAL_DEAL &&
-                    Objects.equals(mDP.cardsIncludedInGame,this.cardsIncludedInGame)){
-                return true;
-            }
-        }
-        return false;
+    public boolean _equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MonopolyDealParameters that = (MonopolyDealParameters) o;
+        return HAND_SIZE == that.HAND_SIZE && DRAWS_WHEN_EMPTY == that.DRAWS_WHEN_EMPTY && INITIAL_DEAL == that.INITIAL_DEAL && ACTIONS_PER_TURN == that.ACTIONS_PER_TURN && DRAWS_PER_TURN == that.DRAWS_PER_TURN && SETS_TO_WIN == that.SETS_TO_WIN && Objects.equals(cardsIncludedInGame, that.cardsIncludedInGame);
     }
 
     @Override
     public int hashCode() {
-        // include the hashcode of all variables.
-        int result = Objects.hash(super.hashCode(), HAND_SIZE,SETS_TO_WIN,DRAWS_PER_TURN,ACTIONS_PER_TURN,DRAWS_WHEN_EMPTY,INITIAL_DEAL,cardsIncludedInGame);
-        return result;
+        return Objects.hash(super.hashCode(), HAND_SIZE, DRAWS_WHEN_EMPTY, INITIAL_DEAL, ACTIONS_PER_TURN, DRAWS_PER_TURN, SETS_TO_WIN, cardsIncludedInGame);
     }
 
     @Override

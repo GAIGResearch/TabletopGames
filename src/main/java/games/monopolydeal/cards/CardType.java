@@ -29,8 +29,8 @@ public enum CardType {
     RailRoadUtilityRent(1,true),
     RedYellowRent(1,true),
 
-    House(3,true,false),
-    Hotel(4,true,false),
+    House(3,true),
+    Hotel(4,true),
 
     BrownProperty(1,true,false),
     BlueProperty(1,true,false),

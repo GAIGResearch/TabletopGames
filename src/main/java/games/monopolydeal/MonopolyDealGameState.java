@@ -119,18 +119,37 @@ public class MonopolyDealGameState extends AbstractGameState {
         MonopolyDealGameState retValue = new MonopolyDealGameState(gameParameters, getNPlayers());
         // TODO: deep copy all variables to the new game state.
 
+        // Placeholder to know how many cards each player had for redrawing cards
+        int[] playerHandSize = new int[getNPlayers()];
+        retValue.drawPile = drawPile.copy();
+        retValue.rnd = rnd;
+
         // Hidden values
         for (int p = 0; p < getNPlayers(); p++) {
             if (playerId == -1) {
+                // No hidden information
                 retValue.playerHands[p] = playerHands[p].copy();
                 
             } else if (playerId == p) {
-
+                // Current players hand is visible information
+                retValue.playerHands[p] = playerHands[p].copy();
             } else{
+                retValue.playerHands[p] = playerHands[p].copy();
+                playerHandSize[p] = retValue.playerHands[p].getSize();
 
+                // Adding all hidden cards back to deck
+                retValue.drawPile.add(retValue.playerHands[p]);
+                retValue.playerHands[p].clear();
             }
-
         }
+        retValue.drawPile.shuffle(rnd);
+        // Redrawing hidden cards into hands
+        for (int p = 0; p < getNPlayers(); p++){
+            if(p != playerId && playerId!= -1){
+                retValue.drawCard(p,playerHandSize[p]);
+            }
+        }
+
         // Completely visible values
         for(int i=0;i<getNPlayers();i++){
             retValue.playerBanks[i] = playerBanks[i].copy();
@@ -186,7 +205,6 @@ public class MonopolyDealGameState extends AbstractGameState {
     }
     // add property
     public void addProperty(int playerID, MonopolyDealCard card){
-        CardType type = card.cardType();
         SetType SType = getSetType(card);
         int indx = getSetIndx(playerID,SType);
         if(indx != 99){
@@ -246,6 +264,10 @@ public class MonopolyDealGameState extends AbstractGameState {
         }
         return setIndx;
     }
+    public void useAction(int actionCost) {
+        actionsLeft = actionsLeft-actionCost;
+    }
+    public int getActionsLeft(){return actionsLeft;}
     // remove property
     public Deck<MonopolyDealCard> getPlayerHand(int playerID){
         return playerHands[playerID];
@@ -273,19 +295,38 @@ public class MonopolyDealGameState extends AbstractGameState {
     @Override
     public double getGameScore(int playerId) {
         // TODO: What is this player's score (if any)?
-        return 0;
+//        return 0;
+        int count = 0;
+        for (PropertySet pSet:playerPropertySets[playerId]) {
+            if(pSet.isComplete){
+                count++;
+            }
+        }
+        return count/params.SETS_TO_WIN;
     }
 
+//    @Override
+//    protected boolean _equals(Object o) {
+//        // TODO: compare all variables in the state
+//        return o instanceof MonopolyDealGameState;
+//    }
+
     @Override
-    protected boolean _equals(Object o) {
-        // TODO: compare all variables in the state
-        return o instanceof MonopolyDealGameState;
+    public boolean _equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        MonopolyDealGameState state = (MonopolyDealGameState) o;
+        return actionsLeft == state.actionsLeft && turnStart == state.turnStart && Objects.equals(params, state.params) && Objects.equals(rnd, state.rnd) && Arrays.equals(playerHands, state.playerHands) && Arrays.equals(playerBanks, state.playerBanks) && Arrays.equals(playerPropertySets, state.playerPropertySets) && Objects.equals(drawPile, state.drawPile) && Objects.equals(discardPile, state.discardPile);
     }
 
     @Override
     public int hashCode() {
-        // TODO: include the hash code of all variables
-        return super.hashCode();
+        int result = Objects.hash(super.hashCode(), params, rnd, drawPile, discardPile, actionsLeft, turnStart);
+        result = 31 * result + Arrays.hashCode(playerHands);
+        result = 31 * result + Arrays.hashCode(playerBanks);
+        result = 31 * result + Arrays.hashCode(playerPropertySets);
+        return result;
     }
 
     public enum MonopolyDealGamePhase implements IGamePhase {

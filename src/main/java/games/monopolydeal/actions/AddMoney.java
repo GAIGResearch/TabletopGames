@@ -3,7 +3,10 @@ package games.monopolydeal.actions;
 import core.AbstractGameState;
 import core.actions.AbstractAction;
 import core.components.Component;
+import games.monopolydeal.MonopolyDealGameState;
 import games.monopolydeal.cards.MonopolyDealCard;
+
+import java.util.Objects;
 
 /**
  * <p>Actions are unit things players can do in the game (e.g. play a card, move a pawn, roll dice, attack etc.).</p>
@@ -37,6 +40,9 @@ public class AddMoney extends AbstractAction {
     @Override
     public boolean execute(AbstractGameState gs) {
         // TODO: Some functionality applied which changes the given game state.
+        MonopolyDealGameState state = (MonopolyDealGameState) gs;
+        state.addMoney(player,card);
+        state.useAction(1);
         return true;
     }
 
@@ -53,26 +59,21 @@ public class AddMoney extends AbstractAction {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        // TODO: compare all other variables in the class
-        if(obj instanceof AddMoney){
-            AddMoney temp = (AddMoney) obj;
-            if(temp.card == card && temp.player == player)
-                return true;
-        }
-        return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AddMoney addMoney = (AddMoney) o;
+        return player == addMoney.player && Objects.equals(card, addMoney.card);
     }
 
     @Override
     public int hashCode() {
-        // TODO: return the hash of all other variables in the class
-        return 0;
+        return Objects.hash(player, card);
     }
 
     @Override
     public String toString() {
-        // TODO: Replace with appropriate string, including any action parameters
-        return "My action name";
+        return "Add " + card.toString() + " to Bank of player " + player;
     }
 
     /**
