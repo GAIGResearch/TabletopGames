@@ -150,7 +150,7 @@ class DataProcessor {
         return null;
     }
 
-    void initAndWriteSegmentFile(int totalNGames) {
+    void initNextSegmentFile(int totalNGames) {
         updateSegmentOutfile(totalNGames);
     }
 

@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.stream.IntStream;
 
-public abstract class TicTacToeRLStateVector extends SimRLFeatureVector {
+public abstract class TicTacToeDimXStateVector extends SimRLFeatureVector {
 
     private final int dims;
     private final String[] names;
 
-    public TicTacToeRLStateVector(int dims) {
+    public TicTacToeDimXStateVector(int dims) {
         if (dims <= 0)
             throw new IllegalArgumentException("Cannot have non-positive dimension");
         this.dims = dims;

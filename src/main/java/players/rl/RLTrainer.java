@@ -77,7 +77,7 @@ class RLTrainer {
             players.add(new RLPlayer(playerParams, qwds, this));
 
         this.dp = new DataProcessor(qwds, params.gameName);
-        dp.initAndWriteSegmentFile(getNextSegmentThreshold(0));
+        dp.initNextSegmentFile(getNextSegmentThreshold(0));
 
         System.out.println("Starting Training!");
 
@@ -89,7 +89,7 @@ class RLTrainer {
                     useGUI ? new ActionController() : null, turnPause);
             if (shouldWriteSegment(i)) {
                 dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
-                dp.initAndWriteSegmentFile(getNextSegmentThreshold(i));
+                dp.initNextSegmentFile(getNextSegmentThreshold(i));
                 gamesPlayedSinceLastWrite = 0;
             }
             if (shouldUpdate(i)) {
@@ -104,7 +104,7 @@ class RLTrainer {
                 System.out.print("\r" + progress + "%");
         }
 
-        dp.initAndWriteSegmentFile(params.nGames);
+        dp.updateAndWriteFile(gamesPlayedSinceLastWrite);
         System.out.println("\tTraining complete!");
     }
 
@@ -158,11 +158,11 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams("TicTacToe", 2, 10000000);
-        params.writeSegmentType = WriteSegmentType.LOGARITHMIC;
-        params.writeSegmentFactor = 2;
-        params.writeSegmentMinIterations = 16384;
-        // params.updateXIterations = 10000;
+        RLTrainingParams params = new RLTrainingParams("TicTacToe", 2, 1611392);
+        params.writeSegmentType = WriteSegmentType.NONE;
+        // params.writeSegmentFactor = 2;
+        // params.writeSegmentMinIterations = 1024;
+        params.updateXIterations = 16113;
         params.alpha = 0.0001f;
         params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
@@ -174,7 +174,7 @@ class RLTrainer {
         RLParams playerParams = new RLParams(new TicTacToeDim3StateVector(), RLType.LinearApprox, seed);
         playerParams.epsilon = 0.375f;
 
-        String infilePath = null;
+        String infilePath = "/Users/qmul/Documents/msc-project/TabletopGames/src/main/java/players/rl/resources/qWeights/TicTacToe/LinearApprox/2023-07-04_00-23-30_n=8388608.json";
 
         RLTrainer trainer = new RLTrainer(params, playerParams, infilePath);
         trainer.runTraining();
