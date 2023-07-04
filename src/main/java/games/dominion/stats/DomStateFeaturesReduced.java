@@ -61,8 +61,4 @@ public class DomStateFeaturesReduced implements IStateFeatureVector {
         return names;
     }
 
-    @Override
-    public int getObservationSpace() {
-        return names.length;
-    }
 }

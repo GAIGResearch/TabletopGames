@@ -25,9 +25,4 @@ public class DBStateFeaturesReduced implements IStateFeatureVector {
     public String[] names() {
         return names;
     }
-
-    @Override
-    public int getObservationSpace() {
-        return names.length;
-    }
 }

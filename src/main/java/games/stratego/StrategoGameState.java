@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class StrategoGameState extends AbstractGameState implements IStateFeatureJSON {
+public class StrategoGameState extends AbstractGameState{
     GridBoard<Piece> gridBoard;
 
     /**
@@ -121,84 +121,5 @@ public class StrategoGameState extends AbstractGameState implements IStateFeatur
         System.out.println(gridBoard.toString());
     }
 
-    @Override
-    public String getObservationJson() {
-        return null;
-    }
 
-    @Override
-    // Gets the observartion vector
-    // Index = position on board
-    // Value = Piece Type
-    public double[] getObservationVector() {
-
-        // Scheme
-        // 1 Unknown Player Piece (I don't think this ever happens)
-        // 2 - 13 Player Piece Type
-        // -1 Unknown Opponent Piece
-        // -2 - -13 Opponent Piece Type
-        // 0 Empty Space
-        List<Piece> pieces = gridBoard.getComponents();
-        List<Double> values = new ArrayList<>();
-        int changeSignRed = getCurrentPlayer() == 0 ? 1 : -1;
-        int changeSignBlue = getCurrentPlayer() == 0 ? -1 : 1;
-
-        for (Piece piece : pieces) {
-            if (piece != null) {
-
-                // Player is Red
-                if (getCurrentPlayer() == 0) {
-
-                    // Player Pieces
-                    if (piece.getPieceAlliance() == Piece.Alliance.RED) {
-                        values.add((double) ((piece.getPieceType().ordinal() + 1)));
-                    }
-
-                    // Opponent Piece is known
-                    else if (piece.getPieceAlliance() == Piece.Alliance.BLUE && piece.isPieceKnown()) {
-                        values.add((double) ((piece.getPieceType().ordinal() + 1) * changeSignBlue));
-                    }
-
-                    // Enemy Unknown
-                    else {
-                        values.add(-1.0);
-                    }
-                }
-
-                // Player is Blue
-                else if (getCurrentPlayer() == 1) {
-                    if (piece.getPieceAlliance() == Piece.Alliance.BLUE) {
-                        values.add((double) ((piece.getPieceType().ordinal() + 1)));
-                    }
-
-                    // Opponent Piece is known
-                    else if (piece.getPieceAlliance() == Piece.Alliance.RED && piece.isPieceKnown()) {
-                        values.add((double) ((piece.getPieceType().ordinal() + 1) * changeSignRed));
-                    }
-
-                    // Enemy Unknown
-                    else {
-                        values.add(-1.0);
-                    }
-                }
-            }
-            // Empty Space
-            else {
-                values.add(0.0);
-            }
-        }
-
-        return values.stream().mapToDouble(Double::doubleValue).toArray();
-    }
-
-    @Override
-    // TODO This
-    public double[] getNormalizedObservationVector() {
-        return getObservationVector();
-    }
-
-    @Override
-    public int getObservationSpace() {
-        return 100;
-    }
 }

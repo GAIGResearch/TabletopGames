@@ -13,7 +13,7 @@ import utilities.Pair;
 import java.util.*;
 
 @SuppressWarnings("unchecked")
-public class SGGameState extends AbstractGameState implements IStateFeatureJSON {
+public class SGGameState extends AbstractGameState {
     List<Deck<SGCard>> playerHands;
     Deck<SGCard> drawPile;
     Deck<SGCard> discardPile;
@@ -278,95 +278,4 @@ public class SGGameState extends AbstractGameState implements IStateFeatureJSON 
                 super.hashCode() + "|";
     }
 
-    @Override
-    public String getObservationJson() {
-        JSONObject json = new JSONObject();
-        int playerID = getCurrentPlayer();
-        json.put("PlayerID", playerID);
-        json.put("nPlayers", getNPlayers());
-        json.put("rounds", getRoundCounter());
-        json.put("cardsInHand", getPlayerHands().get(playerID).toString());
-        json.put("playedCards", getPlayedCards().get(playerID).toString());
-        json.put("playerScore", playerScore[playerID]);
-        for (int i = 0; i < nPlayers; i++){
-            if (i != playerID){
-                json.put("opp" + i + "playedCards", getPlayedCards().get(i).toString());
-                json.put("opp" + i + "score", playerScore[i]);
-
-            }
-        }
-        return json.toJSONString();
-    }
-
-    @Override
-    public double[] getObservationVector() {
-        return new double[0];
-    }
-
-    @Override
-    public double[] getNormalizedObservationVector() {
-        // todo would be better in SGParameters -> at least generating a list of strings
-        int maxCardsInHand = ((SGParameters)getGameParameters()).nCards;
-        int nUnique = Arrays.stream(SGCard.SGCardType.values()).map(e -> e.getIconCountVariation().length).mapToInt(i -> i).sum();
-        String uniqueCards[] = new String[nUnique];
-        int counter = 0;
-        for (SGCard.SGCardType cardType: SGCard.SGCardType.values()){
-            if (cardType.getIconCountVariation().length == 1){
-                uniqueCards[counter] = cardType.name();
-                counter ++;
-            } else {
-                for (int i = 0; i < cardType.getIconCountVariation().length; i++) {
-                    uniqueCards[counter] = cardType.name() + "-" + cardType.getIconCountVariation()[i];
-                    counter++;
-                }
-            }
-        }
-        /* state representation */
-        // rounds
-        // cards in hand
-        // player score
-
-        // encode player hand - note that this could be one hot encoded
-        int playerHand[] = new int[maxCardsInHand];
-        List<SGCard> cardsInHand = playerHands.get(getCurrentPlayer()).getComponents();
-        for (int i = 0; i < cardsInHand.size(); i++){
-            playerHand[i] = Arrays.asList(uniqueCards).indexOf(cardsInHand.get(i).toString());
-        }
-
-        // played cards
-
-        // todo check if this include the counts
-        for (int i = 0; i < nPlayers; i++){
-            List<SGCard> playedCards = getPlayedCards().get(i).getComponents();
-//            Arrays.asList(uniqueCards).indexOf(cardsInHand.get(i).toString());
-        }
-
-
-        return new double[0];
-    }
-
-    public int[] encodeCardType(List<SGCard> deck){
-        int nUnique = (int) Arrays.stream(SGCard.SGCardType.values()).map(e -> e.getIconCountVariation().length).count();
-        String uniqueCards[] = new String[nUnique];
-        int counter = 0;
-        for (SGCard.SGCardType cardType: SGCard.SGCardType.values()){
-            for (int i = 0; i < cardType.getIconCountVariation().length; i++){
-                uniqueCards[counter] = cardType.name() + cardType.getIconCountVariation()[i];
-                counter ++;
-            }
-        }
-        // todo need to encode different variants correctly
-        for (SGCard cards: deck){
-            cards.getType();
-        }
-        for (Pair<SGCard.SGCardType, Integer> types : ((SGParameters) getGameParameters()).nCardsPerType.keySet()){
-
-        }
-        return new int[0];
-    }
-
-    @Override
-    public int getObservationSpace() {
-        return 0;
-    }
 }
