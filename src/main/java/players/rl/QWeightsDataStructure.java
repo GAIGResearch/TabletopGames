@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -15,6 +17,7 @@ import core.actions.AbstractAction;
 
 import players.rl.DataProcessor.Field;
 import players.rl.RLPlayer.RLType;
+import utilities.Pair;
 
 public abstract class QWeightsDataStructure {
 
@@ -31,7 +34,7 @@ public abstract class QWeightsDataStructure {
     protected RLParams playerParams;
     protected RLTrainingParams trainingParams;
 
-    private String gameFolderPath;
+    private String qWeightsFolderPath;
 
     public QWeightsDataStructure(String infileNameOrAbsPath) {
         this.infileName = infileNameOrAbsPath;
@@ -59,31 +62,36 @@ public abstract class QWeightsDataStructure {
         initialized = true;
     }
 
-    protected void initInFilePath(String defaultPath) {
-        infilePath = infileName == null ? null
-                : Paths.get(infileName).isAbsolute() ? Paths.get(infileName)
-                        : Paths.get(defaultPath, infileName).toAbsolutePath();
+    protected void initInfilePath() {
+        if (infileName == null) {
+            infilePath = null;
+            return;
+        }
+        Path[] pathsInOrderOfCheck = {
+                Paths.get(qWeightsFolderPath, infileName), // Just filename
+                Paths.get(RLPlayer.resourcesPath, infileName), // Path relative to resources folder
+                Paths.get(infileName), // Absolute path or relative to root folder
+        };
+        infilePath = Arrays.stream(pathsInOrderOfCheck).filter(p -> p.toFile().exists()).findFirst().get();
     }
 
-    public String getInfilePath() {
+    public String getInfilePathName() {
         return infilePath == null ? null : infilePath.toString();
     }
 
     private void setPaths(String gameName) {
-        this.gameFolderPath = getFolderPath(gameName);
-        initInFilePath(gameFolderPath);
+        this.qWeightsFolderPath = getFolderPath(gameName);
+        initInfilePath();
     }
 
     private JsonNode tryReadQWeightsFromFile() {
         initQWeightsEmpty();
-        if (getInfilePath() == null)
+        if (getInfilePathName() == null)
             return null;
         try {
-            File file = new File(getInfilePath());
+            File file = new File(getInfilePathName());
             JsonNode data = new ObjectMapper().readTree(file);
-            if (!matchesParameters(data.get("Metadata")))
-                throw new IllegalArgumentException(
-                        "Metadata in file does not match provided parameters: " + file.getAbsolutePath());
+            checkIfParametersMatch(data.get("Metadata"));
             StateMap stateMap = new StateMap() {
                 {
                     data.get("Weights").fields()
@@ -98,17 +106,21 @@ public abstract class QWeightsDataStructure {
         return null;
     }
 
-    private boolean matchesParameters(JsonNode metadata) {
-        if (!metadata.get(Field.QWeightsDataStructure.name()).asText()
-                .equals(this.getClass().getCanonicalName()))
-            return false;
-        if (!metadata.get(Field.Type.name()).asText()
-                .equals(playerParams.type.name()))
-            return false;
-        if (!metadata.get(Field.FeatureVector.name()).asText()
-                .equals(playerParams.features.getClass().getCanonicalName()))
-            return false;
-        return true;
+    private void checkIfParametersMatch(JsonNode metadata) {
+        List<Pair<String, String>> texts = new LinkedList<Pair<String, String>>();
+        // Type (Tabular, Linear Approx, etc.)
+        texts.add(new Pair<String, String>(
+                metadata.get(Field.Type.name()).asText(),
+                playerParams.type.name()));
+        // Feature Vector Class name
+        texts.add(new Pair<String, String>(
+                metadata.get(Field.FeatureVector.name()).asText(),
+                playerParams.getFeatureVectorCanonicalName()));
+        // Compare all entries and throw an error where relevant
+        for (int i = 0; i < texts.size(); i++)
+            if (texts.get(i).a != texts.get(i).b)
+                throw new IllegalArgumentException("Metadata in file does not match provided parameters:\n\t"
+                        + texts.get(i).a + " =/= " + texts.get(i).b);
     }
 
     protected void qLearning(RLPlayer player, List<TurnSAR> turns) {
@@ -140,8 +152,8 @@ public abstract class QWeightsDataStructure {
         return Paths.get(RLPlayer.resourcesPath, qWeightsFolderName, gameName, playerParams.type.name()).toString();
     }
 
-    public String getGameFolderPath() {
-        return gameFolderPath;
+    public String getQWeightsFolderPath() {
+        return qWeightsFolderPath;
     }
 
     public abstract RLType getType();

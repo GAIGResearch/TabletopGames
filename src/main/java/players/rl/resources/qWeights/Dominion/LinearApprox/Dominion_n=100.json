@@ -1,0 +1,28 @@
+{
+  "Metadata" : {
+    "Seed" : 1688554326489,
+    "Type" : "LinearApprox",
+    "Alpha" : 0.0010000000474974513,
+    "Gamma" : 0.875,
+    "Epsilon" : 0.375,
+    "Solver" : "Q_LEARNING",
+    "Heuristic" : "players.heuristics.WinOnlyHeuristic",
+    "FeatureVector" : "games.dominion.stats.DomStateFeaturesReduced",
+    "NGamesTotal" : 100,
+    "NGamesWithTheseSettings" : 100,
+    "ContinuedFrom" : null
+  },
+  "Weights" : {
+    "victoryPoints" : -0.003777997056571343,
+    "treasureValue" : -0.01677453607667648,
+    "actionCards" : 0.0,
+    "treasureInHand" : -0.017089265791692475,
+    "actionsLeft" : 0.0,
+    "buysLeft" : -0.010343589903048468,
+    "actionCardsInHand" : 0.0,
+    "provinceCount" : 0.002163174046924662,
+    "duchyCount" : -0.002551362629474278,
+    "estateCount" : -0.036808265197886034,
+    "totalCards" : -0.06294771884907509
+  }
+}

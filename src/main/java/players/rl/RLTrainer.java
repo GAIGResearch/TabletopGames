@@ -11,7 +11,7 @@ import core.Game;
 import core.actions.AbstractAction;
 import evaluation.listeners.IGameListener;
 import games.GameType;
-import games.dotsboxes.DBStateFeaturesReduced;
+import games.dominion.stats.DomStateFeaturesReduced;
 import players.heuristics.WinOnlyHeuristic;
 import players.human.ActionController;
 import players.rl.RLPlayer.RLType;
@@ -38,8 +38,8 @@ class RLTrainer {
 
     void prematurelySetupQWDS() {
         // Note: This is done because these functions are usually called from RLPlayer
-        // inside RLPlayer::initializePlayer. However, we need this information before
-        // that call, and are therefore calling these functions manually from here
+        // inside RLPlayer::initializePlayer. However, when training this information is
+        // needed before that call, and we therefore call these functions manually here.
         qwds.setPlayerParams(playerParams);
         qwds.setTrainingParams(params);
         qwds.initialize(params.gameName);
@@ -150,7 +150,7 @@ class RLTrainer {
     }
 
     public static void main(String[] args) {
-        RLTrainingParams params = new RLTrainingParams("DotsAndBoxes", 2, 10000);
+        RLTrainingParams params = new RLTrainingParams("Dominion", 4, 10000);
         params.writeSegmentType = WriteSegmentType.LOGARITHMIC;
         params.writeSegmentFactor = 10;
         params.writeSegmentMinIterations = 100;
@@ -159,12 +159,12 @@ class RLTrainer {
         params.gamma = 0.875f;
         params.solver = Solver.Q_LEARNING;
         params.heuristic = new WinOnlyHeuristic();
-        params.outfilePrefix = "DABReduced";
+        params.outfilePrefix = "Dominion";
 
         long seed = System.currentTimeMillis();
         // long seed = 1688424067512l;
 
-        RLParams playerParams = new RLParams(new DBStateFeaturesReduced(), RLType.LinearApprox, seed);
+        RLParams playerParams = new RLParams(new DomStateFeaturesReduced(), RLType.LinearApprox, seed);
         playerParams.epsilon = 0.375f;
 
         String infilePath = null;

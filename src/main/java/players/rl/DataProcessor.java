@@ -36,8 +36,6 @@ class DataProcessor {
         Solver,
         // The class name of the used IStateHeuristic
         Heuristic,
-        // The class name of the used players.rl.QWeightsDataStructure
-        QWeightsDataStructure,
         // The class name of the used players.rl.RLFeatureVector
         FeatureVector,
         // The total number of games played by this entry
@@ -84,7 +82,7 @@ class DataProcessor {
     }
 
     private void initMetadata() {
-        ObjectNode existingMetadata = readFileMetadata(qwds.getInfilePath());
+        ObjectNode existingMetadata = readFileMetadata(qwds.getInfilePathName());
         nGamesPlayedFromInfile = existingMetadata == null ? 0 : existingMetadata.get(Field.NGamesTotal.name()).asInt();
 
         ObjectMapper om = new ObjectMapper();
@@ -108,7 +106,6 @@ class DataProcessor {
                 .put(Field.Epsilon.name(), qwds.playerParams.epsilon)
                 .put(Field.Solver.name(), qwds.trainingParams.solver.name())
                 .put(Field.Heuristic.name(), qwds.trainingParams.heuristic.getClass().getCanonicalName())
-                .put(Field.QWeightsDataStructure.name(), qwds.getClass().getCanonicalName())
                 .put(Field.FeatureVector.name(), qwds.playerParams.getFeatureVectorCanonicalName())
                 .put(Field.NGamesTotal.name(), nGamesPlayedFromInfile)
                 .put(Field.NGamesWithTheseSettings.name(), 0);

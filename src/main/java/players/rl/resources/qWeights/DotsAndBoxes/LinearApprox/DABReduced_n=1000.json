@@ -1,23 +1,23 @@
 {
   "Metadata" : {
-    "Seed": 1688480330405,
-    "Type": "LinearApprox",
-    "Alpha": 0.0010000000474974513,
-    "Gamma": 0.875,
-    "Epsilon": 0.375,
-    "Solver": "Q_LEARNING",
-    "Heuristic": "players.heuristics.WinOnlyHeuristic",
-    "QWeightsDataStructure": "players.rl.QWDSLinearApprox",
-    "FeatureVector": "players.rl.utils.ApplyActionStateFeatureVector",
-    "NGamesTotal": 1000,
-    "NGamesWithTheseSettings": 1000,
-    "ContinuedFrom": null
+    "Seed" : 1688547917241,
+    "Type" : "LinearApprox",
+    "Alpha" : 0.0010000000474974513,
+    "Gamma" : 0.875,
+    "Epsilon" : 0.375,
+    "Solver" : "Q_LEARNING",
+    "Heuristic" : "players.heuristics.WinOnlyHeuristic",
+    "QWeightsDataStructure" : "players.rl.QWDSLinearApprox",
+    "FeatureVector" : "games.dotsboxes.DBStateFeaturesReduced",
+    "NGamesTotal" : 1000,
+    "NGamesWithTheseSettings" : 1000,
+    "ContinuedFrom" : null
   },
   "Weights" : {
-    "POINT_ADVANTAGE" : 0.3463347183127479,
-    "POINTS" : -0.04693461281982485,
-    "THREE_BOXES" : 0.0669471082408573,
-    "TWO_BOXES" : -0.04846567763223153,
-    "ORDINAL" : -0.0022848148521754895
+    "POINT_ADVANTAGE" : 0.4850378218759646,
+    "POINTS" : 0.09588703301614533,
+    "THREE_BOXES" : 0.051319602154587925,
+    "TWO_BOXES" : -1.597795223571171E-5,
+    "ORDINAL" : 0.042699902858918365
   }
 }

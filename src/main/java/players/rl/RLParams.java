@@ -64,6 +64,10 @@ public class RLParams extends PlayerParameters {
         return retValue;
     }
 
+    // This should be used instead of this.features.getClass().getCanonicalName(),
+    // since a feature vector extending IStateFeatureVector gets wrapped in another
+    // class. If this.features.getClass().getCanonicalName() was used,the wrapper
+    // class would be returned instead, wheras this prints the wrapped class instead
     public String getFeatureVectorCanonicalName() {
         if (features instanceof ApplyActionStateFeatureVector)
             return ((ApplyActionStateFeatureVector) features).getFeatureVectorCanonicalName();
