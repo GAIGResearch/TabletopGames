@@ -1,17 +1,28 @@
 package games.catan;
 
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 import core.actions.DoNothing;
-import core.components.Card;
 import core.components.Counter;
 import core.components.Deck;
-import games.catan.actions.*;
-import games.catan.components.Settlement;
+import core.components.Edge;
+import games.catan.actions.build.*;
+import games.catan.actions.dev.*;
+import games.catan.actions.discard.DiscardResources;
+import games.catan.actions.robber.MoveRobber;
+import games.catan.actions.robber.MoveRobberAndSteal;
+import games.catan.actions.setup.DeepPlaceSettlementThenRoad;
+import games.catan.actions.setup.PlaceSettlementWithRoad;
+import games.catan.actions.trade.*;
+import games.catan.components.Building;
+import games.catan.components.CatanCard;
+import games.catan.components.CatanTile;
+import utilities.Utils;
 
 import java.util.*;
 
-import static core.CoreConstants.playerHandHash;
-import static games.catan.CatanConstants.cardType;
+import static games.catan.CatanConstants.HEX_SIDES;
+import static games.catan.components.Building.Type.Settlement;
 
 public class CatanActionFactory {
     /**
@@ -19,27 +30,42 @@ public class CatanActionFactory {
      *
      * @return - ArrayList, various action types (unique).
      */
-    static List<AbstractAction> getSetupActions(CatanGameState gs) {
-        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
-        int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
-        int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
-        ArrayList<AbstractAction> actions = new ArrayList();
+    static List<AbstractAction> getSetupActions(CatanGameState gs, ActionSpace actionSpace, int player) {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
         // find possible settlement locations and propose them as actions
         CatanTile[][] board = gs.getBoard();
-        if (turnStep == 0) {
-            for (int x = 0; x < board.length; x++) {
-                for (int y = 0; y < board[x].length; y++) {
-                    CatanTile tile = board[x][y];
-                    for (int i = 0; i < 6; i++) {
-                        Settlement settlement = tile.getSettlements()[i];
-
-                        // where it is legal to place tile then it can be placed from there
-                        if (settlement.getOwner() == -1 &&
-                                !(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))) {
-//                            actions.add(new BuildSettlement_v2(settlement, activePlayer));
-//                            actions.add(new BuildSettlement(x, y, i, activePlayer));
+        HashSet<Integer> settlementsAdded = new HashSet<>();
+        for (int x = 0; x < board.length; x++) {
+            for (int y = 0; y < board[x].length; y++) {
+                CatanTile tile = board[x][y];
+                // where it is legal to place tile then it can be placed from there
+                if (!(tile.getTileType().equals(CatanTile.TileType.SEA) ||
+                    tile.getTileType().equals(CatanTile.TileType.DESERT))) {
+                    for (int i = 0; i < HEX_SIDES; i++) {
+                        Building settlement = gs.getBuilding(tile, i);
+                        if (!settlementsAdded.contains(settlement.getComponentID()) && settlement.getOwnerId() == -1) {
                             if (gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
-                                actions.add(new PlaceSettlementWithRoad(x, y, i, activePlayer));
+                                settlementsAdded.add(settlement.getComponentID());
+                                if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+                                    int[][] coords = tile.getNeighboursOnVertex(i);
+                                    int edge = (HEX_SIDES+i-1)%HEX_SIDES;
+                                    Edge edgeObj = gs.getRoad(settlement, tile, edge);
+                                    if (edgeObj.getOwnerId() == -1) {
+                                        actions.add(new PlaceSettlementWithRoad(x, y, i, edge, player));
+                                        for (int k = 0; k < coords.length; k++) {
+                                            int[] neighbour = coords[k];
+                                            int vertex = (i + 2*(k+1)) % HEX_SIDES;
+                                            edge = (HEX_SIDES+vertex-1)%HEX_SIDES;
+                                            CatanTile nTile = board[neighbour[0]][neighbour[1]];
+                                            edgeObj = gs.getRoad(nTile, vertex, edge);
+                                            if (edgeObj != null && edgeObj.getOwnerId() == -1) {
+                                                actions.add(new PlaceSettlementWithRoad(neighbour[0], neighbour[1], vertex, edge, player));
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    actions.add(new DeepPlaceSettlementThenRoad(x, y, i, player));
+                                }
                             }
                         }
                     }
@@ -50,22 +76,27 @@ public class CatanActionFactory {
         return actions;
     }
 
-    /**
-     * Calculates regular Player actions in the Trade stage
-     *
-     * @return - ArrayList, various action types (unique).
-     */
-    static List<AbstractAction> getTradeStageActions(CatanGameState gs) {
-        CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
+    static List<AbstractAction> getPlayerTradeActions(CatanGameState gs, ActionSpace actionSpace, int player) {
+        List<AbstractAction> actions = new ArrayList<>();
+        OfferPlayerTrade opt = (OfferPlayerTrade) gs.tradeOffer;
 
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        actions.add(new DoNothing());
-        actions.addAll(getTradeActions(gs));
-        actions.addAll(getPlayerTradeOfferActions(gs));
-        if (!cto.isDevelopmentCardPlayed()) {
-            actions.addAll(getDevCardActions(gs));
+        if (opt != null) {
+            // Reject the trade offer
+            actions.add(new EndNegotiation(player, opt.offeringPlayerID));
+
+            // Accept the offer if legal exchange
+            if (gs.checkCost(opt.resourceOffered, opt.nOffered, opt.offeringPlayerID) && gs.checkCost(opt.resourceRequested, opt.nRequested, opt.otherPlayerID)) {
+                actions.add(new AcceptTrade(player, opt.resourceOffered, opt.nOffered, opt.resourceRequested, opt.nRequested, opt.offeringPlayerID, opt.otherPlayerID));
+            }
+
+            // Or counter-offer, if we've not already done too many steps
+            if (gs.nTradesThisTurn < ((CatanParameters)gs.getGameParameters()).max_negotiation_count) {
+                actions.addAll(CatanActionFactory.getPlayerTradeOfferActions(gs, actionSpace, player, opt));
+            }
+        } else if (gs.getNResourcesInHand(player) > 0) {
+            // Create a new offer
+            actions.addAll(getPlayerTradeOfferActions(gs, actionSpace, player, null));
         }
-
         return actions;
     }
 
@@ -73,319 +104,126 @@ public class CatanActionFactory {
      * Generates PlayerTradeOffers relating to single type trades
      * i.e Lumber for Grain, Brick for Stone
      *
-     * @param gs
-     * @return - ArrayList, PlayerTradeOffer type (unique).
+     * @param gs - current state
+     * @param actionSpace - action space type
+     * @param playerID - active player actions are computed for (and has visibility of their own resources)
+     * @param tradeOffer - current trade offer to reply to. If null, a new one will be created from scratch.
+     * @return - ArrayList of OfferPlayerTrade actions
      */
-    static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs) {
+    public static List<AbstractAction> getPlayerTradeOfferActions(CatanGameState gs, ActionSpace actionSpace, int playerID, OfferPlayerTrade tradeOffer) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
-        int[] resources = gs.getPlayerResources(gs.getCurrentPlayer());
-        int exchangeRate = ((CatanParameters) gs.getGameParameters()).default_exchange_rate;
+        HashMap<CatanParameters.Resource, Counter> resources = gs.getPlayerResources(playerID);
         int n_players = gs.getNPlayers();
-        int currentPlayer = gs.getCurrentPlayer();
-        int[] resourcesOffered = new int[5];
-        int[] resourcesRequested = new int[5];
-
-        for (int playerIndex = 0; playerIndex < n_players; playerIndex++) { // loop through players
-            if (playerIndex != currentPlayer) { // exclude current player
-                int[] otherPlayerInventory = gs.getPlayerResources(playerIndex);
-                for (int resourceToOfferIndex = 0; resourceToOfferIndex < resources.length; resourceToOfferIndex++) { // loop through current players resources to offer
-                    if (resources[resourceToOfferIndex] > 0) { // don't continue if the player has none of the current resource
-                        for (int resourceToRequestIndex = 0; resourceToRequestIndex < resources.length; resourceToRequestIndex++) { // loop through current players resources to request
-                            if (resourceToRequestIndex != resourceToOfferIndex) { // exclude the currently offered resource
-                                int maxToRequest = otherPlayerInventory[resourceToRequestIndex];
-                                if (maxToRequest == 0)
-                                    continue;
-                                // we simplify this to be aggressive in our initial bid, on the basis that we are open to a counter-offer.
-                                // Effectively this creates one bid per player and possible pair of resources (which slightly reduces the combinatorial explosion of actions here)
-                                int offerQuantity = Math.max(1, maxToRequest / exchangeRate); // offer at least one
-                                offerQuantity = Math.min(offerQuantity, resources[resourceToOfferIndex]); // do not offer more than we have
-                                resourcesOffered[resourceToOfferIndex] = offerQuantity;
-                                resourcesRequested[resourceToRequestIndex] = Math.min(maxToRequest, offerQuantity * exchangeRate);
-                                actions.add(new OfferPlayerTrade(resourcesOffered.clone(), resourcesRequested.clone(), currentPlayer, playerIndex, 1)); // create the action
-                                Arrays.fill(resourcesOffered, 0);
-                                Arrays.fill(resourcesRequested, 0);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return actions;
-    }
-
-    static List<AbstractAction> getTradeReactionActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
-
-        actions.add(new EndNegotiation()); // rejects the trade offer
-        if (offeredPlayerTrade.getNegotiationCount() < ((CatanParameters) gs.getGameParameters()).max_negotiation_count + 1) { // check that the maximum number of negotiations has not been exceeded to prevent AI looping
-            actions.addAll(getResponsePlayerTradeOfferActions(gs));
-        }
-        actions.addAll(getAcceptTradeActions(gs));
-
-        return actions;
-    }
-
-    static List<AbstractAction> getAcceptTradeActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
-        int[] resources = gs.getPlayerResources(offeredPlayerTrade.otherPlayerID);
-
-        if (CatanGameState.checkCost(resources, offeredPlayerTrade.getResourcesRequested())) {
-            actions.add(new AcceptTrade(offeredPlayerTrade.offeringPlayerID, offeredPlayerTrade.otherPlayerID,
-                    offeredPlayerTrade.resourcesRequested, offeredPlayerTrade.resourcesOffered));
-        }
-
-        return actions;
-    }
-
-    /**
-     * Generates PlayerTradeOffer actions that act as renegotiation on an existing trade offer
-     * This function only generates actions that involve changing the quantities of the offered/requested resources for
-     * single resource type trades
-     *
-     * @param gs
-     * @return
-     */
-    static List<AbstractAction> getResponsePlayerTradeOfferActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        OfferPlayerTrade offeredPlayerTrade = gs.getCurrentTradeOffer();
-        if (offeredPlayerTrade.otherPlayerID != gs.getCurrentPlayer())
-            throw new AssertionError("We should always be alternating Offer and Counter-Offer");
-        int exchangeRate = ((CatanParameters) gs.getGameParameters()).default_exchange_rate;
-        int[] playerResources = gs.getPlayerResources(gs.getCurrentPlayer());
-        int[] resourcesOffered = offeredPlayerTrade.getResourcesOffered();
-        int[] resourcesRequested = offeredPlayerTrade.getResourcesRequested();
-        int[] resourcesToOffer = new int[5];
-        int[] resourcesToRequest = new int[5];
-        int resourceRequestedIndex = 0;
-        int resourceOfferedIndex = 0;
-
-        for (int i = 0; i < resourcesOffered.length; i++) { // Sets the index of which resources are involved in the trade
-            if (resourcesOffered[i] > 0) {
-                resourceOfferedIndex = i;
-            }
-            if (resourcesRequested[i] > 0) {
-                resourceRequestedIndex = i;
-            }
-        }
-
-        int maxRequest = gs.getPlayerResources(offeredPlayerTrade.offeringPlayerID)[resourceOfferedIndex];
-        // TODO: Once we have partial observability of player hands, we need to modify this to take account of uncertainty (add new type of UNKNOWN in result)
-        for (int quantityAvailableToOffer = 1; quantityAvailableToOffer < playerResources[resourceRequestedIndex] + 1; quantityAvailableToOffer++) { // loop through the quantity of resources to offer
-            for (int quantityAvailableToRequest = 1; quantityAvailableToRequest <= maxRequest; quantityAvailableToRequest++) { // loop to generate all possible combinations of offer for the current resource pair
-                if (!(quantityAvailableToOffer == resourcesRequested[resourceRequestedIndex] && quantityAvailableToRequest == resourcesOffered[resourceOfferedIndex])) {
-                    resourcesToOffer[resourceRequestedIndex] = quantityAvailableToOffer;
-                    resourcesToRequest[resourceOfferedIndex] = quantityAvailableToRequest;
-                    if (!(Arrays.equals(resourcesToOffer, resourcesRequested) && Arrays.equals(resourcesToRequest, resourcesOffered))) { // ensures the trade offer is not the same as the existing trade offer
-                        actions.add(new OfferPlayerTrade(resourcesToOffer.clone(), resourcesToRequest.clone(), offeredPlayerTrade.getOtherPlayerID(), offeredPlayerTrade.getOfferingPlayerID(), offeredPlayerTrade.getNegotiationCount() + 1)); // create the action
-                    }
-                    Arrays.fill(resourcesToOffer, 0);
-                    Arrays.fill(resourcesToRequest, 0);
-                }
-            }
-        }
-
-
-        return actions;
-    }
-
-    static List<AbstractAction> getStealActions(CatanGameState gs) {
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        int[] stealingFrom = {0, 0, 0, 0};
-        CatanTile[][] board = gs.getBoard();
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
-                if (tile.hasRobber()) {
-                    Settlement[] settlements = tile.getSettlements();
-                    for (int i = 0; i < settlements.length; i++) {
-                        if (settlements[i].getOwner() != -1 && settlements[i].getOwner() != gs.getCurrentPlayer() && stealingFrom[settlements[i].getOwner()] == 0) {
-                            stealingFrom[settlements[i].getOwner()] = 1;
-                            actions.add(new StealResource(settlements[i].getOwner()));
-                        }
-                    }
-                }
-            }
-        }
-        if (actions.size() == 0) {
-            actions.add(new DoNothing());
-        }
-        return actions;
-    }
-
-    /**
-     * Calculates regular Player actions in Buy stage
-     *
-     * @return - ArrayList, various action types (unique).
-     */
-    static List<AbstractAction> getBuildStageActions(CatanGameState gs) {
-        CatanTurnOrder cto = (CatanTurnOrder) gs.getTurnOrder();
-
-        ArrayList<AbstractAction> actions = new ArrayList();
-        actions.add(new DoNothing());
-        actions.addAll(getBuyActions(gs));
-
-        if (!cto.isDevelopmentCardPlayed()) {
-            actions.addAll(getDevCardActions(gs));
-        }
-
-        return actions;
-    }
-
-    static List<AbstractAction> getDiscardActions(CatanGameState gs) {
-        final int DISCARD_COMBINATION_LIMIT = 20;
-        ArrayList<AbstractAction> actions = new ArrayList<>();
-        Deck<Card> playerResourceDeck = (Deck<Card>) gs.getComponentActingPlayer(playerHandHash);
-
-        int deckSize = playerResourceDeck.getSize();
-        if (deckSize <= ((CatanParameters) gs.getGameParameters()).max_cards_without_discard) {
-            actions.add(new DoNothing());
-            return actions;
-        } else {
-            int n = playerResourceDeck.getSize();
-            int r = n / 2; // remove half of the resources
-            if (deckSize < DISCARD_COMBINATION_LIMIT) {
-                int[] resources = new int[5];
-                playerResourceDeck.stream().forEach(card -> resources[CatanParameters.Resources.valueOf(card.getProperty(cardType).toString()).ordinal()] += 1);
-                List<int[]> combinations = new ArrayList<>();
-                //TODO identify which combinations method is faster
-//                for( int brickIndex = 0; brickIndex <= resources[0]; brickIndex++){
-//                    if(brickIndex == r){
-//                        combinations.add(new int[]{brickIndex, 0, 0, 0, 0});
-//                    } else if(brickIndex > r){
-//                        break;
-//                    }
-//                    for( int lumberIndex = 0; lumberIndex <= resources[1]; lumberIndex++){
-//                        if(brickIndex + lumberIndex == r){
-//                            combinations.add(new int[]{brickIndex, lumberIndex, 0, 0, 0});
-//                        } else if(brickIndex + lumberIndex > r){
-//                            break;
-//                        }
-//                        for( int oreIndex = 0; oreIndex <= resources[2]; oreIndex++){
-//                            if(brickIndex + lumberIndex + oreIndex == r){
-//                                combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, 0, 0});
-//                            } else if(brickIndex + lumberIndex + oreIndex > r){
-//                                break;
-//                            }
-//                            for( int grainIndex = 0; grainIndex <= resources[3]; grainIndex++){
-//                                if(brickIndex + lumberIndex + oreIndex + grainIndex == r){
-//                                    combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, grainIndex, 0});
-//                                } else if(brickIndex + lumberIndex + oreIndex + grainIndex > r){
-//                                    break;
-//                                }
-//                                for( int woolIndex = 0; woolIndex <= resources[4]; woolIndex++){
-//                                    if(brickIndex + lumberIndex + oreIndex + grainIndex + woolIndex == r){
-//                                        combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, grainIndex, woolIndex});
-//                                    } else if(brickIndex + lumberIndex + oreIndex + grainIndex + woolIndex > r){
-//                                        break;
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-
-                for (int brickIndex = resources[0]; brickIndex >= 0; brickIndex--) {
-                    if (brickIndex == r) {
-                        combinations.add(new int[]{brickIndex, 0, 0, 0, 0});
-                    }
-                    if (brickIndex >= r) {
-                        continue;
-                    }
-                    for (int lumberIndex = resources[1]; lumberIndex >= 0; lumberIndex--) {
-                        if (brickIndex + lumberIndex == r) {
-                            combinations.add(new int[]{brickIndex, lumberIndex, 0, 0, 0});
-                        }
-                        if (brickIndex + lumberIndex >= r) {
-                            continue;
-                        }
-                        for (int oreIndex = resources[2]; oreIndex >= 0; oreIndex--) {
-                            if (brickIndex + lumberIndex + oreIndex == r) {
-                                combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, 0, 0});
-                            }
-                            if (brickIndex + lumberIndex + oreIndex >= r) {
-                                continue;
-                            }
-                            for (int grainIndex = resources[3]; grainIndex >= 0; grainIndex--) {
-                                if (brickIndex + lumberIndex + oreIndex + grainIndex == r) {
-                                    combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, grainIndex, 0});
-                                }
-                                if (brickIndex + lumberIndex + oreIndex + grainIndex >= r) {
-                                    continue;
-                                }
-                                for (int woolIndex = resources[4]; woolIndex >= 0; woolIndex--) {
-                                    if (brickIndex + lumberIndex + oreIndex + grainIndex + woolIndex == r) {
-                                        combinations.add(new int[]{brickIndex, lumberIndex, oreIndex, grainIndex, woolIndex});
-                                    } else if (brickIndex + lumberIndex + oreIndex + grainIndex + woolIndex < r) {
-                                        break;
+        if (tradeOffer == null) {
+            // Construct new offer
+            List<AbstractAction> offers = new ArrayList<>();
+            for (int playerIndex = 0; playerIndex < n_players; playerIndex++) { // loop through players
+                if (playerIndex != playerID && gs.getNResourcesInHand(playerIndex) > 0) { // exclude current player and players with no resources in hand
+                    for (CatanParameters.Resource resToOffer : CatanParameters.Resource.values()) {
+                        if (resToOffer == CatanParameters.Resource.WILD) continue;
+                        int maxToOffer = resources.get(resToOffer).getValue();
+                        if (maxToOffer > 0) {
+                            for (CatanParameters.Resource resToRequest : CatanParameters.Resource.values()) {
+                                if (resToRequest == CatanParameters.Resource.WILD) continue;
+                                if (resToRequest != resToOffer) {
+                                    int maxToRequest = ((CatanParameters) gs.getGameParameters()).max_resources_request_trade;
+                                    if (maxToRequest > 0) { // exclude the currently offered resource
+                                        offers.addAll(createTradeOfferActions(playerID, playerIndex, resToOffer, resToRequest, maxToOffer, maxToRequest, -1, -1, OfferPlayerTrade.Stage.Offer));
                                     }
                                 }
                             }
                         }
                     }
                 }
-                CatanParameters.Resources[] values = CatanParameters.Resources.values();
-                for (int[] combination : combinations) {
-                    CatanParameters.Resources[] cardsToDiscard = new CatanParameters.Resources[r];
-                    int counter = 0;
-                    for (int i = 0; i < combination.length; i++) {
-                        for (int k = 0; k < combination[i]; k++) {
-                            cardsToDiscard[counter] = values[i];
-                            counter++;
-                        }
-                    }
-                    actions.add(new DiscardCards(cardsToDiscard, gs.getCurrentPlayer()));
+            }
+            if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Default is flat
+                actions.addAll(offers);
+            } else if (offers.size() > 0) {
+                // Deep new offer construct
+                actions.add(new DeepConstructNewOffer(playerID));
+            }
+        } else {
+            // Adjust existing offer
+            List<AbstractAction> allCounterOffers = new ArrayList<>();
+            int maxToOffer = tradeOffer.offeringPlayerID == playerID ? resources.get(tradeOffer.resourceOffered).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade;
+            int maxToRequest = tradeOffer.otherPlayerID == playerID ? resources.get(tradeOffer.resourceRequested).getValue() : ((CatanParameters) gs.getGameParameters()).max_resources_request_trade;
+            if (maxToOffer > 0 && maxToRequest > 0) {
+                allCounterOffers = createTradeOfferActions(tradeOffer.offeringPlayerID, tradeOffer.otherPlayerID,
+                        tradeOffer.resourceOffered, tradeOffer.resourceRequested, maxToOffer, maxToRequest,
+                        tradeOffer.nOffered, tradeOffer.nRequested,
+                        tradeOffer.stage == OfferPlayerTrade.Stage.Offer ? OfferPlayerTrade.Stage.CounterOffer : OfferPlayerTrade.Stage.Offer);
+            }
+            if (!allCounterOffers.isEmpty()) {
+                if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Default is flat
+                    actions.addAll(allCounterOffers);
+                } else {
+                    // Deep counter-offer construct. Only add if there exists a counter-offer, we still need to calculate all options
+                    actions.add(new DeepCounterOffer(tradeOffer.stage, playerID));
                 }
-            } else {
-                // Current solution to memory issue, random picks cards to discard if player has over DISCARD_COMBINATION_LIMIT
-                Random rnd = new Random();
-                CatanParameters.Resources[] cardsToDiscard = new CatanParameters.Resources[r];
-                int[] combination = new int[r];
-                for (int i = 0; i < combination.length; i++) {
-                    boolean comb_not_set = true;
-                    while (comb_not_set) {
-                        int temp = rnd.nextInt(deckSize);
-                        if (Arrays.stream(combination).sequential().noneMatch(value -> value == temp)) {
-                            combination[i] = temp;
-                            comb_not_set = false;
-                        }
-                    }
-                }
-                for (int i = 0; i < r; i++) {
-                    cardsToDiscard[i] = CatanParameters.Resources.valueOf(playerResourceDeck.get(combination[i]).getProperty(CatanConstants.cardType).toString());
-                }
-                actions.add(new DiscardCards(cardsToDiscard, gs.getCurrentPlayer()));
             }
         }
         return actions;
     }
 
     /**
-     * Returns all the possible index combination of an array.
-     *
-     * @param data        - a list of arrays that gets overwritten and contains the indices
-     * @param buffer      - current buffer of indices
-     * @param bufferIndex - current index in buffer
-     * @param dataIndex   - current index in data
-     * @param dataLength  - length of the original data array
-     * @param r           - number of entries to return per array
+     * Helper function that lists all combinations of trade offers, from 1 to maxToOffer of resource offered, and from 1 to maxToRequest for resource requested
+     * @param offeringPlayer - player offering trade originally (may not be active player)
+     * @param otherPlayer - player involved in trade (that resources are requested from)
+     * @param resourceToOffer - resource to offer
+     * @param resourceToRequest - resource to request
+     * @param maxToOffer - maximum number of resources that should be offered
+     * @param maxToRequest - maximum number of resources that should be requested
+     * @param nOffered - number of resources offered previously, -1 if not yet decided
+     * @param nRequested - number of resources requested previously, -1 if not yet decided
+     * @return actions - list of actions
      */
-    static void getCombination(List<int[]> data, int buffer[], int bufferIndex, int dataIndex, int dataLength, int r) {
-        // buffer is ready to be added to data
-        if (bufferIndex == r) {
-            data.add(buffer.clone());
-            return;
+    private static List<AbstractAction> createTradeOfferActions(int offeringPlayer, int otherPlayer,
+                                                CatanParameters.Resource resourceToOffer,
+                                                CatanParameters.Resource resourceToRequest,
+                                                int maxToOffer, int maxToRequest,
+                                                int nOffered, int nRequested, OfferPlayerTrade.Stage stage) {
+        List<AbstractAction> actions = new ArrayList<>();
+        for (int offerQuantity = 1; offerQuantity <= maxToOffer; offerQuantity++) {
+            for (int requestQuantity = 1; requestQuantity <= maxToRequest; requestQuantity++) {
+                if (nOffered != offerQuantity || nRequested != requestQuantity) {
+                    actions.add(new OfferPlayerTrade(stage, resourceToOffer, offerQuantity, resourceToRequest, requestQuantity, offeringPlayer, otherPlayer));
+                }
+            }
         }
-        // no more elements to add to the buffer
-        if (dataIndex >= dataLength) {
-            return;
+        return actions;
+    }
+
+    /**
+     * Combinations of resources in hand to discard.
+     * @param gs - game state
+     * @param actionSpace - action space type
+     * @param player - player to discard resources
+     * @param nToDiscard - how many to discard
+     * @return - list of actions discarding cards.
+     */
+    public static List<AbstractAction> getDiscardActions(CatanGameState gs, ActionSpace actionSpace, int player, int nToDiscard) {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+            int nResources = gs.getNResourcesInHand(player);
+            int[] resIdx = new int[nResources];
+            for (int i = 0; i < nResources; i++) resIdx[i] = i;
+            List<int[]> combinations = Utils.generateCombinations(resIdx, nResources);
+            for (int[] combination : combinations) {
+                CatanParameters.Resource[] cardsToDiscard = new CatanParameters.Resource[nToDiscard];
+                for (int i = 0; i < nToDiscard; i++) {
+                    cardsToDiscard[i] = gs.pickResourceFromHand(player, combination[i]);
+                }
+                actions.add(new DiscardResources(cardsToDiscard, player));
+            }
+        } else {
+            // Deep: Choose 1 resource at a time
+            for (CatanParameters.Resource resource: CatanParameters.Resource.values()) {
+                if (resource == CatanParameters.Resource.WILD) continue;
+                if (gs.getPlayerResources(player).get(resource).getValue() > 0) actions.add(new DiscardResources(new CatanParameters.Resource[]{resource}, player));
+            }
         }
-        buffer[bufferIndex] = dataIndex;
-        // iterate with including current bufferIndex
-        getCombination(data, buffer, bufferIndex + 1, dataIndex + 1, dataLength, r);
-        // iterate with excluding current bufferIndex
-        getCombination(data, buffer, bufferIndex, dataIndex + 1, dataLength, r);
+        if (actions.size() == 0) actions.add(new DoNothing());
+        return actions;
     }
 
     /**
@@ -393,181 +231,299 @@ public class CatanActionFactory {
      *
      * @return - ArrayList, various action types (unique).
      */
-    static List<AbstractAction> getRobberActions(CatanGameState gs) {
+    static List<AbstractAction> getRobberActions(CatanGameState gs, ActionSpace actionSpace, int player, boolean knight) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
         CatanTile[][] board = gs.getBoard();
         for (int x = 0; x < board.length; x++) {
             for (int y = 0; y < board[x].length; y++) {
                 CatanTile tile = board[x][y];
-                if (!(tile.getType().equals(CatanParameters.TileType.SEA)))
-                    actions.add(new MoveRobber(x, y));
-            }
-        }
-
-        return actions;
-    }
-
-    // --------------- Helper functions to keep main functions simpler -----------------
-
-    /* Function that lists all buy actions to the player; building road, settlement or city or buying a development card */
-    public static List<AbstractAction> getBuyActions(CatanGameState gs) {
-        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
-        int turnStep = ((CatanTurnOrder) gs.getTurnOrder()).turnStep;
-        int activePlayer = gs.getTurnOrder().getCurrentPlayer(gs);
-        int[] resources = gs.getPlayerResources(activePlayer);
-        if (gs.getCoreGameParameters().verbose) {
-            System.out.println("Player " + gs.getCurrentPlayer() + " has " + Arrays.toString(resources));
-        }
-        ArrayList<AbstractAction> actions = new ArrayList();
-
-
-        // find possible roads, settlements and city upgrades and propose them as actions
-        CatanTile[][] board = gs.getBoard();
-        for (int x = 0; x < board.length; x++) {
-            for (int y = 0; y < board[x].length; y++) {
-                CatanTile tile = board[x][y];
-                for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
-                    Settlement settlement = tile.getSettlements()[i];
-
-                    // where it is legal to place tile then it can be placed from there
-                    if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
-                            && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
-                        if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("settlement"))
-                                && !(((Counter) gs.getComponentActingPlayer(CatanConstants.settlementCounterHash)).isMaximum())) {
-                            actions.add(new BuildSettlement(x, y, i, activePlayer, false));
-                        }
-                    }
-
-                    if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
-                            && gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())) {
-                        if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("road"))
-                                && !(((Counter) gs.getComponentActingPlayer(CatanConstants.roadCounterHash)).isMaximum())) {
-                            actions.add(new BuildRoad(x, y, i, activePlayer, false));
-                        }
-                    }
-
-                    if (settlement.getOwner() == activePlayer && settlement.getType() == 1) {
-                        if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("city"))
-                                && !(((Counter) gs.getComponentActingPlayer(CatanConstants.cityCounterHash)).isMaximum())) {
-                            actions.add(new BuildCity(x, y, i, activePlayer));
-                        }
-                    }
-                }
-            }
-        }
-        if (CatanGameState.checkCost(resources, CatanParameters.costMapping.get("developmentCard"))
-                && ((Deck<Card>) gs.getComponent(CatanConstants.developmentDeckHash)).getSize() > 0) {
-            actions.add(new BuyDevelopmentCard());
-        }
-        return actions;
-    }
-
-    public static List<AbstractAction> getDevCardActions(CatanGameState gs) {
-        // Player can buy dev card and play one
-        ArrayList<AbstractAction> actions = new ArrayList();
-        boolean knightCard = false;
-        boolean monopolyCard = false;
-        boolean yearOfPlentyCard = false;
-        boolean roadBuildingCard = false;
-
-        // get playerHand; for each card add a new action
-        Deck<Card> playerDevDeck = (Deck<Card>) gs.getComponentActingPlayer(CatanConstants.developmentDeckHash);
-
-
-        for (Card c : playerDevDeck.getComponents()) {
-            // avoid playing a card that has been bought in the same turn
-            if (c == gs.getBoughtDevCard()) {
-                continue;
-            }
-            // victory points are automatically revealed once a player has 10+ points
-            String cardType = c.getProperty(CatanConstants.cardType).toString();
-            if (cardType.equals(CatanParameters.CardTypes.KNIGHT_CARD.toString())) {
-                if (knightCard) {
-                    continue;
-                } else {
-                    knightCard = true;
-                    actions.add(new PlayKnightCard());
-                }
-            }
-            if (cardType.equals(CatanParameters.CardTypes.MONOPOLY.toString())) {
-                if (monopolyCard) {
-                    continue;
-                } else {
-                    monopolyCard = true;
-                    for (CatanParameters.Resources resource : CatanParameters.Resources.values()) {
-                        actions.add(new Monopoly(resource));
-                    }
-                }
-            }
-            if (cardType.equals(CatanParameters.CardTypes.YEAR_OF_PLENTY.toString())) {
-                if (yearOfPlentyCard) {
-                    continue;
-                } else {
-                    yearOfPlentyCard = true;
-                    Deck<Card> resourceDeck = (Deck<Card>) gs.getComponent(CatanConstants.resourceDeckHash);
-                    CatanParameters.Resources[] resources = CatanParameters.Resources.values();
-                    ArrayList<CatanParameters.Resources> resourcesAvailable = new ArrayList<>();
-
-                    for (int i = 0; i < resources.length; i++) {
-                        int index = i;
-                        Optional<Card> resource = resourceDeck.stream().filter(card -> card.getProperty(CatanConstants.cardType).toString().equals(resources[index].toString())).findFirst();
-                        if (resource.isPresent()) resourcesAvailable.add(resources[i]);
-                    }
-
-                    for (CatanParameters.Resources resource1 : resourcesAvailable) {
-                        for (CatanParameters.Resources resource2 : resourcesAvailable) {
-                            actions.add(new YearOfPlenty(resource1, resource2));
-                        }
-                    }
-                }
-            }
-            if (cardType.equals(CatanParameters.CardTypes.ROAD_BUILDING.toString())) {
-                if (roadBuildingCard) {
-                    continue;
-                } else {
-                    roadBuildingCard = true;
-                    // Identify all possible roads to build
-                    CatanTile[][] board = gs.getBoard();
-                    for (int x = 0; x < board.length; x++) {
-                        for (int y = 0; y < board[x].length; y++) {
-                            CatanTile tile = board[x][y];
-                            for (int i = 0; i < CatanConstants.HEX_SIDES; i++) {
-                                if (!(tile.getType().equals(CatanParameters.TileType.SEA) || tile.getType().equals(CatanParameters.TileType.DESERT))
-                                        && gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())
-                                        && !(((Counter) gs.getComponentActingPlayer(CatanConstants.roadCounterHash)).isMaximum())) {
-                                    actions.add(new BuildRoad(x, y, i, gs.getCurrentPlayer(), true));
-                                }
+                if (!(tile.getTileType().equals(CatanTile.TileType.SEA))) {
+                    if (actionSpace.structure != ActionSpace.Structure.Deep) { // Flat is default
+                        HashSet<Integer> targets = new HashSet<>();
+                        Building[] settlements = gs.getBuildings(tile);
+                        for (Building settlement : settlements) {
+                            if (settlement.getOwnerId() != -1 && settlement.getOwnerId() != gs.getCurrentPlayer()) {
+                                targets.add(settlement.getOwnerId());
                             }
                         }
+                        for (int target : targets) {
+                            if (knight) actions.add(new PlayKnightCard(x, y, player, target));
+                            else actions.add(new MoveRobberAndSteal(x, y, player, target));
+                        }
+                        if (targets.size() == 0) {
+                            if (knight) actions.add(new PlayKnightCard(x, y, player, -1));
+                            else actions.add(new MoveRobberAndSteal(x, y, player, -1));
+                        }
+                    } else {
+                        // Deep: first move, then steal
+                        if (knight) actions.add(new PlayKnightCardDeep(x, y, player));
+                        else actions.add(new MoveRobber(x, y, player));
                     }
                 }
             }
+        }
+        return actions;
+    }
+
+    /**
+     * @param gs - game state
+     * @param actionSpace - action space type
+     * @param player - player buying
+     * @return lists all buy actions to the player; building road, settlement, city or buying a development card
+     */
+    public static List<AbstractAction> getBuyActions(CatanGameState gs, ActionSpace actionSpace, int player) {
+        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+
+        List<AbstractAction> buyRoadActions = getBuyRoadActions(gs, player, false);
+        List<AbstractAction> buySettlementActions = getBuySettlementActions(gs, player);
+        List<AbstractAction> buyCityActions = getBuyCityActions(gs, player);
+        // Road, Settlement or City
+        if (actionSpace.structure != ActionSpace.Structure.Deep) {
+            actions.addAll(buyRoadActions);
+            actions.addAll(buySettlementActions);
+            actions.addAll(buyCityActions);
+        } else {
+            // Deep: choose between buying road / city / settlement, then where to place them
+            for (BuyAction.BuyType type: BuyAction.BuyType.values()) {
+                if (type == BuyAction.BuyType.DevCard) continue;
+                if (gs.checkCost(catanParameters.costMapping.get(type), player)
+                        && !gs.playerTokens.get(player).get(type).isMaximum()) {
+                    if (type == BuyAction.BuyType.Road && buyRoadActions.size() > 0 ||
+                    type == BuyAction.BuyType.Settlement && buySettlementActions.size() > 0 ||
+                    type == BuyAction.BuyType.City && buyCityActions.size() > 0)
+                        actions.add(new BuyAction(player, type));
+                }
+            }
+        }
+
+        // Dev card separate, always just 1 step, no choice
+        if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.DevCard), player) && gs.devCards.getSize() > 0) {
+            actions.add(new BuyDevelopmentCard(player));
         }
 
         return actions;
     }
 
-    public static List<AbstractAction> getTradeActions(CatanGameState gs) {
-        // Player can buy dev card and play one
+    public static List<AbstractAction> getBuyRoadActions(CatanGameState gs, int player, boolean free) {
+        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        if (free || gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Road), player)
+                && !gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
+            HashSet<Integer> roadsAdded = new HashSet<>();
+            CatanTile[][] board = gs.getBoard();
+            for (int x = 0; x < board.length; x++) {
+                for (int y = 0; y < board[x].length; y++) {
+                    CatanTile tile = board[x][y];
+                    for (int i = 0; i < HEX_SIDES; i++) {
+                        Building settlement = gs.getBuilding(tile, i);
+                        // Roads
+                        Edge edge = gs.getRoad(settlement, tile, i);
+                        if (edge == null || roadsAdded.contains(edge.getComponentID())) continue;
+                        roadsAdded.add(edge.getComponentID());
+
+                        if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
+                                && gs.checkRoadPlacement(i, tile, gs.getCurrentPlayer())) {
+                            actions.add(new BuildRoad(x, y, i, player, free));
+                        }
+                    }
+                }
+            }
+        }
+        return actions;
+    }
+
+    public static List<AbstractAction> getBuySettlementActions(CatanGameState gs, int player) {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
+        if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.Settlement), player)
+                && !gs.playerTokens.get(player).get(BuyAction.BuyType.Settlement).isMaximum()) {
+            HashSet<Integer> settlementsAdded = new HashSet<>();
+            CatanTile[][] board = gs.getBoard();
+            for (int x = 0; x < board.length; x++) {
+                for (int y = 0; y < board[x].length; y++) {
+                    CatanTile tile = board[x][y];
+                    for (int i = 0; i < HEX_SIDES; i++) {
+                        Building settlement = gs.getBuilding(tile, i);
+                        if (settlementsAdded.contains(settlement.getComponentID())) continue;
+                        settlementsAdded.add(settlement.getComponentID());
+
+                        // legal to place?
+                        if (!(tile.getTileType().equals(CatanTile.TileType.SEA) || tile.getTileType().equals(CatanTile.TileType.DESERT))
+                                && gs.checkSettlementPlacement(settlement, gs.getCurrentPlayer())) {
+                            actions.add(new BuildSettlement(x, y, i, player, false));
+                        }
+                    }
+                }
+            }
+        }
+        return actions;
+    }
+
+    public static List<AbstractAction> getBuyCityActions(CatanGameState gs, int player) {
+        CatanParameters catanParameters = (CatanParameters) gs.getGameParameters();
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        if (gs.checkCost(catanParameters.costMapping.get(BuyAction.BuyType.City), player)
+                && !gs.playerTokens.get(player).get(BuyAction.BuyType.City).isMaximum()) {
+            HashSet<Integer> settlementsAdded = new HashSet<>();
+            CatanTile[][] board = gs.getBoard();
+            for (int x = 0; x < board.length; x++) {
+                for (int y = 0; y < board[x].length; y++) {
+                    CatanTile tile = board[x][y];
+                    for (int i = 0; i < HEX_SIDES; i++) {
+                        Building settlement = gs.getBuilding(tile, i);
+                        if (settlementsAdded.contains(settlement.getComponentID())) continue;
+                        settlementsAdded.add(settlement.getComponentID());
+                        if (settlement.getOwnerId() == player && settlement.getBuildingType() == Settlement) {
+                            actions.add(new BuildCity(x, y, i, player));
+                        }
+                    }
+                }
+            }
+        }
+        return actions;
+    }
+
+    /**
+     * @param gs - game state
+     * @param actionSpace - action space type
+     * @param player - player playing dev card
+     * @return list of actions to play a dev card in hand
+     */
+    public static List<AbstractAction> getDevCardActions(CatanGameState gs, ActionSpace actionSpace, int player) {
+        Set<AbstractAction> actions = new HashSet<>();
+        Deck<CatanCard> playerDevDeck = gs.playerDevCards.get(player);
+
+        for (CatanCard c : playerDevDeck.getComponents()) {
+            // avoid playing a card that has been bought in the same turn
+            if (c.roundCardWasBought == gs.getTurnCounter() || c.cardType == CatanCard.CardType.VICTORY_POINT_CARD) {  // We don't play VP cards
+                continue;
+            }
+            if (actionSpace.structure != ActionSpace.Structure.Deep) { // Flat is default
+                actions.addAll(getDevCardActions(gs, actionSpace, player, c.cardType));
+            } else {
+                // Deep: play dev card of type X. Then compute for the card type the variations possible, potentially in a deep way if available
+                actions.add(new PlayDevCard(player, c.cardType, c.cardType.nDeepSteps((CatanParameters) gs.getGameParameters())));
+            }
+        }
+
+        return new ArrayList<>(actions);
+    }
+
+    public static List<AbstractAction> getDevCardActions(CatanGameState gs, ActionSpace actionSpace, int player, CatanCard.CardType cardType) {
         ArrayList<AbstractAction> actions = new ArrayList<>();
 
-        // get playerHand; for each card add a new action
-        int[] resources = gs.getPlayerResources(gs.getCurrentPlayer());
+        if (cardType == CatanCard.CardType.KNIGHT_CARD) {
+            actions.addAll(getRobberActions(gs, actionSpace, player, true));
+        }
 
-        // default trade
-        int[] playerExchangeRate = gs.getExchangeRates(gs.getCurrentPlayer());
-        for (int i = 0; i < resources.length; i++) {
-            if (resources[i] >= playerExchangeRate[i]) {
-                for (int j = 0; j < resources.length; j++) {
-                    if (j != i) {
-                        // list all possible trades with the bank / harbours
-                        actions.add(new DefaultTrade(CatanParameters.Resources.values()[i], CatanParameters.Resources.values()[j], playerExchangeRate[i]));
+        else if (cardType == CatanCard.CardType.MONOPOLY) {
+            for (CatanParameters.Resource resource : CatanParameters.Resource.values()) {
+                if (resource == CatanParameters.Resource.WILD) continue;
+                actions.add(new PlayMonopoly(resource, player));
+            }
+        }
+
+        else if (cardType == CatanCard.CardType.YEAR_OF_PLENTY) {
+            List<CatanParameters.Resource> resourcesAvailable = new ArrayList<>();
+            for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
+                if (res == CatanParameters.Resource.WILD) continue;
+                if (gs.resourcePool.get(res).getValue() > 0)
+                    for (int i = 0; i < ((CatanParameters) gs.getGameParameters()).nResourcesYoP; i++) {  // TODO this loop not needed if Utils.generateCombinations allows repetitions
+                        resourcesAvailable.add(res);
+                    }
+            }
+
+            if (resourcesAvailable.size() >= ((CatanParameters) gs.getGameParameters()).nResourcesYoP) {
+                if (actionSpace.structure != ActionSpace.Structure.Deep) {
+
+                    int[] resIdx = new int[resourcesAvailable.size()];
+                    for (int i = 0; i < resourcesAvailable.size(); i++) {
+                        resIdx[i] = i;
+                    }
+                    List<int[]> combinations = Utils.generateCombinations(resIdx, ((CatanParameters) gs.getGameParameters()).nResourcesYoP);
+                    for (int[] combo : combinations) {
+                        CatanParameters.Resource[] resources = new CatanParameters.Resource[combo.length];
+                        for (int i = 0; i < combo.length; i++) {
+                            resources[i] = resourcesAvailable.get(combo[i]);
+                        }
+                        actions.add(new PlayYearOfPlenty(resources, player, true));
+                    }
+                } else {
+                    // Deep: one resource at a time
+                    for (CatanParameters.Resource res : CatanParameters.Resource.values()) {
+                        if (res != CatanParameters.Resource.WILD && gs.resourcePool.get(res).getValue() > 0)
+                            actions.add(new DeepYearOfPlenty(player, res, cardType.nDeepSteps((CatanParameters) gs.getGameParameters())));
                     }
                 }
             }
         }
 
+        else if (cardType == CatanCard.CardType.ROAD_BUILDING) {
+            if (!gs.playerTokens.get(player).get(BuyAction.BuyType.Road).isMaximum()) {
 
+                List<AbstractAction> roads = getBuyRoadActions(gs, player, true);
+                int nRoads = Math.min(gs.playerTokens.get(player).get(BuyAction.BuyType.Road).getValue(), ((CatanParameters) gs.getGameParameters()).nRoadsRB);
+                if (actionSpace.structure != ActionSpace.Structure.Deep && roads.size() >= nRoads) {  // Flat is default
+
+                    // Identify all combinations of possible roads to build
+                    int[] roadsIdx = new int[roads.size()];
+                    for (int i = 0; i < roads.size(); i++) {
+                        roadsIdx[i] = i;
+                    }
+                    List<int[]> combinations = Utils.generateCombinations(roadsIdx, nRoads);
+                    for (int[] combo : combinations) {
+                        AbstractAction[] roadsToBuild = new BuildRoad[combo.length];
+                        for (int i = 0; i < combo.length; i++) {
+                            roadsToBuild[i] = roads.get(combo[i]);
+                        }
+                        actions.add(new PlayRoadBuilding(player, roadsToBuild));
+                    }
+                } else {
+                    // Deep: one road at a time
+                    for (AbstractAction road : roads) {
+                        actions.add(new DeepRoadBuilding(player, road, nRoads));
+                    }
+                }
+            }
+        }
+        return actions;
+    }
+
+    /**
+     * @param gs - game state
+     * @param actionSpace - action space type
+     * @param player - player trading
+     * @return list all possible trades with the bank / harbours, using minimum exchange rate available for each resource
+     * type owned by the player
+     */
+    public static List<AbstractAction> getDefaultTradeActions(CatanGameState gs, ActionSpace actionSpace, int player) {
+        ArrayList<AbstractAction> actions = new ArrayList<>();
+        HashMap<CatanParameters.Resource, Counter> playerExchangeRate = gs.getExchangeRates(player);
+        for (Map.Entry<CatanParameters.Resource, Counter> res: gs.playerResources.get(player).entrySet()) {
+            if (res.getKey() == CatanParameters.Resource.WILD) continue;
+
+            // give N resources (minimum exchange rate for this resource)
+            CatanParameters.Resource resToGive = res.getKey();
+            int nGive = playerExchangeRate.get(res.getKey()).getValue();
+            int nOwned = res.getValue().getValue();
+            if (nOwned >= nGive) {
+                // for 1 other resource
+                List<AbstractAction> trades = new ArrayList<>();
+                for (CatanParameters.Resource resToGet : CatanParameters.Resource.values()) {
+                    if (resToGet != CatanParameters.Resource.WILD && resToGive != resToGet && gs.getResourcePool().get(resToGet).getValue() > 0) {
+                        trades.add(new DefaultTrade(resToGive, resToGet, nGive, player));
+                    }
+                }
+                if (trades.size() > 0) {
+                    if (actionSpace.structure != ActionSpace.Structure.Deep) {  // Flat is default
+                        actions.addAll(trades);
+                    } else {
+                        actions.add(new DeepDefaultTrade(resToGive, nGive, player));
+                    }
+                }
+            }
+        }
         return actions;
     }
 }

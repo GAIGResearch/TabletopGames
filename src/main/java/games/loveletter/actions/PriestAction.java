@@ -7,19 +7,14 @@ import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * The Priest allows a player to see another player's hand cards.
  * This has no effect in case the game is fully observable.
  */
 public class PriestAction extends PlayCard implements IPrintable {
 
-    private transient LoveLetterCard.CardType opponentCard;
-
-    public PriestAction(int playerID, int opponentID, boolean canExecuteEffect) {
-        super(LoveLetterCard.CardType.Priest, playerID, opponentID, null, null, canExecuteEffect);
+    public PriestAction(int cardIdx, int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
+        super(LoveLetterCard.CardType.Priest, cardIdx, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
 
     @Override
@@ -30,50 +25,22 @@ public class PriestAction extends PlayCard implements IPrintable {
         for (int i = 0; i < opponentDeck.getComponents().size(); i++)
             opponentDeck.setVisibilityOfComponent(i, playerID, true);
 
-        opponentCard = opponentDeck.get(0).cardType;
+        targetCardType = opponentDeck.get(0).cardType;
         if (llgs.getCoreGameParameters().recordEventHistory) {
-            llgs.recordHistory("Priest sees " + opponentCard);
+            llgs.recordHistory("Priest sees " + targetCardType);
         }
         return true;
     }
 
     @Override
-    public String _toString(){
-        return "Priest (" + playerID + " sees " + (opponentCard != null? opponentCard : "card") + " of " + targetPlayer + ")";
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
-    }
-
-    @Override
-    public void printToConsole(AbstractGameState gameState) {
-        System.out.println(this);
-    }
-
-    @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PriestAction)) return false;
-        return super.equals(o);
+        return super.equals(o) && o instanceof PriestAction;
     }
 
     @Override
     public PriestAction copy() {
-        PriestAction copy = new PriestAction(playerID, targetPlayer, canExecuteEffect);
-        copy.opponentCard = opponentCard;
+        PriestAction copy = new PriestAction(cardIdx, playerID, targetPlayer, canExecuteEffect, discard);
+        copy.targetCardType = targetCardType;
         return copy;
-    }
-
-    public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
-        List<PlayCard> cardActions = new ArrayList<>();
-        for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-            if (targetPlayer == playerID || gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
-                continue;
-            cardActions.add(new PriestAction(playerID, targetPlayer, true));
-        }
-        if (cardActions.size() == 0) cardActions.add(new PriestAction(playerID, -1, false));
-        return cardActions;
     }
 }

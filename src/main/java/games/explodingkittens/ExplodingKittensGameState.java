@@ -9,6 +9,7 @@ import core.components.Deck;
 import core.components.PartialObservableDeck;
 import core.interfaces.IGamePhase;
 import core.interfaces.IPrintable;
+import core.interfaces.IStateFeatureJSON;
 import core.turnorders.TurnOrder;
 import games.GameType;
 import games.explodingkittens.cards.ExplodingKittensCard;
@@ -185,8 +186,16 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
         }
         orderOfPlayerDeath[playerID] = getNPlayers() - nPlayersActive;
         if (nPlayersActive == 1) {
+            this.gameStatus = CoreConstants.GameResult.GAME_END;
+            for (int i = 0; i < getNPlayers(); i++) {
+                // set winner
+                if (playerResults[i] == CoreConstants.GameResult.GAME_ONGOING) {
+                    playerResults[i] = CoreConstants.GameResult.WIN_GAME;
+                }
+            }
             turnOrder.endGame(this);
         }
+
         ((ExplodingKittensTurnOrder) getTurnOrder()).endPlayerTurnStep(this);
 
     }
@@ -236,6 +245,7 @@ public class ExplodingKittensGameState extends AbstractGameStateWithTurnOrder im
     public void printToConsole() {
         System.out.println(toString());
     }
+
 
     // Printing functions for the game state and decks.
 

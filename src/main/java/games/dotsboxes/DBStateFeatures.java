@@ -5,7 +5,7 @@ import players.heuristics.AbstractStateFeature;
 
 public class DBStateFeatures extends AbstractStateFeature {
 
-    String[] localNames = new String[]{"TWO_BOXES", "THREE_BOXES", "FILLED_BOXES"};
+    String[] localNames = new String[]{"NO_BOXES", "ONE_BOXES", "TWO_BOXES", "THREE_BOXES", "OPPONENTS_FILLED_BOXES", "OWNED_FILLED_BOXES"};
 
     @Override
     protected double maxScore() {
@@ -33,12 +33,13 @@ public class DBStateFeatures extends AbstractStateFeature {
             int edges = state.countCompleteEdges(cell);
             cellCountByEdges[edges]++;
         }
-        double totalCells = state.cells.size();
 
-        int multiplier = state.getCurrentPlayer() == playerID ? 1 : -1;
-        retValue[0] = cellCountByEdges[2] * multiplier / totalCells;
-        retValue[1] = cellCountByEdges[3] * multiplier / 5.0;
-        retValue[2] = cellCountByEdges[4] / totalCells;
+        retValue[0] = cellCountByEdges[0];
+        retValue[1] = cellCountByEdges[1];
+        retValue[2] = cellCountByEdges[2];
+        retValue[3] = cellCountByEdges[3];
+        retValue[4] = cellCountByEdges[4] - gs.getGameScore(playerID);
+        retValue[5] = gs.getGameScore(playerID);
 
         return retValue;
     }

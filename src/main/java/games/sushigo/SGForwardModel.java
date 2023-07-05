@@ -6,15 +6,18 @@ import core.StandardForwardModel;
 import core.actions.AbstractAction;
 import core.components.Counter;
 import core.components.Deck;
+import core.interfaces.ITreeActionSpace;
 import games.sushigo.actions.ChooseCard;
 import games.sushigo.cards.SGCard;
+import utilities.ActionTreeNode;
 import utilities.Pair;
 
 import java.util.*;
+
 import static games.sushigo.cards.SGCard.SGCardType.*;
 
 @SuppressWarnings("unchecked")
-public class SGForwardModel extends StandardForwardModel {
+public class SGForwardModel extends StandardForwardModel implements ITreeActionSpace {
 
     @Override
     protected void _setup(AbstractGameState firstState) {
@@ -266,5 +269,47 @@ public class SGForwardModel extends StandardForwardModel {
             }
         }
         return actions;
+    }
+
+    @Override
+    public ActionTreeNode initActionTree(AbstractGameState gameState) {
+        /* action tree contains 2 branches: play and chopstick and subactions represent the card ids in hand */
+        int nCards = ((SGParameters) gameState.getGameParameters()).nCards;
+        ActionTreeNode root = new ActionTreeNode(0, "root");
+        ActionTreeNode playNode = root.addChild(0, "play");
+        ActionTreeNode chopsticksNode = root.addChild(0, "chopsticks");
+        for (int i = 0; i < nCards; i++){
+            playNode.addChild(0, String.valueOf(i));
+            chopsticksNode.addChild(0, String.valueOf(i));
+        }
+        return root;
+    }
+
+    @Override
+    public ActionTreeNode updateActionTree(ActionTreeNode root, AbstractGameState gameState) {
+        root.resetTree();
+        ActionTreeNode playNode = root.findChildrenByName("play");
+        ActionTreeNode chopsticksNode = root.findChildrenByName("chopsticks");
+        SGGameState sggs = (SGGameState) gameState;
+        int currentPlayer = sggs.getCurrentPlayer();
+        Deck<SGCard> currentPlayerHand = sggs.getPlayerHands().get(currentPlayer);
+        // handle extended actions
+        if (gameState.isActionInProgress()){
+            // only happens with chopstick
+            for (AbstractAction action: gameState.getActionsInProgress().peek()._computeAvailableActions(gameState)) {
+                chopsticksNode.findChildrenByName(String.valueOf(((ChooseCard)action).cardIdx), true).setAction(action);
+            }
+            return root;
+        }
+        // normal action selection
+        for (int i = 0; i < currentPlayerHand.getSize(); i++) {
+            // All players can do is choose a card in hand to play.
+            playNode.findChildrenByName(String.valueOf(i)).setAction(new ChooseCard(currentPlayer, i, false));
+            if (sggs.playedCardTypes[currentPlayer].get(Chopsticks).getValue() > 0 && currentPlayerHand.getSize() > 1) {
+                // If the player played chopsticks in a previous round, then they can choose to use the chopsticks now (and will choose one extra card in hand)
+                chopsticksNode.findChildrenByName(String.valueOf(i)).setAction(new ChooseCard(currentPlayer, i, true));
+            }
+        }
+        return root;
     }
 }

@@ -1,14 +1,12 @@
 package games.loveletter.actions;
 
 import core.AbstractGameState;
-import core.CoreConstants;
 import core.components.Deck;
 import core.interfaces.IPrintable;
 import games.loveletter.LoveLetterGameState;
 import games.loveletter.cards.LoveLetterCard;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * The targeted player discards its current and draws a new one.
@@ -16,11 +14,8 @@ import java.util.List;
  */
 public class PrinceAction extends PlayCard implements IPrintable {
 
-    private transient LoveLetterCard.CardType cardDiscarded;
-    // Not part of state; purely used for logging purposes
-
-    public PrinceAction(int playerID, int opponentID, boolean canExecuteEffect) {
-        super(LoveLetterCard.CardType.Prince, playerID, opponentID, null, null, canExecuteEffect);
+    public PrinceAction(int cardIdx, int playerID, int opponentID, boolean canExecuteEffect, boolean discard) {
+        super(LoveLetterCard.CardType.Prince, cardIdx, playerID, opponentID, null, null, canExecuteEffect, discard);
     }
 
     @Override
@@ -33,8 +28,8 @@ public class PrinceAction extends PlayCard implements IPrintable {
         opponentDiscardPile.add(card);
 
         // if the discarded card is a princess, the targeted player loses the game
-        cardDiscarded = card.cardType;
-        if (cardDiscarded == LoveLetterCard.CardType.Princess) {
+        targetCardType = card.cardType;
+        if (targetCardType == LoveLetterCard.CardType.Princess) {
             llgs.killPlayer(playerID, targetPlayer, cardType);
             if (llgs.getCoreGameParameters().recordEventHistory) {
                 llgs.recordHistory("Player " + targetPlayer + " discards Princess and loses!");
@@ -57,41 +52,14 @@ public class PrinceAction extends PlayCard implements IPrintable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PrinceAction)) return false;
-        return super.equals(o);
-    }
-
-    @Override
-    public String _toString(){
-        return "Prince (" + targetPlayer + " discards " + (cardDiscarded != null? cardDiscarded : "card") + " and draws a new card)";
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
-    }
-
-    @Override
-    public void printToConsole(AbstractGameState gameState) {
-        System.out.println(this);
+        return super.equals(o) && o instanceof PrinceAction;
     }
 
     @Override
     public PrinceAction copy() {
-        PrinceAction pa = new PrinceAction(playerID, targetPlayer, canExecuteEffect);
-        pa.cardDiscarded = cardDiscarded;
+        PrinceAction pa = new PrinceAction(cardIdx, playerID, targetPlayer, canExecuteEffect, discard);
+        pa.targetCardType = targetCardType;
         return pa;
     }
 
-    public static List<? extends PlayCard> generateActions(LoveLetterGameState gs, int playerID) {
-        List<PlayCard> cardActions = new ArrayList<>();
-        for (int targetPlayer = 0; targetPlayer < gs.getNPlayers(); targetPlayer++) {
-            if (gs.getPlayerResults()[targetPlayer] == CoreConstants.GameResult.LOSE_ROUND || gs.isProtected(targetPlayer))
-                continue;
-            cardActions.add(new PrinceAction(playerID, targetPlayer, true));
-        }
-        if (cardActions.size() == 0) cardActions.add(new PrinceAction(playerID, -1, false));
-        return cardActions;
-    }
 }

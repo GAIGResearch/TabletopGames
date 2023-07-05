@@ -149,11 +149,11 @@ public class ProgressiveLearner {
         List<AbstractPlayer> finalAgents = Arrays.stream(agentsPerGeneration).collect(Collectors.toList());
         finalAgents.add(basePlayer);
         finalAgents.forEach(AbstractPlayer::clearDecorators); // remove any random moves
-        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers, SELF_PLAY, finalMatchups,
-                finalMatchups, System.currentTimeMillis(), params);
+        RoundRobinTournament tournament = new RandomRRTournament(finalAgents, gameToPlay, nPlayers,  SELF_PLAY, finalMatchups,
+                finalMatchups, System.currentTimeMillis(), params, "", "");
 
         tournament.setListeners(new ArrayList<>());
-        tournament.runTournament();
+        tournament.run();
         int winnerIndex = tournament.getWinnerIndex();
         if (winnerIndex != finalAgents.size() - 1) {
             // if the basePlayer won, then meh!

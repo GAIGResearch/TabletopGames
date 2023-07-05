@@ -1,19 +1,18 @@
 package games.diamant;
 
 import core.AbstractGameState;
-import core.AbstractGameStateWithTurnOrder;
 import core.AbstractParameters;
 import core.actions.AbstractAction;
 import core.components.Component;
 import core.components.Counter;
 import core.components.Deck;
 import core.interfaces.IPrintable;
-import core.turnorders.AlternatingTurnOrder;
-import core.turnorders.StandardTurnOrder;
-import core.turnorders.TurnOrder;
+import core.interfaces.IStateFeatureJSON;
+import core.interfaces.IStateFeatureNormVector;
 import games.GameType;
 import games.diamant.cards.DiamantCard;
 import games.diamant.components.ActionsPlayed;
+import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;

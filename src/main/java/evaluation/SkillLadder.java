@@ -83,7 +83,7 @@ public class SkillLadder {
             // for each iteration we run a round robin tournament
 
             RoundRobinTournament RRT = new RoundRobinTournament(agents, gameType, nPlayers, gamesPerIteration / nPlayers,
-                    ONE_VS_ALL, params);
+                    ONE_VS_ALL, params, "", "");
             RRT.verbose = false;
             StringBuilder timeDir = new StringBuilder(gameType.name() + "_" + nPlayers + "P_" + new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss").format(new Date()));
             for (String listenerClass : listenerClasses) {
@@ -96,8 +96,7 @@ public class SkillLadder {
             }
 
             long startTime = System.currentTimeMillis();
-            RRT.setResultsFile(game + "_Results.txt");
-            RRT.runTournament();
+            RRT.run();
             long endTime = System.currentTimeMillis();;
             System.out.printf("%d games in %3d minutes\tBudget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f\tvs Budget %5d win rate: %.1f%% +/- %.1f%%, mean rank %.1f +/- %.1f%n",
                     (gamesPerIteration / nPlayers) * nPlayers, (endTime - startTime) / 60000,

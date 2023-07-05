@@ -2,6 +2,7 @@ package core.interfaces;
 
 import core.AbstractGameState;
 import core.actions.AbstractAction;
+import core.actions.ActionSpace;
 
 import java.util.List;
 
@@ -28,6 +29,9 @@ public interface IExtendedSequence {
      * @return the list of possible actions for the currentPlayer
      */
     List<AbstractAction> _computeAvailableActions(AbstractGameState state);
+    default List<AbstractAction> _computeAvailableActions(AbstractGameState state, ActionSpace actionSpace) {
+        return _computeAvailableActions(state);
+    }
 
     /**
      * TurnOrder delegates to this from getCurrentPlayer() if this Extended Sequence is currently active.

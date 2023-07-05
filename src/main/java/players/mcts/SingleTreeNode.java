@@ -3,7 +3,6 @@ package players.mcts;
 import core.*;
 import core.actions.AbstractAction;
 import core.interfaces.IStateHeuristic;
-import core.interfaces.IStatisticLogger;
 import players.PlayerConstants;
 import utilities.*;
 
@@ -95,6 +94,7 @@ public class SingleTreeNode {
                 retValue.opponentModels[p] = player.rolloutStrategy;
             else
                 retValue.opponentModels[p] = player.getOpponentModel(p);
+            retValue.opponentModels[p].getParameters().actionSpace = player.params.actionSpace;  // TODO makes sense?
         }
         // only root node maintains MAST statistics
         retValue.MASTStatistics = new ArrayList<>();
@@ -171,7 +171,9 @@ public class SingleTreeNode {
         // so check the MCTSParams as well
         openLoopState = actionState;
         if (actionState.getCurrentPlayer() == this.decisionPlayer) {
-            actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState);
+            actionsFromOpenLoopState = forwardModel.computeAvailableActions(actionState, params.actionSpace);
+            //      System.out.printf("Setting OLS actions for P%d (%d)%n%s%n", decisionPlayer, actionState.getCurrentPlayer(),
+//                actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
             if (actionsFromOpenLoopState.size() != actionsFromOpenLoopState.stream().distinct().count())
                 throw new AssertionError("Duplicate actions found in action list: " +
                         actionsFromOpenLoopState.stream().map(a -> "\t" + a.toString() + "\n").collect(joining()));
@@ -519,13 +521,14 @@ public class SingleTreeNode {
      */
     protected void advanceToTurnOfPlayer(AbstractGameState gs, int id, boolean inRollout) {
         // For the moment we only have one opponent model - that of a random player
+        AbstractAction action = null;
         while (gs.getCurrentPlayer() != id && gs.isNotTerminalForPlayer(id) && !(inRollout && finishRollout(gs))) {
             //       AbstractGameState preGS = gs.copy();
             AbstractPlayer oppModel = opponentModels[gs.getCurrentPlayer()];
-            List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs);
+            List<AbstractAction> availableActions = forwardModel.computeAvailableActions(gs, params.actionSpace);
             if (availableActions.isEmpty())
-                throw new AssertionError("Should always have at least one action possible...");
-            AbstractAction action = oppModel.getAction(gs, availableActions);
+                throw new AssertionError("Should always have at least one action possible..." + (action != null? " Last action: " + action : ""));
+            action = oppModel.getAction(gs, availableActions);
             if (inRollout) {
                 rolloutDepth++;
                 root.actionsInRollout.add(new Pair<>(gs.getCurrentPlayer(), action));
@@ -804,11 +807,13 @@ public class SingleTreeNode {
                 root.copyCount++;
             }
 
+            AbstractAction next = null;
             while (!finishRollout(rolloutState)) {
-                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState);
-                if (availableActions.isEmpty())
-                    throw new AssertionError("No actions available in rollout!");
-                AbstractAction next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
+                List<AbstractAction> availableActions = forwardModel.computeAvailableActions(rolloutState, params.actionSpace);
+                if (availableActions.isEmpty()) {
+                    throw new AssertionError("No actions available in rollout!" + (next != null? " Last action: " + next.toString() : ""));
+                }
+                next = opponentModels[rolloutState.getCurrentPlayer()].getAction(rolloutState, availableActions);
                 lastActorInRollout = rolloutState.getCurrentPlayer();
                 root.actionsInRollout.add(new Pair<>(lastActorInRollout, next));
                 advance(rolloutState, next, true);
@@ -977,7 +982,7 @@ public class SingleTreeNode {
 
         if (bestAction == null) {
             if (nVisits == 1) {
-                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
+//                System.out.println("Only one visit to root node - insufficient information - hopefully due to JVM warming up");
                 bestAction = children.keySet().stream().findFirst().orElseThrow(() -> new AssertionError("No children"));
             } else
                 throw new AssertionError("Unexpected - no selection made.");
