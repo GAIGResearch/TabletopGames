@@ -34,6 +34,7 @@ public class RHEAPlayer extends AbstractPlayer {
     public RHEAPlayer(RHEAParams params) {
         randomGenerator = new Random(params.getRandomSeed());
         this.params = params;
+        this.parameters = params;
         setName("rhea");
     }
 
@@ -50,7 +51,7 @@ public class RHEAPlayer extends AbstractPlayer {
     }
 
     @Override
-    public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> actions) {
+    public AbstractAction _getAction(AbstractGameState stateObs, List<AbstractAction> possibleActions) {
         ElapsedCpuTimer timer = new ElapsedCpuTimer();  // New timer for this game tick
         timer.setMaxTimeMillis(params.budget);
         numIters = 0;
@@ -106,6 +107,7 @@ public class RHEAPlayer extends AbstractPlayer {
         timePerIteration = numIters == 0 ? 0.0 : (timeTaken - initTime) / numIters;
         // Return first action of best individual
         AbstractAction retValue = population.get(0).actions[0];
+        List<AbstractAction> actions = getForwardModel().computeAvailableActions(stateObs, params.actionSpace);
         if (!actions.contains(retValue))
             throw new AssertionError("Action chosen is not legitimate " + numIters + ", " + params.shiftLeft);
         return retValue;

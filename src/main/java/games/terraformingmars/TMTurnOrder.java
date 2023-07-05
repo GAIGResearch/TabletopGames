@@ -31,7 +31,7 @@ public class TMTurnOrder extends AlternatingTurnOrder {
 
         if (gameState.getGameStatus() != GAME_ONGOING) return;
 
-        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState)));
+        listeners.forEach(l -> l.onEvent(Event.createEvent(Event.GameEvent.TURN_OVER, gameState, turnOwner)));
 
         if (nActionsTaken == nActionsPerPlayer || passed[turnOwner]) {
             nActionsTaken = 0;

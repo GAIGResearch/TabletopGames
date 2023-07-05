@@ -2,7 +2,6 @@ package test.games.dicemonastery;
 
 import core.Game;
 import core.actions.AbstractAction;
-import core.actions.DoNothing;
 import games.GameType;
 import games.dicemonastery.*;
 import games.dicemonastery.actions.*;
