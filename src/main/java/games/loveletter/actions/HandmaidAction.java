@@ -10,8 +10,8 @@ import games.loveletter.cards.LoveLetterCard;
  */
 public class HandmaidAction extends PlayCard implements IPrintable {
 
-    public HandmaidAction(int playerID) {
-        super(LoveLetterCard.CardType.Handmaid, playerID, -1, null, null, true);
+    public HandmaidAction(int cardIdx, int playerID) {
+        super(LoveLetterCard.CardType.Handmaid, cardIdx, playerID, -1, null, null, true, true);
     }
 
     @Override
@@ -19,21 +19,6 @@ public class HandmaidAction extends PlayCard implements IPrintable {
         // set the player's protection status
         gs.setProtection(playerID, true);
         return true;
-    }
-
-    @Override
-    public String _toString() {
-        return "Handmaid (" + playerID + " is protected until their next turn)";
-    }
-
-    @Override
-    public String getString(AbstractGameState gameState) {
-        return toString();
-    }
-
-    @Override
-    public void printToConsole(AbstractGameState gameState) {
-        System.out.println(this);
     }
 
     @Override

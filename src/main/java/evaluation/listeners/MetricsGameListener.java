@@ -1,13 +1,15 @@
 package evaluation.listeners;
 
+import core.AbstractPlayer;
 import core.Game;
+import core.interfaces.IGameEvent;
 import evaluation.metrics.*;
 import evaluation.metrics.tablessaw.DataTableSaw;
-import shapeless.ops.nat;
 
 import java.io.File;
 import java.util.*;
 
+import static evaluation.metrics.Event.GameEvent.*;
 import static evaluation.metrics.IDataLogger.ReportDestination.*;
 import static evaluation.metrics.IDataLogger.ReportType.*;
 
@@ -26,7 +28,7 @@ public class MetricsGameListener implements IGameListener {
     protected Map<String, AbstractMetric> metrics;
 
     // Events the metrics in this listener respond to. Game over is always added.
-    protected Set<Event.GameEvent> eventsOfInterest = new HashSet<>();
+    protected Set<IGameEvent> eventsOfInterest = new HashSet<>();
 
     // Game this listener listens to
     protected Game game;
@@ -82,7 +84,7 @@ public class MetricsGameListener implements IGameListener {
                 metric.run(this, event);
             }
 
-            if (event.type == Event.GameEvent.GAME_OVER)
+            if (event.type == GAME_OVER)
                 metric.notifyGameOver();
         }
     }
@@ -116,7 +118,7 @@ public class MetricsGameListener implements IGameListener {
      * <p>
      * This is useful for Listeners that are just interested in aggregate data across many runs
      */
-    public void allGamesFinished() {
+    public void report() {
         boolean success = true;
 
         if (reportDestinations.contains(ToFile) || reportDestinations.contains(ToBoth)) {
@@ -130,38 +132,36 @@ public class MetricsGameListener implements IGameListener {
         // All metrics report themselves
         if (success) {
             for (AbstractMetric metric : metrics.values()) {
-                metric.processFinishedGames(destDir, reportTypes, reportDestinations);
+                metric.report(destDir, reportTypes, reportDestinations);
             }
 
             // We also create raw data files for groups of metrics responding to the same event
-            for (Event.GameEvent event : eventsOfInterest) {
-                List<AbstractMetric> eventMetrics = new ArrayList<>();
-                for (AbstractMetric metric : metrics.values()) {
-                    if (metric.listens(event)) {
-                        eventMetrics.add(metric);
+            if (reportTypes.contains(RawDataPerEvent)) {
+                for (IGameEvent event : eventsOfInterest) {
+                    List<AbstractMetric> eventMetrics = new ArrayList<>();
+                    for (AbstractMetric metric : metrics.values()) {
+                        if (metric.listens(event)) {
+                            eventMetrics.add(metric);
+                        }
                     }
-                }
-                if (eventMetrics.size() > 1) {
-                    IDataLogger dataLogger = new DataTableSaw(eventMetrics, event, eventToIndexingColumn(event));
-                    dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
+                    if (eventMetrics.size() > 1) {
+                        IDataLogger dataLogger = new DataTableSaw(eventMetrics, event, eventToIndexingColumn(event));
+                        dataLogger.getDefaultProcessor().processRawDataToFile(dataLogger, destDir);
+                    }
                 }
             }
         }
     }
 
-    private String eventToIndexingColumn(Event.GameEvent e) {
-        switch (e) {
-            case ABOUT_TO_START:
-            case GAME_OVER:
-                return "GameID";
-            case ROUND_OVER:
-                return "Round";
-            case TURN_OVER:
+    private String eventToIndexingColumn(IGameEvent e) {
+        if (e == ABOUT_TO_START || e == GAME_OVER) {
+            return "GameID";
+        } else if (e == ROUND_OVER) {
+            return "Round";
+        } else if (e == TURN_OVER) {
                 return "Turn";
-            case ACTION_CHOSEN:
-            case ACTION_TAKEN:
-            case GAME_EVENT:
-                return "Tick";
+        } else if (e == ACTION_CHOSEN || e == ACTION_TAKEN || e == GAME_EVENT) {
+            return "Tick";
         }
         return null;
     }
@@ -182,11 +182,20 @@ public class MetricsGameListener implements IGameListener {
     }
 
     @Override
-    public void init(Game game) {
+    public void init(Game game, int nPlayersPerGame, Set<String> playerNames) {
         this.game = game;
 
         for (AbstractMetric metric : metrics.values()) {
-            metric.init(game);
+            metric.init(game, nPlayersPerGame, playerNames);
+        }
+    }
+
+    @Override
+    public void tournamentInit(Game game, int nPlayersPerGame, Set<String> playerNames, Set<AbstractPlayer> matchup) {
+        for (AbstractMetric metric : metrics.values()) {
+            if (metric instanceof AbstractTournamentMetric) {
+                ((AbstractTournamentMetric)metric).tournamentInit(game, nPlayersPerGame, playerNames, matchup);
+            }
         }
     }
 }

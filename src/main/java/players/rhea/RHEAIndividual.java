@@ -128,7 +128,7 @@ public class RHEAIndividual implements Comparable<RHEAIndividual> {
                 AbstractAction action;
                 AbstractGameState gsCopy = gs.copy();
                 copyCalls++;
-                List<AbstractAction> currentActions = fm.computeAvailableActions(gsCopy);
+                List<AbstractAction> currentActions = fm.computeAvailableActions(gsCopy, rolloutPolicy.getParameters().actionSpace);
                 availableActions[i] = currentActions;
                 boolean illegalAction = !currentActions.contains(actions[i]);
                 illegalActions[i] = illegalAction;

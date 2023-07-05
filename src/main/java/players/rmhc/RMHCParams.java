@@ -1,6 +1,5 @@
 package players.rmhc;
 
-import core.AbstractParameters;
 import players.PlayerParameters;
 import java.util.*;
 
@@ -27,8 +26,11 @@ public class RMHCParams extends PlayerParameters {
     }
 
     @Override
-    protected AbstractParameters _copy() {
-        return new RMHCParams(System.currentTimeMillis());
+    protected RMHCParams _copy() {
+        RMHCParams copy = new RMHCParams(System.currentTimeMillis());
+        copy.horizon = horizon;
+        copy.discountFactor = discountFactor;
+        return copy;
     }
 
 

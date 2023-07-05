@@ -1,8 +1,8 @@
 package games.sushigo.metrics;
 
 import core.CoreConstants;
-import core.Game;
 import core.components.Deck;
+import core.interfaces.IGameEvent;
 import evaluation.listeners.MetricsGameListener;
 import evaluation.metrics.AbstractMetric;
 import evaluation.metrics.Event;
@@ -27,7 +27,7 @@ public class SushiGoMetrics implements IMetricsCollection {
     public static class CardPlayedCount extends AbstractMetric {
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             columns.put("Card played", String.class);
             return columns;
@@ -45,7 +45,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
@@ -132,12 +132,12 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.ACTION_CHOSEN);
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (String typeCount: focusTypes) {
                 for (String typeCount1 : allTypes) {
@@ -170,7 +170,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (SGCard.SGCardType type: types) {
                 columns.put(type.name() + " Count", Integer.class);
@@ -179,7 +179,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
@@ -209,7 +209,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Map<String, Class<?>> getColumns(Game game) {
+        public Map<String, Class<?>> getColumns(int nPlayersPerGame, Set<String> playerNames) {
             Map<String, Class<?>> columns = new HashMap<>();
             for (SGCard.SGCardType type: types) {
                 columns.put(type + " Average Points", Double.class);
@@ -220,7 +220,7 @@ public class SushiGoMetrics implements IMetricsCollection {
         }
 
         @Override
-        public Set<Event.GameEvent> getDefaultEventTypes() {
+        public Set<IGameEvent> getDefaultEventTypes() {
             return Collections.singleton(Event.GameEvent.GAME_OVER);
         }
     }
